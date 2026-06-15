@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {Component} from 'react';
-import {MAPBOX_STYLES, GITHUB_TREE} from '../constants/defaults';
+import {Component} from 'react';
 import App from 'website-examples/terrain/app';
+import {GITHUB_TREE, MAPBOX_STYLES} from '../constants/defaults';
 
 import {makeExample} from '../components';
 
@@ -76,6 +76,42 @@ class TerrainDemo extends Component {
       value: 'Satellite'
     },
     wireframe: {displayName: 'Wireframe', type: 'checkbox', value: false},
+    minZoom: {
+      displayName: 'Min Zoom',
+      type: 'range',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 19,
+      accentColor: '#0275ff'
+    },
+    maxZoom: {
+      displayName: 'Max Zoom',
+      type: 'range',
+      value: 14,
+      step: 1,
+      min: 0,
+      max: 19,
+      accentColor: '#0275ff'
+    },
+    visibleMinZoom: {
+      displayName: 'Visible Min Zoom',
+      type: 'range',
+      value: 0,
+      step: 1,
+      min: 0,
+      max: 19,
+      accentColor: '#1a2b4a'
+    },
+    visibleMaxZoom: {
+      displayName: 'Visible Max Zoom',
+      type: 'range',
+      value: 19,
+      step: 1,
+      min: 0,
+      max: 19,
+      accentColor: '#1a2b4a'
+    },
     zoomOffset: {
       displayName: 'Zoom Offset',
       type: 'range',
@@ -108,13 +144,32 @@ class TerrainDemo extends Component {
             <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
           </div>
         </p>
+        <div className="layout">
+          <div className="stat col-1-2">
+            Viewport Zoom<b>{meta.zoom != null ? meta.zoom.toFixed(1) : '-'}</b>
+          </div>
+        </div>
       </div>
     );
   }
 
+  _onZoomChange = zoom => {
+    this.props.onStateChange({zoom});
+  };
+
   render() {
     const {params, data, ...otherProps} = this.props;
-    const {location, surface, wireframe, globeView, zoomOffset} = params;
+    const {
+      location,
+      surface,
+      wireframe,
+      globeView,
+      minZoom,
+      maxZoom,
+      visibleMinZoom,
+      visibleMaxZoom,
+      zoomOffset
+    } = params;
 
     const initialViewState = LOCATIONS[location.value];
     initialViewState.pitch = 45;
@@ -128,7 +183,12 @@ class TerrainDemo extends Component {
           texture={SURFACE_IMAGES[surface.value]}
           wireframe={wireframe.value}
           globeView={globeView.value}
+          minZoom={minZoom.value}
+          maxZoom={maxZoom.value}
+          visibleMinZoom={visibleMinZoom.value}
+          visibleMaxZoom={visibleMaxZoom.value}
           zoomOffset={zoomOffset.value}
+          onZoomChange={this._onZoomChange}
         />
       </div>
     );
