@@ -450,6 +450,8 @@ webglTest('Deck#multi-canvas presentation', async () => {
   canvasB.id = 'deck-test-canvas-b';
   canvasB.width = 32;
   canvasB.height = 48;
+  parent.getBoundingClientRect = () => ({left: 10, top: 20}) as DOMRect;
+  canvasB.getBoundingClientRect = () => ({left: 310, top: 220}) as DOMRect;
   eventRootB.appendChild(canvasB);
 
   const deck = new Deck({
@@ -483,6 +485,13 @@ webglTest('Deck#multi-canvas presentation', async () => {
   expect(deck.getViewports({x: 0, y: 0, canvasId: 'deck-test-canvas-b'}).map(v => v.id)).toEqual([
     'right'
   ]);
+  const rightViewport = deck.getViewports().find(viewport => viewport.id === 'right');
+  expect(deck.getCanvasBounds(rightViewport, parent)).toEqual({
+    x: 300,
+    y: 200,
+    width: 32,
+    height: 48
+  });
 
   // @ts-expect-error testing private state
   const eventManagers = deck.eventManagers;

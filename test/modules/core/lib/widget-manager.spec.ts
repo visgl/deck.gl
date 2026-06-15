@@ -51,7 +51,8 @@ class TestWidget extends Widget<TestWidgetProps> {
 
 const mockDeckInstance = {
   width: 600,
-  height: 400
+  height: 400,
+  getCanvasBounds: () => ({x: 0, y: 0, width: 600, height: 400})
 };
 
 test('WidgetManager#setProps', () => {
@@ -242,14 +243,10 @@ test('WidgetManager#onRedraw#without viewId uses parent size', () => {
 
 test('WidgetManager#onRedraw#viewId uses presentation canvas offset', () => {
   const parentElement = document.createElement('div');
-  parentElement.getBoundingClientRect = () => ({left: 10, top: 20}) as DOMRect;
-  const canvas = document.createElement('canvas');
-  canvas.getBoundingClientRect = () => ({left: 310, top: 220, width: 400, height: 300}) as DOMRect;
   const widgetManager = new WidgetManager({
     deck: {
       ...mockDeckInstance,
-      viewManager: {getCanvasId: () => 'right-canvas'},
-      _canvasTargets: {'right-canvas': {canvas}}
+      getCanvasBounds: () => ({x: 300, y: 200, width: 400, height: 300})
     },
     parentElement
   });

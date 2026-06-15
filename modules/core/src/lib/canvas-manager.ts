@@ -18,8 +18,6 @@ export type CanvasTarget = {
   eventRoot: HTMLElement;
   presentationContext: PresentationContext;
   eventManager: EventManager;
-  width: number;
-  height: number;
 };
 
 /**
@@ -116,9 +114,7 @@ export default class CanvasManager {
           canvas,
           eventRoot,
           presentationContext,
-          eventManager: this._createEventManager(eventRoot),
-          width: canvas.clientWidth || canvas.width,
-          height: canvas.clientHeight || canvas.height
+          eventManager: this._createEventManager(eventRoot)
         };
       }
 
@@ -156,15 +152,19 @@ export default class CanvasManager {
   }
 
   /** Return CSS pixel sizes for each active presentation canvas. */
-  getMetrics(width: number, height: number): Record<string, {width: number; height: number}> {
+  getMetrics(
+    defaultWidth: number,
+    defaultHeight: number
+  ): Record<string, {width: number; height: number}> {
     const metrics: Record<string, {width: number; height: number}> = {};
     if (!this._order.length) {
-      metrics[this.defaultCanvasId] = {width, height};
+      metrics[this.defaultCanvasId] = {width: defaultWidth, height: defaultHeight};
       return metrics;
     }
 
     for (const [id, target] of Object.entries(this._targets)) {
-      metrics[id] = {width: target.width, height: target.height};
+      const [width, height] = target.presentationContext.getCSSSize();
+      metrics[id] = {width, height};
     }
     return metrics;
   }

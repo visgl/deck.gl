@@ -13,7 +13,11 @@ import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type {Effect, PostRenderOptions} from './effect';
-import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
+import type {
+  CanvasContextLike,
+  LayersPassRenderOptions,
+  FilterContext
+} from '../passes/layers-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
@@ -65,6 +69,7 @@ export default class DeckRenderer {
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
     target?: Framebuffer | null;
+    canvasContext?: CanvasContextLike;
     shaderModuleProps?: any;
     renderPassId?: string;
     layerFilter?: LayerFilter;
@@ -148,13 +153,13 @@ export default class DeckRenderer {
     }
 
     if (this.lastPostProcessEffect) {
-      this._resizeRenderBuffers();
+      this._resizeRenderBuffers(opts.canvasContext);
     }
   }
 
-  private _resizeRenderBuffers() {
+  private _resizeRenderBuffers(canvasContext = this.device.canvasContext!) {
     const {renderBuffers} = this;
-    const size = this.device.canvasContext!.getDrawingBufferSize();
+    const size = canvasContext.getDrawingBufferSize();
     const [width, height] = size;
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {
