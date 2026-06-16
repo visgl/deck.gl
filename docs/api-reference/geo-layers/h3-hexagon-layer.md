@@ -123,6 +123,38 @@ function App() {
 </Tabs>
 
 
+### Consuming H3 cells from a GeoJSON FeatureCollection
+
+A common export pattern is GeoJSON where each feature's `properties`
+carries the H3 cell ID as a string (produced by `geopandas`, QGIS,
+`h3-py`, or a custom spatial-index pipeline). The default
+`getHexagon: object => object.hexagon` accessor returns `undefined`
+for these features because GeoJSON parsers surface them as
+`{type, geometry, properties}` objects.
+
+Override `getHexagon` to pull the cell ID out of `properties`:
+
+```js
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
+
+new H3HexagonLayer({
+  id: 'h3-cells-from-geojson',
+  data: 'cells.geojson',  // FeatureCollection; each feature.properties carries h3_id
+  pickable: true,
+  filled: true,
+  extruded: true,
+  getHexagon: d => d.properties.h3_id,
+  getFillColor: d => [255, (1 - d.properties.value) * 255, 0],
+  getElevation: d => d.properties.value * 1000
+});
+```
+
+Any per-feature value to be styled or extruded by lives under
+`d.properties.*` in this shape. The geometry on each feature is
+ignored — `H3HexagonLayer` reconstructs the hexagon from the cell
+ID via `cellToBoundary`.
+
+
 ## Installation
 
 To install the dependencies from NPM:
