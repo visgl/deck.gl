@@ -4,6 +4,7 @@
 
 import {clamp} from '@math.gl/core';
 import Controller from './controller';
+import {withTerrain} from './terrain';
 
 import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
@@ -244,7 +245,9 @@ class GlobeState extends MapState {
   }
 }
 
-export default class GlobeController extends Controller<MapState> {
+// Terrain-aware by default: the globe camera follows terrain elevation, without
+// inheriting MapController (so no Web-Mercator maxBounds leaks onto the globe).
+export default class GlobeController extends withTerrain(Controller) {
   ControllerState = GlobeState;
 
   transition = {
