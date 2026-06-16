@@ -7,11 +7,14 @@
   <link href="https://unpkg.com/deck.gl@^9.0.0/dist/stylesheet.css" rel='stylesheet' />
   <style>
     body {margin: 0; font-family: sans-serif; overflow: hidden;}
-    #app {width: 100vw; height: 100vh; display: flex; flex-direction: row; align-items: stretch;}
+    #root {width: 100vw; height: 100vh; display: flex; flex-direction: row; align-items: stretch;}
+    #root * {
+      box-sizing: border-box;
+    }
     #left-pane {
       flex: 0 0 auto;
-      width: 40vw;
-      max-width: 800px;
+      width: 40%;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -23,6 +26,19 @@
       padding: 8px 12px;
       border-bottom: 1px solid #ccc;
       background: #f7f7f7;
+    }
+    #toolbar .toolbar-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #toolbar .toolbar-title a {
+      color: #0b57d0;
+      font-size: 13px;
+      text-decoration: none;
+    }
+    #toolbar .toolbar-title a:hover {
+      text-decoration: underline;
     }
     #toolbar button {
       display: flex;
@@ -141,23 +157,63 @@
     }
     #right-pane {
       flex: 1 1 100%;
-      position: relative;
-      overflow: hidden;
-      border-left: solid 1px #444;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
     }
-    #right-pane.html-output iframe {
-      position: absolute;
+    #right-pane .output-pane {
+      flex: 0 0 auto;
+      min-height: 0;
+    }
+    #right-pane .html-pane {
+      position: relative;
+      background: #fff;
+    }
+    #right-pane .html-pane iframe {
       width: 100%;
       height: 100%;
       border: none;
     }
-    #right-pane.text-output {
+    #right-pane .text-pane {
       overflow: auto;
       font-family: monospace;
       background: #222;
       color: #fff;
       padding: 24px;
       white-space: wrap;
+    }
+    #right-pane .text-pane pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    #right-pane .text-output-stderr {
+      color: #ff9b9b;
+    }
+    #right-pane .output-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #666;
+      font-size: 13px;
+    }
+    .gutter {
+      flex: 0 0 auto;
+      background: #ececec;
+      position: relative;
+    }
+    .gutter.gutter-horizontal {
+      cursor: col-resize;
+      width: 4px;
+      border-left: 1px solid #d7d7d7;
+      border-right: 1px solid #d7d7d7;
+    }
+    .gutter.gutter-vertical {
+      cursor: row-resize;
+      height: 4px;
+      border-top: 1px solid #d7d7d7;
+      border-bottom: 1px solid #d7d7d7;
     }
   </style>
 </head>

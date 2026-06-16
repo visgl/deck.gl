@@ -13,6 +13,26 @@ export type PreloadedFileConfig = {
 };
 
 export type WorkerStatus = 'Loading packages...' | 'Running...';
+export type RunUpdate = {
+  status?: WorkerStatus;
+  stderr?: string;
+  stdout?: string;
+};
+export type RunPythonResult = {
+  files: Blob[];
+  result: string;
+  timeElapsed: number;
+};
+type WorkerTransferredFile = {
+  buffer: ArrayBuffer;
+  name: string;
+  type: string;
+};
+type WorkerRunPythonResult = {
+  files: WorkerTransferredFile[];
+  result: string;
+  timeElapsed: number;
+};
 
 type UploadFileInput = {
   buffer: ArrayBuffer;
@@ -22,7 +42,7 @@ type UploadFileInput = {
 };
 
 type PendingRequest = {
-  onStatus?: (status: WorkerStatus) => void;
+  onUpdate?: (update: RunUpdate) => void;
   reject: (reason?: unknown) => void;
   resolve: (value: unknown) => void;
 };
@@ -30,7 +50,7 @@ type PendingRequest = {
 type WorkerMessage =
   | {id: number; type: 'result'; result: unknown}
   | {id: number; type: 'error'; error: string}
-  | {id: number; type: 'status'; status: WorkerStatus};
+  | {id: number; type: 'update'; update: RunUpdate};
 
 function createWorker() {
   return new Worker(new URL('./pyodide-worker.ts', import.meta.url), {type: 'module'});
@@ -52,8 +72,8 @@ class PyodideClient {
         return;
       }
 
-      if (message.type === 'status') {
-        pending.onStatus?.(message.status);
+      if (message.type === 'update') {
+        pending.onUpdate?.(message.update);
         return;
       }
 
@@ -78,8 +98,17 @@ class PyodideClient {
     return this.request<Record<string, UploadedFileRecord>>({files, type: 'preload-files'});
   }
 
-  async runPython(code: string, onStatus?: (status: WorkerStatus) => void) {
-    return this.request<string>({code, type: 'run-python'}, {onStatus});
+  async runPython(code: string, onUpdate: (update: RunUpdate) => void) {
+    const result = await this.request<WorkerRunPythonResult>(
+      {code, type: 'run-python'},
+      {onUpdate}
+    );
+
+    return {
+      files: result.files.map(file => new Blob([file.buffer], {type: file.type})),
+      result: result.result,
+      timeElapsed: result.timeElapsed
+    };
   }
 
   async uploadFiles(files: UploadFileInput[]) {
@@ -92,12 +121,12 @@ class PyodideClient {
 
   private request<T>(
     payload: Record<string, unknown>,
-    options?: {onStatus?: (status: WorkerStatus) => void; transfer?: Transferable[]}
+    options?: {onUpdate?: (update: RunUpdate) => void; transfer?: Transferable[]}
   ): Promise<T> {
     const id = this.nextRequestId++;
 
     return new Promise<T>((resolve, reject) => {
-      this.pendingRequests.set(id, {onStatus: options?.onStatus, reject, resolve});
+      this.pendingRequests.set(id, {onUpdate: options?.onUpdate, reject, resolve});
 
       this.worker.postMessage({id, ...payload}, options?.transfer ?? []);
     });

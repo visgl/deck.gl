@@ -153,7 +153,7 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
             {isLoading ? (
               <SpinnerIcon />
             ) : (
-              <p>Drag and drop some files here, or click to upload files</p>
+              <p>Drag and drop some files here, or click to browse files</p>
             )}
             {error && <p className="dropzone-error">{error}</p>}
           </div>
