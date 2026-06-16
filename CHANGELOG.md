@@ -136,8 +136,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 #### deck.gl [v9.2.0-beta.4] - Oct 6 2025
 
-- fix(arcgis): Replace deprecated externalRenderers with RenderNode
-- fix(arcgis): Restore drawBuffers and enable blending for screen compositing
 - Invoke transform function for constant attributes (#9741)
 - Pass `vertexValid` to SolidPolygonLayer when using binary GeoJSON (#9805)
 - Add IconLayer sizeBasis prop (#9736)

@@ -37,10 +37,6 @@ const renderer = new DeckRenderer(sceneView, {
     })
   ]
 });
-
-// DeckRenderer is a SceneView RenderNode. Constructing it attaches it to the
-// view; it should not be added to the map as a layer.
-renderer;
 ```
 
 
