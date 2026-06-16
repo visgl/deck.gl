@@ -12,7 +12,6 @@ in vec3 instanceTargetPositions;
 in vec3 instanceSourcePositions64Low;
 in vec3 instanceTargetPositions64Low;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
 in float instanceWidths;
 
 out vec4 vColor;
@@ -75,7 +74,7 @@ void main(void) {
   geometry.position = mix(source_commonspace, target_commonspace, segmentIndex);
   uv = positions.xy;
   geometry.uv = uv;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(

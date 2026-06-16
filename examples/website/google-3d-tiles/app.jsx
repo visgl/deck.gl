@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {scaleLinear} from 'd3-scale';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
-import {TerrainController} from '@deck.gl/core';
+import {MapView, _GlobeView as GlobeView, TerrainController} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {DataFilterExtension, _TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -28,10 +28,10 @@ const INITIAL_VIEW_STATE = {
   latitude: 50.089,
   longitude: 14.42,
   zoom: 16,
-  minZoom: 14,
-  maxZoom: 18,
-  bearing: 90,
-  pitch: 60
+  minZoom: 0,
+  maxZoom: 24,
+  bearing: 0,
+  pitch: 0
 };
 
 const BUILDING_DATA =
@@ -48,8 +48,11 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
+export default function App({data = TILESET_URL, distance = 0, opacity = 0.2, globeView = false}) {
   const [credits, setCredits] = useState('');
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
+
   const onTraversalComplete = selectedTiles => {
     const uniqueCredits = new Set();
     selectedTiles.forEach(tile => {
@@ -90,12 +93,25 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2}) {
     })
   ];
 
+  const view = useMemo(
+    () =>
+      globeView
+        ? new GlobeView({id: 'view', controller: true})
+        : new MapView({
+            id: 'view',
+            controller: {type: TerrainController, touchRotate: true, inertia: 500}
+          }),
+    [globeView]
+  );
+
   return (
     <div>
       <DeckGL
+        key={globeView ? 'globe' : 'map'}
         style={{backgroundColor: '#061714'}}
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={{type: TerrainController, touchRotate: true, inertia: 500}}
+        views={view}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
         layers={layers}
         getTooltip={getTooltip}
       />
