@@ -164,6 +164,53 @@ See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`,
 
 ## Remarks
 
+### Using Widgets
+
+deck.gl [widgets](../widgets/overview.md) can be used with `MapboxOverlay`. There are two positioning modes, controlled by the widget's `viewId` prop:
+
+#### Default positioning (deck.gl overlay)
+
+Widgets without a `viewId` (or with a `viewId` other than `'mapbox'`) are rendered inside deck.gl's own overlay container. This container is itself a map control placed at `top-left`, so these widgets appear layered on top of the map canvas.
+
+```ts
+new MapboxOverlay({
+  widgets: [
+    new FullscreenWidget({placement: 'top-left'})
+  ]
+});
+```
+
+#### Map-positioned widgets (`viewId: 'mapbox'`)
+
+Widgets with `viewId: 'mapbox'` are extracted from the deck overlay and wrapped as native map [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) instances. They are added to the map's own control container, positioned alongside native controls like `NavigationControl`. This prevents overlap between deck widgets and native map UI.
+
+```ts
+const overlay = new MapboxOverlay({
+  widgets: [
+    // Positioned by the map's control container
+    new ScreenshotWidget({viewId: 'mapbox', placement: 'top-right'}),
+    new FullscreenWidget({viewId: 'mapbox', placement: 'top-left'}),
+    // Positioned by deck.gl's overlay
+    new PopupWidget({position: [0.45, 51.47], content: 'London'})
+  ]
+});
+
+map.addControl(overlay);
+// Native controls coexist with deck widgets
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+```
+
+#### Limitations
+
+When using `MapboxOverlay`, the map library controls the camera and interaction, not deck.gl. This affects certain widgets:
+
+| Widget Category | Examples | Limitation |
+|---|---|---|
+| **View controls** | `ZoomWidget`, `CompassWidget`, `ResetViewWidget` | Button clicks do not move the camera, because view state is managed by the map. Use native map controls (e.g. `NavigationControl`) instead. |
+| **Canvas capture** | `ScreenshotWidget` | In interleaved mode (`interleaved: true`), deck renders into the map's GL context. `ScreenshotWidget` captures deck's own canvas, which is empty. Use `overlay.getCanvas()` to get the map's canvas instead. |
+
+Informational widgets (`FullscreenWidget`, `LoadingWidget`, `PopupWidget`, `InfoWidget`, etc.) work without limitations in both modes.
+
 ### Multi-view usage
 
 When using `MapboxOverlay` with multiple views passed to the `views` prop, only one of the views can match the base map and receive interaction.
