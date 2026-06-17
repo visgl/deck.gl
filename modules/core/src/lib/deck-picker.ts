@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Buffer, Texture} from '@luma.gl/core';
-import type {Device} from '@luma.gl/core';
+import type {CanvasContext, Device} from '@luma.gl/core';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import log from '../utils/log';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
@@ -44,6 +44,7 @@ type PickOperationContext = {
   layers: Layer[];
   views: Record<string, View>;
   viewports: Viewport[];
+  canvasContext?: CanvasContext;
   onViewportActive: (viewport: Viewport) => void;
   effects: Effect[];
 };
@@ -157,7 +158,7 @@ export default class DeckPicker {
   // Private
 
   /** Ensures that picking framebuffer exists and matches the canvas size */
-  _resizeBuffer() {
+  _resizeBuffer(canvasContext: CanvasContext = this.device.getDefaultCanvasContext()) {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       const pickingColorTexture = this.device.createTexture({
@@ -186,10 +187,11 @@ export default class DeckPicker {
       }
     }
 
-    // Resize it to current canvas size (this is a noop if size hasn't changed)
-    const {canvas} = this.device.getDefaultCanvasContext();
-    this.pickingFBO?.resize({width: canvas.width, height: canvas.height});
-    this.depthFBO?.resize({width: canvas.width, height: canvas.height});
+    // Picking renders in drawing-buffer pixels. DPR and useDevicePixels can make that size
+    // differ from the canvas/CSS size used for viewport bookkeeping.
+    const [width, height] = canvasContext.getDrawingBufferSize();
+    this.pickingFBO?.resize({width, height});
+    this.depthFBO?.resize({width, height});
   }
 
   /** Preliminary filtering of the layers list. Skid picking pass if no layer is pickable. */
@@ -217,14 +219,15 @@ export default class DeckPicker {
     depth = 1,
     mode = 'query',
     unproject3D,
+    canvasContext = this.device.getDefaultCanvasContext(),
     onViewportActive,
     effects
   }: PickByPointOptions & PickOperationContext): Promise<{
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   }> {
-    // @ts-expect-error TODO - assuming WebGL context
-    const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    // Picking starts in CSS pixels, so use the canvas context's current conversion ratio.
+    const pixelRatio = canvasContext.cssToDeviceRatio();
 
     const pickableLayers = this._getPickable(layers);
 
@@ -235,13 +238,12 @@ export default class DeckPicker {
       };
     }
 
-    this._resizeBuffer();
+    this._resizeBuffer(canvasContext);
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
-    // And compensate for pixelRatio
-    // @ts-expect-error TODO - assuming WebGL context
-    const devicePixelRange = this.device.canvasContext.cssToDevicePixels([x, y], true);
+    // And compensate for the context's current CSS-to-device ratio.
+    const devicePixelRange = canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
       devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
@@ -381,14 +383,15 @@ export default class DeckPicker {
     depth = 1,
     mode = 'query',
     unproject3D,
+    canvasContext = this.device.getDefaultCanvasContext(),
     onViewportActive,
     effects
   }: PickByPointOptions & PickOperationContext): {
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   } {
-    // @ts-expect-error TODO - assuming WebGL context
-    const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    // Keep the sync picking path aligned with the same canvas context state used for drawing.
+    const pixelRatio = canvasContext.cssToDeviceRatio();
 
     const pickableLayers = this._getPickable(layers);
 
@@ -399,13 +402,12 @@ export default class DeckPicker {
       };
     }
 
-    this._resizeBuffer();
+    this._resizeBuffer(canvasContext);
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
-    // And compensate for pixelRatio
-    // @ts-expect-error TODO - assuming WebGL context
-    const devicePixelRange = this.device.canvasContext.cssToDevicePixels([x, y], true);
+    // And compensate for the context's current CSS-to-device ratio.
+    const devicePixelRange = canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
       devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
@@ -544,6 +546,7 @@ export default class DeckPicker {
     height = 1,
     mode = 'query',
     maxObjects = null,
+    canvasContext = this.device.getDefaultCanvasContext(),
     onViewportActive,
     effects
   }: PickByRectOptions & PickOperationContext): Promise<PickingInfo[]> {
@@ -553,22 +556,19 @@ export default class DeckPicker {
       return [];
     }
 
-    this._resizeBuffer();
+    this._resizeBuffer(canvasContext);
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
-    // And compensate for pixelRatio
-    // @ts-expect-error TODO - assuming WebGL context
-    const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
-    // @ts-expect-error TODO - assuming WebGL context
-    const leftTop = this.device.canvasContext.cssToDevicePixels([x, y], true);
+    // And compensate for the context's current CSS-to-device ratio.
+    const pixelRatio = canvasContext.cssToDeviceRatio();
+    const leftTop = canvasContext.cssToDevicePixels([x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
     const deviceLeft = leftTop.x;
     const deviceTop = leftTop.y + leftTop.height;
 
     // take right and bottom (y inverted in device pixels) from end location
-    // @ts-expect-error TODO - assuming WebGL context
-    const rightBottom = this.device.canvasContext.cssToDevicePixels([x + width, y + height], true);
+    const rightBottom = canvasContext.cssToDevicePixels([x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
 
@@ -651,6 +651,7 @@ export default class DeckPicker {
     height = 1,
     mode = 'query',
     maxObjects = null,
+    canvasContext = this.device.getDefaultCanvasContext(),
     onViewportActive,
     effects
   }: PickByRectOptions & PickOperationContext): PickingInfo[] {
@@ -660,22 +661,19 @@ export default class DeckPicker {
       return [];
     }
 
-    this._resizeBuffer();
+    this._resizeBuffer(canvasContext);
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
-    // And compensate for pixelRatio
-    // @ts-expect-error TODO - assuming WebGL context
-    const pixelRatio = this.device.canvasContext.cssToDeviceRatio();
-    // @ts-expect-error TODO - assuming WebGL context
-    const leftTop = this.device.canvasContext.cssToDevicePixels([x, y], true);
+    // And compensate for the context's current CSS-to-device ratio.
+    const pixelRatio = canvasContext.cssToDeviceRatio();
+    const leftTop = canvasContext.cssToDevicePixels([x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
     const deviceLeft = leftTop.x;
     const deviceTop = leftTop.y + leftTop.height;
 
     // take right and bottom (y inverted in device pixels) from end location
-    // @ts-expect-error TODO - assuming WebGL context
-    const rightBottom = this.device.canvasContext.cssToDevicePixels([x + width, y + height], true);
+    const rightBottom = canvasContext.cssToDevicePixels([x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
 

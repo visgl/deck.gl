@@ -2,9 +2,32 @@
 
 This utility generates a series of test cases to be used with [testLayer](../test-utils/test-layer.md) that checks the conformance of a layer class.
 
-## Example
+## Example (Vitest)
 
-Example of layer unit tests using `tape`. The test utility itself is test framework agnostic.
+```ts
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
+import {GeoJsonLayer} from '@deck.gl/layers';
+
+test('GeoJsonLayer#conformance', () => {
+  const testCases = generateLayerTests({
+    Layer: GeoJsonLayer,
+    sampleProps: {
+      data: SAMPLE_GEOJSON
+    },
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onAfterUpdate: ({layer, subLayers}) => {
+      expect(layer.state.features).toBeTruthy();
+      const expected = layer.props.stroked ? 2 : 1;
+      expect(subLayers.length).toBe(expected);
+    }
+  });
+
+  testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+```
+
+## Example (tape)
 
 ```js
 import test from 'tape-promise/tape';
@@ -33,7 +56,9 @@ test('GeoJsonLayer#tests', t => {
 
 ## Usage
 
-```js
+```ts
+import {generateLayerTests} from '@deck.gl/test-utils/vitest';
+
 generateLayerTests({Layer, sampleProps, assert, onError});
 ```
 

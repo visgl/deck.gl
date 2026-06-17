@@ -52,6 +52,8 @@ The canvas to render into. Can be either a HTMLCanvasElement or the element id. 
 
 luma.gl Device used to manage the application's connection with the GPU. Will be auto-created if not supplied.
 
+When a `Device` is supplied, Deck does not destroy it when finalized. While the `Deck` instance is active, Deck owns the `device.props.onResize` callback for the active render canvas context; use `DeckProps.onResize` to observe Deck canvas resizes.
+
 #### `deviceProps` ([DeviceProps](https://luma.gl/docs/api-reference/core/device#deviceprops) | [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)) {#deviceprops}
 
 Options used for creating a new luma.gl GPU [Device](https://luma.gl/docs/api-reference/core/device). 
@@ -551,6 +553,7 @@ Receives arguments:
 * `size`
   - `width` (number) - the new width of the deck canvas, in client pixels
   - `height` (number) - the new height of the deck canvas, in client pixels
+* `canvasContext` ([CanvasContext](https://luma.gl/docs/api-reference/core/canvas-context), optional) - the luma.gl canvas context that reported the resize
 
 
 #### `onBeforeRender` (Function) {#onbeforerender}

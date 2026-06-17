@@ -100,9 +100,9 @@ export default class GoogleMapsOverlay {
   setProps(props: Partial<GoogleMapsOverlayProps>): void {
     Object.assign(this.props, props);
     if (this._deck) {
-      const canvas = this._deck.getCanvas();
-      if (props.style && canvas?.parentElement) {
-        const parentStyle = canvas.parentElement.style;
+      const parent = this._deck.props.parent || this._deck.getCanvas()?.parentElement;
+      if (props.style && parent) {
+        const parentStyle = parent.style;
         Object.assign(parentStyle, props.style);
         props.style = null;
       }

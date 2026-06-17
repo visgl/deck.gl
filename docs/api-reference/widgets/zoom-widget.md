@@ -126,7 +126,7 @@ The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
-#### `zoomAxis` (string, optional)
+#### `zoomAxis` (string, optional) {#zoomaxis}
 
 * Default: `'all'`
 

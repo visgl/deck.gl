@@ -20,6 +20,79 @@ yarn add -D @deck.gl/test-utils
 You typically want the major and minor version of ` @deck.gl/test-utils` to match the version of `@deck.gl/core` that you are using. i.e. you want to use `9.0.x` and `9.0.y` together. Check and if necessary edit your `package.json` to make sure things align.
 
 
+## Using with Vitest
+
+`@deck.gl/test-utils` ships a dedicated Vitest entry point at `@deck.gl/test-utils/vitest` that automatically wires up `vi.spyOn()` for layer method spies. This is the recommended way to test deck.gl layers with Vitest.
+
+### Quick Start
+
+```bash
+npm install --save-dev @deck.gl/test-utils vitest @vitest/browser playwright
+```
+
+Import from the vitest-specific entry point:
+
+```ts
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
+```
+
+### Setup
+
+Layer tests require a real WebGL2 context, so tests must run in [Vitest Browser Mode](https://vitest.dev/guide/browser/) with Playwright. JSDOM does not support WebGL and is not a supported environment for `@deck.gl/test-utils`.
+
+Install browser testing dependencies:
+
+```bash
+npm install --save-dev @vitest/browser playwright
+```
+
+Configure `vitest.config.ts`:
+
+```ts
+import {defineConfig} from 'vitest/config';
+import {playwright} from '@vitest/browser-playwright';
+
+export default defineConfig({
+  test: {
+    browser: {
+      enabled: true,
+      provider: playwright({
+        launchOptions: {
+          args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+        }
+      }),
+      instances: [{browser: 'chromium'}],
+      headless: true
+    }
+  }
+});
+```
+
+Write a test:
+
+```ts
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+test('ScatterplotLayer', () => {
+  const testCases = generateLayerTests({
+    Layer: ScatterplotLayer,
+    sampleProps: {
+      data: [{position: [0, 0]}],
+      getPosition: d => d.position
+    },
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy()
+  });
+
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+```
+
+See [testLayer](./test-layer.md) for the full API and more examples including custom layer tests.
+
+
 ## Layer Conformance Tests
 
 Layer conformance tests are designed to verify deck.gl that layers update their internal state correctly in response to various props and prop changes. The layer update test support includes test drivers to initialize a layer and then run a sequence of successive updates, with facilities for validating the layer after each change, and also provides functions to initialize, update and render layers in a test environment.
