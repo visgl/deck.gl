@@ -105,7 +105,7 @@ export const RECOGNIZERS = {
   pinch: [Pinch, {}, null, ['multipan']],
   pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
   dblclick: [Tap, {event: 'dblclick', taps: 2}],
-  click: [Tap, {event: 'click'}, null, ['dblclick']]
+  click: [Tap, {event: 'click', interval: 0}, null, ['dblclick']]
 } as const;
 
 export type RecognizerOptions = {
