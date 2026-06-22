@@ -304,6 +304,8 @@ If [`Deck.canvas`](../api-reference/core/deck.md#canvas) is supplied as an array
 * view layout is resolved relative to the assigned canvas, not a global deck rectangle
 * controllers and picking are scoped to the assigned canvas
 
+View-specific widgets are positioned relative to the presentation canvas assigned to their `viewId`, while their DOM remains under a shared widget root. See [Using with Multiple Canvases](../api-reference/widgets/overview.md#using-with-multiple-canvases).
+
 Common examples in 3D applications that render a 3D scene multiple times with different "cameras":
 
 * To show views from multiple viewpoints (cameras), e.g. in a split screen setup.

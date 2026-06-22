@@ -133,7 +133,7 @@ new Deck({
 
 Widgets with UI (e.g. a button or panel) can be positioned relative to the deck.gl view they are controlling, via the `viewId` and `placement` props. See [WidgetProps](../core/widget.md#widgetprops).
 
-The `viewId` controls which HTML container will mount to, and the `placement` prop will position it relative to the container it is in, like so:
+The `viewId` selects a deck-managed view container under the shared widget root, and the `placement` prop positions the widget within that container:
 
 ```ts
 new Deck({
@@ -181,6 +181,27 @@ Remarks:
 * Widgets in the default container will be overlapped by view-specific widgets.
 * Widget UI with dynamic positioning, such as an `InfoWidget`, may not expose the `placement` prop as they control positioning internally.
 * For more information about using multiple deck.gl views, see the [Using Multiple Views](../../developer-guide/views.md#using-multiple-views) guide.
+
+### Using with Multiple Canvases
+
+When [`Deck.canvas`](../core/deck.md#canvas) is an array, deck.gl still mounts generated widget DOM under one shared `.deck-widget-container`. A widget's `viewId` selects the view used for positioning and event handling; that view's [`canvasId`](../core/view.md#canvasid) determines which presentation-canvas bounds offset the view container. The widget is not reparented into the canvas element.
+
+```ts
+new Deck({
+  parent: document.getElementById('deck-root'),
+  canvas: ['canvas-london', 'canvas-tokyo'],
+  views: [
+    new MapView({id: 'london', canvasId: 'canvas-london'}),
+    new MapView({id: 'tokyo', canvasId: 'canvas-tokyo'})
+  ],
+  widgets: [
+    new ZoomWidget({viewId: 'london'}),
+    new ZoomWidget({id: 'tokyo-zoom', viewId: 'tokyo'})
+  ]
+});
+```
+
+Widgets without a `viewId` stay in the root widget container and are positioned relative to the shared parent, not a specific presentation canvas. Use a common `parent` that covers the presentation canvases when deck-managed widgets need to span them. To opt out of deck-managed positioning, supply an HTMLElement through [`_container`](../core/widget.md#_container).
 
 ## Controlled vs Uncontrolled Mode
 
