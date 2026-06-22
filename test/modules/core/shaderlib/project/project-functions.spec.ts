@@ -149,38 +149,6 @@ test('project#projectPosition', () => {
   }
 });
 
-test('project#projectPosition normalizes legacy numeric coordinate systems', () => {
-  const numericResult = projectPosition([-122.46, 37.8, 1000], {
-    viewport: TEST_VIEWPORT,
-    coordinateSystem: 2 as never,
-    coordinateOrigin: TEST_COORDINATE_ORIGIN,
-    fromCoordinateSystem: 1 as never
-  });
-
-  const stringResult = projectPosition([-122.46, 37.8, 1000], {
-    viewport: TEST_VIEWPORT,
-    coordinateSystem: 'meter-offsets',
-    coordinateOrigin: TEST_COORDINATE_ORIGIN,
-    fromCoordinateSystem: 'lnglat'
-  });
-
-  expect(
-    equals(numericResult, stringResult),
-    'Legacy numeric coordinate systems normalize to string equivalents'
-  ).toBeTruthy();
-
-  const identityResult = projectPosition([0, 0, 0], {
-    viewport: TEST_VIEWPORT,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-    coordinateOrigin: [256, 256, 0]
-  });
-
-  expect(
-    equals(identityResult, [174.15110778808594, -58.11044311523443, 0]),
-    'IDENTITY aliases cartesian behavior'
-  ).toBeTruthy();
-});
-
 webglTest('project#projectPosition vs project_position', async () => {
   const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-5;

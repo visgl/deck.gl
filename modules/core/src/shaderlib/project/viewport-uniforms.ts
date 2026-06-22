@@ -33,30 +33,8 @@ const COORDINATE_SYSTEM_NUMBERS = {
   'lnglat-offsets': 3
 } as const satisfies Record<CoordinateSystem, -1 | 0 | 1 | 2 | 3>;
 
-// Compatibility shim: older loaders.gl versions (e.g. @loaders.gl/i3s <=4.4.x)
-// pass numeric coordinateSystem values from the legacy COORDINATE_SYSTEM enum.
-// Map them back to the current string form.
-const NUMERIC_COORDINATE_SYSTEM: Record<number, CoordinateSystem> = {
-  [-1]: 'default',
-  0: 'cartesian',
-  1: 'lnglat',
-  2: 'meter-offsets',
-  3: 'lnglat-offsets'
-};
-
-export function normalizeCoordinateSystem(
-  coordinateSystem: CoordinateSystem | number
-): CoordinateSystem {
-  if (typeof coordinateSystem === 'number') {
-    const normalized = NUMERIC_COORDINATE_SYSTEM[coordinateSystem];
-    if (normalized !== undefined) return normalized;
-  }
-  return coordinateSystem as CoordinateSystem;
-}
-
 export function getShaderCoordinateSystem(coordinateSystem: CoordinateSystem) {
-  const normalized = normalizeCoordinateSystem(coordinateSystem);
-  const shaderCoordinateSystem = COORDINATE_SYSTEM_NUMBERS[normalized];
+  const shaderCoordinateSystem = COORDINATE_SYSTEM_NUMBERS[coordinateSystem];
   if (shaderCoordinateSystem === undefined) {
     throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
   }
@@ -74,9 +52,6 @@ export function getOffsetOrigin(
   shaderCoordinateOrigin: Vec3;
   offsetMode: boolean;
 } {
-  // Accept legacy numeric coordinateSystem values from older loaders.gl versions.
-  coordinateSystem = normalizeCoordinateSystem(coordinateSystem);
-
   if (coordinateOrigin.length < 3) {
     coordinateOrigin = [coordinateOrigin[0], coordinateOrigin[1], 0];
   }
@@ -263,8 +238,6 @@ export function getUniformsFromViewport({
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
-  // Accept legacy numeric coordinateSystem values from older loaders.gl versions.
-  coordinateSystem = normalizeCoordinateSystem(coordinateSystem);
   if (coordinateSystem === 'default') {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
