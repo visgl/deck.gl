@@ -19,6 +19,7 @@ class MapTileDemo extends Component {
     maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
     visibleMinZoom: {displayName: 'Visible Min Zoom', type: 'range', value: 1, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
     visibleMaxZoom: {displayName: 'Visible Max Zoom', type: 'range', value: 12, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
+    zoomOffset: {displayName: 'Zoom Offset', type: 'range', value: 0, step: 1, min: -2, max: 2},
     showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
     useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
@@ -65,6 +66,7 @@ class MapTileDemo extends Component {
         maxZoom={params.maxZoom.value}
         visibleMinZoom={params.visibleMinZoom.value}
         visibleMaxZoom={params.visibleMaxZoom.value}
+        zoomOffset={params.zoomOffset.value}
         useExtent={params.useExtent.value}
         onTilesLoad={this._onTilesLoad}
         onZoomChange={this._onZoomChange}
