@@ -474,7 +474,10 @@ webglTest('Deck#multi-canvas presentation', async () => {
 
   expect(deck.getCanvas()).toBe(canvasA);
   // @ts-expect-error testing private state
-  expect(Object.keys(deck._canvasTargets)).toEqual(['deck-test-canvas-a', 'deck-test-canvas-b']);
+  expect(Object.keys(deck._canvasManager.targets)).toEqual([
+    'deck-test-canvas-a',
+    'deck-test-canvas-b'
+  ]);
   // @ts-expect-error testing private state
   expect(deck.eventManagers['deck-test-canvas-a'].getElement()).toBe(eventRootA);
   // @ts-expect-error testing private state
@@ -617,7 +620,7 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
   expect(deck.getCanvas()).toBe(null);
   expect(originalCanvas?.isConnected).toBe(false);
   // @ts-expect-error testing private state
-  expect(Object.keys(deck._canvasTargets)).toEqual([]);
+  expect(Object.keys(deck._canvasManager.targets)).toEqual([]);
 
   deck.setProps({canvas: undefined});
   await waitForRender(deck);
@@ -661,9 +664,9 @@ webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
   await waitForRender(deck);
 
   // @ts-expect-error testing private state
-  const targetA = deck._canvasTargets['deck-test-orphan-canvas-a'];
+  const targetA = deck._canvasManager.targets['deck-test-orphan-canvas-a'];
   // @ts-expect-error testing private state
-  const targetB = deck._canvasTargets['deck-test-orphan-canvas-b'];
+  const targetB = deck._canvasManager.targets['deck-test-orphan-canvas-b'];
   const presentCalls = {a: 0, b: 0};
   const renderCalls: string[][] = [];
   const originalPresentA = targetA.presentationContext.present.bind(targetA.presentationContext);

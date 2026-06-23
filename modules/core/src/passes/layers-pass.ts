@@ -22,7 +22,6 @@ import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
-export type CanvasContextLike = CanvasContext | PresentationContext;
 
 // WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
 const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
@@ -39,7 +38,7 @@ const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
   target?: Framebuffer | null;
-  canvasContext?: CanvasContextLike;
+  canvasContext?: CanvasContext | PresentationContext;
   renderPassId?: string;
   isPicking?: boolean;
   pass: string;
@@ -268,7 +267,7 @@ export default class LayersPass extends Pass {
       shaderModuleProps: Record<string, any>;
       pass: string;
       target?: Framebuffer | null;
-      canvasContext: CanvasContextLike;
+      canvasContext: CanvasContext | PresentationContext;
       viewport: Viewport;
       view?: View;
     },
@@ -438,7 +437,7 @@ export default class LayersPass extends Pass {
     layer: Layer,
     effects: Effect[] | undefined,
     pass: string,
-    canvasContext: CanvasContextLike,
+    canvasContext: CanvasContext | PresentationContext,
     overrides: any
   ): any {
     const devicePixelRatio = canvasContext.cssToDeviceRatio();
@@ -542,7 +541,7 @@ function getGLViewport(
     target,
     viewport
   }: {
-    canvasContext?: CanvasContextLike;
+    canvasContext?: CanvasContext | PresentationContext;
     shaderModuleProps: any;
     target?: Framebuffer | null;
     viewport: Viewport;

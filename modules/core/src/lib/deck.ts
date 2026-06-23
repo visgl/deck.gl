@@ -11,7 +11,7 @@ import DeckPicker from './deck-picker';
 import {Widget} from './widget';
 import {WidgetManager} from './widget-manager';
 import {TooltipWidget} from './tooltip-widget';
-import CanvasManager, {type CanvasTarget} from './canvas-manager';
+import CanvasManager from './canvas-manager';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -396,14 +396,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _lastPointerDownInfo: PickingInfo | null = null;
   private _lastPointerDownInfoPromise: Promise<PickingInfo> | null = null;
 
-  private get _canvasTargets(): Record<string, CanvasTarget> {
-    return this._canvasManager.targets;
-  }
-
-  private get _canvasTargetOrder(): string[] {
-    return this._canvasManager.order;
-  }
-
   constructor(props: DeckProps<ViewsT>) {
     const initialProps = props;
     // @ts-ignore views
@@ -470,8 +462,34 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._lastPointerDownInfo = null;
     this._lastPointerDownInfoPromise = null;
 
-    this._teardownManagers();
-    this._destroyCanvasTargets();
+    this.layerManager?.finalize();
+    this.layerManager = null;
+
+    this.viewManager?.finalize();
+    this.viewManager = null;
+
+    this.effectManager?.finalize();
+    this.effectManager = null;
+
+    this.deckRenderer?.finalize();
+    this.deckRenderer = null;
+
+    this.deckPicker?.finalize();
+    this.deckPicker = null;
+
+    if (!Object.keys(this._canvasManager.targets).length) {
+      this.eventManager?.destroy();
+    }
+    this.eventManager = null;
+    this.eventManagers = {};
+
+    this.widgetManager?.finalize();
+    this.widgetManager = null;
+
+    this._canvasManager.finalize();
+    if (this._isMultiCanvasMode()) {
+      this.canvas = null;
+    }
 
     if (!this._isMultiCanvasMode() && this.canvas && this.canvas === this._ownedCanvas) {
       // remove internally created canvas
@@ -570,7 +588,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     if (props.useDevicePixels !== undefined && this._canvasContext?.setProps) {
       this._canvasContext.setProps({useDevicePixels: props.useDevicePixels});
-      for (const target of Object.values(this._canvasTargets)) {
+      for (const target of Object.values(this._canvasManager.targets)) {
         target.presentationContext.setProps({useDevicePixels: props.useDevicePixels});
       }
     }
@@ -1125,250 +1143,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return infos;
   }
 
-  private _isMultiCanvasProp(
-    canvas: DeckProps<ViewsT>['canvas'] | Required<DeckProps<ViewsT>>['canvas']
-  ): canvas is (string | HTMLCanvasElement)[] {
-    return Array.isArray(canvas);
-  }
-
-  private _isMultiCanvasMode(): boolean {
-    return this._isMultiCanvasProp(this.props.canvas);
-  }
-
-  private _getDefaultCanvasId(): string {
-    return this._canvasManager.defaultCanvasId;
-  }
-
-  private _validateCanvasConfiguration(props: DeckProps<ViewsT>): void {
-    if (!this._isMultiCanvasProp(props.canvas)) {
-      return;
-    }
-
-    if (props.gl) {
-      throw new Error(
-        'Array-valued `canvas` is not supported with `gl`. Do not supply `gl`; let Deck create the device.'
-      );
-    }
-
-    if (props.device?.canvasContext && !props.device.getDefaultCanvasContext().offscreenCanvas) {
-      throw new Error(
-        'Array-valued `canvas` requires an offscreen-backed default canvas context when using an external device.'
-      );
-    }
-  }
-
-  private _getPresentationCanvases(): (string | HTMLCanvasElement)[] {
-    return this._isMultiCanvasProp(this.props.canvas) ? this.props.canvas : [];
-  }
-
-  private _createEventManager(root: HTMLElement): EventManager {
-    const eventManager = new EventManager(root, {
-      touchAction: this.props.touchAction,
-      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
-        // Resolve recognizer settings
-        const [RecognizerConstructor, defaultOptions, recognizeWith, requireFailure] =
-          RECOGNIZERS[eventName];
-        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
-        const options = {...defaultOptions, ...optionsOverride, event: eventName};
-        return {
-          recognizer: new RecognizerConstructor(options),
-          recognizeWith,
-          requireFailure
-        };
-      }),
-      events: {
-        pointerdown: this._onPointerDown,
-        pointermove: this._onPointerMove,
-        pointerleave: this._onPointerMove
-      }
-    });
-
-    for (const eventType in EVENT_HANDLERS) {
-      eventManager.on(eventType, this._onEvent);
-    }
-    return eventManager;
-  }
-
-  private _getEventRoot(canvas: HTMLCanvasElement): HTMLElement {
-    return (
-      canvas.closest<HTMLElement>('.deck-events-root') ||
-      this.props.parent?.querySelector<HTMLElement>('.deck-events-root') ||
-      canvas
-    );
-  }
-
-  private _destroyCanvasTargets(): void {
-    this._canvasManager.finalize();
-    this.eventManagers = {};
-    this.eventManager = null;
-    if (this._isMultiCanvasMode()) {
-      this.canvas = null;
-    }
-  }
-
-  private _syncCanvasTargets(): void {
-    if (!this.device || !this._isMultiCanvasMode()) {
-      return;
-    }
-
-    this._canvasManager.sync({
-      device: this.device,
-      canvases: this._getPresentationCanvases(),
-      useDevicePixels: this.props.useDevicePixels
-    });
-    this.eventManagers = this._canvasManager.eventManagers;
-    this.eventManager = this._canvasManager.eventManager;
-    this.canvas = this._canvasManager.canvas;
-  }
-
-  private _setCanvasContext(canvasContext: CanvasContext): void {
-    this._canvasContext = canvasContext;
-
-    if ('style' in canvasContext.canvas) {
-      this.canvas = canvasContext.canvas;
-    }
-  }
-
-  private _setDeviceCanvasContext(device: Device, opts: {syncDrawingBuffer?: boolean} = {}): void {
-    const canvasContext = device.getDefaultCanvasContext();
-    this._setCanvasContext(canvasContext);
-    this._setDeviceResizeHandler(device, opts);
-  }
-
-  private _setDeviceResizeHandler(device: Device, opts: {syncDrawingBuffer?: boolean} = {}): void {
-    const syncDrawingBuffer = Boolean(opts.syncDrawingBuffer);
-    if (this._deviceResizeHandler?.device === device) {
-      this._deviceResizeHandler.syncDrawingBuffer = syncDrawingBuffer;
-      return;
-    }
-
-    this._restoreDeviceResizeHandler();
-
-    const onResize: NonNullable<DeviceProps['onResize']> = canvasContext => {
-      if (canvasContext === this._canvasContext && this._canvasContext) {
-        // Deck owns resize handling for the active render CanvasContext. Applications should use
-        // DeckProps.onResize instead of the lower-level luma device callback while Deck is active.
-        this._onCanvasContextResize(this._canvasContext, {
-          syncDrawingBuffer: this._deviceResizeHandler?.syncDrawingBuffer
-        });
-      } else if (this._isMultiCanvasMode()) {
-        this._updateCanvasMetrics();
-      }
-    };
-
-    device.props.onResize = onResize;
-    this._deviceResizeHandler = {device, onResize, syncDrawingBuffer};
-  }
-
-  private _restoreDeviceResizeHandler(): void {
-    const resizeHandler = this._deviceResizeHandler;
-    if (resizeHandler && resizeHandler.device.props?.onResize === resizeHandler.onResize) {
-      resizeHandler.device.props.onResize = noop;
-    }
-    this._deviceResizeHandler = null;
-  }
-
-  /** Return per-canvas CSS pixel sizes used to resolve view layouts. */
-  private _getCanvasMetrics(): Record<string, {width: number; height: number}> {
-    return this._isMultiCanvasMode()
-      ? this._canvasManager.getMetrics(this.width, this.height)
-      : {[this._getDefaultCanvasId()]: {width: this.width, height: this.height}};
-  }
-  /** Resolve the presentation canvas id that produced a deck-managed DOM event. */
-  private _getCanvasIdFromEvent(
-    event?: {rootElement?: HTMLElement | null} | null
-  ): string | undefined {
-    return this._canvasManager.getCanvasIdFromEvent(event?.rootElement);
-  }
-
-  /** Look up the presentation target for a canvas id in multi-canvas mode. */
-  private _getCanvasTarget(canvasId?: string): CanvasTarget | null {
-    if (!this._isMultiCanvasMode()) {
-      return null;
-    }
-    return this._canvasManager.getTarget(canvasId);
-  }
-
-  /** Look up the canvas context used for a canvas id. */
-  private _getCanvasContext(canvasId?: string): CanvasContext | PresentationContext | null {
-    return this._getCanvasTarget(canvasId)?.presentationContext || this._canvasContext;
-  }
-
-  /** Resize the offscreen default canvas context to match a presentation target. */
-  private _resizeForCanvasTarget(canvasId?: string): void {
-    const target = this._getCanvasTarget(canvasId);
-    if (!target || !this.device?.canvasContext) {
-      return;
-    }
-
-    const [width, height] = target.presentationContext.getDrawingBufferSize();
-    this.device.canvasContext.setDrawingBufferSize(width, height);
-  }
-
-  private _teardownManagers(): void {
-    this.layerManager?.finalize();
-    this.layerManager = null;
-
-    this.viewManager?.finalize();
-    this.viewManager = null;
-
-    this.effectManager?.finalize();
-    this.effectManager = null;
-
-    this.deckRenderer?.finalize();
-    this.deckRenderer = null;
-
-    this.deckPicker?.finalize();
-    this.deckPicker = null;
-
-    if (!Object.keys(this._canvasTargets).length) {
-      this.eventManager?.destroy();
-    }
-    this.eventManager = null;
-    this.eventManagers = {};
-
-    this.widgetManager?.finalize();
-    this.widgetManager = null;
-  }
-
-  private _rebuildDeckOwnedDevice(): void {
-    const ownedCanvas = this._ownedCanvas;
-    this.animationLoop?.stop();
-    this.animationLoop?.destroy();
-    this.animationLoop = null;
-    this._restoreDeviceResizeHandler();
-    this._teardownManagers();
-    this._destroyCanvasTargets();
-    this.device = null;
-    this.canvas = null;
-    this._canvasContext = null;
-
-    if (ownedCanvas) {
-      ownedCanvas.remove();
-      this._ownedCanvas = null;
-    }
-
-    const deviceOrPromise = this._createDevice(this.props);
-    this.animationLoop = this._createAnimationLoop(deviceOrPromise, this.props);
-    this.animationLoop.start();
-  }
-
-  private _createDeviceCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement | OffscreenCanvas {
-    if (this._isMultiCanvasMode()) {
-      const OffscreenCanvasConstructor = globalThis.OffscreenCanvas;
-      if (!OffscreenCanvasConstructor) {
-        throw new Error('Array-valued `canvas` requires OffscreenCanvas support.');
-      }
-      const width =
-        typeof props.width === 'number' && Number.isFinite(props.width) ? props.width : 1;
-      const height =
-        typeof props.height === 'number' && Number.isFinite(props.height) ? props.height : 1;
-      return new OffscreenCanvasConstructor(width, height);
-    }
-
-    return this._createCanvas(props);
-  }
-
   /** Resolve props.canvas to element */
   private _createCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement {
     let canvas = props.canvas;
@@ -1430,6 +1204,230 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
   }
 
+  private _isMultiCanvasProp(
+    canvas: DeckProps<ViewsT>['canvas'] | Required<DeckProps<ViewsT>>['canvas']
+  ): canvas is (string | HTMLCanvasElement)[] {
+    return Array.isArray(canvas);
+  }
+
+  private _isMultiCanvasMode(): boolean {
+    return this._isMultiCanvasProp(this.props.canvas);
+  }
+
+  private _getDefaultCanvasId(): string {
+    return this._canvasManager.order[0] || DEFAULT_CANVAS_ID;
+  }
+
+  private _validateCanvasConfiguration(props: DeckProps<ViewsT>): void {
+    if (!this._isMultiCanvasProp(props.canvas)) {
+      return;
+    }
+
+    if (props.gl) {
+      throw new Error(
+        'Array-valued `canvas` is not supported with `gl`. Do not supply `gl`; let Deck create the device.'
+      );
+    }
+
+    if (props.device?.canvasContext && !props.device.getDefaultCanvasContext().offscreenCanvas) {
+      throw new Error(
+        'Array-valued `canvas` requires an offscreen-backed default canvas context when using an external device.'
+      );
+    }
+  }
+
+  private _createEventManager(root: HTMLElement): EventManager {
+    const eventManager = new EventManager(root, {
+      touchAction: this.props.touchAction,
+      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+        // Resolve recognizer settings
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requireFailure] =
+          RECOGNIZERS[eventName];
+        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
+        const options = {...defaultOptions, ...optionsOverride, event: eventName};
+        return {
+          recognizer: new RecognizerConstructor(options),
+          recognizeWith,
+          requireFailure
+        };
+      }),
+      events: {
+        pointerdown: this._onPointerDown,
+        pointermove: this._onPointerMove,
+        pointerleave: this._onPointerMove
+      }
+    });
+
+    for (const eventType in EVENT_HANDLERS) {
+      eventManager.on(eventType, this._onEvent);
+    }
+    return eventManager;
+  }
+
+  private _getEventRoot(canvas: HTMLCanvasElement): HTMLElement {
+    return (
+      canvas.closest<HTMLElement>('.deck-events-root') ||
+      this.props.parent?.querySelector<HTMLElement>('.deck-events-root') ||
+      canvas
+    );
+  }
+
+  private _syncCanvasTargets(): void {
+    if (!this.device || !this._isMultiCanvasMode()) {
+      return;
+    }
+
+    this._canvasManager.syncCanvasEntries({
+      device: this.device,
+      canvases: this._isMultiCanvasProp(this.props.canvas) ? this.props.canvas : [],
+      useDevicePixels: this.props.useDevicePixels
+    });
+    this.eventManagers = this._canvasManager.eventManagers;
+    const defaultCanvasId = this._getDefaultCanvasId();
+    this.eventManager = this.eventManagers[defaultCanvasId] || null;
+    this.canvas = this._canvasManager.targets[defaultCanvasId]?.canvas || null;
+  }
+
+  private _setCanvasContext(canvasContext: CanvasContext): void {
+    this._canvasContext = canvasContext;
+
+    if ('style' in canvasContext.canvas) {
+      this.canvas = canvasContext.canvas;
+    }
+  }
+
+  private _setDeviceCanvasContext(device: Device, opts: {syncDrawingBuffer?: boolean} = {}): void {
+    const canvasContext = device.getDefaultCanvasContext();
+    this._setCanvasContext(canvasContext);
+    this._setDeviceResizeHandler(device, opts);
+  }
+
+  private _setDeviceResizeHandler(device: Device, opts: {syncDrawingBuffer?: boolean} = {}): void {
+    const syncDrawingBuffer = Boolean(opts.syncDrawingBuffer);
+    if (this._deviceResizeHandler?.device === device) {
+      this._deviceResizeHandler.syncDrawingBuffer = syncDrawingBuffer;
+      return;
+    }
+
+    this._restoreDeviceResizeHandler();
+
+    const onResize: NonNullable<DeviceProps['onResize']> = canvasContext => {
+      if (canvasContext === this._canvasContext && this._canvasContext) {
+        // Deck owns resize handling for the active render CanvasContext. Applications should use
+        // DeckProps.onResize instead of the lower-level luma device callback while Deck is active.
+        this._onCanvasContextResize(this._canvasContext, {
+          syncDrawingBuffer: this._deviceResizeHandler?.syncDrawingBuffer
+        });
+      } else if (this._isMultiCanvasMode()) {
+        this._updateDimensionsFromCanvasMetrics();
+      }
+    };
+
+    device.props.onResize = onResize;
+    this._deviceResizeHandler = {device, onResize, syncDrawingBuffer};
+  }
+
+  private _restoreDeviceResizeHandler(): void {
+    const resizeHandler = this._deviceResizeHandler;
+    if (resizeHandler && resizeHandler.device.props?.onResize === resizeHandler.onResize) {
+      resizeHandler.device.props.onResize = noop;
+    }
+    this._deviceResizeHandler = null;
+  }
+
+  /** Return per-canvas CSS pixel sizes used to resolve view layouts. */
+  private _getCanvasMetrics(): Record<string, {width: number; height: number}> {
+    return this._isMultiCanvasMode()
+      ? this._canvasManager.getMetrics(this.width, this.height)
+      : {[this._getDefaultCanvasId()]: {width: this.width, height: this.height}};
+  }
+  /** Resolve the presentation canvas id that produced a deck-managed DOM event. */
+  private _getCanvasIdFromEvent(
+    event?: {rootElement?: HTMLElement | null} | null
+  ): string | undefined {
+    return this._canvasManager.getCanvasIdFromEvent(event?.rootElement);
+  }
+
+  /** Look up the canvas context used for a canvas id. */
+  private _getCanvasContext(canvasId?: string): CanvasContext | PresentationContext | null {
+    return this._canvasManager.getTarget(canvasId)?.presentationContext || this._canvasContext;
+  }
+
+  /** Resize the offscreen default canvas context to match a presentation target. */
+  private _resizeForCanvasTarget(canvasId?: string): void {
+    const target = this._canvasManager.getTarget(canvasId);
+    if (!target || !this.device?.canvasContext) {
+      return;
+    }
+
+    const [width, height] = target.presentationContext.getDrawingBufferSize();
+    this.device.canvasContext.setDrawingBufferSize(width, height);
+  }
+
+  private _rebuildDeckOwnedDevice(): void {
+    const ownedCanvas = this._ownedCanvas;
+    this.animationLoop?.stop();
+    this.animationLoop?.destroy();
+    this.animationLoop = null;
+    this._restoreDeviceResizeHandler();
+    this.layerManager?.finalize();
+    this.layerManager = null;
+
+    this.viewManager?.finalize();
+    this.viewManager = null;
+
+    this.effectManager?.finalize();
+    this.effectManager = null;
+
+    this.deckRenderer?.finalize();
+    this.deckRenderer = null;
+
+    this.deckPicker?.finalize();
+    this.deckPicker = null;
+
+    if (!Object.keys(this._canvasManager.targets).length) {
+      this.eventManager?.destroy();
+    }
+    this.eventManager = null;
+    this.eventManagers = {};
+
+    this.widgetManager?.finalize();
+    this.widgetManager = null;
+
+    this._canvasManager.finalize();
+    if (this._isMultiCanvasMode()) {
+      this.canvas = null;
+    }
+    this.device = null;
+    this.canvas = null;
+    this._canvasContext = null;
+
+    if (ownedCanvas) {
+      ownedCanvas.remove();
+      this._ownedCanvas = null;
+    }
+
+    const deviceOrPromise = this._createDevice(this.props);
+    this.animationLoop = this._createAnimationLoop(deviceOrPromise, this.props);
+    this.animationLoop.start();
+  }
+
+  private _createDeviceCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement | OffscreenCanvas {
+    if (this._isMultiCanvasMode()) {
+      const OffscreenCanvasConstructor = globalThis.OffscreenCanvas;
+      if (!OffscreenCanvasConstructor) {
+        throw new Error('Array-valued `canvas` requires OffscreenCanvas support.');
+      }
+      const width =
+        typeof props.width === 'number' && Number.isFinite(props.width) ? props.width : 1;
+      const height =
+        typeof props.height === 'number' && Number.isFinite(props.height) ? props.height : 1;
+      return new OffscreenCanvasConstructor(width, height);
+    }
+
+    return this._createCanvas(props);
+  }
+
   /**
    * Sync Deck viewport dimensions from the active canvas context.
    * luma.gl owns resize observation, DPR tracking and drawing buffer sizing for Deck-created
@@ -1437,7 +1435,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
    */
   private _updateCanvasSize(canvasContext: CanvasContext | null = this._canvasContext): void {
     if (this._isMultiCanvasMode()) {
-      this._updateCanvasMetrics();
+      this._updateDimensionsFromCanvasMetrics();
       return;
     }
     const {canvas} = this;
@@ -1476,7 +1474,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._updateCanvasSize(canvasContext);
   }
 
-  private _updateCanvasMetrics(): void {
+  private _updateDimensionsFromCanvasMetrics(): void {
     const canvasMetrics = this._getCanvasMetrics();
     const {width: newWidth = 0, height: newHeight = 0} =
       canvasMetrics[this._getDefaultCanvasId()] || {};
@@ -1679,7 +1677,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _updateCursor(): void {
     const cursor = this.props.getCursor(this.cursorState);
     if (this._isMultiCanvasMode()) {
-      for (const target of Object.values(this._canvasTargets)) {
+      for (const target of Object.values(this._canvasManager.targets)) {
         target.canvas.style.cursor = cursor;
       }
       return;
@@ -1834,9 +1832,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this._isMultiCanvasMode() &&
       opts.pass === 'screen' &&
       !opts.target &&
-      this._canvasTargetOrder.length
+      this._canvasManager.order.length
     ) {
-      for (const canvasId of this._canvasTargetOrder) {
+      for (const canvasId of this._canvasManager.order) {
         const canvasViewports = opts.viewports.filter(
           viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
         );
@@ -1845,7 +1843,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
           continue;
         }
 
-        const target = this._canvasTargets[canvasId];
+        const target = this._canvasManager.targets[canvasId];
         this._resizeForCanvasTarget(canvasId);
         const framebuffer = target.presentationContext.getCurrentFramebuffer();
         this.deckRenderer?.renderLayers({
@@ -1875,7 +1873,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Clear and present a canvas that currently has no mapped viewports. */
   private _clearCanvasTarget(canvasId: string, renderPassId: string): void {
-    const target = this._canvasTargets[canvasId];
+    const target = this._canvasManager.targets[canvasId];
     if (!target || !this.device) {
       return;
     }

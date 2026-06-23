@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device} from '@luma.gl/core';
+import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
@@ -13,11 +13,7 @@ import type Layer from './layer';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type {Effect, PostRenderOptions} from './effect';
-import type {
-  CanvasContextLike,
-  LayersPassRenderOptions,
-  FilterContext
-} from '../passes/layers-pass';
+import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
@@ -69,7 +65,7 @@ export default class DeckRenderer {
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
     target?: Framebuffer | null;
-    canvasContext?: CanvasContextLike;
+    canvasContext?: CanvasContext | PresentationContext;
     shaderModuleProps?: any;
     renderPassId?: string;
     layerFilter?: LayerFilter;

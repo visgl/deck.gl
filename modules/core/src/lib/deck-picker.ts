@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Buffer, Texture} from '@luma.gl/core';
-import type {Device} from '@luma.gl/core';
+import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import log from '../utils/log';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
@@ -16,7 +16,7 @@ import {
 import type {RenderStats} from '../passes/layers-pass';
 import type {Stats} from '@probe.gl/stats';
 import type {Framebuffer} from '@luma.gl/core';
-import type {CanvasContextLike, FilterContext, Rect} from '../passes/layers-pass';
+import type {FilterContext, Rect} from '../passes/layers-pass';
 import type Layer from './layer';
 import type {Effect} from './effect';
 import type View from '../views/view';
@@ -46,7 +46,7 @@ type PickOperationContext = {
   layers: Layer[];
   views: Record<string, View>;
   viewports: Viewport[];
-  canvasContext?: CanvasContextLike;
+  canvasContext?: CanvasContext | PresentationContext;
   onViewportActive: (viewport: Viewport) => void;
   effects: Effect[];
 };
@@ -160,7 +160,9 @@ export default class DeckPicker {
   // Private
 
   /** Ensures that picking framebuffer exists and matches the canvas size */
-  _resizeBuffer(canvasContext: CanvasContextLike = this.device.getDefaultCanvasContext()) {
+  _resizeBuffer(
+    canvasContext: CanvasContext | PresentationContext = this.device.getDefaultCanvasContext()
+  ) {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       const pickingColorTexture = this.device.createTexture({
@@ -189,7 +191,8 @@ export default class DeckPicker {
       }
     }
 
-    // Resize it to current canvas size (this is a noop if size hasn't changed)
+    // Picking renders in drawing-buffer pixels. DPR and useDevicePixels can make that size
+    // differ from the canvas/CSS size used for viewport bookkeeping.
     const [width, height] = canvasContext.getDrawingBufferSize();
     this.pickingFBO?.resize({width, height});
     this.depthFBO?.resize({width, height});
@@ -227,6 +230,7 @@ export default class DeckPicker {
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   }> {
+    // Picking starts in CSS pixels, so use the canvas context's current conversion ratio.
     const pixelRatio = canvasContext.cssToDeviceRatio();
 
     const pickableLayers = this._getPickable(layers);
@@ -242,7 +246,7 @@ export default class DeckPicker {
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
-    // And compensate for pixelRatio
+    // And compensate for the context's current CSS-to-device ratio.
     const devicePixelRange = canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
@@ -392,6 +396,7 @@ export default class DeckPicker {
     result: PickingInfo[];
     emptyInfo: PickingInfo;
   } {
+    // Keep the sync picking path aligned with the same canvas context state used for drawing.
     const pixelRatio = canvasContext.cssToDeviceRatio();
 
     const pickableLayers = this._getPickable(layers);
@@ -407,7 +412,7 @@ export default class DeckPicker {
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
-    // And compensate for pixelRatio
+    // And compensate for the context's current CSS-to-device ratio.
     const devicePixelRange = canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
@@ -562,7 +567,7 @@ export default class DeckPicker {
     this._resizeBuffer(canvasContext);
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
-    // And compensate for pixelRatio
+    // And compensate for the context's current CSS-to-device ratio.
     const pixelRatio = canvasContext.cssToDeviceRatio();
     const leftTop = canvasContext.cssToDevicePixels([x, y], true);
 
@@ -668,7 +673,7 @@ export default class DeckPicker {
     this._resizeBuffer(canvasContext);
 
     // Convert from canvas top-left to WebGL bottom-left coordinates
-    // And compensate for pixelRatio
+    // And compensate for the context's current CSS-to-device ratio.
     const pixelRatio = canvasContext.cssToDeviceRatio();
     const leftTop = canvasContext.cssToDevicePixels([x, y], true);
 
@@ -756,7 +761,7 @@ export default class DeckPicker {
     onViewportActive: (viewport: Viewport) => void;
     cullRect?: Rect;
     effects: Effect[];
-    canvasContext?: CanvasContextLike;
+    canvasContext?: CanvasContext | PresentationContext;
   }): Promise<{
     pickedColors: Uint8Array;
     decodePickingColor: PickingColorDecoder;
@@ -773,7 +778,7 @@ export default class DeckPicker {
       onViewportActive: (viewport: Viewport) => void;
       cullRect?: Rect;
       effects: Effect[];
-      canvasContext?: CanvasContextLike;
+      canvasContext?: CanvasContext | PresentationContext;
     },
     pickZ: true
   ): Promise<{
@@ -802,7 +807,7 @@ export default class DeckPicker {
       onViewportActive: (viewport: Viewport) => void;
       cullRect?: Rect;
       effects: Effect[];
-      canvasContext?: CanvasContextLike;
+      canvasContext?: CanvasContext | PresentationContext;
     },
     pickZ: boolean = false
   ): Promise<{
@@ -931,7 +936,7 @@ export default class DeckPicker {
     onViewportActive: (viewport: Viewport) => void;
     cullRect?: Rect;
     effects: Effect[];
-    canvasContext?: CanvasContextLike;
+    canvasContext?: CanvasContext | PresentationContext;
   }): {
     pickedColors: Uint8Array;
     decodePickingColor: PickingColorDecoder;
@@ -951,7 +956,7 @@ export default class DeckPicker {
       onViewportActive: (viewport: Viewport) => void;
       cullRect?: Rect;
       effects: Effect[];
-      canvasContext?: CanvasContextLike;
+      canvasContext?: CanvasContext | PresentationContext;
     },
     pickZ: true
   ): {
@@ -980,7 +985,7 @@ export default class DeckPicker {
       onViewportActive: (viewport: Viewport) => void;
       cullRect?: Rect;
       effects: Effect[];
-      canvasContext?: CanvasContextLike;
+      canvasContext?: CanvasContext | PresentationContext;
     },
     pickZ: boolean = false
   ): {
