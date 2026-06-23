@@ -154,6 +154,23 @@ test('project#getUniforms', () => {
   ).toBeTruthy();
 });
 
+test('project#getUniforms rejects legacy numeric coordinate systems', () => {
+  expect(
+    () => project.getUniforms({viewport: TEST_VIEWPORTS.map, coordinateSystem: -1 as never}),
+    'Legacy DEFAULT is rejected'
+  ).toThrow(/Invalid coordinateSystem/);
+
+  expect(
+    () =>
+      project.getUniforms({
+        viewport: TEST_VIEWPORTS.mapHighZoom,
+        coordinateSystem: 2 as never,
+        coordinateOrigin: Object.freeze([-122.4, 37.7])
+      }),
+    'Legacy offsets are rejected'
+  ).toThrow(/Invalid coordinateSystem/);
+});
+
 test('project#getUniforms normalizes IDENTITY to CARTESIAN', () => {
   const cartesian = project.getUniforms({
     viewport: TEST_VIEWPORTS.infoVis,
