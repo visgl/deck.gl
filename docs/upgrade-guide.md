@@ -61,6 +61,7 @@ If your app uses 3D ArcGIS integration, migrate as follows:
 - If you pass a custom `esri` object to `loadArcGISModules`, make sure it exposes `esri.views['3d'].webgl.RenderNode`.
 - Remove `externalRenderers.add(sceneView, renderer)`. `DeckRenderer` now self-registers as a `RenderNode`.
 - `SceneView` integration still requires `viewingMode: 'local'`.
+- If you are loading ArcGIS via `esri-loader`, consider pinning the ArcGIS JS API script with `loadScriptOptions` (for example, `{url: 'https://js.arcgis.com/4.32/'}`) to avoid unintentional version drift.
 
 ```js
 // Before
@@ -84,7 +85,9 @@ loadArcGISModules([
   'esri/Map',
   'esri/views/SceneView',
   'esri/views/3d/webgl/RenderNode'
-]).then(({DeckRenderer, modules}) => {
+], {
+  url: 'https://js.arcgis.com/4.32/'
+}).then(({DeckRenderer, modules}) => {
   const [ArcGISMap, SceneView] = modules;
   const sceneView = new SceneView({
     map: new ArcGISMap({basemap: 'dark-gray-vector'}),
