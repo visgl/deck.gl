@@ -18,7 +18,7 @@ Release date: In development
 
 deck.gl can now render a single `Deck` instance into multiple HTML canvases.
 
-- [`Deck.canvas`](./api-reference/core/deck.md#canvas) now accepts an array, creating one presentation target per canvas while keeping one shared layer stack and one shared offscreen device context.
+- [`Deck._canvases`](./api-reference/core/deck.md#_canvases) creates one presentation target per canvas while keeping one shared layer stack and one shared offscreen device context.
 - Views can opt into a specific target with [`View.canvasId`](./api-reference/core/view.md#canvasid). Controllers, picking, and layout resolution are all scoped to that canvas.
 - Unused canvases are now explicitly cleared when views move or are removed, avoiding stale frames during dynamic layouts.
 

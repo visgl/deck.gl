@@ -44,19 +44,22 @@ See the [Properties](#properties) section.
 
 The following properties are used to initialize a `Deck` instance. Any custom value should always be provided to the `Deck` constructor. Changing them with `setProps` afterwards will have no effect.
 
-#### `canvas` (HTMLCanvasElement | String | (HTMLCanvasElement | String)[], optional) {#canvas}
+#### `canvas` (HTMLCanvasElement | String, optional) {#canvas}
 
-The canvas or canvases to render into. A single canvas can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
+The canvas to render into. It can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
 
-When an array is supplied, Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
+#### `_canvases` ((HTMLCanvasElement | String)[], optional) {#_canvases}
 
-Unlike the other initialization settings in this section, an array-valued `canvas` prop is maintained when updated with `setProps()`. Deck diffs the array and creates, reuses, or destroys presentation targets as needed.
+Experimental: presentation canvases for multi-canvas mode. Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
+
+Unlike the other initialization settings in this section, `_canvases` is maintained when updated with `setProps()`. Deck diffs the array and creates, reuses, or destroys presentation targets as needed.
 
 Notes:
 
-* An array-valued `canvas` prop is not compatible with `gl`.
+* Do not supply `canvas` and `_canvases` together.
+* `_canvases` is not compatible with `gl`.
 * In multi-canvas mode, each canvas gets its own event manager and controller routing.
-* `canvas: []` keeps the offscreen-backed device path active but does not create any presentation targets.
+* `_canvases: []` keeps the offscreen-backed device path active but does not create any presentation targets.
 
 #### `device` ([Device](https://luma.gl/docs/api-reference/core/device)) {#device}
 

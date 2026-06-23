@@ -184,12 +184,12 @@ Remarks:
 
 ### Using with Multiple Canvases
 
-When [`Deck.canvas`](../core/deck.md#canvas) is an array, deck.gl still mounts generated widget DOM under one shared `.deck-widget-container`. A widget's `viewId` selects the view used for positioning and event handling; that view's [`canvasId`](../core/view.md#canvasid) determines which presentation-canvas bounds offset the view container. The widget is not reparented into the canvas element.
+When [`Deck._canvases`](../core/deck.md#_canvases) is supplied, deck.gl still mounts generated widget DOM under one shared `.deck-widget-container`. A widget's `viewId` selects the view used for positioning and event handling; that view's [`canvasId`](../core/view.md#canvasid) determines which presentation-canvas bounds offset the view container. The widget is not reparented into the canvas element.
 
 ```ts
 new Deck({
   parent: document.getElementById('deck-root'),
-  canvas: ['canvas-london', 'canvas-tokyo'],
+  _canvases: ['canvas-london', 'canvas-tokyo'],
   views: [
     new MapView({id: 'london', canvasId: 'canvas-london'}),
     new MapView({id: 'tokyo', canvasId: 'canvas-tokyo'})

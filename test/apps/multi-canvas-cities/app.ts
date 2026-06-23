@@ -156,7 +156,7 @@ if (!mapGrid) {
 
 deck = new Deck({
   parent: mapGrid,
-  canvas: CITY_PANELS.map(city => city.id),
+  _canvases: CITY_PANELS.map(city => city.id),
   views: VIEWS,
   initialViewState: INITIAL_VIEW_STATE,
   layers: getLayers(),

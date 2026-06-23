@@ -298,7 +298,7 @@ deck.gl also supports multiple views by taking a `views` prop that is a list of 
 
 Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen) with `x` (left), `y` (top), `width` and `height`. These can be specified in either numbers or CSS-like percentage strings (e.g. `width: '50%'`), which is evaluated at runtime when the canvas resizes.
 
-If [`Deck.canvas`](../api-reference/core/deck.md#canvas) is supplied as an array, each view may also specify a `canvasId`. In that mode:
+If [`Deck._canvases`](../api-reference/core/deck.md#_canvases) is supplied, each view may also specify a `canvasId`. In that mode:
 
 * each canvas gets its own presentation target and event manager
 * view layout is resolved relative to the assigned canvas, not a global deck rectangle
@@ -401,7 +401,7 @@ const views = [
 ];
 
 new Deck({
-  canvas: ['canvas-london', 'canvas-tokyo'],
+  _canvases: ['canvas-london', 'canvas-tokyo'],
   views,
   layers
 });

@@ -458,7 +458,7 @@ webglTest('Deck#multi-canvas presentation', async () => {
     parent,
     width: 64,
     height: 64,
-    canvas: [canvasA, canvasB],
+    _canvases: [canvasA, canvasB],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 1},
       right: {longitude: 10, latitude: 10, zoom: 1}
@@ -499,13 +499,33 @@ webglTest('Deck#multi-canvas presentation', async () => {
   // @ts-expect-error testing private state
   const eventManagers = deck.eventManagers;
   const viewports = deck.getViewports();
-  deck.setProps({canvas: [canvasA, canvasB]});
+  deck.setProps({_canvases: [canvasA, canvasB]});
   // @ts-expect-error testing private state
   expect(deck.eventManagers).toBe(eventManagers);
   expect(deck.getViewports()).toBe(viewports);
 
   deck.finalize();
   parent.remove();
+});
+
+test('Deck#multi-canvas configuration', () => {
+  expect(
+    () =>
+      new Deck({
+        // @ts-expect-error testing runtime validation for JavaScript callers
+        canvas: [],
+        layers: []
+      })
+  ).toThrow('`canvas` accepts one canvas. Use `_canvases` for multi-canvas mode.');
+
+  expect(
+    () =>
+      new Deck({
+        canvas: document.createElement('canvas'),
+        _canvases: [],
+        layers: []
+      })
+  ).toThrow();
 });
 
 webglTest('Deck#multi-canvas picking routes by canvas', async () => {
@@ -528,7 +548,7 @@ webglTest('Deck#multi-canvas picking routes by canvas', async () => {
   const deck = new Deck({
     width: 64,
     height: 64,
-    canvas: [canvasA, canvasB],
+    _canvases: [canvasA, canvasB],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 10},
       right: {longitude: 10, latitude: 10, zoom: 10}
@@ -614,7 +634,7 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
   expect(originalCanvas).toBeTruthy();
   expect(originalCanvas?.isConnected).toBe(true);
 
-  deck.setProps({canvas: []});
+  deck.setProps({_canvases: []});
   await waitForRender(deck);
 
   expect(deck.getCanvas()).toBe(null);
@@ -622,7 +642,7 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
   // @ts-expect-error testing private state
   expect(Object.keys(deck._canvasManager.targets)).toEqual([]);
 
-  deck.setProps({canvas: undefined});
+  deck.setProps({_canvases: undefined});
   await waitForRender(deck);
 
   const rebuiltCanvas = deck.getCanvas();
@@ -649,7 +669,7 @@ webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
   const deck = new Deck({
     width: 64,
     height: 64,
-    canvas: [canvasA, canvasB],
+    _canvases: [canvasA, canvasB],
     initialViewState: {
       left: {longitude: 0, latitude: 0, zoom: 1},
       right: {longitude: 10, latitude: 10, zoom: 1}

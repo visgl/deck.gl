@@ -9,7 +9,7 @@ import type {Device, PresentationContext} from '@luma.gl/core';
 import type {EventManager} from 'mjolnir.js';
 
 /**
- * Runtime state for one canvas in an array-valued `Deck.canvas` configuration.
+ * Runtime state for one canvas in a `Deck._canvases` configuration.
  * @internal
  */
 export type CanvasEntry = {
@@ -21,7 +21,7 @@ export type CanvasEntry = {
 };
 
 /**
- * Owns resources derived from an array-valued `Deck.canvas` configuration.
+ * Owns resources derived from a `Deck._canvases` configuration.
  *
  * The existing single-canvas path stays in Deck. This class only reconciles presentation
  * canvases, their {@link PresentationContext}s and per-canvas {@link EventManager}s, and answers
