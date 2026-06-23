@@ -508,7 +508,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
-    const wasMultiCanvasMode = this._isMultiCanvasMode();
 
     if ('onLayerHover' in props) {
       log.removed('onLayerHover', 'onHover')();
@@ -526,20 +525,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     // Merge with existing props
+    assert(!('_canvases' in props) || Array.isArray(props._canvases) === this._isMultiCanvasMode());
     Object.assign(this.props, props);
     this._validateCanvasConfiguration(this.props);
     this._validateInternalPickingMode();
-
-    if (
-      this.device &&
-      !this.props.device &&
-      !this.props.gl &&
-      wasMultiCanvasMode !== this._isMultiCanvasMode()
-    ) {
-      this._rebuildDeckOwnedDevice();
-      this.stats.get('setProps Time').timeEnd();
-      return;
-    }
 
     if (this.device && this._isMultiCanvasMode()) {
       this._syncCanvasTargets();
@@ -1367,54 +1356,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     const [width, height] = target.presentationContext.getDrawingBufferSize();
     this.device.canvasContext.setDrawingBufferSize(width, height);
-  }
-
-  private _rebuildDeckOwnedDevice(): void {
-    const ownedCanvas = this._ownedCanvas;
-    this.animationLoop?.stop();
-    this.animationLoop?.destroy();
-    this.animationLoop = null;
-    this._restoreDeviceResizeHandler();
-    this.layerManager?.finalize();
-    this.layerManager = null;
-
-    this.viewManager?.finalize();
-    this.viewManager = null;
-
-    this.effectManager?.finalize();
-    this.effectManager = null;
-
-    this.deckRenderer?.finalize();
-    this.deckRenderer = null;
-
-    this.deckPicker?.finalize();
-    this.deckPicker = null;
-
-    if (!Object.keys(this._canvasManager.targets).length) {
-      this.eventManager?.destroy();
-    }
-    this.eventManager = null;
-    this.eventManagers = {};
-
-    this.widgetManager?.finalize();
-    this.widgetManager = null;
-
-    this._canvasManager.finalize();
-    if (this._isMultiCanvasMode()) {
-      this.canvas = null;
-    }
-    this.device = null;
-    this.canvas = null;
-    this._canvasContext = null;
-
-    if (ownedCanvas) {
-      ownedCanvas.remove();
-      this._ownedCanvas = null;
-    }
-
-    const deviceOrPromise = this._createDevice(this.props);
-    this.animationLoop = this._createAnimationLoop(deviceOrPromise, this.props);
-    this.animationLoop.start();
   }
 
   private _createDeviceCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement | OffscreenCanvas {

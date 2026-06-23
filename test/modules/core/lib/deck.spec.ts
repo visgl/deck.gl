@@ -620,7 +620,7 @@ webglTest('Deck#multi-canvas picking routes by canvas', async () => {
   canvasB.remove();
 });
 
-webglTest('Deck#multi-canvas mode transitions', async () => {
+webglTest('Deck#multi-canvas mode cannot be changed', async () => {
   const deck = new Deck({
     width: 64,
     height: 64,
@@ -630,25 +630,7 @@ webglTest('Deck#multi-canvas mode transitions', async () => {
 
   await waitForRender(deck);
 
-  const originalCanvas = deck.getCanvas();
-  expect(originalCanvas).toBeTruthy();
-  expect(originalCanvas?.isConnected).toBe(true);
-
-  deck.setProps({_canvases: []});
-  await waitForRender(deck);
-
-  expect(deck.getCanvas()).toBe(null);
-  expect(originalCanvas?.isConnected).toBe(false);
-  // @ts-expect-error testing private state
-  expect(Object.keys(deck._canvasManager.targets)).toEqual([]);
-
-  deck.setProps({_canvases: undefined});
-  await waitForRender(deck);
-
-  const rebuiltCanvas = deck.getCanvas();
-  expect(rebuiltCanvas).toBeTruthy();
-  expect(rebuiltCanvas).not.toBe(originalCanvas);
-  expect(rebuiltCanvas?.isConnected).toBe(true);
+  expect(() => deck.setProps({_canvases: []})).toThrow();
 
   deck.finalize();
 });
