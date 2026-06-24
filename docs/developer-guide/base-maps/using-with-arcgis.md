@@ -10,4 +10,4 @@ Starting with v8.1, deck.gl has support for ArcGIS with the [@deck.gl/arcgis](..
 
 2D integration with `MapView` is supported by the [DeckLayer](../../api-reference/arcgis/deck-layer.md) class, see [pure JS example](https://github.com/visgl/deck.gl/tree/9.3-release/examples/get-started/pure-js/arcgis).
 
-3D integration with `SceneView` is experimental: see the [DeckRenderer](../../api-reference/arcgis/deck-renderer.md) class.
+3D integration with `SceneView` is experimental and currently targets `viewingMode: 'local'`; `DeckRenderer` attaches as a RenderNode rather than a map layer. See the [DeckRenderer](../../api-reference/arcgis/deck-renderer.md) class.

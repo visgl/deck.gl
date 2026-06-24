@@ -36,6 +36,53 @@ new Deck({
 - The experimental `_renderLayersInGroups` prop has been removed from `MapboxOverlay`. In interleaved mode, layers are now always rendered in groups by `beforeId` or `slot`, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default. If you were using `_renderLayersInGroups: true`, simply remove the prop.
 - Note: extensions that require shared rendering context (MaskExtension, CollisionFilterExtension) only work between layers in the same group. Ensure affected layers share the same `beforeId` or `slot` value.
 
+### @deck.gl/arcgis
+
+`DeckRenderer` now integrates with ArcGIS `SceneView` through `RenderNode` instead of `externalRenderers`.
+
+If your app uses 3D ArcGIS integration, migrate as follows:
+
+- Load `esri/views/3d/webgl/RenderNode` instead of `esri/views/3d/externalRenderers`.
+- If you pass a custom `esri` object to `loadArcGISModules`, make sure it exposes `esri.views['3d'].webgl.RenderNode`.
+- Remove `externalRenderers.add(sceneView, renderer)`. `DeckRenderer` now self-registers as a `RenderNode`.
+- `SceneView` integration still requires `viewingMode: 'local'`.
+- If you are loading ArcGIS via `esri-loader`, consider pinning the ArcGIS JS API script with `loadScriptOptions` (for example, `{url: 'https://js.arcgis.com/4.32/'}`) to avoid unintentional version drift.
+
+```js
+// Before
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/externalRenderers'
+]).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView, externalRenderers] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  const renderer = new DeckRenderer(sceneView, {layers});
+  externalRenderers.add(sceneView, renderer);
+});
+
+// After
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/webgl/RenderNode'
+], {
+  url: 'https://js.arcgis.com/4.32/'
+}).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  new DeckRenderer(sceneView, {layers});
+});
+```
+
 ### Widgets
 
 The following widgets have breaking changes in v9.3:
@@ -47,7 +94,6 @@ The following widgets have breaking changes in v9.3:
 - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) - no longer experimental (removed underscore in export)
 - [ThemeWidget](./api-reference/widgets/theme-widget.md) - no longer experimental (removed underscore in export)
 - [LoadingWidget](./api-reference/widgets/loading-widget.md) - no longer experimental (removed underscore in export)
-
 
 ## Upgrading to v9.1
 
