@@ -18,6 +18,13 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
 import type {TileLoadProps, ZRange} from '../tileset-2d/index';
+
+export type TileLoadingState = {
+  total: number;
+  loaded: number;
+  failed: number;
+  pending: number;
+};
 import {
   Tileset2D,
   Tile2DHeader,
@@ -220,6 +227,19 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           (!tile.content || !tile.layers || tile.layers.every(layer => layer.isLoaded))
       )
     );
+  }
+
+  getTileLoadingState(): TileLoadingState {
+    const selectedTiles: Tile2DHeader<DataT>[] = this.state?.tileset?.selectedTiles ?? [];
+    let loaded = 0;
+    let failed = 0;
+    let pending = 0;
+    for (const tile of selectedTiles) {
+      if (!tile.isLoaded) pending++;
+      else if (tile.content === null) failed++;
+      else loaded++;
+    }
+    return {total: selectedTiles.length, loaded, failed, pending};
   }
 
   shouldUpdateState({changeFlags}): boolean {
