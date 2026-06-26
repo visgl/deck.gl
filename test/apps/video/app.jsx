@@ -37,7 +37,7 @@ export class App extends Component {
 
   _renderLayers() {
     return new BitmapLayer({
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
       image: this._videoRef.current,
       bounds: [-300, -400, 400, 300]
     });
