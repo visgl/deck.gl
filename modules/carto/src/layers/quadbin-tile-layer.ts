@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
+import {getAuthFetchOptions} from '../utils';
 import QuadbinLayer, {QuadbinLayerProps} from './quadbin-layer';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
@@ -45,7 +46,7 @@ export default class QuadbinTileLayer<
   getLoadOptions(): any {
     const tileJSON = this.props.data as TilejsonResult;
     return mergeLoadOptions(super.getLoadOptions(), {
-      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      fetch: getAuthFetchOptions(tileJSON.accessToken),
       cartoSpatialTile: {scheme: 'quadbin'}
     });
   }

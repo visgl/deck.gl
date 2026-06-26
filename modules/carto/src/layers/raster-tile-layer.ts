@@ -11,6 +11,7 @@ import {
   LayersList
 } from '@deck.gl/core';
 import RasterLayer, {RasterLayerProps} from './raster-layer';
+import {getAuthFetchOptions} from '../utils';
 import QuadbinTileset2D from './quadbin-tileset-2d';
 import type {TilejsonResult} from '@carto/api-client';
 import {TilejsonPropType, mergeLoadOptions} from './utils';
@@ -66,7 +67,7 @@ export default class RasterTileLayer<
   getLoadOptions(): any {
     const tileJSON = this.props.data as TilejsonResult;
     return mergeLoadOptions(super.getLoadOptions(), {
-      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}}
+      fetch: getAuthFetchOptions(tileJSON.accessToken)
     });
   }
 
