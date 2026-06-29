@@ -2489,7 +2489,7 @@ a {
 }
 
 .paragraph-1 {
-    padding: 0 40px 60px 0
+    padding: 12px 40px 60px 0
 }
 
 @media (max-width:800px) {
@@ -2608,13 +2608,30 @@ a {
 #agenda .card-agenda .card-bg {
     background-color: #f4f4f4;
     padding: 30px 50px;
-    min-height: 450px
+    min-height: 500px
+}
+
+#agenda .card-agenda-open {
+    border: 1px solid #e4e4e4;
+    padding: 30px 50px;
+    min-height: 500px
+}
+
+#agenda .card-eod {
+    background-color: #f4f4f4;
+    padding: 30px 50px;
+    min-height: 200px
 }
 
 @media (min-width:1632px) {
     #agenda .card-agenda .card-bg {
         padding: 50px 40px;
         min-height: 500px
+    }
+
+    #agenda .card-eod {
+        padding: 50px 40px;
+        min-height: 200px
     }
 }
 
@@ -2643,7 +2660,22 @@ header {
     background-color: #202020;
 }
 
-.header {
+.header_container {
+    color: white;
+    width: fit-content;
+    h1 > * {
+        filter: drop-shadow(0 0 12px #000);
+    }
+    h1 > b {
+        filter: drop-shadow(0 0 8px #333);
+    }
+}
+
+.header_container img {
+    filter: drop-shadow(0 0 12px #333);
+}
+
+.header .header_ribbon {
     display: flex;
     flex-direction: column;
     color: #fff;
@@ -2654,11 +2686,22 @@ header {
     height: 100%;
 }
 
-.header .container {
+.header_text {
+    color: #fff;
+    margin-top: 9px;
+}
+
+.header > .container {
+    margin-top: 100px;
     display: flex;
     flex-direction: column;
     align-items: start;
-    filter: drop-shadow(0 0 8px #000);
+    /*filter: drop-shadow(0 0 8px #000);*/
+}
+
+.header_ribbon img {
+    max-width: 32px;
+    max-height: 32px;
 }
 
 .header img {
