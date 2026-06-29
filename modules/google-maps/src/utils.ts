@@ -281,6 +281,7 @@ export function installMap3DWebGLContextCapture() {
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const getContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function patchedGetContext(
+    this: HTMLCanvasElement,
     type: string,
     ...args: any[]
   ) {
@@ -583,11 +584,12 @@ function normalizeLatLng(center?: GoogleMapsLatLngLike): {
   const value = 'toJSON' in center && center.toJSON ? center.toJSON() : center;
   const lat = typeof value.lat === 'function' ? value.lat() : value.lat;
   const lng = typeof value.lng === 'function' ? value.lng() : value.lng;
+  const altitude = 'altitude' in value && typeof value.altitude === 'number' ? value.altitude : 0;
 
   return {
     lat: lat || 0,
     lng: lng || 0,
-    altitude: value.altitude || 0
+    altitude
   };
 }
 

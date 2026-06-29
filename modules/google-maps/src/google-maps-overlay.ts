@@ -36,6 +36,14 @@ const GL_STATE: GLParameters = {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
+function getDeckAnimationLoop(deck: Deck): DeckAnimationLoop | null {
+  return (deck as unknown as DeckInternal).animationLoop || null;
+}
+
+function getDeckDevice(deck: Deck): Device | null {
+  return (deck as unknown as DeckInternal).device || null;
+}
+
 const defaultProps = {
   interleaved: true
 };
@@ -59,6 +67,17 @@ export type GoogleMapsOverlayProps = Omit<
 type GoogleMapsOverlayMap = google.maps.Map | GoogleMapsMap3DElement;
 type ListenerHandle = {
   remove: () => void;
+};
+type DeckAnimationLoop = {
+  _renderFrame: () => void;
+  animationProps?: unknown;
+  props: {
+    onRender: (props: unknown) => void;
+  };
+};
+type DeckInternal = {
+  animationLoop?: DeckAnimationLoop;
+  device: Device | null;
 };
 
 export default class GoogleMapsOverlay {
@@ -281,15 +300,18 @@ export default class GoogleMapsOverlay {
     // By default, animationLoop._renderFrame invokes
     // animationLoop.onRender. We override this to wrap
     // in withParameters so we don't modify the GL state
-    // @ts-ignore accessing protected member
-    const animationLoop = deck.animationLoop!;
+    const animationLoop = getDeckAnimationLoop(deck);
+    if (!animationLoop) {
+      return;
+    }
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-      // @ts-expect-error accessing protected member
-      const device: Device = deck.device;
-      device.withParametersWebGL({}, () => {
-        animationLoop.props.onRender(animationLoop.animationProps!);
-      });
+      const device = getDeckDevice(deck);
+      if (device) {
+        device.withParametersWebGL({}, () => {
+          animationLoop.props.onRender(animationLoop.animationProps);
+        });
+      }
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
   }
@@ -329,8 +351,8 @@ export default class GoogleMapsOverlay {
     deck.setProps({
       width,
       height,
-      // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
-      viewState: {altitude, ...rest} as MapViewState
+      // altitude is accepted by WebMercatorViewport but not exposed by type
+      viewState: {altitude, ...rest} as unknown as MapViewState
     });
     // Deck is initialized
     deck.redraw();
@@ -352,8 +374,7 @@ export default class GoogleMapsOverlay {
     });
 
     if (interleaved && deck.isInitialized) {
-      // @ts-expect-error
-      const device: Device = deck.device;
+      const device = getDeckDevice(deck);
 
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck. Wrap external handle so luma.gl
@@ -462,20 +483,20 @@ export default class GoogleMapsOverlay {
 
   _overrideMap3DRenderFrame(gl: WebGL2RenderingContext | WebGLRenderingContext) {
     const deck = this._deck;
-    if (!deck?.animationLoop) {
+    const animationLoop = deck && getDeckAnimationLoop(deck);
+    if (!deck || !animationLoop) {
       return;
     }
 
     // Match the vector overlay path: do not leave Deck's GL state in Google's renderer.
-    // @ts-ignore accessing protected member
-    const animationLoop = deck.animationLoop;
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-      // @ts-expect-error accessing protected member
-      const device: Device = deck.device;
-      device.withParametersWebGL({}, () => {
-        animationLoop.props.onRender(animationLoop.animationProps!);
-      });
+      const device = getDeckDevice(deck);
+      if (device) {
+        device.withParametersWebGL({}, () => {
+          animationLoop.props.onRender(animationLoop.animationProps);
+        });
+      }
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
   }
@@ -494,8 +515,7 @@ export default class GoogleMapsOverlay {
     });
 
     if (gl && deck.isInitialized) {
-      // @ts-expect-error
-      const device: Device = deck.device;
+      const device = getDeckDevice(deck);
 
       if (device instanceof WebGLDevice) {
         const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);

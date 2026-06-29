@@ -5,10 +5,10 @@
 import {test, expect} from 'vitest';
 
 import {
-  createEditorState,
-  getInsertIndex,
-  normalizeCoordinate
-} from '../../../examples/website/google-map-3d-overlay-prototype/map3d-editor-state';
+  createMap3DEditorState,
+  getMap3DEditorInsertIndex,
+  normalizeMap3DCoordinate
+} from '../../../modules/google-maps/src/map-3d-editor-state';
 
 const PATH = [
   {lng: -73.985, lat: 40.758, altitude: 0},
@@ -17,7 +17,7 @@ const PATH = [
 ];
 
 test('Map3D editor state appends and deletes active geometry', () => {
-  const editor = createEditorState({path: PATH, points: [], polygon: []});
+  const editor = createMap3DEditorState({path: PATH, points: [], polygon: []});
 
   editor.setMode('point');
   let snapshot = editor.appendPosition({lng: -73.99, lat: 40.75, altitude: 12});
@@ -31,7 +31,7 @@ test('Map3D editor state appends and deletes active geometry', () => {
 });
 
 test('Map3D editor state inserts path vertices at nearest segment', () => {
-  const editor = createEditorState({path: PATH, points: [], polygon: []});
+  const editor = createMap3DEditorState({path: PATH, points: [], polygon: []});
   const inserted = editor.insertPathVertex({lng: -73.982, lat: 40.762, altitude: 0});
 
   expect(inserted.path).toHaveLength(4);
@@ -40,7 +40,7 @@ test('Map3D editor state inserts path vertices at nearest segment', () => {
 });
 
 test('Map3D editor state moves selected vertices', () => {
-  const editor = createEditorState({path: PATH, points: [], polygon: []});
+  const editor = createMap3DEditorState({path: PATH, points: [], polygon: []});
 
   expect(editor.moveSelected({lng: -73.99, lat: 40.75, altitude: 0}).changed).toBe(false);
 
@@ -53,7 +53,7 @@ test('Map3D editor state moves selected vertices', () => {
 });
 
 test('Map3D editor state serializes GeoJSON features', () => {
-  const editor = createEditorState({
+  const editor = createMap3DEditorState({
     path: PATH,
     points: [{lng: -73.99, lat: 40.75, altitude: 2}],
     polygon: [
@@ -75,19 +75,19 @@ test('Map3D editor state serializes GeoJSON features', () => {
 
 test('Map3D editor state normalizes LatLngAltitude-like values', () => {
   expect(
-    normalizeCoordinate({
+    normalizeMap3DCoordinate({
       toJSON: () => ({lat: 40.7, lng: -73.9, altitude: 15})
     })
   ).toEqual({lat: 40.7, lng: -73.9, altitude: 15});
-  expect(normalizeCoordinate({lat: () => 40.8, lng: () => -74})).toEqual({
+  expect(normalizeMap3DCoordinate({lat: () => 40.8, lng: () => -74})).toEqual({
     lat: 40.8,
     lng: -74,
     altitude: 0
   });
-  expect(normalizeCoordinate({lat: Number.NaN, lng: -74})).toBeNull();
+  expect(normalizeMap3DCoordinate({lat: Number.NaN, lng: -74})).toBeNull();
 });
 
 test('Map3D editor state computes insert index for short paths', () => {
-  expect(getInsertIndex([], {lng: 0, lat: 0, altitude: 0})).toBe(0);
-  expect(getInsertIndex([PATH[0]], {lng: 0, lat: 0, altitude: 0})).toBe(1);
+  expect(getMap3DEditorInsertIndex([], {lng: 0, lat: 0, altitude: 0})).toBe(0);
+  expect(getMap3DEditorInsertIndex([PATH[0]], {lng: 0, lat: 0, altitude: 0})).toBe(1);
 });

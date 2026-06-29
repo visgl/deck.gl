@@ -4,7 +4,7 @@
 
 /* global navigator */
 
-import {createEditorState, normalizeCoordinate} from './map3d-editor-state';
+import {createMap3DEditorState, normalizeMap3DCoordinate} from '@deck.gl/google-maps';
 
 const PATH_STYLE = {
   strokeColor: '#ff7a00',
@@ -23,7 +23,7 @@ const POLYGON_STYLE = {
 
 export function createNativeMap3DEditor({map, maps3d, path, polygon, points, onChange}) {
   const constructors = getMap3DConstructors(maps3d);
-  const editorState = createEditorState({path, points, polygon});
+  const editorState = createMap3DEditorState({path, points, polygon});
   const {routeElement, polygonElement} = createGeometryElements(constructors);
   const handles = [];
   let moveSelectedOnNextClick = false;
@@ -250,7 +250,7 @@ function setElementPath(element, coordinates) {
 }
 
 function getEventPosition(event) {
-  return normalizeCoordinate(event.position);
+  return normalizeMap3DCoordinate(event.position);
 }
 
 function getHandleLabel(type, index, selected) {
