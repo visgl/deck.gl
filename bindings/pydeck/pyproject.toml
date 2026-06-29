@@ -1,6 +1,6 @@
 [project]
 name = "pydeck"
-version = "0.9.1"
+version = "0.9.2"
 requires-python = ">=3.8"
 dynamic = ["readme", "license", "authors", "keywords", "classifiers", "dependencies", "optional-dependencies", "description", "urls"]
 

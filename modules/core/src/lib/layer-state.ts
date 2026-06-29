@@ -37,9 +37,15 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
    */
   usesPickingColorCache: boolean;
   /**
-   * If the layer has picking buffer (pickingColors or instancePickingColors)
+   * If the layer has a picking buffer
+   * (rowIndexes, pickingColors or instancePickingColors)
    */
   hasPickingBuffer?: boolean;
+  /**
+   * Object indices temporarily excluded from builtin instance-index picking.
+   * Used by pickMultipleObjects between picking passes.
+   */
+  disabledPickingIndices: number[];
   /**
    * Dirty flags of the layer's props and state
    */
@@ -65,6 +71,7 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
     this.needsUpdate = true;
     this.subLayers = null;
     this.usesPickingColorCache = false;
+    this.disabledPickingIndices = [];
   }
 
   get layer(): LayerT | null {

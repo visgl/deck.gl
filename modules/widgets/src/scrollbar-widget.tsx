@@ -148,6 +148,10 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
     super.onRemove();
   }
 
+  private getContentBounds(viewId: string): ContentBounds | null {
+    return this.props.contentBounds ?? this.deck?.getView(viewId)?.controller?.maxBounds ?? null;
+  }
+
   private updateViewport(viewport?: Viewport): void {
     if (!viewport) {
       this.contentSize = 0;
@@ -156,7 +160,7 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
       return;
     }
 
-    const {contentBounds} = this.props;
+    const contentBounds = this.getContentBounds(viewport.id);
     const isVertical = this.isVertical();
     const projectedBounds = contentBounds
       ? projectBounds(contentBounds, viewport, isVertical)
@@ -168,8 +172,12 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
   }
 
   private getDecorations(viewport?: Viewport): RangeInputDecoration[] {
-    const {decorations = [], contentBounds} = this.props;
-    if (!viewport || !contentBounds || decorations.length === 0) {
+    const {decorations = []} = this.props;
+    if (!viewport || decorations.length === 0) {
+      return [];
+    }
+    const contentBounds = this.getContentBounds(viewport.id);
+    if (!contentBounds) {
       return [];
     }
 

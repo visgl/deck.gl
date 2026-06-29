@@ -1,6 +1,6 @@
 # GlobeViewport (Experimental)
 
-The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, and `zoom`), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
+The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, `zoom`, `bearing`, and `pitch`), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
 
 ## Usage
 
@@ -25,7 +25,7 @@ viewport.project([-122.45, 37.78]);
 ## Constructor
 
 ```js
-new GlobeViewport({width, height, longitude, latitude, zoom});
+new GlobeViewport({width, height, longitude, latitude, zoom, bearing, pitch});
 ```
 
 Parameters:
@@ -40,11 +40,13 @@ Parameters:
   + `latitude` (number, optional) - Latitude of the viewport center on map. Default to `0`.
   + `longitude` (number, optional) - Longitude of the viewport center on map. Default to `0`.
   + `zoom` (number, optional) - Map zoom (scale is calculated as `2^zoom`). Default to `11`.
+  + `bearing` (number, optional) - Bearing angle in degrees. Default to `0`.
+  + `pitch` (number, optional) - Pitch angle in degrees. Default to `0`.
   + `altitude` (number, optional) - Altitude of camera, 1 unit equals to the height of the viewport. Default to `1.5`.
 
   projection matrix arguments:
 
-  + `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
+  + `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.01`.
   + `farZMultiplier` (number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1`.
 
 Remarks:

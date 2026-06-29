@@ -75,12 +75,13 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     if (featureIds) {
       // attributeManager is always defined in a primitive layer
       attributeManager!.add({
-        featureIdsPickingColors: {
-          type: 'uint8',
-          size: 3,
+        /** Feature id for each mesh vertex. */
+        rowIndexes: {
+          type: 'uint32',
+          size: 1,
           noAlloc: true,
           // eslint-disable-next-line @typescript-eslint/unbound-method
-          update: this.calculateFeatureIdsPickingColors
+          update: this.calculateFeatureIdsPickingIndexes
         }
       });
     }
@@ -179,21 +180,10 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     );
   }
 
-  calculateFeatureIdsPickingColors(attribute) {
+  calculateFeatureIdsPickingIndexes(attribute) {
     // This updater is only called if featureIds is not null
     const featureIds = this.props.featureIds!;
-    const value = new Uint8ClampedArray(featureIds.length * attribute.size);
-
-    const pickingColor = [];
-    for (let index = 0; index < featureIds.length; index++) {
-      this.encodePickingColor(featureIds[index], pickingColor);
-
-      value[index * 3] = pickingColor[0];
-      value[index * 3 + 1] = pickingColor[1];
-      value[index * 3 + 2] = pickingColor[2];
-    }
-
-    attribute.value = value;
+    attribute.value = new Uint32Array(featureIds);
   }
 
   finalizeState(context: LayerContext) {

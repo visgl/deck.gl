@@ -99,6 +99,9 @@ export abstract class Widget<
   }
 
   // VIEW STATE HELPERS
+  protected get viewIds(): string[] {
+    return this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
+  }
 
   /** Returns the current view state for the given view */
   protected getViewState(viewId: string): Record<string, unknown> {

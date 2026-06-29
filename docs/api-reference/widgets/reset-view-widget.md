@@ -69,7 +69,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import {DeckGL, _ResetViewWidget as ResetViewWidget} from '@deck.gl/react';
+import {DeckGL, ResetViewWidget} from '@deck.gl/react';
 import '@deck.gl/widgets/stylesheet.css';
 
 function App() {

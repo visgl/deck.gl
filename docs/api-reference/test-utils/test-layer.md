@@ -4,7 +4,53 @@ The `testLayer` utility initializes a layer, test layer updates and draw calls o
 
 The `testLayerAsync` utility is like `testLayer`, but designed for layers that need to resolve resources asynchronously.
 
-## Example
+## Example (Vitest)
+
+Using the dedicated `@deck.gl/test-utils/vitest` entry point which provides built-in `vi.spyOn()` integration:
+
+```ts
+import {test, expect} from 'vitest';
+import {testLayer} from '@deck.gl/test-utils/vitest';
+import {GeoJsonLayer} from '@deck.gl/layers';
+
+test('GeoJsonLayer#tests', () => {
+  testLayer({
+    Layer: GeoJsonLayer,
+    testCases: [
+      // Test case 1
+      {
+        props: {data: []}
+      },
+      // Test case 2
+      {
+        props: {
+          data: SAMPLE_GEOJSON
+        },
+        onAfterUpdate({layer, oldState, subLayers}) {
+          expect(layer.state.features).not.toBe(oldState.features);
+          expect(subLayers.length).toBe(2);
+        }
+      },
+      // Test case 3
+      {
+        updateProps: {
+          // will be merged with the previous props
+          lineWidthScale: 3
+        },
+        onAfterUpdate({subLayers}) {
+          const pathLayer = subLayers.find(l => l.id.endsWith('linestrings'));
+          expect(pathLayer.props.widthScale).toBe(3);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+```
+
+See the [overview](./overview.md#using-with-vitest) for full Vitest setup instructions.
+
+## Example (tape)
 
 Example of layer unit tests using `tape`. The test utility itself is test framework agnostic.
 
@@ -49,7 +95,9 @@ test('GeoJsonLayer#tests', t => {
 
 ## Usage
 
-```js
+```ts
+import {testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
+
 testLayer({Layer, spies, testCases, onError});
 await testLayerAsync({Layer, spies, testCases, onError});
 ```
