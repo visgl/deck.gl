@@ -78,8 +78,29 @@ test('GoogleMapsOverlay#Map3D camera view state', () => {
   expect(equals(viewState.latitude, 37.78), 'latitude is set').toBeTruthy();
   expect(equals(viewState.bearing, 123), 'bearing is set').toBeTruthy();
   expect(equals(viewState.pitch, 67), 'pitch is set').toBeTruthy();
+  expect(equals(viewState.position, [0, 0, 30]), 'center altitude is set').toBeTruthy();
   expect(equals(viewState.zoom, 15.997043852729847), 'range-derived zoom is set').toBeTruthy();
   expect(viewState.projectionMatrix, 'projection matrix is set').toBeTruthy();
+});
+
+test('GoogleMapsOverlay#Map3D cameraPosition zoom', () => {
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30},
+    cameraPosition: {lat: 37.77, lng: -122.46, altitude: 600},
+    range: 1200,
+    heading: 123,
+    tilt: 67,
+    fov: 35
+  });
+
+  const {viewState} = getViewPropsFromMap3D(map);
+
+  expect(
+    equals(viewState.zoom, 16.071044434173626),
+    'cameraPosition-derived zoom is set'
+  ).toBeTruthy();
 });
 
 test('GoogleMapsOverlay#Map3D lifecycle without captured internals', () => {

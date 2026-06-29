@@ -197,6 +197,7 @@ export class Map3DElement {
     };
 
     Object.assign(element, {
+      cameraPosition: opts.cameraPosition,
       center,
       range: opts.range || 1000,
       heading: opts.heading || 0,

@@ -36,6 +36,7 @@ type GoogleMapsLatLngLike =
     };
 
 export type GoogleMapsMap3DElement = HTMLElement & {
+  cameraPosition?: GoogleMapsLatLngLike;
   center?: GoogleMapsLatLngLike;
   range?: number;
   heading?: number;
@@ -325,9 +326,10 @@ export function getViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
       latitude: center.lat,
       longitude: center.lng,
       pitch: map.tilt || 0,
+      position: [0, 0, center.altitude || 0],
       projectionMatrix,
       repeat: true,
-      zoom: getZoomFromMap3DRange(map, center.lat, height, fovy)
+      zoom: getZoomFromMap3DCamera(map, center, height, fovy)
     }
   };
 }
@@ -531,6 +533,25 @@ function getMap3DCanvasHost(canvas: HTMLCanvasElement): Element | null {
   return shadowHost?.localName === 'gmp-map-3d' ? shadowHost : null;
 }
 
+function getZoomFromMap3DCamera(
+  map: GoogleMapsMap3DElement,
+  center: {lat: number; altitude: number},
+  height: number,
+  fovy: number
+): number {
+  const cameraPosition = normalizeLatLng(map.cameraPosition);
+  const cameraHeight = cameraPosition.altitude - center.altitude;
+  if (cameraHeight > 0 && height) {
+    const focalDistance = 0.5 / Math.tan((fovy * Math.PI) / 360);
+    const metersPerWorldUnit =
+      (EARTH_CIRCUMFERENCE_METERS * Math.cos((center.lat * Math.PI) / 180)) / 512;
+    const scale = (focalDistance * height * metersPerWorldUnit) / cameraHeight;
+    return Math.log2(scale);
+  }
+
+  return getZoomFromMap3DRange(map, center.lat, height, fovy);
+}
+
 function getZoomFromMap3DRange(
   map: GoogleMapsMap3DElement,
   latitude: number,
@@ -550,9 +571,13 @@ function getZoomFromMap3DRange(
   return Math.log2(metersPerPixelAtZoom0 / metersPerPixel);
 }
 
-function normalizeLatLng(center?: GoogleMapsLatLngLike): {lat: number; lng: number} {
+function normalizeLatLng(center?: GoogleMapsLatLngLike): {
+  lat: number;
+  lng: number;
+  altitude: number;
+} {
   if (!center) {
-    return {lat: 0, lng: 0};
+    return {lat: 0, lng: 0, altitude: 0};
   }
 
   const value = 'toJSON' in center && center.toJSON ? center.toJSON() : center;
@@ -561,7 +586,8 @@ function normalizeLatLng(center?: GoogleMapsLatLngLike): {lat: number; lng: numb
 
   return {
     lat: lat || 0,
-    lng: lng || 0
+    lng: lng || 0,
+    altitude: value.altitude || 0
   };
 }
 

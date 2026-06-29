@@ -410,7 +410,8 @@ export default class GoogleMapsOverlay {
       if (!gl) {
         log.warn(
           'deck.gl: GoogleMapsOverlay could not capture the Map3D WebGL canvas. ' +
-            'Rendering with a non-interleaved Deck overlay instead.'
+            'Rendering with a non-interleaved Deck overlay instead; this path is approximate ' +
+            'and should not be used for terrain-locked Map3D geometry.'
         )();
       }
     }
