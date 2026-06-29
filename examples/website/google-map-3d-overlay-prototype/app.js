@@ -158,6 +158,12 @@ function bindPanelActions(panel, map, overlay, editor) {
       : 'Select a handle first';
     updatePanel(panel, map, overlay);
   });
+  panel.querySelector('[data-action="move"]').addEventListener('click', () => {
+    demoState.message = editor.moveSelectedToNextClick()
+      ? 'Click the map to move selected vertex'
+      : 'Select a handle first';
+    updatePanel(panel, map, overlay);
+  });
   panel.querySelector('[data-action="undo"]').addEventListener('click', () => {
     demoState.message = editor.undoLast() ? 'Removed last active-mode point' : 'Nothing to undo';
     updatePanel(panel, map, overlay);
@@ -252,6 +258,7 @@ function createPanel() {
     </div>
     <div class="toolbar">
       <button type="button" data-action="delete">Delete</button>
+      <button type="button" data-action="move">Move Selected</button>
       <button type="button" data-action="undo">Undo</button>
       <button type="button" data-action="reset">Reset</button>
       <button type="button" data-action="copy">Copy GeoJSON</button>
@@ -276,11 +283,12 @@ function updatePanel(panel, map, overlay, extra = '') {
   const selected = editorState.selected
     ? `${editorState.selected.type} ${editorState.selected.index + 1}`
     : 'none';
+  const moveStatus = editorState.moveSelectedOnNextClick ? ', move armed' : '';
   panel.querySelector('[data-status]').innerHTML = `
     <div><code>${renderMode}</code></div>
     <div>${geometryMode}</div>
     <div>mode ${editorState.mode}, path ${editorState.path.length}, polygon ${editorState.polygon.length}, points ${editorState.points.length}</div>
-    <div>selected ${selected}</div>
+    <div>selected ${selected}${moveStatus}</div>
     <div>lat ${center.lat.toFixed(5)}, lng ${center.lng.toFixed(5)}</div>
     <div>range ${Math.round(map.range || 0)}m, heading ${Math.round(map.heading || 0)} deg, tilt ${Math.round(map.tilt || 0)} deg</div>
     ${demoState.message ? `<div>${demoState.message}</div>` : ''}
