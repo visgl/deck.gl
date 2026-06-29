@@ -2711,40 +2711,46 @@ header {
     margin: 1em 5% 5% 0;
 }
 
-.header_ribbon {
-    display: flex;
-    position: fixed;
-    top: 0px;
-    z-index: 999;
-    height: fit-content;
-    width: 100%;
-    color: white;
-    font-family: UberMove, Helvetica, Arial, sans-serif;
-    height: 3vh;
-    width: 100%;
-    padding: 0.4vh 0.4vh 0.4vh 0.4vh;
-    background-color: rgba(0,0,0, 0.8);
-    align-content: center;
+
+.header_bg_img {
+    object-fit: cover;
+    background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_orig.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
 }
-.header_ribbon img {
-    width: 32px;
-    height: 32px;
+
+@media (max-width:800px) {
+    .header > .container {
+        margin-top: 12px;
+    }
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_800.jpg);
+    }
 }
-.header_ribbon a {
-    color: white;
-    font-weight: normal;
-    cursor: pointer;
-    text-decoration: none !important;
+
+@media (max-width:1200px) {
+    .header > .container {
+        margin-top: 24px;
+    }
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_1200.jpg);
+    }
 }
-.header_text {
-    padding-left: 1vh;
-    height:100%;
-    width: 100%;
-    vertical-align: middle;
-    align-content: center;
-    font-size: 1em;
-    font-weight: 400;
+
+@media (max-width:2400px) {
+    .header > .container {
+        margin-top: 80px;
+    }
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_2400.jpg);
+    }
 }
+
+/*@media (max-width:3134px) {
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_orig.jpg);
+    }
+}*/
 
 h1 {
     font-size: 4em;
