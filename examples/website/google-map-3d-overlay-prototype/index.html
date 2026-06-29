@@ -48,6 +48,7 @@
       }
       .toolbar {
         display: flex;
+        flex-wrap: wrap;
         gap: 6px;
         margin-top: 10px;
       }
@@ -62,6 +63,11 @@
       }
       button:hover {
         background: rgba(51, 65, 85, 0.95);
+      }
+      button.active {
+        border-color: #38bdf8;
+        color: #e0f2fe;
+        background: rgba(8, 47, 73, 0.95);
       }
       .error {
         position: absolute;

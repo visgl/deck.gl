@@ -5,27 +5,43 @@
 /* global document, window */
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {PathLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
+import {createNativeMap3DEditor} from './map3d-native-editor';
 
 const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
 const GOOGLE_MAP_ID = process.env.GoogleMapsMapId; // eslint-disable-line
 
-const ROUTE = [
-  [-73.98513, 40.7589, 0],
-  [-73.98468, 40.76032, 0],
-  [-73.98385, 40.76179, 0],
-  [-73.98258, 40.76292, 0],
-  [-73.98123, 40.76407, 0],
-  [-73.98004, 40.76542, 0],
-  [-73.97868, 40.76671, 0],
-  [-73.9772, 40.76802, 0]
+const INITIAL_PATH = [
+  {lng: -73.98513, lat: 40.7589, altitude: 0},
+  {lng: -73.98468, lat: 40.76032, altitude: 0},
+  {lng: -73.98385, lat: 40.76179, altitude: 0},
+  {lng: -73.98258, lat: 40.76292, altitude: 0},
+  {lng: -73.98123, lat: 40.76407, altitude: 0},
+  {lng: -73.98004, lat: 40.76542, altitude: 0},
+  {lng: -73.97868, lat: 40.76671, altitude: 0},
+  {lng: -73.9772, lat: 40.76802, altitude: 0}
 ];
 
-const POINTS = [
-  {name: 'Times Sq', position: ROUTE[0]},
-  {name: 'Finish', position: ROUTE[ROUTE.length - 1]}
+const INITIAL_POLYGON = [
+  {lng: -73.98466, lat: 40.76233, altitude: 0},
+  {lng: -73.98265, lat: 40.7636, altitude: 0},
+  {lng: -73.98172, lat: 40.76251, altitude: 0},
+  {lng: -73.98343, lat: 40.7614, altitude: 0}
+];
+
+const INITIAL_POINTS = [
+  {lng: -73.98513, lat: 40.7589, altitude: 0},
+  {lng: -73.9772, lat: 40.76802, altitude: 0}
 ];
 
 const demoState = {
+  editorState: {
+    mode: 'path',
+    path: INITIAL_PATH,
+    points: INITIAL_POINTS,
+    polygon: INITIAL_POLYGON,
+    selected: null
+  },
+  message: '',
   showDeckDebug: false
 };
 
@@ -51,7 +67,8 @@ export async function renderToDOM(container) {
     layers: makeLayers(demoState)
   });
 
-  const {Map3DElement, MapMode, AltitudeMode, Polyline3DElement} = await loadMaps3D();
+  const maps3d = await loadMaps3D();
+  const {Map3DElement, MapMode} = maps3d;
 
   const map = new Map3DElement({
     center: {lat: 40.7631, lng: -73.9817, altitude: 0},
@@ -74,18 +91,18 @@ export async function renderToDOM(container) {
   container.appendChild(map);
   overlay.setMap(map);
 
-  const nativeRoute = new Polyline3DElement({
-    altitudeMode: AltitudeMode.CLAMP_TO_GROUND,
-    strokeColor: '#ff7a00',
-    strokeWidth: 8,
-    outerColor: '#111827',
-    outerWidth: 0.6
+  const editor = createNativeMap3DEditor({
+    map,
+    maps3d,
+    path: INITIAL_PATH,
+    points: INITIAL_POINTS,
+    polygon: INITIAL_POLYGON,
+    onChange: editorState => {
+      demoState.editorState = editorState;
+      overlay.setProps({layers: makeLayers(demoState)});
+      updatePanel(panel, map, overlay);
+    }
   });
-  nativeRoute.setAttribute(
-    'path',
-    ROUTE.map(([lng, lat, altitude]) => `${lat},${lng},${altitude}`).join(' ')
-  );
-  map.appendChild(nativeRoute);
 
   const onCameraChange = () => updatePanel(panel, map, overlay);
   for (const eventName of [
@@ -100,14 +117,18 @@ export async function renderToDOM(container) {
   }
   updatePanel(panel, map, overlay);
 
-  bindPanelActions(panel, map, overlay);
+  const removePanelActions = bindPanelActions(panel, map, overlay, editor);
 
   return {
-    remove: () => overlay.finalize()
+    remove: () => {
+      removePanelActions();
+      editor.destroy();
+      overlay.finalize();
+    }
   };
 }
 
-function bindPanelActions(panel, map, overlay) {
+function bindPanelActions(panel, map, overlay, editor) {
   panel.querySelector('[data-action="spin"]').addEventListener('click', () => {
     map.heading = ((map.heading || 0) + 45) % 360;
   });
@@ -125,17 +146,61 @@ function bindPanelActions(panel, map, overlay) {
     overlay.setProps({layers: makeLayers(demoState)});
     updatePanel(panel, map, overlay);
   });
+  for (const modeButton of panel.querySelectorAll('[data-mode]')) {
+    modeButton.addEventListener('click', () => {
+      editor.setMode(modeButton.dataset.mode);
+      updateModeButtons(panel);
+    });
+  }
+  panel.querySelector('[data-action="delete"]').addEventListener('click', () => {
+    demoState.message = editor.deleteSelected()
+      ? 'Deleted selected vertex'
+      : 'Select a handle first';
+    updatePanel(panel, map, overlay);
+  });
+  panel.querySelector('[data-action="undo"]').addEventListener('click', () => {
+    demoState.message = editor.undoLast() ? 'Removed last active-mode point' : 'Nothing to undo';
+    updatePanel(panel, map, overlay);
+  });
+  panel.querySelector('[data-action="reset"]').addEventListener('click', () => {
+    editor.reset();
+    demoState.message = 'Editor reset';
+    updatePanel(panel, map, overlay);
+  });
+  panel.querySelector('[data-action="copy"]').addEventListener('click', async () => {
+    const geojson = await editor.copyGeoJSON();
+    demoState.message = `GeoJSON ready (${geojson.length} chars)`;
+    updatePanel(panel, map, overlay);
+  });
+
+  const onKeyDown = event => {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (editor.deleteSelected()) {
+        event.preventDefault();
+      }
+    }
+  };
+  window.addEventListener('keydown', onKeyDown);
+  updateModeButtons(panel);
+
+  return () => window.removeEventListener('keydown', onKeyDown);
 }
 
-function makeLayers({showDeckDebug}) {
+function makeLayers({editorState, showDeckDebug}) {
   if (!showDeckDebug) {
     return [];
   }
 
+  const path = editorState.path.map(toDeckPosition);
+  const points = [
+    {name: 'Start', position: path[0]},
+    {name: 'Finish', position: path[path.length - 1]}
+  ].filter(point => point.position);
+
   return [
     new PathLayer({
       id: 'deck-route',
-      data: [{path: ROUTE}],
+      data: [{path}],
       getPath: d => d.path,
       getColor: [0, 210, 255, 190],
       getWidth: 5,
@@ -146,7 +211,7 @@ function makeLayers({showDeckDebug}) {
     }),
     new ScatterplotLayer({
       id: 'deck-route-points',
-      data: POINTS,
+      data: points,
       getPosition: d => d.position,
       getRadius: 16,
       radiusUnits: 'pixels',
@@ -159,7 +224,7 @@ function makeLayers({showDeckDebug}) {
     }),
     new TextLayer({
       id: 'deck-labels',
-      data: POINTS,
+      data: points,
       getPosition: d => d.position,
       getText: d => d.name,
       getSize: 14,
@@ -181,6 +246,17 @@ function createPanel() {
     <strong>Map3D + GoogleMapsOverlay prototype</strong>
     <div data-status>Booting...</div>
     <div class="toolbar">
+      <button type="button" data-mode="path">Path</button>
+      <button type="button" data-mode="polygon">Polygon</button>
+      <button type="button" data-mode="point">Point</button>
+    </div>
+    <div class="toolbar">
+      <button type="button" data-action="delete">Delete</button>
+      <button type="button" data-action="undo">Undo</button>
+      <button type="button" data-action="reset">Reset</button>
+      <button type="button" data-action="copy">Copy GeoJSON</button>
+    </div>
+    <div class="toolbar">
       <button type="button" data-action="spin">Rotate</button>
       <button type="button" data-action="lower">Closer</button>
       <button type="button" data-action="raise">Higher</button>
@@ -192,18 +268,31 @@ function createPanel() {
 
 function updatePanel(panel, map, overlay, extra = '') {
   const center = normalizeCenter(map.center);
+  const {editorState} = demoState;
   const renderMode = overlay._map3DGL ? 'shared WebGL captured' : 'DOM overlay fallback';
   const geometryMode = demoState.showDeckDebug
-    ? 'native route + approximate deck debug'
-    : 'native route locked to Map3D surface';
+    ? 'native editor + approximate deck debug'
+    : 'native editor locked to Map3D surface';
+  const selected = editorState.selected
+    ? `${editorState.selected.type} ${editorState.selected.index + 1}`
+    : 'none';
   panel.querySelector('[data-status]').innerHTML = `
     <div><code>${renderMode}</code></div>
     <div>${geometryMode}</div>
+    <div>mode ${editorState.mode}, path ${editorState.path.length}, polygon ${editorState.polygon.length}, points ${editorState.points.length}</div>
+    <div>selected ${selected}</div>
     <div>lat ${center.lat.toFixed(5)}, lng ${center.lng.toFixed(5)}</div>
     <div>range ${Math.round(map.range || 0)}m, heading ${Math.round(map.heading || 0)} deg, tilt ${Math.round(map.tilt || 0)} deg</div>
+    ${demoState.message ? `<div>${demoState.message}</div>` : ''}
     <div>If Google shows "Oops", allow this origin in the Maps key referrers.</div>
     ${extra ? `<div>${extra}</div>` : ''}
   `;
+}
+
+function updateModeButtons(panel) {
+  for (const modeButton of panel.querySelectorAll('[data-mode]')) {
+    modeButton.classList.toggle('active', modeButton.dataset.mode === demoState.editorState.mode);
+  }
 }
 
 function normalizeCenter(center) {
@@ -215,6 +304,10 @@ function normalizeCenter(center) {
     lat: Number(value.lat || 0),
     lng: Number(value.lng || 0)
   };
+}
+
+function toDeckPosition({lng, lat, altitude = 0}) {
+  return [lng, lat, altitude];
 }
 
 async function loadMaps3D() {
