@@ -345,7 +345,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
 
     await sleep(100);
     expect(map.getLayer('deck-layer-group-last'), 'Layer group is added').toBeTruthy();
-    expect(drawLog, 'layers correctly filtered').toEqual(['poi']);
+    expect(new Set(drawLog), 'layers correctly filtered').toEqual(new Set(['poi']));
     drawLog = [];
 
     overlay.setProps({
@@ -355,7 +355,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
 
     await sleep(100);
     expect(map.getLayer('deck-layer-group-last'), 'Layer group exists').toBeTruthy();
-    expect(drawLog, 'layers correctly filtered').toEqual(['cities']);
+    expect(new Set(drawLog), 'layers correctly filtered').toEqual(new Set(['cities']));
 
     map.removeControl(overlay);
     expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();

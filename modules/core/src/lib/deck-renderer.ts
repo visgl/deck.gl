@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device} from '@luma.gl/core';
+import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
@@ -65,6 +65,9 @@ export default class DeckRenderer {
     onViewportActive: (viewport: Viewport) => void;
     effects: Effect[];
     target?: Framebuffer | null;
+    canvasContext?: CanvasContext | PresentationContext;
+    shaderModuleProps?: any;
+    renderPassId?: string;
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;
@@ -146,13 +149,13 @@ export default class DeckRenderer {
     }
 
     if (this.lastPostProcessEffect) {
-      this._resizeRenderBuffers();
+      this._resizeRenderBuffers(opts.canvasContext);
     }
   }
 
-  private _resizeRenderBuffers() {
+  private _resizeRenderBuffers(canvasContext = this.device.canvasContext!) {
     const {renderBuffers} = this;
-    const size = this.device.canvasContext!.getDrawingBufferSize();
+    const size = canvasContext.getDrawingBufferSize();
     const [width, height] = size;
     if (renderBuffers.length === 0) {
       [0, 1].map(i => {

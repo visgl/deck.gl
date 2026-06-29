@@ -3,8 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import type {
+  CanvasContext,
   Device,
   Parameters,
+  PresentationContext,
   RenderPassParameters,
   RenderPipelineParameters
 } from '@luma.gl/core';
@@ -36,6 +38,8 @@ const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
   target?: Framebuffer | null;
+  canvasContext?: CanvasContext | PresentationContext;
+  renderPassId?: string;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -87,7 +91,7 @@ export default class LayersPass extends Pass {
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
-    const canvasContext = this.device.canvasContext!;
+    const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
 
@@ -107,6 +111,7 @@ export default class LayersPass extends Pass {
     }
 
     const renderPass = this.device.beginRenderPass({
+      id: options.renderPassId || options.pass,
       framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,
@@ -126,6 +131,7 @@ export default class LayersPass extends Pass {
   /** Draw a list of layers in a list of viewports */
   private _drawLayers(renderPass: RenderPass, options: LayersPassRenderOptions) {
     const {
+      canvasContext = this.device.canvasContext!,
       target,
       shaderModuleProps,
       viewports,
@@ -156,6 +162,7 @@ export default class LayersPass extends Pass {
           renderPass,
           {
             target,
+            canvasContext,
             shaderModuleProps,
             viewport: subViewport,
             view,
@@ -183,6 +190,7 @@ export default class LayersPass extends Pass {
       cullRect,
       views,
       effects,
+      canvasContext = this.device.canvasContext!,
       shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
@@ -222,6 +230,7 @@ export default class LayersPass extends Pass {
           layer,
           effects,
           pass,
+          canvasContext,
           shaderModuleProps
         );
         const defaultParams =
@@ -250,6 +259,7 @@ export default class LayersPass extends Pass {
       shaderModuleProps: globalModuleParameters,
       pass,
       target,
+      canvasContext,
       viewport,
       view
     }: {
@@ -257,12 +267,14 @@ export default class LayersPass extends Pass {
       shaderModuleProps: Record<string, any>;
       pass: string;
       target?: Framebuffer | null;
+      canvasContext: CanvasContext | PresentationContext;
       viewport: Viewport;
       view?: View;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
+      canvasContext,
       shaderModuleProps: globalModuleParameters,
       target,
       viewport
@@ -425,10 +437,10 @@ export default class LayersPass extends Pass {
     layer: Layer,
     effects: Effect[] | undefined,
     pass: string,
+    canvasContext: CanvasContext | PresentationContext,
     overrides: any
   ): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    const devicePixelRatio = canvasContext.cssToDeviceRatio();
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const shaderModuleProps = {
@@ -524,23 +536,22 @@ export function layerIndexResolver(
 function getGLViewport(
   device: Device,
   {
+    canvasContext = device.canvasContext!,
     shaderModuleProps,
     target,
     viewport
   }: {
+    canvasContext?: CanvasContext | PresentationContext;
     shaderModuleProps: any;
     target?: Framebuffer | null;
     viewport: Viewport;
   }
 ): [number, number, number, number] {
   const pixelRatio =
-    shaderModuleProps?.project?.devicePixelRatio ??
-    // @ts-expect-error TODO - assuming WebGL context
-    device.canvasContext.cssToDeviceRatio();
+    shaderModuleProps?.project?.devicePixelRatio ?? canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  // @ts-expect-error TODO - assuming WebGL context
-  const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const [, drawingBufferHeight] = canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

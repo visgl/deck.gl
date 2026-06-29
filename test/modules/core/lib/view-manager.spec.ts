@@ -221,6 +221,7 @@ test('ViewManager#routes controllers by canvas event manager', () => {
   const leftEventManager = new EventManager(document.createElement('div'));
   const rightEventManager = new EventManager(document.createElement('div'));
   const replacementRightEventManager = new EventManager(document.createElement('div'));
+
   const leftView = new MapView({id: 'left', canvasId: 'left-canvas', controller: true});
   const rightView = new MapView({id: 'right', canvasId: 'right-canvas', controller: true});
 
@@ -284,6 +285,51 @@ test('ViewManager#routes controllers by canvas event manager', () => {
   leftEventManager.destroy();
   rightEventManager.destroy();
   replacementRightEventManager.destroy();
+});
+
+test('ViewManager#multi-canvas layout', () => {
+  const leftEventManager = new EventManager(document.createElement('div'));
+  const rightEventManager = new EventManager(document.createElement('div'));
+  const leftView = new MapView({id: 'left', canvasId: 'left-canvas'});
+  const rightView = new MapView({id: 'right', canvasId: 'right-canvas'});
+
+  const viewManager = new ViewManager({
+    views: [leftView, rightView],
+    viewState: {
+      left: {longitude: -122, latitude: 38, zoom: 10},
+      right: {longitude: -74, latitude: 40.7, zoom: 11}
+    },
+    width: 1,
+    height: 1,
+    canvasMetrics: {
+      'left-canvas': {width: 200, height: 100},
+      'right-canvas': {width: 120, height: 180}
+    },
+    eventManager: leftEventManager,
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': rightEventManager
+    }
+  });
+
+  expect(viewManager.getViewport('left')?.width).toBe(200);
+  expect(viewManager.getViewport('right')?.height).toBe(180);
+  expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'left-canvas'})).toEqual([
+    viewManager.getViewport('left')
+  ]);
+
+  const viewports = viewManager.getViewports();
+  viewManager.setProps({
+    canvasMetrics: {
+      'left-canvas': {width: 200, height: 100},
+      'right-canvas': {width: 120, height: 180}
+    }
+  });
+  expect(viewManager.getViewports()).toBe(viewports);
+
+  viewManager.finalize();
+  leftEventManager.destroy();
+  rightEventManager.destroy();
 });
 
 /* eslint-disable max-statements */

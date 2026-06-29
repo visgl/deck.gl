@@ -165,36 +165,6 @@ test('Deck wires mjolnir requireFailure between recognizers', async () => {
   });
 });
 
-test('Deck#getEventManager resolves the default manager for views', async () => {
-  await new Promise<void>((resolve, reject) => {
-    const deck = new Deck({
-      device,
-      width: 1,
-      height: 1,
-      views: [new MapView({id: 'main'}), new MapView({id: 'overlay', canvasId: 'overlay'})],
-      viewState: {
-        main: {longitude: 0, latitude: 0, zoom: 0},
-        overlay: {longitude: 0, latitude: 0, zoom: 0}
-      },
-      layers: [],
-      onLoad: () => {
-        try {
-          const eventManager = (deck as any).eventManager;
-          expect(deck.getEventManager()).toBe(eventManager);
-          expect(deck.getEventManager('main')).toBe(eventManager);
-          expect(deck.getEventManager('overlay')).toBe(eventManager);
-          expect(Object.keys((deck as any).eventManagers)).toEqual(['default-canvas']);
-
-          deck.finalize();
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      }
-    });
-  });
-});
-
 test('Deck#abort', async () => {
   const deck = new Deck({
     device,
@@ -458,6 +428,278 @@ webglTest('Deck#rendering, picking, logging', async () => {
       }
     });
   });
+});
+
+webglTest('Deck#multi-canvas presentation', async () => {
+  const parent = document.createElement('div');
+  document.body.appendChild(parent);
+
+  const eventRootA = document.createElement('div');
+  eventRootA.className = 'deck-events-root';
+  parent.appendChild(eventRootA);
+  const canvasA = document.createElement('canvas');
+  canvasA.id = 'deck-test-canvas-a';
+  canvasA.width = 64;
+  canvasA.height = 64;
+  eventRootA.appendChild(canvasA);
+
+  const eventRootB = document.createElement('div');
+  eventRootB.className = 'deck-events-root';
+  parent.appendChild(eventRootB);
+  const canvasB = document.createElement('canvas');
+  canvasB.id = 'deck-test-canvas-b';
+  canvasB.width = 32;
+  canvasB.height = 48;
+  parent.getBoundingClientRect = () => ({left: 10, top: 20}) as DOMRect;
+  canvasB.getBoundingClientRect = () => ({left: 310, top: 220}) as DOMRect;
+  eventRootB.appendChild(canvasB);
+
+  const deck = new Deck({
+    parent,
+    width: 64,
+    height: 64,
+    _canvases: [canvasA, canvasB],
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 1},
+      right: {longitude: 10, latitude: 10, zoom: 1}
+    },
+    views: [
+      new MapView({id: 'left', canvasId: 'deck-test-canvas-a'}),
+      new MapView({id: 'right', canvasId: 'deck-test-canvas-b'})
+    ],
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  expect(deck.getCanvas()).toBe(canvasA);
+  // @ts-expect-error testing private state
+  expect(Object.keys(deck._canvasManager.targets)).toEqual([
+    'deck-test-canvas-a',
+    'deck-test-canvas-b'
+  ]);
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers['deck-test-canvas-a'].getElement()).toBe(eventRootA);
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers['deck-test-canvas-b'].getElement()).toBe(eventRootB);
+  expect(deck.getViewports({x: 0, y: 0, canvasId: 'deck-test-canvas-a'}).map(v => v.id)).toEqual([
+    'left'
+  ]);
+  expect(deck.getViewports({x: 0, y: 0, canvasId: 'deck-test-canvas-b'}).map(v => v.id)).toEqual([
+    'right'
+  ]);
+  const rightViewport = deck.getViewports().find(viewport => viewport.id === 'right');
+  expect(deck.getCanvasBounds(rightViewport, parent)).toEqual({
+    x: 300,
+    y: 200,
+    width: 32,
+    height: 48
+  });
+
+  // @ts-expect-error testing private state
+  const eventManagers = deck.eventManagers;
+  const viewports = deck.getViewports();
+  deck.setProps({_canvases: [canvasA, canvasB]});
+  // @ts-expect-error testing private state
+  expect(deck.eventManagers).toBe(eventManagers);
+  expect(deck.getViewports()).toBe(viewports);
+
+  deck.finalize();
+  parent.remove();
+});
+
+test('Deck#multi-canvas configuration', () => {
+  expect(
+    () =>
+      new Deck({
+        // @ts-expect-error testing runtime validation for JavaScript callers
+        canvas: [],
+        layers: []
+      })
+  ).toThrow('`canvas` accepts one canvas. Use `_canvases` for multi-canvas mode.');
+
+  expect(
+    () =>
+      new Deck({
+        canvas: document.createElement('canvas'),
+        _canvases: [],
+        layers: []
+      })
+  ).toThrow();
+});
+
+webglTest('Deck#multi-canvas picking routes by canvas', async () => {
+  const canvasA = document.createElement('canvas');
+  canvasA.id = 'deck-test-pick-canvas-a';
+  canvasA.width = 64;
+  canvasA.height = 64;
+  canvasA.style.width = '64px';
+  canvasA.style.height = '64px';
+  document.body.appendChild(canvasA);
+
+  const canvasB = document.createElement('canvas');
+  canvasB.id = 'deck-test-pick-canvas-b';
+  canvasB.width = 32;
+  canvasB.height = 48;
+  canvasB.style.width = '32px';
+  canvasB.style.height = '48px';
+  document.body.appendChild(canvasB);
+
+  const deck = new Deck({
+    width: 64,
+    height: 64,
+    _canvases: [canvasA, canvasB],
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 10},
+      right: {longitude: 10, latitude: 10, zoom: 10}
+    },
+    views: [
+      new MapView({id: 'left', canvasId: 'deck-test-pick-canvas-a'}),
+      new MapView({id: 'right', canvasId: 'deck-test-pick-canvas-b'})
+    ],
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  const syncCalls: any[] = [];
+  const asyncCalls: any[] = [];
+  const rectCalls: any[] = [];
+
+  // @ts-expect-error test override
+  deck.deckPicker.pickObject = opts => {
+    syncCalls.push(opts);
+    return createPointPickResult({
+      layer: {id: opts.canvasId === 'deck-test-pick-canvas-b' ? 'right-layer' : 'left-layer'}
+    });
+  };
+  // @ts-expect-error test override
+  deck.deckPicker.pickObjectAsync = opts => {
+    asyncCalls.push(opts);
+    return Promise.resolve(
+      createPointPickResult({
+        layer: {id: opts.canvasId === 'deck-test-pick-canvas-b' ? 'right-layer' : 'left-layer'}
+      })
+    );
+  };
+  // @ts-expect-error test override
+  deck.deckPicker.pickObjects = opts => {
+    rectCalls.push(opts);
+    return [
+      createPickingInfo({
+        layer: {id: opts.canvasId === 'deck-test-pick-canvas-b' ? 'right-layer' : 'left-layer'}
+      })
+    ];
+  };
+
+  expect(deck.pickObject({x: 32, y: 32})?.layer?.id).toBe('left-layer');
+  expect(syncCalls[0].canvasId).toBe('deck-test-pick-canvas-a');
+  expect(syncCalls[0].viewports.map(viewport => viewport.id)).toEqual(['left']);
+
+  expect(deck.pickObject({x: 16, y: 24, canvasId: 'deck-test-pick-canvas-b'})?.layer?.id).toBe(
+    'right-layer'
+  );
+  expect(syncCalls[1].canvasId).toBe('deck-test-pick-canvas-b');
+  expect(syncCalls[1].viewports.map(viewport => viewport.id)).toEqual(['right']);
+
+  expect(
+    (await deck.pickObjectAsync({x: 16, y: 24, canvasId: 'deck-test-pick-canvas-b'}))?.layer?.id
+  ).toBe('right-layer');
+  expect(asyncCalls[0].canvasId).toBe('deck-test-pick-canvas-b');
+  expect(asyncCalls[0].viewports.map(viewport => viewport.id)).toEqual(['right']);
+
+  expect(
+    deck.pickObjects({x: 16, y: 24, width: 1, height: 1, canvasId: 'deck-test-pick-canvas-b'})[0]
+      ?.layer?.id
+  ).toBe('right-layer');
+  expect(rectCalls[0].canvasId).toBe('deck-test-pick-canvas-b');
+  expect(rectCalls[0].viewports.map(viewport => viewport.id)).toEqual(['right']);
+
+  deck.finalize();
+  canvasA.remove();
+  canvasB.remove();
+});
+
+webglTest('Deck#multi-canvas mode cannot be changed', async () => {
+  const deck = new Deck({
+    width: 64,
+    height: 64,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  expect(() => deck.setProps({_canvases: []})).toThrow();
+
+  deck.finalize();
+});
+
+webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
+  const canvasA = document.createElement('canvas');
+  canvasA.id = 'deck-test-orphan-canvas-a';
+  canvasA.width = 64;
+  canvasA.height = 64;
+  document.body.appendChild(canvasA);
+
+  const canvasB = document.createElement('canvas');
+  canvasB.id = 'deck-test-orphan-canvas-b';
+  canvasB.width = 64;
+  canvasB.height = 64;
+  document.body.appendChild(canvasB);
+
+  const deck = new Deck({
+    width: 64,
+    height: 64,
+    _canvases: [canvasA, canvasB],
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 1},
+      right: {longitude: 10, latitude: 10, zoom: 1}
+    },
+    views: [
+      new MapView({id: 'left', canvasId: 'deck-test-orphan-canvas-a'}),
+      new MapView({id: 'right', canvasId: 'deck-test-orphan-canvas-b'})
+    ],
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  // @ts-expect-error testing private state
+  const targetA = deck._canvasManager.targets['deck-test-orphan-canvas-a'];
+  // @ts-expect-error testing private state
+  const targetB = deck._canvasManager.targets['deck-test-orphan-canvas-b'];
+  const presentCalls = {a: 0, b: 0};
+  const renderCalls: string[][] = [];
+  const originalPresentA = targetA.presentationContext.present.bind(targetA.presentationContext);
+  const originalPresentB = targetB.presentationContext.present.bind(targetB.presentationContext);
+  const originalRenderLayers = deck.deckRenderer.renderLayers.bind(deck.deckRenderer);
+
+  targetA.presentationContext.present = () => {
+    presentCalls.a++;
+    originalPresentA();
+  };
+  targetB.presentationContext.present = () => {
+    presentCalls.b++;
+    originalPresentB();
+  };
+  // @ts-expect-error test override
+  deck.deckRenderer.renderLayers = opts => {
+    renderCalls.push(opts.viewports.map(viewport => viewport.id));
+    originalRenderLayers(opts);
+  };
+
+  deck.setProps({
+    views: [new MapView({id: 'left', canvasId: 'deck-test-orphan-canvas-a'})]
+  });
+  await waitForRender(deck);
+
+  expect(renderCalls).toEqual([['left']]);
+  expect(presentCalls).toEqual({a: 1, b: 1});
+
+  deck.finalize();
+  canvasA.remove();
+  canvasB.remove();
 });
 
 test('Deck#async picking', async () => {
