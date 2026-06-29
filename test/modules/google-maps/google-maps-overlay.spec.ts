@@ -78,7 +78,7 @@ test('GoogleMapsOverlay#Map3D camera view state', () => {
   expect(equals(viewState.latitude, 37.78), 'latitude is set').toBeTruthy();
   expect(equals(viewState.bearing, 123), 'bearing is set').toBeTruthy();
   expect(equals(viewState.pitch, 67), 'pitch is set').toBeTruthy();
-  expect(equals(viewState.position, [0, 0, 30]), 'center altitude is set').toBeTruthy();
+  expect(equals(viewState.position, [0, 0, 0]), 'deck viewport altitude stays stable').toBeTruthy();
   expect(equals(viewState.zoom, 15.997043852729847), 'range-derived zoom is set').toBeTruthy();
   expect(viewState.projectionMatrix, 'projection matrix is set').toBeTruthy();
 });

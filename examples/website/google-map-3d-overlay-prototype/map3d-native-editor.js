@@ -7,6 +7,7 @@
 import {createMap3DEditorState, normalizeMap3DCoordinate} from '@deck.gl/google-maps';
 
 const PATH_STYLE = {
+  drawsOccludedSegments: true,
   strokeColor: '#ff7a00',
   strokeWidth: 8,
   outerColor: '#111827',
@@ -14,11 +15,10 @@ const PATH_STYLE = {
 };
 
 const POLYGON_STYLE = {
+  drawsOccludedSegments: true,
   fillColor: '#0ea5e955',
   strokeColor: '#38bdf8',
-  strokeWidth: 4,
-  outerColor: '#0f172a',
-  outerWidth: 0.4
+  strokeWidth: 4
 };
 
 export function createNativeMap3DEditor({map, maps3d, path, polygon, points, onChange}) {

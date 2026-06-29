@@ -327,7 +327,8 @@ export function getViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
       latitude: center.lat,
       longitude: center.lng,
       pitch: map.tilt || 0,
-      position: [0, 0, center.altitude || 0],
+      // Map3D terrain/target altitude is not a stable Deck viewport origin during pan.
+      position: [0, 0, 0],
       projectionMatrix,
       repeat: true,
       zoom: getZoomFromMap3DCamera(map, center, height, fovy)

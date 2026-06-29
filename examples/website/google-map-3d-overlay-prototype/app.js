@@ -44,6 +44,10 @@ const demoState = {
   message: '',
   showDeckDebug: false
 };
+const DECK_DEBUG_PARAMETERS = {
+  depthMask: false,
+  depthTest: false
+};
 
 export async function renderToDOM(container) {
   if (!GOOGLE_MAPS_API_KEY) {
@@ -207,6 +211,7 @@ function makeLayers({editorState, showDeckDebug}) {
     new PathLayer({
       id: 'deck-route',
       data: [{path}],
+      parameters: DECK_DEBUG_PARAMETERS,
       getPath: d => d.path,
       getColor: [0, 210, 255, 190],
       getWidth: 5,
@@ -218,6 +223,7 @@ function makeLayers({editorState, showDeckDebug}) {
     new ScatterplotLayer({
       id: 'deck-route-points',
       data: points,
+      parameters: DECK_DEBUG_PARAMETERS,
       getPosition: d => d.position,
       getRadius: 16,
       radiusUnits: 'pixels',
@@ -231,6 +237,7 @@ function makeLayers({editorState, showDeckDebug}) {
     new TextLayer({
       id: 'deck-labels',
       data: points,
+      parameters: DECK_DEBUG_PARAMETERS,
       getPosition: d => d.position,
       getText: d => d.name,
       getSize: 14,
@@ -278,7 +285,7 @@ function updatePanel(panel, map, overlay, extra = '') {
   const {editorState} = demoState;
   const renderMode = overlay._map3DGL ? 'shared WebGL captured' : 'DOM overlay fallback';
   const geometryMode = demoState.showDeckDebug
-    ? 'native editor + approximate deck debug'
+    ? 'native editor + screen-composited deck debug'
     : 'native editor locked to Map3D surface';
   const selected = editorState.selected
     ? `${editorState.selected.type} ${editorState.selected.index + 1}`

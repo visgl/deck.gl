@@ -25,9 +25,16 @@ import type {DeckProps, MapViewState} from '@deck.gl/core';
 import type {Device, Framebuffer} from '@luma.gl/core';
 import type {GoogleMapsMap3DElement} from './utils';
 const HIDE_ALL_LAYERS = () => false;
-const GL_STATE: GLParameters = {
+const VECTOR_GL_STATE: GLParameters = {
   depthMask: true,
   depthTest: true,
+  blend: true,
+  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendEquation: GL.FUNC_ADD
+};
+const MAP3D_GL_STATE: GLParameters = {
+  depthMask: false,
+  depthTest: false,
   blend: true,
   blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
   blendEquation: GL.FUNC_ADD
@@ -411,7 +418,7 @@ export default class GoogleMapsOverlay {
           stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
 
-        device.withParametersWebGL(GL_STATE, () => {
+        device.withParametersWebGL(VECTOR_GL_STATE, () => {
           deck._drawLayers('google-vector', {
             clearCanvas: false
           });
@@ -541,7 +548,7 @@ export default class GoogleMapsOverlay {
           stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
 
-        device.withParametersWebGL(GL_STATE, () => {
+        device.withParametersWebGL(MAP3D_GL_STATE, () => {
           deck._drawLayers('google-map-3d', {
             clearCanvas: false
           });
