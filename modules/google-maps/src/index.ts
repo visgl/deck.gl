@@ -4,3 +4,4 @@
 
 export {default as GoogleMapsOverlay} from './google-maps-overlay';
 export type {GoogleMapsOverlayProps} from './google-maps-overlay';
+export type {GoogleMapsMap3DElement} from './utils';

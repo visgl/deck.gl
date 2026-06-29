@@ -7,14 +7,46 @@ import {Deck, MapView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
+export const MAP3D_CONTAINER_ID = 'deck-gl-google-maps-3d-container';
 
 // https://en.wikipedia.org/wiki/Web_Mercator_projection#Formulas
 const MAX_LATITUDE = 85.05113;
+const EARTH_CIRCUMFERENCE_METERS = 40075016.68557849;
+const DEFAULT_MAP3D_FOV = 25;
+
+type WebGLContext = WebGL2RenderingContext | WebGLRenderingContext;
 
 type UserData = {
-  _googleMap: google.maps.Map;
-  _eventListeners: Record<string, google.maps.MapsEventListener | null>;
+  _googleMap?: google.maps.Map;
+  _googleMap3D?: GoogleMapsMap3DElement;
+  _eventListeners: Record<string, GoogleMapsEventListener | null>;
 };
+
+type GoogleMapsEventListener = {
+  remove: () => void;
+};
+
+type GoogleMapsLatLngLike =
+  | google.maps.LatLng
+  | {
+      lat?: number | (() => number);
+      lng?: number | (() => number);
+      altitude?: number;
+      toJSON?: () => {lat: number; lng: number; altitude?: number};
+    };
+
+export type GoogleMapsMap3DElement = HTMLElement & {
+  center?: GoogleMapsLatLngLike;
+  range?: number;
+  heading?: number;
+  tilt?: number;
+  roll?: number;
+  fov?: number;
+};
+
+let isMap3DContextCaptureInstalled = false;
+const map3DCanvasContexts = new WeakMap<HTMLCanvasElement, WebGLContext>();
+const map3DHostContexts = new WeakMap<Element, WebGLContext>();
 
 /**
  * Get a new deck instance
@@ -74,6 +106,60 @@ export function createDeckInstance(
   return newDeck;
 }
 
+/**
+ * Get a new deck instance for a Maps 3D web component.
+ * This is intentionally separate from the 2D Google Maps path because Map3D
+ * exposes DOM camera events instead of OverlayView/WebGLOverlayView hooks.
+ */
+export function createDeckInstanceForMap3D(
+  map: GoogleMapsMap3DElement,
+  deck: Deck | null | undefined,
+  props
+): Deck {
+  if (deck) {
+    if (deck.userData._googleMap3D === map) {
+      return deck;
+    }
+    // deck instance was created for a different map
+    destroyDeckInstance(deck);
+  }
+
+  const newDeck = new Deck({
+    ...props,
+    useDevicePixels: props.useDevicePixels ?? true,
+    style: props.gl ? null : {pointerEvents: 'none'},
+    parent: getMap3DContainer(map, props.style),
+    views: new MapView({repeat: true}),
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    },
+    controller: false
+  });
+
+  const eventListeners = {
+    click: addDOMEventListener(map, 'click', evt => handleMap3DEvent(newDeck, 'click', evt, map)),
+    dblclick: addDOMEventListener(map, 'dblclick', evt =>
+      handleMap3DEvent(newDeck, 'dblclick', evt, map)
+    ),
+    contextmenu: addDOMEventListener(map, 'contextmenu', evt =>
+      handleMap3DEvent(newDeck, 'rightclick', evt, map)
+    ),
+    pointermove: addDOMEventListener(map, 'pointermove', evt =>
+      handleMap3DEvent(newDeck, 'mousemove', evt, map)
+    ),
+    pointerleave: addDOMEventListener(map, 'pointerleave', evt =>
+      handleMap3DEvent(newDeck, 'mouseout', evt, map)
+    )
+  };
+
+  (newDeck.userData as UserData)._googleMap3D = map;
+  (newDeck.userData as UserData)._eventListeners = eventListeners;
+
+  return newDeck;
+}
+
 // Create a container that will host the deck canvas and tooltip
 function getContainer(
   overlay: google.maps.OverlayView | google.maps.WebGLOverlayView,
@@ -98,12 +184,39 @@ function getContainer(
   return container;
 }
 
+function getMap3DContainer(
+  map: GoogleMapsMap3DElement,
+  style?: Partial<CSSStyleDeclaration>
+): HTMLElement {
+  const container = document.createElement('div');
+  container.id = MAP3D_CONTAINER_ID;
+  container.style.position = 'absolute';
+  container.style.left = '0';
+  container.style.top = '0';
+  container.style.width = '100%';
+  container.style.height = '100%';
+  container.style.pointerEvents = 'none';
+  Object.assign(container.style, style);
+
+  const parent = map.parentElement;
+  if (parent) {
+    const parentStyle = parent.style;
+    if (!parentStyle.position) {
+      parentStyle.position = 'relative';
+    }
+    parent.appendChild(container);
+  } else {
+    map.appendChild(container);
+  }
+  return container;
+}
+
 /**
  * Safely remove a deck instance
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck: Deck) {
-  const {_eventListeners: eventListeners} = deck.userData;
+  const {_eventListeners: eventListeners = {}} = deck.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
@@ -114,6 +227,132 @@ export function destroyDeckInstance(deck: Deck) {
   }
 
   deck.finalize();
+}
+
+export function isMap3DElement(map: unknown): map is GoogleMapsMap3DElement {
+  if (!map || typeof map !== 'object') {
+    return false;
+  }
+
+  const candidate = map as Partial<GoogleMapsMap3DElement> & {
+    localName?: string;
+    tagName?: string;
+    constructor?: {name?: string};
+  };
+  const tagName = (candidate.localName || candidate.tagName || '').toLowerCase();
+
+  return (
+    tagName === 'gmp-map-3d' ||
+    candidate.constructor?.name === 'Map3DElement' ||
+    ('range' in candidate && 'center' in candidate && !('getRenderingType' in candidate))
+  );
+}
+
+export function captureMap3DWebGLContext(map: GoogleMapsMap3DElement): WebGLContext | null {
+  const hostContext = map3DHostContexts.get(map);
+  if (hostContext) {
+    return hostContext;
+  }
+
+  const roots = [
+    map,
+    (map as {shadowRoot?: ShadowRoot | null}).shadowRoot,
+    (map as {renderRoot?: ParentNode | null}).renderRoot
+  ].filter(Boolean) as ParentNode[];
+
+  for (const root of roots) {
+    const canvas = root.querySelector?.<HTMLCanvasElement>('canvas');
+    const gl = canvas && map3DCanvasContexts.get(canvas);
+    if (gl) {
+      return gl;
+    }
+  }
+
+  return null;
+}
+
+export function installMap3DWebGLContextCapture() {
+  if (isMap3DContextCaptureInstalled || !globalThis.HTMLCanvasElement) {
+    return;
+  }
+
+  isMap3DContextCaptureInstalled = true;
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  const getContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function patchedGetContext(
+    type: string,
+    ...args: any[]
+  ) {
+    const context = getContext.call(this, type as any, ...args);
+
+    if (context && (type === 'webgl2' || type === 'webgl' || type === 'experimental-webgl')) {
+      const host = getMap3DCanvasHost(this);
+      if (host) {
+        const gl = context as WebGLContext;
+        map3DCanvasContexts.set(this, gl);
+        map3DHostContexts.set(host, gl);
+      }
+    }
+
+    return context;
+  } as typeof HTMLCanvasElement.prototype.getContext;
+}
+
+/**
+ * Get the current view state from a Google Maps 3D web component.
+ */
+export function getViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
+  const {width, height} = getMap3DSize(map);
+  const center = normalizeLatLng(map.center);
+  const fovy = map.fov || DEFAULT_MAP3D_FOV;
+  const aspect = height ? width / height : 1;
+  const near = 0.75;
+  const far = 300000000000000;
+  const projectionMatrix = new Matrix4().perspective({
+    fovy: (fovy * Math.PI) / 180,
+    aspect,
+    near,
+    far
+  });
+  const focalDistance = 0.5 * projectionMatrix[5];
+
+  return {
+    width,
+    height,
+    viewState: {
+      altitude: focalDistance,
+      bearing: map.heading || 0,
+      latitude: center.lat,
+      longitude: center.lng,
+      pitch: map.tilt || 0,
+      projectionMatrix,
+      repeat: true,
+      zoom: getZoomFromMap3DRange(map, center.lat, height, fovy)
+    }
+  };
+}
+
+export function addMap3DCameraChangeListener(
+  map: GoogleMapsMap3DElement,
+  callback: () => void
+): GoogleMapsEventListener {
+  const listeners = [
+    'gmp-centerchange',
+    'gmp-rangechange',
+    'gmp-headingchange',
+    'gmp-tiltchange',
+    'gmp-rollchange',
+    'gmp-fovchange',
+    'gmp-animationend'
+  ].map(eventType => addDOMEventListener(map, eventType, callback));
+
+  return {
+    remove: () => {
+      for (const listener of listeners) {
+        listener.remove();
+      }
+    }
+  };
 }
 
 /* eslint-disable max-statements */
@@ -273,6 +512,59 @@ function getMapSize(map: google.maps.Map): {width: number; height: number} {
   };
 }
 
+function getMap3DSize(map: GoogleMapsMap3DElement): {width: number; height: number} {
+  const rect = map.getBoundingClientRect();
+  return {
+    width: map.clientWidth || rect.width,
+    height: map.clientHeight || rect.height
+  };
+}
+
+function getMap3DCanvasHost(canvas: HTMLCanvasElement): Element | null {
+  const lightDOMHost = canvas.closest?.('gmp-map-3d');
+  if (lightDOMHost) {
+    return lightDOMHost;
+  }
+
+  const root = canvas.getRootNode?.();
+  const shadowHost = root && 'host' in root ? (root as ShadowRoot).host : null;
+  return shadowHost?.localName === 'gmp-map-3d' ? shadowHost : null;
+}
+
+function getZoomFromMap3DRange(
+  map: GoogleMapsMap3DElement,
+  latitude: number,
+  height: number,
+  fovy: number
+): number {
+  const range = map.range || 0;
+  if (!range || !height) {
+    return 1;
+  }
+
+  const visibleMeters = 2 * range * Math.tan((fovy * Math.PI) / 360);
+  const metersPerPixel = visibleMeters / height;
+  const metersPerPixelAtZoom0 =
+    (EARTH_CIRCUMFERENCE_METERS * Math.cos((latitude * Math.PI) / 180)) / 256;
+
+  return Math.log2(metersPerPixelAtZoom0 / metersPerPixel);
+}
+
+function normalizeLatLng(center?: GoogleMapsLatLngLike): {lat: number; lng: number} {
+  if (!center) {
+    return {lat: 0, lng: 0};
+  }
+
+  const value = 'toJSON' in center && center.toJSON ? center.toJSON() : center;
+  const lat = typeof value.lat === 'function' ? value.lat() : value.lat;
+  const lng = typeof value.lng === 'function' ? value.lng() : value.lng;
+
+  return {
+    lat: lat || 0,
+    lng: lng || 0
+  };
+}
+
 function pixelToLngLat(
   projection: google.maps.MapCanvasProjection,
   x: number,
@@ -282,6 +574,22 @@ function pixelToLngLat(
   const latLng = projection.fromContainerPixelToLatLng(point);
   // @ts-ignore (TS2531) Object is possibly 'null'
   return [latLng.lng(), latLng.lat()];
+}
+
+function getDOMEventPixel(
+  event: Event | google.maps.MapMouseEvent,
+  map: GoogleMapsMap3DElement
+): {x: number; y: number} {
+  if ('pixel' in event && event.pixel) {
+    return event.pixel as {x: number; y: number};
+  }
+
+  const srcEvent = ('srcEvent' in event ? event.srcEvent : event) as MouseEvent;
+  const rect = map.getBoundingClientRect();
+  return {
+    x: srcEvent.clientX - rect.left,
+    y: srcEvent.clientY - rect.top
+  };
 }
 
 function getEventPixel(event, deck: Deck): {x: number; y: number} {
@@ -294,6 +602,17 @@ function getEventPixel(event, deck: Deck): {x: number; y: number} {
   return {
     x: point[0],
     y: point[1]
+  };
+}
+
+function addDOMEventListener(
+  target: EventTarget,
+  eventType: string,
+  callback: (event: Event) => void
+): GoogleMapsEventListener {
+  target.addEventListener(eventType, callback);
+  return {
+    remove: () => target.removeEventListener(eventType, callback)
   };
 }
 
@@ -315,6 +634,52 @@ function handleMouseEvent(deck: Deck, type: string, event) {
       mockEvent.type = 'click';
       mockEvent.tapCount = 1;
       // Hack: because we do not listen to pointer down, perform picking now
+      deck._onPointerDown(mockEvent as MjolnirPointerEvent);
+      deck._onEvent(mockEvent as MjolnirGestureEvent);
+      break;
+
+    case 'dblclick':
+      mockEvent.type = 'click';
+      mockEvent.tapCount = 2;
+      deck._onEvent(mockEvent as MjolnirGestureEvent);
+      break;
+
+    case 'mousemove':
+      mockEvent.type = 'pointermove';
+      deck._onPointerMove(mockEvent as MjolnirPointerEvent);
+      break;
+
+    case 'mouseout':
+      mockEvent.type = 'pointerleave';
+      deck._onPointerMove(mockEvent as MjolnirPointerEvent);
+      break;
+
+    default:
+      return;
+  }
+}
+
+function handleMap3DEvent(
+  deck: Deck,
+  type: string,
+  event: Event | google.maps.MapMouseEvent,
+  map: GoogleMapsMap3DElement
+) {
+  if (!deck.isInitialized) {
+    return;
+  }
+
+  const mockEvent: Record<string, any> = {
+    type,
+    offsetCenter: getDOMEventPixel(event, map),
+    srcEvent: event
+  };
+
+  switch (type) {
+    case 'click':
+    case 'rightclick':
+      mockEvent.type = 'click';
+      mockEvent.tapCount = 1;
       deck._onPointerDown(mockEvent as MjolnirPointerEvent);
       deck._onEvent(mockEvent as MjolnirGestureEvent);
       break;

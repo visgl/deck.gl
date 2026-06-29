@@ -6,10 +6,12 @@
 import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
+import {log} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
+import {getViewPropsFromMap3D, isMap3DElement} from '../../../modules/google-maps/src/utils';
 import * as mapsApi from './mock-maps-api';
 
 globalThis.google = {maps: mapsApi};
@@ -54,6 +56,59 @@ test('GoogleMapsOverlay#interleaved prop', () => {
   });
 
   expect(!overlay.props.interleaved, 'interleaved set to false').toBeTruthy();
+});
+
+test('GoogleMapsOverlay#Map3D camera view state', () => {
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30},
+    range: 1200,
+    heading: 123,
+    tilt: 67,
+    fov: 35
+  });
+
+  const {width, height, viewState} = getViewPropsFromMap3D(map);
+
+  expect(isMap3DElement(map), 'Map3D element is recognized').toBeTruthy();
+  expect(width, 'width is set').toBe(800);
+  expect(height, 'height is set').toBe(400);
+  expect(equals(viewState.longitude, -122.45), 'longitude is set').toBeTruthy();
+  expect(equals(viewState.latitude, 37.78), 'latitude is set').toBeTruthy();
+  expect(equals(viewState.bearing, 123), 'bearing is set').toBeTruthy();
+  expect(equals(viewState.pitch, 67), 'pitch is set').toBeTruthy();
+  expect(equals(viewState.zoom, 15.997043852729847), 'range-derived zoom is set').toBeTruthy();
+  expect(viewState.projectionMatrix, 'projection matrix is set').toBeTruthy();
+});
+
+test('GoogleMapsOverlay#Map3D lifecycle without captured internals', () => {
+  const warnSpy = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30},
+    range: 1200,
+    heading: 123,
+    tilt: 67,
+    fov: 35
+  });
+  const overlay = new GoogleMapsOverlay({
+    device,
+    layers: []
+  });
+
+  overlay.setMap(map);
+  expect(
+    warnSpy.mock.calls.some(call => String(call[0]).includes('could not capture the Map3D WebGL')),
+    'missing Map3D internals warns clearly'
+  ).toBeTruthy();
+  expect(overlay._deck, 'Deck instance is created').toBeTruthy();
+  expect(overlay._deck.props.viewState.longitude, 'Map3D longitude is set').toBe(-122.45);
+
+  overlay.setMap(null);
+  overlay.finalize();
+  warnSpy.mockRestore();
 });
 
 test('GoogleMapsOverlay#useDevicePixels prop', () => {
