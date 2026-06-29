@@ -2762,6 +2762,12 @@ h1 b {
 }
 
 @media (max-width:800px) {
+    .header_ribbon {
+        height: 5vh;
+    }
+    .header_text {
+        font-size: 1.4em;
+    }
     .header .container {
         padding-left: 10%;
     }
@@ -2795,6 +2801,9 @@ h1 b {
     header .container {
         margin-left: calc(1em - 3.5vw);
     }
+    .header_ribbon {
+        height: 5.5vh;
+    }
 }
 
 @media (max-width:360px) {
@@ -2803,5 +2812,8 @@ h1 b {
     }
     header .container {
         margin-left: calc(1em - 6.25vw);
+    }
+    .header_ribbon {
+        height: 5vh;
     }
 }

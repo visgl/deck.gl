@@ -15,6 +15,11 @@ export {GeocoderWidget as _GeocoderWidget} from './geocoder-widget';
 // View widgets
 export {FullscreenWidget} from './fullscreen-widget';
 export {SplitterWidget as _SplitterWidget} from './splitter-widget';
+export {
+  buildViewsFromViewLayout,
+  type CompiledDeckViews
+} from './view-layout/build-views-from-view-layout';
+export type {ViewLayout} from './view-layout/view-layout';
 
 // Information widgets
 export {InfoWidget} from './info-widget';
@@ -49,7 +54,7 @@ export type {InfoWidgetProps} from './info-widget';
 export type {PopupWidgetProps} from './popup-widget';
 export type {StatsWidgetProps} from './stats-widget';
 export type {ContextMenuWidgetProps} from './context-menu-widget';
-export type {SplitterWidgetProps} from './splitter-widget';
+export type {SplitterWidgetProps, SplitterWidgetViewLayout} from './splitter-widget';
 export type {TimelineWidgetProps} from './timeline-widget';
 export type {SelectorWidgetProps} from './selector-widget';
 export type {GimbalWidgetProps} from './gimbal-widget';

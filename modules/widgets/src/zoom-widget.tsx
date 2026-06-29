@@ -163,15 +163,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   }
 
   handleZoomIn() {
-    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
-    for (const viewId of viewIds) {
+    for (const viewId of this.viewIds) {
       this.handleZoom(viewId, 1);
     }
   }
 
   handleZoomOut() {
-    const viewIds = this.viewId ? [this.viewId] : (this.deck?.getViews().map(v => v.id) ?? []);
-    for (const viewId of viewIds) {
+    for (const viewId of this.viewIds) {
       this.handleZoom(viewId, -1);
     }
   }

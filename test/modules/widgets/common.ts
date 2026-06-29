@@ -1,14 +1,22 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
 import {Deck} from '@deck.gl/core';
 import type {DeckProps, View} from '@deck.gl/core';
+import {nullAdapter} from '@luma.gl/test-utils';
+import '@deck.gl/widgets/stylesheet.css';
 
 const WIDTH = 600;
 const HEIGHT = 400;
 
-export class WidgetTester {
-  private deck: Deck<any> | null;
+type ViewOrViews = View | View[] | null;
+
+export class WidgetTester<ViewsT extends ViewOrViews = null> {
+  private deck: Deck<ViewsT> | null;
   private container: HTMLDivElement | null;
 
-  constructor(deckProps?: DeckProps<any>) {
+  constructor(deckProps?: DeckProps<ViewsT>) {
     const container = document.createElement('div');
     container.id = 'deck-container';
     container.style.cssText = `position: absolute; left: 0; top: 0; width: ${WIDTH}px; height: ${HEIGHT}px;`;
@@ -17,14 +25,26 @@ export class WidgetTester {
     this.container = container;
     this.deck = new Deck({
       id: 'widget-test-deck',
+      // Most tests do not need a GL context
+      deviceProps: {
+        type: 'null',
+        adapters: [nullAdapter]
+      },
       ...deckProps,
       parent: container,
       debug: true
     });
   }
 
-  setProps(deckProps: DeckProps) {
+  setProps(deckProps: DeckProps<ViewsT>) {
     this.deck?.setProps(deckProps);
+  }
+
+  getProps(): DeckProps<ViewsT> {
+    if (!this.deck) {
+      throw new Error('Tester has been finalized');
+    }
+    return this.deck.props;
   }
 
   idle(): Promise<void> {
@@ -42,7 +62,8 @@ export class WidgetTester {
     if (!this.container) {
       throw new Error('Tester has been finalized');
     }
-    return Array.from(this.container.querySelectorAll(`.deck-widget-container ${selector}`));
+    if (!selector) return [this.container];
+    return Array.from(this.container.querySelectorAll(selector));
   }
 
   click(
@@ -56,7 +77,7 @@ export class WidgetTester {
     if (!this.container) {
       throw new Error('Tester has been finalized');
     }
-    const element = this.container.querySelector(`.deck-widget-container ${selector}`);
+    const element = this.container.querySelector(selector);
     if (!element) {
       throw new Error(`Element ${selector} is not found`);
     }

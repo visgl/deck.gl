@@ -4,20 +4,18 @@
 
 import {JSX, render} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
-import {
-  Widget,
-  _deepEqual as deepEqual,
-  type Deck,
-  type WidgetProps,
-  type View
-} from '@deck.gl/core';
+import {Widget, _deepEqual as deepEqual, type WidgetProps, type View} from '@deck.gl/core';
 
-export type ViewLayout = {
+import {buildViewsFromViewLayout} from './view-layout/build-views-from-view-layout';
+import type {ViewLayoutSplitValues} from './view-layout/build-views-from-view-layout';
+import type {ViewLayout, ViewLayoutChild} from './view-layout/view-layout';
+
+export type SplitterWidgetViewLayout = {
   /** Stacking orientation of the sub views */
   orientation: 'vertical' | 'horizontal';
   /** Initial instances that describe the sub views.
    * x, y, width and height of the views' props will be overwritten by the SplitterWidget as split changes. */
-  views: [view1: View | ViewLayout, view2: View | ViewLayout];
+  views: [view1: View | SplitterWidgetViewLayout, view2: View | SplitterWidgetViewLayout];
   /** The ratio of view1's share over the whole available height (vertical) or width (horizontal). Between 0-1.
    * @default 0.5
    */
@@ -38,6 +36,7 @@ export type ViewLayout = {
 
 type ManagedViewLayout = {
   id: number;
+  splitId: string;
   orientation: 'vertical' | 'horizontal';
   views: [view1: View | ManagedViewLayout, view2: View | ManagedViewLayout];
   split: number;
@@ -50,16 +49,27 @@ type ManagedViewLayout = {
   height: number;
 };
 
-function parseViewLayout(root: ViewLayout): ManagedViewLayout[] {
+type AdaptedViewLayout = {
+  layout: ViewLayout;
+  viewLayouts: ManagedViewLayout[];
+};
+
+function adaptViewLayout(root: SplitterWidgetViewLayout): AdaptedViewLayout {
   const layoutsById: ManagedViewLayout[] = [];
-  const isViewLayout = (v: View | ViewLayout): v is ViewLayout => 'views' in v;
-  function createManagedViewLayout(l: ViewLayout): ManagedViewLayout {
+  const isViewLayout = (v: View | SplitterWidgetViewLayout): v is SplitterWidgetViewLayout =>
+    'views' in v;
+  function adaptLayout(l: SplitterWidgetViewLayout): {
+    layout: ViewLayout;
+    managed: ManagedViewLayout;
+  } {
     const id = layoutsById.length;
+    const splitId = `splitter-${id}`;
     const minSplit = l.minSplit ?? 0.05;
     const maxSplit = l.maxSplit ?? 0.95;
     const split = Math.min(Math.max(l.initialSplit ?? 0.5, minSplit), maxSplit);
     const managed: ManagedViewLayout = {
       id,
+      splitId,
       orientation: l.orientation,
       views: l.views as [view1: View | ManagedViewLayout, view2: View | ManagedViewLayout],
       split,
@@ -72,87 +82,75 @@ function parseViewLayout(root: ViewLayout): ManagedViewLayout[] {
       height: 0
     };
     layoutsById.push(managed);
-    managed.views = [
-      isViewLayout(l.views[0]) ? createManagedViewLayout(l.views[0]) : l.views[0],
-      isViewLayout(l.views[1]) ? createManagedViewLayout(l.views[1]) : l.views[1]
+
+    const childEntries = l.views.map(view => {
+      if (!isViewLayout(view)) {
+        return {layout: view, managed: view};
+      }
+      const adapted = adaptLayout(view);
+      return {layout: adapted.layout, managed: adapted.managed};
+    }) as [
+      {layout: ViewLayoutChild; managed: View | ManagedViewLayout},
+      {layout: ViewLayoutChild; managed: View | ManagedViewLayout}
     ];
-    return managed;
+    managed.views = [childEntries[0].managed, childEntries[1].managed];
+
+    const layout: ViewLayout = {
+      orientation: l.orientation,
+      splitId,
+      initialSplit: split,
+      minSplit,
+      maxSplit,
+      views: [childEntries[0].layout, childEntries[1].layout]
+    };
+    return {layout, managed};
   }
-  createManagedViewLayout(root);
-  return layoutsById;
+
+  const {layout} = adaptLayout(root);
+  return {layout, viewLayouts: layoutsById};
 }
 
-function evaluateViews(root: ManagedViewLayout): View[] {
-  const views: View[] = [];
-  function evaluateViewLayout(
-    l: ManagedViewLayout,
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ) {
-    l.x = x;
-    l.y = y;
-    l.width = width;
-    l.height = height;
+function evaluateViews(
+  layout: ViewLayout,
+  viewLayouts: ManagedViewLayout[],
+  splitValues: ViewLayoutSplitValues
+): View[] {
+  const compiled = buildViewsFromViewLayout({
+    layout,
+    width: 100,
+    height: 100,
+    splitValues
+  });
 
-    const child1X = x;
-    const child1Y = y;
-    let child1Width = width;
-    let child1Height = height;
-    let child2X = x;
-    let child2Y = y;
-    let child2Width = width;
-    let child2Height = height;
-
-    if (l.orientation === 'horizontal') {
-      child1Width = width * l.split;
-      child2X = x + child1Width;
-      child2Width = width - child1Width;
-    } else {
-      child1Height = height * l.split;
-      child2Y = y + child1Height;
-      child2Height = height - child1Height;
-    }
-
-    const [view1, view2] = l.views;
-    if ('views' in view1) {
-      evaluateViewLayout(view1, child1X, child1Y, child1Width, child1Height);
-    } else {
-      views.push(
-        view1.clone({
-          x: `${child1X}%`,
-          y: `${child1Y}%`,
-          width: `${child1Width}%`,
-          height: `${child1Height}%`
-        })
-      );
-    }
-
-    if ('views' in view2) {
-      evaluateViewLayout(view2, child2X, child2Y, child2Width, child2Height);
-    } else {
-      views.push(
-        view2.clone({
-          x: `${child2X}%`,
-          y: `${child2Y}%`,
-          width: `${child2Width}%`,
-          height: `${child2Height}%`
-        })
-      );
+  for (const viewLayout of viewLayouts) {
+    const splitter = compiled.splittersById[viewLayout.splitId];
+    if (splitter) {
+      viewLayout.x = splitter.x;
+      viewLayout.y = splitter.y;
+      viewLayout.width = splitter.width;
+      viewLayout.height = splitter.height;
+      viewLayout.split = splitter.split;
+      viewLayout.minSplit = splitter.minSplit;
+      viewLayout.maxSplit = splitter.maxSplit;
     }
   }
 
-  evaluateViewLayout(root, 0, 0, 100, 100);
-  return views;
+  return compiled.views.map(view =>
+    view.clone({
+      x: `${view.props.x}%`,
+      y: `${view.props.y}%`,
+      width: `${view.props.width}%`,
+      height: `${view.props.height}%`
+    })
+  );
 }
 
 /** Properties for the SplitterWidget */
-export type SplitterWidgetProps = WidgetProps & {
+export type SplitterWidgetProps<ViewsT extends View[] = View[]> = WidgetProps & {
   /** Stacking views descriptor */
-  viewLayout: ViewLayout;
+  viewLayout: SplitterWidgetViewLayout;
   /** Callback invoked when the splitter is dragged with the new split value */
-  onChange?: (views: View[]) => void;
+  onChange?: (views: ViewsT) => void;
   /** Callback invoked when dragging starts */
   onDragStart?: () => void;
   /** Callback invoked when dragging ends */
@@ -164,7 +162,10 @@ export type SplitterWidgetProps = WidgetProps & {
  * across the deck.gl canvas. It positions itself based on the split percentage
  * of the first view and provides callbacks when dragged.
  */
-export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
+export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
+  SplitterWidgetProps<ViewsT>,
+  ViewsT
+> {
   static defaultProps: Required<SplitterWidgetProps> = {
     ...Widget.defaultProps,
     id: 'splitter-widget',
@@ -176,24 +177,33 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
 
   className = 'deck-widget-splitter';
   placement = 'fill' as const;
+  viewLayout!: ViewLayout;
   viewLayouts!: ManagedViewLayout[];
+  splitValues: Record<string, number> = {};
   /** evaluated from the current viewLayouts */
-  views!: View[];
+  views!: ViewsT;
   /** views set in the last update */
-  lastViews?: View[];
+  lastViews?: ViewsT;
   needsUpdate = true;
 
-  constructor(props: SplitterWidgetProps) {
+  constructor(props: SplitterWidgetProps<ViewsT>) {
     super(props);
-    this.viewLayouts = parseViewLayout(this.props.viewLayout);
+    this.updateViewLayout(this.props.viewLayout);
   }
 
-  setProps(props: Partial<SplitterWidgetProps>) {
+  setProps(props: Partial<SplitterWidgetProps<ViewsT>>) {
     if (props.viewLayout && !deepEqual(props.viewLayout, this.props.viewLayout, -1)) {
-      this.viewLayouts = parseViewLayout(props.viewLayout);
+      this.updateViewLayout(props.viewLayout);
       this.views = undefined!;
     }
     super.setProps(props);
+  }
+
+  private updateViewLayout(viewLayout: SplitterWidgetViewLayout): void {
+    const adapted = adaptViewLayout(viewLayout);
+    this.viewLayout = adapted.layout;
+    this.viewLayouts = adapted.viewLayouts;
+    this.splitValues = {};
   }
 
   onRedraw() {
@@ -207,9 +217,9 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
   updateHTML() {
     if (!this.views) {
       // viewLayouts has changed, re-evaluate
-      this.views = evaluateViews(this.viewLayouts[0]);
+      this.views = evaluateViews(this.viewLayout, this.viewLayouts, this.splitValues) as ViewsT;
       // we send a copy to the callback so that externally set views can be differentiated from internal
-      this.props.onChange(this.views.slice());
+      this.props.onChange(this.views.slice() as ViewsT);
     }
     // This method is called inside deck.setProps > widgetManager.setProps > widget.setProps
     // Calling deck.setProps immediately would cause infinite loop
@@ -235,11 +245,11 @@ export class SplitterWidget extends Widget<SplitterWidgetProps, View[]> {
   }
 
   private onChange(newSplit: number, layout: ManagedViewLayout) {
-    layout.split = newSplit;
+    this.splitValues = {...this.splitValues, [layout.splitId]: newSplit};
     // layout has updated, re-evaluate
-    this.views = evaluateViews(this.viewLayouts[0]);
+    this.views = evaluateViews(this.viewLayout, this.viewLayouts, this.splitValues) as ViewsT;
     // we send a copy to the callback so that externally set views can be differentiated from internal
-    this.props.onChange(this.views.slice());
+    this.props.onChange(this.views.slice() as ViewsT);
     this.doUpdate();
   }
 

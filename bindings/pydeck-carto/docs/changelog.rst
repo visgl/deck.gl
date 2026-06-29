@@ -6,6 +6,13 @@ Releases and associated GitHub PRs for pydeck-carto are documented here.
 0.2 Releases
 ------------
 
+0.2.1 - Apr 16 2026
+^^^^^^^^^^^^^^^^^^^
+- Migrate dev setup to uv
+- Fix ReadTheDocs builds
+- Document aggregation_exp as required parameter
+- Dependency updates
+
 0.2.0 - Apr 29 2024
 ^^^^^^^^^^^^^^^^^^^
 - Update to deck.gl v9.0

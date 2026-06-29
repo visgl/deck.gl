@@ -45,13 +45,13 @@ import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
 import {Deck, OrbitView, type OrbitViewState} from '@deck.gl/core';
 import '@deck.gl/widgets/stylesheet.css';
 
-new Deck({
+new Deck<OrbitView[]>({
   initialViewState: {
     front: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 90, zoom: 0} satisfies OrbitViewState,
     perspective: {target: [0, 0, 0], rotationX: 45, rotationOrbit: 30, zoom: 0} satisfies OrbitViewState
   },
   widgets: [
-    new SplitterWidget({
+    new SplitterWidget<OrbitView[]>({
       viewLayout: {
         orientation: 'horizontal',
         views: [
@@ -140,8 +140,11 @@ function App() {
 ## Constructor
 
 ```ts
-import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
-new SplitterWidget({} satisfies SplitterWidgetProps);
+import {
+  _SplitterWidget as SplitterWidget,
+  type SplitterWidgetProps
+} from '@deck.gl/widgets';
+new SplitterWidget<ViewType[]>({} satisfies SplitterWidgetProps);
 ```
 
 ## Types
@@ -150,7 +153,7 @@ new SplitterWidget({} satisfies SplitterWidgetProps);
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### `viewLayout` (ViewLayout, required) {#viewlayout}
+#### `viewLayout` (SplitterWidgetViewLayout, required) {#viewlayout}
 
 Layout descriptor of how views are arranged on the canvas. Contains the following fields:
 
@@ -161,7 +164,7 @@ Layout descriptor of how views are arranged on the canvas. Contains the followin
 - `minSplit` (number, optional) - Min value of the split. The user cannot make the first view smaller than this ratio. Default `0.05`.
 - `maxSplit` (number, optional) - Max value of the split. The user cannot make the first view larger than this ratio. Default `0.95`.
 
-You may also replace one or both item in `views` with a `ViewLayout` object, composing more than two views into a complex layout.
+You may also replace one or both items in `views` with a nested `SplitterWidgetViewLayout` object, composing more than two views into a complex layout.
 
 
 #### `onChange` (Function, optional) {#onchange}

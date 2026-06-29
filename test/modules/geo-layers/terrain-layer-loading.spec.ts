@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
-import {MapView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, _GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
+import {expect, test} from 'vitest';
 
 function createDeferred() {
   let resolve;
@@ -21,6 +21,12 @@ function sleep(): Promise<void> {
 }
 
 const TEST_VIEWPORT = new MapView().makeViewport({
+  width: 100,
+  height: 100,
+  viewState: {longitude: 0, latitude: 0, zoom: 0}
+});
+
+const TEST_GLOBE_VIEWPORT = new GlobeView().makeViewport({
   width: 100,
   height: 100,
   viewState: {longitude: 0, latitude: 0, zoom: 0}
@@ -123,5 +129,88 @@ test('TerrainLayer#isLoaded waits for elevation and texture in tiled mode', asyn
   texture.resolve(createTestTexture());
   const handle = await initPromise;
   expect(layer.isLoaded, 'tiled terrain layer is loaded after both resources resolve').toBe(true);
+  handle?.finalize();
+});
+
+test('TerrainLayer fetches tiles at correct zoom levels for different zoomOffset values', async () => {
+  // Create a viewport at zoom 3 to test various zoomOffset values
+  const viewportZoom3 = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 3}
+  });
+
+  const testCases = [
+    {zoomOffset: -1, expectedZ: 2, description: 'zoomOffset: -1 (lower detail)'},
+    {zoomOffset: 0, expectedZ: 3, description: 'zoomOffset: 0 (normal)'},
+    {zoomOffset: 1, expectedZ: 4, description: 'zoomOffset: +1 (higher detail)'}
+  ];
+
+  for (const testCase of testCases) {
+    const fetchedUrls: {elevation: string[]; texture: string[]} = {
+      elevation: [],
+      texture: []
+    };
+
+    const layer = new TerrainLayer({
+      id: `terrain-zoom-offset-${testCase.zoomOffset}`,
+      elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
+      texture: 'https://example.com/texture/{z}/{x}/{y}.png',
+      zoomOffset: testCase.zoomOffset,
+      minZoom: 0,
+      maxZoom: 6,
+      fetch: (url, {propName}) => {
+        if (propName === 'elevationData') {
+          fetchedUrls.elevation.push(url);
+        } else if (propName === 'texture') {
+          fetchedUrls.texture.push(url);
+        }
+        return Promise.resolve(createTestMesh());
+      }
+    });
+
+    const handle = await testInitializeLayerAsync({
+      layer,
+      viewport: viewportZoom3,
+      finalize: false
+    });
+
+    await sleep();
+
+    // Verify tiles are fetched at the expected zoom level for both elevation and texture
+    const expectedZoomPath = `/${testCase.expectedZ}/`;
+    expect(
+      fetchedUrls.elevation.some(url => url.includes(expectedZoomPath)),
+      `${testCase.description}: elevation tiles fetched at z=${testCase.expectedZ}`
+    ).toBe(true);
+    expect(
+      fetchedUrls.texture.some(url => url.includes(expectedZoomPath)),
+      `${testCase.description}: texture tiles fetched at z=${testCase.expectedZ}`
+    ).toBe(true);
+
+    handle?.finalize();
+  }
+});
+
+test('TerrainLayer renders tiled Martini meshes in lng/lat coordinates on GlobeView', async () => {
+  const layer = new TerrainLayer({
+    id: 'terrain-tiled-globe',
+    elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
+    minZoom: 0,
+    maxZoom: 0,
+    fetch: () => Promise.resolve(createTestMesh())
+  });
+
+  const handle = await testInitializeLayerAsync({
+    layer,
+    viewport: TEST_GLOBE_VIEWPORT,
+    finalize: false
+  });
+
+  const tileLayer = layer.getSubLayers()[0];
+  const meshLayer = tileLayer.getSubLayers()[0];
+  expect(meshLayer.props.coordinateSystem, 'Globe terrain mesh uses lng/lat').toBe(
+    COORDINATE_SYSTEM.LNGLAT
+  );
   handle?.finalize();
 });
