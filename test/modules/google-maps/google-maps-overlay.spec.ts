@@ -11,7 +11,11 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
-import {getViewPropsFromMap3D, isMap3DElement} from '../../../modules/google-maps/src/utils';
+import {
+  addMap3DCameraChangeListener,
+  getViewPropsFromMap3D,
+  isMap3DElement
+} from '../../../modules/google-maps/src/utils';
 import * as mapsApi from './mock-maps-api';
 
 globalThis.google = {maps: mapsApi};
@@ -102,6 +106,45 @@ test('GoogleMapsOverlay#Map3D cameraPosition zoom', () => {
     equals(viewState.zoom, 14.715292534987455),
     'cameraPosition-derived zoom is set'
   ).toBeTruthy();
+});
+
+test('GoogleMapsOverlay#Map3D redraws continuously while camera is not steady', () => {
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
+  const frames = new Map<number, FrameRequestCallback>();
+  let frameId = 0;
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    frameId++;
+    frames.set(frameId, callback);
+    return frameId;
+  }) as typeof globalThis.requestAnimationFrame;
+  globalThis.cancelAnimationFrame = ((id: number) => {
+    frames.delete(id);
+  }) as typeof globalThis.cancelAnimationFrame;
+
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30}
+  });
+  const callback = vi.fn();
+  const listener = addMap3DCameraChangeListener(map, callback);
+
+  map.dispatchEvent(new CustomEvent('gmp-steadychange', {detail: {isSteady: false}}));
+  expect(callback, 'steady false redraws immediately').toHaveBeenCalledTimes(1);
+  expect(frames.size, 'continuous redraw loop is scheduled').toBe(1);
+
+  frames.get(1)?.(0);
+  expect(callback, 'animation frame redraws while moving').toHaveBeenCalledTimes(2);
+  expect(frames.has(2), 'continuous redraw loop schedules next frame').toBeTruthy();
+
+  map.dispatchEvent(new CustomEvent('gmp-steadychange', {detail: {isSteady: true}}));
+  expect(callback, 'steady true redraws final pose').toHaveBeenCalledTimes(3);
+  expect(frames.has(2), 'continuous redraw loop is cancelled').toBeFalsy();
+
+  listener.remove();
+  globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+  globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
 });
 
 test('GoogleMapsOverlay#Map3D lifecycle without captured internals', () => {

@@ -340,6 +340,35 @@ export function addMap3DCameraChangeListener(
   map: GoogleMapsMap3DElement,
   callback: () => void
 ): GoogleMapsEventListener {
+  let cameraRedrawFrame = 0;
+
+  const stopContinuousRedraw = () => {
+    if (cameraRedrawFrame && globalThis.cancelAnimationFrame) {
+      globalThis.cancelAnimationFrame(cameraRedrawFrame);
+    }
+    cameraRedrawFrame = 0;
+  };
+  const startContinuousRedraw = () => {
+    if (cameraRedrawFrame || !globalThis.requestAnimationFrame) {
+      return;
+    }
+    const redraw = () => {
+      callback();
+      cameraRedrawFrame = globalThis.requestAnimationFrame(redraw);
+    };
+    cameraRedrawFrame = globalThis.requestAnimationFrame(redraw);
+  };
+  const handleCameraChange = () => callback();
+  const handleSteadyChange = (event: Event) => {
+    callback();
+    const isSteady = getMap3DSteadyState(event);
+    if (isSteady === false) {
+      startContinuousRedraw();
+    } else if (isSteady === true) {
+      stopContinuousRedraw();
+    }
+  };
+
   const listeners = [
     'gmp-centerchange',
     'gmp-rangechange',
@@ -347,17 +376,27 @@ export function addMap3DCameraChangeListener(
     'gmp-tiltchange',
     'gmp-rollchange',
     'gmp-fovchange',
-    'gmp-steadychange',
     'gmp-animationend'
-  ].map(eventType => addDOMEventListener(map, eventType, callback));
+  ].map(eventType => addDOMEventListener(map, eventType, handleCameraChange));
+  listeners.push(addDOMEventListener(map, 'gmp-steadychange', handleSteadyChange));
 
   return {
     remove: () => {
+      stopContinuousRedraw();
       for (const listener of listeners) {
         listener.remove();
       }
     }
   };
+}
+
+function getMap3DSteadyState(event: Event): boolean | undefined {
+  const candidate = event as Event & {
+    detail?: {isSteady?: boolean};
+    isSteady?: boolean;
+  };
+  const isSteady = candidate.detail?.isSteady ?? candidate.isSteady;
+  return typeof isSteady === 'boolean' ? isSteady : undefined;
 }
 
 /* eslint-disable max-statements */

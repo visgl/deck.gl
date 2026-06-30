@@ -43,7 +43,7 @@ const demoState = {
     selected: null
   },
   message: '',
-  showDeckDebug: true
+  showDeckDebug: false
 };
 const DECK_DEBUG_COLORS = {
   mesh: {
