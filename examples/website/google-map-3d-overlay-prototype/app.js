@@ -42,7 +42,6 @@ const demoState = {
     polygon: INITIAL_POLYGON,
     selected: null
   },
-  deckFallbackSuspended: false,
   message: '',
   showDeckDebug: true
 };
@@ -120,10 +119,7 @@ export async function renderToDOM(container) {
     }
   });
 
-  const onCameraChange = event => {
-    updateDeckFallbackSuspension(event, overlay, () => updatePanel(panel, map, overlay));
-    updatePanel(panel, map, overlay);
-  };
+  const onCameraChange = () => updatePanel(panel, map, overlay);
   for (const eventName of [
     'gmp-centerchange',
     'gmp-rangechange',
@@ -159,7 +155,6 @@ function bindPanelActions(panel, map, overlay, editor) {
   });
   panel.querySelector('[data-action="toggle-deck"]').addEventListener('click', () => {
     demoState.showDeckDebug = !demoState.showDeckDebug;
-    demoState.deckFallbackSuspended = false;
     setDeckLayers(overlay);
     updateDeckButtons(panel);
     updatePanel(panel, map, overlay);
@@ -220,8 +215,8 @@ function bindPanelActions(panel, map, overlay, editor) {
   return () => window.removeEventListener('keydown', onKeyDown);
 }
 
-function makeLayers({deckDepthMode, deckFallbackSuspended, editorState, showDeckDebug}) {
-  if (!showDeckDebug || deckFallbackSuspended) {
+function makeLayers({deckDepthMode, editorState, showDeckDebug}) {
+  if (!showDeckDebug) {
     return [];
   }
 
@@ -309,24 +304,15 @@ function createPanel() {
 
 function updatePanel(panel, map, overlay, extra = '') {
   const center = normalizeCenter(map.center);
-  const {deckDepthMode, deckFallbackSuspended, editorState, showDeckDebug} = demoState;
+  const {deckDepthMode, editorState, showDeckDebug} = demoState;
   const renderMode = overlay._map3DGL ? 'shared WebGL captured' : 'DOM overlay fallback';
-  const deckMode = getDeckDepthStatus(deckDepthMode, overlay);
-  const geometryMode = showDeckDebug
-    ? `native editor + ${deckMode}`
-    : `native editor locked to Map3D surface${overlay._map3DGL ? '' : ', Deck fallback hidden'}`;
   const selected = editorState.selected
     ? `${editorState.selected.type} ${editorState.selected.index + 1}`
     : 'none';
   const moveStatus = editorState.moveSelectedOnNextClick ? ', move armed' : '';
   panel.querySelector('[data-status]').innerHTML = `
     <div><code>${renderMode}</code></div>
-    <div>${geometryMode}</div>
-    ${
-      showDeckDebug && deckFallbackSuspended
-        ? '<div>Deck fallback paused while Map3D camera is moving</div>'
-        : ''
-    }
+    <div>${getGeometryStatus(deckDepthMode, overlay, showDeckDebug)}</div>
     <div>mode ${editorState.mode}, path ${editorState.path.length}, polygon ${editorState.polygon.length}, points ${editorState.points.length}</div>
     <div>selected ${selected}${moveStatus}</div>
     <div>lat ${center.lat.toFixed(5)}, lng ${center.lng.toFixed(5)}</div>
@@ -365,53 +351,23 @@ function getDeckDepthStatus(deckDepthMode, overlay) {
   if (deckDepthMode === 'mesh') {
     return overlay._map3DGL
       ? 'deck mesh-depth debug'
-      : 'deck mesh-depth requested (shared WebGL unavailable)';
+      : 'deck mesh-depth requested, using aligned canvas fallback';
   }
-  return overlay._map3DGL ? 'deck screen debug' : 'screen-composited deck fallback';
+  return overlay._map3DGL ? 'deck screen debug' : 'aligned deck canvas fallback';
 }
 
-let deckFallbackResumeTimer = 0;
+function getGeometryStatus(deckDepthMode, overlay, showDeckDebug) {
+  if (showDeckDebug) {
+    return `native editor + ${getDeckDepthStatus(deckDepthMode, overlay)}`;
+  }
+
+  return `native editor locked to Map3D surface${
+    overlay._map3DGL ? '' : ', Deck diagnostic hidden'
+  }`;
+}
 
 function setDeckLayers(overlay) {
   overlay.setProps({layers: makeLayers(demoState)});
-}
-
-function updateDeckFallbackSuspension(event, overlay, onChange) {
-  if (overlay._map3DGL || !demoState.showDeckDebug) {
-    setDeckFallbackSuspended(false, overlay, onChange);
-    return;
-  }
-
-  if (event.type === 'gmp-steadychange') {
-    const isSteady = getMapSteadyState(event);
-    if (isSteady === false) {
-      setDeckFallbackSuspended(true, overlay, onChange);
-    } else if (isSteady === true) {
-      setDeckFallbackSuspended(false, overlay, onChange);
-    }
-    return;
-  }
-
-  setDeckFallbackSuspended(true, overlay, onChange);
-  window.clearTimeout(deckFallbackResumeTimer);
-  deckFallbackResumeTimer = window.setTimeout(() => {
-    setDeckFallbackSuspended(false, overlay, onChange);
-  }, 180);
-}
-
-function setDeckFallbackSuspended(suspended, overlay, onChange) {
-  window.clearTimeout(deckFallbackResumeTimer);
-  if (demoState.deckFallbackSuspended === suspended) {
-    return;
-  }
-  demoState.deckFallbackSuspended = suspended;
-  setDeckLayers(overlay);
-  onChange?.();
-}
-
-function getMapSteadyState(event) {
-  const isSteady = event.detail?.isSteady ?? event.isSteady;
-  return typeof isSteady === 'boolean' ? isSteady : undefined;
 }
 
 function normalizeCenter(center) {
