@@ -69,7 +69,7 @@ export async function renderToDOM(container) {
   window.gm_authFailure = () => {
     renderError(
       container,
-      'Google Maps rejected this API key for the standalone dev origin. Allow http://127.0.0.1:5173/* in the key referrers, then reload.'
+      `Google Maps rejected this API key for the standalone dev origin. Allow ${window.location.origin}/* in the key referrers, then reload.`
     );
   };
 
