@@ -79,6 +79,7 @@ Class-specific improvements:
 
 - [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) adds new `visibleMinZoom` and `visibleMaxZoom` props to control the zoom range at which tiles are drawn, independent of the zoom range at which data is loaded.
+- Experimental [`_SharedTile2DLayer`](./api-reference/geo-layers/shared-tile-2d-layer.md) and [`_SharedTileset2D`](./api-reference/geo-layers/shared-tileset-2d.md) let 2D tiled layers reuse one tile-content cache across multiple views.
 - Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
 - WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
 
