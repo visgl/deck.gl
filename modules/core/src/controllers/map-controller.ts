@@ -600,66 +600,12 @@ export default class MapController extends Controller<MapState> {
 
   dragMode: 'pan' | 'rotate' = 'pan';
 
-  /**
-   * Rotation pivot behavior:
-   * - 'center': Rotate around viewport center (default)
-   * - '2d': Rotate around pointer position at ground level (z=0)
-   * - '3d': Rotate around 3D picked point (requires pickPosition callback)
-   */
-  protected rotationPivot: 'center' | '2d' | '3d' = 'center';
-
-  setProps(
-    props: ControllerProps &
-      MapStateProps & {
-        rotationPivot?: 'center' | '2d' | '3d';
-        getAltitude?: (pos: [number, number]) => number | undefined;
-      }
-  ) {
-    if ('rotationPivot' in props) {
-      this.rotationPivot = props.rotationPivot || 'center';
-    }
+  setProps(props: ControllerProps & MapStateProps) {
     // this will be passed to MapState constructor
-    props.getAltitude = this._getAltitude;
     props.position = props.position || [0, 0, 0];
     props.maxBounds =
       props.maxBounds || (props.normalize === false ? null : WEB_MERCATOR_MAX_BOUNDS);
 
     super.setProps(props);
   }
-
-  protected updateViewport(
-    newControllerState: MapState,
-    extraProps: Record<string, any> | null = null,
-    interactionState: InteractionState = {}
-  ): void {
-    // Inject rotation pivot position during rotation for visual feedback
-    const state = newControllerState.getState();
-    if (interactionState.isDragging && state.startRotateLngLat) {
-      interactionState = {
-        ...interactionState,
-        rotationPivotPosition: state.startRotateLngLat
-      };
-    } else if (interactionState.isDragging === false) {
-      // Clear pivot when drag ends
-      interactionState = {...interactionState, rotationPivotPosition: undefined};
-    }
-
-    super.updateViewport(newControllerState, extraProps, interactionState);
-  }
-
-  /** Add altitude to rotateStart params based on rotationPivot mode */
-  protected _getAltitude = (pos: [number, number]): number | undefined => {
-    if (this.rotationPivot === '2d') {
-      return 0;
-    } else if (this.rotationPivot === '3d') {
-      if (this.pickPosition) {
-        const {x, y} = this.props;
-        const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
-        if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
-          return pickResult.coordinate[2];
-        }
-      }
-    }
-    return undefined;
-  };
 }

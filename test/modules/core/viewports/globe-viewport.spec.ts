@@ -168,6 +168,30 @@ test('GlobeViewport#project, unproject', () => {
   config.EPSILON = oldEpsilon;
 });
 
+test('GlobeViewport#panByPosition3D', () => {
+  const viewport = new GlobeViewport({
+    ...TEST_VIEWPORTS[0],
+    pitch: 35,
+    bearing: 20
+  });
+  const fromPixel = [430, 320];
+  const toPixel = [410, 300];
+  const anchor = viewport.unproject(fromPixel, {targetZ: 1000});
+  const adjustedProps = viewport.panByPosition3D(anchor, toPixel);
+  const adjustedViewport = new GlobeViewport({
+    ...TEST_VIEWPORTS[0],
+    pitch: 35,
+    bearing: 20,
+    ...adjustedProps
+  });
+  const projectedAnchor = adjustedViewport.project(anchor);
+
+  expect(
+    Math.hypot(projectedAnchor[0] - toPixel[0], projectedAnchor[1] - toPixel[1]) < 2,
+    '3D anchor projects near requested pixel'
+  ).toBeTruthy();
+});
+
 test('GlobeViewport#getBounds', () => {
   for (const testCase of TEST_VIEWPORTS) {
     const bounds = new GlobeViewport(testCase).getBounds();

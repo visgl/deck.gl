@@ -88,6 +88,8 @@ By default, `GlobeView` uses the `GlobeController` to handle interactivity. To e
 const view = new GlobeView({id: 'globe', controller: true});
 ```
 
+The default controller is terrain-aware: it adjusts camera elevation to follow picked terrain and uses a 3D rotation pivot when the scene contains a layer with `pickable: '3d'`.
+
 Visit the [GlobeController](./globe-controller.md) documentation for a full list of supported options.
 
 

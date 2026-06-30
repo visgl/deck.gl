@@ -70,7 +70,7 @@ Class-specific improvements:
 - [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
 - [OrbitController](./api-reference/core/orbit-controller.md) now uses 3D picking to determine zoom and pan anchors, providing more intuitive navigation around 3D content.
 - All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
-- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
+- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes, improved stability, and terrain-aware camera elevation by default.
 - [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
 
 ### Layers
