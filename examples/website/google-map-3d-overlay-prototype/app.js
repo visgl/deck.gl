@@ -34,6 +34,7 @@ const INITIAL_POINTS = [
 ];
 
 const demoState = {
+  deckDepthMode: 'screen',
   editorState: {
     mode: 'path',
     path: INITIAL_PATH,
@@ -44,9 +45,17 @@ const demoState = {
   message: '',
   showDeckDebug: false
 };
-const DECK_DEBUG_PARAMETERS = {
-  depthMask: false,
-  depthTest: false
+const DECK_DEBUG_COLORS = {
+  mesh: {
+    fill: [255, 245, 0, 245],
+    path: [255, 245, 0, 220],
+    textBackground: [92, 58, 0, 230]
+  },
+  screen: {
+    fill: [24, 255, 116, 245],
+    path: [24, 255, 116, 220],
+    textBackground: [12, 80, 38, 230]
+  }
 };
 
 export async function renderToDOM(container) {
@@ -68,6 +77,7 @@ export async function renderToDOM(container) {
 
   const overlay = new GoogleMapsOverlay({
     interleaved: true,
+    map3DDepthMode: demoState.deckDepthMode,
     layers: makeLayers(demoState)
   });
 
@@ -142,12 +152,19 @@ function bindPanelActions(panel, map, overlay, editor) {
   panel.querySelector('[data-action="raise"]').addEventListener('click', () => {
     map.range = Math.min(4000, (map.range || 1450) * 1.3);
   });
-  panel.querySelector('[data-action="toggle-deck"]').addEventListener('click', event => {
+  panel.querySelector('[data-action="toggle-deck"]').addEventListener('click', () => {
     demoState.showDeckDebug = !demoState.showDeckDebug;
-    event.currentTarget.textContent = demoState.showDeckDebug
-      ? 'Hide Deck Debug'
-      : 'Show Deck Debug';
     overlay.setProps({layers: makeLayers(demoState)});
+    updateDeckButtons(panel);
+    updatePanel(panel, map, overlay);
+  });
+  panel.querySelector('[data-action="toggle-deck-depth"]').addEventListener('click', () => {
+    demoState.deckDepthMode = demoState.deckDepthMode === 'screen' ? 'mesh' : 'screen';
+    overlay.setProps({
+      map3DDepthMode: demoState.deckDepthMode,
+      layers: makeLayers(demoState)
+    });
+    updateDeckButtons(panel);
     updatePanel(panel, map, overlay);
   });
   for (const modeButton of panel.querySelectorAll('[data-mode]')) {
@@ -192,29 +209,32 @@ function bindPanelActions(panel, map, overlay, editor) {
   };
   window.addEventListener('keydown', onKeyDown);
   updateModeButtons(panel);
+  updateDeckButtons(panel);
 
   return () => window.removeEventListener('keydown', onKeyDown);
 }
 
-function makeLayers({editorState, showDeckDebug}) {
+function makeLayers({deckDepthMode, editorState, showDeckDebug}) {
   if (!showDeckDebug) {
     return [];
   }
 
   const path = editorState.path.map(toDeckPosition);
+  const colors = DECK_DEBUG_COLORS[deckDepthMode];
+  const parameters = getDeckDebugParameters(deckDepthMode);
   const points = [
-    {name: 'Start', position: path[0]},
-    {name: 'Finish', position: path[path.length - 1]}
+    {name: 'Deck Start', position: path[0]},
+    {name: 'Deck Finish', position: path[path.length - 1]}
   ].filter(point => point.position);
 
   return [
     new PathLayer({
       id: 'deck-route',
       data: [{path}],
-      parameters: DECK_DEBUG_PARAMETERS,
+      parameters,
       getPath: d => d.path,
-      getColor: [0, 210, 255, 190],
-      getWidth: 5,
+      getColor: colors.path,
+      getWidth: 9,
       widthUnits: 'pixels',
       capRounded: true,
       jointRounded: true,
@@ -223,13 +243,13 @@ function makeLayers({editorState, showDeckDebug}) {
     new ScatterplotLayer({
       id: 'deck-route-points',
       data: points,
-      parameters: DECK_DEBUG_PARAMETERS,
+      parameters,
       getPosition: d => d.position,
-      getRadius: 16,
+      getRadius: 20,
       radiusUnits: 'pixels',
-      getFillColor: [255, 255, 255, 240],
-      getLineColor: [0, 210, 255, 255],
-      getLineWidth: 3,
+      getFillColor: colors.fill,
+      getLineColor: [15, 23, 42, 255],
+      getLineWidth: 4,
       lineWidthUnits: 'pixels',
       stroked: true,
       pickable: true
@@ -237,7 +257,7 @@ function makeLayers({editorState, showDeckDebug}) {
     new TextLayer({
       id: 'deck-labels',
       data: points,
-      parameters: DECK_DEBUG_PARAMETERS,
+      parameters,
       getPosition: d => d.position,
       getText: d => d.name,
       getSize: 14,
@@ -246,7 +266,7 @@ function makeLayers({editorState, showDeckDebug}) {
       getTextAnchor: 'middle',
       getAlignmentBaseline: 'bottom',
       background: true,
-      getBackgroundColor: [15, 23, 42, 220],
+      getBackgroundColor: colors.textBackground,
       backgroundPadding: [5, 3]
     })
   ];
@@ -275,6 +295,7 @@ function createPanel() {
       <button type="button" data-action="lower">Closer</button>
       <button type="button" data-action="raise">Higher</button>
       <button type="button" data-action="toggle-deck">Show Deck Debug</button>
+      <button type="button" data-action="toggle-deck-depth">Deck: Screen</button>
     </div>
   `;
   return panel;
@@ -282,10 +303,11 @@ function createPanel() {
 
 function updatePanel(panel, map, overlay, extra = '') {
   const center = normalizeCenter(map.center);
-  const {editorState} = demoState;
+  const {deckDepthMode, editorState, showDeckDebug} = demoState;
   const renderMode = overlay._map3DGL ? 'shared WebGL captured' : 'DOM overlay fallback';
-  const geometryMode = demoState.showDeckDebug
-    ? 'native editor + screen-composited deck debug'
+  const deckMode = getDeckDepthStatus(deckDepthMode, overlay);
+  const geometryMode = showDeckDebug
+    ? `native editor + ${deckMode}`
     : 'native editor locked to Map3D surface';
   const selected = editorState.selected
     ? `${editorState.selected.type} ${editorState.selected.index + 1}`
@@ -308,6 +330,33 @@ function updateModeButtons(panel) {
   for (const modeButton of panel.querySelectorAll('[data-mode]')) {
     modeButton.classList.toggle('active', modeButton.dataset.mode === demoState.editorState.mode);
   }
+}
+
+function updateDeckButtons(panel) {
+  const toggleDeckButton = panel.querySelector('[data-action="toggle-deck"]');
+  const toggleDepthButton = panel.querySelector('[data-action="toggle-deck-depth"]');
+  toggleDeckButton.textContent = demoState.showDeckDebug ? 'Hide Deck Debug' : 'Show Deck Debug';
+  toggleDepthButton.textContent = `Deck: ${getDeckDepthLabel(demoState.deckDepthMode)}`;
+  toggleDepthButton.classList.toggle('active', demoState.deckDepthMode === 'mesh');
+}
+
+function getDeckDebugParameters(deckDepthMode) {
+  return deckDepthMode === 'mesh'
+    ? {depthMask: false, depthTest: true}
+    : {depthMask: false, depthTest: false};
+}
+
+function getDeckDepthLabel(deckDepthMode) {
+  return deckDepthMode === 'mesh' ? 'Mesh Depth' : 'Screen';
+}
+
+function getDeckDepthStatus(deckDepthMode, overlay) {
+  if (deckDepthMode === 'mesh') {
+    return overlay._map3DGL
+      ? 'deck mesh-depth debug'
+      : 'deck mesh-depth requested (shared WebGL unavailable)';
+  }
+  return 'screen-composited deck debug';
 }
 
 function normalizeCenter(center) {

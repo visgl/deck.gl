@@ -32,9 +32,17 @@ const VECTOR_GL_STATE: GLParameters = {
   blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
   blendEquation: GL.FUNC_ADD
 };
-const MAP3D_GL_STATE: GLParameters = {
+const MAP3D_SCREEN_GL_STATE: GLParameters = {
   depthMask: false,
   depthTest: false,
+  blend: true,
+  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendEquation: GL.FUNC_ADD
+};
+const MAP3D_MESH_GL_STATE: GLParameters = {
+  depthMask: false,
+  depthTest: true,
+  depthFunc: GL.LEQUAL,
   blend: true,
   blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
   blendEquation: GL.FUNC_ADD
@@ -52,8 +60,11 @@ function getDeckDevice(deck: Deck): Device | null {
 }
 
 const defaultProps = {
-  interleaved: true
+  interleaved: true,
+  map3DDepthMode: 'screen' as GoogleMapsMap3DDepthMode
 };
+
+export type GoogleMapsMap3DDepthMode = 'mesh' | 'screen';
 
 export type GoogleMapsOverlayProps = Omit<
   DeckProps,
@@ -69,6 +80,12 @@ export type GoogleMapsOverlayProps = Omit<
   | 'controller'
 > & {
   interleaved?: boolean;
+  /**
+   * Experimental Map3D-only draw mode.
+   * `screen` draws Deck as a compositor overlay. `mesh` depth-tests Deck against
+   * Google Map3D's depth buffer when a shared WebGL context is available.
+   */
+  map3DDepthMode?: GoogleMapsMap3DDepthMode;
 };
 
 type GoogleMapsOverlayMap = google.maps.Map | GoogleMapsMap3DElement;
@@ -160,6 +177,9 @@ export default class GoogleMapsOverlay {
         props.style = null;
       }
       this._deck.setProps(props);
+      if ('map3DDepthMode' in props && this._map && isMap3DElement(this._map)) {
+        this._requestMap3DRedraw();
+      }
     }
   }
 
@@ -436,10 +456,14 @@ export default class GoogleMapsOverlay {
     if (interleaved) {
       gl = captureMap3DWebGLContext(map);
       if (!gl) {
+        const meshDepthMessage =
+          this.props.map3DDepthMode === 'mesh'
+            ? ' Mesh-depth mode was requested, but it requires a captured shared Map3D WebGL context.'
+            : '';
         log.warn(
           'deck.gl: GoogleMapsOverlay could not capture the Map3D WebGL canvas. ' +
             'Rendering with a non-interleaved Deck overlay instead; this path is approximate ' +
-            'and should not be used for terrain-locked Map3D geometry.'
+            `and should not be used for terrain-locked Map3D geometry.${meshDepthMessage}`
         )();
       }
     }
@@ -548,7 +572,7 @@ export default class GoogleMapsOverlay {
           stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
 
-        device.withParametersWebGL(MAP3D_GL_STATE, () => {
+        device.withParametersWebGL(getMap3DGLState(this.props.map3DDepthMode), () => {
           deck._drawLayers('google-map-3d', {
             clearCanvas: false
           });
@@ -558,4 +582,8 @@ export default class GoogleMapsOverlay {
       deck.redraw();
     }
   }
+}
+
+function getMap3DGLState(depthMode: GoogleMapsMap3DDepthMode | undefined): GLParameters {
+  return depthMode === 'mesh' ? MAP3D_MESH_GL_STATE : MAP3D_SCREEN_GL_STATE;
 }

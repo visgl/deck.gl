@@ -37,6 +37,7 @@ test('GoogleMapsOverlay#constructor', () => {
   const deck = overlay._deck;
   expect(deck, 'Deck instance is created').toBeTruthy();
   expect(overlay.props.interleaved, 'interleaved defaults to true').toBeTruthy();
+  expect(overlay.props.map3DDepthMode, 'Map3D depth mode defaults to screen').toBe('screen');
 
   overlay.setMap(map);
   expect(overlay._deck, 'Deck instance is the same').toBe(deck);
@@ -128,6 +129,34 @@ test('GoogleMapsOverlay#Map3D lifecycle without captured internals', () => {
   expect(overlay._deck.props.viewState.longitude, 'Map3D longitude is set').toBe(-122.45);
 
   overlay.setMap(null);
+  overlay.finalize();
+  warnSpy.mockRestore();
+});
+
+test('GoogleMapsOverlay#Map3D mesh depth mode warns without captured internals', () => {
+  const warnSpy = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30},
+    range: 1200,
+    heading: 123,
+    tilt: 67,
+    fov: 35
+  });
+  const overlay = new GoogleMapsOverlay({
+    device,
+    layers: [],
+    map3DDepthMode: 'mesh'
+  });
+
+  overlay.setMap(map);
+  expect(overlay.props.map3DDepthMode, 'Map3D depth mode is set').toBe('mesh');
+  expect(
+    warnSpy.mock.calls.some(call => String(call[0]).includes('Mesh-depth mode was requested')),
+    'mesh depth fallback warns clearly'
+  ).toBeTruthy();
+
   overlay.finalize();
   warnSpy.mockRestore();
 });
