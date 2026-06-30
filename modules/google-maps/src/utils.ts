@@ -347,6 +347,7 @@ export function addMap3DCameraChangeListener(
     'gmp-tiltchange',
     'gmp-rollchange',
     'gmp-fovchange',
+    'gmp-steadychange',
     'gmp-animationend'
   ].map(eventType => addDOMEventListener(map, eventType, callback));
 
@@ -543,11 +544,13 @@ function getZoomFromMap3DCamera(
 ): number {
   const cameraPosition = normalizeLatLng(map.cameraPosition);
   const cameraHeight = cameraPosition.altitude - center.altitude;
-  if (cameraHeight > 0 && height) {
+  const pitch = map.tilt || 0;
+  const pitchCosine = Math.cos((pitch * Math.PI) / 180);
+  if (cameraHeight > 0 && height && pitchCosine > 0) {
     const focalDistance = 0.5 / Math.tan((fovy * Math.PI) / 360);
     const metersPerWorldUnit =
       (EARTH_CIRCUMFERENCE_METERS * Math.cos((center.lat * Math.PI) / 180)) / 512;
-    const scale = (focalDistance * height * metersPerWorldUnit) / cameraHeight;
+    const scale = (focalDistance * height * metersPerWorldUnit * pitchCosine) / cameraHeight;
     return Math.log2(scale);
   }
 
@@ -568,7 +571,7 @@ function getZoomFromMap3DRange(
   const visibleMeters = 2 * range * Math.tan((fovy * Math.PI) / 360);
   const metersPerPixel = visibleMeters / height;
   const metersPerPixelAtZoom0 =
-    (EARTH_CIRCUMFERENCE_METERS * Math.cos((latitude * Math.PI) / 180)) / 256;
+    (EARTH_CIRCUMFERENCE_METERS * Math.cos((latitude * Math.PI) / 180)) / 512;
 
   return Math.log2(metersPerPixelAtZoom0 / metersPerPixel);
 }

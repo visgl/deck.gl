@@ -9,9 +9,7 @@ import {createMap3DEditorState, normalizeMap3DCoordinate} from '@deck.gl/google-
 const PATH_STYLE = {
   drawsOccludedSegments: true,
   strokeColor: '#ff7a00',
-  strokeWidth: 8,
-  outerColor: '#111827',
-  outerWidth: 0.6
+  strokeWidth: 8
 };
 
 const POLYGON_STYLE = {
