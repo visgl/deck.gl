@@ -105,6 +105,7 @@ export class WebGLAggregationTransform {
     const aggregatorTransformProps: Partial<AggregatorTransformProps> = {
       isCount: isCount as NumberArray3,
       isMean: isMean as NumberArray3,
+      naN: Number.NaN,
       bins
     };
     transform.model.shaderInputs.setProps({aggregatorTransform: aggregatorTransformProps});
@@ -146,8 +147,6 @@ flat out vec2 values;
 flat out vec3 values;
 #endif
 
-const float NAN = intBitsToFloat(-1);
-
 void main() {
   int row = gl_VertexID / SAMPLER_WIDTH;
   int col = gl_VertexID - row * SAMPLER_WIDTH;
@@ -158,7 +157,7 @@ void main() {
     aggregatorTransform.isMean
   );
   if (weights.a == 0.0) {
-    value3 = vec3(NAN);
+    value3 = vec3(aggregatorTransform.naN);
   }
 
 #if NUM_DIMS == 1
@@ -221,12 +220,6 @@ void main() {
   }
 }
 `;
-
-  // Enable intBitsToFloat on Firefox + Nvidia driver: https://github.com/visgl/deck.gl/pull/10069
-  if (device.type === 'webgl') {
-    // @ts-expect-error WebGLDevice method
-    device.getExtension('GL_ARB_shader_bit_encoding');
-  }
 
   return new BufferTransform(device, {
     vs,
