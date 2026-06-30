@@ -13,7 +13,9 @@ import {equals} from '@math.gl/core';
 
 import {
   addMap3DCameraChangeListener,
+  captureMap3DWebGLContext,
   getViewPropsFromMap3D,
+  installMap3DWebGLContextCapture,
   isMap3DElement
 } from '../../../modules/google-maps/src/utils';
 import * as mapsApi from './mock-maps-api';
@@ -21,6 +23,31 @@ import * as mapsApi from './mock-maps-api';
 globalThis.google = {maps: mapsApi};
 
 const withDevice = props => ({device, ...props});
+
+test('GoogleMapsOverlay#Map3D captures nested renderer canvas context', () => {
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
+  const gl = {canvas: null};
+  HTMLCanvasElement.prototype.getContext = function getContext(this: HTMLCanvasElement) {
+    gl.canvas = this;
+    return gl;
+  } as typeof HTMLCanvasElement.prototype.getContext;
+
+  installMap3DWebGLContextCapture();
+
+  const map = document.createElement('gmp-map-3d') as mapsApi.Map3DElement;
+  const internalHost = document.createElement('gmp-internal-renderer');
+  const shadowRoot = map.attachShadow({mode: 'open'});
+  const internalRoot = internalHost.attachShadow({mode: 'open'});
+  const canvas = document.createElement('canvas');
+  shadowRoot.appendChild(internalHost);
+  internalRoot.appendChild(canvas);
+
+  canvas.getContext('webgl2');
+
+  expect(captureMap3DWebGLContext(map), 'nested Map3D WebGL context is captured').toBe(gl);
+
+  HTMLCanvasElement.prototype.getContext = originalGetContext;
+});
 
 test('GoogleMapsOverlay#constructor', () => {
   const map = new mapsApi.Map({

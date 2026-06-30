@@ -43,7 +43,7 @@ const demoState = {
     selected: null
   },
   message: '',
-  showDeckDebug: true
+  showDeckDebug: false
 };
 const DECK_DEBUG_COLORS = {
   mesh: {
@@ -308,7 +308,7 @@ function updatePanel(panel, map, overlay, extra = '') {
   const deckMode = getDeckDepthStatus(deckDepthMode, overlay);
   const geometryMode = showDeckDebug
     ? `native editor + ${deckMode}`
-    : 'native editor locked to Map3D surface';
+    : `native editor locked to Map3D surface${overlay._map3DGL ? '' : ', Deck fallback hidden'}`;
   const selected = editorState.selected
     ? `${editorState.selected.type} ${editorState.selected.index + 1}`
     : 'none';
@@ -356,7 +356,7 @@ function getDeckDepthStatus(deckDepthMode, overlay) {
       ? 'deck mesh-depth debug'
       : 'deck mesh-depth requested (shared WebGL unavailable)';
   }
-  return 'screen-composited deck debug';
+  return overlay._map3DGL ? 'deck screen debug' : 'screen-composited deck fallback';
 }
 
 function normalizeCenter(center) {

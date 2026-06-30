@@ -570,9 +570,20 @@ function getMap3DCanvasHost(canvas: HTMLCanvasElement): Element | null {
     return lightDOMHost;
   }
 
-  const root = canvas.getRootNode?.();
-  const shadowHost = root && 'host' in root ? (root as ShadowRoot).host : null;
-  return shadowHost?.localName === 'gmp-map-3d' ? shadowHost : null;
+  let node: Element | null = canvas;
+  while (node) {
+    const root = node.getRootNode?.();
+    const shadowHost = root && 'host' in root ? (root as ShadowRoot).host : null;
+    if (!shadowHost) {
+      return null;
+    }
+    if (shadowHost.localName === 'gmp-map-3d') {
+      return shadowHost;
+    }
+    node = shadowHost;
+  }
+
+  return null;
 }
 
 function getZoomFromMap3DCamera(
