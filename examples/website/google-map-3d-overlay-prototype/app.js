@@ -36,7 +36,7 @@ const INITIAL_POINTS = [
 
 const demoState = {
   deckDepthMode: 'screen',
-  deckFallbackMode: 'screen',
+  deckFallbackMode: 'geospatial',
   editorState: {
     mode: 'path',
     path: INITIAL_PATH,
