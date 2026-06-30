@@ -492,7 +492,8 @@ export default class GoogleMapsOverlay {
 
     this._map3DCameraListener = addMap3DCameraChangeListener(
       map,
-      this._requestMap3DRedraw.bind(this)
+      this._requestMap3DRedraw.bind(this),
+      {redrawWhileMoving: Boolean(gl)}
     );
     this._onDrawMap3D();
   }

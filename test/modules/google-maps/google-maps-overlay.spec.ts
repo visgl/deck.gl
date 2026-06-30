@@ -242,6 +242,50 @@ test('GoogleMapsOverlay#Map3D fallback waits for steady camera before redraw', (
   listener.remove();
 });
 
+test('GoogleMapsOverlay#Map3D fallback does not redraw continuously while pitching', () => {
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
+  const frames = new Map<number, FrameRequestCallback>();
+  let frameId = 0;
+  globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    frameId++;
+    frames.set(frameId, callback);
+    return frameId;
+  }) as typeof globalThis.requestAnimationFrame;
+  globalThis.cancelAnimationFrame = ((id: number) => {
+    frames.delete(id);
+  }) as typeof globalThis.cancelAnimationFrame;
+
+  const warnSpy = vi.spyOn(log, 'warn').mockReturnValue(() => {});
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30}
+  });
+  const overlay = new GoogleMapsOverlay({
+    device,
+    layers: [],
+    map3DFallbackMode: 'screen'
+  });
+
+  overlay.setMap(map);
+  expect(frames.size, 'initial Map3D fallback draw is not scheduled through rAF').toBe(0);
+
+  map.dispatchEvent(new CustomEvent('gmp-steadychange', {detail: {isSteady: false}}));
+  expect(frames.size, 'moving fallback does not start a continuous redraw loop').toBe(0);
+
+  map.dispatchEvent(new Event('gmp-tiltchange'));
+  expect(frames.size, 'pitch changes are skipped while the fallback camera is moving').toBe(0);
+
+  map.dispatchEvent(new CustomEvent('gmp-steadychange', {detail: {isSteady: true}}));
+  expect(frames.size, 'settled fallback schedules one final redraw').toBe(1);
+
+  overlay.finalize();
+  warnSpy.mockRestore();
+  globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+  globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
+});
+
 test('GoogleMapsOverlay#Map3D lifecycle without captured internals', () => {
   const warnSpy = vi.spyOn(log, 'warn').mockReturnValue(() => {});
   const map = new mapsApi.Map3DElement({
