@@ -174,6 +174,32 @@ test('GoogleMapsOverlay#Map3D redraws continuously while camera is not steady', 
   globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
 });
 
+test('GoogleMapsOverlay#Map3D fallback waits for steady camera before redraw', () => {
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30}
+  });
+  const callback = vi.fn();
+  const listener = addMap3DCameraChangeListener(map, callback, {redrawWhileMoving: false});
+
+  map.dispatchEvent(new CustomEvent('gmp-steadychange', {detail: {isSteady: false}}));
+  expect(callback, 'steady false does not redraw fallback immediately').toHaveBeenCalledTimes(0);
+
+  map.dispatchEvent(new Event('gmp-centerchange'));
+  expect(callback, 'camera changes are skipped while fallback is moving').toHaveBeenCalledTimes(0);
+
+  map.dispatchEvent(new CustomEvent('gmp-steadychange', {detail: {isSteady: true}}));
+  expect(callback, 'steady true redraws fallback final pose').toHaveBeenCalledTimes(1);
+
+  map.dispatchEvent(new Event('gmp-centerchange'));
+  expect(callback, 'camera changes redraw fallback after camera is steady').toHaveBeenCalledTimes(
+    2
+  );
+
+  listener.remove();
+});
+
 test('GoogleMapsOverlay#Map3D lifecycle without captured internals', () => {
   const warnSpy = vi.spyOn(log, 'warn').mockReturnValue(() => {});
   const map = new mapsApi.Map3DElement({

@@ -338,9 +338,12 @@ export function getViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
 
 export function addMap3DCameraChangeListener(
   map: GoogleMapsMap3DElement,
-  callback: () => void
+  callback: () => void,
+  options: {redrawWhileMoving?: boolean} = {}
 ): GoogleMapsEventListener {
   let cameraRedrawFrame = 0;
+  let isCameraMoving = false;
+  const redrawWhileMoving = options.redrawWhileMoving ?? true;
 
   const stopContinuousRedraw = () => {
     if (cameraRedrawFrame && globalThis.cancelAnimationFrame) {
@@ -358,14 +361,26 @@ export function addMap3DCameraChangeListener(
     };
     cameraRedrawFrame = globalThis.requestAnimationFrame(redraw);
   };
-  const handleCameraChange = () => callback();
-  const handleSteadyChange = (event: Event) => {
+  const handleCameraChange = () => {
+    if (!redrawWhileMoving && isCameraMoving) {
+      return;
+    }
     callback();
+  };
+  const handleSteadyChange = (event: Event) => {
     const isSteady = getMap3DSteadyState(event);
     if (isSteady === false) {
-      startContinuousRedraw();
+      isCameraMoving = true;
+      if (redrawWhileMoving) {
+        callback();
+        startContinuousRedraw();
+      }
     } else if (isSteady === true) {
+      isCameraMoving = false;
       stopContinuousRedraw();
+      callback();
+    } else if (redrawWhileMoving) {
+      callback();
     }
   };
 
