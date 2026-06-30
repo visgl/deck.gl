@@ -45,7 +45,7 @@ const demoState = {
     selected: null
   },
   message: '',
-  showDeckDebug: true
+  showDeckDebug: false
 };
 const DECK_DEBUG_COLORS = {
   mesh: {
@@ -224,12 +224,13 @@ function makeLayers({deckDepthMode, deckFallbackMode, editorState, showDeckDebug
   }
 
   const screenFallback = deckFallbackMode === 'screen' && !overlay?._map3DGL;
-  const path = screenFallback
-    ? toScreenPath(editorState.path, map)
-    : editorState.path.map(toDeckPosition);
   const colors = DECK_DEBUG_COLORS[deckDepthMode];
   const parameters = getDeckDebugParameters(deckDepthMode);
-  const coordinateSystem = screenFallback ? COORDINATE_SYSTEM.CARTESIAN : undefined;
+  if (screenFallback) {
+    return makeScreenDiagnosticLayers(map, colors, parameters);
+  }
+
+  const path = editorState.path.map(toDeckPosition);
   const points = [
     {name: 'Deck Start', position: path[0]},
     {name: 'Deck Finish', position: path[path.length - 1]}
@@ -240,7 +241,6 @@ function makeLayers({deckDepthMode, deckFallbackMode, editorState, showDeckDebug
       id: 'deck-route',
       data: [{path}],
       parameters,
-      coordinateSystem,
       getPath: d => d.path,
       getColor: colors.path,
       getWidth: 9,
@@ -253,7 +253,6 @@ function makeLayers({deckDepthMode, deckFallbackMode, editorState, showDeckDebug
       id: 'deck-route-points',
       data: points,
       parameters,
-      coordinateSystem,
       getPosition: d => d.position,
       getRadius: 20,
       radiusUnits: 'pixels',
@@ -268,7 +267,6 @@ function makeLayers({deckDepthMode, deckFallbackMode, editorState, showDeckDebug
       id: 'deck-labels',
       data: points,
       parameters,
-      coordinateSystem,
       getPosition: d => d.position,
       getText: d => d.name,
       getSize: 14,
@@ -279,6 +277,61 @@ function makeLayers({deckDepthMode, deckFallbackMode, editorState, showDeckDebug
       background: true,
       getBackgroundColor: colors.textBackground,
       backgroundPadding: [5, 3]
+    })
+  ];
+}
+
+function makeScreenDiagnosticLayers(map, colors, parameters) {
+  const path = getScreenDiagnosticPath(map);
+  const points = [{position: path[0]}, {position: path[path.length - 1]}];
+  const label = [
+    {
+      name: 'Deck canvas',
+      position: [(path[0][0] + path[1][0]) / 2, path[0][1], 0]
+    }
+  ];
+
+  return [
+    new PathLayer({
+      id: 'deck-screen-diagnostic-line',
+      data: [{path}],
+      parameters,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      getPath: d => d.path,
+      getColor: colors.path,
+      getWidth: 5,
+      widthUnits: 'pixels',
+      capRounded: true
+    }),
+    new ScatterplotLayer({
+      id: 'deck-screen-diagnostic-points',
+      data: points,
+      parameters,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      getPosition: d => d.position,
+      getRadius: 7,
+      radiusUnits: 'pixels',
+      getFillColor: colors.fill,
+      getLineColor: [15, 23, 42, 255],
+      getLineWidth: 2,
+      lineWidthUnits: 'pixels',
+      stroked: true
+    }),
+    new TextLayer({
+      id: 'deck-screen-diagnostic-labels',
+      data: label,
+      parameters,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      getPosition: d => d.position,
+      getText: d => d.name,
+      getSize: 12,
+      getColor: [255, 255, 255, 255],
+      getPixelOffset: [0, -18],
+      getTextAnchor: 'middle',
+      getAlignmentBaseline: 'bottom',
+      background: true,
+      getBackgroundColor: colors.textBackground,
+      backgroundPadding: [4, 2]
     })
   ];
 }
@@ -305,7 +358,7 @@ function createPanel() {
       <button type="button" data-action="spin">Rotate</button>
       <button type="button" data-action="lower">Closer</button>
       <button type="button" data-action="raise">Higher</button>
-      <button type="button" data-action="toggle-deck">Show Deck Debug</button>
+      <button type="button" data-action="toggle-deck">Show Deck Diagnostic</button>
       <button type="button" data-action="toggle-deck-depth">Deck: Screen</button>
     </div>
   `;
@@ -342,7 +395,9 @@ function updateModeButtons(panel) {
 function updateDeckButtons(panel) {
   const toggleDeckButton = panel.querySelector('[data-action="toggle-deck"]');
   const toggleDepthButton = panel.querySelector('[data-action="toggle-deck-depth"]');
-  toggleDeckButton.textContent = demoState.showDeckDebug ? 'Hide Deck Debug' : 'Show Deck Debug';
+  toggleDeckButton.textContent = demoState.showDeckDebug
+    ? 'Hide Deck Diagnostic'
+    : 'Show Deck Diagnostic';
   toggleDepthButton.textContent = `Deck: ${getDeckDepthLabel(demoState.deckDepthMode)}`;
   toggleDepthButton.classList.toggle('active', demoState.deckDepthMode === 'mesh');
 }
@@ -361,9 +416,9 @@ function getDeckDepthStatus(deckDepthMode, deckFallbackMode, overlay) {
   if (deckDepthMode === 'mesh') {
     return overlay._map3DGL
       ? 'deck mesh-depth debug'
-      : `deck mesh-depth requested, using ${deckFallbackMode} canvas fallback`;
+      : `deck mesh-depth requested, ${deckFallbackMode} diagnostic fallback`;
   }
-  return overlay._map3DGL ? 'deck screen debug' : `${deckFallbackMode} deck canvas fallback`;
+  return overlay._map3DGL ? 'deck screen debug' : `${deckFallbackMode} deck diagnostic fallback`;
 }
 
 function getGeometryStatus(deckDepthMode, deckFallbackMode, overlay, showDeckDebug) {
@@ -395,28 +450,20 @@ function toDeckPosition({lng, lat, altitude = 0}) {
   return [lng, lat, altitude];
 }
 
-function toScreenPath(path, map) {
+function getScreenDiagnosticPath(map) {
   const rect = map?.getBoundingClientRect?.() || {width: 800, height: 600};
   const width = rect.width || map?.clientWidth || 800;
   const height = rect.height || map?.clientHeight || 600;
-  const lngs = path.map(position => position.lng);
-  const lats = path.map(position => position.lat);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const lngSpan = maxLng - minLng || 1;
-  const latSpan = maxLat - minLat || 1;
-  const paddingX = Math.min(width * 0.2, 180);
-  const paddingY = Math.min(height * 0.2, 140);
-  const innerWidth = Math.max(width - paddingX * 2, 1);
-  const innerHeight = Math.max(height - paddingY * 2, 1);
+  const margin = 24;
+  const length = Math.min(140, width * 0.28);
+  const endX = Math.max(margin + length, width - margin);
+  const startX = endX - length;
+  const y = Math.max(margin, Math.min(Math.max(430, height * 0.72), height - 120));
 
-  return path.map(({lng, lat}) => [
-    paddingX + ((lng - minLng) / lngSpan) * innerWidth,
-    height - paddingY - ((lat - minLat) / latSpan) * innerHeight,
-    0
-  ]);
+  return [
+    [startX, y, 0],
+    [endX, y, 0]
+  ];
 }
 
 async function loadMaps3D() {
