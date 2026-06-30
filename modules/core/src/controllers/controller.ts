@@ -74,6 +74,8 @@ export type ControllerOptions = {
       };
   /** Drag behavior without pressing function keys, one of `pan` and `rotate`. */
   dragMode?: 'pan' | 'rotate';
+  /** Zoom anchor, one of `center` and `pointer`. Default depends on the controller. */
+  zoomAround?: 'center' | 'pointer';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
   /** Bounding box of content that the controller is constrained in */
@@ -291,8 +293,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   get controllerState(): ControllerState {
     this._controllerState = this._controllerState || new this.ControllerState({
       makeViewport: this.makeViewport,
-      ...this.props,
-      ...this.state
+      ...this.state,
+      ...this.props
     });
     return this._controllerState;
   }
