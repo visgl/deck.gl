@@ -351,9 +351,9 @@ function getDeckDepthStatus(deckDepthMode, overlay) {
   if (deckDepthMode === 'mesh') {
     return overlay._map3DGL
       ? 'deck mesh-depth debug'
-      : 'deck mesh-depth requested, using steady aligned canvas fallback';
+      : 'deck mesh-depth requested, using range-stabilized canvas fallback';
   }
-  return overlay._map3DGL ? 'deck screen debug' : 'steady aligned deck canvas fallback';
+  return overlay._map3DGL ? 'deck screen debug' : 'range-stabilized deck canvas fallback';
 }
 
 function getGeometryStatus(deckDepthMode, overlay, showDeckDebug) {

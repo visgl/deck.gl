@@ -482,8 +482,7 @@ export default class GoogleMapsOverlay {
 
     this._map3DCameraListener = addMap3DCameraChangeListener(
       map,
-      this._requestMap3DRedraw.bind(this),
-      {redrawWhileMoving: Boolean(gl)}
+      this._requestMap3DRedraw.bind(this)
     );
     this._onDrawMap3D();
   }
@@ -542,7 +541,7 @@ export default class GoogleMapsOverlay {
     const gl = this._map3DGL;
     const interleaved = Boolean(gl);
     deck.setProps({
-      ...getViewPropsFromMap3D(this._map),
+      ...getViewPropsFromMap3D(this._map, {zoomSource: gl ? 'camera' : 'range'}),
       ...(interleaved && {width: null, height: null})
     });
 

@@ -303,7 +303,10 @@ export function installMap3DWebGLContextCapture() {
 /**
  * Get the current view state from a Google Maps 3D web component.
  */
-export function getViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
+export function getViewPropsFromMap3D(
+  map: GoogleMapsMap3DElement,
+  options: {zoomSource?: 'camera' | 'range'} = {}
+) {
   const {width, height} = getMap3DSize(map);
   const center = normalizeLatLng(map.center);
   const fovy = map.fov || DEFAULT_MAP3D_FOV;
@@ -331,7 +334,10 @@ export function getViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
       position: [0, 0, 0],
       projectionMatrix,
       repeat: true,
-      zoom: getZoomFromMap3DCamera(map, center, height, fovy)
+      zoom:
+        options.zoomSource === 'range'
+          ? getZoomFromMap3DRange(map, center.lat, height, fovy)
+          : getZoomFromMap3DCamera(map, center, height, fovy)
     }
   };
 }

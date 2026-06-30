@@ -135,6 +135,29 @@ test('GoogleMapsOverlay#Map3D cameraPosition zoom', () => {
   ).toBeTruthy();
 });
 
+test('GoogleMapsOverlay#Map3D range zoom ignores camera altitude', () => {
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30},
+    cameraPosition: {lat: 37.77, lng: -122.46, altitude: 600},
+    range: 1200,
+    heading: 123,
+    tilt: 67,
+    fov: 35
+  });
+
+  const {viewState} = getViewPropsFromMap3D(map, {zoomSource: 'range'});
+
+  expect(equals(viewState.zoom, 14.997043852729847), 'range-derived zoom is set').toBeTruthy();
+
+  map.cameraPosition = {lat: 37.77, lng: -122.46, altitude: 900};
+  expect(
+    equals(getViewPropsFromMap3D(map, {zoomSource: 'range'}).viewState.zoom, viewState.zoom),
+    'range-derived zoom ignores camera altitude changes'
+  ).toBeTruthy();
+});
+
 test('GoogleMapsOverlay#Map3D redraws continuously while camera is not steady', () => {
   const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
   const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
