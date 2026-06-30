@@ -9,6 +9,8 @@ This example shows several built-in widgets for map navigation and interaction:
 - FullscreenWidget and ScreenshotWidget for utility
 - ScaleWidget for displaying map scale
 - StatsWidget for rendering performance stats
+- PopupWidget for anchored geographic popups
+- InfoWidget for hover/click-activated feature popups
 """
 
 import pydeck as pdk
@@ -54,6 +56,17 @@ widgets = [
     pdk.Widget("ScreenshotWidget"),
     pdk.Widget("ScaleWidget", placement="bottom-right"),
     pdk.Widget("StatsWidget", statsType="luma", placement="bottom-left"),
+    # PopupWidget: static popup anchored to a geographic coordinate.
+    # content accepts a string (plain text) or a dict with "text", "html", or "element".
+    pdk.Widget(
+        "PopupWidget",
+        position=[-0.4543, 51.4775],  # Heathrow Airport, London
+        content={"html": "<strong>Heathrow Airport</strong><br/>London, United Kingdom"},
+        placement="right",
+    ),
+    # InfoWidget: popup triggered by hovering over pickable features.
+    # getTooltip uses the @@= expression syntax from @deck.gl/json to access feature properties.
+    pdk.Widget("InfoWidget", mode="hover", getTooltip="@@=object.properties.name"),
 ]
 
 deck = pdk.Deck(
