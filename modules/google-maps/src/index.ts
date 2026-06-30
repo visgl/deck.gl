@@ -10,7 +10,11 @@ export {
   normalizeMap3DCoordinate,
   toMap3DEditorGeoJSON
 } from './map-3d-editor-state';
-export type {GoogleMapsMap3DDepthMode, GoogleMapsOverlayProps} from './google-maps-overlay';
+export type {
+  GoogleMapsMap3DDepthMode,
+  GoogleMapsMap3DFallbackMode,
+  GoogleMapsOverlayProps
+} from './google-maps-overlay';
 export type {
   Map3DEditorCoordinate,
   Map3DEditorCoordinateLike,

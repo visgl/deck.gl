@@ -14,6 +14,7 @@ import {equals} from '@math.gl/core';
 import {
   addMap3DCameraChangeListener,
   captureMap3DWebGLContext,
+  getScreenViewPropsFromMap3D,
   getViewPropsFromMap3D,
   installMap3DWebGLContextCapture,
   isMap3DElement
@@ -69,6 +70,9 @@ test('GoogleMapsOverlay#constructor', () => {
   expect(deck, 'Deck instance is created').toBeTruthy();
   expect(overlay.props.interleaved, 'interleaved defaults to true').toBeTruthy();
   expect(overlay.props.map3DDepthMode, 'Map3D depth mode defaults to screen').toBe('screen');
+  expect(overlay.props.map3DFallbackMode, 'Map3D fallback mode defaults to geospatial').toBe(
+    'geospatial'
+  );
 
   overlay.setMap(map);
   expect(overlay._deck, 'Deck instance is the same').toBe(deck);
@@ -113,6 +117,21 @@ test('GoogleMapsOverlay#Map3D camera view state', () => {
   expect(equals(viewState.position, [0, 0, 0]), 'deck viewport altitude stays stable').toBeTruthy();
   expect(equals(viewState.zoom, 14.997043852729847), 'range-derived zoom is set').toBeTruthy();
   expect(viewState.projectionMatrix, 'projection matrix is set').toBeTruthy();
+});
+
+test('GoogleMapsOverlay#Map3D screen fallback view state', () => {
+  const map = new mapsApi.Map3DElement({
+    width: 800,
+    height: 400,
+    center: {lat: 37.78, lng: -122.45, altitude: 30}
+  });
+
+  const {width, height, viewState} = getScreenViewPropsFromMap3D(map);
+
+  expect(width, 'width is set').toBe(800);
+  expect(height, 'height is set').toBe(400);
+  expect(equals(viewState.target, [400, 200, 0]), 'screen target is centered').toBeTruthy();
+  expect(viewState.zoom, 'screen zoom is one pixel per unit').toBe(0);
 });
 
 test('GoogleMapsOverlay#Map3D cameraPosition zoom', () => {

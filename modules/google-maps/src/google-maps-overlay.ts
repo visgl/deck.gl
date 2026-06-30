@@ -12,6 +12,7 @@ import {
   createDeckInstance,
   createDeckInstanceForMap3D,
   destroyDeckInstance,
+  getScreenViewPropsFromMap3D,
   getViewPropsFromMap3D,
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer,
@@ -61,10 +62,12 @@ function getDeckDevice(deck: Deck): Device | null {
 
 const defaultProps = {
   interleaved: true,
-  map3DDepthMode: 'screen' as GoogleMapsMap3DDepthMode
+  map3DDepthMode: 'screen' as GoogleMapsMap3DDepthMode,
+  map3DFallbackMode: 'geospatial' as GoogleMapsMap3DFallbackMode
 };
 
 export type GoogleMapsMap3DDepthMode = 'mesh' | 'screen';
+export type GoogleMapsMap3DFallbackMode = 'geospatial' | 'screen';
 
 export type GoogleMapsOverlayProps = Omit<
   DeckProps,
@@ -86,6 +89,13 @@ export type GoogleMapsOverlayProps = Omit<
    * Google Map3D's depth buffer when a shared WebGL context is available.
    */
   map3DDepthMode?: GoogleMapsMap3DDepthMode;
+  /**
+   * Experimental Map3D-only fallback mode used when a shared Google Map3D WebGL
+   * context cannot be captured.
+   * `geospatial` applies approximate Map3D camera math to geospatial Deck layers.
+   * `screen` uses a stable screen-coordinate Deck overlay for diagnostics/widgets.
+   */
+  map3DFallbackMode?: GoogleMapsMap3DFallbackMode;
 };
 
 type GoogleMapsOverlayMap = google.maps.Map | GoogleMapsMap3DElement;
@@ -540,10 +550,14 @@ export default class GoogleMapsOverlay {
     const deck = this._deck;
     const gl = this._map3DGL;
     const interleaved = Boolean(gl);
+    const viewProps =
+      !gl && this.props.map3DFallbackMode === 'screen'
+        ? getScreenViewPropsFromMap3D(this._map)
+        : getViewPropsFromMap3D(this._map, {zoomSource: gl ? 'camera' : 'range'});
     deck.setProps({
-      ...getViewPropsFromMap3D(this._map, {zoomSource: gl ? 'camera' : 'range'}),
+      ...viewProps,
       ...(interleaved && {width: null, height: null})
-    });
+    } as DeckProps);
 
     if (gl && deck.isInitialized) {
       const device = getDeckDevice(deck);

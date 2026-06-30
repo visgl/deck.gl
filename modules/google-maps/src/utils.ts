@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global google, document */
-import {Deck, MapView} from '@deck.gl/core';
+import {Deck, MapView, OrthographicView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
@@ -125,17 +125,24 @@ export function createDeckInstanceForMap3D(
     destroyDeckInstance(deck);
   }
 
+  const deckProps = {...props};
+  delete deckProps.map3DDepthMode;
+  delete deckProps.map3DFallbackMode;
+  const useScreenFallback = !props.gl && props.map3DFallbackMode === 'screen';
+
   const newDeck = new Deck({
-    ...props,
-    useDevicePixels: props.useDevicePixels ?? true,
-    style: props.gl ? null : {pointerEvents: 'none'},
-    parent: getMap3DContainer(map, props.style),
-    views: new MapView({repeat: true}),
-    initialViewState: {
-      longitude: 0,
-      latitude: 0,
-      zoom: 1
-    },
+    ...deckProps,
+    useDevicePixels: deckProps.useDevicePixels ?? true,
+    style: deckProps.gl ? null : {pointerEvents: 'none'},
+    parent: getMap3DContainer(map, deckProps.style),
+    views: useScreenFallback ? new OrthographicView({flipY: true}) : new MapView({repeat: true}),
+    initialViewState: useScreenFallback
+      ? {target: [0, 0, 0], zoom: 0}
+      : {
+          longitude: 0,
+          latitude: 0,
+          zoom: 1
+        },
     controller: false
   });
 
@@ -338,6 +345,18 @@ export function getViewPropsFromMap3D(
         options.zoomSource === 'range'
           ? getZoomFromMap3DRange(map, center.lat, height, fovy)
           : getZoomFromMap3DCamera(map, center, height, fovy)
+    }
+  };
+}
+
+export function getScreenViewPropsFromMap3D(map: GoogleMapsMap3DElement) {
+  const {width, height} = getMap3DSize(map);
+  return {
+    width,
+    height,
+    viewState: {
+      target: [width / 2, height / 2, 0],
+      zoom: 0
     }
   };
 }

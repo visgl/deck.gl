@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global document, window */
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {PathLayer, ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 import {createNativeMap3DEditor} from './map3d-native-editor';
@@ -35,6 +36,7 @@ const INITIAL_POINTS = [
 
 const demoState = {
   deckDepthMode: 'screen',
+  deckFallbackMode: 'screen',
   editorState: {
     mode: 'path',
     path: INITIAL_PATH,
@@ -78,7 +80,8 @@ export async function renderToDOM(container) {
   const overlay = new GoogleMapsOverlay({
     interleaved: true,
     map3DDepthMode: demoState.deckDepthMode,
-    layers: makeLayers(demoState)
+    map3DFallbackMode: demoState.deckFallbackMode,
+    layers: []
   });
 
   const maps3d = await loadMaps3D();
@@ -104,7 +107,7 @@ export async function renderToDOM(container) {
 
   container.appendChild(map);
   overlay.setMap(map);
-  overlay.setProps({layers: makeLayers(demoState)});
+  setDeckLayers(overlay, map);
 
   const editor = createNativeMap3DEditor({
     map,
@@ -114,7 +117,7 @@ export async function renderToDOM(container) {
     polygon: INITIAL_POLYGON,
     onChange: editorState => {
       demoState.editorState = editorState;
-      setDeckLayers(overlay);
+      setDeckLayers(overlay, map);
       updatePanel(panel, map, overlay);
     }
   });
@@ -155,7 +158,7 @@ function bindPanelActions(panel, map, overlay, editor) {
   });
   panel.querySelector('[data-action="toggle-deck"]').addEventListener('click', () => {
     demoState.showDeckDebug = !demoState.showDeckDebug;
-    setDeckLayers(overlay);
+    setDeckLayers(overlay, map);
     updateDeckButtons(panel);
     updatePanel(panel, map, overlay);
   });
@@ -163,7 +166,7 @@ function bindPanelActions(panel, map, overlay, editor) {
     demoState.deckDepthMode = demoState.deckDepthMode === 'screen' ? 'mesh' : 'screen';
     overlay.setProps({
       map3DDepthMode: demoState.deckDepthMode,
-      layers: makeLayers(demoState)
+      layers: makeLayers(demoState, map, overlay)
     });
     updateDeckButtons(panel);
     updatePanel(panel, map, overlay);
@@ -215,14 +218,18 @@ function bindPanelActions(panel, map, overlay, editor) {
   return () => window.removeEventListener('keydown', onKeyDown);
 }
 
-function makeLayers({deckDepthMode, editorState, showDeckDebug}) {
+function makeLayers({deckDepthMode, deckFallbackMode, editorState, showDeckDebug}, map, overlay) {
   if (!showDeckDebug) {
     return [];
   }
 
-  const path = editorState.path.map(toDeckPosition);
+  const screenFallback = deckFallbackMode === 'screen' && !overlay?._map3DGL;
+  const path = screenFallback
+    ? toScreenPath(editorState.path, map)
+    : editorState.path.map(toDeckPosition);
   const colors = DECK_DEBUG_COLORS[deckDepthMode];
   const parameters = getDeckDebugParameters(deckDepthMode);
+  const coordinateSystem = screenFallback ? COORDINATE_SYSTEM.CARTESIAN : undefined;
   const points = [
     {name: 'Deck Start', position: path[0]},
     {name: 'Deck Finish', position: path[path.length - 1]}
@@ -233,6 +240,7 @@ function makeLayers({deckDepthMode, editorState, showDeckDebug}) {
       id: 'deck-route',
       data: [{path}],
       parameters,
+      coordinateSystem,
       getPath: d => d.path,
       getColor: colors.path,
       getWidth: 9,
@@ -245,6 +253,7 @@ function makeLayers({deckDepthMode, editorState, showDeckDebug}) {
       id: 'deck-route-points',
       data: points,
       parameters,
+      coordinateSystem,
       getPosition: d => d.position,
       getRadius: 20,
       radiusUnits: 'pixels',
@@ -259,6 +268,7 @@ function makeLayers({deckDepthMode, editorState, showDeckDebug}) {
       id: 'deck-labels',
       data: points,
       parameters,
+      coordinateSystem,
       getPosition: d => d.position,
       getText: d => d.name,
       getSize: 14,
@@ -304,7 +314,7 @@ function createPanel() {
 
 function updatePanel(panel, map, overlay, extra = '') {
   const center = normalizeCenter(map.center);
-  const {deckDepthMode, editorState, showDeckDebug} = demoState;
+  const {deckDepthMode, deckFallbackMode, editorState, showDeckDebug} = demoState;
   const renderMode = overlay._map3DGL ? 'shared WebGL captured' : 'DOM overlay fallback';
   const selected = editorState.selected
     ? `${editorState.selected.type} ${editorState.selected.index + 1}`
@@ -312,7 +322,7 @@ function updatePanel(panel, map, overlay, extra = '') {
   const moveStatus = editorState.moveSelectedOnNextClick ? ', move armed' : '';
   panel.querySelector('[data-status]').innerHTML = `
     <div><code>${renderMode}</code></div>
-    <div>${getGeometryStatus(deckDepthMode, overlay, showDeckDebug)}</div>
+    <div>${getGeometryStatus(deckDepthMode, deckFallbackMode, overlay, showDeckDebug)}</div>
     <div>mode ${editorState.mode}, path ${editorState.path.length}, polygon ${editorState.polygon.length}, points ${editorState.points.length}</div>
     <div>selected ${selected}${moveStatus}</div>
     <div>lat ${center.lat.toFixed(5)}, lng ${center.lng.toFixed(5)}</div>
@@ -347,18 +357,18 @@ function getDeckDepthLabel(deckDepthMode) {
   return deckDepthMode === 'mesh' ? 'Mesh Depth' : 'Screen';
 }
 
-function getDeckDepthStatus(deckDepthMode, overlay) {
+function getDeckDepthStatus(deckDepthMode, deckFallbackMode, overlay) {
   if (deckDepthMode === 'mesh') {
     return overlay._map3DGL
       ? 'deck mesh-depth debug'
-      : 'deck mesh-depth requested, using range-stabilized canvas fallback';
+      : `deck mesh-depth requested, using ${deckFallbackMode} canvas fallback`;
   }
-  return overlay._map3DGL ? 'deck screen debug' : 'range-stabilized deck canvas fallback';
+  return overlay._map3DGL ? 'deck screen debug' : `${deckFallbackMode} deck canvas fallback`;
 }
 
-function getGeometryStatus(deckDepthMode, overlay, showDeckDebug) {
+function getGeometryStatus(deckDepthMode, deckFallbackMode, overlay, showDeckDebug) {
   if (showDeckDebug) {
-    return `native editor + ${getDeckDepthStatus(deckDepthMode, overlay)}`;
+    return `native editor + ${getDeckDepthStatus(deckDepthMode, deckFallbackMode, overlay)}`;
   }
 
   return `native editor locked to Map3D surface${
@@ -366,8 +376,8 @@ function getGeometryStatus(deckDepthMode, overlay, showDeckDebug) {
   }`;
 }
 
-function setDeckLayers(overlay) {
-  overlay.setProps({layers: makeLayers(demoState)});
+function setDeckLayers(overlay, map) {
+  overlay.setProps({layers: makeLayers(demoState, map, overlay)});
 }
 
 function normalizeCenter(center) {
@@ -383,6 +393,30 @@ function normalizeCenter(center) {
 
 function toDeckPosition({lng, lat, altitude = 0}) {
   return [lng, lat, altitude];
+}
+
+function toScreenPath(path, map) {
+  const rect = map?.getBoundingClientRect?.() || {width: 800, height: 600};
+  const width = rect.width || map?.clientWidth || 800;
+  const height = rect.height || map?.clientHeight || 600;
+  const lngs = path.map(position => position.lng);
+  const lats = path.map(position => position.lat);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const lngSpan = maxLng - minLng || 1;
+  const latSpan = maxLat - minLat || 1;
+  const paddingX = Math.min(width * 0.2, 180);
+  const paddingY = Math.min(height * 0.2, 140);
+  const innerWidth = Math.max(width - paddingX * 2, 1);
+  const innerHeight = Math.max(height - paddingY * 2, 1);
+
+  return path.map(({lng, lat}) => [
+    paddingX + ((lng - minLng) / lngSpan) * innerWidth,
+    height - paddingY - ((lat - minLat) / latSpan) * innerHeight,
+    0
+  ]);
 }
 
 async function loadMaps3D() {
