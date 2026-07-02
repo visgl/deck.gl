@@ -11,12 +11,19 @@ import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
 import type {Padding} from '../viewports/viewport';
 import type {ConstructorOf} from '../types/types';
+import type {Parameters} from '@luma.gl/core';
 
 export type CommonViewState = TransitionProps;
 
 export type CommonViewProps<ViewState> = {
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
+  /**
+   * Optional id of the presentation canvas associated with this view.
+   * Integrations that render views into multiple canvases can use this id to route view-scoped
+   * resources such as event managers.
+   */
+  canvasId?: string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
   x?: number | string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
@@ -40,6 +47,8 @@ export type CommonViewProps<ViewState> = {
   clearDepth?: number | false;
   /** Stencil buffer Value to clear the viewport with, between 0 - 255. Default `0` (clear). */
   clearStencil?: number | false;
+  /** Override the GPU parameters used to draw layers in this view. */
+  parameters?: Parameters;
   /** State of the view */
   viewState?:
     | string

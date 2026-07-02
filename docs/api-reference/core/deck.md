@@ -52,6 +52,8 @@ The canvas to render into. Can be either a HTMLCanvasElement or the element id. 
 
 luma.gl Device used to manage the application's connection with the GPU. Will be auto-created if not supplied.
 
+When a `Device` is supplied, Deck does not destroy it when finalized. While the `Deck` instance is active, Deck owns the `device.props.onResize` callback for the active render canvas context; use `DeckProps.onResize` to observe Deck canvas resizes.
+
 #### `deviceProps` ([DeviceProps](https://luma.gl/docs/api-reference/core/device#deviceprops) | [WebGLDeviceProps](https://luma.gl/docs/api-reference/webgl/#webgldeviceprops)) {#deviceprops}
 
 Options used for creating a new luma.gl GPU [Device](https://luma.gl/docs/api-reference/core/device). 
@@ -179,7 +181,8 @@ new Deck({
 
 Notes:
 
-- Any GPU `parameters` prop supplied to individual layers will still override the global `parameters` when that layer is rendered.
+- GPU `parameters` supplied to a view override the global `parameters` for layers rendered in that view.
+- GPU `parameters` supplied to individual layers override both view and global `parameters` when that layer is rendered.
 
 #### `layers` (LayersList) {#layers}
 
@@ -550,6 +553,7 @@ Receives arguments:
 * `size`
   - `width` (number) - the new width of the deck canvas, in client pixels
   - `height` (number) - the new height of the deck canvas, in client pixels
+* `canvasContext` ([CanvasContext](https://luma.gl/docs/api-reference/core/canvas-context), optional) - the luma.gl canvas context that reported the resize
 
 
 #### `onBeforeRender` (Function) {#onbeforerender}
@@ -772,7 +776,7 @@ Parameters:
 * `y` (number) - y position in pixels
 * `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
-* `depth` - Specifies the max number of objects to return. Default `10`.
+* `depth` - Specifies the max number of objects to return. Default `10`. For layers without explicit picking index buffers, only the default depth of 10 unique objects per layer is guaranteed; higher custom depths may return duplicate results for these layers.
 * `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
 
 Returns:
@@ -782,6 +786,7 @@ Returns:
 Notes:
 
 * Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
+* Layers that provide explicit picking index buffers support buffer mutation between picking passes and are not subject to the default-depth unique-object guarantee.
 
 
 #### `pickObjects` {#pickobjects}

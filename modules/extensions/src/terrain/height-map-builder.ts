@@ -3,9 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 import {Device, Framebuffer} from '@luma.gl/core';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
+import {
+  joinLayerBounds,
+  getRenderBounds,
+  makeViewport,
+  getMercatorReferenceViewport,
+  lngLatToMercatorCommon,
+  Bounds
+} from '../utils/projection-utils';
 import {createRenderTarget} from './utils';
 
+import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import type {Viewport, Layer} from '@deck.gl/core';
 
 const MAP_MAX_SIZE = 2048;
@@ -72,10 +80,10 @@ export class HeightMapBuilder {
       );
 
     if (layersChanged) {
-      // Recalculate cached bounds
+      // Recalculate cached bounds in absolute Mercator common space
       this.layers = layers;
       this.layersBounds = layers.map(layer => layer.getBounds());
-      this.layersBoundsCommon = joinLayerBounds(layers, viewport);
+      this.layersBoundsCommon = joinLayerBounds(layers, getMercatorReferenceViewport(viewport));
     }
 
     const viewportChanged = !this.lastViewport || !viewport.equals(this.lastViewport);
@@ -83,7 +91,11 @@ export class HeightMapBuilder {
     if (!this.layersBoundsCommon) {
       this.renderViewport = null;
     } else if (layersChanged || viewportChanged) {
-      const bounds = getRenderBounds(this.layersBoundsCommon, viewport);
+      // On GlobeView, viewport bounds are sphere cartesian — skip intersection
+      const bounds =
+        viewport instanceof GlobeViewport
+          ? this.layersBoundsCommon
+          : getRenderBounds(this.layersBoundsCommon, viewport);
       if (bounds[2] <= bounds[0] || bounds[3] <= bounds[1]) {
         this.renderViewport = null;
         return false;
@@ -96,6 +108,14 @@ export class HeightMapBuilder {
       const pixelWidth = (bounds[2] - bounds[0]) * scale;
       const pixelHeight = (bounds[3] - bounds[1]) * scale;
 
+      // Use Mercator center — viewport.center on GlobeView is sphere cartesian
+      const centerMerc = viewport.isGeospatial
+        ? lngLatToMercatorCommon([
+            (viewport as {longitude?: number}).longitude ?? 0,
+            (viewport as {latitude?: number}).latitude ?? 0
+          ])
+        : [viewport.center[0], viewport.center[1]];
+
       this.renderViewport =
         pixelWidth > 0 || pixelHeight > 0
           ? makeViewport({
@@ -103,12 +123,7 @@ export class HeightMapBuilder {
               // vertices will not use the standard project_to_clipspace in the DRAW_TO_HEIGHT_MAP shader
               // However the viewport must have the same center and zoom as the screen viewport
               // So that projection uniforms used for calculating z are the same
-              bounds: [
-                viewport.center[0] - 1,
-                viewport.center[1] - 1,
-                viewport.center[0] + 1,
-                viewport.center[1] + 1
-              ],
+              bounds: [centerMerc[0] - 1, centerMerc[1] - 1, centerMerc[0] + 1, centerMerc[1] + 1],
               zoom: viewport.zoom,
               width: Math.min(pixelWidth, MAP_MAX_SIZE),
               height: Math.min(pixelHeight, MAP_MAX_SIZE),

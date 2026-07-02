@@ -129,7 +129,8 @@ export default class PickLayersPass extends LayersPass {
     return {
       picking: {
         isActive: 1,
-        isAttribute: this.pickZ
+        isAttribute: this.pickZ,
+        disabledPickingIndices: layer.internalState?.disabledPickingIndices
       },
       lighting: {enabled: false}
     };

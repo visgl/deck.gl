@@ -20,7 +20,11 @@ test('picking#wgsl uniform layout matches luma module contract', () => {
     'isHighlightActive',
     'useByteColors',
     'highlightedObjectColor',
-    'highlightColor'
+    'highlightColor',
+    'disabledPickingIndexCount',
+    'disabledPickingIndices0',
+    'disabledPickingIndices1',
+    'disabledPickingIndices2'
   ]);
 });
 

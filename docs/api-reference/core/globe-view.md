@@ -18,9 +18,7 @@ It's recommended that you read the [Views and Projections guide](../../developer
 ## Limitations
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
-In the initial release, this class mainly addresses the need to render an overview of the entire globe. The following limitations apply, as features are still under development: 
 
-- No support for rotation (`pitch` or `bearing`). The camera always points towards the center of the earth, with north up.
 - No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
 - Only supports `'lnglat'` (the default value of the `coordinateSystem` prop).
 - Known rendering issues when using multiple views mixing `GlobeView` and `MapView`, or switching between the two.
@@ -54,6 +52,16 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
+#### `parameters` (object, optional) {#parameters}
+
+`GlobeView` enables back-face culling by default with `parameters: {cullMode: 'back'}`. To override this behavior, supply the desired GPU parameters to the constructor:
+
+```js
+new GlobeView({
+  parameters: {cullMode: 'none'}
+});
+```
+
 
 ## View State
 
@@ -62,8 +70,14 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `longitude` (number) - longitude at the viewport center
 - `latitude` (number) - latitude at the viewport center
 - `zoom` (number) - zoom level
+- `bearing` (number, optional) - bearing angle in degrees. Default `0` (north up).
+- `pitch` (number, optional) - pitch angle in degrees. `0` looks straight down at the earth. Default `0`.
 - `maxZoom` (number, optional) - max zoom level. Default `20`.
 - `minZoom` (number, optional) - min zoom level. Default `0`.
+- `maxPitch` (number, optional) - max pitch angle. Default `60`.
+- `minPitch` (number, optional) - min pitch angle. Default `0`.
+
+When `bearing` is `0` (the default), north is always kept pointing up and the globe behaves like a traditional desk globe — horizontal drag changes longitude, vertical drag changes latitude, and the polar axis stays fixed. When the user changes the bearing (via shift+drag or right-click drag), the globe enters free rotation mode where bearing evolves naturally to avoid orientation discontinuities near the poles.
 
 
 ## Controller

@@ -6,7 +6,7 @@ export default `\
 
 in vec4 fillColors;
 in vec4 lineColors;
-in vec3 pickingColors;
+in float rowIndexes;
 
 out vec4 vColor;
 
@@ -33,7 +33,7 @@ void calculatePosition(PolygonProps props) {
   vec4 colors = solidPolygon.isWireframe ? lineColors : fillColors;
 
   geometry.worldPosition = props.positions;
-  geometry.pickingColor = pickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
 
   if (solidPolygon.extruded) {
     pos.z += props.elevations * solidPolygon.elevationScale;

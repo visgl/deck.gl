@@ -8,7 +8,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
-import source from './scatterplot-layer.wgsl';
+import {getShaderWGSL} from './scatterplot-layer.wgsl';
 
 import type {
   LayerProps,
@@ -117,6 +117,11 @@ type _ScatterplotLayerProps<DataT> = {
    */
   getLineWidth?: Accessor<DataT, number>;
   /**
+   * Pixel offset accessor, [x, y] in pixels.
+   * @default [0, 0]
+   */
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  /**
    * @deprecated Use `getLineWidth` instead
    */
   strokeWidth?: number;
@@ -151,6 +156,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
 
   // deprecated
   strokeWidth: {deprecatedFor: 'getLineWidth'},
@@ -170,15 +176,27 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
       modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 
   initializeState() {
+    const attributes: Record<string, any> = (this.props.data as any)?.attributes?.rowIndexes
+      ? {
+          /** Caller-provided logical picking index per point instance. */
+          rowIndexes: {
+            size: 1,
+            type: 'uint32',
+            noAlloc: true
+          }
+        }
+      : {};
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
@@ -212,7 +230,13 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         transition: true,
         accessor: 'getLineWidth',
         defaultValue: 1
-      }
+      },
+      instancePixelOffset: {
+        size: 2,
+        transition: true,
+        accessor: 'getPixelOffset'
+      },
+      ...attributes
     });
   }
 
