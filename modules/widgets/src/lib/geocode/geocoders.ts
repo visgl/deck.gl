@@ -195,12 +195,9 @@ function dmsToDecimal(s: string): number {
   const minutes = parseFloat(match[2]) || 0;
   const seconds = parseFloat(match[3]) || 0;
   const direction = match[4] || '';
-  const sign = degrees < 0 ? -1 : 1;
-  let dec = Math.abs(degrees) + minutes / 60 + seconds / 3600;
+  let dec = degrees + minutes / 60 + seconds / 3600;
   if (/[SW]/i.test(direction)) {
     dec = -dec;
-  } else {
-    dec = sign * dec;
   }
   return dec;
 }

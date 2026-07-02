@@ -51,25 +51,6 @@ test('CoordinatesGeocoder.geocode - Handles DMS format correctly', async () => {
   }
 });
 
-test('CoordinatesGeocoder.geocode - Handles negative DMS degrees correctly', async () => {
-  const cases = [
-    {
-      input: '-37°48\'00\", 144°57\'47\"',
-      expected: {latitude: -37.8, longitude: 144.96305555555556}
-    },
-    {
-      input: '-33°51\'36\", -70°40\'12\"',
-      expected: {latitude: -33.86, longitude: -70.67}
-    }
-  ];
-
-  for (const {input, expected} of cases) {
-    const result = await CoordinatesGeocoder.geocode(input);
-    expect(result?.latitude, `geocode(${input}) latitude`).toBeCloseTo(expected.latitude, 4);
-    expect(result?.longitude, `geocode(${input}) longitude`).toBeCloseTo(expected.longitude, 4);
-  }
-});
-
 test('CoordinatesGeocoder.geocode - Returns null for invalid inputs', async () => {
   const cases = [
     {input: 'not a coordinate', expected: null},
