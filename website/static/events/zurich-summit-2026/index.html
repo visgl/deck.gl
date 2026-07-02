@@ -13,16 +13,24 @@
     </head>
     
     <body class="is-bgWhite" cz-shortcut-listen="true">
-        <header class="header_ribbon" style="">
+<!--         <header class="header_ribbon" style="">
             <a href="https://deck.gl"><img src="https://deck.gl/images/visgl-logo-light.png" alt="vis.gl Logo"></a>
             <div class="header_text"><a href="https://deck.gl">deck.gl</a></div>
         </header>
+ -->     
         <header class="section">
-           <img class="header_bg_img" width="100%" height="100%" srcset="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_800.jpg 800w, https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_1200.jpg 1200w, https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_2400.jpg 2400w" style="object-fit: cover" />
-           <div class="header" style="width:100%;height:100%;" >
-            <div class="container">
-              <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/openjsf-color-textw-logow.svg" />
-              <h1><b>Open Visualization</b><br/><nobr>Collaborator Summit</nobr> 2026</h1>
+           <div class="header_ribbon" style="margin: 8px 0px 8px 8px;">
+               <div class="grid" style="">
+                    <a style="display: inherit;" href="https://deck.gl">
+                        <img src="https://deck.gl/images/visgl-logo-light.png" alt="vis.gl Logo">
+                        <span class="header_text" style="">deck.gl</span>
+                    </a>
+               </div>
+           </div>
+           <div class="header header_bg_img" style="width:100%;height:100%; padding: 32px 32px 32px 32px" >
+            <div class="container header_container">
+              <img class="header_container" src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/openjsf-color-textw-logow.svg" />
+              <h1><b>Open Visualization</b><br/><nobr>Collaborator Summit</nobr> <span>2026</span></h1>
             </div>
            </div>
         </header>
@@ -107,94 +115,156 @@
                 <div class="grid grid-cell grid-cell--col12 u-mt80 gradient-border u-flex-column" id="agenda">
                     <h3 class="title-gl f48 u-mb56">Agenda</h3>
 
-                    <div class="days-agenda" id="pending-announcement">
+                    <div class="days-agenda u-mb48" id="pending-announcement">
                         <h4 class="title-gl f32 f24--tablet u-mb48">
-                            To be announced
+                            Have A Topic Idea?
                         </h4>
+                        Talk sessions are beginning to fill up. If you have an idea for a session, send it in. All levels and topics on GIS, analytics, microbiology, automated transportation, graphing, computation, and more are all welcomed!<br>
                         <a href="https://github.com/openjs-foundation/summit/issues/new?assignees=chrisgervang&labels=Z%C3%BCrich+2026%2C+Collaborator+Summit%2C+Session+Proposal&projects=&template=openviz-summit-topic-proposal.md&title=Open+Visualization+Session+Proposal%3A+%3CProject+Name%3E+%3CSession+Title%3E" class="u-mt24 u-mb48--tablet button-gl">SUBMIT SESSION PROPOSAL</a>
                     </div>
-                    <div class="days-agenda" id="day-1" style="display: none">
+                    <div class="days-agenda" id="day-1">
                         <h4 class="title-gl f32 f24--tablet u-mb48">
                             Day 1:
                         </h4>
 
                         <div class="grid talks-gl">
                             <div class="divider-agenda u-mb56">
-                                <p>08:30 Breakfast &amp; Social</p>
+                                <p>08:30 Breakfast &amp; Social (30 mins)</p>
                             </div>
-                            <div
-                                class="grid-cell grid-cell--col6 grid-cell--col12--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                            <div class="grid-cell grid-cell--col8 grid-cell--col12--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <!-- card -->
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
                                         <h4 class="title-gl f32 f24--tablet u-mb20">09:00 - 09:55</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/chris_gervang.jpg" alt="Chris Gervang" class="author u-mr10" />
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/ib_green.jpg" alt="Ib Green" class="author u-mr10" />
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/felix_palmer.jpg" alt="Felix Palmer" class="author u-mr10" />
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/xiaoji_chen.jpg" alt="Xiaoji Chen" class="author u-mr10" />
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Vis.gl
                                         </h3>
-        
+                                        <h4 class="f18 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            State of the Union
+                                        </h4>
+
                                         <p class="u-mb8 f18--desktop-l">
+                                          <h4>OpenVis Steering Committee</h4>
                                           <!-- Panel member<br /-->
                                           <!-- span class="f16 author-title">{Title}</span-->
+                                          <ul>
+                                              <li class="f16 author-title">Chris Gervang</li>
+                                              <li class="f16 author-title">Ib Green</li>
+                                              <li class="f16 author-title">Felix Palmer</li>
+                                              <li class="f16 author-title">Xiaoji Chen</li>
+                                          </ul>
                                         </p>
                                     </div>
-                                    <div class="u-mt32">
+                                    <div>
                                         <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                        <a href="https://vis.gl"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl"></a>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                            <div class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
                                         <h4 class="title-gl f32 f24--tablet u-mb20">10:00 - 10:25</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/ilya_boyandin.jpg" alt="Ilya Boyandin" class="author u-mr10" />
+                                            <!-- <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/xun_li.jpg" alt="Xun Li" class="author u-mr10" /> -->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            <!-- Title -->
+                                            SQLRooms
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Beyond notebooks and dashboards
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
+                                          Ilya Boyandin
                                           <!-- span class="f16 author-title">{Title}</span-->
+                                          <ul>
+                                              <li class="f16 author-title"></li>
+                                              <!-- <li class="f16 author-title">Xun Li</li> -->
+                                          </ul>
                                         </p>
                                     </div>
                                     <div class="u-mt32">
                                         <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                        <a href="https://sqlrooms.org"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/sqlrooms.png" height="18" alt="SQLRooms" /></a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="divider-agenda u-mb56">
-                                <p>10:30 Break &amp; Networking</p>
+                                <p>10:25 Break &amp; Networking (20 mins)</p>
                             </div>
 
                             <div
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:00 - 11:25</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">10:45 - 11:10</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                             <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/placeholder.png" alt="Name" class="author u-mr10" />
+                                             <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/placeholder.png" alt="Name" class="author u-mr10" />
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            erdblick: Hypercharged NDS.Live HAD Map Visualization
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Why deck.gl Ruined Cesium For Us
+                                        </h4>
+                                        <p class="f16 f18--desktop-l author-title">
+                                          <!-- Panel member<br /-->
+                                          Joseph Birkner
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                        <p class="u-mb8 f16 f18--desktop-l author-title">
+                                          Vagram Airiian
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <!-- Org Logo -->
+                                        <!-- NDS e.V. -->
+                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-agenda-open u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:15 - 11:40</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
                                             <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            <!-- Open -->
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
                                           <!-- span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
+                                        <a href="https://github.com/openjs-foundation/summit/issues/new?assignees=chrisgervang&labels=Z%C3%BCrich+2026%2C+Collaborator+Summit%2C+Session+Proposal&projects=&template=openviz-summit-topic-proposal.md&title=Open+Visualization+Session+Proposal%3A+%3CProject+Name%3E+%3CSession+Title%3E" class="u-mt24 u-mb48--tablet button-gl">OPEN SESSION</a>
                                         <!-- Org Logo -->
                                         <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
                                     </div>
@@ -205,123 +275,51 @@
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:30 - 11:55</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:45 - 12:10</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/javier_de_la_torres.jpg" alt="Javier de la Torre" class="author u-mr10" />
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Making deck.gl AI-Ready
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Declarative Specs as an Agent-Native Interface for Maps
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
+                                          Javier de la Torre
                                           <!-- span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
                                         <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="divider-agenda u-mb56">
-                                <p>12:00 Lunch</p>
-                            </div>
-
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
-                                <div class="card-bg u-flex u-flex-column u-justify-space">
-                                    <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">13:00 - 13:25</h4>
-                                        <div class="u-flex u-justify-center u-mb20">
-                                            <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
-                                        </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
-                                        </h3>
-        
-                                        <p class="u-mb8 f18--desktop-l">
-                                          <!-- Panel member<br /-->
-                                          <!-- span class="f16 author-title">{Title}</span-->
-                                        </p>
-                                    </div>
-                                    <div class="u-mt32">
-                                        <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
-                                <div class="card-bg u-flex u-flex-column u-justify-space">
-                                    <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">13:30 - 13:55</h4>
-                                        <div class="u-flex u-justify-center u-mb20">
-                                            <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
-                                        </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
-                                        </h3>
-        
-                                        <p class="u-mb8 f18--desktop-l">
-                                          <!-- Panel member<br /-->
-                                          <!-- span class="f16 author-title">{Title}</span-->
-                                        </p>
-                                    </div>
-                                    <div class="u-mt32">
-                                        <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
-                                <div class="card-bg u-flex u-flex-column u-justify-space">
-                                    <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">14:00 - 14:25</h4>
-                                        <div class="u-flex u-justify-center u-mb20">
-                                            <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
-                                        </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
-                                        </h3>
-        
-                                        <p class="u-mb8 f18--desktop-l">
-                                          <!-- Panel member<br /-->
-                                          <!-- span class="f16 author-title">{Title}</span-->
-                                        </p>
-                                    </div>
-                                    <div class="u-mt32">
-                                        <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                        <a href="https://carto.com"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/carto.svg" height="18" alt="CARTO" /></a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="divider-agenda u-mb56">
-                                <p>14:30 Break &amp; Networking</p>
+                                <p>12:15 Lunch (1-1/2 hr)</p>
                             </div>
 
                             <div
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">15:00 - 15:25</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">13:45 - 14:10</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://deck.gl/images/visgl-logo-dark.png" alt="Vis.gl" class="author u-mr10" /-->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Post Lunch Huddle:
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Open floor demos & discussions while we digest.
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
                                           <!-- span class="f16 author-title">{Title}</span-->
@@ -336,65 +334,209 @@
 
                             <div
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
-                                <div class="card-bg u-flex u-flex-column u-justify-space">
+                                <div class="card-agenda-open u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">15:30 - 16:00</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">14:15 - 14:40</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
                                             <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            <!-- Open -->
                                         </h3>
-
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
                                           <!-- span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
+                                        <a href="https://github.com/openjs-foundation/summit/issues/new?assignees=chrisgervang&labels=Z%C3%BCrich+2026%2C+Collaborator+Summit%2C+Session+Proposal&projects=&template=openviz-summit-topic-proposal.md&title=Open+Visualization+Session+Proposal%3A+%3CProject+Name%3E+%3CSession+Title%3E" class="u-mt24 u-mb48--tablet button-gl">OPEN SESSION</a>
                                         <!-- Org Logo -->
                                         <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
                                     </div>
                                 </div>
                             </div>
 
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-bg u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">14:45 - 15:10</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                             <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/frank_elsinga.jpg" alt="Frank Elsinga" class="author u-mr10" />
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            MLT in the deck.gl ecosystem
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Why it exists and why it matters
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          <!-- Panel member<br /-->
+                                          Frank Elsinga
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <!-- Org Logo -->
+                                        <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/maplibre.svg" height="18" alt="vis.gl" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="divider-agenda u-mb56">
+                                <p>15:10 Break &amp; Networking (20 mins, Tentative)</p>
+                            </div>
+
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-agenda-open u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">15:30 - 15:55</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            <!-- Open -->
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          <!-- Panel member<br /-->
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <a href="https://github.com/openjs-foundation/summit/issues/new?assignees=chrisgervang&labels=Z%C3%BCrich+2026%2C+Collaborator+Summit%2C+Session+Proposal&projects=&template=openviz-summit-topic-proposal.md&title=Open+Visualization+Session+Proposal%3A+%3CProject+Name%3E+%3CSession+Title%3E" class="u-mt24 u-mb48--tablet button-gl">OPEN SESSION</a>
+                                        <!-- Org Logo -->
+                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-agenda-open u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">16:00 - 16:25</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l title-gl">
+                                            <!-- Open -->
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          <!-- Panel member<br /-->
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <a href="https://github.com/openjs-foundation/summit/issues/new?assignees=chrisgervang&labels=Z%C3%BCrich+2026%2C+Collaborator+Summit%2C+Session+Proposal&projects=&template=openviz-summit-topic-proposal.md&title=Open+Visualization+Session+Proposal%3A+%3CProject+Name%3E+%3CSession+Title%3E" class="u-mt24 u-mb48--tablet button-gl">OPEN SESSION</a>
+                                        <!-- Org Logo -->
+                                        <!-- <a href="https://vis.gl"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl"></a> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-eod u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">Group Photo</h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                            We welcome everyone to join our yearly group photo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="divider-agenda u-mb56">
+                                <p>Day 1: End of Programming</p>
+                            </div>
                         </div>
 
                         
                     </div>
 
-                    <div class="days-agenda" id="day-2" style="display: none;">
+                    <div class="days-agenda" id="day-2">
                         <h4 class="title-gl f32 f24--tablet u-mb48">
                             Day 2:
                         </h4>
 
                         <div class="grid talks-gl">
                             <div class="divider-agenda u-mb56">
-                                <p>09:00 Breakfast &amp; Social</p>
+                                <p>08:30 Breakfast &amp; Social</p>
                             </div>
 
                             <div
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">09:30 - 09:55</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">09:00 - 09:25</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/julia_koschinsky.jpg" alt="Julia Koschinsky" class="author u-mr10" />
+                                            <!-- <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/xun_li.png" alt="Xun Li" class="author u-mr10" /> -->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            The GeoDa Project
                                         </h3>
-        
+                                        <h4 class="f16 u-mb20 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Open Geospatial Analytics in Browser with AI Assistance
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          <h4>GeoDa Steering Committee</h4>
+                                          <ul>
+                                          <!-- Panel member<br /-->
+                                          <li class="f18 author-title">Julia Koschinsky</li>
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                          <!-- <li>Xun Li</li -->
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                          </ul>
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <!-- Org Logo -->
+                                        <a class="u-mt12" href="https://geoda.ai/"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/geoda-ai.svg" height="18" alt="GeoDa.AI" /></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-bg u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">9:30 - 9:55</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/felix_palmer.jpg" alt="Felix Palmer" class="author u-mr10" />
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            One Giant Leap For 3D Tiles
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            &nbsp;
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
+                                          Felix Palmer
                                           <!-- span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
                                         <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                        <a href="https://carto.com"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/carto.svg" height="18" alt="CARTO" /></a>
                                     </div>
                                 </div>
                             </div>
@@ -406,47 +548,81 @@
                                         <h4 class="title-gl f32 f24--tablet u-mb20">10:00 - 10:25</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/oliver_wipfli.jpg" alt="Oliver Wipfli" class="author u-mr10" />
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Mapterhorn
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Aggregating satellite, terrain, and aerial imagery
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
                                           <!-- Panel member<br /-->
+                                          Oliver Wipfli
                                           <!-- span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
                                         <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                        <a href="https://maplibre.org"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/maplibre.svg" height="18" alt="MapLibre" /></a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="divider-agenda u-mb56">
-                                <p>10:30 Break &amp; Networking</p>
+                                <p>10:25 Break &amp; Networking (20 mins)</p>
                             </div>
 
                             <div
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:00 - 11:25</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">10:45 - 11:10</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/nikita_rokotyan.jpg" alt="Nikita Rokotyan" class="author u-mr10" />
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Reserved
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            &nbsp;
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          Nikita Rokotyan
+                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <!-- Org Logo -->
+                                        <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/cosmos-light-theme.svg" height="18" alt="cosmos.gl" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-agenda-open u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:15 - 11:40</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
                                             <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            <!-- Open -->
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
-                                          <!-- Panel member<br /-->
-                                          <!-- span class="f16 author-title">{Title}</span-->
+                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
+                                        <a href="https://github.com/openjs-foundation/summit/issues/new?assignees=chrisgervang&labels=Z%C3%BCrich+2026%2C+Collaborator+Summit%2C+Session+Proposal&projects=&template=openviz-summit-topic-proposal.md&title=Open+Visualization+Session+Proposal%3A+%3CProject+Name%3E+%3CSession+Title%3E" class="u-mt24 u-mb48--tablet button-gl">OPEN SESSION</a>
                                         <!-- Org Logo -->
                                         <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
                                     </div>
@@ -457,69 +633,22 @@
                                 class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:30 - 11:55</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">11:45 - 12:10</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/robert_christie_400.jpg" alt="Robert Christie" class="author u-mr10" />
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            🛳 poopdeck.gl
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Spatiotemporal-tiles and Time Series Animations
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
-                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
-                                        </p>
-                                    </div>
-                                    <div class="u-mt32">
-                                        <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="divider-agenda u-mb56">
-                                <p>12:00 Lunch</p>
-                            </div>
-
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
-                                <div class="card-bg u-flex u-flex-column u-justify-space">
-                                    <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">13:00 - 13:25</h4>
-                                        <div class="u-flex u-justify-center u-mb20">
-                                            <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
-                                        </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
-                                        </h3>
-        
-                                        <p class="u-mb8 f18--desktop-l">
-                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
-                                        </p>
-                                    </div>
-                                    <div class="u-mt32">
-                                        <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
-                                <div class="card-bg u-flex u-flex-column u-justify-space">
-                                    <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">13:30 - 13:55</h4>
-                                        <div class="u-flex u-justify-center u-mb20">
-                                            <!-- speakers -->
-                                            <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
-                                        </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
-                                        </h3>
-        
-                                        <p class="u-mb8 f18--desktop-l">
-                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
+                                          <!-- {Panel Member} -->
+                                          Robert Christie
+                                          <!-- <span class="f16 author-title">{Title}</span-->
                                         </p>
                                     </div>
                                     <div class="u-mt32">
@@ -530,6 +659,71 @@
                             </div>
 
                             <div class="divider-agenda u-mb56">
+                                <p>12:15 Lunch (1-1/2 hr)</p>
+                            </div>
+
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-bg u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">13:45 - 14:10</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/charles_richardson.jpeg" alt="Charles Richardson" class="author u-mr10" />
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            4 Year Odyssey With Deck.gl
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          <!-- {Panel Member} -->
+                                          Charles Richardson
+                                          <!--<span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <!-- Org Logo -->
+                                        <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/logos/new_heat_200.png" height="8" width="" alt="NEW HEAT" /-->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                                <div class="card-bg u-flex u-flex-column u-justify-space">
+                                    <div class="u-flex u-flex-column">
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">14:15 - 14:40</h4>
+                                        <div class="u-flex u-justify-center u-mb20">
+                                            <!-- speakers -->
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/xiaoji_chen.jpg" alt="Xiaoji Chen" class="author u-mr10" />
+                                            <img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/ib_green.jpg" alt="Ib Green" class="author u-mr10" />
+                                        </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Reserved
+                                        </h3>
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            &nbsp;
+                                        </h4>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          Xiaoji Chen
+                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                        <p class="u-mb8 f18--desktop-l">
+                                          Ib Green
+                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
+                                        </p>
+                                    </div>
+                                    <div class="u-mt32">
+                                        <!-- Org Logo -->
+                                        <a href="https://openai.com"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/logos/openai.svg" height="18" alt="OpenAI" /></a>
+                                    </div>
+                                </div>
+                            </div>
+
+<!--                             <div class="divider-agenda u-mb56">
                                 <p>14:00 Break &amp; Networking</p>
                             </div>
 
@@ -541,48 +735,54 @@
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
                                             <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
-                                        </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+<!--                                         </div>
+                                        <h3 class="f18 f20--desktop-l" style="font-weight: 500">
+                                            Open
                                         </h3>
-        
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                         </h4>
                                         <p class="u-mb8 f18--desktop-l">
-                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
+                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span
                                         </p>
                                     </div>
                                     <div class="u-mt32">
                                         <!-- Org Logo -->
                                         <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
-                                    </div>
+                                    <!-- </div>
                                 </div>
-                            </div>
+                            </div> -->
 
-                            <div
-                                class="grid-cell grid-cell--col4 grid-cell--col6--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
+                           <div class="grid-cell grid-cell--col8 grid-cell--col12--desktop-s grid-cell--col12--mobile u-mb56 card-agenda">
                                 <div class="card-bg u-flex u-flex-column u-justify-space">
                                     <div class="u-flex u-flex-column">
-                                        <h4 class="title-gl f32 f24--tablet u-mb20">15:00 - 15:25</h4>
+                                        <h4 class="title-gl f32 f24--tablet u-mb20">14:45 - 15:30</h4>
                                         <div class="u-flex u-justify-center u-mb20">
                                             <!-- speakers -->
                                             <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/speakers/{image}.jpg" alt="Name" class="author u-mr10" /-->
                                         </div>
-                                        <h3 class="f18 u-mb20 f20--desktop-l" style="font-weight: 500">
-                                            TBD
+                                        <h3 class="f18 f20--desktop-l title-gl">
+                                            Discussion: Future of Vis.gl
                                         </h3>
-
+                                        <h4 class="f16 u-mb48 f18--desktop-l" style="font-weight: 200">
+                                            <!-- Subtitle -->
+                                            Join us for an open discussion on where we go from here?
+                                        </h4>
                                         <p class="u-mb8 f18--desktop-l">
-                                          <!-- {Panel Member} <span class="f16 author-title">{Title}</span-->
+                                          <!-- Panel member<br /-->
+                                          <!-- span class="f16 author-title">{Title}</span-->
+                                          <h4>Vis.gl Steering Committee Members</h4>
                                         </p>
                                     </div>
                                     <div class="u-mt32">
                                         <!-- Org Logo -->
-                                        <!-- img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl" /-->
+                                        <a href="https://vis.gl"><img src="https://raw.githubusercontent.com/visgl/deck.gl-data/master/images/logos/visgl.svg" height="18" alt="vis.gl"></a>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="divider-agenda u-mb56">
-                                <p>15:00 Wrap up</p>
+                                <p>Day 2: End of Programming</p>
                             </div>
                         </div>
                     </div>
