@@ -21,14 +21,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
-#### deck.gl [v9.3.6] - Jul 2 2026
-
-- fix(widgets): handle negative DMS degrees in CoordinatesGeocoder (#10242)
-- fix(jupyter-widget): remove incorrect widget JSON registration overrides (#10242)
-- fix(layers): add missing `@types/geojson` dependency (#10268)
-- chore(pydeck): bump frontend to deck.gl ~9.3.*, add widget gallery examples (#10242)
-- chore(deps): bump bleach to 6.4.0 and jupyter-server to 2.20.0 (#10242)
-
 #### deck.gl [v9.3.0-beta.2] - Apr 11 2026
 
 - fix(widgets): ZoomWidget works with OrthographicView (#10202)
