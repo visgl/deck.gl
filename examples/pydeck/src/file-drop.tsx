@@ -9,9 +9,21 @@ import React, {
 import Dropzone from 'react-dropzone';
 
 import {CopyIcon, SpinnerIcon} from './icons';
-import {pyodide, type PreloadedFileConfig, type UploadedFileRecord} from './pyodide';
+import {PyodideClient, type PreloadedFileConfig, type UploadedFileRecord} from './pyodide';
+import {
+  CopyFileButton,
+  DropzoneError,
+  DropzoneSection,
+  DropzoneTarget,
+  FileEntry,
+  FileInfo,
+  FileMain,
+  FileName,
+  FilesList
+} from './styles';
 
 type FileDropProps = {
+  engine: PyodideClient;
   preloadedFiles?: PreloadedFileConfig[];
 };
 
@@ -30,7 +42,7 @@ function createLoadingController() {
 }
 
 export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileDrop(
-  {preloadedFiles = []}: FileDropProps,
+  {engine, preloadedFiles = []}: FileDropProps,
   ref
 ) {
   const [copiedFileName, setCopiedFileName] = useState<string | null>(null);
@@ -68,7 +80,7 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
   useEffect(() => {
     beginLoading();
 
-    pyodide
+    engine
       .preloadFiles(preloadedFiles)
       .then(result => {
         setFiles(Object.values(result));
@@ -79,7 +91,7 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
       .finally(() => {
         finishLoading();
       });
-  }, [preloadedFiles]);
+  }, [engine, preloadedFiles]);
 
   const handleUpload = useCallback(
     async (acceptedFiles: File[]) => {
@@ -99,7 +111,7 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
             type: file.type
           }))
         );
-        const nextUploadedFiles = await pyodide.uploadFiles(filesToUpload);
+        const nextUploadedFiles = await engine.uploadFiles(filesToUpload);
         setFiles(Object.values(nextUploadedFiles));
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
@@ -107,7 +119,7 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
         finishLoading();
       }
     },
-    [beginLoading, finishLoading]
+    [beginLoading, engine, finishLoading]
   ) as (files: File[]) => void;
 
   const handleCopy = useCallback(async (fileName: string) => {
@@ -122,15 +134,14 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
   return (
     <Dropzone onDrop={handleUpload}>
       {({getRootProps, getInputProps}) => (
-        <section id="dropzone">
-          <div className="files-list">
+        <DropzoneSection>
+          <FilesList>
             {files.map(file => (
-              <div className="file-entry" key={file.originalName}>
-                <div className="file-main">
-                  <div className="file-name">{file.originalName}</div>
-                  <button
+              <FileEntry key={file.originalName}>
+                <FileMain>
+                  <FileName>{file.originalName}</FileName>
+                  <CopyFileButton
                     aria-label={`Copy uploaded_files path for ${file.originalName}`}
-                    className="copy-file-button"
                     onClick={event => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -142,22 +153,22 @@ export const FileDrop = forwardRef<FileDropHandle, FileDropProps>(function FileD
                     type="button"
                   >
                     <CopyIcon />
-                  </button>
-                </div>
-                <div className="file-info">{formatByteSize(file.size)}</div>
-              </div>
+                  </CopyFileButton>
+                </FileMain>
+                <FileInfo>{formatByteSize(file.size)}</FileInfo>
+              </FileEntry>
             ))}
-          </div>
-          <div className="dropzone-target" {...getRootProps()}>
+          </FilesList>
+          <DropzoneTarget {...getRootProps()}>
             <input {...getInputProps()} />
             {isLoading ? (
               <SpinnerIcon />
             ) : (
               <p>Drag and drop some files here, or click to browse files</p>
             )}
-            {error && <p className="dropzone-error">{error}</p>}
-          </div>
-        </section>
+            {error && <DropzoneError>{error}</DropzoneError>}
+          </DropzoneTarget>
+        </DropzoneSection>
       )}
     </Dropzone>
   );

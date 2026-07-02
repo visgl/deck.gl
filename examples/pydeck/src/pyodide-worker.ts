@@ -1,4 +1,4 @@
-const PYODIDE_CDN_URL = 'https://cdn.jsdelivr.net/pyodide/v314.0.0/full/pyodide.mjs';
+const PYODIDE_CDN_URL = 'https://cdn.jsdelivr.net/pyodide/v314.0.2/full/pyodide.mjs';
 
 const UPLOADS_DIR = '/uploads';
 
@@ -59,7 +59,7 @@ let flushScheduled = false;
 let captureStreams = false;
 
 const pyodideReadyPromise = (async () => {
-  const {loadPyodide} = await import(/* @vite-ignore */ PYODIDE_CDN_URL);
+  const {loadPyodide} = await import(PYODIDE_CDN_URL);
   const pyodide = await loadPyodide();
   pyodide.FS.mkdirTree(UPLOADS_DIR);
   pyodide.setStdout({

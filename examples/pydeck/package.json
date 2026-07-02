@@ -15,7 +15,8 @@
     "react-dom": "^18.0.0",
     "react-dropzone": "^15.0.0",
     "react-virtualized-auto-sizer": "^1.0.2",
-    "split.js": "^1.6.5"
+    "split.js": "^1.6.5",
+    "styled-components": "^5.3"
   },
   "devDependencies": {
     "typescript": "^4.6.0",

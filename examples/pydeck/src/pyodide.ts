@@ -44,7 +44,7 @@ type UploadFileInput = {
 type PendingRequest = {
   onUpdate?: (update: RunUpdate) => void;
   reject: (reason?: unknown) => void;
-  resolve: (value: unknown) => void;
+  resolve: (value: any) => void;
 };
 
 type WorkerMessage =
@@ -52,18 +52,16 @@ type WorkerMessage =
   | {id: number; type: 'error'; error: string}
   | {id: number; type: 'update'; update: RunUpdate};
 
-function createWorker() {
-  return new Worker(new URL('./pyodide-worker.ts', import.meta.url), {type: 'module'});
-}
-
-class PyodideClient {
+export class PyodideClient {
   private nextRequestId = 0;
   private readonly pendingRequests = new Map<number, PendingRequest>();
-  private readonly worker = createWorker();
+  private readonly worker: Worker;
 
   readonly ready: Promise<void>;
 
-  constructor() {
+  constructor({workerUrl}: {workerUrl: string | URL}) {
+    this.worker = new Worker(workerUrl, {type: 'module'});
+
     this.worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data;
       const pending = this.pendingRequests.get(message.id);
@@ -132,5 +130,3 @@ class PyodideClient {
     });
   }
 }
-
-export const pyodide = new PyodideClient();

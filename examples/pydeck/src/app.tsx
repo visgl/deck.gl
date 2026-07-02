@@ -3,13 +3,33 @@
 // Copyright (c) vis.gl contributors
 
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
-import {createRoot} from 'react-dom/client';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import Split from 'split.js';
 import {Editor, type EditorHandle} from './editor';
 import {PlayIcon, SpinnerIcon} from './icons';
 import {FileDrop, type FileDropHandle} from './file-drop';
-import {pyodide, type PreloadedFileConfig, type RunUpdate, type WorkerStatus} from './pyodide';
+import {
+  PyodideClient,
+  type PreloadedFileConfig,
+  type RunUpdate,
+  type WorkerStatus
+} from './pyodide';
+import {
+  EditorPane,
+  GlobalStyle,
+  HtmlPane,
+  LeftPane,
+  OutputEmpty,
+  RightPane,
+  Root,
+  RunButton,
+  TextOutput,
+  TextOutputPart as TextOutputPartView,
+  TextPane,
+  Toolbar,
+  ToolbarLink,
+  ToolbarTitle
+} from './styles';
 
 const DEFAULT_SAMPLE = `\
 import pydeck
@@ -61,7 +81,14 @@ type OutputState = {
   textParts: TextOutputPart[];
 };
 
-export function App({preloadedFiles}: {preloadedFiles?: PreloadedFileConfig[]}) {
+export default function App({
+  preloadedFiles = PRELOADED_FILES,
+  workerUrl
+}: {
+  preloadedFiles?: PreloadedFileConfig[];
+  workerUrl: string | URL;
+}) {
+  const pyodide = useMemo(() => new PyodideClient({workerUrl}), [workerUrl]);
   const editorRef = useRef<EditorHandle>(null);
   const fileDropRef = useRef<FileDropHandle>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -238,62 +265,65 @@ export function App({preloadedFiles}: {preloadedFiles?: PreloadedFileConfig[]}) 
   };
 
   return (
-    <div id="root" ref={rootRef}>
-      {/* Left Pane: Monaco Editor and Template Selector */}
-      <div id="left-pane">
-        <div id="toolbar">
-          <div className="toolbar-title">
-            <strong>pydeck playground</strong>
-            <a href="https://deckgl.readthedocs.io/en/latest/" rel="noreferrer" target="_blank">
-              Docs
-            </a>
-          </div>
-          <button
-            disabled={status !== null}
-            onClick={() => {
-              void runCode();
-            }}
-            type="button"
-          >
-            {status ? (
-              <>
-                <SpinnerIcon />
-                {status}
-              </>
+    <>
+      <GlobalStyle />
+      <Root id="root" ref={rootRef}>
+        {/* Left Pane: Monaco Editor and Template Selector */}
+        <LeftPane>
+          <Toolbar>
+            <ToolbarTitle>
+              <strong>pydeck playground</strong>
+              <ToolbarLink
+                href="https://deckgl.readthedocs.io/en/latest/"
+                rel="noreferrer"
+                target="_blank"
+              >
+                Docs
+              </ToolbarLink>
+            </ToolbarTitle>
+            <RunButton
+              disabled={status !== null}
+              onClick={() => {
+                void runCode();
+              }}
+              type="button"
+            >
+              {status ? (
+                <>
+                  <SpinnerIcon />
+                  {status}
+                </>
+              ) : (
+                <PlayIcon />
+              )}
+            </RunButton>
+          </Toolbar>
+          <EditorPane>
+            <Editor defaultValue={DEFAULT_SAMPLE} ref={editorRef} />
+          </EditorPane>
+          <FileDrop engine={pyodide} preloadedFiles={preloadedFiles} ref={fileDropRef} />
+        </LeftPane>
+
+        {/* Right Pane: Output */}
+        <RightPane>
+          <HtmlPane>
+            {output.html ? (
+              <iframe srcDoc={output.html} title="Python HTML output" />
             ) : (
-              <PlayIcon />
+              <OutputEmpty>No HTML output</OutputEmpty>
             )}
-          </button>
-        </div>
-        <div id="editor">
-          <Editor defaultValue={DEFAULT_SAMPLE} ref={editorRef} />
-        </div>
-        <FileDrop preloadedFiles={preloadedFiles} ref={fileDropRef} />
-      </div>
-
-      {/* Right Pane: Output */}
-      <div id="right-pane">
-        <section className="output-pane html-pane">
-          {output.html ? (
-            <iframe srcDoc={output.html} title="Python HTML output" />
-          ) : (
-            <div className="output-empty">No HTML output</div>
-          )}
-        </section>
-        <section className="output-pane text-pane">
-          <pre>
-            {output.textParts.map((part, index) => (
-              <span className={`text-output-${part.type}`} key={index}>
-                {part.text}
-              </span>
-            ))}
-          </pre>
-        </section>
-      </div>
-    </div>
+          </HtmlPane>
+          <TextPane>
+            <TextOutput>
+              {output.textParts.map((part, index) => (
+                <TextOutputPartView $type={part.type} key={index}>
+                  {part.text}
+                </TextOutputPartView>
+              ))}
+            </TextOutput>
+          </TextPane>
+        </RightPane>
+      </Root>
+    </>
   );
-}
-
-export function renderToDOM(container) {
-  createRoot(container).render(<App preloadedFiles={PRELOADED_FILES} />);
 }
