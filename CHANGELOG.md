@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.6] - Jul 2 2026
+
+- fix(widgets): handle negative DMS degrees in CoordinatesGeocoder (#10242)
+- fix(pydeck): guard InfoWidget tooltip expression against undefined object (#10242)
+- chore(deps): bump bleach to 6.4.0 and jupyter-server to 2.20.0 (#10390, #10391)
+
 #### deck.gl [v9.3.5] - Jun 25 2026
 
 - fix(arcgis): update arcgis module to use RenderNode instead of externalRenderers (#10257)
