@@ -6,6 +6,13 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.9 Releases
 ------------
 
+0.9.3 - Jul 2026
+^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v9.3 (#10242)
+- Add PopupWidget and InfoWidget to widget gallery example
+- Fix negative DMS coordinate parsing in GeocoderWidget
+- Add pydeck playground at `deck.gl/pydeck <https://deck.gl/pydeck>`__
+
 0.9.2 - Apr 16 2026
 ^^^^^^^^^^^^^^^^^^^
 - Update to deck.gl v9.2 (#9895)

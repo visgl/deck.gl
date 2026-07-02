@@ -97,6 +97,13 @@ Class-specific improvements:
 
 - Overlaid layers now render at the correct DOM position when `interleaved: false`.
 
+### pydeck 0.9.3
+
+- Updated to deck.gl v9.3
+- New [pydeck playground](https://deck.gl/pydeck) for experimenting with pydeck scripts directly in the browser
+- Added `PopupWidget` and `InfoWidget` to the widget gallery example
+- Fixed negative DMS coordinate parsing in `GeocoderWidget`
+
 ## deck.gl v9.2
 
 Release date: October 7, 2025
