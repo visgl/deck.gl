@@ -27,7 +27,7 @@ Release date: TBD
 
 ### @deck.gl/arcgis
 
-- `DeckRenderer` now integrates with ArcGIS `SceneView` through the modern `RenderNode` API instead of the deprecated `externalRenderers`. This aligns with ArcGIS JS API 4.x best practices and improves rendering lifecycle management.
+- `DeckRenderer` now integrates with ArcGIS `SceneView` through the modern `RenderNode` API instead of the deprecated `externalRenderers`.
 
 ### Performance
 
