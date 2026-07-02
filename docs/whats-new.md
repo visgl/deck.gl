@@ -25,6 +25,10 @@ Release date: TBD
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
 
+### @deck.gl/arcgis
+
+- `DeckRenderer` now integrates with ArcGIS `SceneView` through the modern `RenderNode` API instead of the deprecated `externalRenderers`. This aligns with ArcGIS JS API 4.x best practices and improves rendering lifecycle management.
+
 ### Performance
 
 - Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, instead using shader builtins `instance_index` / `gl_InstanceID`, reducing memory usage and initialization times.
