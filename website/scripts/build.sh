@@ -24,7 +24,7 @@ case $MODE in
     docusaurus build
     ;;
   "staging")
-    STAGING=true docusaurus build
+    WEBSITE_BASE_URL=/deck.gl/ docusaurus build
     ;;
 esac
 
