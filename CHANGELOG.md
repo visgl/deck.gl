@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.6] - Jul 2 2026
+
+- fix(widgets): handle negative DMS degrees in CoordinatesGeocoder (#10242)
+- fix(jupyter-widget): remove incorrect widget JSON registration overrides (#10242)
+- fix(layers): add missing `@types/geojson` dependency (#10268)
+
 #### deck.gl [v9.3.5] - Jun 25 2026
 
 - fix(arcgis): update arcgis module to use RenderNode instead of externalRenderers (#10257)
