@@ -188,6 +188,10 @@ const config = {
                 href: '/playground'
               },
               {
+                label: 'Pydeck',
+                href: '/pydeck'
+              },
+              {
                 label: 'Codepen demos',
                 href: 'https://codepen.io/vis-gl/'
               }
