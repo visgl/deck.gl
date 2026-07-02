@@ -11,13 +11,14 @@ const darkCodeTheme = prismThemes.nightOwl;
 
 const webpack = require('webpack');
 const {resolve} = require('path');
+const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'deck.gl',
   tagline: 'GPU-powered, highly performant large-scale data visualization',
   url: 'https://deck.gl',
-  baseUrl: process.env.STAGING ? '/deck.gl/' : '/',
+  baseUrl: websiteBaseUrl,
   onBrokenLinks: 'throw',
   markdown: {
     hooks: {
