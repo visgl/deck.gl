@@ -6,21 +6,29 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: TBD
 
-### Controllers
+### Core Performance
 
-- New `doubleClickDragZoom` gesture on all controllers enables smooth zoom by double-clicking and dragging up/down.
+- Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, reducing memory usage and initialization times. (deck.gl now using shader builtins `instance_index` / `gl_InstanceID`). 
 
-### GlobeView
+### Views and Controllers
+
+#### GlobeView
+
+`GlobeView`, while still experimental, is improved and nearing graduation: 
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 
-### Views
+#### Views
 
 - Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.
 
-### Geo Layers
+#### Controllers
+
+- New `doubleClickDragZoom` gesture on all controllers enables smooth zoom by double-clicking and dragging up/down.
+
+### @deck.gl/geo-layers
 
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
@@ -29,9 +37,9 @@ Release date: TBD
 
 - `DeckRenderer` now integrates with ArcGIS `SceneView` through the modern `RenderNode` API instead of the deprecated `externalRenderers`.
 
-### Performance
+### @deck.gl/widgets
 
-- Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, instead using shader builtins `instance_index` / `gl_InstanceID`, reducing memory usage and initialization times.
+A new experimental `ViewLayout` system with a helper function `buildViewsFromViewLayout()` allows advanced nested and relative view layouts to be specified using a declarative layout tree.
 
 ## deck.gl v9.3
 
