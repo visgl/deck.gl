@@ -16,6 +16,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: April 13, 2026
 
+### v9.3 Patch Releases
+
+- Fixed negative DMS coordinate parsing in `GeocoderWidget` — coordinates like `-37°48'00"` now resolve correctly (#10242)
+
 ### Widgets
 
 
