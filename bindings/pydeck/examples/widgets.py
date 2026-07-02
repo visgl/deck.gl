@@ -73,7 +73,7 @@ deck = pdk.Deck(
     layers=[countries_layer, airports_layer],
     initial_view_state=view_state,
     widgets=widgets,
-    tooltip={"text": "{properties.name} ({properties.abbrev})\n{properties.type}"},
+    tooltip=False,
 )
 
 deck.to_html("widgets.html")
