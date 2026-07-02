@@ -66,7 +66,7 @@ widgets = [
     ),
     # InfoWidget: popup triggered by hovering over pickable features.
     # getTooltip uses the @@= expression syntax from @deck.gl/json to access feature properties.
-    pdk.Widget("InfoWidget", mode="hover", getTooltip="@@=object.properties.name"),
+    pdk.Widget("InfoWidget", mode="hover", getTooltip="@@=object && object.properties && object.properties.name"),
 ]
 
 deck = pdk.Deck(
