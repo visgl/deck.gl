@@ -2577,6 +2577,29 @@ a {
     padding: 90px 80px
 }
 
+@media (max-width:431px) {
+    #agenda {
+        padding: unset
+    }
+    #agenda > h3 {
+        padding: 24px 24px;
+    }
+    #pending-announcement {
+        max-width: 95vw;
+        padding: 24px 0 0 24px;
+    }
+    #pending-announcement .button-gl {
+        width: 75vw;
+    }
+    .card-bg {
+        max-width: 99.5vw;
+    }
+    .title-day {
+        padding-left: 24px;
+    }
+
+}
+
 @media (min-width:1632px) {
     #agenda {
         padding: 120px 100px
@@ -2587,9 +2610,42 @@ a {
     padding: 0 40px 0 0
 }
 
+#agenda .card-logo-cell {
+    padding-left: 0px;
+    flex: 0 0 75%;
+    max-width: 75%
+}
+
+#agenda .card-info {
+    padding-left: 56px;
+    flex: 0 0 16.6666666667%;
+    max-width: 16.6666666667%;
+}
+
+#agenda .card-info > a:link {
+    color: #2e3c43;
+    text-decoration: none;
+}
+
+#agenda .card-info > a:visited {
+    color: #2e3c43;
+    text-decoration: none;
+}
+
+#agenda .card-info > a:hover {
+    text-decoration: none;
+}
+
+#agenda .card-info >  a:active {
+    text-decoration: none;
+}
+
 @media (max-width:800px) {
     #agenda .card-agenda {
         padding: 0 20px 0 0
+    }
+    #agenda .card-info {
+        padding-left: 24px;
     }
 }
 
@@ -2658,6 +2714,14 @@ header {
     position: relative;
     height: 628px;
     background-color: #202020;
+}
+
+.dropshadow8 {
+    filter: drop-shadow(0 0 8px #000);
+}
+
+.dropshadow12 {
+    filter: drop-shadow(0 0 12px #000);
 }
 
 .header_container {
