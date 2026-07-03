@@ -16,6 +16,11 @@ Gallery
 Overview
 ^^^^^^^^
 
+`pydeck Playground <https://deck.gl/pydeck>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Try pydeck scripts directly in the browser with the `pydeck playground <https://deck.gl/pydeck>`__. No installation needed — edit Python code and see the visualization update in real time.
+
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
