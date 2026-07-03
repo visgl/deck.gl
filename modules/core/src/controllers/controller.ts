@@ -20,21 +20,13 @@ const NO_TRANSITION_PROPS = {
 
 const DEFAULT_INERTIA = 300;
 const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
-// One-finger double-click/tap-drag-to-zoom gesture (matches Google Maps).
-// Empirical values chosen to feel snappy but reject accidental triggers.
-const DOUBLE_CLICK_DRAG_INTERVAL = 500;
-const DOUBLE_CLICK_DRAG_MAX_TAP_DURATION = 350;
-const DOUBLE_CLICK_DRAG_MAX_TAP_DISTANCE = 28;
-const DOUBLE_CLICK_DRAG_START_THRESHOLD = 1;
-const DOUBLE_CLICK_DRAG_PIXELS_PER_ZOOM = 120;
-
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
   MULTI_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
   DOUBLE_CLICK: ['dblclick'],
-  DOUBLE_CLICK_DRAG: ['pointerdown', 'pointermove', 'pointerup', 'pointercancel'],
+  DOUBLE_CLICK_DRAG: ['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend', 'dblclickdragcancel'],
   KEYBOARD: ['keydown']
 } as const;
 
@@ -122,24 +114,6 @@ export type ViewStateChangeParameters<ViewStateT = any> = {
 
 const pinchEventWorkaround: any = {};
 
-type DoubleClickDragTapState = {
-  pos: [number, number];
-  time: number;
-  pointerId?: number;
-};
-
-type DoubleClickDragZoomState = {
-  startPos: [number, number];
-  pointerId?: number;
-  active: boolean;
-};
-
-function getDistance(a: [number, number], b: [number, number]): number {
-  const dx = a[0] - b[0];
-  const dy = a[1] - b[1];
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
 export default abstract class Controller<ControllerState extends IViewState<ControllerState>> {
   abstract get ControllerState(): ConstructorOf<ControllerState>;
   abstract get transition(): TransitionProps;
@@ -163,9 +137,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
   private _panMove: boolean = false;
-  private _doubleClickDragTapStart: DoubleClickDragTapState | null = null;
-  private _lastDoubleClickDragTap: DoubleClickDragTapState | null = null;
-  private _doubleClickDragZoomState: DoubleClickDragZoomState | null = null;
+  private _doubleClickDragAnchor: [number, number] | null = null;
   private _suppressDoubleClickUntil: number = 0;
 
   protected invertPan: boolean = false;
@@ -242,19 +214,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
     switch (event.type) {
       case 'panstart':
-        if (this._doubleClickDragZoomState) {
-          return false;
-        }
         return eventStartBlocked ? false : this._onPanStart(event);
       case 'panmove':
-        if (this._doubleClickDragZoomState) {
-          return false;
-        }
         return this._onPan(event);
       case 'panend':
-        if (this._doubleClickDragZoomState) {
-          return false;
-        }
         return this._onPanEnd(event);
       case 'pinchstart':
         return eventStartBlocked ? false : this._onPinchStart(event);
@@ -270,13 +233,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         return this._onMultiPanEnd(event);
       case 'dblclick':
         return this._onDoubleClick(event);
-      case 'pointerdown':
-        return this._onDoubleClickDragPointerDown(event);
-      case 'pointermove':
-        return this._onDoubleClickDragPointerMove(event);
-      case 'pointerup':
-      case 'pointercancel':
-        return this._onDoubleClickDragPointerUp(event);
+      case 'dblclickdragstart':
+        return eventStartBlocked ? false : this._onDoubleClickDragStart(event);
+      case 'dblclickdragmove':
+        return this._onDoubleClickDrag(event);
+      case 'dblclickdragend':
+      case 'dblclickdragcancel':
+        return this._onDoubleClickDragEnd(event);
       case 'wheel':
         return this._onWheel(event as MjolnirWheelEvent);
       case 'keydown':
@@ -693,7 +656,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   // Default handler for the `pinchstart` event.
   protected _onPinchStart(event: MjolnirGestureEvent): boolean {
-    this._resetDoubleClickDragZoom();
+    this._doubleClickDragAnchor = null;
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -807,154 +770,61 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return true;
   }
 
-  protected _onDoubleClickDragPointerDown(event: MjolnirEvent): boolean {
-    if (!this.doubleClickDragZoom || !this._isPrimaryPointer(event)) {
-      this._resetDoubleClickDragZoom();
+  protected _onDoubleClickDragStart(event: MjolnirGestureEvent): boolean {
+    if (!this.doubleClickDragZoom) {
+      this._doubleClickDragAnchor = null;
       return false;
     }
 
-    const pos = this.getCenter(event as MjolnirGestureEvent);
+    const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
-      this._resetDoubleClickDragZoom();
+      this._doubleClickDragAnchor = null;
       return false;
     }
 
-    const time = this._getEventTime(event);
-    const pointerId = (event.srcEvent as PointerEvent).pointerId;
-    if (
-      this._lastDoubleClickDragTap &&
-      time - this._lastDoubleClickDragTap.time <= DOUBLE_CLICK_DRAG_INTERVAL &&
-      getDistance(pos, this._lastDoubleClickDragTap.pos) <= DOUBLE_CLICK_DRAG_MAX_TAP_DISTANCE
-    ) {
-      this._doubleClickDragTapStart = null;
-      this._lastDoubleClickDragTap = null;
-      this._doubleClickDragZoomState = {startPos: pos, pointerId, active: false};
-      event.srcEvent.preventDefault();
-      event.stopPropagation();
-      return true;
+    this._doubleClickDragAnchor = pos;
+    let newControllerState = this.controllerState.zoomStart({pos});
+    if (event.scale !== 1) {
+      newControllerState = newControllerState.zoom({pos, scale: event.scale});
     }
-
-    this._doubleClickDragTapStart = {pos, time, pointerId};
-    this._lastDoubleClickDragTap = null;
-    if ((event.srcEvent as PointerEvent).pointerType === 'touch') {
-      event.srcEvent.preventDefault();
-    }
-    return false;
-  }
-
-  protected _onDoubleClickDragPointerMove(event: MjolnirEvent): boolean {
-    const doubleClickDragZoomState = this._doubleClickDragZoomState;
-    if (
-      !doubleClickDragZoomState ||
-      !this._isSamePointer(event, doubleClickDragZoomState.pointerId)
-    ) {
-      return false;
-    }
-
-    const pos = this.getCenter(event as MjolnirGestureEvent);
-    const dy = doubleClickDragZoomState.startPos[1] - pos[1];
-    if (!doubleClickDragZoomState.active && Math.abs(dy) < DOUBLE_CLICK_DRAG_START_THRESHOLD) {
-      event.srcEvent.preventDefault();
-      event.stopPropagation();
-      return true;
-    }
-
-    const scale = Math.pow(2, dy / DOUBLE_CLICK_DRAG_PIXELS_PER_ZOOM);
-    const startPos = doubleClickDragZoomState.startPos;
-    let newControllerState = this.controllerState;
-    if (!doubleClickDragZoomState.active) {
-      doubleClickDragZoomState.active = true;
-      newControllerState = newControllerState.zoomStart({pos: startPos});
-    }
-    newControllerState = newControllerState.zoom({pos: startPos, scale});
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isPanning: true,
       isZooming: true
     });
-
-    event.srcEvent.preventDefault();
-    event.stopPropagation();
     return true;
   }
 
-  protected _onDoubleClickDragPointerUp(event: MjolnirEvent): boolean {
-    const doubleClickDragZoomState = this._doubleClickDragZoomState;
-    if (
-      doubleClickDragZoomState &&
-      this._isSamePointer(event, doubleClickDragZoomState.pointerId)
-    ) {
-      this._doubleClickDragZoomState = null;
-      if (doubleClickDragZoomState.active) {
-        const newControllerState = this.controllerState.zoomEnd();
-        this.updateViewport(newControllerState, null, {
-          isDragging: false,
-          isPanning: false,
-          isZooming: false
-        });
-        this._suppressDoubleClickUntil = Date.now() + 100;
-        this.blockEvents(100);
-        event.srcEvent.preventDefault();
-        event.stopPropagation();
-        return true;
-      }
+  protected _onDoubleClickDrag(event: MjolnirGestureEvent): boolean {
+    const pos = this._doubleClickDragAnchor;
+    if (!pos) {
       return false;
     }
 
-    if (event.type === 'pointercancel') {
-      this._resetDoubleClickDragZoom();
-      return false;
-    }
-
-    const doubleClickDragTapStart = this._doubleClickDragTapStart;
-    if (
-      !doubleClickDragTapStart ||
-      !this._isSamePointer(event, doubleClickDragTapStart.pointerId)
-    ) {
-      return false;
-    }
-
-    const pos = this.getCenter(event as MjolnirGestureEvent);
-    const time = this._getEventTime(event);
-    if (
-      time - doubleClickDragTapStart.time <= DOUBLE_CLICK_DRAG_MAX_TAP_DURATION &&
-      getDistance(pos, doubleClickDragTapStart.pos) <= DOUBLE_CLICK_DRAG_MAX_TAP_DISTANCE
-    ) {
-      this._lastDoubleClickDragTap = {pos, time, pointerId: doubleClickDragTapStart.pointerId};
-    } else {
-      this._lastDoubleClickDragTap = null;
-    }
-    this._doubleClickDragTapStart = null;
-    if ((event.srcEvent as PointerEvent).pointerType === 'touch') {
-      event.srcEvent.preventDefault();
-    }
-    return false;
-  }
-
-  private _resetDoubleClickDragZoom(): void {
-    this._doubleClickDragTapStart = null;
-    this._lastDoubleClickDragTap = null;
-    this._doubleClickDragZoomState = null;
-  }
-
-  private _getEventTime(event: MjolnirEvent): number {
-    return (event as any).timeStamp || event.srcEvent.timeStamp || Date.now();
-  }
-
-  private _isPrimaryPointer(event: MjolnirEvent): boolean {
-    const pointers = (event as any).pointers;
-    if (pointers && pointers.length > 1) {
-      return false;
-    }
-    const srcEvent = event.srcEvent as PointerEvent;
-    if (srcEvent.pointerType === 'mouse') {
-      return (event as any).leftButton !== false;
-    }
+    const newControllerState = this.controllerState.zoom({pos, scale: event.scale});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isPanning: true,
+      isZooming: true
+    });
     return true;
   }
 
-  private _isSamePointer(event: MjolnirEvent, pointerId?: number): boolean {
-    return pointerId === undefined || (event.srcEvent as PointerEvent).pointerId === pointerId;
+  protected _onDoubleClickDragEnd(_event: MjolnirGestureEvent): boolean {
+    if (!this._doubleClickDragAnchor) {
+      return false;
+    }
+
+    this._doubleClickDragAnchor = null;
+    const newControllerState = this.controllerState.zoomEnd();
+    this.updateViewport(newControllerState, null, {
+      isDragging: false,
+      isPanning: false,
+      isZooming: false
+    });
+    this._suppressDoubleClickUntil = Date.now() + 100;
+    this.blockEvents(100);
+    return true;
   }
 
   // Default handler for the `keydown` event
