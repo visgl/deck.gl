@@ -165,6 +165,45 @@ test('Deck wires mjolnir requireFailure between recognizers', async () => {
   });
 });
 
+test('Deck sets click recognizer interval to 0 to avoid the 300ms tap delay', async () => {
+  // Regression guard for #10384: because `click` requires `dblclick` to fail
+  // (see the test above), mjolnir's TapRecognizer routes recognition through a
+  // `setTimeout(..., interval)` instead of firing immediately. With the default
+  // 300ms interval that delayed every click by 300ms. `interval: 0` makes the
+  // timer fire on the next tick, restoring the sub-millisecond click response
+  // that existed before 9.3.4.
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      layers: [],
+      controller: true,
+      onLoad: () => {
+        try {
+          const recognizers = (deck as any).eventManager?.manager?.recognizers ?? [];
+          const clickRecognizer = recognizers.find(r => r.options.event === 'click');
+
+          expect(clickRecognizer, 'click recognizer is registered').toBeTruthy();
+          expect(clickRecognizer.options.interval, 'click recognizer fires without delay').toBe(0);
+          // The delay only exists because click blocks on dblclick, so the
+          // interval override is only meaningful while that requirement holds.
+          const clickRequires = (clickRecognizer.requireFail ?? []).map(
+            (r: any) => r.options.event
+          );
+          expect(clickRequires, 'click still waits for dblclick').toContain('dblclick');
+
+          deck.finalize();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
 test('Deck#getEventManager resolves the default manager for views', async () => {
   await new Promise<void>((resolve, reject) => {
     const deck = new Deck({
