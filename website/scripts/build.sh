@@ -24,12 +24,13 @@ case $MODE in
     docusaurus build
     ;;
   "staging")
-    STAGING=true docusaurus build
+    WEBSITE_BASE_URL=/deck.gl/ docusaurus build
     ;;
 esac
 
 # transpile workers
 BABEL_ENV=es5 npx babel ./static/workers --out-dir ./$OUTPUT_DIR/workers
+BABEL_ENV=esm npx babel ../examples/pydeck/src/pyodide-worker.ts --out-file ./$OUTPUT_DIR/workers/pyodide-worker.mjs
 
 # build gallery (scripting) examples
 (
