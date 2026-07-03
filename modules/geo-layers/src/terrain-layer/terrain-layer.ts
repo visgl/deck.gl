@@ -6,7 +6,9 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
+  COORDINATE_SYSTEM,
   DefaultProps,
+  _GlobeViewport as GlobeViewport,
   Layer,
   LayersList,
   log,
@@ -15,7 +17,6 @@ import {
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
@@ -26,7 +27,7 @@ import type {
   TileLoadProps,
   ZRange
 } from '../tileset-2d/index';
-import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
+import {getURLFromTemplate, Tile2DHeader, URLTemplate, urlType} from '../tileset-2d/index';
 
 const DUMMY_DATA = [1];
 const TILE_OVERLAP_PIXELS = 1;
@@ -246,7 +247,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const overlappedBounds = getOverlappedBounds(
       bounds,
       this.props.tileSize,
-      Boolean(viewport.resolution && viewport.resolution > 0)
+      viewport instanceof GlobeViewport
     );
 
     const terrain = this.loadTerrain({
@@ -286,7 +287,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
-    const isGlobe = Boolean(viewport.resolution && viewport.resolution > 0);
+    const isGlobe = viewport instanceof GlobeViewport;
     const boundingBox = (mesh as MeshWithBoundingBox | null)?.header?.boundingBox;
     const hasLngLatBounds =
       boundingBox &&
@@ -355,7 +356,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy
+      refinementStrategy,
+      zoomOffset
     } = this.props;
 
     if (this.state.isTiled) {
@@ -372,7 +374,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
               texture: urlTemplateToUpdateTrigger(texture),
               meshMaxError,
               elevationDecoder,
-              projectionMode: this.context.viewport.projectionMode
+              projectionMode: this.context.viewport.projectionMode,
+              zoomOffset
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),
@@ -387,7 +390,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           onTileError,
           maxCacheSize,
           maxCacheByteSize,
-          refinementStrategy
+          refinementStrategy,
+          zoomOffset
         }
       );
     }

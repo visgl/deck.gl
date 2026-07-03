@@ -5,6 +5,7 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer, IconLayer, TextLayer} from '@deck.gl/layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -25,7 +26,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -0.6194,
   zoom: 10,
   pitch: 55,
-  maxZoom: 13.5,
+  maxZoom: 23.5,
   bearing: 0,
   maxPitch: 89
 };
@@ -67,6 +68,7 @@ type Stage = {
   coordinates: [number, number];
   type: 'start' | 'finish';
 };
+type ViewType = 'MapView' | 'GlobeView';
 
 function getTooltip({object}: PickingInfo<Route>) {
   if (!object) return null;
@@ -79,11 +81,14 @@ function getTooltip({object}: PickingInfo<Route>) {
 }
 
 export default function App({
-  initialViewState = INITIAL_VIEW_STATE
+  initialViewState = INITIAL_VIEW_STATE,
+  view = 'GlobeView'
 }: {
   initialViewState?: MapViewState;
+  view?: ViewType;
 }) {
   const [routes, setRoutes] = useState<FeatureCollection<LineString, RouteProperties>>();
+  const [viewState, setViewState] = useState<MapViewState>(initialViewState);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -111,8 +116,8 @@ export default function App({
       elevationDecoder: ELEVATION_DECODER,
       elevationData: TERRAIN_IMAGE,
       texture: SURFACE_IMAGE,
-      wireframe: false,
-      color: [255, 255, 255],
+      material: false,
+      maxRequests: 12,
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer<RouteProperties>({
@@ -129,6 +134,10 @@ export default function App({
       data: stages,
       iconAtlas: `${DATA_URL_BASE}/flag-icons.png`,
       iconMapping: `${DATA_URL_BASE}/flag-icons.json`,
+      parameters: {
+        cullMode: 'none',
+        depthCompare: 'always'
+      },
       getPosition: d => d.coordinates,
       getIcon: d => (d.type === 'start' ? 'green' : 'checker'),
       getSize: 32,
@@ -140,6 +149,7 @@ export default function App({
       characterSet: 'auto',
       parameters: {
         // should not be occluded by terrain
+        cullMode: 'none',
         depthCompare: 'always'
       },
       getPosition: d => d.coordinates,
@@ -151,9 +161,13 @@ export default function App({
     })
   ];
 
+  const deckView = useMemo(() => (view === 'GlobeView' ? new GlobeView() : new MapView()), [view]);
+
   return (
     <DeckGL
-      initialViewState={initialViewState}
+      views={deckView}
+      viewState={viewState}
+      onViewStateChange={e => setViewState(e.viewState as MapViewState)}
       controller={true}
       layers={layers}
       pickingRadius={5}

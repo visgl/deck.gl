@@ -19,7 +19,7 @@ in vec3 instanceEndPositions64Low;
 in vec3 instanceRightPositions64Low;
 in float instanceStrokeWidths;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
+in float rowIndexes;
 
 uniform float opacity;
 
@@ -148,7 +148,7 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 }
 
 void main() {
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * layer.opacity);
 

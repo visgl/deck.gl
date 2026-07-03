@@ -75,6 +75,11 @@ const sidebars = {
           type: 'link',
           label: 'Playground',
           href: `/playground`
+        },
+        {
+          type: 'link',
+          label: 'pydeck',
+          href: `/pydeck`
         }
       ]
     }
