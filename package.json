@@ -69,8 +69,8 @@
     "puppeteer": "^24.26.1",
     "s2-geometry": "^1.2.10",
     "sharp": "^0.34.5",
-    "vitest": "^4.0.18",
-    "vite-bundle-analyzer": "^1.3.6"
+    "vite-bundle-analyzer": "^1.3.6",
+    "vitest": "^4.0.18"
   },
   "resolutions": {
     "vite": "^7.3.1"
