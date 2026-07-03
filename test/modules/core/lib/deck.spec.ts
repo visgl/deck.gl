@@ -1010,3 +1010,49 @@ test('Deck#props omitted are unchanged', async () => {
     });
   });
 });
+
+test('Deck forwards retained animation clocks to screen, picking, and offscreen passes', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const renderedPasses: Array<Record<string, any>> = [];
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      layers: [],
+      onLoad: () => {
+        try {
+          const internalDeck = deck as any;
+          internalDeck.animationLoop.stop();
+          internalDeck.deckRenderer.renderLayers = options => renderedPasses.push(options);
+          internalDeck._needsRedraw = 'animation clock test';
+
+          internalDeck._onRenderFrame({
+            ...internalDeck.animationLoop.animationProps,
+            time: 12_500,
+            engineTime: 4_250,
+            tock: 7
+          });
+          internalDeck._drawLayers('offscreen clock test', {pass: 'offscreen'});
+
+          const expectedClocks = {
+            timelineTime: 12.5,
+            engineTime: 4.25,
+            frameIndex: 7
+          };
+          expect(renderedPasses[0].pass).toBe('screen');
+          expect(renderedPasses[0].shaderModuleProps.layer).toEqual(expectedClocks);
+          expect(renderedPasses[1].pass).toBe('offscreen');
+          expect(renderedPasses[1].shaderModuleProps.layer).toEqual(expectedClocks);
+          expect(internalDeck.deckPicker.shaderModuleProps.layer).toEqual(expectedClocks);
+
+          deck.finalize();
+          resolve();
+        } catch (error) {
+          deck.finalize();
+          reject(error);
+        }
+      }
+    });
+  });
+});

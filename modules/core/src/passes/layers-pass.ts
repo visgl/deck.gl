@@ -432,7 +432,8 @@ export default class LayersPass extends Pass {
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const shaderModuleProps = {
-      layer: layerProps,
+      // Layer props are frozen. Clone only when a render pass adds global layer module props.
+      layer: overrides?.layer ? {...layerProps} : layerProps,
       picking: {
         isActive: false
       } satisfies PickingProps,

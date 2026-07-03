@@ -68,6 +68,7 @@ export default class DeckRenderer {
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;
+    shaderModuleProps?: Record<string, any>;
   }) {
     if (!opts.viewports.length) {
       return;

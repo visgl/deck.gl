@@ -20,7 +20,7 @@ import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/webgl/constants';
 import {Timeline} from '@luma.gl/engine';
-import {AnimationLoop} from '@luma.gl/engine';
+import {AnimationLoop, type AnimationProps} from '@luma.gl/engine';
 import type {
   CanvasContext,
   CanvasContextProps,
@@ -92,6 +92,12 @@ type InternalPickingMode = 'sync' | 'async';
 type PointPickResult = {
   result: PickingInfo[];
   emptyInfo: PickingInfo;
+};
+
+type LayerAnimationProps = {
+  timelineTime: number;
+  engineTime: number;
+  frameIndex: number;
 };
 
 export type DeckProps<ViewsT extends ViewOrViews = null> = {
@@ -358,6 +364,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     gpuMemory: 0
   };
   private _metricsCounter: number = 0;
+  private _layerAnimationProps: LayerAnimationProps = {
+    timelineTime: 0,
+    engineTime: 0,
+    frameIndex: 0
+  };
   private _hoverPickSequence: number = 0;
   private _pointerDownPickSequence: number = 0;
 
@@ -1492,6 +1503,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       effects?: Effect[];
       clearStack?: boolean;
       clearCanvas?: boolean;
+      shaderModuleProps?: Record<string, any>;
     }
   ) {
     const {device, gl} = this.layerManager!.context;
@@ -1506,7 +1518,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       views: this.viewManager!.getViews(),
       pass: 'screen',
       effects: this.effectManager!.getEffects(),
-      ...renderOptions
+      ...renderOptions,
+      shaderModuleProps: {
+        ...renderOptions?.shaderModuleProps,
+        layer: {
+          ...this._layerAnimationProps,
+          ...renderOptions?.shaderModuleProps?.layer
+        }
+      }
     };
     this.deckRenderer?.renderLayers(opts);
 
@@ -1524,7 +1543,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   // Callbacks
 
-  private _onRenderFrame() {
+  private _onRenderFrame(animationProps: AnimationProps) {
+    this._layerAnimationProps.timelineTime = animationProps.time / 1000;
+    this._layerAnimationProps.engineTime = animationProps.engineTime / 1000;
+    this._layerAnimationProps.frameIndex = animationProps.tock;
+    this.deckPicker?.setProps({
+      shaderModuleProps: {layer: this._layerAnimationProps}
+    });
+
     this._getFrameStats();
 
     // Log perf stats every second

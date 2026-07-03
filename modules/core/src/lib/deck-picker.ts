@@ -57,6 +57,7 @@ export default class DeckPicker {
   pickLayersPass: PickLayersPass;
   layerFilter?: (context: FilterContext) => boolean;
   stats?: Stats;
+  shaderModuleProps?: Record<string, any>;
 
   /** Identifiers of the previously picked object, for callback tracking and auto highlight */
   lastPickedInfo: {
@@ -85,6 +86,10 @@ export default class DeckPicker {
 
     if ('_pickable' in props) {
       this._pickable = props._pickable;
+    }
+
+    if ('shaderModuleProps' in props) {
+      this.shaderModuleProps = props.shaderModuleProps;
     }
   }
 
@@ -814,7 +819,8 @@ export default class DeckPicker {
       pass,
       pickZ,
       preRenderStats: {},
-      isPicking: true
+      isPicking: true,
+      shaderModuleProps: this.shaderModuleProps
     };
 
     for (const effect of effects) {
@@ -987,7 +993,8 @@ export default class DeckPicker {
       pass,
       pickZ,
       preRenderStats: {},
-      isPicking: true
+      isPicking: true,
+      shaderModuleProps: this.shaderModuleProps
     };
 
     for (const effect of effects) {
