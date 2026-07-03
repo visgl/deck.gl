@@ -106,7 +106,10 @@ export const RECOGNIZERS = {
   pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
   dblclick: [Tap, {event: 'dblclick', taps: 2}],
   click: [Tap, {event: 'click'}, null, ['dblclick']],
-  dblclickdrag: [DoubleClickDrag, {event: 'dblclickdrag'}]
+  // Must recognize simultaneously with click/dblclick: otherwise the manager resets
+  // DoubleClickDrag (clearing its first-tap memory) as soon as those recognizers activate,
+  // so the second press never matches and the gesture never arms.
+  dblclickdrag: [DoubleClickDrag, {event: 'dblclickdrag'}, ['dblclick', 'click'], null]
 } as const;
 
 export type RecognizerOptions = {
