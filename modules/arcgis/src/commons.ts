@@ -19,7 +19,6 @@ export type RenderResources = {
   texture: Texture;
   model: Model;
   fbo: Framebuffer;
-  _externalFramebuffer?: {handle: WebGLFramebuffer; wrapper: Framebuffer};
 };
 
 async function createDeckInstance(gl: WebGL2RenderingContext): Promise<{
@@ -87,7 +86,9 @@ out vec4 fragColor;
 
 void main(void) {
     vec4 imageColor = texture(deckglTexture, v_texcoord);
-    imageColor.rgb *= imageColor.a;
+    // FBO stores premultiplied RGBA (rgb already multiplied by alpha).
+    // The composite blend (ONE, ONE_MINUS_SRC_ALPHA) handles premultiplied
+    // input correctly; multiplying again here would darken overlays.
     fragColor = imageColor;
 }
     `,
@@ -95,8 +96,8 @@ void main(void) {
       deckglTexture: texture
     },
     parameters: {
-      depthWriteEnabled: true,
-      depthCompare: 'less-equal',
+      depthWriteEnabled: false,
+      depthCompare: 'always',
       blendColorSrcFactor: 'one',
       blendColorDstFactor: 'one-minus-src-alpha',
       blendAlphaSrcFactor: 'one',
@@ -128,6 +129,18 @@ void main(void) {
 
     _customRender: redrawReason => {
       if (redrawReason === 'arcgis') {
+        // ArcGIS renders with alphaSrc=ZERO (preserves destination alpha for its
+        // own compositing pipeline). Without resetting this, deck layers inherit
+        // that blend state and write alpha=0 into the FBO, making the composite
+        // shader output (0,0,0,0) everywhere. Reset to standard premultiplied-alpha
+        // blend so the FBO stores correct RGBA for the composite pass.
+        const glCtx = (device as WebGLDevice).gl;
+        glCtx.blendFuncSeparate(
+          glCtx.ONE,
+          glCtx.ONE_MINUS_SRC_ALPHA,
+          glCtx.ONE,
+          glCtx.ONE_MINUS_SRC_ALPHA
+        );
         deckInstance._drawLayers(redrawReason);
       } else {
         this.redraw();
@@ -149,44 +162,81 @@ export function render(
     altitude?: number;
     pitch: number;
     bearing: number;
+    views?: unknown;
+    viewState?: unknown;
   }
 ) {
   const {model, deck, fbo} = resources;
   const device = model.device;
   if (device instanceof WebGLDevice) {
-    const {width, height, ...viewState} = viewport;
+    // @ts-ignore device.getParametersWebGL should return `any` not `void`?
+    const rawScreenFbo: WebGLFramebuffer | null = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+    const {width, height, views, viewState, ...defaultViewState} = viewport;
 
     /* global window */
     const dpr = window.devicePixelRatio;
     const pixelWidth = Math.round(width * dpr);
     const pixelHeight = Math.round(height * dpr);
 
-    // Wrap the external framebuffer handle so luma.gl treats it as a proper Framebuffer resource.
-    const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
-    let screenFbo: Framebuffer | null = null;
-    if (externalFbo) {
-      if (resources._externalFramebuffer?.handle !== externalFbo) {
-        resources._externalFramebuffer?.wrapper.destroy();
-        const wrapper = device.createFramebuffer({
-          handle: externalFbo,
-          width: pixelWidth,
-          height: pixelHeight
-        });
-        resources._externalFramebuffer = {handle: externalFbo, wrapper};
-      }
-      screenFbo = resources._externalFramebuffer!.wrapper;
-    }
-
     fbo.resize({width: pixelWidth, height: pixelHeight});
 
-    deck.setProps({viewState});
+    // luma's Framebuffer.resize() clones and destroys the color attachment texture when
+    // dimensions change, leaving the cached texture reference and the model sampler binding
+    // pointing at a destroyed GPU handle. Re-sync if the attachment was replaced.
+    const currentTexture =
+      (fbo.colorAttachments[0] as any).texture ?? (fbo.colorAttachments[0] as unknown as Texture);
+    if (currentTexture !== resources.texture) {
+      resources.texture = currentTexture;
+      (model as any).setBindings({deckglTexture: currentTexture});
+    }
+
+    // Pass CSS pixel dimensions — deck handles DPR internally. Passing physical
+    // pixels would double-apply DPR and project layer geometry off-screen.
+    // Without width/height, deck's viewport aspect diverges from ArcGIS's,
+    // causing the overlay to drift off the ground plane under tilt/rotation.
+    const deckProps: any = {
+      width,
+      height,
+      viewState: viewState || defaultViewState
+    };
+    if (views) {
+      deckProps.views = views;
+    }
+    deck.setProps(deckProps);
     // redraw deck immediately into deckFbo
     deck.redraw('arcgis');
 
     // We overlay the texture on top of the map using the full-screen quad.
+    const {gl} = device;
+
+    // drawBuffers is per-FBO state not tracked by luma's state cache;
+    // restore it for the screen FBO after rendering to the offscreen FBO.
+    if (rawScreenFbo) {
+      gl.bindFramebuffer(GL.FRAMEBUFFER, rawScreenFbo);
+      gl.drawBuffers([GL.COLOR_ATTACHMENT0]);
+    } else {
+      gl.drawBuffers([GL.BACK]);
+    }
+
+    // The model sets blend factors but not blend:true, so
+    // setDeviceParameters won't enable blending on its own.
+    gl.enable(GL.BLEND);
+    gl.blendFuncSeparate(GL.ONE, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
+    gl.blendEquationSeparate(GL.FUNC_ADD, GL.FUNC_ADD);
+
+    // luma's WEBGLRenderPass duck-types the framebuffer prop, reading `.handle`, `.width`,
+    // `.height`, and `.colorAttachments`. A raw WebGLFramebuffer has none of those, which
+    // breaks viewport auto-setup and draw-buffer selection. Build a minimal adapter that
+    // luma's state tracker accepts; `'handle' in obj` is true, so the raw FBO is bound.
+    const screenFboAdapter = {
+      handle: rawScreenFbo,
+      width: pixelWidth,
+      height: pixelHeight,
+      colorAttachments: [null]
+    };
 
     const textureToScreenPass = device.beginRenderPass({
-      framebuffer: screenFbo,
+      framebuffer: screenFboAdapter as any,
       parameters: {viewport: [0, 0, pixelWidth, pixelHeight]},
       clearColor: false,
       clearDepth: false
@@ -204,5 +254,4 @@ export function finalizeResources(resources: RenderResources) {
   resources.model.destroy();
   resources.fbo.destroy();
   resources.texture.destroy();
-  resources._externalFramebuffer?.wrapper.destroy();
 }

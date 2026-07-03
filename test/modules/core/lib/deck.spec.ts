@@ -165,6 +165,36 @@ test('Deck wires mjolnir requireFailure between recognizers', async () => {
   });
 });
 
+test('Deck#getEventManager resolves the default manager for views', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+      views: [new MapView({id: 'main'}), new MapView({id: 'overlay', canvasId: 'overlay'})],
+      viewState: {
+        main: {longitude: 0, latitude: 0, zoom: 0},
+        overlay: {longitude: 0, latitude: 0, zoom: 0}
+      },
+      layers: [],
+      onLoad: () => {
+        try {
+          const eventManager = (deck as any).eventManager;
+          expect(deck.getEventManager()).toBe(eventManager);
+          expect(deck.getEventManager('main')).toBe(eventManager);
+          expect(deck.getEventManager('overlay')).toBe(eventManager);
+          expect(Object.keys((deck as any).eventManagers)).toEqual(['default-canvas']);
+
+          deck.finalize();
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
 test('Deck#abort', async () => {
   const deck = new Deck({
     device,
