@@ -1087,7 +1087,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
 
     for (const eventType in EVENT_HANDLERS) {
-      eventManager.on(eventType, this._onEvent);
+      if (eventType === 'dblclick') {
+        // Use watch (passive) so the dblclick recognizer is only enabled by the
+        // controller's doubleClickZoom option — not by the picking system.
+        eventManager.watch(eventType, this._onEvent);
+      } else {
+        eventManager.on(eventType, this._onEvent);
+      }
     }
 
     return eventManager;
