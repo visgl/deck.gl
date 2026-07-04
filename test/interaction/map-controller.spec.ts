@@ -29,8 +29,9 @@ function getCanvas(): HTMLCanvasElement {
   return canvas;
 }
 
-async function dispatchPointerTap(x: number, y: number) {
+async function dispatchPointerTap(x: number, y: number, opts?: {shiftKey?: boolean}) {
   const canvas = getCanvas();
+  const shiftKey = opts?.shiftKey ?? false;
   const down = new PointerEvent('pointerdown', {
     clientX: x,
     clientY: y,
@@ -40,7 +41,8 @@ async function dispatchPointerTap(x: number, y: number) {
     pointerType: 'mouse',
     isPrimary: true,
     button: 0,
-    buttons: 1
+    buttons: 1,
+    shiftKey
   });
   canvas.dispatchEvent(down);
   await sleep(10);
@@ -53,10 +55,17 @@ async function dispatchPointerTap(x: number, y: number) {
     pointerType: 'mouse',
     isPrimary: true,
     button: 0,
-    buttons: 0
+    buttons: 0,
+    shiftKey
   });
   // PointerEventInput listens for pointerup on window, not on the element
   window.dispatchEvent(up);
+}
+
+async function dispatchPointerDoubleTap(x: number, y: number, opts?: {shiftKey?: boolean}) {
+  await dispatchPointerTap(x, y, opts);
+  await sleep(50);
+  await dispatchPointerTap(x, y, opts);
 }
 
 // Shared Deck instance and state
@@ -161,35 +170,42 @@ test('MapController rotate', async () => {
   ).toBeTruthy();
 });
 
-// These dblclick tests are skipped: page.mouse.dblclick() doesn't properly
-// dispatch pointer events to the canvas inside the vitest browser iframe.
-// The dblclick zoom feature is covered by unit tests in controllers.spec.ts.
-test.skip('MapController dblclick zoom in', async () => {
-  await resetViewState();
-  deck!.setProps({controller: {doubleClickZoom: true}});
-  await emulateEvent({wait: 100});
-  const oldViewport = getViewport();
+test('MapController dblclick zoom in', async () => {
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'dblclick-zoom-in-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
 
-  await emulateEvent({type: 'dblclick', x: 200, y: 100});
-  await emulateEvent({wait: 300});
+  const oldZoom = testDeck.getViewports()[0].zoom;
+  await dispatchPointerDoubleTap(200, 100);
+  await sleep(500);
 
-  const newViewport = getViewport();
-  expect(newViewport.zoom > oldViewport.zoom, 'map zoomed in').toBeTruthy();
-  deck!.setProps({controller: true});
+  const newZoom = testDeck.getViewports()[0].zoom;
+  testDeck.finalize();
+  expect(newZoom > oldZoom, 'map zoomed in').toBeTruthy();
 });
 
-test.skip('MapController shift-dblclick zoom out', async () => {
-  await resetViewState();
-  deck!.setProps({controller: {doubleClickZoom: true}});
-  await emulateEvent({wait: 100});
-  const oldViewport = getViewport();
+test('MapController shift-dblclick zoom out', async () => {
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'dblclick-zoom-out-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
 
-  await emulateEvent({type: 'dblclick', x: 200, y: 100, shiftKey: true});
-  await emulateEvent({wait: 300});
+  const oldZoom = testDeck.getViewports()[0].zoom;
+  await dispatchPointerDoubleTap(200, 100, {shiftKey: true});
+  await sleep(500);
 
-  const newViewport = getViewport();
-  expect(newViewport.zoom < oldViewport.zoom, 'map zoomed out').toBeTruthy();
-  deck!.setProps({controller: true});
+  const newZoom = testDeck.getViewports()[0].zoom;
+  testDeck.finalize();
+  expect(newZoom < oldZoom, 'map zoomed out').toBeTruthy();
 });
 
 test('MapController keyboard left', async () => {
