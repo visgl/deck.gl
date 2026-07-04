@@ -15,7 +15,7 @@ The base Controller class supports the following options:
 * `dragPan` (boolean) - enable panning with pointer drag. Default `true`
 * `dragRotate` (boolean) - enable rotating with pointer drag. Default `true`
 * `doubleClickZoom` (boolean) - enable zooming with double click. Default `false`. Enabling adds ~300ms latency to click events due to the tap recognizer waiting to distinguish single clicks from double clicks.
-* `doubleClickDragZoom` (boolean) - enable zooming by double clicking/tapping and dragging. Default `true`
+* `doubleClickDragZoom` (boolean) - enable zooming by double clicking/tapping and dragging. Default `false`. Enabling adds ~300ms latency to click events due to the tap recognizer waiting to distinguish single clicks from double-click-drags.
 * `touchZoom` (boolean) - enable zooming with multi-touch pinch. Default `true`
 * `touchRotate` (boolean) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
 * `keyboard` (boolean | object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
