@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   MapView,
   OrbitView,
@@ -10,6 +10,8 @@ import {
   FirstPersonView,
   _GlobeView as GlobeView
 } from '@deck.gl/core';
+import {EventManager} from 'mjolnir.js';
+import {RECOGNIZERS} from '@deck.gl/core/lib/constants';
 import {Timeline} from '@luma.gl/engine';
 
 import testController, {createTestController} from './test-controller';
@@ -265,4 +267,135 @@ test('FirstPersonController', async () => {
     // FirstPersonController does not pan
     ['pan#function key', 'pan#function key#disabled']
   );
+});
+
+// --- Click delay tests ---
+// These test the recognizer-level timing behavior through the full EventManager pipeline.
+
+function createEventManager(opts: {doubleClickZoom?: boolean; doubleClickDragZoom?: boolean} = {}) {
+  const element = document.createElement('div');
+  element.style.width = '100px';
+  element.style.height = '100px';
+  document.body.appendChild(element);
+
+  const eventManager = new EventManager(element, {
+    recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+      const [RecognizerConstructor, defaultOptions, recognizeWith, requireFailure] =
+        RECOGNIZERS[eventName];
+      return {
+        recognizer: new RecognizerConstructor({...defaultOptions, event: eventName}),
+        recognizeWith,
+        requireFailure
+      };
+    })
+  });
+
+  // Toggle recognizers based on options (mimics controller.setProps behavior)
+  if (opts.doubleClickZoom !== undefined) {
+    const dblclickRecognizer = eventManager['manager'].get('dblclick');
+    if (dblclickRecognizer) {
+      dblclickRecognizer.set({enable: opts.doubleClickZoom});
+    }
+  }
+  if (opts.doubleClickDragZoom !== undefined) {
+    const dblclickdragRecognizer = eventManager['manager'].get('dblclickdrag');
+    if (dblclickdragRecognizer) {
+      dblclickdragRecognizer.set({enable: opts.doubleClickDragZoom});
+    }
+  }
+
+  return {element, eventManager};
+}
+
+function simulateTap(element: HTMLElement) {
+  const pointerDown = new PointerEvent('pointerdown', {
+    pointerId: 1,
+    clientX: 50,
+    clientY: 50,
+    buttons: 1,
+    bubbles: true
+  });
+  const pointerUp = new PointerEvent('pointerup', {
+    pointerId: 1,
+    clientX: 50,
+    clientY: 50,
+    buttons: 0,
+    bubbles: true
+  });
+  element.dispatchEvent(pointerDown);
+  element.dispatchEvent(pointerUp);
+}
+
+function cleanup(element: HTMLElement, eventManager: EventManager) {
+  eventManager.destroy();
+  element.remove();
+}
+
+test('click fires immediately when doubleClickZoom and doubleClickDragZoom are disabled', () => {
+  vi.useFakeTimers();
+  const {element, eventManager} = createEventManager({
+    doubleClickZoom: false,
+    doubleClickDragZoom: false
+  });
+
+  let clickFired = false;
+  eventManager.on('click', () => {
+    clickFired = true;
+  });
+
+  simulateTap(element);
+
+  expect(clickFired, 'click fires immediately with no delay').toBe(true);
+
+  cleanup(element, eventManager);
+  vi.useRealTimers();
+});
+
+test('click is delayed ~300ms when doubleClickZoom is enabled', () => {
+  vi.useFakeTimers();
+  const {element, eventManager} = createEventManager({
+    doubleClickZoom: true,
+    doubleClickDragZoom: false
+  });
+
+  let clickFired = false;
+  eventManager.on('click', () => {
+    clickFired = true;
+  });
+
+  simulateTap(element);
+
+  expect(clickFired, 'click does not fire immediately').toBe(false);
+
+  vi.advanceTimersByTime(299);
+  expect(clickFired, 'click has not fired at 299ms').toBe(false);
+
+  vi.advanceTimersByTime(1);
+  expect(clickFired, 'click fires at 300ms').toBe(true);
+
+  cleanup(element, eventManager);
+  vi.useRealTimers();
+});
+
+test('click is delayed ~300ms when doubleClickDragZoom is enabled', () => {
+  vi.useFakeTimers();
+  const {element, eventManager} = createEventManager({
+    doubleClickZoom: false,
+    doubleClickDragZoom: true
+  });
+
+  let clickFired = false;
+  eventManager.on('click', () => {
+    clickFired = true;
+  });
+
+  simulateTap(element);
+
+  expect(clickFired, 'click does not fire immediately').toBe(false);
+
+  vi.advanceTimersByTime(300);
+  expect(clickFired, 'click fires after 300ms').toBe(true);
+
+  cleanup(element, eventManager);
+  vi.useRealTimers();
 });
