@@ -43,7 +43,7 @@ export type ControllerOptions = {
   dragPan?: boolean;
   /** Enable rotating with pointer drag. Default `true` */
   dragRotate?: boolean;
-  /** Enable zooming with double click. Default `true` */
+  /** Enable zooming with double click. Default `false`. Enabling adds ~300ms latency to click events. */
   doubleClickZoom?: boolean;
   /** Enable zooming with double click/tap and drag. Default `true` */
   doubleClickDragZoom?: boolean;
@@ -326,7 +326,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       scrollZoom = true,
       dragPan = true,
       dragRotate = true,
-      doubleClickZoom = true,
+      doubleClickZoom = false,
       doubleClickDragZoom = true,
       touchZoom = true,
       touchRotate = false,
