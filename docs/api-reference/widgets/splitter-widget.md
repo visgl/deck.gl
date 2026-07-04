@@ -140,7 +140,10 @@ function App() {
 ## Constructor
 
 ```ts
-import {_SplitterWidget as SplitterWidget, type SplitterWidgetProps} from '@deck.gl/widgets';
+import {
+  _SplitterWidget as SplitterWidget,
+  type SplitterWidgetProps
+} from '@deck.gl/widgets';
 new SplitterWidget<ViewType[]>({} satisfies SplitterWidgetProps);
 ```
 
@@ -150,7 +153,7 @@ new SplitterWidget<ViewType[]>({} satisfies SplitterWidgetProps);
 
 The `SplitterWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
-#### `viewLayout` (ViewLayout, required) {#viewlayout}
+#### `viewLayout` (SplitterWidgetViewLayout, required) {#viewlayout}
 
 Layout descriptor of how views are arranged on the canvas. Contains the following fields:
 
@@ -161,7 +164,7 @@ Layout descriptor of how views are arranged on the canvas. Contains the followin
 - `minSplit` (number, optional) - Min value of the split. The user cannot make the first view smaller than this ratio. Default `0.05`.
 - `maxSplit` (number, optional) - Max value of the split. The user cannot make the first view larger than this ratio. Default `0.95`.
 
-You may also replace one or both item in `views` with a `ViewLayout` object, composing more than two views into a complex layout.
+You may also replace one or both items in `views` with a nested `SplitterWidgetViewLayout` object, composing more than two views into a complex layout.
 
 
 #### `onChange` (Function, optional) {#onchange}
