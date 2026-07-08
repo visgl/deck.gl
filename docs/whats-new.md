@@ -41,6 +41,8 @@ Release date: TBD
 
 A new experimental `ViewLayout` system with a helper function `buildViewsFromViewLayout()` allows advanced nested and relative view layouts to be specified using a declarative layout tree.
 
+[ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026
