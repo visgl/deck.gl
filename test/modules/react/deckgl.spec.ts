@@ -16,7 +16,7 @@ import {
 } from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {Layer, Widget, type WebMercatorViewport, type MapViewState} from '@deck.gl/core';
+import {Deck, Layer, Widget, type WebMercatorViewport, type MapViewState} from '@deck.gl/core';
 import DeckGL, {type DeckGLRef} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 
@@ -286,6 +286,47 @@ test('DeckGL#controlled view state', async () => {
   viewport = deckInstance.getViewports()[0] as WebMercatorViewport;
   expect(viewport.longitude).toBe(0);
   expect(viewport.zoom).toBe(2);
+
+  act(() => {
+    root.render(null);
+  });
+  container.remove();
+});
+
+test('DeckGL#initial render redraw happens exactly once', async () => {
+  const redrawSpy = vi.spyOn(Deck.prototype, 'redraw');
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 100,
+        height: 100
+      })
+    );
+  });
+  await waitUntilReady(ref);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        initialViewState: TEST_VIEW_STATE,
+        ref,
+        width: 200,
+        height: 100
+      })
+    );
+  });
+  await waitUntilReady(ref);
+
+  const initialRenderCalls = redrawSpy.mock.calls.filter(call => call[0] === 'Initial render');
+  expect(initialRenderCalls, 'Initial render redraw happens exactly once').toHaveLength(1);
+  redrawSpy.mockRestore();
 
   act(() => {
     root.render(null);
