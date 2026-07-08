@@ -1,6 +1,6 @@
 # Widget Tooltip
 
-`updateWidgetTooltip` adds delegated, theme-aware text tooltips to a custom widget.
+`updateWidgetTooltip` adds delegated, theme-aware text tooltips to a widget. Bundled button widgets use it by default.
 
 ```ts
 import {Widget} from '@deck.gl/core';
@@ -11,7 +11,7 @@ import '@deck.gl/widgets/stylesheet.css';
 
 ## Usage
 
-Call `updateWidgetTooltip` from `onAfterRenderHTML()`. Descendants with a `data-deck-widget-tooltip` attribute become tooltip anchors.
+Bundled button widgets expose tooltip metadata and call the helper after rendering. In custom widgets, call `updateWidgetTooltip` from `onAfterRenderHTML()`. Descendants with a `data-deck-widget-tooltip` attribute become tooltip anchors.
 
 ```tsx
 class ResetWidget extends Widget {

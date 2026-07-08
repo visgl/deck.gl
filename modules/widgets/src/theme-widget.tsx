@@ -7,6 +7,7 @@ import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 // import {useCallback} from 'preact/hooks';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 import type {DeckWidgetTheme} from './themes';
 import {LightGlassTheme, DarkGlassTheme} from './themes';
 
@@ -55,6 +56,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
 
   className = 'deck-widget-theme';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
   themeMode: 'light' | 'dark' = 'dark';
   appliedTheme: DeckWidgetTheme = {};
 

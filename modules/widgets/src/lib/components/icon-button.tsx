@@ -33,6 +33,8 @@ export const IconButton = (props: IconButtonProps) => {
         type="button"
         onClick={onClick}
         title={label}
+        aria-label={label}
+        data-deck-widget-tooltip={label}
       >
         {children ? children : <div className="deck-widget-icon" style={iconStyle} />}
       </button>

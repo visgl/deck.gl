@@ -7,6 +7,7 @@ import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
 import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 /** Properties for the ScreenshotWidget */
 export type ScreenshotWidgetProps = WidgetProps & {
@@ -42,6 +43,7 @@ export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
 
   className = 'deck-widget-screenshot';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
 
   constructor(props: ScreenshotWidgetProps = {}) {
     super(props);

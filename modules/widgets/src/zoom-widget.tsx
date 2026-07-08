@@ -7,6 +7,7 @@ import type {WidgetProps, WidgetPlacement, OrthographicViewState} from '@deck.gl
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 export type ZoomWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -59,6 +60,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
 
   constructor(props: ZoomWidgetProps = {}) {
     super(props);

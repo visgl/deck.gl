@@ -134,7 +134,7 @@ new Deck({
 
 Widgets with UI (e.g. a button or panel) can be positioned relative to the deck.gl view they are controlling, via the `viewId` and `placement` props. See [WidgetProps](../core/widget.md#widgetprops).
 
-Custom widgets can opt into [themed text tooltips](./widget-tooltip.md) by calling `updateWidgetTooltip` from `@deck.gl/widgets` in `onAfterRenderHTML()`.
+Bundled button widgets use [themed text tooltips](./widget-tooltip.md). Custom widgets can call `updateWidgetTooltip` from `onAfterRenderHTML()` to use the same renderer.
 
 The `viewId` controls which HTML container will mount to, and the `placement` prop will position it relative to the container it is in, like so:
 

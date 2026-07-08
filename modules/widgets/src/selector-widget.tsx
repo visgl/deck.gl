@@ -7,6 +7,7 @@ import {Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {SimpleMenu, type MenuItem} from './lib/components/dropdown-menu';
 import {Popover, type PopoverProps} from './lib/components/popover';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 export type SelectorWidgetOption<ValueT = string> = {
   value: ValueT;
@@ -48,6 +49,7 @@ export class SelectorWidget<ValueT = string> extends Widget<SelectorWidgetProps<
 
   className = 'deck-widget-selector';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
   value: ValueT;
   isOpen: {x: number; y: number; placement: PopoverProps['placement']} | false = false;
 

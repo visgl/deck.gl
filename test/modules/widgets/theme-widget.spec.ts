@@ -69,7 +69,9 @@ test('ThemeWidget - button label and icon reflect current mode', async () => {
   let button = testInstance.findElements(
     '.deck-widget-theme .deck-widget-icon-button'
   )[0] as HTMLButtonElement;
-  expect(button.title).toBe('Dark Mode');
+  expect(button.title).toBe('');
+  expect(button.getAttribute('aria-label')).toBe('Dark Mode');
+  expect(button.getAttribute('data-deck-widget-tooltip')).toBe('Dark Mode');
   expect(button.className).toContain('deck-widget-moon');
 
   testInstance.setProps({
@@ -86,7 +88,9 @@ test('ThemeWidget - button label and icon reflect current mode', async () => {
   button = testInstance.findElements(
     '.deck-widget-theme .deck-widget-icon-button'
   )[0] as HTMLButtonElement;
-  expect(button.title).toBe('Light Mode');
+  expect(button.title).toBe('');
+  expect(button.getAttribute('aria-label')).toBe('Light Mode');
+  expect(button.getAttribute('data-deck-widget-tooltip')).toBe('Light Mode');
   expect(button.className).toContain('deck-widget-sun');
 });
 

@@ -5,6 +5,7 @@
 import {Widget, LinearInterpolator} from '@deck.gl/core';
 import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 export type GimbalWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
@@ -44,6 +45,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
 
   className = 'deck-widget-gimbal';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: GimbalWidgetProps = {}) {
@@ -72,6 +74,8 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
             }
           }}
           title={this.props.label}
+          aria-label={this.props.label}
+          data-deck-widget-tooltip={this.props.label}
           style={{position: 'relative', width: 26, height: 26}}
         >
           {/* Outer ring */}

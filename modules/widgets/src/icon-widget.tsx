@@ -6,6 +6,7 @@ import type {WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render, type JSX} from 'preact';
 import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 export type IconWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'bottom-left'. */
@@ -39,6 +40,7 @@ export class IconWidget extends Widget<IconWidgetProps> {
 
   className = '';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
 
   constructor(props: IconWidgetProps) {
     super(props);

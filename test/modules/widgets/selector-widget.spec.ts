@@ -31,7 +31,9 @@ test('SelectorWidget', async () => {
 
   await testInstance.idle();
   let button = testInstance.findElements('.deck-widget-icon-button')[0] as HTMLButtonElement;
-  expect(button.title).toBe('Grid');
+  expect(button.title).toBe('');
+  expect(button.getAttribute('aria-label')).toBe('Grid');
+  expect(button.getAttribute('data-deck-widget-tooltip')).toBe('Grid');
 
   testInstance.click('.deck-widget-icon-button');
   await testInstance.idle();
@@ -45,6 +47,8 @@ test('SelectorWidget', async () => {
 
   expect(onChange).toHaveBeenCalledWith('list');
   button = testInstance.findElements('.deck-widget-icon-button')[0] as HTMLButtonElement;
-  expect(button.title).toBe('List');
+  expect(button.title).toBe('');
+  expect(button.getAttribute('aria-label')).toBe('List');
+  expect(button.getAttribute('data-deck-widget-tooltip')).toBe('List');
   expect(testInstance.findElements('.deck-widget-dropdown-item')).toHaveLength(0);
 });

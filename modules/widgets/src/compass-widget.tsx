@@ -5,6 +5,7 @@
 import {Widget, FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
 import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 export type CompassWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -42,6 +43,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
 
   className = 'deck-widget-compass';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
   viewports: {[id: string]: Viewport} = {};
 
   constructor(props: CompassWidgetProps = {}) {
@@ -70,6 +72,8 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
             }
           }}
           title={this.props.label}
+          aria-label={this.props.label}
+          data-deck-widget-tooltip={this.props.label}
           style={{transform: `rotateX(${rx}deg)`}}
         >
           <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">

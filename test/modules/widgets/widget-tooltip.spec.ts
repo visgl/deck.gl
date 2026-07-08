@@ -3,13 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 import {afterEach, test, expect} from 'vitest';
-import {updateWidgetTooltip} from '@deck.gl/widgets';
+import {updateWidgetTooltip, ZoomWidget} from '@deck.gl/widgets';
+import {WidgetTester} from './common';
 
 let rootElement: HTMLDivElement | undefined;
+let testInstance: WidgetTester<any> | undefined;
 
 afterEach(() => {
   rootElement?.remove();
   rootElement = undefined;
+  testInstance?.destroy();
+  testInstance = undefined;
 });
 
 function createTooltipTarget(label: string) {
@@ -71,4 +75,19 @@ test('updateWidgetTooltip resolves SVG targets and updated labels', () => {
   updateWidgetTooltip(rootElement!);
   dispatchPointerOver(button);
   expect(rootElement?.querySelector('.deck-widget-tooltip')?.textContent).toBe('Reset view');
+});
+
+test('button widgets use themed tooltips', async () => {
+  testInstance = new WidgetTester({
+    widgets: [new ZoomWidget()]
+  });
+  await testInstance.idle();
+
+  const button = testInstance.findElements('.deck-widget-zoom-in')[0] as HTMLButtonElement;
+  expect(button.title).toBe('');
+  expect(button.getAttribute('aria-label')).toBe('Zoom In');
+  expect(button.getAttribute('data-deck-widget-tooltip')).toBe('Zoom In');
+
+  dispatchPointerOver(button);
+  expect(testInstance.findElements('.deck-widget-tooltip')[0].textContent).toBe('Zoom In');
 });

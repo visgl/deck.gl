@@ -41,7 +41,7 @@ Release date: TBD
 
 A new experimental `ViewLayout` system with a helper function `buildViewsFromViewLayout()` allows advanced nested and relative view layouts to be specified using a declarative layout tree.
 
-The new `updateWidgetTooltip` helper lets custom widgets opt into themed text tooltips.
+Bundled button widgets now use themed text tooltips. Custom widgets can use the same renderer through the new `updateWidgetTooltip` helper.
 
 ## deck.gl v9.3
 

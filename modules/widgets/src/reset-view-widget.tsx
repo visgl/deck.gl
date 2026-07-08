@@ -7,6 +7,7 @@ import type {ViewStateMap, View} from '@deck.gl/core';
 import {render} from 'preact';
 import {Widget} from '@deck.gl/core';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 /** @note Mirrors an internal calss in deck.gl/core. We can easily redefine it here */
 type ViewOrViews = View | View[] | null;
@@ -51,6 +52,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
 
   className = 'deck-widget-reset-view';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
 
   constructor(props: ResetViewWidgetProps<ViewsT> = {}) {
     super(props);

@@ -6,6 +6,7 @@
 import {log, Widget, type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {render} from 'preact';
 import {IconButton} from './lib/components/icon-button';
+import {updateWidgetTooltip} from './lib/widget-tooltip';
 
 /* eslint-enable max-len */
 
@@ -44,6 +45,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
 
   className = 'deck-widget-fullscreen';
   placement: WidgetPlacement = 'top-left';
+  protected override onAfterRenderHTML = updateWidgetTooltip;
   fullscreen: boolean = false;
 
   constructor(props: FullscreenWidgetProps = {}) {
