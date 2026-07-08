@@ -9,8 +9,9 @@ import {Map} from 'react-map-gl/maplibre';
 import DeckWithMapLibre from './deck-with-maplibre';
 import DeckWithGoogleMaps from './deck-with-google-maps';
 
-import {FlyToInterpolator} from '@deck.gl/core';
+import {FlyToInterpolator, View} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
+import {buildViewsFromViewLayout, type ViewLayout} from '@deck.gl/widgets';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
 
 import Editor from '@monaco-editor/react';
@@ -21,6 +22,59 @@ const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
 const GOOGLE_MAPS_TOKEN = process.env.GoogleMapsAPIKey; // eslint-disable-line
+const VIEW_LAYOUT_TYPES = new Set(['row', 'column', 'overlay', 'spacer']);
+
+/** JSON-facing layout node accepted by the playground `viewLayout` prop. */
+type JsonViewLayout = {
+  /** Playground-only discriminator that maps to `ViewLayout.type`. */
+  layout: 'row' | 'column' | 'overlay' | 'spacer';
+  /** Ordered child layout nodes or converted deck.gl views. */
+  children?: JsonViewLayoutChild[];
+  /** Additional layout props forwarded to `buildViewsFromViewLayout`. */
+  [key: string]: unknown;
+};
+
+/** JSON-facing child accepted by a playground `viewLayout` node. */
+type JsonViewLayoutChild = JsonViewLayout | View | null | false | undefined;
+
+/** Deck props produced by the playground JSON converter. */
+type PlaygroundDeckProps = Record<string, any> & {
+  /** Optional JSON-facing view layout tree. */
+  viewLayout?: JsonViewLayout;
+  /** Concrete views passed to DeckGL after view layout compilation. */
+  views?: View[];
+};
+
+/**
+ * Checks whether a value is a JSON-facing layout node instead of a converted deck.gl view.
+ *
+ * @param value - Candidate child from a converted playground JSON `viewLayout`.
+ * @returns `true` when the value is a playground layout node.
+ */
+function isJsonViewLayout(value: unknown): value is JsonViewLayout {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      !(value instanceof View) &&
+      'layout' in value &&
+      VIEW_LAYOUT_TYPES.has(String(value.layout))
+  );
+}
+
+/**
+ * Converts the playground JSON `layout` discriminator to the widget API's `type` discriminator.
+ *
+ * @param item - Playground JSON layout node after `@@type` view leaves have been converted.
+ * @returns `ViewLayout` accepted by `buildViewsFromViewLayout`.
+ */
+function normalizeViewLayout(item: JsonViewLayout): ViewLayout {
+  const {layout, children, ...props} = item;
+  return {
+    ...props,
+    type: layout,
+    children: children?.map(child => (isJsonViewLayout(child) ? normalizeViewLayout(child) : child))
+  } as ViewLayout;
+}
 
 function isFunctionObject(value) {
   return typeof value === 'object' && '@@function' in value;
@@ -150,12 +204,43 @@ export default class App extends Component {
     );
   }
 
-  render() {
-    const {jsonProps, initialViewState} = this.state;
+  /**
+   * Builds the props that should be passed to DeckGL for the current pane size.
+   *
+   * @param width - Current deck pane width in CSS pixels.
+   * @param height - Current deck pane height in CSS pixels.
+   * @returns Converted JSON props with playground `viewLayout` compiled to concrete `views`.
+   */
+  _getDeckProps(width: number, height: number): PlaygroundDeckProps {
+    const {viewLayout, ...deckProps} = this.state.jsonProps as PlaygroundDeckProps;
+    if (isJsonViewLayout(viewLayout)) {
+      try {
+        const compiled = buildViewsFromViewLayout({
+          layout: normalizeViewLayout(viewLayout),
+          width,
+          height
+        });
+        deckProps.views = compiled.views;
+      } catch {
+        deckProps.views = [];
+      }
+    }
+    return deckProps;
+  }
 
-    let deckMap;
+  /**
+   * Renders the active playground deck implementation inside the measured right pane.
+   *
+   * @param width - Current deck pane width in CSS pixels.
+   * @param height - Current deck pane height in CSS pixels.
+   * @returns React element for the selected map integration.
+   */
+  _renderDeck(width: number, height: number): React.ReactNode {
+    const {initialViewState} = this.state;
+    const jsonProps = this._getDeckProps(width, height);
+
     if (jsonProps.google === true) {
-      deckMap = (
+      return (
         <DeckWithGoogleMaps
           initialViewState={initialViewState}
           id="json-deck"
@@ -163,17 +248,19 @@ export default class App extends Component {
           googleMapsToken={GOOGLE_MAPS_TOKEN}
         />
       );
-    } else {
-      deckMap = (
-        <DeckWithMapLibre
-          id="json-deck"
-          {...jsonProps}
-          initialViewState={initialViewState}
-          Map={Map}
-        />
-      );
     }
 
+    return (
+      <DeckWithMapLibre
+        id="json-deck"
+        {...jsonProps}
+        initialViewState={initialViewState}
+        Map={Map}
+      />
+    );
+  }
+
+  render() {
     return (
       <Fragment>
         {/* Left Pane: Monaco Editor and Template Selector */}
@@ -198,7 +285,9 @@ export default class App extends Component {
         </div>
 
         {/* Right Pane: DeckGL */}
-        <div id="right-pane">{deckMap}</div>
+        <div id="right-pane">
+          <AutoSizer>{({width, height}) => this._renderDeck(width, height)}</AutoSizer>
+        </div>
       </Fragment>
     );
   }

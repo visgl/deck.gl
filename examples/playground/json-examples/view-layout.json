@@ -1,0 +1,311 @@
+{
+  "description": "A declarative row, column, and overlay view layout compiled into deck.gl views",
+  "websiteUrl": "https://deck.gl/examples/view-layout",
+  "initialViewState": {
+    "header": {"target": [0, 0, 0], "zoom": 0},
+    "sidebar": {"target": [0, 0, 0], "zoom": 0},
+    "main": {"target": [0, 0, 0], "zoom": 0, "minZoom": -2, "maxZoom": 4},
+    "selection-overlay": {"target": [0, 0, 0], "zoom": 0, "minZoom": -2, "maxZoom": 4},
+    "minimap": {"target": [0, 0, 0], "zoom": -2}
+  },
+  "viewLayout": {
+    "layout": "column",
+    "children": [
+      {
+        "@@type": "OrthographicView",
+        "id": "header",
+        "height": 64,
+        "controller": false
+      },
+      {
+        "layout": "row",
+        "splitId": "sidebar-main",
+        "initialSplit": 0.22,
+        "children": [
+          {
+            "@@type": "OrthographicView",
+            "id": "sidebar",
+            "controller": false,
+            "minPixels": 180,
+            "maxPixels": 420
+          },
+          {
+            "layout": "overlay",
+            "children": [
+              {
+                "@@type": "OrthographicView",
+                "id": "main",
+                "controller": true
+              },
+              {
+                "@@type": "OrthographicView",
+                "id": "selection-overlay",
+                "controller": false
+              },
+              {
+                "@@type": "OrthographicView",
+                "id": "minimap",
+                "x": "calc(100% - 196px)",
+                "y": "calc(100% - 136px)",
+                "width": 180,
+                "height": 120,
+                "controller": false,
+                "clear": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "layerFilter": {
+    "@@function": "layerIdStartsWithViewportId"
+  },
+  "widgets": [
+    {"@@type": "_LabelWidget", "id": "header-label", "viewId": "header", "label": "header"},
+    {"@@type": "_LabelWidget", "id": "sidebar-label", "viewId": "sidebar", "label": "sidebar"},
+    {"@@type": "_LabelWidget", "id": "main-label", "viewId": "main", "label": "main"},
+    {
+      "@@type": "_LabelWidget",
+      "id": "selection-overlay-label",
+      "viewId": "selection-overlay",
+      "label": "selection-overlay",
+      "offset": [54, 0]
+    },
+    {"@@type": "_LabelWidget", "id": "minimap-label", "viewId": "minimap", "label": "minimap"}
+  ],
+  "layers": [
+    {
+      "@@type": "PolygonLayer",
+      "id": "header-panel",
+      "data": [
+        {
+          "polygon": [
+            [-1000, -1000],
+            [1000, -1000],
+            [1000, 1000],
+            [-1000, 1000]
+          ]
+        }
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPolygon": "@@=polygon",
+      "getFillColor": [24, 35, 58, 245]
+    },
+    {
+      "@@type": "TextLayer",
+      "id": "header-labels",
+      "data": [
+        {
+          "text": "View layout manager",
+          "position": [-360, -16],
+          "size": 22,
+          "color": [255, 255, 255]
+        },
+        {
+          "text": "A declarative row / column / overlay tree compiled into deck.gl views",
+          "position": [-360, 14],
+          "size": 13,
+          "color": [203, 213, 225]
+        }
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPosition": "@@=position",
+      "getText": "@@=text",
+      "getSize": "@@=size",
+      "getColor": "@@=color",
+      "getTextAnchor": "start",
+      "getAlignmentBaseline": "center"
+    },
+    {
+      "@@type": "PolygonLayer",
+      "id": "sidebar-panel",
+      "data": [
+        {
+          "polygon": [
+            [-1000, -1000],
+            [1000, -1000],
+            [1000, 1000],
+            [-1000, 1000]
+          ]
+        }
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPolygon": "@@=polygon",
+      "getFillColor": [31, 41, 55, 245]
+    },
+    {
+      "@@type": "TextLayer",
+      "id": "sidebar-labels",
+      "data": [
+        {"text": "Layout tree", "position": [-80, -160], "size": 18, "color": [255, 255, 255]},
+        {"text": "column", "position": [-80, -112], "size": 13, "color": [203, 213, 225]},
+        {"text": "header: 64px", "position": [-64, -78], "size": 13, "color": [203, 213, 225]},
+        {"text": "row", "position": [-64, -44], "size": 13, "color": [203, 213, 225]},
+        {
+          "text": "split id: sidebar-main",
+          "position": [-48, -10],
+          "size": 13,
+          "color": [203, 213, 225]
+        },
+        {"text": "overlay", "position": [-48, 24], "size": 13, "color": [203, 213, 225]},
+        {
+          "text": "main + overlay + minimap",
+          "position": [-32, 58],
+          "size": 13,
+          "color": [203, 213, 225]
+        }
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPosition": "@@=position",
+      "getText": "@@=text",
+      "getSize": "@@=size",
+      "getColor": "@@=color",
+      "getTextAnchor": "start",
+      "getAlignmentBaseline": "center"
+    },
+    {
+      "@@type": "PolygonLayer",
+      "id": "main-panel",
+      "data": [
+        {
+          "polygon": [
+            [-1000, -1000],
+            [1000, -1000],
+            [1000, 1000],
+            [-1000, 1000]
+          ]
+        }
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPolygon": "@@=polygon",
+      "getFillColor": [248, 250, 252, 255]
+    },
+    {
+      "@@type": "PathLayer",
+      "id": "main-grid",
+      "data": [
+        [
+          [-300, -200],
+          [300, -200]
+        ],
+        [
+          [-300, -100],
+          [300, -100]
+        ],
+        [
+          [-300, 0],
+          [300, 0]
+        ],
+        [
+          [-300, 100],
+          [300, 100]
+        ],
+        [
+          [-300, 200],
+          [300, 200]
+        ],
+        [
+          [-300, -250],
+          [-300, 250]
+        ],
+        [
+          [-150, -250],
+          [-150, 250]
+        ],
+        [
+          [0, -250],
+          [0, 250]
+        ],
+        [
+          [150, -250],
+          [150, 250]
+        ],
+        [
+          [300, -250],
+          [300, 250]
+        ]
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPath": "@@=-",
+      "getColor": [203, 213, 225, 130],
+      "getWidth": 1,
+      "widthUnits": "pixels"
+    },
+    {
+      "@@type": "ScatterplotLayer",
+      "id": "main-points",
+      "data": [
+        {"position": [-200, -120], "radius": 12, "color": [45, 212, 191, 210]},
+        {"position": [-130, 40], "radius": 10, "color": [59, 130, 246, 210]},
+        {"position": [-60, -30], "radius": 14, "color": [129, 140, 248, 210]},
+        {"position": [20, 100], "radius": 11, "color": [34, 197, 94, 210]},
+        {"position": [80, -80], "radius": 13, "color": [14, 165, 233, 210]},
+        {"position": [160, 30], "radius": 9, "color": [168, 85, 247, 210]},
+        {"position": [210, -150], "radius": 15, "color": [59, 130, 246, 210]},
+        {"position": [250, 130], "radius": 8, "color": [45, 212, 191, 210]}
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPosition": "@@=position",
+      "getRadius": "@@=radius",
+      "radiusUnits": "pixels",
+      "getFillColor": "@@=color",
+      "pickable": true
+    },
+    {
+      "@@type": "PathLayer",
+      "id": "selection-overlay-crosshair",
+      "data": [
+        [
+          [-18, 0],
+          [18, 0]
+        ],
+        [
+          [0, -18],
+          [0, 18]
+        ]
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPath": "@@=-",
+      "getColor": [15, 23, 42, 180],
+      "getWidth": 2,
+      "widthUnits": "pixels"
+    },
+    {
+      "@@type": "PolygonLayer",
+      "id": "minimap-panel",
+      "data": [
+        {
+          "polygon": [
+            [-1000, -1000],
+            [1000, -1000],
+            [1000, 1000],
+            [-1000, 1000]
+          ]
+        }
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPolygon": "@@=polygon",
+      "getFillColor": [255, 255, 255, 240]
+    },
+    {
+      "@@type": "ScatterplotLayer",
+      "id": "minimap-points",
+      "data": [
+        {"position": [-200, -120]},
+        {"position": [-130, 40]},
+        {"position": [-60, -30]},
+        {"position": [20, 100]},
+        {"position": [80, -80]},
+        {"position": [160, 30]},
+        {"position": [210, -150]},
+        {"position": [250, 130]}
+      ],
+      "coordinateSystem": "@@#COORDINATE_SYSTEM.CARTESIAN",
+      "getPosition": "@@=position",
+      "getRadius": 3,
+      "radiusUnits": "pixels",
+      "getFillColor": [37, 99, 235, 180]
+    }
+  ]
+}

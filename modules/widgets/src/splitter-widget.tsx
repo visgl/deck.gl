@@ -6,8 +6,11 @@ import {JSX, render} from 'preact';
 import {useState, useRef, useEffect} from 'preact/hooks';
 import {Widget, _deepEqual as deepEqual, type WidgetProps, type View} from '@deck.gl/core';
 
-import {buildViewsFromViewLayout} from './view-layout/build-views-from-view-layout';
-import type {ViewLayoutSplitValues} from './view-layout/build-views-from-view-layout';
+import {
+  buildViewsFromViewLayout,
+  type ViewLayoutSplitter,
+  type ViewLayoutSplitValues
+} from './view-layout/build-views-from-view-layout';
 import type {ViewLayout, ViewLayoutChild} from './view-layout/view-layout';
 
 export type SplitterWidgetViewLayout = {
@@ -148,9 +151,13 @@ function evaluateViews(
 /** Properties for the SplitterWidget */
 export type SplitterWidgetProps<ViewsT extends View[] = View[]> = WidgetProps & {
   /** Stacking views descriptor */
-  viewLayout: SplitterWidgetViewLayout;
+  viewLayout?: SplitterWidgetViewLayout;
+  /** Single externally managed split to render. */
+  split?: ViewLayoutSplitter;
   /** Callback invoked when the splitter is dragged with the new split value */
   onChange?: (views: ViewsT) => void;
+  /** Callback invoked when an externally managed splitter is dragged. */
+  onSplitChange?: (newSplit: number, splitId: string) => void;
   /** Callback invoked when dragging starts */
   onDragStart?: () => void;
   /** Callback invoked when dragging ends */
@@ -170,7 +177,9 @@ export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
     ...Widget.defaultProps,
     id: 'splitter-widget',
     viewLayout: undefined!,
+    split: undefined!,
     onChange: () => {},
+    onSplitChange: () => {},
     onDragStart: () => {},
     onDragEnd: () => {}
   };
@@ -192,14 +201,19 @@ export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
   }
 
   setProps(props: Partial<SplitterWidgetProps<ViewsT>>) {
-    if (props.viewLayout && !deepEqual(props.viewLayout, this.props.viewLayout, -1)) {
+    if ('viewLayout' in props && !deepEqual(props.viewLayout, this.props.viewLayout, -1)) {
       this.updateViewLayout(props.viewLayout);
       this.views = undefined!;
     }
     super.setProps(props);
   }
 
-  private updateViewLayout(viewLayout: SplitterWidgetViewLayout): void {
+  private updateViewLayout(viewLayout: SplitterWidgetViewLayout | undefined): void {
+    if (!viewLayout) {
+      this.viewLayouts = [];
+      this.splitValues = {};
+      return;
+    }
     const adapted = adaptViewLayout(viewLayout);
     this.viewLayout = adapted.layout;
     this.viewLayouts = adapted.viewLayouts;
@@ -215,7 +229,7 @@ export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
   // In this case we need the widget UI to synchronize with deck view states
   // so we update deck props here and rerender DOM in the next onRedraw
   updateHTML() {
-    if (!this.views) {
+    if (this.viewLayouts.length > 0 && !this.views) {
       // viewLayouts has changed, re-evaluate
       this.views = evaluateViews(this.viewLayout, this.viewLayouts, this.splitValues) as ViewsT;
       // we send a copy to the callback so that externally set views can be differentiated from internal
@@ -263,9 +277,17 @@ export class SplitterWidget<ViewsT extends View[] = View[]> extends Widget<
                 {...layout}
                 onChange={newSplit => this.onChange(newSplit, layout)}
                 onDragStart={() => this.props.onDragStart()}
-                onDragEnd={() => this.props.onDragStart()}
+                onDragEnd={() => this.props.onDragEnd()}
               />
             )
+        )}
+        {this.props.split && (
+          <Splitter
+            {...this.props.split}
+            onChange={newSplit => this.props.onSplitChange(newSplit, this.props.split.id)}
+            onDragStart={() => this.props.onDragStart()}
+            onDragEnd={() => this.props.onDragEnd()}
+          />
         )}
       </>,
       rootElement

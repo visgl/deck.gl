@@ -151,6 +151,8 @@ export {
   // View widgets
   FullscreenWidget,
   _SplitterWidget,
+  _HeaderWidget,
+  _LabelWidget,
   buildViewsFromViewLayout,
   // Information widgets
   InfoWidget,
@@ -246,6 +248,11 @@ export type {
   ContextMenuWidgetProps,
   SplitterWidgetProps,
   SplitterWidgetViewLayout,
+  ControlledViewBounds,
+  HeaderWidgetProps,
+  LabelWidgetProps,
+  ResizeHandlePosition,
+  ViewBoundsWidgetProps,
   CompiledDeckViews,
   ViewLayout,
   TimelineWidgetProps,
