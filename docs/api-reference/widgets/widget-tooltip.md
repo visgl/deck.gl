@@ -1,6 +1,6 @@
 # Widget Tooltip
 
-`updateWidgetTooltip` adds delegated, theme-aware text tooltips to a custom widget. It is opt-in and does not change the behavior of bundled widgets.
+`updateWidgetTooltip` adds delegated, theme-aware text tooltips to a custom widget.
 
 ```ts
 import {Widget} from '@deck.gl/core';
