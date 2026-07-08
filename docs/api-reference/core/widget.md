@@ -39,12 +39,6 @@ Additional inline CSS styles on the top HTML element of the widget. camelCase CS
 
 Additional CSS classnames on the top HTML element.
 
-#### `onAfterRenderHTML` (function, optional) {#onafterrenderhtml-prop}
-
-Called after the widget has rendered HTML into its root element. Receives the root `HTMLElement`.
-
-If a widget subclass implements the protected `onAfterRenderHTML()` method, that method runs before this callback.
-
 #### `_container` (string | HTMLDivElement, optional) {#_container}
 
 Experimental. The container that this widget is being attached to. Default to `viewId`.
@@ -99,7 +93,7 @@ This function is implemented by the specific widget subclass to update the HTML 
 
 #### `onAfterRenderHTML` {#onafterrenderhtml}
 
-Optional. Called after `onRenderHTML()` has updated the widget HTML, and before the `onAfterRenderHTML` prop callback.
+Optional. Called after `onRenderHTML()` has updated the widget HTML.
 
 #### `onAdd` {#onadd}
 

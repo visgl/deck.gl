@@ -11,7 +11,7 @@ import '@deck.gl/widgets/stylesheet.css';
 
 ## Usage
 
-Pass `updateWidgetTooltip` as the `onAfterRenderHTML` prop. Descendants with a `data-deck-widget-tooltip` attribute become tooltip anchors.
+Call `updateWidgetTooltip` from `onAfterRenderHTML()`. Descendants with a `data-deck-widget-tooltip` attribute become tooltip anchors.
 
 ```tsx
 class ResetWidget extends Widget {
@@ -27,17 +27,9 @@ class ResetWidget extends Widget {
       rootElement
     );
   }
+
+  protected override onAfterRenderHTML = updateWidgetTooltip;
 }
-
-const widget = new ResetWidget({
-  onAfterRenderHTML: updateWidgetTooltip
-});
-```
-
-Subclassing remains available when a custom widget always needs the helper:
-
-```ts
-protected override onAfterRenderHTML = updateWidgetTooltip;
 ```
 
 Tooltip labels are plain text. Set `aria-label` separately when the anchor needs an accessible name, such as an icon-only button. If an anchor also has a native `title`, the helper removes it to avoid competing browser tooltips. The helper shows tooltips on pointer hover and keyboard focus, and hides them on pointer leave, blur, Escape, or the next render.

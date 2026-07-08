@@ -18,8 +18,6 @@ export type WidgetProps = {
   style?: Partial<CSSStyleDeclaration>;
   /** Additional CSS class. */
   className?: string;
-  /** Called after the widget has rendered HTML into its root element. */
-  onAfterRenderHTML?: (rootElement: HTMLElement) => void;
   /**
    * The container that this widget is being attached to. Default to `viewId`.
    * If set to `'root'`, the widget is placed relative to the whole deck.gl canvas.
@@ -37,8 +35,7 @@ export abstract class Widget<
     id: 'widget',
     style: {},
     _container: null,
-    className: '',
-    onAfterRenderHTML: undefined!
+    className: ''
   };
 
   /** Unique identifier of the widget. */
@@ -99,7 +96,6 @@ export abstract class Widget<
     if (this.rootElement) {
       this.onRenderHTML(this.rootElement);
       this.onAfterRenderHTML(this.rootElement);
-      this.props.onAfterRenderHTML?.(this.rootElement);
     }
   }
 
