@@ -27,10 +27,11 @@ new ZoomWidget({ zoomInTooltip: tip })
 
 ### Disabling tooltips
 
-Pass an empty string to suppress the tooltip for a specific button:
+Pass `false` to suppress the tooltip for a specific button:
 
 ```ts
-new ZoomWidget({ zoomInTooltip: '' })
+new ZoomWidget({ zoomInTooltip: false })
+new CompassWidget({ tooltip: false })
 ```
 
 ### Styling tooltips

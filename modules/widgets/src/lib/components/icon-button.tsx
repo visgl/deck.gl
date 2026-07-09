@@ -11,8 +11,8 @@ export type IconButtonProps = {
   className?: string;
   icon?: string;
   label?: string;
-  /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | ComponentChildren;
+  /** Custom tooltip content. Overrides label for tooltip display. Pass `false` to disable. */
+  tooltip?: string | ComponentChildren | false;
   color?: string;
   style?: JSX.CSSProperties;
   onClick?: JSX.MouseEventHandler<HTMLButtonElement>;
@@ -22,7 +22,7 @@ export type IconButtonProps = {
 /** Renders a button component with widget CSS */
 export const IconButton = (props: IconButtonProps) => {
   const {className = '', style, color, icon, label, tooltip, onClick, children} = props;
-  const tooltipContent = tooltip ?? label;
+  const tooltipContent = tooltip === false ? undefined : (tooltip ?? label);
 
   const iconStyle = useMemo(() => {
     const css: JSX.CSSProperties | undefined = getCSSMask(icon);

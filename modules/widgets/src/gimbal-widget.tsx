@@ -14,7 +14,7 @@ export type GimbalWidgetProps = WidgetProps & {
   /** Tooltip message. */
   label?: string;
   /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | HTMLElement;
+  tooltip?: string | HTMLElement | false;
   /** Width of gimbal lines. */
   strokeWidth?: number;
   /** Transition duration in ms when resetting rotation. */
@@ -66,7 +66,8 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     const widgetViewport = this.viewports[viewId];
     const {rotationOrbit, rotationX} = this.getNormalizedRotation(widgetViewport);
     // Note - we use CSS 3D transforms instead of SVG 2D transforms
-    const tooltipContent = this.props.tooltip ?? this.props.label;
+    const tooltipContent =
+      this.props.tooltip === false ? undefined : (this.props.tooltip ?? this.props.label);
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100, pointerEvents: 'auto'}}>
         <Tooltip content={tooltipContent}>

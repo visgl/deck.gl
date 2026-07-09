@@ -20,9 +20,9 @@ export type FullscreenWidgetProps = WidgetProps & {
   /** Tooltip message when fullscreen. */
   exitLabel?: string;
   /** Custom tooltip content when out of fullscreen. Overrides enterLabel for tooltip display. */
-  enterTooltip?: string | HTMLElement;
+  enterTooltip?: string | HTMLElement | false;
   /** Custom tooltip content when fullscreen. Overrides exitLabel for tooltip display. */
-  exitTooltip?: string | HTMLElement;
+  exitTooltip?: string | HTMLElement | false;
   /**
    * A compatible DOM element which should be made full screen. By default, the map container element will be made full screen.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements

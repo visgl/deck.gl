@@ -17,7 +17,7 @@ export type ScreenshotWidgetProps = WidgetProps & {
   /** Tooltip message */
   label?: string;
   /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | HTMLElement;
+  tooltip?: string | HTMLElement | false;
   /** Filename to save to */
   filename?: string;
   /** Image format */

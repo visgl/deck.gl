@@ -21,11 +21,11 @@ export type ToggleWidgetProps = WidgetProps & {
   /** Tooltip label */
   label?: string;
   /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | HTMLElement;
+  tooltip?: string | HTMLElement | false;
   /** Tooltip label when it is checked */
   onLabel?: string;
   /** Custom tooltip content when checked. Overrides onLabel for tooltip display. */
-  onTooltip?: string | HTMLElement;
+  onTooltip?: string | HTMLElement | false;
   /** Icon color, a CSS Color string */
   color?: string;
   /** Icon color when it is checked, a CSS Color string */

@@ -17,7 +17,7 @@ export type IconWidgetProps = WidgetProps & {
   /** Tooltip label */
   label?: string;
   /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | HTMLElement;
+  tooltip?: string | HTMLElement | false;
   /** Icon color, a CSS Color string */
   color?: string;
   /** Callback when the widget is clicked */

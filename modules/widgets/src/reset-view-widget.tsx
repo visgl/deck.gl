@@ -18,7 +18,7 @@ export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProp
   /** Tooltip message */
   label?: string;
   /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | HTMLElement;
+  tooltip?: string | HTMLElement | false;
   /** The initial view state to reset the view to. Defaults to deck.props.initialViewState */
   initialViewState?: ViewStateMap<ViewsT>;
   /** View to interact with. Required when using multiple views. */

@@ -15,7 +15,7 @@ export type CompassWidgetProps = WidgetProps & {
   /** Tooltip message. */
   label?: string;
   /** Custom tooltip content. Overrides label for tooltip display. */
-  tooltip?: string | HTMLElement;
+  tooltip?: string | HTMLElement | false;
   /** Bearing and pitch reset transition duration in ms. */
   transitionDuration?: number;
   /**
@@ -64,7 +64,8 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
     const widgetViewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(widgetViewport);
 
-    const tooltipContent = this.props.tooltip ?? this.props.label;
+    const tooltipContent =
+      this.props.tooltip === false ? undefined : (this.props.tooltip ?? this.props.label);
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100}}>
         <Tooltip content={tooltipContent}>

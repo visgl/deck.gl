@@ -18,13 +18,13 @@ export type ThemeWidgetProps = WidgetProps & {
   /** Tooltip message when dark mode is selected. */
   lightModeLabel?: string;
   /** Custom tooltip content when dark mode is selected. Overrides lightModeLabel for tooltip display. */
-  lightModeTooltip?: string | HTMLElement;
+  lightModeTooltip?: string | HTMLElement | false;
   /** Styles for light mode theme */
   lightModeTheme?: DeckWidgetTheme;
   /** Tooltip message when light mode is selected. */
   darkModeLabel?: string;
   /** Custom tooltip content when light mode is selected. Overrides darkModeLabel for tooltip display. */
-  darkModeTooltip?: string | HTMLElement;
+  darkModeTooltip?: string | HTMLElement | false;
   /** Styles for dark mode theme */
   darkModeTheme?: DeckWidgetTheme;
   /** Initial theme mode for uncontrolled usage. 'auto' reads the browser default setting */
