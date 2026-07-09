@@ -18,7 +18,7 @@ export type TooltipProps = {
 };
 
 export const Tooltip = ({content, placement = 'right', children}: TooltipProps) => {
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const delayRef = useRef<ReturnType<typeof setTimeout>>();
@@ -41,9 +41,10 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
   );
 
   useEffect(() => {
-    if (!visible || !triggerRef.current || !tooltipRef.current) return undefined;
-    const trigger = triggerRef.current;
+    if (!visible || !wrapperRef.current || !tooltipRef.current) return undefined;
+    const trigger = wrapperRef.current.firstElementChild as HTMLElement | null;
     const tooltip = tooltipRef.current;
+    if (!trigger) return undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     computePosition(trigger, tooltip, {
@@ -72,10 +73,10 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
 
   return (
     <div
-      ref={triggerRef}
+      ref={wrapperRef}
       className="deck-widget-tooltip-trigger"
-      onPointerEnter={show}
-      onPointerLeave={hide}
+      onPointerOver={show}
+      onPointerOut={hide}
       onFocusCapture={show}
       onBlurCapture={hide}
       onKeyDown={onKeyDown}
