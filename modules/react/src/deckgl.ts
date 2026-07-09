@@ -23,7 +23,6 @@ type DeckInstanceRef<ViewsT extends ViewOrViews> = {
   lastRenderedViewports?: Viewport[];
   viewStateUpdateRequested?: any;
   interactionStateUpdateRequested?: any;
-  initialRenderDone?: boolean;
   forceUpdate: () => void;
   version: number;
   control: React.ReactHTMLElement<HTMLElement> | null;
@@ -203,10 +202,6 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   useEffect(() => {
     const DeckClass = props.Deck || Deck;
 
-    // The flag belongs to the Deck instance created below. Reset it so that a
-    // recreated instance (e.g. after a React StrictMode remount) gets its own
-    // initial render even though thisRef persists across the remount.
-    thisRef.initialRenderDone = false;
     thisRef.deck = createDeckInstance(thisRef, DeckClass, {
       ...deckProps,
       parent: containerRef.current,
@@ -229,12 +224,6 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     }
     if (interactionStateUpdateRequested) {
       handleInteractionStateChange(interactionStateUpdateRequested);
-    }
-
-    // Force initial render once when Deck is initialized
-    if (thisRef.deck?.isInitialized && !thisRef.initialRenderDone) {
-      thisRef.initialRenderDone = true;
-      thisRef.deck.redraw('Initial render');
     }
   });
 

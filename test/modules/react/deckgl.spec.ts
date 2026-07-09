@@ -293,7 +293,7 @@ test('DeckGL#controlled view state', async () => {
   container.remove();
 });
 
-test('DeckGL#initial render redraw happens exactly once', async () => {
+test('DeckGL#rerender does not force redraw', async () => {
   const redrawSpy = vi.spyOn(Deck.prototype, 'redraw');
   const ref = createRef<DeckGLRef>();
   const container = document.createElement('div');
@@ -324,8 +324,10 @@ test('DeckGL#initial render redraw happens exactly once', async () => {
   });
   await waitUntilReady(ref);
 
-  const initialRenderCalls = redrawSpy.mock.calls.filter(call => call[0] === 'Initial render');
-  expect(initialRenderCalls, 'Initial render redraw happens exactly once').toHaveLength(1);
+  // Deck's animation loop calls redraw() without arguments on every frame to flush
+  // pending dirty flags. Only calls with a reason argument force a full redraw.
+  const forcedRedrawCalls = redrawSpy.mock.calls.filter(call => call[0] !== undefined);
+  expect(forcedRedrawCalls, 'React wrapper does not force redraws').toHaveLength(0);
   redrawSpy.mockRestore();
 
   act(() => {
