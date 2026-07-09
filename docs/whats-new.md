@@ -12,7 +12,7 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 ### Core Performance
 
-- Picking in most instanced layers now uses shader builtins (`instance_index` / `gl_InstanceID`) instead of allocating an `instancePickingColors` attribute buffer, reducing GPU memory usage and layer initialization time.
+- Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
 
 ### Views and Controllers
 
