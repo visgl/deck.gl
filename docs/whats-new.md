@@ -16,11 +16,11 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 ### Views and Controllers
 
-Views and controllers are a multi-release work stream in deck.gl. Following the substantial changes in v9.3, v9.4 continues this long-running theme with improvements across core, geo layers, and widgets.
+deck.gl v9.4 brings additional view and controller improvements on top of the substantial changes in v9.3.
 
 #### GlobeView
 
-[`GlobeView`](./api-reference/core/globe-view.md) remains experimental, but continues to mature with significantly expanded layer compatibility:
+[`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
