@@ -19,13 +19,12 @@ export type TooltipProps = {
 
 export const Tooltip = ({content, placement = 'right', children}: TooltipProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const delayRef = useRef<ReturnType<typeof setTimeout>>();
 
   const show = useCallback(() => {
     clearTimeout(delayRef.current);
-    delayRef.current = setTimeout(() => setVisible(true), 100);
+    setVisible(true);
   }, []);
 
   const hide = useCallback(() => {
@@ -40,23 +39,23 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
     [hide]
   );
 
-  useEffect(() => {
-    if (!visible || !wrapperRef.current || !tooltipRef.current) return undefined;
-    const trigger = wrapperRef.current.firstElementChild as HTMLElement | null;
-    const tooltip = tooltipRef.current;
-    if (!trigger) return undefined;
+  const tooltipRefCallback = useCallback(
+    (tooltip: HTMLDivElement | null) => {
+      if (!tooltip || !wrapperRef.current) return;
+      const trigger = wrapperRef.current.firstElementChild as HTMLElement | null;
+      if (!trigger) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    computePosition(trigger, tooltip, {
-      placement,
-      strategy: 'fixed',
-      middleware: [offset(8), flip(), shift({padding: 4})]
-    }).then(({x, y}) => {
-      Object.assign(tooltip.style, {left: `${x}px`, top: `${y}px`});
-    });
-
-    return undefined;
-  }, [visible, placement]);
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      computePosition(trigger, tooltip, {
+        placement,
+        strategy: 'fixed',
+        middleware: [offset(8), flip(), shift({padding: 4})]
+      }).then(({x, y}) => {
+        Object.assign(tooltip.style, {left: `${x}px`, top: `${y}px`, opacity: '1'});
+      });
+    },
+    [placement]
+  );
 
   useEffect(() => {
     return () => clearTimeout(delayRef.current);
@@ -84,10 +83,16 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
       {children}
       {visible && (
         <div
-          ref={tooltipRef}
+          ref={tooltipRefCallback}
           className="deck-widget-tooltip"
           role="tooltip"
-          style={{position: 'fixed', visibility: visible ? 'visible' : 'hidden'}}
+          style={{
+            position: 'fixed',
+            opacity: 0,
+            whiteSpace: 'nowrap',
+            fontSize: '12px',
+            padding: '4px 8px'
+          }}
         >
           {renderContent()}
         </div>

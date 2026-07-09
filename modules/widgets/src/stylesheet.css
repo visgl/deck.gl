@@ -59,25 +59,25 @@
 
 /* Border radius adjustments for grouped buttons */
 .deck-widget-button-group.vertical > *:not(:last-child),
-.deck-widget-button-group.vertical > *:not(:last-child) > button {
+.deck-widget-button-group.vertical > *:not(:last-child) button {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .deck-widget-button-group.vertical > *:not(:first-child),
-.deck-widget-button-group.vertical > *:not(:first-child) > button {
+.deck-widget-button-group.vertical > *:not(:first-child) button {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
 .deck-widget-button-group.horizontal > *:not(:last-child),
-.deck-widget-button-group.horizontal > *:not(:last-child) > button {
+.deck-widget-button-group.horizontal > *:not(:last-child) button {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .deck-widget-button-group.horizontal > *:not(:first-child),
-.deck-widget-button-group.horizontal > *:not(:first-child) > button {
+.deck-widget-button-group.horizontal > *:not(:first-child) button {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
@@ -211,10 +211,10 @@
   right: 0;
   pointer-events: all;
 }
-.deck-widget.deck-widget-timeline[data-placement^=top-] {
+.deck-widget.deck-widget-timeline[data-placement^='top-'] {
   top: 0;
 }
-.deck-widget.deck-widget-timeline[data-placement^=bottom-] {
+.deck-widget.deck-widget-timeline[data-placement^='bottom-'] {
   bottom: 0;
 }
 .deck-widget.deck-widget-timeline .deck-widget-button-group {
@@ -315,7 +315,8 @@
   border-radius: calc(var(--button-corner-radius, 8px) - 1px);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   font-size: 13px;
 }
 
@@ -339,7 +340,8 @@
   border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
   color: rgb(220, 80, 80);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   font-size: 12px;
   text-align: center;
 }
@@ -405,7 +407,8 @@
   border: var(--menu-border, unset);
   border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--menu-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
   font-size: 13px;
 }
 
@@ -637,20 +640,20 @@
   top: var(--range-step-button-size, 24px);
   height: calc(100% - var(--range-step-button-size, 24px) * 2);
 }
-.deck-widget-scrollbar[data-placement$=-left] .deck-widget-range--vertical {
+.deck-widget-scrollbar[data-placement$='-left'] .deck-widget-range--vertical {
   left: 0;
 }
-.deck-widget-scrollbar[data-placement$=-right] .deck-widget-range--vertical {
+.deck-widget-scrollbar[data-placement$='-right'] .deck-widget-range--vertical {
   right: 0;
 }
 .deck-widget-scrollbar .deck-widget-range--horizontal {
   left: var(--range-step-button-size, 24px);
   width: calc(100% - var(--range-step-button-size, 24px) * 2);
 }
-.deck-widget-scrollbar[data-placement^=top-] .deck-widget-range--horizontal {
+.deck-widget-scrollbar[data-placement^='top-'] .deck-widget-range--horizontal {
   top: 0;
 }
-.deck-widget-scrollbar[data-placement^=bottom-] .deck-widget-range--horizontal {
+.deck-widget-scrollbar[data-placement^='bottom-'] .deck-widget-range--horizontal {
   bottom: 0;
 }
 
@@ -716,6 +719,5 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   line-height: 1.4;
-  white-space: normal;
-  overflow-wrap: break-word;
+  white-space: nowrap;
 }
