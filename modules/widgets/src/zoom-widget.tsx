@@ -19,6 +19,10 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomInLabel?: string;
   /** Tooltip message on zoom out button. */
   zoomOutLabel?: string;
+  /** Custom tooltip content for zoom in button. Overrides zoomInLabel for tooltip display. */
+  zoomInTooltip?: string | HTMLElement;
+  /** Custom tooltip content for zoom out button. Overrides zoomOutLabel for tooltip display. */
+  zoomOutTooltip?: string | HTMLElement;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
   /**  Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
@@ -52,6 +56,8 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     transitionDuration: 200,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
+    zoomInTooltip: undefined!,
+    zoomOutTooltip: undefined!,
     zoomAxis: 'all',
     viewId: null,
     onZoom: () => {}
@@ -77,11 +83,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
         <IconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
+          tooltip={this.props.zoomInTooltip}
           className="deck-widget-zoom-in"
         />
         <IconButton
           onClick={() => this.handleZoomOut()}
           label={this.props.zoomOutLabel}
+          tooltip={this.props.zoomOutTooltip}
           className="deck-widget-zoom-out"
         />
       </ButtonGroup>

@@ -16,6 +16,8 @@ export type IconWidgetProps = WidgetProps & {
   icon: string;
   /** Tooltip label */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement;
   /** Icon color, a CSS Color string */
   color?: string;
   /** Callback when the widget is clicked */
@@ -33,6 +35,7 @@ export class IconWidget extends Widget<IconWidgetProps> {
     viewId: null,
     icon: '',
     label: '',
+    tooltip: undefined!,
     color: '',
     onClick: undefined!
   };
@@ -52,7 +55,7 @@ export class IconWidget extends Widget<IconWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {className, style, icon, color, label, onClick} = this.props;
+    const {className, style, icon, color, label, tooltip, onClick} = this.props;
 
     render(
       <IconButton
@@ -61,6 +64,7 @@ export class IconWidget extends Widget<IconWidgetProps> {
         color={color}
         icon={icon}
         label={label}
+        tooltip={tooltip}
         onClick={onClick}
       />,
       rootElement

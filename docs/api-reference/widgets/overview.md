@@ -252,6 +252,10 @@ new Deck({
 });
 ```
 
+## Tooltips
+
+Built-in button widgets show styled tooltips on hover. See [Widget Tooltips](./tooltips) for customization and usage in custom widgets.
+
 ## Themes and Styling
 
 deck.gl widget appearance can be customized using [themes and CSS](./styling).

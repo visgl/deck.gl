@@ -16,6 +16,8 @@ export type ScreenshotWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement;
   /** Filename to save to */
   filename?: string;
   /** Image format */
@@ -35,6 +37,7 @@ export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
     placement: 'top-left',
     viewId: null,
     label: 'Screenshot',
+    tooltip: undefined!,
     filename: 'screenshot.png',
     imageFormat: 'image/png',
     onCapture: undefined!
@@ -59,6 +62,7 @@ export class ScreenshotWidget extends Widget<ScreenshotWidgetProps> {
       <IconButton
         className="deck-widget-camera"
         label={this.props.label}
+        tooltip={this.props.tooltip}
         onClick={this.handleClick.bind(this)}
       />,
       rootElement

@@ -17,10 +17,14 @@ export type ThemeWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message when dark mode is selected. */
   lightModeLabel?: string;
+  /** Custom tooltip content when dark mode is selected. Overrides lightModeLabel for tooltip display. */
+  lightModeTooltip?: string | HTMLElement;
   /** Styles for light mode theme */
   lightModeTheme?: DeckWidgetTheme;
   /** Tooltip message when light mode is selected. */
   darkModeLabel?: string;
+  /** Custom tooltip content when light mode is selected. Overrides darkModeLabel for tooltip display. */
+  darkModeTooltip?: string | HTMLElement;
   /** Styles for dark mode theme */
   darkModeTheme?: DeckWidgetTheme;
   /** Initial theme mode for uncontrolled usage. 'auto' reads the browser default setting */
@@ -45,8 +49,10 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
     placement: 'top-left',
     viewId: null,
     lightModeLabel: 'Light Mode',
+    lightModeTooltip: undefined!,
     lightModeTheme: LightGlassTheme,
     darkModeLabel: 'Dark Mode',
+    darkModeTooltip: undefined!,
     darkModeTheme: DarkGlassTheme,
     initialThemeMode: 'auto',
     themeMode: undefined!,
@@ -72,7 +78,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {lightModeLabel, darkModeLabel} = this.props;
+    const {lightModeLabel, darkModeLabel, lightModeTooltip, darkModeTooltip} = this.props;
     const currentMode = this.getThemeMode();
     this._applyTheme(currentMode, rootElement);
 
@@ -80,6 +86,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
       <IconButton
         onClick={this._handleClick.bind(this)}
         label={currentMode === 'dark' ? darkModeLabel : lightModeLabel}
+        tooltip={currentMode === 'dark' ? lightModeTooltip : darkModeTooltip}
         className={currentMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
       />,
       rootElement

@@ -145,6 +145,13 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | `--menu-text` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgb(24, 24, 26)` |
 | `--menu-item-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(0, 0, 0, 0.08)` |
 
+### Tooltip
+
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--tooltip-max-width` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `240px` |
+| `--tooltip-z-index` | Number | `1000` |
+
 ### Range input
 
 | Name | Type | Default |
