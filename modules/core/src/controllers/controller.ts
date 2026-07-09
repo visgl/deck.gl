@@ -326,7 +326,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       scrollZoom = true,
       dragPan = true,
       dragRotate = true,
-      doubleClickZoom = false,
+      doubleClickZoom = true,
       doubleClickDragZoom = false,
       touchZoom = true,
       touchRotate = false,

@@ -1292,7 +1292,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      normalizedViews[0].props.controller = this.props.controller;
+      // Clone the view so that ViewManager._diffViews detects the change
+      normalizedViews[0] = normalizedViews[0].clone({controller: this.props.controller});
     }
     return normalizedViews;
   }

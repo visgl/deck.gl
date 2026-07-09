@@ -274,12 +274,11 @@ test('MapController keyboard shift-plus zoom in', async () => {
   expect(newViewport.zoom > oldViewport.zoom, 'map zoomed').toBeTruthy();
 });
 
-test('MapController click fires immediately with default controller options', async () => {
-  // Create a fresh Deck instance with defaults to avoid state pollution from prior tests
+test('MapController click fires immediately when doubleClickZoom is disabled', async () => {
   const testDeck = new Deck({
     ...deckProps,
     id: 'click-test-deck',
-    controller: true
+    controller: {doubleClickZoom: false}
   });
   await new Promise<void>(resolve => {
     testDeck.setProps({onLoad: resolve});
@@ -334,6 +333,48 @@ test('MapController click is delayed when doubleClickZoom is enabled', async () 
   expect(timestamps.length, 'click fired after recognizer delay').toBeGreaterThan(0);
   const delay = timestamps[0] - beforeClick;
   expect(delay, 'click took at least 250ms (300ms recognizer delay)').toBeGreaterThan(250);
+
+  eventManager.off('click', handler);
+  testDeck.finalize();
+});
+
+test('MapController runtime controller prop change takes effect', async () => {
+  // Start with doubleClickZoom enabled (click is delayed ~300ms)
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'runtime-toggle-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
+
+  const timestamps: number[] = [];
+  const eventManager = testDeck.getEventManager()!;
+  const handler = () => {
+    timestamps.push(performance.now());
+  };
+  eventManager.on('click', handler);
+
+  // Confirm click is delayed with doubleClickZoom on
+  await dispatchPointerTap(400, 200);
+  await sleep(100);
+  expect(timestamps.length, 'click delayed with doubleClickZoom:true').toBe(0);
+  await sleep(300);
+  timestamps.length = 0;
+
+  // Toggle doubleClickZoom off at runtime
+  testDeck.setProps({controller: {doubleClickZoom: false}});
+  await sleep(50);
+
+  // Click should now fire immediately
+  const beforeClick = performance.now();
+  await dispatchPointerTap(400, 200);
+  await sleep(50);
+
+  expect(timestamps.length, 'click fires after runtime toggle').toBeGreaterThan(0);
+  const delay = timestamps[0] - beforeClick;
+  expect(delay, 'click is immediate after disabling doubleClickZoom').toBeLessThan(100);
 
   eventManager.off('click', handler);
   testDeck.finalize();
