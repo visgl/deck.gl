@@ -4,17 +4,23 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
-Release date: TBD
+Release date: July 2026
+
+deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
+
+Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
 ### Core Performance
 
-- Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, reducing memory usage and initialization times. (deck.gl now using shader builtins `instance_index` / `gl_InstanceID`). 
+- Picking in most instanced layers now uses shader builtins (`instance_index` / `gl_InstanceID`) instead of allocating an `instancePickingColors` attribute buffer, reducing GPU memory usage and layer initialization time.
 
 ### Views and Controllers
 
+Views and controllers were a substantial focus of v9.3, and that long-running theme continues in v9.4 with improvements across core, geo layers, ArcGIS integration, and widgets.
+
 #### GlobeView
 
-`GlobeView`, while still experimental, is improved and nearing graduation: 
+[`GlobeView`](./api-reference/core/globe-view.md) remains experimental, but continues to mature with significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
@@ -22,24 +28,32 @@ Release date: TBD
 
 #### Views
 
-- Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.
+- [Views](./api-reference/core/view.md#parameters) now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with:
+
+```js
+new GlobeView({
+  parameters: {
+    cullMode: 'none'
+  }
+});
+```
 
 #### Controllers
 
-- New `doubleClickDragZoom` gesture on all controllers enables smooth zoom by double-clicking and dragging up/down.
+- All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
+
+#### @deck.gl/arcgis
+
+- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
+
+#### @deck.gl/widgets
+
+- A new experimental [`ViewLayout`](./api-reference/widgets/view-layout.md) system supports declarative nested and relative view layouts. The `buildViewsFromViewLayout()` helper generates `View` instances from a layout tree, making complex multi-view applications easier to build.
 
 ### @deck.gl/geo-layers
 
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
-
-### @deck.gl/arcgis
-
-- `DeckRenderer` now integrates with ArcGIS `SceneView` through the modern `RenderNode` API instead of the deprecated `externalRenderers`.
-
-### @deck.gl/widgets
-
-A new experimental `ViewLayout` system with a helper function `buildViewsFromViewLayout()` allows advanced nested and relative view layouts to be specified using a declarative layout tree.
 
 ## deck.gl v9.3
 
