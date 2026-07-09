@@ -16,6 +16,14 @@ OUTPUT_DIR=build
   yarn build
 )
 
+# generate playground schema and publish it as a static website asset
+(
+  cd ../examples/playground
+  yarn
+  yarn generate-schema
+)
+cp ../examples/playground/schema.generated.json ./static/schema.generated.json
+
 # clean up cache
 docusaurus clear
 
