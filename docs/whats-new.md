@@ -16,7 +16,7 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 ### Views and Controllers
 
-Views and controllers were a substantial focus of v9.3, and that long-running theme continues in v9.4 with improvements across core, geo layers, ArcGIS integration, and widgets.
+Views and controllers are a multi-release work stream in deck.gl. Following the substantial changes in v9.3, v9.4 continues this long-running theme with improvements across core, geo layers, and widgets.
 
 #### GlobeView
 
@@ -42,18 +42,18 @@ new GlobeView({
 
 - All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
 
-#### @deck.gl/arcgis
+#### View Layout
 
-- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
-
-#### @deck.gl/widgets
-
-- A new experimental [`ViewLayout`](./api-reference/widgets/view-layout.md) system supports declarative nested and relative view layouts. The `buildViewsFromViewLayout()` helper generates `View` instances from a layout tree, making complex multi-view applications easier to build.
+- A new experimental [`ViewLayout`](./api-reference/widgets/view-layout.md) system in `@deck.gl/widgets` supports declarative nested and relative view layouts. The `buildViewsFromViewLayout()` helper generates `View` instances from a layout tree, making complex multi-view applications easier to build.
 
 ### @deck.gl/geo-layers
 
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
+
+### @deck.gl/arcgis
+
+- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
 
 ## deck.gl v9.3
 
