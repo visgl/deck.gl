@@ -44,7 +44,7 @@ new GlobeView({
 
 #### View Layout
 
-- A new experimental [`ViewLayout`](./api-reference/widgets/view-layout.md) system in `@deck.gl/widgets` supports declarative nested and relative view layouts. The `buildViewsFromViewLayout()` helper generates `View` instances from a layout tree, making complex multi-view applications easier to build.
+- A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
 
 ### @deck.gl/geo-layers
 
