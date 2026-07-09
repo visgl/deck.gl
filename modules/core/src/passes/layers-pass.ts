@@ -160,7 +160,8 @@ export default class LayersPass extends Pass {
             viewport: subViewport,
             view,
             pass: options.pass,
-            layers: options.layers
+            layers: options.layers,
+            isPicking: options.isPicking
           },
           drawLayerParams
         );
@@ -251,7 +252,8 @@ export default class LayersPass extends Pass {
       pass,
       target,
       viewport,
-      view
+      view,
+      isPicking
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
@@ -259,6 +261,7 @@ export default class LayersPass extends Pass {
       target?: Framebuffer | null;
       viewport: Viewport;
       view?: View;
+      isPicking?: boolean;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
@@ -276,7 +279,12 @@ export default class LayersPass extends Pass {
         let depthToUse: number | false = 1.0;
         let stencilToUse: number | false = 0;
 
-        if (Array.isArray(clearColor)) {
+        if (isPicking) {
+          // The picking buffer encodes object references as colors. Clearing with the
+          // view's clearColor would fill the background with a color that decodes to a
+          // (non-existent) picked object, so clear with transparent black instead.
+          colorToUse = [0, 0, 0, 0];
+        } else if (Array.isArray(clearColor)) {
           colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
             c => c / 255
           ) as NumberArray4;
