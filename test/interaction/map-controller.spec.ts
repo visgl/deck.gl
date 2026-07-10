@@ -19,6 +19,55 @@ async function emulateEvent(event: any): Promise<void> {
   }
 }
 
+function getCanvas(): HTMLCanvasElement {
+  const canvases = Array.from(document.querySelectorAll('canvas'));
+  const canvas = canvases.reverse().find(el => {
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+  if (!canvas) throw new Error('No canvas found');
+  return canvas;
+}
+
+async function dispatchPointerTap(x: number, y: number, opts?: {shiftKey?: boolean}) {
+  const canvas = getCanvas();
+  const shiftKey = opts?.shiftKey ?? false;
+  const down = new PointerEvent('pointerdown', {
+    clientX: x,
+    clientY: y,
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: 'mouse',
+    isPrimary: true,
+    button: 0,
+    buttons: 1,
+    shiftKey
+  });
+  canvas.dispatchEvent(down);
+  await sleep(10);
+  const up = new PointerEvent('pointerup', {
+    clientX: x,
+    clientY: y,
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: 'mouse',
+    isPrimary: true,
+    button: 0,
+    buttons: 0,
+    shiftKey
+  });
+  // PointerEventInput listens for pointerup on window, not on the element
+  window.dispatchEvent(up);
+}
+
+async function dispatchPointerDoubleTap(x: number, y: number, opts?: {shiftKey?: boolean}) {
+  await dispatchPointerTap(x, y, opts);
+  await sleep(50);
+  await dispatchPointerTap(x, y, opts);
+}
+
 // Shared Deck instance and state
 let deck: Deck<any> | null = null;
 
@@ -122,25 +171,41 @@ test('MapController rotate', async () => {
 });
 
 test('MapController dblclick zoom in', async () => {
-  await resetViewState();
-  const oldViewport = getViewport();
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'dblclick-zoom-in-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
 
-  await emulateEvent({type: 'dblclick', x: 200, y: 100});
-  await emulateEvent({wait: 300});
+  const oldZoom = testDeck.getViewports()[0].zoom;
+  await dispatchPointerDoubleTap(200, 100);
+  await sleep(500);
 
-  const newViewport = getViewport();
-  expect(newViewport.zoom > oldViewport.zoom, 'map zoomed in').toBeTruthy();
+  const newZoom = testDeck.getViewports()[0].zoom;
+  testDeck.finalize();
+  expect(newZoom > oldZoom, 'map zoomed in').toBeTruthy();
 });
 
 test('MapController shift-dblclick zoom out', async () => {
-  await resetViewState();
-  const oldViewport = getViewport();
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'dblclick-zoom-out-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
 
-  await emulateEvent({type: 'dblclick', x: 200, y: 100, shiftKey: true});
-  await emulateEvent({wait: 300});
+  const oldZoom = testDeck.getViewports()[0].zoom;
+  await dispatchPointerDoubleTap(200, 100, {shiftKey: true});
+  await sleep(500);
 
-  const newViewport = getViewport();
-  expect(newViewport.zoom < oldViewport.zoom, 'map zoomed out').toBeTruthy();
+  const newZoom = testDeck.getViewports()[0].zoom;
+  testDeck.finalize();
+  expect(newZoom < oldZoom, 'map zoomed out').toBeTruthy();
 });
 
 test('MapController keyboard left', async () => {
@@ -207,4 +272,110 @@ test('MapController keyboard shift-plus zoom in', async () => {
 
   const newViewport = getViewport();
   expect(newViewport.zoom > oldViewport.zoom, 'map zoomed').toBeTruthy();
+});
+
+test('MapController click fires immediately when doubleClickZoom is disabled', async () => {
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'click-test-deck',
+    controller: {doubleClickZoom: false}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
+
+  const timestamps: number[] = [];
+  const eventManager = testDeck.getEventManager()!;
+
+  const handler = () => {
+    timestamps.push(performance.now());
+  };
+  eventManager.on('click', handler);
+
+  const beforeClick = performance.now();
+  await dispatchPointerTap(400, 200);
+  await sleep(50);
+
+  eventManager.off('click', handler);
+  testDeck.finalize();
+
+  expect(timestamps.length, 'click event fired').toBeGreaterThan(0);
+  const delay = timestamps[0] - beforeClick;
+  expect(delay, 'click fired without 300ms recognizer delay').toBeLessThan(100);
+});
+
+test('MapController click is delayed when doubleClickZoom is enabled', async () => {
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'click-delay-test-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
+
+  const timestamps: number[] = [];
+  const eventManager = testDeck.getEventManager()!;
+
+  const handler = () => {
+    timestamps.push(performance.now());
+  };
+  eventManager.on('click', handler);
+
+  const beforeClick = performance.now();
+  await dispatchPointerTap(400, 200);
+  await sleep(100);
+
+  expect(timestamps.length, 'click has not fired within 100ms').toBe(0);
+
+  await sleep(250);
+
+  expect(timestamps.length, 'click fired after recognizer delay').toBeGreaterThan(0);
+  const delay = timestamps[0] - beforeClick;
+  expect(delay, 'click took at least 250ms (300ms recognizer delay)').toBeGreaterThan(250);
+
+  eventManager.off('click', handler);
+  testDeck.finalize();
+});
+
+test('MapController runtime controller prop change takes effect', async () => {
+  // Start with doubleClickZoom enabled (click is delayed ~300ms)
+  const testDeck = new Deck({
+    ...deckProps,
+    id: 'runtime-toggle-deck',
+    controller: {doubleClickZoom: true}
+  });
+  await new Promise<void>(resolve => {
+    testDeck.setProps({onLoad: resolve});
+  });
+
+  const timestamps: number[] = [];
+  const eventManager = testDeck.getEventManager()!;
+  const handler = () => {
+    timestamps.push(performance.now());
+  };
+  eventManager.on('click', handler);
+
+  // Confirm click is delayed with doubleClickZoom on
+  await dispatchPointerTap(400, 200);
+  await sleep(100);
+  expect(timestamps.length, 'click delayed with doubleClickZoom:true').toBe(0);
+  await sleep(300);
+  timestamps.length = 0;
+
+  // Toggle doubleClickZoom off at runtime
+  testDeck.setProps({controller: {doubleClickZoom: false}});
+  await sleep(50);
+
+  // Click should now fire immediately
+  const beforeClick = performance.now();
+  await dispatchPointerTap(400, 200);
+  await sleep(50);
+
+  expect(timestamps.length, 'click fires after runtime toggle').toBeGreaterThan(0);
+  const delay = timestamps[0] - beforeClick;
+  expect(delay, 'click is immediate after disabling doubleClickZoom').toBeLessThan(100);
+
+  eventManager.off('click', handler);
+  testDeck.finalize();
 });
