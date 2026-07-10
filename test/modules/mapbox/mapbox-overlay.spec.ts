@@ -42,6 +42,28 @@ class TestScatterplotLayer extends ScatterplotLayer {
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
+test('MapboxOverlay#overlaid passes pixelSizeSource css-dpr', () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    device,
+    layers: [new ScatterplotLayer()]
+  });
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  expect(deck, 'Deck instance is created').toBeTruthy();
+  expect(
+    deck.props.deviceProps?.createCanvasContext?.pixelSizeSource,
+    'pixelSizeSource is css-dpr in overlaid mode'
+  ).toBe('css-dpr');
+
+  map.removeControl(overlay);
+});
+
 test('MapboxOverlay#overlaid', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
