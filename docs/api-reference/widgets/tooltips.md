@@ -127,8 +127,7 @@ Built-in widget tooltips follow these accessibility practices:
 
 - Buttons use `aria-label` for screen reader announcements
 - Tooltip elements have `role="tooltip"`
-- Triggers link to their tooltip via `aria-describedby`
-- Tooltips appear on keyboard focus (`:focus-visible`)
+- Tooltips appear on keyboard focus
 - Pressing `Escape` dismisses the tooltip
 
 Custom widget authors should follow the same patterns.

@@ -74,8 +74,8 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
     <div
       ref={wrapperRef}
       className="deck-widget-tooltip-trigger"
-      onPointerOver={show}
-      onPointerOut={hide}
+      onPointerEnter={show}
+      onPointerLeave={hide}
       onFocusCapture={show}
       onBlurCapture={hide}
       onKeyDown={onKeyDown}
