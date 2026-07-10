@@ -171,6 +171,12 @@ Data URL used as the option icon mask.
 
 Text shown in the menu and used as the button's `aria-label` and styled [tooltip](./tooltips.md) when selected.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content for the selector button. Overrides the option label text in the tooltip. Pass `false` to disable.
+
 ## Styles
 
 The `SelectorWidget` uses the shared button and menu theme variables described in the [styling guide](./styling.md).

@@ -79,6 +79,12 @@ The `InfoWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetpro
 
 Text used as the button's `aria-label` and displayed as a styled [tooltip](./tooltips.md) on hover/focus.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content for the loading button. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `onLoadingChange` (Function, optional) {#onloadingchange}
 
 ```ts
