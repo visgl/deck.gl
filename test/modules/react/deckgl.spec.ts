@@ -30,11 +30,24 @@ const TEST_VIEW_STATE: MapViewState = {
   zoom: 12
 };
 
-function waitUntilReady(ref: RefObject<DeckGLRef | null>): Promise<boolean> {
-  return vi.waitUntil(() => {
-    const deck = ref.current?.deck;
-    return deck && deck.isInitialized && !deck.needsRedraw({clearRedrawFlags: false});
-  });
+/**
+ * Tracks completed draws via the deck instance's onAfterRender prop.
+ */
+function createRenderTracker(): {
+  /** Pass to the DeckGL element under test */
+  onAfterRender: () => void;
+  /** Wait until deck has completed a draw with this tracker attached */
+  waitUntilReady: (ref: RefObject<DeckGLRef | null>) => Promise<void>;
+} {
+  let drawCount = 0;
+  return {
+    onAfterRender: () => {
+      drawCount++;
+    },
+    waitUntilReady: async ref => {
+      await vi.waitUntil(() => ref.current?.deck?.isInitialized && drawCount > 0);
+    }
+  };
 }
 
 test('DeckGL#mount/unmount', async () => {
@@ -43,13 +56,15 @@ test('DeckGL#mount/unmount', async () => {
   document.body.append(container);
   const root = createRoot(container);
 
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
   act(() => {
     root.render(
       createElement(DeckGL, {
         initialViewState: TEST_VIEW_STATE,
         ref,
         width: 100,
-        height: 100
+        height: 100,
+        onAfterRender
       })
     );
   });
@@ -76,6 +91,7 @@ test('DeckGL#render', async () => {
   document.body.append(container);
   const root = createRoot(container);
 
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
   act(() => {
     root.render(
       createElement(
@@ -84,7 +100,8 @@ test('DeckGL#render', async () => {
           ref,
           initialViewState: TEST_VIEW_STATE,
           width: 100,
-          height: 100
+          height: 100,
+          onAfterRender
         },
         createElement('div', {className: 'child'}, 'Child')
       )
@@ -125,6 +142,7 @@ test('DeckGL#props omitted are reset', async () => {
   const root = createRoot(container);
 
   // Initialize widgets and layers on first render.
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
   act(() => {
     root.render(
       createElement(DeckGL, {
@@ -133,7 +151,8 @@ test('DeckGL#props omitted are reset', async () => {
         width: 100,
         height: 100,
         layers: LAYERS,
-        widgets: WIDGETS
+        widgets: WIDGETS,
+        onAfterRender
       })
     );
   });
@@ -145,15 +164,18 @@ test('DeckGL#props omitted are reset', async () => {
   expect(widgets && Array.isArray(widgets) && widgets.length, 'Widgets is set').toBe(1);
   expect(layers && Array.isArray(layers) && layers.length, 'Layers is set').toBe(1);
 
+  const {onAfterRender: onAfterRerender, waitUntilReady: waitUntilRerendered} =
+    createRenderTracker();
   act(() => {
     // Render deck a second time without setting widget or layer props.
     root.render(
       createElement(DeckGL, {
-        ref
+        ref,
+        onAfterRender: onAfterRerender
       })
     );
   });
-  await waitUntilReady(ref);
+  await waitUntilRerendered(ref);
 
   widgets = deck!.props.widgets;
   layers = deck!.props.layers;
@@ -179,6 +201,7 @@ test('DeckGL#uncontrolled view state', async () => {
   const root = createRoot(container);
   const onViewStateChange = vi.fn();
 
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
   act(() => {
     root.render(
       createElement(DeckGL, {
@@ -189,7 +212,8 @@ test('DeckGL#uncontrolled view state', async () => {
         },
         ref,
         width: 100,
-        height: 100
+        height: 100,
+        onAfterRender
       })
     );
   });
@@ -208,7 +232,6 @@ test('DeckGL#uncontrolled view state', async () => {
       }
     });
   });
-  await waitUntilReady(ref);
 
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.longitude).toBe(0);
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.zoom).toBe(1);
@@ -241,8 +264,15 @@ test('DeckGL#controlled view state', async () => {
     height: 100
   };
 
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
   act(() => {
-    root.render(createElement(DeckGL, {...deckProps, viewState: TEST_VIEW_STATE}));
+    root.render(
+      createElement(DeckGL, {
+        ...deckProps,
+        viewState: TEST_VIEW_STATE,
+        onAfterRender
+      })
+    );
   });
   await waitUntilReady(ref);
 
@@ -259,7 +289,6 @@ test('DeckGL#controlled view state', async () => {
       }
     });
   });
-  await waitUntilReady(ref);
 
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.longitude).toBe(0);
   expect(onViewStateChange.mock.lastCall?.[0]?.viewState.zoom).toBe(1);
@@ -268,6 +297,8 @@ test('DeckGL#controlled view state', async () => {
   expect(viewport.longitude).toBe(-122.45);
   expect(viewport.zoom).toBe(12);
 
+  const {onAfterRender: onAfterRerender, waitUntilReady: waitUntilRerendered} =
+    createRenderTracker();
   act(() => {
     root.render(
       createElement(DeckGL, {
@@ -276,11 +307,12 @@ test('DeckGL#controlled view state', async () => {
           longitude: 0,
           latitude: 0,
           zoom: 2
-        }
+        },
+        onAfterRender: onAfterRerender
       })
     );
   });
-  await waitUntilReady(ref);
+  await waitUntilRerendered(ref);
 
   // Deck viewport should match viewState (new value)
   viewport = deckInstance.getViewports()[0] as WebMercatorViewport;
@@ -300,29 +332,36 @@ test('DeckGL#rerender does not force redraw', async () => {
   document.body.append(container);
   const root = createRoot(container);
 
+  const {onAfterRender, waitUntilReady} = createRenderTracker();
   act(() => {
     root.render(
       createElement(DeckGL, {
         initialViewState: TEST_VIEW_STATE,
         ref,
         width: 100,
-        height: 100
+        height: 100,
+        onAfterRender
       })
     );
   });
   await waitUntilReady(ref);
+  // Only assert on redraw calls triggered by the rerender below, not by mount/initialization
+  redrawSpy.mockClear();
 
+  const {onAfterRender: onAfterRerender, waitUntilReady: waitUntilRerendered} =
+    createRenderTracker();
   act(() => {
     root.render(
       createElement(DeckGL, {
         initialViewState: TEST_VIEW_STATE,
         ref,
         width: 200,
-        height: 100
+        height: 100,
+        onAfterRender: onAfterRerender
       })
     );
   });
-  await waitUntilReady(ref);
+  await waitUntilRerendered(ref);
 
   // Deck's animation loop calls redraw() without arguments on every frame to flush
   // pending dirty flags. Only calls with a reason argument force a full redraw.
