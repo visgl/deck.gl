@@ -175,7 +175,7 @@ Text shown in the menu and used as the button's `aria-label` and styled [tooltip
 
 * Default: value of `label`
 
-Custom tooltip content for the selector button. Overrides the option label text in the tooltip. Pass `false` to disable.
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 ## Styles
 

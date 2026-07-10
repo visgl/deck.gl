@@ -255,13 +255,13 @@ Callback when play/pause button is clicked.
 
 * Default: `'Play'`
 
-Custom tooltip content for the play button. Overrides the default label text in the [tooltip](./tooltips.md). Pass `false` to disable.
+Custom tooltip content for the play button. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `pauseTooltip` (string | HTMLElement | false, optional) {#pausetooltip}
 
 * Default: `'Pause'`
 
-Custom tooltip content for the pause button. Overrides the default label text in the [tooltip](./tooltips.md). Pass `false` to disable.
+Custom tooltip content for the pause button. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `formatLabel` (function, optional) {#formatlabel}
 

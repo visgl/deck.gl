@@ -83,7 +83,7 @@ Text used as the button's `aria-label` and displayed as a styled [tooltip](./too
 
 * Default: value of `label`
 
-Custom tooltip content for the loading button. Overrides the default label text in the tooltip. Pass `false` to disable.
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `onLoadingChange` (Function, optional) {#onloadingchange}
 
