@@ -61,9 +61,18 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
     return () => clearTimeout(delayRef.current);
   }, []);
 
+  const htmlRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      if (el && content instanceof HTMLElement) {
+        el.replaceChildren(content.cloneNode(true));
+      }
+    },
+    [content]
+  );
+
   const renderContent = () => {
     if (content instanceof HTMLElement) {
-      return <div ref={el => el?.replaceChildren(content.cloneNode(true))} />;
+      return <div ref={htmlRef} />;
     }
     return content;
   };
