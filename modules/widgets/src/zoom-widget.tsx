@@ -19,9 +19,9 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomInLabel?: string;
   /** Tooltip message on zoom out button. */
   zoomOutLabel?: string;
-  /** Custom tooltip content for zoom in button. Overrides zoomInLabel for tooltip display. Pass `false` to disable. */
+  /** Custom tooltip content for zoom in button. Overrides zoomInLabel for tooltip display. */
   zoomInTooltip?: string | HTMLElement | false;
-  /** Custom tooltip content for zoom out button. Overrides zoomOutLabel for tooltip display. Pass `false` to disable. */
+  /** Custom tooltip content for zoom out button. Overrides zoomOutLabel for tooltip display. */
   zoomOutTooltip?: string | HTMLElement | false;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;

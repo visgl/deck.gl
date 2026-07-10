@@ -15,7 +15,7 @@ export type LoadingWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message when loading */
   label?: string;
-  /** Custom tooltip content. Overrides label for tooltip display. Pass `false` to disable. */
+  /** Custom tooltip content. Overrides label for tooltip display. */
   tooltip?: string | HTMLElement | false;
   /**
    * Callback when the loading state changes.

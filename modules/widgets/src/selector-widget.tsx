@@ -23,7 +23,7 @@ export type SelectorWidgetProps<ValueT = string> = WidgetProps & {
   options: SelectorWidgetOption<ValueT>[];
   /** The initial value. Default to the first option. */
   initialValue?: ValueT;
-  /** Custom tooltip content. Overrides option label for tooltip display. Pass `false` to disable. */
+  /** Custom tooltip content. Overrides label for tooltip display. */
   tooltip?: string | HTMLElement | false;
   /** Callback invoked when the value changes */
   onChange?: (value: ValueT) => void;

@@ -56,9 +56,9 @@ export type TimelineWidgetProps = WidgetProps & {
   onPlayingChange?: (playing: boolean) => void;
   /** Callback to get label from time value */
   formatLabel?: (value: number) => string;
-  /** Custom tooltip for the play button. Defaults to `'Play'`. Pass `false` to disable. */
+  /** Custom tooltip content. Overrides label for tooltip display. */
   playTooltip?: string | HTMLElement | false;
-  /** Custom tooltip for the pause button. Defaults to `'Pause'`. Pass `false` to disable. */
+  /** Custom tooltip content. Overrides label for tooltip display. */
   pauseTooltip?: string | HTMLElement | false;
 };
 

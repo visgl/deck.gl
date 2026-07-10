@@ -11,7 +11,7 @@ export type IconButtonProps = {
   className?: string;
   icon?: string;
   label?: string;
-  /** Custom tooltip content. Overrides label for tooltip display. Pass `false` to disable. */
+  /** Custom tooltip content. Overrides label for tooltip display. */
   tooltip?: string | ComponentChildren | false;
   color?: string;
   style?: JSX.CSSProperties;
