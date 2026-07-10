@@ -279,12 +279,10 @@ export default class LayersPass extends Pass {
         let depthToUse: number | false = 1.0;
         let stencilToUse: number | false = 0;
 
-        if (isPicking) {
-          // The picking buffer encodes object references as colors. Clearing with the
-          // view's clearColor would fill the background with a color that decodes to a
-          // (non-existent) picked object, so clear with transparent black instead.
-          colorToUse = [0, 0, 0, 0];
-        } else if (Array.isArray(clearColor)) {
+        // While picking, ignore the view's clearColor: the picking buffer encodes object
+        // references as colors and is already cleared to transparent black.
+        // `clearColor: false` below still means "don't clear color" in both modes.
+        if (Array.isArray(clearColor) && !isPicking) {
           colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
             c => c / 255
           ) as NumberArray4;
