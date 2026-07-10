@@ -21,6 +21,10 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomOutLabel?: string;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
+  /** Zoom level delta applied by each button click.
+   * @default 1
+   */
+  zoomStep?: number;
   /**  Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
    * Only effective if the current view is OrthographicView.
    */
@@ -50,6 +54,7 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     placement: 'top-left',
     orientation: 'vertical',
     transitionDuration: 200,
+    zoomStep: 1,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
     zoomAxis: 'all',
@@ -164,13 +169,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   handleZoomIn() {
     for (const viewId of this.viewIds) {
-      this.handleZoom(viewId, 1);
+      this.handleZoom(viewId, this.props.zoomStep);
     }
   }
 
   handleZoomOut() {
     for (const viewId of this.viewIds) {
-      this.handleZoom(viewId, -1);
+      this.handleZoom(viewId, -this.props.zoomStep);
     }
   }
 }
