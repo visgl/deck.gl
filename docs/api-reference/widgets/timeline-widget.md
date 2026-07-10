@@ -251,6 +251,18 @@ In controlled mode, the widget does not automatically reset time to the beginnin
 
 Callback when play/pause button is clicked.
 
+#### `playTooltip` (string | HTMLElement | false, optional) {#playtooltip}
+
+* Default: `'Play'`
+
+Custom tooltip content for the play button. Overrides the default label text in the [tooltip](./tooltips.md). Pass `false` to disable.
+
+#### `pauseTooltip` (string | HTMLElement | false, optional) {#pausetooltip}
+
+* Default: `'Pause'`
+
+Custom tooltip content for the pause button. Overrides the default label text in the [tooltip](./tooltips.md). Pass `false` to disable.
+
 #### `formatLabel` (function, optional) {#formatlabel}
 
 ```ts
