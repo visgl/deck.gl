@@ -6,6 +6,10 @@ Built-in button widgets ship with styled tooltips that appear on hover and keybo
 
 ## Customizing Built-in Tooltips
 
+### `label` vs `tooltip`
+
+The `label` prop sets the button's accessible name (`aria-label`) and is always a plain string. By default, the tooltip displays the label text. The `tooltip` prop overrides only the visual tooltip — use it for rich HTML content, a different display string, or `false` to hide the tooltip while preserving accessibility.
+
 ### Overriding tooltip text
 
 Each button widget accepts a tooltip prop that overrides the default label:
