@@ -7929,10 +7929,10 @@ mitt@^3.0.1:
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.1.tgz#ea36cf0cc30403601ae074c8f77b7092cdab36d1"
   integrity sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==
 
-mjolnir.js@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-3.0.0.tgz#2140362331c421501c43be2190479ea9cdbade4b"
-  integrity sha512-siX3YCG7N2HnmN1xMH3cK4JkUZJhbkhRFJL+G5N1vH0mh1t5088rJknIoqDFWDIU6NPGvRRgLnYW3ZHjSMEBLA==
+mjolnir.js@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-3.0.1.tgz#68c87869a277d9b96f41b642734d269273034c4a"
+  integrity sha512-/RMi8Jm3NKleOkVI8D2ai+1OVwtfRJsSVBVjbTXNm83nfsN4uORYaN3u1/hsg5CqVI+di8enTkvgDNDOywn6cQ==
 
 mkdirp@^1.0.3:
   version "1.0.4"
