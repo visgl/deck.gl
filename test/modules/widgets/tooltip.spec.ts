@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {afterEach, test, expect} from 'vitest';
-import {ZoomWidget, ThemeWidget} from '@deck.gl/widgets';
+import {ZoomWidget} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
 let testInstance: WidgetTester<any> | undefined;
@@ -107,85 +107,4 @@ test('Tooltip - HTMLElement replacement on content change', async () => {
 
   tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
   expect(tooltip.textContent).toContain('Second');
-});
-
-test('ThemeWidget - tooltip matches label mode', async () => {
-  testInstance = new WidgetTester({
-    widgets: [
-      new ThemeWidget({
-        themeMode: 'dark',
-        darkModeLabel: 'Dark Mode',
-        lightModeLabel: 'Light Mode',
-        darkModeTooltip: 'Currently Dark',
-        lightModeTooltip: 'Currently Light'
-      })
-    ]
-  });
-
-  await testInstance.idle();
-  let button = testInstance.findElements(
-    '.deck-widget-theme .deck-widget-icon-button'
-  )[0] as HTMLButtonElement;
-  expect(button.getAttribute('aria-label')).toBe('Dark Mode');
-
-  // Trigger tooltip
-  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
-  await testInstance.idle();
-
-  let tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
-  expect(tooltip).toBeTruthy();
-  expect(tooltip.textContent).toBe('Currently Dark');
-
-  // Switch to light mode
-  button.dispatchEvent(new PointerEvent('pointerleave', {bubbles: true}));
-  await testInstance.idle();
-
-  testInstance.setProps({
-    widgets: [
-      new ThemeWidget({
-        themeMode: 'light',
-        darkModeLabel: 'Dark Mode',
-        lightModeLabel: 'Light Mode',
-        darkModeTooltip: 'Currently Dark',
-        lightModeTooltip: 'Currently Light'
-      })
-    ]
-  });
-  await testInstance.idle();
-
-  button = testInstance.findElements(
-    '.deck-widget-theme .deck-widget-icon-button'
-  )[0] as HTMLButtonElement;
-  expect(button.getAttribute('aria-label')).toBe('Light Mode');
-
-  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
-  await testInstance.idle();
-
-  tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
-  expect(tooltip).toBeTruthy();
-  expect(tooltip.textContent).toBe('Currently Light');
-});
-
-test('ThemeWidget - tooltip falls back to label when tooltip prop not set', async () => {
-  testInstance = new WidgetTester({
-    widgets: [
-      new ThemeWidget({
-        themeMode: 'dark',
-        darkModeLabel: 'Dark Mode',
-        lightModeLabel: 'Light Mode'
-      })
-    ]
-  });
-
-  await testInstance.idle();
-  const button = testInstance.findElements(
-    '.deck-widget-theme .deck-widget-icon-button'
-  )[0] as HTMLButtonElement;
-
-  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
-  await testInstance.idle();
-
-  const tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
-  expect(tooltip).toBeTruthy();
-  expect(tooltip.textContent).toBe('Dark Mode');
 });

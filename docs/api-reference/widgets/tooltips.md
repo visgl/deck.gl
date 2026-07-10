@@ -146,4 +146,8 @@ Custom widget authors should follow the same patterns.
 | IconWidget | `tooltip` |
 | ToggleWidget | `tooltip`, `onTooltip` |
 
-All tooltip props accept `string | HTMLElement` and default to the widget's label prop value.
+All tooltip props accept `string | HTMLElement | false` and default to the widget's label prop value.
+
+## Automatic tooltips via IconButton
+
+Widgets that use the internal `IconButton` component automatically display a tooltip derived from their `label` prop. This includes `SelectorWidget`, `LoadingWidget`, `TimelineWidget`, `StatsWidget`, and `PopupWidget` in addition to those listed above. These widgets do not currently expose a dedicated `*Tooltip` override prop — their tooltip shows the `label` value by default and can be suppressed by passing an empty `label`.
