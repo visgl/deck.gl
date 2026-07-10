@@ -1,5 +1,6 @@
 build/
 dist/
+*.generated.json
 **/*.min.js
 node_modules/
 coverage/
