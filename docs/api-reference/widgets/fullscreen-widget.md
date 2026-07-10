@@ -85,11 +85,23 @@ A [compatible DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Elem
 
 Tooltip message displayed while hovering a mouse over the widget when out of fullscreen.
 
+#### `enterTooltip` (string | HTMLElement | false, optional) {#entertooltip}
+
+* Default: value of `enterLabel`
+
+Custom tooltip content for the enter fullscreen button. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `exitLabel` (string, optional) {#exitlabel}
 
 * Default: `'Exit Fullscreen'`
 
 Tooltip message displayed while hovering a mouse over the widget when fullscreen.
+
+#### `exitTooltip` (string | HTMLElement | false, optional) {#exittooltip}
+
+* Default: value of `exitLabel`
+
+Custom tooltip content for the exit fullscreen button. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `onFullscreenChange` (Function, optional) {#onfullscreenchange}
 

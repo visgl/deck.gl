@@ -93,6 +93,12 @@ Data URL used as the button icon mask.
 
 Tooltip message displayed while hovering over the widget.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `color` (string, optional) {#color}
 
 CSS color applied to the icon.

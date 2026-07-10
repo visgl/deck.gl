@@ -84,6 +84,12 @@ The `ScreenshotWidget` accepts the generic [`WidgetProps`](../core/widget.md#wid
 
 Tooltip message displayed while hovering a mouse over the widget.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `filename` (string, optional) {#filename}
 
 * Default: `'screenshot.png'`

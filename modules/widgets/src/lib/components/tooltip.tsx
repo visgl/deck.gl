@@ -63,7 +63,7 @@ export const Tooltip = ({content, placement = 'right', children}: TooltipProps) 
 
   const renderContent = () => {
     if (content instanceof HTMLElement) {
-      return <div ref={el => el && !el.firstChild && el.appendChild(content.cloneNode(true))} />;
+      return <div ref={el => el?.replaceChildren(content.cloneNode(true))} />;
     }
     return content;
   };

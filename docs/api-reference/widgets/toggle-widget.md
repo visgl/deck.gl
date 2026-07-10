@@ -114,11 +114,23 @@ Data URL used as the icon when the widget is checked.
 
 Tooltip message displayed while hovering over the widget.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `onLabel` (string, optional) {#onlabel}
 
 * Default: same as `label`
 
 Tooltip shown while the widget is checked.
+
+#### `onTooltip` (string | HTMLElement | false, optional) {#ontooltip}
+
+* Default: value of `onLabel`
+
+Custom tooltip content when the widget is checked. Overrides the default onLabel text in the tooltip. Pass `false` to disable.
 
 #### `color` (string, optional) {#color}
 

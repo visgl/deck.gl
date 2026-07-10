@@ -86,7 +86,7 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
       <IconButton
         onClick={this._handleClick.bind(this)}
         label={currentMode === 'dark' ? darkModeLabel : lightModeLabel}
-        tooltip={currentMode === 'dark' ? lightModeTooltip : darkModeTooltip}
+        tooltip={currentMode === 'dark' ? darkModeTooltip : lightModeTooltip}
         className={currentMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
       />,
       rootElement
