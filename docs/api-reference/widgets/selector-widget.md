@@ -169,7 +169,7 @@ Data URL used as the option icon mask.
 
 #### `label` (string, optional) {#label}
 
-Text shown in the menu and used as the button tooltip when selected.
+Text shown in the menu and used as the button's `aria-label` and styled [tooltip](./tooltips.md) when selected.
 
 ## Styles
 
