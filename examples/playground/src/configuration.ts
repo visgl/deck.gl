@@ -55,16 +55,16 @@ export default {
     CesiumIonLoader
   },
 
-  postProcessConvertedJson: json => {
+  postProcessConvertedJson: (json: any) => {
     // Filter out invalid props. Typically, props will be invalid while the user is typing.
     if (json.layers) {
-      json.layers = json.layers.filter(layer => layer instanceof Layer);
+      json.layers = json.layers.filter((layer: any) => layer instanceof Layer);
     }
     if (json.widgets) {
-      json.widgets = json.widgets.filter(widget => typeof widget.onAdd === 'function');
+      json.widgets = json.widgets.filter((widget: any) => typeof widget.onAdd === 'function');
     }
     if (json.views && !(json.views instanceof View)) {
-      json.views = json.views.filter(view => view instanceof View);
+      json.views = json.views.filter((view: any) => view instanceof View);
     }
     return json;
   }
