@@ -8,7 +8,7 @@ import TabItem from '@theme/TabItem';
 
 <ZoomWidgetDemo />
 
-This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
+This widget controls the zoom level of a deck.gl view. Click '+' to zoom in or '-' to zoom out by the configured `zoomStep`. Supports controlling Map and Globe views.
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">
@@ -132,6 +132,14 @@ Widget button orientation. Valid options are `vertical` or `horizontal`.
 
 Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
 Only effective if the current view is an [OrthographicView](../core/orthographic-view.md).
+
+#### `zoomStep` (number, optional) {#zoomstep}
+
+<img src="https://img.shields.io/badge/from-v9.4-green.svg?style=flat-square" alt="from v9.4" />
+
+* Default: `1`
+
+Zoom level delta applied by each button click.
 
 #### `zoomInLabel` (string, optional) {#zoominlabel}
 
