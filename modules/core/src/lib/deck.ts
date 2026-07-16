@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import LayerManager from './layer-manager';
-import ViewManager from './view-manager';
+import ViewManager, {DEFAULT_CANVAS_ID} from './view-manager';
 import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
@@ -317,6 +317,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   protected deckRenderer: DeckRenderer | null = null;
   protected deckPicker: DeckPicker | null = null;
   protected eventManager: EventManager | null = null;
+  protected eventManagers: Record<string, EventManager> = {};
   protected widgetManager: WidgetManager | null = null;
   protected tooltip: TooltipWidget | null = null;
   protected animationLoop: AnimationLoop | null = null;
@@ -465,6 +466,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.eventManager?.destroy();
     this.eventManager = null;
+    this.eventManagers = {};
 
     this.widgetManager?.finalize();
     this.widgetManager = null;
@@ -509,12 +511,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       height: number;
       views: View[];
       viewState: ViewStateObject<ViewsT> | null;
+      eventManagers: Record<string, EventManager>;
     } = Object.create(this.props);
     Object.assign(resolvedProps, {
       views: this._getViews(),
       width: this.width,
       height: this.height,
-      viewState: this._getViewState()
+      viewState: this._getViewState(),
+      eventManagers: this.eventManagers
     });
 
     if (props.device && props.device.id !== this.device?.id) {
@@ -526,6 +530,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         // DOM here might be a bit unexpected but it should be ok for most users.
         this.canvas?.remove();
         this.eventManager?.destroy();
+        this.eventManager = null;
+        this.eventManagers = {};
 
         // ensure we will re-attach ourselves after createDevice callbacks
         this.canvas = null;
@@ -656,6 +662,18 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Get the current canvas element. */
   getCanvas(): HTMLCanvasElement | null {
     return this.canvas;
+  }
+
+  /**
+   * Get the event manager associated with a view or the default Deck canvas.
+   */
+  getEventManager(viewId?: string): EventManager | null {
+    if (!viewId || !this.viewManager) {
+      return this.eventManager;
+    }
+
+    const canvasId = this.viewManager.getCanvasId(viewId) || DEFAULT_CANVAS_ID;
+    return this.eventManagers[canvasId] || this.eventManager;
   }
 
   /** Query the object rendered on top at a given point */
@@ -1046,6 +1064,41 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return canvas;
   }
 
+  private _createEventManager(root: HTMLElement): EventManager {
+    const eventManager = new EventManager(root, {
+      touchAction: this.props.touchAction,
+      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
+        // Resolve recognizer settings
+        const [RecognizerConstructor, defaultOptions, recognizeWith, requireFailure] =
+          RECOGNIZERS[eventName];
+        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
+        const options = {...defaultOptions, ...optionsOverride, event: eventName};
+        return {
+          recognizer: new RecognizerConstructor(options),
+          recognizeWith,
+          requireFailure
+        };
+      }),
+      events: {
+        pointerdown: this._onPointerDown,
+        pointermove: this._onPointerMove,
+        pointerleave: this._onPointerMove
+      }
+    });
+
+    for (const eventType in EVENT_HANDLERS) {
+      if (eventType === 'dblclick') {
+        // Use watch (passive) so the dblclick recognizer is only enabled by the
+        // controller's doubleClickZoom option — not by the picking system.
+        eventManager.watch(eventType, this._onEvent);
+      } else {
+        eventManager.on(eventType, this._onEvent);
+      }
+    }
+
+    return eventManager;
+  }
+
   private _setCanvasContext(canvasContext: CanvasContext): void {
     this._canvasContext = canvasContext;
 
@@ -1239,7 +1292,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      normalizedViews[0].props.controller = this.props.controller;
+      // Clone the view so that ViewManager._diffViews detects the change
+      normalizedViews[0] = normalizedViews[0].clone({controller: this.props.controller});
     }
     return normalizedViews;
   }
@@ -1377,33 +1431,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     const eventRoot =
       this.props.parent?.querySelector<HTMLDivElement>('.deck-events-root') || this.canvas;
-    this.eventManager = new EventManager(eventRoot, {
-      touchAction: this.props.touchAction,
-      recognizers: Object.keys(RECOGNIZERS).map((eventName: string) => {
-        // Resolve recognizer settings
-        const [RecognizerConstructor, defaultOptions, recognizeWith, requestFailure] =
-          RECOGNIZERS[eventName];
-        const optionsOverride = this.props.eventRecognizerOptions?.[eventName];
-        const options = {...defaultOptions, ...optionsOverride, event: eventName};
-        return {
-          recognizer: new RecognizerConstructor(options),
-          recognizeWith,
-          requestFailure
-        };
-      }),
-      events: {
-        pointerdown: this._onPointerDown,
-        pointermove: this._onPointerMove,
-        pointerleave: this._onPointerMove
-      }
-    });
-    for (const eventType in EVENT_HANDLERS) {
-      this.eventManager.on(eventType, this._onEvent);
-    }
+    assert(eventRoot);
+    this.eventManager = this._createEventManager(eventRoot);
+    this.eventManagers = {[DEFAULT_CANVAS_ID]: this.eventManager};
 
     this.viewManager = new ViewManager({
       timeline,
       eventManager: this.eventManager,
+      eventManagers: this.eventManagers,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
       pickPosition: this._pickPositionForController.bind(this),

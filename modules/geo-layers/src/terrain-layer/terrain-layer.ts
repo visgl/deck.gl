@@ -6,18 +6,18 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
+  COORDINATE_SYSTEM,
   DefaultProps,
+  _GlobeViewport as GlobeViewport,
   Layer,
   LayersList,
   log,
   Material,
   TextureSource,
-  UpdateParameters,
-  _GlobeViewport
+  UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import type {Mesh} from '@loaders.gl/schema';
+import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import {
   MAX_LATITUDE as MAX_WEB_MERCATOR_LATITUDE,
@@ -32,7 +32,7 @@ import type {
   TileLoadProps,
   ZRange
 } from '../tileset-2d/index';
-import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
+import {getURLFromTemplate, Tile2DHeader, URLTemplate, urlType} from '../tileset-2d/index';
 
 const DUMMY_DATA = [1];
 const TILE_OVERLAP_PIXELS = 1;
@@ -118,9 +118,9 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [Mesh | null, TextureSource | null];
+type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
 type MeshBoundingBox = [min: number[], max: number[]];
-type MeshWithBoundingBox = Mesh & {
+type MeshWithBoundingBox = MeshAttributes & {
   header?: {
     boundingBox?: MeshBoundingBox;
   };
@@ -172,7 +172,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   state!: {
     isTiled?: boolean;
-    terrain?: Mesh;
+    terrain?: MeshAttributes;
     zRange?: ZRange | null;
   };
 
@@ -212,7 +212,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     meshMaxError,
     shouldRemapTerrainMeshToWebMercatorTile,
     signal
-  }: TerrainLoadProps): Promise<Mesh> | null {
+  }: TerrainLoadProps): Promise<MeshAttributes> | null {
     if (!elevationData) {
       return null;
     }
@@ -260,7 +260,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       topRight = [bbox.right, bbox.top];
     }
     const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-    const isGlobe = viewport instanceof _GlobeViewport;
+    const isGlobe = viewport instanceof GlobeViewport;
     const overlappedBounds = getOverlappedBounds(bounds, this.props.tileSize, isGlobe);
 
     const terrain =
@@ -304,7 +304,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
-    const isGlobe = viewport instanceof _GlobeViewport;
+    const isGlobe = viewport instanceof GlobeViewport;
     const boundingBox = (mesh as MeshWithBoundingBox | null)?.header?.boundingBox;
     const hasLngLatBounds =
       boundingBox &&
@@ -371,7 +371,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy
+      refinementStrategy,
+      zoomOffset
     } = this.props;
 
     if (this.state.isTiled) {
@@ -388,7 +389,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
               texture: urlTemplateToUpdateTrigger(texture),
               meshMaxError,
               elevationDecoder,
-              projectionMode: this.context.viewport.projectionMode
+              projectionMode: this.context.viewport.projectionMode,
+              zoomOffset
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),
@@ -403,7 +405,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           onTileError,
           maxCacheSize,
           maxCacheByteSize,
-          refinementStrategy
+          refinementStrategy,
+          zoomOffset
         }
       );
     }
@@ -434,7 +437,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
 
-function remapTerrainMeshToWebMercatorTile(mesh: Mesh, bounds: Bounds): Mesh {
+function remapTerrainMeshToWebMercatorTile(mesh: MeshAttributes, bounds: Bounds): MeshAttributes {
   const positionAttribute = mesh.attributes.POSITION;
   const texCoordAttribute = mesh.attributes.TEXCOORD_0;
   const positions = positionAttribute?.value;

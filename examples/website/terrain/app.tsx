@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useCallback} from 'react';
-import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import React, {useCallback, useState} from 'react';
+import {createRoot} from 'react-dom/client';
 
-import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
-import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {MapViewState} from '@deck.gl/core';
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -38,25 +38,46 @@ export default function App({
   texture = SURFACE_IMAGE,
   wireframe = false,
   globeView = false,
-  initialViewState = INITIAL_VIEW_STATE
+  zoomOffset = 0,
+  minZoom = 0,
+  maxZoom = 14,
+  visibleMinZoom = 0,
+  visibleMaxZoom = 14,
+  initialViewState = INITIAL_VIEW_STATE,
+  onZoomChange
 }: {
   texture?: string;
   wireframe?: boolean;
   globeView?: boolean;
+  zoomOffset?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  visibleMinZoom?: number;
+  visibleMaxZoom?: number;
   initialViewState?: MapViewState;
+  onZoomChange?: (zoom: number) => void;
 }) {
   const [viewState, setViewState] = useState(initialViewState);
-  const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
+  const onViewStateChange = useCallback(
+    ({viewState: vs}) => {
+      setViewState(vs);
+      onZoomChange?.(vs.zoom);
+    },
+    [onZoomChange]
+  );
 
   const layer = new TerrainLayer({
     id: 'terrain',
-    minZoom: 0,
-    maxZoom: 14,
+    minZoom,
+    maxZoom,
+    visibleMinZoom,
+    visibleMaxZoom,
     refinementStrategy: 'best-available',
     elevationDecoder: ELEVATION_DECODER,
     elevationData: TERRAIN_IMAGE,
     texture,
     wireframe,
+    zoomOffset,
     color: [255, 255, 255],
     pickable: '3d'
   });
