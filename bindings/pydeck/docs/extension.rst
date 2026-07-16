@@ -28,6 +28,9 @@ example ``get_filter_value`` and ``filter_range``) are passed to the ``pydeck.La
         extensions=[pdk.Extension("DataFilterExtension", filter_size=1)],
     )
 
+See the `DataFilterExtension gallery example <gallery/data_filter_extension.html>`__ for a
+complete, runnable script.
+
 Available extensions
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -58,3 +61,17 @@ in a **Limitations** section, for example:
 - `CollisionFilterExtension limitations <https://deck.gl/docs/api-reference/extensions/collision-filter-extension#limitations>`__
 
 Refer to the individual extension page for the layer it is applied to before using it.
+
+Python-specific caveats
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **Accessors are expressions, not functions.** Many extensions add accessors to the
+  layer (``get_filter_value``, ``get_filter_category``, ``get_brushing_target``,
+  ``get_dash_array``, ...). In pydeck these are serialized as ``@@=`` strings and
+  evaluated by deck.gl's JSON expression parser, which supports property access and simple
+  operators (for example ``get_filter_value="properties.timeOfDay"``) but **not arbitrary
+  JavaScript functions**. Logic that cannot be written as an expression cannot be passed
+  from Python.
+- **Binary transport.** Combining an extension accessor with
+  ``Layer(use_binary_transport=True)`` is not currently tested; prefer standard (JSON)
+  data transport when using extension accessors.
