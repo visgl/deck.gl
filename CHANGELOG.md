@@ -21,6 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.3 Prereleases
 
+#### deck.gl [v9.3.7] - Jul 16 2026
+
+- fix(core): do not write View clearColor into the picking buffer (#10431)
+- fix(mapbox): avoid crash when MapboxOverlay beforeId layer is removed (#10425)
+- fix(widgets): InfoWidget not rendering on hover/click (#10421)
+
 #### deck.gl [v9.3.6] - Jul 2 2026
 
 - fix(widgets): handle negative DMS degrees in CoordinatesGeocoder (#10242)
