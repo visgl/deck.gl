@@ -51,18 +51,13 @@ export type RefinementStrategy =
 export type LODStrategy = 'none' | 'coverage';
 
 const DEFAULT_CACHE_SCALE = 5;
-<<<<<<< HEAD
 const COVERAGE_ZOOM_DELTA = 1;
 const MIN_RESOLUTION_COVERAGE_ZOOM = 6;
 const MIN_RESOLUTION_FALLBACK_ZOOM = 4;
 const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
 const PREFETCH_TILE_PRIORITY = 2e8;
-=======
-const SELECTED_TILE_PRIORITY = 0;
-const VISIBLE_TILE_PRIORITY = 1e8;
 const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
->>>>>>> origin/master
 
 const STRATEGIES = {
   [STRATEGY_DEFAULT]: updateTileStateDefault,
@@ -474,13 +469,17 @@ export class Tileset2D {
   private _getCullBounds = memoize(getCullBounds);
 
   private _getRequestPriority(tile: Tile2DHeader): number {
-<<<<<<< HEAD
     // RequestScheduler loads lower priority values first.
+    if (!tile.isSelected && !tile.isVisible && !tile.isPrefetch) {
+      return -1;
+    }
+
+    const distance = this._getTileDistancePriority(tile);
     if (tile.isSelected) {
-      return SELECTED_TILE_PRIORITY;
+      return SELECTED_TILE_PRIORITY + distance;
     }
     if (tile.isVisible) {
-      return VISIBLE_TILE_PRIORITY;
+      return VISIBLE_TILE_PRIORITY + distance;
     }
     if (tile.isPrefetch) {
       const prefetchPriority = this._prefetchTilePriority.get(tile.id);
@@ -489,17 +488,6 @@ export class Tileset2D {
       return PREFETCH_TILE_PRIORITY + zoomPriority;
     }
     return -1;
-=======
-    if (!tile.isSelected && !tile.isVisible) {
-      return -1;
-    }
-
-    // RequestScheduler loads lower priority values first.
-    const distance = this._getTileDistancePriority(tile);
-    if (tile.isSelected) {
-      return SELECTED_TILE_PRIORITY + distance;
-    }
-    return VISIBLE_TILE_PRIORITY + distance;
   }
 
   private _getTileDistancePriority(tile: Tile2DHeader): number {
@@ -583,7 +571,6 @@ export class Tileset2D {
     const distanceX = x - segmentX;
     const distanceY = y - segmentY;
     return distanceX * distanceX + distanceY * distanceY;
->>>>>>> origin/master
   }
 
   private _pruneRequests(): void {
@@ -705,11 +692,7 @@ export class Tileset2D {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       tile.loadData({
         getData: this.opts.getTileData,
-<<<<<<< HEAD
-        getPriority: this._getRequestPriority.bind(this),
-=======
         getRequestPriority: this._getRequestPriority.bind(this),
->>>>>>> origin/master
         requestScheduler: this._requestScheduler,
         onLoad: this.onTileLoad,
         onError: this.opts.onTileError

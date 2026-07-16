@@ -357,11 +357,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       maxCacheSize,
       maxCacheByteSize,
       refinementStrategy,
-<<<<<<< HEAD
-      lodStrategy
-=======
+      lodStrategy,
       zoomOffset
->>>>>>> origin/master
     } = this.props;
 
     if (this.state.isTiled) {
@@ -395,11 +392,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           maxCacheSize,
           maxCacheByteSize,
           refinementStrategy,
-<<<<<<< HEAD
-          lodStrategy
-=======
+          lodStrategy,
           zoomOffset
->>>>>>> origin/master
         }
       );
     }

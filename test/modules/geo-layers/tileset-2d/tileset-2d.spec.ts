@@ -61,7 +61,6 @@ test('Tileset2D#update', () => {
   expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
-<<<<<<< HEAD
 test('Tileset2D#update with coverage LOD', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -76,7 +75,10 @@ test('Tileset2D#update with coverage LOD', () => {
     'nearest lower resolution coverage tile is prefetched'
   ).toBe(true);
   expect(tileset._cache.get('1171-1566-12')?.isSelected, 'target tile remains selected').toBe(true);
-=======
+
+  tileset.finalize();
+});
+
 test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -115,12 +117,10 @@ test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () 
   expect((tileset as any)._getRequestPriority(selectedNearCenter)).toBeLessThan(
     (tileset as any)._getRequestPriority(visibleAtCenter)
   );
->>>>>>> origin/master
 
   tileset.finalize();
 });
 
-<<<<<<< HEAD
 test('Tileset2D#coverage LOD uses higher minimum coverage zoom for resolution viewports', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -271,7 +271,10 @@ test('Tileset2D#coverage LOD keeps cached root below the resolution fallback flo
   expect(fallback.isVisible, 'fallback ancestor covers pending selected tile').toBe(true);
   expect(root.isVisible, 'root remains below the visible fallback floor').toBe(false);
   expect(selected.isVisible, 'pending selected tile is hidden').toBe(false);
-=======
+
+  tileset.finalize();
+});
+
 test('Tileset2D#getRequestPriority keeps unprojectable tiles within priority tiers', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -317,7 +320,6 @@ test('Tileset2D#getRequestPriority keeps unprojectable tiles within priority tie
     (tileset as any)._getRequestPriority(visibleUnprojectable)
   );
   expect((tileset as any)._getRequestPriority(staleAtCenter)).toBeLessThan(0);
->>>>>>> origin/master
 
   tileset.finalize();
 });

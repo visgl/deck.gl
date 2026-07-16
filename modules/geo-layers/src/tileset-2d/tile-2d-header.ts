@@ -10,11 +10,7 @@ import type {Layer} from '@deck.gl/core';
 export type TileLoadDataProps<DataT = any> = {
   requestScheduler: RequestScheduler;
   getData: (props: TileLoadProps) => Promise<DataT>;
-<<<<<<< HEAD
-  getPriority: (tile: Tile2DHeader<DataT>) => number;
-=======
   getRequestPriority: (tile: Tile2DHeader<DataT>) => number;
->>>>>>> origin/master
   onLoad: (tile: Tile2DHeader<DataT>) => void;
   onError: (error: any, tile: Tile2DHeader<DataT>) => void;
 };
@@ -113,11 +109,7 @@ export class Tile2DHeader<DataT = any> {
   /* eslint-disable max-statements */
   private async _loadData({
     getData,
-<<<<<<< HEAD
-    getPriority,
-=======
     getRequestPriority,
->>>>>>> origin/master
     requestScheduler,
     onLoad,
     onError
@@ -128,12 +120,7 @@ export class Tile2DHeader<DataT = any> {
     this._abortController = new AbortController();
     const {signal} = this._abortController;
 
-    // @ts-expect-error (2345) loaders.gl's RequestScheduler callback type is too narrow.
-<<<<<<< HEAD
-    const requestToken = await requestScheduler.scheduleRequest(this, getPriority);
-=======
     const requestToken = await requestScheduler.scheduleRequest(this, getRequestPriority);
->>>>>>> origin/master
 
     if (!requestToken) {
       this._isCancelled = true;
