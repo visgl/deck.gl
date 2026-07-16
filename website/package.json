@@ -1,6 +1,6 @@
 {
   "name": "project-website",
-  "version": "9.3.0-beta.1",
+  "version": "9.3.0-beta.2",
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
@@ -37,9 +37,11 @@
     "popmotion": "^11.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-dropzone": "^15.0.0",
     "react-map-gl": "^8.1.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "source-map-loader": "^5.0.0",
+    "split.js": "^1.6.5",
     "styled-components": "^5.3.3",
     "supercluster": "^8.0.1",
     "zustand": "^5.0.5"

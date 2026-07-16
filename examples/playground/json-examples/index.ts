@@ -34,4 +34,4 @@ export default {
   // GET STARTED EXAMPLES AS JSON PAYLOADS
   'get-started/US map (GeoJsonLayer)': usMap,
   'get-started/Dot Text (Scatterplot/TextLayer)': dotText
-};
+} as Record<string, any>;

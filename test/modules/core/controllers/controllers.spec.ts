@@ -14,14 +14,11 @@ import {Timeline} from '@luma.gl/engine';
 
 import testController, {createTestController} from './test-controller';
 
-const makePointerEvent = (type: string, y: number, timeStamp: number, pointerId: number = 1) => ({
+const makeDoubleClickDragEvent = (type: string, y: number, scale: number = 1) => ({
   type,
   offsetCenter: {x: 50, y},
-  timeStamp,
+  scale,
   srcEvent: {
-    pointerId,
-    pointerType: 'touch',
-    timeStamp,
     preventDefault() {}
   },
   stopPropagation() {}
@@ -63,13 +60,11 @@ test('MapController supports double-click drag zoom when double click and touch 
     }
   });
 
-  controller.handleEvent(makePointerEvent('pointerdown', 50, 0) as any);
-  controller.handleEvent(makePointerEvent('pointerup', 50, 50) as any);
-  controller.handleEvent(makePointerEvent('pointerdown', 50, 120) as any);
-  controller.handleEvent(makePointerEvent('pointermove', 20, 150) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragstart', 50, 1.1) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragmove', 20, 1.3) as any);
   const zoomAfterMove = controller.props.zoom;
 
-  controller.handleEvent(makePointerEvent('pointerup', 20, 180) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragend', 20, 1.3) as any);
 
   expect(zoomAfterMove, 'dragging up after double click zooms in').toBeGreaterThan(10);
   expect(controller.props.zoom, 'release should not change zoom').toBeCloseTo(zoomAfterMove);
@@ -88,11 +83,9 @@ test('MapController disables double-click drag zoom', () => {
     }
   });
 
-  controller.handleEvent(makePointerEvent('pointerdown', 50, 0) as any);
-  controller.handleEvent(makePointerEvent('pointerup', 50, 50) as any);
-  controller.handleEvent(makePointerEvent('pointerdown', 50, 120) as any);
-  controller.handleEvent(makePointerEvent('pointermove', 20, 150) as any);
-  controller.handleEvent(makePointerEvent('pointerup', 20, 180) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragstart', 50, 1.1) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragmove', 20, 1.3) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragend', 20, 1.3) as any);
 
   expect(controller.props.zoom, 'double-click drag zoom stays disabled').toBe(10);
 });
