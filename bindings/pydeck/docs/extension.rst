@@ -73,9 +73,7 @@ Python-specific caveats
   operators (for example ``get_filter_value="properties.timeOfDay"``) but **not arbitrary
   JavaScript functions**. Logic that cannot be written as an expression cannot be passed
   from Python.
-- **Binary transport.** ``Layer(use_binary_transport=True)`` is a Jupyter-widget-only
-  optimization — it is ignored by ``to_html()`` and other standalone/HTML export, which
-  serialize the data inline. When it is used, accessor columns are extracted into binary
-  buffers generically by accessor name, so an extension accessor bound to a data column
-  (for example ``get_filter_value="value"``) is transported the same way as a core
-  accessor such as ``get_position``.
+- **Binary transport.** An extension accessor bound to a data column (for example
+  ``get_filter_value="value"``) is carried by binary transport the same way as a core
+  accessor such as ``get_position`` — it is extracted by accessor name like any other. See
+  :doc:`binary_transfer` for the requirements and current status of binary transport.
