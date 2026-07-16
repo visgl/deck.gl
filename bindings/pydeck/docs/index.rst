@@ -76,6 +76,11 @@ Configure the lighting within a visualization.
 
 Configure one of the many deck.gl UI widgets for displaying and controlling deck.gl state in pydeck.
 
+`Extensions <extension.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add optional deck.gl layer extensions, like data-driven filtering or masking, to a layer.
+
 .. note::
    The pydeck library assumes Internet access. You will need an Internet connection or the visualization will not render.
 
@@ -110,6 +115,7 @@ Index
    view
    light_settings
    widget
+   extension
    types
 
 .. toctree::
