@@ -57,6 +57,7 @@ export default function App({
   maxZoom = 7,
   visibleMinZoom,
   visibleMaxZoom = 7,
+  zoomOffset = 0,
   useExtent = false
 }: {
   showBorder?: boolean;
@@ -66,6 +67,7 @@ export default function App({
   maxZoom?: number;
   visibleMinZoom?: number;
   visibleMaxZoom?: number;
+  zoomOffset?: number;
   useExtent?: boolean;
 }) {
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
@@ -95,6 +97,7 @@ export default function App({
     tileSize: 512,
     visibleMinZoom,
     visibleMaxZoom,
+    zoomOffset,
     extent: useExtent ? FRANCE_EXTENT : undefined,
     renderSubLayers: props => {
       const [[west, south], [east, north]] = props.tile.boundingBox;
