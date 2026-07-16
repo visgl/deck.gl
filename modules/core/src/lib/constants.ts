@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-<<<<<<< HEAD
-import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
-=======
-import log from '../utils/log';
 import {Pan, DoubleClickDrag, InputDirection, Pinch, Tap} from 'mjolnir.js';
->>>>>>> origin/master
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
