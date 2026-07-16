@@ -17,18 +17,19 @@ example ``get_filter_value`` and ``filter_range``) are passed to the ``pydeck.La
     import pydeck as pdk
 
     layer = pdk.Layer(
-        "ScatterplotLayer",
+        "PathLayer",
         data=df,
-        get_position="position",
-        get_radius=100,
+        get_path="path",
+        get_color="color",
+        get_width=5,
         # Props added to the layer by the extension:
-        get_filter_value="value",
-        filter_range=[0, 1],
+        get_dash_array=[8, 4],
+        dash_justified=True,
         # The extension itself, with its own options:
-        extensions=[pdk.Extension("DataFilterExtension", filter_size=1)],
+        extensions=[pdk.Extension("PathStyleExtension", dash=True)],
     )
 
-See the `DataFilterExtension gallery example <gallery/data_filter_extension.html>`__ for a
+See the `PathStyleExtension gallery example <gallery/path_style_extension.html>`__ for a
 complete, runnable script.
 
 Available extensions
