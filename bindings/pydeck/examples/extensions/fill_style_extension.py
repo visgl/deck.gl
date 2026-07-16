@@ -6,9 +6,8 @@ Vancouver blocks filled with a repeating hatch pattern using the deck.gl
 ``FillStyleExtension``. The extension is enabled with ``pattern=True``; the layer supplies
 the pattern atlas (a sprite sheet), its mapping, and a ``get_fill_pattern`` accessor.
 
-Note: ``fill_pattern_atlas`` must point at a publicly hosted sprite sheet. The mapping
-below matches the atlas used by deck.gl's render tests
-(``test/data/pattern.png``); host that image (or your own) and update the URL.
+The pattern atlas and mapping are the sprite sheet deck.gl ships for its own examples and
+render tests.
 """
 
 import pandas as pd
@@ -17,14 +16,9 @@ import pydeck as pdk
 DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
 df = pd.read_json(DATA_URL)
 
-# TODO: host this sprite sheet in deck.gl-data and update the URL.
-FILL_PATTERN_ATLAS = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/pattern.png"
-FILL_PATTERN_MAPPING = {
-    "hatch-1x": {"x": 4, "y": 4, "width": 120, "height": 120, "mask": True},
-    "hatch-2x": {"x": 132, "y": 4, "width": 120, "height": 120, "mask": True},
-    "hatch-cross": {"x": 4, "y": 132, "width": 120, "height": 120, "mask": True},
-    "dots": {"x": 132, "y": 132, "width": 120, "height": 120, "mask": True},
-}
+DECKGL_RAW = "https://raw.githubusercontent.com/visgl/deck.gl/master"
+FILL_PATTERN_ATLAS = DECKGL_RAW + "/test/data/pattern.png"
+FILL_PATTERN_MAPPING = DECKGL_RAW + "/test/data/pattern.json"
 
 layer = pdk.Layer(
     "GeoJsonLayer",
