@@ -14,6 +14,16 @@ import {Timeline} from '@luma.gl/engine';
 
 import testController, {createTestController} from './test-controller';
 
+const makeDoubleClickDragEvent = (type: string, y: number, scale: number = 1) => ({
+  type,
+  offsetCenter: {x: 50, y},
+  scale,
+  srcEvent: {
+    preventDefault() {}
+  },
+  stopPropagation() {}
+});
+
 test('MapController', async () => {
   await testController(MapView, {
     longitude: -122.45,
@@ -33,6 +43,51 @@ test('MapController#inertia', async () => {
     bearing: -45,
     inertia: true
   });
+});
+
+test('MapController supports double-click drag zoom when double click and touch zoom are disabled', () => {
+  const controller = createTestController({
+    view: new MapView({
+      controller: {doubleClickZoom: false, doubleClickDragZoom: true, touchZoom: false}
+    }),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragstart', 50, 1.1) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragmove', 20, 1.3) as any);
+  const zoomAfterMove = controller.props.zoom;
+
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragend', 20, 1.3) as any);
+
+  expect(zoomAfterMove, 'dragging up after double click zooms in').toBeGreaterThan(10);
+  expect(controller.props.zoom, 'release should not change zoom').toBeCloseTo(zoomAfterMove);
+});
+
+test('MapController disables double-click drag zoom', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {doubleClickDragZoom: false}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45,
+      inertia: 300
+    }
+  });
+
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragstart', 50, 1.1) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragmove', 20, 1.3) as any);
+  controller.handleEvent(makeDoubleClickDragEvent('dblclickdragend', 20, 1.3) as any);
+
+  expect(controller.props.zoom, 'double-click drag zoom stays disabled').toBe(10);
 });
 
 test('GlobeController', async () => {

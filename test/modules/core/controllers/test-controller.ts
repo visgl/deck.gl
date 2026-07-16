@@ -44,6 +44,7 @@ const BASE_PROPS = {
   dragPan: true,
   dragRotate: true,
   doubleClickZoom: true,
+  doubleClickDragZoom: true,
   touchZoom: true,
   touchRotate: true,
   keyboard: true
@@ -167,6 +168,13 @@ const TEST_CASES = [
     interactionStates: 2
   },
   {
+    title: 'dblclickdrag',
+    props: {},
+    events: () => makeEvents(['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend']),
+    viewStateChanges: 3,
+    interactionStates: 3
+  },
+  {
     title: 'dblclick#out of bounds',
     props: {x: 200},
     events: () => makeEvents(['dblclick']),
@@ -174,9 +182,23 @@ const TEST_CASES = [
     interactionStates: 0
   },
   {
+    title: 'dblclickdrag#out of bounds',
+    props: {x: 200},
+    events: () => makeEvents(['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend']),
+    viewStateChanges: 0,
+    interactionStates: 0
+  },
+  {
     title: 'dblclick#disabled',
     props: {doubleClickZoom: false},
     events: () => makeEvents(['dblclick']),
+    viewStateChanges: 0,
+    interactionStates: 0
+  },
+  {
+    title: 'dblclickdrag#disabled',
+    props: {doubleClickDragZoom: false},
+    events: () => makeEvents(['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend']),
     viewStateChanges: 0,
     interactionStates: 0
   },

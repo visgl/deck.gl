@@ -20,13 +20,13 @@ const NO_TRANSITION_PROPS = {
 
 const DEFAULT_INERTIA = 300;
 const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
-
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
   MULTI_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
   DOUBLE_CLICK: ['dblclick'],
+  DOUBLE_CLICK_DRAG: ['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend', 'dblclickdragcancel'],
   KEYBOARD: ['keydown']
 } as const;
 
@@ -43,9 +43,11 @@ export type ControllerOptions = {
   dragPan?: boolean;
   /** Enable rotating with pointer drag. Default `true` */
   dragRotate?: boolean;
-  /** Enable zooming with double click. Default `true` */
+  /** Enable zooming with double click. Default `false`. Enabling adds ~300ms latency to click events. */
   doubleClickZoom?: boolean;
-  /** Enable zooming with multi-touch. Default `true` */
+  /** Enable zooming with double click/tap and drag. Default `false`. Enabling adds ~300ms latency to click events. */
+  doubleClickDragZoom?: boolean;
+  /** Enable zooming with multi-touch pinch. Default `true` */
   touchZoom?: boolean;
   /** Enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false` */
   touchRotate?: boolean;
@@ -135,6 +137,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
   private _panMove: boolean = false;
+  private _doubleClickDragAnchor: [number, number] | null = null;
+  private _suppressDoubleClickUntil: number = 0;
 
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
@@ -143,6 +147,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected dragPan: boolean = true;
   protected dragRotate: boolean = true;
   protected doubleClickZoom: boolean = true;
+  protected doubleClickDragZoom: boolean = true;
   protected touchZoom: boolean = true;
   protected touchRotate: boolean = false;
   protected keyboard:
@@ -228,6 +233,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         return this._onMultiPanEnd(event);
       case 'dblclick':
         return this._onDoubleClick(event);
+      case 'dblclickdragstart':
+        return eventStartBlocked ? false : this._onDoubleClickDragStart(event);
+      case 'dblclickdragmove':
+        return this._onDoubleClickDrag(event);
+      case 'dblclickdragend':
+      case 'dblclickdragcancel':
+        return this._onDoubleClickDragEnd(event);
       case 'wheel':
         return this._onWheel(event as MjolnirWheelEvent);
       case 'keydown':
@@ -315,6 +327,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       dragPan = true,
       dragRotate = true,
       doubleClickZoom = true,
+      doubleClickDragZoom = false,
       touchZoom = true,
       touchRotate = false,
       keyboard = true
@@ -328,6 +341,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
     this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && touchRotate);
     this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK, isInteractive && doubleClickZoom);
+    this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK_DRAG, isInteractive && doubleClickDragZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
 
     // Interaction toggles
@@ -335,6 +349,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.dragPan = dragPan;
     this.dragRotate = dragRotate;
     this.doubleClickZoom = doubleClickZoom;
+    this.doubleClickDragZoom = doubleClickDragZoom;
     this.touchZoom = touchZoom;
     this.touchRotate = touchRotate;
     this.keyboard = keyboard;
@@ -641,6 +656,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   // Default handler for the `pinchstart` event.
   protected _onPinchStart(event: MjolnirGestureEvent): boolean {
+    this._doubleClickDragAnchor = null;
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -735,6 +751,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.doubleClickZoom) {
       return false;
     }
+    if (Date.now() < this._suppressDoubleClickUntil) {
+      return false;
+    }
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
       return false;
@@ -747,6 +766,63 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       isZooming: true,
       isPanning: true
     });
+    this.blockEvents(100);
+    return true;
+  }
+
+  protected _onDoubleClickDragStart(event: MjolnirGestureEvent): boolean {
+    if (!this.doubleClickDragZoom) {
+      this._doubleClickDragAnchor = null;
+      return false;
+    }
+
+    const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos, event)) {
+      this._doubleClickDragAnchor = null;
+      return false;
+    }
+
+    this._doubleClickDragAnchor = pos;
+    let newControllerState = this.controllerState.zoomStart({pos});
+    if (event.scale !== 1) {
+      newControllerState = newControllerState.zoom({pos, scale: event.scale});
+    }
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isPanning: true,
+      isZooming: true
+    });
+    return true;
+  }
+
+  protected _onDoubleClickDrag(event: MjolnirGestureEvent): boolean {
+    const pos = this._doubleClickDragAnchor;
+    if (!pos) {
+      return false;
+    }
+
+    const newControllerState = this.controllerState.zoom({pos, scale: event.scale});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isPanning: true,
+      isZooming: true
+    });
+    return true;
+  }
+
+  protected _onDoubleClickDragEnd(_event: MjolnirGestureEvent): boolean {
+    if (!this._doubleClickDragAnchor) {
+      return false;
+    }
+
+    this._doubleClickDragAnchor = null;
+    const newControllerState = this.controllerState.zoomEnd();
+    this.updateViewport(newControllerState, null, {
+      isDragging: false,
+      isPanning: false,
+      isZooming: false
+    });
+    this._suppressDoubleClickUntil = Date.now() + 100;
     this.blockEvents(100);
     return true;
   }
@@ -826,7 +902,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return NO_TRANSITION_PROPS;
     }
 
-    // Enables Transitions on double-tap and key-down events.
+    // Enables Transitions on double-click/tap and key-down events.
     return opts
       ? {
         ...transition,

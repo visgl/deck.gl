@@ -61,6 +61,7 @@ test('Tileset2D#update', () => {
   expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
+<<<<<<< HEAD
 test('Tileset2D#update with coverage LOD', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -75,10 +76,51 @@ test('Tileset2D#update with coverage LOD', () => {
     'nearest lower resolution coverage tile is prefetched'
   ).toBe(true);
   expect(tileset._cache.get('1171-1566-12')?.isSelected, 'target tile remains selected').toBe(true);
+=======
+test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => [x, y]
+    }
+  });
+
+  const selectedAtCenterEdge = {
+    bbox: {left: 0, top: 0, right: 50, bottom: 100},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const selectedNearCenter = {
+    bbox: {left: 60, top: 45, right: 70, bottom: 55},
+    index: {x: 1, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const visibleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 8},
+    isSelected: false,
+    isVisible: true
+  };
+
+  expect((tileset as any)._getRequestPriority(selectedAtCenterEdge)).toBeLessThan(
+    (tileset as any)._getRequestPriority(selectedNearCenter)
+  );
+  expect((tileset as any)._getRequestPriority(selectedNearCenter)).toBeLessThan(
+    (tileset as any)._getRequestPriority(visibleAtCenter)
+  );
+>>>>>>> origin/master
 
   tileset.finalize();
 });
 
+<<<<<<< HEAD
 test('Tileset2D#coverage LOD uses higher minimum coverage zoom for resolution viewports', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -229,6 +271,53 @@ test('Tileset2D#coverage LOD keeps cached root below the resolution fallback flo
   expect(fallback.isVisible, 'fallback ancestor covers pending selected tile').toBe(true);
   expect(root.isVisible, 'root remains below the visible fallback floor').toBe(false);
   expect(selected.isVisible, 'pending selected tile is hidden').toBe(false);
+=======
+test('Tileset2D#getRequestPriority keeps unprojectable tiles within priority tiers', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => (x < 0 || y < 0 ? [Number.NaN, Number.NaN] : [x, y])
+    }
+  });
+
+  const selectedUnprojectable = {
+    bbox: {left: -20, top: -20, right: -10, bottom: -10},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true
+  };
+  const visibleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 1, y: 0, z: 10},
+    isSelected: false,
+    isVisible: true
+  };
+  const visibleUnprojectable = {
+    bbox: {left: -20, top: -20, right: -10, bottom: -10},
+    index: {x: 2, y: 0, z: 10},
+    isSelected: false,
+    isVisible: true
+  };
+  const staleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 3, y: 0, z: 10},
+    isSelected: false,
+    isVisible: false
+  };
+
+  expect((tileset as any)._getRequestPriority(selectedUnprojectable)).toBeLessThan(
+    (tileset as any)._getRequestPriority(visibleAtCenter)
+  );
+  expect((tileset as any)._getRequestPriority(visibleAtCenter)).toBeLessThan(
+    (tileset as any)._getRequestPriority(visibleUnprojectable)
+  );
+  expect((tileset as any)._getRequestPriority(staleAtCenter)).toBeLessThan(0);
+>>>>>>> origin/master
 
   tileset.finalize();
 });

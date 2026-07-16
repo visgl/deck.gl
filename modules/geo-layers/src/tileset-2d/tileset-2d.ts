@@ -10,7 +10,7 @@ import {Matrix4, equals, NumericArray} from '@math.gl/core';
 import {Tile2DHeader} from './tile-2d-header';
 
 import {getTileIndices, tileToBoundingBox, getCullBounds, transformBox} from './utils';
-import {Bounds, TileIndex, ZRange} from './types';
+import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
 
@@ -51,12 +51,18 @@ export type RefinementStrategy =
 export type LODStrategy = 'none' | 'coverage';
 
 const DEFAULT_CACHE_SCALE = 5;
+<<<<<<< HEAD
 const COVERAGE_ZOOM_DELTA = 1;
 const MIN_RESOLUTION_COVERAGE_ZOOM = 6;
 const MIN_RESOLUTION_FALLBACK_ZOOM = 4;
 const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
 const PREFETCH_TILE_PRIORITY = 2e8;
+=======
+const SELECTED_TILE_PRIORITY = 0;
+const VISIBLE_TILE_PRIORITY = 1e8;
+const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
+>>>>>>> origin/master
 
 const STRATEGIES = {
   [STRATEGY_DEFAULT]: updateTileStateDefault,
@@ -468,6 +474,7 @@ export class Tileset2D {
   private _getCullBounds = memoize(getCullBounds);
 
   private _getRequestPriority(tile: Tile2DHeader): number {
+<<<<<<< HEAD
     // RequestScheduler loads lower priority values first.
     if (tile.isSelected) {
       return SELECTED_TILE_PRIORITY;
@@ -482,6 +489,101 @@ export class Tileset2D {
       return PREFETCH_TILE_PRIORITY + zoomPriority;
     }
     return -1;
+=======
+    if (!tile.isSelected && !tile.isVisible) {
+      return -1;
+    }
+
+    // RequestScheduler loads lower priority values first.
+    const distance = this._getTileDistancePriority(tile);
+    if (tile.isSelected) {
+      return SELECTED_TILE_PRIORITY + distance;
+    }
+    return VISIBLE_TILE_PRIORITY + distance;
+  }
+
+  private _getTileDistancePriority(tile: Tile2DHeader): number {
+    const {width, height} = this._viewport || {};
+    if (!this._viewport || !width || !height) {
+      return 0;
+    }
+
+    try {
+      const points = this._getTileScreenCorners(tile.bbox);
+      const center: [number, number] = [width / 2, height / 2];
+      if (points.length === 4) {
+        if (this._isPointInPolygon(center, points)) {
+          return 0;
+        }
+        const distance = points.reduce((minDistance, point, i) => {
+          const nextPoint = points[(i + 1) % points.length];
+          return Math.min(
+            minDistance,
+            this._getPointToSegmentDistanceSquared(center, point, nextPoint)
+          );
+        }, Number.MAX_SAFE_INTEGER);
+        return Math.min(distance, MAX_TILE_DISTANCE_PRIORITY);
+      }
+    } catch {
+      // Some viewport/tile combinations are not projectable. Keep them valid but last in tier.
+    }
+    return MAX_TILE_DISTANCE_PRIORITY;
+  }
+
+  private _getTileScreenCorners(bbox: TileBoundingBox): [number, number][] {
+    const coordinates: [number, number][] =
+      'west' in bbox
+        ? [
+            [bbox.west, bbox.south],
+            [bbox.east, bbox.south],
+            [bbox.east, bbox.north],
+            [bbox.west, bbox.north]
+          ]
+        : [
+            [bbox.left, bbox.top],
+            [bbox.right, bbox.top],
+            [bbox.right, bbox.bottom],
+            [bbox.left, bbox.bottom]
+          ];
+
+    return coordinates
+      .map(coordinate => this._viewport!.project(coordinate))
+      .filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y)) as [number, number][];
+  }
+
+  private _isPointInPolygon(point: [number, number], polygon: [number, number][]): boolean {
+    let inside = false;
+    const [x, y] = point;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const [xi, yi] = polygon[i];
+      const [xj, yj] = polygon[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  private _getPointToSegmentDistanceSquared(
+    point: [number, number],
+    segmentStart: [number, number],
+    segmentEnd: [number, number]
+  ): number {
+    const [x, y] = point;
+    const [x1, y1] = segmentStart;
+    const [x2, y2] = segmentEnd;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lengthSquared = dx * dx + dy * dy;
+    const t = lengthSquared
+      ? Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lengthSquared))
+      : 0;
+    const segmentX = x1 + t * dx;
+    const segmentY = y1 + t * dy;
+    const distanceX = x - segmentX;
+    const distanceY = y - segmentY;
+    return distanceX * distanceX + distanceY * distanceY;
+>>>>>>> origin/master
   }
 
   private _pruneRequests(): void {
@@ -603,7 +705,11 @@ export class Tileset2D {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       tile.loadData({
         getData: this.opts.getTileData,
+<<<<<<< HEAD
         getPriority: this._getRequestPriority.bind(this),
+=======
+        getRequestPriority: this._getRequestPriority.bind(this),
+>>>>>>> origin/master
         requestScheduler: this._requestScheduler,
         onLoad: this.onTileLoad,
         onError: this.opts.onTileError

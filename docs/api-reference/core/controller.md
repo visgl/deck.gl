@@ -14,8 +14,9 @@ The base Controller class supports the following options:
   + `smooth` (boolean) - smoothly transition to the new zoom. If enabled, will provide a slightly lagged but smoother experience. Default `false`.
 * `dragPan` (boolean) - enable panning with pointer drag. Default `true`
 * `dragRotate` (boolean) - enable rotating with pointer drag. Default `true`
-* `doubleClickZoom` (boolean) - enable zooming with double click. Default `true`
-* `touchZoom` (boolean) - enable zooming with multi-touch. Default `true`
+* `doubleClickZoom` (boolean) - enable zooming with double click. Default `true`. Adds ~300ms latency to click events due to the tap recognizer waiting to distinguish single clicks from double clicks. Set to `false` for immediate click response. Note: disabling also prevents `onClick` from firing with `tapCount: 2` on double-click.
+* `doubleClickDragZoom` (boolean) - enable zooming by double clicking/tapping and dragging. Default `false`. Enabling adds ~300ms latency to click events due to the tap recognizer waiting to distinguish single clicks from double-click-drags.
+* `touchZoom` (boolean) - enable zooming with multi-touch pinch. Default `true`
 * `touchRotate` (boolean) - enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false`
 * `keyboard` (boolean | object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
     * `zoomSpeed` (number) - speed of zoom using +/- keys. Default `2`.
@@ -25,6 +26,8 @@ The base Controller class supports the following options:
 * `dragMode` (string) - drag behavior without pressing function keys, one of `pan` and `rotate`.
 * `inertia` (boolean | number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
 * `maxBounds` (`[min: number[], max: number[]]`) - constrain camera to the specified bounding box. Different type of views may handle this constraint differently.
+
+> **Mobile users:** See [Optimization for Mobile](../../developer-guide/tips-and-tricks.md#optimization-for-mobile) for CSS and browser event guards that help prevent native selection, tap highlight, and touch callout UI during repeated touch gestures.
 
 ## Methods
 
@@ -116,6 +119,7 @@ Note that the following events are always toggled on/off by user options:
 * `touchZoom` - `['pinch']`
 * `touchRotate` - `['pinch', 'multipan']`
 * `doubleClickZoom` - `['dblclick']`
+* `doubleClickDragZoom` - `['pointerdown', 'pointermove', 'pointerup', 'pointercancel']`
 * `keyboard` - `['keydown']`
 
 
