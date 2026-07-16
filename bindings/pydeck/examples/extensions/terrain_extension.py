@@ -32,8 +32,9 @@ route = pdk.Layer(
     width_min_pixels=6,
     cap_rounded=True,
     joint_rounded=True,
-    # Props added to the layer by the TerrainExtension:
-    terrain_draw_mode="offset",
+    # Props added to the layer by the TerrainExtension. Quote the literal draw-mode enum
+    # so pydeck serializes it verbatim instead of as an ``@@=`` accessor.
+    terrain_draw_mode="'offset'",
     extensions=[pdk.Extension("TerrainExtension")],
 )
 

@@ -26,7 +26,9 @@ mask_layer = pdk.Layer(
     [{"polygon": mask_polygon[0]}],
     id="sf-mask",
     get_polygon="polygon",
-    operation="mask",
+    # Quote literal string props so pydeck serializes them verbatim instead of as
+    # ``@@=`` accessor expressions.
+    operation="'mask'",
 )
 
 stations = pdk.Layer(
@@ -39,8 +41,8 @@ stations = pdk.Layer(
     get_position="coordinates",
     get_radius="exits_radius",
     get_fill_color=[255, 80, 120],
-    # Props added to the layer by the MaskExtension:
-    mask_id="sf-mask",
+    # Props added to the layer by the MaskExtension (mask_id is a literal string id):
+    mask_id="'sf-mask'",
     extensions=[pdk.Extension("MaskExtension")],
 )
 

@@ -32,7 +32,8 @@ layer = pdk.Layer(
     # Props added to the layer by the BrushingExtension:
     brushing_enabled=True,
     brushing_radius=20000,
-    brushing_target="source",
+    # Quote the literal enum so pydeck serializes it verbatim, not as an ``@@=`` accessor
+    brushing_target="'source'",
     extensions=[pdk.Extension("BrushingExtension")],
 )
 
