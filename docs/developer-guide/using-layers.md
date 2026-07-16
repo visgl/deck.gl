@@ -156,7 +156,7 @@ import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 
 type Flight = {
   callSign: string;
-  lon: number;
+  lng: number;
   lat: number;
   alt: number;
 };

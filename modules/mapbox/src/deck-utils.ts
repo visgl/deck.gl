@@ -5,13 +5,13 @@
 import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
 import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
-import type MapboxLayer from './mapbox-layer';
 import type MapboxLayerGroup from './mapbox-layer-group';
 import type {LayerOverlayProps, Map} from './types';
+import {getLayerGroupId} from './resolve-layer-groups';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
-const MAPBOX_VIEW_ID = 'mapbox';
+export const MAPBOX_VIEW_ID = 'mapbox';
 
 type UserData = {
   currentViewport?: Viewport | null;
@@ -45,14 +45,15 @@ export function getDeckInstance({
       // customRender may be subscribed by DeckGL React component to update child props
       // make sure it is still called
       // Hack - do not pass a redraw reason here to prevent the React component from clearing the context
-      // Rerender will be triggered by MapboxLayer's render()
+      // Rerender will be triggered by MapboxLayerGroup's render()
       customRender?.('');
     }
   };
   deckProps.views ||= getDefaultView(map);
 
-  // deck is using the WebGLContext created by mapbox,
-  // block deck from setting the canvas size, and use the map's viewState to drive deck.
+  // deck is using the WebGLContext created by mapbox.
+  // The map and its attached luma canvas context own canvas sizing and DPR state here.
+  // Deck only follows view state and avoids trying to size the shared canvas itself.
   Object.assign(deckProps, {
     width: null,
     height: null,
@@ -111,40 +112,7 @@ export function getDefaultParameters(map: Map, interleaved: boolean): Parameters
         blendAlphaOperation: 'add'
       }
     : {};
-  if (getProjection(map) === 'globe') {
-    result.cullMode = 'back';
-  }
   return result;
-}
-
-export function drawLayer(
-  deck: Deck,
-  map: Map,
-  layer: MapboxLayer<any>,
-  renderParameters: any
-): void {
-  if (!deck.isInitialized) {
-    return;
-  }
-
-  let {currentViewport} = deck.userData as UserData;
-  let clearStack: boolean = false;
-  if (!currentViewport) {
-    // This is the first layer drawn in this render cycle.
-    // Generate viewport from the current map state.
-    currentViewport = getViewport(deck, map, renderParameters);
-    (deck.userData as UserData).currentViewport = currentViewport;
-    clearStack = true;
-  }
-
-  deck._drawLayers('mapbox-repaint', {
-    viewports: [currentViewport],
-    layerFilter: params =>
-      (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-      (layer.id === params.layer.id || params.layer.props.operation.includes('terrain')),
-    clearStack,
-    clearCanvas: false
-  });
 }
 
 export function drawLayerGroup(
@@ -165,6 +133,10 @@ export function drawLayerGroup(
     currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
+  }
+
+  if (!currentViewport) {
+    return;
   }
 
   deck._drawLayers('mapbox-repaint', {
@@ -301,13 +273,13 @@ type MaplibreRenderParameters = {
   projectionMatrix: number[];
 };
 
-function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport {
+function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport | null {
   const viewState = getViewState(map);
   // View is always MapView or GlobeView in this context
   const view = (deck.getView(MAPBOX_VIEW_ID) || getDefaultView(map)) as MapView | GlobeView;
 
   if (renderParameters) {
-    // Called from MapboxLayer.render
+    // Called from MapboxLayerGroup.render
     // Magic number, matches mapbox-gl@>=1.3.0's projection matrix
     view.props.nearZMultiplier = 0.2;
   }
@@ -327,13 +299,15 @@ function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport
     width: deck.width,
     height: deck.height,
     viewState
-  }) as Viewport;
+  });
 }
 
 function afterRender(deck: Deck, map: Map): void {
-  // Draw non-Mapbox layers (layers that don't have a corresponding MapboxLayer on the map)
-  const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
-  const hasNonMapboxLayers = deckLayers.some(layer => layer && !map.getLayer(layer.id));
+  // Draw non-Mapbox layers (layers that don't have a corresponding MapboxLayerGroup on the map)
+  const deckLayers = flatten(deck.props.layers, Boolean) as Layer<LayerOverlayProps>[];
+  const hasNonMapboxLayers = deckLayers.some(
+    layer => layer && !map.getLayer(getLayerGroupId(layer))
+  );
   let viewports = deck.getViewports();
   const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
   const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
@@ -341,16 +315,29 @@ function afterRender(deck: Deck, map: Map): void {
   if (hasNonMapboxLayers || hasNonMapboxViews) {
     if (mapboxViewportIdx >= 0) {
       viewports = viewports.slice();
-      viewports[mapboxViewportIdx] = getViewport(deck, map);
+      const mapboxViewport = getViewport(deck, map);
+      if (mapboxViewport) {
+        viewports[mapboxViewportIdx] = mapboxViewport;
+      } else {
+        viewports.splice(mapboxViewportIdx, 1);
+      }
     }
 
     deck._drawLayers('mapbox-repaint', {
       viewports,
       layerFilter: params =>
         (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-        (params.viewport.id !== MAPBOX_VIEW_ID || !map.getLayer(params.layer.id)),
+        (params.viewport.id !== MAPBOX_VIEW_ID ||
+          !map.getLayer(getLayerGroupId(params.layer as Layer<LayerOverlayProps>))),
       clearCanvas: false
     });
+  } else {
+    // Even when there are no non-Mapbox layers to draw, fire lifecycle callbacks
+    // so that consumers can still track view state changes via onAfterRender
+    const device = (deck as any).device;
+    const gl = device?.gl;
+    deck.props.onBeforeRender?.({device, gl});
+    deck.props.onAfterRender?.({device, gl});
   }
 
   // End of render cycle, clear generated viewport

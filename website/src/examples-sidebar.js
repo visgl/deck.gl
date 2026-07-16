@@ -38,6 +38,7 @@ const sidebars = {
         'screen-grid-layer',
         'terrain-layer',
         'text-layer',
+        'text-layer-clipping',
         'tile-layer',
         'tile-layer-non-geospatial',
         'tile-3d-layer',
@@ -74,6 +75,11 @@ const sidebars = {
           type: 'link',
           label: 'Playground',
           href: `/playground`
+        },
+        {
+          type: 'link',
+          label: 'pydeck',
+          href: `/pydeck`
         }
       ]
     }

@@ -5,7 +5,7 @@
 import * as tf from '@tensorflow/tfjs';
 
 import {UpdateParameters, Layer, CompositeLayer, LayersList} from '@deck.gl/core';
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 import {Tensor2DLayer} from './tensor-2d-layer';
 import {CustomTFContext} from '../tf-utils/tf-context';

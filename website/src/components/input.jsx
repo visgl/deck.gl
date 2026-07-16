@@ -69,7 +69,7 @@ const InputContainer = styled.div`
   }
 `;
 
-function RangeInput({name, min, max, step, displayName, displayValue, onChange}) {
+function RangeInput({name, min, max, step, displayName, displayValue, onChange, accentColor}) {
   const onInput = useCallback(
     evt => {
       const {value} = evt.target;
@@ -91,7 +91,7 @@ function RangeInput({name, min, max, step, displayName, displayValue, onChange})
       <div className="tooltip">
         {displayName}: {String(displayValue)}
       </div>
-      <input type="range" min={min} max={max} value={displayValue} step={step} onChange={onInput} />
+      <input type="range" min={min} max={max} value={displayValue} step={step} onChange={onInput} style={accentColor ? {accentColor} : undefined} />
     </InputContainer>
   );
 }

@@ -16,10 +16,11 @@ import {
   Accessor,
   Color,
   Material,
-  DefaultProps
+  DefaultProps,
+  gouraudMaterial,
+  phongMaterial
 } from '@deck.gl/core';
-import {gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
-import {Model} from '@luma.gl/engine';
+import {Geometry, Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
@@ -369,10 +370,17 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     const fillModel = this.state.fillModel!;
     const wireframeModel = this.state.wireframeModel!;
-    fillModel.setGeometry(geometry);
-    fillModel.setTopology('triangle-strip');
-    // Disable indices
-    fillModel.setIndexBuffer(null);
+
+    // The fill model renders a triangle-strip with degenerate triangles and does not
+    // use indices. Give it a separate Geometry without `indices` so that later buffer
+    // layout rebuilds (e.g. binary-data transitions, HMR) cannot re-attach the
+    // wireframe indices via `_setGeometryAttributes`.
+    const {POSITION, NORMAL} = geometry.attributes;
+    const fillGeometry = new Geometry({
+      topology: 'triangle-strip',
+      attributes: {POSITION, NORMAL}
+    });
+    fillModel.setGeometry(fillGeometry);
 
     wireframeModel.setGeometry(geometry);
     wireframeModel.setTopology('line-list');

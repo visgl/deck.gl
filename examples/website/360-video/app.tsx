@@ -5,7 +5,7 @@
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
-import {FirstPersonView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {FirstPersonView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/engine';
 
@@ -64,7 +64,7 @@ export default function App() {
   const layer = new SimpleMeshLayer({
     id: 'video-sphere',
     data: [0],
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     texture: video,
     mesh: sphere,
     getPosition: _ => [0, 0, 0],

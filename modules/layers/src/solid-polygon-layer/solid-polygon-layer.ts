@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, project32, picking, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -156,13 +155,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
-    if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-      coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    if (viewport.isGeospatial && coordinateSystem === 'default') {
+      coordinateSystem = 'lnglat';
     }
 
     let preproject: ((xy: number[]) => number[]) | undefined;
 
-    if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+    if (coordinateSystem === 'lnglat') {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {
@@ -183,8 +182,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     const attributeManager = this.getAttributeManager()!;
     const noAlloc = true;
-
-    attributeManager.remove(['instancePickingColors']);
 
     /* eslint-disable max-len */
     attributeManager.add({
@@ -241,12 +238,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR
       },
-      pickingColors: {
-        size: 4,
-        type: 'uint8',
+      /** Source polygon row, including __source.index for composite data. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
         stepMode: 'dynamic',
-        accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
+        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
       }
     });
     /* eslint-enable max-len */

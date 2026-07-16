@@ -5,13 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
-import {
-  COORDINATE_SYSTEM,
-  OrbitView,
-  DirectionalLight,
-  LightingEffect,
-  AmbientLight
-} from '@deck.gl/core';
+import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
@@ -76,7 +70,7 @@ export default function App() {
       id: 'mini-coopers',
       data: SAMPLE_DATA,
       mesh: MESH_URL,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPosition: d => d.position,
       getColor: d => d.color,
       getOrientation: d => d.orientation
@@ -86,7 +80,7 @@ export default function App() {
       id: 'background',
       data: background,
       extruded: false,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPolygon: f => f,
       getFillColor: [0, 0, 0, 0]
     })

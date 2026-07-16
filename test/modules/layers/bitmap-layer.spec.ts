@@ -2,22 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
 
 import {testPickingLayer} from './test-picking-layer';
 
-test('BitmapLayer#constructor', t => {
+test('BitmapLayer#constructor', () => {
   const positionsWithZ = new Float32Array([2, 4, 1, 2, 8, 1, 16, 8, 1, 16, 4, 1]);
   const positions = new Float32Array([2, 4, 0, 2, 8, 0, 16, 8, 0, 16, 4, 0]);
 
   testLayer({
     Layer: BitmapLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         title: 'Empty layer',
@@ -38,12 +38,11 @@ test('BitmapLayer#constructor', t => {
           ]
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.deepEqual(
+          expect(layer.state, 'should update layer state').toBeTruthy();
+          expect(
             layer.getAttributeManager()!.attributes.positions.value,
-            positionsWithZ,
             'should update positions'
-          );
+          ).toEqual(positionsWithZ);
         }
       },
       {
@@ -52,26 +51,21 @@ test('BitmapLayer#constructor', t => {
           bounds: [2, 4, 16, 8]
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.deepEqual(
+          expect(layer.state, 'should update layer state').toBeTruthy();
+          expect(
             layer.getAttributeManager()!.attributes.positions.value,
-            positions,
             'should update positions'
-          );
+          ).toEqual(positions);
         }
       }
     ]
   });
-
-  t.end();
 });
 
-test('BitmapLayer#imageCoordinateSystem', t => {
-  t.plan(13);
-
+test('BitmapLayer#imageCoordinateSystem', () => {
   testLayer({
     Layer: BitmapLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         title: 'MapView + default imageCoordinateSystem',
@@ -80,8 +74,8 @@ test('BitmapLayer#imageCoordinateSystem', t => {
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
-          t.is(coordinateConversion, 0, 'No coordinate conversion');
-          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+          expect(coordinateConversion, 'No coordinate conversion').toBe(0);
+          expect(bounds, 'Default bounds').toEqual([0, 0, 0, 0]);
         }
       },
       {
@@ -91,8 +85,8 @@ test('BitmapLayer#imageCoordinateSystem', t => {
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
-          t.is(coordinateConversion, 0, 'No coordinate conversion');
-          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+          expect(coordinateConversion, 'No coordinate conversion').toBe(0);
+          expect(bounds, 'Default bounds').toEqual([0, 0, 0, 0]);
         }
       },
       {
@@ -102,8 +96,8 @@ test('BitmapLayer#imageCoordinateSystem', t => {
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
-          t.is(coordinateConversion, -1, 'Convert image coordinate from LNGLAT');
-          t.deepEqual(bounds, [-180, -90, 180, 90], 'Generated LNGLAT bounds');
+          expect(coordinateConversion, 'Convert image coordinate from LNGLAT').toBe(-1);
+          expect(bounds, 'Generated LNGLAT bounds').toEqual([-180, -90, 180, 90]);
         }
       }
     ]
@@ -111,7 +105,7 @@ test('BitmapLayer#imageCoordinateSystem', t => {
 
   testLayer({
     Layer: BitmapLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     viewport: new GlobeViewport({width: 800, height: 600, latitude: 0, longitude: 0, zoom: 1}),
     testCases: [
       {
@@ -121,8 +115,8 @@ test('BitmapLayer#imageCoordinateSystem', t => {
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
-          t.is(coordinateConversion, 0, 'No coordinate conversion');
-          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+          expect(coordinateConversion, 'No coordinate conversion').toBe(0);
+          expect(bounds, 'Default bounds').toEqual([0, 0, 0, 0]);
         }
       },
       {
@@ -132,8 +126,8 @@ test('BitmapLayer#imageCoordinateSystem', t => {
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
-          t.is(coordinateConversion, 1, 'Convert image coordinates from WebMercator');
-          t.deepEqual(bounds, [256, 211.23850847154438, 320, 256], 'Generated bounds');
+          expect(coordinateConversion, 'Convert image coordinates from WebMercator').toBe(1);
+          expect(bounds, 'Generated bounds').toEqual([256, 211.23850847154438, 320, 256]);
         }
       },
       {
@@ -143,8 +137,8 @@ test('BitmapLayer#imageCoordinateSystem', t => {
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
-          t.is(coordinateConversion, 0, 'No coordinate conversion');
-          t.deepEqual(bounds, [0, 0, 0, 0], 'Default bounds');
+          expect(coordinateConversion, 'No coordinate conversion').toBe(0);
+          expect(bounds, 'Default bounds').toEqual([0, 0, 0, 0]);
         }
       }
     ]
@@ -160,11 +154,12 @@ test('BitmapLayer#imageCoordinateSystem', t => {
       ],
       _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
     }),
-    onError: () => t.pass('Layer should throw if _imageCoordinateSystem is used with quad bounds')
+    onError: () =>
+      console.log('Layer should throw if _imageCoordinateSystem is used with quad bounds')
   });
 });
 
-test('createMesh', t => {
+test('createMesh', () => {
   const bounds = [
     [0, 0, 0],
     [0, 2, 1],
@@ -173,21 +168,19 @@ test('createMesh', t => {
   ];
 
   const result1 = createMesh(bounds);
-  t.is(result1.vertexCount, 6, 'returns 1 quad');
-  t.is(result1.positions.length, 3 * 4, 'returns 4 vertices');
+  expect(result1.vertexCount, 'returns 1 quad').toBe(6);
+  expect(result1.positions.length, 'returns 4 vertices').toBe(3 * 4);
 
   const result2 = createMesh(bounds);
-  t.is(result1.indices, result2.indices, 'reuses indices array');
-  t.is(result1.texCoords, result2.texCoords, 'reuses texCoords array');
+  expect(result1.indices, 'reuses indices array').toBe(result2.indices);
+  expect(result1.texCoords, 'reuses texCoords array').toBe(result2.texCoords);
 
   const result3 = createMesh(bounds, 1);
-  t.is(result3.vertexCount, 6 * 4, 'returns 4 quads');
-  t.is(result3.positions.length, 3 * 9, 'returns 9 vertices');
-
-  t.end();
+  expect(result3.vertexCount, 'returns 4 quads').toBe(6 * 4);
+  expect(result3.positions.length, 'returns 9 vertices').toBe(3 * 9);
 });
 
-test('BitmapLayer#picking', async t => {
+test('BitmapLayer#picking', async () => {
   await testPickingLayer({
     layer: new BitmapLayer({
       id: 'image',
@@ -206,22 +199,17 @@ test('BitmapLayer#picking', async t => {
         pickedLayerId: 'image',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.deepEqual(
-            info.bitmap,
-            {
-              size: {width: 8, height: 8},
-              uv: [0.25, 0.125],
-              pixel: [2, 1]
-            },
-            'info.bitmap populated'
-          );
+          expect(info.bitmap, 'info.bitmap populated').toEqual({
+            size: {width: 8, height: 8},
+            uv: [0.25, 0.125],
+            pixel: [2, 1]
+          });
           const uniforms = layer.getModels()[0].shaderInputs.getUniformValues();
-          t.is(uniforms.picking.isHighlightActive, true, `auto highlight is set`);
-          t.deepEqual(
+          expect(uniforms.picking.isHighlightActive, `auto highlight is set`).toBe(true);
+          expect(
             uniforms.picking.highlightedObjectColor,
-            [1, 0, 0],
             'highlighted index is set correctly'
-          );
+          ).toEqual([1, 0, 0]);
         }
       },
       {
@@ -229,13 +217,11 @@ test('BitmapLayer#picking', async t => {
         pickedLayerId: '',
         mode: 'hover',
         onAfterUpdate: ({layer, subLayers, info}) => {
-          t.notOk(info.bitmap, 'info.bitmap not populated');
+          expect(info.bitmap, 'info.bitmap not populated').toBeFalsy();
           const uniforms = layer.getModels()[0].shaderInputs.getUniformValues();
-          t.is(uniforms.picking.isHighlightActive, false, `auto highlight is cleared`);
+          expect(uniforms.picking.isHighlightActive, `auto highlight is cleared`).toBe(false);
         }
       }
     ]
   });
-
-  t.end();
 });

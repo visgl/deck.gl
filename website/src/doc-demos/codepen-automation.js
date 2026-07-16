@@ -16,7 +16,7 @@ const BASE_LAYER_PROP_WHITE_LIST = [
 ];
 const PROP_OVERRIDES = {
   loaders: [],
-  coordinateSystem: 'COORDINATE_SYSTEM.LNGLAT',
+  coordinateSystem: "'lnglat'",
   renderSubLayers: 'props => new GeoJsonLayer(props)',
   characterSet:
     '" !\\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"'

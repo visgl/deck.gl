@@ -38,9 +38,11 @@ new Deck({
 Supports all [Controller options](./controller.md#options) with the following default behavior:
 
 - `dragPan`: default `'pan'` (drag to pan)
-- `dragRotate`: not effective, this view does not currently support rotation
-- `touchRotate`: not effective, this view does not currently support rotation
+- `dragRotate`: shift+drag or right-click drag to change bearing and pitch
+- `touchRotate`: multi-touch rotate to change bearing
 - `keyboard`: arrow keys to pan, +/- to zoom
+- `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
+- `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 
 ## Custom GlobeController
 

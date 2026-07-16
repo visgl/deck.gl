@@ -11,7 +11,6 @@ export default `\
 in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
 in vec3 instanceModelMatrixCol0;
 in vec3 instanceModelMatrixCol1;
 in vec3 instanceModelMatrixCol2;
@@ -46,7 +45,7 @@ void main(void) {
   #endif
 
   geometry.worldPosition = instancePositions;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   mat3 instanceModelMatrix = mat3(instanceModelMatrixCol0, instanceModelMatrixCol1, instanceModelMatrixCol2);
 
@@ -86,11 +85,12 @@ void main(void) {
     #endif
 
     #ifdef HAS_UV
-      pbr_vUV = texCoords;
+      pbr_vUV0 = texCoords;
     #else
-      pbr_vUV = vec2(0., 0.);
+      pbr_vUV0 = vec2(0., 0.);
     #endif
-    geometry.uv = pbr_vUV;
+    pbr_vUV1 = vec2(0., 0.);
+    geometry.uv = pbr_vUV0;
   #endif
 
   vColor = instanceColors;

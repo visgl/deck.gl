@@ -6,7 +6,7 @@ import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = /* glsl */ `\
-uniform gridUniforms {
+layout(std140) uniform gridUniforms {
   vec4 colorDomain;
   vec4 elevationDomain;
   vec2 elevationRange;

@@ -2,12 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE, UNIT} from '../../lib/constants';
+import {PROJECTION_MODE, UNIT} from '../../lib/constants';
+import {getShaderCoordinateSystem} from './viewport-uniforms';
 
-// We are generating these from the js code in constants.js
-const COORDINATE_SYSTEM_WGSL_CONSTANTS = Object.keys(COORDINATE_SYSTEM)
-  .map(key => `const COORDINATE_SYSTEM_${key}: i32 = ${COORDINATE_SYSTEM[key]};`)
-  .join('');
+const SHADER_COORDINATE_SYSTEMS = [
+  'default',
+  'lnglat',
+  'meter-offsets',
+  'lnglat-offsets',
+  'cartesian'
+] as const;
+
+const COORDINATE_SYSTEM_WGSL_CONSTANTS = SHADER_COORDINATE_SYSTEMS.map(
+  coordinateSystem =>
+    `const COORDINATE_SYSTEM_${coordinateSystem.toUpperCase().replaceAll('-', '_')}: i32 = ${getShaderCoordinateSystem(coordinateSystem)};`
+).join('');
 const PROJECTION_MODE_WGSL_CONSTANTS = Object.keys(PROJECTION_MODE)
   .map(key => `const PROJECTION_MODE_${key}: i32 = ${PROJECTION_MODE[key]};`)
   .join('');
@@ -50,14 +59,13 @@ struct ProjectUniforms {
   pseudoMeters: i32,
 };
 
-@group(0) @binding(0)
+@group(0) @binding(auto)
 var<uniform> project: ProjectUniforms;
 
 // -----------------------------------------------------------------------------
-// Geometry data
-// (In your GLSL code, "geometry" was assumed to be available globally. In WGSL,
-// you might supply this via vertex attributes or a uniform. Here we define a
-// uniform struct for demonstration.)
+// Geometry data shared across the project helpers.
+// The active layer shader is responsible for populating this private module
+// state before calling the project functions below.
 // -----------------------------------------------------------------------------
 
 // Structure to carry additional geometry data used by deck.gl filters.
@@ -70,7 +78,6 @@ struct Geometry {
   pickingColor: vec3<f32>,
 };
 
-// @group(0) @binding(1)
 var<private> geometry: Geometry;
 `;
 
@@ -221,6 +228,12 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
         project_globe_(position_world.xyz),
         position_world.w
       );
+    }
+    if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
+      let enuMatrix = project_get_orientation_matrix(project.commonOrigin);
+      let metersToCommon = GLOBE_RADIUS / EARTH_RADIUS;
+      let offsetCommon = (enuMatrix * vec3<f32>(-position_world.x, -position_world.y, position_world.z)) * metersToCommon;
+      return vec4<f32>(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {

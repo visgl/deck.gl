@@ -1,9 +1,13 @@
-import {WidgetPreview} from '@site/src/doc-demos/widgets';
-import {_GeocoderWidget} from '@deck.gl/widgets';
 
 # GeocoderWidget (Experimental)
 
 <img src="https://img.shields.io/badge/from-v9.2-green.svg?style=flat-square" alt="from v9.2" />
+
+import {GeocoderWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<GeocoderWidgetDemo />
 
 The GeocoderWidget helps the user find positions on the map.
 
@@ -13,15 +17,86 @@ The user types an address or coordinates into the text field and press **Go** to
 
 Addresses that return a valid location are stored in browser local storage (up to five entries). They will appear in the drop-down for quick re-use during later visits.
 
-<WidgetPreview cls={_GeocoderWidget}/>
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
+
+```js
+import {Deck} from '@deck.gl/core';
+import {_GeocoderWidget as GeocoderWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new GeocoderWidget({
+      geocoder: 'coordinates',
+      _geolocation: true
+    })
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
 ```ts
 import {Deck} from '@deck.gl/core';
 import {_GeocoderWidget as GeocoderWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 new Deck({
-  widgets: [new GeocoderWidget()]
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new GeocoderWidget({
+      geocoder: 'coordinates',
+      _geolocation: true
+    })
+  ]
 });
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import DeckGL, {_GeocoderWidget as GeocoderWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <GeocoderWidget geocoder="coordinates" _geolocation />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {_GeocoderWidget as GeocoderWidget, type GeocoderWidgetProps} from '@deck.gl/widgets';
+new GeocoderWidget({} satisfies GeocoderWidgetProps);
 ```
 
 ## Types
@@ -63,6 +138,19 @@ Only used when `geocoder` is `'custom'`. A function that receives the entered te
 In addition to addresses / coordinates, one position of obvious interest is the user's own current position. This experimental option adds a `current` menu item that calls the browser's geolocation API and navigates to the user's current position. Note that this requires the user to enable geolocation in the browser.
 
 If `props._geolocation` **Current position** from the drop-down uses `navigator.geolocation` to center the map. The option is hidden if the browser does not provide the Geolocation API or the user denies access.
+
+#### `onGeocode` (Function, optional) {#ongeocode}
+
+```ts
+(params: {viewId: string; coordinates: {longitude: number; latitude: number; zoom?: number}}) => void
+```
+
+* Default: `() => {}`
+
+Callback when a location is geocoded and the view will navigate to it.
+
+- `viewId`: The view being updated
+- `coordinates`: The geocoded coordinates (longitude, latitude, and optionally zoom)
 
 ## Source
 

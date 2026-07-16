@@ -9,7 +9,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
-import {shaderWGSL as source} from './icon-layer.wgsl';
+import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 
 import type {
@@ -26,7 +26,6 @@ import type {
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
-import {Parameters} from '@luma.gl/core';
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
@@ -141,7 +140,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, source, modules: [project32, color, picking, iconUniforms]});
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
+    return super.getShaders({
+      vs,
+      fs,
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
+      modules: [project32, color, picking, iconUniforms]
+    });
   }
 
   initializeState() {
@@ -204,7 +210,17 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 2,
         transition: true,
         accessor: 'getPixelOffset'
-      }
+      },
+      ...((this.props.data as any)?.attributes?.rowIndexes
+        ? {
+            /** Caller-provided logical picking index per icon instance. */
+            rowIndexes: {
+              size: 1,
+              type: 'uint32',
+              noAlloc: true
+            }
+          }
+        : {})
     });
     /* eslint-enable max-len */
   }
@@ -289,13 +305,6 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
-    const parameters =
-      this.context.device.type === 'webgpu'
-        ? ({
-            depthWriteEnabled: true,
-            depthCompare: 'less-equal'
-          } satisfies Parameters)
-        : undefined;
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
@@ -315,8 +324,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         }
       }),
-      isInstanced: true,
-      parameters
+      isInstanced: true
     });
   }
 

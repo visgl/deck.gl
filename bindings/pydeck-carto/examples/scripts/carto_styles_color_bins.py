@@ -4,6 +4,7 @@ CartoLayer
 
 Render cloud data with color bins style.
 """
+
 import pydeck as pdk
 import pydeck_carto as pdkc
 from carto_auth import CartoAuth

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {COORDINATE_SYSTEM, WebMercatorViewport, project32} from '@deck.gl/core';
@@ -13,8 +13,10 @@ import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, runOnGPU, testUniforms, verifyGPUResult} from './project-glsl-test-utils';
 import {TestCase} from './project-glsl.spec';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const PIXEL_TOLERANCE = 0.001;
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
@@ -150,55 +152,55 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
-test('project32&64#vs', async t => {
+webglTest('project32&64#vs', async () => {
   const oldEpsilon = config.EPSILON;
 
-  for (const usefp64 of [false, true]) {
-    /* eslint-disable max-nested-callbacks, complexity */
-    for (const testCase of TEST_CASES) {
-      if (usefp64 && testCase.projectProps.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
-        // Apply 64 bit projection only for LNGLAT_DEPRECATED
-        return;
-      }
+  try {
+    for (const usefp64 of [false, true]) {
+      /* eslint-disable max-nested-callbacks, complexity */
+      for (const testCase of TEST_CASES) {
+        if (usefp64 && testCase.projectProps.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
+          // Apply 64 bit projection only for LNGLAT mode.
+          continue;
+        }
 
-      t.comment(`${testCase.title}: ${usefp64 ? 'fp64' : 'fp32'}`);
+        console.log(`${testCase.title}: ${usefp64 ? 'fp64' : 'fp32'}`);
 
-      let uniforms = {};
-      if (usefp64) {
-        // fp64arithmetic uniform
-        // TODO remove when https://github.com/visgl/luma.gl/pull/2262 landed
-        uniforms = {ONE: 1.0};
-      }
+        let uniforms = {};
+        if (usefp64) {
+          // fp64arithmetic uniform
+          // TODO remove when https://github.com/visgl/luma.gl/pull/2262 landed
+          uniforms = {ONE: 1.0};
+        }
 
-      for (const c of testCase.tests) {
-        const expected = (usefp64 && c.output64) || c.output;
-        const actual = await runOnGPU({
-          vs: c.vs,
-          modules: usefp64 ? [project64, testUniforms] : [project32, testUniforms],
-          varying: 'outValue',
-          vertexCount: 1,
-          shaderInputProps: {
-            project: testCase.projectProps,
-            project64: testCase.projectProps,
-            test: {
-              uPos: c.testProps.uPos!,
-              uPos64Low: c.testProps.uPos!.map(fp64LowPart) as NumberArray3
-            }
-          },
-          uniforms
-        });
-        config.EPSILON = c.precision ?? 1e-5;
+        for (const c of testCase.tests) {
+          const expected = (usefp64 && c.output64) || c.output;
+          const actual = await runOnGPU({
+            vs: c.vs,
+            modules: usefp64 ? [project64, testUniforms] : [project32, testUniforms],
+            varying: 'outValue',
+            vertexCount: 1,
+            shaderInputProps: {
+              project: testCase.projectProps,
+              project64: testCase.projectProps,
+              test: {
+                uPos: c.testProps.uPos!,
+                uPos64Low: c.testProps.uPos!.map(fp64LowPart) as NumberArray3
+              }
+            },
+            uniforms
+          });
+          config.EPSILON = c.precision ?? 1e-5;
 
-        t.is(
-          verifyGPUResult(actual, expected),
-          true,
-          `${usefp64 ? 'project64' : 'project32'} ${c.name}`
-        );
+          expect(
+            verifyGPUResult(actual, expected),
+            `${usefp64 ? 'project64' : 'project32'} ${c.name}`
+          ).toBe(true);
+        }
       }
     }
+  } finally {
+    config.EPSILON = oldEpsilon;
   }
   /* eslint-enable max-nested-callbacks, complexity */
-
-  config.EPSILON = oldEpsilon;
-  t.end();
 });

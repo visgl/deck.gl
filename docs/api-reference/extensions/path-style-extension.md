@@ -3,6 +3,8 @@
 
 The `PathStyleExtension` adds selected features to the [PathLayer](../layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md).
 
+It also supports dashed strokes on [ScatterplotLayer](../layers/scatterplot-layer.md) and [TextLayer](../layers/text-layer.md) backgrounds (via the `dash` option).
+
 > Note: In v8.0, the `getDashArray` and `dashJustified` props are removed from the `PathLayer` and moved into this extension.
 
 <div style={{position:'relative',height:450}}></div>
@@ -88,6 +90,8 @@ The dash array to draw each path with: `[dashSize, gapSize]` relative to the wid
 * Default: `false`
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends. Overrides the effect of `highPrecisionDash`.
+
+> Note: `dashJustified` and `highPrecisionDash` only apply to `PathLayer` and its composites. They have no effect on `ScatterplotLayer` or `TextLayer` backgrounds, which have continuous stroke geometry with no segment joints.
 
 
 #### `getOffset` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getoffset}

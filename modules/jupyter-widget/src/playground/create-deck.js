@@ -8,7 +8,7 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {registerLoaders} from '@loaders.gl/core';
 
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants
-import {GL as GLConstants} from '@luma.gl/constants';
+import {GL as GLConstants} from '@luma.gl/webgl/constants';
 
 import makeTooltip from './widget-tooltip';
 
@@ -39,18 +39,15 @@ function extractElements(library = {}, filter) {
 }
 
 // Handle JSONConverter and loaders configuration
-const jsonConverterConfiguration = {
+const JSON_CONVERTER_CONFIGURATION = {
   classes: {
     ...extractElements(deckExports, classesFilter),
-    // Add experimental widgets (exported with _ prefix)
-    FpsWidget: deckExports._FpsWidget,
+    // Register widgets exported with _ prefix under their canonical names
     StatsWidget: deckExports._StatsWidget,
     ScaleWidget: deckExports._ScaleWidget,
     GeocoderWidget: deckExports._GeocoderWidget,
     SplitterWidget: deckExports._SplitterWidget,
-    InfoWidget: deckExports._InfoWidget,
-    ThemeWidget: deckExports._ThemeWidget,
-    LoadingWidget: deckExports._LoadingWidget
+    TimelineWidget: deckExports._TimelineWidget
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
@@ -62,7 +59,7 @@ const jsonConverterConfiguration = {
 registerLoaders([CSVLoader]);
 
 const jsonConverter = new JSONConverter({
-  configuration: jsonConverterConfiguration
+  configuration: JSON_CONVERTER_CONFIGURATION
 });
 
 function addModuleToConverter(module, converter) {

@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Widget, FlyToInterpolator, LinearInterpolator} from '@deck.gl/core';
-import type {Viewport, WidgetProps, WidgetPlacement} from '@deck.gl/core';
+import {Widget, FlyToInterpolator, LinearInterpolator, OrthographicView} from '@deck.gl/core';
+import type {WidgetProps, WidgetPlacement, OrthographicViewState} from '@deck.gl/core';
 import {render} from 'preact';
 import {ButtonGroup} from './lib/components/button-group';
-import {GroupedIconButton} from './lib/components/grouped-icon-button';
+import {IconButton} from './lib/components/icon-button';
 
 export type ZoomWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -21,6 +21,30 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomOutLabel?: string;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
+  /** Zoom level delta applied by each button click.
+   * @default 1
+   */
+  zoomStep?: number;
+  /**  Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
+   * Only effective if the current view is OrthographicView.
+   */
+  zoomAxis?: 'X' | 'Y' | 'all';
+  /**
+   * Callback when zoom buttons are clicked.
+   * Called for each viewport that will be zoomed.
+   */
+  onZoom?: (params: {
+    /** The view being zoomed */
+    viewId: string;
+    /** Zoom direction: +1 for zoom in, -1 for zoom out */
+    delta: number;
+    /** The new zoom level */
+    zoom: number;
+    /** The new zoom level of the X axis, if using OrthographicView */
+    zoomX?: number;
+    /** The new zoom level of the Y axis, if using OrthographicView */
+    zoomY?: number;
+  }) => void;
 };
 
 export class ZoomWidget extends Widget<ZoomWidgetProps> {
@@ -30,14 +54,16 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     placement: 'top-left',
     orientation: 'vertical',
     transitionDuration: 200,
+    zoomStep: 1,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
-    viewId: null
+    zoomAxis: 'all',
+    viewId: null,
+    onZoom: () => {}
   };
 
   className = 'deck-widget-zoom';
   placement: WidgetPlacement = 'top-left';
-  viewports: {[id: string]: Viewport} = {};
 
   constructor(props: ZoomWidgetProps = {}) {
     super(props);
@@ -53,12 +79,12 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
   onRenderHTML(rootElement: HTMLElement): void {
     const ui = (
       <ButtonGroup orientation={this.props.orientation}>
-        <GroupedIconButton
+        <IconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
           className="deck-widget-zoom-in"
         />
-        <GroupedIconButton
+        <IconButton
           onClick={() => this.handleZoomOut()}
           label={this.props.zoomOutLabel}
           className="deck-widget-zoom-out"
@@ -68,15 +94,66 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     render(ui, rootElement);
   }
 
-  onViewportChange(viewport: Viewport) {
-    this.viewports[viewport.id] = viewport;
+  isOrthographicView(viewId: string): boolean {
+    const deck = this.deck;
+    const view = deck?.isInitialized && deck.getView(viewId);
+    return view instanceof OrthographicView;
   }
 
-  handleZoom(viewport: Viewport, nextZoom: number) {
-    const viewId = this.viewId || viewport?.id || 'default-view';
+  handleZoom(viewId: string, delta: number) {
+    // Respect minZoom/maxZoom constraints from the view state
+    const viewState = this.getViewState(viewId);
+    const newViewState: Record<string, unknown> = {};
+
+    if (this.isOrthographicView(viewId)) {
+      const {zoomAxis} = this.props;
+      const {zoomX, minZoomX, maxZoomX, zoomY, minZoomY, maxZoomY} = normalizeOrthographicViewState(
+        viewState as any
+      );
+      let nextZoom: number;
+      let nextZoomY: number;
+      if (zoomAxis === 'X') {
+        nextZoom = clamp(zoomX + delta, minZoomX, maxZoomX);
+        nextZoomY = zoomY;
+      } else if (zoomAxis === 'Y') {
+        nextZoom = zoomX;
+        nextZoomY = clamp(zoomY + delta, minZoomY, maxZoomY);
+      } else {
+        const clampedDelta = clamp(
+          delta,
+          Math.max(minZoomX - zoomX, minZoomY - zoomY),
+          Math.min(maxZoomX - zoomX, maxZoomY - zoomY)
+        );
+        nextZoom = zoomX + clampedDelta;
+        nextZoomY = zoomY + clampedDelta;
+      }
+      newViewState.zoom = [nextZoom, nextZoomY];
+      newViewState.zoomX = nextZoom;
+      newViewState.zoomY = nextZoomY;
+      // Call callback
+      this.props.onZoom?.({
+        viewId,
+        delta,
+        // `zoom` will not match the new state if using 2D zoom. Deprecated behavior for backward compatibility.
+        zoom: zoomAxis === 'Y' ? nextZoomY : nextZoom,
+        zoomX: nextZoom,
+        zoomY: nextZoomY
+      });
+    } else {
+      const {zoom = 0, minZoom, maxZoom} = viewState as any;
+      const nextZoom = clamp(zoom + delta, minZoom, maxZoom);
+      newViewState.zoom = nextZoom;
+      // Call callback
+      this.props.onZoom?.({
+        viewId,
+        delta,
+        zoom: nextZoom
+      });
+    }
+
     const nextViewState: Record<string, unknown> = {
-      ...viewport,
-      zoom: nextZoom
+      ...viewState,
+      ...newViewState
     };
     if (this.props.transitionDuration > 0) {
       nextViewState.transitionDuration = this.props.transitionDuration;
@@ -84,27 +161,48 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
         'latitude' in nextViewState
           ? new FlyToInterpolator()
           : new LinearInterpolator({
-              transitionProps: ['zoom']
+              transitionProps: 'zoomX' in newViewState ? ['zoomX', 'zoomY'] : ['zoom']
             });
     }
     this.setViewState(viewId, nextViewState);
   }
 
   handleZoomIn() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom + 1);
+    for (const viewId of this.viewIds) {
+      this.handleZoom(viewId, this.props.zoomStep);
     }
   }
 
   handleZoomOut() {
-    for (const viewport of Object.values(this.viewports)) {
-      this.handleZoom(viewport, viewport.zoom - 1);
+    for (const viewId of this.viewIds) {
+      this.handleZoom(viewId, -this.props.zoomStep);
     }
   }
+}
 
-  /** @todo - move to deck or widget manager */
-  private setViewState(viewId: string, viewState: Record<string, unknown>): void {
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState, interactionState: {}});
-  }
+function clamp(zoom: number, minZoom: number, maxZoom: number): number {
+  return zoom < minZoom ? minZoom : zoom > maxZoom ? maxZoom : zoom;
+}
+
+function normalizeOrthographicViewState({
+  zoom = 0,
+  zoomX,
+  zoomY,
+  minZoom = -Infinity,
+  maxZoom = Infinity,
+  minZoomX = minZoom,
+  maxZoomX = maxZoom,
+  minZoomY = minZoom,
+  maxZoomY = maxZoom
+}: OrthographicViewState): {
+  zoomX: number;
+  zoomY: number;
+  minZoomX: number;
+  maxZoomX: number;
+  minZoomY: number;
+  maxZoomY: number;
+} {
+  zoomX = zoomX ?? (Array.isArray(zoom) ? zoom[0] : zoom);
+  zoomY = zoomY ?? (Array.isArray(zoom) ? zoom[1] : zoom);
+  return {zoomX, zoomY, minZoomX, minZoomY, maxZoomX, maxZoomY};
 }

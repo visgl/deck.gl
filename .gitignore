@@ -1,9 +1,13 @@
 build/
 dist/
+*.generated.json
 **/*.min.js
 node_modules/
 coverage/
 test/**/*-failed.png
+test/render/golden-images/**/*-fail.png
+test/render/golden-images/**/*-diff.png
+test/**/__screenshots__/
 .nyc_output/
 .reify-cache/
 

@@ -6,7 +6,7 @@ import type {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform simpleMeshUniforms {
+layout(std140) uniform simpleMeshUniforms {
   float sizeScale;
   bool composeModelMatrix;
   bool hasTexture;

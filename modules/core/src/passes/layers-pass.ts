@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
+import type {
+  Device,
+  Parameters,
+  RenderPassParameters,
+  RenderPipelineParameters
+} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {NumberArray4} from '@math.gl/core';
 
@@ -15,6 +20,18 @@ import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
+
+// WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
+  depthWriteEnabled: true,
+  depthCompare: 'less-equal',
+  blendColorOperation: 'add',
+  blendColorSrcFactor: 'src-alpha',
+  blendColorDstFactor: 'one',
+  blendAlphaOperation: 'add',
+  blendAlphaSrcFactor: 'one-minus-dst-alpha',
+  blendAlphaDstFactor: 'one'
+};
 
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
@@ -65,9 +82,14 @@ export type RenderStats = {
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
-  render(options: LayersPassRenderOptions): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+  render(options: LayersPassRenderOptions): void {
+    this._render(options);
+  }
+
+  protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    const canvasContext = this.device.canvasContext!;
+    const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
+    const [width, height] = canvasContext.getDrawingBufferSize();
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
@@ -85,7 +107,7 @@ export default class LayersPass extends Pass {
     }
 
     const renderPass = this.device.beginRenderPass({
-      framebuffer: options.target,
+      framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,
       clearDepth,
@@ -138,7 +160,8 @@ export default class LayersPass extends Pass {
             viewport: subViewport,
             view,
             pass: options.pass,
-            layers: options.layers
+            layers: options.layers,
+            isPicking: options.isPicking
           },
           drawLayerParams
         );
@@ -159,6 +182,7 @@ export default class LayersPass extends Pass {
       isPicking = false,
       layerFilter,
       cullRect,
+      views,
       effects,
       shaderModuleProps
     }: LayersPassRenderOptions,
@@ -201,8 +225,12 @@ export default class LayersPass extends Pass {
           pass,
           shaderModuleProps
         );
+        const defaultParams =
+          layer.context.device.type === 'webgpu' ? WEBGPU_DEFAULT_DRAW_PARAMETERS : null;
         layerParam.layerParameters = {
+          ...defaultParams,
           ...layer.context.deck?.props.parameters,
+          ...views?.[viewport.id]?.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
@@ -224,7 +252,8 @@ export default class LayersPass extends Pass {
       pass,
       target,
       viewport,
-      view
+      view,
+      isPicking
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
@@ -232,6 +261,7 @@ export default class LayersPass extends Pass {
       target?: Framebuffer | null;
       viewport: Viewport;
       view?: View;
+      isPicking?: boolean;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
@@ -249,7 +279,10 @@ export default class LayersPass extends Pass {
         let depthToUse: number | false = 1.0;
         let stencilToUse: number | false = 0;
 
-        if (Array.isArray(clearColor)) {
+        // While picking, ignore the view's clearColor: the picking buffer encodes object
+        // references as colors and is already cleared to transparent black.
+        // `clearColor: false` below still means "don't clear color" in both modes.
+        if (Array.isArray(clearColor) && !isPicking) {
           colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
             c => c / 255
           ) as NumberArray4;
@@ -425,6 +458,15 @@ export default class LayersPass extends Pass {
           shaderModuleProps,
           effect.getShaderModuleProps?.(layer, shaderModuleProps)
         );
+      }
+    }
+
+    // Ensure all default shader modules have an entry so their getUniforms is called.
+    // Without this, default modules added by effects (e.g. terrain) may not get their
+    // bindings set when rendered in passes that don't include those effects (e.g. mask pass).
+    for (const module of layer.context.defaultShaderModules) {
+      if (!(module.name in shaderModuleProps)) {
+        shaderModuleProps[module.name] = {};
       }
     }
 

@@ -6,10 +6,10 @@ import {useContext, useMemo, useEffect} from 'react';
 import {DeckGlContext} from './deckgl-context';
 import {log, Widget, type WidgetProps, _deepEqual as deepEqual} from '@deck.gl/core';
 
-export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetProps>(
-  WidgetClass: {new (props_: WidgetPropsT): WidgetT},
-  props: WidgetPropsT
-): WidgetT {
+export function useWidget<
+  WidgetT extends Widget<WidgetProps, any>,
+  WidgetPropsT extends WidgetProps
+>(WidgetClass: {new (props_: WidgetPropsT): WidgetT}, props: WidgetPropsT): WidgetT {
   const context = useContext(DeckGlContext);
   const {widgets, deck} = context;
   useEffect(() => {
@@ -23,7 +23,7 @@ export function useWidget<WidgetT extends Widget, WidgetPropsT extends WidgetPro
     return () => {
       // Remove widget from context when it is unmounted
       const index = widgets?.indexOf(widget);
-      if (index && index !== -1) {
+      if (index !== undefined && index !== -1) {
         widgets?.splice(index, 1);
         deck?.setProps({widgets});
       }

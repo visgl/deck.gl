@@ -6,11 +6,15 @@ import {log, createIterable} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import {SdfProps, sdfUniforms} from './sdf-uniforms';
+import {TextModuleProps, textUniforms, ContentAlignModes} from '../text-uniforms';
+
+import vs from './multi-icon-layer-vertex.glsl';
 import fs from './multi-icon-layer-fragment.glsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
 import type {
   Attribute,
+  Accessor,
   AccessorFunction,
   Color,
   UpdateParameters,
@@ -23,10 +27,17 @@ const EMPTY_ARRAY = [];
 
 type _MultiIconLayerProps<DataT> = {
   getIconOffsets?: AccessorFunction<DataT, number[]>;
+  getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
+
+  fontSize?: number;
   sdf?: boolean;
   smoothing?: number;
   outlineWidth?: number;
   outlineColor?: Color;
+
+  contentCutoffPixels?: [width: number, height: number];
+  contentAlignHorizontal?: ContentAlignModes;
+  contentAlignVertical?: ContentAlignModes;
 };
 
 export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
@@ -34,10 +45,15 @@ export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
 
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
   getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
+  getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
+  fontSize: 1,
   alphaCutoff: 0.001,
   smoothing: 0.1,
   outlineWidth: 0,
-  outlineColor: {type: 'color', value: [0, 0, 0, 255]}
+  outlineColor: {type: 'color', value: [0, 0, 0, 255]},
+  contentCutoffPixels: {type: 'array', value: [0, 0]},
+  contentAlignHorizontal: 'none',
+  contentAlignVertical: 'none'
 };
 
 export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends IconLayer<
@@ -53,7 +69,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, modules: [...shaders.modules, sdfUniforms], fs};
+    return {...shaders, modules: [...shaders.modules, textUniforms, sdfUniforms], vs, fs};
   }
 
   initializeState() {
@@ -64,10 +80,16 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     // eslint-disable-next-line @typescript-eslint/unbound-method
     instanceIconDefs.settings.update = this.calculateInstanceIconDefs;
     attributeManager!.addInstanced({
-      instancePickingColors: {
-        type: 'uint8',
+      /** Source text row for each generated character instance. */
+      rowIndexes: {
+        type: 'uint32',
+        size: 1,
+        accessor: (object, {index}) => index
+      },
+      instanceClipRect: {
         size: 4,
-        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
+        accessor: 'getContentBox',
+        defaultValue: [0, 0, -1, -1]
       }
     });
   }
@@ -102,7 +124,15 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
   }
 
   draw(params) {
-    const {sdf, smoothing, outlineWidth} = this.props;
+    const {
+      sdf,
+      smoothing,
+      fontSize,
+      outlineWidth,
+      contentCutoffPixels,
+      contentAlignHorizontal,
+      contentAlignVertical
+    } = this.props;
     const {outlineColor} = this.state;
     const outlineBuffer = outlineWidth
       ? Math.max(smoothing, DEFAULT_BUFFER * (1 - outlineWidth))
@@ -116,7 +146,14 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       enabled: Boolean(sdf),
       outlineColor
     };
-    model.shaderInputs.setProps({sdf: sdfProps});
+    const textProps: TextModuleProps = {
+      contentCutoffPixels,
+      contentAlignHorizontal,
+      contentAlignVertical,
+      fontSize,
+      viewport: this.context.viewport
+    };
+    model.shaderInputs.setProps({sdf: sdfProps, text: textProps});
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
@@ -148,7 +185,7 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
         for (const char of Array.from(text)) {
           const def = super.getInstanceIconDef(char);
           def[0] = offsets[j * 2];
-          def[1] = offsets[j * 2 + 1];
+          def[1] += offsets[j * 2 + 1];
           def[6] = 1; // mask
           output.set(def, i);
           i += attribute.size;

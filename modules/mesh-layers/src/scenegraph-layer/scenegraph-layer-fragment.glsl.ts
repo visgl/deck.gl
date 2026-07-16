@@ -23,7 +23,7 @@ out vec4 fragColor;
 void main(void) {
   #ifdef LIGHTING_PBR
     fragColor = vColor * pbr_filterColor(vec4(0));
-    geometry.uv = pbr_vUV;
+    geometry.uv = pbr_vUV0;
   #else
     #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
       fragColor = vColor * texture(pbr_baseColorSampler, vTEXCOORD_0);

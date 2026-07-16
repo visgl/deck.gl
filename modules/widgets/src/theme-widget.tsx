@@ -23,8 +23,19 @@ export type ThemeWidgetProps = WidgetProps & {
   darkModeLabel?: string;
   /** Styles for dark mode theme */
   darkModeTheme?: DeckWidgetTheme;
-  /** Initial theme mode. 'auto' reads the browser default setting */
+  /** Initial theme mode for uncontrolled usage. 'auto' reads the browser default setting */
   initialThemeMode?: 'auto' | 'light' | 'dark';
+  /**
+   * Controlled theme mode. When provided, the widget is in controlled mode
+   * and this prop determines the current theme.
+   */
+  themeMode?: 'light' | 'dark';
+  /**
+   * Callback when the user clicks the theme toggle button.
+   * In controlled mode, use this to update the themeMode prop.
+   * In uncontrolled mode, this is called after the internal state updates.
+   */
+  onThemeModeChange?: (newMode: 'light' | 'dark') => void;
 };
 
 export class ThemeWidget extends Widget<ThemeWidgetProps> {
@@ -37,12 +48,15 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
     lightModeTheme: LightGlassTheme,
     darkModeLabel: 'Dark Mode',
     darkModeTheme: DarkGlassTheme,
-    initialThemeMode: 'auto'
+    initialThemeMode: 'auto',
+    themeMode: undefined!,
+    onThemeModeChange: () => {}
   };
 
   className = 'deck-widget-theme';
   placement: WidgetPlacement = 'top-left';
   themeMode: 'light' | 'dark' = 'dark';
+  appliedTheme: DeckWidgetTheme = {};
 
   constructor(props: ThemeWidgetProps = {}) {
     super(props);
@@ -52,74 +66,75 @@ export class ThemeWidget extends Widget<ThemeWidgetProps> {
 
   // eslint-disable-next-line complexity
   setProps(props: Partial<ThemeWidgetProps>) {
-    const {lightModeTheme, darkModeTheme} = this.props;
     this.placement = props.placement ?? this.placement;
     this.viewId = props.viewId ?? this.viewId;
     super.setProps(props);
-
-    switch (this.themeMode) {
-      case 'light':
-        if (props.lightModeTheme && !deepEqual(props.lightModeTheme, lightModeTheme, 1)) {
-          this._setThemeMode('light');
-        }
-        break;
-      case 'dark':
-        if (props.darkModeTheme && !deepEqual(props.darkModeTheme, darkModeTheme, 1)) {
-          this._setThemeMode('dark');
-        }
-        break;
-      default:
-        log.warn(`Invalid theme mode ${this.themeMode}`)();
-    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
     const {lightModeLabel, darkModeLabel} = this.props;
-    // const onClick = useCallback(this._handleClick.bind(this), [this._handleClick]);
+    const currentMode = this.getThemeMode();
+    this._applyTheme(currentMode, rootElement);
 
     render(
       <IconButton
         onClick={this._handleClick.bind(this)}
-        label={this.themeMode === 'dark' ? darkModeLabel : lightModeLabel}
-        className={this.themeMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
+        label={currentMode === 'dark' ? darkModeLabel : lightModeLabel}
+        className={currentMode === 'dark' ? 'deck-widget-moon' : 'deck-widget-sun'}
       />,
       rootElement
     );
   }
 
-  onAdd() {
-    // Note: theme styling is applied in here onAdd() once DOM element is created
-    this._setThemeMode(this.themeMode);
+  /**
+   * Returns the current theme mode.
+   * In controlled mode, returns the themeMode prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getThemeMode(): 'light' | 'dark' {
+    return this.props.themeMode ?? this.themeMode;
   }
 
   _handleClick() {
-    const newThemeMode = this.themeMode === 'dark' ? 'light' : 'dark';
-    this._setThemeMode(newThemeMode);
-  }
+    const currentMode = this.getThemeMode();
+    const nextMode = currentMode === 'dark' ? 'light' : 'dark';
 
-  _setThemeMode(themeMode: 'light' | 'dark') {
-    this.themeMode = themeMode;
-    const container = this.rootElement?.closest<HTMLDivElement>('.deck-widget-container');
-    if (container) {
-      const themeStyle =
-        themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
-      applyStyles(container, themeStyle);
+    // Always call callback if provided
+    this.props.onThemeModeChange?.(nextMode);
 
-      const label =
-        this.themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel;
-      log.log(1, `Switched theme to ${label}`, themeStyle)();
-
+    // Only update internal state if uncontrolled
+    if (this.props.themeMode === undefined) {
+      this.themeMode = nextMode;
       this.updateHTML();
     }
+    // In controlled mode, parent will update themeMode prop which triggers _applyTheme via setProps
+  }
+
+  /** Apply theme styling without changing internal state */
+  _applyTheme(themeMode: 'light' | 'dark', rootElement: HTMLElement) {
+    const themeStyle = themeMode === 'dark' ? this.props.darkModeTheme : this.props.lightModeTheme;
+    if (deepEqual(themeStyle, this.appliedTheme, 1)) {
+      return;
+    }
+    const container = rootElement.closest<HTMLDivElement>('.deck-widget-container');
+    if (!container) return;
+
+    applyStyles(container, themeStyle);
+    this.appliedTheme = themeStyle;
+
+    const label = themeMode === 'dark' ? this.props.darkModeLabel : this.props.lightModeLabel;
+    log.log(1, `Switched theme to ${label}`, themeStyle)();
   }
 
   /** Read browser preference */
   _getInitialThemeMode(): 'light' | 'dark' {
     const {initialThemeMode} = this.props;
-    return initialThemeMode === 'auto'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-      : initialThemeMode;
+    if (initialThemeMode !== 'auto') {
+      return initialThemeMode;
+    }
+    if (typeof window === 'undefined') {
+      return 'light';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 }

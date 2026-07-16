@@ -6,7 +6,7 @@ import type {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform bitmapUniforms {
+layout(std140) uniform bitmapUniforms {
   vec4 bounds;
   float coordinateConversion;
   float desaturate;

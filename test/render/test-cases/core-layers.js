@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable callback-return */
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {
   ScatterplotLayer,
@@ -13,7 +13,7 @@ import {
   LineLayer
 } from '@deck.gl/layers';
 
-import {Fp64Extension} from '@deck.gl/extensions';
+import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 import * as dataSamples from 'deck.gl-test/data';
 
 // prettier-ignore
@@ -173,6 +173,83 @@ export default [
     goldenImage: './test/render/golden-images/scatterplot-smoothedge.png'
   },
   {
+    name: 'scatterplot-dash',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new ScatterplotLayer({
+        id: 'scatterplot-dash',
+        data: [
+          // Filled + dashed, varying dash patterns
+          {
+            pos: [-200, -120],
+            radius: 55,
+            dash: [3, 2],
+            fill: [255, 200, 0, 180],
+            line: [0, 100, 200],
+            filled: true
+          },
+          {
+            pos: [0, -120],
+            radius: 70,
+            dash: [6, 2],
+            fill: [100, 255, 100, 180],
+            line: [0, 0, 0],
+            filled: true
+          },
+          {
+            pos: [200, -120],
+            radius: 45,
+            dash: [1, 1],
+            fill: [255, 180, 180, 180],
+            line: [150, 50, 50],
+            filled: true
+          },
+          // Stroke-only, varying dash patterns
+          {
+            pos: [-200, 100],
+            radius: 60,
+            dash: [4, 3],
+            fill: [0, 0, 0, 0],
+            line: [200, 50, 100],
+            filled: false
+          },
+          {
+            pos: [0, 100],
+            radius: 50,
+            dash: [2, 4],
+            fill: [0, 0, 0, 0],
+            line: [0, 150, 0],
+            filled: false
+          },
+          // Solid stroke for comparison (no dash)
+          {
+            pos: [200, 100],
+            radius: 50,
+            dash: [0, 0],
+            fill: [220, 220, 255, 180],
+            line: [100, 0, 100],
+            filled: true
+          }
+        ],
+        getPosition: d => d.pos,
+        getRadius: d => d.radius,
+        getFillColor: d => d.fill,
+        getLineColor: d => d.line,
+        getDashArray: d => d.dash,
+        stroked: true,
+        getFilled: d => d.filled,
+        radiusUnits: 'pixels',
+        lineWidthMinPixels: 4,
+        extensions: [new PathStyleExtension({dash: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/scatterplot-dash.png'
+  },
+  {
     name: 'line-lnglat',
     viewState: {
       latitude: 37.751537058389985,
@@ -209,7 +286,7 @@ export default [
       new BitmapLayer({
         opacity: 0.8,
         bounds: [-122.45, 37.7, -122.35, 37.8],
-        image: './test/data/icon-atlas.png'
+        image: '/test/data/icon-atlas.png'
       })
     ],
     goldenImage: './test/render/golden-images/bitmap.png'
@@ -226,7 +303,7 @@ export default [
     layers: [
       new BitmapLayer({
         bounds: [-180, -90, 180, 90],
-        image: './test/data/world.jpg',
+        image: '/test/data/world.jpg',
         _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
       })
     ],

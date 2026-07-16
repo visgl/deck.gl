@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+const shaderWGSL = /* wgsl */ `\
 // Main shaders
 
 struct ScatterplotUniforms {
@@ -27,7 +27,7 @@ struct ConstantAttributeUniforms {
  instanceLineWidths: f32,
  instanceFillColors: vec4<f32>,
  instanceLineColors: vec4<f32>,
- instancePickingColors: vec3<f32>,
+ instancePixelOffset: vec2<f32>,
 
  instancePositionsConstant: i32,
  instancePositions64LowConstant: i32,
@@ -35,10 +35,10 @@ struct ConstantAttributeUniforms {
  instanceLineWidthsConstant: i32,
  instanceFillColorsConstant: i32,
  instanceLineColorsConstant: i32,
- instancePickingColorsConstant: i32
+ instancePixelOffsetConstant: i32
 };
 
-@group(0) @binding(2) var<uniform> scatterplot: ScatterplotUniforms;
+@group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
 
 struct ConstantAttributes {
   instancePositions: vec3<f32>,
@@ -47,7 +47,7 @@ struct ConstantAttributes {
   instanceLineWidths: f32,
   instanceFillColors: vec4<f32>,
   instanceLineColors: vec4<f32>,
-  instancePickingColors: vec3<f32>
+  instancePixelOffset: vec2<f32>
 };
 
 const constants = ConstantAttributes(
@@ -57,7 +57,7 @@ const constants = ConstantAttributes(
   0.0,
   vec4<f32>(0.0, 0.0, 0.0, 1.0),
   vec4<f32>(0.0, 0.0, 0.0, 1.0),
-  vec3<f32>(0.0)
+  vec2<f32>(0.0)
 );
 
 struct Attributes {
@@ -70,7 +70,8 @@ struct Attributes {
   @location(4) instanceLineWidths: f32,
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instancePickingColors: vec3<f32>
+  @location(7) instancePixelOffset: vec2<f32>,
+  PICKING_COLOR_ATTRIBUTE
 };
 
 struct Varyings {
@@ -80,6 +81,7 @@ struct Varyings {
   @location(2) unitPosition: vec2<f32>,
   @location(3) innerUnitRadius: f32,
   @location(4) outerRadiusPixels: f32,
+  @location(5) pickingColor: vec3<f32>,
 };
 
 @vertex
@@ -93,8 +95,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   //   return varyings;
   // }
 
-  // var geometry: Geometry;
-  // geometry.worldPosition = instancePositions;
+  geometry.worldPosition = attributes.instancePositions;
 
   // Multiply out radius and clamp to limits
   varyings.outerRadiusPixels = clamp(
@@ -120,30 +121,32 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // position on the containing square in [-1, 1] space
   varyings.unitPosition = edgePadding * attributes.positions.xy;
   geometry.uv = varyings.unitPosition;
-  geometry.pickingColor = attributes.instancePickingColors;
+  geometry.pickingColor = PICKING_COLOR_VALUE;
 
   varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
 
   if (scatterplot.billboard != 0) {
     varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0)); // TODO , geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
-    let offset = attributes.positions; // * edgePadding * varyings.outerRadiusPixels;
+    var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
+    offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
-    varyings.position.x = clipPixels.x;
-    varyings.position.y = clipPixels.y;
+    varyings.position = vec4<f32>(varyings.position.x + clipPixels.x, varyings.position.y + clipPixels.y, varyings.position.z, varyings.position.w);
   } else {
-    let offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
+    var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
+    offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
     varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset); // TODO , geometry.position);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
   }
 
   // Apply opacity to instance color, or return instance picking color
-  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * color.opacity);
+  varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(varyings.vFillColor, geometry);
-  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * color.opacity);
+  varyings.vLineColor = vec4<f32>(attributes.instanceLineColors.rgb, attributes.instanceLineColors.a * layer.opacity);
   // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
+  varyings.pickingColor = geometry.pickingColor;
 
   return varyings;
 }
@@ -188,7 +191,30 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   fragColor.a *= inCircle;
-  // DECKGL_FILTER_COLOR(fragColor, geometry);
+
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(varyings.pickingColor)) {
+      discard;
+    }
+    return vec4<f32>(varyings.pickingColor, 1.0);
+  }
+
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(varyings.pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
 
   // Apply premultiplied alpha as required by transparent canvas
   fragColor = deckgl_premultiplied_alpha(fragColor);
@@ -197,3 +223,16 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // return vec4<f32>(0, 0, 1, 1);
 }
 `;
+
+export function getShaderWGSL(useRowIndexes: boolean): string {
+  return shaderWGSL
+    .replace('PICKING_COLOR_ATTRIBUTE', useRowIndexes ? '@location(8) rowIndexes: u32,' : '')
+    .replace(
+      'PICKING_COLOR_VALUE',
+      useRowIndexes
+        ? 'picking_getPickingColorFromIndex(attributes.rowIndexes)'
+        : 'picking_getPickingColorFromIndex(attributes.instanceIndex)'
+    );
+}
+
+export default shaderWGSL;

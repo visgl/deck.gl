@@ -261,9 +261,21 @@ The min zoom level of the layer's data. When underzoomed (i.e. `zoom < minZoom`)
 
 - Default: 0
 
+#### `visibleMinZoom` (number | null, optional) {#visibleminzoom}
+
+The minimum zoom level at which tiles are visible. When the viewport zoom is below this level, no tiles are rendered. This is independent of `minZoom`, which controls the minimum zoom level at which tiles are *fetched*.
+
+- Default: `null`
+
+#### `visibleMaxZoom` (number | null, optional) {#visiblemaxzoom}
+
+The maximum zoom level at which tiles are visible. When the viewport zoom is above this level, no tiles are rendered. This is independent of `maxZoom`, which controls the maximum zoom level at which tiles are *fetched*.
+
+- Default: `null`
+
 #### `extent` (number[4], optional) {#extent}
 
-The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box. 
+The bounding box of the layer's data, in the form of `[minX, minY, maxX, maxY]`. If provided, the layer will only load and render the tiles that are needed to fill this box.
 
 - Default: `null`
 
@@ -312,6 +324,8 @@ The maximum number of concurrent `getTileData` calls.
 If `<= 0`, no throttling will occur, and `getTileData` may be called an unlimited number of times concurrently regardless of how long that tile is or was visible.
 
 If `> 0`, a maximum of `maxRequests` instances of `getTileData` will be called concurrently. Requests may never be called if the tile wasn't visible long enough to be scheduled and started. Requests may also be aborted (through the `signal` passed to `getTileData`) if there are more than `maxRequests` ongoing requests and some of those are for tiles that are no longer visible.
+
+When requests are queued, tiles closer to the viewport center are scheduled first.
 
 If `getTileData` makes `fetch` requests against an HTTP 1 web server, then `maxRequests` should correlate to the browser's maximum number of concurrent `fetch` requests. For Chrome, the max is 6 per domain. If you use the `data` prop and specify multiple domains, you can increase this limit. For example, with Chrome and 3 domains specified, you can set `maxRequests=18`.
 

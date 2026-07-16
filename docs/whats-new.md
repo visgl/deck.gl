@@ -2,15 +2,149 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-## deck.gl v9.3 (in development)
+## deck.gl v9.4
 
-### Core
+Release date: July 2026
 
-- View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
+deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
+
+Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
+
+### Core Performance
+
+- Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
+
+### Views and Controllers
+
+deck.gl v9.4 brings additional view and controller improvements on top of the substantial changes in v9.3.
+
+#### GlobeView
+
+[`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
+
+- [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
+- [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
+- [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
+
+#### Views
+
+- [Views](./api-reference/core/view.md#parameters) now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with:
+
+```js
+new GlobeView({
+  parameters: {
+    cullMode: 'none'
+  }
+});
+```
+
+#### Controllers
+
+- All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
+
+#### View Layout
+
+- A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
+
+### @deck.gl/geo-layers
+
+- [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
+- [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
+
+### @deck.gl/arcgis
+
+- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
+
+[ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
+
+## deck.gl v9.3
+
+Release date: April 13, 2026
+
+### Widgets
+
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/popup.jpg?raw=true" />
+        <p><i>PopupWidget</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/splitter.gif?raw=true" />
+        <p><i>SplitterWidget</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:200}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/scrollbar.gif?raw=true" />
+        <p><i>ScrollbarWidget</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Many experimental widgets got a design overhaul in v9.3, along with new additions to the catalog.
+
+- The [InfoWidget](./api-reference/widgets/info-widget.md), [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) and the new [PopupWidget](./api-reference/widgets/popup-widget.md) now use [popper](http://floating-ui.com/) under the hood to provide smarter UI placement that responds to window size, content size and scroll position.
+- New generic-purpose controls rendered by [IconWidget](./api-reference/widgets/icon-widget.md), [ToggleWidget](./api-reference/widgets/toggle-widget.md) and [SelectorWidget](./api-reference/widgets/selector-widget.md) cover many common use cases that would otherwise require implementing your own custom widget.
+- [SplitterWidget](./api-reference/widgets/splitter-widget.md) now supports arbitrary division of the canvas, as well as a cleaner API that no longer requires any custom viewport calculation.
+- New [ScrollbarWidget](./api-reference/widgets/scrollbar-widget.md) lets users get around a large orthographic canvas just like scrolling an HTML page.
+- [TimelineWidget](./api-reference/widgets/timeline-widget.md) has a fresh new look that is entirely customizable via CSS variables.
+- `FpsWidget` is merged into [StatsWidget](./api-reference/widgets/stats-widget.md) as a unified, sleek-looking debugging surface.
+
+Widgets now support **controlled and uncontrolled component patterns**, enabling app developers to control, observe, and intercept user interactions. Widgets with internal state — such as [TimelineWidget](./api-reference/widgets/timeline-widget.md), [StatsWidget](./api-reference/widgets/stats-widget.md), and [ThemeWidget](./api-reference/widgets/theme-widget.md) — accept controlled props (e.g. `time`, `playing`, `expanded`, `themeMode`) alongside `initial*` props for uncontrolled defaults. All widgets now fire state change callbacks (`onTimeChange`, `onPlayingChange`, `onExpandedChange`, `onThemeModeChange`, `onFullscreenChange`, `onLoadingChange`, `onReset`, `onZoom`, `onGeocode`, `onChange`) for common integration patterns.
+
+Aside from the above, all widgets also received the following improvements:
+
+- You can pass a `_container` prop to a widget to render it into any parent container.
+- All widgets now have React wrappers, exported from `@deck.gl/react`.
+- All widget documentation pages now have live demos and easy-to-follow code samples.
+- A bug was fixed where widgets used with the `DeckGL` React component did not block pointer interaction with the canvas underneath.
+
+### Views and Controllers
+
+deck.gl v9.3 is a substantial step forward in 3D navigation and rendering support. See the new [Using with 3D Tiles](./developer-guide/base-maps/using-with-3d-tiles.md) guide for a complete walkthrough.
+
+New `pickable: '3d'` [option](./api-reference/core/layer.md) on all layers enables depth picking, returning actual 3D coordinates on picked geometry.
+
+View layout props (`x`, `y`, `width`, `height`, and padding) now accept CSS-style expressions such as `calc(50% - 10px)` so you can mix relative percentages with fixed pixel offsets when arranging multi-view layouts.
+
+Class-specific improvements:
+
+- New [TerrainController](./api-reference/core/terrain-controller.md) - A terrain-aware controller that automatically adjusts camera elevation to follow 3D tilesets and elevated terrain.
+- [MapController](./api-reference/core/map-controller.md) - New `rotationPivot: '3d'` option rotates around the object under the pointer, for more natural interaction with terrain and 3D tiles.
+- [OrbitController](./api-reference/core/orbit-controller.md) now uses 3D picking to determine zoom and pan anchors, providing more intuitive navigation around 3D content.
+- All controllers - New `maxBounds` option constrains the camera within a (2D or 3D) bounding box, preventing users from navigating outside of the content area.
+- [GlobeController](./api-reference/core/globe-controller.md) - Major bug fixes and improved stability.
+- [OrthographicView](./api-reference/core/orthographic-view.md) is moving away from 2d-array zoom and adds per-axis `zoom*`, `minZoom*`, `maxZoom*` props.
+
+### Layers
+
+![TextLayer clipping feature](https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/text-clipping.gif?raw=true)
+
+- [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
+- [TileLayer](./api-reference/geo-layers/tile-layer.md) adds new `visibleMinZoom` and `visibleMaxZoom` props to control the zoom range at which tiles are drawn, independent of the zoom range at which data is loaded.
+- Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
+- WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
+
+### Extensions
+
+- [PathStyleExtension](./api-reference/extensions/path-style-extension.md) now supports dashed strokes on [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md) and [TextLayer](./api-reference/layers/text-layer.md) backgrounds, in addition to PathLayer. See [#9864](https://github.com/visgl/deck.gl/issues/9864).
+
+### @deck.gl/mapbox
+
+- In interleaved mode, `MapboxOverlay` now always renders layers in groups by `beforeId` or `slot`. This enables cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default, without needing the previously experimental `_renderLayersInGroups` prop.
+- Multi-view setups now work consistently across overlaid and interleaved modes.
+- Basemap now works correctly when canvas has zero dimensions.
+- Heatmap layer now blends correctly in interleaved mode.
+
+### @deck.gl/google-maps
+
+- Overlaid layers now render at the correct DOM position when `interleaved: false`.
 
 ## deck.gl v9.2
 
-Target release date: September, 2025
+Release date: October 7, 2025
 
 <table style={{border: 0}} align="center">
   <tbody>
@@ -36,7 +170,7 @@ Target release date: September, 2025
 
 - A suite of new widgets have been added to the [`@deck.gl/widgets`](./api-reference/widgets/overview.md) module:
   - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md)
-  - [FpsWidget](./api-reference/widgets/fps-widget.md)
+  - FpsWidget
   - [GeocoderWidget](./api-reference/widgets/geocoder-widget.md)
   - [GimbalWidget](./api-reference/widgets/gimbal-widget.md)
   - [InfoWidget](./api-reference/widgets/info-widget.md)
@@ -48,7 +182,7 @@ Target release date: September, 2025
   - [StatsWidget](./api-reference/widgets/stats-widget.md)
   - [ThemeWidget](./api-reference/widgets/theme-widget.md)
   - [TimelineWidget](./api-reference/widgets/timeline-widget.md)
-  - [ViewSelectorWidget](./api-reference/widgets/view-selector-widget.md)
+  - ViewSelectorWidget
 - Pre-wrapped React components - deck.gl widgets are available via the [`@deck.gl/react`](./api-reference/react/overview.md) package
 - Custom widgets in pydeck - via the `custom_libraries` parameter, Python users can integrate custom deck.gl widgets seamlessly
 - Documentation for styling and custom themes - see [Styling Widgets](./api-reference/widgets/styling)

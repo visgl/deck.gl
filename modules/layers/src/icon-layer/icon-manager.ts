@@ -116,6 +116,15 @@ function getIconId(icon: UnpackedIcon): string {
   return icon && (icon.id || icon.url);
 }
 
+function regenerateMipmaps(texture: Texture) {
+  const {device} = texture;
+  if (device.type === 'webgl') {
+    texture.generateMipmapsWebGL();
+  } else if (device.type === 'webgpu') {
+    device.generateMipmapsWebGPU(texture);
+  }
+}
+
 // resize texture without losing original data
 function resizeTexture(
   texture: Texture,
@@ -140,8 +149,9 @@ function resizeTexture(
     width: oldWidth,
     height: oldHeight
   });
-  commandEncoder.finish();
-  newTexture.generateMipmapsWebGL();
+  const commandBuffer = commandEncoder.finish();
+  device.submit(commandBuffer);
+  regenerateMipmaps(newTexture);
 
   texture.destroy();
   return newTexture;
@@ -486,7 +496,9 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          this._texture?.generateMipmapsWebGL();
+          if (this._texture) {
+            regenerateMipmaps(this._texture);
+          }
 
           this.onUpdate(width !== maxWidth || height !== maxHeight);
         })

@@ -4,11 +4,10 @@
 
 import {Widget, type WidgetPlacement, type WidgetProps} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
-import {render} from 'preact';
+import {render, type JSX} from 'preact';
+import {useEffect, useState} from 'preact/hooks';
 import type {Stats, Stat} from '@probe.gl/stats';
-
-const RIGHT_ARROW = '\u25b6';
-const DOWN_ARROW = '\u2b07';
+import {IconButton} from './lib/components/icon-button';
 
 const DEFAULT_COUNT_FORMATTER = (stat: Stat): string => `${stat.name}: ${stat.count}`;
 
@@ -36,6 +35,10 @@ export type StatsWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Type of stats to display. */
   type?: 'deck' | 'luma' | 'device' | 'custom';
+  /** Expand the stats UI by default.
+   * @default false
+   */
+  initialExpanded?: boolean;
   /** Stats object to visualize. */
   stats?: Stats;
   /** Title shown in the header of the pop-up. Defaults to stats.id. */
@@ -46,6 +49,15 @@ export type StatsWidgetProps = WidgetProps & {
   formatters?: Record<string, string | ((stat: Stat) => string)>;
   /** Whether to reset particular stats after each update. */
   resetOnUpdate?: Record<string, boolean>;
+  /**
+   * Controlled expanded state. When provided, the widget is in controlled mode.
+   */
+  expanded?: boolean;
+  /**
+   * Callback when the expanded state changes (user clicks header).
+   * In controlled mode, use this to update the expanded prop.
+   */
+  onExpandedChange?: (expanded: boolean) => void;
 };
 
 /** Displays probe.gl stats in a floating pop-up. */
@@ -55,12 +67,15 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     type: 'deck',
     placement: 'top-left',
     viewId: null,
+    initialExpanded: false,
     stats: undefined!,
     title: 'Stats',
     framesPerUpdate: 1,
     formatters: {},
     resetOnUpdate: {},
-    id: 'stats'
+    id: 'stats',
+    expanded: undefined!,
+    onExpandedChange: () => {}
   };
 
   className = 'deck-widget-stats';
@@ -69,12 +84,22 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
   private _counter = 0;
   private _formatters: Record<string, (stat: Stat) => string>;
   private _resetOnUpdate: Record<string, boolean>;
-  collapsed: boolean = true;
+  private _expanded: boolean = false;
+
+  /**
+   * Returns the current expanded state.
+   * In controlled mode, returns the expanded prop.
+   * In uncontrolled mode, returns the internal state.
+   */
+  getExpanded(): boolean {
+    return this.props.expanded ?? this._expanded;
+  }
 
   constructor(props: StatsWidgetProps = {}) {
     super(props);
     this._formatters = {...DEFAULT_FORMATTERS};
     this._resetOnUpdate = {...this.props.resetOnUpdate};
+    this._expanded = Boolean(props.initialExpanded);
     this.setProps(props);
   }
 
@@ -94,17 +119,26 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     super.setProps(props);
   }
 
-  onAdd(): void {
-    this.updateHTML();
+  onRemove() {
+    if (this.rootElement) {
+      // Make sure all preact hooks are finalized
+      render(null, this.rootElement);
+    }
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
+    const isExpanded = this.getExpanded();
+    if (!isExpanded) {
+      render(<FpsIcon getFps={this._getFps} onClick={this._toggleExpanded} />, rootElement);
+      return;
+    }
+
     const stats = this._getStats();
-    const collapsed = this.collapsed;
     const title = this.props.title || ('id' in stats ? stats.id : null) || 'Stats';
+    const deviceLabel = this._getDeviceLabel();
     const items: JSX.Element[] = [];
 
-    if (!collapsed && stats) {
+    if (stats) {
       stats.forEach(stat => {
         const lines = this._getLines(stat).split('\n');
         if (this._resetOnUpdate && this._resetOnUpdate[stat.name]) {
@@ -125,20 +159,26 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
         <div
           className="deck-widget-stats-header"
           style={{cursor: 'pointer', pointerEvents: 'auto'}}
-          onClick={this._toggleCollapsed}
+          onClick={this._toggleExpanded}
         >
-          {collapsed ? RIGHT_ARROW : DOWN_ARROW} {title}
+          <b>{title}</b>
+          {deviceLabel && <span className="deck-widget-stats-device">{deviceLabel}</span>}
+          <button className="deck-widget-dropdown-button">
+            <span className="deck-widget-dropdown-icon open" />
+          </button>
         </div>
-        {!collapsed && <div className="deck-widget-stats-content">{items}</div>}
+        <div className="deck-widget-stats-content">{items}</div>
       </div>,
       rootElement
     );
   }
 
   onRedraw(): void {
-    const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
-    if (this._counter++ % framesPerUpdate === 0) {
-      this.updateHTML();
+    if (this.getExpanded()) {
+      const framesPerUpdate = Math.max(1, this.props.framesPerUpdate || 1);
+      if (this._counter++ % framesPerUpdate === 0) {
+        this.updateHTML();
+      }
     }
   }
 
@@ -162,10 +202,40 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
     }
   }
 
-  protected _toggleCollapsed = (): void => {
-    this.collapsed = !this.collapsed;
-    this.updateHTML();
+  protected _toggleExpanded = (): void => {
+    const nextExpanded = !this.getExpanded();
+
+    // Always call callback if provided
+    this.props.onExpandedChange?.(nextExpanded);
+
+    // Only update internal state if uncontrolled
+    if (this.props.expanded === undefined) {
+      this._expanded = nextExpanded;
+      this.updateHTML();
+    }
+    // In controlled mode, parent will update expanded prop which triggers updateHTML via setProps
   };
+
+  protected _getFps = (): number => {
+    // @ts-expect-error metrics is protected
+    return Math.round(this.deck?.metrics.fps ?? 0);
+  };
+
+  protected _getDeviceLabel(): string | null {
+    // @ts-expect-error device is protected
+    const deviceType = this.deck?.device?.type;
+    if (!deviceType) {
+      return null;
+    }
+    switch (deviceType) {
+      case 'webgpu':
+        return 'WebGPU';
+      case 'webgl':
+        return 'WebGL';
+      default:
+        return String(deviceType);
+    }
+  }
 
   protected _getLines(stat: Stat | [key: string, value: number]): string {
     if ('count' in stat) {
@@ -182,4 +252,28 @@ export class StatsWidget extends Widget<StatsWidgetProps> {
 
     return `${key}: ${formattedValue}`;
   }
+}
+
+function FpsIcon({getFps, onClick}: {getFps: () => number; onClick: () => void}) {
+  const [fps, setFps] = useState(getFps());
+  useEffect(() => {
+    const onUpdate = () => {
+      setFps(getFps());
+      timer = requestAnimationFrame(onUpdate);
+    };
+    let timer = requestAnimationFrame(onUpdate);
+    return () => {
+      cancelAnimationFrame(timer);
+    };
+  }, [getFps]);
+
+  return (
+    <IconButton onClick={onClick}>
+      <div className="text">
+        FPS
+        <br />
+        {fps}
+      </div>
+    </IconButton>
+  );
 }

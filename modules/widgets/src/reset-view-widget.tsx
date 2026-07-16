@@ -21,6 +21,15 @@ export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProp
   initialViewState?: ViewStateMap<ViewsT>;
   /** View to interact with. Required when using multiple views. */
   viewId?: string | null;
+  /**
+   * Callback when the reset view button is clicked.
+   */
+  onReset?: (params: {
+    /** The view being reset */
+    viewId: string;
+    /** The view state being reset to */
+    viewState: Record<string, unknown>;
+  }) => void;
 };
 
 /**
@@ -36,7 +45,8 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
     placement: 'top-left',
     label: 'Reset View',
     initialViewState: undefined!,
-    viewId: null
+    viewId: null,
+    onReset: () => {}
   };
 
   className = 'deck-widget-reset-view';
@@ -66,18 +76,22 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
 
   handleClick() {
     const initialViewState = this.props.initialViewState || this.deck?.props.initialViewState;
-    this.setViewState(initialViewState);
+    this.resetViewState(initialViewState);
   }
 
-  setViewState(viewState?: ViewStateMap<ViewsT>) {
-    const viewId = (this.props.viewId || 'default-view') as unknown as string;
-    const nextViewState = {
-      ...(viewId !== 'default-view' ? viewState?.[viewId] : viewState)
-      // only works for geospatial?
-      // transitionDuration: this.props.transitionDuration,
-      // transitionInterpolator: new FlyToInterpolator()
-    };
-    // @ts-ignore Using private method temporary until there's a public one
-    this.deck._onViewStateChange({viewId, viewState: nextViewState, interactionState: {}});
+  resetViewState(viewState?: ViewStateMap<ViewsT>) {
+    for (const viewId of this.viewIds) {
+      const nextViewState = {
+        ...(viewState?.[viewId] ?? viewState)
+        // only works for geospatial?
+        // transitionDuration: this.props.transitionDuration,
+        // transitionInterpolator: new FlyToInterpolator()
+      };
+
+      // Call callback
+      this.props.onReset?.({viewId, viewState: nextViewState as Record<string, unknown>});
+
+      this.setViewState(viewId, nextViewState);
+    }
   }
 }

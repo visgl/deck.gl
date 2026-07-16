@@ -10,6 +10,7 @@ import type {Layer} from '@deck.gl/core';
 export type TileLoadDataProps<DataT = any> = {
   requestScheduler: RequestScheduler;
   getData: (props: TileLoadProps) => Promise<DataT>;
+  getRequestPriority: (tile: Tile2DHeader<DataT>) => number;
   onLoad: (tile: Tile2DHeader<DataT>) => void;
   onError: (error: any, tile: Tile2DHeader<DataT>) => void;
 };
@@ -106,6 +107,7 @@ export class Tile2DHeader<DataT = any> {
   /* eslint-disable max-statements */
   private async _loadData({
     getData,
+    getRequestPriority,
     requestScheduler,
     onLoad,
     onError
@@ -116,10 +118,8 @@ export class Tile2DHeader<DataT = any> {
     this._abortController = new AbortController();
     const {signal} = this._abortController;
 
-    // @ts-expect-error (2345) Argument of type '(tile: any) => 1 | -1' is not assignable ...
-    const requestToken = await requestScheduler.scheduleRequest(this, tile => {
-      return tile.isSelected ? 1 : -1;
-    });
+    // @ts-expect-error (2345) loaders.gl's RequestScheduler callback type is too narrow.
+    const requestToken = await requestScheduler.scheduleRequest(this, getRequestPriority);
 
     if (!requestToken) {
       this._isCancelled = true;
@@ -148,7 +148,8 @@ export class Tile2DHeader<DataT = any> {
     // Clear the `isLoading` flag
     this._loader = undefined;
     // Rewrite tile content with the result of getTileData if successful, or `null` in case of
-    // error or cancellation
+    // error or cancellation. A `null` tile is still a terminal result for the request: the tile
+    // should stop blocking viewport loading even if the source returned 404 / empty content.
     this.content = tileData;
     // If cancelled, do not invoke the callbacks
     // Consider it loaded if we tried to cancel but `getTileData` still returned data
@@ -156,6 +157,9 @@ export class Tile2DHeader<DataT = any> {
       this._isLoaded = false;
       return;
     }
+    // Errors are reported via onError below, but the request itself has completed. Mark the tile
+    // as loaded so higher-level layers can treat expected missing tiles as settled instead of
+    // waiting forever for content or sublayers that will never exist.
     this._isLoaded = true;
     this._isCancelled = false;
 
