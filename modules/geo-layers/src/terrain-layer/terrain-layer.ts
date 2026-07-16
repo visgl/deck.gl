@@ -337,8 +337,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const {zRange} = this.state;
     const ranges = tiles
       .map(tile => tile.content)
+      .filter(Boolean)
       .flatMap(arr => {
-        const bounds = arr?.[0]?.header?.boundingBox;
+        // @ts-ignore - terrain loader returns {attributes, header} shape; header is not in MeshAttributes type
+        const bounds = (arr[0] as MeshWithBoundingBox | null)?.header?.boundingBox;
         return bounds ? [bounds.map(bound => bound[2])] : [];
       });
     if (ranges.length === 0) {
@@ -438,8 +440,11 @@ const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
 
 function remapTerrainMeshToWebMercatorTile(mesh: MeshAttributes, bounds: Bounds): MeshAttributes {
-  const positionAttribute = mesh.attributes.POSITION;
-  const texCoordAttribute = mesh.attributes.TEXCOORD_0;
+  // The terrain loader returns {attributes: MeshAttributes, header?: ...} at runtime.
+  // MeshAttributes is typed as an index type so we use a cast to access the nested fields.
+  const attrs = (mesh as any).attributes as MeshAttributes | undefined;
+  const positionAttribute = attrs?.POSITION;
+  const texCoordAttribute = attrs?.TEXCOORD_0;
   const positions = positionAttribute?.value;
   const texCoords = texCoordAttribute?.value;
   if (!positions || !texCoords) {
@@ -458,15 +463,15 @@ function remapTerrainMeshToWebMercatorTile(mesh: MeshAttributes, bounds: Bounds)
   }
 
   return {
-    ...mesh,
+    ...(mesh as any),
     attributes: {
-      ...mesh.attributes,
+      ...attrs,
       POSITION: {
         ...positionAttribute,
         value: remappedPositions
       }
     }
-  };
+  } as MeshAttributes;
 }
 
 function lngLatToMercatorWorldY(latitude: number): number {
