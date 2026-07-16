@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+<<<<<<< HEAD
 import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
+=======
+import log from '../utils/log';
+import {Pan, DoubleClickDrag, InputDirection, Pinch, Tap} from 'mjolnir.js';
+>>>>>>> origin/master
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
@@ -89,12 +94,15 @@ export const EVENT_HANDLERS = {
   panend: 'onDragEnd'
 } as const satisfies {[eventName: string]: string};
 
+// Order matters: recognizeWith/requireFailure resolve by name, so a recognizer
+// must be registered before any later entry can reference it.
 export const RECOGNIZERS = {
   multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
   pinch: [Pinch, {}, null, ['multipan']],
   pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
-  dblclick: [Tap, {event: 'dblclick', taps: 2}],
-  click: [Tap, {event: 'click'}, null, ['dblclick']]
+  dblclick: [Tap, {event: 'dblclick', taps: 2, enable: false}],
+  dblclickdrag: [DoubleClickDrag, {event: 'dblclickdrag', enable: false}, ['dblclick'], null],
+  click: [Tap, {event: 'click'}, ['dblclickdrag'], ['dblclick', 'dblclickdrag']]
 } as const;
 
 export type RecognizerOptions = {
