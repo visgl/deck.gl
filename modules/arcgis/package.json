@@ -17,6 +17,10 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
