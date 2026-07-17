@@ -57,6 +57,28 @@ new GlobeView({
 
 [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 
+### pydeck
+
+deck.gl's Python bindings gain first-class support for [layer extensions](./api-reference/extensions/overview.md).
+
+- `@deck.gl/extensions` is now registered with the pydeck / Jupyter widget, so extension classes resolve from JSON. Previously, adding any extension silently dropped the layer with a `No registered class of type ...` error.
+- A typed [`pydeck.Extension`](https://deckgl.readthedocs.io/en/latest/extension.html) wrapper configures extensions without hand-writing raw `@@type` dicts:
+
+```python
+import pydeck as pdk
+
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=df,
+    get_position="position",
+    get_filter_value="value",
+    filter_range=[0, 1],
+    extensions=[pdk.Extension("DataFilterExtension", filter_size=1)],
+)
+```
+
+- The pydeck gallery adds a runnable, live example for each extension — `DataFilterExtension`, `PathStyleExtension`, `BrushingExtension`, `ClipExtension`, `MaskExtension`, `CollisionFilterExtension`, `FillStyleExtension`, and `TerrainExtension` — grouped into a dedicated **Extensions** section.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026
