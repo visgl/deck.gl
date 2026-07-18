@@ -47,7 +47,9 @@ const JSON_CONVERTER_CONFIGURATION = {
     ScaleWidget: deckExports._ScaleWidget,
     GeocoderWidget: deckExports._GeocoderWidget,
     SplitterWidget: deckExports._SplitterWidget,
-    TimelineWidget: deckExports._TimelineWidget
+    TimelineWidget: deckExports._TimelineWidget,
+    // Register the extension exported with _ prefix under its canonical name
+    TerrainExtension: deckExports._TerrainExtension
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {

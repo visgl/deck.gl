@@ -35,6 +35,7 @@
   "dependencies": {
     "@deck.gl/aggregation-layers": "9.4.0-alpha.1",
     "@deck.gl/core": "9.4.0-alpha.1",
+    "@deck.gl/extensions": "9.4.0-alpha.1",
     "@deck.gl/geo-layers": "9.4.0-alpha.1",
     "@deck.gl/google-maps": "9.4.0-alpha.1",
     "@deck.gl/json": "9.4.0-alpha.1",
