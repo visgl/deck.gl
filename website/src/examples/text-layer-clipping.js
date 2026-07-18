@@ -19,6 +19,8 @@ class TextDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/treemap`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     gzip: {displayName: 'Gzipped size', type: 'checkbox', value: true},
   };
@@ -40,6 +42,8 @@ class TextDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
+        device={this.props.device}
         data={root}
         width={3000}
         height={2000}

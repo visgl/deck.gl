@@ -251,6 +251,9 @@ export default class AttributeBufferGroups {
     }
 
     for (const attribute of Object.values(attributes)) {
+      if (attribute.settings.isIndexed) {
+        continue;
+      }
       const groupId = attribute.settings.bufferGroup;
       const group = groupId && groups.get(groupId);
       if (group && groupedAttributeIds.has(attribute.id)) {

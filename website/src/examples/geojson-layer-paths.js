@@ -25,6 +25,8 @@ class HighwayDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/highway`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     year: {displayName: 'Year', type: 'range', value: 1990, step: 5, min: 1990, max: 2015}
   };
@@ -84,6 +86,8 @@ class HighwayDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
+        device={this.props.device}
         year={params.year.value}
         accidents={data && data[0]}
         roads={data && data[1]}

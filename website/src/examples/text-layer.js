@@ -19,6 +19,8 @@ class TextDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/text`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     noOverlap: {displayName: 'Prevent overlap', type: 'checkbox', value: true},
     fontSize: {displayName: 'Font Size', type: 'range', value: 32, step: 1, min: 20, max: 80}
@@ -52,6 +54,8 @@ class TextDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
+        device={this.props.device}
         data={data}
         noOverlap={params.noOverlap.value}
         fontSize={params.fontSize.value}

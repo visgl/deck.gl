@@ -18,6 +18,8 @@ const colorRamp = inFlowColors
 class ArcDemo extends Component {
   static title = 'United States County-to-county Migration';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/arc-data.txt`,
     worker: '/workers/arc-data-decoder.js'
@@ -78,6 +80,8 @@ class ArcDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
+        device={this.props.device}
         strokeWidth={params.lineWidth.value}
         onSelectCounty={this._onSelectCounty}
       />

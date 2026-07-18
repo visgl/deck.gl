@@ -14,6 +14,7 @@ import {scaleSqrt} from 'd3-scale';
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {BrushingExtensionProps} from '@deck.gl/extensions';
 import type {Feature, Polygon, MultiPolygon} from 'geojson';
+import type {Device} from '@luma.gl/core';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -112,7 +113,8 @@ export default function App({
   brushRadius = 100000,
   strokeWidth = 1,
   opacity = 0.7,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device
 }: {
   data?: County[];
   enableBrushing?: boolean;
@@ -120,6 +122,7 @@ export default function App({
   strokeWidth?: number;
   opacity?: number;
   mapStyle?: string;
+  device?: Device;
 }) {
   const layerData = useMemo(() => getLayerData(data), [data]);
   const radiusScale = useMemo(() => {
@@ -195,6 +198,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

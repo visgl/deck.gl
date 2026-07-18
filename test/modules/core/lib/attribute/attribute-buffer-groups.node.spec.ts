@@ -74,6 +74,20 @@ test('AttributeManager without groups keeps WebGPU layouts unchanged', () => {
   attributeManager.finalize();
 });
 
+test('AttributeManager excludes index buffers from WebGPU vertex layouts', () => {
+  const attributeManager = new AttributeManager(createWebGPUDevice());
+  attributeManager.add({
+    indices: {size: 1, isIndexed: true, accessor: 'getIndex'},
+    positions: {size: 3, accessor: 'getPosition'}
+  });
+
+  expect(
+    attributeManager.getBufferLayouts({isInstanced: false}).map(layout => layout.name)
+  ).toEqual(['positions']);
+
+  attributeManager.finalize();
+});
+
 test('AttributeManager buffer groups pack IconLayer-style shader attributes', async () => {
   const attributeManager = new AttributeManager(createWebGPUDevice());
   attributeManager.addInstanced({
@@ -285,7 +299,6 @@ test('Layer grouped bindings preserve legacy fallback and index binding', () => 
   (layer as any)._setModelAttributes(model, attributeManager.getAttributes());
 
   expect(model.setBufferLayout.mock.calls[0][0].map(layout => layout.name)).toEqual([
-    'indices',
     'constant',
     'group-a'
   ]);
@@ -304,7 +317,6 @@ test('Layer grouped bindings preserve legacy fallback and index binding', () => 
   (layer as any)._setModelAttributes(excludedModel, attributeManager.getAttributes());
 
   expect(excludedModel.setBufferLayout.mock.calls[0][0].map(layout => layout.name)).toEqual([
-    'indices',
     'constant',
     'a',
     'b'
