@@ -4,15 +4,27 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
-Release date: In development
+Target Release Date: July 2026
 
-### Views
+deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
-- Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.
+Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
-### Performance
+### Core Performance
 
-- Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, instead using shader builtins `instance_index` / `gl_InstanceID`, reducing memory usage and initialization times.
+- Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
+
+### Views and Controllers
+
+deck.gl v9.4 brings additional view and controller improvements on top of the substantial changes in v9.3.
+
+#### GlobeView
+
+[`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
+
+- [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
+- [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
+- [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 
 ### Multi-canvas rendering
 
@@ -24,12 +36,42 @@ deck.gl can now render a single `Deck` instance into multiple HTML canvases.
 
 There is a new standalone TypeScript multi-canvas cities example in the repository that shows four independently navigable city maps with shared scatterplot interactions and view-bound widgets: [test/apps/multi-canvas-cities](https://github.com/visgl/deck.gl/tree/master/test/apps/multi-canvas-cities).
 
+#### View Layout
+
+- A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
+
+#### View
+
+- [Views](./api-reference/core/view.md#parameters) now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with:
+
+```js
+new GlobeView({
+  parameters: {
+    cullMode: 'none'
+  }
+});
+```
+
+#### Controller
+
+- All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
+
+### @deck.gl/geo-layers
+
+- [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
+- [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
+
+### @deck.gl/arcgis
+
+- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
+
+[ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026
 
 ### Widgets
-
 
 <table style={{border: 0}} align="center">
   <tbody>

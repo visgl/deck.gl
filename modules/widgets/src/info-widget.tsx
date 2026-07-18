@@ -96,12 +96,14 @@ export class InfoWidget extends Widget<InfoWidgetProps> {
   onHover(info: PickingInfo): void {
     if (this.props.mode === 'hover') {
       this.tooltip = this._getTooltip(info);
+      this.updateHTML();
     }
   }
 
   onClick(info: PickingInfo): void {
     if (this.props.mode === 'click') {
       this.tooltip = this._getTooltip(info);
+      this.updateHTML();
     }
   }
 
