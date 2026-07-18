@@ -59,10 +59,7 @@ new GlobeView({
 
 ### pydeck
 
-deck.gl's Python bindings gain first-class support for [layer extensions](./api-reference/extensions/overview.md).
-
-- `@deck.gl/extensions` is now registered with the pydeck / Jupyter widget, so extension classes resolve from JSON. Previously, adding any extension silently dropped the layer with a `No registered class of type ...` error.
-- A typed [`pydeck.Extension`](https://deckgl.readthedocs.io/en/latest/extension.html) wrapper configures extensions without hand-writing raw `@@type` dicts:
+deck.gl's Python bindings gain first-class support for [layer extensions](./api-reference/extensions/overview.md), available through a typed [`pydeck.Extension`](https://deckgl.readthedocs.io/en/latest/extension.html) wrapper:
 
 ```python
 import pydeck as pdk
@@ -77,7 +74,7 @@ layer = pdk.Layer(
 )
 ```
 
-- The pydeck gallery adds a runnable, live example for each extension — `DataFilterExtension`, `PathStyleExtension`, `BrushingExtension`, `ClipExtension`, `MaskExtension`, `CollisionFilterExtension`, `FillStyleExtension`, and `TerrainExtension` — grouped into a dedicated **Extensions** section.
+See the [pydeck gallery](https://deckgl.readthedocs.io/en/latest/) for a runnable, live example of each extension.
 
 ## deck.gl v9.3
 
