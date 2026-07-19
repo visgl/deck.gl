@@ -6,7 +6,7 @@
 /* global document, window, global */
 import {test, expect, describe} from 'vitest';
 
-import {CompositeLayer, LayerExtension} from '@deck.gl/core';
+import {CompositeLayer, LayerExtension, _GlobeView as GlobeView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
@@ -94,6 +94,28 @@ describe('jupyter-widget: extensions-registration', () => {
     expect(
       extension instanceof DataFilterExtension,
       'Layer extension is hydrated into a class instance'
+    ).toBeTruthy();
+  });
+});
+
+describe('jupyter-widget: view aliases', () => {
+  test('GlobeView canonical alias', () => {
+    const props = jsonConverter.convert({
+      views: [{'@@type': 'GlobeView', id: 'globe', controller: true}]
+    });
+    expect(
+      props.views[0] instanceof GlobeView,
+      'GlobeView @@type hydrates into a GlobeView instance'
+    ).toBeTruthy();
+  });
+
+  test('_GlobeView experimental name still works', () => {
+    const props = jsonConverter.convert({
+      views: [{'@@type': '_GlobeView', id: 'globe', controller: true}]
+    });
+    expect(
+      props.views[0] instanceof GlobeView,
+      '_GlobeView @@type remains registered for back-compat'
     ).toBeTruthy();
   });
 });

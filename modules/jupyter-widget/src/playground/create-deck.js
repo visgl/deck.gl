@@ -42,6 +42,8 @@ function extractElements(library = {}, filter) {
 const JSON_CONVERTER_CONFIGURATION = {
   classes: {
     ...extractElements(deckExports, classesFilter),
+    // Register views exported with _ prefix under their canonical names
+    GlobeView: deckExports._GlobeView,
     // Register widgets exported with _ prefix under their canonical names
     StatsWidget: deckExports._StatsWidget,
     ScaleWidget: deckExports._ScaleWidget,
