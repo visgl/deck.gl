@@ -6,8 +6,8 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.9 Releases
 ------------
 
-Next
-^^^^
+0.9.4 - TBD
+^^^^^^^^^^^
 - Add typed lighting and post-processing effects through ``pydeck.Effect``
 - Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop
 
