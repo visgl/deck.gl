@@ -1,12 +1,7 @@
-from pydeck import Deck, Layer, LightSettings, View, ViewState
+from pydeck import Deck, Layer, View, ViewState
 
 
 def create_minimal_test_object():
-    lights = LightSettings(
-        lights_position=[-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
-        ambient_ratio=0.4,
-        diffuse_ratio=0.6,
-    )
     layer = Layer(
         "HexagonLayer",
         "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
@@ -15,7 +10,6 @@ def create_minimal_test_object():
         elevation_range=[0, 3000],
         extruded=True,
         coverage=1,
-        light_settings=lights,
     )
     view_state = ViewState(
         longitude=-1.4157267858730052,

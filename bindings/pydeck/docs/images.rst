@@ -78,6 +78,21 @@
 .. image:: gallery/images/icon_layer.png
    :width: 0
 
+.. image:: gallery/images/ambient_light.png
+   :width: 0
+
+.. image:: gallery/images/camera_light.png
+   :width: 0
+
+.. image:: gallery/images/directional_light.png
+   :width: 0
+
+.. image:: gallery/images/point_light.png
+   :width: 0
+
+.. image:: gallery/images/sun_light.png
+   :width: 0
+
 .. image:: gallery/images/line_layer.png
    :width: 0
 
@@ -91,6 +106,63 @@
    :width: 0
 
 .. image:: gallery/images/polygon_layer.png
+   :width: 0
+
+.. image:: gallery/images/brightness_contrast.png
+   :width: 0
+
+.. image:: gallery/images/bulge_pinch.png
+   :width: 0
+
+.. image:: gallery/images/color_halftone.png
+   :width: 0
+
+.. image:: gallery/images/denoise.png
+   :width: 0
+
+.. image:: gallery/images/dot_screen.png
+   :width: 0
+
+.. image:: gallery/images/edge_work.png
+   :width: 0
+
+.. image:: gallery/images/fxaa.png
+   :width: 0
+
+.. image:: gallery/images/hexagonal_pixelate.png
+   :width: 0
+
+.. image:: gallery/images/hue_saturation.png
+   :width: 0
+
+.. image:: gallery/images/ink.png
+   :width: 0
+
+.. image:: gallery/images/magnify.png
+   :width: 0
+
+.. image:: gallery/images/noise.png
+   :width: 0
+
+.. image:: gallery/images/sepia.png
+   :width: 0
+
+.. image:: gallery/images/swirl.png
+   :width: 0
+
+.. image:: gallery/images/tilt_shift.png
+   :width: 0
+
+.. image:: gallery/images/triangle_blur.png
+   :width: 0
+
+.. image:: gallery/images/vibrance.png
+   :width: 0
+
+.. image:: gallery/images/vignette.png
+   :width: 0
+
+.. image:: gallery/images/zoom_blur.png
    :width: 0
 
 .. image:: gallery/images/s2_layer.png
@@ -173,6 +245,16 @@
 
    gallery/icon_layer
 
+   gallery/ambient_light
+
+   gallery/camera_light
+
+   gallery/directional_light
+
+   gallery/point_light
+
+   gallery/sun_light
+
    gallery/line_layer
 
    gallery/maplibre_globe
@@ -182,6 +264,44 @@
    gallery/point_cloud_layer
 
    gallery/polygon_layer
+
+   gallery/brightness_contrast
+
+   gallery/bulge_pinch
+
+   gallery/color_halftone
+
+   gallery/denoise
+
+   gallery/dot_screen
+
+   gallery/edge_work
+
+   gallery/fxaa
+
+   gallery/hexagonal_pixelate
+
+   gallery/hue_saturation
+
+   gallery/ink
+
+   gallery/magnify
+
+   gallery/noise
+
+   gallery/sepia
+
+   gallery/swirl
+
+   gallery/tilt_shift
+
+   gallery/triangle_blur
+
+   gallery/vibrance
+
+   gallery/vignette
+
+   gallery/zoom_blur
 
    gallery/s2_layer
 
