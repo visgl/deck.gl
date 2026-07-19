@@ -8,7 +8,8 @@ import {
   OrbitView,
   OrthographicView,
   FirstPersonView,
-  _GlobeView as GlobeView
+  _GlobeView as GlobeView,
+  _GlobeController as GlobeController
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
 
@@ -101,6 +102,29 @@ test('GlobeController', async () => {
     // GlobeView cannot be rotated
     ['pan#function key', 'pinch', 'multipan']
   );
+});
+
+test('GlobeController is terrain-aware by default', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: true}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 1
+    }
+  });
+
+  // GlobeController is terrain-aware via the `withTerrain` mixin — WITHOUT inheriting
+  // MapController/TerrainController. The mixin defaults rotation to pivot around the
+  // 3D point under the pointer, which is observable on the controller props.
+  expect(controller, 'GlobeView default controller is a GlobeController').toBeInstanceOf(
+    GlobeController
+  );
+  expect(
+    (controller.props as any).rotationPivot,
+    'terrain mixin defaults rotationPivot to 3d'
+  ).toBe('3d');
+  controller.finalize();
 });
 
 test('OrbitController', async () => {

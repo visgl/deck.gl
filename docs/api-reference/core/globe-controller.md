@@ -6,6 +6,8 @@ The `GlobeController` class can be passed to either the `Deck` class's [controll
 
 `GlobeController` is the default controller for [GlobeView](./globe-view.md).
 
+It is **terrain-aware**: when the scene contains a layer with `pickable: '3d'`, the camera follows picked terrain elevation and rotation pivots around the 3D point under the pointer. This is the same terrain behavior as [TerrainController](./terrain-controller.md), composed in via a shared mixin — `GlobeController` does **not** inherit `MapController`, so the Web-Mercator map constraints never apply to the globe.
+
 ## Usage
 
 Use with the default view:
@@ -39,10 +41,12 @@ Supports all [Controller options](./controller.md#options) with the following de
 
 - `dragPan`: default `'pan'` (drag to pan)
 - `dragRotate`: shift+drag or right-click drag to change bearing and pitch
+- `rotationPivot`: default `'3d'` (rotate around the picked object under the pointer)
 - `touchRotate`: multi-touch rotate to change bearing
 - `keyboard`: arrow keys to pan, +/- to zoom
 - `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
 - `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
+- Terrain following requires a layer with `pickable: '3d'`; without one, the controller behaves like a standard `GlobeController`.
 
 ## Custom GlobeController
 

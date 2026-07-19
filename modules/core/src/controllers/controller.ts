@@ -66,6 +66,8 @@ export type ControllerOptions = {
       };
   /** Drag behavior without pressing function keys, one of `pan` and `rotate`. */
   dragMode?: 'pan' | 'rotate';
+  /** Pivot for rotation: `'center'` (viewport center), `'2d'` (pointer at ground level), or `'3d'` (the picked 3D point under the pointer). Default `'center'`. */
+  rotationPivot?: 'center' | '2d' | '3d';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
   /** Bounding box of content that the controller is constrained in */
@@ -142,6 +144,30 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   protected invertPan: boolean = false;
   protected dragMode: 'pan' | 'rotate' = 'rotate';
+
+  /**
+   * Rotation pivot behavior:
+   * - 'center': rotate around viewport center (default)
+   * - '2d': rotate around the pointer at ground level (z=0)
+   * - '3d': rotate around the 3D picked point (requires a pickPosition callback)
+   */
+  protected rotationPivot: 'center' | '2d' | '3d' = 'center';
+
+  /** Altitude for rotateStart based on rotationPivot mode. Passed to the ControllerState. */
+  protected _getAltitude = (pos: [number, number]): number | undefined => {
+    if (this.rotationPivot === '2d') {
+      return 0;
+    } else if (this.rotationPivot === '3d') {
+      if (this.pickPosition) {
+        const {x, y} = this.props;
+        const pickResult = this.pickPosition(x + pos[0], y + pos[1]);
+        if (pickResult && pickResult.coordinate && pickResult.coordinate.length >= 3) {
+          return pickResult.coordinate[2];
+        }
+      }
+    }
+    return undefined;
+  };
   protected inertia: number = 0;
   protected scrollZoom: boolean | {speed?: number; smooth?: boolean} = true;
   protected dragPan: boolean = true;
@@ -308,6 +334,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
+    if ('rotationPivot' in props) {
+      this.rotationPivot = props.rotationPivot || 'center';
+    }
+    // Passed to the ControllerState constructor for rotate-around-pivot.
+    (props as any).getAltitude = this._getAltitude;
     const oldProps = this.props;
     this.props = props;
 
@@ -394,6 +425,14 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   /* Callback util */
   // formats map state and invokes callback function
   protected updateViewport(newControllerState: ControllerState, extraProps: Record<string, any> | null = null, interactionState: InteractionState = {}) {
+    // Inject rotation pivot position during rotation for visual feedback
+    const rotateState = newControllerState.getState() as {startRotateLngLat?: [number, number, number]};
+    if (interactionState.isDragging && rotateState.startRotateLngLat) {
+      interactionState = {...interactionState, rotationPivotPosition: rotateState.startRotateLngLat};
+    } else if (interactionState.isDragging === false) {
+      interactionState = {...interactionState, rotationPivotPosition: undefined};
+    }
+
     const viewState = {...newControllerState.getViewportProps(), ...extraProps};
 
     // TODO - to restore diffing, we need to include interactionState

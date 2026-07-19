@@ -283,6 +283,21 @@ export default class GlobeViewport extends Viewport {
     out.zoom += zoomAdjust(out.latitude);
     return out;
   }
+
+  /**
+   * Returns a new longitude and latitude that keeps a 3D coordinate at a given screen pixel.
+   */
+  panByPosition3D(coords: number[], pixel: number[]): GlobeViewportOptions {
+    const targetZ = coords[2] || 0;
+    const [longitudeAtPixel, latitudeAtPixel] = this.unproject(pixel, {targetZ});
+    const latitude = Math.max(Math.min(this.latitude + coords[1] - latitudeAtPixel, 90), -90);
+    const out = {
+      longitude: this.longitude + coords[0] - longitudeAtPixel,
+      latitude,
+      zoom: this.zoom + zoomAdjust(latitude) - zoomAdjust(this.latitude)
+    };
+    return out;
+  }
 }
 
 export function zoomAdjust(latitude: number, clampToPoles?: boolean): number {
