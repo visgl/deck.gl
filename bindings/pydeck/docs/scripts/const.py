@@ -10,11 +10,7 @@ EXAMPLES_DIR = os.path.abspath(os.path.join(here, "..", "..", "examples"))
 # in examples/ (the default group) or in a subfolder (examples/<group>/), which becomes a
 # labeled section on the gallery page. The whole gallery pipeline is keyed by each file's
 # base name, so subfolders group the grid without affecting page/thumbnail/toctree naming.
-EXAMPLE_GLOB = sorted(
-    path
-    for path in glob.glob(os.path.join(EXAMPLES_DIR, "**", "*.py"), recursive=True)
-    if not os.path.basename(path).startswith("_")
-)
+EXAMPLE_GLOB = sorted(glob.glob(os.path.join(EXAMPLES_DIR, "**", "*.py"), recursive=True))
 # EXAMPLE_NAMES represents the snake_case names of the examples on the website
 EXAMPLE_NAMES = [os.path.splitext(os.path.basename(p))[0] for p in EXAMPLE_GLOB]
 
