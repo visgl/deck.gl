@@ -15,6 +15,8 @@ from pydeck.io.html import (
     render_json_to_html,
     deck_to_html,
     CDN_URL,
+    CDN_CSS_URL,
+    widget_css_picker,
 )
 from IPython.display import HTML
 
@@ -38,8 +40,11 @@ def test_cdn_picker(monkeypatch):
     PORT = 8080
     monkeypatch.setenv("PYDECK_DEV_PORT", PORT)
     assert "localhost:{}".format(PORT) in cdn_picker()
+    assert "index.js.map" not in cdn_picker()
+    assert ".deck-widget" in widget_css_picker()
     monkeypatch.delenv("PYDECK_DEV_PORT", raising=False)
     assert CDN_URL in cdn_picker()
+    assert CDN_CSS_URL in widget_css_picker()
 
 
 def test_iframe_with_srcdoc():
