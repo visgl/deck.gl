@@ -1627,9 +1627,9 @@
     "@probe.gl/stats" "^4.1.1"
 
 "@luma.gl/webgl@^9.3.3":
-  version "9.3.3"
-  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.3.3.tgz#502b275da952f49bdea4d2f70751e52266aa19e5"
-  integrity sha512-X+aavdP5o6VFHSA0es9gKZTT145jfcFbhKJt/gwJrptnKNoIW4+Y37ZEpCo1AzAnr+FQCxjgcM2kOCpoWMfSVA==
+  version "9.3.6"
+  resolved "https://registry.yarnpkg.com/@luma.gl/webgl/-/webgl-9.3.6.tgz#d7ced68d3a4548ad91075d9e6bfd733bdb8f348d"
+  integrity sha512-tGm7FGWPmJKxGZMvkRPRi219x3tKmBxR7Uke09nTp2ujNak/O5V9xPIQ9lUBGTxqAb8U2yjKkXG8j+f/4b2+sw==
   dependencies:
     "@math.gl/types" "^4.1.0"
     "@probe.gl/env" "^4.1.1"
