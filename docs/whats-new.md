@@ -74,8 +74,6 @@ layer = pdk.Layer(
 )
 ```
 
-See the [pydeck gallery](https://deckgl.readthedocs.io/en/latest/) for a runnable, live example of each extension.
-
 pydeck also gains typed lighting and post-processing effects through `pydeck.Effect`:
 
 ```python
@@ -93,9 +91,10 @@ contrast = pdk.Effect(
 pdk.Deck(layers=[layer], effects=[lighting, contrast])
 ```
 
-The pydeck gallery includes examples for every supported light and bundled
-post-processing module. The obsolete `pydeck.LightSettings` API has been removed;
-it targeted a layer prop that deck.gl has not supported since v7.
+The obsolete `pydeck.LightSettings` API has been removed; it targeted a layer prop that
+deck.gl has not supported since v7. Explore the
+[pydeck gallery](https://deckgl.readthedocs.io/en/latest/) for runnable, live examples of
+all supported extensions, lights, and bundled post-processing modules.
 
 ## deck.gl v9.3
 
