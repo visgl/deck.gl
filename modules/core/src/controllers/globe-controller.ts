@@ -9,7 +9,12 @@ import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
+import type Viewport from '../viewports/viewport';
+import GlobeViewport, {
+  zoomAdjust,
+  GLOBE_RADIUS,
+  GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO
+} from '../viewports/globe-viewport';
 import {
   Globe,
   type CameraFrame,
@@ -35,12 +40,15 @@ function pixelsToDegrees(pixels: number, zoom: number = 0): number {
   return radians * RADIANS_TO_DEGREES;
 }
 
+type GlobeZoomAround = 'center' | 'pointer';
+
 type GlobeStateInternal = MapStateInternal & {
   startPanPos?: [number, number];
   startPanCameraFrame?: CameraFrame;
   startPanAngularRate?: number;
   /** When true, bearing is held fixed during pan (north stays up) */
   startPanLockBearing?: boolean;
+  zoomAround?: GlobeZoomAround;
 };
 
 class GlobeState extends MapState {
@@ -48,6 +56,7 @@ class GlobeState extends MapState {
     options: MapStateProps &
       GlobeStateInternal & {
         makeViewport: (props: Record<string, any>) => any;
+        zoomAround?: GlobeZoomAround;
       }
   ) {
     const {
@@ -55,6 +64,7 @@ class GlobeState extends MapState {
       startPanCameraFrame,
       startPanAngularRate,
       startPanLockBearing,
+      zoomAround,
       ...mapStateOptions
     } = options;
     mapStateOptions.normalize = false;
@@ -65,6 +75,10 @@ class GlobeState extends MapState {
     if (startPanCameraFrame !== undefined) s.startPanCameraFrame = startPanCameraFrame;
     if (startPanAngularRate !== undefined) s.startPanAngularRate = startPanAngularRate;
     if (startPanLockBearing !== undefined) s.startPanLockBearing = startPanLockBearing;
+    // Unlike the transient gesture anchors above, zoomAround is a config option that
+    // must always carry a value: guarding it with `!== undefined` lets a partial-props
+    // or HMR reconstruction drop the key, silently reverting pointer zoom to center.
+    s.zoomAround = zoomAround || 'center';
   }
 
   panStart({pos}: {pos: [number, number]}): GlobeState {
@@ -142,10 +156,59 @@ class GlobeState extends MapState {
     }) as GlobeState;
   }
 
-  zoom({scale}: {scale: number}): MapState {
-    const startZoom = this.getState().startZoom || this.getViewportProps().zoom;
-    const zoom = startZoom + Math.log2(scale);
-    return this._getUpdatedState({zoom});
+  zoomStart({pos}: {pos: [number, number]}): GlobeState {
+    const startZoomLngLat = this._shouldZoomAroundPointer()
+      ? this._unprojectZoomAnchor(pos)
+      : undefined;
+
+    return this._getUpdatedState({
+      startZoomLngLat,
+      startZoom: this.getViewportProps().zoom
+    }) as GlobeState;
+  }
+
+  zoom({
+    pos,
+    startPos,
+    scale
+  }: {
+    pos: [number, number];
+    startPos?: [number, number];
+    scale: number;
+  }): MapState {
+    const state = this.getState();
+    const {startZoom} = state;
+    const initialStartZoomLngLat = state.startZoomLngLat;
+    const hasZoomStart = startZoom !== null && startZoom !== undefined;
+    const startZoomValue = hasZoomStart ? startZoom : this.getViewportProps().zoom;
+    const zoom = this._constrainZoom(startZoomValue + Math.log2(scale));
+
+    if (!this._shouldZoomAroundPointer()) {
+      return this._getUpdatedState({zoom});
+    }
+
+    const startZoomLngLat =
+      initialStartZoomLngLat ??
+      this._unprojectZoomAnchor(startPos) ??
+      this._unprojectZoomAnchor(pos);
+
+    if (!startZoomLngLat) {
+      return this._getUpdatedState({zoom});
+    }
+
+    const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
+    return this._getUpdatedState({
+      zoom,
+      ...(hasZoomStart && !initialStartZoomLngLat ? {startZoomLngLat} : {}),
+      ...this._panByZoomAnchor(zoomedViewport, startZoomLngLat, pos)
+    });
+  }
+
+  zoomEnd(): GlobeState {
+    return this._getUpdatedState({
+      startZoomLngLat: null,
+      startZoom: null
+    }) as GlobeState;
   }
 
   _panFromCenter(offset: [number, number]): GlobeState {
@@ -242,6 +305,37 @@ class GlobeState extends MapState {
     const zoomAdjustment = zoomAdjust(props.latitude, true) - zoomAdjust(0, true);
     return clamp(zoom, minZoom + zoomAdjustment, maxZoom + zoomAdjustment);
   }
+
+  private _unprojectZoomAnchor(pos?: [number, number]): [number, number] | undefined {
+    if (!pos) {
+      return undefined;
+    }
+
+    const viewport = this.makeViewport(this.getViewportProps());
+    if (
+      viewport instanceof GlobeViewport &&
+      !viewport.isPointOnGlobe(pos, {maxDistanceRatio: GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO})
+    ) {
+      return undefined;
+    }
+
+    const lngLat = viewport.unproject(pos);
+    return [lngLat[0], lngLat[1]];
+  }
+
+  private _panByZoomAnchor(
+    viewport: Viewport,
+    anchorLngLat: [number, number],
+    pixel: [number, number]
+  ): Record<string, any> {
+    return viewport instanceof GlobeViewport
+      ? viewport.panByGlobeAnchor(anchorLngLat, pixel)
+      : viewport.panByPosition(anchorLngLat, pixel);
+  }
+
+  private _shouldZoomAroundPointer(): boolean {
+    return (this.getState() as GlobeStateInternal).zoomAround === 'pointer';
+  }
 }
 
 export default class GlobeController extends Controller<MapState> {
@@ -261,6 +355,15 @@ export default class GlobeController extends Controller<MapState> {
 
   // Ring buffer tracking globe position during pan for inertia velocity
   private _panHistory: Array<{longitude: number; latitude: number; timestamp: number}> = [];
+
+  protected _getTransitionProps(opts?: any) {
+    if (opts?.around && this.props.zoomAround !== 'pointer') {
+      const centerZoomOpts = {...opts};
+      delete centerZoomOpts.around;
+      return super._getTransitionProps(centerZoomOpts);
+    }
+    return super._getTransitionProps(opts);
+  }
 
   protected _onPanStart(event: MjolnirGestureEvent): boolean {
     this._panHistory = [];

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/* global document, localStorage */
+
 import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
 import {ResetViewWidget as _ResetViewWidget} from '@deck.gl/widgets';
@@ -22,12 +24,17 @@ const INITIAL_VIEW_STATE = {
   zoom: 1
 };
 
+const ZOOM_AROUND_STORAGE_KEY = 'deckgl-test-app-globe-zoom-around';
+
+let currentViewState = {...INITIAL_VIEW_STATE};
+let zoomAround = getInitialZoomAround();
+
 const GRATICULES = getGraticules(30);
 
 export const deck = new Deck({
   views: new GlobeView(),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {inertia: 500},
+  controller: {inertia: 500, zoomAround},
   parameters: {
     cull: true
   },
@@ -73,7 +80,7 @@ export const deck = new Deck({
       filled: true,
       pointRadiusMinPixels: 2,
       pointRadiusScale: 2000,
-      getRadius: f => 11 - f.properties.scalerank,
+      getPointRadius: f => 11 - f.properties.scalerank,
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
@@ -119,7 +126,6 @@ function getGraticules(resolution) {
 }
 
 // For automated test cases
-/* global document */
 document.body.style.margin = '0px';
 
 // Debug overlay
@@ -141,22 +147,120 @@ Object.assign(overlay.style, {
 });
 document.body.appendChild(overlay);
 
+const controls = document.createElement('div');
+controls.innerHTML = `
+  <div class="label">Zoom anchor</div>
+  <div class="button-row" role="group" aria-label="Zoom anchor">
+    <button type="button" data-zoom-around="center" aria-pressed="true">Center</button>
+    <button type="button" data-zoom-around="pointer" aria-pressed="false">Pointer</button>
+  </div>
+  <div class="button-row" role="group" aria-label="View presets">
+    <button type="button" data-view-preset="reset">Reset</button>
+    <button type="button" data-view-preset="high-zoom">Zoom 13</button>
+  </div>
+`;
+Object.assign(controls.style, {
+  position: 'fixed',
+  top: '10px',
+  right: '10px',
+  background: 'rgba(0,0,0,0.72)',
+  color: '#fff',
+  padding: '10px',
+  fontFamily: 'system-ui, sans-serif',
+  fontSize: '12px',
+  borderRadius: '4px',
+  zIndex: '1000',
+  lineHeight: '1.4'
+});
+for (const row of controls.querySelectorAll('.button-row')) {
+  Object.assign(row.style, {
+    display: 'flex',
+    gap: '6px',
+    marginTop: '6px'
+  });
+}
+for (const button of controls.querySelectorAll('button')) {
+  Object.assign(button.style, {
+    padding: '5px 8px',
+    border: '1px solid rgba(255,255,255,0.35)',
+    borderRadius: '3px',
+    background: 'rgba(255,255,255,0.12)',
+    color: '#fff',
+    cursor: 'pointer'
+  });
+}
+document.body.appendChild(controls);
+
 function updateOverlay(vs) {
   const {longitude = 0, latitude = 0, zoom = 0, bearing = 0, pitch = 0} = vs;
   overlay.textContent =
     `lat: ${latitude.toFixed(2)}  lng: ${longitude.toFixed(2)}\n` +
-    `zoom: ${zoom.toFixed(2)}  bearing: ${bearing.toFixed(2)}  pitch: ${pitch.toFixed(2)}`;
+    `zoom: ${zoom.toFixed(2)}  bearing: ${bearing.toFixed(2)}  pitch: ${pitch.toFixed(2)}\n` +
+    `zoomAround: ${zoomAround}`;
 }
 updateOverlay(INITIAL_VIEW_STATE);
+
+function setViewState(nextViewState) {
+  currentViewState = {...currentViewState, ...nextViewState};
+  deck.setProps({viewState: currentViewState});
+  updateOverlay(currentViewState);
+}
+
+function setZoomAround(nextZoomAround) {
+  if (!isZoomAroundMode(nextZoomAround)) {
+    return;
+  }
+  zoomAround = nextZoomAround;
+  deck.setProps({controller: {inertia: 500, zoomAround}});
+  try {
+    localStorage.setItem(ZOOM_AROUND_STORAGE_KEY, zoomAround);
+  } catch {
+    // Ignore storage failures in sandboxed test apps.
+  }
+  for (const button of controls.querySelectorAll('[data-zoom-around]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.zoomAround === zoomAround));
+    button.style.background =
+      button.dataset.zoomAround === zoomAround ? 'rgba(70,120,255,0.85)' : 'rgba(255,255,255,0.12)';
+  }
+  updateOverlay(currentViewState);
+}
+
+function isZoomAroundMode(value) {
+  return value === 'center' || value === 'pointer';
+}
+
+function getInitialZoomAround() {
+  try {
+    const storedZoomAround = localStorage.getItem(ZOOM_AROUND_STORAGE_KEY);
+    return isZoomAroundMode(storedZoomAround) ? storedZoomAround : 'center';
+  } catch {
+    return 'center';
+  }
+}
+
+controls.addEventListener('click', event => {
+  const button = event.target.closest('button');
+  if (!button) {
+    return;
+  }
+  if (button.dataset.zoomAround) {
+    setZoomAround(button.dataset.zoomAround);
+  } else if (button.dataset.viewPreset === 'reset') {
+    setViewState(INITIAL_VIEW_STATE);
+  } else if (button.dataset.viewPreset === 'high-zoom') {
+    setViewState({...currentViewState, zoom: 13});
+  }
+});
+setZoomAround(zoomAround);
 
 deck.setProps({
   widgets: [
     new _ResetViewWidget({
-      placement: 'top-right',
+      placement: 'bottom-right',
       initialViewState: {...INITIAL_VIEW_STATE, transitionDuration: 300}
     })
   ],
   onViewStateChange: ({viewState}) => {
-    updateOverlay(viewState);
+    setViewState(viewState);
   }
 });

@@ -43,6 +43,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `keyboard`: arrow keys to pan, +/- to zoom
 - `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
 - `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
+- `zoomAround`: default `'center'`. Set to `'pointer'` to keep the longitude/latitude under the cursor or touch anchor fixed during wheel, pinch, and double-click zoom. If the anchor is off the rendered globe, zoom falls back to center anchoring.
 
 ## Custom GlobeController
 

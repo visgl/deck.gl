@@ -8,6 +8,7 @@ import {
   OrbitController,
   FirstPersonController,
   _GlobeController as GlobeController,
+  _GlobeViewport as GlobeViewport,
   OrbitViewport,
   OrthographicController,
   Viewport
@@ -171,6 +172,36 @@ test('GlobeViewState', () => {
     'small bounds#latitude is adjusted'
   ).toBeTruthy();
   expect(viewportProps.zoom > 12, 'small bounds#zoom is adjusted').toBeTruthy();
+});
+
+test('GlobeViewState recovers pointer anchored zoom when zoomStart misses the globe', () => {
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+  const makeViewport = (props: any) => new GlobeViewport(props);
+
+  const pos: [number, number] = [500, 300];
+  const missedStartPos: [number, number] = [0, 0];
+  const startProps = {
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 2,
+    zoomAround: 'pointer',
+    makeViewport
+  };
+  const anchor = makeViewport(startProps).unproject(pos);
+  const zoomed = new GlobeViewState(startProps)
+    .zoomStart({pos: missedStartPos})
+    .zoom({pos, scale: 1.25})
+    .getViewportProps();
+  const anchorPosition = makeViewport(zoomed).project(anchor);
+
+  expect(
+    makeViewport(startProps).isPointOnGlobe(missedStartPos),
+    'test starts outside the globe surface'
+  ).toBe(false);
+  expect(anchorPosition[0], 'recovered pointer anchor keeps cursor x fixed').toBeCloseTo(pos[0]);
+  expect(anchorPosition[1], 'recovered pointer anchor keeps cursor y fixed').toBeCloseTo(pos[1]);
 });
 
 test('OrbitViewState', () => {

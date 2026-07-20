@@ -103,6 +103,165 @@ test('GlobeController', async () => {
   );
 });
 
+test('GlobeController supports pointer anchored zoom option', () => {
+  const makeController = (controller: true | {zoomAround: 'center' | 'pointer'}) =>
+    createTestController({
+      view: new GlobeView({controller}),
+      initialViewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 1
+      }
+    });
+
+  const makeWheelEvent = () => ({
+    type: 'wheel',
+    offsetCenter: {x: 75, y: 50},
+    delta: -10,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  });
+
+  const centerZoomController = makeController(true);
+  const pointerZoomController = makeController({zoomAround: 'pointer'});
+
+  centerZoomController.handleEvent(makeWheelEvent() as any);
+  pointerZoomController.handleEvent(makeWheelEvent() as any);
+
+  expect(centerZoomController.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+  expect(pointerZoomController.props.longitude, 'pointer zoom adjusts longitude').not.toBeCloseTo(
+    0
+  );
+});
+
+test('GlobeController applies updated zoomAround option', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'center'}}),
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    }
+  });
+
+  const wheelEvent = {
+    type: 'wheel',
+    offsetCenter: {x: 75, y: 50},
+    delta: -10,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  };
+
+  controller.handleEvent(wheelEvent as any);
+  expect(controller.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+
+  controller.setProps({...controller.props, zoomAround: 'pointer'});
+  controller.handleEvent(wheelEvent as any);
+  expect(controller.props.longitude, 'updated pointer zoom adjusts longitude').not.toBeCloseTo(0);
+});
+
+test('GlobeController keeps pointer anchored zoom after constrained pan', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 800,
+      height: 600,
+      longitude: 30,
+      latitude: 20,
+      zoom: 1
+    }
+  });
+
+  const makeGestureEvent = (type: string, x: number, y: number) => ({
+    type,
+    offsetCenter: {x, y},
+    delta: -10,
+    deltaX: 0,
+    deltaY: 0,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  });
+
+  controller.handleEvent(makeGestureEvent('panstart', 400, 300) as any);
+  controller.handleEvent(makeGestureEvent('panmove', 400, 0) as any);
+  controller.handleEvent(makeGestureEvent('panend', 400, 0) as any);
+
+  const longitudeAfterPan = controller.props.longitude;
+  const latitudeAfterPan = controller.props.latitude;
+  expect(latitudeAfterPan, 'pan reached the constrained latitude').toBeLessThan(-80);
+
+  controller.handleEvent(makeGestureEvent('wheel', 500, 300) as any);
+
+  expect(
+    controller.props.longitude,
+    'pointer zoom after constrained pan still adjusts longitude'
+  ).not.toBeCloseTo(longitudeAfterPan);
+  expect(
+    controller.props.latitude,
+    'pointer zoom after constrained pan still adjusts latitude'
+  ).not.toBeCloseTo(latitudeAfterPan);
+});
+
+test('GlobeController keeps pointer anchored zoom above GlobeViewport zoom range', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 800,
+      height: 600,
+      longitude: 0,
+      latitude: 0,
+      zoom: 13
+    }
+  });
+
+  const wheelEvent = {
+    type: 'wheel',
+    offsetCenter: {x: 500, y: 300},
+    delta: 10,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  };
+
+  expect(
+    () => controller.handleEvent(wheelEvent as any),
+    'pointer zoom falls back to WebMercator anchoring at high zoom'
+  ).not.toThrow();
+  expect(
+    Math.abs(controller.props.longitude),
+    'high zoom pointer zoom adjusts longitude'
+  ).toBeGreaterThan(1e-5);
+});
+
+test('GlobeController omits transition anchor when zoomAround is center', () => {
+  const centerZoomController = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'center'}}),
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    }
+  });
+
+  const pointerZoomController = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    }
+  });
+
+  const centerTransitionAround = (centerZoomController as any)._getTransitionProps({
+    around: [75, 50]
+  }).transitionInterpolator.opts.around;
+  const pointerTransitionAround = (pointerZoomController as any)._getTransitionProps({
+    around: [75, 50]
+  }).transitionInterpolator.opts.around;
+
+  expect(centerTransitionAround, 'center mode does not transition around pointer').toBeUndefined();
+  expect(pointerTransitionAround, 'pointer mode keeps transition anchor').toEqual([75, 50]);
+});
+
 test('OrbitController', async () => {
   await testController(OrbitView, {
     orbitAxis: 'Y',
