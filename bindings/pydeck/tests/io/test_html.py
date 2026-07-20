@@ -27,6 +27,8 @@ def test_rendering_is_not_broken():
     rendered = render_json_to_html(fixtures["minimal"], "fake_key")
     assert fixtures["minimal"] in rendered
     assert "fake_key" in rendered
+    assert "mapbox-gl.css" in rendered
+    assert "maplibre-gl" in rendered
 
 
 def test_display_html():
