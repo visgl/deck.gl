@@ -267,6 +267,11 @@ export default class GlobeController extends Controller<MapState> {
     return super._onPanStart(event);
   }
 
+  protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
+    this._panHistory = [];
+    return super._onMultiPanStart(event);
+  }
+
   protected _onPanMove(event: MjolnirGestureEvent): boolean {
     if (!this.dragPan) {
       return false;
