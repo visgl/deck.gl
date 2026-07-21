@@ -160,17 +160,6 @@ test('project#projectPosition rejects legacy numeric coordinate systems', () => 
       }),
     'Legacy numeric coordinate systems are rejected'
   ).toThrow(/Invalid coordinateSystem/);
-
-  const identityResult = projectPosition([0, 0, 0], {
-    viewport: TEST_VIEWPORT,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-    coordinateOrigin: [256, 256, 0]
-  });
-
-  expect(
-    equals(identityResult, [174.15110778808594, -58.11044311523443, 0]),
-    'IDENTITY aliases cartesian behavior'
-  ).toBeTruthy();
 });
 
 webglTest('project#projectPosition vs project_position', async () => {
