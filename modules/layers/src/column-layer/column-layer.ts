@@ -5,6 +5,7 @@
 import {
   Layer,
   project32,
+  color,
   picking,
   UNIT,
   LayerProps,
@@ -24,6 +25,7 @@ import {Geometry, Model} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
+import {getColumnLayerWGSL as source} from './column-layer.wgsl';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
@@ -231,14 +233,22 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const defines: Record<string, any> = {};
 
     const {flatShading} = this.props;
+    const isWebGPU = this.context.device.type === 'webgpu';
     if (flatShading) {
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
+      ...(isWebGPU ? {source: source(flatShading)} : {}),
       vs,
       fs,
       defines,
-      modules: [project32, flatShading ? phongMaterial : gouraudMaterial, picking, columnUniforms]
+      modules: [
+        project32,
+        ...(isWebGPU ? [color] : []),
+        flatShading ? phongMaterial : gouraudMaterial,
+        picking,
+        columnUniforms
+      ]
     });
   }
 
