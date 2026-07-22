@@ -1,4 +1,5 @@
 from .deck import Deck  # noqa
+from .extension import Extension  # noqa
 from .layer import Layer  # noqa
 from .light_settings import LightSettings  # noqa
 from .view import View  # noqa

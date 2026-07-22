@@ -766,6 +766,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Apply changed attributes to model */
+  // eslint-disable-next-line max-statements
   protected _setModelAttributes(
     model: Model,
     changedAttributes: {
@@ -777,12 +778,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
+    const attributeManager = this.getAttributeManager();
+    if (attributeManager?.hasBufferGroups()) {
+      this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
+      return;
+    }
+
     if (bufferLayoutChanged) {
       // AttributeManager is always defined when this method is called
-      const attributeManager = this.getAttributeManager()!;
-      model.setBufferLayout(attributeManager.getBufferLayouts(model));
+      const manager = this.getAttributeManager()!;
+      model.setBufferLayout(manager.getBufferLayouts(model));
       // All attributes must be reset after buffer layout change
-      changedAttributes = attributeManager.getAttributes();
+      changedAttributes = manager.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
@@ -809,6 +816,52 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
     }
     // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
+  }
+
+  /** Apply explicit WebGPU buffer groups while preserving legacy bindings for fallbacks. */
+  private _setGroupedModelAttributes(
+    model: Model,
+    attributeManager: AttributeManager,
+    changedAttributes: {[id: string]: Attribute}
+  ) {
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const bindings = attributeManager.getBufferGroupBindings(
+      changedAttributes,
+      model,
+      excludeAttributes
+    );
+
+    // Runtime state can make a declared group temporarily ineligible, e.g. during transitions.
+    // Refreshing the layout here lets the group safely fall back to standalone bindings.
+    model.setBufferLayout(bindings.bufferLayouts);
+
+    const attributeBuffers: Record<string, Buffer> = {...bindings.buffers};
+    const constantAttributes: Record<string, TypedArray> = {};
+    const attributes = attributeManager.getAttributes();
+
+    for (const name in attributes) {
+      if (excludeAttributes[name] || bindings.groupedAttributeIds.has(name)) {
+        continue;
+      }
+      const attribute = attributes[name];
+      const values = attribute.getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (attribute.settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
+          constantAttributes[attributeName] = value;
+        }
+      }
+    }
+
     model.setAttributes(attributeBuffers);
     model.setConstantAttributes(constantAttributes);
   }

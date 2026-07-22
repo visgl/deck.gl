@@ -3,7 +3,7 @@
   "description": "deck.gl core library",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.0-beta.2",
+  "version": "9.4.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -17,6 +17,10 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -55,7 +59,7 @@
     "@probe.gl/stats": "^4.1.1",
     "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
-    "mjolnir.js": "^3.0.1"
+    "mjolnir.js": "^3.1.0-beta.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
