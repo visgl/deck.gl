@@ -17,8 +17,10 @@ The base Controller class supports the following options:
 * `doubleClickZoom` (boolean) - enable zooming with double click. Default `true`. Adds ~300ms latency to click events due to the tap recognizer waiting to distinguish single clicks from double clicks. Set to `false` for immediate click response. Note: disabling also prevents `onClick` from firing with `tapCount: 2` on double-click.
 * `doubleClickDragZoom` (boolean) - enable zooming by double clicking/tapping and dragging. Default `false`. Enabling adds ~300ms latency to click events due to the tap recognizer waiting to distinguish single clicks from double-click-drags.
 * `touchZoom` (boolean) - enable zooming with multi-touch pinch. Default `true`
-* `multiTouchDrag` (string) - behavior of two-pointer translation gestures, either `pan` or `rotate`. In `pan` mode, two-finger swiping pans the viewport. In `rotate` mode, horizontal swiping changes bearing and vertical swiping changes pitch. A two-finger twist also changes bearing in `rotate` mode. By default, two-pointer translation is disabled.
-* `trackpadGesture` (boolean) - handle trackpad gestures as continuous touch-like gestures. Trackpad pinch follows `touchZoom`, while two-finger swiping follows `multiTouchDrag`. When enabled, `scrollZoom` handles mouse wheels only. Default `false`.
+* `multiTouchDrag` ('pan' | 'rotate' | null) - behavior of two-pointer translation gestures. In `pan` mode, two-finger swiping pans the viewport. In `rotate` mode, horizontal swiping changes bearing and vertical swiping changes pitch. Default `null` (disabled).
+* `trackpadGesture` (boolean) - treat trackpad similar to a touch screen instead of a mouse. Default `false`.
+  + When `true`, two-finger gesture on the trackpad emits multi-touch pinch or drag events.
+  + When `false`, two-finger gesture on the trackpad emits wheel scroll events.
 * `keyboard` (boolean | object) - enable interaction with keyboard. Default `true`. If an object is supplied, it may contain the following fields to customize the keyboard behavior:
     * `zoomSpeed` (number) - speed of zoom using +/- keys. Default `2`.
     * `moveSpeed` (number) - speed of movement using arrow keys, in pixels.
