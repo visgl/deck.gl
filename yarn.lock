@@ -7931,7 +7931,7 @@ mitt@^3.0.1:
 
 mjolnir.js@^3.1.0-beta.3:
   version "3.1.0-beta.3"
-  resolved "https://socket-firewall-registry.gateway.unified-30.internal.api.openai.org/npm/mjolnir.js/-/mjolnir.js-3.1.0-beta.3.tgz#3ce7450c944092d28e555175b0831dfcbcbba1dd"
+  resolved "https://registry.npmjs.org/mjolnir.js/-/mjolnir.js-3.1.0-beta.3.tgz#3ce7450c944092d28e555175b0831dfcbcbba1dd"
   integrity sha512-wOby2pVVA4Xp+b40xifY8WQBw0ohGkvd7O5TkDMKHn6ZjWuD5YHjwV4Vsvw3zqFSfLhLMLCNfJzzW1YGVUHXpQ==
 
 mkdirp@^1.0.3:
