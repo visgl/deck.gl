@@ -16,10 +16,27 @@ function getStoredDeviceType() {
     return undefined;
   }
 
-  const storedDeviceType = window.localStorage.getItem(DEVICE_TYPE_STORAGE_KEY);
-  return storedDeviceType === 'webgl' || storedDeviceType === 'webgpu'
-    ? storedDeviceType
-    : undefined;
+  try {
+    const storedDeviceType = window.localStorage.getItem(DEVICE_TYPE_STORAGE_KEY);
+    return storedDeviceType === 'webgl' || storedDeviceType === 'webgpu'
+      ? storedDeviceType
+      : undefined;
+  } catch {
+    // Some browser policies block localStorage access. Persistence is best-effort.
+    return undefined;
+  }
+}
+
+function storeDeviceType(deviceType) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(DEVICE_TYPE_STORAGE_KEY, deviceType);
+  } catch {
+    // Some browser policies block localStorage access. Persistence is best-effort.
+  }
 }
 
 export async function createDevice(type) {
@@ -52,9 +69,7 @@ export const useStore = create(set => ({
     } catch (error) {
       deviceError = error.message;
     }
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(DEVICE_TYPE_STORAGE_KEY, deviceType);
-    }
+    storeDeviceType(deviceType);
     return set(state => ({deviceType, deviceError, device}));
   },
 }));
