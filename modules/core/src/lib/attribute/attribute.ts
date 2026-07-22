@@ -49,6 +49,12 @@ export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
+  /**
+   * @internal
+   * WebGPU-only hint to publish compatible CPU-backed attributes through one shared vertex
+   * buffer. WebGL and unsupported grouped states retain the legacy standalone buffer path.
+   */
+  bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
