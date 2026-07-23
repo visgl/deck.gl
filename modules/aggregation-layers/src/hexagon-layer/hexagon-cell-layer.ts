@@ -6,6 +6,7 @@ import {Texture} from '@luma.gl/core';
 import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
+import source from './hexagon-cell-layer.wgsl';
 import vs from './hexagon-cell-layer-vertex.glsl';
 import {HexagonProps, hexagonUniforms} from './hexagon-layer-uniforms';
 import type {ScaleType} from '../common/types';
@@ -35,7 +36,7 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
   getShaders() {
     const shaders = super.getShaders();
     shaders.modules.push(hexagonUniforms);
-    return {...shaders, vs};
+    return this.context.device.type === 'webgpu' ? {...shaders, source, vs} : {...shaders, vs};
   }
 
   initializeState() {
