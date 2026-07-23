@@ -54,7 +54,7 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
-  /** CSS pixel sizes for each presentation canvas, keyed by canvas id. */
+  /** CSS pixel dimensions for each presentation canvas, keyed by canvas id. */
   canvasMetrics?: Record<string, {width: number; height: number}>;
   /** Event managers keyed by presentation canvas id. */
   eventManagers?: Record<string, EventManager>;
@@ -82,7 +82,6 @@ export default class ViewManager<ViewsT extends View[]> {
   };
   private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   private _canvasMetrics: Record<string, {width: number; height: number}>;
-  private _viewportsByCanvasId: {[canvasId: string]: Viewport[]};
 
   constructor(
     props: ViewManagerProps<ViewsT> & {
@@ -114,7 +113,6 @@ export default class ViewManager<ViewsT extends View[]> {
     };
     this._pickPosition = props.pickPosition;
     this._canvasMetrics = props.canvasMetrics || {};
-    this._viewportsByCanvasId = {};
 
     Object.seal(this);
 
@@ -169,7 +167,7 @@ export default class ViewManager<ViewsT extends View[]> {
    *   + not provided - return all viewports
    *   + {x, y} - only return viewports that contain this pixel
    *   + {x, y, width, height} - only return viewports that overlap with this rectangle
-   *   + {canvasId} - limit the search to the specified presentation canvas
+   *   + {canvasId} - only return viewports associated with this canvas
    */
   getViewports(rect?: {
     x: number;
@@ -178,13 +176,14 @@ export default class ViewManager<ViewsT extends View[]> {
     height?: number;
     canvasId?: string;
   }): Viewport[] {
-    const viewports = rect?.canvasId
-      ? this._viewportsByCanvasId[rect.canvasId] || []
-      : this._viewports;
     if (rect) {
-      return viewports.filter(viewport => viewport.containsPixel(rect));
+      return this._viewports.filter(
+        viewport =>
+          (!rect.canvasId || this.getCanvasId(viewport.id) === rect.canvasId) &&
+          viewport.containsPixel(rect)
+      );
     }
-    return viewports;
+    return this._viewports;
   }
 
   /** Get a map of all views */
@@ -344,17 +343,17 @@ export default class ViewManager<ViewsT extends View[]> {
     }
   }
 
-  private _setCanvasMetrics(canvasMetrics: Record<string, {width: number; height: number}>): void {
-    if (!deepEqual(canvasMetrics, this._canvasMetrics, 2)) {
-      this._canvasMetrics = canvasMetrics;
-      this.setNeedsUpdate('canvasMetrics changed');
-    }
-  }
-
   private _setEventManagers(eventManagers: Record<string, EventManager>): void {
     if (this._eventManagers !== eventManagers) {
       this._eventManagers = eventManagers;
       this.setNeedsUpdate('eventManagers changed');
+    }
+  }
+
+  private _setCanvasMetrics(canvasMetrics: Record<string, {width: number; height: number}>): void {
+    if (!deepEqual(canvasMetrics, this._canvasMetrics, 2)) {
+      this._canvasMetrics = canvasMetrics;
+      this.setNeedsUpdate('canvasMetrics changed');
     }
   }
 
@@ -363,21 +362,20 @@ export default class ViewManager<ViewsT extends View[]> {
     return view.props.canvasId || canvasIds[0] || DEFAULT_CANVAS_ID;
   }
 
+  private _getCanvasMetrics(view: View): {width: number; height: number} {
+    const canvasId = this._resolveCanvasId(view);
+    const metrics = this._canvasMetrics[canvasId];
+    return {
+      width: metrics?.width ?? this.width,
+      height: metrics?.height ?? this.height
+    };
+  }
+
   private _getViewEventManager(view: View): ViewEventManager {
     const canvasId = this.getCanvasId(view) || DEFAULT_CANVAS_ID;
     return {
       canvasId,
       eventManager: this._eventManagers[canvasId] || this._eventManager
-    };
-  }
-
-  private _getCanvasMetrics(view: View): {width: number; height: number; canvasId: string} {
-    const canvasId = this._resolveCanvasId(view);
-    const metrics = this._canvasMetrics[canvasId];
-    return {
-      canvasId,
-      width: metrics?.width ?? this.width,
-      height: metrics?.height ?? this.height
     };
   }
 
@@ -390,7 +388,6 @@ export default class ViewManager<ViewsT extends View[]> {
     this._viewports = [];
     this.controllers = {};
     this._viewEventManagers = {};
-    this._viewportsByCanvasId = {};
     return {oldControllers, oldViewEventManagers};
   }
 
@@ -475,7 +472,7 @@ export default class ViewManager<ViewsT extends View[]> {
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
-      const {canvasId, width, height} = this._getCanvasMetrics(view);
+      const {width, height} = this._getCanvasMetrics(view);
       const viewEventManager = this._getViewEventManager(view);
       this._viewEventManagers[view.id] = viewEventManager;
       const viewState = this.getViewState(view);
@@ -503,8 +500,6 @@ export default class ViewManager<ViewsT extends View[]> {
 
       if (viewport) {
         this._viewports.unshift(viewport);
-        this._viewportsByCanvasId[canvasId] ||= [];
-        this._viewportsByCanvasId[canvasId].unshift(viewport);
       }
     }
 

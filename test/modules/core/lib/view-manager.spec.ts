@@ -221,7 +221,6 @@ test('ViewManager#routes controllers by canvas event manager', () => {
   const leftEventManager = new EventManager(document.createElement('div'));
   const rightEventManager = new EventManager(document.createElement('div'));
   const replacementRightEventManager = new EventManager(document.createElement('div'));
-
   const leftView = new MapView({id: 'left', canvasId: 'left-canvas', controller: true});
   const rightView = new MapView({id: 'right', canvasId: 'right-canvas', controller: true});
 
@@ -287,7 +286,8 @@ test('ViewManager#routes controllers by canvas event manager', () => {
   replacementRightEventManager.destroy();
 });
 
-test('ViewManager#multi-canvas layout', () => {
+/* eslint-disable max-statements */
+test('ViewManager#layouts and filters views by canvas', () => {
   const leftEventManager = new EventManager(document.createElement('div'));
   const rightEventManager = new EventManager(document.createElement('div'));
   const leftView = new MapView({id: 'left', canvasId: 'left-canvas'});
@@ -317,6 +317,7 @@ test('ViewManager#multi-canvas layout', () => {
   expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'left-canvas'})).toEqual([
     viewManager.getViewport('left')
   ]);
+  expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'unknown-canvas'})).toEqual([]);
 
   const viewports = viewManager.getViewports();
   viewManager.setProps({
@@ -325,14 +326,44 @@ test('ViewManager#multi-canvas layout', () => {
       'right-canvas': {width: 120, height: 180}
     }
   });
-  expect(viewManager.getViewports()).toBe(viewports);
+  expect(viewManager.getViewports(), 'unchanged canvas dimensions preserve viewports').toBe(
+    viewports
+  );
+
+  viewManager.setProps({
+    canvasMetrics: {
+      'left-canvas': {width: 240, height: 140},
+      'right-canvas': {width: 120, height: 180}
+    }
+  });
+  expect(viewManager.getViewport('left')?.width, 'updated dimensions rebuild the viewport').toBe(
+    240
+  );
 
   viewManager.finalize();
   leftEventManager.destroy();
   rightEventManager.destroy();
 });
 
-/* eslint-disable max-statements */
+test('ViewManager#uses the first canvas for views without an explicit canvas id', () => {
+  const eventManager = new EventManager(document.createElement('div'));
+  const viewManager = new ViewManager({
+    views: [new MapView({id: 'main'})],
+    viewState: {longitude: -122, latitude: 38, zoom: 10},
+    width: 1,
+    height: 1,
+    canvasMetrics: {'first-canvas': {width: 160, height: 90}},
+    eventManager
+  });
+
+  expect(viewManager.getCanvasId('main')).toBe('first-canvas');
+  expect(viewManager.getViewport('main')?.width).toBe(160);
+  expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'first-canvas'})).toHaveLength(1);
+
+  viewManager.finalize();
+  eventManager.destroy();
+});
+
 test('ViewManager#zero-size', () => {
   const mainView = new MapView({id: 'main', controller: true});
 

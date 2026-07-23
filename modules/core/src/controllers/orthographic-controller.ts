@@ -8,6 +8,7 @@ import ViewState from './view-state';
 
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
+import type {MjolnirGestureEvent} from 'mjolnir.js';
 
 export type OrthographicStateProps = {
   width: number;
@@ -437,6 +438,10 @@ export default class OrthographicController extends Controller<OrthographicState
   setProps(props: ControllerProps & OrthographicStateProps) {
     Object.assign(props, normalizeZoom(props));
     super.setProps(props);
+  }
+
+  protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
+    return this.multiTouchDrag === 'pan' && super._onMultiPanStart(event);
   }
 
   _onPanRotate() {
