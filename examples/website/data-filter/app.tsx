@@ -15,6 +15,7 @@ import RangeInput from './range-input';
 
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 import type {DataFilterExtensionProps} from '@deck.gl/extensions';
+import type {Device} from '@luma.gl/core';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -90,10 +91,12 @@ function getTooltip({object}: PickingInfo<Earthquake>) {
 
 export default function App({
   data,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device
 }: {
   data?: Earthquake[];
   mapStyle?: string;
+  device?: Device;
 }) {
   const [filter, setFilter] = useState<[start: number, end: number] | null>(null);
 
@@ -132,6 +135,7 @@ export default function App({
   return (
     <>
       <DeckGL
+        device={device}
         views={MAP_VIEW}
         layers={layers}
         initialViewState={INITIAL_VIEW_STATE}

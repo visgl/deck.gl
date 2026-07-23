@@ -5,6 +5,19 @@
 import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct HexagonUniforms {
+  colorDomain: vec4<f32>,
+  elevationDomain: vec4<f32>,
+  elevationRange: vec2<f32>,
+  originCommon: vec2<f32>,
+};
+
+@group(0) @binding(auto) var<uniform> hexagon: HexagonUniforms;
+@group(0) @binding(auto) var colorRange: texture_2d<f32>;
+@group(0) @binding(auto) var colorRangeSampler: sampler;
+`;
+
 const uniformBlock = /* glsl */ `\
 layout(std140) uniform hexagonUniforms {
   vec4 colorDomain;
@@ -24,6 +37,7 @@ export type HexagonProps = {
 
 export const hexagonUniforms = {
   name: 'hexagon',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   uniformTypes: {
     colorDomain: 'vec4<f32>',

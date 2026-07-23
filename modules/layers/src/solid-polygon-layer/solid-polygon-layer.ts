@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, gouraudMaterial} from '@deck.gl/core';
+import {Layer, color, project32, picking, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
+import type {BufferLayout} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -12,6 +13,7 @@ import {solidPolygonUniforms, SolidPolygonProps} from './solid-polygon-layer-uni
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
+import {getSolidPolygonShaderWGSL} from './solid-polygon-layer.wgsl';
 
 import type {
   LayerProps,
@@ -133,13 +135,21 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   };
 
   getShaders(type) {
+    const ringWindingOrderCW = !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1;
+    const isWebGPU = this.context.device.type === 'webgpu';
+
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
       fs,
-      defines: {
-        RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
-      },
-      modules: [project32, gouraudMaterial, picking, solidPolygonUniforms]
+      source: isWebGPU ? getSolidPolygonShaderWGSL(type, Boolean(ringWindingOrderCW)) : undefined,
+      ...(isWebGPU
+        ? {}
+        : {
+            defines: {
+              RING_WINDING_ORDER_CW: ringWindingOrderCW
+            }
+          }),
+      modules: [project32, color, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 
@@ -182,6 +192,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     const attributeManager = this.getAttributeManager()!;
     const noAlloc = true;
+    const isWebGPU = this.context.device.type === 'webgpu';
 
     /* eslint-disable max-len */
     attributeManager.add({
@@ -202,15 +213,34 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
-        shaderAttributes: {
-          nextVertexPositions: {
-            vertexOffset: 1
-          }
-        }
+        ...(isWebGPU
+          ? {}
+          : {
+              shaderAttributes: {
+                nextVertexPositions: {
+                  vertexOffset: 1
+                }
+              }
+            })
       },
+      ...(isWebGPU
+        ? {
+            nextVertexPositions: {
+              size: 3,
+              type: 'float64',
+              stepMode: 'dynamic',
+              fp64: this.use64bitPositions(),
+              transition: ATTRIBUTE_TRANSITION,
+              accessor: 'getPolygon',
+              // eslint-disable-next-line @typescript-eslint/unbound-method
+              update: this.calculateNextPositions,
+              noAlloc
+            }
+          }
+        : {}),
       instanceVertexValid: {
         size: 1,
-        type: 'uint16',
+        ...(isWebGPU ? {} : {type: 'uint16'}),
         stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
@@ -377,8 +407,21 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     if (filled) {
       const shaders = this.getShaders('top');
-      shaders.defines.NON_INSTANCED_MODEL = 1;
-      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
+      shaders.defines = {...shaders.defines, NON_INSTANCED_MODEL: 1};
+      let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
+      if (this.context.device.type === 'webgpu') {
+        bufferLayout = filterBufferLayout(
+          bufferLayout,
+          new Set([
+            'vertexPositions',
+            'vertexPositions64Low',
+            'elevations',
+            'fillColors',
+            'lineColors',
+            'rowIndexes'
+          ])
+        );
+      }
 
       topModel = new Model(this.context.device, {
         ...shaders,
@@ -392,7 +435,23 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       });
     }
     if (extruded) {
-      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+      let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+      if (this.context.device.type === 'webgpu') {
+        bufferLayout = filterBufferLayout(
+          bufferLayout,
+          new Set([
+            'vertexPositions',
+            'vertexPositions64Low',
+            'nextVertexPositions',
+            'nextVertexPositions64Low',
+            'instanceVertexValid',
+            'elevations',
+            'fillColors',
+            'lineColors',
+            'rowIndexes'
+          ])
+        );
+      }
 
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
@@ -456,6 +515,55 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   protected calculateVertexValid(attribute) {
-    attribute.value = this.state.polygonTesselator.get('vertexValid');
+    const vertexValid = this.state.polygonTesselator.get('vertexValid');
+    attribute.value =
+      this.context.device.type === 'webgpu' && vertexValid
+        ? Float32Array.from(vertexValid)
+        : vertexValid;
   }
+
+  protected calculateNextPositions(attribute) {
+    const {polygonTesselator} = this.state;
+    const positions = polygonTesselator.get('positions');
+    attribute.startIndices = polygonTesselator.vertexStarts;
+
+    if (!positions) {
+      attribute.value = positions;
+      return;
+    }
+
+    const ArrayType = positions.constructor as typeof Float32Array;
+    const nextPositions = new ArrayType(positions.length);
+
+    for (let i = 0; i < positions.length; i += 3) {
+      const nextIndex = i + 3 < positions.length ? i + 3 : i;
+      nextPositions[i] = positions[nextIndex];
+      nextPositions[i + 1] = positions[nextIndex + 1];
+      nextPositions[i + 2] = positions[nextIndex + 2];
+    }
+
+    attribute.value = nextPositions;
+  }
+}
+
+function filterBufferLayout(
+  bufferLayout: BufferLayout[],
+  allowedAttributes: Set<string>
+): BufferLayout[] {
+  const filteredLayouts: BufferLayout[] = [];
+
+  for (const layout of bufferLayout) {
+    if (layout.attributes) {
+      const attributes = layout.attributes.filter(attribute =>
+        allowedAttributes.has(attribute.attribute)
+      );
+      if (attributes.length) {
+        filteredLayouts.push({...layout, attributes});
+      }
+    } else if (allowedAttributes.has(layout.name)) {
+      filteredLayouts.push(layout);
+    }
+  }
+
+  return filteredLayouts;
 }

@@ -36,7 +36,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | Module | Layer | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/layers` | `ArcLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `BitmapLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `BitmapLayer` | ✅ | 🚧 |
 | `@deck.gl/layers` | `IconLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `LineLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ |
@@ -44,22 +44,23 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/layers` | `ColumnLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PathLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `PolygonLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `TextLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ❌ |
-| `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ❌ |
-| `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ❌ |
-| `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `TextLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ |
+| `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ |
+| `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ |
+| `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ |
 | `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ❌ |
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ❌ |
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
-| `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
+| `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `A5Layer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `TileLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ |
+| `@deck.gl/geo-layers` | `_WMSLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ❌ |
@@ -75,20 +76,22 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `RasterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
+On WebGPU, the supported aggregation layers currently use their CPU aggregation fallback before rendering their WGSL-backed sublayers. Their WebGL GPU aggregation paths are unchanged.
+
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. They all remain WebGL-only today because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU.
+The table below covers the public extensions in `@deck.gl/extensions`. They remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. On WebGPU, deck.gl ignores extensions instead of invoking their lifecycle hooks or adding their shaders and attributes. Layers that otherwise support WebGPU can still render, but the extension behavior is absent.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
-| `@deck.gl/extensions` | `BrushingExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `Fp64Extension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `ClipExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `BrushingExtension` | ✅ | ignored |
+| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ignored |
+| `@deck.gl/extensions` | `Fp64Extension` | ✅ | ignored |
+| `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ignored |
+| `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ignored |
+| `@deck.gl/extensions` | `ClipExtension` | ✅ | ignored |
+| `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ignored |
+| `@deck.gl/extensions` | `MaskExtension` | ✅ | ignored |
 
 ## Effects
 
@@ -105,7 +108,7 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
 | Picking | ❌ | `Deck` currently skips picking on WebGPU, including hover and click picking paths. |
-| Shader hooks / layer extensions | ❌ | deck.gl's WGSL shader hook list is currently empty, so injection-based extensions are not yet portable. |
+| Shader hooks / layer extensions | ❌ | deck.gl's WGSL shader hook list is currently empty, so WebGPU ignores layer extensions. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
 | Constant attributes | 🚧 | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |

@@ -11,6 +11,7 @@ import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 // Data provided by the OpenSky Network, https://opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
@@ -110,10 +111,12 @@ export function useInterval(callback: () => unknown, delay: number) {
 }
 
 export default function App({
+  device,
   sizeScale = 25,
   onDataLoad,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   sizeScale?: number;
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
@@ -178,6 +181,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={[layer]}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

@@ -10,6 +10,7 @@ import {ContourLayer} from '@deck.gl/aggregation-layers';
 
 import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/contour/covid-by-county.json'; // eslint-disable-line
@@ -55,13 +56,15 @@ export default function App({
   week = 35,
   contours = BANDS,
   cellSize = 60000,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  device
 }: {
   data?: string | CaseReport[];
   week?: number;
   contours?: ContourLayerProps['contours'];
   cellSize?: number;
   mapStyle?: string;
+  device?: Device;
 }) {
   const layers = [
     new ContourLayer<CaseReport>({
@@ -101,6 +104,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       layers={layers}

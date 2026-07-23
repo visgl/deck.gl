@@ -471,7 +471,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       disableWarnings: true,
       modules: this.context.defaultShaderModules
     });
-    for (const extension of this.props.extensions) {
+    for (const extension of this._getExtensions()) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
     return shaders;
@@ -505,7 +505,9 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const needsPickingBuffer =
         Number.isInteger(props.highlightedObjectIndex) ||
         Boolean(props.pickable) ||
-        props.extensions.some(extension => extension.getNeedsPickingBuffer.call(this, extension));
+        this._getExtensions().some(extension =>
+          extension.getNeedsPickingBuffer.call(this, extension)
+        );
 
       // Only generate picking buffer if needed
       if (hasPickingBuffer !== needsPickingBuffer) {
@@ -1003,7 +1005,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this.initializeState(this.context);
 
     // Initialize extensions
-    for (const extension of this.props.extensions) {
+    for (const extension of this._getExtensions()) {
       extension.initializeState.call(this, this.context, extension);
     }
     // End subclass lifecycle methods
@@ -1084,7 +1086,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         }
       }
       // Execute extension updates
-      for (const extension of this.props.extensions) {
+      for (const extension of this._getExtensions()) {
         extension.updateState.call(this, updateParams, extension);
       }
 
@@ -1114,7 +1116,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Call subclass lifecycle method
     this.finalizeState(this.context);
     // Finalize extensions
-    for (const extension of this.props.extensions) {
+    for (const extension of this._getExtensions()) {
       extension.finalizeState.call(this, this.context, extension);
     }
   }
@@ -1166,7 +1168,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
-          for (const extension of this.props.extensions) {
+          for (const extension of this._getExtensions()) {
             extension.draw.call(this, opts, extension);
           }
 
@@ -1179,7 +1181,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
         // extensions
-        for (const extension of this.props.extensions) {
+        for (const extension of this._getExtensions()) {
           extension.draw.call(this, opts, extension);
         }
 
@@ -1411,7 +1413,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     redraw = redraw || attributeManagerNeedsRedraw;
 
     if (redraw) {
-      for (const extension of this.props.extensions) {
+      for (const extension of this._getExtensions()) {
         extension.onNeedsRedraw.call(this, extension);
       }
     }
@@ -1425,6 +1427,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // @ts-ignore TS2531 this method can only be called internally with internalState assigned
     this._diffProps(this.props, this.internalState.getOldProps());
     this.setNeedsUpdate();
+  }
+
+  private _getExtensions() {
+    return this.context.device.type === 'webgpu' ? EMPTY_ARRAY : this.props.extensions;
   }
 }
 

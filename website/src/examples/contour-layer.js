@@ -13,6 +13,8 @@ const MS_PER_WEEK = 1000 * 60 * 60 * 24 * 7;
 class ContourDemo extends Component {
   static title = 'COVID-19 Cases in the United States';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/covid-by-county.txt`,
     worker: '/workers/contour-data-decoder.js'
@@ -126,6 +128,8 @@ class ContourDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
+        device={this.props.device}
         data={data}
         contours={style === 'Isoband' ? BANDS : LINES}
         cellSize={cellSize}

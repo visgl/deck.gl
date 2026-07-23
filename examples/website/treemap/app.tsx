@@ -18,6 +18,8 @@ import {
 } from 'd3-hierarchy';
 import {format} from 'd3-format';
 
+import type {Device} from '@luma.gl/core';
+
 // Sample data
 const DATA_URL =
   'https://raw.githubusercontent.com/d3/d3-hierarchy/refs/heads/main/test/data/flare.json';
@@ -50,12 +52,15 @@ const INITIAL_VIEW_STATE = {
 const FONT_FAMILY = 'Arial, Helvetica, sans-serif';
 const HEADER_SIZE = 20;
 const GAP_SIZE = 1;
+const VIEW_BACKGROUND_COLOR = [15, 23, 42, 255];
 
 export default function App({
+  device,
   data,
   width = 800,
   height = 800
 }: {
+  device?: Device;
   data?: HierarchyNode<Datum>;
   width?: number;
   height?: number;
@@ -162,8 +167,9 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
-      views={new OrthographicView()}
+      views={new OrthographicView({clearColor: VIEW_BACKGROUND_COLOR})}
       initialViewState={INITIAL_VIEW_STATE}
       controller={{
         maxBounds: boundingBox
