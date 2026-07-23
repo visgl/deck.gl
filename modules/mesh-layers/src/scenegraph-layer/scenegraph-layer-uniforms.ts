@@ -14,7 +14,7 @@ struct ScenegraphUniforms {
   composeModelMatrix: f32,
 };
 
-@group(0) @binding(20)
+@group(0) @binding(auto)
 var<uniform> scenegraph: ScenegraphUniforms;
 `;
 
