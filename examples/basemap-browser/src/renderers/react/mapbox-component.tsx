@@ -33,6 +33,7 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
     multiView,
     views,
     layerFilter,
+    useDevicePixels,
     onViewStateChange
   } = config;
 
@@ -42,10 +43,17 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapboxMap
-        key={`mapbox-${interleaved}-${multiView}`}
+        key={`mapbox-${interleaved}-${multiView}-${useDevicePixels}`}
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={mapInitialViewState}
+        pixelRatio={
+          typeof useDevicePixels === 'number'
+            ? useDevicePixels
+            : useDevicePixels === false
+              ? 1
+              : undefined
+        }
         onMove={e => {
           onViewStateChange?.({
             latitude: e.viewState.latitude,
@@ -59,6 +67,7 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
         <MapboxDeckOverlay
           layers={layers}
           interleaved={interleaved}
+          useDevicePixels={useDevicePixels}
           views={multiView ? views : undefined}
           layerFilter={multiView ? layerFilter : undefined}
           initialViewState={multiView ? initialViewState : undefined}
