@@ -10,7 +10,7 @@ import App from 'website-examples/scenegraph/app';
 import {makeExample} from '../components';
 
 class ScenegraphDemo extends Component {
-  static title = 'Realtime Flight Tracker';
+  static title = 'Flight Tracker';
 
   static code = `${GITHUB_TREE}/examples/website/scenegraph`;
 
@@ -26,7 +26,7 @@ class ScenegraphDemo extends Component {
     return (
       <div>
         <p>
-          Data source:
+          Flight data:
           <a href="https://opensky-network.org">The OpenSky Network</a>
         </p>
         <div className="layout">
