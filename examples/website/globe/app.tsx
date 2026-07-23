@@ -127,7 +127,6 @@ export default function App({device, data}: {device?: Device; data?: DailyFlight
   return (
     <>
       <DeckGL
-        device={device}
         views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}

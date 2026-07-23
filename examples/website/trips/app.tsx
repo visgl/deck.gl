@@ -13,7 +13,6 @@ import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from 'popmotion';
 
 import type {Position, Color, Material, MapViewState} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL = {
@@ -94,7 +93,6 @@ export default function App({
   initialViewState = INITIAL_VIEW_STATE,
   mapStyle = MAP_STYLE,
   theme = DEFAULT_THEME,
-  device,
   loopLength = 1800, // unit corresponds to the timestamp in source data
   animationSpeed = 1
 }: {
@@ -107,7 +105,6 @@ export default function App({
   initialViewState?: MapViewState;
   mapStyle?: string;
   theme?: Theme;
-  device?: Device;
 }) {
   const [time, setTime] = useState(0);
 
@@ -160,7 +157,6 @@ export default function App({
 
   return (
     <DeckGL
-      device={device}
       layers={layers}
       effects={theme.effects}
       initialViewState={initialViewState}
