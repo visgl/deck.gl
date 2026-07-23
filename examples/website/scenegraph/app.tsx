@@ -82,6 +82,9 @@ function normalizeData({time, states}: {time: number; states: Aircraft[]}): Airc
   });
 }
 
+// https://github.com/visgl/deck.gl/pull/10465 updated the live OpenSky URL,
+// but the endpoint still rejects cross-origin browser requests. Start with this
+// bundled snapshot so the demo can render immediately and keep it as fallback.
 const DATA = normalizeData(sampleData as {time: number; states: Aircraft[]});
 
 async function fetchData(signal: AbortSignal): Promise<Aircraft[]> {

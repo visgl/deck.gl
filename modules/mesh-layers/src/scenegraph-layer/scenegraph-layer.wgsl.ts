@@ -14,7 +14,6 @@ struct VertexInputs {
   @location(6) instancePositions: vec3<f32>,
   @location(7) instancePositions64Low: vec3<f32>,
   @location(8) instanceColors: vec4<f32>,
-  @location(9) instancePickingColors: vec3<f32>,
   @location(10) instanceModelMatrixCol0: vec3<f32>,
   @location(11) instanceModelMatrixCol1: vec3<f32>,
   @location(12) instanceModelMatrixCol2: vec3<f32>,
@@ -31,11 +30,14 @@ struct FragmentInputs {
 };
 
 @vertex
-fn vertexMain(inputs: VertexInputs) -> FragmentInputs {
+fn vertexMain(
+  inputs: VertexInputs,
+  @builtin(instance_index) instanceIndex: u32
+) -> FragmentInputs {
   var outputs: FragmentInputs;
 
   geometry.worldPosition = inputs.instancePositions;
-  geometry.pickingColor = inputs.instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
 
   var vertexPosition = inputs.positions;
   var texCoord = vec2<f32>(0.0, 0.0);
@@ -112,7 +114,7 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 #endif
 #endif
 
-  fragColor.a *= color.opacity;
+  fragColor.a *= layer.opacity;
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;
