@@ -36,7 +36,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | Module | Layer | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/layers` | `ArcLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `BitmapLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `BitmapLayer` | ✅ | 🚧 |
 | `@deck.gl/layers` | `IconLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `LineLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ |
@@ -59,7 +59,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `TileLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ❌ |
