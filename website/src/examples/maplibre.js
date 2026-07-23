@@ -31,7 +31,7 @@ class MapLibreDemo extends React.Component {
         </p>
         <p>
           Data source: <a href="https://zenodo.org/record/3974209">Crowdsourced air traffic data</a>{' '}
-          from <a href="http://www.opensky-network.org"> The OpenSky Network</a>
+          from <a href="https://opensky-network.org"> The OpenSky Network</a>
         </p>
       </div>
     );

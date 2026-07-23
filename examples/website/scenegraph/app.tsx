@@ -12,7 +12,7 @@ import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 
-// Data provided by the OpenSky Network, http://www.opensky-network.org
+// Data provided by the OpenSky Network, https://opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
 // For local debugging
 // const DATA_URL = './all.json';
