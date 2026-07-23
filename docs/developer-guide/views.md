@@ -766,7 +766,30 @@ function App({carPose}: {
 </Tabs>
 
 
-Some layers, including `TileLayer`, `MVTLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching and/or aggregation) on viewport change. Therefore, it is generally *NOT* recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+Some layers, including `TileLayer`, `MVTLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching and/or aggregation) on viewport change. Therefore, it is generally *NOT* recommended to render them into multiple views.
+
+For 2D tiled content that can share one payload cache, the experimental [`_SharedTile2DLayer`](../api-reference/geo-layers/shared-tile-2d-layer.md) and [`_SharedTileset2D`](../api-reference/geo-layers/shared-tileset-2d.md) support one shared tileset feeding multiple viewports:
+
+```ts
+import {
+  _SharedTile2DLayer as SharedTile2DLayer,
+  _SharedTileset2D as SharedTileset2D,
+  sharedTile2DDeckAdapter
+} from '@deck.gl/geo-layers';
+
+const tileset = new SharedTileset2D({
+  adapter: sharedTile2DDeckAdapter,
+  getTileData: ({index, signal}) => fetchTile(index, signal)
+});
+
+const layer = new SharedTile2DLayer({
+  id: 'shared-tiles',
+  data: tileset,
+  renderSubLayers
+});
+```
+
+For tiled layers that do not use that experimental shared path, including `MVTLayer`, create one layer instance for each view and limit their rendering with `layerFilter`:
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">

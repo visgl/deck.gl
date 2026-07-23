@@ -10,6 +10,7 @@ export {default as GreatCircleLayer} from './great-circle-layer/great-circle-lay
 export {default as S2Layer} from './s2-layer/s2-layer';
 export {default as QuadkeyLayer} from './quadkey-layer/quadkey-layer';
 export {default as TileLayer} from './tile-layer/tile-layer';
+export {SharedTile2DLayer as _SharedTile2DLayer} from './shared-tile-2d-layer/index';
 export {default as TripsLayer} from './trips-layer/trips-layer';
 export {default as H3ClusterLayer} from './h3-layers/h3-cluster-layer';
 export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
@@ -28,6 +29,10 @@ export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
 export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';
 export type {S2LayerProps} from './s2-layer/s2-layer';
 export type {TileLayerProps, TileLayerPickingInfo} from './tile-layer/tile-layer';
+export type {
+  SharedTile2DLayerPickingInfo,
+  SharedTile2DLayerProps
+} from './shared-tile-2d-layer/index';
 export type {TripsLayerProps} from './trips-layer/trips-layer';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
@@ -41,7 +46,18 @@ export type {GeohashLayerProps} from './geohash-layer/geohash-layer';
 export type {GeoBoundingBox, NonGeoBoundingBox} from './tileset-2d/index';
 export type {TileLoadProps as _TileLoadProps} from './tileset-2d/index';
 export type {Tileset2DProps as _Tileset2DProps} from './tileset-2d/index';
+export type {
+  SharedRefinementStrategy,
+  SharedTileset2DAdapter,
+  SharedTileset2DBaseProps,
+  SharedTileset2DProps,
+  SharedTileset2DTileContext,
+  SharedTileset2DTraversalContext
+} from './shared-tileset-2d/index';
 
 export {getURLFromTemplate as _getURLFromTemplate} from './tileset-2d/index';
 export {Tileset2D as _Tileset2D} from './tileset-2d/index';
 export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
+export {SharedTileset2D as _SharedTileset2D} from './shared-tileset-2d/index';
+export {SharedTile2DHeader as _SharedTile2DHeader} from './shared-tileset-2d/index';
+export {sharedTile2DDeckAdapter} from './shared-tile-2d-layer/index';

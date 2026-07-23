@@ -2,13 +2,7 @@
   {
     "type": "category",
     "label": "Overview",
-    "items": [
-      "README",
-      "whats-new",
-      "upgrade-guide",
-      "contributing",
-      "faq"
-    ]
+    "items": ["README", "whats-new", "upgrade-guide", "contributing", "faq"]
   },
   {
     "type": "category",
@@ -120,6 +114,8 @@
           "api-reference/layers/scatterplot-layer",
           "api-reference/mesh-layers/scenegraph-layer",
           "api-reference/aggregation-layers/screen-grid-layer",
+          "api-reference/geo-layers/shared-tile-2d-layer",
+          "api-reference/geo-layers/shared-tileset-2d",
           "api-reference/mesh-layers/simple-mesh-layer",
           "api-reference/layers/solid-polygon-layer",
           "api-reference/geo-layers/terrain-layer",
@@ -144,9 +140,7 @@
       {
         "type": "category",
         "label": "Scripting Interface",
-        "items": [
-          "api-reference/core/deckgl"
-        ]
+        "items": ["api-reference/core/deckgl"]
       },
       {
         "type": "category",
@@ -203,10 +197,7 @@
       {
         "type": "category",
         "label": "Effects",
-        "items": [
-          "api-reference/core/lighting-effect",
-          "api-reference/core/post-process-effect"
-        ]
+        "items": ["api-reference/core/lighting-effect", "api-reference/core/post-process-effect"]
       },
       {
         "type": "category",
@@ -289,10 +280,7 @@
       {
         "type": "category",
         "label": "@deck.gl/mapbox",
-        "items": [
-          "api-reference/mapbox/overview",
-          "api-reference/mapbox/mapbox-overlay"
-        ]
+        "items": ["api-reference/mapbox/overview", "api-reference/mapbox/mapbox-overlay"]
       },
       {
         "type": "category",
