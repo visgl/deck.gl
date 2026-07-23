@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
-Release date: July 2026
+Target Release Date: July 2026
 
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
@@ -26,7 +26,21 @@ deck.gl v9.4 brings additional view and controller improvements on top of the su
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 
-#### Views
+### Multi-canvas rendering
+
+deck.gl can now render a single `Deck` instance into multiple HTML canvases.
+
+- [`Deck._canvases`](./api-reference/core/deck.md#_canvases) creates one presentation target per canvas while keeping one shared layer stack and one shared offscreen device context.
+- Views can opt into a specific target with [`View.canvasId`](./api-reference/core/view.md#canvasid). Controllers, picking, and layout resolution are all scoped to that canvas.
+- Unused canvases are now explicitly cleared when views move or are removed, avoiding stale frames during dynamic layouts.
+
+There is a new standalone TypeScript multi-canvas cities example in the repository that shows four independently navigable city maps with shared scatterplot interactions and view-bound widgets: [test/apps/multi-canvas-cities](https://github.com/visgl/deck.gl/tree/master/test/apps/multi-canvas-cities).
+
+#### View Layout
+
+- A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
+
+#### View
 
 - [Views](./api-reference/core/view.md#parameters) now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with:
 
@@ -38,13 +52,9 @@ new GlobeView({
 });
 ```
 
-#### Controllers
+#### Controller
 
 - All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
-
-#### View Layout
-
-- A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
 
 ### @deck.gl/geo-layers
 
@@ -81,7 +91,6 @@ See the [pydeck gallery](https://deckgl.readthedocs.io/en/latest/) for a runnabl
 Release date: April 13, 2026
 
 ### Widgets
-
 
 <table style={{border: 0}} align="center">
   <tbody>

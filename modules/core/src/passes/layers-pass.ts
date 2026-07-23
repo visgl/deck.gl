@@ -40,6 +40,7 @@ export type LayersPassRenderOptions = {
   target?: Framebuffer | null;
   /** Canvas context that provides framebuffer dimensions and pixel conversion. */
   canvasContext?: CanvasContext | PresentationContext;
+  renderPassId?: string;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -111,6 +112,7 @@ export default class LayersPass extends Pass {
     }
 
     const renderPass = this.device.beginRenderPass({
+      id: options.renderPassId || options.pass,
       framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,

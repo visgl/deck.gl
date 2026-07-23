@@ -46,7 +46,20 @@ The following properties are used to initialize a `Deck` instance. Any custom va
 
 #### `canvas` (HTMLCanvasElement | String, optional) {#canvas}
 
-The canvas to render into. Can be either a HTMLCanvasElement or the element id. Will be auto-created if not supplied.
+The canvas to render into. It can be either a HTMLCanvasElement or the element id, and will be auto-created if not supplied.
+
+#### `_canvases` ((HTMLCanvasElement | String)[], optional) {#_canvases}
+
+Experimental: presentation canvases for multi-canvas mode. Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
+
+Unlike the other initialization settings in this section, `_canvases` is maintained when updated with `setProps()`. Deck diffs the array and creates, reuses, or destroys presentation targets as needed.
+
+Notes:
+
+* Do not supply `canvas` and `_canvases` together.
+* `_canvases` is not compatible with `gl`.
+* In multi-canvas mode, each canvas gets its own event manager and controller routing.
+* `_canvases: []` keeps the offscreen-backed device path active but does not create any presentation targets.
 
 #### `device` ([Device](https://luma.gl/docs/api-reference/core/device)) {#device}
 
@@ -616,6 +629,7 @@ Returns:
 Notes:
 
 * See the [canvas](#canvas) prop for more information.
+* In multi-canvas mode, this returns the first configured presentation canvas.
 
 #### `getViews` {#getviews}
 
@@ -658,6 +672,7 @@ Parameters:
   + `y` (number) - top of the bounding box in pixels
   + `width` (number, optional) - width of the bounding box in pixels
   + `height` (number, optional) - height of the bounding box in pixels
+  + `canvasId` (string, optional) - limit the search to viewports rendered into the given presentation canvas
 
 Returns:
 
@@ -695,13 +710,14 @@ Parameters:
 Get the closest pickable and visible object at the given screen coordinate.
 
 ```ts
-await deck.pickObjectAsync({x, y, radius, layerIds, unproject3D})
+await deck.pickObjectAsync({x, y, canvasId, radius, layerIds, unproject3D})
 ```
 
 Parameters:
 
 * `x` (number) - x position in pixels
 * `y` (number) - y position in pixels
+* `canvasId` (string, optional) - query within the specified presentation canvas in multi-canvas mode
 * `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 * `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
@@ -716,7 +732,7 @@ Returns:
 Get all pickable and visible objects within a bounding box.
 
 ```ts
-await deck.pickObjectsAsync({x, y, width, height, layerIds, maxObjects})
+await deck.pickObjectsAsync({x, y, width, height, canvasId, layerIds, maxObjects})
 ```
 
 Parameters:
@@ -725,6 +741,7 @@ Parameters:
 * `y` (number) - top of the bouding box in pixels
 * `width` (number, optional) - width of the bouding box in pixels. Default `1`.
 * `height` (number, optional) - height of the bouding box in pixels. Default `1`.
+* `canvasId` (string, optional) - query within the specified presentation canvas in multi-canvas mode
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 * `maxObjects` (number, optional) - if specified, limits the number of objects that can be returned.
 
@@ -744,13 +761,14 @@ Notes:
 Get the closest pickable and visible object at the given screen coordinate.
 
 ```js
-deck.pickObject({x, y, radius, layerIds, unproject3D})
+deck.pickObject({x, y, canvasId, radius, layerIds, unproject3D})
 ```
 
 Parameters:
 
 * `x` (number) - x position in pixels
 * `y` (number) - y position in pixels
+* `canvasId` (string, optional) - query within the specified presentation canvas in multi-canvas mode
 * `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 * `unproject3D` (boolean, optional) - if `true`, `info.coordinate` will be a 3D point by unprojecting the `x, y` screen coordinates onto the picked geometry. Default `false`.
@@ -767,13 +785,14 @@ Returns:
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
 ```js
-deck.pickMultipleObjects({x, y, radius, layerIds, depth, unproject3D})
+deck.pickMultipleObjects({x, y, canvasId, radius, layerIds, depth, unproject3D})
 ```
 
 Parameters:
 
 * `x` (number) - x position in pixels
 * `y` (number) - y position in pixels
+* `canvasId` (string, optional) - query within the specified presentation canvas in multi-canvas mode
 * `radius` (number, optional) - radius of tolerance in pixels. Default `0`.
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 * `depth` - Specifies the max number of objects to return. Default `10`. For layers without explicit picking index buffers, only the default depth of 10 unique objects per layer is guaranteed; higher custom depths may return duplicate results for these layers.
@@ -796,7 +815,7 @@ Notes:
 Get all pickable and visible objects within a bounding box.
 
 ```js
-deck.pickObjects({x, y, width, height, layerIds, maxObjects})
+deck.pickObjects({x, y, width, height, canvasId, layerIds, maxObjects})
 ```
 
 Parameters:
@@ -805,6 +824,7 @@ Parameters:
 * `y` (number) - top of the bouding box in pixels
 * `width` (number, optional) - width of the bouding box in pixels. Default `1`.
 * `height` (number, optional) - height of the bouding box in pixels. Default `1`.
+* `canvasId` (string, optional) - query within the specified presentation canvas in multi-canvas mode
 * `layerIds` (string[], optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
 * `maxObjects` (number, optional) - if specified, limits the number of objects that can be returned.
 

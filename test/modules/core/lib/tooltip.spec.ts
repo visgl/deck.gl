@@ -139,3 +139,27 @@ test('TooltipWidget#onViewportChange', () => {
 
   widgetManager.finalize();
 });
+
+test('TooltipWidget#onHover offsets for multi-canvas', () => {
+  const container = document.createElement('div');
+
+  const deck = {
+    props: {getTooltip: () => 'Test tooltip'},
+    getCanvasBounds: () => ({x: 100, y: 200, width: 0, height: 0})
+  };
+
+  const widgetManager = new WidgetManager({deck, parentElement: container});
+  const tooltip = new TooltipWidget();
+  widgetManager.addDefault(tooltip);
+
+  tooltip.onHover({
+    object: {elevationValue: 10},
+    viewport: new WebMercatorViewport({id: 'right-view'}),
+    x: 5,
+    y: 7
+  });
+
+  expect(tooltip.rootElement?.style.transform).toBe('translate(105px, 207px)');
+
+  widgetManager.finalize();
+});

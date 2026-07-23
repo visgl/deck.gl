@@ -66,6 +66,8 @@ export default class DeckRenderer {
     effects: Effect[];
     target?: Framebuffer | null;
     canvasContext?: CanvasContext | PresentationContext;
+    shaderModuleProps?: any;
+    renderPassId?: string;
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;

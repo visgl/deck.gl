@@ -42,7 +42,7 @@ export const DEFAULT_CANVAS_ID = 'default-canvas';
 
 type ViewEventManager = {
   canvasId: string;
-  eventManager: EventManager;
+  eventManager: EventManager | null;
 };
 
 /** ViewManager props directly supplied by the user */
@@ -51,7 +51,7 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
-  pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
   /** CSS pixel dimensions for each presentation canvas, keyed by canvas id. */
@@ -73,21 +73,21 @@ export default class ViewManager<ViewsT extends View[]> {
   private _isUpdating: boolean;
   private _needsRedraw: string | false;
   private _needsUpdate: string | false;
-  private _eventManager: EventManager;
+  private _eventManager: EventManager | null;
   private _eventManagers: Record<string, EventManager>;
   private _viewEventManagers: {[viewId: string]: ViewEventManager};
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
-  private _pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   private _canvasMetrics: Record<string, {width: number; height: number}>;
 
   constructor(
     props: ViewManagerProps<ViewsT> & {
       // Initial options
       timeline: Timeline;
-      eventManager: EventManager;
+      eventManager: EventManager | null;
     }
   ) {
     // List of view descriptors, gets re-evaluated when width/height changes
@@ -425,7 +425,7 @@ export default class ViewManager<ViewsT extends View[]> {
           width: this._getCanvasMetrics(view).width,
           height: this._getCanvasMetrics(view).height
         }),
-      pickPosition: this._pickPosition
+      pickPosition: (x, y) => this._pickPosition?.(x, y, view.id)
     });
 
     return controller;

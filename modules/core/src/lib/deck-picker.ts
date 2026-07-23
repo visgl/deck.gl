@@ -25,6 +25,7 @@ import type Viewport from '../viewports/viewport';
 export type PickByPointOptions = {
   x: number;
   y: number;
+  canvasId?: string;
   radius?: number;
   depth?: number;
   mode?: string;
@@ -34,6 +35,7 @@ export type PickByPointOptions = {
 export type PickByRectOptions = {
   x: number;
   y: number;
+  canvasId?: string;
   width?: number;
   height?: number;
   mode?: string;
