@@ -26,11 +26,11 @@ const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
   depthWriteEnabled: true,
   depthCompare: 'less-equal',
   blendColorOperation: 'add',
-  blendColorSrcFactor: 'src-alpha',
-  blendColorDstFactor: 'one',
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one-minus-src-alpha',
   blendAlphaOperation: 'add',
-  blendAlphaSrcFactor: 'one-minus-dst-alpha',
-  blendAlphaDstFactor: 'one'
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha'
 };
 
 export type LayersPassRenderOptions = {
