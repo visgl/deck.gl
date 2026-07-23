@@ -13,6 +13,7 @@ import sampleData from './all.json';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 // Live data provided by the OpenSky Network, https://opensky-network.org.
 // The API may reject browser requests from other origins, so the bundled
@@ -107,10 +108,12 @@ function getTooltip({object}: PickingInfo<Aircraft>) {
 }
 
 export default function App({
+  device,
   sizeScale = 25,
   onDataLoad,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   sizeScale?: number;
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
@@ -168,6 +171,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={[layer]}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
