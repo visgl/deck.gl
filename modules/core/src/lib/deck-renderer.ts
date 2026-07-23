@@ -177,6 +177,7 @@ export default class DeckRenderer {
 
   private _postRender(effects: Effect[], opts: LayersPassRenderOptions) {
     const {renderBuffers} = this;
+    const target = opts.target ?? opts.canvasContext?.getCurrentFramebuffer() ?? opts.target;
     const params: PostRenderOptions = {
       ...opts,
       inputBuffer: renderBuffers[0],
@@ -186,7 +187,7 @@ export default class DeckRenderer {
       if (effect.postRender) {
         // If not the last post processing effect, unset the target so that
         // it only renders between the swap buffers
-        params.target = effect.id === this.lastPostProcessEffect ? opts.target : undefined;
+        params.target = effect.id === this.lastPostProcessEffect ? target : undefined;
         const buffer = effect.postRender(params);
         // Buffer cannot be null if target is unset
         params.inputBuffer = buffer!;
