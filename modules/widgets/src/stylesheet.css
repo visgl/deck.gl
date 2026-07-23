@@ -3,6 +3,12 @@
   box-sizing: border-box;
 }
 
+/* When a widget is inside a basemap control container (e.g. MapboxOverlay with viewId: 'mapbox'),
+   the map already provides spacing between controls, so remove the widget's own margin. */
+.deck-widget-ctrl .deck-widget {
+  margin: 0;
+}
+
 /* Common button container styles */
 .deck-widget-button,
 .deck-widget-button-group {

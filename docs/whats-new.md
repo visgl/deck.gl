@@ -156,6 +156,7 @@ Class-specific improvements:
 - Multi-view setups now work consistently across overlaid and interleaved modes.
 - Basemap now works correctly when canvas has zero dimensions.
 - Heatmap layer now blends correctly in interleaved mode.
+- deck.gl widgets can now be positioned alongside native map controls (e.g. `NavigationControl`) by setting `viewId: 'mapbox'` on the widget. See [Using Widgets](./api-reference/mapbox/mapbox-overlay.md#using-widgets) for details.
 
 ### @deck.gl/google-maps
 
