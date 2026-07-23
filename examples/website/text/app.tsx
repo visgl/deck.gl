@@ -18,6 +18,7 @@ import {load} from '@loaders.gl/core';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 import type {CollisionFilterExtensionProps} from '@deck.gl/extensions';
+import type {Device} from '@luma.gl/core';
 
 // Sample data
 const DATA_URL =
@@ -100,7 +101,8 @@ export default function App({
       sizeMaxPixels: sizeMaxPixels * 2,
       sizeMinPixels: sizeMinPixels * 2
     },
-    extensions: [new CollisionFilterExtension()]
+    // CollisionFilterExtension has not been ported to WebGPU yet.
+    extensions: device?.type === 'webgpu' ? [] : [new CollisionFilterExtension()]
   });
 
   return (
