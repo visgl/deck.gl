@@ -8,6 +8,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {log} from '@deck.gl/core';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
@@ -126,7 +127,15 @@ export default function App({
   const [, setVersion] = useState(0); // Re-render on data change.
 
   const sync = useCallback(async () => {
-    let newData = await fetchData(abortController.signal);
+    let newData: Aircraft[];
+    try {
+      newData = await fetchData(abortController.signal);
+    } catch (error) {
+      if (!abortController.signal.aborted) {
+        log.warn('Scenegraph example could not load live OpenSky data', error)();
+      }
+      return;
+    }
 
     // In order to keep the animation smooth we need to always return the same
     // object at a given index. This function will discard new objects
@@ -143,7 +152,7 @@ export default function App({
     if (onDataLoad) {
       onDataLoad(newData.length);
     }
-  }, []);
+  }, [abortController, onDataLoad]);
 
   useInterval(sync, REFRESH_TIME_SECONDS * 1000);
   useEffect(() => () => abortController.abort(), []);
