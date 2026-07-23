@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {Layer, project32, color, picking, UNIT} from '@deck.gl/core';
+import {BufferLayout, Parameters} from '@luma.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
+import source from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -135,7 +137,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, pathUniforms]}); // 'project' module added by default.
+    const isWebGPU = this.context.device.type === 'webgpu';
+
+    return super.getShaders({
+      vs,
+      fs,
+      ...(isWebGPU ? {source} : {}),
+      modules: [project32, ...(isWebGPU ? [color] : []), picking, pathUniforms]
+    }); // 'project' module added by default.
   }
 
   get wrapLongitude(): boolean {
@@ -143,6 +152,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   getBounds(): [number[], number[]] | null {
+    if (this.context.device.type === 'webgpu') {
+      return null;
+    }
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 
@@ -150,60 +162,123 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
-    attributeManager!.addInstanced({
-      vertexPositions: {
-        size: 3,
-        // Start filling buffer from 1 vertex in
-        vertexOffset: 1,
-        type: 'float64',
-        fp64: this.use64bitPositions(),
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPath',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        update: this.calculatePositions,
-        noAlloc,
-        shaderAttributes: {
-          instanceLeftPositions: {
-            vertexOffset: 0
+    if (this.context.device.type === 'webgpu') {
+      attributeManager!.addInstanced({
+        instancePositions: {
+          size: 12,
+          type: 'float32',
+          // WebGPU keeps the fp64 path by uploading float32 high parts and reconstructing
+          // with the matching `instancePositions64Low` residuals in WGSL.
+          transition: false,
+          accessor: 'getPath',
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateInstancePositions,
+          shaderAttributes: {
+            instanceLeftPositions: {size: 3, elementOffset: 0},
+            instanceStartPositions: {size: 3, elementOffset: 3},
+            instanceEndPositions: {size: 3, elementOffset: 6},
+            instanceRightPositions: {size: 3, elementOffset: 9}
           },
-          instanceStartPositions: {
-            vertexOffset: 1
+          noAlloc
+        },
+        instancePositions64Low: {
+          size: 12,
+          type: 'float32',
+          // This is the low-part companion to `instancePositions`, not a plain-fp32 downgrade.
+          transition: false,
+          accessor: 'getPath',
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateInstancePositions64Low,
+          shaderAttributes: {
+            instanceLeftPositions64Low: {size: 3, elementOffset: 0},
+            instanceStartPositions64Low: {size: 3, elementOffset: 3},
+            instanceEndPositions64Low: {size: 3, elementOffset: 6},
+            instanceRightPositions64Low: {size: 3, elementOffset: 9}
           },
-          instanceEndPositions: {
-            vertexOffset: 2
-          },
-          instanceRightPositions: {
-            vertexOffset: 3
-          }
+          noAlloc
+        },
+        instanceTypes: {
+          size: 1,
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateSegmentTypes,
+          noAlloc
+        },
+        instanceStrokeWidths: {
+          size: 1,
+          accessor: 'getWidth',
+          transition: false,
+          defaultValue: 1
+        },
+        instanceColors: {
+          size: this.props.colorFormat.length,
+          type: 'unorm8',
+          accessor: 'getColor',
+          transition: false,
+          defaultValue: DEFAULT_COLOR
+        },
+        /** Source path row for each generated segment/joint instance. */
+        rowIndexes: {
+          size: 1,
+          type: 'uint32',
+          accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
         }
-      },
-      instanceTypes: {
-        size: 1,
-        type: 'uint8',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        update: this.calculateSegmentTypes,
-        noAlloc
-      },
-      instanceStrokeWidths: {
-        size: 1,
-        accessor: 'getWidth',
-        transition: ATTRIBUTE_TRANSITION,
-        defaultValue: 1
-      },
-      instanceColors: {
-        size: this.props.colorFormat.length,
-        type: 'unorm8',
-        accessor: 'getColor',
-        transition: ATTRIBUTE_TRANSITION,
-        defaultValue: DEFAULT_COLOR
-      },
-      /** Source path row for each generated segment/joint instance. */
-      rowIndexes: {
-        size: 1,
-        type: 'uint32',
-        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
-      }
-    });
+      });
+    } else {
+      attributeManager!.addInstanced({
+        vertexPositions: {
+          size: 3,
+          // Start filling buffer from 1 vertex in
+          vertexOffset: 1,
+          type: 'float64',
+          fp64: this.use64bitPositions(),
+          transition: ATTRIBUTE_TRANSITION,
+          accessor: 'getPath',
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculatePositions,
+          noAlloc,
+          shaderAttributes: {
+            instanceLeftPositions: {
+              vertexOffset: 0
+            },
+            instanceStartPositions: {
+              vertexOffset: 1
+            },
+            instanceEndPositions: {
+              vertexOffset: 2
+            },
+            instanceRightPositions: {
+              vertexOffset: 3
+            }
+          }
+        },
+        instanceTypes: {
+          size: 1,
+          type: 'uint8',
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateSegmentTypes,
+          noAlloc
+        },
+        instanceStrokeWidths: {
+          size: 1,
+          accessor: 'getWidth',
+          transition: ATTRIBUTE_TRANSITION,
+          defaultValue: 1
+        },
+        instanceColors: {
+          size: this.props.colorFormat.length,
+          type: 'unorm8',
+          accessor: 'getColor',
+          transition: ATTRIBUTE_TRANSITION,
+          defaultValue: DEFAULT_COLOR
+        },
+        /** Source path row for each generated segment/joint instance. */
+        rowIndexes: {
+          size: 1,
+          type: 'uint32',
+          accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
+        }
+      });
+    }
     /* eslint-enable max-len */
 
     this.setState({
@@ -317,6 +392,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   protected _getModel(): Model {
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies Parameters)
+        : undefined;
+
     /*
      *       _
      *        "-_ 1                   3                       5
@@ -364,7 +447,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout: this._getModelBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-list',
         attributes: {
@@ -372,6 +455,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           positions: {value: new Float32Array(SEGMENT_POSITIONS), size: 2}
         }
       }),
+      parameters,
       isInstanced: true
     });
   }
@@ -383,10 +467,71 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     attribute.value = pathTesselator.get('positions');
   }
 
+  protected calculateInstancePositions(attribute) {
+    this._calculateInterleavedInstancePositions(attribute, false);
+  }
+
+  protected calculateInstancePositions64Low(attribute) {
+    this._calculateInterleavedInstancePositions(attribute, true);
+  }
+
   protected calculateSegmentTypes(attribute) {
     const {pathTesselator} = this.state;
 
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = pathTesselator.get('segmentTypes');
+  }
+
+  protected _calculateInterleavedInstancePositions(attribute, lowPart: boolean) {
+    const {pathTesselator} = this.state;
+    const value = pathTesselator.get('positions');
+
+    if (!value) {
+      attribute.value = null;
+      return;
+    }
+
+    const numInstances = pathTesselator.instanceCount;
+    const result = new Float32Array(numInstances * 12);
+    // WebGL reads a padded neighbor window using `vertexOffset: 1`; this materializes
+    // the same [-1, 0, 1, 2] access pattern explicitly for the WebGPU layout.
+    const neighborOffsets = [-1, 0, 1, 2];
+
+    for (let i = 0; i < numInstances; i++) {
+      const targetIndex = i * 12;
+      for (let vertexOffset = 0; vertexOffset < 4; vertexOffset++) {
+        const sourceVertex = i + neighborOffsets[vertexOffset];
+        const targetOffset = targetIndex + vertexOffset * 3;
+        for (let j = 0; j < 3; j++) {
+          const position =
+            sourceVertex >= 0 && sourceVertex < numInstances ? value[sourceVertex * 3 + j] : 0;
+          result[targetOffset + j] = lowPart ? position - Math.fround(position) : position;
+        }
+      }
+    }
+
+    attribute.startIndices = pathTesselator.vertexStarts;
+    attribute.value = result;
+  }
+
+  protected _getModelBufferLayouts(): BufferLayout[] {
+    const bufferLayouts = this.getAttributeManager()!.getBufferLayouts();
+
+    if (this.context.device.type === 'webgpu') {
+      return bufferLayouts;
+    }
+
+    return bufferLayouts.map(layout =>
+      layout.name === 'vertexPositions'
+        ? {
+            ...layout,
+            attributes: (layout.attributes || []).filter(
+              attribute =>
+                attribute.attribute !== 'vertexPositions' &&
+                attribute.attribute !== 'vertexPositions64Low'
+            )
+          }
+        : layout
+    );
   }
 }

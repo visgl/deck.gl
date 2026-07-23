@@ -36,7 +36,9 @@ export default class PathTesselator extends Tesselator<
           initialize: true,
           type: opts.fp64 ? Float64Array : Float32Array
         },
-        segmentTypes: {size: 1, type: Uint8ClampedArray}
+        // WebGPU currently consumes `instanceTypes` as f32; using Float32Array keeps the
+        // upload and vertex layout 4-byte aligned without introducing a padded uint8 path.
+        segmentTypes: {size: 1, type: Float32Array}
       }
     });
   }
