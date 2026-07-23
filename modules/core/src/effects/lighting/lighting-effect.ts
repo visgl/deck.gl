@@ -59,7 +59,7 @@ export default class LightingEffect implements Effect {
     this.context = context;
     const {device, deck} = context;
 
-    if (this.shadow && this._supportsShadowModule() && !this.dummyShadowMap) {
+    if (this.shadow && !this.dummyShadowMap) {
       this._createShadowPasses(device);
 
       deck._addDefaultShaderModule(shadow);
@@ -105,7 +105,7 @@ export default class LightingEffect implements Effect {
   }
 
   preRender({layers, layerFilter, viewports, onViewportActive, views}: PreRenderOptions) {
-    if (!this.shadow || !this._supportsShadowModule()) return;
+    if (!this.shadow) return;
 
     // create light matrix every frame to make sure always updated from light source
     this.shadowMatrices = this._calculateMatrices();
@@ -130,7 +130,7 @@ export default class LightingEffect implements Effect {
   }
 
   getShaderModuleProps(layer: Layer, otherShaderModuleProps: Record<string, any>) {
-    const shadowProps = this.shadow && this._supportsShadowModule()
+    const shadowProps = this.shadow
       ? ({
           project: otherShaderModuleProps.project,
           shadowMaps: this.shadowPasses.map(shadowPass => shadowPass.getShadowMap()),
@@ -164,14 +164,8 @@ export default class LightingEffect implements Effect {
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
       this.dummyShadowMap = null;
-      if (this._supportsShadowModule()) {
-        context.deck._removeDefaultShaderModule(shadow);
-      }
+      context.deck._removeDefaultShaderModule(shadow);
     }
-  }
-
-  private _supportsShadowModule(): boolean {
-    return this.context?.device.type !== 'webgpu';
   }
 
   private _calculateMatrices(): Matrix4[] {

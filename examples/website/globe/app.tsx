@@ -24,7 +24,6 @@ import {CSVLoader} from '@loaders.gl/csv';
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
 import type {GlobeViewState} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
 
 // Data source
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe';
@@ -70,7 +69,7 @@ type DailyFlights = {
   flights: Flight[];
 };
 
-export default function App({data, device}: {data?: DailyFlights[]; device?: Device}) {
+export default function App({data}: {data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
@@ -127,7 +126,6 @@ export default function App({data, device}: {data?: DailyFlights[]; device?: Dev
   return (
     <>
       <DeckGL
-        device={device}
         views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}

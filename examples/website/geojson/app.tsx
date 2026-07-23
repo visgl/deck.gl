@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
@@ -13,7 +13,6 @@ import {scaleThreshold} from 'd3-scale';
 import type {Color, Position, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 import type {Feature, Geometry} from 'geojson';
-import type {DeckGLRef} from '@deck.gl/react';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -99,32 +98,10 @@ export default function App({
   mapStyle?: string;
   device?: Device;
 }) {
-  const deckRef = useRef<DeckGLRef>(null);
-  const isWebGPU = device?.type === 'webgpu';
-  const parameters = isWebGPU
-    ? {
-        blendColorOperation: 'add' as const,
-        // WebGPU shaders output premultiplied color, so use `one` here to match
-        // the legacy WebGL visual intensity instead of multiplying alpha twice.
-        blendColorSrcFactor: 'one' as const,
-        blendColorDstFactor: 'one' as const,
-        blendAlphaOperation: 'add' as const,
-        blendAlphaSrcFactor: 'one-minus-dst-alpha' as const,
-        blendAlphaDstFactor: 'one' as const
-      }
-    : undefined;
   const [effects] = useState(() => {
     const lightingEffect = new LightingEffect({ambientLight, dirLight});
     lightingEffect.shadowColor = [0, 0, 0, 0.5];
     return [lightingEffect];
-  });
-
-  useEffect(() => {
-    (window as typeof window & {__deckProps?: unknown}).__deckProps = {device};
-  }, [device]);
-
-  useEffect(() => {
-    (window as typeof window & {__deck?: unknown}).__deck = deckRef.current?.deck;
   });
 
   const layers = [
@@ -153,14 +130,12 @@ export default function App({
 
   return (
     <DeckGL
-      ref={deckRef}
       device={device}
       layers={layers}
       effects={effects}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       getTooltip={getTooltip}
-      parameters={parameters}
     >
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
