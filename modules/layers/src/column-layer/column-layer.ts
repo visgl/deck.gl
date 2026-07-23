@@ -21,7 +21,7 @@ import {
   gouraudMaterial,
   phongMaterial
 } from '@deck.gl/core';
-import {Geometry, Model} from '@luma.gl/engine';
+import {Geometry, Model, makeInterleavedGeometry} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
@@ -373,27 +373,42 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
+    const positionAttribute = geometry.attributes.POSITION!;
+    const normalAttribute = geometry.attributes.NORMAL!;
 
     this.setState({
-      fillVertexCount: geometry.attributes.POSITION.value.length / 3
+      fillVertexCount: positionAttribute.value.length / 3
     });
 
-    const fillModel = this.state.fillModel!;
     const wireframeModel = this.state.wireframeModel!;
 
     // The fill model renders a triangle-strip with degenerate triangles and does not
     // use indices. Give it a separate Geometry without `indices` so that later buffer
     // layout rebuilds (e.g. binary-data transitions, HMR) cannot re-attach the
     // wireframe indices via `_setGeometryAttributes`.
-    const {POSITION, NORMAL} = geometry.attributes;
-    const fillGeometry = new Geometry({
-      topology: 'triangle-strip',
-      attributes: {POSITION, NORMAL}
-    });
-    fillModel.setGeometry(fillGeometry);
+    this._setFillGeometry(
+      new Geometry({
+        topology: 'triangle-strip',
+        attributes: {POSITION: positionAttribute, NORMAL: normalAttribute}
+      })
+    );
 
-    wireframeModel.setGeometry(geometry);
+    const wireframeGeometry = makeInterleavedGeometry(geometry);
+    wireframeModel.setBufferLayout([
+      ...wireframeModel.bufferLayout,
+      ...wireframeGeometry.bufferLayout
+    ]);
+    wireframeModel.setGeometry(wireframeGeometry);
     wireframeModel.setTopology('line-list');
+  }
+
+  protected _setFillGeometry(geometry: Geometry): void {
+    const fillGeometry = makeInterleavedGeometry(geometry);
+    const fillModel = this.state.fillModel!;
+    // Register the interleaved layout before attaching geometry so that luma.gl
+    // creates the vertex array with the correct WebGL attribute accessors.
+    fillModel.setBufferLayout([...fillModel.bufferLayout, ...fillGeometry.bufferLayout]);
+    fillModel.setGeometry(fillGeometry);
   }
 
   draw({uniforms}) {

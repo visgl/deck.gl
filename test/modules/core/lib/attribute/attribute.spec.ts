@@ -25,6 +25,18 @@ test('Attribute#constructor', () => {
   expect(() => new Attribute(device, {size: 1}), 'Attribute missing update option').toThrow();
 });
 
+test('Attribute#getBufferLayout uses WebGL-only three-component integer formats', () => {
+  const attribute = new Attribute(device, {
+    size: 3,
+    type: 'unorm16',
+    accessor: 'a'
+  });
+
+  expect(attribute.getBufferLayout().attributes[0].format).toBe('unorm16x3-webgl');
+
+  attribute.delete();
+});
+
 test('Attribute#delete', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
   attribute.setData(new Float32Array(4));
