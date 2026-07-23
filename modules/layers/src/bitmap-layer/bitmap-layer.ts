@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  color as colorModule,
   project32,
   picking,
   CoordinateSystem,
@@ -23,6 +24,7 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 import createMesh from './create-mesh';
 
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
+import source from './bitmap-layer.wgsl';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
@@ -129,7 +131,16 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
+    const isWebGPU = this.context.device.type === 'webgpu';
+
+    return super.getShaders({
+      ...(isWebGPU && {source}),
+      vs,
+      fs,
+      modules: isWebGPU
+        ? [colorModule, project32, picking, bitmapUniforms]
+        : [project32, picking, bitmapUniforms]
+    });
   }
 
   initializeState() {
@@ -256,10 +267,18 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
        |       |
       0,1 --- 1,1
     */
+    const bufferLayout =
+      this.context.device.type === 'webgpu'
+        ? this.getAttributeManager()!
+            .getBufferLayouts({isInstanced: false})
+            // WebGPU index buffers are bound separately from vertex buffer layouts.
+            .filter(layout => layout.name !== 'indices')
+        : this.getAttributeManager()!.getBufferLayouts();
+
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout,
       topology: 'triangle-list',
       isInstanced: false
     });
