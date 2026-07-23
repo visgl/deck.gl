@@ -9,6 +9,35 @@ import {webgl2Adapter} from '@luma.gl/webgl';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 
 const cachedDevice = {};
+const DEVICE_TYPE_STORAGE_KEY = 'deck-device-type';
+
+function getStoredDeviceType() {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  try {
+    const storedDeviceType = window.localStorage.getItem(DEVICE_TYPE_STORAGE_KEY);
+    return storedDeviceType === 'webgl' || storedDeviceType === 'webgpu'
+      ? storedDeviceType
+      : undefined;
+  } catch {
+    // Some browser policies block localStorage access. Persistence is best-effort.
+    return undefined;
+  }
+}
+
+function storeDeviceType(deviceType) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(DEVICE_TYPE_STORAGE_KEY, deviceType);
+  } catch {
+    // Some browser policies block localStorage access. Persistence is best-effort.
+  }
+}
 
 export async function createDevice(type) {
   cachedDevice[type] =
@@ -40,6 +69,12 @@ export const useStore = create(set => ({
     } catch (error) {
       deviceError = error.message;
     }
+    storeDeviceType(deviceType);
     return set(state => ({deviceType, deviceError, device}));
   },
 }));
+
+const storedDeviceType = getStoredDeviceType();
+if (storedDeviceType) {
+  void useStore.getState().setDeviceType(storedDeviceType);
+}
