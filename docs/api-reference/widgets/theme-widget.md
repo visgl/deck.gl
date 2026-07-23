@@ -139,11 +139,23 @@ Callback when the user clicks the theme toggle button.
 
 Tooltip message displayed while hovering a mouse over the widget when light mode is available.
 
+#### `lightModeTooltip` (string | HTMLElement | false, optional) {#lightmodetooltip}
+
+* Default: value of `lightModeLabel`
+
+Custom tooltip content when in light mode. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
 * Default: `'Dark Mode'`
 
 Tooltip message displayed while hovering a mouse over the widget when dark mode is available.
+
+#### `darkModeTooltip` (string | HTMLElement | false, optional) {#darkmodetooltip}
+
+* Default: value of `darkModeLabel`
+
+Custom tooltip content when in dark mode. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 ## Styles
 

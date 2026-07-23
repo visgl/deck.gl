@@ -139,6 +139,12 @@ The `GimbalWidgetProps` accepts the generic [`WidgetProps`](../core/widget.md#wi
 
 Tooltip message displayed while hovering a mouse over the widget.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `strokeWidth` (number, optional) {#strokewidth}
 
 * Default: `1.5`

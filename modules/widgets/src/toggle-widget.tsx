@@ -20,8 +20,12 @@ export type ToggleWidgetProps = WidgetProps & {
   onIcon?: string;
   /** Tooltip label */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement | false;
   /** Tooltip label when it is checked */
   onLabel?: string;
+  /** Custom tooltip content when checked. Overrides onLabel for tooltip display. */
+  onTooltip?: string | HTMLElement | false;
   /** Icon color, a CSS Color string */
   color?: string;
   /** Icon color when it is checked, a CSS Color string */
@@ -43,7 +47,9 @@ export class ToggleWidget extends Widget<ToggleWidgetProps> {
     icon: '',
     onIcon: undefined!,
     label: '',
+    tooltip: undefined!,
     onLabel: undefined!,
+    onTooltip: undefined!,
     color: '',
     onColor: undefined!,
     onChange: undefined!
@@ -71,9 +77,11 @@ export class ToggleWidget extends Widget<ToggleWidgetProps> {
       style,
       icon,
       label,
+      tooltip,
       color,
       onIcon = icon,
       onLabel = label,
+      onTooltip = tooltip,
       onColor = color
     } = this.props;
     const on = this.checked;
@@ -86,6 +94,7 @@ export class ToggleWidget extends Widget<ToggleWidgetProps> {
         style={style as JSX.CSSProperties}
         icon={on ? onIcon : icon}
         label={on ? onLabel : label}
+        tooltip={on ? onTooltip : tooltip}
         color={on ? onColor : color}
         onClick={this._toggle}
       />,

@@ -15,6 +15,8 @@ export type LoadingWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message when loading */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement | false;
   /**
    * Callback when the loading state changes.
    * Called when layers transition between loading and loaded states.
@@ -32,6 +34,7 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
     placement: 'top-left',
     viewId: null,
     label: 'Loading layer data',
+    tooltip: undefined!,
     onLoadingChange: () => {}
   };
 
@@ -57,6 +60,7 @@ export class LoadingWidget extends Widget<LoadingWidgetProps> {
         <IconButton
           className="deck-widget-spinner"
           label={this.props.label}
+          tooltip={this.props.tooltip}
           onClick={this.handleClick.bind(this)}
         />
       ),

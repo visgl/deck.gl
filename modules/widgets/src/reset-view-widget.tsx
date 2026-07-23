@@ -17,6 +17,8 @@ export type ResetViewWidgetProps<ViewsT extends ViewOrViews = null> = WidgetProp
   placement?: WidgetPlacement;
   /** Tooltip message */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement | false;
   /** The initial view state to reset the view to. Defaults to deck.props.initialViewState */
   initialViewState?: ViewStateMap<ViewsT>;
   /** View to interact with. Required when using multiple views. */
@@ -44,6 +46,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
     id: 'reset-view',
     placement: 'top-left',
     label: 'Reset View',
+    tooltip: undefined!,
     initialViewState: undefined!,
     viewId: null,
     onReset: () => {}
@@ -68,6 +71,7 @@ export class ResetViewWidget<ViewsT extends ViewOrViews = null> extends Widget<
       <IconButton
         className="deck-widget-reset-focus"
         label={this.props.label}
+        tooltip={this.props.tooltip}
         onClick={this.handleClick.bind(this)}
       />,
       rootElement

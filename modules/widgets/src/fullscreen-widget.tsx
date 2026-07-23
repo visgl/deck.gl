@@ -19,6 +19,10 @@ export type FullscreenWidgetProps = WidgetProps & {
   enterLabel?: string;
   /** Tooltip message when fullscreen. */
   exitLabel?: string;
+  /** Custom tooltip content when out of fullscreen. Overrides enterLabel for tooltip display. */
+  enterTooltip?: string | HTMLElement | false;
+  /** Custom tooltip content when fullscreen. Overrides exitLabel for tooltip display. */
+  exitTooltip?: string | HTMLElement | false;
   /**
    * A compatible DOM element which should be made full screen. By default, the map container element will be made full screen.
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullScreen#Compatible_elements
@@ -38,6 +42,8 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
     viewId: null,
     enterLabel: 'Enter Fullscreen',
     exitLabel: 'Exit Fullscreen',
+    enterTooltip: undefined!,
+    exitTooltip: undefined!,
     container: undefined!,
     onFullscreenChange: () => {}
   };
@@ -67,6 +73,7 @@ export class FullscreenWidget extends Widget<FullscreenWidgetProps> {
           this.handleClick().catch(err => log.error(err)());
         }}
         label={isFullscreen ? this.props.exitLabel : this.props.enterLabel}
+        tooltip={isFullscreen ? this.props.exitTooltip : this.props.enterTooltip}
         className={isFullscreen ? 'deck-widget-fullscreen-exit' : 'deck-widget-fullscreen-enter'}
       />,
       rootElement

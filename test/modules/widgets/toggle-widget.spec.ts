@@ -35,13 +35,13 @@ test('ToggleWidget', async () => {
   const icon = testInstance.findElements('.deck-widget-icon')[0] as HTMLDivElement;
 
   expect(root.dataset.checked).toBe('false');
-  expect(button.title).toBe('Toggle off');
+  expect(button.getAttribute('aria-label')).toBe('Toggle off');
   expect(icon.style.backgroundColor).toBe('rgb(255, 0, 0)');
 
   testInstance.click('.deck-widget-icon-button');
 
   expect(onChange).toHaveBeenCalledWith(true);
   expect(root.dataset.checked).toBe('true');
-  expect(button.title).toBe('Toggle on');
+  expect(button.getAttribute('aria-label')).toBe('Toggle on');
   expect(icon.style.backgroundColor).toBe('rgb(0, 255, 0)');
 });
