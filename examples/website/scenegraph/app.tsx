@@ -2,25 +2,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global fetch, setInterval, clearInterval */
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+/* global fetch */
+import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {log} from '@deck.gl/core';
+import sampleData from './all.json';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
-// Data provided by the OpenSky Network, https://opensky-network.org
+// Live data provided by the OpenSky Network, https://opensky-network.org.
+// The API may reject browser requests from other origins, so the bundled
+// snapshot below remains the default and fallback data.
 const DATA_URL = 'https://opensky-network.org/api/states/all';
-// For local debugging
-// const DATA_URL = './all.json';
 const MODEL_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scenegraph-layer/airplane.glb';
-const REFRESH_TIME_SECONDS = 60;
 const DROP_IF_OLDER_THAN_SECONDS = 120;
 
 const ANIMATIONS: ScenegraphLayerProps['_animations'] = {
@@ -73,14 +73,23 @@ const DATA_INDEX = {
   CATEGORY: 17
 } as const;
 
-async function fetchData(signal: AbortSignal): Promise<Aircraft[]> {
-  const resp = await fetch(DATA_URL, {signal});
-  const {time, states} = (await resp.json()) as {time: number; states: Aircraft[]};
+function normalizeData({time, states}: {time: number; states: Aircraft[]}): Aircraft[] {
   // make lastContact timestamp relative to response time
-  for (const a of states) {
-    a[DATA_INDEX.LAST_CONTACT] -= time;
+  return states.map(state => {
+    const aircraft = [...state] as Aircraft;
+    aircraft[DATA_INDEX.LAST_CONTACT] -= time;
+    return aircraft;
+  });
+}
+
+const DATA = normalizeData(sampleData as {time: number; states: Aircraft[]});
+
+async function fetchData(signal: AbortSignal): Promise<Aircraft[]> {
+  const response = await fetch(DATA_URL, {signal});
+  if (!response.ok) {
+    throw new Error(`OpenSky request failed with status ${response.status}`);
   }
-  return states;
+  return normalizeData((await response.json()) as {time: number; states: Aircraft[]});
 }
 
 function getTooltip({object}: PickingInfo<Aircraft>) {
@@ -95,22 +104,6 @@ function getTooltip({object}: PickingInfo<Aircraft>) {
   );
 }
 
-export function useInterval(callback: () => unknown, delay: number) {
-  const savedCallback = useRef(callback);
-
-  // Update callback.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // Loop.
-  useEffect(() => {
-    savedCallback.current(); // Initial call.
-    const id = setInterval(() => savedCallback.current(), delay);
-    return () => clearInterval(id);
-  }, [delay]);
-}
-
 export default function App({
   device,
   sizeScale = 25,
@@ -122,44 +115,32 @@ export default function App({
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
 }) {
-  const [abortController] = useState<AbortController>(new AbortController());
-  const dataRef = useRef<Aircraft[]>([]); // Callback requires stable reference to data.
-  const [, setVersion] = useState(0); // Re-render on data change.
+  const [data, setData] = useState(DATA);
+  const onDataLoadRef = useRef(onDataLoad);
 
-  const sync = useCallback(async () => {
-    let newData: Aircraft[];
-    try {
-      newData = await fetchData(abortController.signal);
-    } catch (error) {
-      if (!abortController.signal.aborted) {
-        log.warn('Scenegraph example could not load live OpenSky data', error)();
-      }
-      return;
-    }
+  useEffect(() => {
+    onDataLoadRef.current = onDataLoad;
+  }, [onDataLoad]);
 
-    // In order to keep the animation smooth we need to always return the same
-    // object at a given index. This function will discard new objects
-    // and only update existing ones.
-    if (dataRef.current.length > 0) {
-      const dataById: Record<string, Aircraft> = {};
-      newData.forEach(entry => (dataById[entry[DATA_INDEX.UNIQUE_ID]] = entry));
-      newData = dataRef.current.map(entry => dataById[entry[DATA_INDEX.UNIQUE_ID]] || entry);
-    }
+  useEffect(() => {
+    onDataLoadRef.current?.(data.length);
+  }, [data]);
 
-    dataRef.current = newData;
-    setVersion(v => v + 1);
-
-    if (onDataLoad) {
-      onDataLoad(newData.length);
-    }
-  }, [abortController, onDataLoad]);
-
-  useInterval(sync, REFRESH_TIME_SECONDS * 1000);
-  useEffect(() => () => abortController.abort(), []);
+  useEffect(() => {
+    const abortController = new AbortController();
+    fetchData(abortController.signal)
+      .then(setData)
+      .catch(error => {
+        if (!abortController.signal.aborted) {
+          log.warn('Scenegraph example is using its bundled flight snapshot', error)();
+        }
+      });
+    return () => abortController.abort();
+  }, []);
 
   const layer = new ScenegraphLayer<Aircraft>({
     id: 'scenegraph-layer',
-    data: dataRef.current,
+    data,
     pickable: true,
     sizeScale,
     scenegraph: MODEL_URL,
@@ -182,9 +163,6 @@ export default function App({
     getScale: d => {
       const lastContact = d[DATA_INDEX.LAST_CONTACT];
       return lastContact < -DROP_IF_OLDER_THAN_SECONDS ? [0, 0, 0] : [1, 1, 1];
-    },
-    transitions: {
-      getPosition: REFRESH_TIME_SECONDS * 1000
     }
   });
 
