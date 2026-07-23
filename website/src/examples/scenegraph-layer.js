@@ -14,6 +14,8 @@ class ScenegraphDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/scenegraph`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     sizeScale: {displayName: 'Size', type: 'range', value: 25, step: 5, min: 5, max: 500}
   };
@@ -42,6 +44,8 @@ class ScenegraphDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
+        device={this.props.device}
         sizeScale={params.sizeScale.value}
         onDataLoad={count => this.props.onStateChange({count})}
       />
