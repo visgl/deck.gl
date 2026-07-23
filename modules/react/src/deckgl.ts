@@ -225,11 +225,6 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     if (interactionStateUpdateRequested) {
       handleInteractionStateChange(interactionStateUpdateRequested);
     }
-
-    // Force initial render if Deck is initialized
-    if (thisRef.deck?.isInitialized) {
-      thisRef.deck.redraw('Initial render');
-    }
   });
 
   useImperativeHandle(ref, () => getRefHandles(thisRef), []);
