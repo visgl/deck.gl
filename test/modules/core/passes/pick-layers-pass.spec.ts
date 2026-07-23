@@ -8,6 +8,7 @@ import {LayerManager, MapView, PolygonLayer, ScatterplotLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
+import type {CanvasContext} from '@luma.gl/core';
 
 test('PickLayersPass#drawPickingBuffer', () => {
   const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
@@ -47,6 +48,51 @@ test('PickLayersPass#drawPickingBuffer', () => {
     getLayerUniforms(subLayers[0], 'lighting').enabled,
     `PickLayersPass lighting disabled correctly`
   ).toBe(0);
+});
+
+test('PickLayersPass#forwards the supplied canvas context', () => {
+  const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
+  pickingFBO.resize({width: 64, height: 64});
+
+  const view = new MapView();
+  const viewport = view.makeViewport({
+    width: 10,
+    height: 8,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const layer = new ScatterplotLayer({
+    data: [{position: [0, 0]}],
+    getPosition: datum => datum.position,
+    radiusMinPixels: 2,
+    pickable: true
+  });
+  const canvasContext = {
+    getCurrentFramebuffer: () => pickingFBO,
+    getDrawingBufferSize: () => [64, 64],
+    cssToDeviceRatio: () => 2
+  } as CanvasContext;
+  const layerManager = new LayerManager(device, {viewport});
+  const pickLayersPass = new PickLayersPass(device);
+
+  layerManager.setLayers([layer]);
+  pickLayersPass.render({
+    canvasContext,
+    viewports: [viewport],
+    views: {[view.id]: view},
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    pickingFBO,
+    deviceRect: {x: 0, y: 0, width: 64, height: 64}
+  });
+
+  expect(
+    // @ts-expect-error glParameters not exposed
+    layerManager.context.renderPass.glParameters.viewport,
+    'picking pass preserves the supplied canvas pixel ratio'
+  ).toEqual([0, 48, 20, 16]);
+
+  layerManager.finalize();
+  pickingFBO.destroy();
 });
 
 test('PickLayersPass#view clearColor does not corrupt the picking buffer', () => {
