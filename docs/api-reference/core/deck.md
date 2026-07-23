@@ -690,6 +690,43 @@ Parameters:
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
+#### `waitForFrameReady` {#waitforframeready}
+
+Wait until all pending updates have settled and a frame has been rendered. Useful for headless capture, video export, or any flow that needs to read back canvas pixels and must know that the next read will reflect a fully-settled scene.
+
+The returned Promise resolves once:
+
+* All layers report `layer.isLoaded === true` (no pending async props or resources)
+* The layer manager has no pending updates (`needsUpdate() === false`)
+* No redraw is queued (`needsRedraw() === false`)
+* If the scene was not already settled, an `onAfterRender` cycle has completed since the call started
+
+If the deadline passes before the scene settles, the Promise rejects with an `Error`.
+
+```ts
+const result = await deck.waitForFrameReady({timeout: 5000});
+// result: {layersReady: boolean, attributesReady: boolean, duration: number}
+```
+
+Parameters:
+
+* `options.timeout` (number, optional) - maximum wait time in milliseconds before the Promise rejects. Default `5000`.
+* `options.checkLayers` (boolean, optional) - if `false`, skip the per-layer `isLoaded` check. Default `true`.
+* `options.checkAttributes` (boolean, optional) - if `false`, skip the layer-manager `needsUpdate` check. Default `true`.
+
+Returns:
+
+* A Promise that resolves with an object describing the final state:
+  + `layersReady` (boolean) - whether all layers reported loaded
+  + `attributesReady` (boolean) - whether the attribute manager reported settled
+  + `duration` (number) - elapsed time in milliseconds
+
+Notes:
+
+* `waitForFrameReady` does not force a redraw on its own. If you need to ensure a render happens, call `setProps`, mutate `layers`, or call `redraw('forced')` before/while awaiting.
+* The implementation chains its own `onAfterRender` handler over the user-provided one and restores the original handler before resolving or rejecting.
+
+
 #### `pickObjectAsync` {#pickobjectasync}
 
 Get the closest pickable and visible object at the given screen coordinate.
