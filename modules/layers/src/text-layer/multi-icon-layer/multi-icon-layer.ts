@@ -10,6 +10,7 @@ import {TextModuleProps, textUniforms, ContentAlignModes} from '../text-uniforms
 
 import vs from './multi-icon-layer-vertex.glsl';
 import fs from './multi-icon-layer-fragment.glsl';
+import {shaderWGSL as source} from './multi-icon-layer.wgsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
 import type {
@@ -69,7 +70,13 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, modules: [...shaders.modules, textUniforms, sdfUniforms], vs, fs};
+    const textShaders = {
+      ...shaders,
+      modules: [...shaders.modules, textUniforms, sdfUniforms],
+      vs,
+      fs
+    };
+    return this.context.device.type === 'webgpu' ? {...textShaders, source} : textShaders;
   }
 
   initializeState() {
@@ -84,10 +91,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       rowIndexes: {
         type: 'uint32',
         size: 1,
+        bufferGroup: 'icon-instance-data',
         accessor: (object, {index}) => index
       },
       instanceClipRect: {
         size: 4,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getContentBox',
         defaultValue: [0, 0, -1, -1]
       }

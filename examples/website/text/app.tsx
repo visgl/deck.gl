@@ -17,6 +17,7 @@ import {load} from '@loaders.gl/core';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 import type {CollisionFilterExtensionProps} from '@deck.gl/extensions';
+import type {Device} from '@luma.gl/core';
 
 // Sample data
 const DATA_URL =
@@ -51,11 +52,13 @@ const colorScale = scaleLog<Color>()
   ]);
 
 export default function App({
+  device,
   data,
   noOverlap = true,
   fontSize = 32,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: City[];
   noOverlap?: boolean;
   fontSize?: number;
@@ -97,11 +100,13 @@ export default function App({
       sizeMaxPixels: sizeMaxPixels * 2,
       sizeMinPixels: sizeMinPixels * 2
     },
-    extensions: [new CollisionFilterExtension()]
+    // CollisionFilterExtension has not been ported to WebGPU yet.
+    extensions: device?.type === 'webgpu' ? [] : [new CollisionFilterExtension()]
   });
 
   return (
     <DeckGL
+      device={device}
       views={new MapView({repeat: true})}
       layers={[textLayer]}
       initialViewState={INITIAL_VIEW_STATE}
