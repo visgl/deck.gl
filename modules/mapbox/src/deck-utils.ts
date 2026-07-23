@@ -337,7 +337,7 @@ function afterRender(deck: Deck, map: Map): void {
     const device = (deck as any).device;
     const gl = device?.gl;
     deck.props.onBeforeRender?.({device, gl});
-    deck.props.onAfterRender?.({device, gl});
+    deck.props.onAfterRender?.({device, gl, pass: 'screen'});
   }
 
   // End of render cycle, clear generated viewport
