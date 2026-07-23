@@ -92,3 +92,66 @@ test('ColumnGeometry#tesselation', () => {
     -1, 0, 0
   ]), 'positions generated').toBeTruthy();
 });
+
+test('ColumnGeometry#cap', () => {
+  const nradial = 4;
+  const vertsAroundEdge = nradial + 1;
+
+  // capSegs = 1 for cone
+  const capSegsCone = 1;
+  const expectedConeVerts = vertsAroundEdge * 2 * (1 + capSegsCone) + capSegsCone + 1;
+  let geometry = new ColumnGeometry({radius: 1, height: 1, nradial, cap: 'cone'});
+  let attributes = geometry.getAttributes();
+
+  expect(attributes.POSITION.value.length, 'cone cap POSITION has correct size').toBe(
+    expectedConeVerts * 3
+  );
+  expect(attributes.NORMAL.value.length, 'cone cap NORMAL has correct size').toBe(
+    expectedConeVerts * 3
+  );
+  // wireframe indices unchanged (covers sides only)
+  expect(attributes.indices.value.length, 'cone cap indices has correct size').toBe(
+    nradial * 3 * 2
+  );
+
+  // Verify apex vertices (ring_1 = theta=PI/2) have z = height/2 + radius = 1/2 + 1 = 1.5
+  // and position (0, 0, 1.5) (radius * cos(PI/2) = 0)
+  const apexZ = 1 / 2 + 1; // 1.5
+  let foundApex = false;
+  for (let n = 0; n < expectedConeVerts; n++) {
+    const x = attributes.POSITION.value[n * 3];
+    const y = attributes.POSITION.value[n * 3 + 1];
+    const z = attributes.POSITION.value[n * 3 + 2];
+    if (Math.abs(x) < 1e-6 && Math.abs(y) < 1e-6 && Math.abs(z - apexZ) < 1e-6) {
+      foundApex = true;
+    }
+  }
+  expect(foundApex, 'cone cap has apex vertex at (0, 0, height/2 + radius)').toBeTruthy();
+
+  // capSegs = max(2, round(nradial/4)) for dome; nradial=4 → max(2,1) = 2
+  const capSegsDome = Math.max(2, Math.round(nradial / 4));
+  const expectedDomeVerts = vertsAroundEdge * 2 * (1 + capSegsDome) + capSegsDome + 1;
+  geometry = new ColumnGeometry({radius: 1, height: 1, nradial, cap: 'dome'});
+  attributes = geometry.getAttributes();
+
+  expect(attributes.POSITION.value.length, 'dome cap POSITION has correct size').toBe(
+    expectedDomeVerts * 3
+  );
+
+  // Verify side geometry is preserved (first 8 side vertices unchanged from flat)
+  const flatGeometry = new ColumnGeometry({radius: 1, height: 1, nradial});
+  const flatAttributes = flatGeometry.getAttributes();
+  expect(
+    equals(
+      attributes.POSITION.value.slice(0, 3 * 8),
+      flatAttributes.POSITION.value.slice(0, 3 * 8)
+    ),
+    'dome cap: side positions match flat'
+  ).toBeTruthy();
+
+  geometry = new ColumnGeometry({radius: 1, height: 0, nradial, cap: 'dome'});
+  attributes = geometry.getAttributes();
+  expect(attributes.POSITION.value.length, 'cap ignored when height=0 (not extruded)').toBe(
+    nradial * 3
+  );
+});
