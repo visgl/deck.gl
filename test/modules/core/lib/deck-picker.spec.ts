@@ -180,3 +180,41 @@ test('DeckPicker#pick async empty', async () => {
   layerManager.finalize();
   deckPicker.finalize();
 });
+
+test('DeckPicker#getDepthLayers', () => {
+  const deckPicker = new DeckPicker(device);
+  // depthFBO must exist or the method early-returns []
+  deckPicker.depthFBO = {destroy: () => {}};
+
+  const terrainLayer = {props: {operation: 'terrain+draw'}, state: {}};
+  const offsetLayer = {props: {operation: 'draw'}, state: {terrainDrawMode: 'offset'}};
+  const drapedLayer = {props: {operation: 'draw'}, state: {terrainDrawMode: 'drape'}};
+  const regularLayer = {props: {operation: 'draw'}, state: {}};
+
+  const pickableLayers = [offsetLayer, terrainLayer, regularLayer, drapedLayer];
+  const noPick = {pickedColor: null, pickedObjectIndex: -1};
+
+  // unproject3D disabled → always []
+  expect(deckPicker._getDepthLayers(noPick, pickableLayers, false)).toEqual([]);
+
+  // nothing picked → terrain layers
+  expect(deckPicker._getDepthLayers(noPick, pickableLayers, true)).toEqual([terrainLayer]);
+
+  // regular layer picked → just that layer
+  expect(
+    deckPicker._getDepthLayers({...noPick, pickedLayer: regularLayer}, pickableLayers, true)
+  ).toEqual([regularLayer]);
+
+  // drape layer picked → terrain layers (geometry is at z=0, need terrain for depth)
+  expect(
+    deckPicker._getDepthLayers({...noPick, pickedLayer: drapedLayer}, pickableLayers, true)
+  ).toEqual([terrainLayer]);
+
+  // offset layer picked → [pickedLayer, ...terrainLayers] so TerrainEffect.preRender
+  // doesn't early-exit and the heightmap is available for the depth pass
+  expect(
+    deckPicker._getDepthLayers({...noPick, pickedLayer: offsetLayer}, pickableLayers, true)
+  ).toEqual([offsetLayer, terrainLayer]);
+
+  deckPicker.finalize();
+});
