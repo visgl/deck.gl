@@ -18,6 +18,7 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
 import {addSupportComponents} from '../lib/components/index';
+import {JSONPostProcessEffect} from './post-process-effect';
 
 /* eslint-disable import/namespace */
 import * as deckExports from '../deck-bundle';
@@ -42,6 +43,11 @@ function extractElements(library = {}, filter) {
 const JSON_CONVERTER_CONFIGURATION = {
   classes: {
     ...extractElements(deckExports, classesFilter),
+    // PostProcessEffect requires a shader module as its first constructor argument
+    PostProcessEffect: JSONPostProcessEffect,
+    // Register lights exported with _ prefix under their canonical names
+    SunLight: deckExports._SunLight,
+    CameraLight: deckExports._CameraLight,
     // Register views exported with _ prefix under their canonical names
     GlobeView: deckExports._GlobeView,
     // Register widgets exported with _ prefix under their canonical names

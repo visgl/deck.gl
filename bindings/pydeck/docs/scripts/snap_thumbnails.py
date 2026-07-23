@@ -12,6 +12,7 @@ Usage:
 
 import asyncio
 import os
+import shutil
 import subprocess
 import sys
 
@@ -45,7 +46,15 @@ def run_example(fname):
         print(f"[error] {fname} exited with {result.returncode}")
         if result.stderr:
             print(f"[stderr] {result.stderr}")
-    return result.returncode == 0
+        return False
+
+    basename = os.path.splitext(os.path.basename(fname))[0]
+    html_source = os.path.abspath(basename + ".html")
+    if not os.path.exists(html_source):
+        print(f"[error] {fname} did not produce {html_source}")
+        return False
+    shutil.move(html_source, os.path.join(HTML_DIR, basename + ".html"))
+    return True
 
 
 async def snap(fname):
@@ -78,6 +87,7 @@ async def snap(fname):
             # Give deck.gl a moment to finish rendering
             await page.wait_for_timeout(3000)
 
+        await page.wait_for_selector("canvas", timeout=10000)
         await page.screenshot(path=png_fname)
         await browser.close()
 
@@ -112,7 +122,9 @@ def shrink_image(fname):
 
 async def main(fname_arg=None):
     os.makedirs(LOCAL_IMAGE_DIR, exist_ok=True)
+    os.makedirs(HTML_DIR, exist_ok=True)
     fnames = [fname_arg] if fname_arg else EXAMPLE_GLOB
+    failed = []
     for fname in fnames:
         png_fname = await snap_with_retries(fname)
         if png_fname:
@@ -120,7 +132,12 @@ async def main(fname_arg=None):
                 shrink_image(png_fname)
             except Exception as e:
                 print(f"[warn] Failed to shrink {png_fname}: {e}")
-                continue
+                failed.append(fname)
+        else:
+            failed.append(fname)
+
+    if failed:
+        raise RuntimeError(f"Failed to generate {len(failed)} thumbnail(s): {', '.join(failed)}")
 
 
 if __name__ == "__main__":
