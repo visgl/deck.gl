@@ -12,9 +12,11 @@ import {
   GetPickingInfoParams,
   DefaultProps,
   FilterContext,
-  _flatten as flatten
+  COORDINATE_SYSTEM,
+  _flatten as flatten,
+  _GlobeViewport
 } from '@deck.gl/core';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
 import type {TileLoadProps, ZRange} from '../tileset-2d/index';
@@ -421,12 +423,14 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           _offset: 0,
           tile
         });
-        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
-          layer.clone({
+        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer => {
+          const globeBitmapProps = this._getGlobeBitmapLayerProps(layer);
+          return layer.clone({
             tile,
+            ...globeBitmapProps,
             ...subLayerProps
-          })
-        );
+          });
+        });
       } else if (
         subLayerProps &&
         tile.layers[0] &&
@@ -438,6 +442,25 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
       return tile.layers;
     });
+  }
+
+  private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
+    // BitmapLayer and subclasses draw tile imagery over lng/lat bounds. XYZ imagery is encoded
+    // in WebMercator, so default GlobeView bitmap sublayers need UV reprojection; other layer
+    // types do not share this image-coordinate contract and are left unchanged.
+    if (
+      !(this.context.viewport instanceof _GlobeViewport) ||
+      !(layer instanceof BitmapLayer) ||
+      (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
+    ) {
+      return null;
+    }
+
+    return {
+      // XYZ/slippy tile imagery is Web Mercator encoded. In GlobeView, BitmapLayer
+      // positions the mesh in lng/lat, so the image needs Mercator-to-lnglat UV conversion.
+      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    };
   }
 
   filterSubLayer({layer, cullRect}: FilterContext) {
