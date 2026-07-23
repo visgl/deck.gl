@@ -121,7 +121,7 @@ export default class LayersPass extends Pass {
     });
 
     try {
-      return this._drawLayers(renderPass, options);
+      return this._drawLayers(renderPass, {...options, target: framebuffer});
     } finally {
       renderPass.end();
       // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
