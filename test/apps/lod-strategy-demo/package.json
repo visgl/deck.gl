@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.3.0-beta.2",
+    "@deck.gl/geo-layers": "^9.3.0-beta.2",
+    "@deck.gl/layers": "^9.3.0-beta.2",
+    "@deck.gl/react": "^9.3.0-beta.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
