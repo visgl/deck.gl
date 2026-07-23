@@ -78,11 +78,14 @@ fn vertexMain(
     );
   } else {
     let sizeAdjustedPos = project_size_vec3(pos);
-    geometry.position = vec4<f32>(
-      project_position_vec3_f64(inputs.instancePositions, inputs.instancePositions64Low) +
-        sizeAdjustedPos,
-      1.0
+    // Scenegraph offsets are east/north/up in globe mode. Use project32's helper so it can
+    // rotate the offset onto the local tangent plane before producing the common position.
+    let projectResult = project_position_to_clipspace_and_commonspace(
+      inputs.instancePositions,
+      inputs.instancePositions64Low,
+      sizeAdjustedPos
     );
+    geometry.position = projectResult.commonPosition;
     geometry.normal = project_normal(worldNormal);
   }
 
@@ -103,7 +106,9 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 
 #ifdef LIGHTING_PBR
   fragmentInputs.pbr_vPosition = inputs.pbrPosition;
-  fragmentInputs.pbr_vUV = inputs.pbrUV;
+  // scenegraphPbrMaterial uses the indexed UV fields from the current PBR module.
+  fragmentInputs.pbr_vUV0 = inputs.pbrUV;
+  fragmentInputs.pbr_vUV1 = vec2<f32>(0.0);
   fragmentInputs.pbr_vNormal = inputs.pbrNormal;
   fragColor = fragColor * pbr_filterColor(vec4<f32>(0.0));
 #else
