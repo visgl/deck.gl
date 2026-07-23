@@ -15,6 +15,7 @@ import {
   PointLight,
   PostProcessEffect,
   _CameraLight as CameraLight,
+  _GlobeView as GlobeView,
   _SunLight as SunLight
 } from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -196,5 +197,27 @@ describe('jupyter-widget: effects-registration', () => {
       device.destroy();
     }
     expect(effect.passes).toBeUndefined();
+  });
+});
+
+describe('jupyter-widget: view aliases', () => {
+  test('GlobeView canonical alias', () => {
+    const props = jsonConverter.convert({
+      views: [{'@@type': 'GlobeView', id: 'globe', controller: true}]
+    });
+    expect(
+      props.views[0] instanceof GlobeView,
+      'GlobeView @@type hydrates into a GlobeView instance'
+    ).toBeTruthy();
+  });
+
+  test('_GlobeView experimental name still works', () => {
+    const props = jsonConverter.convert({
+      views: [{'@@type': '_GlobeView', id: 'globe', controller: true}]
+    });
+    expect(
+      props.views[0] instanceof GlobeView,
+      '_GlobeView @@type remains registered for back-compat'
+    ).toBeTruthy();
   });
 });

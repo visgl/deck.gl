@@ -415,8 +415,8 @@ By default, the deck canvas captures all touch interactions. This prop is useful
 Set options for gesture recognition. May contain the following fields:
 
 - `pan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for `onDrag` events, viewport panning (mouse/touch) and rotating (mouse+ctrl). Default `{threshold: 1}`.
-- `pinch` - an object that is [Pinch](https://visgl.github.io/mjolnir.js/docs/api-reference/pinch) options This gesture is used for multi-touch zooming/rotating.
-- `multipan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for multi-touch pitching. Default `{threshold: 10, direction: InputDirection.Vertical, pointers: 2}`.
+- `pinch` - an object that is [Pinch](https://visgl.github.io/mjolnir.js/docs/api-reference/pinch) options. This gesture is used for multi-touch zooming/rotating and trackpad pinch. Default `{trackpad: true}`.
+- `multipan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for multi-touch and trackpad panning/rotation. Default `{threshold: 10, pointers: 2, trackpad: true}`.
 - `click` - an object that is [Tap](https://visgl.github.io/mjolnir.js/docs/api-reference/tap) options. This gesture is used for the `onClick` event.
 - `dblclick` - an object that is [Tap](https://visgl.github.io/mjolnir.js/docs/api-reference/tap) options. This gesture is used for double-click zooming.
 
