@@ -10,6 +10,8 @@ import App from 'website-examples/text/app';
 import {makeExample} from '../components';
 
 class TextDemo extends Component {
+  static hasDeviceTabs = true;
+
   static title = 'World Cities by Population';
 
   static data = {
@@ -52,6 +54,8 @@ class TextDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
+        device={this.props.device}
         data={data}
         noOverlap={params.noOverlap.value}
         fontSize={params.fontSize.value}
