@@ -11,6 +11,7 @@ import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core
 import {scaleThreshold} from 'd3-scale';
 
 import type {Color, Position, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 import type {Feature, Geometry} from 'geojson';
 
 // Source data GeoJSON
@@ -90,10 +91,12 @@ function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
 
 export default function App({
   data = DATA_URL,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device
 }: {
   data?: string | Feature<Geometry, BlockProperties>[];
   mapStyle?: string;
+  device?: Device;
 }) {
   const [effects] = useState(() => {
     const lightingEffect = new LightingEffect({ambientLight, dirLight});
@@ -127,6 +130,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       effects={effects}
       initialViewState={INITIAL_VIEW_STATE}

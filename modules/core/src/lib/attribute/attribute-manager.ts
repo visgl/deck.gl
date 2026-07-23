@@ -315,9 +315,9 @@ export default class AttributeManager {
     if (this.hasBufferGroups()) {
       return this.attributeBufferGroups!.getBufferLayouts(this.getAttributes(), modelInfo);
     }
-    return Object.values(this.getAttributes()).map(attribute =>
-      attribute.getBufferLayout(modelInfo)
-    );
+    return Object.values(this.getAttributes())
+      .filter(attribute => this.device.type !== 'webgpu' || !attribute.settings.isIndexed)
+      .map(attribute => attribute.getBufferLayout(modelInfo));
   }
 
   /** @internal Returns whether this WebGPU manager has explicitly grouped attributes. */
