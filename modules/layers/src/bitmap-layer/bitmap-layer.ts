@@ -131,15 +131,11 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   };
 
   getShaders() {
-    const isWebGPU = this.context.device.type === 'webgpu';
-
     return super.getShaders({
-      ...(isWebGPU && {source}),
       vs,
       fs,
-      modules: isWebGPU
-        ? [colorModule, project32, picking, bitmapUniforms]
-        : [project32, picking, bitmapUniforms]
+      source,
+      modules: [colorModule, project32, picking, bitmapUniforms]
     });
   }
 
