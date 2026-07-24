@@ -64,6 +64,7 @@ const background = [
   ]
 ];
 
+/** @param {{device?: import('@luma.gl/core').Device}} props */
 export default function App({device}) {
   const layers = [
     new SimpleMeshLayer({

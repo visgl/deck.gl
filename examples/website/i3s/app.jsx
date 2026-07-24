@@ -21,6 +21,13 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 20
 };
 
+/**
+ * @param {{
+ *   device?: import('@luma.gl/core').Device,
+ *   data?: string,
+ *   mapStyle?: string
+ * }} props
+ */
 export default function App({
   device,
   data = TILESET_URL,

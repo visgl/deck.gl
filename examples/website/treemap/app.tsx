@@ -5,10 +5,11 @@
 import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
-import type {Device} from '@luma.gl/core';
 import {OrthographicView} from '@deck.gl/core';
 import type {PickingInfo, Color} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
+
+import type {Device} from '@luma.gl/core';
 import {scaleOrdinal} from 'd3-scale';
 import {
   hierarchy,

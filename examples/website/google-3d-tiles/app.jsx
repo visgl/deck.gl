@@ -48,6 +48,15 @@ function getTooltip({object}) {
   );
 }
 
+/**
+ * @param {{
+ *   device?: import('@luma.gl/core').Device,
+ *   data?: string,
+ *   distance?: number,
+ *   opacity?: number,
+ *   globeView?: boolean
+ * }} props
+ */
 export default function App({
   device,
   data = TILESET_URL,
