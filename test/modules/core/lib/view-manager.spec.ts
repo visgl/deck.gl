@@ -7,6 +7,7 @@ import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {equals} from '@math.gl/core';
 import {EventManager} from 'mjolnir.js';
+import type {CanvasContext} from '@luma.gl/core';
 
 test('ViewManager#constructor', () => {
   const viewManager = new ViewManager({
@@ -292,6 +293,16 @@ test('ViewManager#layouts and filters views by canvas', () => {
   const rightEventManager = new EventManager(document.createElement('div'));
   const leftView = new MapView({id: 'left', canvasId: 'left-canvas'});
   const rightView = new MapView({id: 'right', canvasId: 'right-canvas'});
+  const canvasSizes: Record<string, [number, number]> = {
+    'left-canvas': [200, 100],
+    'right-canvas': [120, 180]
+  };
+  const canvasContexts = Object.fromEntries(
+    Object.keys(canvasSizes).map(canvasId => [
+      canvasId,
+      {id: canvasId, getCSSSize: () => canvasSizes[canvasId]} as CanvasContext
+    ])
+  );
 
   const viewManager = new ViewManager({
     views: [leftView, rightView],
@@ -301,10 +312,7 @@ test('ViewManager#layouts and filters views by canvas', () => {
     },
     width: 1,
     height: 1,
-    canvasMetrics: {
-      'left-canvas': {width: 200, height: 100},
-      'right-canvas': {width: 120, height: 180}
-    },
+    getCanvasContext: canvasId => canvasContexts[canvasId || 'left-canvas'] || null,
     eventManager: leftEventManager,
     eventManagers: {
       'left-canvas': leftEventManager,
@@ -317,25 +325,24 @@ test('ViewManager#layouts and filters views by canvas', () => {
   expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'left-canvas'})).toEqual([
     viewManager.getViewport('left')
   ]);
+  expect(viewManager.getViewports({canvasId: 'left-canvas'})).toEqual([
+    viewManager.getViewport('left')
+  ]);
+  expect(viewManager.getViewports({canvasId: 'right-canvas'})).toEqual([
+    viewManager.getViewport('right')
+  ]);
+  expect(viewManager.getViewports({canvasId: 'unknown-canvas'})).toEqual([]);
   expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'unknown-canvas'})).toEqual([]);
 
   const viewports = viewManager.getViewports();
-  viewManager.setProps({
-    canvasMetrics: {
-      'left-canvas': {width: 200, height: 100},
-      'right-canvas': {width: 120, height: 180}
-    }
-  });
+  viewManager.setProps({});
   expect(viewManager.getViewports(), 'unchanged canvas dimensions preserve viewports').toBe(
     viewports
   );
 
-  viewManager.setProps({
-    canvasMetrics: {
-      'left-canvas': {width: 240, height: 140},
-      'right-canvas': {width: 120, height: 180}
-    }
-  });
+  canvasSizes['left-canvas'] = [240, 140];
+  viewManager.setNeedsUpdate('Canvas resized');
+  viewManager.setProps({});
   expect(viewManager.getViewport('left')?.width, 'updated dimensions rebuild the viewport').toBe(
     240
   );
@@ -347,12 +354,16 @@ test('ViewManager#layouts and filters views by canvas', () => {
 
 test('ViewManager#uses the first canvas for views without an explicit canvas id', () => {
   const eventManager = new EventManager(document.createElement('div'));
+  const canvasContext = {
+    id: 'first-canvas',
+    getCSSSize: () => [160, 90]
+  } as CanvasContext;
   const viewManager = new ViewManager({
     views: [new MapView({id: 'main'})],
     viewState: {longitude: -122, latitude: 38, zoom: 10},
     width: 1,
     height: 1,
-    canvasMetrics: {'first-canvas': {width: 160, height: 90}},
+    getCanvasContext: () => canvasContext,
     eventManager
   });
 

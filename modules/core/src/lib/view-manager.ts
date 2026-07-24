@@ -10,6 +10,7 @@ import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
+import type {CanvasContext, PresentationContext} from '@luma.gl/core';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
@@ -54,8 +55,8 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
-  /** CSS pixel dimensions for each presentation canvas, keyed by canvas id. */
-  canvasMetrics?: Record<string, {width: number; height: number}>;
+  /** Look up existing canvas contexts; luma owns their observed CSS and drawing-buffer sizes. */
+  getCanvasContext?: (canvasId?: string) => CanvasContext | PresentationContext | null;
   /** Event managers keyed by presentation canvas id. */
   eventManagers?: Record<string, EventManager>;
 };
@@ -81,7 +82,7 @@ export default class ViewManager<ViewsT extends View[]> {
     onInteractionStateChange?: (state: InteractionState) => void;
   };
   private _pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
-  private _canvasMetrics: Record<string, {width: number; height: number}>;
+  private _getCanvasContext?: (canvasId?: string) => CanvasContext | PresentationContext | null;
 
   constructor(
     props: ViewManagerProps<ViewsT> & {
@@ -112,7 +113,7 @@ export default class ViewManager<ViewsT extends View[]> {
       onInteractionStateChange: props.onInteractionStateChange
     };
     this._pickPosition = props.pickPosition;
-    this._canvasMetrics = props.canvasMetrics || {};
+    this._getCanvasContext = props.getCanvasContext;
 
     Object.seal(this);
 
@@ -169,18 +170,16 @@ export default class ViewManager<ViewsT extends View[]> {
    *   + {x, y, width, height} - only return viewports that overlap with this rectangle
    *   + {canvasId} - only return viewports associated with this canvas
    */
-  getViewports(rect?: {
-    x: number;
-    y: number;
-    width?: number;
-    height?: number;
-    canvasId?: string;
-  }): Viewport[] {
+  getViewports(
+    rect?:
+      | {canvasId: string}
+      | {x: number; y: number; width?: number; height?: number; canvasId?: string}
+  ): Viewport[] {
     if (rect) {
       return this._viewports.filter(
         viewport =>
           (!rect.canvasId || this.getCanvasId(viewport.id) === rect.canvasId) &&
-          viewport.containsPixel(rect)
+          (!('x' in rect) || viewport.containsPixel(rect))
       );
     }
     return this._viewports;
@@ -268,10 +267,6 @@ export default class ViewManager<ViewsT extends View[]> {
       this._pickPosition = props.pickPosition;
     }
 
-    if ('canvasMetrics' in props) {
-      this._setCanvasMetrics(props.canvasMetrics || {});
-    }
-
     if ('eventManagers' in props) {
       this._setEventManagers(props.eventManagers || {});
     }
@@ -350,25 +345,16 @@ export default class ViewManager<ViewsT extends View[]> {
     }
   }
 
-  private _setCanvasMetrics(canvasMetrics: Record<string, {width: number; height: number}>): void {
-    if (!deepEqual(canvasMetrics, this._canvasMetrics, 2)) {
-      this._canvasMetrics = canvasMetrics;
-      this.setNeedsUpdate('canvasMetrics changed');
-    }
-  }
-
   private _resolveCanvasId(view: View): string {
-    const canvasIds = Object.keys(this._canvasMetrics);
-    return view.props.canvasId || canvasIds[0] || DEFAULT_CANVAS_ID;
+    return view.props.canvasId || this._getCanvasContext?.()?.id || DEFAULT_CANVAS_ID;
   }
 
-  private _getCanvasMetrics(view: View): {width: number; height: number} {
-    const canvasId = this._resolveCanvasId(view);
-    const metrics = this._canvasMetrics[canvasId];
-    return {
-      width: metrics?.width ?? this.width,
-      height: metrics?.height ?? this.height
-    };
+  private _getCanvasDimensions(view: View): {width: number; height: number} {
+    // Viewport layout uses CSS pixels, not framebuffer pixels. Read them directly from the
+    // observed luma context instead of maintaining a second per-canvas size snapshot.
+    const canvasContext = this._getCanvasContext?.(this._resolveCanvasId(view));
+    const [width, height] = canvasContext?.getCSSSize() || [this.width, this.height];
+    return {width, height};
   }
 
   private _getViewEventManager(view: View): ViewEventManager {
@@ -422,8 +408,7 @@ export default class ViewManager<ViewsT extends View[]> {
       makeViewport: viewState =>
         this.getView(view.id)?.makeViewport({
           viewState,
-          width: this._getCanvasMetrics(view).width,
-          height: this._getCanvasMetrics(view).height
+          ...this._getCanvasDimensions(view)
         }),
       pickPosition: this._pickPosition
     });
@@ -472,7 +457,7 @@ export default class ViewManager<ViewsT extends View[]> {
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
-      const {width, height} = this._getCanvasMetrics(view);
+      const {width, height} = this._getCanvasDimensions(view);
       const viewEventManager = this._getViewEventManager(view);
       this._viewEventManagers[view.id] = viewEventManager;
       const viewState = this.getViewState(view);
