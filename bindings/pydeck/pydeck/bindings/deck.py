@@ -87,6 +87,10 @@ class Deck(JSONMixin):
             Layers must have ``pickable=True`` set in order to display a tooltip.
             For more advanced usage, the user can pass a dict to configure more custom tooltip features.
             Further documentation is `here <tooltip.html>`_.
+        effects : list of pydeck.Effect, default None
+            Lighting and post-processing effects applied to the rendered layers.
+        widgets : list of pydeck.Widget, default None
+            List of :class:`pydeck.bindings.widget.Widget` objects to render.
         show_error : bool, default False
             If ``True``, will display the error in the rendered output.
             Otherwise, will only show error in browser console.

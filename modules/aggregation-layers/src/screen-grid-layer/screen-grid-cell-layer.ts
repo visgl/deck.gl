@@ -4,12 +4,12 @@
 
 import {Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {Layer, picking, UpdateParameters, Color} from '@deck.gl/core';
+import {Layer, color, picking, UpdateParameters, Color} from '@deck.gl/core';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
+import source from './screen-grid-cell-layer.wgsl';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
-import {ShaderModule} from '@luma.gl/shadertools';
 import type {ScaleType} from '../common/types';
 
 /** Proprties added by ScreenGridCellLayer. */
@@ -31,7 +31,10 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
     colorTexture: Texture;
   };
 
-  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
+  getShaders() {
+    if (this.context.device.type === 'webgpu') {
+      return super.getShaders({source, vs, fs, modules: [color, picking, screenGridUniforms]});
+    }
     return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
   }
 

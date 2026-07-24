@@ -70,10 +70,10 @@ def test_literal_string_props_serialize_verbatim():
         "PathLayer",
         [{"path": [[0, 0]]}],
         get_path="path",
-        terrain_draw_mode="'offset'",
+        terrain_draw_mode="'drape'",
         extensions=[Extension("TerrainExtension")],
     )
-    assert json.loads(Deck(terrain_route).to_json())["layers"][0]["terrainDrawMode"] == "offset"
+    assert json.loads(Deck(terrain_route).to_json())["layers"][0]["terrainDrawMode"] == "drape"
 
 
 def test_all_extensions_have_a_gallery_example():

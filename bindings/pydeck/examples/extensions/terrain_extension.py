@@ -5,7 +5,7 @@ TerrainExtension
 A route draped over 3D terrain using the deck.gl ``TerrainExtension``. A ``TerrainLayer``
 builds the surface from the free AWS Terrain Tiles (terrarium-encoded elevation, no access
 token required) with a CARTO basemap as the texture. The ``PathLayer`` uses the extension
-with ``terrain_draw_mode="offset"`` so it follows the elevation of the surface below it.
+with ``terrain_draw_mode="drape"`` so it follows the elevation of the surface below it.
 """
 
 import pydeck as pdk
@@ -20,6 +20,7 @@ terrain = pdk.Layer(
     elevation_data=ELEVATION_DATA,
     texture=TEXTURE,
     elevation_decoder=ELEVATION_DECODER,
+    operation="'terrain+draw'",
 )
 
 # A route across the Marin hills, draped onto the terrain surface
@@ -28,13 +29,13 @@ route = pdk.Layer(
     [{"path": [[-122.475, 37.905], [-122.463, 37.892], [-122.452, 37.878], [-122.437, 37.868], [-122.423, 37.859]]}],
     get_path="path",
     get_color=[255, 64, 64],
-    get_width=10,
-    width_min_pixels=6,
+    get_width=8,
+    width_units="'pixels'",
     cap_rounded=True,
     joint_rounded=True,
     # Props added to the layer by the TerrainExtension. Quote the literal draw-mode enum
     # so pydeck serializes it verbatim instead of as an ``@@=`` accessor.
-    terrain_draw_mode="'offset'",
+    terrain_draw_mode="'drape'",
     extensions=[pdk.Extension("TerrainExtension")],
 )
 
