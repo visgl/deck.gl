@@ -263,7 +263,7 @@ export default class ViewManager<ViewsT extends View[]> {
   getCanvasId(viewOrViewId: string | View): string | undefined {
     const view = typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
     return view
-      ? this._viewEventManagers[view.id]?.canvasId || this._resolveCanvasId(view)
+      ? this._viewEventManagers[view.id]?.canvasId || this._getCanvasIdFromView(view)
       : undefined;
   }
 
@@ -393,7 +393,7 @@ export default class ViewManager<ViewsT extends View[]> {
    * @param view - View whose presentation canvas is being determined.
    * @returns The explicit, default-context, or legacy default canvas id.
    */
-  private _resolveCanvasId(view: View): string {
+  private _getCanvasIdFromView(view: View): string {
     return view.props.canvasId || this._getCanvasContext?.()?.id || DEFAULT_CANVAS_ID;
   }
 
@@ -405,7 +405,7 @@ export default class ViewManager<ViewsT extends View[]> {
   private _getCanvasDimensions(view: View): CanvasDimensions {
     // Viewport layout uses CSS pixels, not framebuffer pixels. Read them directly from the
     // observed luma context instead of maintaining a second per-canvas size snapshot.
-    const canvasContext = this._getCanvasContext?.(this._resolveCanvasId(view));
+    const canvasContext = this._getCanvasContext?.(this._getCanvasIdFromView(view));
     const [width, height] = canvasContext?.getCSSSize() || [this.width, this.height];
     return {width, height};
   }
