@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import React, {useCallback, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 
@@ -35,6 +36,7 @@ const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
 };
 
 export default function App({
+  device,
   texture = SURFACE_IMAGE,
   wireframe = false,
   globeView = false,
@@ -46,6 +48,7 @@ export default function App({
   initialViewState = INITIAL_VIEW_STATE,
   onZoomChange
 }: {
+  device?: Device;
   texture?: string;
   wireframe?: boolean;
   globeView?: boolean;
@@ -84,6 +87,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       views={globeView ? new GlobeView() : new MapView()}
       viewState={viewState}
       onViewStateChange={onViewStateChange}

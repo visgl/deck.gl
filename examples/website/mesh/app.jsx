@@ -64,7 +64,7 @@ const background = [
   ]
 ];
 
-export default function App() {
+export default function App({device}) {
   const layers = [
     new SimpleMeshLayer({
       id: 'mini-coopers',
@@ -88,6 +88,7 @@ export default function App() {
 
   return (
     <DeckGL
+      device={device}
       views={
         new OrbitView({
           near: 0.1,

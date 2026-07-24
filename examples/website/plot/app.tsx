@@ -5,6 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {OrbitView, OrbitViewState} from '@deck.gl/core';
 import PlotLayer, {Axes, PlotLayerPickingInfo} from './plot-layer';
 import {scaleLinear} from 'd3-scale';
@@ -52,10 +53,12 @@ function getTooltip({sample}: PlotLayerPickingInfo) {
 }
 
 export default function App({
+  device,
   resolution = 200,
   showAxis = true,
   equation = DEFAULT_EQUATION
 }: {
+  device?: Device;
   equation?: Equation;
   resolution?: number;
   showAxis?: boolean;
@@ -85,6 +88,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       views={new OrbitView({orbitAxis: 'Y'})}
       initialViewState={INITIAL_VIEW_STATE}

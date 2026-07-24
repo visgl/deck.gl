@@ -22,6 +22,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 export default function App({
+  device,
   data = TILESET_URL,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }) {
@@ -40,6 +41,7 @@ export default function App({
   return (
     <div>
       <DeckGL
+        device={device}
         style={{backgroundColor: '#061714'}}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
