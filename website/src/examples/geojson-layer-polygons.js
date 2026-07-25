@@ -73,7 +73,7 @@ class GeoJsonDemo extends Component {
   }
 
   render() {
-    return <App {...this.props} key={this.props.device?.type} device={this.props.device} />;
+    return <App {...this.props} />;
   }
 }
 
