@@ -8,8 +8,75 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {MapView} from '@deck.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
+import {
+  maxWeightUniforms,
+  weightUniforms
+} from '@deck.gl/aggregation-layers/heatmap-layer/heatmap-layer-uniforms';
+import {triangleUniforms} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer-uniforms';
+import triangleSource from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer.wgsl';
+import maxWeightSource from '@deck.gl/aggregation-layers/heatmap-layer/max.wgsl';
+import weightSource from '@deck.gl/aggregation-layers/heatmap-layer/weights.wgsl';
+import {
+  getShaderModuleSource,
+  getShaderModuleUniformLayoutValidationResult
+} from '@luma.gl/shadertools';
 
 const getPosition = d => d.COORDINATES;
+
+test('HeatmapLayer#WGSL uniform layouts', () => {
+  const modules = [
+    {
+      module: weightUniforms,
+      uniformNames: ['commonBounds', 'radiusPixels', 'textureWidth', 'weightsScale']
+    },
+    {module: maxWeightUniforms, uniformNames: ['textureSize']},
+    {
+      module: triangleUniforms,
+      uniformNames: ['aggregationMode', 'colorDomain', 'intensity', 'threshold']
+    }
+  ];
+
+  for (const {module, uniformNames} of modules) {
+    const validation = getShaderModuleUniformLayoutValidationResult(module, 'wgsl');
+
+    expect(validation, `${module.name} declares a WGSL uniform block`).toBeTruthy();
+    expect(validation?.matches, `${module.name} matches its uniform types`).toBe(true);
+    expect(validation?.expectedUniformNames, `${module.name} preserves uniform order`).toEqual(
+      uniformNames
+    );
+  }
+});
+
+test('HeatmapLayer#WGSL texture bindings', () => {
+  const maxModuleSource = getShaderModuleSource(maxWeightUniforms, 'wgsl');
+  const triangleModuleSource = getShaderModuleSource(triangleUniforms, 'wgsl');
+
+  expect(maxModuleSource).toContain('var inTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var colorTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var colorTextureSampler: sampler');
+  expect(triangleModuleSource).toContain('var maxTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var weightsTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var weightsTextureSampler: sampler');
+});
+
+test('HeatmapLayer#WGSL kernel uses instanced quads', () => {
+  expect(weightSource).toContain('@builtin(vertex_index) vertexIndex: u32');
+  expect(weightSource).toContain('array<vec2<f32>, 6>');
+  expect(weightSource).toContain('instancePositions: vec3<f32>');
+  expect(weightSource).toContain('instancePositions64Low: vec3<f32>');
+  expect(weightSource).toContain('instanceWeights: f32');
+  expect(weightSource).not.toContain('gl_PointCoord');
+});
+
+test('HeatmapLayer#WGSL maximum reduction uses bounded blocks', () => {
+  expect(maxWeightSource).toContain('MAX_WEIGHT_REDUCTION_SIZE: u32 = 16u');
+  expect(maxWeightSource).toContain('textureCoordinates.x < textureSize');
+  expect(maxWeightSource).toContain('textureCoordinates.y < textureSize');
+});
+
+test('HeatmapLayer#WGSL presentation corrects render-target origin', () => {
+  expect(triangleSource).toContain('1.0 - attributes.texCoords.y');
+});
 
 const viewport0 = new MapView().makeViewport({
   width: 100,

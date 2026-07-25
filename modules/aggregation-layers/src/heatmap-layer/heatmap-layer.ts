@@ -10,7 +10,14 @@ import {
   scaleToAspectRatio,
   getTextureCoordinates
 } from './heatmap-layer-utils';
-import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
+import {
+  Buffer,
+  DeviceFeature,
+  Texture,
+  TextureProps,
+  TextureFormat,
+  TextureFormatColor
+} from '@luma.gl/core';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
 import {
   Accessor,
@@ -34,6 +41,8 @@ import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
 import maxFs from './max-fs.glsl';
+import maxSource from './max.wgsl';
+import weightsSource from './weights.wgsl';
 import {
   MaxWeightProps,
   maxWeightUniforms,
@@ -42,6 +51,7 @@ import {
 } from './heatmap-layer-uniforms';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
+const MAX_WEIGHT_REDUCTION_SIZE = 16;
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
   dimension: '2d',
@@ -376,11 +386,20 @@ export default class HeatmapLayer<
 
   _setupAttributes() {
     const attributeManager = this.getAttributeManager()!;
-    attributeManager.add({
-      positions: {size: 3, type: 'float64', accessor: 'getPosition'},
-      weights: {size: 1, accessor: 'getWeight'}
-    });
-    this.setState({positionAttributeName: 'positions'});
+
+    if (this.context.device.type === 'webgpu') {
+      attributeManager.addInstanced({
+        instancePositions: {size: 3, type: 'float64', accessor: 'getPosition'},
+        instanceWeights: {size: 1, accessor: 'getWeight'}
+      });
+      this.setState({positionAttributeName: 'instancePositions'});
+    } else {
+      attributeManager.add({
+        positions: {size: 3, type: 'float64', accessor: 'getPosition'},
+        weights: {size: 1, accessor: 'getWeight'}
+      });
+      this.setState({positionAttributeName: 'positions'});
+    }
   }
 
   _setupTextureParams() {
@@ -388,8 +407,15 @@ export default class HeatmapLayer<
     const {weightsTextureSize} = this.props;
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
-    const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
-    const format: TextureFormat = floatTargetSupport ? 'rgba32float' : 'rgba8unorm';
+    const isWebGPU = device.type === 'webgpu';
+    const floatTargetSupport = isWebGPU
+      ? device.getTextureFormatCapabilities('rgba16float').blend
+      : FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
+    const format: TextureFormat = floatTargetSupport
+      ? isWebGPU
+        ? 'rgba16float'
+        : 'rgba32float'
+      : 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {
@@ -402,14 +428,23 @@ export default class HeatmapLayer<
   _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
+    const isWebGPU = this.context.device.type === 'webgpu';
     const attributeManager = this.getAttributeManager()!;
 
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
       ...shaders,
-      bufferLayout: attributeManager.getBufferLayouts(),
-      vertexCount: 1,
+      source: weightsSource,
+      bufferLayout: attributeManager.getBufferLayouts({isInstanced: isWebGPU}),
+      vertexCount: isWebGPU ? 6 : 1,
+      ...(isWebGPU
+        ? {
+            colorAttachmentFormats: [weightsTexture!.format as TextureFormatColor],
+            isInstanced: true,
+            instanceCount: this.getNumInstances()
+          }
+        : {}),
       targetTexture: weightsTexture!,
       parameters: {
         depthWriteEnabled: false,
@@ -420,7 +455,7 @@ export default class HeatmapLayer<
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one'
       },
-      topology: 'point-list',
+      topology: isWebGPU ? 'triangle-list' : 'point-list',
       modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
@@ -439,6 +474,7 @@ export default class HeatmapLayer<
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders({
+      source: maxSource,
       vs: maxVs,
       fs: maxFs,
       modules: [maxWeightUniforms]
@@ -447,7 +483,13 @@ export default class HeatmapLayer<
       id: `${this.id}-max-weights-transform`,
       targetTexture: maxWeightsTexture!,
       ...maxWeightsTransformShaders,
-      vertexCount: textureSize * textureSize,
+      ...(device.type === 'webgpu'
+        ? {colorAttachmentFormats: [maxWeightsTexture!.format as TextureFormatColor]}
+        : {}),
+      vertexCount:
+        device.type === 'webgpu'
+          ? Math.ceil(textureSize / MAX_WEIGHT_REDUCTION_SIZE) ** 2
+          : textureSize * textureSize,
       topology: 'point-list',
       parameters: {
         depthWriteEnabled: false,
@@ -605,7 +647,13 @@ export default class HeatmapLayer<
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
     this._setModelAttributes(weightsTransform.model, attributes);
-    weightsTransform.model.setVertexCount(this.getNumInstances());
+    if (this.context.device.type === 'webgpu') {
+      const instanceCount = this.getNumInstances();
+      weightsTransform.model.setVertexCount(instanceCount > 0 ? 6 : 0);
+      weightsTransform.model.setInstanceCount(instanceCount);
+    } else {
+      weightsTransform.model.setVertexCount(this.getNumInstances());
+    }
 
     const weightProps: WeightProps = {
       radiusPixels,
