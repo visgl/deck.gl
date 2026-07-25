@@ -233,18 +233,17 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const defines: Record<string, any> = {};
 
     const {flatShading} = this.props;
-    const isWebGPU = this.context.device.type === 'webgpu';
     if (flatShading) {
       defines.FLAT_SHADING = 1;
     }
     return super.getShaders({
-      ...(isWebGPU ? {source: source(flatShading)} : {}),
       vs,
       fs,
+      source: source(flatShading),
       defines,
       modules: [
         project32,
-        ...(isWebGPU ? [color] : []),
+        color,
         flatShading ? phongMaterial : gouraudMaterial,
         picking,
         columnUniforms

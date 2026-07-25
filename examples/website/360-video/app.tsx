@@ -5,6 +5,7 @@
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {FirstPersonView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {SphereGeometry} from '@luma.gl/engine';
@@ -39,7 +40,7 @@ const INITIAL_VIEW_STATE: FirstPersonViewState = {
   bearing: 90
 };
 
-export default function App() {
+export default function App({device}: {device?: Device}) {
   const [isPlaying, setPlaying] = useState(false);
   const [video, setVideo] = useState<HTMLVideoElement>();
 
@@ -85,6 +86,7 @@ export default function App() {
 
   return (
     <DeckGL
+      device={device}
       views={new FirstPersonView()}
       initialViewState={INITIAL_VIEW_STATE}
       controller={{scrollZoom: false, doubleClickZoom: false}}

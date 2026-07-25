@@ -57,7 +57,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     const [data, setData] = useState(defaultData);
     const [params, setParams] = useState(defaultParams);
     const [meta, setMeta] = useState({});
-    const device = useStore(state => state.device)
+    const device = useStore(state => (DemoComponent.hasDeviceTabs ? state.device : undefined));
     const baseUrl = useBaseUrl('/');
 
     const useParam = useCallback(newParameters => {
