@@ -6,11 +6,11 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
-import {Device} from '@luma.gl/core';
 
 import {Feature, LineString, MultiLineString} from 'geojson';
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';

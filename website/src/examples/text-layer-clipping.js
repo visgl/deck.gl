@@ -42,8 +42,6 @@ class TextDemo extends Component {
     return (
       <App
         {...this.props}
-        key={this.props.device?.type}
-        device={this.props.device}
         data={root}
         width={3000}
         height={2000}

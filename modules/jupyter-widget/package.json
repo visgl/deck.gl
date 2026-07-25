@@ -48,6 +48,7 @@
     "@loaders.gl/core": "^4.4.3",
     "@loaders.gl/csv": "^4.4.3",
     "@luma.gl/core": "^9.3.3",
+    "@luma.gl/effects": "^9.3.3",
     "@luma.gl/webgl": "^9.3.3",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2",

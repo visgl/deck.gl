@@ -80,8 +80,6 @@ class ArcDemo extends Component {
     return (
       <App
         {...otherProps}
-        key={this.props.device?.type}
-        device={this.props.device}
         strokeWidth={params.lineWidth.value}
         onSelectCounty={this._onSelectCounty}
       />

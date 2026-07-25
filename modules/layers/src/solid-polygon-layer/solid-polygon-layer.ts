@@ -4,7 +4,6 @@
 
 import {Layer, color, project32, picking, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import type {BufferLayout} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -136,19 +135,14 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
   getShaders(type) {
     const ringWindingOrderCW = !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1;
-    const isWebGPU = this.context.device.type === 'webgpu';
 
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
       fs,
-      source: isWebGPU ? getSolidPolygonShaderWGSL(type, Boolean(ringWindingOrderCW)) : undefined,
-      ...(isWebGPU
-        ? {}
-        : {
-            defines: {
-              RING_WINDING_ORDER_CW: ringWindingOrderCW
-            }
-          }),
+      source: getSolidPolygonShaderWGSL(type, Boolean(ringWindingOrderCW)),
+      defines: {
+        RING_WINDING_ORDER_CW: ringWindingOrderCW
+      },
       modules: [project32, color, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
@@ -225,12 +219,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       },
       ...(isWebGPU
         ? {
+            // WebGPU cannot express WebGL's one-vertex offset view in a buffer layout.
             nextVertexPositions: {
               size: 3,
               type: 'float64',
               stepMode: 'dynamic',
               fp64: this.use64bitPositions(),
-              transition: ATTRIBUTE_TRANSITION,
+              transition: false,
               accessor: 'getPolygon',
               // eslint-disable-next-line @typescript-eslint/unbound-method
               update: this.calculateNextPositions,
@@ -240,7 +235,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         : {}),
       instanceVertexValid: {
         size: 1,
-        ...(isWebGPU ? {} : {type: 'uint16'}),
+        type: isWebGPU ? 'float32' : 'uint16',
         stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
@@ -250,7 +245,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         size: 1,
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getElevation'
+        accessor: 'getElevation',
+        bufferGroup: 'solid-polygon-instance-data'
       },
       fillColors: {
         size: this.props.colorFormat.length,
@@ -258,7 +254,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        bufferGroup: 'solid-polygon-instance-data'
       },
       lineColors: {
         size: this.props.colorFormat.length,
@@ -266,14 +263,16 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        bufferGroup: 'solid-polygon-instance-data'
       },
       /** Source polygon row, including __source.index for composite data. */
       rowIndexes: {
         size: 1,
         type: 'uint32',
         stepMode: 'dynamic',
-        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
+        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index),
+        bufferGroup: 'solid-polygon-instance-data'
       }
     });
     /* eslint-enable max-len */
@@ -410,16 +409,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       shaders.defines = {...shaders.defines, NON_INSTANCED_MODEL: 1};
       let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
       if (this.context.device.type === 'webgpu') {
-        bufferLayout = filterBufferLayout(
-          bufferLayout,
-          new Set([
-            'vertexPositions',
-            'vertexPositions64Low',
-            'elevations',
-            'fillColors',
-            'lineColors',
-            'rowIndexes'
-          ])
+        // Indices are bound separately, and the top model does not bind side-only attributes.
+        bufferLayout = bufferLayout.filter(
+          layout =>
+            layout.name !== 'indices' &&
+            layout.name !== 'instanceVertexValid' &&
+            layout.name !== 'nextVertexPositions'
         );
       }
 
@@ -430,27 +425,15 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferLayout,
         isIndexed: true,
         userData: {
-          excludeAttributes: {instanceVertexValid: true}
+          excludeAttributes: {instanceVertexValid: true, nextVertexPositions: true}
         }
       });
     }
     if (extruded) {
       let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
       if (this.context.device.type === 'webgpu') {
-        bufferLayout = filterBufferLayout(
-          bufferLayout,
-          new Set([
-            'vertexPositions',
-            'vertexPositions64Low',
-            'nextVertexPositions',
-            'nextVertexPositions64Low',
-            'instanceVertexValid',
-            'elevations',
-            'fillColors',
-            'lineColors',
-            'rowIndexes'
-          ])
-        );
+        // Indices are owned by the top model; WebGPU vertex layouts cannot include index buffers.
+        bufferLayout = bufferLayout.filter(layout => layout.name !== 'indices');
       }
 
       sideModel = new Model(this.context.device, {
@@ -525,6 +508,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   protected calculateNextPositions(attribute) {
     const {polygonTesselator} = this.state;
     const positions = polygonTesselator.get('positions');
+    const vertexValid = polygonTesselator.get('vertexValid');
     attribute.startIndices = polygonTesselator.vertexStarts;
 
     if (!positions) {
@@ -532,38 +516,17 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       return;
     }
 
-    const ArrayType = positions.constructor as typeof Float32Array;
-    const nextPositions = new ArrayType(positions.length);
-
-    for (let i = 0; i < positions.length; i += 3) {
-      const nextIndex = i + 3 < positions.length ? i + 3 : i;
-      nextPositions[i] = positions[nextIndex];
-      nextPositions[i + 1] = positions[nextIndex + 1];
-      nextPositions[i + 2] = positions[nextIndex + 2];
+    const vertexCount = positions.length / 3;
+    const nextPositions = new (positions.constructor as typeof Float32Array)(positions.length);
+    for (let vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
+      const sourceIndex = vertexIndex * 3;
+      const nextSourceIndex =
+        vertexValid?.[vertexIndex] && vertexIndex + 1 < vertexCount ? sourceIndex + 3 : sourceIndex;
+      for (let componentIndex = 0; componentIndex < 3; componentIndex++) {
+        nextPositions[sourceIndex + componentIndex] = positions[nextSourceIndex + componentIndex];
+      }
     }
 
     attribute.value = nextPositions;
   }
-}
-
-function filterBufferLayout(
-  bufferLayout: BufferLayout[],
-  allowedAttributes: Set<string>
-): BufferLayout[] {
-  const filteredLayouts: BufferLayout[] = [];
-
-  for (const layout of bufferLayout) {
-    if (layout.attributes) {
-      const attributes = layout.attributes.filter(attribute =>
-        allowedAttributes.has(attribute.attribute)
-      );
-      if (attributes.length) {
-        filteredLayouts.push({...layout, attributes});
-      }
-    } else if (allowedAttributes.has(layout.name)) {
-      filteredLayouts.push(layout);
-    }
-  }
-
-  return filteredLayouts;
 }

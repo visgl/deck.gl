@@ -150,13 +150,11 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getShaders() {
-    const isWebGPU = this.context.device.type === 'webgpu';
-
     return super.getShaders({
       vs,
       fs,
-      ...(isWebGPU ? {source} : {}),
-      modules: [project32, ...(isWebGPU ? [color] : []), picking, arcUniforms]
+      source,
+      modules: [project32, color, picking, arcUniforms]
     }); // 'project' module added by default.
   }
 

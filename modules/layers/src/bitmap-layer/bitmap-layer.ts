@@ -132,9 +132,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
   getShaders() {
     return super.getShaders({
-      source,
       vs,
       fs,
+      source,
       modules: [colorModule, project32, picking, bitmapUniforms]
     });
   }
@@ -265,7 +265,10 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     */
     const bufferLayout =
       this.context.device.type === 'webgpu'
-        ? this.getAttributeManager()!.getBufferLayouts({isInstanced: false})
+        ? this.getAttributeManager()!
+            .getBufferLayouts({isInstanced: false})
+            // WebGPU index buffers are bound separately from vertex buffer layouts.
+            .filter(layout => layout.name !== 'indices')
         : this.getAttributeManager()!.getBufferLayouts();
 
     return new Model(this.context.device, {

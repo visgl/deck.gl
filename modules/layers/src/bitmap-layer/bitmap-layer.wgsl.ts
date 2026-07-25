@@ -13,6 +13,8 @@ struct Varyings {
   @builtin(position) position: vec4<f32>,
   @location(0) vTexCoord: vec2<f32>,
   @location(1) vTexPos: vec2<f32>,
+  @location(2) pickingColor: vec3<f32>,
+  @location(3) pickingDepth: f32,
 };
 
 // from degrees to Web Mercator
@@ -74,7 +76,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   var output: Varyings;
   geometry.worldPosition = attributes.positions;
   geometry.uv = attributes.texCoords;
-  geometry.pickingColor = vec3<f32>(1.0, 0.0, 0.0);
+  geometry.pickingColor = picking_getPickingColorFromIndex(0u);
 
   let projectedPosition = project_position_to_clipspace_and_commonspace(
     attributes.positions,
@@ -85,6 +87,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   output.position = projectedPosition.clipPosition;
   output.vTexCoord = attributes.texCoords;
   output.vTexPos = vec2<f32>(0.0);
+  output.pickingColor = geometry.pickingColor;
+  output.pickingDepth = output.position.z / output.position.w;
 
   if (bitmap.coordinateConversion < -0.5) {
     output.vTexPos = geometry.position.xy + project.commonOrigin.xy;
@@ -105,17 +109,37 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
   }
 
   let bitmapColor = textureSample(bitmapTexture, bitmapTextureSampler, uv);
-  let colorValue = apply_opacity(
+  var fragColor = apply_opacity(
     color_tint(color_desaturate(bitmapColor.rgb)),
     bitmapColor.a * layer.opacity
   );
 
   geometry.uv = uv;
 
-  if (picking.isActive > 0.5 && picking.isAttribute < 0.5) {
+  if (picking.isActive > 0.5) {
+    if (picking.isAttribute > 0.5) {
+      return vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
+    }
     return vec4<f32>(packUVsIntoRGB(uv), 1.0);
   }
 
-  return deckgl_premultiplied_alpha(colorValue);
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(input.pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + fragColor.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        fragColor = vec4<f32>(fragColor.rgb, 0.0);
+      }
+    }
+  }
+
+  return deckgl_premultiplied_alpha(fragColor);
 }
 `;

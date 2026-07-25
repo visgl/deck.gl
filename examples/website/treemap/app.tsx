@@ -8,6 +8,8 @@ import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import type {PickingInfo, Color} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
+
+import type {Device} from '@luma.gl/core';
 import {scaleOrdinal} from 'd3-scale';
 import {
   hierarchy,
@@ -17,8 +19,6 @@ import {
   type HierarchyRectangularNode
 } from 'd3-hierarchy';
 import {format} from 'd3-format';
-
-import type {Device} from '@luma.gl/core';
 
 // Sample data
 const DATA_URL =
@@ -52,7 +52,6 @@ const INITIAL_VIEW_STATE = {
 const FONT_FAMILY = 'Arial, Helvetica, sans-serif';
 const HEADER_SIZE = 20;
 const GAP_SIZE = 1;
-const VIEW_BACKGROUND_COLOR = [15, 23, 42, 255];
 
 export default function App({
   device,
@@ -169,7 +168,7 @@ export default function App({
     <DeckGL
       device={device}
       layers={layers}
-      views={new OrthographicView({clearColor: VIEW_BACKGROUND_COLOR})}
+      views={new OrthographicView()}
       initialViewState={INITIAL_VIEW_STATE}
       controller={{
         maxBounds: boundingBox

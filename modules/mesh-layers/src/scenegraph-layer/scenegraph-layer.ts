@@ -81,6 +81,7 @@ type _ScenegraphLayerProps<DataT> = {
     | PBREnvironment
     | ((context: {
         device?: Device;
+        /** @deprecated Use `device.handle`. */
         gl?: WebGL2RenderingContext;
         layer: ScenegraphLayer<DataT>;
       }) => PBREnvironment);
@@ -192,13 +193,21 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const isWebGPU = this.context.device?.type === 'webgpu';
 
     if (this.props._lighting === 'pbr') {
+      // The stock pbrMaterial module supplies the existing GLSL PBR path.
+      // WebGPU uses a Scenegraph-specific wrapper because its WGSL source must
+      // adapt the PBR position/normal inputs and camera binding to deck.gl's
+      // project module.
       pbr = isWebGPU ? scenegraphPbrMaterial : pbrMaterial;
       defines.LIGHTING_PBR = 1;
     } else if (isWebGPU) {
+      // The flat WGSL path can still sample a glTF base-color texture, so it
+      // needs the Scenegraph PBR module's sampler bindings even though
+      // LIGHTING_PBR is not enabled.
       pbr = scenegraphPbrMaterial;
     } else {
-      // Dummy shader module needed to handle
-      // pbrMaterial.pbr_baseColorSampler binding
+      // The flat GLSL shader declares pbr_baseColorSampler itself. Register a
+      // name-only module so the glTF material binding is still routed to that
+      // sampler without injecting the full PBR lighting module.
       pbr = {name: 'pbrMaterial'};
     }
 

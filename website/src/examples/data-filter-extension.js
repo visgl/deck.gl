@@ -12,8 +12,6 @@ import {makeExample} from '../components';
 class DataFilterDemo extends Component {
   static title = '40 Years of Earthquakes';
 
-  static hasDeviceTabs = true;
-
   static data = {
     url: `${DATA_URI}/earthquakes.txt`,
     worker: '/workers/earthquakes-decoder.js'
@@ -62,7 +60,7 @@ class DataFilterDemo extends Component {
   render() {
     const {data, ...otherProps} = this.props;
     // renders the data filter demo app wrapped in necessary BaseUI and Styletron providers
-    return <App key={this.props.device?.type} device={this.props.device} data={data} {...otherProps} />;
+    return <App data={data} {...otherProps} />;
   }
 }
 

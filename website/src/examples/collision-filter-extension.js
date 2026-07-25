@@ -11,8 +11,6 @@ import {makeExample} from '../components';
 class CollisionDemo extends Component {
   static title = 'Mexico principals roads';
 
-  static hasDeviceTabs = true;
-
   static code = `${GITHUB_TREE}/examples/website/collision-filter`;
 
   static parameters = {
@@ -53,8 +51,6 @@ class CollisionDemo extends Component {
     return (
       <App
         {...otherProps}
-        key={this.props.device?.type}
-        device={this.props.device}
         sizeScale={params.sizeScale.value}
         collisionEnabled={params.collisionEnabled.value}
       />

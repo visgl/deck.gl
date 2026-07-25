@@ -8,6 +8,7 @@ import {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
@@ -17,7 +18,6 @@ import {load} from '@loaders.gl/core';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 import type {CollisionFilterExtensionProps} from '@deck.gl/extensions';
-import type {Device} from '@luma.gl/core';
 
 // Sample data
 const DATA_URL =
@@ -73,6 +73,7 @@ export default function App({
   const scale = 2 ** zoom;
   const sizeMaxPixels = (scale / 3) * fontSize;
   const sizeMinPixels = Math.min(scale / 1000, 0.5) * fontSize;
+
   const textLayer = new TextLayer<City, CollisionFilterExtensionProps<City>>({
     id: 'world-cities',
     data,
@@ -99,7 +100,8 @@ export default function App({
       sizeMaxPixels: sizeMaxPixels * 2,
       sizeMinPixels: sizeMinPixels * 2
     },
-    extensions: [new CollisionFilterExtension()]
+    // CollisionFilterExtension has not been ported to WebGPU yet.
+    extensions: device?.type === 'webgpu' ? [] : [new CollisionFilterExtension()]
   });
 
   return (

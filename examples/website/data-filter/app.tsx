@@ -6,6 +6,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
@@ -15,7 +16,6 @@ import RangeInput from './range-input';
 
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 import type {DataFilterExtensionProps} from '@deck.gl/extensions';
-import type {Device} from '@luma.gl/core';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -90,13 +90,13 @@ function getTooltip({object}: PickingInfo<Earthquake>) {
 }
 
 export default function App({
+  device,
   data,
-  mapStyle = MAP_STYLE,
-  device
+  mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: Earthquake[];
   mapStyle?: string;
-  device?: Device;
 }) {
   const [filter, setFilter] = useState<[start: number, end: number] | null>(null);
 

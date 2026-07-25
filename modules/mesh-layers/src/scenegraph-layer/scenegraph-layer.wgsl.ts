@@ -4,7 +4,6 @@
 
 export default /* wgsl */ `\
 struct VertexInputs {
-  @builtin(instance_index) instanceIndex: u32,
   @location(0) positions: vec3<f32>,
 #ifdef HAS_NORMALS
   @location(1) normals: vec3<f32>,
@@ -31,11 +30,14 @@ struct FragmentInputs {
 };
 
 @vertex
-fn vertexMain(inputs: VertexInputs) -> FragmentInputs {
+fn vertexMain(
+  inputs: VertexInputs,
+  @builtin(instance_index) instanceIndex: u32
+) -> FragmentInputs {
   var outputs: FragmentInputs;
 
   geometry.worldPosition = inputs.instancePositions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(inputs.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
 
   var vertexPosition = inputs.positions;
   var texCoord = vec2<f32>(0.0, 0.0);
@@ -76,11 +78,14 @@ fn vertexMain(inputs: VertexInputs) -> FragmentInputs {
     );
   } else {
     let sizeAdjustedPos = project_size_vec3(pos);
-    geometry.position = vec4<f32>(
-      project_position_vec3_f64(inputs.instancePositions, inputs.instancePositions64Low) +
-        sizeAdjustedPos,
-      1.0
+    // Scenegraph offsets are east/north/up in globe mode. Use project32's helper so it can
+    // rotate the offset onto the local tangent plane before producing the common position.
+    let projectResult = project_position_to_clipspace_and_commonspace(
+      inputs.instancePositions,
+      inputs.instancePositions64Low,
+      sizeAdjustedPos
     );
+    geometry.position = projectResult.commonPosition;
     geometry.normal = project_normal(worldNormal);
   }
 
@@ -101,7 +106,9 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 
 #ifdef LIGHTING_PBR
   fragmentInputs.pbr_vPosition = inputs.pbrPosition;
-  fragmentInputs.pbr_vUV = inputs.pbrUV;
+  // scenegraphPbrMaterial uses the indexed UV fields from the current PBR module.
+  fragmentInputs.pbr_vUV0 = inputs.pbrUV;
+  fragmentInputs.pbr_vUV1 = vec2<f32>(0.0);
   fragmentInputs.pbr_vNormal = inputs.pbrNormal;
   fragColor = fragColor * pbr_filterColor(vec4<f32>(0.0));
 #else
@@ -112,7 +119,7 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 #endif
 #endif
 
-  fragColor.a *= color.opacity;
+  fragColor.a *= layer.opacity;
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

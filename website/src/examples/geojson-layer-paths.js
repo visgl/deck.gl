@@ -86,8 +86,6 @@ class HighwayDemo extends Component {
     return (
       <App
         {...otherProps}
-        key={this.props.device?.type}
-        device={this.props.device}
         year={params.year.value}
         accidents={data && data[0]}
         roads={data && data[1]}

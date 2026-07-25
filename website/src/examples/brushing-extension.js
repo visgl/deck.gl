@@ -15,8 +15,6 @@ const colorRamp = [inFlowColor, outFlowColor]
 class BrushingDemo extends Component {
   static title = 'United States County-to-county Migration';
 
-  static hasDeviceTabs = true;
-
   static data = {
     url: `${DATA_URI}/arc-data.txt`,
     worker: '/workers/arc-data-decoder.js'
@@ -83,8 +81,6 @@ class BrushingDemo extends Component {
     return (
       <App
         {...this.props}
-        key={this.props.device?.type}
-        device={this.props.device}
         enableBrushing={params.enableBrushing.value}
         strokeWidth={params.lineWidth.value}
         brushRadius={params.brushRadius.value}

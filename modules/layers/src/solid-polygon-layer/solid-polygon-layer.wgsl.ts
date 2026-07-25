@@ -6,14 +6,6 @@ type SolidPolygonShaderType = 'top' | 'side';
 
 function getSolidPolygonVertexHelpers() {
   return /* wgsl */ `\
-struct SolidPolygonUniforms {
-  extruded: f32,
-  isWireframe: f32,
-  elevationScale: f32,
-};
-
-@group(0) @binding(0) var<uniform> solidPolygon: SolidPolygonUniforms;
-
 fn project_offset_normal(vector: vec3<f32>) -> vec3<f32> {
   if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
       project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {

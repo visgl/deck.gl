@@ -7,13 +7,13 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, CollisionFilterExtensionProps} from '@deck.gl/extensions';
 import {calculateLabels, Label} from './calculate-labels';
 
 import type {Position, MapViewState} from '@deck.gl/core';
 import type {FeatureCollection, Geometry} from 'geojson';
-import type {Device} from '@luma.gl/core';
 
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/collision-filter/ne_10_roads.json';
@@ -32,17 +32,17 @@ type RoadProperties = {
 };
 
 export default function App({
+  device,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   sizeScale = 10,
   collisionEnabled = true,
-  pointSpacing = 5,
-  device
+  pointSpacing = 5
 }: {
+  device?: Device;
   mapStyle?: string;
   sizeScale?: number;
   collisionEnabled?: boolean;
   pointSpacing?: number;
-  device?: Device;
 }) {
   const [roads, setRoads] = useState<FeatureCollection<Geometry, RoadProperties>>();
 

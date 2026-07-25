@@ -17,7 +17,7 @@ struct ScreenGridUniforms {
 @group(0) @binding(auto) var colorRangeSampler: sampler;
 `;
 
-const uniformBlockGLSL = /* glsl */ `\
+const uniformBlock = /* glsl */ `\
 layout(std140) uniform screenGridUniforms {
   vec2 cellSizeClipspace;
   vec2 gridSizeClipspace;
@@ -35,7 +35,7 @@ export type ScreenGridProps = {
 export const screenGridUniforms = {
   name: 'screenGrid',
   source: uniformBlockWGSL,
-  vs: uniformBlockGLSL,
+  vs: uniformBlock,
   uniformTypes: {
     cellSizeClipspace: 'vec2<f32>',
     gridSizeClipspace: 'vec2<f32>',

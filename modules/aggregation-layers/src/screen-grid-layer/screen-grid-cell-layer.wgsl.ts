@@ -52,6 +52,25 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     }
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
-  return deckgl_premultiplied_alpha(varyings.color);
+
+  var color = varyings.color;
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(varyings.pickingColor - highlightedObjectColor))) {
+      let highLightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highLightAlpha + color.a * (1.0 - highLightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highLightRatio = highLightAlpha / blendedAlpha;
+        color = vec4<f32>(
+          mix(color.rgb, picking.highlightColor.rgb, highLightRatio),
+          blendedAlpha
+        );
+      } else {
+        color = vec4<f32>(color.rgb, 0.0);
+      }
+    }
+  }
+
+  return deckgl_premultiplied_alpha(color);
 }
 `;

@@ -7,6 +7,7 @@ import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {scaleSqrt} from 'd3-scale';
@@ -14,7 +15,6 @@ import {scaleSqrt} from 'd3-scale';
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
 import type {BrushingExtensionProps} from '@deck.gl/extensions';
 import type {Feature, Polygon, MultiPolygon} from 'geojson';
-import type {Device} from '@luma.gl/core';
 
 // Source data GeoJSON
 const DATA_URL =
@@ -108,21 +108,21 @@ function getTooltip({object}: PickingInfo<MigrationDestination>) {
 
 /* eslint-disable react/no-deprecated */
 export default function App({
+  device,
   data,
   enableBrushing = true,
   brushRadius = 100000,
   strokeWidth = 1,
   opacity = 0.7,
-  mapStyle = MAP_STYLE,
-  device
+  mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: County[];
   enableBrushing?: boolean;
   brushRadius?: number;
   strokeWidth?: number;
   opacity?: number;
   mapStyle?: string;
-  device?: Device;
 }) {
   const layerData = useMemo(() => getLayerData(data), [data]);
   const radiusScale = useMemo(() => {

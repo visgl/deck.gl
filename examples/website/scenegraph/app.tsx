@@ -7,11 +7,11 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
 
 // Data provided by the OpenSky Network, https://opensky-network.org
 const DATA_URL = 'https://opensky-network.org/api/states/all';
