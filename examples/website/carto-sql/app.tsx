@@ -6,6 +6,7 @@ import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
 import {colorBins, H3TileLayer} from '@deck.gl/carto';
 import {h3QuerySource} from '@carto/api-client';
@@ -28,9 +29,15 @@ const globalOptions = {
 const transitionInterpolator = new LinearInterpolator();
 
 export default function App({
+  device,
   urbanity = 'any',
   tourism = 0,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+}: {
+  device?: Device;
+  urbanity?: string;
+  tourism?: number;
+  mapStyle?: string;
 }) {
   const [viewState, updateViewState] = useState<Record<string, any>>(INITIAL_VIEW_STATE);
 
@@ -91,6 +98,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       controller={true}
       viewState={viewState}
       layers={layers}

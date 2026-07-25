@@ -7,6 +7,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
@@ -110,10 +111,12 @@ export function useInterval(callback: () => unknown, delay: number) {
 }
 
 export default function App({
+  device,
   sizeScale = 25,
   onDataLoad,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   sizeScale?: number;
   onDataLoad?: (count: number) => void;
   mapStyle?: string;
@@ -178,6 +181,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={[layer]}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
