@@ -47,7 +47,7 @@ Also accepts additional options:
 
 - `zoomAxis` (string) - which axes to apply zoom to. Affects scroll, keyboard +/- and double tap. One of `X` (zoom along the X axis only), `Y` (zoom along the Y axis only), `all`. Default `all`. If this option is set to `X` or `Y`, `viewState.zoom` must be an array to enable independent zoom for each axis.
 - `maxBounds` - constrains the target position within the specified bounding box `[[minX, minY], [maxX, maxY]]`
-- `rubberBand` (boolean) - allows panning to temporarily overshoot `maxBounds` with increasing resistance, then animates the viewport back within bounds on release. Requires `maxBounds`. Default `false`.
+- `rubberBand` (boolean) - allows panning to temporarily overshoot `maxBounds` with increasing resistance, then animates the viewport back within bounds on release. Requires `maxBounds`. Uses the configured `inertia` duration, or a 300 ms default, for the return transition. Default `false`.
 
 ## Custom OrthographicController
 

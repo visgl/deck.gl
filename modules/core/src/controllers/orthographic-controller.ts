@@ -56,6 +56,7 @@ export type OrthographicStateProps = {
   minZoomY?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  /** Enables resisted, spring-backed panning when `maxBounds` is set. */
   rubberBand?: boolean;
 };
 
@@ -182,6 +183,10 @@ export class OrthographicState extends ViewState<
       for (const [index, halfSize] of [halfWidth, halfHeight].entries()) {
         const minimum = maxBounds[0][index] + halfSize;
         const maximum = maxBounds[1][index] - halfSize;
+        if (!Number.isFinite(halfSize) || minimum > maximum) {
+          newProps.target[index] = (maxBounds[0][index] + maxBounds[1][index]) / 2;
+          continue;
+        }
         const constrained = clamp(newProps.target[index], minimum, maximum);
         const overshoot = newProps.target[index] - constrained;
         if (overshoot) {
@@ -415,7 +420,7 @@ export class OrthographicState extends ViewState<
         : props.zoomX;
 
     const {maxBounds, target} = props;
-    if (maxBounds && !(props.rubberBand && RUBBER_BAND_TARGETS.has(target))) {
+    if (maxBounds) {
       // only calculate center and zoom ranges at rotation=0
       // to maintain visual stability when rotating
       const halfWidth = props.width / 2 / 2 ** zoomX;
@@ -424,12 +429,26 @@ export class OrthographicState extends ViewState<
       const maxX = maxBounds[1][0] - halfWidth;
       const minY = maxBounds[0][1] + halfHeight;
       const maxY = maxBounds[1][1] - halfHeight;
-      const x = clamp(target[0], minX, maxX);
-      const y = clamp(target[1], minY, maxY);
+      const preserveRubberBandTarget = Boolean(props.rubberBand && RUBBER_BAND_TARGETS.has(target));
+      const x =
+        minX > maxX && props.rubberBand
+          ? (maxBounds[0][0] + maxBounds[1][0]) / 2
+          : preserveRubberBandTarget
+            ? target[0]
+            : clamp(target[0], minX, maxX);
+      const y =
+        minY > maxY && props.rubberBand
+          ? (maxBounds[0][1] + maxBounds[1][1]) / 2
+          : preserveRubberBandTarget
+            ? target[1]
+            : clamp(target[1], minY, maxY);
       if (x !== target[0] || y !== target[1]) {
         props.target = target.slice();
         props.target[0] = x;
         props.target[1] = y;
+        if (preserveRubberBandTarget && (minX <= maxX || minY <= maxY)) {
+          RUBBER_BAND_TARGETS.add(props.target);
+        }
       }
     }
     return props;
@@ -526,7 +545,15 @@ export default class OrthographicController extends Controller<OrthographicState
     const constrainedTarget = constrainedState.getViewportProps().target;
 
     if (overshotTarget[0] === constrainedTarget[0] && overshotTarget[1] === constrainedTarget[1]) {
-      return super._onPanMoveEnd(event);
+      const currentState = this.controllerState;
+      const currentTarget = currentState.getViewportProps().target;
+      const currentConstrainedTarget = currentState.panEnd().getViewportProps().target;
+      if (
+        currentTarget[0] === currentConstrainedTarget[0] &&
+        currentTarget[1] === currentConstrainedTarget[1]
+      ) {
+        return super._onPanMoveEnd(event);
+      }
     }
 
     this.updateViewport(
