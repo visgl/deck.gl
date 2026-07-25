@@ -60,7 +60,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `S2Layer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |

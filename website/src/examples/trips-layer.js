@@ -13,6 +13,8 @@ import {makeExample} from '../components';
 class TripsDemo extends Component {
   static title = 'Yellow Cab Vs. Green Cab Trips in Manhattan';
 
+  static hasDeviceTabs = true;
+
   static data = [
     {
       url: `${DATA_URI}/trips-data.txt`,

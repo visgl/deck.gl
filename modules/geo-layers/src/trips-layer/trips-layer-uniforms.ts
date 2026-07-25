@@ -4,7 +4,18 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const uniformBlockWGSL = /* wgsl */ `\
+struct TripsUniforms {
+  fadeTrail: f32,
+  trailLength: f32,
+  currentTime: f32,
+};
+
+@group(0) @binding(auto)
+var<uniform> trips: TripsUniforms;
+`;
+
+const uniformBlockGLSL = `\
 layout(std140) uniform tripsUniforms {
   bool fadeTrail;
   float trailLength;
@@ -20,8 +31,9 @@ export type TripsProps = {
 
 export const tripsUniforms = {
   name: 'trips',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: uniformBlockWGSL,
+  vs: uniformBlockGLSL,
+  fs: uniformBlockGLSL,
   uniformTypes: {
     fadeTrail: 'f32',
     trailLength: 'f32',

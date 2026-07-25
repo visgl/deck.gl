@@ -107,6 +107,7 @@ export default function App({
   theme?: Theme;
 }) {
   const [time, setTime] = useState(0);
+  const isWebGPU = device?.type === 'webgpu';
 
   useEffect(() => {
     const animation = animate({
@@ -153,13 +154,13 @@ export default function App({
       getFillColor: theme.buildingColor,
       material: theme.material
     })
-  ];
+  ].filter(layer => !isWebGPU || layer instanceof TripsLayer);
 
   return (
     <DeckGL
       device={device}
       layers={layers}
-      effects={theme.effects}
+      effects={isWebGPU ? [] : theme.effects}
       initialViewState={initialViewState}
       controller={true}
     >

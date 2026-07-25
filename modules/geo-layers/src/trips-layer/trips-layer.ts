@@ -7,6 +7,7 @@ import {AccessorFunction, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
 import {tripsUniforms, TripsProps} from './trips-layer-uniforms';
+import {packTripTimestamps, tripsShaderInjectionsWGSL} from './trips-layer.wgsl';
 
 const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
@@ -51,32 +52,35 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
 
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      'vs:#decl': `\
+    shaders.inject =
+      this.context.device.type === 'webgpu'
+        ? tripsShaderInjectionsWGSL
+        : {
+            'vs:#decl': `\
 in float instanceTimestamps;
 in float instanceNextTimestamps;
 out float vTime;
 `,
-      // Timestamp of the vertex
-      'vs:#main-end': `\
+            // Timestamp of the vertex
+            'vs:#main-end': `\
 vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
 `,
-      'fs:#decl': `\
+            'fs:#decl': `\
 in float vTime;
 `,
-      // Drop the segments outside of the time window
-      'fs:#main-start': `\
+            // Drop the segments outside of the time window
+            'fs:#main-start': `\
 if(vTime > trips.currentTime || (trips.fadeTrail && (vTime < trips.currentTime - trips.trailLength))) {
   discard;
 }
 `,
-      // Fade the color (currentTime - 100%, end of trail - 0%)
-      'fs:DECKGL_FILTER_COLOR': `\
+            // Fade the color (currentTime - 100%, end of trail - 0%)
+            'fs:DECKGL_FILTER_COLOR': `\
 if(trips.fadeTrail) {
   color.a *= 1.0 - (trips.currentTime - vTime) / trips.trailLength;
 }
 `
-    };
+          };
     shaders.modules = [...shaders.modules, tripsUniforms];
     return shaders;
   }
@@ -86,18 +90,29 @@ if(trips.fadeTrail) {
 
     const attributeManager = this.getAttributeManager();
     attributeManager!.addInstanced({
-      timestamps: {
-        size: 1,
-        accessor: 'getTimestamps',
-        shaderAttributes: {
-          instanceTimestamps: {
-            vertexOffset: 0
-          },
-          instanceNextTimestamps: {
-            vertexOffset: 1
-          }
-        }
-      }
+      timestamps:
+        this.context.device.type === 'webgpu'
+          ? {
+              size: 2,
+              accessor: 'getTimestamps',
+              transform: packTripTimestamps,
+              bufferGroup: 'path-instance-data',
+              shaderAttributes: {
+                instanceTimestamps: {size: 2}
+              }
+            }
+          : {
+              size: 1,
+              accessor: 'getTimestamps',
+              shaderAttributes: {
+                instanceTimestamps: {
+                  vertexOffset: 0
+                },
+                instanceNextTimestamps: {
+                  vertexOffset: 1
+                }
+              }
+            }
     });
   }
 
