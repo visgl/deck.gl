@@ -5,6 +5,11 @@
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {GridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {gridUniforms} from '@deck.gl/aggregation-layers/grid-layer/grid-layer-uniforms';
+import {
+  getShaderModuleSource,
+  getShaderModuleUniformLayoutValidationResult
+} from '@luma.gl/shadertools';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -13,6 +18,31 @@ const SAMPLE_PROPS = {
   getPosition: d => d.COORDINATES
   // gpuAggregation: false
 };
+
+test('GridLayer#WGSL grid uniform layout', () => {
+  const validationResult = getShaderModuleUniformLayoutValidationResult(gridUniforms, 'wgsl');
+
+  expect(validationResult, 'WGSL grid module exposes a uniform block').toBeTruthy();
+  expect(validationResult?.matches, 'WGSL block matches declared uniform types').toBe(true);
+  expect(validationResult?.expectedUniformNames, 'uniform field order stays stable').toEqual([
+    'colorDomain',
+    'elevationDomain',
+    'elevationRange',
+    'originCommon',
+    'sizeCommon'
+  ]);
+});
+
+test('GridLayer#WGSL color range bindings', () => {
+  const source = getShaderModuleSource(gridUniforms, 'wgsl');
+
+  expect(source, 'WGSL grid module declares its color-range texture').toContain(
+    'var colorRange: texture_2d<f32>'
+  );
+  expect(source, 'WGSL grid module declares its color-range sampler').toContain(
+    'var colorRangeSampler: sampler'
+  );
+});
 
 test('GridLayer', () => {
   const testCases = generateLayerTests({
