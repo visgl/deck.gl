@@ -14,7 +14,6 @@ import sampleData from './all.json';
 
 import type {ScenegraphLayerProps} from '@deck.gl/mesh-layers';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
 
 // Live data provided by the OpenSky Network, https://opensky-network.org.
 // The API may reject browser requests from other origins, so the bundled
