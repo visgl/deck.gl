@@ -18,7 +18,6 @@ import {load} from '@loaders.gl/core';
 
 import type {Color, MapViewState} from '@deck.gl/core';
 import type {CollisionFilterExtensionProps} from '@deck.gl/extensions';
-import type {Device} from '@luma.gl/core';
 
 // Sample data
 const DATA_URL =

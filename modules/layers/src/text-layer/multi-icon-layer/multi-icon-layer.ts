@@ -70,13 +70,13 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   getShaders() {
     const shaders = super.getShaders();
-    const textShaders = {
+    return {
       ...shaders,
       modules: [...shaders.modules, textUniforms, sdfUniforms],
       vs,
-      fs
+      fs,
+      source
     };
-    return this.context.device.type === 'webgpu' ? {...textShaders, source} : textShaders;
   }
 
   initializeState() {
