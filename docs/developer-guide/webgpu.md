@@ -53,7 +53,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ✅ v9.4  |
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
+| `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
