@@ -235,7 +235,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
-    attributes.instanceColors.a * color.opacity
+    attributes.instanceColors.a * layer.opacity
   );
   return varyings;
 }

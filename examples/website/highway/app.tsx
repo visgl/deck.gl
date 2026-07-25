@@ -11,7 +11,6 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
-import {Device} from '@luma.gl/core';
 
 import {Feature, LineString, MultiLineString} from 'geojson';
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';

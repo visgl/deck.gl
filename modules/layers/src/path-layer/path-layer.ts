@@ -136,13 +136,11 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    const isWebGPU = this.context.device.type === 'webgpu';
-
     return super.getShaders({
       vs,
       fs,
-      ...(isWebGPU ? {source} : {}),
-      modules: [project32, ...(isWebGPU ? [color] : []), picking, pathUniforms]
+      source,
+      modules: [project32, color, picking, pathUniforms]
     }); // 'project' module added by default.
   }
 
