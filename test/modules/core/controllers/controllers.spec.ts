@@ -323,6 +323,188 @@ test('OrthographicController', async () => {
   );
 });
 
+const ORTHOGRAPHIC_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [0, 0],
+  [200, 200]
+];
+
+test('OrthographicController keeps maxBounds hard by default', () => {
+  for (const rubberBand of [undefined, false]) {
+    const controller = createTestController({
+      view: new OrthographicView({
+        controller: {
+          maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
+          rubberBand
+        }
+      }),
+      initialViewState: {target: [100, 100, 0], zoom: 0}
+    });
+
+    controller.handleEvent(makeGestureEvent('panstart') as any);
+    controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
+
+    expect(controller.props.target, 'panning stops at the visible bounds').toEqual([50, 100]);
+    controller.finalize();
+  }
+});
+
+test('OrthographicController applies resistance beyond every edge', () => {
+  for (const {x, y, axes} of [
+    {x: 200, y: 50, axes: [0]},
+    {x: -100, y: 50, axes: [0]},
+    {x: 50, y: 200, axes: [1]},
+    {x: 50, y: -100, axes: [1]},
+    {x: 200, y: 200, axes: [0, 1]}
+  ]) {
+    const controller = createTestController({
+      view: new OrthographicView({
+        controller: {
+          maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
+          rubberBand: true
+        }
+      }),
+      initialViewState: {target: [100, 100, 0], zoom: 0}
+    });
+
+    controller.handleEvent(makeGestureEvent('panstart') as any);
+    controller.handleEvent(makeGestureEvent('panmove', {x, y}) as any);
+
+    for (const axis of axes) {
+      const displacement = Math.abs(controller.props.target[axis] - 100);
+      expect(Number.isFinite(displacement), 'overscroll stays finite').toBe(true);
+      expect(displacement, 'panning temporarily exceeds the visible bounds').toBeGreaterThan(50);
+      expect(displacement, 'overscroll is smaller than the unresisted displacement').toBeLessThan(
+        150
+      );
+    }
+    controller.finalize();
+  }
+});
+
+test('OrthographicController springs overscroll back within maxBounds', () => {
+  for (const {inertia, velocity} of [
+    {inertia: undefined, velocity: 0},
+    {inertia: 450, velocity: 1}
+  ]) {
+    const interactionStates: any[] = [];
+    const controller = createTestController({
+      view: new OrthographicView({
+        controller: {
+          maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
+          rubberBand: true,
+          inertia
+        }
+      }),
+      initialViewState: {target: [100, 100, 0], zoom: 0},
+      onStateChange: state => interactionStates.push({...state})
+    });
+
+    controller.handleEvent(makeGestureEvent('panstart') as any);
+    controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
+    const draggedTarget = controller.props.target[0];
+    controller.handleEvent({
+      ...makeGestureEvent('panend', {x: 200}),
+      velocity,
+      velocityX: velocity,
+      velocityY: 0
+    } as any);
+
+    const transition = controller.transitionManager.transition;
+    expect(transition.inProgress, 'release starts a spring-back transition').toBe(true);
+    expect(transition.settings.duration, 'spring-back uses the configured inertia').toBe(
+      inertia ?? 300
+    );
+
+    const timeline: Timeline = transition._timeline;
+    timeline.setTime(timeline.getTime() + transition.settings.duration / 4);
+    controller.updateTransition();
+    if (velocity) {
+      expect(controller.props.target[0], 'a fling increases the initial overshoot').toBeLessThan(
+        draggedTarget
+      );
+    }
+
+    timeline.setTime(timeline.getTime() + (transition.settings.duration * 3) / 4);
+    controller.updateTransition();
+
+    expect(controller.props.target, 'spring-back finishes exactly at the edge').toEqual([50, 100]);
+    expect(transition.inProgress, 'the transition finishes').toBe(false);
+    expect(
+      interactionStates[interactionStates.length - 1],
+      'interaction state is cleared'
+    ).toMatchObject({
+      inTransition: false,
+      isDragging: false,
+      isPanning: false
+    });
+    controller.finalize();
+  }
+});
+
+test('OrthographicController interrupts rubber-band spring-back with a new pan', () => {
+  const interactionStates: any[] = [];
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
+        rubberBand: true
+      }
+    }),
+    initialViewState: {target: [100, 100, 0], zoom: 0},
+    onStateChange: state => interactionStates.push({...state})
+  });
+
+  controller.handleEvent(makeGestureEvent('panstart') as any);
+  controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
+  controller.handleEvent(makeGestureEvent('panend', {x: 200}) as any);
+  expect(controller.transitionManager.transition.inProgress).toBe(true);
+
+  controller.handleEvent(makeGestureEvent('panstart') as any);
+
+  expect(controller.transitionManager.transition.inProgress).toBe(false);
+  expect(interactionStates[interactionStates.length - 1]).toMatchObject({
+    inTransition: false,
+    isDragging: true,
+    isPanning: false
+  });
+  controller.finalize();
+});
+
+test('OrthographicController applies rubber-band resistance to multi-touch panning', () => {
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
+        rubberBand: true,
+        multiTouchDrag: 'pan'
+      }
+    }),
+    initialViewState: {target: [100, 100, 0], zoom: 0}
+  });
+
+  controller.handleEvent(makeGestureEvent('multipanstart') as any);
+  controller.handleEvent(makeGestureEvent('multipanmove', {x: 200, deltaX: 150}) as any);
+
+  expect(controller.props.target[0], 'multi-touch panning overshoots the edge').toBeLessThan(50);
+  expect(controller.props.target[0], 'multi-touch overscroll is resisted').toBeGreaterThan(-50);
+  controller.finalize();
+});
+
+test('OrthographicController ignores rubberBand without maxBounds', () => {
+  for (const rubberBand of [false, true]) {
+    const controller = createTestController({
+      view: new OrthographicView({controller: {rubberBand}}),
+      initialViewState: {target: [100, 100, 0], zoom: 0}
+    });
+
+    controller.handleEvent(makeGestureEvent('panstart') as any);
+    controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
+
+    expect(controller.props.target, 'unbounded panning is unchanged').toEqual([-50, 100]);
+    controller.finalize();
+  }
+});
+
 test('OrthographicController supports multipan only in pan mode', () => {
   const panController = createTestController({
     view: new OrthographicView({controller: {multiTouchDrag: 'pan'}}),

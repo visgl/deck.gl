@@ -10,6 +10,36 @@ import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import type {MjolnirGestureEvent} from 'mjolnir.js';
 
+// Only gesture and transition targets may temporarily exceed maxBounds.
+const RUBBER_BAND_TARGETS = new WeakSet<number[]>();
+
+class RubberBandInterpolator extends LinearInterpolator {
+  private target: number[];
+
+  constructor(target: number[]) {
+    super(['target', 'zoomX', 'zoomY']);
+    this.target = target;
+  }
+
+  override interpolateProps(
+    startProps: Record<string, any>,
+    endProps: Record<string, any>,
+    t: number
+  ): Record<string, any> {
+    const props = super.interpolateProps(startProps, endProps, t);
+    if (t < 1) {
+      props.target = this.target.map(
+        (value: number, index: number) =>
+          (1 - t) * (1 - t) * (startProps.target[index] ?? value) +
+          2 * (1 - t) * t * value +
+          t * t * (endProps.target[index] ?? value)
+      );
+      RUBBER_BAND_TARGETS.add(props.target);
+    }
+    return props;
+  }
+}
+
 export type OrthographicStateProps = {
   width: number;
   height: number;
@@ -26,6 +56,7 @@ export type OrthographicStateProps = {
   minZoomY?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  rubberBand?: boolean;
 };
 
 type OrthographicStateInternal = {
@@ -81,6 +112,7 @@ export class OrthographicState extends ViewState<
       maxZoomY = maxZoom,
 
       maxBounds = null,
+      rubberBand = false,
 
       /** Interaction states, required to calculate change during transform */
       // Model state when the pan operation first started
@@ -105,7 +137,8 @@ export class OrthographicState extends ViewState<
         maxZoomX,
         minZoomY,
         maxZoomY,
-        maxBounds
+        maxBounds,
+        rubberBand
       },
       {
         startPanPosition,
@@ -139,6 +172,26 @@ export class OrthographicState extends ViewState<
 
     const viewport = this.makeViewport(this.getViewportProps());
     const newProps = viewport.panByPosition(startPanPosition, pos);
+    const {maxBounds, rubberBand, width, height, zoomX, zoomY} = this.getViewportProps();
+
+    if (rubberBand && maxBounds && this.getState().startPanPosition) {
+      const halfWidth = width / 2 / 2 ** zoomX;
+      const halfHeight = height / 2 / 2 ** zoomY;
+      newProps.target = newProps.target.slice();
+
+      for (const [index, halfSize] of [halfWidth, halfHeight].entries()) {
+        const minimum = maxBounds[0][index] + halfSize;
+        const maximum = maxBounds[1][index] - halfSize;
+        const constrained = clamp(newProps.target[index], minimum, maximum);
+        const overshoot = newProps.target[index] - constrained;
+        if (overshoot) {
+          newProps.target[index] =
+            constrained + (overshoot * halfSize) / (halfSize + Math.abs(overshoot));
+        }
+      }
+
+      RUBBER_BAND_TARGETS.add(newProps.target);
+    }
 
     return this._getUpdatedState(newProps);
   }
@@ -148,8 +201,10 @@ export class OrthographicState extends ViewState<
    * Must call if `panStart()` was called
    */
   panEnd(): OrthographicState {
+    const {target} = this.getViewportProps();
     return this._getUpdatedState({
-      startPanPosition: null
+      startPanPosition: null,
+      ...(RUBBER_BAND_TARGETS.has(target) && {target: target.slice()})
     });
   }
 
@@ -360,7 +415,7 @@ export class OrthographicState extends ViewState<
         : props.zoomX;
 
     const {maxBounds, target} = props;
-    if (maxBounds) {
+    if (maxBounds && !(props.rubberBand && RUBBER_BAND_TARGETS.has(target))) {
       // only calculate center and zoom ranges at rotation=0
       // to maintain visual stability when rotating
       const halfWidth = props.width / 2 / 2 ** zoomX;
@@ -440,8 +495,64 @@ export default class OrthographicController extends Controller<OrthographicState
     super.setProps(props);
   }
 
+  protected override _onPanStart(event: MjolnirGestureEvent): boolean {
+    const handled = super._onPanStart(event);
+    if (handled) {
+      this._cancelRubberBandTransition();
+    }
+    return handled;
+  }
+
+  protected override _onPanMoveEnd(event: MjolnirGestureEvent): boolean {
+    if (!this.props.rubberBand || !this.props.maxBounds || !this.dragPan) {
+      return super._onPanMoveEnd(event);
+    }
+
+    const duration = this.inertia || this.transition.transitionDuration;
+    let overshotState = this.controllerState;
+
+    if (event.velocity) {
+      const position = this.getCenter(event);
+      overshotState = overshotState.pan({
+        pos: [
+          position[0] + (event.velocityX * duration) / 2,
+          position[1] + (event.velocityY * duration) / 2
+        ]
+      });
+    }
+
+    const constrainedState = overshotState.panEnd();
+    const overshotTarget = overshotState.getViewportProps().target;
+    const constrainedTarget = constrainedState.getViewportProps().target;
+
+    if (overshotTarget[0] === constrainedTarget[0] && overshotTarget[1] === constrainedTarget[1]) {
+      return super._onPanMoveEnd(event);
+    }
+
+    this.updateViewport(
+      constrainedState,
+      {
+        ...this._getTransitionProps(),
+        transitionDuration: duration,
+        transitionInterpolator: new RubberBandInterpolator(overshotTarget)
+      },
+      {isDragging: false, isPanning: true}
+    );
+    return true;
+  }
+
   protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
-    return this.multiTouchDrag === 'pan' && super._onMultiPanStart(event);
+    const handled = this.multiTouchDrag === 'pan' && super._onMultiPanStart(event);
+    if (handled) {
+      this._cancelRubberBandTransition();
+    }
+    return handled;
+  }
+
+  private _cancelRubberBandTransition(): void {
+    if (this.props.rubberBand && this.props.maxBounds) {
+      this.transitionManager.transition.cancel();
+    }
   }
 
   _onPanRotate() {
