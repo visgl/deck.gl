@@ -90,18 +90,17 @@ if(trips.fadeTrail) {
 
     const attributeManager = this.getAttributeManager();
     attributeManager!.addInstanced({
-      timestamps:
-        this.context.device.type === 'webgpu'
-          ? {
+      ...(this.context.device.type === 'webgpu'
+        ? {
+            instanceTimestamps: {
               size: 2,
               accessor: 'getTimestamps',
               transform: packTripTimestamps,
-              bufferGroup: 'path-instance-data',
-              shaderAttributes: {
-                instanceTimestamps: {size: 2}
-              }
+              bufferGroup: 'path-instance-data'
             }
-          : {
+          }
+        : {
+            timestamps: {
               size: 1,
               accessor: 'getTimestamps',
               shaderAttributes: {
@@ -113,6 +112,7 @@ if(trips.fadeTrail) {
                 }
               }
             }
+          })
     });
   }
 
