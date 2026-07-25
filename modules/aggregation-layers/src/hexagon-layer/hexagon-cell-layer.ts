@@ -36,7 +36,7 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
   getShaders() {
     const shaders = super.getShaders();
     shaders.modules.push(hexagonUniforms);
-    return this.context.device.type === 'webgpu' ? {...shaders, source, vs} : {...shaders, vs};
+    return {...shaders, source, vs};
   }
 
   initializeState() {
