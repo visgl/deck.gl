@@ -92,8 +92,11 @@ export type ControllerOptions = {
     | [min: [number, number], max: [number, number]]
     | [min: [number, number, number], max: [number, number, number]]
     | null;
-  /** Allow orthographic panning to temporarily overshoot `maxBounds`. Default `false`. */
-  rubberBand?: boolean;
+  /**
+   * Allows orthographic panning to temporarily exceed `maxBounds` and spring back.
+   * @default false
+   */
+  maxBoundsRubberBand?: boolean;
 };
 
 export type ControllerProps = {

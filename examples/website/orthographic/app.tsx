@@ -228,7 +228,7 @@ export default function App({
       initialViewState={initialViewState}
       controller={{
         maxBounds: contentBounds,
-        rubberBand: true
+        maxBoundsRubberBand: true
       }}
       layers={layers}
       layerFilter={layerFilter}

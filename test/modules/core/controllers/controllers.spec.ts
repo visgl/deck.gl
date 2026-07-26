@@ -4,6 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {
+  type ControllerProps,
   MapView,
   OrbitView,
   OrthographicView,
@@ -328,24 +329,96 @@ const ORTHOGRAPHIC_MAX_BOUNDS: [[number, number], [number, number]] = [
   [200, 200]
 ];
 
+type RubberBandControllerOptions = Omit<Parameters<typeof createTestController>[0], 'view'> & {
+  controller?: Partial<ControllerProps>;
+};
+
+/** Creates a bounded orthographic controller with elasticity enabled by default. */
+function createRubberBandController({
+  controller: controllerOptions,
+  initialViewState,
+  ...options
+}: RubberBandControllerOptions = {}) {
+  return createTestController({
+    ...options,
+    view: new OrthographicView({
+      controller: {
+        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
+        maxBoundsRubberBand: true,
+        ...controllerOptions
+      }
+    }),
+    initialViewState: {target: [100, 100, 0], zoom: 0, ...initialViewState}
+  });
+}
+
+/** Replays a pointer or two-finger pan through deck.gl's normal gesture handlers. */
+function panRubberBand(
+  controller: ReturnType<typeof createTestController>,
+  position: Parameters<typeof makeGestureEvent>[1] = {x: 200},
+  gesture: 'pan' | 'multipan' = 'pan'
+) {
+  controller.handleEvent(makeGestureEvent(`${gesture}start`) as any);
+  return controller.handleEvent(makeGestureEvent(`${gesture}move`, position) as any);
+}
+
+/** Advances a spring-back deterministically on the controller's own timeline. */
+function advanceRubberBandTransition(
+  controller: ReturnType<typeof createTestController>,
+  duration: number
+) {
+  const timeline: Timeline = controller.transitionManager.transition._timeline;
+  timeline.setTime(timeline.getTime() + duration);
+  controller.updateTransition();
+}
+
+/** Checks that both gesture and transition interaction flags are cleared. */
+function expectRubberBandInteractionEnded(interactionStates: any[]) {
+  expect(
+    interactionStates[interactionStates.length - 1],
+    'interaction state is cleared'
+  ).toMatchObject({
+    inTransition: false,
+    isDragging: false,
+    isPanning: false
+  });
+}
+
 test('OrthographicController keeps maxBounds hard by default', () => {
-  for (const rubberBand of [undefined, false]) {
-    const controller = createTestController({
-      view: new OrthographicView({
-        controller: {
-          maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-          rubberBand
-        }
-      }),
-      initialViewState: {target: [100, 100, 0], zoom: 0}
-    });
-
-    controller.handleEvent(makeGestureEvent('panstart') as any);
-    controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
-
+  for (const maxBoundsRubberBand of [undefined, false]) {
+    const controller = createRubberBandController({controller: {maxBoundsRubberBand}});
+    panRubberBand(controller);
     expect(controller.props.target, 'panning stops at the visible bounds').toEqual([50, 100]);
     controller.finalize();
   }
+});
+
+test('OrthographicController keeps non-gesture bounds hard with rubber-banding enabled', () => {
+  const controller = createRubberBandController({
+    controller: {keyboard: {moveSpeed: 150}},
+    initialViewState: {target: [-100, 100, 0]},
+    onViewStateChange: ({viewState}) => ({...viewState, transitionDuration: 0})
+  });
+  expect(controller.props.target, 'programmatic view state is hard-clamped').toEqual([50, 100, 0]);
+  controller.handleEvent({
+    type: 'keydown',
+    srcEvent: {code: 'ArrowRight', preventDefault() {}},
+    stopPropagation() {}
+  } as any);
+  expect(controller.props.target[0], 'keyboard navigation is hard-clamped').toBe(50);
+  controller.finalize();
+
+  const disabledController = createRubberBandController({controller: {dragPan: false}});
+  const handled = panRubberBand(disabledController);
+  expect(handled, 'disabled panning ignores movement').toBe(false);
+  expect(disabledController.props.target, 'disabled panning does not overscroll').toEqual([
+    100, 100, 0
+  ]);
+  expect(
+    disabledController.transitionManager.transition.inProgress,
+    'disabled panning does not start a spring-back'
+  ).toBe(false);
+  disabledController.finalize();
 });
 
 test('OrthographicController applies resistance beyond every edge', () => {
@@ -356,19 +429,8 @@ test('OrthographicController applies resistance beyond every edge', () => {
     {x: 50, y: -100, axes: [1]},
     {x: 200, y: 200, axes: [0, 1]}
   ]) {
-    const controller = createTestController({
-      view: new OrthographicView({
-        controller: {
-          maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-          rubberBand: true
-        }
-      }),
-      initialViewState: {target: [100, 100, 0], zoom: 0}
-    });
-
-    controller.handleEvent(makeGestureEvent('panstart') as any);
-    controller.handleEvent(makeGestureEvent('panmove', {x, y}) as any);
-
+    const controller = createRubberBandController();
+    panRubberBand(controller, {x, y});
     for (const axis of axes) {
       const displacement = Math.abs(controller.props.target[axis] - 100);
       expect(Number.isFinite(displacement), 'overscroll stays finite').toBe(true);
@@ -388,9 +450,7 @@ test.each([
       [0, 10],
       [200, 11]
     ] as [[number, number], [number, number]],
-    target: [100, 10.5, 0],
-    maxZoomX: 6,
-    maxZoomY: 2,
+    initialViewState: {target: [100, 10.5, 0], zoomAxis: 'X', maxZoomX: 6, maxZoomY: 2},
     position: {x: 200, y: 50},
     elasticAxis: 0,
     centeredAxis: 1
@@ -401,76 +461,31 @@ test.each([
       [10, 0],
       [11, 200]
     ] as [[number, number], [number, number]],
-    target: [10.5, 100, 0],
-    maxZoomX: 2,
-    maxZoomY: 6,
+    initialViewState: {target: [10.5, 100, 0], zoomAxis: 'X', maxZoomX: 2, maxZoomY: 6},
     position: {x: 50, y: 200},
     elasticAxis: 1,
     centeredAxis: 0
   }
 ])('OrthographicController preserves rubber-band panning when $description', testCase => {
+  const {maxBounds, initialViewState, position, elasticAxis, centeredAxis} = testCase;
   const interactionStates: any[] = [];
-  const controller = createTestController({
-    view: new OrthographicView({
-      controller: {
-        maxBounds: testCase.maxBounds,
-        rubberBand: true
-      }
-    }),
-    initialViewState: {
-      target: testCase.target,
-      zoom: 0,
-      zoomAxis: 'X',
-      maxZoomX: testCase.maxZoomX,
-      maxZoomY: testCase.maxZoomY
-    },
+  const controller = createRubberBandController({
+    controller: {maxBounds},
+    initialViewState,
     onStateChange: state => interactionStates.push({...state})
   });
-
-  expect(controller.props.target[testCase.centeredAxis], 'the non-fitting axis is centered').toBe(
-    10.5
-  );
-
-  controller.handleEvent(makeGestureEvent('panstart') as any);
-  controller.handleEvent(makeGestureEvent('panmove', testCase.position) as any);
-
-  expect(
-    controller.props.target[testCase.centeredAxis],
-    'panning keeps the other axis centered'
-  ).toBe(10.5);
-  expect(controller.props.target[testCase.elasticAxis], 'the fitting axis overshoots').toBeLessThan(
-    50
-  );
-  expect(
-    controller.props.target[testCase.elasticAxis],
-    'the overshoot is resisted'
-  ).toBeGreaterThan(-50);
-
-  controller.handleEvent(makeGestureEvent('panend', testCase.position) as any);
-
+  expect(controller.props.target[centeredAxis], 'the non-fitting axis is centered').toBe(10.5);
+  panRubberBand(controller, position);
+  expect(controller.props.target[centeredAxis], 'panning keeps the other axis centered').toBe(10.5);
+  expect(controller.props.target[elasticAxis], 'the fitting axis overshoots').toBeLessThan(50);
+  expect(controller.props.target[elasticAxis], 'the overshoot is resisted').toBeGreaterThan(-50);
+  controller.handleEvent(makeGestureEvent('panend', position) as any);
   const transition = controller.transitionManager.transition;
   expect(transition.inProgress, 'the fitting axis starts a spring-back transition').toBe(true);
-
-  const timeline: Timeline = transition._timeline;
-  timeline.setTime(timeline.getTime() + transition.settings.duration);
-  controller.updateTransition();
-
-  expect(
-    controller.props.target[testCase.elasticAxis],
-    'the fitting axis settles at its edge'
-  ).toBe(50);
-  expect(
-    controller.props.target[testCase.centeredAxis],
-    'the non-fitting axis stays centered'
-  ).toBe(10.5);
-  expect(
-    interactionStates[interactionStates.length - 1],
-    'interaction state is cleared'
-  ).toMatchObject({
-    inTransition: false,
-    isDragging: false,
-    isPanning: false
-  });
+  advanceRubberBandTransition(controller, transition.settings.duration);
+  expect(controller.props.target[elasticAxis], 'the fitting axis settles at its edge').toBe(50);
+  expect(controller.props.target[centeredAxis], 'the non-fitting axis stays centered').toBe(10.5);
+  expectRubberBandInteractionEnded(interactionStates);
   controller.finalize();
 });
 
@@ -480,20 +495,11 @@ test('OrthographicController springs overscroll back within maxBounds', () => {
     {inertia: 450, velocity: 1}
   ]) {
     const interactionStates: any[] = [];
-    const controller = createTestController({
-      view: new OrthographicView({
-        controller: {
-          maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-          rubberBand: true,
-          inertia
-        }
-      }),
-      initialViewState: {target: [100, 100, 0], zoom: 0},
+    const controller = createRubberBandController({
+      controller: {inertia},
       onStateChange: state => interactionStates.push({...state})
     });
-
-    controller.handleEvent(makeGestureEvent('panstart') as any);
-    controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
+    panRubberBand(controller);
     const draggedTarget = controller.props.target[0];
     controller.handleEvent({
       ...makeGestureEvent('panend', {x: 200}),
@@ -501,122 +507,70 @@ test('OrthographicController springs overscroll back within maxBounds', () => {
       velocityX: velocity,
       velocityY: 0
     } as any);
-
     const transition = controller.transitionManager.transition;
     expect(transition.inProgress, 'release starts a spring-back transition').toBe(true);
     expect(transition.settings.duration, 'spring-back uses the configured inertia').toBe(
       inertia ?? 300
     );
-
-    const timeline: Timeline = transition._timeline;
-    timeline.setTime(timeline.getTime() + transition.settings.duration / 4);
-    controller.updateTransition();
+    advanceRubberBandTransition(controller, transition.settings.duration / 4);
     if (velocity) {
       expect(controller.props.target[0], 'a fling increases the initial overshoot').toBeLessThan(
         draggedTarget
       );
     }
-
-    timeline.setTime(timeline.getTime() + (transition.settings.duration * 3) / 4);
-    controller.updateTransition();
-
+    advanceRubberBandTransition(controller, (transition.settings.duration * 3) / 4);
     expect(controller.props.target, 'spring-back finishes exactly at the edge').toEqual([50, 100]);
     expect(transition.inProgress, 'the transition finishes').toBe(false);
-    expect(
-      interactionStates[interactionStates.length - 1],
-      'interaction state is cleared'
-    ).toMatchObject({
-      inTransition: false,
-      isDragging: false,
-      isPanning: false
-    });
+    expectRubberBandInteractionEnded(interactionStates);
     controller.finalize();
   }
 });
 
 test('OrthographicController preserves overscroll during an inward fling', () => {
   const interactionStates: any[] = [];
-  const controller = createTestController({
-    view: new OrthographicView({
-      controller: {
-        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-        rubberBand: true,
-        inertia: 300
-      }
-    }),
-    initialViewState: {target: [100, 100, 0], zoom: 0},
+  const controller = createRubberBandController({
+    controller: {inertia: 300},
     onStateChange: state => interactionStates.push({...state})
   });
-
-  controller.handleEvent(makeGestureEvent('panstart') as any);
-  controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
-
+  panRubberBand(controller);
   const draggedTarget = controller.props.target[0];
   expect(draggedTarget, 'the drag temporarily exceeds the visible edge').toBeLessThan(50);
-
   controller.handleEvent({
     ...makeGestureEvent('panend', {x: 200}),
     velocity: 1,
     velocityX: -1,
     velocityY: 0
   } as any);
-
   const transition = controller.transitionManager.transition;
   expect(transition.inProgress, 'the inward release starts a rubber-band transition').toBe(true);
   expect(
     controller.props.target[0],
     'the first transition frame does not snap to the edge'
   ).toBeCloseTo(draggedTarget);
-
-  const timeline: Timeline = transition._timeline;
-  timeline.setTime(timeline.getTime() + 20);
-  controller.updateTransition();
-
+  advanceRubberBandTransition(controller, 20);
   expect(controller.props.target[0], 'the spring moves inward').toBeGreaterThan(draggedTarget);
   expect(
     controller.props.target[0],
     'the early transition frame remains overscrolled'
   ).toBeLessThan(50);
-
-  timeline.setTime(timeline.getTime() + 280);
-  controller.updateTransition();
-
+  advanceRubberBandTransition(controller, 280);
   expect(controller.props.target, 'the fling settles at the projected in-bounds target').toEqual([
     100, 100
   ]);
   expect(transition.inProgress, 'the transition finishes').toBe(false);
-  expect(
-    interactionStates[interactionStates.length - 1],
-    'interaction state is cleared'
-  ).toMatchObject({
-    inTransition: false,
-    isDragging: false,
-    isPanning: false
-  });
+  expectRubberBandInteractionEnded(interactionStates);
   controller.finalize();
 });
 
 test('OrthographicController preserves native inertia for in-bounds flings', () => {
-  const controller = createTestController({
-    view: new OrthographicView({
-      controller: {
-        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-        rubberBand: true,
-        inertia: 300
-      }
-    }),
-    initialViewState: {target: [100, 100, 0], zoom: 0}
-  });
-
-  controller.handleEvent(makeGestureEvent('panstart') as any);
-  controller.handleEvent(makeGestureEvent('panmove', {x: 60}) as any);
+  const controller = createRubberBandController({controller: {inertia: 300}});
+  panRubberBand(controller, {x: 60});
   controller.handleEvent({
     ...makeGestureEvent('panend', {x: 60}),
     velocity: 1,
     velocityX: 0.1,
     velocityY: 0
   } as any);
-
   const transition = controller.transitionManager.transition;
   expect(transition.inProgress, 'the in-bounds fling starts native inertia').toBe(true);
   expect(
@@ -626,65 +580,84 @@ test('OrthographicController preserves native inertia for in-bounds flings', () 
   controller.finalize();
 });
 
-test('OrthographicController interrupts rubber-band spring-back with a new pan', () => {
+test.each([
+  ['pointer pan', 'pan'],
+  ['multi-touch pan', 'multipan']
+])('OrthographicController interrupts spring-back with a new %s', (_description, gesture) => {
   const interactionStates: any[] = [];
-  const controller = createTestController({
-    view: new OrthographicView({
-      controller: {
-        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-        rubberBand: true
-      }
-    }),
-    initialViewState: {target: [100, 100, 0], zoom: 0},
+  const controller = createRubberBandController({
+    controller: {multiTouchDrag: 'pan'},
     onStateChange: state => interactionStates.push({...state})
   });
-
-  controller.handleEvent(makeGestureEvent('panstart') as any);
-  controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
+  panRubberBand(controller);
   controller.handleEvent(makeGestureEvent('panend', {x: 200}) as any);
-  expect(controller.transitionManager.transition.inProgress).toBe(true);
-
-  controller.handleEvent(makeGestureEvent('panstart') as any);
-
-  expect(controller.transitionManager.transition.inProgress).toBe(false);
-  expect(interactionStates[interactionStates.length - 1]).toMatchObject({
+  const transition = controller.transitionManager.transition;
+  expect(transition.inProgress, 'release starts a spring-back transition').toBe(true);
+  advanceRubberBandTransition(controller, transition.settings.duration / 4);
+  const targetBeforeInterruption = controller.props.target.slice();
+  expect(targetBeforeInterruption[0], 'the return remains overscrolled').toBeLessThan(50);
+  controller.handleEvent(makeGestureEvent(`${gesture}start`) as any);
+  expect(transition.inProgress, 'the new gesture interrupts the return').toBe(false);
+  expect(controller.props.target, 'the new gesture does not jump to the boundary').toEqual(
+    targetBeforeInterruption
+  );
+  expect(interactionStates[interactionStates.length - 1], 'the new drag is active').toMatchObject({
     inTransition: false,
     isDragging: true,
     isPanning: false
   });
+  const position = {x: 60, deltaX: 10};
+  controller.handleEvent(makeGestureEvent(`${gesture}move`, position) as any);
+  controller.handleEvent(makeGestureEvent(`${gesture}end`, position) as any);
+  if (transition.inProgress) {
+    advanceRubberBandTransition(controller, transition.settings.duration);
+  }
+  expectRubberBandInteractionEnded(interactionStates);
   controller.finalize();
 });
 
 test('OrthographicController applies rubber-band resistance to multi-touch panning', () => {
-  const controller = createTestController({
-    view: new OrthographicView({
-      controller: {
-        maxBounds: ORTHOGRAPHIC_MAX_BOUNDS,
-        rubberBand: true,
-        multiTouchDrag: 'pan'
-      }
-    }),
-    initialViewState: {target: [100, 100, 0], zoom: 0}
-  });
-
-  controller.handleEvent(makeGestureEvent('multipanstart') as any);
-  controller.handleEvent(makeGestureEvent('multipanmove', {x: 200, deltaX: 150}) as any);
-
+  const controller = createRubberBandController({controller: {multiTouchDrag: 'pan'}});
+  panRubberBand(controller, {x: 200, deltaX: 150}, 'multipan');
   expect(controller.props.target[0], 'multi-touch panning overshoots the edge').toBeLessThan(50);
   expect(controller.props.target[0], 'multi-touch overscroll is resisted').toBeGreaterThan(-50);
   controller.finalize();
 });
 
-test('OrthographicController ignores rubberBand without maxBounds', () => {
-  for (const rubberBand of [false, true]) {
-    const controller = createTestController({
-      view: new OrthographicView({controller: {rubberBand}}),
-      initialViewState: {target: [100, 100, 0], zoom: 0}
+test('OrthographicController does not expose rubber-band interaction metadata', () => {
+  const viewStates: Record<string, any>[] = [];
+  const controller = createRubberBandController({
+    onViewStateChange: ({viewState}) => {
+      viewStates.push(viewState);
+    }
+  });
+  panRubberBand(controller);
+  controller.handleEvent(makeGestureEvent('panend', {x: 200}) as any);
+  const transition = controller.transitionManager.transition;
+  expect(transition.inProgress, 'release starts a spring-back transition').toBe(true);
+  advanceRubberBandTransition(controller, transition.settings.duration / 2);
+  advanceRubberBandTransition(controller, transition.settings.duration / 2);
+  expect(viewStates.length, 'drag and transition updates are emitted').toBeGreaterThan(3);
+  for (const viewState of viewStates) {
+    expect(Object.getOwnPropertySymbols(viewState), 'view state has no private symbols').toEqual(
+      []
+    );
+    expect(Object.getOwnPropertySymbols(viewState.target), 'target has no private symbols').toEqual(
+      []
+    );
+    expect(JSON.parse(JSON.stringify(viewState)).target, 'view state remains serializable').toEqual(
+      viewState.target
+    );
+  }
+  controller.finalize();
+});
+
+test('OrthographicController ignores maxBoundsRubberBand without maxBounds', () => {
+  for (const maxBoundsRubberBand of [false, true]) {
+    const controller = createRubberBandController({
+      controller: {maxBounds: null, maxBoundsRubberBand}
     });
-
-    controller.handleEvent(makeGestureEvent('panstart') as any);
-    controller.handleEvent(makeGestureEvent('panmove', {x: 200}) as any);
-
+    panRubberBand(controller);
     expect(controller.props.target, 'unbounded panning is unchanged').toEqual([-50, 100]);
     controller.finalize();
   }
