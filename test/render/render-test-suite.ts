@@ -3,9 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import type {TestDeviceType} from './device-test-utils';
-import {createTestDevice} from './device-test-utils';
 import {
+  createTestDevice,
   createContainer,
   createDeck,
   removeContainer,
@@ -13,7 +12,8 @@ import {
   runRenderTest,
   updateDeckForTest,
   DeckTestContext,
-  TestCase
+  TestCase,
+  TestDeviceType
 } from './deck-test-utils';
 
 type RenderTestSuiteOptions = {

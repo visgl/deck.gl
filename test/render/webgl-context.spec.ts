@@ -3,11 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {describe, test, expect} from 'vitest';
-import type {TestDeviceType} from './device-test-utils';
+import type {TestDeviceType} from './deck-test-utils';
 
 describe.each([
-  'webgl'
-  // 'webgpu'
+  'webgl',
+  'webgpu'
 ] as TestDeviceType[])('%s', deviceType => {
   test(`render browser provides ${deviceType}`, () => {
     if (deviceType === 'webgpu') {

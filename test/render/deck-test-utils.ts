@@ -5,8 +5,13 @@
 import {expect} from 'vitest';
 import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {webgpuAdapter} from '@luma.gl/webgpu';
 import {WIDTH, HEIGHT, OS} from './constants';
+
+export type TestDeviceType = 'webgl' | 'webgpu';
 
 export interface TestCase {
   name: string;
@@ -29,6 +34,24 @@ export interface DeckTestContext {
   deck: Deck | null;
   container: HTMLDivElement | null;
   device?: Device;
+}
+
+/**
+ * Creates a device and canvas for a render test.
+ */
+export function createTestDevice(type: TestDeviceType, container: HTMLDivElement): Promise<Device> {
+  return luma.createDevice({
+    type,
+    adapters: type === 'webgl' ? [webgl2Adapter] : [webgpuAdapter],
+    createCanvasContext: {
+      container,
+      width: WIDTH,
+      height: HEIGHT,
+      useDevicePixels: false,
+      autoResize: true,
+      alphaMode: type === 'webgpu' ? 'premultiplied' : undefined
+    }
+  });
 }
 
 function formatBrowserDiagnostics(
