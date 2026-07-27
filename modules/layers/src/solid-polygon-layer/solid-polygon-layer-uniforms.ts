@@ -4,6 +4,16 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct SolidPolygonUniforms {
+  extruded: f32,
+  isWireframe: f32,
+  elevationScale: f32,
+};
+
+@group(0) @binding(auto) var<uniform> solidPolygon: SolidPolygonUniforms;
+`;
+
 const uniformBlock = `\
 layout(std140) uniform solidPolygonUniforms {
   bool extruded;
@@ -20,6 +30,7 @@ export type SolidPolygonProps = {
 
 export const solidPolygonUniforms = {
   name: 'solidPolygon',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   fs: uniformBlock,
   uniformTypes: {

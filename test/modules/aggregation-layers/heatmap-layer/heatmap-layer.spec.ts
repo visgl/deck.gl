@@ -5,11 +5,79 @@
 import {test, expect} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {MapView} from '@deck.gl/core';
+import {LayerManager, MapView} from '@deck.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
+import {
+  maxWeightUniforms,
+  weightUniforms
+} from '@deck.gl/aggregation-layers/heatmap-layer/heatmap-layer-uniforms';
+import {triangleUniforms} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer-uniforms';
+import triangleSource from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer.wgsl';
+import maxWeightSource from '@deck.gl/aggregation-layers/heatmap-layer/max.wgsl';
+import weightSource from '@deck.gl/aggregation-layers/heatmap-layer/weights.wgsl';
+import {
+  getShaderModuleSource,
+  getShaderModuleUniformLayoutValidationResult
+} from '@luma.gl/shadertools';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 const getPosition = d => d.COORDINATES;
+
+test('HeatmapLayer#WGSL uniform layouts', () => {
+  const modules = [
+    {
+      module: weightUniforms,
+      uniformNames: ['commonBounds', 'radiusPixels', 'textureWidth', 'weightsScale']
+    },
+    {module: maxWeightUniforms, uniformNames: ['textureSize']},
+    {
+      module: triangleUniforms,
+      uniformNames: ['aggregationMode', 'colorDomain', 'intensity', 'threshold']
+    }
+  ];
+
+  for (const {module, uniformNames} of modules) {
+    const validation = getShaderModuleUniformLayoutValidationResult(module, 'wgsl');
+
+    expect(validation, `${module.name} declares a WGSL uniform block`).toBeTruthy();
+    expect(validation?.matches, `${module.name} matches its uniform types`).toBe(true);
+    expect(validation?.expectedUniformNames, `${module.name} preserves uniform order`).toEqual(
+      uniformNames
+    );
+  }
+});
+
+test('HeatmapLayer#WGSL texture bindings', () => {
+  const maxModuleSource = getShaderModuleSource(maxWeightUniforms, 'wgsl');
+  const triangleModuleSource = getShaderModuleSource(triangleUniforms, 'wgsl');
+
+  expect(maxModuleSource).toContain('var inTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var colorTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var colorTextureSampler: sampler');
+  expect(triangleModuleSource).toContain('var maxTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var weightsTexture: texture_2d<f32>');
+  expect(triangleModuleSource).toContain('var weightsTextureSampler: sampler');
+});
+
+test('HeatmapLayer#WGSL kernel uses instanced quads', () => {
+  expect(weightSource).toContain('@builtin(vertex_index) vertexIndex: u32');
+  expect(weightSource).toContain('array<vec2<f32>, 6>');
+  expect(weightSource).toContain('instancePositions: vec3<f32>');
+  expect(weightSource).toContain('instancePositions64Low: vec3<f32>');
+  expect(weightSource).toContain('instanceWeights: f32');
+  expect(weightSource).not.toContain('gl_PointCoord');
+});
+
+test('HeatmapLayer#WGSL maximum reduction uses bounded blocks', () => {
+  expect(maxWeightSource).toContain('MAX_WEIGHT_REDUCTION_SIZE: u32 = 16u');
+  expect(maxWeightSource).toContain('textureCoordinates.x < textureSize');
+  expect(maxWeightSource).toContain('textureCoordinates.y < textureSize');
+});
+
+test('HeatmapLayer#WGSL presentation corrects render-target origin', () => {
+  expect(triangleSource).toContain('1.0 - attributes.texCoords.y');
+});
 
 const viewport0 = new MapView().makeViewport({
   width: 100,
@@ -270,4 +338,54 @@ test('HeatmapLayer#binaryData', () => {
       }
     ]
   });
+});
+
+test('HeatmapLayer#WebGPU binary positions', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  for (const positionSize of [2, 3]) {
+    const errors: Error[] = [];
+    const layerManager = new LayerManager(webgpuDevice, {viewport: viewport0});
+    layerManager.setProps({onError: error => errors.push(error)});
+
+    const positions =
+      positionSize === 2
+        ? new Float32Array([-122.4, 37.8, -122.3, 37.7])
+        : new Float32Array([-122.4, 37.8, 0, -122.3, 37.7, 0]);
+    const layer = new HeatmapLayer({
+      id: `webgpu-binary-heatmap-${positionSize}`,
+      data: {
+        length: 2,
+        attributes: {
+          getPosition: {value: positions, size: positionSize},
+          getWeight: {value: new Float32Array([100, 50]), size: 1}
+        }
+      },
+      radiusPixels: 30
+    });
+
+    webgpuDevice.handle.pushErrorScope('validation');
+    layerManager.setLayers([layer]);
+
+    expect(errors, `${positionSize}-component binary positions initialize`).toEqual([]);
+    expect(layer.state.weightsTransform, 'creates the weights transform').toBeDefined();
+    const positionLayout = layer.state.weightsTransform?.model.bufferLayout.find(
+      layout => layout.name === 'instancePositions'
+    );
+    expect(positionLayout?.byteStride, 'packs high and low XYZ positions').toBe(24);
+    expect(positionLayout?.attributes, 'declares compatible WebGPU vertex attributes').toEqual([
+      {attribute: 'instancePositions', format: 'float32x3', byteOffset: 0},
+      {attribute: 'instancePositions64Low', format: 'float32x3', byteOffset: 12}
+    ]);
+    expect(
+      await webgpuDevice.handle.popErrorScope(),
+      `${positionSize}-component binary positions create a valid WebGPU pipeline`
+    ).toBeNull();
+
+    layerManager.finalize();
+  }
 });
