@@ -12,18 +12,17 @@ import type {MjolnirGestureEvent} from 'mjolnir.js';
 
 /** Marks temporary gesture and transition props without exposing them in view state. */
 const MAX_BOUNDS_RUBBER_BAND_PHASE = Symbol('maxBoundsRubberBandPhase');
+/** Minimum dominant-axis release speed required to classify a pan as a flick, in pixels/ms. */
+const MAX_BOUNDS_RUBBER_BAND_MIN_FLING_VELOCITY = 0.3;
 
 type MaxBoundsRubberBandPhase = {
   [MAX_BOUNDS_RUBBER_BAND_PHASE]?: 'drag' | 'transition';
 };
 
-/** Returns an overscrolled target through a quadratic Bézier curve. */
+/** Preserves temporary overscroll during a direct, monotonic return to the content bounds. */
 class RubberBandInterpolator extends LinearInterpolator {
-  private target: number[];
-
-  constructor(target: number[]) {
+  constructor() {
     super(['target', 'zoomX', 'zoomY']);
-    this.target = target;
   }
 
   /** Allows a zero-duration gesture to interrupt an in-progress return. */
@@ -43,12 +42,6 @@ class RubberBandInterpolator extends LinearInterpolator {
     const props = super.interpolateProps(startProps, endProps, t) as Record<string, any> &
       MaxBoundsRubberBandPhase;
     if (t < 1) {
-      props.target = this.target.map(
-        (value: number, index: number) =>
-          (1 - t) * (1 - t) * (startProps.target[index] ?? value) +
-          2 * (1 - t) * t * value +
-          t * t * (endProps.target[index] ?? value)
-      );
       props[MAX_BOUNDS_RUBBER_BAND_PHASE] = 'transition';
     }
     return props;
@@ -431,13 +424,17 @@ export class OrthographicState extends ViewState<
       for (const [index, halfSize] of [halfWidth, halfHeight].entries()) {
         const minimum = maxBounds[0][index] + halfSize;
         const maximum = maxBounds[1][index] - halfSize;
+        const midpoint = (maxBounds[0][index] + maxBounds[1][index]) / 2;
 
-        if (maxBoundsRubberBand && (!Number.isFinite(halfSize) || minimum > maximum)) {
-          constrainedTarget[index] = (maxBounds[0][index] + maxBounds[1][index]) / 2;
+        if (maxBoundsRubberBand && !Number.isFinite(halfSize)) {
+          constrainedTarget[index] = midpoint;
           continue;
         }
 
-        const constrained = clamp(target[index], minimum, maximum);
+        const constrained =
+          maxBoundsRubberBand && minimum > maximum
+            ? midpoint
+            : clamp(target[index], minimum, maximum);
         const overshoot = target[index] - constrained;
         constrainedTarget[index] =
           maxBoundsRubberBand && maxBoundsRubberBandPhase === 'transition'
@@ -533,44 +530,41 @@ export default class OrthographicController extends Controller<OrthographicState
       return super._onPanMoveEnd(event);
     }
 
-    // Keep elastic returns responsive when ordinary pan inertia is disabled.
-    const duration = this.inertia || this.transition.transitionDuration;
     const currentState = this.controllerState;
-    let overshotState = currentState;
-
-    if (event.velocity) {
-      const position = this.getCenter(event);
-      overshotState = overshotState.pan({
-        pos: [
-          position[0] + (event.velocityX * duration) / 2,
-          position[1] + (event.velocityY * duration) / 2
-        ]
-      });
-    }
-
-    const constrainedState = overshotState.panEnd();
-    const overshotTarget = overshotState.getViewportProps().target;
-    const constrainedTarget = constrainedState.getViewportProps().target;
+    const constrainedState = currentState.panEnd();
     const currentTarget = currentState.getViewportProps().target;
-    const currentConstrainedTarget = currentState.panEnd().getViewportProps().target;
+    const constrainedTarget = constrainedState.getViewportProps().target;
+    const isOverscrolled = currentTarget.some((value, index) => value !== constrainedTarget[index]);
 
-    if (
-      overshotTarget.every((value, index) => value === constrainedTarget[index]) &&
-      currentTarget.every((value, index) => value === currentConstrainedTarget[index])
-    ) {
-      return super._onPanMoveEnd(event);
+    if (isOverscrolled) {
+      this.updateViewport(
+        constrainedState,
+        {
+          ...this._getTransitionProps(),
+          transitionDuration: this.transition.transitionDuration,
+          transitionEasing: time => 1 - (1 - time) * (1 - time),
+          transitionInterpolator: new RubberBandInterpolator()
+        },
+        {isDragging: false, isPanning: true}
+      );
+      return true;
     }
 
-    this.updateViewport(
-      constrainedState,
-      {
-        ...this._getTransitionProps(),
-        transitionDuration: duration,
-        transitionInterpolator: new RubberBandInterpolator(overshotTarget)
-      },
-      {isDragging: false, isPanning: true}
-    );
-    return true;
+    const velocityX = Number.isFinite(event.velocityX) ? event.velocityX : 0;
+    const velocityY = Number.isFinite(event.velocityY) ? event.velocityY : 0;
+    const isIntentionalFling =
+      Math.max(Math.abs(velocityX), Math.abs(velocityY)) >
+      MAX_BOUNDS_RUBBER_BAND_MIN_FLING_VELOCITY;
+
+    if (!isIntentionalFling && event.velocity) {
+      this.updateViewport(constrainedState, null, {
+        isDragging: false,
+        isPanning: false
+      });
+      return true;
+    }
+
+    return super._onPanMoveEnd(event);
   }
 
   protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
