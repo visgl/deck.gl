@@ -26,6 +26,10 @@ function expectUniqueGeometryLayout(layer: ColumnLayer): void {
       geometryLayout?.attributes?.map(attribute => attribute.attribute),
       `${model.id} geometry attributes`
     ).toEqual(['positions', 'normals']);
+    expect(
+      attachedGeometryLayout,
+      `${model.id} has an attached geometry buffer layout`
+    ).toBeTruthy();
     expect(geometryLayout, `${model.id} layout matches its attached geometry`).toEqual(
       attachedGeometryLayout
     );
