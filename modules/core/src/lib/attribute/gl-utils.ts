@@ -25,7 +25,7 @@ export const dataTypeFromTypedArray = dataTypeDecoder.getDataType.bind(dataTypeD
 export function getBufferAttributeLayout(
   name: string,
   accessor: BufferAccessor,
-  deviceType: 'webgpu' | 'wegbgl' | string
+  deviceType: 'webgpu' | 'webgl' | string
 ): BufferAttributeLayout | null {
   if ((accessor.size as number) > 4) {
     // Definitely not valid. TODO - stricter validation?

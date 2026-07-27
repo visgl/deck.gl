@@ -25,17 +25,50 @@ test('Attribute#constructor', () => {
   expect(() => new Attribute(device, {size: 1}), 'Attribute missing update option').toThrow();
 });
 
-test('Attribute#getBufferLayout uses WebGL-only three-component integer formats', () => {
-  const attribute = new Attribute(device, {
-    size: 3,
-    type: 'unorm16',
-    accessor: 'a'
-  });
+const WEBGL_ONLY_X3_TYPES = [
+  'uint8',
+  'sint8',
+  'unorm8',
+  'snorm8',
+  'uint16',
+  'sint16',
+  'unorm16',
+  'snorm16'
+] as const;
 
-  expect(attribute.getBufferLayout().attributes[0].format).toBe('unorm16x3-webgl');
+test.each(WEBGL_ONLY_X3_TYPES)(
+  'Attribute#getBufferLayout uses the WebGL-only suffix for %s x3',
+  type => {
+    const attribute = new Attribute(device, {
+      size: 3,
+      type,
+      accessor: 'a'
+    });
 
-  attribute.delete();
-});
+    expect(attribute.getBufferLayout().attributes[0].format).toBe(`${type}x3-webgl`);
+
+    attribute.delete();
+  }
+);
+
+test.each([
+  {type: 'float32', size: 3, format: 'float32x3'},
+  {type: 'unorm16', size: 2, format: 'unorm16x2'},
+  {type: 'unorm16', size: 4, format: 'unorm16x4'}
+] as const)(
+  'Attribute#getBufferLayout does not use the WebGL-only suffix for $type x$size',
+  ({type, size, format}) => {
+    const attribute = new Attribute(device, {
+      size,
+      type,
+      accessor: 'a'
+    });
+
+    expect(attribute.getBufferLayout().attributes[0].format).toBe(format);
+
+    attribute.delete();
+  }
+);
 
 test('Attribute#delete', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
