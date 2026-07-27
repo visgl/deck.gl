@@ -43,7 +43,7 @@ export const DEFAULT_CANVAS_ID = 'default-canvas';
 
 type ViewEventManager = {
   canvasId: string;
-  eventManager: EventManager;
+  eventManager: EventManager | null;
 };
 
 /**
@@ -89,7 +89,7 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
-  pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
   /** Resolve existing luma contexts, which own all canvas resize and pixel-size tracking. */
@@ -112,14 +112,14 @@ export default class ViewManager<ViewsT extends View[]> {
   private _isUpdating: boolean;
   private _needsRedraw: string | false;
   private _needsUpdate: string | false;
-  private _eventManager: EventManager;
+  private _eventManager: EventManager | null;
   private _eventManagers: Record<string, EventManager>;
   private _viewEventManagers: {[viewId: string]: ViewEventManager};
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
-  private _pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   /** Context lookup supplied by Deck; context dimensions remain owned and observed by luma. */
   private _getCanvasContext?: CanvasContextResolver;
 
@@ -131,7 +131,7 @@ export default class ViewManager<ViewsT extends View[]> {
     props: ViewManagerProps<ViewsT> & {
       // Initial options
       timeline: Timeline;
-      eventManager: EventManager;
+      eventManager: EventManager | null;
     }
   ) {
     // List of view descriptors, gets re-evaluated when width/height changes
@@ -469,7 +469,7 @@ export default class ViewManager<ViewsT extends View[]> {
           viewState,
           ...this._getCanvasDimensions(view)
         }),
-      pickPosition: this._pickPosition
+      pickPosition: (x, y) => this._pickPosition?.(x, y, view.id)
     });
 
     return controller;
