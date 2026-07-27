@@ -15,6 +15,7 @@ import {
   A5Layer
 } from '@deck.gl/geo-layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
+import type {Device} from '@luma.gl/core';
 import type {GlobeViewState} from '@deck.gl/core';
 import {LANDCOVER_LEGEND} from './landcover-palette';
 
@@ -28,12 +29,15 @@ type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/';
 
 export default function App({
+  device,
   gridSystem,
   landcoverLegend
 }: {
+  device?: Device;
   gridSystem: GridSystem;
   landcoverLegend?: any[];
 }) {
+  const isWebGPU = device?.type === 'webgpu';
   const [loaded, setLoaded] = useState<GridSystem[]>([gridSystem]);
   if (!loaded.includes(gridSystem)) {
     setLoaded([...loaded, gridSystem]);
@@ -49,9 +53,16 @@ export default function App({
     opacity: 0.8,
     filled: true,
     getFillColor: (d: GridCell) => LANDCOVER_LEGEND[d.value].color || [0, 0, 0],
-    getFilterCategory: (d: GridCell) => d.value,
-    filterCategories,
-    extensions: [new DataFilterExtension({categorySize: 1})],
+    ...(isWebGPU
+      ? {
+          dataTransform: (cells: GridCell[]) =>
+            cells.filter(cell => filterCategories.includes(Number(cell.value)))
+        }
+      : {
+          getFilterCategory: (cell: GridCell) => cell.value,
+          filterCategories,
+          extensions: [new DataFilterExtension({categorySize: 1})]
+        }),
     extruded: true,
     getElevation: 50000,
     beforeId: 'watername_ocean',
@@ -122,7 +133,7 @@ export default function App({
         dragRotate={false}
         maxPitch={0}
       >
-        <DeckGLOverlay layers={layers} interleaved />
+        <DeckGLOverlay key={device?.type} device={device} layers={layers} interleaved={!isWebGPU} />
       </Map>
     </div>
   );

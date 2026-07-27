@@ -57,8 +57,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `A5Layer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `S2Layer` | ✅ | ✅ |
+| `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ❌ |
@@ -66,7 +66,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `HeatmapTileLayer` | ✅ | ❌ |
@@ -76,6 +76,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
 `GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
+
+`S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
 
 ## Extensions
 
