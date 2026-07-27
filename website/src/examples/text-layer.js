@@ -54,6 +54,7 @@ class TextDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
         data={data}
         noOverlap={params.noOverlap.value}
         fontSize={params.fontSize.value}
