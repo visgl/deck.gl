@@ -21,6 +21,7 @@ import {
   gouraudMaterial,
   phongMaterial
 } from '@deck.gl/core';
+import type {BufferLayout} from '@luma.gl/core';
 import {Geometry, Model, makeInterleavedGeometry} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
@@ -30,6 +31,16 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
+const GEOMETRY_BUFFER_LAYOUT: BufferLayout = {
+  name: 'geometry',
+  stepMode: 'vertex',
+  byteStride: 24,
+  attributes: [
+    {attribute: 'positions', format: 'float32x3', byteOffset: 0},
+    {attribute: 'normals', format: 'float32x3', byteOffset: 12}
+  ]
+};
 
 const defaultProps: DefaultProps<ColumnLayerProps> = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -348,7 +359,10 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _getModels() {
     const shaders = this.getShaders();
-    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
+    const bufferLayout = [
+      ...this.getAttributeManager()!.getBufferLayouts(),
+      GEOMETRY_BUFFER_LAYOUT
+    ];
 
     const fillModel = new Model(this.context.device, {
       ...shaders,
@@ -379,8 +393,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       fillVertexCount: positionAttribute.value.length / 3
     });
 
-    const wireframeModel = this.state.wireframeModel!;
-
     // The fill model renders a triangle-strip with degenerate triangles and does not
     // use indices. Give it a separate Geometry without `indices` so that later buffer
     // layout rebuilds (e.g. binary-data transitions, HMR) cannot re-attach the
@@ -392,22 +404,20 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       })
     );
 
-    const wireframeGeometry = makeInterleavedGeometry(geometry);
-    wireframeModel.setBufferLayout([
-      ...wireframeModel.bufferLayout,
-      ...wireframeGeometry.bufferLayout
-    ]);
-    wireframeModel.setGeometry(wireframeGeometry);
-    wireframeModel.setTopology('line-list');
+    this._setWireframeGeometry(geometry);
   }
 
   protected _setFillGeometry(geometry: Geometry): void {
     const fillGeometry = makeInterleavedGeometry(geometry);
     const fillModel = this.state.fillModel!;
-    // Register the interleaved layout before attaching geometry so that luma.gl
-    // creates the vertex array with the correct WebGL attribute accessors.
-    fillModel.setBufferLayout([...fillModel.bufferLayout, ...fillGeometry.bufferLayout]);
     fillModel.setGeometry(fillGeometry);
+  }
+
+  protected _setWireframeGeometry(geometry: Geometry): void {
+    const wireframeGeometry = makeInterleavedGeometry(geometry);
+    const wireframeModel = this.state.wireframeModel!;
+    wireframeModel.setGeometry(wireframeGeometry);
+    wireframeModel.setTopology('line-list');
   }
 
   draw({uniforms}) {

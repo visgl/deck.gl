@@ -32,7 +32,9 @@ export default class GridCellLayer<DataT = any, ExtraPropsT extends {} = {}> ext
   static defaultProps = defaultProps;
 
   protected _updateGeometry() {
-    this._setFillGeometry(new CubeGeometry());
+    const geometry = new CubeGeometry();
+    this._setFillGeometry(geometry);
+    this._setWireframeGeometry(geometry);
   }
 
   draw({uniforms}) {
