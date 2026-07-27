@@ -21,7 +21,8 @@ import {
   gouraudMaterial,
   phongMaterial
 } from '@deck.gl/core';
-import {Geometry, Model} from '@luma.gl/engine';
+import type {BufferLayout} from '@luma.gl/core';
+import {Geometry, Model, makeInterleavedGeometry} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
@@ -30,6 +31,16 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
+const GEOMETRY_BUFFER_LAYOUT: BufferLayout = {
+  name: 'geometry',
+  stepMode: 'vertex',
+  byteStride: 24,
+  attributes: [
+    {attribute: 'positions', format: 'float32x3', byteOffset: 0},
+    {attribute: 'normals', format: 'float32x3', byteOffset: 12}
+  ]
+};
 
 const defaultProps: DefaultProps<ColumnLayerProps> = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -348,7 +359,10 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _getModels() {
     const shaders = this.getShaders();
-    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
+    const bufferLayout = [
+      ...this.getAttributeManager()!.getBufferLayouts(),
+      GEOMETRY_BUFFER_LAYOUT
+    ];
 
     const fillModel = new Model(this.context.device, {
       ...shaders,
@@ -372,26 +386,41 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
+    const positionAttribute = geometry.attributes.POSITION!;
+    const normalAttribute = geometry.attributes.NORMAL!;
 
     this.setState({
-      fillVertexCount: geometry.attributes.POSITION.value.length / 3
+      fillVertexCount: positionAttribute.value.length / 3
     });
-
-    const fillModel = this.state.fillModel!;
-    const wireframeModel = this.state.wireframeModel!;
 
     // The fill model renders a triangle-strip with degenerate triangles and does not
     // use indices. Give it a separate Geometry without `indices` so that later buffer
     // layout rebuilds (e.g. binary-data transitions, HMR) cannot re-attach the
     // wireframe indices via `_setGeometryAttributes`.
-    const {POSITION, NORMAL} = geometry.attributes;
-    const fillGeometry = new Geometry({
-      topology: 'triangle-strip',
-      attributes: {POSITION, NORMAL}
-    });
-    fillModel.setGeometry(fillGeometry);
+    this._setFillGeometry(
+      new Geometry({
+        topology: 'triangle-strip',
+        attributes: {POSITION: positionAttribute, NORMAL: normalAttribute}
+      })
+    );
 
-    wireframeModel.setGeometry(geometry);
+    this._setWireframeGeometry(geometry);
+  }
+
+  protected _setFillGeometry(geometry: Geometry): void {
+    const fillGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
+    const fillModel = this.state.fillModel!;
+    fillModel.setGeometry(fillGeometry);
+  }
+
+  protected _setWireframeGeometry(geometry: Geometry): void {
+    const wireframeGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
+    const wireframeModel = this.state.wireframeModel!;
+    wireframeModel.setGeometry(wireframeGeometry);
     wireframeModel.setTopology('line-list');
   }
 
