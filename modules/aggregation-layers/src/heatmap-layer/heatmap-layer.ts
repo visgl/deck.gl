@@ -389,7 +389,13 @@ export default class HeatmapLayer<
 
     if (this.context.device.type === 'webgpu') {
       attributeManager.addInstanced({
-        instancePositions: {size: 3, type: 'float64', accessor: 'getPosition'},
+        instancePositions: {
+          size: 3,
+          type: 'float64',
+          accessor: 'getPosition',
+          // Normalize binary XY positions into the packed XYZ high/low layout WebGPU requires.
+          transform: (position: Position) => [position[0], position[1], position[2] ?? 0]
+        },
         instanceWeights: {size: 1, accessor: 'getWeight'}
       });
       this.setState({positionAttributeName: 'instancePositions'});

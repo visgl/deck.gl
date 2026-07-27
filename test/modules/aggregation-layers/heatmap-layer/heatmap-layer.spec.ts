@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {MapView} from '@deck.gl/core';
+import {LayerManager, MapView} from '@deck.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
 import {
@@ -20,6 +20,7 @@ import {
   getShaderModuleSource,
   getShaderModuleUniformLayoutValidationResult
 } from '@luma.gl/shadertools';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 const getPosition = d => d.COORDINATES;
 
@@ -337,4 +338,54 @@ test('HeatmapLayer#binaryData', () => {
       }
     ]
   });
+});
+
+test('HeatmapLayer#WebGPU binary positions', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  for (const positionSize of [2, 3]) {
+    const errors: Error[] = [];
+    const layerManager = new LayerManager(webgpuDevice, {viewport: viewport0});
+    layerManager.setProps({onError: error => errors.push(error)});
+
+    const positions =
+      positionSize === 2
+        ? new Float32Array([-122.4, 37.8, -122.3, 37.7])
+        : new Float32Array([-122.4, 37.8, 0, -122.3, 37.7, 0]);
+    const layer = new HeatmapLayer({
+      id: `webgpu-binary-heatmap-${positionSize}`,
+      data: {
+        length: 2,
+        attributes: {
+          getPosition: {value: positions, size: positionSize},
+          getWeight: {value: new Float32Array([100, 50]), size: 1}
+        }
+      },
+      radiusPixels: 30
+    });
+
+    webgpuDevice.handle.pushErrorScope('validation');
+    layerManager.setLayers([layer]);
+
+    expect(errors, `${positionSize}-component binary positions initialize`).toEqual([]);
+    expect(layer.state.weightsTransform, 'creates the weights transform').toBeDefined();
+    const positionLayout = layer.state.weightsTransform?.model.bufferLayout.find(
+      layout => layout.name === 'instancePositions'
+    );
+    expect(positionLayout?.byteStride, 'packs high and low XYZ positions').toBe(24);
+    expect(positionLayout?.attributes, 'declares compatible WebGPU vertex attributes').toEqual([
+      {attribute: 'instancePositions', format: 'float32x3', byteOffset: 0},
+      {attribute: 'instancePositions64Low', format: 'float32x3', byteOffset: 12}
+    ]);
+    expect(
+      await webgpuDevice.handle.popErrorScope(),
+      `${positionSize}-component binary positions create a valid WebGPU pipeline`
+    ).toBeNull();
+
+    layerManager.finalize();
+  }
 });
