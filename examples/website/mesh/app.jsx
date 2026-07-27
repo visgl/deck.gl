@@ -86,7 +86,7 @@ export default function App({device}) {
       getPolygon: f => f,
       getFillColor: [0, 0, 0, 0]
     })
-  ].filter(layer => !isWebGPU || layer instanceof SimpleMeshLayer);
+  ];
 
   return (
     <DeckGL
