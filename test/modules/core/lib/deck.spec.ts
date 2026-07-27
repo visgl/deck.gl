@@ -64,6 +64,14 @@ async function waitForRender(deck: Deck): Promise<void> {
   });
 }
 
+/** Release test-owned WebGL contexts before Chromium evicts the shared test device. */
+function finalizeOwnedDeck(deck: Deck): void {
+  const ownedDevice = deck.device;
+  deck.finalize();
+  ownedDevice?.loseDevice();
+  ownedDevice?.destroy();
+}
+
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 test('Deck#constructor', async () => {
@@ -574,7 +582,7 @@ webglTest('Deck#multi-canvas presentation', async () => {
   ).toBe(80);
   rightCanvasContext.getCSSSize = originalGetCSSSize;
 
-  deck.finalize();
+  finalizeOwnedDeck(deck);
   parent.remove();
 });
 
@@ -685,13 +693,14 @@ webglTest('Deck#multi-canvas picking routes by canvas', async () => {
   expect(rectCalls[0].canvasId).toBe('deck-test-pick-canvas-b');
   expect(rectCalls[0].viewports.map(viewport => viewport.id)).toEqual(['right']);
 
-  deck.finalize();
+  finalizeOwnedDeck(deck);
   canvasA.remove();
   canvasB.remove();
 });
 
 webglTest('Deck#multi-canvas mode cannot be changed', async () => {
   const deck = new Deck({
+    device,
     width: 64,
     height: 64,
     initialViewState: {longitude: 0, latitude: 0, zoom: 1},
@@ -777,7 +786,7 @@ webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
   expect(orphanClearPass?.clearDepth, 'orphan canvas clears stale depth').toBe(1);
   beginRenderPass.mockRestore();
 
-  deck.finalize();
+  finalizeOwnedDeck(deck);
   canvasA.remove();
   canvasB.remove();
 });
