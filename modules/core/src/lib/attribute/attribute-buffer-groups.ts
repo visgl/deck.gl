@@ -117,7 +117,9 @@ export default class AttributeBufferGroups {
     }
 
     return {
-      bufferLayouts: this._getBufferLayouts(attributes, groups, modelInfo),
+      bufferLayouts: this._getBufferLayouts(attributes, groups, modelInfo).filter(
+        layout => !excludeAttributes[layout.name] && !attributes[layout.name]?.settings.isIndexed
+      ),
       buffers,
       groupedAttributeIds
     };

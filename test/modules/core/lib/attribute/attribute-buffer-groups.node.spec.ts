@@ -285,7 +285,6 @@ test('Layer grouped bindings preserve legacy fallback and index binding', () => 
   (layer as any)._setModelAttributes(model, attributeManager.getAttributes());
 
   expect(model.setBufferLayout.mock.calls[0][0].map(layout => layout.name)).toEqual([
-    'indices',
     'constant',
     'group-a'
   ]);
@@ -304,10 +303,8 @@ test('Layer grouped bindings preserve legacy fallback and index binding', () => 
   (layer as any)._setModelAttributes(excludedModel, attributeManager.getAttributes());
 
   expect(excludedModel.setBufferLayout.mock.calls[0][0].map(layout => layout.name)).toEqual([
-    'indices',
     'constant',
-    'a',
-    'b'
+    'a'
   ]);
   expect(excludedModel.setAttributes.mock.calls[0][0]['group-a']).toBeUndefined();
   expect(excludedModel.setAttributes.mock.calls[0][0].a).toBeTruthy();

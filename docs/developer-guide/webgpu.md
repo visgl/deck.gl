@@ -44,15 +44,15 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/layers` | `ColumnLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ |
 | `@deck.gl/layers` | `PathLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `PolygonLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | 🚧 |
 | `@deck.gl/layers` | `TextLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ |
 | `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ |
 | `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ❌ |
 | `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ❌ |
 | `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ❌ |
-| `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ❌ |
+| `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ |
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `A5Layer` | ✅ | ❌ |
@@ -74,6 +74,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `QuadbinTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `RasterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
+
+`GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
 
 ## Extensions
 
