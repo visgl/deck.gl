@@ -22,6 +22,7 @@ export default class PathTesselator extends Tesselator<
     resolution?: number;
     wrapLongitude?: boolean;
     loop?: boolean;
+    isWebGPU?: boolean;
   }
 > {
   constructor(opts) {
@@ -36,7 +37,8 @@ export default class PathTesselator extends Tesselator<
           initialize: true,
           type: opts.fp64 ? Float64Array : Float32Array
         },
-        segmentTypes: {size: 1, type: Uint8ClampedArray}
+        // WebGPU vertex inputs use a 4-byte scalar; keep WebGL's compact uint8 buffer unchanged.
+        segmentTypes: {size: 1, type: opts.isWebGPU ? Float32Array : Uint8ClampedArray}
       }
     });
   }

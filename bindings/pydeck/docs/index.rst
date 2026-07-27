@@ -66,10 +66,10 @@ a user's zoom level
 Used to enable or disable map controls and also modify the kind of map projection,
 like plotting in flat plane instead of plotting on a mercator projection
 
-`LightSettings (Experimental) <light_settings.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Effects <effect.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Configure the lighting within a visualization.
+Configure lighting and screen-space post-processing effects.
 
 `Widgets <widget.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -113,7 +113,7 @@ Index
    data_utils
    view_state
    view
-   light_settings
+   effect
    widget
    extension
    types

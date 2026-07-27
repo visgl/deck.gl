@@ -32,10 +32,7 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   };
 
   getShaders() {
-    if (this.context.device.type === 'webgpu') {
-      return super.getShaders({source, vs, fs, modules: [color, picking, screenGridUniforms]});
-    }
-    return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
+    return super.getShaders({source, vs, fs, modules: [color, picking, screenGridUniforms]});
   }
 
   initializeState() {
