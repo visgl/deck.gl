@@ -44,6 +44,7 @@ class ScenegraphDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
         sizeScale={params.sizeScale.value}
         onDataLoad={count => this.props.onStateChange({count})}
       />

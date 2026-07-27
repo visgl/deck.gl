@@ -27,6 +27,7 @@ struct FragmentInputs {
   @location(2) pbrPosition: vec3<f32>,
   @location(3) pbrUV: vec2<f32>,
   @location(4) pbrNormal: vec3<f32>,
+  @location(5) pickingColor: vec3<f32>,
 };
 
 @vertex
@@ -95,12 +96,20 @@ fn vertexMain(
   outputs.pbrPosition = geometry.position.xyz;
   outputs.pbrUV = texCoord;
   outputs.pbrNormal = geometry.normal;
+  outputs.pickingColor = geometry.pickingColor;
   return outputs;
 }
 
 @fragment
 fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
   fragmentGeometry.uv = inputs.vTexCoord;
+
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(inputs.pickingColor)) {
+      discard;
+    }
+    return vec4<f32>(inputs.pickingColor, 1.0);
+  }
 
   var fragColor = inputs.vColor;
 
@@ -120,6 +129,22 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 #endif
 
   fragColor.a *= layer.opacity;
+
+  if (picking.isHighlightActive > 0.5) {
+    let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
+    if (picking_isColorZero(abs(inputs.pickingColor - highlightedObjectColor))) {
+      let highlightAlpha = picking.highlightColor.a;
+      let blendedAlpha = highlightAlpha + fragColor.a * (1.0 - highlightAlpha);
+      if (blendedAlpha > 0.0) {
+        let highlightRatio = highlightAlpha / blendedAlpha;
+        fragColor = vec4<f32>(
+          mix(fragColor.rgb, picking.highlightColor.rgb, highlightRatio),
+          blendedAlpha
+        );
+      }
+    }
+  }
+
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;
