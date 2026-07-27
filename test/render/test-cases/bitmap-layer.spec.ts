@@ -5,7 +5,7 @@
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
-import testCases from './screen-grid-layer';
+import testCases from './bitmap-layer';
 
 describe.each([
   'webgl'

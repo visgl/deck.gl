@@ -6,43 +6,14 @@
 // This is required for animation tests where deck.animationLoop.timeline.setTime()
 // needs to trigger re-renders between frames.
 
-import {test, beforeAll, afterAll} from 'vitest';
-import {
-  createContainer,
-  createDeck,
-  removeContainer,
-  finalizeDeck,
-  updateDeckForTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
+import {describe} from 'vitest';
+import {runPersistentRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 import testCases from './scenegraph-layer';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
-
-beforeAll(() => {
-  ctx.container = createContainer();
-  ctx.deck = createDeck(ctx.container);
-});
-
-// Note: No afterEach finalizeDeck - we keep the deck running between tests
-
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await updateDeckForTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runPersistentRenderTestSuite(testCases as TestCase[], deviceType);
 });

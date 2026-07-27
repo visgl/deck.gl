@@ -5,6 +5,7 @@
 import {expect} from 'vitest';
 import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 import {WIDTH, HEIGHT, OS} from './constants';
 
 export interface TestCase {
@@ -27,6 +28,7 @@ export interface TestCase {
 export interface DeckTestContext {
   deck: Deck | null;
   container: HTMLDivElement | null;
+  device?: Device;
 }
 
 function formatBrowserDiagnostics(
@@ -108,10 +110,11 @@ export function defaultOnAfterRender({
  * Creates a Deck instance for reuse across multiple tests.
  * Use with updateDeckForTest() for tests that need the animation loop to keep running.
  */
-export function createDeck(container: HTMLDivElement): Deck {
+export function createDeck(container: HTMLDivElement, device?: Device): Deck {
   return new Deck({
     id: 'render-test-deck',
     container,
+    device,
     width: WIDTH,
     height: HEIGHT,
     useDevicePixels: false,
@@ -162,6 +165,7 @@ export async function runRenderTest(
     ctx.deck = new Deck({
       id: 'render-test-deck',
       container: ctx.container!,
+      device: ctx.device,
       width: WIDTH,
       height: HEIGHT,
       views: views || new MapView({}),
@@ -213,10 +217,29 @@ export async function runRenderTest(
  */
 async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext): Promise<void> {
   const {name, goldenImage, imageDiffOptions} = testCase;
+  const goldenImagePath = goldenImage.split('golden-images/').at(-1)!;
+  const deviceType = ctx.device?.type ?? 'webgl';
+  const osName = OS.toLowerCase();
+  const candidateDirectories = [
+    `./test/render/golden-images/platform-overrides/${osName}/${deviceType}`,
+    `./test/render/golden-images/platform-overrides/${deviceType}`,
+    `./test/render/golden-images/platform-overrides/${osName}`,
+    './test/render/golden-images'
+  ];
+  const resolvedGoldenImage = await commands.findGoldenImage({
+    goldenImage: goldenImagePath,
+    candidateDirectories
+  });
+
+  if (!resolvedGoldenImage) {
+    throw new Error(
+      `${name}: Golden image "${goldenImagePath}" not found in ${candidateDirectories.join(', ')}`
+    );
+  }
 
   const region = getCanvasRegion(ctx.deck);
   const diffOptions = {
-    goldenImage,
+    goldenImage: resolvedGoldenImage,
     region,
     threshold: imageDiffOptions?.threshold ?? 0.99,
     tolerance: 0.1,
@@ -228,28 +251,12 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
 
   const result = await commands.captureAndDiffScreen(diffOptions);
 
-  // If failed, try platform-specific golden image
-  let finalResult = result;
-  if (!result.success) {
-    const platformGoldenImage = goldenImage.replace(
-      'golden-images/',
-      `golden-images/platform-overrides/${OS.toLowerCase()}/`
-    );
-    const platformResult = await commands.captureAndDiffScreen({
-      ...diffOptions,
-      goldenImage: platformGoldenImage
-    });
-    if (platformResult.success) {
-      finalResult = platformResult;
-    }
-  }
-
   const diagnostics = await commands.consumeBrowserDiagnostics();
   const diagnosticsText = formatBrowserDiagnostics(diagnostics);
 
   expect(
-    finalResult.success,
-    `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}${diagnosticsText}`
+    result.success,
+    `${name}: ${result.error || `match: ${result.matchPercentage}%`}${diagnosticsText}`
   ).toBe(true);
 }
 
