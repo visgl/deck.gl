@@ -452,14 +452,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     interactionState: InteractionState = {}
   ) {
     const viewState = {...newControllerState.getViewportProps(), ...extraProps};
+    const {transitionInteractionState, ...controllerState} = newControllerState.getState();
 
     // TODO - to restore diffing, we need to include interactionState
     const changed = this.controllerState !== newControllerState;
     // const oldViewState = this.controllerState.getViewportProps();
     // const changed = Object.keys(viewState).some(key => oldViewState[key] !== viewState[key]);
 
-    this.state = newControllerState.getState();
-    this._setInteractionState(interactionState);
+    // Semantic state actions may keep an interaction active for a transition after input ends.
+    // Consume this one-shot signal instead of persisting it into the next gesture.
+    this.state = controllerState;
+    this._setInteractionState({...interactionState, ...transitionInteractionState});
 
     if (changed) {
       const oldViewState = this.controllerState && this.controllerState.getViewportProps();
@@ -550,12 +553,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         pos[1] + (event.velocityY * inertia) / 2
       ];
       const newControllerState = this.controllerState.pan({pos: endPos}).panEnd();
+      const stateTransition = newControllerState.getViewportProps();
+      const defaultTransition = this._getTransitionProps();
       this.updateViewport(
         newControllerState,
         {
-          ...this._getTransitionProps(),
+          ...defaultTransition,
+          // A semantic panEnd may supply an interpolator that distinguishes an
+          // already-overscrolled release from ordinary projected inertia.
+          transitionInterpolator:
+            stateTransition.transitionInterpolator ?? defaultTransition.transitionInterpolator,
           transitionDuration: inertia,
-          transitionEasing: INERTIA_EASING
+          transitionEasing: stateTransition.transitionEasing ?? INERTIA_EASING
         },
         {
           isDragging: false,
