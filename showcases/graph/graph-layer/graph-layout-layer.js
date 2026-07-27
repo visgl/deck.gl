@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {CompositeLayer} from 'deck.gl';
 import GraphLayer from './graph-layer';
 
 import LayoutD3 from './layout/layout-d3';
@@ -13,7 +13,7 @@ const defaultProps = {
   data: null,
   opacity: 1.0,
   layout: LayoutD3,
-  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  coordinateSystem: 'cartesian',
   nodeIconAccessors: {}
 };
 

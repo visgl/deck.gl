@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, IconLayer, LineLayer, ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {CompositeLayer, IconLayer, LineLayer, ScatterplotLayer} from 'deck.gl';
 
 const defaultProps = {
   offset: {x: 0, y: 0},
-  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  coordinateSystem: 'cartesian',
 
   getLinkPosition: link => ({
     sourcePosition: [link.source.x, link.source.y],

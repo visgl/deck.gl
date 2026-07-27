@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {CompositeLayer, IconLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {CompositeLayer, IconLayer} from 'deck.gl';
 import {makeFontAtlas} from '@deck.gl/layers/dist/esm/text-layer/font-atlas';
 import AsciiFilter from './ascii-filter';
 
@@ -110,7 +110,7 @@ export default class AsciiLayer extends CompositeLayer {
 
     return new IconLayer({
       id: 'text',
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       data: grid,
       opacity: 1,
       iconAtlas,

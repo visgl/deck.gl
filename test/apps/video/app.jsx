@@ -5,7 +5,7 @@
 import React, {createRef, Component} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 
 const DATA_URL =
@@ -37,7 +37,7 @@ export class App extends Component {
 
   _renderLayers() {
     return new BitmapLayer({
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       image: this._videoRef.current,
       bounds: [-300, -400, 400, 300]
     });
