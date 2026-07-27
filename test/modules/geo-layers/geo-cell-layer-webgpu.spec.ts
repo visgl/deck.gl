@@ -8,6 +8,36 @@ import {GeohashLayer, QuadkeyLayer, S2Layer} from '@deck.gl/geo-layers';
 import {PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {s2cells} from 'deck.gl-test/data';
+import {
+  filterGridCells,
+  normalizeGridCells
+} from '../../../examples/website/global-grids/grid-data';
+
+test('Global grid data#normalizes loaders.gl CSV tables', () => {
+  const rows = [
+    {id: 'first', value: '1'},
+    {id: 'second', value: '2'}
+  ];
+  const expectedCells = [
+    {id: 'first', value: 1},
+    {id: 'second', value: 2}
+  ];
+
+  expect(normalizeGridCells(rows)).toEqual(expectedCells);
+  expect(normalizeGridCells({data: rows})).toEqual(expectedCells);
+});
+
+test('Global grid data#reapplies legend filtering to loaded rows', () => {
+  const cells = [
+    {id: 'first', value: 0},
+    {id: 'second', value: 1},
+    {id: 'third', value: 2}
+  ];
+
+  expect(filterGridCells(cells, [0, 2])).toEqual([cells[0], cells[2]]);
+  expect(filterGridCells(cells, [1])).toEqual([cells[1]]);
+  expect(filterGridCells(cells, [])).toEqual([]);
+});
 
 const TEST_CASES = [
   {

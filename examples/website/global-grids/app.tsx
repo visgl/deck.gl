@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {Map, useControl} from 'react-map-gl/maplibre';
 import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
@@ -16,17 +16,18 @@ import {
 } from '@deck.gl/geo-layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import type {Device} from '@luma.gl/core';
-import type {GlobeViewState} from '@deck.gl/core';
+import {log, type GlobeViewState} from '@deck.gl/core';
+import {filterGridCells, normalizeGridCells, type GridCell} from './grid-data';
 import {LANDCOVER_LEGEND} from './landcover-palette';
 
 import {createRoot} from 'react-dom/client';
 import {CSVLoader} from '@loaders.gl/csv';
 
 const INITIAL_VIEW_STATE: GlobeViewState = {longitude: 0, latitude: 0, zoom: 2};
-type GridCell = {id: string; value: number};
 type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/';
+const EMPTY_GRID_CELLS: GridCell[] = [];
 
 export default function App({
   device,
@@ -39,25 +40,88 @@ export default function App({
 }) {
   const isWebGPU = device?.type === 'webgpu';
   const [loaded, setLoaded] = useState<GridSystem[]>([gridSystem]);
+  const [resolvedGridData, setResolvedGridData] = useState<Partial<Record<GridSystem, GridCell[]>>>(
+    {}
+  );
   if (!loaded.includes(gridSystem)) {
     setLoaded([...loaded, gridSystem]);
   }
 
   // Use legend state to determine which landcover types are visible
   const activeLegend = landcoverLegend || LANDCOVER_LEGEND;
-  const filterCategories = activeLegend
-    .map((item, index) => (item.selected !== false ? index : null))
-    .filter(index => index !== null);
+  const filterCategories = useMemo(
+    () =>
+      activeLegend
+        .map((item, index) => (item.selected !== false ? index : null))
+        .filter((index): index is number => index !== null),
+    [activeLegend]
+  );
+
+  useEffect(() => {
+    if (!isWebGPU) {
+      return undefined;
+    }
+
+    const pendingSystems = loaded.filter(system => !resolvedGridData[system]);
+    if (pendingSystems.length === 0) {
+      return undefined;
+    }
+
+    const abortController = new AbortController();
+
+    Promise.all(
+      pendingSystems.map(async system => {
+        const response = await fetch(`${DATA_URL}landcover-${system}.csv`, {
+          signal: abortController.signal
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to load ${system} grid data: ${response.status}`);
+        }
+
+        const table = await CSVLoader.parseText(await response.text(), {
+          csv: {shape: 'object-row-table', dynamicTyping: false}
+        });
+        if (table.shape !== 'object-row-table') {
+          throw new Error(`Expected ${system} grid data to contain object rows`);
+        }
+
+        return [system, normalizeGridCells(table)] as const;
+      })
+    )
+      .then(results => {
+        if (!abortController.signal.aborted) {
+          setResolvedGridData(previous => ({...previous, ...Object.fromEntries(results)}));
+        }
+      })
+      .catch(error => {
+        if (!abortController.signal.aborted) {
+          log.error('Failed to load global grid data', error)();
+        }
+      });
+
+    return () => abortController.abort();
+  }, [isWebGPU, loaded, resolvedGridData]);
+
+  const filteredGridData = useMemo(
+    () =>
+      Object.fromEntries(
+        loaded.flatMap(system => {
+          const cells = resolvedGridData[system];
+          return cells ? [[system, filterGridCells(cells, filterCategories)]] : [];
+        })
+      ) as Partial<Record<GridSystem, GridCell[]>>,
+    [filterCategories, loaded, resolvedGridData]
+  );
+
+  const getGridData = (system: GridSystem): string | GridCell[] =>
+    isWebGPU ? filteredGridData[system] || EMPTY_GRID_CELLS : `${DATA_URL}landcover-${system}.csv`;
 
   const commonLayerProps = {
     opacity: 0.8,
     filled: true,
     getFillColor: (d: GridCell) => LANDCOVER_LEGEND[d.value].color || [0, 0, 0],
     ...(isWebGPU
-      ? {
-          dataTransform: (cells: GridCell[]) =>
-            cells.filter(cell => filterCategories.includes(Number(cell.value)))
-        }
+      ? {}
       : {
           getFilterCategory: (cell: GridCell) => cell.value,
           filterCategories,
@@ -74,7 +138,7 @@ export default function App({
     loaded.includes('a5') &&
       new A5Layer<GridCell>({
         id: 'a5-layer',
-        data: `${DATA_URL}landcover-a5.csv`,
+        data: getGridData('a5'),
         visible: gridSystem === 'a5',
         getPentagon: (d: GridCell) => d.id,
         ...commonLayerProps
@@ -82,7 +146,7 @@ export default function App({
     loaded.includes('geohash') &&
       new GeohashLayer<GridCell>({
         id: 'geohash-layer',
-        data: `${DATA_URL}landcover-geohash.csv`,
+        data: getGridData('geohash'),
         visible: gridSystem === 'geohash',
         getGeohash: (d: GridCell) => d.id,
         ...commonLayerProps
@@ -90,7 +154,7 @@ export default function App({
     loaded.includes('h3') &&
       new H3HexagonLayer<GridCell>({
         id: 'h3-layer',
-        data: `${DATA_URL}landcover-h3.csv`,
+        data: getGridData('h3'),
         visible: gridSystem === 'h3',
         getHexagon: (d: GridCell) => d.id,
         ...commonLayerProps
@@ -98,7 +162,7 @@ export default function App({
     loaded.includes('quadkey') &&
       new QuadkeyLayer<GridCell>({
         id: 'quadkey-layer',
-        data: `${DATA_URL}landcover-quadkey.csv`,
+        data: getGridData('quadkey'),
         visible: gridSystem === 'quadkey',
         getQuadkey: (d: GridCell) => d.id,
         ...commonLayerProps
@@ -106,7 +170,7 @@ export default function App({
     loaded.includes('s2') &&
       new S2Layer<GridCell>({
         id: 's2-layer',
-        data: `${DATA_URL}landcover-s2.csv`,
+        data: getGridData('s2'),
         visible: gridSystem === 's2',
         getS2Token: (d: GridCell) => d.id,
         ...commonLayerProps
