@@ -61,8 +61,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ |
+| `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
@@ -76,6 +76,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
 `GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
+
+`H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. `H3ClusterLayer` renders through the polygon path.
 
 ## Extensions
 
