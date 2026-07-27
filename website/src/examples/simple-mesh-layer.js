@@ -27,7 +27,7 @@ class SimpleMeshDemo extends Component {
   }
 
   render() {
-    return <App device={this.props.device} />;
+    return <App key={this.props.device?.type} device={this.props.device} />;
   }
 }
 
