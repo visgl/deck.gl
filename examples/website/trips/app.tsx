@@ -157,6 +157,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       effects={theme.effects}
       initialViewState={initialViewState}

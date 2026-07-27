@@ -226,14 +226,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
               stepMode: 'dynamic',
               fp64: this.use64bitPositions(),
               transition: false,
-              accessor: 'getPolygon',
               // eslint-disable-next-line @typescript-eslint/unbound-method
               update: this.calculateNextPositions,
               noAlloc
             }
           }
         : {}),
-      instanceVertexValid: {
+      [isWebGPU ? 'vertexValid' : 'instanceVertexValid']: {
         size: 1,
         type: isWebGPU ? 'float32' : 'uint16',
         stepMode: 'instance',
@@ -373,7 +372,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         data: props.data,
         normalize: props._normalize,
         geometryBuffer: buffers.getPolygon,
-        buffers,
+        // Keep derived WebGPU attributes independent of external binary accessor buffers.
+        buffers: this.context.device.type === 'webgpu' ? {...buffers} : buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
         wrapLongitude: props.wrapLongitude,
@@ -413,6 +413,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferLayout = bufferLayout.filter(
           layout =>
             layout.name !== 'indices' &&
+            layout.name !== 'vertexValid' &&
             layout.name !== 'instanceVertexValid' &&
             layout.name !== 'nextVertexPositions'
         );
@@ -425,7 +426,11 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferLayout,
         isIndexed: true,
         userData: {
-          excludeAttributes: {instanceVertexValid: true, nextVertexPositions: true}
+          excludeAttributes: {
+            vertexValid: true,
+            instanceVertexValid: true,
+            nextVertexPositions: true
+          }
         }
       });
     }
@@ -494,11 +499,35 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   protected calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
     attribute.startIndices = polygonTesselator.vertexStarts;
+
+    const binaryPositions = (this.props.data as any).attributes?.getPolygon;
+    if (this.context.device.type === 'webgpu' && ArrayBuffer.isView(binaryPositions?.value)) {
+      const {value, size = 3, offset = 0, stride} = binaryPositions;
+      const elementOffset = offset / value.BYTES_PER_ELEMENT;
+      const elementStride = stride ? stride / value.BYTES_PER_ELEMENT : size;
+      const positions = new Float64Array(polygonTesselator.instanceCount * 3);
+
+      for (let vertexIndex = 0; vertexIndex < polygonTesselator.instanceCount; vertexIndex++) {
+        const sourceIndex = elementOffset + vertexIndex * elementStride;
+        const targetIndex = vertexIndex * 3;
+        positions[targetIndex] = value[sourceIndex];
+        positions[targetIndex + 1] = value[sourceIndex + 1];
+        positions[targetIndex + 2] = size > 2 ? value[sourceIndex + 2] : 0;
+      }
+
+      attribute.value = positions;
+      return;
+    }
+
     attribute.value = polygonTesselator.get('positions');
   }
 
   protected calculateVertexValid(attribute) {
-    const vertexValid = this.state.polygonTesselator.get('vertexValid');
+    const binaryVertexValid = (this.props.data as any).attributes?.instanceVertexValid?.value;
+    const vertexValid =
+      this.context.device.type === 'webgpu' && binaryVertexValid
+        ? binaryVertexValid
+        : this.state.polygonTesselator.get('vertexValid');
     attribute.value =
       this.context.device.type === 'webgpu' && vertexValid
         ? Float32Array.from(vertexValid)
@@ -507,8 +536,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
   protected calculateNextPositions(attribute) {
     const {polygonTesselator} = this.state;
-    const positions = polygonTesselator.get('positions');
-    const vertexValid = polygonTesselator.get('vertexValid');
+    const attributes = this.getAttributeManager()!.getAttributes();
+    const positions = attributes.vertexPositions.value;
+    const vertexValid =
+      (this.props.data as any).attributes?.instanceVertexValid?.value ||
+      attributes.vertexValid?.value ||
+      polygonTesselator.get('vertexValid');
     attribute.startIndices = polygonTesselator.vertexStarts;
 
     if (!positions) {

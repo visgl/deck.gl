@@ -139,7 +139,7 @@ struct Attributes {
   @location(2) vertexPositions64Low: vec3<f32>,
   @location(3) nextVertexPositions: vec3<f32>,
   @location(4) nextVertexPositions64Low: vec3<f32>,
-  @location(5) instanceVertexValid: f32,
+  @location(5) vertexValid: f32,
   @location(6) elevations: f32,
   @location(7) fillColors: vec4<f32>,
   @location(8) lineColors: vec4<f32>,
@@ -159,7 +159,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.vColor = vec4<f32>(0.0);
   outp.pickingColor = picking_getPickingColorFromIndex(attributes.rowIndexes);
 
-  if (attributes.instanceVertexValid < 0.5) {
+  if (attributes.vertexValid < 0.5) {
     return outp;
   }
 
