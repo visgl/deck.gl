@@ -237,6 +237,18 @@ Whether to generate a line wireframe of the column. The outline will have
 If `true`, the vertical surfaces of the columns use [flat shading](https://en.wikipedia.org/wiki/Shading#Flat_vs._smooth_shading).
 If `false`, use smooth shading. Only effective if `extruded` is `true`.
 
+#### `cap` (string, optional) {#cap}
+
+* Default: `'flat'`
+
+The shape of the cap at the top of each column. Only applies if `extruded: true`. Accepted values:
+
+- `'flat'`: flat disk cap (default behavior, no additional geometry)
+- `'dome'`: smooth hemispherical cap; normals transition from outward at the base to upward at the apex, giving a curved appearance under lighting
+- `'cone'`: pointed conical cap
+
+The height of the dome or cone cap equals the column radius.
+
 #### `radiusUnits` (string, optional) {#radiusunits}
 
 * Default: `'meters'`
