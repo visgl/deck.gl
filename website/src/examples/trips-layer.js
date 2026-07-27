@@ -75,6 +75,7 @@ class TripsDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
         trips={data && data[0]}
         buildings={data && data[1]}
         animationSpeed={1}

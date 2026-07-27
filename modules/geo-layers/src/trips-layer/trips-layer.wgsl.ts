@@ -4,13 +4,29 @@
 
 import type {NumericArray} from '@math.gl/core';
 
-/** Pack each path timestamp with the following timestamp for WebGPU instance stepping. */
-export function packTripTimestamps(timestamps: NumericArray): Float32Array {
-  const packedTimestamps = new Float32Array(timestamps.length * 2);
+/** Pack timestamps in the same padded instance order used by PathTesselator. */
+export function packTripTimestamps(
+  timestamps: NumericArray,
+  instanceCount: number = timestamps.length,
+  isLoop: boolean = false
+): Float32Array {
+  const packedTimestamps = new Float32Array(instanceCount * 2);
 
-  for (let index = 0; index < timestamps.length; index++) {
-    packedTimestamps[index * 2] = timestamps[index];
-    packedTimestamps[index * 2 + 1] = timestamps[index + 1] ?? timestamps[index];
+  if (timestamps.length === 0) {
+    return packedTimestamps;
+  }
+
+  const isClosed = instanceCount > timestamps.length;
+  const cycleLength = isLoop ? timestamps.length : Math.max(timestamps.length - 1, 1);
+
+  for (let index = 0; index < instanceCount; index++) {
+    const timestampIndex = isClosed ? index % cycleLength : Math.min(index, timestamps.length - 1);
+    const nextTimestampIndex = isClosed
+      ? (timestampIndex + 1) % cycleLength
+      : Math.min(timestampIndex + 1, timestamps.length - 1);
+
+    packedTimestamps[index * 2] = timestamps[timestampIndex];
+    packedTimestamps[index * 2 + 1] = timestamps[nextTimestampIndex];
   }
 
   return packedTimestamps;

@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import type {NumericArray} from '@math.gl/core';
-import {AccessorFunction, DefaultProps} from '@deck.gl/core';
+import {createIterable} from '@deck.gl/core';
+import type {AccessorFunction, Attribute, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
 import {tripsUniforms, TripsProps} from './trips-layer-uniforms';
@@ -95,7 +96,8 @@ if(trips.fadeTrail) {
             instanceTimestamps: {
               size: 2,
               accessor: 'getTimestamps',
-              transform: packTripTimestamps,
+              // eslint-disable-next-line @typescript-eslint/unbound-method
+              update: this.calculateWebGPUTimestamps,
               bufferGroup: 'path-instance-data'
             }
           }
@@ -114,6 +116,37 @@ if(trips.fadeTrail) {
             }
           })
     });
+  }
+
+  /** Materialize timestamps in the same per-path instance layout as the path tessellator. */
+  protected calculateWebGPUTimestamps(
+    attribute: Attribute,
+    {data, props}: {data: TripsLayerProps<DataT>['data']; props: TripsLayerProps<DataT>}
+  ): void {
+    const {pathTesselator} = this.state;
+    const {instanceCount, vertexStarts} = pathTesselator;
+    const packedTimestamps = new Float32Array(instanceCount * 2);
+    const {iterable, objectInfo} = createIterable(data);
+
+    for (const object of iterable) {
+      objectInfo.index++;
+
+      const vertexStart = vertexStarts[objectInfo.index];
+      const vertexEnd = vertexStarts[objectInfo.index + 1] ?? instanceCount;
+
+      if (vertexEnd <= vertexStart) {
+        continue;
+      }
+
+      const timestamps = props.getTimestamps?.(object, objectInfo) ?? [];
+      packedTimestamps.set(
+        packTripTimestamps(timestamps, vertexEnd - vertexStart, props._pathType === 'loop'),
+        vertexStart * 2
+      );
+    }
+
+    attribute.startIndices = vertexStarts;
+    attribute.value = packedTimestamps;
   }
 
   draw(params) {
