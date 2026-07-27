@@ -408,13 +408,17 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   protected _setFillGeometry(geometry: Geometry): void {
-    const fillGeometry = makeInterleavedGeometry(geometry);
+    const fillGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
     const fillModel = this.state.fillModel!;
     fillModel.setGeometry(fillGeometry);
   }
 
   protected _setWireframeGeometry(geometry: Geometry): void {
-    const wireframeGeometry = makeInterleavedGeometry(geometry);
+    const wireframeGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
     const wireframeModel = this.state.wireframeModel!;
     wireframeModel.setGeometry(wireframeGeometry);
     wireframeModel.setTopology('line-list');

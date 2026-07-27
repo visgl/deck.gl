@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 
-import {ColumnLayer} from '@deck.gl/layers';
+import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 
 function expectUniqueGeometryLayout(layer: ColumnLayer): void {
@@ -19,10 +19,16 @@ function expectUniqueGeometryLayout(layer: ColumnLayer): void {
     ).toHaveLength(1);
 
     const geometryLayout = model.bufferLayout.find(layout => layout.name === 'geometry');
+    const attachedGeometryLayout = model._gpuGeometry?.bufferLayout.find(
+      layout => layout.name === 'geometry'
+    );
     expect(
       geometryLayout?.attributes?.map(attribute => attribute.attribute),
       `${model.id} geometry attributes`
     ).toEqual(['positions', 'normals']);
+    expect(geometryLayout, `${model.id} layout matches its attached geometry`).toEqual(
+      attachedGeometryLayout
+    );
 
     const pipelineBufferNames = model.pipeline.bufferLayout.map(layout => layout.name);
     expect(
@@ -122,6 +128,23 @@ test('ColumnLayer - geometry updates preserve a unique buffer layout', () => {
             [1, 1],
             [-1, 1]
           ]
+        },
+        onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('GridCellLayer - packed geometry matches the model buffer layout', () => {
+  testLayer({
+    Layer: GridCellLayer,
+    testCases: [
+      {
+        title: 'cube geometry',
+        props: {
+          data: [{position: [0, 0]}],
+          extruded: true
         },
         onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
       }
