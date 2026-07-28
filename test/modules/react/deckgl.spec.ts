@@ -85,6 +85,206 @@ test('DeckGL#mount/unmount', async () => {
   container.remove();
 });
 
+test('DeckGL#external WebGPU device uses the native render loop', () => {
+  let capturedProps: Record<string, any> | undefined;
+  const externalCanvas = document.createElement('canvas');
+  const onAfterRender = vi.fn();
+
+  class TestDeck {
+    isInitialized = false;
+
+    constructor(props: Record<string, any>) {
+      capturedProps = props;
+    }
+
+    finalize() {}
+  }
+
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        Deck: TestDeck as unknown as typeof Deck,
+        device: {
+          type: 'webgpu',
+          getDefaultCanvasContext: () => ({canvas: externalCanvas})
+        } as any,
+        onAfterRender
+      })
+    );
+  });
+
+  expect(capturedProps?._customRender).toBeUndefined();
+  expect(externalCanvas.style.visibility).toBe('hidden');
+
+  capturedProps?.onAfterRender({});
+  expect(externalCanvas.style.visibility).toBe('');
+  expect(onAfterRender).toHaveBeenCalledOnce();
+
+  act(() => {
+    root.render(null);
+  });
+  container.remove();
+});
+
+test('DeckGL#external WebGPU device waits for its final size before mounting React children', () => {
+  let capturedProps: Record<string, any> | undefined;
+  let deckInstance: TestDeck;
+
+  class TestDeck {
+    isInitialized = true;
+    width = 1;
+    height = 1;
+    canvas: HTMLCanvasElement;
+    eventManager = {};
+    viewports = [
+      {
+        id: 'default-view',
+        x: 0,
+        y: 0,
+        width: 1,
+        height: 1,
+        padding: null
+      }
+    ];
+    viewManager = {
+      views: [{id: 'default-view'}],
+      getViewport: () => this.viewports[0],
+      getViewState: () => ({})
+    };
+
+    constructor(props: Record<string, any>) {
+      capturedProps = props;
+      this.canvas = props.canvas;
+      deckInstance = this;
+    }
+
+    getViewports() {
+      return this.viewports;
+    }
+
+    finalize() {}
+  }
+
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        Deck: TestDeck as unknown as typeof Deck,
+        device: {
+          type: 'webgpu',
+          getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
+        } as any,
+        children: createElement('div', {id: 'map-child'})
+      })
+    );
+  });
+
+  const wrapper = container.querySelector('#deckgl-wrapper')!;
+  Object.defineProperties(wrapper, {
+    clientWidth: {value: 100},
+    clientHeight: {value: 50}
+  });
+
+  act(() => {
+    capturedProps?.onAfterRender({});
+  });
+  expect(container.querySelector('#map-child')).toBeNull();
+
+  deckInstance!.width = 100;
+  deckInstance!.height = 50;
+  deckInstance!.viewports = [
+    {
+      id: 'default-view',
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 50,
+      padding: null
+    }
+  ];
+  act(() => {
+    capturedProps?.onAfterRender({});
+  });
+  expect(container.querySelector('#map-child')).toBeTruthy();
+
+  act(() => {
+    root.render(null);
+  });
+  container.remove();
+});
+
+test('DeckGL#external WebGPU device synchronizes React children after view state changes', () => {
+  let capturedProps: Record<string, any> | undefined;
+  let deckInstance: TestDeck;
+  let viewportReadCount = 0;
+
+  class TestDeck {
+    isInitialized = true;
+    width = 0;
+    height = 0;
+
+    constructor(props: Record<string, any>) {
+      capturedProps = props;
+      deckInstance = this;
+    }
+
+    getViewports() {
+      viewportReadCount++;
+      return [];
+    }
+
+    finalize() {}
+  }
+
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        Deck: TestDeck as unknown as typeof Deck,
+        device: {
+          type: 'webgpu',
+          getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
+        } as any,
+        initialViewState: TEST_VIEW_STATE
+      })
+    );
+  });
+
+  const wrapper = container.querySelector('#deckgl-wrapper')!;
+  Object.defineProperties(wrapper, {
+    clientWidth: {value: 100},
+    clientHeight: {value: 50}
+  });
+  deckInstance!.width = 100;
+  deckInstance!.height = 50;
+
+  const viewportReadCountBeforeChange = viewportReadCount;
+  act(() => {
+    capturedProps?.onViewStateChange({
+      viewId: 'default-view',
+      viewState: {...TEST_VIEW_STATE, longitude: 0},
+      interactionState: {}
+    });
+  });
+
+  expect(viewportReadCount).toBeGreaterThan(viewportReadCountBeforeChange);
+
+  act(() => {
+    root.render(null);
+  });
+  container.remove();
+});
+
 test('DeckGL#render', async () => {
   const ref = createRef<DeckGLRef>();
   const container = document.createElement('div');

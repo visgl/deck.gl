@@ -2,15 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useEffect, useCallback, Children, isValidElement, cloneElement} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  Children,
+  isValidElement,
+  cloneElement
+} from 'react';
 import styled from 'styled-components';
 import InfoPanel from '../info-panel';
 import {loadData, joinPath} from '../../utils/data-utils';
 import {normalizeParam} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { DeviceTabs } from '../device-tabs';
-import { useStore } from '../../store/device-store';
+import {DeviceTabs} from '../device-tabs';
+import {useStore} from '../../store/device-store';
 
 const DemoContainer = styled.div`
   height: 100%;
@@ -121,14 +128,17 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
       <>
         {DemoComponent.hasDeviceTabs && <DeviceTabs />}
         <DemoContainer style={style}>
-          <DemoComponent
-            device={device}
-            data={data}
-            mapStyle={mapStyle || MAPBOX_STYLES.BLANK}
-            params={params}
-            useParam={useParam}
-            onStateChange={updateMeta}
-          />
+          {(!DemoComponent.hasDeviceTabs || device) && (
+            <DemoComponent
+              key={device?.id}
+              device={device}
+              data={data}
+              mapStyle={mapStyle || MAPBOX_STYLES.BLANK}
+              params={params}
+              useParam={useParam}
+              onStateChange={updateMeta}
+            />
+          )}
           {isInteractive && (
             <InfoPanel
               title={DemoComponent.title}

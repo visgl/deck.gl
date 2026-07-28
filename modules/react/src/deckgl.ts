@@ -23,6 +23,8 @@ type DeckInstanceRef<ViewsT extends ViewOrViews> = {
   lastRenderedViewports?: Viewport[];
   viewStateUpdateRequested?: any;
   interactionStateUpdateRequested?: any;
+  externalCanvasStyle?: CSSStyleDeclaration;
+  originalCanvasVisibility?: string;
   forceUpdate: () => void;
   version: number;
   control: React.ReactHTMLElement<HTMLElement> | null;
@@ -76,36 +78,79 @@ function redrawDeck(thisRef: DeckInstanceRef<any>) {
   }
 }
 
+function showExternalCanvas(thisRef: DeckInstanceRef<any>) {
+  if (thisRef.externalCanvasStyle) {
+    thisRef.externalCanvasStyle.visibility = thisRef.originalCanvasVisibility || '';
+    thisRef.externalCanvasStyle = undefined;
+    thisRef.originalCanvasVisibility = undefined;
+  }
+}
+
+function isWebGPUDevice(props: DeckProps<any>): boolean {
+  return (
+    props.device?.type === 'webgpu' ||
+    props.deviceProps?.type === 'webgpu' ||
+    props.deviceProps?.adapters?.[0]?.type === 'webgpu'
+  );
+}
+
+function deckSizeMatchesContainer(
+  thisRef: DeckInstanceRef<any>,
+  container: HTMLElement | null
+): boolean {
+  const deck = thisRef.deck;
+  return Boolean(
+    deck &&
+      container &&
+      deck.width === container.clientWidth &&
+      deck.height === container.clientHeight
+  );
+}
+
 function createDeckInstance<ViewsT extends ViewOrViews>(
   thisRef: DeckInstanceRef<ViewsT>,
   DeckClass: typeof Deck,
   props: DeckProps<ViewsT>
 ): Deck<ViewsT> {
+  const isWebGPU = isWebGPUDevice(props);
+  const externalCanvas = props.device?.getDefaultCanvasContext().canvas;
+  const externalCanvasStyle =
+    externalCanvas instanceof HTMLCanvasElement && !externalCanvas.isConnected
+      ? externalCanvas.style
+      : null;
+
+  // A reused external device retains the last rendered frame in its canvas. Keep a detached
+  // canvas hidden while Deck moves it into the new container and initializes the first frame.
+  if (externalCanvasStyle) {
+    thisRef.externalCanvasStyle = externalCanvasStyle;
+    thisRef.originalCanvasVisibility = externalCanvasStyle.visibility;
+    externalCanvasStyle.visibility = 'hidden';
+  }
+
   const deck = new DeckClass({
     ...props,
     // The Deck's animation loop is independent from React's render cycle, causing potential
     // synchronization issues. We provide this custom render function to make sure that React
     // and Deck update on the same schedule.
     // TODO(ibgreen) - Hack to enable WebGPU as it needs to render quickly to avoid CanvasContext texture from going stale
-    _customRender:
-      props.deviceProps?.adapters?.[0]?.type === 'webgpu'
-        ? undefined
-        : redrawReason => {
-            // Save the dirty flag for later
-            thisRef.redrawReason = redrawReason;
+    _customRender: isWebGPU
+      ? undefined
+      : redrawReason => {
+          // Save the dirty flag for later
+          thisRef.redrawReason = redrawReason;
 
-            // Viewport/view state is passed to child components as props.
-            // If they have changed, we need to trigger a React rerender to update children props.
-            const viewports = deck.getViewports();
-            if (thisRef.lastRenderedViewports !== viewports) {
-              // Viewports have changed, update children props first.
-              // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-              // so that the canvas does not get rendered before the child components update.
-              thisRef.forceUpdate();
-            } else {
-              redrawDeck(thisRef);
-            }
+          // Viewport/view state is passed to child components as props.
+          // If they have changed, we need to trigger a React rerender to update children props.
+          const viewports = deck.getViewports();
+          if (thisRef.lastRenderedViewports !== viewports) {
+            // Viewports have changed, update children props first.
+            // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
+            // so that the canvas does not get rendered before the child components update.
+            thisRef.forceUpdate();
+          } else {
+            redrawDeck(thisRef);
           }
+        }
   });
   return deck;
 }
@@ -145,7 +190,18 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       return null;
     }
     thisRef.viewStateUpdateRequested = null;
-    return props.onViewStateChange?.(params);
+    const viewState = props.onViewStateChange?.(params);
+    if (
+      !props.viewState &&
+      isWebGPUDevice(props) &&
+      deckSizeMatchesContainer(thisRef, containerRef.current)
+    ) {
+      // WebGPU uses Deck's native render loop so that its CanvasContext texture is consumed
+      // immediately. Explicitly update React children (typically a basemap) when Deck advances
+      // an internally managed view state.
+      thisRef.forceUpdate();
+    }
+    return viewState;
   };
 
   const handleInteractionStateChange: DeckProps<ViewsT>['onInteractionStateChange'] = params => {
@@ -158,6 +214,22 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       thisRef.interactionStateUpdateRequested = null;
       props.onInteractionStateChange?.(params);
     }
+  };
+
+  const handleAfterRender: DeckProps<ViewsT>['onAfterRender'] = context => {
+    showExternalCanvas(thisRef);
+    if (
+      isWebGPUDevice(props) &&
+      thisRef.deck?.isInitialized &&
+      deckSizeMatchesContainer(thisRef, containerRef.current) &&
+      thisRef.lastRenderedViewports !== thisRef.deck.getViewports()
+    ) {
+      // The native WebGPU render loop bypasses `_customRender`, which normally schedules the
+      // first React rerender after Deck initializes. Trigger it here so children such as a
+      // basemap are positioned using the initialized viewport.
+      thisRef.forceUpdate();
+    }
+    props.onAfterRender?.(context);
   };
 
   // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
@@ -175,7 +247,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       canvas: canvasRef.current,
       layers: jsxProps.layers,
       onViewStateChange: handleViewStateChange,
-      onInteractionStateChange: handleInteractionStateChange
+      onInteractionStateChange: handleInteractionStateChange,
+      onAfterRender: handleAfterRender
     };
 
     if (jsxProps.views) {
@@ -208,7 +281,10 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       canvas: canvasRef.current
     });
 
-    return () => thisRef.deck?.finalize();
+    return () => {
+      showExternalCanvas(thisRef);
+      thisRef.deck?.finalize();
+    };
   }, []);
 
   useIsomorphicLayoutEffect(() => {
