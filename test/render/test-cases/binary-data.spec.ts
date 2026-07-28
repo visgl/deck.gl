@@ -5,7 +5,7 @@
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
-import testCases from './effects';
+import testCases from './binary-data';
 
 describe.each([
   'webgl'
