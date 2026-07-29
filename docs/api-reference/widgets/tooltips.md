@@ -56,6 +56,17 @@ Tooltip appearance inherits the widget theme via CSS variables. You can customiz
 
 Tooltips also inherit the following [menu variables](./styling.md#menu): `--menu-background`, `--menu-shadow`, `--menu-backdrop-filter`, `--menu-text`.
 
+## Accessibility
+
+Built-in widget tooltips follow these accessibility practices:
+
+- Buttons use `aria-label` for screen reader announcements
+- Tooltip elements have `role="tooltip"`
+- Tooltips appear on keyboard focus
+- Pressing `Escape` dismisses the tooltip
+
+Custom widget authors should follow the same patterns when building custom tooltips. See [WAI-ARIA: Tooltip Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/tooltip/) for guidance.
+
 ## Writing Tooltips in Custom Widgets
 
 ### Using Preact (with \_Tooltip component)
@@ -73,9 +84,7 @@ class MyWidget extends Widget {
   onRenderHTML(rootElement) {
     render(
       <Tooltip content="My tooltip text">
-        <button aria-label="My Action" onClick={...}>
-          Do thing
-        </button>
+        <button onClick={...}>Do thing</button>
       </Tooltip>,
       rootElement
     );
@@ -102,13 +111,10 @@ class MyWidget extends Widget {
 
   onRenderHTML(rootElement) {
     const btn = document.createElement('button');
-    btn.setAttribute('aria-label', 'My Action');
-    btn.setAttribute('aria-describedby', 'my-tooltip');
+    btn.textContent = 'Do thing';
 
     const tooltip = document.createElement('div');
-    tooltip.id = 'my-tooltip';
     tooltip.className = 'deck-widget-tooltip';
-    tooltip.setAttribute('role', 'tooltip');
     tooltip.textContent = 'My Action';
     tooltip.hidden = true;
 
@@ -124,15 +130,3 @@ The `.deck-widget-tooltip` class provides themed background, shadow, text color,
 
 - Positioning (consider [@floating-ui/dom](https://floating-ui.com/docs/getting-started) or CSS anchor positioning)
 - Show/hide behavior (pointer events, focus, keyboard dismiss)
-
-## Accessibility
-
-Built-in widget tooltips follow these accessibility practices:
-
-- Buttons use `aria-label` for screen reader announcements
-- Tooltip elements have `role="tooltip"`
-- Tooltips appear on keyboard focus
-- Pressing `Escape` dismisses the tooltip
-
-Custom widget authors should follow the same patterns.
-
