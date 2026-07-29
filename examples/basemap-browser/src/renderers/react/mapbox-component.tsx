@@ -47,13 +47,6 @@ export default function MapboxComponent({config}: MapboxComponentProps) {
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={mapInitialViewState}
-        pixelRatio={
-          typeof useDevicePixels === 'number'
-            ? useDevicePixels
-            : useDevicePixels === false
-              ? 1
-              : undefined
-        }
         onMove={e => {
           onViewStateChange?.({
             latitude: e.viewState.latitude,

@@ -121,6 +121,12 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
     () => buildConfig(dimensions, handleViewStateChange),
     [dimensions, handleViewStateChange]
   );
+  const displayedPixelRatioOverride =
+    dimensions.useDevicePixels === false
+      ? 1
+      : dimensions.useDevicePixels === true
+        ? 1.5
+        : dimensions.useDevicePixels;
 
   // Update a single dimension
   const updateDimension = useCallback(
@@ -287,7 +293,7 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
                 updateDimension('useDevicePixels', dimensions.useDevicePixels === true ? 1.5 : true)
               }
             />
-            Override Pixel Ratio (1.5)
+            Override Pixel Ratio ({displayedPixelRatioOverride})
           </label>
         </div>
 

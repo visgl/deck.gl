@@ -39,7 +39,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
   // For multi-view, extract the mapbox view state for the base map
   const mapInitialViewState = getBaseMapViewState(initialViewState);
 
-  const mapOpts: any = {
+  const mapOpts: mapboxgl.MapOptions = {
     container,
     style: mapStyle,
     center: [mapInitialViewState.longitude, mapInitialViewState.latitude],
@@ -47,11 +47,6 @@ export function mount(container: HTMLElement, config: Config): () => void {
     bearing: mapInitialViewState.bearing || 0,
     pitch: mapInitialViewState.pitch || 0
   };
-  if (typeof useDevicePixels === 'number') {
-    mapOpts.pixelRatio = useDevicePixels;
-  } else if (useDevicePixels === false) {
-    mapOpts.pixelRatio = 1;
-  }
   const map = new mapboxgl.Map(mapOpts);
 
   const overlayConfig: any = {
