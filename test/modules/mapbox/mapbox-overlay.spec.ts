@@ -1037,6 +1037,37 @@ test('MapboxOverlay#widgets - onRemove clears widget _container', () => {
   expect(widget.props._container, '_container is cleared after removeControl').toBeFalsy();
 });
 
+test('MapboxOverlay#widgets - map removal cleans up later controls', async () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+
+  const widget = new TestWidget({id: 'mapbox-widget', viewId: 'mapbox', placement: 'top-right'});
+  const overlay = new MapboxOverlay({
+    device: overlaidTestDevice,
+    layers: [new ScatterplotLayer()],
+    widgets: [widget]
+  });
+  let laterControlRemoveCount = 0;
+  const laterControl = {
+    onAdd: () => document.createElement('div'),
+    onRemove: () => {
+      laterControlRemoveCount++;
+    }
+  };
+
+  map.addControl(overlay);
+  map.addControl(laterControl);
+  await sleep(0);
+  map.remove();
+
+  expect(laterControlRemoveCount, 'Later control is removed exactly once').toBe(1);
+  expect(widget.props._container, 'Widget _container is cleared').toBeFalsy();
+  expect(overlay._widgetControls.length, 'Widget controls are cleaned up').toBe(0);
+  expect(overlay._deck, 'Deck instance is finalized').toBeFalsy();
+});
+
 test('MapboxOverlay#widgets - getDefaultPosition maps placement correctly', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},

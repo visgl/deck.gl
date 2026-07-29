@@ -84,18 +84,18 @@ export default class Map extends Evented {
   }
 
   addControl(control, position?) {
+    control.onAdd(this);
     this._controls.push({
       control,
       position: position || control.getDefaultPosition?.() || 'top-right'
     });
-    control.onAdd(this);
   }
   removeControl(control) {
     const i = this._controls.findIndex(c => c.control === control);
     if (i >= 0) {
       this._controls.splice(i, 1);
-      control.onRemove(this);
     }
+    control.onRemove(this);
   }
   hasControl(control) {
     return this._controls.some(c => c.control === control);
@@ -151,6 +151,9 @@ export default class Map extends Evented {
   }
 
   remove() {
+    for (const {control} of this._controls) {
+      control.onRemove(this);
+    }
     this._controls = [];
     this.style = null;
   }

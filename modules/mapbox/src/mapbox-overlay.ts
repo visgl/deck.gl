@@ -240,9 +240,13 @@ export default class MapboxOverlay implements IControl {
     const map = this._map;
 
     if (map) {
-      // Remove widget controls
-      for (const control of this._widgetControls) {
-        map.removeControl(control);
+      // Mapbox/MapLibre remove the overlay from their control list before calling
+      // onRemove(), except during map.remove(), which iterates the list directly.
+      // Do not mutate that list while it is being iterated.
+      if (!map.hasControl(this)) {
+        for (const control of this._widgetControls) {
+          map.removeControl(control);
+        }
       }
       this._widgetControls = [];
 

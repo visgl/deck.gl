@@ -175,7 +175,10 @@ Widgets without a `viewId` (or with a `viewId` other than `'mapbox'`) are render
 ```ts
 new MapboxOverlay({
   widgets: [
-    new FullscreenWidget({placement: 'top-left'})
+    new FullscreenWidget({
+      placement: 'top-left',
+      container: map.getContainer()
+    })
   ]
 });
 ```
@@ -189,7 +192,11 @@ const overlay = new MapboxOverlay({
   widgets: [
     // Positioned by the map's control container
     new ScreenshotWidget({viewId: 'mapbox', placement: 'top-right'}),
-    new FullscreenWidget({viewId: 'mapbox', placement: 'top-left'}),
+    new FullscreenWidget({
+      viewId: 'mapbox',
+      placement: 'top-left',
+      container: map.getContainer()
+    }),
     // Positioned by deck.gl's overlay
     new PopupWidget({position: [0.45, 51.47], content: 'London'})
   ]
@@ -208,8 +215,9 @@ When using `MapboxOverlay`, the map library controls the camera and interaction,
 |---|---|---|
 | **View controls** | `ZoomWidget`, `CompassWidget`, `ResetViewWidget` | Button clicks do not move the camera, because view state is managed by the map. Use native map controls (e.g. `NavigationControl`) instead. |
 | **Canvas capture** | `ScreenshotWidget` | In interleaved mode (`interleaved: true`), deck renders into the map's GL context. `ScreenshotWidget` captures deck's own canvas, which is empty. Use `overlay.getCanvas()` to get the map's canvas instead. |
+| **Fullscreen** | `FullscreenWidget` | Set `container: map.getContainer()` so that the basemap and map controls are included in the fullscreen element. |
 
-Informational widgets (`FullscreenWidget`, `LoadingWidget`, `PopupWidget`, `InfoWidget`, etc.) work without limitations in both modes.
+Other informational widgets (`LoadingWidget`, `PopupWidget`, `InfoWidget`, etc.) work without limitations in both modes.
 
 ### Multi-view usage
 
