@@ -45,3 +45,25 @@ test('ToggleWidget', async () => {
   expect(button.getAttribute('aria-label')).toBe('Toggle on');
   expect(icon.style.backgroundColor).toBe('rgb(0, 255, 0)');
 });
+
+test('ToggleWidget - checked tooltip falls back to onLabel', async () => {
+  testInstance = new WidgetTester({
+    widgets: [
+      new ToggleWidget({
+        icon: './icon-off.png',
+        initialChecked: true,
+        label: 'Toggle off',
+        tooltip: 'Custom unchecked tooltip',
+        onLabel: 'Toggle on'
+      })
+    ]
+  });
+
+  await testInstance.idle();
+  const button = testInstance.findElements('.deck-widget-icon-button')[0] as HTMLButtonElement;
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await testInstance.idle();
+
+  const tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
+  expect(tooltip.textContent).toBe('Toggle on');
+});

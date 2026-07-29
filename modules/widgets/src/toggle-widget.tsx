@@ -81,7 +81,7 @@ export class ToggleWidget extends Widget<ToggleWidgetProps> {
       color,
       onIcon = icon,
       onLabel = label,
-      onTooltip = tooltip,
+      onTooltip,
       onColor = color
     } = this.props;
     const on = this.checked;

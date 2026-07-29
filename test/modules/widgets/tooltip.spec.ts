@@ -3,15 +3,27 @@
 // Copyright (c) vis.gl contributors
 
 import {afterEach, test, expect} from 'vitest';
-import {ZoomWidget} from '@deck.gl/widgets';
+import {h, render} from 'preact';
+import {ZoomWidget, _Tooltip as Tooltip} from '@deck.gl/widgets';
 import {WidgetTester} from './common';
 
 let testInstance: WidgetTester<any> | undefined;
+let componentContainer: HTMLDivElement | undefined;
 
 afterEach(() => {
   testInstance?.destroy();
   testInstance = undefined;
+  if (componentContainer) {
+    render(null, componentContainer);
+    componentContainer.remove();
+    componentContainer = undefined;
+  }
 });
+
+const waitForPositionUpdate = () =>
+  new Promise<void>(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
 
 test('Tooltip - string override', async () => {
   testInstance = new WidgetTester({
@@ -107,4 +119,60 @@ test('Tooltip - HTMLElement replacement on content change', async () => {
 
   tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
   expect(tooltip.textContent).toContain('Second');
+});
+
+test('Tooltip - updates position after layout changes', async () => {
+  testInstance = new WidgetTester({
+    widgets: [new ZoomWidget()]
+  });
+
+  await testInstance.idle();
+  const container = testInstance.findElements('')[0] as HTMLDivElement;
+  const button = testInstance.findElements('.deck-widget-icon-button')[0] as HTMLButtonElement;
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await waitForPositionUpdate();
+
+  const tooltip = testInstance.findElements('.deck-widget-tooltip')[0] as HTMLDivElement;
+  const initialLeft = Number.parseFloat(tooltip.style.left);
+
+  container.style.left = '100px';
+  window.dispatchEvent(new Event('resize'));
+  await waitForPositionUpdate();
+
+  expect(Number.parseFloat(tooltip.style.left) - initialLeft).toBeCloseTo(100);
+});
+
+test('Tooltip - wraps long content', async () => {
+  testInstance = new WidgetTester({
+    widgets: [new ZoomWidget({zoomInTooltip: 'A tooltip with a long line of content'})]
+  });
+
+  await testInstance.idle();
+  const button = testInstance.findElements('.deck-widget-icon-button')[0] as HTMLButtonElement;
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await waitForPositionUpdate();
+
+  const tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
+  const style = getComputedStyle(tooltip);
+  expect(style.whiteSpace).toBe('normal');
+  expect(style.overflowWrap).toBe('anywhere');
+});
+
+test('Tooltip - renders numeric zero content', async () => {
+  componentContainer = document.createElement('div');
+  document.body.appendChild(componentContainer);
+  render(
+    h(Tooltip, {
+      content: 0,
+      children: h('button', {type: 'button'}, 'Trigger')
+    }),
+    componentContainer
+  );
+
+  const button = componentContainer.querySelector('button') as HTMLButtonElement;
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await waitForPositionUpdate();
+
+  const tooltip = componentContainer.querySelector('.deck-widget-tooltip');
+  expect(tooltip?.textContent).toBe('0');
 });
