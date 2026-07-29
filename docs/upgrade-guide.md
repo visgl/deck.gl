@@ -2,6 +2,41 @@
 
 ## Upgrading to v9.4
 
+### pydeck lighting
+
+The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
+`lightSettings` layer prop, which deck.gl has not supported since v7. Use deck-level
+lighting effects instead:
+
+```python
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+pdk.Deck(layers=[layer], effects=[lighting])
+```
+
+### Controller touch gestures
+
+The `touchRotate` controller option is deprecated. Historically, `touchRotate: true` enabled two touchscreen gestures: a two-finger twist changed bearing, and a two-finger vertical drag changed pitch.
+
+`touchRotate: true` is now treated as an alias for `multiTouchDrag: 'rotate'`. This preserves the existing twist and vertical-drag behaviors, and also allows a horizontal two-finger drag to change bearing. If both options are supplied, `multiTouchDrag` takes precedence. Trackpad gestures still require the separate `trackpadGesture: true` opt-in.
+
+Use `multiTouchDrag: 'rotate'` instead:
+
+```ts
+// Before
+controller: {
+  touchRotate: true
+}
+
+// After
+controller: {
+  multiTouchDrag: 'rotate'
+}
+```
+
 #### `pickMultipleObjects()` pick depth limits
 
 For layers that use built-in shader instance ids instead of explicit picking index buffers, `pickMultipleObjects()` now only guarantees the default `depth` of 10 unique objects per layer. Applications that call `pickMultipleObjects()` with a custom `depth` above the default may receive duplicate results for these layers. Layers with explicit picking index buffers keep their previous buffer-mutation behavior.
@@ -51,6 +86,53 @@ new Deck({
 - The experimental `_renderLayersInGroups` prop has been removed from `MapboxOverlay`. In interleaved mode, layers are now always rendered in groups by `beforeId` or `slot`, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default. If you were using `_renderLayersInGroups: true`, simply remove the prop.
 - Note: extensions that require shared rendering context (MaskExtension, CollisionFilterExtension) only work between layers in the same group. Ensure affected layers share the same `beforeId` or `slot` value.
 
+### @deck.gl/arcgis
+
+`DeckRenderer` now integrates with ArcGIS `SceneView` through `RenderNode` instead of `externalRenderers`.
+
+If your app uses 3D ArcGIS integration, migrate as follows:
+
+- Load `esri/views/3d/webgl/RenderNode` instead of `esri/views/3d/externalRenderers`.
+- If you pass a custom `esri` object to `loadArcGISModules`, make sure it exposes `esri.views['3d'].webgl.RenderNode`.
+- Remove `externalRenderers.add(sceneView, renderer)`. `DeckRenderer` now self-registers as a `RenderNode`.
+- `SceneView` integration still requires `viewingMode: 'local'`.
+- If you are loading ArcGIS via `esri-loader`, consider pinning the ArcGIS JS API script with `loadScriptOptions` (for example, `{url: 'https://js.arcgis.com/4.32/'}`) to avoid unintentional version drift.
+
+```js
+// Before
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/externalRenderers'
+]).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView, externalRenderers] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  const renderer = new DeckRenderer(sceneView, {layers});
+  externalRenderers.add(sceneView, renderer);
+});
+
+// After
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/webgl/RenderNode'
+], {
+  url: 'https://js.arcgis.com/4.32/'
+}).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  new DeckRenderer(sceneView, {layers});
+});
+```
+
 ### Widgets
 
 The following widgets have breaking changes in v9.3:
@@ -62,7 +144,6 @@ The following widgets have breaking changes in v9.3:
 - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) - no longer experimental (removed underscore in export)
 - [ThemeWidget](./api-reference/widgets/theme-widget.md) - no longer experimental (removed underscore in export)
 - [LoadingWidget](./api-reference/widgets/loading-widget.md) - no longer experimental (removed underscore in export)
-
 
 ## Upgrading to v9.1
 

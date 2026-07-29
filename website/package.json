@@ -1,6 +1,6 @@
 {
   "name": "project-website",
-  "version": "9.3.0-beta.1",
+  "version": "9.3.0-beta.2",
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
@@ -16,11 +16,11 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
-    "@loaders.gl/core": "^4.4.1",
-    "@loaders.gl/i3s": "^4.4.1",
-    "@loaders.gl/las": "^4.4.1",
-    "@loaders.gl/obj": "^4.4.1",
-    "@loaders.gl/ply": "^4.4.1",
+    "@loaders.gl/core": "^4.4.3",
+    "@loaders.gl/i3s": "^4.4.3",
+    "@loaders.gl/las": "^4.4.3",
+    "@loaders.gl/obj": "^4.4.3",
+    "@loaders.gl/ply": "^4.4.3",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -37,9 +37,11 @@
     "popmotion": "^11.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-dropzone": "^15.0.0",
     "react-map-gl": "^8.1.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "source-map-loader": "^5.0.0",
+    "split.js": "^1.6.5",
     "styled-components": "^5.3.3",
     "supercluster": "^8.0.1",
     "zustand": "^5.0.5"

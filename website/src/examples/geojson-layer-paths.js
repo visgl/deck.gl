@@ -25,6 +25,8 @@ class HighwayDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/highway`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     year: {displayName: 'Year', type: 'range', value: 1990, step: 5, min: 1990, max: 2015}
   };

@@ -39,7 +39,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 
 - `dragPan`: default `'pan'` (drag to pan)
 - `dragRotate`: shift+drag or right-click drag to change bearing and pitch
-- `touchRotate`: multi-touch rotate to change bearing
+- `multiTouchDrag`: two-pointer translation can pan or change bearing and pitch
 - `keyboard`: arrow keys to pan, +/- to zoom
 - `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
 - `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`

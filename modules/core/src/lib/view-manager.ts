@@ -10,6 +10,7 @@ import type Controller from '../controllers/controller';
 import type {ViewStateChangeParameters, InteractionState} from '../controllers/controller';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
+import type {CanvasContext, PresentationContext} from '@luma.gl/core';
 import type {Timeline} from '@luma.gl/engine';
 import type {EventManager} from 'mjolnir.js';
 import type {ConstructorOf} from '../types/types';
@@ -37,7 +38,52 @@ export type ViewStateObject<ViewsT extends ViewOrViews> =
   | AnyViewStateOf<ViewsT>
   | {[viewId: string]: AnyViewStateOf<ViewsT>};
 
-/** ViewManager props directly supplied by the user */
+/** Canvas id used by views that do not declare a presentation canvas. */
+export const DEFAULT_CANVAS_ID = 'default-canvas';
+
+type ViewEventManager = {
+  canvasId: string;
+  eventManager: EventManager;
+};
+
+/**
+ * Looks up an existing canvas context without duplicating its resize or pixel-size bookkeeping.
+ * @param canvasId - Presentation canvas to resolve, or undefined to select the default canvas.
+ * @returns The existing render or presentation context, or null when no canvas matches.
+ */
+type CanvasContextResolver = (canvasId?: string) => CanvasContext | PresentationContext | null;
+
+/**
+ * Restricts viewport selection to one presentation canvas, optionally at a CSS-pixel location.
+ * Canvas-only filters intentionally omit coordinates so they return every matching viewport.
+ */
+type ViewportFilter =
+  | {
+      /** Presentation canvas whose viewports should be returned. */
+      canvasId: string;
+    }
+  | {
+      /** Horizontal CSS-pixel coordinate to match. */
+      x: number;
+      /** Vertical CSS-pixel coordinate to match. */
+      y: number;
+      /** Optional width of the CSS-pixel query rectangle. */
+      width?: number;
+      /** Optional height of the CSS-pixel query rectangle. */
+      height?: number;
+      /** Optional presentation canvas that further restricts the pixel query. */
+      canvasId?: string;
+    };
+
+/** CSS-pixel dimensions read directly from an existing canvas context. */
+type CanvasDimensions = {
+  /** Canvas width in CSS pixels. */
+  width: number;
+  /** Canvas height in CSS pixels. */
+  height: number;
+};
+
+/** Internal view, controller, and canvas-routing properties supplied by Deck. */
 type ViewManagerProps<ViewsT extends ViewOrViews> = {
   views: ViewsT;
   viewState: ViewStateObject<ViewsT> | null;
@@ -46,8 +92,13 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
+  /** Resolve existing luma contexts, which own all canvas resize and pixel-size tracking. */
+  getCanvasContext?: CanvasContextResolver;
+  /** Event managers keyed by presentation canvas id. */
+  eventManagers?: Record<string, EventManager>;
 };
 
+/** Builds viewports and routes controllers using their assigned canvas coordinate systems. */
 export default class ViewManager<ViewsT extends View[]> {
   width: number;
   height: number;
@@ -62,12 +113,20 @@ export default class ViewManager<ViewsT extends View[]> {
   private _needsRedraw: string | false;
   private _needsUpdate: string | false;
   private _eventManager: EventManager;
+  private _eventManagers: Record<string, EventManager>;
+  private _viewEventManagers: {[viewId: string]: ViewEventManager};
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
   };
   private _pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  /** Context lookup supplied by Deck; context dimensions remain owned and observed by luma. */
+  private _getCanvasContext?: CanvasContextResolver;
 
+  /**
+   * Initializes the viewport layout, controller routing, and optional canvas-context lookup.
+   * @param props - Initial views, view state, event managers, dimensions, and context resolver.
+   */
   constructor(
     props: ViewManagerProps<ViewsT> & {
       // Initial options
@@ -90,11 +149,14 @@ export default class ViewManager<ViewsT extends View[]> {
     this._needsUpdate = 'Initialize';
 
     this._eventManager = props.eventManager;
+    this._eventManagers = props.eventManagers || {};
+    this._viewEventManagers = {};
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
       onInteractionStateChange: props.onInteractionStateChange
     };
     this._pickPosition = props.pickPosition;
+    this._getCanvasContext = props.getCanvasContext;
 
     Object.seal(this);
 
@@ -143,16 +205,21 @@ export default class ViewManager<ViewsT extends View[]> {
     }
   }
 
-  /** Get a set of viewports for a given width and height
-   * TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
-   * @param rect (object, optional) - filter the viewports
-   *   + not provided - return all viewports
-   *   + {x, y} - only return viewports that contain this pixel
-   *   + {x, y, width, height} - only return viewports that overlap with this rectangle
+  /**
+   * Returns active viewports, optionally restricted by canvas and/or CSS-pixel coordinates.
+   * @param filter - A canvas-only selection or a point/rectangle with an optional canvas id.
+   * @returns Matching viewports in their original rendering order.
    */
-  getViewports(rect?: {x: number; y: number; width?: number; height?: number}): Viewport[] {
-    if (rect) {
-      return this._viewports.filter(viewport => viewport.containsPixel(rect));
+  getViewports(filter?: ViewportFilter): Viewport[] {
+    if (filter) {
+      return this._viewports.filter(viewport => {
+        // Different canvases can contain the same CSS coordinates. First select the requested
+        // canvas, then test pixel containment only when coordinates were actually supplied;
+        // canvas-only queries must retain every viewport on that canvas.
+        const matchesCanvas = !filter.canvasId || this.getCanvasId(viewport.id) === filter.canvasId;
+        const matchesPixel = !('x' in filter) || viewport.containsPixel(filter);
+        return matchesCanvas && matchesPixel;
+      });
     }
     return this._viewports;
   }
@@ -186,6 +253,18 @@ export default class ViewManager<ViewsT extends View[]> {
 
   getViewport(viewId: string): Viewport | undefined {
     return this._viewportMap[viewId];
+  }
+
+  /**
+   * Resolves the presentation canvas associated with an existing or supplied view.
+   * @param viewOrViewId - View instance or id whose canvas association should be resolved.
+   * @returns The assigned canvas id, or undefined when the view does not exist.
+   */
+  getCanvasId(viewOrViewId: string | View): string | undefined {
+    const view = typeof viewOrViewId === 'string' ? this.getView(viewOrViewId) : viewOrViewId;
+    return view
+      ? this._viewEventManagers[view.id]?.canvasId || this._getCanvasIdFromView(view)
+      : undefined;
   }
 
   /**
@@ -229,6 +308,10 @@ export default class ViewManager<ViewsT extends View[]> {
 
     if ('pickPosition' in props) {
       this._pickPosition = props.pickPosition;
+    }
+
+    if ('eventManagers' in props) {
+      this._setEventManagers(props.eventManagers || {});
     }
 
     // Important: avoid invoking _update() inside itself
@@ -298,6 +381,77 @@ export default class ViewManager<ViewsT extends View[]> {
     }
   }
 
+  private _setEventManagers(eventManagers: Record<string, EventManager>): void {
+    if (this._eventManagers !== eventManagers) {
+      this._eventManagers = eventManagers;
+      this.setNeedsUpdate('eventManagers changed');
+    }
+  }
+
+  /**
+   * Resolves a view's explicit canvas id, falling back to the existing default canvas context.
+   * @param view - View whose presentation canvas is being determined.
+   * @returns The explicit, default-context, or legacy default canvas id.
+   */
+  private _getCanvasIdFromView(view: View): string {
+    return view.props.canvasId || this._getCanvasContext?.()?.id || DEFAULT_CANVAS_ID;
+  }
+
+  /**
+   * Reads the CSS dimensions used to lay out a view and its controller viewport.
+   * @param view - View whose assigned canvas provides the layout coordinate space.
+   * @returns Context-owned CSS dimensions, or the manager dimensions without a canvas context.
+   */
+  private _getCanvasDimensions(view: View): CanvasDimensions {
+    // Viewport layout uses CSS pixels, not framebuffer pixels. Read them directly from the
+    // observed luma context instead of maintaining a second per-canvas size snapshot.
+    const canvasContext = this._getCanvasContext?.(this._getCanvasIdFromView(view));
+    const [width, height] = canvasContext?.getCSSSize() || [this.width, this.height];
+    return {width, height};
+  }
+
+  private _getViewEventManager(view: View): ViewEventManager {
+    const canvasId = this.getCanvasId(view) || DEFAULT_CANVAS_ID;
+    return {
+      canvasId,
+      eventManager: this._eventManagers[canvasId] || this._eventManager
+    };
+  }
+
+  private _startViewportRebuild(): {
+    oldControllers: {[viewId: string]: Controller<any> | null};
+    oldViewEventManagers: {[viewId: string]: ViewEventManager};
+  } {
+    const oldControllers = this.controllers;
+    const oldViewEventManagers = this._viewEventManagers;
+    this._viewports = [];
+    this.controllers = {};
+    this._viewEventManagers = {};
+    return {oldControllers, oldViewEventManagers};
+  }
+
+  private _getReusableController(
+    controller: Controller<any> | null | undefined,
+    oldViewEventManager: ViewEventManager | undefined,
+    viewEventManager: ViewEventManager
+  ): Controller<any> | null | undefined {
+    if (
+      controller &&
+      (oldViewEventManager?.canvasId !== viewEventManager.canvasId ||
+        oldViewEventManager?.eventManager !== viewEventManager.eventManager)
+    ) {
+      controller.finalize();
+      return null;
+    }
+    return controller;
+  }
+
+  /**
+   * Creates a controller that resolves its viewport against the view's assigned canvas.
+   * @param view - View receiving the controller.
+   * @param props - Controller identity and implementation class.
+   * @returns The initialized controller for the view.
+   */
   private _createController(
     view: View,
     props: {id: string; type: ConstructorOf<Controller<any>>}
@@ -306,15 +460,14 @@ export default class ViewManager<ViewsT extends View[]> {
 
     const controller = new Controller({
       timeline: this.timeline,
-      eventManager: this._eventManager,
+      eventManager: this._getViewEventManager(view).eventManager,
       // Set an internal callback that calls the prop callback if provided
       onViewStateChange: this._eventCallbacks.onViewStateChange,
       onStateChange: this._eventCallbacks.onInteractionStateChange,
       makeViewport: viewState =>
         this.getView(view.id)?.makeViewport({
           viewState,
-          width: this.width,
-          height: this.height
+          ...this._getCanvasDimensions(view)
         }),
       pickPosition: this._pickPosition
     });
@@ -353,22 +506,27 @@ export default class ViewManager<ViewsT extends View[]> {
     return null;
   }
 
-  // Rebuilds viewports from descriptors towards a certain window size
+  /** Rebuilds each viewport and controller using its presentation canvas's CSS dimensions. */
   private _rebuildViewports(): void {
     const {views} = this;
 
-    const oldControllers = this.controllers;
-    this._viewports = [];
-    this.controllers = {};
+    const {oldControllers, oldViewEventManagers} = this._startViewportRebuild();
 
     let invalidateControllers = false;
     // Create controllers in reverse order, so that views on top receive events first
     for (let i = views.length; i--; ) {
       const view = views[i];
+      const {width, height} = this._getCanvasDimensions(view);
+      const viewEventManager = this._getViewEventManager(view);
+      this._viewEventManagers[view.id] = viewEventManager;
       const viewState = this.getViewState(view);
-      const viewport = view.makeViewport({viewState, width: this.width, height: this.height});
+      const viewport = view.makeViewport({viewState, width, height});
 
-      let oldController = oldControllers[view.id];
+      let oldController = this._getReusableController(
+        oldControllers[view.id],
+        oldViewEventManagers[view.id],
+        viewEventManager
+      );
       const hasController = Boolean(view.controller);
       if (hasController && !oldController) {
         // When a new controller is added, invalidate all controllers below it so that

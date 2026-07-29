@@ -18,6 +18,7 @@ import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
 import {addSupportComponents} from '../lib/components/index';
+import {JSONPostProcessEffect} from './post-process-effect';
 
 /* eslint-disable import/namespace */
 import * as deckExports from '../deck-bundle';
@@ -42,15 +43,21 @@ function extractElements(library = {}, filter) {
 const JSON_CONVERTER_CONFIGURATION = {
   classes: {
     ...extractElements(deckExports, classesFilter),
-    // Add experimental widgets (exported with _ prefix)
-    FpsWidget: deckExports._FpsWidget,
+    // PostProcessEffect requires a shader module as its first constructor argument
+    PostProcessEffect: JSONPostProcessEffect,
+    // Register lights exported with _ prefix under their canonical names
+    SunLight: deckExports._SunLight,
+    CameraLight: deckExports._CameraLight,
+    // Register views exported with _ prefix under their canonical names
+    GlobeView: deckExports._GlobeView,
+    // Register widgets exported with _ prefix under their canonical names
     StatsWidget: deckExports._StatsWidget,
     ScaleWidget: deckExports._ScaleWidget,
     GeocoderWidget: deckExports._GeocoderWidget,
     SplitterWidget: deckExports._SplitterWidget,
-    InfoWidget: deckExports._InfoWidget,
-    ThemeWidget: deckExports._ThemeWidget,
-    LoadingWidget: deckExports._LoadingWidget
+    TimelineWidget: deckExports._TimelineWidget,
+    // Register the extension exported with _ prefix under its canonical name
+    TerrainExtension: deckExports._TerrainExtension
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
