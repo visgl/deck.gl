@@ -57,9 +57,14 @@ export default class MapboxOverlay implements IControl {
 
   /** Filter out props to pass to Deck **/
   filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
-    const {interleaved = false, useDevicePixels, ...deckProps} = props;
-    if (!interleaved && useDevicePixels !== undefined) {
-      // useDevicePixels cannot be used in interleaved mode
+    const {interleaved, useDevicePixels, ...deckProps} = props;
+    if (this._interleaved) {
+      if (useDevicePixels !== undefined && useDevicePixels !== true) {
+        log.warn(
+          'useDevicePixels has no effect in interleaved mode. The basemap controls the drawing buffer resolution. Use MapLibre pixelRatio option instead.'
+        )();
+      }
+    } else if (useDevicePixels !== undefined) {
       (deckProps as MapboxOverlayProps).useDevicePixels = useDevicePixels;
     }
     return deckProps;
