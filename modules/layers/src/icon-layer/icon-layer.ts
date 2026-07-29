@@ -171,11 +171,13 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       instanceSizes: {
         size: 1,
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getSize',
         defaultValue: 1
       },
       instanceIconDefs: {
         size: 7,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getIcon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         transform: this.getInstanceIconDef,
@@ -198,17 +200,20 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: this.props.colorFormat.length,
         type: 'unorm8',
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceAngles: {
         size: 1,
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getAngle'
       },
       instancePixelOffset: {
         size: 2,
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getPixelOffset'
       },
       ...((this.props.data as any)?.attributes?.rowIndexes

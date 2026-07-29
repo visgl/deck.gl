@@ -40,7 +40,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 
 - `dragPan`: default `'pan'` (drag to pan)
 - `dragRotate`: not effective, this view cannot be rotated
-- `touchRotate`: not effective, this view cannot be rotated
+- `multiTouchDrag`: supports `pan`; `rotate` is not effective because this view cannot be rotated
 - `keyboard`: arrow keys to pan, +/- to zoom
 
 Also accepts additional options:

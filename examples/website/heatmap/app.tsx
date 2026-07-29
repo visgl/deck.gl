@@ -6,6 +6,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 import type {MapViewState} from '@deck.gl/core';
@@ -27,12 +28,14 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-styl
 type DataPoint = [longitude: number, latitude: number, count: number];
 
 export default function App({
+  device,
   data = DATA_URL,
   intensity = 1,
   threshold = 0.03,
   radiusPixels = 30,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: string | DataPoint[];
   intensity?: number;
   threshold?: number;
@@ -53,7 +56,7 @@ export default function App({
   ];
 
   return (
-    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
+    <DeckGL device={device} initialViewState={INITIAL_VIEW_STATE} controller={true} layers={layers}>
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );

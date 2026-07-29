@@ -17,6 +17,47 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.4
+
+### deck.gl v9.4 Prereleases
+
+#### deck.gl [v9.4.0-alpha.1] - Jul 16 2026
+
+- fix(core): do not write View clearColor into the picking buffer (#10431)
+- feat(widgets): add zoomStep to ZoomWidget (#10426)
+- feat(core): upgrade mjolnir.js for DoubleClickDrag recognizer (#10416)
+- fix(mapbox): avoid crash when MapboxOverlay beforeId layer is removed (#10425)
+- fix(widgets): InfoWidget not rendering on hover/click (#10421)
+- fix(layers): Add missing `@types/geojson` dependency (#10268)
+- feat(core): Support multiple event managers (multi-canvas prep) (#10375)
+- fix(arcgis): update arcgis module to use RenderNode instead of externalRenderers (#10257)
+- fix(geo-layers): Pass zoomOffset through TerrainLayer to child TileLayer (#10382)
+- chore(deps): bump loaders.gl to ^4.4.3 (#10380)
+- refactor(geo-layers): prioritize tile requests by viewport center (#10364)
+- fix(layers): closed shapes with binary data and transition props (#10094)
+- fix(core): use correct mjolnir requireFailure key for recognizers (#10323)
+- feat(extensions): TerrainExtension GlobeView support (#10251)
+- feat(core): doubleClickDragZoom gesture (#10327)
+- chore(core): Adopt luma CanvasContext (#10228)
+- feat(core): Row index based picking (#10302)
+- fix(geo-layers): TerrainLayer GlobeView support (#10250)
+- feat(core): Remove redundant instance picking colors (#10275)
+- fix(core): Tile3DLayer renders correctly on GlobeView (#10252)
+- fix(heatmap): compilation failure on Qualcomm Adreno 660 (#10301)
+- feat(core): GlobeController with inertia, tilt & pan (#10298)
+- fix(extensions): MaskExtension compatible with TerrainExtension (#10187)
+- feat(carto): Clipped polygon labels (#10278)
+- feat(core): ViewProps.parameters (#10262)
+- feat(layers): add getPixelOffset prop to ScatterplotLayer (#10178)
+- fix(layers): GeoJsonLayer TypeScript types elevationScale as number (#10261)
+- fix(google-maps, arcgis): Wrap external FB handle (#10253)
+- fix(react): Align React widget names with pure js (#10239)
+- feat(widgets): ScrollbarWidget falls back to controller.maxBounds (#10236)
+- fix(widgets): ThemeWidget does not apply theme variables on initial add (#10238)
+- fix(widgets): CoordinateGeocoder edge case handling (#10235)
+- feat(widgets): unify viewId handling (#10234)
+- fix(widgets): SplitterWidget types (#10233)
+
 ## deck.gl v9.3
 
 ### deck.gl v9.3 Prereleases

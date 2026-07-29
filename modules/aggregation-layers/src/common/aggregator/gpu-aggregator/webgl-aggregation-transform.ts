@@ -112,6 +112,7 @@ export class WebGLAggregationTransform {
     transform.run({
       id: 'gpu-aggregation-domain',
       framebuffer: target,
+      discard: false,
       parameters: {
         viewport: [0, 0, 2, 1]
       },
@@ -243,11 +244,8 @@ void main() {
       blendAlphaOperation: 'max'
     },
     defines: {
-      // @ts-expect-error TODO fix luma type
       NUM_DIMS: props.dimensions,
-      // @ts-expect-error TODO fix luma type
       NUM_CHANNELS: props.channelCount,
-      // @ts-expect-error TODO fix luma type
       SAMPLER_WIDTH: TEXTURE_WIDTH
     },
     varyings: ['binIds', 'values'],

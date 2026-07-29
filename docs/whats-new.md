@@ -57,6 +57,45 @@ new GlobeView({
 
 [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 
+### pydeck
+
+deck.gl's Python bindings gain first-class support for [layer extensions](./api-reference/extensions/overview.md), available through a typed [`pydeck.Extension`](https://deckgl.readthedocs.io/en/latest/extension.html) wrapper:
+
+```python
+import pydeck as pdk
+
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=df,
+    get_position="position",
+    get_filter_value="value",
+    filter_range=[0, 1],
+    extensions=[pdk.Extension("DataFilterExtension", filter_size=1)],
+)
+```
+
+pydeck also gains typed lighting and post-processing effects through `pydeck.Effect`:
+
+```python
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+contrast = pdk.Effect(
+    "PostProcessEffect",
+    module="brightnessContrast",
+    brightness=0.15,
+    contrast=0.3,
+)
+pdk.Deck(layers=[layer], effects=[lighting, contrast])
+```
+
+The obsolete `pydeck.LightSettings` API has been removed; it targeted a layer prop that
+deck.gl has not supported since v7. Explore the
+[pydeck gallery](https://deckgl.readthedocs.io/en/latest/) for runnable, live examples of
+all supported extensions, lights, and bundled post-processing modules.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026

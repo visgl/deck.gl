@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import log from '../utils/log';
-import {Pan, DoubleClickDrag, InputDirection, Pinch, Tap} from 'mjolnir.js';
+import {Pan, DoubleClickDrag, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
@@ -103,8 +103,8 @@ export const EVENT_HANDLERS = {
 // Order matters: recognizeWith/requireFailure resolve by name, so a recognizer
 // must be registered before any later entry can reference it.
 export const RECOGNIZERS = {
-  multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
-  pinch: [Pinch, {}, null, ['multipan']],
+  multipan: [Pan, {threshold: 10, pointers: 2, trackpad: true}],
+  pinch: [Pinch, {trackpad: true}, null, ['multipan']],
   pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
   dblclick: [Tap, {event: 'dblclick', taps: 2, enable: false}],
   dblclickdrag: [DoubleClickDrag, {event: 'dblclickdrag', enable: false}, ['dblclick'], null],
