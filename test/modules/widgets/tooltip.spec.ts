@@ -158,6 +158,27 @@ test('Tooltip - wraps long content', async () => {
   expect(style.overflowWrap).toBe('anywhere');
 });
 
+test('Tooltip - preserves intrinsic width inside a perspective container', async () => {
+  componentContainer = document.createElement('div');
+  componentContainer.style.cssText = 'width: 28px; perspective: 100px;';
+  document.body.appendChild(componentContainer);
+  render(
+    h(Tooltip, {
+      content: 'Reset Compass',
+      children: h('button', {type: 'button'}, 'Compass')
+    }),
+    componentContainer
+  );
+
+  const button = componentContainer.querySelector('button') as HTMLButtonElement;
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await waitForPositionUpdate();
+
+  const tooltip = componentContainer.querySelector('.deck-widget-tooltip') as HTMLDivElement;
+  expect(tooltip.getBoundingClientRect().width).toBeGreaterThan(80);
+  expect(tooltip.getBoundingClientRect().height).toBeLessThan(40);
+});
+
 test('Tooltip - renders numeric zero content', async () => {
   componentContainer = document.createElement('div');
   document.body.appendChild(componentContainer);

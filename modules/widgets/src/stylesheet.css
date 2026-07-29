@@ -709,6 +709,7 @@
 .deck-widget-tooltip {
   z-index: var(--tooltip-z-index, 1000);
   pointer-events: none;
+  width: max-content;
   max-width: var(--tooltip-max-width, 240px);
   padding: 4px 8px;
   border-radius: calc(var(--button-corner-radius, 8px) - 2px);
