@@ -6,43 +6,145 @@
 // This is required for animation tests where deck.animationLoop.timeline.setTime()
 // needs to trigger re-renders between frames.
 
-import {test, beforeAll, afterAll} from 'vitest';
-import {
-  createContainer,
-  createDeck,
-  removeContainer,
-  finalizeDeck,
-  updateDeckForTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './scenegraph-layer';
+import {describe} from 'vitest';
+import {runPersistentRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {Matrix4} from '@math.gl/core';
+import {registerLoaders} from '@loaders.gl/core';
+import {GLTFLoader} from '@loaders.gl/gltf';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-  ctx.deck = createDeck(ctx.container);
-});
+// Register the proper loader for scenegraph.gltf
+registerLoaders(GLTFLoader);
 
-// Note: No afterEach finalizeDeck - we keep the deck running between tests
+import {meshSampleData} from 'deck.gl-test/data';
 
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
+const testCases = [
+  {
+    name: 'scenegraph-layer-frame-1',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 16,
+      pitch: 30,
+      bearing: 0
+    },
+    onBeforeRender: ({deck, layers}) => {
+      deck.animationLoop.timeline.pause();
+      deck.animationLoop.timeline.setTime(0);
+    },
+    layers: [
+      new ScenegraphLayer({
+        id: 'scenegraph-layer',
+        data: meshSampleData,
+        scenegraph: '/test/data/BoxAnimated.glb',
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getOrientation: d => d.orientation,
+        _animations: {
+          '*': {speed: 5}
+        },
+        sizeScale: 30,
+        _lighting: 'pbr'
+      })
+    ],
+    goldenImage: './test/render/golden-images/scenegraph-layer-frame-1.png'
+  },
+  {
+    name: 'scenegraph-layer-frame-2',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 16,
+      pitch: 30,
+      bearing: 0
+    },
+    onBeforeRender: ({deck, layers}) => {
+      deck.animationLoop.timeline.pause();
+      deck.animationLoop.timeline.setTime(400);
+    },
+    layers: [
+      new ScenegraphLayer({
+        id: 'scenegraph-layer',
+        data: meshSampleData,
+        scenegraph: '/test/data/BoxAnimated.glb',
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getOrientation: d => d.orientation,
+        _animations: {
+          '*': {speed: 5}
+        },
+        sizeScale: 30,
+        _lighting: 'pbr'
+      })
+    ],
+    goldenImage: './test/render/golden-images/scenegraph-layer-frame-2.png'
+  },
+  {
+    name: 'scenegraph-layer-frame-3',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 16,
+      pitch: 30,
+      bearing: 0
+    },
+    onBeforeRender: ({deck, layers}) => {
+      deck.animationLoop.timeline.pause();
+      deck.animationLoop.timeline.setTime(1000);
+    },
+    layers: [
+      new ScenegraphLayer({
+        id: 'scenegraph-layer',
+        data: meshSampleData,
+        scenegraph: '/test/data/BoxAnimated.glb',
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getOrientation: d => d.orientation,
+        _animations: {
+          '*': {speed: 5}
+        },
+        sizeScale: 30,
+        _lighting: 'pbr'
+      })
+    ],
+    goldenImage: './test/render/golden-images/scenegraph-layer-frame-3.png'
+  },
+  ...['flat', 'pbr'].map(lighting => ({
+    name: `scenegraph-layer-duck-${lighting}`,
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 16,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new ScenegraphLayer({
+        id: `scenegraph-layer-${lighting}`,
+        data: meshSampleData,
+        scenegraph:
+          'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
+        coordinateOrigin: [-122.45, 37.75, 0],
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
+        getOrientation: (d, {index}) => [-3 * index, -0.5 * index, 0],
+        sizeScale: 50,
+        _lighting: lighting
+      })
+    ],
+    goldenImage: `./test/render/golden-images/scenegraph-layer-duck-${lighting}.png`
+  }))
+];
 
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await updateDeckForTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runPersistentRenderTestSuite(testCases as TestCase[], deviceType);
 });

@@ -6,6 +6,8 @@ import {test, expect} from 'vitest';
 import {MapView} from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {equals} from '@math.gl/core';
+import {EventManager} from 'mjolnir.js';
+import type {CanvasContext} from '@luma.gl/core';
 
 test('ViewManager#constructor', () => {
   const viewManager = new ViewManager({
@@ -215,7 +217,164 @@ test('ViewManager#update view props', () => {
   viewManager.finalize();
 });
 
+test('ViewManager#routes controllers by canvas event manager', () => {
+  const defaultEventManager = new EventManager(document.createElement('div'));
+  const leftEventManager = new EventManager(document.createElement('div'));
+  const rightEventManager = new EventManager(document.createElement('div'));
+  const replacementRightEventManager = new EventManager(document.createElement('div'));
+  const leftView = new MapView({id: 'left', canvasId: 'left-canvas', controller: true});
+  const rightView = new MapView({id: 'right', canvasId: 'right-canvas', controller: true});
+
+  const viewManager = new ViewManager({
+    views: [leftView, rightView],
+    viewState: {
+      left: {longitude: -122, latitude: 38, zoom: 10},
+      right: {longitude: -74, latitude: 40.7, zoom: 11}
+    },
+    width: 100,
+    height: 100,
+    eventManager: defaultEventManager,
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': rightEventManager
+    }
+  });
+
+  expect(viewManager.getCanvasId('left')).toBe('left-canvas');
+  expect(viewManager.getCanvasId('right')).toBe('right-canvas');
+  expect(viewManager.getCanvasId(new MapView({id: 'default'}))).toBe('default-canvas');
+  expect((viewManager.controllers.left as any).eventManager).toBe(leftEventManager);
+  expect((viewManager.controllers.right as any).eventManager).toBe(rightEventManager);
+
+  const originalLeftController = viewManager.controllers.left;
+  const originalRightController = viewManager.controllers.right;
+  viewManager.setProps({
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': rightEventManager
+    }
+  });
+
+  expect(viewManager.controllers.left).toBe(originalLeftController);
+  expect(viewManager.controllers.right).toBe(originalRightController);
+
+  viewManager.setProps({
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': replacementRightEventManager
+    }
+  });
+
+  expect(viewManager.controllers.right).not.toBe(originalRightController);
+  expect((viewManager.controllers.left as any).eventManager).toBe(leftEventManager);
+  expect((viewManager.controllers.right as any).eventManager).toBe(replacementRightEventManager);
+
+  const leftController = viewManager.controllers.left;
+  const rightController = viewManager.controllers.right;
+  viewManager.setProps({
+    views: [new MapView({id: 'left', canvasId: 'right-canvas', controller: true}), rightView]
+  });
+
+  expect(viewManager.getCanvasId('left')).toBe('right-canvas');
+  expect(viewManager.controllers.left).not.toBe(leftController);
+  expect((viewManager.controllers.left as any).eventManager).toBe(replacementRightEventManager);
+  expect(viewManager.controllers.right).toBe(rightController);
+
+  viewManager.finalize();
+  defaultEventManager.destroy();
+  leftEventManager.destroy();
+  rightEventManager.destroy();
+  replacementRightEventManager.destroy();
+});
+
 /* eslint-disable max-statements */
+test('ViewManager#layouts and filters views by canvas', () => {
+  const leftEventManager = new EventManager(document.createElement('div'));
+  const rightEventManager = new EventManager(document.createElement('div'));
+  const leftView = new MapView({id: 'left', canvasId: 'left-canvas'});
+  const rightView = new MapView({id: 'right', canvasId: 'right-canvas'});
+  const canvasSizes: Record<string, [number, number]> = {
+    'left-canvas': [200, 100],
+    'right-canvas': [120, 180]
+  };
+  const canvasContexts = Object.fromEntries(
+    Object.keys(canvasSizes).map(canvasId => [
+      canvasId,
+      {id: canvasId, getCSSSize: () => canvasSizes[canvasId]} as CanvasContext
+    ])
+  );
+
+  const viewManager = new ViewManager({
+    views: [leftView, rightView],
+    viewState: {
+      left: {longitude: -122, latitude: 38, zoom: 10},
+      right: {longitude: -74, latitude: 40.7, zoom: 11}
+    },
+    width: 1,
+    height: 1,
+    getCanvasContext: canvasId => canvasContexts[canvasId || 'left-canvas'] || null,
+    eventManager: leftEventManager,
+    eventManagers: {
+      'left-canvas': leftEventManager,
+      'right-canvas': rightEventManager
+    }
+  });
+
+  expect(viewManager.getViewport('left')?.width).toBe(200);
+  expect(viewManager.getViewport('right')?.height).toBe(180);
+  expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'left-canvas'})).toEqual([
+    viewManager.getViewport('left')
+  ]);
+  expect(viewManager.getViewports({canvasId: 'left-canvas'})).toEqual([
+    viewManager.getViewport('left')
+  ]);
+  expect(viewManager.getViewports({canvasId: 'right-canvas'})).toEqual([
+    viewManager.getViewport('right')
+  ]);
+  expect(viewManager.getViewports({canvasId: 'unknown-canvas'})).toEqual([]);
+  expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'unknown-canvas'})).toEqual([]);
+
+  const viewports = viewManager.getViewports();
+  viewManager.setProps({});
+  expect(viewManager.getViewports(), 'unchanged canvas dimensions preserve viewports').toBe(
+    viewports
+  );
+
+  canvasSizes['left-canvas'] = [240, 140];
+  viewManager.setNeedsUpdate('Canvas resized');
+  viewManager.setProps({});
+  expect(viewManager.getViewport('left')?.width, 'updated dimensions rebuild the viewport').toBe(
+    240
+  );
+
+  viewManager.finalize();
+  leftEventManager.destroy();
+  rightEventManager.destroy();
+});
+
+test('ViewManager#uses the first canvas for views without an explicit canvas id', () => {
+  const eventManager = new EventManager(document.createElement('div'));
+  const canvasContext = {
+    id: 'first-canvas',
+    getCSSSize: () => [160, 90]
+  } as CanvasContext;
+  const viewManager = new ViewManager({
+    views: [new MapView({id: 'main'})],
+    viewState: {longitude: -122, latitude: 38, zoom: 10},
+    width: 1,
+    height: 1,
+    getCanvasContext: () => canvasContext,
+    eventManager
+  });
+
+  expect(viewManager.getCanvasId('main')).toBe('first-canvas');
+  expect(viewManager.getViewport('main')?.width).toBe(160);
+  expect(viewManager.getViewports({x: 1, y: 1, canvasId: 'first-canvas'})).toHaveLength(1);
+
+  viewManager.finalize();
+  eventManager.destroy();
+});
+
 test('ViewManager#zero-size', () => {
   const mainView = new MapView({id: 'main', controller: true});
 

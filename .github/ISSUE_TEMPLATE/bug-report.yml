@@ -15,19 +15,20 @@ body:
     description: What you're experiencing.
   validations:
     required: true
-- type: checkboxes
+- type: dropdown
   id: flavor
   attributes:
     label: Flavors
     description: Are you using one of the following platform-specific APIs?
+    multiple: true
     options:
-      - label: Script tag
-      - label: React
-      - label: Python/Jupyter notebook
-      - label: MapboxOverlay
-      - label: GoogleMapsOverlay
-      - label: CARTO
-      - label: ArcGIS
+      - Script tag
+      - React
+      - Python/Jupyter notebook
+      - MapboxOverlay
+      - GoogleMapsOverlay
+      - CARTO
+      - ArcGIS
 - type: textarea
   attributes:
     label: Expected Behavior

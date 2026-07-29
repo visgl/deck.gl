@@ -8,7 +8,7 @@ that acts as an interface between deck.gl and ArcGIS.
 
 2D integration with `MapView` is supported by the [DeckLayer](./deck-layer.md) class.
 
-3D integration with `SceneView` is experimental: see the [DeckRenderer](./deck-renderer.md) class.
+3D integration with `SceneView` is experimental and currently targets `viewingMode: 'local'`: see the [DeckRenderer](./deck-renderer.md) class.
 
 ## Installation
 

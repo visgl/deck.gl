@@ -2,43 +2,71 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './a5-layer';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import {A5Layer} from '@deck.gl/geo-layers';
+import {pentagons} from 'deck.gl-test/data';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+const testCases = [
+  {
+    name: 'a5-layer-flat',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new A5Layer({
+        data: pentagons,
+        opacity: 0.8,
+        filled: true,
+        stroked: false,
+        getPentagon: f => f.pentagon,
+        getFillColor: f => {
+          const value = f.count / 211;
+          return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+        },
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/a5-layer-flat.png'
+  },
+  {
+    name: 'a5-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 10.5,
+      pitch: 40,
+      bearing: 0
+    },
+    layers: [
+      new A5Layer({
+        data: pentagons,
+        opacity: 0.8,
+        filled: true,
+        extruded: true,
+        getPentagon: f => f.pentagon,
+        getFillColor: f => {
+          const value = f.count / 211;
+          return [(1 - value) * 235, 255 - 85 * value, 255 - 170 * value];
+        },
+        getElevation: f => f.count,
+        elevationScale: 30,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/a5-layer.png'
+  }
+];
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
-
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });

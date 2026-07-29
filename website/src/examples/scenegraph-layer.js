@@ -25,7 +25,7 @@ class ScenegraphDemo extends Component {
       <div>
         <p>
           Data source:
-          <a href="http://www.opensky-network.org">The OpenSky Network</a>
+          <a href="https://opensky-network.org">The OpenSky Network</a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">
