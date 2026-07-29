@@ -23,6 +23,8 @@ type DeckInstanceRef<ViewsT extends ViewOrViews> = {
   lastRenderedViewports?: Viewport[];
   viewStateUpdateRequested?: any;
   interactionStateUpdateRequested?: any;
+  // An externally supplied device owns its canvas across DeckGL mounts. Preserve its original
+  // visibility so an interrupted backend switch cannot leave the shared canvas permanently hidden.
   externalCanvasStyle?: CSSStyleDeclaration;
   originalCanvasVisibility?: string;
   forceUpdate: () => void;
@@ -78,6 +80,9 @@ function redrawDeck(thisRef: DeckInstanceRef<any>) {
   }
 }
 
+// A device can be cached and mounted again when the website switches WebGPU -> WebGL -> WebGPU.
+// Reveal its canvas only after the new Deck has drawn, or when the mount is cancelled. Otherwise
+// the old WebGPU frame can flash in the new React container.
 function showExternalCanvas(thisRef: DeckInstanceRef<any>) {
   if (thisRef.externalCanvasStyle) {
     thisRef.externalCanvasStyle.visibility = thisRef.originalCanvasVisibility || '';
@@ -86,6 +91,8 @@ function showExternalCanvas(thisRef: DeckInstanceRef<any>) {
   }
 }
 
+// DeckGL accepts both an already-created device and instructions for creating one. Account for
+// both forms so the render policy does not change depending on who initialized the WebGPU device.
 function isWebGPUDevice(props: DeckProps<any>): boolean {
   return (
     props.device?.type === 'webgpu' ||
@@ -94,6 +101,8 @@ function isWebGPUDevice(props: DeckProps<any>): boolean {
   );
 }
 
+// luma.gl initially gives a detached canvas a small placeholder size. Do not mount a basemap
+// against that temporary viewport: MapLibre would initialize its own canvas at 1 x 1 pixels.
 function deckSizeMatchesContainer(
   thisRef: DeckInstanceRef<any>,
   container: HTMLElement | null
@@ -119,8 +128,8 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
       ? externalCanvas.style
       : null;
 
-  // A reused external device retains the last rendered frame in its canvas. Keep a detached
-  // canvas hidden while Deck moves it into the new container and initializes the first frame.
+  // The website reuses one device per backend. Its canvas can therefore still contain the previous
+  // example's frame when Deck moves it from a detached container into this React wrapper.
   if (externalCanvasStyle) {
     thisRef.externalCanvasStyle = externalCanvasStyle;
     thisRef.originalCanvasVisibility = externalCanvasStyle.visibility;
@@ -129,28 +138,32 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
 
   const deck = new DeckClass({
     ...props,
-    // The Deck's animation loop is independent from React's render cycle, causing potential
-    // synchronization issues. We provide this custom render function to make sure that React
-    // and Deck update on the same schedule.
-    // TODO(ibgreen) - Hack to enable WebGPU as it needs to render quickly to avoid CanvasContext texture from going stale
-    _customRender: isWebGPU
-      ? undefined
-      : redrawReason => {
-          // Save the dirty flag for later
-          thisRef.redrawReason = redrawReason;
+    // Keep one authoritative render callback for both backends. Deck calls `_customRender` from
+    // its animation loop whenever its viewport or layers become dirty; this is also the point
+    // where React children must be synchronized with the viewport used to draw those layers.
+    _customRender: redrawReason => {
+      thisRef.redrawReason = redrawReason;
 
-          // Viewport/view state is passed to child components as props.
-          // If they have changed, we need to trigger a React rerender to update children props.
-          const viewports = deck.getViewports();
-          if (thisRef.lastRenderedViewports !== viewports) {
-            // Viewports have changed, update children props first.
-            // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-            // so that the canvas does not get rendered before the child components update.
-            thisRef.forceUpdate();
-          } else {
-            redrawDeck(thisRef);
-          }
+      const viewports = deck.getViewports();
+      if (thisRef.lastRenderedViewports !== viewports) {
+        // Do not initialize a map against the detached WebGPU canvas's temporary 1 x 1 viewport.
+        // The next resize invalidates Deck again and repeats this callback with the final size.
+        if (!isWebGPU || deckSizeMatchesContainer(thisRef, props.parent || null)) {
+          thisRef.forceUpdate();
         }
+
+        if (!isWebGPU) {
+          // WebGL may defer drawing until React's layout effect so its DOM children and canvas
+          // appear in the same frame. Keep master behavior unchanged for the existing backend.
+          return;
+        }
+      }
+
+      // WebGPU's current canvas texture is valid only for this animation frame. Draw now, even
+      // when React still has a pending viewport update; waiting for a layout effect would reuse
+      // an expired texture. React children catch up through the forceUpdate scheduled above.
+      redrawDeck(thisRef);
+    }
   });
   return deck;
 }
@@ -190,18 +203,10 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       return null;
     }
     thisRef.viewStateUpdateRequested = null;
-    const viewState = props.onViewStateChange?.(params);
-    if (
-      !props.viewState &&
-      isWebGPUDevice(props) &&
-      deckSizeMatchesContainer(thisRef, containerRef.current)
-    ) {
-      // WebGPU uses Deck's native render loop so that its CanvasContext texture is consumed
-      // immediately. Explicitly update React children (typically a basemap) when Deck advances
-      // an internally managed view state.
-      thisRef.forceUpdate();
-    }
-    return viewState;
+    // Deck marks the new viewport dirty and schedules `_customRender`; do not start a competing
+    // React update here. Keeping redraw ownership in one callback handles both controlled and
+    // uncontrolled view state without making WebGPU a separate synchronization path.
+    return props.onViewStateChange?.(params);
   };
 
   const handleInteractionStateChange: DeckProps<ViewsT>['onInteractionStateChange'] = params => {
@@ -217,18 +222,10 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
   };
 
   const handleAfterRender: DeckProps<ViewsT>['onAfterRender'] = context => {
+    // `_customRender` has already submitted the first frame. It is now safe to reveal a reused
+    // external canvas without displaying the previous DeckGL instance's contents.
     showExternalCanvas(thisRef);
-    if (
-      isWebGPUDevice(props) &&
-      thisRef.deck?.isInitialized &&
-      deckSizeMatchesContainer(thisRef, containerRef.current) &&
-      thisRef.lastRenderedViewports !== thisRef.deck.getViewports()
-    ) {
-      // The native WebGPU render loop bypasses `_customRender`, which normally schedules the
-      // first React rerender after Deck initializes. Trigger it here so children such as a
-      // basemap are positioned using the initialized viewport.
-      thisRef.forceUpdate();
-    }
+    // Preserve the public callback: canvas ownership is internal to the React wrapper.
     props.onAfterRender?.(context);
   };
 
@@ -282,6 +279,8 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     });
 
     return () => {
+      // Device switching can unmount an example before its first frame. Restore the canvas even
+      // when `onAfterRender` never ran so the cached device remains usable on its next mount.
       showExternalCanvas(thisRef);
       thisRef.deck?.finalize();
     };

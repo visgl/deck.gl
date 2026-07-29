@@ -34,12 +34,15 @@ test('device store suspends rendering and ignores a stale device request', async
   await state.setDeviceType('webgl');
   expect(state.device).toBe(webglDevice);
 
+  // Starting a switch must unmount the current demo before its replacement device resolves.
   const pendingWebGPUSwitch = state.setDeviceType('webgpu');
   expect(state).toMatchObject({
     deviceType: 'webgpu',
     device: undefined
   });
 
+  // Resolve the newer WebGL selection first, then complete the stale WebGPU request. The older
+  // promise must not take ownership of the canvas or overwrite the persisted WebGL preference.
   await state.setDeviceType('webgl');
   resolveWebGPUDevice?.(webgpuDevice);
   await pendingWebGPUSwitch;

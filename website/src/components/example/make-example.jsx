@@ -64,6 +64,8 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     const [data, setData] = useState(defaultData);
     const [params, setParams] = useState(defaultParams);
     const [meta, setMeta] = useState({});
+    // Only demos that expose device tabs receive the shared device. Unsupported examples keep
+    // their existing, independently initialized WebGL path.
     const device = useStore(state => (DemoComponent.hasDeviceTabs ? state.device : undefined));
     const baseUrl = useBaseUrl('/');
 
@@ -128,6 +130,12 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
       <>
         {DemoComponent.hasDeviceTabs && <DeviceTabs />}
         <DemoContainer style={style}>
+          {/*
+            Device creation is asynchronous. Unmount the current demo while a switch is pending;
+            otherwise two Deck instances can temporarily try to render into the same canvas.
+            The device key makes a completed switch create a fresh DeckGL lifecycle instead of
+            replacing a GPU backend inside an already initialized Deck.
+          */}
           {(!DemoComponent.hasDeviceTabs || device) && (
             <DemoComponent
               key={device?.id}

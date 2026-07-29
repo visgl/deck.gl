@@ -44,10 +44,8 @@ module.exports = function (
       // Load existing source maps
       _config.module.rules.push({
         test: /\/dist\/.+\.js$/,
-        // arc@0.2.0 publishes source maps without the referenced TypeScript sources
-        exclude: /node_modules\/arc\/dist\//,
-        enforce: 'pre',
-        use: ['source-map-loader']
+        enforce: "pre",
+        use: ["source-map-loader"],
       });
 
       const devtool = debug ? 'source-map' : false;
