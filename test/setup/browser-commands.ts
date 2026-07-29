@@ -38,6 +38,11 @@ interface DiffResult {
   error: string | null;
 }
 
+interface FindGoldenImageOptions {
+  goldenImage: string;
+  candidateDirectories: string[];
+}
+
 interface BrowserDiagnostic {
   level: string;
   text: string;
@@ -62,6 +67,23 @@ function pushDiagnostic(state: DiagnosticState, entry: BrowserDiagnostic) {
     state.entries.splice(0, state.entries.length - MAX_DIAGNOSTIC_ENTRIES);
   }
 }
+
+/**
+ * Returns the first candidate path containing the requested golden image.
+ */
+export const findGoldenImage: BrowserCommand<[options: FindGoldenImageOptions]> = (
+  ctx,
+  {goldenImage, candidateDirectories}
+) => {
+  for (const candidateDirectory of candidateDirectories) {
+    const candidatePath = path.join(candidateDirectory, goldenImage);
+    const absolutePath = path.resolve(ctx.project.config.root, candidatePath);
+    if (fs.existsSync(absolutePath)) {
+      return candidatePath;
+    }
+  }
+  return null;
+};
 
 function ensureDiagnosticCapture(page: any): DiagnosticState {
   let state = diagnosticStateByPage.get(page);
@@ -466,6 +488,7 @@ export const consumeBrowserDiagnostics: BrowserCommand<[]> = async ctx => {
 
 // Export all commands for registration in vitest config
 export const browserCommands = {
+  findGoldenImage,
   captureAndDiffScreen,
   emulateInput,
   isHeadless,

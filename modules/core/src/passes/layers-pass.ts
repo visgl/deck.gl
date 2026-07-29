@@ -3,8 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import type {
+  CanvasContext,
   Device,
   Parameters,
+  PresentationContext,
   RenderPassParameters,
   RenderPipelineParameters
 } from '@luma.gl/core';
@@ -26,16 +28,18 @@ const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
   depthWriteEnabled: true,
   depthCompare: 'less-equal',
   blendColorOperation: 'add',
-  blendColorSrcFactor: 'src-alpha',
-  blendColorDstFactor: 'one',
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one-minus-src-alpha',
   blendAlphaOperation: 'add',
-  blendAlphaSrcFactor: 'one-minus-dst-alpha',
-  blendAlphaDstFactor: 'one'
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha'
 };
 
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
   target?: Framebuffer | null;
+  /** Canvas context that provides framebuffer dimensions and pixel conversion. */
+  canvasContext?: CanvasContext | PresentationContext;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -87,7 +91,7 @@ export default class LayersPass extends Pass {
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
-    const canvasContext = this.device.canvasContext!;
+    const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
 
@@ -115,7 +119,7 @@ export default class LayersPass extends Pass {
     });
 
     try {
-      return this._drawLayers(renderPass, options);
+      return this._drawLayers(renderPass, {...options, target: framebuffer});
     } finally {
       renderPass.end();
       // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
@@ -126,6 +130,7 @@ export default class LayersPass extends Pass {
   /** Draw a list of layers in a list of viewports */
   private _drawLayers(renderPass: RenderPass, options: LayersPassRenderOptions) {
     const {
+      canvasContext = this.device.canvasContext!,
       target,
       shaderModuleProps,
       viewports,
@@ -156,11 +161,13 @@ export default class LayersPass extends Pass {
           renderPass,
           {
             target,
+            canvasContext,
             shaderModuleProps,
             viewport: subViewport,
             view,
             pass: options.pass,
-            layers: options.layers
+            layers: options.layers,
+            isPicking: options.isPicking
           },
           drawLayerParams
         );
@@ -183,6 +190,7 @@ export default class LayersPass extends Pass {
       cullRect,
       views,
       effects,
+      canvasContext = this.device.canvasContext!,
       shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
@@ -222,6 +230,7 @@ export default class LayersPass extends Pass {
           layer,
           effects,
           pass,
+          canvasContext,
           shaderModuleProps
         );
         const defaultParams =
@@ -250,19 +259,24 @@ export default class LayersPass extends Pass {
       shaderModuleProps: globalModuleParameters,
       pass,
       target,
+      canvasContext,
       viewport,
-      view
+      view,
+      isPicking
     }: {
       layers: Layer[];
       shaderModuleProps: Record<string, any>;
       pass: string;
       target?: Framebuffer | null;
+      canvasContext: CanvasContext | PresentationContext;
       viewport: Viewport;
       view?: View;
+      isPicking?: boolean;
     },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
+      canvasContext,
       shaderModuleProps: globalModuleParameters,
       target,
       viewport
@@ -276,7 +290,10 @@ export default class LayersPass extends Pass {
         let depthToUse: number | false = 1.0;
         let stencilToUse: number | false = 0;
 
-        if (Array.isArray(clearColor)) {
+        // While picking, ignore the view's clearColor: the picking buffer encodes object
+        // references as colors and is already cleared to transparent black.
+        // `clearColor: false` below still means "don't clear color" in both modes.
+        if (Array.isArray(clearColor) && !isPicking) {
           colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
             c => c / 255
           ) as NumberArray4;
@@ -425,10 +442,10 @@ export default class LayersPass extends Pass {
     layer: Layer,
     effects: Effect[] | undefined,
     pass: string,
+    canvasContext: CanvasContext | PresentationContext,
     overrides: any
   ): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    const devicePixelRatio = canvasContext.cssToDeviceRatio();
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const shaderModuleProps = {
@@ -524,23 +541,22 @@ export function layerIndexResolver(
 function getGLViewport(
   device: Device,
   {
+    canvasContext = device.canvasContext!,
     shaderModuleProps,
     target,
     viewport
   }: {
+    canvasContext?: CanvasContext | PresentationContext;
     shaderModuleProps: any;
     target?: Framebuffer | null;
     viewport: Viewport;
   }
 ): [number, number, number, number] {
   const pixelRatio =
-    shaderModuleProps?.project?.devicePixelRatio ??
-    // @ts-expect-error TODO - assuming WebGL context
-    device.canvasContext.cssToDeviceRatio();
+    shaderModuleProps?.project?.devicePixelRatio ?? canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  // @ts-expect-error TODO - assuming WebGL context
-  const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const [, drawingBufferHeight] = canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

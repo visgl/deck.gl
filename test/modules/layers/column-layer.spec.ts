@@ -4,8 +4,47 @@
 
 import {test, expect} from 'vitest';
 
-import {ColumnLayer} from '@deck.gl/layers';
+import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils/vitest';
+
+function expectUniqueGeometryLayout(layer: ColumnLayer): void {
+  for (const model of layer.getModels()) {
+    const bufferNames = model.bufferLayout.map(layout => layout.name);
+    expect(new Set(bufferNames).size, `${model.id} has unique buffer layouts`).toBe(
+      bufferNames.length
+    );
+    expect(
+      bufferNames.filter(name => name === 'geometry'),
+      `${model.id} has one geometry buffer layout`
+    ).toHaveLength(1);
+
+    const geometryLayout = model.bufferLayout.find(layout => layout.name === 'geometry');
+    const attachedGeometryLayout = model._gpuGeometry?.bufferLayout.find(
+      layout => layout.name === 'geometry'
+    );
+    expect(
+      geometryLayout?.attributes?.map(attribute => attribute.attribute),
+      `${model.id} geometry attributes`
+    ).toEqual(['positions', 'normals']);
+    expect(
+      attachedGeometryLayout,
+      `${model.id} has an attached geometry buffer layout`
+    ).toBeTruthy();
+    expect(geometryLayout, `${model.id} layout matches its attached geometry`).toEqual(
+      attachedGeometryLayout
+    );
+
+    const pipelineBufferNames = model.pipeline.bufferLayout.map(layout => layout.name);
+    expect(
+      new Set(pipelineBufferNames).size,
+      `${model.id} pipeline has unique buffer layouts`
+    ).toBe(pipelineBufferNames.length);
+    expect(
+      pipelineBufferNames.filter(name => name === 'geometry'),
+      `${model.id} pipeline has one geometry buffer layout`
+    ).toHaveLength(1);
+  }
+}
 
 // Regression test for #9463 / #10021: with binary data the fill model must
 // never acquire the wireframe index buffer, even after a buffer-layout rebuild
@@ -54,6 +93,64 @@ test('ColumnLayer - fill model never acquires wireframe indices', () => {
             'fill model still has no wireframe indices after buffer-layout rebuild'
           ).toBeFalsy();
         }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('ColumnLayer - geometry updates preserve a unique buffer layout', () => {
+  testLayer({
+    Layer: ColumnLayer,
+    testCases: [
+      {
+        title: 'initial geometry',
+        props: {
+          data: [{position: [0, 0]}],
+          diskResolution: 6,
+          extruded: true
+        },
+        onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
+      },
+      {
+        title: 'update disk resolution',
+        updateProps: {diskResolution: 8},
+        onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
+      },
+      {
+        title: 'update extrusion',
+        updateProps: {extruded: false},
+        onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
+      },
+      {
+        title: 'update vertices',
+        updateProps: {
+          diskResolution: 4,
+          vertices: [
+            [-1, -1],
+            [1, -1],
+            [1, 1],
+            [-1, 1]
+          ]
+        },
+        onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('GridCellLayer - packed geometry matches the model buffer layout', () => {
+  testLayer({
+    Layer: GridCellLayer,
+    testCases: [
+      {
+        title: 'cube geometry',
+        props: {
+          data: [{position: [0, 0]}],
+          extruded: true
+        },
+        onAfterUpdate: ({layer}) => expectUniqueGeometryLayout(layer)
       }
     ],
     onError: err => expect(err).toBeFalsy()

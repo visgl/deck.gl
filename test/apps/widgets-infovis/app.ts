@@ -70,10 +70,20 @@ new Deck({
     })
   ],
   widgets: [
-    new ZoomWidget(),
-    new GimbalWidget(),
     new FullscreenWidget(),
-    new ResetViewWidget(),
+    new GimbalWidget(),
+    new ResetViewWidget({id: 'reset-orbit', viewId: 'orbit-view', placement: 'top-right'}),
+    new ScrollbarWidget({
+      id: 'scroll-orbit',
+      viewId: 'orbit-view',
+      orientation: 'horizontal',
+      contentBounds: [
+        [-50, -50],
+        [50, 50]
+      ]
+    }),
+    new ResetViewWidget({id: 'reset-ortho', viewId: 'ortho-view', placement: 'top-right'}),
+    new ZoomWidget({viewId: 'ortho-view'}),
     new ThemeWidget({
       // darkModeTheme: DarkTheme,
       // lightModeTheme: LightTheme,
