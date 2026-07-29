@@ -188,7 +188,7 @@ export default class MapboxOverlay implements IControl {
    * Only recreates controls when placement changes to avoid orphaning the widget's
    * rootElement when the container is removed from the DOM.
    */
-  private _processWidgets(widgets: Widget[] | undefined): void {
+  private _processWidgets(widgets: Widget<any>[] | undefined): void {
     const map = this._map;
     if (!map) return;
 

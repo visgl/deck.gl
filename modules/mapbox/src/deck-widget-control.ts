@@ -14,10 +14,10 @@ import type {IControl, ControlPosition, Map} from './types';
  * @internal Used by MapboxOverlay for widgets with `viewId: 'mapbox'`.
  */
 export class DeckWidgetControl implements IControl {
-  private _widget: Widget;
+  private _widget: Widget<any>;
   private _container: HTMLDivElement | null = null;
 
-  constructor(widget: Widget) {
+  constructor(widget: Widget<any>) {
     this._widget = widget;
   }
 
@@ -64,7 +64,7 @@ export class DeckWidgetControl implements IControl {
   }
 
   /** Returns the wrapped widget */
-  get widget(): Widget {
+  get widget(): Widget<any> {
     return this._widget;
   }
 
@@ -72,7 +72,7 @@ export class DeckWidgetControl implements IControl {
    * Updates the wrapped widget reference.
    * Used when reusing this control for a new widget instance with the same id.
    */
-  setWidget(widget: Widget): void {
+  setWidget(widget: Widget<any>): void {
     this._widget = widget;
   }
 }
