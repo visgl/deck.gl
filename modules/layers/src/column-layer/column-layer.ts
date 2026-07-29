@@ -386,8 +386,8 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
-    const positionAttribute = geometry.attributes.POSITION!;
-    const normalAttribute = geometry.attributes.NORMAL!;
+    const positionAttribute = geometry.attributes.POSITION;
+    const normalAttribute = geometry.attributes.NORMAL;
 
     this.setState({
       fillVertexCount: positionAttribute.value.length / 3
