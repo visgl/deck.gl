@@ -57,7 +57,7 @@ export default class MapboxOverlay implements IControl {
 
   /** Filter out props to pass to Deck **/
   filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
-    const {interleaved, useDevicePixels, ...deckProps} = props;
+    const {interleaved: _, useDevicePixels, ...deckProps} = props;
     if (this._interleaved) {
       if (useDevicePixels !== undefined && useDevicePixels !== true) {
         log.warn(
