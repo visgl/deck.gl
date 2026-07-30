@@ -270,7 +270,13 @@ export default class AttributeBufferGroups {
 
   private _getPackedBuffer(group: PackedGroup, upload: boolean): Buffer {
     const byteLength = group.rowCount * group.byteStride;
-    const layoutKey = JSON.stringify(group.layout);
+    // Step mode is pipeline metadata; it does not change the packed buffer contents. A layer may
+    // share one group across instanced and non-instanced models, as SolidPolygonLayer does for
+    // its side and top models.
+    const layoutKey = JSON.stringify({
+      byteStride: group.layout.byteStride,
+      attributes: group.layout.attributes
+    });
     let state = this.packedBuffers[group.id];
 
     if (!state || state.buffer.byteLength < byteLength || state.layoutKey !== layoutKey) {
