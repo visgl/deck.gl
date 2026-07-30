@@ -64,7 +64,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
