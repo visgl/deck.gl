@@ -386,7 +386,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
+    // Assertions required: tspc resolves ColumnGeometry.attributes as Record<string, BinaryAttribute>
+    // (key access = T | undefined) while eslint sees Geometry's narrower type (POSITION/NORMAL required).
+    // Upstream issue: luma.gl Geometry.attributes type doesn't match subclass usage patterns.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const positionAttribute = geometry.attributes.POSITION!;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const normalAttribute = geometry.attributes.NORMAL!;
 
     this.setState({
