@@ -21,6 +21,34 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
+#### deck.gl [v9.4.0-alpha.2] - Jul 29 2026
+
+- fix: add npm metadata to all modules (#10358)
+- feat(jupyter-widget, pydeck): register `@deck.gl/extensions` for JSON `@@type` resolution (#10447)
+- feat(core): add explicit WebGPU buffer groups (#10151)
+- feat(core): add trackpad gesture support to controllers (#10459)
+- examples: update OpenSky Network URLs (#10465)
+- fix: update Zurich Summit 2026 event page map to HIL building (#10445)
+- feat(website): persist selected device tab (#10467)
+- feat(layers): add simple WebGPU layer ports (#10466)
+- fix(react): remove redundant initial render redraw (#10428)
+- feat(pydeck): register GlobeView canonical alias in jupyter-widget (#10451)
+- feat(aggregation-layers): port HexagonLayer to WebGPU (#10471)
+- feat(aggregation-layers): port ScreenGridLayer to WebGPU (#10472)
+- feat(layers): port BitmapLayer to WebGPU (#10470)
+- feat(pydeck): add lighting and post-processing effects (#10455)
+- refactor(core): make WebGPU shader props unconditional (#10479)
+- feat(website): pass device to example apps (#10480)
+- feat(layers): port PathLayer to WebGPU (#10113)
+- refactor(core): honor canvas contexts throughout render passes (#10474)
+- fix(core): position widgets relative to their canvas (#10491)
+- feat(aggregation-layers): port HeatmapLayer to WebGPU (#10483)
+- feat(layers): port SolidPolygonLayer to WebGPU (#10142)
+- chore: update luma.gl to 9.4.0-alpha.1 (#10478)
+- chore(test): enable render tests for WebGPU (#10493)
+- feat(website): enable WebGPU polygon-dependent examples (#10494)
+- fix(core): preserve WebGPU polygon side buffers (#10505)
+
 #### deck.gl [v9.4.0-alpha.1] - Jul 16 2026
 
 - fix(core): do not write View clearColor into the picking buffer (#10431)
