@@ -18,6 +18,7 @@ test('ColumnGeometry#constructor', () => {
   let geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 6});
   let attributes = geometry.getAttributes();
 
+  expect(geometry.topology, 'wireframe topology').toBe('line-list');
   expect(ArrayBuffer.isView(attributes.indices.value), 'indices generated').toBeTruthy();
   expect(ArrayBuffer.isView(attributes.POSITION.value), 'positions generated').toBeTruthy();
   expect(ArrayBuffer.isView(attributes.NORMAL.value), 'normals generated').toBeTruthy();
