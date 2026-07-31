@@ -58,13 +58,10 @@ export default class MapboxOverlay implements IControl {
   /** Filter out props to pass to Deck **/
   filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
     const {interleaved: _, useDevicePixels, ...deckProps} = props;
-    if (this._interleaved) {
-      if (useDevicePixels !== undefined && useDevicePixels !== true) {
-        log.warn(
-          'useDevicePixels has no effect in interleaved mode. The basemap controls the drawing buffer resolution. Use MapLibre pixelRatio option instead.'
-        )();
-      }
-    } else if (useDevicePixels !== undefined) {
+    // In interleaved mode the base map owns the WebGL context and the canvas drawing buffer size,
+    // so useDevicePixels cannot be applied and is dropped here. Use MapLibre's `pixelRatio` map
+    // option instead. Mapbox GL JS has no equivalent option.
+    if (!this._interleaved && useDevicePixels !== undefined) {
       (deckProps as MapboxOverlayProps).useDevicePixels = useDevicePixels;
     }
     return deckProps;

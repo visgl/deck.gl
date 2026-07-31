@@ -113,7 +113,7 @@ new MapboxOverlay(props: MapboxOverlayProps);
 - `parent` / `canvas` / `device` - context creation is managed internally.
 - `viewState` / `initialViewState` - camera state is managed internally.
 - `controller` - always disabled (to use Mapbox's interaction handlers).
-- `useDevicePixels` - ignored in interleaved mode. To control pixel ratio in interleaved mode, use MapLibre's [`pixelRatio`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/#pixelratio) constructor option on the Map instance. Mapbox GL JS does not expose an equivalent option.
+- `useDevicePixels` - ignored in interleaved mode, where the base map owns the WebGL context and the canvas drawing buffer size. To control pixel ratio in interleaved mode, use MapLibre's [`pixelRatio`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/#pixelratio) constructor option on the Map instance. Mapbox GL JS does not expose an equivalent option.
 
 The constructor additionally accepts the following options:
 

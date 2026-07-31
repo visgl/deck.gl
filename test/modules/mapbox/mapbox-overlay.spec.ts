@@ -366,6 +366,25 @@ webglTest('MapboxOverlay#interleaved', async () => {
   await renderPromise;
 });
 
+test('MapboxOverlay#interleaved drops useDevicePixels', () => {
+  // The base map owns the drawing buffer size in interleaved mode, so useDevicePixels cannot apply
+  const interleaved = new MapboxOverlay({interleaved: true, useDevicePixels: 1.5});
+  expect(
+    'useDevicePixels' in interleaved._props,
+    'useDevicePixels is dropped in interleaved mode'
+  ).toBeFalsy();
+
+  // setProps must drop it too, even though `interleaved` is not in the partial props
+  interleaved.setProps({useDevicePixels: 1.5});
+  expect(
+    'useDevicePixels' in interleaved._props,
+    'useDevicePixels is dropped by setProps in interleaved mode'
+  ).toBeFalsy();
+
+  const overlaid = new MapboxOverlay({useDevicePixels: 1.5});
+  expect(overlaid._props.useDevicePixels, 'useDevicePixels is kept in overlaid mode').toBe(1.5);
+});
+
 webglTest('MapboxOverlay#interleaved#remove and add', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
