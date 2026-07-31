@@ -289,17 +289,18 @@ export default class AttributeBufferGroups {
       byteStride: group.layout.byteStride,
       attributes: group.layout.attributes
     });
-    let state: PackedGroupState | undefined = this.packedBuffers[group.id];
+    const state: PackedGroupState | undefined = this.packedBuffers[group.id];
 
     if (!state || state.layoutKey !== layoutKey) {
-      state?.packed.destroy();
-      state = undefined;
       upload = true;
     }
 
     if (upload) {
+      if (state) {
+        state.packed.destroy();
+        delete this.packedBuffers[group.id];
+      }
       const packed = this._interleavePackedGroup(group);
-      state?.packed.destroy();
       this.packedBuffers[group.id] = {packed, layoutKey};
       return packed.buffer;
     }
