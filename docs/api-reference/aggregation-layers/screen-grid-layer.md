@@ -1,4 +1,5 @@
 # ScreenGridLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ScreenGridLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
