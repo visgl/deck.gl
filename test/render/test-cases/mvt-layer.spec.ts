@@ -2,43 +2,84 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './mvt-layer';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLoader} from '@loaders.gl/mvt';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+function createMVTLayer(id, {highlight = false, binary = false, holes = false} = {}) {
+  let goldenImage;
+  if (holes) {
+    goldenImage = './test/render/golden-images/mvt-layer-holes.png';
+  } else if (highlight) {
+    goldenImage = './test/render/golden-images/mvt-layer-highlight.png';
+  } else {
+    goldenImage = './test/render/golden-images/mvt-layer.png';
+  }
+  const highlightProps = highlight
+    ? {highlightedFeatureId: 1862, uniqueIdProperty: 'cartodb_id'}
+    : {};
+  const viewState = highlight
+    ? {
+        longitude: -74.006,
+        latitude: 40.7128,
+        zoom: 13,
+        pitch: 0,
+        bearing: 0
+      }
+    : {
+        longitude: -100,
+        latitude: 40,
+        zoom: 3,
+        pitch: 0,
+        bearing: 0
+      };
+  return {
+    name: id,
+    timeout: holes ? 20000 : undefined,
+    viewState,
+    layers: [
+      new MVTLayer({
+        id,
+        data: [`/test/data/${holes ? 'mvt-with-hole' : 'mvt-tiles'}/{z}/{x}/{y}.mvt`],
+        getFillColor: [0, 0, 0, 128],
+        getLineColor: [255, 0, 0, 128],
+        ...highlightProps,
+        onTileError: error => {
+          if (error.message.includes('404')) {
+            // trying to load tiles in the previous viewport, ignore
+          } else {
+            throw error;
+          }
+        },
+        lineWidthMinPixels: 1,
+        binary,
+        loaders: [MVTLoader],
+        loadOptions: {
+          core: {
+            worker: false
+          }
+        }
+      })
+    ],
+    goldenImage
+  };
+}
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
+const testCases = [
+  createMVTLayer('mvt-layer'),
+  createMVTLayer('mvt-layer-highlight', {highlight: true}),
+  createMVTLayer('mvt-layer-binary', {binary: true}),
+  createMVTLayer('mvt-layer-binary-highlight', {highlight: true, binary: true}),
+  createMVTLayer('mvt-with-holes', {holes: true}),
+  createMVTLayer('mvt-with-holes-binary', {binary: true, holes: true})
+];
 
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });
