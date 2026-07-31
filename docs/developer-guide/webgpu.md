@@ -55,7 +55,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
@@ -76,6 +76,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
 `GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
+
+`A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
 
 ## Extensions
 
