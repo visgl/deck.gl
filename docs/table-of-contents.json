@@ -319,6 +319,7 @@
         "items": [
           "api-reference/widgets/overview",
           "api-reference/widgets/styling",
+          "api-reference/widgets/tooltips",
           "api-reference/widgets/compass-widget",
           "api-reference/widgets/context-menu-widget",
           "api-reference/widgets/fullscreen-widget",
