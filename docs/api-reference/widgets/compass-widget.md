@@ -136,6 +136,12 @@ The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#widget
 
 Tooltip message displayed while hovering a mouse over the widget.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `transitionDuration` (number, optional) {#transitionduration}
 
 * Default: `200`
