@@ -190,6 +190,36 @@ test('AttributeManager buffer groups pack IconLayer-style shader attributes', as
   expect(deleteSpy).toHaveBeenCalled();
 });
 
+test('AttributeManager buffer groups are shared across model step modes', () => {
+  const attributeManager = new AttributeManager(createWebGPUDevice());
+  attributeManager.add({
+    a: {size: 1, stepMode: 'dynamic', accessor: 'getA', bufferGroup: 'group-a'},
+    b: {size: 1, stepMode: 'dynamic', accessor: 'getB', bufferGroup: 'group-a'}
+  });
+  updateSimpleGroup(attributeManager, [
+    {a: 1, b: 2},
+    {a: 3, b: 4}
+  ]);
+
+  const attributes = attributeManager.getAttributes();
+  const instancedBindings = attributeManager.getBufferGroupBindings(attributes, {
+    isInstanced: true
+  });
+  const packedBuffer = instancedBindings.buffers['group-a'];
+  const deleteSpy = vi.spyOn(packedBuffer, 'delete');
+
+  const vertexBindings = attributeManager.getBufferGroupBindings(attributes, {
+    isInstanced: false
+  });
+
+  expect(instancedBindings.bufferLayouts[0].stepMode).toBe('instance');
+  expect(vertexBindings.bufferLayouts[0].stepMode).toBe('vertex');
+  expect(vertexBindings.buffers['group-a']).toBe(packedBuffer);
+  expect(deleteSpy).not.toHaveBeenCalled();
+
+  attributeManager.finalize();
+});
+
 test('AttributeManager buffer groups fall back for transitions and external buffers', () => {
   const testDevice = createWebGPUDevice();
   const attributeManager = new AttributeManager(testDevice);
