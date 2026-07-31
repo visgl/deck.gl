@@ -69,7 +69,7 @@ test('ThemeWidget - button label and icon reflect current mode', async () => {
   let button = testInstance.findElements(
     '.deck-widget-theme .deck-widget-icon-button'
   )[0] as HTMLButtonElement;
-  expect(button.title).toBe('Dark Mode');
+  expect(button.getAttribute('aria-label')).toBe('Dark Mode');
   expect(button.className).toContain('deck-widget-moon');
 
   testInstance.setProps({
@@ -86,8 +86,87 @@ test('ThemeWidget - button label and icon reflect current mode', async () => {
   button = testInstance.findElements(
     '.deck-widget-theme .deck-widget-icon-button'
   )[0] as HTMLButtonElement;
-  expect(button.title).toBe('Light Mode');
+  expect(button.getAttribute('aria-label')).toBe('Light Mode');
   expect(button.className).toContain('deck-widget-sun');
+});
+
+test('ThemeWidget - tooltip matches label mode', async () => {
+  testInstance = new WidgetTester({
+    widgets: [
+      new ThemeWidget({
+        themeMode: 'dark',
+        darkModeLabel: 'Dark Mode',
+        lightModeLabel: 'Light Mode',
+        darkModeTooltip: 'Currently Dark',
+        lightModeTooltip: 'Currently Light'
+      })
+    ]
+  });
+
+  await testInstance.idle();
+  let button = testInstance.findElements(
+    '.deck-widget-theme .deck-widget-icon-button'
+  )[0] as HTMLButtonElement;
+  expect(button.getAttribute('aria-label')).toBe('Dark Mode');
+
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await testInstance.idle();
+
+  let tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
+  expect(tooltip).toBeTruthy();
+  expect(tooltip.textContent).toBe('Currently Dark');
+
+  button.dispatchEvent(new PointerEvent('pointerleave', {bubbles: true}));
+  await testInstance.idle();
+
+  testInstance.setProps({
+    widgets: [
+      new ThemeWidget({
+        themeMode: 'light',
+        darkModeLabel: 'Dark Mode',
+        lightModeLabel: 'Light Mode',
+        darkModeTooltip: 'Currently Dark',
+        lightModeTooltip: 'Currently Light'
+      })
+    ]
+  });
+  await testInstance.idle();
+
+  button = testInstance.findElements(
+    '.deck-widget-theme .deck-widget-icon-button'
+  )[0] as HTMLButtonElement;
+  expect(button.getAttribute('aria-label')).toBe('Light Mode');
+
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await testInstance.idle();
+
+  tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
+  expect(tooltip).toBeTruthy();
+  expect(tooltip.textContent).toBe('Currently Light');
+});
+
+test('ThemeWidget - tooltip falls back to label when tooltip prop not set', async () => {
+  testInstance = new WidgetTester({
+    widgets: [
+      new ThemeWidget({
+        themeMode: 'dark',
+        darkModeLabel: 'Dark Mode',
+        lightModeLabel: 'Light Mode'
+      })
+    ]
+  });
+
+  await testInstance.idle();
+  const button = testInstance.findElements(
+    '.deck-widget-theme .deck-widget-icon-button'
+  )[0] as HTMLButtonElement;
+
+  button.dispatchEvent(new PointerEvent('pointerenter', {bubbles: true}));
+  await testInstance.idle();
+
+  const tooltip = testInstance.findElements('.deck-widget-tooltip')[0];
+  expect(tooltip).toBeTruthy();
+  expect(tooltip.textContent).toBe('Dark Mode');
 });
 
 test('ThemeWidget - applies theme to widget container', async () => {

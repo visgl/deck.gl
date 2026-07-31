@@ -50,8 +50,18 @@ test('GridLayer', () => {
     sampleProps: SAMPLE_PROPS,
     assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
-    onAfterUpdate({layer}) {
+    onAfterUpdate({layer, subLayer}) {
       expect(layer.state.aggregator, 'should have aggregator').toBeTruthy();
+      for (const model of subLayer?.getModels() || []) {
+        const bufferNames = model.bufferLayout.map(layout => layout.name);
+        expect(
+          bufferNames.filter(name => name === 'geometry'),
+          `${model.id} has one geometry buffer layout`
+        ).toHaveLength(1);
+        expect(new Set(bufferNames).size, `${model.id} has unique buffer layouts`).toBe(
+          bufferNames.length
+        );
+      }
     }
   });
 

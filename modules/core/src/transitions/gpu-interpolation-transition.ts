@@ -202,7 +202,6 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
       defines: {
         // @ts-expect-error TODO fix luma type
         ATTRIBUTE_TYPE: attributeType,
-        // @ts-expect-error TODO fix luma type
         ATTRIBUTE_SIZE: attributeSize
       },
       // Default uniforms are not set without this

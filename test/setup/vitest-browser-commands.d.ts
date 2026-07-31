@@ -54,6 +54,14 @@ interface InputEvent {
 declare module 'vitest/browser' {
   interface BrowserCommands {
     /**
+     * Returns the first candidate path containing the requested golden image.
+     */
+    findGoldenImage(options: {
+      goldenImage: string;
+      candidateDirectories: string[];
+    }): Promise<string | null>;
+
+    /**
      * Captures a screenshot and compares it with a golden image.
      * Replaces browserTestDriver_captureAndDiffScreen from @probe.gl/test-utils
      */

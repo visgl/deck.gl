@@ -2,43 +2,165 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './contour-layer';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {ContourLayer} from '@deck.gl/aggregation-layers';
+import {points} from 'deck.gl-test/data';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+import {WIDTH, HEIGHT} from '../constants';
+const screenSpaceData = [
+  [0, -100],
+  [0, -110],
+  [0, -115],
+  [10, -100],
+  [0, 100],
+  [0, 105],
+  [-100, -100],
+  [-100, -100],
+  [100, 10],
+  [100, 12],
+  [100, 100],
+  [110, 90]
+];
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
+const testCases = [
+  {
+    name: 'contour-infoviz',
+    views: [new OrthographicView()],
+    viewState: {
+      left: -WIDTH / 2,
+      top: -HEIGHT / 2,
+      right: WIDTH / 2,
+      bottom: HEIGHT / 2,
+      zoom: 0.1
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-infoviz',
+        data: screenSpaceData,
+        getPosition: d => d,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        cellSize: 40,
+        gridOrigin: [0, 15],
+        contours: [
+          {threshold: 1, color: [50, 50, 50]},
+          {threshold: 2, color: [100, 100, 100]},
+          {threshold: 3, color: [150, 150, 150]}
+        ],
+        gpuAggregation: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/contour-infoviz.png'
+  },
+  {
+    name: 'contour-isobands-infoviz',
+    views: [new OrthographicView()],
+    viewState: {
+      left: -WIDTH / 2,
+      top: -HEIGHT / 2,
+      right: WIDTH / 2,
+      bottom: HEIGHT / 2
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-isobands-infoviz',
+        data: screenSpaceData,
+        getPosition: d => d,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        cellSize: 40,
+        gridOrigin: [0, 15],
+        contours: [
+          {threshold: [1, 2], color: [150, 0, 0]},
+          {threshold: [2, 5], color: [0, 150, 0]}
+        ],
+        gpuAggregation: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/contour-infoviz_border_ref.png'
+  },
+  {
+    name: 'contour-lnglat-cpu-aggregation',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-lnglat-cpu-aggregation',
+        data: points,
+        cellSize: 200,
+        getPosition: d => d.COORDINATES,
+        contours: [
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
+          {threshold: 15, color: [0, 0, 255]}
+        ],
+        gpuAggregation: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/contour-lnglat.png'
+  },
+  {
+    name: 'contour-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-lnglat',
+        data: points,
+        cellSize: 200,
+        getPosition: d => d.COORDINATES,
+        contours: [
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
+          {threshold: 15, color: [0, 0, 255]}
+        ],
+        gpuAggregation: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/contour-lnglat.png'
+  },
+  {
+    name: 'contour-isobands-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-isobands-lnglat',
+        data: points,
+        cellSize: 200,
+        getPosition: d => d.COORDINATES,
+        contours: [
+          {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
+          {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},
+          {threshold: [15, 1000], color: [0, 0, 255]}
+        ],
+        gpuAggregation: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/contour-isobands-lnglat.png'
+  }
+];
 
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });
