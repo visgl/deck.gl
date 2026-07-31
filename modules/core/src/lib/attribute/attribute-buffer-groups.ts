@@ -6,6 +6,13 @@ import Attribute from './attribute';
 import {getStride} from './gl-utils';
 
 import {Buffer} from '@luma.gl/core';
+import {
+  backendRegistry,
+  cleanEvaluateSync,
+  GPUDataEvaluator,
+  interleave as interleaveTables
+} from '@luma.gl/gpgpu';
+import {interleave as webgpuInterleave} from '@luma.gl/gpgpu/webgpu';
 import type {BufferAttributeLayout, BufferLayout, Device} from '@luma.gl/core';
 
 type ModelInfo = {
@@ -22,7 +29,7 @@ type PackedGroup = {
 };
 
 type PackedGroupState = {
-  buffer: Buffer;
+  packed: GPUDataEvaluator;
   layoutKey: string;
 };
 
@@ -62,6 +69,12 @@ export default class AttributeBufferGroups {
     this.device = device;
     this.id = id;
     this.isTransitionAttribute = isTransitionAttribute;
+
+    if (this.device.type === 'webgpu') {
+      backendRegistry.add('webgpu', {
+        interleave: webgpuInterleave
+      });
+    }
   }
 
   /** Returns whether any attributes explicitly request WebGPU grouping. */
@@ -75,7 +88,7 @@ export default class AttributeBufferGroups {
   /** Deletes shared buffers created by this helper. */
   finalize(): void {
     for (const state of Object.values(this.packedBuffers)) {
-      state.buffer.delete();
+      state.packed.destroy();
     }
     this.packedBuffers = {};
   }
@@ -269,7 +282,6 @@ export default class AttributeBufferGroups {
   }
 
   private _getPackedBuffer(group: PackedGroup, upload: boolean): Buffer {
-    const byteLength = group.rowCount * group.byteStride;
     // Step mode is pipeline metadata; it does not change the packed buffer contents. A layer may
     // share one group across instanced and non-instanced models, as SolidPolygonLayer does for
     // its side and top models.
@@ -277,45 +289,72 @@ export default class AttributeBufferGroups {
       byteStride: group.layout.byteStride,
       attributes: group.layout.attributes
     });
-    let state = this.packedBuffers[group.id];
+    let state: PackedGroupState | undefined = this.packedBuffers[group.id];
 
-    if (!state || state.buffer.byteLength < byteLength || state.layoutKey !== layoutKey) {
-      state?.buffer.delete();
-      state = {
-        buffer: this.device.createBuffer({
-          id: `${this.id}-${group.id}`,
-          usage: Buffer.VERTEX | Buffer.COPY_DST,
-          byteLength
-        }),
-        layoutKey
-      };
-      this.packedBuffers[group.id] = state;
+    if (!state || state.layoutKey !== layoutKey) {
+      state?.packed.destroy();
+      state = undefined;
       upload = true;
     }
 
     if (upload) {
-      const data = new Uint8Array(byteLength);
-      for (const attribute of group.attributes) {
-        const value = attribute.value as ArrayBufferView;
-        const source = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-        const sourceStride = getStride(attribute.getAccessor());
-        const targetOffset = group.byteOffsets[attribute.id];
-
-        for (let row = 0; row < group.rowCount; row++) {
-          const sourceOffset = row * sourceStride;
-          data.set(
-            source.subarray(sourceOffset, sourceOffset + sourceStride),
-            row * group.byteStride + targetOffset
-          );
-        }
-      }
-      state.buffer.write(data);
+      const packed = this._interleavePackedGroup(group);
+      state?.packed.destroy();
+      this.packedBuffers[group.id] = {packed, layoutKey};
+      return packed.buffer;
     }
 
-    return state.buffer;
+    if (!state) {
+      throw new Error(`Attribute buffer group ${group.id} has no packed buffer`);
+    }
+    return state.packed.buffer;
+  }
+
+  private _interleavePackedGroup(group: PackedGroup): GPUDataEvaluator {
+    const evaluators = group.attributes.map(attribute =>
+      this._getInterleaveInput(group, attribute)
+    );
+    const packed = interleaveTables(...evaluators);
+    cleanEvaluateSync(this.device, packed);
+    return packed;
+  }
+
+  private _getInterleaveInput(group: PackedGroup, attribute: Attribute): GPUDataEvaluator {
+    const buffer = attribute.getBuffer();
+    const rowByteLength = getStride(attribute.getAccessor());
+    const byteOffset = attribute.byteOffset;
+    const stride = attribute.getAccessor().stride || rowByteLength;
+    const groupByteOffset = group.byteOffsets[attribute.id];
+
+    assertU32Aligned(`${group.id}.${attribute.id} byteOffset`, byteOffset);
+    assertU32Aligned(`${group.id}.${attribute.id} stride`, stride);
+    assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
+    assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
+
+    if (!buffer) {
+      throw new Error(
+        `Attribute group ${group.id} cannot interleave missing buffer ${attribute.id}`
+      );
+    }
+
+    return new GPUDataEvaluator({
+      id: attribute.id,
+      type: 'uint32',
+      size: rowByteLength / 4,
+      offset: byteOffset,
+      stride,
+      length: group.rowCount,
+      buffer
+    });
   }
 }
 
 function alignTo4(value: number): number {
   return Math.ceil(value / 4) * 4;
+}
+
+function assertU32Aligned(label: string, value: number): void {
+  if (value % 4 !== 0) {
+    throw new Error(`Attribute buffer groups require 32-bit alignment: ${label}=${value}`);
+  }
 }
