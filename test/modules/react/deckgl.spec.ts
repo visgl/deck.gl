@@ -88,11 +88,11 @@ test('DeckGL#mount/unmount', async () => {
 
 test('DeckGL#external WebGPU device preserves the React custom render loop', () => {
   let capturedProps: Record<string, any> | undefined;
-  const externalCanvas = document.createElement('canvas');
   const onAfterRender = vi.fn();
 
   class TestDeck {
     isInitialized = false;
+    device = {type: 'webgpu'};
 
     constructor(props: Record<string, any>) {
       capturedProps = props;
@@ -111,7 +111,7 @@ test('DeckGL#external WebGPU device preserves the React custom render loop', () 
         Deck: TestDeck as unknown as typeof Deck,
         device: {
           type: 'webgpu',
-          getDefaultCanvasContext: () => ({canvas: externalCanvas})
+          getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
         } as any,
         onAfterRender
       })
@@ -119,11 +119,63 @@ test('DeckGL#external WebGPU device preserves the React custom render loop', () 
   });
 
   expect(capturedProps?._customRender).toEqual(expect.any(Function));
-  expect(externalCanvas.style.visibility).toBe('hidden');
+  expect(capturedProps?.onAfterRender).toBe(onAfterRender);
 
-  capturedProps?.onAfterRender({});
-  expect(externalCanvas.style.visibility).toBe('');
-  expect(onAfterRender).toHaveBeenCalledOnce();
+  act(() => {
+    root.render(null);
+  });
+  container.remove();
+});
+
+test('DeckGL#custom render uses the initialized device type', () => {
+  let capturedProps: Record<string, any> | undefined;
+  let deckInstance: TestDeck;
+
+  class TestDeck {
+    isInitialized = true;
+    // Simulate a requested WebGPU adapter falling back to WebGL.
+    device = {type: 'webgl'};
+    drawReasons: string[] = [];
+
+    constructor(props: Record<string, any>) {
+      capturedProps = props;
+      deckInstance = this;
+    }
+
+    getViewports() {
+      return [];
+    }
+
+    _drawLayers(reason: string) {
+      this.drawReasons.push(reason);
+    }
+
+    finalize() {}
+  }
+
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+
+  act(() => {
+    root.render(
+      createElement(DeckGL, {
+        Deck: TestDeck as unknown as typeof Deck,
+        deviceProps: {type: 'webgpu'}
+      })
+    );
+  });
+
+  let drawCountDuringCustomRender = -1;
+  act(() => {
+    capturedProps?._customRender('adapter fallback');
+    drawCountDuringCustomRender = deckInstance!.drawReasons.length;
+  });
+
+  // WebGL defers the draw until React has synchronized its children. If deviceProps were used,
+  // this would incorrectly take the WebGPU path and draw synchronously inside _customRender.
+  expect(drawCountDuringCustomRender).toBe(0);
+  expect(deckInstance!.drawReasons).toEqual(['adapter fallback']);
 
   act(() => {
     root.render(null);
@@ -175,6 +227,7 @@ test('DeckGL#external WebGPU device waits for its final size before mounting Rea
 
   class TestDeck {
     isInitialized = true;
+    device = {type: 'webgpu'};
     width = 1;
     height = 1;
     canvas: HTMLCanvasElement;
@@ -276,6 +329,7 @@ test('DeckGL#external WebGPU device synchronizes view changes through custom ren
 
   class TestDeck {
     isInitialized = true;
+    device = {type: 'webgpu'};
     width = 0;
     height = 0;
     drawReasons: string[] = [];
