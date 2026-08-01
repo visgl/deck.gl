@@ -39,6 +39,10 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
+  // Half of the stroke width, in device pixels. vCornerOffset and vPathPosition.x are in units
+  // of half-width, so multiplying by this converts them to device-pixel distances for analytic
+  // edge coverage. Device pixel ratio is folded in here because project is vertex-stage only.
+  @location(6) vHalfWidthDevicePixels: f32,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -177,6 +181,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       path.widthMaxPixels
     ) / 2.0;
 
+  varyings.vHalfWidthDevicePixels = widthPixels * project.devicePixelRatio;
+
   if (path.billboard != 0.0) {
     var prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
     var currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET);
@@ -244,15 +250,35 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
 
-  if (varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength) {
-    if (varyings.vJointType > 0.5 && length(varyings.vCornerOffset) > 1.0) {
+  let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
+  let isRound = varyings.vJointType > 0.5;
+
+  if (isCorner) {
+    if (isRound && length(varyings.vCornerOffset) > 1.0) {
       discard;
     }
-    if (varyings.vJointType < 0.5 && varyings.vMiterLength > path.miterLimit + 1.0) {
+    if (!isRound && varyings.vMiterLength > path.miterLimit + 1.0) {
       discard;
     }
   }
 
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  var color = varyings.vColor;
+
+  if (path.antialiasing != 0.0) {
+    // Signed distance to the outer silhouette, in units of half-width. Rounded joints and caps
+    // are bounded by the corner offset; everywhere else the boundary is the edge of the stroke.
+    // Only the across-width silhouette is feathered - consecutive segment instances abut along
+    // the length of the path, so feathering there would leave a seam at every vertex.
+    let edgeDistance = select(
+      1.0 - abs(varyings.vPathPosition.x),
+      1.0 - length(varyings.vCornerOffset),
+      isRound && isCorner
+    );
+    // Spread the transition over exactly one device pixel, centered on the edge.
+    // Applied before premultiplication so the color channels scale with coverage too.
+    color.a *= clamp(edgeDistance * varyings.vHalfWidthDevicePixels + 0.5, 0.0, 1.0);
+  }
+
+  return deckgl_premultiplied_alpha(color);
 }
 `;

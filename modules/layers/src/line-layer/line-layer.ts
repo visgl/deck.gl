@@ -35,7 +35,8 @@ const defaultProps: DefaultProps<LineLayerProps> = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
+  antialiasing: false
 };
 
 /** All properties supported by LineLayer. */
@@ -67,6 +68,16 @@ type _LineLayerProps<DataT> = {
    * @default Number.MAX_SAFE_INTEGER
    */
   widthMaxPixels?: number;
+
+  /**
+   * If `true`, lines are rendered with smoothed edges, computed analytically from the line
+   * geometry rather than relying on the framebuffer's MSAA. Useful when the WebGL context has
+   * antialiasing disabled — notably interleaved rendering into a base map, since MapLibre and
+   * Mapbox create their context with `antialias: false`. Antialiasing can cause artifacts where
+   * lines overlap.
+   * @default false
+   */
+  antialiasing?: boolean;
 
   /**
    * Source position of each object.
@@ -169,13 +180,15 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   draw({uniforms}): void {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude, antialiasing} =
+      this.props;
     const model = this.state.model!;
     const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
+      antialiasing,
       useShortestPath: wrapLongitude ? 1 : 0
     };
     model.shaderInputs.setProps({line: lineProps});

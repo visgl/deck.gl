@@ -63,6 +63,15 @@ type _PathLayerProps<DataT> = {
    */
   miterLimit?: number;
   /**
+   * If `true`, paths are rendered with smoothed edges, computed analytically from the stroke
+   * geometry rather than relying on the framebuffer's MSAA. Useful when the WebGL context has
+   * antialiasing disabled — notably interleaved rendering into a base map, since MapLibre and
+   * Mapbox create their context with `antialias: false`. Antialiasing can cause artifacts where
+   * a path overlaps itself.
+   * @default false
+   */
+  antialiasing?: boolean;
+  /**
    * If `true`, extrude the path in screen space (width always faces the camera).
    * If `false`, the width always faces up (z).
    * @default false
@@ -106,6 +115,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   jointRounded: false,
   capRounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
+  antialiasing: false,
   billboard: false,
   _pathType: null,
 
@@ -335,6 +345,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       jointRounded,
       capRounded,
       billboard,
+      antialiasing,
       miterLimit,
       widthUnits,
       widthScale,
@@ -347,6 +358,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       jointType: Number(jointRounded),
       capType: Number(capRounded),
       billboard,
+      antialiasing,
       widthUnits: UNIT[widthUnits],
       widthScale,
       miterLimit,

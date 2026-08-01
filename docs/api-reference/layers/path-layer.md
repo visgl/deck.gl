@@ -217,6 +217,16 @@ If `false`, the width always faces up.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `jointRounded` is `false`.
 
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+If `true`, paths are rendered with smoothed edges. Edge coverage is computed analytically from the stroke geometry, so it does not depend on the WebGL context being created with multisampling.
+
+Enable this when the context has antialiasing disabled. The most common case is [interleaved](../mapbox/mapbox-overlay.md) rendering into a base map: both MapLibre GL JS and Mapbox GL JS create their WebGL context with `antialias: false`, so deck.gl layers drawn into it receive no antialiasing from the framebuffer. Alternatively, enable MSAA on the base map itself — in MapLibre GL JS v5 that is `canvasContextAttributes: {antialias: true}` on the `Map` constructor, which is more expensive at high resolutions.
+
+Only the edges along the width of the path are smoothed. Flat (non-rounded) caps at the two ends of a path are left hard; set `capRounded` to `true` if those need smoothing too. Antialiasing can cause artifacts where a path overlaps itself, since the blended edges are composited twice.
+
 #### `_pathType` (object, optional) {#_pathtype}
 
 * Default: `null`

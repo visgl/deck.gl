@@ -29,6 +29,10 @@ out float vMiterLength;
 out vec2 vPathPosition;
 out float vPathLength;
 out float vJointType;
+// Half of the stroke width, in device pixels. vCornerOffset and vPathPosition.x are in units of
+// half-width, so multiplying by this converts them to device-pixel distances for analytic edge
+// coverage. Device pixel ratio is folded in here because the project module is vertex-stage only.
+out float vHalfWidthDevicePixels;
 
 const float EPSILON = 0.001;
 const vec3 ZERO_OFFSET = vec3(0.0);
@@ -181,6 +185,8 @@ void main() {
 
     width = vec3(widthPixels, 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
+    // Already in pixels in this branch
+    vHalfWidthDevicePixels = width.x * project.devicePixelRatio;
 
     vec3 offset = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
@@ -199,6 +205,8 @@ void main() {
 
     width = vec3(project_pixel_size(widthPixels), 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
+    // width is in common space here; project.scale is the inverse of project_pixel_size
+    vHalfWidthDevicePixels = width.x * project.scale * project.devicePixelRatio;
 
     vec3 offset = getLineJoinOffset(prevPosition, currPosition, nextPosition, width.xy);
     geometry.position = vec4(currPosition + offset, 1.0);
