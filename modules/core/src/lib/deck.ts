@@ -135,13 +135,15 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 
   /** The canvas to render into.
    * Can be either an `HTMLCanvasElement` or the element id, and will be auto-created if not
-   * supplied.
+   * supplied. This existing single-canvas contract is unchanged; use `_canvases` to opt into
+   * experimental multi-canvas presentation.
    */
   canvas?: HTMLCanvasElement | string | null;
 
   /** Experimental: canvases to present into in multi-canvas mode.
    * Deck renders into an offscreen default context and presents the result into one canvas per
    * entry. Views without an explicit `canvasId` render into the first configured canvas.
+   * This separate opt-in preserves the existing `canvas` API and single-canvas integrations.
    */
   _canvases?: (HTMLCanvasElement | string)[] | null;
 
@@ -1152,14 +1154,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return canvas;
   }
 
+  /** Check whether the experimental multi-canvas path was explicitly enabled. */
   private _isMultiCanvasMode(): boolean {
     return Array.isArray(this.props._canvases);
   }
 
+  /** Return the first configured presentation canvas or the single-canvas fallback id. */
   private _getDefaultCanvasId(): string {
     return this._canvasManager.order[0] || DEFAULT_CANVAS_ID;
   }
 
+  /** Keep the existing single-canvas API separate from incompatible multi-canvas options. */
   private _validateCanvasConfiguration(props: DeckProps<ViewsT>): void {
     if (Array.isArray(props.canvas)) {
       throw new Error('`canvas` accepts one canvas. Use `_canvases` for multi-canvas mode.');
@@ -1218,6 +1223,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return eventManager;
   }
 
+  /** Preserve the existing custom event-root lookup for each presentation canvas. */
   private _getEventRoot(canvas: HTMLCanvasElement): HTMLElement {
     return (
       canvas.closest<HTMLElement>('.deck-events-root') ||
@@ -1226,6 +1232,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     );
   }
 
+  /** Reconcile experimental presentation targets without changing single-canvas resources. */
   private _syncCanvasTargets(): void {
     if (!this.device || !this._isMultiCanvasMode()) {
       return;
@@ -1350,6 +1357,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.device.canvasContext.setDrawingBufferSize(width, height);
   }
 
+  /** Create the existing DOM canvas or the offscreen render canvas required for presentation. */
   private _createDeviceCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement | OffscreenCanvas {
     if (this._isMultiCanvasMode()) {
       const OffscreenCanvasConstructor = globalThis.OffscreenCanvas;

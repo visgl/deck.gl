@@ -194,12 +194,27 @@ test('Deck#getEventManager resolves the default manager for views', async () => 
       onLoad: () => {
         try {
           const eventManager = (deck as any).eventManager;
+          const destroyEventManager = vi.spyOn(eventManager, 'destroy');
           expect(deck.getEventManager()).toBe(eventManager);
           expect(deck.getEventManager('main')).toBe(eventManager);
           expect(deck.getEventManager('overlay')).toBe(eventManager);
           expect(Object.keys((deck as any).eventManagers)).toEqual(['default-canvas']);
 
+          deck.setProps({width: 2});
+          expect(
+            deck.getEventManager(),
+            'ordinary updates preserve the single-canvas manager'
+          ).toBe(eventManager);
+          expect(
+            destroyEventManager,
+            'ordinary updates do not destroy existing listeners'
+          ).not.toHaveBeenCalled();
+
           deck.finalize();
+          expect(
+            destroyEventManager,
+            'finalization releases the single-canvas manager'
+          ).toHaveBeenCalledTimes(1);
           resolve();
         } catch (error) {
           reject(error);
