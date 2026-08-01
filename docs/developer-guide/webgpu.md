@@ -8,7 +8,7 @@ deck.gl is gradually adding support for running on WebGPU. Support is landing la
 
 This page is conservative and source-based:
 
-- `✅` means the current tree contains an explicit WebGPU/WGSL implementation, or the API is a thin wrapper over one.
+- `✅ vX.Y` means the current tree contains an explicit WebGPU/WGSL implementation, or the API is a thin wrapper over one. The version identifies the first deck.gl minor release with full WebGPU support.
 - `🚧` means some code paths work, but the full API surface is not yet ported.
 - `❌` means there is no in-tree WebGPU implementation yet.
 
@@ -35,31 +35,31 @@ The table below covers the public layer exports from the layer packages. It is d
 
 | Module | Layer | WebGL | WebGPU |
 | --- | --- | --- | --- |
-| `@deck.gl/layers` | `ArcLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `ArcLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `BitmapLayer` | ✅ | 🚧 |
-| `@deck.gl/layers` | `IconLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `LineLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `ScatterplotLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `ColumnLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `PathLayer` | ✅ | ✅ |
-| `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `IconLayer` | ✅ | ✅ v9.3 |
+| `@deck.gl/layers` | `LineLayer` | ✅ | ✅ v9.2 |
+| `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ v9.2 |
+| `@deck.gl/layers` | `ScatterplotLayer` | ✅ | ✅ v9.2 |
+| `@deck.gl/layers` | `ColumnLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/layers` | `PathLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `GeoJsonLayer` | ✅ | 🚧 |
 | `@deck.gl/layers` | `TextLayer` | ✅ | ❌ |
-| `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ |
-| `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ |
-| `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ |
-| `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ |
+| `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ❌ |
-| `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ |
+| `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ |
+| `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ❌ |
@@ -76,6 +76,8 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
 `GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
+
+`A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
 
 ## Extensions
 
