@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
@@ -10,6 +10,7 @@ import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/webgl/constants';
+import type {CanvasContext} from '@luma.gl/core';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -344,6 +345,46 @@ test('LayersPass#viewParameters', () => {
     blendColorSrcFactor: 'src-alpha',
     cullMode: 'none'
   });
+});
+
+test('LayersPass#uses the supplied canvas context for viewport and clear passes', () => {
+  const layer = new TestLayer({id: 'canvas-context-layer'});
+  const layerManager = new LayerManager(device, {});
+  const layersPass = new DrawLayersPass(device);
+  const framebuffer = device.createFramebuffer({
+    width: 60,
+    height: 40,
+    colorAttachments: ['rgba8unorm']
+  });
+  const canvasContext = {
+    getCurrentFramebuffer: () => framebuffer,
+    getDrawingBufferSize: () => [60, 40],
+    cssToDeviceRatio: () => 2
+  } as CanvasContext;
+  const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
+
+  layerManager.setLayers([layer]);
+  const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
+  layersPass.render({
+    canvasContext,
+    views: {[viewport.id]: new MapView({id: viewport.id, clear: true})},
+    viewports: [viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+
+  expect(
+    // @ts-expect-error glParameters not exposed
+    layerManager.context.renderPass.glParameters.viewport,
+    'viewport uses the supplied drawing-buffer height and pixel ratio'
+  ).toEqual([4, 18, 20, 16]);
+  expect(beginRenderPass).toHaveBeenCalledTimes(2);
+  expect(beginRenderPass.mock.calls[0][0].framebuffer).toBe(framebuffer);
+  expect(beginRenderPass.mock.calls[1][0].framebuffer).toBe(framebuffer);
+
+  beginRenderPass.mockRestore();
+  layerManager.finalize();
+  framebuffer.destroy();
 });
 
 test('LayersPass#GLViewport', () => {

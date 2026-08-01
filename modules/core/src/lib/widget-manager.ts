@@ -25,13 +25,28 @@ export type WidgetPlacement = keyof typeof PLACEMENTS;
 
 const ROOT_CONTAINER_ID = 'root';
 
+/** CSS-pixel bounds of a canvas relative to the shared widget root. */
+type WidgetCanvasBounds = {
+  /** Horizontal offset from the widget root. */
+  x: number;
+  /** Vertical offset from the widget root. */
+  y: number;
+  /** Canvas width in CSS pixels. */
+  width: number;
+  /** Canvas height in CSS pixels. */
+  height: number;
+};
+
 export type WidgetManagerProps = {
   deck: Deck<any>;
   parentElement?: HTMLElement | null;
+  /** Optional resolver for a viewport's canvas bounds relative to the widget root. */
+  getCanvasBounds?: (viewport?: Viewport | null) => WidgetCanvasBounds;
 };
 export class WidgetManager {
   deck: Deck<any>;
   parentElement?: HTMLElement | null;
+  private _resolveCanvasBounds?: (viewport?: Viewport | null) => WidgetCanvasBounds;
 
   /** Widgets added via the imperative API */
   private defaultWidgets: Widget[] = [];
@@ -45,10 +60,11 @@ export class WidgetManager {
   /** Viewport provided to widget on redraw */
   private lastViewports: {[id: string]: Viewport} = {};
 
-  constructor({deck, parentElement}: WidgetManagerProps) {
+  constructor({deck, parentElement, getCanvasBounds}: WidgetManagerProps) {
     this.deck = deck;
     parentElement?.classList.add('deck-widget-container');
     this.parentElement = parentElement;
+    this._resolveCanvasBounds = getCanvasBounds;
   }
 
   getWidgets(): Widget[] {
@@ -123,6 +139,23 @@ export class WidgetManager {
         widget.onHover?.(info, event);
       }
     }
+  }
+
+  /** Resolves a viewport's canvas bounds relative to the shared widget root. */
+  getCanvasBounds(viewport?: Viewport | null): WidgetCanvasBounds {
+    if (this._resolveCanvasBounds) {
+      return this._resolveCanvasBounds(viewport);
+    }
+
+    const canvas = this.deck?.getCanvas?.();
+    const canvasBounds = canvas?.getBoundingClientRect();
+    const parentBounds = this.parentElement?.getBoundingClientRect();
+    return {
+      x: canvasBounds && parentBounds ? canvasBounds.left - parentBounds.left : 0,
+      y: canvasBounds && parentBounds ? canvasBounds.top - parentBounds.top : 0,
+      width: canvasBounds?.width || this.deck?.width || 0,
+      height: canvasBounds?.height || this.deck?.height || 0
+    };
   }
 
   onEvent(info: PickingInfo, event: MjolnirGestureEvent) {
@@ -253,23 +286,42 @@ export class WidgetManager {
   }
 
   private _updateContainers() {
-    const canvasWidth = this.deck.width;
-    const canvasHeight = this.deck.height;
     for (const id in this.containers) {
       const viewport = this.lastViewports[id] || null;
       const visible = id === ROOT_CONTAINER_ID || viewport;
 
       const container = this.containers[id];
       if (visible) {
+        const bounds = this._getContainerBounds(viewport);
         container.style.display = 'block';
         // Align the container with the view
-        container.style.left = `${viewport ? viewport.x : 0}px`;
-        container.style.top = `${viewport ? viewport.y : 0}px`;
-        container.style.width = `${viewport ? viewport.width : canvasWidth}px`;
-        container.style.height = `${viewport ? viewport.height : canvasHeight}px`;
+        container.style.left = `${bounds.x}px`;
+        container.style.top = `${bounds.y}px`;
+        container.style.width = `${bounds.width}px`;
+        container.style.height = `${bounds.height}px`;
       } else {
         container.style.display = 'none';
       }
     }
+  }
+
+  /** Resolves a root container or view container in the shared widget coordinate system. */
+  private _getContainerBounds(viewport: Viewport | null): WidgetCanvasBounds {
+    if (!viewport) {
+      return {
+        x: 0,
+        y: 0,
+        width: this.parentElement?.clientWidth || this.deck.width,
+        height: this.parentElement?.clientHeight || this.deck.height
+      };
+    }
+
+    const canvasBounds = this.getCanvasBounds(viewport);
+    return {
+      x: canvasBounds.x + viewport.x,
+      y: canvasBounds.y + viewport.y,
+      width: viewport.width,
+      height: viewport.height
+    };
   }
 }

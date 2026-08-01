@@ -26,7 +26,7 @@ const browserPlaywright = playwright({
 // Playwright provider with viewport configured for render tests
 const renderPlaywright = playwright({
   launchOptions: {
-    args: chromiumLaunchArgs
+    args: [...chromiumLaunchArgs, '--enable-unsafe-webgpu']
   },
   contextOptions: {
     viewport: {width: 1024, height: 768}

@@ -49,8 +49,14 @@ export type ControllerOptions = {
   doubleClickDragZoom?: boolean;
   /** Enable zooming with multi-touch pinch. Default `true` */
   touchZoom?: boolean;
-  /** Enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false` */
+  /** Enable rotating with multi-touch. Default `false`.
+   * @deprecated Use `multiTouchDrag: 'rotate'`.
+   */
   touchRotate?: boolean;
+  /** Behavior of two-pointer translation gestures. Default disabled. */
+  multiTouchDrag?: 'pan' | 'rotate' | null;
+  /** Enable gestures synthesized from trackpad input. Default `false`. */
+  trackpadGesture?: boolean;
   /** Enable interaction with keyboard. Default `true`. */
   keyboard?:
     | boolean
@@ -137,6 +143,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
   private _panMove: boolean = false;
+  private _multiPanMode: 'pan' | 'rotate' | null = null;
+  private _multiPanStartCenter: {x: number; y: number} | null = null;
   private _doubleClickDragAnchor: [number, number] | null = null;
   private _suppressDoubleClickUntil: number = 0;
 
@@ -150,6 +158,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected doubleClickDragZoom: boolean = true;
   protected touchZoom: boolean = true;
   protected touchRotate: boolean = false;
+  protected multiTouchDrag: 'pan' | 'rotate' | null = null;
+  protected trackpadGesture: boolean = false;
   protected keyboard:
     | boolean
     | {
@@ -220,11 +230,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       case 'panend':
         return this._onPanEnd(event);
       case 'pinchstart':
-        return eventStartBlocked ? false : this._onPinchStart(event);
+        return eventStartBlocked || !this._isTrackpadGestureAllowed(event)
+          ? false
+          : this._onPinchStart(event);
       case 'pinchmove':
-        return this._onPinch(event);
+        return this._isTrackpadGestureAllowed(event) ? this._onPinch(event) : false;
       case 'pinchend':
-        return this._onPinchEnd(event);
+        return this._isTrackpadGestureAllowed(event) ? this._onPinchEnd(event) : false;
       case 'multipanstart':
         return eventStartBlocked ? false : this._onMultiPanStart(event);
       case 'multipanmove':
@@ -330,6 +342,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       doubleClickDragZoom = false,
       touchZoom = true,
       touchRotate = false,
+      multiTouchDrag = touchRotate ? 'rotate' : null,
+      trackpadGesture = false,
       keyboard = true
     } = props;
 
@@ -338,8 +352,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     // We always need the pan events to set the correct isDragging state, even if dragPan & dragRotate are both false
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
-    this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
-    this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && touchRotate);
+    this.toggleEvents(
+      EVENT_TYPES.PINCH,
+      isInteractive && (touchZoom || multiTouchDrag === 'rotate')
+    );
+    this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && Boolean(multiTouchDrag));
     this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK_DRAG, isInteractive && doubleClickDragZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
@@ -351,7 +368,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.doubleClickZoom = doubleClickZoom;
     this.doubleClickDragZoom = doubleClickDragZoom;
     this.touchZoom = touchZoom;
-    this.touchRotate = touchRotate;
+    this.touchRotate = multiTouchDrag === 'rotate';
+    this.multiTouchDrag = multiTouchDrag;
+    this.trackpadGesture = trackpadGesture;
     this.keyboard = keyboard;
 
     // Normalize view state if maxBounds is defined
@@ -555,6 +574,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (!this.scrollZoom) {
       return false;
     }
+    if (this.trackpadGesture && event.device !== 'mouse') {
+      return false;
+    }
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos, event)) {
@@ -594,64 +616,94 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
-    const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos, event)) {
+    const {multiTouchDrag} = this;
+    if (!multiTouchDrag || !this._isMultiPanEventAllowed(event, multiTouchDrag)) {
       return false;
     }
-    const newControllerState = this.controllerState.rotateStart({pos});
+
+    const currentCenter = event.offsetCenter;
+    if (!this.isPointInBounds(this.getCenter(event), event)) {
+      return false;
+    }
+
+    const isTrackpad = event.pointerType === 'trackpad';
+    const startCenter = {
+      x: currentCenter.x - (isTrackpad ? 0 : event.deltaX),
+      y: currentCenter.y - (isTrackpad ? 0 : event.deltaY)
+    };
+    const startEvent = {...event, offsetCenter: startCenter};
+    const pos = this.getCenter(startEvent);
+    const newControllerState =
+      multiTouchDrag === 'pan'
+        ? this.controllerState.panStart({pos})
+        : this.controllerState.rotateStart({pos});
+
+    this._multiPanMode = multiTouchDrag;
+    this._multiPanStartCenter = startCenter;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
 
   protected _onMultiPan(event: MjolnirGestureEvent): boolean {
-    if (!this.touchRotate) {
-      return false;
-    }
-    if (!this.isDragging()) {
+    const {mode, event: panEvent} = this._getMultiPanEvent(event);
+    if (!mode || !panEvent || !this.isDragging()) {
       return false;
     }
 
-    const pos = this.getCenter(event);
-    pos[0] -= event.deltaX;
-
-    const newControllerState = this.controllerState.rotate({pos});
-    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isDragging: true,
-      isRotating: true
-    });
-    return true;
+    return mode === 'pan' ? this._onPanMove(panEvent) : this._onPanRotate(panEvent);
   }
 
   protected _onMultiPanEnd(event: MjolnirGestureEvent): boolean {
-    if (!this.isDragging()) {
+    const {mode, event: panEvent} = this._getMultiPanEvent(event);
+    if (!mode || !panEvent || !this.isDragging()) {
+      this._resetMultiPan();
       return false;
     }
-    const {inertia} = this;
-    if (this.touchRotate && inertia && event.velocityY) {
-      const pos = this.getCenter(event);
-      const endPos: [number, number] = [pos[0], (pos[1] += (event.velocityY * inertia) / 2)];
-      const newControllerState = this.controllerState.rotate({pos: endPos});
-      this.updateViewport(
-        newControllerState,
-        {
-          ...this._getTransitionProps(),
-          transitionDuration: inertia,
-          transitionEasing: INERTIA_EASING
-        },
-        {
-          isDragging: false,
-          isRotating: true
-        }
-      );
-      this.blockEvents(inertia);
-    } else {
-      const newControllerState = this.controllerState.rotateEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isRotating: false
-      });
+
+    const handled =
+      mode === 'pan' ? this._onPanMoveEnd(panEvent) : this._onPanRotateEnd(panEvent);
+    this._resetMultiPan();
+    return handled;
+  }
+
+  private _isTrackpadGestureAllowed(event: MjolnirGestureEvent): boolean {
+    return event.pointerType !== 'trackpad' || this.trackpadGesture;
+  }
+
+  private _isMultiPanEventAllowed(
+    event: MjolnirGestureEvent,
+    mode: 'pan' | 'rotate'
+  ): boolean {
+    if (event.pointerType === 'trackpad') {
+      return this.trackpadGesture && (mode === 'pan' ? this.dragPan : this.dragRotate);
     }
-    return true;
+    return event.pointerType === 'touch' && (mode === 'pan' ? this.dragPan : this.dragRotate);
+  }
+
+  private _getMultiPanEvent(event: MjolnirGestureEvent): {
+    mode: 'pan' | 'rotate' | null;
+    event: MjolnirGestureEvent | null;
+  } {
+    const mode = this._multiPanMode;
+    const startCenter = this._multiPanStartCenter;
+    if (!mode || !startCenter) {
+      return {mode: null, event: null};
+    }
+    return {
+      mode,
+      event: {
+        ...event,
+        offsetCenter: {
+          x: startCenter.x + event.deltaX,
+          y: startCenter.y + event.deltaY
+        }
+      }
+    };
+  }
+
+  private _resetMultiPan(): void {
+    this._multiPanMode = null;
+    this._multiPanStartCenter = null;
   }
 
   // Default handler for the `pinchstart` event.

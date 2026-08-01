@@ -133,7 +133,7 @@ new Deck({
 
 Widgets with UI (e.g. a button or panel) can be positioned relative to the deck.gl view they are controlling, via the `viewId` and `placement` props. See [WidgetProps](../core/widget.md#widgetprops).
 
-The `viewId` controls which HTML container will mount to, and the `placement` prop will position it relative to the container it is in, like so:
+The `viewId` selects a deck-managed view container under the shared widget root, and the `placement` prop positions the widget within that container:
 
 ```ts
 new Deck({
@@ -251,6 +251,10 @@ new Deck({
   widgets: [new LoadingIndicator({size: 48})]
 });
 ```
+
+## Tooltips
+
+Built-in button widgets show styled tooltips on hover. See [Widget Tooltips](./tooltips) for customization and usage in custom widgets.
 
 ## Themes and Styling
 
