@@ -55,18 +55,18 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ |
+| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `S2Layer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ |
-| `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ |
+| `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `HeatmapTileLayer` | ✅ | ❌ |
@@ -77,6 +77,7 @@ The table below covers the public layer exports from the layer packages. It is d
 
 `GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
 
+- `S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
 - `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 
 - `H3ClusterLayer` renders through the polygon path.
 - `A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
