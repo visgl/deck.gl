@@ -36,7 +36,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | Module | Layer | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/layers` | `ArcLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/layers` | `BitmapLayer` | ✅ | 🚧 |
+| `@deck.gl/layers` | `BitmapLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `IconLayer` | ✅ | ✅ v9.3 |
 | `@deck.gl/layers` | `LineLayer` | ✅ | ✅ v9.2 |
 | `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ v9.2 |
@@ -51,7 +51,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ❌ |
+| `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ✅ v9.4  |
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
@@ -108,12 +108,12 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Feature | Status | Comment |
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
-| Picking | ❌ | `Deck` currently skips picking on WebGPU, including hover and click picking paths. |
+| Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
 | Shader hooks / layer extensions | ❌ | deck.gl's WGSL shader hook list is currently empty, so injection-based extensions are not yet portable. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
-| Constant attributes | 🚧 | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
+| Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |
-| Base map overlays | ❌ | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
+| Base map overlays |  🚧 | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
 | Base map interleaving | ❌ | No current base map integration path supports WebGPU interleaving. |
 
 ## Background
