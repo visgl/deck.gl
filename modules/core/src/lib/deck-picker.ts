@@ -22,23 +22,39 @@ import type {Effect} from './effect';
 import type View from '../views/view';
 import type Viewport from '../viewports/viewport';
 
+/** CSS-pixel coordinates and routing options for picking a single point. */
 export type PickByPointOptions = {
+  /** Horizontal position in CSS pixels relative to the selected canvas. */
   x: number;
+  /** Vertical position in CSS pixels relative to the selected canvas. */
   y: number;
+  /** Presentation canvas to query when experimental multi-canvas mode is enabled. */
   canvasId?: string;
+  /** Additional CSS-pixel radius around the queried point. */
   radius?: number;
+  /** Maximum number of overlapping objects to return. */
   depth?: number;
+  /** Picking mode used when dispatching layer picking callbacks. */
   mode?: string;
+  /** Whether to reconstruct a three-dimensional world coordinate. */
   unproject3D?: boolean;
 };
 
+/** CSS-pixel bounds and routing options for picking a rectangular region. */
 export type PickByRectOptions = {
+  /** Horizontal position of the rectangle in the selected canvas. */
   x: number;
+  /** Vertical position of the rectangle in the selected canvas. */
   y: number;
+  /** Presentation canvas to query when experimental multi-canvas mode is enabled. */
   canvasId?: string;
+  /** Width of the query rectangle in CSS pixels. */
   width?: number;
+  /** Height of the query rectangle in CSS pixels. */
   height?: number;
+  /** Picking mode used when dispatching layer picking callbacks. */
   mode?: string;
+  /** Optional upper bound on the number of returned objects. */
   maxObjects?: number | null;
 };
 

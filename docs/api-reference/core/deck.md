@@ -52,6 +52,8 @@ The canvas to render into. It can be either a HTMLCanvasElement or the element i
 
 Experimental: presentation canvases for multi-canvas mode. Deck renders into an offscreen default context and presents the result into one `PresentationContext` per canvas entry. String entries are resolved as DOM element ids. Views without an explicit [`canvasId`](./view.md#canvasid) render into the first configured canvas.
 
+This is a separate experimental opt-in so the existing single-canvas [`canvas`](#canvas) property's accepted values and behavior remain unchanged. Applications that do not provide `_canvases` continue to use the existing single-canvas rendering, event handling, and integration paths.
+
 Unlike the other initialization settings in this section, `_canvases` is maintained when updated with `setProps()`. Deck diffs the array and creates, reuses, or destroys presentation targets as needed.
 
 Notes:

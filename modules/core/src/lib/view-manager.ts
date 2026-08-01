@@ -41,8 +41,11 @@ export type ViewStateObject<ViewsT extends ViewOrViews> =
 /** Canvas id used by views that do not declare a presentation canvas. */
 export const DEFAULT_CANVAS_ID = 'default-canvas';
 
+/** Event manager assigned to a view's current presentation canvas. */
 type ViewEventManager = {
+  /** Presentation canvas receiving the view's controller events. */
   canvasId: string;
+  /** Event manager for that canvas, or null when no presentation target exists. */
   eventManager: EventManager | null;
 };
 
