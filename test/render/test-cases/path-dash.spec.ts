@@ -336,6 +336,57 @@ const testCases: TestCase[] = [
     jointRounded: true,
     extensions: [new PathStyleExtension({dash: true})]
   }),
+  // dashMode 'path' is the whole point of the exercise: all six strips draw the same line and
+  // must come out identical no matter how many vertices it was built from.
+  createSegmentDensityCase('path-dash-density-mode-path', {
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Justified now composes with continuous phase instead of overriding it. The period is
+  // stretched once across the whole path, so every strip still matches.
+  createSegmentDensityCase('path-dash-density-mode-path-justified', {
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Whole-path justification must derive its period from each path's own arclength and
+  // stroke width. These variants deliberately change length, width and shape; every path
+  // should still begin and end with half a dash and contain only complete periods between.
+  {
+    name: 'path-dash-mode-path-justified-variants',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers('path-dash-mode-path-justified-variants', [
+      {
+        data: [createStraightPath(40, getStripY(0, 4), 720)],
+        getWidth: 6,
+        getDashArray: [4, 5],
+        dashJustified: true,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      },
+      {
+        data: [createStraightPath(40, getStripY(1, 4), 540)],
+        getWidth: 12,
+        getDashArray: [4, 5],
+        dashJustified: true,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      },
+      {
+        data: [createZigzagPath(16, getStripY(2, 4), 14)],
+        getWidth: 8,
+        getDashArray: [3, 2],
+        dashJustified: true,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      },
+      {
+        data: [createDiagonalPath(40, getStripY(3, 4), 12)],
+        getWidth: 16,
+        getDashArray: [2, 3],
+        dashJustified: true,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      }
+    ]),
+    goldenImage: './test/render/golden-images/path-dash-mode-path-justified-variants.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
+  },
 
   // Matched control for the path-mode variants added later in the stack. This captures the
   // existing per-segment behavior on the same four paths without justification.
@@ -689,6 +740,22 @@ const testCases: TestCase[] = [
       }))
     ),
     goldenImage: './test/render/golden-images/path-dash-offset-mode-path.png'
+  },
+  {
+    name: 'path-dash-offset-mode-path-justified',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-mode-path-justified',
+      [0, 1, 2, -2].map((offset, index) => ({
+        data: [createStraightPath(40, getStripY(index, 4))],
+        getDashArray: [4, 5],
+        dashJustified: true,
+        getOffset: offset,
+        extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-mode-path-justified.png'
   },
 
   // ---------------------------------------------------------------------------------------

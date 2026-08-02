@@ -91,14 +91,7 @@ const CONTROLS = [
   {key: 'dashSize', type: 'range', label: 'dash size', min: 0.25, max: 16, step: 0.25},
   {key: 'gapSize', type: 'range', label: 'gap size', min: 0.25, max: 16, step: 0.25},
   {key: 'width', type: 'range', label: 'stroke width', min: 1, max: 40, step: 1},
-  {
-    key: 'dashMode',
-    type: 'select',
-    label: 'dash mode',
-    // Layer 1 expresses path mode through the legacy highPrecisionDash option. Layer 4
-    // replaces this implementation with the dashMode API while preserving the control.
-    options: ['segment', 'path']
-  },
+  {key: 'dashMode', type: 'select', label: 'dash mode', options: ['segment', 'path']},
   {key: 'widthUnits', type: 'select', label: 'width units', options: ['pixels', 'meters']},
   {key: 'billboard', type: 'select', label: 'billboard', options: ['both', 'off', 'on']},
   {key: 'dashJustified', type: 'checkbox', label: 'justified'},
@@ -177,10 +170,7 @@ function billboardVariants() {
 }
 
 function dashExtension() {
-  return new PathStyleExtension({
-    dash: true,
-    highPrecisionDash: state.dashMode === 'path'
-  });
+  return new PathStyleExtension({dash: true, dashMode: state.dashMode});
 }
 
 function getLongitudePerPixel(zoom) {

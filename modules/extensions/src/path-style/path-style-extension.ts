@@ -57,6 +57,18 @@ export type PathStyleExtensionProps<DataT = any> = {
   dashGapPickable?: boolean;
 };
 
+/**
+ * How the dash pattern is positioned along a path.
+ *
+ * - `'segment'` restarts the pattern at every vertex. A dash therefore depends on how the
+ *   path happens to be divided into segments, and a path whose segments are shorter than one
+ *   dash period renders solid.
+ * - `'path'` runs the pattern continuously from the start of each path, so the result is
+ *   invariant to how densely the path is tessellated. This costs a vertex attribute and a
+ *   CPU pass over the geometry to accumulate distance.
+ */
+export type DashMode = 'segment' | 'path';
+
 export type PathStyleExtensionOptions = {
   /**
    * Add capability to render dashed lines.
@@ -69,7 +81,15 @@ export type PathStyleExtensionOptions = {
    */
   offset: boolean;
   /**
+   * How the dash pattern is positioned along a path. `'path'` keeps dashes invariant to how
+   * the path is divided into segments, at the cost of a vertex attribute and a CPU pass over
+   * the geometry.
+   * @default 'segment'
+   */
+  dashMode: DashMode;
+  /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
+   * @deprecated Use `dashMode: 'path'` instead, which this is now an alias for.
    * @default false
    */
   highPrecisionDash: boolean;
@@ -85,9 +105,17 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
   constructor({
     dash = false,
     offset = false,
+    dashMode,
     highPrecisionDash = false
   }: Partial<PathStyleExtensionOptions> = {}) {
-    super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
+    // `highPrecisionDash` is the old spelling of `dashMode: 'path'`; either one implies dash.
+    const resolvedDashMode: DashMode = dashMode ?? (highPrecisionDash ? 'path' : 'segment');
+    super({
+      dash: dash || highPrecisionDash || resolvedDashMode === 'path',
+      offset,
+      dashMode: resolvedDashMode,
+      highPrecisionDash: resolvedDashMode === 'path'
+    });
   }
 
   private getLayerType(layer: Layer): LayerType | null {
@@ -171,10 +199,13 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     if (extension.opts.dash) {
       attributeManager.addInstanced({
         instanceDashArrays: {size: 2, accessor: 'getDashArray'},
-        ...(layerType === 'path' && extension.opts.highPrecisionDash
+        ...(layerType === 'path' && extension.opts.dashMode === 'path'
           ? {
+              // [distance from the start of the path, total length of the path]. Packing both
+              // into one vec2 keeps this to a single vertex attribute slot, which matters
+              // against the 16 attribute ceiling noted in the extension docs.
               instanceDashOffsets: {
-                size: 1,
+                size: 2,
                 accessor: 'getPath',
                 transform: extension.getDashOffsets.bind(this)
               }
@@ -215,25 +246,42 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
   }
 
+  /**
+   * Per vertex, `[distance from the start of the path, total length of the path]`, both in
+   * common space. Distance is measured in 3D, matching the shader's along-segment coordinate,
+   * which scales by the same 3D-to-2D arclength ratio.
+   */
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
-    const result = [0];
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
     const isNested = Array.isArray(path[0]);
     const geometrySize = isNested ? path.length : path.length / positionSize;
 
+    // Accumulate across every point, including the last. The original implementation stopped
+    // one short, which was fine when only per-vertex offsets were needed - the final vertex is
+    // the tesselator's trailing INVALID padding and is never drawn - but the total length of
+    // the path is exactly the distance the final point sits at.
+    const distances = [0];
     let p;
     let prevP;
-    for (let i = 0; i < geometrySize - 1; i++) {
+    for (let i = 0; i < geometrySize; i++) {
       p = isNested ? path[i] : path.slice(i * positionSize, i * positionSize + positionSize);
       p = this.projectPosition(p);
 
       if (i > 0) {
-        result[i] = result[i - 1] + vec3.dist(prevP, p);
+        distances[i] = distances[i - 1] + vec3.dist(prevP, p);
       }
 
       prevP = p;
     }
-    result[geometrySize - 1] = 0;
+    const totalLength = distances[geometrySize - 1];
+
+    const result: number[] = new Array(geometrySize * 2);
+    for (let i = 0; i < geometrySize; i++) {
+      result[i * 2] = distances[i];
+      result[i * 2 + 1] = totalLength;
+    }
+    // Keep the padding vertex's offset zeroed, as before.
+    result[(geometrySize - 1) * 2] = 0;
     return result;
   }
 }
