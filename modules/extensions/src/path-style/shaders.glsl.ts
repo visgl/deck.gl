@@ -28,10 +28,12 @@ out float vDashOffset;
 out float vDashPathLength;
 
 // Also declared in the fragment stage. The vertex stage needs dashAlignMode so that it can
-// reduce the dash phase modulo the same period the fragment stage will test against.
+// reduce the dash phase modulo the same period the fragment stage will test against, and
+// dashUnits to scale the dash array into that period's units.
 layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
+  highp int dashUnits;
 } pathStyle;
 `,
 
@@ -52,11 +54,24 @@ float dashWidthPixels = path.billboard
   ? width.x * project.focalDistance
   : width.x * project.scale;
 
-// getDashArray is documented relative to the stroke, which is what flat paths already do, so
-// the billboard case is corrected onto the flat one rather than the other way round.
-vDashArray = path.billboard
-  ? instanceDashArrays / project.focalDistance
-  : instanceDashArrays;
+// The actual half stroke width on screen, which is what 'widths' is relative to. It differs
+// from dashWidthPixels by exactly the spurious focalDistance above, so expressing 'widths'
+// as a ratio of the two corrects the billboard case onto the flat one - getDashArray is
+// documented relative to the stroke, and flat paths already honor that.
+float strokeHalfWidthPixels = path.billboard ? width.x : width.x * project.scale;
+
+// Everything reduces to "how many screen pixels is one dash unit", divided through by the
+// pixels per unit of vPathPosition.y, so the fragment shader needs no notion of units at all.
+// Keep the cases in sync with DASH_UNITS in path-style-extension.ts.
+float dashUnitPixels = strokeHalfWidthPixels;
+if (pathStyle.dashUnits == 1) {
+  dashUnitPixels = 1.0;
+} else if (pathStyle.dashUnits == 2) {
+  dashUnitPixels = project_size_to_pixel(1.0);
+} else if (pathStyle.dashUnits == 3) {
+  dashUnitPixels = project.scale;
+}
+vDashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
 
 #ifdef HIGH_PRECISION_DASH
 // instanceDashOffsets accumulates common-space distance on the CPU. Converting it to pixels
@@ -86,6 +101,7 @@ vDashPathLength = 0.0;
 layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
+  highp int dashUnits;
 } pathStyle;
 
 in vec2 vDashArray;
@@ -457,6 +473,11 @@ in float instanceOffsets;
 #ifdef DASH_ENABLED
   // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so these rescalings restore
   // units of the original half-width. The dash block merges ahead of this one.
+  if (pathStyle.dashUnits != 0) {
+    // Absolute dash units must not inherit the artificial width used to build offset
+    // geometry. Relative 'widths' units intentionally remain tied to the original stroke.
+    vDashArray *= offsetWidth;
+  }
 #ifdef HIGH_PRECISION_DASH
   vDashPathLength *= offsetWidth;
   // The dash block reduced the CPU path offset modulo a period expressed in widened-width
