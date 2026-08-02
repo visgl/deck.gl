@@ -142,6 +142,21 @@ attachments only, with depth/stencil explicitly rejected alongside `samples > 1`
 keeps it clear of ArcGIS, and its deferred WebGPU mapping is what keeps it clear of that backend.
 Both efforts should land; see the matrix above for the split.
 
+### If luma.gl#2741 lands
+
+No part of this proposal is descoped by it. Interleaved base maps draw into the host's default
+framebuffer rather than an offscreen target, and routing them through one would break the depth
+interaction that interleaving exists for — the same reason post-process effects cannot be used in
+interleaved mode. WebGPU is a deferred follow-up in that RFC. And the `PathStyleExtension` offset
+edge is defined by a `discard`, which kills every sample of a fragment, so no sample count smooths
+it. ArcGIS could move once multisampled depth is supported, since its framebuffer is depth-attached.
+
+What does change is post-processing. deck's render buffers pass only `colorAttachments`
+(`DeckRenderer._prepareRenderBuffers`), and luma auto-creates a depth attachment only when both
+attachment lists are empty, so they are genuinely color-only and fall squarely in that RFC's initial
+scope. The better fix there is to set `samples` on them, closing
+[#10404](https://github.com/visgl/deck.gl/issues/10404) for every layer rather than for these two.
+
 ## Proposal
 
 Add an `antialiasing` prop to `PathLayer` and `LineLayer`, defaulting to `false`.
@@ -277,8 +292,9 @@ image diff cannot express:
 - **`PathStyleExtension` offset ramp clipping**, above — the remaining half of
   [#8063](https://github.com/visgl/deck.gl/issues/8063) /
   [#9395](https://github.com/visgl/deck.gl/issues/9395).
-- **Coordinate with [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741).** If offscreen MSAA
-  lands, [#10404](https://github.com/visgl/deck.gl/issues/10404) is better fixed there than by asking
-  applications to set this prop.
+- **Set `samples` on the post-process render buffers** once
+  [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741) lands, closing
+  [#10404](https://github.com/visgl/deck.gl/issues/10404) for every layer. See Prior art for why
+  that is the only row this proposal cedes.
 - **Consider defaulting to `true` in a major release**, once the trade-offs have been exercised in
   the wild.
