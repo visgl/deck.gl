@@ -46,8 +46,12 @@ void main(void) {
     // screen-space derivative converts the distance to the boundary into device pixels, which
     // stays correct under perspective foreshortening and under extensions that rescale the stroke
     // or remap vPathPosition (PathStyleExtension's offset does both).
-    // Both branches are evaluated unconditionally - taking the derivative of a branched value
-    // would differentiate across the corner/body seam and corrupt every joint.
+    // Both are evaluated unconditionally so each derivative stays on a single smooth field.
+    // Derivatives are computed per 2x2 quad, so a quad straddling the corner/body boundary would
+    // otherwise difference two different fields. In practice the two agree exactly at that
+    // boundary - where vPathPosition.y is 0, the offset is perpendicular to the segment, so
+    // |vPathPosition.x| equals length(vCornerOffset) - which makes the branched form very nearly
+    // equivalent. Keeping them separate costs one extra derivative and avoids depending on that.
     float bodyCoord = abs(vPathPosition.x);
     float cornerCoord = length(vCornerOffset);
     float bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);

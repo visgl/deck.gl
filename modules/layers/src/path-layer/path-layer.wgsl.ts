@@ -249,8 +249,10 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // screen-space derivative converts the distance to the boundary into device pixels, which stays
   // correct under perspective foreshortening and under extensions that rescale the stroke.
   // Derivatives must be taken in uniform control flow, so they are hoisted above the discards
-  // below. Both branches are evaluated for the same reason the GLSL version does: taking the
-  // derivative of a branched value would differentiate across the corner/body seam.
+  // below. Both are evaluated unconditionally so each derivative stays on a single smooth field:
+  // derivatives are computed per 2x2 quad, and a quad straddling the corner/body boundary would
+  // otherwise difference two different fields. The two agree exactly at that boundary, so this is
+  // insurance rather than a fix for an observed artifact - see the GLSL shader for the details.
   let bodyCoord = abs(varyings.vPathPosition.x);
   let cornerCoord = length(varyings.vCornerOffset);
   let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
