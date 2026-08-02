@@ -128,7 +128,10 @@ describe('PathLayer#antialiasing', () => {
     ).toBeGreaterThan(40);
   }, 60000);
 
-  test('feather survives PathStyleExtension offset', async () => {
+  // PathStyleExtension's `offset` inflates the stroke width through DECKGL_FILTER_SIZE and
+  // separately rescales vPathPosition, so any implementation that derives the pixel scale from the
+  // stroke width rather than from screen-space derivatives gets the feather wrong here.
+  test('feather survives an extension that rescales the stroke', async () => {
     const on = await measure({antialiasing: true});
     const onOffset = await measure({
       antialiasing: true,
@@ -138,17 +141,25 @@ describe('PathLayer#antialiasing', () => {
 
     expect(onOffset.solid, 'offset strokes were drawn').toBeGreaterThan(200);
 
-    // Regression guard. An earlier implementation passed the stroke half-width to the fragment
-    // shader as a varying read after DECKGL_FILTER_SIZE. PathStyleExtension's `offset` inflates
-    // that width and separately rescales vPathPosition, so the feather collapsed to
-    // 1/offsetWidth of a pixel - measured at 0.33x for getOffset: 1. Deriving the pixel scale
-    // from screen-space derivatives instead keeps it close to the un-offset case. The extension
-    // hard-discards outside the band, clipping the outer half of the ramp, so this stays below 1.
+    // Coverage is still continuous rather than collapsed back to a hard edge
+    expect(
+      onOffset.partial,
+      `offset stroke should still be feathered (got ${onOffset.partial} partial pixels)`
+    ).toBeGreaterThan(200);
+    expect(
+      onOffset.levels,
+      `offset coverage should be continuous (got ${onOffset.levels} distinct alpha levels)`
+    ).toBeGreaterThan(40);
+
+    // ...and at the right scale. The extension discards outside the band, clipping the outer half
+    // of a centered one-pixel ramp, so a correct feather keeps roughly the inner half. Materially
+    // below that means the pixel scale is being derived from the inflated stroke width rather than
+    // from screen-space derivatives.
     const ratio = onOffset.partial / on.partial;
     expect(
       ratio,
-      `offset feather should not collapse (on=${on.partial}, offset=${onOffset.partial}, ` +
-        `ratio=${ratio.toFixed(3)})`
-    ).toBeGreaterThan(0.55);
+      `offset feather should be comparable to un-offset (on=${on.partial}, ` +
+        `offset=${onOffset.partial}, ratio=${ratio.toFixed(3)})`
+    ).toBeGreaterThan(0.5);
   }, 60000);
 });
