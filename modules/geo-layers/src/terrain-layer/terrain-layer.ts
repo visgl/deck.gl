@@ -19,6 +19,11 @@ import {
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
+import {
+  MAX_LATITUDE as MAX_WEB_MERCATOR_LATITUDE,
+  lngLatToWorld,
+  worldToLngLat
+} from '@math.gl/web-mercator';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
   Bounds,
@@ -109,6 +114,7 @@ type TerrainLoadProps = {
   elevationData: string | null;
   elevationDecoder: ElevationDecoder;
   meshMaxError: number;
+  shouldRemapTerrainMeshToWebMercatorTile?: boolean;
   signal?: AbortSignal;
 };
 
@@ -204,6 +210,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     bounds,
     elevationDecoder,
     meshMaxError,
+    shouldRemapTerrainMeshToWebMercatorTile,
     signal
   }: TerrainLoadProps): Promise<MeshAttributes> | null {
     if (!elevationData) {
@@ -222,7 +229,16 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       }
     };
     const {fetch} = this.props;
-    return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
+    const terrain = fetch(elevationData, {
+      propName: 'elevationData',
+      layer: this,
+      loadOptions,
+      signal
+    });
+
+    return shouldRemapTerrainMeshToWebMercatorTile
+      ? terrain.then(mesh => (mesh ? remapTerrainMeshToWebMercatorTile(mesh, bounds) : mesh))
+      : terrain;
   }
 
   getTiledTerrainData(tile: TileLoadProps): Promise<MeshAndTexture> {
@@ -244,19 +260,20 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       topRight = [bbox.right, bbox.top];
     }
     const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-    const overlappedBounds = getOverlappedBounds(
-      bounds,
-      this.props.tileSize,
-      viewport instanceof GlobeViewport
-    );
+    const isGlobe = viewport instanceof GlobeViewport;
+    const overlappedBounds = getOverlappedBounds(bounds, this.props.tileSize, isGlobe);
 
-    const terrain = this.loadTerrain({
-      elevationData: dataUrl,
-      bounds: overlappedBounds,
-      elevationDecoder,
-      meshMaxError,
-      signal
-    });
+    const terrain =
+      this.loadTerrain({
+        elevationData: dataUrl,
+        bounds: overlappedBounds,
+        elevationDecoder,
+        meshMaxError,
+        // The terrain surface keeps its original texture and UVs; only mesh row positions are
+        // remapped from WebMercator tile spacing to lng/lat for GlobeView.
+        shouldRemapTerrainMeshToWebMercatorTile: isGlobe,
+        signal
+      }) ?? Promise.resolve(null);
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
         fetch(textureUrl, {propName: 'texture', layer: this, loaders: [], signal}).catch(_ => null)
@@ -321,10 +338,10 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const ranges = tiles
       .map(tile => tile.content)
       .filter(Boolean)
-      .map(arr => {
-        // @ts-ignore
-        const bounds = arr[0].header.boundingBox;
-        return bounds.map(bound => bound[2]);
+      .flatMap(arr => {
+        // @ts-ignore - terrain loader returns {attributes, header} shape; header is not in MeshAttributes type
+        const bounds = (arr[0] as MeshWithBoundingBox | null)?.header?.boundingBox;
+        return bounds ? [bounds.map(bound => bound[2])] : [];
       });
     if (ranges.length === 0) {
       return;
@@ -421,3 +438,46 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
 const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
+
+function remapTerrainMeshToWebMercatorTile(mesh: MeshAttributes, bounds: Bounds): MeshAttributes {
+  // The terrain loader returns {attributes: MeshAttributes, header?: ...} at runtime.
+  // MeshAttributes is typed as an index type so we use a cast to access the nested fields.
+  const attrs = (mesh as any).attributes as MeshAttributes | undefined;
+  const positionAttribute = attrs?.POSITION;
+  const texCoordAttribute = attrs?.TEXCOORD_0;
+  const positions = positionAttribute?.value;
+  const texCoords = texCoordAttribute?.value;
+  if (!positions || !texCoords) {
+    return mesh;
+  }
+
+  const [, south, , north] = bounds;
+  const northY = lngLatToMercatorWorldY(north);
+  const southY = lngLatToMercatorWorldY(south);
+  const remappedPositions = new Float32Array(positions);
+
+  for (let i = 0; i < texCoords.length / 2; i++) {
+    const v = texCoords[i * 2 + 1];
+    const mercatorY = northY + (southY - northY) * v;
+    remappedPositions[i * 3 + 1] = worldToLngLat([0, mercatorY])[1];
+  }
+
+  return {
+    ...(mesh as any),
+    attributes: {
+      ...attrs,
+      POSITION: {
+        ...positionAttribute,
+        value: remappedPositions
+      }
+    }
+  } as MeshAttributes;
+}
+
+function lngLatToMercatorWorldY(latitude: number): number {
+  const clampedLatitude = Math.max(
+    -MAX_WEB_MERCATOR_LATITUDE,
+    Math.min(MAX_WEB_MERCATOR_LATITUDE, latitude)
+  );
+  return lngLatToWorld([0, clampedLatitude])[1];
+}
