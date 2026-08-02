@@ -8,6 +8,11 @@ export type Defines = {
    * Enable high precision dash rendering.
    */
   HIGH_PRECISION_DASH?: boolean;
+  /**
+   * Set whenever the dash shaders are injected, so that the offset shaders can adjust dash
+   * varyings only when they actually exist.
+   */
+  DASH_ENABLED?: boolean;
 };
 
 export const dashShaders = {
@@ -22,9 +27,34 @@ out float vDashOffset;
 `,
 
     'vs:#main-end': `
-vDashArray = instanceDashArrays;
+// How many screen pixels one unit of vPathPosition.y covers. The two extrusion branches of
+// the path layer leave this in different units, and both differences have to be undone here
+// for a billboarded path to dash like a flat one.
+//
+// Flat paths extrude in common space, so \`width\` is in common units and a unit of
+// vPathPosition.y is width.x * project.scale pixels.
+//
+// Billboarded paths extrude in clip space, so \`width\` is already in pixels at this point -
+// the clip-space conversion happens inside getLineJoinOffset. That conversion also folds in
+// project.focalDistance, which scales the half-width the segment delta is divided by but not
+// the delta itself, so a unit of vPathPosition.y ends up focalDistance pixels wider than the
+// stroke it is supposed to be relative to.
+float dashWidthPixels = path.billboard
+  ? width.x * project.focalDistance
+  : width.x * project.scale;
+
+// getDashArray is documented relative to the stroke, which is what flat paths already do, so
+// the billboard case is corrected onto the flat one rather than the other way round.
+vDashArray = path.billboard
+  ? instanceDashArrays / project.focalDistance
+  : instanceDashArrays;
+
 #ifdef HIGH_PRECISION_DASH
-vDashOffset = instanceDashOffsets / width.x;
+// instanceDashOffsets accumulates common-space distance on the CPU. Converting it to pixels
+// and dividing by the pixel half-width above works in either branch; the previous
+// \`instanceDashOffsets / width.x\` was only dimensionally correct for flat paths, and dropped
+// a whole factor of project.scale when billboarded.
+vDashOffset = (instanceDashOffsets * project.scale) / dashWidthPixels;
 #else
 vDashOffset = 0.0;
 #endif
@@ -59,7 +89,9 @@ in float vDashOffset;
     if (pathStyle.dashAlignMode == 0.0) {
       offset = vDashOffset;
     } else {
-      unitLength = vPathLength / round(vPathLength / unitLength);
+      // At least one whole period per segment: a segment shorter than half a period rounds
+      // to zero periods, which made unitLength infinite and rendered the segment solid.
+      unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
       offset = solidLength / 2.0;
     }
 
@@ -316,6 +348,13 @@ in float instanceOffsets;
   vPathPosition.x = (vPathPosition.x + offsetDir) * offsetWidth - offsetDir;
   vPathPosition.y *= offsetWidth;
   vPathLength *= offsetWidth;
+#ifdef DASH_ENABLED
+  // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so the three rescalings
+  // here restore units of the original half-width. vDashOffset was computed against the
+  // widened stroke in the dash block, which merges ahead of this one, so it needs the same
+  // correction or a dashed offset line drifts out of phase with an unoffset one.
+  vDashOffset *= offsetWidth;
+#endif
 `,
     'fs:#main-start': `
   float isInside;

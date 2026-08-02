@@ -91,7 +91,23 @@ fn getLineJoinOffset(
   let miterVec = vec2<f32>(-tangent.y, tangent.x);
   let dir = select(dirB, dirA, isEnd);
   let perp = select(perpB, perpA, isEnd);
-  let pathLength = select(lenB, lenA, isEnd);
+  let segmentLength2D = select(lenB, lenA, isEnd);
+
+  // Extrusion happens in the XY plane, so segmentLength2D is a 2D length and pathPosition.y
+  // below measures 2D distance along the segment. For a path that also moves in Z the true
+  // arc length is longer by this ratio. Scaling pathLength and pathPosition.y by it makes
+  // the coordinate measure real 3D distance while leaving the joint tests unchanged, since
+  // they compare the two against each other and both are scaled alike. Billboard mode is
+  // excluded: it extrudes in clip space, where the perspective divide has already reduced
+  // the segment to its screen projection. Mirrors path-layer-vertex.glsl.ts.
+  let currDelta3 = select(deltaB3, deltaA3, isEnd);
+  let currLength2D = length(currDelta3.xy);
+  let arcLengthRatio = select(
+    1.0,
+    length(currDelta3) / max(currLength2D, EPSILON),
+    path.billboard == 0.0 && currLength2D > 0.0
+  );
+  let pathLength = segmentLength2D * arcLengthRatio;
 
   let sinHalfA = abs(dot(miterVec, perp));
   let cosHalfA = abs(dot(dirA, miterVec));
@@ -129,7 +145,7 @@ fn getLineJoinOffset(
   let offsetFromStartOfPath = offsetVec + deltaA * select(0.0, 1.0, isEnd);
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
-    dot(offsetFromStartOfPath, dir)
+    dot(offsetFromStartOfPath, dir) * arcLengthRatio
   );
   let isValid = step(f32(instanceTypes), 3.5);
   var offset = vec3<f32>(offsetVec * width * isValid, 0.0);
