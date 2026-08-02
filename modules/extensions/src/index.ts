@@ -23,7 +23,8 @@ export type {
 } from './data-filter/data-filter-extension';
 export type {
   PathStyleExtensionProps,
-  PathStyleExtensionOptions
+  PathStyleExtensionOptions,
+  DashMode
 } from './path-style/path-style-extension';
 export type {
   FillStyleExtensionProps,

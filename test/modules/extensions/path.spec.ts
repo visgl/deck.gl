@@ -90,16 +90,23 @@ test('PathStyleExtension#PathLayer', () => {
           0
         ]);
 
-        let dashOffsetValid = true;
-        let i;
-        for (i = 0; i < FIXTURES.zigzag[0].path.length - 2; i++) {
-          dashOffsetValid =
-            dashOffsetValid &&
-            attributes.instanceDashOffsets.value[i] <= attributes.instanceDashOffsets.value[i + 1];
-        }
-        dashOffsetValid = dashOffsetValid && attributes.instanceDashOffsets.value[i + 1] === 0;
+        // instanceDashOffsets packs [distance from path start, total path length] per vertex.
+        const dashOffsets = attributes.instanceDashOffsets.value;
+        expect(attributes.instanceDashOffsets.size, 'instanceDashOffsets is a vec2').toBe(2);
 
-        expect(dashOffsetValid, 'instanceDashOffsets attribute is populated').toBeTruthy();
+        const pointCount = FIXTURES.zigzag[0].path.length;
+        let distancesAscend = true;
+        for (let i = 0; i < pointCount - 2; i++) {
+          distancesAscend = distancesAscend && dashOffsets[i * 2] <= dashOffsets[(i + 1) * 2];
+        }
+        expect(distancesAscend, 'distances accumulate along the path').toBeTruthy();
+
+        const totalLength = dashOffsets[1];
+        expect(totalLength, 'total path length is positive').toBeGreaterThan(0);
+        expect(
+          dashOffsets[(pointCount - 2) * 2] <= totalLength,
+          'no vertex sits past the end of the path'
+        ).toBeTruthy();
       }
     },
     {
@@ -325,21 +332,57 @@ test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
     projectPosition: p => p
   };
 
+  // Each entry is [distance from the start of the path, total length of the path].
   const flat = extension.getDashOffsets.call(layer, [
     [0, 0, 0],
     [3, 0, 0],
     [6, 0, 0]
   ]);
-  expect(flat.slice(0, 2), 'accumulates distance along a flat path').toEqual([0, 3]);
+  expect(flat, 'accumulates distance along a flat path').toEqual([0, 6, 3, 6, 0, 6]);
 
   const climbing = extension.getDashOffsets.call(layer, [
     [0, 0, 0],
     [3, 0, 4],
     [6, 0, 8]
   ]);
-  // 3-4-5 triangles: each segment is 5 long in 3D, not 3.
-  expect(climbing.slice(0, 2), 'accumulates 3D distance along a climbing path').toEqual([0, 5]);
+  // 3-4-5 triangles: each segment is 5 long in 3D, not 3, so the path totals 10.
+  expect(climbing, 'accumulates 3D distance along a climbing path').toEqual([0, 10, 5, 10, 0, 10]);
 
-  // The trailing vertex is the tesselator's INVALID padding vertex and must stay zeroed.
-  expect(climbing[climbing.length - 1], 'last offset is zeroed').toBe(0);
+  // The trailing vertex is the tesselator's INVALID padding vertex, so its offset stays
+  // zeroed even though the total length beside it is still carried.
+  expect(climbing[climbing.length - 2], 'last offset is zeroed').toBe(0);
+});
+
+test('PathStyleExtension#dashMode', () => {
+  // 'path' allocates the offsets attribute; 'segment' must not pay for it.
+  const segmentLayer = new PathStyleExtension({dash: true});
+  expect(segmentLayer.opts.dashMode, 'defaults to segment').toBe('segment');
+
+  const pathModeLayer = new PathStyleExtension({dashMode: 'path'});
+  expect(pathModeLayer.opts.dashMode, 'dashMode is respected').toBe('path');
+  expect(pathModeLayer.opts.dash, 'dashMode path implies dash').toBe(true);
+
+  // highPrecisionDash is the old spelling of dashMode: 'path'.
+  const legacy = new PathStyleExtension({highPrecisionDash: true});
+  expect(legacy.opts.dashMode, 'highPrecisionDash maps to dashMode path').toBe('path');
+  expect(legacy.opts.dash, 'highPrecisionDash implies dash').toBe(true);
+
+  const testCases = [
+    {
+      props: {
+        id: 'dash-mode-segment',
+        data: FIXTURES.zigzag,
+        getPath: datum => datum.path,
+        getDashArray: [4, 5],
+        extensions: [new PathStyleExtension({dash: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        expect(
+          layer.getAttributeManager().getAttributes().instanceDashOffsets,
+          'segment mode allocates no offsets attribute'
+        ).toBeUndefined();
+      }
+    }
+  ];
+  testLayer({Layer: PathLayer, testCases, onError: error => expect(error).toBeFalsy()});
 });
