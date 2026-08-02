@@ -542,9 +542,9 @@ const testCases: TestCase[] = [
 
   // ---------------------------------------------------------------------------------------
   // 3D paths. Every row draws the identical geographic line on screen - Z is invisible in
-  // an orthographic MapView at pitch 0 - so they should carry identical dash patterns. The
-  // CPU accumulates 3D distance between segment starts; if the shader coordinate advances
-  // at the 2D rate within each elevated segment, the two disagree at each of the 40 joints.
+  // an orthographic MapView at pitch 0 - while its true arclength increases with elevation.
+  // The projected dashes should therefore shorten uniformly without phase jumps at any of
+  // the 40 joints, and the flat and billboard images should agree exactly apart from color.
   // ---------------------------------------------------------------------------------------
   ...[false, true].map(billboard => ({
     name: `path-dash-3d-${billboard ? 'billboard' : 'flat'}`,

@@ -58,6 +58,7 @@ fn getLineJoinOffset(
   currPoint: vec3<f32>,
   nextPoint: vec3<f32>,
   width: vec2<f32>,
+  sourceArcLengthRatio: f32,
 #ifdef ANTIALIASING
   coverageScale: f32,
 #endif
@@ -94,7 +95,26 @@ fn getLineJoinOffset(
   let miterVec = vec2<f32>(-tangent.y, tangent.x);
   let dir = select(dirB, dirA, isEnd);
   let perp = select(perpB, perpA, isEnd);
-  let pathLength = select(lenB, lenA, isEnd);
+  let segmentLength2D = select(lenB, lenA, isEnd);
+
+  // Extrusion happens in the XY plane, so segmentLength2D is a 2D length and pathPosition.y
+  // below measures 2D distance along the segment. For a path that also moves in Z the true
+  // arc length is longer by this ratio. Scaling pathLength and pathPosition.y by it makes
+  // the coordinate measure real 3D distance while leaving the joint tests unchanged, since
+  // they compare the two against each other and both are scaled alike. Billboard mode
+  // extrudes in clip space, where the perspective divide has already reduced the segment to
+  // its screen projection, so its common-space ratio is supplied by the caller. Mirrors
+  // path-layer-vertex.glsl.ts.
+  let currDelta3 = select(deltaB3, deltaA3, isEnd);
+  let currLength2D = length(currDelta3.xy);
+  // Do not clamp a valid denominator to EPSILON: high-zoom Web Mercator deltas are often
+  // smaller than that in common space, and changing their scale corrupts even flat paths.
+  let safeLength2D = select(1.0, currLength2D, currLength2D > 0.0);
+  var arcLengthRatio = sourceArcLengthRatio;
+  if (path.billboard == 0.0 && currLength2D > 0.0) {
+    arcLengthRatio = length(currDelta3) / safeLength2D;
+  }
+  let pathLength = segmentLength2D * arcLengthRatio;
 
   let sinHalfA = abs(dot(miterVec, perp));
   let cosHalfA = abs(dot(dirA, miterVec));
@@ -141,7 +161,7 @@ fn getLineJoinOffset(
 #endif
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
-    dot(offsetFromStartOfPath, dir)
+    dot(offsetFromStartOfPath, dir) * arcLengthRatio
   );
   let isValid = step(f32(instanceTypes), 3.5);
 #ifdef ANTIALIASING
@@ -200,9 +220,21 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     ) / 2.0;
 
   if (path.billboard != 0.0) {
-    var prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
-    var currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET);
-    var nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64Low, ZERO_OFFSET);
+    let prevProjection = project_position_to_clipspace_and_commonspace(
+      prevPosition, prevPosition64Low, ZERO_OFFSET
+    );
+    let currProjection = project_position_to_clipspace_and_commonspace(
+      currPosition, currPosition64Low, ZERO_OFFSET
+    );
+    let nextProjection = project_position_to_clipspace_and_commonspace(
+      nextPosition, nextPosition64Low, ZERO_OFFSET
+    );
+    let prevPositionCommon = prevProjection.commonPosition.xyz;
+    let currPositionCommon = currProjection.commonPosition.xyz;
+    let nextPositionCommon = nextProjection.commonPosition.xyz;
+    var prevPositionScreen = prevProjection.clipPosition;
+    var currPositionScreen = currProjection.clipPosition;
+    var nextPositionScreen = nextProjection.clipPosition;
 
     prevPositionScreen = clipLine(prevPositionScreen, currPositionScreen);
     nextPositionScreen = clipLine(nextPositionScreen, currPositionScreen);
@@ -215,11 +247,24 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       widthPixels > 0.0
     );
 #endif
+    let currentDeltaCommon = select(
+      nextPositionCommon - currPositionCommon,
+      currPositionCommon - prevPositionCommon,
+      isEnd > 0.0
+    );
+    let currentLength2DCommon = length(currentDeltaCommon.xy);
+    let safeLength2DCommon = select(1.0, currentLength2DCommon, currentLength2DCommon > 0.0);
+    let billboardArcLengthRatio = select(
+      1.0,
+      length(currentDeltaCommon) / safeLength2DCommon,
+      currentLength2DCommon > 0.0
+    );
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
+      billboardArcLengthRatio,
 #ifdef ANTIALIASING
       coverageScale,
 #endif
@@ -258,6 +303,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       currPositionCommon,
       nextPositionCommon,
       width,
+      1.0,
 #ifdef ANTIALIASING
       coverageScale,
 #endif
