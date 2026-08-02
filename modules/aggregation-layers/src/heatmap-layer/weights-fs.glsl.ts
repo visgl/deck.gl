@@ -11,7 +11,7 @@ out vec4 fragColor;
 //   return 0.75 * (1.0 - u * u);
 // }
 float gaussianKDE(float u){
-  return pow(2.71828, -u*u/0.05555)/(1.77245385*0.166666);
+  return exp(-u * u / 0.05555) / (1.77245385 * 0.166666);
 }
 void main()
 {
