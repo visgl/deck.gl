@@ -2,41 +2,82 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-// Antialiasing cannot be covered by a golden image here: the render canvas is created with the
-// browser default `antialias: true`, so MSAA smooths the strokes whether or not the prop is set,
-// and the residual difference is far below the golden diff threshold. A golden test passes even
-// with the feature completely disabled. These tests read the framebuffer instead and assert on
-// the coverage itself.
+// `antialiasing` exists for contexts created without multisampling - notably interleaved rendering
+// into a base map, since MapLibre and Mapbox create their WebGL context with `antialias: false`.
+// These tests therefore create their own device with MSAA disabled, rather than using the shared
+// render-test device, which takes the browser default of `antialias: true`.
+//
+// This cannot be covered by a golden image: with MSAA on, the strokes are smoothed whether or not
+// the prop is set and the residual difference falls below the diff threshold - a golden test was
+// tried and passed with the feature completely disabled. These tests read the framebuffer and
+// assert on the coverage itself.
 
 import {describe, test, expect} from 'vitest';
-import {OrthographicView} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
-import {createContainer, removeContainer, createTestDevice, createDeck} from './deck-test-utils';
 
-const DIAGONALS = [0, 1, 2, 3, 4].map(i => ({
-  // Shallow diagonals at varying slope - the worst case for aliasing. An axis-aligned edge would
-  // land on exact pixel boundaries and never produce partial coverage at all.
+const W = 240;
+const H = 180;
+
+// Shallow diagonals at varying slope - the worst case for aliasing. An axis-aligned edge would
+// land on exact pixel boundaries and never produce partial coverage at all.
+const DIAGONALS = [0, 1, 2, 3].map(i => ({
   path: [
-    [-150, -120 + i * 60],
-    [150, -120 + i * 60 + 8 + i * 12]
+    [-110, -70 + i * 42],
+    [110, -70 + i * 42 + 6 + i * 9]
   ]
 }));
 
 type Coverage = {solid: number; partial: number; levels: number};
 
-function measure(deck, device, layers): Promise<Coverage> {
-  return new Promise(resolve => {
-    deck.setProps({
-      views: new OrthographicView(),
-      viewState: {target: [0, 0, 0], zoom: 0},
-      layers,
-      onAfterRender: () => {
-        const gl = device.gl;
-        const [w, h] = device.canvasContext.getDrawingBufferSize();
-        const px = new Uint8Array(w * h * 4);
-        gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+function createContainer(): HTMLDivElement {
+  const el = document.createElement('div');
+  el.style.cssText = `position:absolute;top:0;left:0;width:${W}px;height:${H}px;`;
+  document.body.appendChild(el);
+  return el;
+}
 
+/** Render one PathLayer into a context without MSAA and measure the resulting coverage. */
+async function measure(layerProps: Record<string, unknown>): Promise<Coverage> {
+  const container = createContainer();
+  const device = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    // The condition under test: no multisampling, as base maps create their context
+    webgl: {antialias: false},
+    createCanvasContext: {container, width: W, height: H, useDevicePixels: false, autoResize: true}
+  });
+
+  const deck = new Deck({
+    device,
+    container,
+    width: W,
+    height: H,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+
+  const coverage = await new Promise<Coverage>(resolve => {
+    deck.setProps({
+      layers: [
+        new PathLayer({
+          id: 'path-antialiasing',
+          data: DIAGONALS,
+          getPath: d => d.path,
+          getColor: [20, 20, 20],
+          getWidth: 2,
+          widthUnits: 'pixels',
+          ...layerProps
+        })
+      ],
+      onAfterRender: () => {
+        const gl = (device as any).gl;
+        const px = new Uint8Array(W * H * 4);
+        gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, px);
         let solid = 0;
         let partial = 0;
         const levels = new Set<number>();
@@ -53,64 +94,61 @@ function measure(deck, device, layers): Promise<Coverage> {
       }
     });
   });
+
+  deck.finalize();
+  device.destroy();
+  container.remove();
+  return coverage;
 }
 
-const BASE = {
-  data: DIAGONALS,
-  getPath: d => d.path,
-  getColor: [255, 180, 0] as [number, number, number],
-  getWidth: 6,
-  widthUnits: 'pixels' as const
-};
-
 describe('PathLayer#antialiasing', () => {
-  test('produces continuous coverage, and survives PathStyleExtension offset', async () => {
-    const container = createContainer();
-    const device = await createTestDevice('webgl', container);
-    const deck = createDeck(container, device);
+  test('adds analytic coverage where the context provides none', async () => {
+    const off = await measure({antialiasing: false});
+    const on = await measure({antialiasing: true});
 
-    const off = await measure(deck, device, [
-      new PathLayer({...BASE, id: 'off', antialiasing: false})
-    ]);
-    const on = await measure(deck, device, [
-      new PathLayer({...BASE, id: 'on', antialiasing: true})
-    ]);
-    const onOffset = await measure(deck, device, [
-      new PathLayer({
-        ...BASE,
-        id: 'on-offset',
-        antialiasing: true,
-        getOffset: 1,
-        extensions: [new PathStyleExtension({offset: true})]
-      })
-    ]);
+    expect(off.solid, 'strokes were drawn').toBeGreaterThan(500);
+    expect(on.solid, 'strokes were drawn').toBeGreaterThan(200);
 
-    // Sanity: all three actually drew something
-    expect(off.solid, 'antialiasing:false drew strokes').toBeGreaterThan(1000);
-    expect(on.solid, 'antialiasing:true drew strokes').toBeGreaterThan(1000);
-    expect(onOffset.solid, 'offset stroke drew strokes').toBeGreaterThan(1000);
+    // Without MSAA and without the prop there is no antialiasing from any source: every covered
+    // pixel is fully opaque and the edges are a hard staircase.
+    expect(
+      off.partial,
+      `antialiasing:false in a non-MSAA context should produce no partial coverage ` +
+        `(got ${off.partial} partial pixels)`
+    ).toBe(0);
 
-    // Analytic coverage is continuous; MSAA alone quantizes to its sample count. Observed ~20
-    // levels off vs ~200 on, so 3x is a wide margin against driver differences in sample count.
+    // With the prop, edges are feathered over roughly one device pixel with continuous coverage
+    expect(
+      on.partial,
+      `antialiasing:true should feather the edges (got ${on.partial} partial pixels)`
+    ).toBeGreaterThan(300);
     expect(
       on.levels,
-      `antialiasing:true should produce far more distinct alpha levels than MSAA alone ` +
-        `(off=${off.levels}, on=${on.levels})`
-    ).toBeGreaterThan(off.levels * 3);
+      `coverage should be continuous, not quantized (got ${on.levels} distinct alpha levels)`
+    ).toBeGreaterThan(40);
+  }, 60000);
 
-    // Regression guard for the varying-based implementation, which scaled the feather by
-    // PathStyleExtension's inflated width and collapsed it to 1/offsetWidth of a pixel - measured
-    // at 0.33x the normal feather for getOffset: 1. Deriving the scale from screen-space
-    // derivatives instead keeps it close to the un-offset case. The extension hard-discards
-    // outside the band, clipping the outer half of the ramp, so this does not reach 1.0.
-    const featherRatio = onOffset.partial / on.partial;
+  test('feather survives PathStyleExtension offset', async () => {
+    const on = await measure({antialiasing: true});
+    const onOffset = await measure({
+      antialiasing: true,
+      getOffset: 1,
+      extensions: [new PathStyleExtension({offset: true})]
+    });
+
+    expect(onOffset.solid, 'offset strokes were drawn').toBeGreaterThan(200);
+
+    // Regression guard. An earlier implementation passed the stroke half-width to the fragment
+    // shader as a varying read after DECKGL_FILTER_SIZE. PathStyleExtension's `offset` inflates
+    // that width and separately rescales vPathPosition, so the feather collapsed to
+    // 1/offsetWidth of a pixel - measured at 0.33x for getOffset: 1. Deriving the pixel scale
+    // from screen-space derivatives instead keeps it close to the un-offset case. The extension
+    // hard-discards outside the band, clipping the outer half of the ramp, so this stays below 1.
+    const ratio = onOffset.partial / on.partial;
     expect(
-      featherRatio,
-      `offset feather should not collapse (partial on=${on.partial}, ` +
-        `onOffset=${onOffset.partial}, ratio=${featherRatio.toFixed(3)})`
+      ratio,
+      `offset feather should not collapse (on=${on.partial}, offset=${onOffset.partial}, ` +
+        `ratio=${ratio.toFixed(3)})`
     ).toBeGreaterThan(0.55);
-
-    deck.finalize();
-    removeContainer(container);
-  });
+  }, 60000);
 });
