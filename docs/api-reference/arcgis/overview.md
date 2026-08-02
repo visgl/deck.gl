@@ -64,3 +64,9 @@ Not supported features:
 - Multiple views
 - Controller
 - React integration
+
+### Antialiasing
+
+deck.gl renders into an auxiliary framebuffer here and composites the result into the ArcGIS scene. That framebuffer is not multisampled, so layers whose edges depend on MSAA — most visibly [PathLayer](../layers/path-layer.md) and [LineLayer](../layers/line-layer.md) — render with hard, aliased edges regardless of how the ArcGIS API created its context.
+
+Set `antialiasing: true` on those layers to have them compute edge coverage in the shader instead. On composite layers the prop is named `lineAntialiasing` ([GeoJsonLayer](../layers/geojson-layer.md#lineantialiasing), [PolygonLayer](../layers/polygon-layer.md#lineantialiasing)).

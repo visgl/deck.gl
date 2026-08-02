@@ -168,7 +168,9 @@ new PathLayer({
 });
 ```
 
-`PolygonLayer`, `GeoJsonLayer` and `TripsLayer` inherit it through `PathLayer`. The prop name,
+`TripsLayer` inherits it by subclassing `PathLayer`. `PolygonLayer` and `GeoJsonLayer` forward their
+stroke props explicitly rather than by inheritance, so they expose it as `lineAntialiasing`,
+following the existing `pointAntialiasing` precedent in `sub-layer-map.ts`. The prop name,
 default-off ergonomics and documentation register follow the existing `ScatterplotLayer.antialiasing`
 precedent.
 
