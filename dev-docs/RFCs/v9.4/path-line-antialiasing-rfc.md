@@ -142,16 +142,31 @@ change.
 
 ## Testing
 
-Golden images cannot cover this feature. The render-test canvas takes the browser default
-`antialias: true`, so the strokes are smoothed whether or not the prop is set and the residual
-difference falls well below the diff threshold. A golden test was written first and **passed with
-the feature completely disabled** — it is included in this RFC as a caution, not as a proposal.
+Two complementary tests. Every assertion below was verified by breaking the code it guards and
+confirming the test fails.
 
-`test/render/path-antialiasing.spec.ts` instead creates its own device with `antialias: false`,
-reads back the framebuffer and asserts on coverage directly. Both assertions were verified to fail
-against the code they guard:
+**Golden image** — `test/render/test-cases/path-antialiasing.spec.ts`. A golden diff can cover this,
+but only with three changes to the render-test setup. Without any one of them the test passes with
+the feature completely disabled, which is how the first attempt behaved:
 
-- Deleting the feather drops the antialiased pass to 0 partial pixels.
+1. **A device created with `antialias: false`**, so MSAA is not doing the smoothing. The render test
+   canvas otherwise takes the browser default of `true`, which is the one condition where the prop
+   is redundant. `runRenderTestSuite` now accepts `webgl` context attributes.
+2. **`includeAA: true` in the image diff.** This is the decisive one. pixelmatch detects
+   antialiased pixels and excludes them from the mismatch count by default, and this prop changes
+   nothing *but* antialiased pixels — so the diff is structurally blind to it regardless of MSAA or
+   geometry. `TestCase.imageDiffOptions` now threads it through, and also honours `tolerance`, which
+   was previously declared but ignored.
+3. **A scene dense with thin shallow diagonals, and a tightened `threshold`.** The prop only changes
+   edge pixels, so edges must be a large enough fraction of the frame to register.
+
+With all three, disabling the feather drops the match to 99.06% against a 99.8% threshold.
+
+**Coverage assertions** — `test/render/path-antialiasing.spec.ts`. Creates its own `antialias: false`
+device, reads back the framebuffer and asserts on coverage numerically, which catches things an
+image diff cannot express:
+
+- Deleting the feather drops the antialiased pass from 719 partial pixels to 0.
 - Restoring the previous varying-based implementation reproduces the 0.328 offset collapse.
 
 ## Follow-ups

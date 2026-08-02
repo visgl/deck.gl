@@ -7,10 +7,10 @@
 // These tests therefore create their own device with MSAA disabled, rather than using the shared
 // render-test device, which takes the browser default of `antialias: true`.
 //
-// This cannot be covered by a golden image: with MSAA on, the strokes are smoothed whether or not
-// the prop is set and the residual difference falls below the diff threshold - a golden test was
-// tried and passed with the feature completely disabled. These tests read the framebuffer and
-// assert on the coverage itself.
+// A golden image covers the visual result - see test/render/test-cases/path-antialiasing.spec.ts,
+// which needs a no-MSAA device plus `includeAA: true` to see this feature at all. These tests
+// complement it by reading the framebuffer and asserting on coverage numerically, which catches
+// things an image diff cannot express, such as the feather surviving PathStyleExtension's offset.
 
 import {describe, test, expect} from 'vitest';
 import {luma} from '@luma.gl/core';
