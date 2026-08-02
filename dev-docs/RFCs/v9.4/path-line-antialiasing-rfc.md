@@ -32,8 +32,11 @@ deck does not choose the context attributes; the host application or SDK does.
   `1.0 / u_device_pixel_ratio`, so deck.gl strokes look conspicuously aliased directly against
   smooth base map geometry.
 - **`@deck.gl/google-maps`, interleaved.** deck attaches to the context handed to
-  `google.maps.WebGLOverlayView.onContextRestored`. Whether Google enables MSAA is not determinable
-  from deck's source and is not documented; treat as unknown rather than assuming either way.
+  `google.maps.WebGLOverlayView.onContextRestored`. Google's context attributes are not documented
+  and not determinable from deck's source, but the behaviour is established by report:
+  [#7647](https://github.com/visgl/deck.gl/issues/7647) shows vector maps unantialiased with
+  `interleaved: true` and antialiased with `interleaved: false`, confirmed by several users over
+  two years. Unlike MapLibre there is no option to request MSAA.
 
 ### 2. Offscreen render targets
 
@@ -77,6 +80,55 @@ most of the work, and analytic coverage is then a quality and cost improvement (
 quantized to the sample count) rather than a fix. The fourth row shows how easily that row stops
 applying — the canvas still has `antialias: true`, but a post-process effect has moved rasterization
 off it.
+
+## Prior art
+
+This is long-standing and well-reported ground. The tracker history also shapes what this proposal
+should and should not claim.
+
+**The established answer has been "turn on MSAA in the host."** In
+[#5742](https://github.com/visgl/deck.gl/issues/5742) (2021, closed) the guidance was to construct
+the `Map` with `antialias: true`, which resolved it for that reporter. That advice is still correct
+where it applies, and this proposal does not replace it — see Alternatives. Two things have narrowed
+it since: MapLibre v5 moved the option into `canvasContextAttributes`, so the top-level form quietly
+does nothing on current versions, and it was never available for Google Maps, ArcGIS, offscreen
+targets or WebGPU.
+
+**Google Maps interleaved has been unresolved for over two years.**
+[#7647](https://github.com/visgl/deck.gl/issues/7647) (open since Feb 2023) reports exactly this
+symptom on vector maps, with multiple independent confirmations through 2025 and no fix. Users'
+only workaround is `interleaved: false`, which costs them interleaving and reportedly introduces
+z-fighting. This answers empirically what deck's source cannot: the `WebGLOverlayView` context does
+not provide multisampling, and unlike MapLibre there is no documented option to ask for it. That
+makes an in-shader solution the only avenue there.
+
+**`PathStyleExtension` offset already breaks antialiasing.**
+[#8063](https://github.com/visgl/deck.gl/issues/8063) (2023) and
+[#9395](https://github.com/visgl/deck.gl/issues/9395) (2025) are both open. The mechanism is worth
+stating because it is not obvious: the extension defines the stroke's visible edge with a `discard`
+rather than with geometry, and `discard` kills every sample of a fragment, so MSAA cannot smooth
+that edge at all — no context attribute will fix those two issues. Analytic coverage does improve
+them, since it computes coverage in the shader instead of relying on the rasterizer. The improvement
+is partial: the extension's discard still clips the outer half of the ramp, as recorded under
+Limitations. A complete fix means turning that discard into a coverage term inside the extension.
+
+**Offscreen MSAA is being addressed separately, and is complementary rather than overlapping.**
+[deck.gl#10404](https://github.com/visgl/deck.gl/issues/10404) tracks post-process effects losing
+MSAA — independently reproduced for this RFC — and
+[luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741) proposes color-only MSAA for offscreen
+framebuffers with automatic resolve, superseding
+[luma.gl#2702](https://github.com/visgl/luma.gl/issues/2702). Mapping that RFC's scope against the
+cases enumerated above:
+
+| case | fixed by luma.gl#2741? |
+| --- | --- |
+| Post-process `renderBuffers` | **Yes** — they are color-only, matching its initial scope |
+| `@deck.gl/arcgis` | No — its framebuffer has a `depthStencilAttachment`, explicitly out of initial scope |
+| Interleaved base maps | No — the host owns the default framebuffer; not an offscreen target |
+| WebGPU | No — the WebGPU mapping is deferred as a follow-up |
+
+So the two efforts should both land. Neither subsumes the other, and the sole overlap is
+post-processing, where luma.gl#2741 is the better fix because it covers every layer rather than two.
 
 ## Proposal
 
@@ -156,9 +208,10 @@ misbehaves. Beyond the plumbing, FXAA operates on the already-rasterized image a
 coverage that was never captured, and TAA needs several frames to converge, which is wrong for
 one-shot high-resolution export.
 
-**Offscreen MSAA in luma.gl.** Would benefit every layer rather than these two, but luma's WebGL
-backend has no multisample renderbuffer support today (only the constants), so this is a much larger
-change.
+**Offscreen MSAA in luma.gl.** Benefits every layer rather than these two, and is actively proposed
+in [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741). It should land, and it is the
+better fix for the post-processing case. It does not reach interleaved base maps, ArcGIS's
+depth-attached framebuffer, or WebGPU — see Prior art for the breakdown.
 
 ## Limitations
 
@@ -169,7 +222,9 @@ change.
 - **`PathStyleExtension` offset.** The extension hard-`discard`s outside `|vPathPosition.x| > 1`
   before layer code runs, clipping the outer half of the centered ramp — coverage reaches ~0.5 at the
   boundary and then cuts. Measured at 0.730 of the un-offset feather, versus 0.328 before this
-  design. Fixing it fully means turning that discard into a coverage term inside the extension.
+  design. This improves [#8063](https://github.com/visgl/deck.gl/issues/8063) and
+  [#9395](https://github.com/visgl/deck.gl/issues/9395) without closing them; a complete fix means
+  turning that discard into a coverage term inside the extension.
 
 ## Testing
 
@@ -207,6 +262,11 @@ image diff cannot express:
   derivative approach used here would make it crisper, at the cost of changing its render baselines.
 - **Other stroked layers.** `ArcLayer` and `SolidPolygonLayer` edges have the same gap and are not
   covered by this change.
-- **`PathStyleExtension` offset ramp clipping**, above.
+- **`PathStyleExtension` offset ramp clipping**, above — the remaining half of
+  [#8063](https://github.com/visgl/deck.gl/issues/8063) /
+  [#9395](https://github.com/visgl/deck.gl/issues/9395).
+- **Coordinate with [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741).** If offscreen MSAA
+  lands, [#10404](https://github.com/visgl/deck.gl/issues/10404) is better fixed there than by asking
+  applications to set this prop.
 - **Consider defaulting to `true` in a major release**, once the trade-offs have been exercised in
   the wild.
