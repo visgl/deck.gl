@@ -6,9 +6,16 @@
 
 ## Summary
 
-This RFC proposes `dashMode` on `PathStyleExtension`, which decouples the dash pattern from
-the tessellation of the path it is drawn on, and deprecates `highPrecisionDash` in its
-favour.
+This RFC proposes two additions to `PathStyleExtension`, both aimed at the same complaint —
+that a dash is not reliably a dash:
+
+* `dashMode`, which decouples the dash pattern from the tessellation of the path it is drawn
+  on, deprecating `highPrecisionDash` in its favour.
+* `dashUnits`, which decouples the dash size from the stroke width, so a dash can be held
+  constant on screen.
+
+They are independent and can be adopted separately. The first is about *where* dashes fall
+along a path; the second is about *how large* they are.
 
 ## Background
 
@@ -104,6 +111,38 @@ It becomes an alias for `dashMode: 'path'` and keeps working unchanged. There is
 to break it; it is the same capability under a name that describes the mechanism instead of
 the result.
 
+### `dashUnits`
+
+A layer prop selecting what `getDashArray` is measured in:
+
+| value | one dash unit is |
+| --- | --- |
+| `'widths'` (default) | half the stroke width |
+| `'pixels'` | one screen pixel |
+| `'meters'` | one metre on the ground |
+| `'common'` | one deck.gl common-space unit |
+
+`getDashArray` has only ever been relative to half the stroke width. That is a reasonable
+default — dashes stay proportional to the line, which is also what `line-dasharray` does in
+MapLibre and what `stroke-dasharray` does in SVG when the stroke is scaled. But `PathLayer`
+defaults to `widthUnits: 'meters'`, so the stroke thickens as the user zooms in, and the
+dashes lengthen with it. Measured on a stroke with `widthUnits: 'meters'`:
+
+| `dashUnits` | z12 | z13 | z14 |
+| --- | --- | --- | --- |
+| `'widths'` | 17.6px | 34.7px | 67.9px |
+| `'pixels'` | 43.6px | 43.6px | 43.6px |
+
+Both behaviors are wanted. A dash that scales with the line is right for a stroke that
+represents a real width; a dash fixed on screen is right when the dash is a legend — "this
+boundary is disputed", "this segment is planned" — and should read the same at every zoom.
+Until now only the first was reachable.
+
+This is a **layer prop rather than a constructor option** because it is uniform-driven and
+allocates nothing, so it can vary per frame.
+
+`'widths'` remains the default, so nothing changes for existing users.
+
 ## Prior art
 
 **MapLibre / Mapbox** accumulate distance along the whole line on the CPU into an
@@ -145,10 +184,20 @@ better at the call site and leaves room for a future third mode.
 the main reason the existing capability goes unused by people hitting exactly the problem it
 solves.
 
+**Reuse deck.gl's existing `Unit` type for `dashUnits`.** `Unit` is
+`'meters' | 'common' | 'pixels'` and has no member for "relative to the stroke", which is
+both the default and the only behavior that exists today. Extending `Unit` itself would give
+every other `*Units` prop in the library a value that means nothing to it.
+
+**Express screen-constant dashes as `dashUnits: 'pixels'` versus a boolean like
+`dashScreenSpace`.** A boolean covers two of the four cases and leaves no room for the
+ground-relative ones, which fall out of the same conversion for free.
+
 ## Compatibility
 
-Additive. `dashMode` defaults to `'segment'`, which is the existing behavior;
-`highPrecisionDash` continues to work. No golden image changes from this proposal alone.
+Additive. `dashMode` defaults to `'segment'` and `dashUnits` defaults to `'widths'`, both of
+which are the existing behavior; `highPrecisionDash` continues to work. No golden image
+changes from either proposal alone.
 
 One internal change: `instanceDashOffsets` widens from a `float` to a `vec2` carrying
 `[distance from the start of the path, total length of the path]`, the second component
@@ -161,6 +210,19 @@ being what whole-path justification needs. A `vec2` still occupies one attribute
 each mode. All six strips draw the identical line, so the assertion is simply that the image
 shows six identical strips — a defect in either mode shows up as one strip differing from
 its neighbours.
+
+`dashUnits` is covered by rendering the same content at z12, z13 and z14 with
+`widthUnits: 'meters'`. The assertion is a comparison *between* the three images: the
+`'widths'` rows should double with each level, and the `'pixels'` rows should not move.
+
+One trap is worth recording, since it cost a round here and is easy to repeat. pixelmatch
+excludes antialiased pixels from its mismatch count unless `includeAA` is set. Any dash
+change that only alters edge coverage is therefore invisible to a golden diff by default —
+the prefiltered-coverage work in this series initially passed all but two of its own goldens
+with the feature reverted. Cases whose subject is edge coverage must set
+`imageDiffOptions.includeAA`, and must put enough affected pixels on screen to clear the
+mismatch threshold: horizontal strips have dash ends that land on exact pixel columns and
+produce no partial coverage at all, so a diagonal case is required.
 
 ## Limitations and future work
 

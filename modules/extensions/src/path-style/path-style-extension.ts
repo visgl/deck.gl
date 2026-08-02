@@ -19,12 +19,31 @@ const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   getOffset: {type: 'accessor', value: 0},
   dashJustified: false,
-  dashGapPickable: false
+  dashGapPickable: false,
+  dashUnits: 'widths'
+};
+
+/**
+ * What `getDashArray` is measured in.
+ *
+ * `'widths'` is relative to half the stroke width and is the historical behavior, so a dash
+ * scales with the line. The others are absolute: `'pixels'` keeps a dash the same size on
+ * screen at every zoom, while `'meters'` and `'common'` keep it the same size on the ground.
+ */
+export type DashUnits = 'widths' | 'pixels' | 'meters' | 'common';
+
+/** Keep in sync with the branch in the dash vertex shader. */
+const DASH_UNITS: Record<DashUnits, number> = {
+  widths: 0,
+  pixels: 1,
+  meters: 2,
+  common: 3
 };
 
 type PathStyleProps = {
   dashAlignMode: number;
   dashGapPickable: boolean;
+  dashUnits: number;
 };
 
 type SDFDashStyleProps = {
@@ -55,6 +74,13 @@ export type PathStyleExtensionProps<DataT = any> = {
    * @default false
    */
   dashGapPickable?: boolean;
+  /**
+   * What `getDashArray` is measured in. `'widths'` is relative to half the stroke width, so a
+   * dash scales with the line. `'pixels'` keeps a dash the same size on screen at every zoom,
+   * which is useful when `widthUnits` is `'meters'` and the stroke itself does not.
+   * @default 'widths'
+   */
+  dashUnits?: DashUnits;
 };
 
 /**
@@ -180,7 +206,8 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       inject,
       uniformTypes: {
         dashAlignMode: 'f32',
-        dashGapPickable: 'i32'
+        dashGapPickable: 'i32',
+        dashUnits: 'i32'
       }
     };
     return {
@@ -239,7 +266,8 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       } else {
         const pathStyleProps: PathStyleProps = {
           dashAlignMode: this.props.dashJustified ? 1 : 0,
-          dashGapPickable: Boolean(this.props.dashGapPickable)
+          dashGapPickable: Boolean(this.props.dashGapPickable),
+          dashUnits: DASH_UNITS[this.props.dashUnits] ?? DASH_UNITS.widths
         };
         this.setShaderModuleProps({pathStyle: pathStyleProps});
       }

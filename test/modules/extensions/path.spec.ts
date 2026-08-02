@@ -333,3 +333,40 @@ test('PathStyleExtension#dashMode', () => {
   ];
   testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+test('PathStyleExtension#dashUnits', () => {
+  const testCases = [
+    {
+      props: {
+        id: 'dash-units-test',
+        data: FIXTURES.zigzag,
+        getPath: d => d.path,
+        getDashArray: [4, 5],
+        extensions: [new PathStyleExtension({dash: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        expect(getLayerUniforms(layer).dashUnits, 'defaults to widths').toBe(0);
+      }
+    },
+    {
+      updateProps: {dashUnits: 'pixels'},
+      onAfterUpdate: ({layer}) => {
+        expect(getLayerUniforms(layer).dashUnits, 'pixels').toBe(1);
+      }
+    },
+    {
+      updateProps: {dashUnits: 'meters'},
+      onAfterUpdate: ({layer}) => {
+        expect(getLayerUniforms(layer).dashUnits, 'meters').toBe(2);
+      }
+    },
+    {
+      updateProps: {dashUnits: 'common'},
+      onAfterUpdate: ({layer}) => {
+        expect(getLayerUniforms(layer).dashUnits, 'common').toBe(3);
+      }
+    }
+  ];
+
+  testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});

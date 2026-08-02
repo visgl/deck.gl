@@ -70,6 +70,7 @@ const state = {
   dashJustified: false,
   capRounded: false,
   widthUnits: 'pixels',
+  dashUnits: 'widths',
   width: 8,
   billboard: 'both',
   showCircle: true
@@ -81,6 +82,12 @@ const CONTROLS = [
   {key: 'width', type: 'range', label: 'stroke width', min: 1, max: 40, step: 1},
   {key: 'dashMode', type: 'select', label: 'dash mode', options: ['segment', 'path']},
   {key: 'widthUnits', type: 'select', label: 'width units', options: ['pixels', 'meters']},
+  {
+    key: 'dashUnits',
+    type: 'select',
+    label: 'dash units',
+    options: ['widths', 'pixels', 'meters', 'common']
+  },
   {key: 'billboard', type: 'select', label: 'billboard', options: ['both', 'off', 'on']},
   {key: 'dashJustified', type: 'checkbox', label: 'justified'},
   {key: 'capRounded', type: 'checkbox', label: 'rounded caps'},
@@ -157,6 +164,13 @@ function billboardVariants() {
   return [false, true];
 }
 
+// In 'widths' a dash is a multiple of the half stroke width; in the absolute units the same
+// numbers would be a fraction of a pixel, so scale them into a comparable range.
+function dashArray() {
+  const scale = state.dashUnits === 'widths' ? 1 : state.width / 2;
+  return [state.dashSize * scale, state.gapSize * scale];
+}
+
 function dashExtension() {
   return new PathStyleExtension({dash: true, dashMode: state.dashMode});
 }
@@ -183,7 +197,8 @@ function buildLayers() {
           getWidth: state.widthUnits === 'meters' ? state.width * 8 : state.width,
           widthMinPixels: 1,
           getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-          getDashArray: [state.dashSize, state.gapSize],
+          getDashArray: dashArray(),
+          dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
           jointRounded: state.capRounded,
@@ -224,7 +239,8 @@ function buildLayers() {
           getWidth: state.widthUnits === 'meters' ? state.width * 8 : state.width,
           widthMinPixels: 1,
           getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-          getDashArray: [state.dashSize, state.gapSize],
+          getDashArray: dashArray(),
+          dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
           jointRounded: state.capRounded,
