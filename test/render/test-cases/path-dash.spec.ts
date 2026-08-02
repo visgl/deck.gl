@@ -90,26 +90,28 @@ function createZigzagPath(
 }
 
 /**
- * A geographic line that climbs steadily in Z.
+ * A horizontal line that also descends steadily in Z.
  *
- * Note this cannot fully isolate the 2D-vs-3D arclength defect: `MapView` is a perspective
- * projection at every pitch, so raising a path also displaces it on screen, and
- * `OrthographicView` - which would be a true parallel projection - clips almost any Z at
- * this scale. What the resulting image does show is whether the dash period stays uniform
- * *along* each drawn line, which is the property the fix has to restore. Compare each row
- * against the `heightMeters: 0` row drawn in the same style.
+ * `OrthographicView` is a true parallel projection, so Z does not move the line on screen at
+ * all: every strip draws the identical shape and any difference in the dash pattern is
+ * attributable to arclength alone. `MapView` cannot isolate it this way, being a perspective
+ * projection at every pitch - raising a path there also magnifies it.
+ *
+ * Z descends rather than climbs because the orthographic camera sits at z = 1 with a near
+ * plane at 0.1, so positive Z clips almost immediately while negative Z has ~999 units of
+ * room.
  */
-function createClimbingPath(
+function createDescendingPath(
   segments: number,
-  zoom: number,
-  offsetPixels: number,
-  heightMeters: number
+  verticalPosition: number,
+  depth: number
 ): number[][] {
-  return createGeographicPath(segments, zoom, offsetPixels).map((point, index) => [
-    point[0],
-    point[1],
-    (heightMeters * index) / segments
-  ]);
+  const path: number[][] = [];
+  for (let pointIndex = 0; pointIndex <= segments; pointIndex++) {
+    const fraction = pointIndex / segments;
+    path.push([-STRIP_LENGTH / 2 + STRIP_LENGTH * fraction, verticalPosition, -depth * fraction]);
+  }
+  return path;
 }
 
 const MAP_CENTER = [-122.4, 37.78];
@@ -442,27 +444,23 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
-  // 3D paths: CPU offsets measure 3D distance, the shader coordinate measures 2D
+  // 3D paths. Every strip draws the identical screen line - Z is invisible under a parallel
+  // projection - so all four should carry an identical, evenly spaced dash pattern. The
+  // CPU accumulates 3D distance between segment starts, so if the shader coordinate advances
+  // at the 2D rate within each segment the two disagree by a fixed fraction of every segment
+  // and the pattern breaks up at each of the 40 joints.
   // ---------------------------------------------------------------------------------------
-  // Elevation displaces a path radially on screen under perspective, so these are kept to
-  // one style per image with generous separation rather than packed into a single frame.
   ...[false, true].map(billboard => ({
     name: `path-dash-3d-${billboard ? 'billboard' : 'flat'}`,
-    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom: 13, pitch: 30, bearing: 0},
-    layers: [
-      // [height in meters, vertical offset in pixels]
-      [0, 120],
-      [900, -20],
-      [2700, -170]
-    ].map(
-      ([heightMeters, offsetPixels]) =>
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: [0, 300, 720, 900].map(
+      (depth, index) =>
         new PathLayer({
-          id: `path-dash-3d-${heightMeters}`,
-          data: [createClimbingPath(40, 13, offsetPixels, heightMeters)],
-          getPath: (path: number[][]) => path,
+          id: `path-dash-3d-${depth}`,
+          data: [createDescendingPath(40, getStripY(index, 4), depth)],
+          ...CARTESIAN,
           billboard,
-          widthUnits: 'pixels' as const,
-          getWidth: 8,
           getColor: billboard ? [0, 90, 200] : [200, 0, 0],
           getDashArray: [4, 5],
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
@@ -470,6 +468,23 @@ const testCases: TestCase[] = [
     ),
     goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`
   })),
+  {
+    name: 'path-dash-3d-flat-antialiasing',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: [0, 300, 720, 900].map(
+      (depth, index) =>
+        new PathLayer({
+          id: `path-dash-3d-antialiasing-${depth}`,
+          data: [createDescendingPath(40, getStripY(index, 4), depth)],
+          ...CARTESIAN,
+          antialiasing: true,
+          getDashArray: [4, 5],
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        })
+    ),
+    goldenImage: './test/render/golden-images/path-dash-3d-flat-antialiasing.png'
+  },
 
   // ---------------------------------------------------------------------------------------
   // Offset extension combined with dashing
@@ -480,8 +495,11 @@ const testCases: TestCase[] = [
     viewState: ORTHO_VIEW_STATE,
     layers: createStripLayers(
       'path-dash-offset',
+      // Two segments, not forty: at high vertex counts every strip collapses to solid via
+      // the segment-density defect and the image says nothing about offsetting. All four
+      // strips should share one dash phase - the offset must not rescale the pattern.
       [0, 1, 2, -2].map((offset, index) => ({
-        data: [createStraightPath(40, getStripY(index, 4))],
+        data: [createStraightPath(2, getStripY(index, 4))],
         getDashArray: [4, 5],
         getOffset: offset,
         extensions: [new PathStyleExtension({dash: true, offset: true})]

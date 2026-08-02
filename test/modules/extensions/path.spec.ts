@@ -216,3 +216,77 @@ test('PathStyleExtension#TextBackgroundLayer', () => {
 
   testLayer({Layer: TextBackgroundLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+test('PathStyleExtension#shader defines', () => {
+  const testCases = [
+    {
+      props: {
+        id: 'path-defines-test',
+        data: FIXTURES.zigzag,
+        getPath: d => d.path,
+        extensions: [new PathStyleExtension({offset: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        expect(
+          layer.getShaders().defines.DASH_ENABLED,
+          'DASH_ENABLED is unset when only offset is enabled'
+        ).toBeUndefined();
+      }
+    },
+    {
+      updateProps: {
+        extensions: [new PathStyleExtension({dash: true, offset: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {defines} = layer.getShaders();
+        // The offset shaders rescale vDashOffset, which only exists when the dash shaders
+        // are injected too, so they are guarded on this define.
+        expect(defines.DASH_ENABLED, 'DASH_ENABLED is set when dash is enabled').toBe(true);
+        expect(
+          defines.HIGH_PRECISION_DASH,
+          'HIGH_PRECISION_DASH is off by default'
+        ).toBeUndefined();
+      }
+    },
+    {
+      updateProps: {
+        extensions: [new PathStyleExtension({highPrecisionDash: true})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {defines} = layer.getShaders();
+        expect(defines.DASH_ENABLED, 'highPrecisionDash implies dash').toBe(true);
+        expect(defines.HIGH_PRECISION_DASH, 'HIGH_PRECISION_DASH is set').toBe(true);
+      }
+    }
+  ];
+
+  testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
+  const extension = new PathStyleExtension({highPrecisionDash: true});
+  // The shader now scales its along-segment coordinate by the same 3D-to-2D arclength ratio,
+  // so these CPU offsets and the GPU coordinate agree on paths that move in Z.
+  const layer = {
+    props: {positionFormat: 'XYZ'},
+    projectPosition: p => p
+  };
+
+  const flat = extension.getDashOffsets.call(layer, [
+    [0, 0, 0],
+    [3, 0, 0],
+    [6, 0, 0]
+  ]);
+  expect(flat.slice(0, 2), 'accumulates distance along a flat path').toEqual([0, 3]);
+
+  const climbing = extension.getDashOffsets.call(layer, [
+    [0, 0, 0],
+    [3, 0, 4],
+    [6, 0, 8]
+  ]);
+  // 3-4-5 triangles: each segment is 5 long in 3D, not 3.
+  expect(climbing.slice(0, 2), 'accumulates 3D distance along a climbing path').toEqual([0, 5]);
+
+  // The trailing vertex is the tesselator's INVALID padding vertex and must stay zeroed.
+  expect(climbing[climbing.length - 1], 'last offset is zeroed').toBe(0);
+});
