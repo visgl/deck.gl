@@ -5,9 +5,29 @@
 - **Status**: Proposed — implemented in this PR
 
 Summary: `PathLayer` and `LineLayer` have no antialiasing of their own; their edges are smoothed
-entirely by the default framebuffer's MSAA. This RFC proposes an opt-in `antialiasing` prop that
-computes edge coverage analytically in the fragment shader, for the two situations where MSAA is not
-available: interleaved rendering into a base map, and WebGPU.
+entirely by the framebuffer's MSAA. This RFC proposes an opt-in `antialiasing` prop that computes
+edge coverage analytically in the fragment shader, for the situations where MSAA is unavailable.
+
+## At a glance
+
+Where deck.gl has multisampling today, and which remedy applies. "Host MSAA" is asking the base map
+or canvas for `antialias: true`; "luma.gl#2741" is the proposed
+[color-only MSAA for offscreen framebuffers](https://github.com/visgl/luma.gl/issues/2741); "this
+prop" is `antialiasing: true`.
+
+| Situation | MSAA today | Host MSAA | luma.gl#2741 | This prop | Recommended |
+| --- | --- | --- | --- | --- | --- |
+| Standalone canvas | yes | on by default | — | optional | nothing needed |
+| Standalone + `PostProcessEffect` ([#10404](https://github.com/visgl/deck.gl/issues/10404)) | **no** | no — bypassed | **yes** | yes | luma.gl#2741; this prop meanwhile |
+| Interleaved MapLibre / Mapbox | **no** | **yes** | no | yes | either; this prop is cheaper at 4K |
+| Interleaved Google Maps vector ([#7647](https://github.com/visgl/deck.gl/issues/7647)) | **no** | no option exposed | no | yes | **this prop — only avenue** |
+| `@deck.gl/arcgis` | **no** | no | no — depth attachment | yes | **this prop — only avenue** |
+| App-supplied `_framebuffer` | **no** | no | if color-only | yes | whichever fits the target |
+| WebGPU, any target | **no** | no such attribute | no — deferred | yes | **this prop — only avenue** |
+| `PathStyleExtension` offset ([#8063](https://github.com/visgl/deck.gl/issues/8063), [#9395](https://github.com/visgl/deck.gl/issues/9395)) | **no** — edge is a `discard` | no | no | partial | this prop; full fix needs an extension change |
+
+Three rows have no alternative at all, and one — post-processing — is better served by luma.gl#2741
+than by this proposal. The two efforts overlap only there; neither subsumes the other.
 
 ## Background
 
@@ -117,18 +137,10 @@ Limitations. A complete fix means turning that discard into a coverage term insi
 MSAA — independently reproduced for this RFC — and
 [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741) proposes color-only MSAA for offscreen
 framebuffers with automatic resolve, superseding
-[luma.gl#2702](https://github.com/visgl/luma.gl/issues/2702). Mapping that RFC's scope against the
-cases enumerated above:
-
-| case | fixed by luma.gl#2741? |
-| --- | --- |
-| Post-process `renderBuffers` | **Yes** — they are color-only, matching its initial scope |
-| `@deck.gl/arcgis` | No — its framebuffer has a `depthStencilAttachment`, explicitly out of initial scope |
-| Interleaved base maps | No — the host owns the default framebuffer; not an offscreen target |
-| WebGPU | No — the WebGPU mapping is deferred as a follow-up |
-
-So the two efforts should both land. Neither subsumes the other, and the sole overlap is
-post-processing, where luma.gl#2741 is the better fix because it covers every layer rather than two.
+[luma.gl#2702](https://github.com/visgl/luma.gl/issues/2702). Its initial scope is WebGL2, color
+attachments only, with depth/stencil explicitly rejected alongside `samples > 1` — which is what
+keeps it clear of ArcGIS, and its deferred WebGPU mapping is what keeps it clear of that backend.
+Both efforts should land; see the matrix above for the split.
 
 ## Proposal
 
