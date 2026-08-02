@@ -105,6 +105,30 @@ The offset to draw each path with, relative to the width of the path. Negative o
 * If a function is provided, it is called on each path to retrieve its offset.
 
 
+#### `dashUnits` (string, optional) {#dashunits}
+
+* Default: `'widths'`
+
+What `getDashArray` is measured in, one of `'widths'`, `'pixels'`, `'meters'` and `'common'`.
+
+`'widths'` is relative to half the stroke width, so a dash scales with the line. With the `PathLayer` default of `widthUnits: 'meters'` the stroke thickens as you zoom in, and the dashes thicken and lengthen with it.
+
+`'pixels'` makes a dash an absolute size on screen, holding the same length at every zoom level regardless of `widthUnits`. `'meters'` and `'common'` instead pin it to the ground.
+
+> Note: `dashUnits` applies to `PathLayer` and composite layers that render paths. `ScatterplotLayer` outlines and `TextLayer` backgrounds continue to interpret `getDashArray` relative to their stroke width.
+
+```js
+// A 20px dash and a 25px gap, unchanging as the user zooms
+new PathLayer({
+  ...
+  widthUnits: 'meters',
+  getWidth: 60,
+  getDashArray: [20, 25],
+  dashUnits: 'pixels',
+  extensions: [new PathStyleExtension({dashMode: 'path'})]
+});
+```
+
 #### `dashGapPickable` (boolean, optional) {#dashgappickable}
 
 * Default `false`
@@ -148,4 +172,4 @@ Picking is unaffected and remains a hard in-or-out test, so `dashGapPickable` ke
 
 [modules/extensions/src/path-style](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/path-style)
 
-Design rationale for `dashMode` is in [dev-docs/RFCs/v9.4/path-dash-rfc.md](https://github.com/visgl/deck.gl/tree/master/dev-docs/RFCs/v9.4/path-dash-rfc.md).
+Design rationale for `dashMode` and `dashUnits` is in [dev-docs/RFCs/v9.4/path-dash-rfc.md](https://github.com/visgl/deck.gl/tree/master/dev-docs/RFCs/v9.4/path-dash-rfc.md).
