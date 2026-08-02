@@ -27,6 +27,13 @@ export interface TestCase {
   imageDiffOptions?: {
     threshold?: number;
     tolerance?: number;
+    /**
+     * Count antialiased pixels as mismatches. pixelmatch drops them by default, which makes a
+     * golden image blind to any change that only alters edge coverage - a feature producing
+     * exactly that can be removed entirely and the diff still passes. Set this on cases whose
+     * subject *is* the antialiasing.
+     */
+    includeAA?: boolean;
   };
 }
 
@@ -265,7 +272,8 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
     goldenImage: resolvedGoldenImage,
     region,
     threshold: imageDiffOptions?.threshold ?? 0.99,
-    tolerance: 0.1,
+    tolerance: imageDiffOptions?.tolerance ?? 0.1,
+    includeAA: imageDiffOptions?.includeAA ?? false,
     includeEmpty: false,
     platform: OS,
     saveOnFail: true,

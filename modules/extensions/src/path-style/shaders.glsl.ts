@@ -68,6 +68,31 @@ layout(std140) uniform pathStyleUniforms {
 
 in vec2 vDashArray;
 in float vDashOffset;
+
+// Integral of the dash square wave from 0 to t, i.e. how much solid stroke lies before t.
+float dashPatternIntegral(float t, float solidLength, float unitLength) {
+  return floor(t / unitLength) * solidLength + min(mod(t, unitLength), solidLength);
+}
+
+// Fraction of [t - filterWidth / 2, t + filterWidth / 2] covered by solid stroke.
+//
+// Testing the dash pattern with a single comparison per fragment aliases as soon as one
+// period approaches one pixel: the stroke breaks into moire or, when the phase happens to
+// land inside a dash, reads as solid. Integrating the wave over the fragment footprint
+// instead is the closed form of what a mipmapped dash texture approximates, and it degrades
+// the way one wants - once a period drops below a pixel the result converges on the duty
+// cycle solidLength / unitLength, so the stroke fades to a uniformly lighter line.
+//
+// t is reduced into the first period first. The integral satisfies
+// F(t + n * unitLength) = F(t) + n * solidLength, so the same n cancels out of the
+// difference below, and keeping the arguments small avoids subtracting two large nearly
+// equal numbers in fp32 on long paths.
+float dashPatternCoverage(float t, float solidLength, float unitLength, float filterWidth) {
+  float halfFilter = 0.5 * filterWidth;
+  float tReduced = mod(t, unitLength);
+  return (dashPatternIntegral(tReduced + halfFilter, solidLength, unitLength) -
+    dashPatternIntegral(tReduced - halfFilter, solidLength, unitLength)) / filterWidth;
+}
 `,
 
     // if given position is in the gap part of the dashed line
@@ -79,13 +104,14 @@ in float vDashOffset;
     // 1 - stretch to fit, draw half dash at each end for nicer joints
     // o--    ----    ----    ----    --o--      --o--     ----     --o
     'fs:#main-start': `
+  float dashCoverage = 1.0;
+
   float solidLength = vDashArray.x;
   float gapLength = vDashArray.y;
   float unitLength = solidLength + gapLength;
 
-  float offset;
-
-  if (unitLength > 0.0) {
+  if (unitLength > 0.0 && gapLength > 0.0) {
+    float offset;
     if (pathStyle.dashAlignMode == 0.0) {
       offset = vDashOffset;
     } else {
@@ -95,27 +121,51 @@ in float vDashOffset;
       offset = solidLength / 2.0;
     }
 
-    float unitOffset = mod(vPathPosition.y + offset, unitLength);
+    float alongPath = vPathPosition.y + offset;
+    float unitOffset = mod(alongPath, unitLength);
 
-    if (gapLength > 0.0 && unitOffset > solidLength) {
-      if (path.capType <= 0.5) {
-        if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
-          discard;
-        }
-      } else {
-        // caps are rounded, test the distance to solid ends
-        float distToEnd = length(vec2(
+    // Picking stays a hard in-or-out test. A blended picking colour decodes to the wrong
+    // index, and dashGapPickable is defined in terms of whole gaps rather than coverage.
+    if (bool(picking.isActive)) {
+      bool inGap = unitOffset > solidLength;
+      if (path.capType > 0.5) {
+        inGap = length(vec2(
           min(unitOffset - solidLength, unitLength - unitOffset),
           vPathPosition.x
-        ));
-        if (distToEnd > 1.0) {
-          if (!(pathStyle.dashGapPickable && bool(picking.isActive))) {
-            discard;
-          }
-        }
+        )) > 1.0;
       }
+      if (inGap && !pathStyle.dashGapPickable) {
+        discard;
+      }
+    } else if (path.capType <= 0.5) {
+      dashCoverage = dashPatternCoverage(
+        alongPath, solidLength, unitLength, max(fwidth(alongPath), 0.0001)
+      );
+    } else {
+      // Rounded caps: the dash end is an arc, so resolve the 2D distance to the nearer solid
+      // end rather than the 1D position along the path.
+      float distToEnd = length(vec2(
+        max(min(unitOffset - solidLength, unitLength - unitOffset), 0.0),
+        vPathPosition.x
+      ));
+      float edgeWidth = max(fwidth(distToEnd), 0.0001);
+      dashCoverage = 1.0 - smoothstep(1.0 - edgeWidth, 1.0 + edgeWidth, distToEnd);
+      // That smoothstep resolves one dash end at a time, so it stops meaning anything once a
+      // whole period fits inside a pixel. Fade to the duty cycle over the same range the
+      // square-cap path converges on by itself.
+      float subPixel = clamp(max(fwidth(alongPath), 0.0001) / unitLength, 0.0, 1.0);
+      dashCoverage = mix(dashCoverage, solidLength / unitLength, subPixel);
+    }
+
+    // Fully transparent fragments would still write depth and occlude whatever is behind.
+    if (dashCoverage < 0.004) {
+      discard;
     }
   }
+`,
+
+    'fs:#main-end': `
+  fragColor.a *= dashCoverage;
 `
   }
 };

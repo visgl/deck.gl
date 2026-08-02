@@ -39,6 +39,11 @@ import {PathStyleExtension} from '@deck.gl/extensions';
  *   accumulates 3D distance while the shader coordinate measures 2D.
  */
 
+// Dash ends are the subject of these images, and pixelmatch discards antialiased pixels
+// from the mismatch count unless told otherwise - without this, prefiltered dash coverage
+// can be removed wholesale and most of these goldens still pass.
+const DASH_DIFF_OPTIONS = {includeAA: true};
+
 const STRIP_LENGTH = 720;
 const STRIP_SPACING = 62;
 
@@ -176,8 +181,27 @@ function segmentDensityCase(name: string, dashProps: Record<string, any>): TestC
         ...dashProps
       }))
     ),
-    goldenImage: `./test/render/golden-images/${name}.png`
+    goldenImage: `./test/render/golden-images/${name}.png`,
+    imageDiffOptions: DASH_DIFF_OPTIONS
   };
+}
+
+/**
+ * A straight line at `angleDegrees`, so that neither the stroke edges nor the dash ends are
+ * axis aligned.
+ *
+ * Every other case here draws horizontal strips, where a dash end is a vertical line landing
+ * on an exact pixel column and there is no partial coverage for prefiltering to produce.
+ * Those images therefore cannot tell whether dash ends are antialiased at all. This one can.
+ */
+function diagonalPath(segments: number, y: number, angleDegrees: number = 27): number[][] {
+  const radians = (angleDegrees * Math.PI) / 180;
+  const path: number[][] = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments - 0.5;
+    path.push([Math.cos(radians) * STRIP_LENGTH * t, y + Math.sin(radians) * STRIP_LENGTH * t]);
+  }
+  return path;
 }
 
 /** Vertical gap between the flat and billboard copies of a parity pair, in world units. */
@@ -253,7 +277,72 @@ const testCases: TestCase[] = [
         extensions: [new PathStyleExtension({dash: true})]
       }))
     ),
-    goldenImage: './test/render/golden-images/path-dash-arrays.png'
+    goldenImage: './test/render/golden-images/path-dash-arrays.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
+  },
+
+  // ---------------------------------------------------------------------------------------
+  // Sub-pixel dash periods. The stroke is 10px wide, so one dash unit is 5px and the last
+  // strips put a whole period well inside a single pixel. A per-fragment comparison cannot
+  // represent that and aliases into moire or reads as solid depending on where the phase
+  // lands; prefiltered coverage should instead fade each strip toward a uniform 50% alpha,
+  // since every pattern here has an even duty cycle.
+  // ---------------------------------------------------------------------------------------
+  ...[false, true].map(capRounded => ({
+    name: `path-dash-subpixel-${capRounded ? 'rounded' : 'square'}`,
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: stripLayers(
+      `path-dash-subpixel-${capRounded ? 'rounded' : 'square'}`,
+      [4, 1, 0.4, 0.15, 0.06, 0.02].map((dashSize, index) => ({
+        data: [straightPath(1, stripY(index, 6))],
+        getDashArray: [dashSize, dashSize],
+        capRounded,
+        jointRounded: capRounded,
+        extensions: [new PathStyleExtension({dash: true})]
+      }))
+    ),
+    goldenImage: `./test/render/golden-images/path-dash-subpixel-${
+      capRounded ? 'rounded' : 'square'
+    }.png`,
+    imageDiffOptions: DASH_DIFF_OPTIONS
+  })),
+
+  // ---------------------------------------------------------------------------------------
+  // Diagonal strokes, where dash ends fall between pixel columns and prefiltering has real
+  // partial coverage to produce. Paired with imageDiffOptions.includeAA, this is the case
+  // that actually holds dash-end antialiasing to account.
+  // ---------------------------------------------------------------------------------------
+  {
+    name: 'path-dash-diagonal',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    // Deliberately dense. One dash end perturbs only a handful of pixels, so a handful of
+    // ends stays far below the 1% mismatch the threshold requires and the case would pass
+    // with the feature deleted. Eight lines of fine dashes put enough dash-end edge on
+    // screen for the diff to register it.
+    layers: stripLayers(
+      'path-dash-diagonal',
+      [
+        [1.5, 1.5, false],
+        [1.5, 1.5, true],
+        [1, 1, false],
+        [1, 1, true],
+        [1.5, 1.5, false],
+        [1.5, 1.5, true],
+        [1, 1, false],
+        [1, 1, true]
+      ].map(([dashSize, gapSize, capRounded], index) => ({
+        data: [diagonalPath(1, (index - 3.5) * 54)],
+        getDashArray: [dashSize, gapSize],
+        getWidth: 14,
+        capRounded,
+        jointRounded: capRounded,
+        extensions: [new PathStyleExtension({dash: true})]
+      }))
+    ),
+    imageDiffOptions: DASH_DIFF_OPTIONS,
+    goldenImage: './test/render/golden-images/path-dash-diagonal.png'
   },
 
   // ---------------------------------------------------------------------------------------
@@ -288,7 +377,8 @@ const testCases: TestCase[] = [
         extensions: [new PathStyleExtension({highPrecisionDash: true})]
       }
     ]),
-    goldenImage: './test/render/golden-images/path-dash-corners.png'
+    goldenImage: './test/render/golden-images/path-dash-corners.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   },
 
   // ---------------------------------------------------------------------------------------
@@ -315,7 +405,8 @@ const testCases: TestCase[] = [
         extensions: [new PathStyleExtension({highPrecisionDash: true})]
       })
     ],
-    goldenImage: `./test/render/golden-images/path-dash-circle-zoom${zoom}.png`
+    goldenImage: `./test/render/golden-images/path-dash-circle-zoom${zoom}.png`,
+    imageDiffOptions: DASH_DIFF_OPTIONS
   })),
 
   // ---------------------------------------------------------------------------------------
@@ -330,7 +421,8 @@ const testCases: TestCase[] = [
       ...billboardParityLayers('parity-dense', y => straightPath(120, y), stripY(1, 3)),
       ...billboardParityLayers('parity-circle', y => circlePath(80, 120, [0, y - 30]), stripY(2, 3))
     ],
-    goldenImage: './test/render/golden-images/path-dash-billboard-ortho.png'
+    goldenImage: './test/render/golden-images/path-dash-billboard-ortho.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   },
   {
     name: 'path-dash-billboard-ortho-continuous',
@@ -352,7 +444,8 @@ const testCases: TestCase[] = [
         }
       )
     ],
-    goldenImage: './test/render/golden-images/path-dash-billboard-ortho-continuous.png'
+    goldenImage: './test/render/golden-images/path-dash-billboard-ortho-continuous.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   },
 
   // Unpitched MapView across zoom levels - flat and billboard must stay locked together.
@@ -382,7 +475,8 @@ const testCases: TestCase[] = [
         extensions: [new PathStyleExtension({highPrecisionDash: true})]
       });
     }),
-    goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`
+    goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`,
+    imageDiffOptions: DASH_DIFF_OPTIONS
   })),
 
   // Pitched MapView - flat and billboard are EXPECTED to diverge toward the horizon
@@ -404,7 +498,8 @@ const testCases: TestCase[] = [
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         })
     ),
-    goldenImage: './test/render/golden-images/path-dash-billboard-pitched.png'
+    goldenImage: './test/render/golden-images/path-dash-billboard-pitched.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   },
 
   // ---------------------------------------------------------------------------------------
@@ -430,7 +525,8 @@ const testCases: TestCase[] = [
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         })
     ),
-    goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`
+    goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`,
+    imageDiffOptions: DASH_DIFF_OPTIONS
   })),
 
   // ---------------------------------------------------------------------------------------
@@ -452,7 +548,8 @@ const testCases: TestCase[] = [
         extensions: [new PathStyleExtension({dash: true, offset: true})]
       }))
     ),
-    goldenImage: './test/render/golden-images/path-dash-offset.png'
+    goldenImage: './test/render/golden-images/path-dash-offset.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   },
 
   // ---------------------------------------------------------------------------------------
@@ -478,7 +575,8 @@ const testCases: TestCase[] = [
         extensions: [new PathStyleExtension({dash: true})]
       }))
     ),
-    goldenImage: './test/render/golden-images/path-dash-arrays-dpr2.png'
+    goldenImage: './test/render/golden-images/path-dash-arrays-dpr2.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   },
   {
     name: 'path-dash-billboard-ortho-dpr2',
@@ -490,7 +588,8 @@ const testCases: TestCase[] = [
       ...billboardParityLayers('parity-dense', y => straightPath(120, y), stripY(1, 3)),
       ...billboardParityLayers('parity-circle', y => circlePath(80, 120, [0, y - 30]), stripY(2, 3))
     ],
-    goldenImage: './test/render/golden-images/path-dash-billboard-ortho-dpr2.png'
+    goldenImage: './test/render/golden-images/path-dash-billboard-ortho-dpr2.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
   }
 ];
 
