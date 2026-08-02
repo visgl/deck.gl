@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import {COORDINATE_SYSTEM, Deck, OrthographicView} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {
   PathLayer,
@@ -10,9 +11,61 @@ import {
   ScatterplotLayer,
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
+import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
+
+const webglTest = device.type === 'webgl' ? test : test.skip;
+
+async function waitForRender(deck: Deck): Promise<void> {
+  await new Promise<void>(resolve => {
+    deck.setProps({onAfterRender: () => resolve()});
+  });
+}
+
+webglTest('PathStyleExtension#rounded dash picking', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 200;
+  canvas.height = 100;
+  const gl = canvas.getContext('webgl2');
+  expect(gl, 'WebGL2 context is created').toBeTruthy();
+
+  const deck = new Deck({
+    gl: gl!,
+    width: 200,
+    height: 100,
+    views: new OrthographicView(),
+    initialViewState: {target: [0, 0, 0], zoom: 0},
+    controller: false,
+    layers: [
+      new PathLayer({
+        id: 'rounded-dash-picking',
+        data: [
+          [
+            [-80, 0],
+            [80, 0]
+          ]
+        ],
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: path => path,
+        widthUnits: 'pixels',
+        getWidth: 20,
+        getDashArray: [4, 4],
+        capRounded: true,
+        pickable: true,
+        extensions: [new PathStyleExtension({dash: true})]
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+    expect(deck.pickObject({x: 40, y: 50})?.index, 'middle of a rounded dash is pickable').toBe(0);
+    expect(deck.pickObject({x: 80, y: 50}), 'middle of a rounded gap is not pickable').toBeNull();
+  } finally {
+    deck.finalize();
+  }
+});
 
 test('PathStyleExtension#PathLayer', () => {
   const testCases = [
