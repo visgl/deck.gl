@@ -369,6 +369,68 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
+  // Sub-pixel dash periods. The stroke is 10px wide, so one dash unit is 5px and the last
+  // strips put a whole period well inside a single pixel. A per-fragment comparison cannot
+  // represent that and aliases into moire or reads as solid depending on where the phase
+  // lands; prefiltered coverage should instead fade each strip toward a uniform 50% alpha,
+  // since every pattern here has an even duty cycle.
+  // ---------------------------------------------------------------------------------------
+  ...[false, true].map(capRounded => ({
+    name: `path-dash-subpixel-${capRounded ? 'rounded' : 'square'}`,
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      `path-dash-subpixel-${capRounded ? 'rounded' : 'square'}`,
+      [4, 1, 0.4, 0.15, 0.06, 0.02].map((dashSize, index) => ({
+        data: [createStraightPath(1, getStripY(index, 6))],
+        getDashArray: [dashSize, dashSize],
+        capRounded,
+        jointRounded: capRounded,
+        extensions: [new PathStyleExtension({dash: true})]
+      }))
+    ),
+    goldenImage: `./test/render/golden-images/path-dash-subpixel-${
+      capRounded ? 'rounded' : 'square'
+    }.png`
+  })),
+
+  // ---------------------------------------------------------------------------------------
+  // Diagonal strokes, where dash ends fall between pixel columns and prefiltering has real
+  // partial coverage to produce. Paired with the suite-wide includeAA policy, this is the case
+  // that actually holds dash-end antialiasing to account.
+  // ---------------------------------------------------------------------------------------
+  {
+    name: 'path-dash-diagonal',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    // Deliberately dense. One dash end perturbs only a handful of pixels, so a handful of
+    // ends stays far below the 1% mismatch the threshold requires and the case would pass
+    // with the feature deleted. Eight lines of fine dashes put enough dash-end edge on
+    // screen for the diff to register it.
+    layers: createStripLayers(
+      'path-dash-diagonal',
+      [
+        [1.5, 1.5, false],
+        [1.5, 1.5, true],
+        [1, 1, false],
+        [1, 1, true],
+        [1.5, 1.5, false],
+        [1.5, 1.5, true],
+        [1, 1, false],
+        [1, 1, true]
+      ].map(([dashSize, gapSize, capRounded], index) => ({
+        data: [createDiagonalPath(1, (index - 3.5) * 54)],
+        getDashArray: [dashSize, gapSize],
+        getWidth: 14,
+        capRounded,
+        jointRounded: capRounded,
+        extensions: [new PathStyleExtension({dash: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-diagonal.png'
+  },
+
+  // ---------------------------------------------------------------------------------------
   // Corners: dashes across sharp joints, square vs rounded
   // ---------------------------------------------------------------------------------------
   {
