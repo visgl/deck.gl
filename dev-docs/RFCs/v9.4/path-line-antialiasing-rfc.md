@@ -15,22 +15,48 @@ Both layers write a flat color per fragment. `path-layer-fragment.glsl.ts` ends 
 `fragColor = vColor` with hard `discard`s at the joints; `line-layer-fragment.glsl.ts` is the same.
 There is no coverage computation anywhere, so edge quality is inherited from the render target.
 
-For a standalone deck.gl canvas that is fine — luma passes context attributes straight through and
-deck never sets `antialias`, so the browser default of `true` applies and MSAA smooths the strokes.
+For a plain standalone deck.gl canvas that is fine — luma passes context attributes straight through
+and deck never sets `antialias`, so the browser default of `true` applies and MSAA smooths the
+strokes.
 
-There are two situations where that fallback does not exist.
+That fallback disappears in more places than it might seem, and they divide into three mechanisms.
 
-**Interleaved base maps.** MapLibre GL JS and Mapbox GL JS own the WebGL context in interleaved
-mode and both create it with `antialias: false` as a performance optimization. deck.gl layers drawn
-into that context receive no multisampling. The base map's own lines stay crisp because MapLibre
-computes analytic coverage in `line.fragment.glsl`, scaled by `1.0 / u_device_pixel_ratio` — so
-deck.gl strokes look conspicuously aliased directly against smooth base map geometry.
+### 1. Externally-owned contexts
 
-**WebGPU.** There is no `antialias` canvas attribute. MSAA requires an explicitly multisampled
-render target and a matching pipeline `sampleCount`, and luma's WebGPU canvas context does not
-configure one — `RenderPipelineParameters.sampleCount` defaults to `0` and `RenderBundle` only
-supports `1`. The `path-layer.wgsl.ts` port inherits the missing coverage with no escape hatch at
-all.
+deck does not choose the context attributes; the host application or SDK does.
+
+- **`@deck.gl/mapbox`, interleaved.** MapLibre GL JS and Mapbox GL JS both default
+  `canvasContextAttributes.antialias` to `false` as a performance optimization (verifiable in
+  maplibre-gl `src/ui/map.ts` — `defaultOptions.canvasContextAttributes`). The base map's own lines
+  stay crisp because MapLibre computes analytic coverage in `line.fragment.glsl`, scaled by
+  `1.0 / u_device_pixel_ratio`, so deck.gl strokes look conspicuously aliased directly against
+  smooth base map geometry.
+- **`@deck.gl/google-maps`, interleaved.** deck attaches to the context handed to
+  `google.maps.WebGLOverlayView.onContextRestored`. Whether Google enables MSAA is not determinable
+  from deck's source and is not documented; treat as unknown rather than assuming either way.
+
+### 2. Offscreen render targets
+
+Here MSAA is absent *unconditionally*, whatever the host context was created with, because luma's
+WebGL backend has no multisample renderbuffer support — `device.createFramebuffer` always produces a
+single-sample target.
+
+- **`@deck.gl/arcgis`.** Always renders into an auxiliary framebuffer (`_framebuffer`) and
+  composites it with a fullscreen quad, so deck content is never multisampled regardless of the
+  ArcGIS SDK's own context attributes.
+- **Any application passing `_framebuffer`** to render into its own target.
+- **Any application using a `PostProcessEffect`.** `DeckRenderer._preRender` redirects layer
+  rendering into `renderBuffers`, which are plain framebuffers, then blits to the target. This one
+  is easy to miss because it affects plain standalone deck.gl with a default canvas: measured on a
+  context created with `antialias: true`, adding a single effect takes a 2px diagonal from 1361
+  partial-coverage pixels to **0**.
+
+### 3. WebGPU
+
+There is no `antialias` canvas attribute. MSAA requires an explicitly multisampled render target and
+a matching pipeline `sampleCount`, and luma's WebGPU canvas context does not configure one —
+`RenderPipelineParameters.sampleCount` defaults to `0` and `RenderBundle` only supports `1`. The
+`path-layer.wgsl.ts` port inherits the missing coverage with no escape hatch at all.
 
 ### Measured impact
 
@@ -40,12 +66,17 @@ A 2px diagonal path rendered into a 240×180 context, counting pixels by alpha:
 | --- | --- | --- | --- |
 | no MSAA (base-map-like) | `false` | **0** | **0** |
 | no MSAA (base-map-like) | `true` | 719 | 104 |
-| MSAA | `false` | 1361 | 3 |
+| MSAA canvas | `false` | 1361 | 3 |
+| MSAA canvas + `PostProcessEffect` | `false` | **0** | **0** |
 
-Without MSAA and without the prop there is no antialiasing from any source — every covered pixel is
-fully opaque and the edge is a hard staircase. The third row is included to show the honest
-comparison: where MSAA *is* available it does most of the work, and analytic coverage is a quality
-and cost improvement (continuous vs. quantized to the sample count) rather than a fix.
+Where the framebuffer provides no multisampling there is no antialiasing from any source — every
+covered pixel is fully opaque and the edge is a hard staircase.
+
+The third row is included to show the honest comparison: where MSAA *is* genuinely available it does
+most of the work, and analytic coverage is then a quality and cost improvement (continuous vs.
+quantized to the sample count) rather than a fix. The fourth row shows how easily that row stops
+applying — the canvas still has `antialias: true`, but a post-process effect has moved rasterization
+off it.
 
 ## Proposal
 
