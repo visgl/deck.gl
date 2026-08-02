@@ -254,6 +254,17 @@ const testCases: TestCase[] = [
     jointRounded: true,
     extensions: [new PathStyleExtension({dash: true})]
   }),
+  // dashMode 'path' is the whole point of the exercise: all six strips draw the same line and
+  // must come out identical no matter how many vertices it was built from.
+  segmentDensityCase('path-dash-density-mode-path', {
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Justified now composes with continuous phase instead of overriding it. The period is
+  // stretched once across the whole path, so every strip still matches.
+  segmentDensityCase('path-dash-density-mode-path-justified', {
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
 
   // ---------------------------------------------------------------------------------------
   // Dash arrays, from long dashes down to sub-pixel periods

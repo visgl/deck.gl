@@ -79,13 +79,7 @@ const CONTROLS = [
   {key: 'dashSize', type: 'range', label: 'dash size', min: 0.25, max: 16, step: 0.25},
   {key: 'gapSize', type: 'range', label: 'gap size', min: 0.25, max: 16, step: 0.25},
   {key: 'width', type: 'range', label: 'stroke width', min: 1, max: 40, step: 1},
-  {
-    key: 'dashMode',
-    type: 'select',
-    label: 'dash mode',
-    // 'path' only exists once layer 4 lands; before that it falls back to 'segment'.
-    options: ['segment', 'path']
-  },
+  {key: 'dashMode', type: 'select', label: 'dash mode', options: ['segment', 'path']},
   {key: 'widthUnits', type: 'select', label: 'width units', options: ['pixels', 'meters']},
   {key: 'billboard', type: 'select', label: 'billboard', options: ['both', 'off', 'on']},
   {key: 'dashJustified', type: 'checkbox', label: 'justified'},
@@ -164,16 +158,7 @@ function billboardVariants() {
 }
 
 function dashExtension() {
-  // `dashMode` is only understood once layer 4 lands. Probe the constructor so this app
-  // keeps working against every layer of the stack rather than throwing on older builds.
-  try {
-    return new PathStyleExtension({dash: true, dashMode: state.dashMode});
-  } catch (error) {
-    return new PathStyleExtension({
-      dash: true,
-      highPrecisionDash: state.dashMode === 'path'
-    });
-  }
+  return new PathStyleExtension({dash: true, dashMode: state.dashMode});
 }
 
 function buildLayers() {
