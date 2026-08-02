@@ -39,10 +39,6 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
-  // Half of the stroke width, in device pixels. vCornerOffset and vPathPosition.x are in units
-  // of half-width, so multiplying by this converts them to device-pixel distances for analytic
-  // edge coverage. Device pixel ratio is folded in here because project is vertex-stage only.
-  @location(6) vHalfWidthDevicePixels: f32,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -181,8 +177,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       path.widthMaxPixels
     ) / 2.0;
 
-  varyings.vHalfWidthDevicePixels = widthPixels * project.devicePixelRatio;
-
   if (path.billboard != 0.0) {
     var prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
     var currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET);
@@ -250,6 +244,18 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
 
+  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
+  // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
+  // screen-space derivative converts the distance to the boundary into device pixels, which stays
+  // correct under perspective foreshortening and under extensions that rescale the stroke.
+  // Derivatives must be taken in uniform control flow, so they are hoisted above the discards
+  // below. Both branches are evaluated for the same reason the GLSL version does: taking the
+  // derivative of a branched value would differentiate across the corner/body seam.
+  let bodyCoord = abs(varyings.vPathPosition.x);
+  let cornerCoord = length(varyings.vCornerOffset);
+  let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
+  let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+
   let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
   let isRound = varyings.vJointType > 0.5;
 
@@ -265,18 +271,12 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   var color = varyings.vColor;
 
   if (path.antialiasing != 0.0) {
-    // Signed distance to the outer silhouette, in units of half-width. Rounded joints and caps
-    // are bounded by the corner offset; everywhere else the boundary is the edge of the stroke.
     // Only the across-width silhouette is feathered - consecutive segment instances abut along
     // the length of the path, so feathering there would leave a seam at every vertex.
-    let edgeDistance = select(
-      1.0 - abs(varyings.vPathPosition.x),
-      1.0 - length(varyings.vCornerOffset),
-      isRound && isCorner
-    );
     // Spread the transition over exactly one device pixel, centered on the edge.
     // Applied before premultiplication so the color channels scale with coverage too.
-    color.a *= clamp(edgeDistance * varyings.vHalfWidthDevicePixels + 0.5, 0.0, 1.0);
+    let edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
+    color.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
   }
 
   return deckgl_premultiplied_alpha(color);

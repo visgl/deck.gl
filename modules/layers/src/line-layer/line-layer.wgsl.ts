@@ -58,10 +58,6 @@ struct Varyings {
   @location(0) vColor: vec4<f32>,
   @location(1) uv: vec2<f32>,
   @location(2) pickingColor: vec3<f32>,
-  // Half of the line width, in device pixels. uv.y runs [-1, 1] across the width, so multiplying
-  // by this converts it to a device-pixel distance for analytic edge coverage. Device pixel ratio
-  // is folded in here because project is vertex-stage only.
-  @location(3) vHalfWidthDevicePixels: f32,
 };
 
 // ---------- Vertex Shader Entry Point ----------
@@ -150,9 +146,6 @@ fn vertexMain(
   output.vColor = vColor;
   output.uv = uv;
   output.pickingColor = geometry.pickingColor;
-  // getExtrusionOffset returns a unit direction scaled by half the width, so the magnitude of the
-  // filtered offset is the half-width in pixels
-  output.vHalfWidthDevicePixels = length(filteredOffset.xy) * project.devicePixelRatio;
   return output;
 }
 
@@ -160,8 +153,7 @@ fn vertexMain(
 fn fragmentMain(
   @location(0) vColor: vec4<f32>,
   @location(1) uv: vec2<f32>,
-  @location(2) pickingColor: vec3<f32>,
-  @location(3) vHalfWidthDevicePixels: f32
+  @location(2) pickingColor: vec3<f32>
 ) -> @location(0) vec4<f32> {
   // Create and initialize geometry with the provided uv.
   var geometry: Geometry;
@@ -170,12 +162,16 @@ fn fragmentMain(
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
 
+  // uv.y runs [-1, 1] across the width. Dividing the distance to the edge by the screen-space
+  // derivative converts it to device pixels, which stays correct under perspective foreshortening
+  // and at any device pixel ratio. Taken in uniform control flow, ahead of the picking discard.
+  let edgeCoord = abs(uv.y);
+  let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+
   if (line.antialiasing != 0.0) {
-    // Distance to the edge of the line, in device pixels. Only the across-width silhouette is
-    // feathered - the ends butt against neighboring segments in a multi-segment path.
-    // Spread the transition over exactly one device pixel, centered on the edge.
-    let edgeDistance = (1.0 - abs(uv.y)) * vHalfWidthDevicePixels;
-    fragColor.a *= clamp(edgeDistance + 0.5, 0.0, 1.0);
+    // Only the across-width silhouette is feathered - the ends butt against neighboring segments
+    // in a multi-segment path. Spread the transition over one device pixel, centered on the edge.
+    fragColor.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
   }
 
   if (picking.isActive > 0.5) {

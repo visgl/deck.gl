@@ -16,10 +16,6 @@ in float instanceWidths;
 
 out vec4 vColor;
 out vec2 uv;
-// Half of the line width, in device pixels. uv.y runs [-1, 1] across the width, so multiplying by
-// this converts it to a device-pixel distance for analytic edge coverage. Device pixel ratio is
-// folded in here because the project module is vertex-stage only.
-out float vHalfWidthDevicePixels;
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)
@@ -91,9 +87,6 @@ void main(void) {
     getExtrusionOffset(target.xy - source.xy, positions.y, widthPixels),
     0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
-  // getExtrusionOffset returns a unit direction scaled by half the width, so the magnitude of the
-  // (possibly filtered) offset is the half-width in pixels
-  vHalfWidthDevicePixels = length(offset.xy) * project.devicePixelRatio;
   DECKGL_FILTER_GL_POSITION(p, geometry);
   gl_Position = p + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
 

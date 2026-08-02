@@ -200,11 +200,7 @@ The maximum line width in pixels. This prop can be used to prevent the line from
 
 * Default: `false`
 
-If `true`, lines are rendered with smoothed edges. Edge coverage is computed analytically from the line geometry, so it does not depend on the WebGL context being created with multisampling.
-
-Enable this when the context has antialiasing disabled. The most common case is [interleaved](../mapbox/mapbox-overlay.md) rendering into a base map: both MapLibre GL JS and Mapbox GL JS create their WebGL context with `antialias: false`, so deck.gl layers drawn into it receive no antialiasing from the framebuffer. Alternatively, enable MSAA on the base map itself — in MapLibre GL JS v5 that is `canvasContextAttributes: {antialias: true}` on the `Map` constructor, which is more expensive at high resolutions.
-
-Only the edges along the width of the line are smoothed; the two ends are left hard. Antialiasing can cause artifacts where lines overlap, since the blended edges are composited twice.
+If `true`, lines are rendered with smoothed edges. If `false`, lines are rendered with rough edges. Antialiasing can cause artifacts where lines overlap. Only the edges along the width of the line are smoothed — the two ends are not.
 
 
 ### Data Accessors

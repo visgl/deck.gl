@@ -70,11 +70,9 @@ type _LineLayerProps<DataT> = {
   widthMaxPixels?: number;
 
   /**
-   * If `true`, lines are rendered with smoothed edges, computed analytically from the line
-   * geometry rather than relying on the framebuffer's MSAA. Useful when the WebGL context has
-   * antialiasing disabled — notably interleaved rendering into a base map, since MapLibre and
-   * Mapbox create their context with `antialias: false`. Antialiasing can cause artifacts where
-   * lines overlap.
+   * If `true`, lines are rendered with smoothed edges. If `false`, lines are rendered with rough
+   * edges. Antialiasing can cause artifacts where lines overlap. Only the edges along the width of
+   * the line are smoothed - the two ends are not.
    * @default false
    */
   antialiasing?: boolean;

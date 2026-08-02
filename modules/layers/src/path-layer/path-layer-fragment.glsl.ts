@@ -19,7 +19,6 @@ in float vMiterLength;
 in vec2 vPathPosition;
 in float vPathLength;
 in float vJointType;
-in float vHalfWidthDevicePixels;
 
 out vec4 fragColor;
 
@@ -42,15 +41,22 @@ void main(void) {
   fragColor = vColor;
 
   if (path.antialiasing) {
-    // Signed distance to the outer silhouette, in units of half-width. Rounded joints and caps
-    // are bounded by the corner offset; everywhere else the boundary is the edge of the stroke.
+    // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
+    // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
+    // screen-space derivative converts the distance to the boundary into device pixels, which
+    // stays correct under perspective foreshortening and under extensions that rescale the stroke
+    // or remap vPathPosition (PathStyleExtension's offset does both).
+    // Both branches are evaluated unconditionally - taking the derivative of a branched value
+    // would differentiate across the corner/body seam and corrupt every joint.
+    float bodyCoord = abs(vPathPosition.x);
+    float cornerCoord = length(vCornerOffset);
+    float bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
+    float cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
     // Only the across-width silhouette is feathered - consecutive segment instances abut along
     // the length of the path, so feathering there would leave a seam at every vertex.
-    float edgeDistance = isRound && isCorner
-      ? 1.0 - length(vCornerOffset)
-      : 1.0 - abs(vPathPosition.x);
-    // Spread the transition over exactly one device pixel, centered on the edge
-    fragColor.a *= clamp(edgeDistance * vHalfWidthDevicePixels + 0.5, 0.0, 1.0);
+    // Spread the transition over exactly one device pixel, centered on the edge.
+    float edgePixels = isRound && isCorner ? cornerPixels : bodyPixels;
+    fragColor.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
   }
 
   DECKGL_FILTER_COLOR(fragColor, geometry);

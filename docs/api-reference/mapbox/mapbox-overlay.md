@@ -115,15 +115,6 @@ new MapboxOverlay(props: MapboxOverlayProps);
 - `controller` - always disabled (to use Mapbox's interaction handlers).
 - `useDevicePixels` - ignored in interleaved mode, where the base map owns the WebGL context and the canvas drawing buffer size. To control pixel ratio in interleaved mode, use MapLibre's [`pixelRatio`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/#pixelratio) constructor option on the Map instance. Mapbox GL JS does not expose an equivalent option.
 
-### Antialiasing in interleaved mode
-
-Both MapLibre GL JS and Mapbox GL JS create their WebGL context with `antialias: false` as a performance optimization, so in interleaved mode deck.gl layers receive no multisampling from the framebuffer. Layers whose edges rely on it — most visibly [PathLayer](../layers/path-layer.md) and [LineLayer](../layers/line-layer.md) — will look aliased next to the crisp base map lines, which compute their own coverage in the shader.
-
-There are two ways to fix this:
-
-- Set `antialiasing: true` on the affected layers. Coverage is computed analytically in the shader, at no extra memory cost and independent of the context.
-- Or enable MSAA on the base map. In MapLibre GL JS v5 this is `canvasContextAttributes: {antialias: true}` on the `Map` constructor — note that in v5 the top-level `antialias` option is no longer read, so it must be nested. This antialiases every layer at once, but multisampling the whole canvas is significantly more expensive at high resolutions.
-
 The constructor additionally accepts the following options:
 
 - `interleaved` (boolean) - If `false`, a dedicated deck.gl canvas is added on top of the base map. If `true`, deck.gl layers are inserted into mapbox-gl's layer stack, and share the same `WebGL2RenderingContext` as the base map. Default is `false`. Note that interleaving with basemaps such as mapbox-gl-js v1 that only support WebGL 1 is not supported, see [compatibility](./overview#interleaved-renderer-compatibility).
@@ -173,6 +164,10 @@ Removes the control and deletes all resources.
 See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`, returns the base map's `canvas`.
 
 ## Remarks
+
+### Antialiasing
+
+Base maps create their WebGL context with `antialias: false`, so in interleaved mode deck.gl layers receive no multisampling. Layers that rely on it — most visibly [PathLayer](../layers/path-layer.md) and [LineLayer](../layers/line-layer.md) — will look aliased against the base map. Set `antialiasing: true` on those layers, or enable MSAA on the base map itself.
 
 ### Multi-view usage
 

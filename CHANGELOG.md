@@ -21,10 +21,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
-#### Unreleased
-
-- feat(layers): add `antialiasing` prop to PathLayer and LineLayer for analytic edge smoothing, for contexts without MSAA such as interleaved base map rendering
-
 #### deck.gl [v9.4.0-alpha.2] - Jul 29 2026
 
 - fix: add npm metadata to all modules (#10358)

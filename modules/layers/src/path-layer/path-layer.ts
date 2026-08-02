@@ -63,11 +63,9 @@ type _PathLayerProps<DataT> = {
    */
   miterLimit?: number;
   /**
-   * If `true`, paths are rendered with smoothed edges, computed analytically from the stroke
-   * geometry rather than relying on the framebuffer's MSAA. Useful when the WebGL context has
-   * antialiasing disabled — notably interleaved rendering into a base map, since MapLibre and
-   * Mapbox create their context with `antialias: false`. Antialiasing can cause artifacts where
-   * a path overlaps itself.
+   * If `true`, paths are rendered with smoothed edges. If `false`, paths are rendered with rough
+   * edges. Antialiasing can cause artifacts where a path overlaps itself. Only the edges along the
+   * width of the path are smoothed - flat caps at the two ends of a path are not.
    * @default false
    */
   antialiasing?: boolean;
