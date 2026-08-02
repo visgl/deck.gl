@@ -248,24 +248,19 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
   // screen-space derivative converts the distance to the boundary into device pixels, which stays
   // correct under perspective foreshortening and under extensions that rescale the stroke.
-  // Derivatives must be taken in uniform control flow and are undefined once any invocation in
-  // the quad has been discarded, so they are hoisted above the discards below. path.antialiasing
-  // is a uniform, so branching on it stays uniform and costs nothing when the feature is off.
-  // Both coordinates are evaluated so each derivative stays on a single smooth field: a quad
-  // straddling the corner/body boundary would otherwise difference two different fields. The two
-  // agree exactly at that boundary, so this is insurance rather than a fix for an observed
-  // artifact - see the GLSL shader for the details.
   let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
   let isRound = varyings.vJointType > 0.5;
 
+  // Distance to the silhouette in device pixels, from the derivative of the coordinate that
+  // bounds it. Computed before the discards below: derivatives need uniform control flow and are
+  // undefined after a discard in the quad. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
   var edgePixels = 0.0;
   if (path.antialiasing != 0.0) {
     let bodyCoord = abs(varyings.vPathPosition.x);
     let cornerCoord = length(varyings.vCornerOffset);
+    // Both evaluated so each derivative stays on one field across the corner/body boundary
     let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
     let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
-    // Only the across-width silhouette is feathered - consecutive segment instances abut along
-    // the length of the path, so feathering there would leave a seam at every vertex.
     edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
   }
 
@@ -281,8 +276,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   var color = varyings.vColor;
 
   if (path.antialiasing != 0.0) {
-    // Spread the transition over exactly one device pixel, centered on the edge.
-    // Applied before premultiplication so the color channels scale with coverage too.
+    // Feather one device pixel across the width only, before premultiplication
     color.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
   }
 

@@ -162,15 +162,13 @@ fn fragmentMain(
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
 
-  // uv.y runs [-1, 1] across the width. Dividing the distance to the edge by the screen-space
-  // derivative converts it to device pixels, which stays correct under perspective foreshortening
-  // and at any device pixel ratio. Taken in uniform control flow, ahead of the picking discard.
+  // Distance to the edge in device pixels, from the derivative of uv.y. Taken in uniform control
+  // flow, ahead of the picking discard below
   let edgeCoord = abs(uv.y);
   let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
 
   if (line.antialiasing != 0.0) {
-    // Only the across-width silhouette is feathered - the ends butt against neighboring segments
-    // in a multi-segment path. Spread the transition over one device pixel, centered on the edge.
+    // Feather one device pixel across the width. The ends are left hard - they abut neighbors
     fragColor.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
   }
 
