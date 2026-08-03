@@ -280,7 +280,10 @@ fn project_position_vec2_f32(position: vec2<f32>) -> vec2<f32> {
 
 // Transforms a common space position to clip space.
 fn project_common_position_to_clipspace_with_projection(position: vec4<f32>, viewProjectionMatrix: mat4x4<f32>, center: vec4<f32>) -> vec4<f32> {
-  return viewProjectionMatrix * position + center;
+  let clipPosition = viewProjectionMatrix * position + center;
+  // Viewports build WebGL-convention matrices, whose clip volume is -w <= z <= w. WebGPU's is
+  // 0 <= z <= w, so remap depth here - without it the near half of the range is clipped away.
+  return vec4<f32>(clipPosition.xy, (clipPosition.z + clipPosition.w) * 0.5, clipPosition.w);
 }
 
 // Uses the project viewProjectionMatrix and center.
