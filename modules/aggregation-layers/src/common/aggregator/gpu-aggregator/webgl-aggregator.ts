@@ -8,7 +8,7 @@ import {_deepEqual as deepEqual, log, BinaryAttribute} from '@deck.gl/core';
 
 import type {Aggregator, AggregationProps, AggregatedBin} from '../aggregator';
 import type {Device, Buffer, BufferLayout, TypedArray} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
 
 /** Options used to construct a new WebGLAggregator */
 export type WebGLAggregatorProps = {
@@ -31,6 +31,8 @@ export type WebGLAggregatorProps = {
    * Required to support certain layer extensions (e.g. data filter)
    */
   modules?: ShaderModule[];
+  /** Shader assembler configured for the owning layer and rendering device. */
+  shaderAssembler?: ShaderAssembler;
   /** Shadertool module defines */
   defines?: Record<string, string | number | boolean>;
 } & Partial<WebGLAggregationProps>;

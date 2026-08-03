@@ -247,6 +247,7 @@ void main() {
 `;
   const model = new Model(device, {
     bufferLayout: props.bufferLayout,
+    ...(props.shaderAssembler ? {shaderAssembler: props.shaderAssembler} : {}),
     modules: [...(props.modules || []), binSorterUniforms],
     defines: {...props.defines, NON_INSTANCED_MODEL: 1, NUM_CHANNELS: props.channelCount},
     isInstanced: false,

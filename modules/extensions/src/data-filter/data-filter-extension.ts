@@ -219,7 +219,10 @@ export default class DataFilterExtension extends LayerExtension<
       const filterModel = aggregator.getModel(
         device,
         attributeManager.getBufferLayouts({isInstanced: false}),
-        extension.getShaders.call(this, extension),
+        {
+          ...extension.getShaders.call(this, extension),
+          ...(this.context.shaderAssembler ? {shaderAssembler: this.context.shaderAssembler} : {})
+        },
         useFloatTarget
       );
       this.setState({filterFBO, filterModel});
