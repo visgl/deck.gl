@@ -276,8 +276,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   var color = varyings.vColor;
 
   if (path.antialiasing != 0.0) {
-    // Feather one device pixel across the width only, before premultiplication
-    color.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
+    // Feather one device pixel across the width only, before premultiplication. edgePixels is a
+    // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
+    color.a *= smoothedge(0.0, edgePixels);
   }
 
   return deckgl_premultiplied_alpha(color);

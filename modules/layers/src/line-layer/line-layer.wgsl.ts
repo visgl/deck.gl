@@ -169,7 +169,7 @@ fn fragmentMain(
 
   if (line.antialiasing != 0.0) {
     // Feather one device pixel across the width. The ends are left hard - they abut neighbors
-    fragColor.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
+    fragColor.a *= smoothedge(0.0, edgePixels);
   }
 
   if (picking.isActive > 0.5) {

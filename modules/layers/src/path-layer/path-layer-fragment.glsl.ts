@@ -54,8 +54,10 @@ void main(void) {
   fragColor = vColor;
 
   if (path.antialiasing) {
-    // Feather one device pixel across the width only - segments abut lengthwise, which would seam
-    fragColor.a *= clamp(edgePixels + 0.5, 0.0, 1.0);
+    // Feather one device pixel across the width only - segments abut lengthwise, which would seam.
+    // edgePixels is a signed device-pixel distance, and SMOOTH_EDGE_RADIUS is 0.5, so smoothedge
+    // ramps across exactly one pixel centered on the edge.
+    fragColor.a *= smoothedge(0.0, edgePixels);
   }
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
