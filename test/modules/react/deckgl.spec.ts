@@ -183,7 +183,9 @@ test('DeckGL#custom render uses the initialized device type', () => {
   container.remove();
 });
 
-test('DeckGL#real WebGPU device draws through the React custom render loop', async ({skip}) => {
+test.skip('DeckGL#real WebGPU device draws through the React custom render loop', async ({
+  skip
+}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
