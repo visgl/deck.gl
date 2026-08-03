@@ -7,20 +7,43 @@ import type {GLParameters} from '@luma.gl/webgl/constants';
 import {GL} from '@luma.gl/webgl/constants';
 import {WebGLDevice} from '@luma.gl/webgl';
 import {
+  addMap3DCameraChangeListener,
+  captureMap3DWebGLContext,
   createDeckInstance,
+  createDeckInstanceForMap3D,
   destroyDeckInstance,
+  getScreenViewPropsFromMap3D,
+  getViewPropsFromMap3D,
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer,
+  installMap3DWebGLContextCapture,
+  isMap3DElement,
   POSITIONING_CONTAINER_ID
 } from './utils';
-import {Deck} from '@deck.gl/core';
+import {Deck, log} from '@deck.gl/core';
 
 import type {DeckProps, MapViewState} from '@deck.gl/core';
 import type {Device, Framebuffer} from '@luma.gl/core';
+import type {GoogleMapsMap3DElement} from './utils';
 const HIDE_ALL_LAYERS = () => false;
-const GL_STATE: GLParameters = {
+const VECTOR_GL_STATE: GLParameters = {
   depthMask: true,
   depthTest: true,
+  blend: true,
+  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendEquation: GL.FUNC_ADD
+};
+const MAP3D_SCREEN_GL_STATE: GLParameters = {
+  depthMask: false,
+  depthTest: false,
+  blend: true,
+  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
+  blendEquation: GL.FUNC_ADD
+};
+const MAP3D_MESH_GL_STATE: GLParameters = {
+  depthMask: false,
+  depthTest: true,
+  depthFunc: GL.LEQUAL,
   blend: true,
   blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
   blendEquation: GL.FUNC_ADD
@@ -29,9 +52,22 @@ const GL_STATE: GLParameters = {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 function noop() {}
 
+function getDeckAnimationLoop(deck: Deck): DeckAnimationLoop | null {
+  return (deck as unknown as DeckInternal).animationLoop || null;
+}
+
+function getDeckDevice(deck: Deck): Device | null {
+  return (deck as unknown as DeckInternal).device || null;
+}
+
 const defaultProps = {
-  interleaved: true
+  interleaved: true,
+  map3DDepthMode: 'screen' as GoogleMapsMap3DDepthMode,
+  map3DFallbackMode: 'geospatial' as GoogleMapsMap3DFallbackMode
 };
+
+export type GoogleMapsMap3DDepthMode = 'mesh' | 'screen';
+export type GoogleMapsMap3DFallbackMode = 'geospatial' | 'screen';
 
 export type GoogleMapsOverlayProps = Omit<
   DeckProps,
@@ -47,34 +83,72 @@ export type GoogleMapsOverlayProps = Omit<
   | 'controller'
 > & {
   interleaved?: boolean;
+  /**
+   * Experimental Map3D-only draw mode.
+   * `screen` draws Deck as a compositor overlay. `mesh` depth-tests Deck against
+   * Google Map3D's depth buffer when a shared WebGL context is available.
+   */
+  map3DDepthMode?: GoogleMapsMap3DDepthMode;
+  /**
+   * Experimental Map3D-only fallback mode used when a shared Google Map3D WebGL
+   * context cannot be captured.
+   * `geospatial` applies approximate Map3D camera math to geospatial Deck layers.
+   * `screen` uses a stable screen-coordinate Deck overlay for diagnostics/widgets.
+   */
+  map3DFallbackMode?: GoogleMapsMap3DFallbackMode;
+};
+
+type GoogleMapsOverlayMap = google.maps.Map | GoogleMapsMap3DElement;
+type ListenerHandle = {
+  remove: () => void;
+};
+type DeckAnimationLoop = {
+  _renderFrame: () => void;
+  animationProps?: unknown;
+  props: {
+    onRender: (props: unknown) => void;
+  };
+};
+type DeckInternal = {
+  animationLoop?: DeckAnimationLoop;
+  device: Device | null;
 };
 
 export default class GoogleMapsOverlay {
   private props: GoogleMapsOverlayProps = {};
-  private _map: google.maps.Map | null = null;
+  private _map: GoogleMapsOverlayMap | null = null;
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
   private _positioningOverlay: google.maps.OverlayView | null = null;
+  private _map3DCameraListener: ListenerHandle | null = null;
+  private _map3DRenderFrame = 0;
+  private _map3DGL: WebGL2RenderingContext | WebGLRenderingContext | null = null;
   private _externalFramebuffer: {
     handle: WebGLFramebuffer;
     wrapper: import('@luma.gl/core').Framebuffer;
   } | null = null;
 
   constructor(props: GoogleMapsOverlayProps) {
+    installMap3DWebGLContextCapture();
     this.setProps({...defaultProps, ...props});
   }
 
   /* Public API */
 
   /** Add/remove the overlay from a map. */
-  setMap(map: google.maps.Map | null): void {
+  setMap(map: GoogleMapsOverlayMap | null): void {
     if (map === this._map) {
       return;
     }
 
-    const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
     if (this._map) {
-      if (!map && this._map.getRenderingType() === VECTOR && this.props.interleaved) {
+      if (isMap3DElement(this._map)) {
+        this._removeOverlayMap3D();
+      } else if (
+        !map &&
+        this._map.getRenderingType() === google.maps.RenderingType.VECTOR &&
+        this.props.interleaved
+      ) {
         (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
       }
       this._overlay?.setMap(null);
@@ -83,6 +157,12 @@ export default class GoogleMapsOverlay {
     }
     if (map) {
       this._map = map;
+      if (isMap3DElement(map)) {
+        this._createOverlayMap3D(map);
+        return;
+      }
+
+      const {UNINITIALIZED} = google.maps.RenderingType;
       const renderingType = map.getRenderingType();
       if (renderingType !== UNINITIALIZED) {
         this._createOverlay(map);
@@ -107,6 +187,9 @@ export default class GoogleMapsOverlay {
         props.style = null;
       }
       this._deck.setProps(props);
+      if ('map3DDepthMode' in props && this._map && isMap3DElement(this._map)) {
+        this._requestMap3DRedraw();
+      }
     }
   }
 
@@ -148,6 +231,10 @@ export default class GoogleMapsOverlay {
     } else {
       this._createOverlayRaster(map);
     }
+  }
+
+  _getGoogleMap(): google.maps.Map | null {
+    return this._map && !isMap3DElement(this._map) ? this._map : null;
   }
 
   /**
@@ -211,7 +298,7 @@ export default class GoogleMapsOverlay {
 
   _updateContainerSize() {
     // Update positioning container size and position to match map
-    if (!this._map) return;
+    if (!this._map || isMap3DElement(this._map)) return;
 
     const container = this._map
       .getDiv()
@@ -232,7 +319,7 @@ export default class GoogleMapsOverlay {
   }
 
   _onContextRestored({gl}) {
-    if (!this._map || !this._overlay) {
+    if (!this._map || isMap3DElement(this._map) || !this._overlay) {
       return;
     }
     const _customRender = () => {
@@ -250,15 +337,18 @@ export default class GoogleMapsOverlay {
     // By default, animationLoop._renderFrame invokes
     // animationLoop.onRender. We override this to wrap
     // in withParameters so we don't modify the GL state
-    // @ts-ignore accessing protected member
-    const animationLoop = deck.animationLoop!;
+    const animationLoop = getDeckAnimationLoop(deck);
+    if (!animationLoop) {
+      return;
+    }
     animationLoop._renderFrame = () => {
       const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
-      // @ts-expect-error accessing protected member
-      const device: Device = deck.device;
-      device.withParametersWebGL({}, () => {
-        animationLoop.props.onRender(animationLoop.animationProps!);
-      });
+      const device = getDeckDevice(deck);
+      if (device) {
+        device.withParametersWebGL({}, () => {
+          animationLoop.props.onRender(animationLoop.animationProps);
+        });
+      }
       gl.bindBuffer(gl.ARRAY_BUFFER, ab);
     };
   }
@@ -276,7 +366,7 @@ export default class GoogleMapsOverlay {
   }
 
   _onDrawRaster() {
-    if (!this._deck || !this._map) {
+    if (!this._deck || !this._map || isMap3DElement(this._map)) {
       return;
     }
     const deck = this._deck;
@@ -298,15 +388,16 @@ export default class GoogleMapsOverlay {
     deck.setProps({
       width,
       height,
-      // @ts-expect-error altitude is accepted by WebMercatorViewport but not exposed by type
-      viewState: {altitude, ...rest} as MapViewState
+      // altitude is accepted by WebMercatorViewport but not exposed by type
+      viewState: {altitude, ...rest} as unknown as MapViewState
     });
     // Deck is initialized
     deck.redraw();
   }
 
   _onDrawVector({gl, transformer}) {
-    if (!this._deck || !this._map) {
+    const map = this._getGoogleMap();
+    if (!this._deck || !map) {
       return;
     }
 
@@ -314,14 +405,13 @@ export default class GoogleMapsOverlay {
     const {interleaved} = this.props;
 
     deck.setProps({
-      ...getViewPropsFromCoordinateTransformer(this._map, transformer),
+      ...getViewPropsFromCoordinateTransformer(map, transformer),
       // Using external gl context - do not set css size
       ...(interleaved && {width: null, height: null})
     });
 
     if (interleaved && deck.isInitialized) {
-      // @ts-expect-error
-      const device: Device = deck.device;
+      const device = getDeckDevice(deck);
 
       // As an optimization, some renders are to an separate framebuffer
       // which we need to pass onto deck. Wrap external handle so luma.gl
@@ -358,7 +448,7 @@ export default class GoogleMapsOverlay {
           stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
         });
 
-        device.withParametersWebGL(GL_STATE, () => {
+        device.withParametersWebGL(VECTOR_GL_STATE, () => {
           deck._drawLayers('google-vector', {
             clearCanvas: false
           });
@@ -368,4 +458,147 @@ export default class GoogleMapsOverlay {
       deck.redraw();
     }
   }
+
+  _createOverlayMap3D(map: GoogleMapsMap3DElement) {
+    const interleaved = this.props.interleaved ?? defaultProps.interleaved;
+    let gl: WebGL2RenderingContext | WebGLRenderingContext | null = null;
+
+    if (interleaved) {
+      gl = captureMap3DWebGLContext(map);
+      if (!gl) {
+        const meshDepthMessage =
+          this.props.map3DDepthMode === 'mesh'
+            ? ' Mesh-depth mode was requested, but it requires a captured shared Map3D WebGL context.'
+            : '';
+        log.warn(
+          'deck.gl: GoogleMapsOverlay could not capture the Map3D WebGL canvas. ' +
+            'Rendering with a non-interleaved Deck overlay instead; this path is approximate ' +
+            `and should not be used for terrain-locked Map3D geometry.${meshDepthMessage}`
+        )();
+      }
+    }
+
+    this._map3DGL = gl;
+    this._deck = createDeckInstanceForMap3D(map, this._deck, {
+      ...(gl && {
+        gl,
+        _customRender: this._requestMap3DRedraw.bind(this)
+      }),
+      ...this.props
+    });
+    if (gl) {
+      this._overrideMap3DRenderFrame(gl);
+    }
+
+    this._map3DCameraListener = addMap3DCameraChangeListener(
+      map,
+      this._requestMap3DRedraw.bind(this),
+      {redrawWhileMoving: Boolean(gl)}
+    );
+    this._onDrawMap3D();
+  }
+
+  _removeOverlayMap3D() {
+    this._map3DCameraListener?.remove();
+    this._map3DCameraListener = null;
+    if (this._map3DRenderFrame && globalThis.cancelAnimationFrame) {
+      globalThis.cancelAnimationFrame(this._map3DRenderFrame);
+    }
+    this._map3DRenderFrame = 0;
+    this._map3DGL = null;
+    this._onRemove();
+  }
+
+  _requestMap3DRedraw() {
+    if (!globalThis.requestAnimationFrame) {
+      this._onDrawMap3D();
+      return;
+    }
+    if (this._map3DRenderFrame) {
+      return;
+    }
+    this._map3DRenderFrame = globalThis.requestAnimationFrame(() => {
+      this._map3DRenderFrame = 0;
+      this._onDrawMap3D();
+    });
+  }
+
+  _overrideMap3DRenderFrame(gl: WebGL2RenderingContext | WebGLRenderingContext) {
+    const deck = this._deck;
+    const animationLoop = deck && getDeckAnimationLoop(deck);
+    if (!deck || !animationLoop) {
+      return;
+    }
+
+    // Match the vector overlay path: do not leave Deck's GL state in Google's renderer.
+    animationLoop._renderFrame = () => {
+      const ab = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+      const device = getDeckDevice(deck);
+      if (device) {
+        device.withParametersWebGL({}, () => {
+          animationLoop.props.onRender(animationLoop.animationProps);
+        });
+      }
+      gl.bindBuffer(gl.ARRAY_BUFFER, ab);
+    };
+  }
+
+  _onDrawMap3D() {
+    if (!this._deck || !this._map || !isMap3DElement(this._map)) {
+      return;
+    }
+
+    const deck = this._deck;
+    const gl = this._map3DGL;
+    const interleaved = Boolean(gl);
+    const viewProps =
+      !gl && this.props.map3DFallbackMode === 'screen'
+        ? getScreenViewPropsFromMap3D(this._map)
+        : getViewPropsFromMap3D(this._map, {zoomSource: gl ? 'camera' : 'range'});
+    deck.setProps({
+      ...viewProps,
+      ...(interleaved && {width: null, height: null})
+    } as DeckProps);
+
+    if (gl && deck.isInitialized) {
+      const device = getDeckDevice(deck);
+
+      if (device instanceof WebGLDevice) {
+        const externalFbo = device.getParametersWebGL(GL.FRAMEBUFFER_BINDING);
+        let _framebuffer: Framebuffer | null = null;
+        if (externalFbo) {
+          if (this._externalFramebuffer?.handle !== externalFbo) {
+            this._externalFramebuffer?.wrapper.destroy();
+            const wrapper = device.createFramebuffer({
+              handle: externalFbo,
+              width: gl.canvas.width,
+              height: gl.canvas.height
+            });
+            this._externalFramebuffer = {handle: externalFbo, wrapper};
+          }
+          _framebuffer = this._externalFramebuffer!.wrapper;
+        }
+        deck.setProps({_framebuffer});
+
+        deck.needsRedraw({clearRedrawFlags: true});
+        device.setParametersWebGL({
+          viewport: [0, 0, gl.canvas.width, gl.canvas.height],
+          scissor: [0, 0, gl.canvas.width, gl.canvas.height],
+          stencilFunc: [gl.ALWAYS, 0, 255, gl.ALWAYS, 0, 255]
+        });
+
+        device.withParametersWebGL(getMap3DGLState(this.props.map3DDepthMode), () => {
+          deck._drawLayers('google-map-3d', {
+            clearCanvas: false
+          });
+        });
+      }
+    } else {
+      deck.redraw();
+    }
+  }
+}
+
+function getMap3DGLState(depthMode: GoogleMapsMap3DDepthMode | undefined): GLParameters {
+  return depthMode === 'mesh' ? MAP3D_MESH_GL_STATE : MAP3D_SCREEN_GL_STATE;
 }

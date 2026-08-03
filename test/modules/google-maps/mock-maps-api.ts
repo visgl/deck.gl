@@ -186,6 +186,47 @@ export class Map {
   }
 }
 
+export class Map3DElement {
+  constructor(opts) {
+    /* global document */
+    const element = document.createElement('gmp-map-3d');
+    const center = opts.center || {
+      lat: opts.latitude || 0,
+      lng: opts.longitude || 0,
+      altitude: opts.altitude || 0
+    };
+
+    Object.assign(element, {
+      cameraPosition: opts.cameraPosition,
+      center,
+      range: opts.range || 1000,
+      heading: opts.heading || 0,
+      tilt: opts.tilt || opts.pitch || 0,
+      roll: opts.roll || 0,
+      fov: opts.fov || 25,
+      emit: event => element.dispatchEvent(new Event(event.type))
+    });
+    Object.defineProperty(element, 'clientWidth', {value: opts.width, configurable: true});
+    Object.defineProperty(element, 'clientHeight', {value: opts.height, configurable: true});
+    Object.defineProperty(element, 'offsetWidth', {value: opts.width, configurable: true});
+    Object.defineProperty(element, 'offsetHeight', {value: opts.height, configurable: true});
+    element.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      right: opts.width,
+      bottom: opts.height,
+      width: opts.width,
+      height: opts.height
+    });
+
+    return element;
+  }
+}
+
+export const maps3d = {
+  Map3DElement
+};
+
 export class OverlayView {
   constructor() {
     this.map = null;
