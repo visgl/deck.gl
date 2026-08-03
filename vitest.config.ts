@@ -9,7 +9,7 @@ const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftsha
 
 const headlessPlaywright = playwright({
   launchOptions: {
-    args: chromiumLaunchArgs
+    args: [...chromiumLaunchArgs, '--enable-unsafe-webgpu']
   }
 });
 
