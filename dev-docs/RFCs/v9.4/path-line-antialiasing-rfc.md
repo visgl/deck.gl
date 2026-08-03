@@ -284,6 +284,14 @@ image diff cannot express:
 - Deleting the feather drops the antialiased pass from 719 partial pixels to 0.
 - Restoring the previous varying-based implementation reproduces the 0.328 offset collapse.
 
+**WebGPU** is asserted by hand rather than in CI. `test/render/test-cases/line-layer.spec.ts` wires
+`antialiasing: deviceType === 'webgpu'` so one golden can serve both backends, but the `'webgpu'`
+row stays commented out: the WebGPU canvas does not present under the headless software renderer CI
+runs on, so the screenshot the suite diffs comes back blank whatever deck draws. Reading back an
+offscreen framebuffer instead — which sidesteps canvas presentation — `LineLayer`, `PathLayer` and
+`ScatterplotLayer` all paint on WebGPU, within a few pixels of their WebGL counts. Enable the row
+once CI has hardware WebGPU.
+
 ## Follow-ups
 
 - **`ScatterplotLayer` feather is not DPR-aware.** Its `SMOOTH_EDGE_RADIUS` is a fixed 0.5 CSS

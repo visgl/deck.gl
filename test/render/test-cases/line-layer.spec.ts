@@ -43,11 +43,11 @@ function getTestCases(deviceType: TestDeviceType) {
   ];
 }
 
-// 'webgpu' is ready to enable - the case above supplies the analytic coverage that the backend's
-// lack of MSAA otherwise costs it. It stays commented out because WebGPU rasterizes nothing under
-// the software renderer this suite runs on: both this case and every path-layer case come back as
-// a blank frame, with the device created and no validation errors. Uncomment on a machine with
-// hardware WebGPU, or once CI has it.
+// 'webgpu' renders correctly now - the case above supplies the analytic coverage that the
+// backend's lack of MSAA otherwise costs it, and layers draw as expected when read back from an
+// offscreen framebuffer. It stays commented out because the screenshot this suite diffs against
+// comes back blank: the WebGPU canvas does not present under the headless software renderer, which
+// is independent of what deck draws. Uncomment once CI has hardware WebGPU.
 describe.each([
   'webgl'
   // 'webgpu'
