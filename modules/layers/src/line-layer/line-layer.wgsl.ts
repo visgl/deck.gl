@@ -168,7 +168,8 @@ fn fragmentMain(
   let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
 
   if (line.antialiasing != 0.0) {
-    // Feather one device pixel across the width. The ends are left hard - they abut neighbors
+    // Feather one device pixel across the width, before premultiplication below. The ends are left
+    // hard - they abut neighbors
     fragColor.a *= smoothedge(0.0, edgePixels);
   }
 

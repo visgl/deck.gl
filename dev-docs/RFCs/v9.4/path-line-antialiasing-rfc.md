@@ -106,6 +106,13 @@ off it.
 This is long-standing and well-reported ground. The tracker history also shapes what this proposal
 should and should not claim.
 
+**luma.gl is the canonical reference for the techniques themselves.**
+[Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) maps artifacts
+to remedies across both backends, and is where that taxonomy is being consolidated. It reaches the
+same conclusion this proposal rests on: "for analytic shapes such as circles, lines, and
+signed-distance-field text, shader-computed coverage with a smooth transition can be more precise
+than postprocessing." The sections below cover only what is specific to deck.gl.
+
 **The established answer has been "turn on MSAA in the host."** In
 [#5742](https://github.com/visgl/deck.gl/issues/5742) (2021, closed) the guidance was to construct
 the `Map` with `antialias: true`, which resolved it for that reporter. That advice is still correct
@@ -242,10 +249,38 @@ in [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741). It should land,
 better fix for the post-processing case. It does not reach interleaved base maps, ArcGIS's
 depth-attached framebuffer, or WebGPU — see Prior art for the breakdown.
 
+**Alpha-to-coverage.** The most interesting alternative, and the only one that could beat this
+proposal on quality. Turning coverage into a sample mask rather than an alpha value would fix the two
+Limitations below — per-sample masks compose without alpha blending's conflation artifact, so ends
+and self-overlaps would stop needing special treatment — and it is the standard remedy for
+`discard`-defined edges, which MSAA cannot touch at all. It is parked rather than adopted, for three
+separate reasons:
+
+1. **It is a no-op on WebGL.** luma declares `sampleAlphaToCoverageEnabled`
+   (`core/src/adapter/types/parameters.ts`) but never maps it —
+   `webgl/src/adapter/converters/device-parameters.ts` handles neighbouring parameters and warns on
+   unsupported ones, and this one silently falls through.
+2. **It is inert on WebGPU.** It does map there
+   (`webgpu/src/adapter/helpers/webgpu-parameters.ts` → `multisample.alphaToCoverageEnabled`), but
+   that requires `sampleCount > 1` and deck has no multisampled WebGPU target: the canvas has none,
+   and offscreen MSAA is luma.gl#2741 again.
+3. **It collides with deck's blending.** The mask is derived from fragment alpha, and deck blends
+   with `SRC_ALPHA`, so both consume the same value and a translucent layer is counted twice.
+   Separating geometric coverage from object opacity needs an explicit sample mask —
+   `@builtin(sample_mask)` in WGSL, blocked by (2); in GLSL ES 3.00 it does not exist at all, and the
+   `OES_sample_variables` extension that supplies it is unused by luma.
+
+Worth revisiting once luma.gl#2741 lands, since that clears (2) and makes the WGSL path viable.
+
 ## Limitations
 
+Both of the first two are conflation artifacts — consequences of expressing coverage as alpha and
+compositing it — rather than anything specific to this design. Per-sample coverage avoids them; see
+alpha-to-coverage under Alternatives for why that is not available yet.
+
 - **Flat caps.** The two ends of a path are not feathered, since that would require feathering along
-  the path length. `capRounded: true` gets smoothed ends. `LineLayer` ends are likewise unfeathered.
+  the path length, and abutting segments would then seam. `capRounded: true` gets smoothed ends.
+  `LineLayer` ends are likewise unfeathered.
 - **Self-overlap.** Where a path overlaps itself the blended edges composite twice, the same
   trade-off `ScatterplotLayer.antialiasing` already documents.
 - **`PathStyleExtension` offset.** The extension hard-`discard`s outside `|vPathPosition.x| > 1`
@@ -284,7 +319,13 @@ image diff cannot express:
 - Deleting the feather drops the antialiased pass from 719 partial pixels to 0.
 - Restoring the previous varying-based implementation reproduces the 0.328 offset collapse.
 
-**WebGPU** is asserted by hand rather than in CI. `test/render/test-cases/line-layer.spec.ts` wires
+**Premultiplied alpha** — `test/render/webgpu-antialiasing.spec.ts`. WebGPU blends premultiplied, so
+coverage has to reach alpha *before* `deckgl_premultiplied_alpha`; applying it after would leave RGB
+too bright for its alpha, a light halo on every edge. The test renders on WebGPU into an offscreen
+framebuffer and asserts red tracks alpha at partial-coverage pixels. Moving the multiply after
+premultiplication takes the worst overshoot from 2 to 126.
+
+**WebGPU golden coverage** is asserted by hand rather than in CI. `test/render/test-cases/line-layer.spec.ts` wires
 `antialiasing: deviceType === 'webgpu'` so one golden can serve both backends, but the `'webgpu'`
 row stays commented out: the WebGPU canvas does not present under the headless software renderer CI
 runs on, so the screenshot the suite diffs comes back blank whatever deck draws. Reading back an
@@ -301,7 +342,13 @@ once CI has hardware WebGPU.
   covered by this change.
 - **`PathStyleExtension` offset ramp clipping**, above — the remaining half of
   [#8063](https://github.com/visgl/deck.gl/issues/8063) /
-  [#9395](https://github.com/visgl/deck.gl/issues/9395).
+  [#9395](https://github.com/visgl/deck.gl/issues/9395). Same underlying problem as the next item: a
+  `discard` that alpha cannot soften.
+- **Revisit alpha-to-coverage** once [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741)
+  gives WebGPU a multisampled target, which unblocks the `@builtin(sample_mask)` route. That would
+  address the flat-cap and self-overlap limitations and the `discard`-defined edges together. Closing
+  the WebGL side additionally needs luma to map `sampleAlphaToCoverageEnabled`, which it currently
+  ignores. See Alternatives.
 - **Set `samples` on the post-process render buffers** once
   [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741) lands, closing
   [#10404](https://github.com/visgl/deck.gl/issues/10404) for every layer. See Prior art for why

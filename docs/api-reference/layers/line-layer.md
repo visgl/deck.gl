@@ -202,6 +202,8 @@ The maximum line width in pixels. This prop can be used to prevent the line from
 
 If `true`, lines are rendered with smoothed edges. If `false`, lines are rendered with rough edges. Antialiasing can cause artifacts where lines overlap. Only the edges along the width of the line are smoothed — the two ends are not.
 
+This computes coverage in the shader, which is one of several antialiasing techniques with different trade-offs. See [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs for choosing between them.
+
 
 ### Data Accessors
 
