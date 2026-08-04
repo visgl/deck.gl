@@ -102,7 +102,7 @@ function App() {
       <InfoWidget
         viewId="ortho-view"
         mode="hover"
-        getTooltip={({object}) => object ? 'point' : null}
+        getTooltip={({object}) => (object ? 'point' : null)}
       />
       <ScrollbarWidget
         id="scrollbar-v"

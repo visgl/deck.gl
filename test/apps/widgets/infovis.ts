@@ -101,7 +101,7 @@ new Deck({
     new InfoWidget({
       viewId: 'ortho-view',
       mode: 'hover',
-      getTooltip: ({object}) => object ? 'point' : null,
+      getTooltip: ({object}) => (object ? 'point' : null)
     }),
     new ScrollbarWidget({
       id: 'scrollbar-v',
