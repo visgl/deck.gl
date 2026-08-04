@@ -43,14 +43,12 @@ function getTestCases(deviceType: TestDeviceType) {
   ];
 }
 
-// 'webgpu' renders correctly now - the case above supplies the analytic coverage that the
-// backend's lack of MSAA otherwise costs it, and layers draw as expected when read back from an
-// offscreen framebuffer. It stays commented out because the screenshot this suite diffs against
-// comes back blank: the WebGPU canvas does not present under the headless software renderer, which
-// is independent of what deck draws. Uncomment once CI has hardware WebGPU.
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+// 'webgpu' is expected to fail against the shared golden for now, and is enabled deliberately so
+// that gap is visible and tracked rather than invisible. Last measured 83.25% against a 99%
+// threshold - the two backends rasterize 2px lines differently (WebGPU is crisper: 73.8k ink pixels
+// vs WebGL's 90.0k), and it is not a misalignment, since shifting the image a pixel in any direction
+// only reaches 84.98%. Closing that gap is part of finishing the WebGPU port; the diff image CI
+// uploads on failure is the measurement. Requires a virtual display - see the test workflow.
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(getTestCases(deviceType) as TestCase[], deviceType);
 });

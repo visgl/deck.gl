@@ -36,9 +36,13 @@ jobs:
         run: yarn build
 
       - name: Run tests
+        # Render tests run under a virtual display. Chromium's --enable-gpu stops headless forcing
+        # software rendering, but the driver autodetection it falls back to needs an X display on
+        # Linux - without one the WebGPU canvas is never composited and captures as a blank frame.
+        # WebGL is unaffected either way. See https://github.com/visgl/luma.gl/issues/2874
         run: |
           yarn lint
-          yarn test-ci
+          xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-ci
 
       - name: Upload render test failure images
         if: failure()
