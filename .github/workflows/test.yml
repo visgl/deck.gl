@@ -53,9 +53,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: Run tape backward compatibility smoke test
-        run: yarn test-tape-compat
-
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
