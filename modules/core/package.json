@@ -48,6 +48,7 @@
     "@loaders.gl/images": "^4.4.3",
     "@luma.gl/core": "^9.4.0-alpha.4",
     "@luma.gl/engine": "^9.4.0-alpha.4",
+    "@luma.gl/gpgpu": "^9.4.0-alpha.4",
     "@luma.gl/shadertools": "^9.4.0-alpha.4",
     "@luma.gl/webgl": "^9.4.0-alpha.4",
     "@math.gl/core": "^4.1.0",
