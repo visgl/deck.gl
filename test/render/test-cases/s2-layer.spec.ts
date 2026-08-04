@@ -43,32 +43,11 @@ const testCases = [
     },
     layers: [
       new S2Layer({
-        // prettier-ignore
+        // biome-ignore format: preserve layout
         data: [
-          '04',
-          '0c',
-          '14',
-          '1c',
-          '24',
-          '2c',
-          '34',
-          '3c',
-          '44',
-          '4c',
-          '54',
-          '5c',
-          '64',
-          '6c',
-          '74',
-          '7c',
-          '84',
-          '8c',
-          '94',
-          '9c',
-          'a4',
-          'ac',
-          'b4',
-          'bc'
+          '04', '0c', '14', '1c', '24', '2c', '34', '3c',
+          '44', '4c', '54', '5c', '64', '6c', '74', '7c',
+          '84', '8c', '94', '9c', 'a4', 'ac', 'b4', 'bc',
         ],
         opacity: 0.6,
         getS2Token: f => f,

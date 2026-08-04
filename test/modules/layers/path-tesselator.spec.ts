@@ -157,10 +157,20 @@ test('PathTesselator#partial update', () => {
   positions = tesselator.get('positions').slice(0, 36);
   expect(tesselator.instanceCount, 'Updated instance count').toBe(12);
   expect(positions, 'positions').toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [
-      1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5,
-      5, 0, 6, 6, 0
+      1, 1, 0,
+      2, 2, 0,
+      3, 3, 0,
+      1, 1, 0,
+      2, 2, 0,
+      3, 3, 0,
+      1, 1, 0,
+      2, 2, 0,
+      3, 3, 0,
+      4, 4, 0,
+      5, 5, 0,
+      6, 6, 0
     ]
   );
   expect(Array.from(accessorCalled), 'Accessor called only on partial data').toEqual(['C']);

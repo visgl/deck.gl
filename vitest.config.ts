@@ -169,6 +169,21 @@ const projects = [
         }
       },
 
+      // Tape compatibility project - verifies the legacy @deck.gl/test-utils entry point
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'tape-compat',
+          environment: 'node',
+          include: ['test/smoke/**/*.tape.spec.js'],
+          globals: false,
+          testTimeout: 30000,
+          setupFiles: ['./test/setup/vitest-node-setup.ts'],
+          sequence: {groupOrder: 0}
+        }
+      },
+
       // Headless project - unit tests in headless browser
       // Used by test-headless and test-ci
       {

@@ -195,12 +195,13 @@ webglTest('ComponentState#async props with transform', async () => {
   const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];
-  // prettier-ignore
-  const testImage = {
-    data: new Uint8ClampedArray([0, 0, 0, 255, 255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255]),
-    width: 2,
-    height: 2
-  };
+  // biome-ignore format: preserve layout
+  const testImage = {data: new Uint8ClampedArray([
+    0, 0, 0, 255,
+    255, 0, 0, 255,
+    0, 255, 0, 255,
+    0, 0, 255, 255
+  ]), width: 2, height: 2};
 
   // @ts-expect-error
   const state = new ComponentState();

@@ -387,14 +387,20 @@ test('Attribute#updateBuffer', () => {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
-        255, 0, 0, 255, 128, 128, 128, 128, 255, 255, 255, 255, 0, 0, 0, 128, 0, 0, 0, 255
+        255, 0, 0, 255,
+        128, 128, 128, 128,
+        255, 255, 255, 255,
+        0, 0, 0, 128,
+        0, 0, 0, 255
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
-        255, 0, 0, 255, 255, 0, 0, 255, 128, 128, 128, 128, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128
+        255, 0, 0, 255, 255, 0, 0, 255,
+        128, 128, 128, 128,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128
       ]
     },
     {
@@ -416,11 +422,19 @@ test('Attribute#updateBuffer', () => {
         size: 3,
         accessor: (_, {index}) => [index, 0, 0]
       }),
-      // prettier-ignore
-      standard: [0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
+      standard: [
+        0, 0, 0,
+        1, 0, 0,
+        2, 0, 0,
+        3, 0, 0
+      ],
+      // biome-ignore format: preserve layout
       'variable size': [
-        0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0
+        0, 0, 0, 0, 0, 0,
+        1, 0, 0,
+        2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0,
+        3, 0, 0, 3, 0, 0, 3, 0, 0
       ]
     },
     {
@@ -598,10 +612,14 @@ test('Attribute#standard accessor - variable width', () => {
         defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       result: [
-        255, 0, 0, 255, 255, 255, 0, 255, 128, 128, 128, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255
+        255, 0, 0, 255,
+        255, 255, 0, 255,
+        128, 128, 128, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255,
+        255, 255, 255, 255
       ]
     }
   ];

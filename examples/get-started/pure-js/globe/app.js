@@ -27,15 +27,8 @@ new Deck({
     new SolidPolygonLayer({
       id: 'background',
       data: [
-        // prettier-ignore
-        [
-          [-180, 90],
-          [0, 90],
-          [180, 90],
-          [180, -90],
-          [0, -90],
-          [-180, -90]
-        ]
+        // biome-ignore format: preserve layout
+        [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
       ],
       opacity: 0.5,
       getPolygon: d => d,

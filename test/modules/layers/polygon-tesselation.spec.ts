@@ -375,7 +375,7 @@ test('PolygonTesselator#partial update', () => {
   let indices = tesselator.get('indices').slice(0, tesselator.vertexCount);
   expect(tesselator.instanceCount, 'Initial instance count').toBe(9);
   expect(tesselator.vertexCount, 'Initial vertex count').toBe(9);
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(positions, 'positions').toEqual([
     1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0
   ]);
@@ -397,10 +397,12 @@ test('PolygonTesselator#partial update', () => {
   indices = tesselator.get('indices').slice(0, tesselator.vertexCount);
   expect(tesselator.instanceCount, 'Updated instance count').toBe(13);
   expect(tesselator.vertexCount, 'Updated vertex count').toBe(12);
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(positions, 'positions').toEqual([
-    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0, 4, 4, 0, 5, 5,
-    0, 6, 4, 0, 4, 4, 0
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1,
+    1, 0, 0, 0, 0, 0, 2, 0, 2, 2,
+    0, 2, 0, 0, 0, 0, 0, 4, 4, 0,
+    5, 5, 0, 6, 4, 0, 4, 4, 0
   ]);
   expect(indices, 'incides').toEqual([1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11]);
   expect(Array.from(accessorCalled), 'Accessor called only on partial data').toEqual(['C']);
@@ -419,10 +421,12 @@ test('PolygonTesselator#partial update', () => {
   indices = tesselator.get('indices').slice(0, tesselator.vertexCount);
   expect(tesselator.instanceCount, 'Updated instance count').toBe(13);
   expect(tesselator.vertexCount, 'Updated vertex count').toBe(12);
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(positions, 'positions').toEqual([
-    2, 2, 0, 3, 0, 0, 1, 1, 0, 2, 2, 0, 0, 0, 0, 0, 2, 0, 2, 2, 0, 2, 0, 0, 0, 0, 0, 4, 4, 0, 5, 5,
-    0, 6, 4, 0, 4, 4, 0
+    2, 2, 0, 3, 0, 0, 1, 1, 0, 2,
+    2, 0, 0, 0, 0, 0, 2, 0, 2, 2,
+    0, 2, 0, 0, 0, 0, 0, 4, 4, 0,
+    5, 5, 0, 6, 4, 0, 4, 4, 0
   ]);
 
   expect(indices, 'incides').toEqual([1, 3, 2, 5, 8, 7, 7, 6, 5, 10, 12, 11]);
