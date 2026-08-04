@@ -20,6 +20,8 @@ deck.gl v9.4 substantially expands its experimental WebGPU support. Newly suppor
 
 This release improves WebGPU attribute-buffer handling, adds WebGPU render-test coverage, and makes switching between WebGL2 and WebGPU more reliable in React and across website examples.
 
+The WebGPU-capable code is included by default so that adopting WebGPU does not require changing application imports. Applications that only target WebGL2 can instead configure their bundler to resolve the custom export condition `visgl:webgl-only`; supported deck.gl packages will then use alternate builds with WebGPU branches and WGSL shader sources removed, reducing their contribution to bundle size without changing the imported APIs. See [Building Apps](./developer-guide/building-apps.md#bundle-size) for details.
+
 WebGPU support remains experimental and is not yet recommended for production. Some layers and features remain unavailable or only partially supported. See the [WebGPU guide](./developer-guide/webgpu.md) for setup instructions, current limitations, and the complete compatibility matrix.
 
 ### Views and Controllers

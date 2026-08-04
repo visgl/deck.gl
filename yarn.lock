@@ -2851,9 +2851,9 @@
   dependencies:
     "@vaadin/vaadin-development-mode-detector" "^2.0.0"
 
-"@vis.gl/dev-tools@^2.0.0-alpha.3":
+"@vis.gl/dev-tools@2.0.0-alpha.3":
   version "2.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@vis.gl/dev-tools/-/dev-tools-2.0.0-alpha.3.tgz#0c7d0ee14f74572877eb6449f092749c88f389a4"
+  resolved "https://registry.npmjs.org/@vis.gl/dev-tools/-/dev-tools-2.0.0-alpha.3.tgz#0c7d0ee14f74572877eb6449f092749c88f389a4"
   integrity sha512-ODRK9i36O+G9zeM81U5syjVO87tcK7RS9C3sJCb7gnDI3qa5amxAs5tz6VHDIsTCSKH+vmqRCZIV4oQs7FBtyg==
   dependencies:
     "@biomejs/biome" "^2.4.8"
@@ -2872,10 +2872,10 @@
     tsconfig-paths "^4.1.1"
     typescript "^5.2.2"
 
-"@vis.gl/ts-plugins@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@vis.gl/ts-plugins/-/ts-plugins-1.0.2.tgz#dc8526e1711b844db19e693bac89678f57869b85"
-  integrity sha512-OQRgHuCkW9B3YcxueOvRgcCqR2IqlnITWEePGcWM8v8rfI4ioHZanfACZA9KNUg+I7CooFlKzDQczoc2fQ8o/A==
+"@vis.gl/ts-plugins@2.0.0-alpha.3":
+  version "2.0.0-alpha.3"
+  resolved "https://registry.npmjs.org/@vis.gl/ts-plugins/-/ts-plugins-2.0.0-alpha.3.tgz#69548eca8c5907be83608bf5d58a906d48e40b7c"
+  integrity sha512-d3Sxs7vZyQ9/tRvysPVDILjIqUdlabaQqQ5h8EOqtM6tX/E0qu5owDlM0YP50rtT/LmdkTL/PZnwljL+3RyTZA==
   dependencies:
     "@luma.gl/constants" "^9.0.0"
     minimatch "^3.0.0"
@@ -5862,7 +5862,7 @@ is-core-module@^2.13.0, is-core-module@^2.5.0:
 
 is-core-module@^2.16.2:
   version "2.16.2"
-  resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.16.2.tgz#3e07450a8080ebce3fbf0cac494f4d2ab324e082"
+  resolved "https://registry.npmjs.org/is-core-module/-/is-core-module-2.16.2.tgz#3e07450a8080ebce3fbf0cac494f4d2ab324e082"
   integrity sha512-evOr8xfXKxE6qSR0hSXL2r3sd7ALj8+7jQEUvPYcm5sgZFdJ+AYzT6yNmJenvIYQBgIGwfwz08sL8zoL7yq2BA==
   dependencies:
     hasown "^2.0.3"
