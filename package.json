@@ -58,6 +58,7 @@
     "@vis.gl/dev-tools": "^2.0.0-alpha.3",
     "@vis.gl/ts-plugins": "1.0.2",
     "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-v8": "^4.0.18",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
     "pixelmatch": "^7.1.0",
