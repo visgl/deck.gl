@@ -378,8 +378,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // start corner
       0, 1, 2,
       // body
-      1, 4, 2,
-      1, 3, 4,
+      1, 4, 2, 1, 3, 4,
       // end corner
       3, 5, 4
     ];

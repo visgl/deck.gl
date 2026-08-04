@@ -456,12 +456,7 @@ export default class DataColumn<Options, State> {
     return true;
   }
 
-  updateSubBuffer(
-    opts: {
-      startOffset?: number;
-      endOffset?: number;
-    } = {}
-  ): void {
+  updateSubBuffer(opts: {startOffset?: number; endOffset?: number} = {}): void {
     this.state.bounds = null; // clear cached bounds
 
     const value = this.value as TypedArray;

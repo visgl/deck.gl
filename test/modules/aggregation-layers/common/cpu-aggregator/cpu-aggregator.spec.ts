@@ -143,10 +143,7 @@ test('CPUAggregator#2D', () => {
 
   expect(binaryAttributeToArray(aggregator.getBins(), aggregator.binCount), 'getBins()').toEqual(
     // prettier-ignore
-    [ 2, 2, 2, 3, 2, 4,
-      3, 3, 3, 4, 3, 5,
-      4, 4, 4, 5, 4, 3, 4, 2,
-      5, 3, 5, 5 ]
+    [2, 2, 2, 3, 2, 4, 3, 3, 3, 4, 3, 5, 4, 4, 4, 5, 4, 3, 4, 2, 5, 3, 5, 5]
   );
 
   expect(
@@ -154,7 +151,7 @@ test('CPUAggregator#2D', () => {
     'getResult() - total counts'
   ).toEqual(
     // prettier-ignore
-    [ 4, 4, 2, 2, 2, 1, 2, 1, 1, 1, 3, 1 ]
+    [4, 4, 2, 2, 2, 1, 2, 1, 1, 1, 3, 1]
   );
   expect(aggregator.getResultDomain(0), 'getResultDomain() - counts').toEqual([1, 4]);
 
@@ -163,7 +160,7 @@ test('CPUAggregator#2D', () => {
     'getResult() - mean income'
   ).toEqual(
     // prettier-ignore
-    [25, 97.5, 10, 90, 175, 60, 320, 110, 80, 65, 200, 120 ]
+    [25, 97.5, 10, 90, 175, 60, 320, 110, 80, 65, 200, 120]
   );
   expect(aggregator.getResultDomain(1), 'getResultDomain() - mean income').toEqual([10, 320]);
 

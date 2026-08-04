@@ -46,36 +46,50 @@ test('ColumnGeometry#tesselation', () => {
   expect(attributes.indices.value.length, 'indices has correct size').toBe(4 * 3 * 2);
 
   // prettier-ignore
-  expect(equals(attributes.POSITION.value.slice(0, 3 * 8), [
-    1, 0, 0.5, 1, 0, -0.5, 0, 1, 0.5, 0, 1, -0.5,
-    -1, 0, 0.5, -1, 0, -0.5, 0, -1, 0.5, 0, -1, -0.5
-  ]), 'positions generated').toBeTruthy();
+  expect(
+    equals(
+      attributes.POSITION.value.slice(0, 3 * 8),
+      [
+        1, 0, 0.5, 1, 0, -0.5, 0, 1, 0.5, 0, 1, -0.5, -1, 0, 0.5, -1, 0, -0.5, 0, -1, 0.5, 0, -1,
+        -0.5
+      ]
+    ),
+    'positions generated'
+  ).toBeTruthy();
 
   // prettier-ignore
-  expect(equals(attributes.NORMAL.value.slice(0, 3 * 8), [
-    1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
-    -1, 0, 0, -1, 0, 0, 0, -1, 0, 0, -1, 0
-  ]), 'normals generated').toBeTruthy();
+  expect(
+    equals(
+      attributes.NORMAL.value.slice(0, 3 * 8),
+      [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, -1, 0, 0, -1, 0, 0, 0, -1, 0, 0, -1, 0]
+    ),
+    'normals generated'
+  ).toBeTruthy();
 
   console.log('Custom geometry with height');
   geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 4, vertices: TEST_VERTICES});
   attributes = geometry.getAttributes();
 
   // prettier-ignore
-  expect(equals(attributes.POSITION.value.slice(0, 3 * 8), [
-    1, -1, 0.5, 1, -1, -0.5,
-    1, 1, 0.5, 1, 1, -0.5,
-    -1, 1, 0.5, -1, 1, -0.5,
-    -1, -1, 0.5, -1, -1, -0.5
-  ]), 'positions generated').toBeTruthy();
+  expect(
+    equals(
+      attributes.POSITION.value.slice(0, 3 * 8),
+      [
+        1, -1, 0.5, 1, -1, -0.5, 1, 1, 0.5, 1, 1, -0.5, -1, 1, 0.5, -1, 1, -0.5, -1, -1, 0.5, -1,
+        -1, -0.5
+      ]
+    ),
+    'positions generated'
+  ).toBeTruthy();
 
   // prettier-ignore
-  expect(equals(attributes.NORMAL.value.slice(0, 3 * 8), [
-    1, -1, 0, 1, -1, -0,
-    1, 1, 0, 1, 1, -0,
-    -1, 1, 0, -1, 1, -0,
-    -1, -1, 0, -1, -1, -0
-  ]), 'normals generated').toBeTruthy();
+  expect(
+    equals(
+      attributes.NORMAL.value.slice(0, 3 * 8),
+      [1, -1, 0, 1, -1, -0, 1, 1, 0, 1, 1, -0, -1, 1, 0, -1, 1, -0, -1, -1, 0, -1, -1, -0]
+    ),
+    'normals generated'
+  ).toBeTruthy();
 
   console.log('Regular geometry without height');
   geometry = new ColumnGeometry({radius: 1, height: 0, nradial: 4});
@@ -86,10 +100,8 @@ test('ColumnGeometry#tesselation', () => {
   expect(attributes.indices.value.length, 'indices has correct size').toBe(0);
 
   // prettier-ignore
-  expect(equals(attributes.POSITION.value, [
-    1, 0, 0,
-    0, 1, 0,
-    0, -1, 0,
-    -1, 0, 0
-  ]), 'positions generated').toBeTruthy();
+  expect(
+    equals(attributes.POSITION.value, [1, 0, 0, 0, 1, 0, 0, -1, 0, -1, 0, 0]),
+    'positions generated'
+  ).toBeTruthy();
 });

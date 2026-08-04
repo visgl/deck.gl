@@ -159,18 +159,8 @@ test('PathTesselator#partial update', () => {
   expect(positions, 'positions').toEqual(
     // prettier-ignore
     [
-      1, 1, 0,
-      2, 2, 0,
-      3, 3, 0,
-      1, 1, 0,
-      2, 2, 0,
-      3, 3, 0,
-      1, 1, 0,
-      2, 2, 0,
-      3, 3, 0,
-      4, 4, 0,
-      5, 5, 0,
-      6, 6, 0
+      1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5,
+      5, 0, 6, 6, 0
     ]
   );
   expect(Array.from(accessorCalled), 'Accessor called only on partial data').toEqual(['C']);

@@ -256,11 +256,10 @@ webglTest('WebGLAggregator#2D', () => {
 
   expect(binaryAttributeToArray(aggregator.getBins(), aggregator.binCount), 'getBins()').toEqual(
     // prettier-ignore
-    [ 2, 1, 3, 1, 4, 1, 5, 1,
-      2, 2, 3, 2, 4, 2, 5, 2,
-      2, 3, 3, 3, 4, 3, 5, 3,
-      2, 4, 3, 4, 4, 4, 5, 4,
-      2, 5, 3, 5, 4, 5, 5, 5 ]
+    [
+      2, 1, 3, 1, 4, 1, 5, 1, 2, 2, 3, 2, 4, 2, 5, 2, 2, 3, 3, 3, 4, 3, 5, 3, 2, 4, 3, 4, 4, 4, 5,
+      4, 2, 5, 3, 5, 4, 5, 5, 5
+    ]
   );
 
   expect(
@@ -268,10 +267,7 @@ webglTest('WebGLAggregator#2D', () => {
     'getResult() - total counts'
   ).toEqual(
     // prettier-ignore
-    [ NaN, NaN, NaN, NaN, 4,
-      NaN, 1, NaN, 4, 2,
-      1, 3, 2, 2, 2,
-      NaN, NaN, 1, 1, 1 ]
+    [NaN, NaN, NaN, NaN, 4, NaN, 1, NaN, 4, 2, 1, 3, 2, 2, 2, NaN, NaN, 1, 1, 1]
   );
   expect(aggregator.getResultDomain(0), 'getResultDomain() - counts').toEqual([1, 4]);
 
@@ -280,10 +276,7 @@ webglTest('WebGLAggregator#2D', () => {
     'getResult() - mean income'
   ).toEqual(
     // prettier-ignore
-    [ NaN, NaN, NaN, NaN, 25,
-      NaN, 65, NaN, 97.5, 90,
-      80, 200, 10, 175, 320,
-      NaN, NaN, 60, 110, 120 ]
+    [NaN, NaN, NaN, NaN, 25, NaN, 65, NaN, 97.5, 90, 80, 200, 10, 175, 320, NaN, NaN, 60, 110, 120]
   );
   expect(aggregator.getResultDomain(1), 'getResultDomain() - mean income').toEqual([10, 320]);
 
