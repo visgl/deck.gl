@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {defineConfig, configDefaults, TestUserConfig} from 'vitest/config';
+import {getVitestConfig} from '@vis.gl/dev-tools';
+import {TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
@@ -135,12 +136,7 @@ const assetsIncludeConfig = [
   '**/*.terrain' // Terrain files
 ];
 
-export default defineConfig({
-  test: {
-    // Globally exclude tape-based tests from all vitest projects
-    exclude: [...configDefaults.exclude, '**/*.tape.spec.ts'],
-    coverage: coverageConfig,
-    projects: [
+const projects = [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation
       {
@@ -169,6 +165,21 @@ export default defineConfig({
           globals: false,
           testTimeout: 30000,
           // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: 0}
+        }
+      },
+
+      // Tape compatibility project - verifies the legacy @deck.gl/test-utils entry point
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'tape-compat',
+          environment: 'node',
+          include: ['test/smoke/**/*.tape.spec.js'],
+          globals: false,
+          testTimeout: 30000,
+          setupFiles: ['./test/setup/vitest-node-setup.ts'],
           sequence: {groupOrder: 0}
         }
       },
@@ -278,6 +289,9 @@ export default defineConfig({
           sequence: {groupOrder: 4}
         }
       }
-    ]
-  }
+];
+
+export default getVitestConfig({
+  coverage: coverageConfig,
+  projects: Object.fromEntries(projects.map(project => [project.test.name, project]))
 });

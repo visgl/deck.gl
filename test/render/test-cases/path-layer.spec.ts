@@ -11,7 +11,7 @@ import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {zigzag, zigzag3D, meterPaths, positionOrigin} from 'deck.gl-test/data';
 
-// prettier-ignore
+// biome-ignore format: preserve layout
 const DASH_TEST_DATA = [
   [53.38,218.93,43.55,179.03,26.22,158.15,-2.25,138.62,-38.51,128.07,-72.23,127.35,-103.39,133.87,
     -117.30,141.74,-126.97,153.52,-130.41,168.93,-126.97,184.34,-117.30,196.12,-103.39,203.99,-72.23,210.51,

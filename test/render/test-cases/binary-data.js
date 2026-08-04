@@ -5,7 +5,7 @@
 import {OrthographicView} from '@deck.gl/core';
 import {PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 
-// prettier-ignore
+// biome-ignore format: preserve layout
 const BINARY_DATA = [
   0.7, 0.2, 0, 0, 0, 0,
   0.8, 0.6, 0, 0, 5, 0,
