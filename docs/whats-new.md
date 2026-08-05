@@ -14,6 +14,16 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 - Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
 
+### WebGPU
+
+deck.gl v9.4 substantially expands its experimental WebGPU support. Newly supported layers include [`ArcLayer`](./api-reference/layers/arc-layer.md), [`ColumnLayer`](./api-reference/layers/column-layer.md), [`GridCellLayer`](./api-reference/layers/grid-cell-layer.md), [`PathLayer`](./api-reference/layers/path-layer.md), [`PolygonLayer`](./api-reference/layers/polygon-layer.md), [`SolidPolygonLayer`](./api-reference/layers/solid-polygon-layer.md), and [`TileLayer`](./api-reference/geo-layers/tile-layer.md), together with [`ScreenGridLayer`](./api-reference/aggregation-layers/screen-grid-layer.md), [`HexagonLayer`](./api-reference/aggregation-layers/hexagon-layer.md), [`ContourLayer`](./api-reference/aggregation-layers/contour-layer.md), and [`HeatmapLayer`](./api-reference/aggregation-layers/heatmap-layer.md). [`BitmapLayer`](./api-reference/layers/bitmap-layer.md) and [`GeoJsonLayer`](./api-reference/layers/geojson-layer.md) also gain partial WebGPU support.
+
+This release improves WebGPU attribute-buffer handling, adds WebGPU render-test coverage, and makes switching between WebGL2 and WebGPU more reliable in React and across website examples.
+
+The WebGPU-capable code is included by default so that adopting WebGPU does not require changing application imports. Applications that only target WebGL2 can instead configure their bundler to resolve the custom export condition `visgl:webgl-only`; supported deck.gl packages will then use alternate builds with WebGPU branches and WGSL shader sources removed, reducing their contribution to bundle size without changing the imported APIs. See [Building Apps](./developer-guide/building-apps.md#bundle-size) for details.
+
+WebGPU support remains experimental and is not yet recommended for production. Some layers and features remain unavailable or only partially supported. See the [WebGPU guide](./developer-guide/webgpu.md) for setup instructions, current limitations, and the complete compatibility matrix.
+
 ### Views and Controllers
 
 deck.gl v9.4 brings additional view and controller improvements on top of the substantial changes in v9.3.

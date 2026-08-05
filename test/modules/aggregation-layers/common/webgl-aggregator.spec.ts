@@ -147,7 +147,7 @@ webglTest('WebGLAggregator#1D', () => {
   expect(aggregator.binCount, 'binCount').toBe(15);
 
   expect(binaryAttributeToArray(aggregator.getBins(), aggregator.binCount), 'getBins()').toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
   );
 
@@ -155,7 +155,7 @@ webglTest('WebGLAggregator#1D', () => {
     binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     'getResult() - total counts'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [NaN, 1, 5, 5, 3, 2, 3, 2, 2, 2, 1, 2, 1, 1, 2]
   );
   expect(aggregator.getResultDomain(0), 'getResultDomain() - counts').toEqual([1, 5]);
@@ -164,7 +164,7 @@ webglTest('WebGLAggregator#1D', () => {
     binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     'getResult() - mean income'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [NaN, 25, 48, 54, 100, 145, 250, 72.5, 252.5, 107.5, 0, 127.5, 0, 40, 25]
   );
 
@@ -174,7 +174,7 @@ webglTest('WebGLAggregator#1D', () => {
     binaryAttributeToArray(aggregator.getResult(2), aggregator.binCount),
     'getResult() - max education'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [NaN, 1, 3, 4, 5, 4, 5, 3, 3, 5, 3, 4, 1, 2, 3]
   );
 
@@ -255,7 +255,7 @@ webglTest('WebGLAggregator#2D', () => {
   expect(aggregator.binCount, 'binCount').toBe(20);
 
   expect(binaryAttributeToArray(aggregator.getBins(), aggregator.binCount), 'getBins()').toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [ 2, 1, 3, 1, 4, 1, 5, 1,
       2, 2, 3, 2, 4, 2, 5, 2,
       2, 3, 3, 3, 4, 3, 5, 3,
@@ -267,7 +267,7 @@ webglTest('WebGLAggregator#2D', () => {
     binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     'getResult() - total counts'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [ NaN, NaN, NaN, NaN, 4,
       NaN, 1, NaN, 4, 2,
       1, 3, 2, 2, 2,
@@ -279,7 +279,7 @@ webglTest('WebGLAggregator#2D', () => {
     binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     'getResult() - mean income'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [ NaN, NaN, NaN, NaN, 25,
       NaN, 65, NaN, 97.5, 90,
       80, 200, 10, 175, 320,

@@ -38,7 +38,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "npm run build-bundle && mkdir -p ./dist && cp ../widgets/src/stylesheet.css ./dist",
+    "build": "npm run build-bundle && mkdir -p ./dist && cp ../widgets/dist/stylesheet.css ./dist",
     "build-bundle": "ocular-bundle ./bundle.ts",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
@@ -57,8 +57,8 @@
     "@deck.gl/react": "9.4.0-alpha.2",
     "@deck.gl/widgets": "9.4.0-alpha.2",
     "@loaders.gl/core": "^4.4.3",
-    "@luma.gl/core": "^9.4.0-alpha.1",
-    "@luma.gl/engine": "^9.4.0-alpha.1"
+    "@luma.gl/core": "^9.4.0-alpha.4",
+    "@luma.gl/engine": "^9.4.0-alpha.4"
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
