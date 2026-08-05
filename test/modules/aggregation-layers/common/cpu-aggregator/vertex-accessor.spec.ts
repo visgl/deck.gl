@@ -113,12 +113,12 @@ test('evaluateVertexAccessor#size=3', () => {
     getValue: ({position}) => position
   };
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   attributes.position.setData({value: new Float64Array([0, 0, 0.5, 1, 0, 0.75, 1, 1, 0.25, 0, 1, 0.45])});
   let getter = evaluateVertexAccessor(accessor, attributes, {});
   expect(getter(1), 'Basic attribute').toEqual([1, 0, 0.75]);
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   attributes.position.setData({value: new Float64Array([0, 0, 0.5, 1, 0, 0.75, 1, 1, 0.25, 0, 1, 0.45]), stride: 48, offset: 8});
   getter = evaluateVertexAccessor(accessor, attributes, {});
   expect(getter(1), 'With stride and offset').toEqual([1, 0.25, 0]);

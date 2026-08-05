@@ -456,12 +456,7 @@ export default class DataColumn<Options, State> {
     return true;
   }
 
-  updateSubBuffer(
-    opts: {
-      startOffset?: number;
-      endOffset?: number;
-    } = {}
-  ): void {
+  updateSubBuffer(opts: {startOffset?: number; endOffset?: number} = {}): void {
     this.state.bounds = null; // clear cached bounds
 
     const value = this.value as TypedArray;
@@ -621,11 +616,15 @@ export default class DataColumn<Options, State> {
     }
 
     const {isIndexed, type} = this.settings;
+    const usage =
+      this.device.type === 'webgpu' && !isIndexed
+        ? Buffer.VERTEX | Buffer.STORAGE | Buffer.COPY_DST | Buffer.COPY_SRC
+        : (isIndexed ? Buffer.INDEX : Buffer.VERTEX) | Buffer.COPY_DST;
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,
       id: this.id,
-      // TODO(ibgreen) - WebGPU requires COPY_DST and COPY_SRC to allow write / read
-      usage: (isIndexed ? Buffer.INDEX : Buffer.VERTEX) | Buffer.COPY_DST,
+      // Grouped WebGPU attribute interleave binds vertex attributes as storage buffers.
+      usage,
       indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
       byteLength
     });

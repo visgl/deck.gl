@@ -59,6 +59,8 @@ const SURFACE_IMAGES = {
 class TerrainDemo extends Component {
   static title = 'Terrains';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/terrain`;
 
   static parameters = {

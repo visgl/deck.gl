@@ -16,7 +16,7 @@ import {
   FullscreenWidget,
   ResetViewWidget,
   ScrollbarWidget,
-  _TimelineWidget as TimelineWidget,
+  InfoWidget,
   ThemeWidget,
   DarkTheme,
   LightTheme
@@ -54,7 +54,17 @@ const INITIAL_VIEW_STATE = {
 new Deck({
   views: [
     new OrbitView({id: 'orbit-view', x: 0, width: '50%', controller: true}),
-    new OrthographicView({id: 'ortho-view', x: '50%', width: '50%', controller: true})
+    new OrthographicView({
+      id: 'ortho-view',
+      x: '50%',
+      width: '50%',
+      controller: {
+        maxBounds: [
+          [-50, -50, -50],
+          [50, 50, 50]
+        ]
+      }
+    })
   ],
   initialViewState: INITIAL_VIEW_STATE,
   layers: [
@@ -85,24 +95,17 @@ new Deck({
     new ResetViewWidget({id: 'reset-ortho', viewId: 'ortho-view', placement: 'top-right'}),
     new ZoomWidget({viewId: 'ortho-view'}),
     new ThemeWidget({
-      // darkModeTheme: DarkTheme,
-      // lightModeTheme: LightTheme,
+      darkModeTheme: DarkTheme,
+      lightModeTheme: LightTheme
     }),
-    new TimelineWidget({
-      viewId: 'orbit-view',
-      timeRange: [0, 600],
-      formatLabel: (t: number) =>
-        `${Math.floor(t / 60)
-          .toString()
-          .padStart(2, '0')}: ${(t % 60).toFixed(0).padStart(2, '0')}`
-      // autoPlay: true
+    new InfoWidget({
+      viewId: 'ortho-view',
+      mode: 'hover',
+      getTooltip: ({object}) => (object ? 'point' : null)
     }),
     new ScrollbarWidget({
+      id: 'scrollbar-v',
       viewId: 'ortho-view',
-      contentBounds: [
-        [-50, -50, -50],
-        [50, 50, 50]
-      ],
       // decorations: [
       //   {
       //     contentBounds: [[10, 10, 0], [20, 20, 50]],
@@ -114,11 +117,8 @@ new Deck({
       orientation: 'vertical'
     }),
     new ScrollbarWidget({
+      id: 'scrollbar-h',
       viewId: 'ortho-view',
-      contentBounds: [
-        [-50, -50, -50],
-        [50, 50, 50]
-      ],
       placement: 'bottom-right',
       orientation: 'horizontal'
     })

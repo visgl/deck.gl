@@ -31,18 +31,20 @@ deck.gl provides a lot of functionality and the amount of code these libraries c
 
 deck.gl is designed from the ground up to be highly extensible. Visualization types are supported by different layers; additional layer features can be added by layer extensions; more data formats can be supported by loaders.gl submodules. The core is fairly lean, and each functionality is self-contained, so that applications do not have to bundle things that they don't need. Because modern build tools support tree shaking, most new features added do not have a visible size impact on existing applications.
 
+Starting with v9.4, applications that only target WebGL2 can further reduce bundle size by configuring their bundler to resolve the custom [`package.json` export condition](https://nodejs.org/api/packages.html#conditional-exports) `visgl:webgl-only`. Packages that contain WebGPU implementations, including `@deck.gl/core`, `@deck.gl/layers`, and the `@deck.gl/*-layers` packages, then resolve to builds with WebGPU branches and WGSL shader sources removed while preserving their normal public API and tree-shaking behavior. The default export remains WebGPU-enabled, so applications that use WebGPU should not enable this condition. Refer to your build tool's documentation for adding custom conditions: [esbuild `conditions`](https://esbuild.github.io/api/#conditions), [Vite `resolve.conditions`](https://vite.dev/config/shared-options.html#resolve-conditions) (also available in [Vitest through Vite configuration](https://vitest.dev/config/)), [Rollup `exportConditions`](https://github.com/rollup/plugins/tree/master/packages/node-resolve#exportconditions), [webpack `resolve.conditionNames`](https://webpack.js.org/configuration/resolve/#resolveconditionnames), or [Rspack `resolve.conditionNames`](https://rspack.dev/config/resolve.html#resolveconditionnames).
+
 deck.gl maintainers are conscious about how design decisions and code changes impact bundle size. The test harness has a script that evaluates the size of a minified bundle after each build. The following numbers are offered for your reference.
 
-| Imports        | Bundle size | Compressed | Comments |
-| ---            | ---         | ---        | ---      |
-| Deck + Layer   | 501.2 kb    | 145.3 kb   | Minimal core; baseline      |
-| DeckGL (React) | 10.9 kb     | 3.84 kb    |          |
-| HexagonLayer   | 39.1 kb     | 11.3 kb    |          |
-| GeoJsonLayer   | 97.9 kb     | 27.7 kb    | Includes the most commonly used primitive layers:<br/> ScatterplotLayer, IconLayer, TextLayer, PathLayer, PolygonLayer  |
-| MVTLayer       | 180.9 kb    | 52.6 kb    | GeoJsonLayer + TileLayer + MVT loader  |
-| Tile3DLayer    | 253.9 kb    | 75.1 kb    | ScenegraphLayer + SimpleMeshLayer + GLTF loader + 3D tiles loader   |
+| Imports        | Bundle size | Compressed | Bundle size (WebGL only) | Compressed (WebGL only) | Comments |
+| ---            | ---         | ---        | ---                      | ---                     | ---      |
+| Deck + Layer   | 504.9 kb    | 146.8 kb   | 493.6 kb                 | 144.5 kb                | Minimal core; baseline      |
+| DeckGL (React) | 13.6 kb     | 5.2 kb     | 13.6 kb                  | 5.2 kb                  |          |
+| HexagonLayer   | 50.9 kb     | 14.4 kb    | 40.2 kb                  | 12.5 kb                 |          |
+| GeoJsonLayer   | 167.4 kb    | 46.9 kb    | 129.6 kb                 | 39.5 kb                 | Includes the most commonly used primitive layers:<br/> ScatterplotLayer, IconLayer, TextLayer, PathLayer, PolygonLayer  |
+| MVTLayer       | 283.4 kb    | 82.1 kb    | 245.6 kb                 | 74.6 kb                 | GeoJsonLayer + TileLayer + MVT loader  |
+| Tile3DLayer    | 355.4 kb    | 106.1 kb   | 343.9 kb                 | 103.7 kb                | ScenegraphLayer + SimpleMeshLayer + GLTF loader + 3D tiles loader   |
 
-* Numbers measured using v9.0.1
-* Bundled and minified by esbuild targeting evergreen browsers.
-* All rows after the first are incremental impact on top of the minimal core
+* Numbers measured using v9.4.0-alpha.2.
+* Each row is an independent bundle that exposes only the listed class or classes. Rows after the first externalize `@deck.gl/core` and its direct `@luma.gl/*` dependencies to show their incremental impact on an application that already includes the core bundle.
+* Bundled and minified by esbuild targeting evergreen browsers using `--tsconfig=test/size/tsconfig.json`. The WebGL-only columns additionally use `--conditions=visgl:webgl-only`.
 * Compressed bundle sizes are calculated using `gzip -9`. Consider using slower `brotli` compression for static assets, it typically provides an additional 20% reduction.
