@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, MapView} from '@deck.gl/core';
+import React, {useState} from 'react';
+import {createRoot} from 'react-dom/client';
+import {View, MapView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import {LightTheme, DarkTheme, _SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
+import {DeckGL, _SplitterWidget as SplitterWidget, SplitterWidgetProps} from '@deck.gl/react';
+
 import '@deck.gl/widgets/stylesheet.css';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -13,13 +16,13 @@ const COUNTRIES =
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   latitude: 51.47,
   longitude: 0.45,
   zoom: 4
 };
 
-export const LAYERS = [
+const LAYERS = [
   new GeoJsonLayer({
     id: 'base-map',
     data: COUNTRIES,
@@ -47,7 +50,7 @@ export const LAYERS = [
   new ArcLayer({
     id: 'arcs',
     data: AIR_PORTS,
-    dataTransform: d => d.features.filter(f => f.properties.scalerank < 4),
+    dataTransform: (d: any) => d.features.filter(f => f.properties.scalerank < 4),
     // Styles
     getSourcePosition: f => [-0.4531566, 51.4709959], // London
     getTargetPosition: f => f.geometry.coordinates,
@@ -57,7 +60,7 @@ export const LAYERS = [
   })
 ];
 
-export const VIEW_LAYOUT = {
+const VIEW_LAYOUT: SplitterWidgetProps['viewLayout'] = {
   orientation: 'horizontal',
   views: [
     new MapView({id: 'left', controller: true}),
@@ -69,13 +72,21 @@ export const VIEW_LAYOUT = {
       ]
     }
   ]
-} as const;
+};
 
-export function main() {
-  new Deck({
-    initialViewState: INITIAL_VIEW_STATE,
-    // controller: true,
-    layers: LAYERS,
-    widgets: [new SplitterWidget({viewLayout: VIEW_LAYOUT})]
-  });
+function App() {
+  const [views, setViews] = useState<View[]>([new MapView({id: 'left'})]);
+
+  return (
+    <DeckGL
+      views={views}
+      // @ts-expect-error intentionally use the same initial state for all views
+      initialViewState={INITIAL_VIEW_STATE}
+      layers={LAYERS}
+    >
+      <SplitterWidget viewLayout={VIEW_LAYOUT} onChange={setViews} />
+    </DeckGL>
+  );
 }
+
+createRoot(document.body.appendChild(document.createElement('div'))).render(<App />);
