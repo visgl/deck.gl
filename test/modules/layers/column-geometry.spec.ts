@@ -18,6 +18,7 @@ test('ColumnGeometry#constructor', () => {
   let geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 6});
   let attributes = geometry.getAttributes();
 
+  expect(geometry.topology, 'wireframe topology').toBe('line-list');
   expect(ArrayBuffer.isView(attributes.indices.value), 'indices generated').toBeTruthy();
   expect(ArrayBuffer.isView(attributes.POSITION.value), 'positions generated').toBeTruthy();
   expect(ArrayBuffer.isView(attributes.NORMAL.value), 'normals generated').toBeTruthy();
@@ -44,13 +45,13 @@ test('ColumnGeometry#tesselation', () => {
   expect(attributes.NORMAL.value.length, 'NORMAL has correct size').toBe((5 * 3 + 1) * 3);
   expect(attributes.indices.value.length, 'indices has correct size').toBe(4 * 3 * 2);
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(equals(attributes.POSITION.value.slice(0, 3 * 8), [
     1, 0, 0.5, 1, 0, -0.5, 0, 1, 0.5, 0, 1, -0.5,
     -1, 0, 0.5, -1, 0, -0.5, 0, -1, 0.5, 0, -1, -0.5
   ]), 'positions generated').toBeTruthy();
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(equals(attributes.NORMAL.value.slice(0, 3 * 8), [
     1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0,
     -1, 0, 0, -1, 0, 0, 0, -1, 0, 0, -1, 0
@@ -60,7 +61,7 @@ test('ColumnGeometry#tesselation', () => {
   geometry = new ColumnGeometry({radius: 1, height: 1, nradial: 4, vertices: TEST_VERTICES});
   attributes = geometry.getAttributes();
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(equals(attributes.POSITION.value.slice(0, 3 * 8), [
     1, -1, 0.5, 1, -1, -0.5,
     1, 1, 0.5, 1, 1, -0.5,
@@ -68,7 +69,7 @@ test('ColumnGeometry#tesselation', () => {
     -1, -1, 0.5, -1, -1, -0.5
   ]), 'positions generated').toBeTruthy();
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(equals(attributes.NORMAL.value.slice(0, 3 * 8), [
     1, -1, 0, 1, -1, -0,
     1, 1, 0, 1, 1, -0,
@@ -84,7 +85,7 @@ test('ColumnGeometry#tesselation', () => {
   expect(attributes.NORMAL.value.length, 'NORMAL has correct size').toBe(4 * 3);
   expect(attributes.indices.value.length, 'indices has correct size').toBe(0);
 
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   expect(equals(attributes.POSITION.value, [
     1, 0, 0,
     0, 1, 0,

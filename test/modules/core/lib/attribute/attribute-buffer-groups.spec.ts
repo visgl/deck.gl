@@ -5,14 +5,22 @@
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {Layer} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
-import {test, expect, vi} from 'vitest';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {beforeAll, test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 
+import type {Device} from '@luma.gl/core';
 import type Attribute from '@deck.gl/core/lib/attribute/attribute';
 
-function createWebGPUDevice() {
-  return Object.defineProperty(Object.create(device), 'type', {value: 'webgpu'});
-}
+let webgpuDevice: Device;
+
+beforeAll(async () => {
+  const testDevice = await getWebGPUTestDevice();
+  if (!testDevice) {
+    throw new Error('Attribute buffer group tests require WebGPU');
+  }
+  webgpuDevice = testDevice;
+});
 
 function addSimpleGroup(attributeManager: AttributeManager) {
   attributeManager.addInstanced({
@@ -56,7 +64,7 @@ test('AttributeManager buffer groups are ignored on WebGL', () => {
 });
 
 test('AttributeManager without groups keeps WebGPU layouts unchanged', () => {
-  const attributeManager = new AttributeManager(createWebGPUDevice());
+  const attributeManager = new AttributeManager(webgpuDevice);
   attributeManager.addInstanced({
     a: {size: 1, accessor: 'getA'},
     b: {size: 1, accessor: 'getB'}
@@ -75,7 +83,7 @@ test('AttributeManager without groups keeps WebGPU layouts unchanged', () => {
 });
 
 test('AttributeManager buffer groups pack IconLayer-style shader attributes', async () => {
-  const attributeManager = new AttributeManager(createWebGPUDevice());
+  const attributeManager = new AttributeManager(webgpuDevice);
   attributeManager.addInstanced({
     a: {size: 1, accessor: 'getA', bufferGroup: 'group-a'},
     iconDefs: {
@@ -186,12 +194,16 @@ test('AttributeManager buffer groups pack IconLayer-style shader attributes', as
   expect(dataView.getFloat32(0, true)).toBe(3);
   expect(dataView.getFloat32(4, true), 'untouched column is repacked').toBe(10);
 
+  const packedEvaluator = (attributeManager as any).attributeBufferGroups.packedBuffers['group-a']
+    .packed;
+  const destroySpy = vi.spyOn(packedEvaluator, 'destroy');
   attributeManager.finalize();
-  expect(deleteSpy).toHaveBeenCalled();
+  expect(destroySpy).toHaveBeenCalled();
+  expect(deleteSpy).not.toHaveBeenCalled();
 });
 
 test('AttributeManager buffer groups are shared across model step modes', () => {
-  const attributeManager = new AttributeManager(createWebGPUDevice());
+  const attributeManager = new AttributeManager(webgpuDevice);
   attributeManager.add({
     a: {size: 1, stepMode: 'dynamic', accessor: 'getA', bufferGroup: 'group-a'},
     b: {size: 1, stepMode: 'dynamic', accessor: 'getB', bufferGroup: 'group-a'}
@@ -221,7 +233,7 @@ test('AttributeManager buffer groups are shared across model step modes', () => 
 });
 
 test('AttributeManager buffer groups fall back for transitions and external buffers', () => {
-  const testDevice = createWebGPUDevice();
+  const testDevice = webgpuDevice;
   const attributeManager = new AttributeManager(testDevice);
   addSimpleGroup(attributeManager);
   updateSimpleGroup(attributeManager, [
@@ -279,7 +291,7 @@ test('AttributeManager buffer groups fall back for transitions and external buff
 });
 
 test('Layer grouped bindings preserve legacy fallback and index binding', () => {
-  const attributeManager = new AttributeManager(createWebGPUDevice());
+  const attributeManager = new AttributeManager(webgpuDevice);
   attributeManager.add({
     indices: {size: 1, isIndexed: true, accessor: 'getIndex'},
     constant: {size: 1, accessor: 'getConstant'}
@@ -344,7 +356,7 @@ test('Layer grouped bindings preserve legacy fallback and index binding', () => 
 });
 
 test('IconLayer opts into grouped WebGPU layouts without changing WebGL layouts', () => {
-  const getLayouts = (testDevice: typeof device) => {
+  const getLayouts = (testDevice: Device) => {
     const attributeManager = new AttributeManager(testDevice);
     const layer = new IconLayer({id: 'icon-layer', data: []});
     (layer as any).context = {device: testDevice};
@@ -361,7 +373,7 @@ test('IconLayer opts into grouped WebGPU layouts without changing WebGL layouts'
   };
 
   const webglLayouts = getLayouts(device);
-  const webgpuLayouts = getLayouts(createWebGPUDevice());
+  const webgpuLayouts = getLayouts(webgpuDevice);
 
   expect(webglLayouts).toEqual([
     'instancePositions',

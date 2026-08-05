@@ -100,7 +100,8 @@ export default function App({
       sizeMaxPixels: sizeMaxPixels * 2,
       sizeMinPixels: sizeMinPixels * 2
     },
-    extensions: [new CollisionFilterExtension()]
+    // CollisionFilterExtension has not been ported to WebGPU yet.
+    extensions: device?.type === 'webgpu' ? [] : [new CollisionFilterExtension()]
   });
 
   return (

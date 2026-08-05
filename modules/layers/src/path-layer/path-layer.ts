@@ -373,7 +373,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
      *                                   /     :     o
      */
 
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     const SEGMENT_INDICES = [
       // start corner
       0, 1, 2,
@@ -386,7 +386,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     // [0] position on segment - 0: start, 1: end
     // [1] side of path - -1: left, 0: center (joint), 1: right
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     const SEGMENT_POSITIONS = [
       // bevel start corner
       0, 0,
