@@ -111,18 +111,12 @@
 /* Fullscreen styles */
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-fullscreen button.deck-widget-fullscreen-enter .deck-widget-icon {
-  mask-image: var(
-    --icon-fullscreen-enter,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M200-200h80q17 0 28.5 11.5T320-160q0 17-11.5 28.5T280-120H160q-17 0-28.5-11.5T120-160v-120q0-17 11.5-28.5T160-320q17 0 28.5 11.5T200-280v80Zm560 0v-80q0-17 11.5-28.5T800-320q17 0 28.5 11.5T840-280v120q0 17-11.5 28.5T800-120H680q-17 0-28.5-11.5T640-160q0-17 11.5-28.5T680-200h80ZM200-760v80q0 17-11.5 28.5T160-640q-17 0-28.5-11.5T120-680v-120q0-17 11.5-28.5T160-840h120q17 0 28.5 11.5T320-800q0 17-11.5 28.5T280-760h-80Zm560 0h-80q-17 0-28.5-11.5T640-800q0-17 11.5-28.5T680-840h120q17 0 28.5 11.5T840-800v120q0 17-11.5 28.5T800-640q-17 0-28.5-11.5T760-680v-80Z"/></svg>')
-  );
+  mask-image: var(--icon-fullscreen-enter, svg-load("icons/fullscreen.svg"));
 }
 
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:fullscreen_exit:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-fullscreen button.deck-widget-fullscreen-exit .deck-widget-icon {
-  mask-image: var(
-    --icon-fullscreen-exit,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M240-240h-80q-17 0-28.5-11.5T120-280q0-17 11.5-28.5T160-320h120q17 0 28.5 11.5T320-280v120q0 17-11.5 28.5T280-120q-17 0-28.5-11.5T240-160v-80Zm480 0v80q0 17-11.5 28.5T680-120q-17 0-28.5-11.5T640-160v-120q0-17 11.5-28.5T680-320h120q17 0 28.5 11.5T840-280q0 17-11.5 28.5T800-240h-80ZM240-720v-80q0-17 11.5-28.5T280-840q17 0 28.5 11.5T320-800v120q0 17-11.5 28.5T280-640H160q-17 0-28.5-11.5T120-680q0-17 11.5-28.5T160-720h80Zm480 0h80q17 0 28.5 11.5T840-680q0 17-11.5 28.5T800-640H680q-17 0-28.5-11.5T640-680v-120q0-17 11.5-28.5T680-840q17 0 28.5 11.5T720-800v80Z"/></svg>')
-  );
+  mask-image: var(--icon-fullscreen-exit, svg-load("icons/fullscreen-exit.svg"));
 }
 
 .deck-pseudo-fullscreen {
@@ -137,53 +131,35 @@
 /* Zoom styles */
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-zoom button.deck-widget-zoom-in .deck-widget-icon {
-  mask-image: var(
-    --icon-zoom-in,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M440-440H240q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h200v-200q0-17 11.5-28.5T480-760q17 0 28.5 11.5T520-720v200h200q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H520v200q0 17-11.5 28.5T480-200q-17 0-28.5-11.5T440-240v-200Z"/></svg>')
-  );
+  mask-image: var(--icon-zoom-in, svg-load("icons/add.svg"));
 }
 
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-zoom button.deck-widget-zoom-out .deck-widget-icon {
-  mask-image: var(
-    --icon-zoom-out,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M240-440q-17 0-28.5-11.5T200-480q0-17 11.5-28.5T240-520h480q17 0 28.5 11.5T760-480q0 17-11.5 28.5T720-440H240Z"/></svg>')
-  );
+  mask-image: var(--icon-zoom-out, svg-load("icons/remove.svg"));
 }
 
 /* Screenshot styles */
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:photo_camera:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-screenshot button.deck-widget-camera .deck-widget-icon {
-  mask-image: var(
-    --icon-camera,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l50-54q11-12 26.5-19t32.5-7h170q17 0 32.5 7t26.5 19l50 54h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg>')
-  );
+  mask-image: var(--icon-camera, svg-load("icons/photo-camera.svg"));
 }
 
 /* Theme widget styles */
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:light_mode:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-theme button.deck-widget-sun .deck-widget-icon {
-  mask-image: var(
-    --icon-sun,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M565-395q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Zm-226.5 56.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM80-440q-17 0-28.5-11.5T40-480q0-17 11.5-28.5T80-520h80q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440H80Zm720 0q-17 0-28.5-11.5T760-480q0-17 11.5-28.5T800-520h80q17 0 28.5 11.5T920-480q0 17-11.5 28.5T880-440h-80ZM451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920q17 0 28.5 11.5T520-880v80q0 17-11.5 28.5T480-760q-17 0-28.5-11.5Zm0 720Q440-63 440-80v-80q0-17 11.5-28.5T480-200q17 0 28.5 11.5T520-160v80q0 17-11.5 28.5T480-40q-17 0-28.5-11.5ZM226-678l-43-42q-12-11-11.5-28t11.5-29q12-12 29-12t28 12l42 43q11 12 11 28t-11 28q-11 12-27.5 11.5T226-678Zm494 495-42-43q-11-12-11-28.5t11-27.5q11-12 27.5-11.5T734-282l43 42q12 11 11.5 28T777-183q-12 12-29 12t-28-12Zm-42-495q-12-11-11.5-27.5T678-734l42-43q11-12 28-11.5t29 11.5q12 12 12 29t-12 28l-43 42q-12 11-28 11t-28-11ZM183-183q-12-12-12-29t12-28l43-42q12-11 28.5-11t27.5 11q12 11 11.5 27.5T282-226l-42 43q-11 12-28 11.5T183-183Zm297-297Z"/></svg>')
-  );
+  mask-image: var(--icon-sun, svg-load("icons/light-mode.svg"));
 }
 
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:dark_mode:FILL@0;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-theme button.deck-widget-moon .deck-widget-icon {
-  mask-image: var(
-    --icon-moon,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M480-120q-151 0-255.5-104.5T120-480q0-138 90-239.5T440-838q13-2 23 3.5t16 14.5q6 9 6.5 21t-7.5 23q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q11-7 22.5-6.5T819-479q10 5 15.5 15t3.5 24q-14 138-117.5 229T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/></svg>')
-  );
+  mask-image: var(--icon-moon, svg-load("icons/dark-mode.svg"));
 }
 
 /* Reset view styles */
 /* Icon source: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:reset_focus:FILL@1;wght@400;GRAD@0;opsz@24 */
 .deck-widget.deck-widget-reset-view button.deck-widget-reset-focus .deck-widget-icon {
-  mask-image: var(
-    --icon-reset-view,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M540-420v70q0 13-8.5 21.5T510-320q-13 0-21.5-8.5T480-350v-90q0-17 11.5-28.5T520-480h90q13 0 21.5 8.5T640-450q0 13-8.5 21.5T610-420h-70Zm0 280h70q13 0 21.5 8.5T640-110q0 13-8.5 21.5T610-80h-90q-17 0-28.5-11.5T480-120v-90q0-13 8.5-21.5T510-240q13 0 21.5 8.5T540-210v70Zm280-280h-70q-13 0-21.5-8.5T720-450q0-13 8.5-21.5T750-480h90q17 0 28.5 11.5T880-440v90q0 13-8.5 21.5T850-320q-13 0-21.5-8.5T820-350v-70Zm0 280v-70q0-13 8.5-21.5T850-240q13 0 21.5 8.5T880-210v90q0 17-11.5 28.5T840-80h-90q-13 0-21.5-8.5T720-110q0-13 8.5-21.5T750-140h70ZM480-760q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-70q0-17 11.5-28.5T360-360q17 0 28.5 11.5T400-320v160q0 17-11.5 28.5T360-120H200q-17 0-28.5-11.5T160-160q0-17 11.5-28.5T200-200h54q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q114 0 204 62.5T814-615q6 16 0 31t-22 21q-16 6-31.5 0T739-585q-31-78-100.5-126.5T480-760Z"/></svg>')
-  );
+  mask-image: var(--icon-reset-view, svg-load("icons/reset-focus.svg"));
 }
 
 /* Timeline widget styles */
@@ -206,16 +182,10 @@
   padding: var(--widget-margin, 12px);
 }
 .deck-widget-timeline button.deck-widget-timeline-pause .deck-widget-icon {
-  mask-image: var(
-    --icon-pause,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>')
-  );
+  mask-image: var(--icon-pause, svg-load("icons/pause.svg"));
 }
 .deck-widget-timeline button.deck-widget-timeline-play .deck-widget-icon {
-  mask-image: var(
-    --icon-play,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="black"><path d="M320-200v-560l440 280-440 280Z"/></svg>')
-  );
+  mask-image: var(--icon-play, svg-load("icons/play-arrow.svg"));
 }
 .deck-widget-timeline-label {
   position: relative;
@@ -244,10 +214,7 @@
 }
 
 .deck-widget.deck-widget-loading button.deck-widget-spinner .deck-widget-icon {
-  mask-image: var(
-    --loading-icon,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>')
-  );
+  mask-image: var(--loading-icon, svg-load("icons/loading.svg"));
 }
 
 /* Scale styles */
@@ -350,7 +317,7 @@
   width: 12px;
   height: 12px;
   background-color: var(--button-icon-idle, rgba(97, 97, 102, 1));
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>');
+  mask-image: svg-load("icons/dropdown.svg");
   mask-size: contain;
   transition: transform 0.2s ease;
 }
@@ -475,10 +442,7 @@
   box-shadow: none;
 }
 .deck-widget-popup-content button.deck-widget-popup-close-button .deck-widget-icon {
-  mask-image: var(
-    --icon-close,
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -120 120 120" fill="black"><path d="m32-25-7-7 28-28-28-28 7-7 28 28 28-28 7 7-28 28 28 28-7 7-28-28-28 28Z"/></svg>')
-  );
+  mask-image: var(--icon-close, svg-load("icons/close.svg"));
 }
 
 /** Range input */
@@ -565,10 +529,10 @@
   right: 0;
 }
 .deck-widget-range--vertical .deck-widget-range__button--start .deck-widget-icon {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z"/></svg>');
+  mask-image: svg-load("icons/chevron-up.svg");
 }
 .deck-widget-range--vertical .deck-widget-range__button--end .deck-widget-icon {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>');
+  mask-image: svg-load("icons/chevron-down.svg");
 }
 .deck-widget-range--horizontal .deck-widget-range__track {
   height: var(--range-track-size, 16px);
@@ -589,10 +553,10 @@
   bottom: 0;
 }
 .deck-widget-range--horizontal .deck-widget-range__button--start .deck-widget-icon {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></svg>');
+  mask-image: svg-load("icons/chevron-left.svg");
 }
 .deck-widget-range--horizontal .deck-widget-range__button--end .deck-widget-icon {
-  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 -960 960 960" fill="black"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>');
+  mask-image: svg-load("icons/chevron-right.svg");
 }
 
 /** Scrollbar */
