@@ -1,5 +1,5 @@
 # PointCloudLayer
-[webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {PointCloudLayerDemo} from '@site/src/doc-demos/layers';
 

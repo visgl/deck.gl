@@ -79,6 +79,9 @@ const config = {
             '@luma.gl/webgl/constants': resolve(
               '../node_modules/@luma.gl/webgl/dist/constants'
             ),
+            '@luma.gl/gpgpu/webgpu': resolve(
+              '../node_modules/@luma.gl/gpgpu/dist/operations/webgpu'
+            ),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
             '@math.gl': resolve('../node_modules/@math.gl'),
             '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
