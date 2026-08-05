@@ -892,7 +892,7 @@ export default class DeckPicker {
         );
       }
       const source = new ArrayType(
-        readData.buffer,
+        readData.buffer as ArrayBuffer,
         readData.byteOffset,
         layout.byteLength / bytesPerElement
       );
