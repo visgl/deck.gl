@@ -7,9 +7,11 @@ import type {
   Device,
   Parameters,
   PresentationContext,
+  RenderPassProps,
   RenderPassParameters,
   RenderPipelineParameters
 } from '@luma.gl/core';
+import {Buffer, ShaderBlockWriter, makeShaderBlockLayout} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {NumberArray4} from '@math.gl/core';
 
@@ -18,7 +20,8 @@ import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
 import type {Effect} from '../lib/effect';
-import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
+import {getUniformsFromViewport, type ProjectProps} from '../shaderlib/project/viewport-uniforms';
+import project from '../shaderlib/project/project';
 import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
@@ -34,6 +37,10 @@ const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
   blendAlphaSrcFactor: 'one',
   blendAlphaDstFactor: 'one-minus-src-alpha'
 };
+
+const PROJECT_UNIFORM_WRITER = new ShaderBlockWriter(
+  makeShaderBlockLayout(project.uniformTypes, {layout: 'wgsl-uniform'})
+);
 
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
@@ -110,21 +117,162 @@ export default class LayersPass extends Pass {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
-    const renderPass = this.device.beginRenderPass({
+    const renderPassProps: RenderPassProps = {
       framebuffer,
       parameters,
       clearColor: clearColor as NumberArray4,
       clearDepth,
       clearStencil
-    });
+    };
+    const renderOptions = {...options, target: framebuffer};
+
+    if (this._shouldRenderSeparatePasses(options.viewports)) {
+      return this._drawLayersInSeparatePasses(renderPassProps, renderOptions);
+    }
+
+    const renderPass = this.device.beginRenderPass(renderPassProps);
 
     try {
-      return this._drawLayers(renderPass, {...options, target: framebuffer});
+      return this._drawLayers(renderPass, renderOptions);
     } finally {
       renderPass.end();
       // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
       this.device.submit();
     }
+  }
+
+  /** WebGPU must order projection uploads before each viewport that redraws the same model. */
+  private _shouldRenderSeparatePasses(viewports: Viewport[]): boolean {
+    return (
+      this.device.type === 'webgpu' &&
+      (viewports.length > 1 || viewports.some(viewport => (viewport.subViewports?.length || 1) > 1))
+    );
+  }
+
+  /** Encode projection uploads and viewport passes in draw order using one GPU submission. */
+  private _drawLayersInSeparatePasses(
+    renderPassProps: RenderPassProps,
+    options: LayersPassRenderOptions
+  ): RenderStats[] {
+    const {
+      canvasContext = this.device.canvasContext!,
+      target,
+      shaderModuleProps,
+      viewports,
+      views,
+      onViewportActive,
+      clearStack = true
+    } = options;
+    options.pass = options.pass || 'unknown';
+
+    if (clearStack) {
+      this._lastRenderIndex = -1;
+    }
+
+    const renderStats: RenderStats[] = [];
+    let hasRenderedViewport = false;
+
+    try {
+      for (const viewport of viewports) {
+        const view = views && views[viewport.id];
+        onViewportActive?.(viewport);
+
+        const drawLayerParams = this._getDrawLayerParams(viewport, options);
+        const subViewports = viewport.subViewports || [viewport];
+
+        for (const subViewport of subViewports) {
+          const preparedLayerParams = this._prepareViewportModels(
+            subViewport,
+            options.layers,
+            drawLayerParams,
+            options.pass
+          );
+
+          const renderPass = this.device.beginRenderPass({
+            ...renderPassProps,
+            ...(hasRenderedViewport && {
+              clearColor: false,
+              clearDepth: false,
+              clearStencil: false
+            })
+          });
+
+          try {
+            const stats = this._drawLayersInViewport(
+              renderPass,
+              {
+                target,
+                canvasContext,
+                shaderModuleProps,
+                viewport: subViewport,
+                view,
+                pass: options.pass,
+                layers: options.layers,
+                isPicking: options.isPicking
+              },
+              preparedLayerParams
+            );
+            renderStats.push(stats);
+          } finally {
+            renderPass.end();
+          }
+
+          hasRenderedViewport = true;
+        }
+      }
+
+      return renderStats;
+    } finally {
+      this.device.submit();
+    }
+  }
+
+  /** Upload only projection uniforms; layer-specific inputs are finalized inside Layer.draw(). */
+  private _prepareViewportModels(
+    viewport: Viewport,
+    layers: Layer[],
+    drawLayerParams: DrawLayerParameters[],
+    pass: string
+  ): DrawLayerParameters[] {
+    let preparedLayerParams = drawLayerParams;
+
+    for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+      const layer = layers[layerIndex];
+      const drawLayerParameters = drawLayerParams[layerIndex];
+
+      if (!layer.isDrawable || !drawLayerParameters.shouldDrawLayer) {
+        continue;
+      }
+
+      try {
+        const {shaderModuleProps} = drawLayerParameters;
+        if (!shaderModuleProps.project) {
+          continue;
+        }
+
+        const projectUniforms = getUniformsFromViewport({...shaderModuleProps.project, viewport});
+
+        for (const model of layer.getModels()) {
+          const projectBuffer = model.bindings.projectUniforms;
+          if (projectBuffer instanceof Buffer) {
+            this.device.writeBufferViaCommandEncoder(
+              this.device.commandEncoder,
+              projectBuffer,
+              PROJECT_UNIFORM_WRITER.getData(projectUniforms)
+            );
+          }
+        }
+      } catch (error) {
+        layer.raiseError(error as Error, `drawing ${layer} to ${pass}`);
+
+        if (preparedLayerParams === drawLayerParams) {
+          preparedLayerParams = drawLayerParams.slice();
+        }
+        preparedLayerParams[layerIndex] = {...drawLayerParameters, shouldDrawLayer: false};
+      }
+    }
+
+    return preparedLayerParams;
   }
 
   /** Draw a list of layers in a list of viewports */

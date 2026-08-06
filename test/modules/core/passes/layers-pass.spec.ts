@@ -7,7 +7,10 @@ import {test, expect, vi} from 'vitest';
 import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
+import {Buffer, Texture} from '@luma.gl/core';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {getGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/webgl/constants';
 import type {CanvasContext} from '@luma.gl/core';
@@ -345,6 +348,93 @@ test('LayersPass#viewParameters', () => {
     blendColorSrcFactor: 'src-alpha',
     cullMode: 'none'
   });
+});
+
+test('LayersPass#WebGPU renders each repeated world at its own offset', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+
+  const width = 1152;
+  const height = 128;
+  const view = new MapView({repeat: true});
+  const viewport = view.makeViewport({
+    width,
+    height,
+    viewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  const subViewports = viewport.subViewports!;
+  expect(subViewports, 'the viewport includes three visible world copies').toHaveLength(3);
+
+  const colorTexture = webgpuDevice.createTexture({
+    format: 'rgba8unorm',
+    width,
+    height,
+    usage: Texture.RENDER | Texture.COPY_SRC
+  });
+  const framebuffer = webgpuDevice.createFramebuffer({
+    width,
+    height,
+    colorAttachments: [colorTexture],
+    depthStencilAttachment: 'depth24plus'
+  });
+  const readbackOptions = {x: 0, y: height / 2, width, height: 1};
+  const readbackLayout = colorTexture.computeMemoryLayout(readbackOptions);
+  const readbackBuffer = webgpuDevice.createBuffer({
+    byteLength: readbackLayout.byteLength,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  const layer = new ScatterplotLayer({
+    id: 'webgpu-repeated-world',
+    data: [{position: [0, 0]}],
+    getPosition: point => point.position,
+    getFillColor: [255, 0, 0, 255],
+    radiusMinPixels: 8
+  });
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  const layersPass = new DrawLayersPass(webgpuDevice);
+  const submit = vi.spyOn(webgpuDevice, 'submit');
+
+  try {
+    layerManager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    layerManager.setLayers([layer]);
+    submit.mockClear();
+
+    const renderStats = layersPass.render({
+      target: framebuffer,
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      pass: 'webgpu-repeat-regression'
+    });
+    expect(renderStats, 'one render result is returned for each world copy').toHaveLength(3);
+    expect(submit, 'all world copies are submitted together').toHaveBeenCalledOnce();
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const worldColors = subViewports.map(subViewport => {
+      const pixelIndex = Math.round(subViewport.project([0, 0])[0]) * 4;
+      return Array.from(pixels.subarray(pixelIndex, pixelIndex + 4));
+    });
+
+    expect(worldColors, 'each world copy is visible at its projected position').toEqual([
+      [255, 0, 0, 255],
+      [255, 0, 0, 255],
+      [255, 0, 0, 255]
+    ]);
+  } finally {
+    submit.mockRestore();
+    readbackBuffer.destroy();
+    layerManager.finalize();
+    framebuffer.destroy();
+    colorTexture.destroy();
+  }
 });
 
 test('LayersPass#uses the supplied canvas context for viewport and clear passes', () => {
