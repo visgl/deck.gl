@@ -15,7 +15,7 @@ export type TestDeviceType = 'webgl' | 'webgpu';
 
 export interface TestCase {
   name: string;
-  skip?: boolean;
+  skip?: boolean | string[];
   views?: any;
   viewState: any;
   layers: any[];

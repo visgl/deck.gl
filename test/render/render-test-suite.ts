@@ -15,6 +15,7 @@ import {
   TestCase,
   TestDeviceType
 } from './deck-test-utils';
+import {OS} from './constants';
 
 type RenderTestSuiteOptions = {
   beforeAll?: () => void | Promise<void>;
@@ -29,10 +30,13 @@ function cloneTestCases(testCases: TestCase[]): TestCase[] {
 
 function registerTests(
   testCases: TestCase[],
+  environment: string[],
   runTest: (testCase: TestCase) => Promise<void>
 ): void {
-  const activeTests = testCases.filter(testCase => !testCase.skip);
-  const skippedTests = testCases.filter(testCase => testCase.skip);
+  const shouldSkip = ({skip}: TestCase): boolean =>
+    skip === true || (Array.isArray(skip) && skip.some(value => environment.includes(value)));
+  const activeTests = testCases.filter(testCase => !shouldSkip(testCase));
+  const skippedTests = testCases.filter(shouldSkip);
 
   skippedTests.forEach(testCase => {
     test.skip(testCase.name, () => {});
@@ -70,7 +74,9 @@ export function runRenderTestSuite(
     ctx.container = null;
   });
 
-  registerTests(deviceTestCases, testCase => runRenderTest(testCase, ctx));
+  registerTests(deviceTestCases, [OS.toLowerCase(), deviceType], testCase =>
+    runRenderTest(testCase, ctx)
+  );
 }
 
 export function runPersistentRenderTestSuite(
@@ -97,5 +103,7 @@ export function runPersistentRenderTestSuite(
     ctx.container = null;
   });
 
-  registerTests(deviceTestCases, testCase => updateDeckForTest(testCase, ctx));
+  registerTests(deviceTestCases, [OS.toLowerCase(), deviceType], testCase =>
+    updateDeckForTest(testCase, ctx)
+  );
 }

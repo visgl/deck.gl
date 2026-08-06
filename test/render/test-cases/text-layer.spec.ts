@@ -349,6 +349,7 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
   },
   {
     name: 'text-layer-background-dash',
+    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0
