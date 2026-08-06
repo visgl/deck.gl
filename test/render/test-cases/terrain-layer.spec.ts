@@ -65,6 +65,7 @@ const testCases = [
   },
   {
     name: 'terrain-extension-drape',
+    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -130,9 +131,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });
