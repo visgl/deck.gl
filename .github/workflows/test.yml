@@ -36,8 +36,6 @@ jobs:
         run: yarn build
 
       - name: Run tests
-        env:
-          RENDER_TEST_DEVICE: webgl
         run: |
           yarn lint
           yarn test-ci
@@ -90,7 +88,7 @@ jobs:
 
       - name: Run WebGPU tests
         env:
-          RENDER_TEST_DEVICE: webgpu
+          RENDER_TEST_LOG_DEVICE: 'true'
         run: yarn test-webgpu
 
       - name: Upload render test failure images
