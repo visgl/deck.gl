@@ -357,6 +357,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       maxCacheSize,
       maxCacheByteSize,
       refinementStrategy,
+      lodStrategy,
       zoomOffset
     } = this.props;
 
@@ -391,6 +392,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           maxCacheSize,
           maxCacheByteSize,
           refinementStrategy,
+          lodStrategy,
           zoomOffset
         }
       );
