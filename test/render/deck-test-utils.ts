@@ -113,9 +113,21 @@ export function finalizeDeck(ctx: DeckTestContext): void {
   }
 }
 
-function throwIfDeviceLost(ctx: DeckTestContext): void {
-  if (ctx.deviceLoss?.error) {
-    throw ctx.deviceLoss.error;
+async function getDeviceLossError(deviceLoss: DeviceLossState, error: Error): Promise<Error> {
+  const diagnostics = await commands.consumeBrowserDiagnostics();
+  const diagnosticsText = formatBrowserDiagnostics(diagnostics);
+  if (diagnosticsText && !error.message.includes('\nBrowser diagnostics:')) {
+    const errorWithDiagnostics = new Error(`${error.message}${diagnosticsText}`, {cause: error});
+    deviceLoss.error = errorWithDiagnostics;
+    return errorWithDiagnostics;
+  }
+  return error;
+}
+
+async function throwIfDeviceLost(ctx: DeckTestContext): Promise<void> {
+  const deviceLoss = ctx.deviceLoss;
+  if (deviceLoss?.error) {
+    throw await getDeviceLossError(deviceLoss, deviceLoss.error);
   }
 }
 
@@ -125,12 +137,12 @@ function failOnDeviceLoss<T>(operation: Promise<T>, ctx: DeckTestContext): Promi
     return operation;
   }
   if (deviceLoss.error) {
-    return Promise.reject(deviceLoss.error);
+    return getDeviceLossError(deviceLoss, deviceLoss.error).then(error => Promise.reject(error));
   }
   return Promise.race([
     operation,
-    deviceLoss.promise.then(error => {
-      throw error;
+    deviceLoss.promise.then(async error => {
+      throw await getDeviceLossError(deviceLoss, error);
     })
   ]);
 }
@@ -199,7 +211,7 @@ export async function runRenderTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
-  throwIfDeviceLost(ctx);
+  await throwIfDeviceLost(ctx);
 
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
@@ -328,7 +340,7 @@ export async function updateDeckForTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
-  throwIfDeviceLost(ctx);
+  await throwIfDeviceLost(ctx);
 
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
