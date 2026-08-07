@@ -19,7 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.3
 
-### deck.gl v9.3 Prereleases
+#### deck.gl [v9.3.8] - Aug 7 2026
+
+- feat(core): override size zoom in OrthographicView (#10532)
+- fix(mapbox,google-maps): use css-dpr pixel sizing in overlaid mode to prevent basemap misalignment (#10370)
+- fix(mapbox): ignore useDevicePixels in interleaved mode (#10510)
+- fix(react): remove redundant initial render redraw (#10428)
 
 #### deck.gl [v9.3.7] - Jul 16 2026
 
@@ -69,6 +74,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 deck.gl v9.3 features big improvements to widgets, controllers and WebGPU. Find out more on [What's New](https://deck.gl/docs/whats-new) and [Upgrade Guide](https://deck.gl/docs/upgrade-guide).
 
+
+### deck.gl v9.3 Prereleases
 
 #### deck.gl [v9.3.0-beta.2] - Apr 11 2026
 
