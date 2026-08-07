@@ -18,6 +18,14 @@ void main(void) {
 
   fragColor = vColor;
 
+  if (line.antialiasing) {
+    // Feather one device pixel across the width, from the derivative of uv.y. The ends are left
+    // hard - they abut neighboring segments. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+    float edgeCoord = abs(uv.y);
+    float edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+    fragColor.a *= smoothedge(0.0, edgePixels);
+  }
+
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

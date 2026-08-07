@@ -18,6 +18,12 @@ import {
 
 type RenderTestSuiteOptions = {
   beforeAll?: () => void | Promise<void>;
+  /**
+   * WebGL context attributes for the suite's device. Defaults to the browser's, which enables
+   * MSAA - pass `{antialias: false}` to test what applications get when a base map owns the
+   * context.
+   */
+  webgl?: {antialias?: boolean};
 };
 
 function cloneTestCases(testCases: TestCase[]): TestCase[] {
@@ -54,7 +60,7 @@ export function runRenderTestSuite(
 
   beforeAll(async () => {
     ctx.container = createContainer();
-    ctx.device = await createTestDevice(deviceType, ctx.container);
+    ctx.device = await createTestDevice(deviceType, ctx.container, options.webgl);
     await options.beforeAll?.();
   });
 

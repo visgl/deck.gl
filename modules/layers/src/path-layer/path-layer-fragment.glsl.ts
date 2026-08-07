@@ -25,17 +25,40 @@ out vec4 fragColor;
 void main(void) {
   geometry.uv = vPathPosition;
 
-  if (vPathPosition.y < 0.0 || vPathPosition.y > vPathLength) {
+  bool isCorner = vPathPosition.y < 0.0 || vPathPosition.y > vPathLength;
+  bool isRound = vJointType > 0.5;
+
+  // Distance to the silhouette in device pixels, from the derivative of the coordinate that
+  // bounds it. Computed before the discards below: derivatives are undefined once an invocation
+  // in the quad has been discarded. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+  float edgePixels = 0.0;
+  if (path.antialiasing) {
+    float bodyCoord = abs(vPathPosition.x);
+    float cornerCoord = length(vCornerOffset);
+    // Both evaluated so each derivative stays on one field across the corner/body boundary
+    float bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
+    float cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+    edgePixels = isRound && isCorner ? cornerPixels : bodyPixels;
+  }
+
+  if (isCorner) {
     // if joint is rounded, test distance from the corner
-    if (vJointType > 0.5 && length(vCornerOffset) > 1.0) {
+    if (isRound && length(vCornerOffset) > 1.0) {
       discard;
     }
     // trim miter
-    if (vJointType < 0.5 && vMiterLength > path.miterLimit + 1.0) {
+    if (!isRound && vMiterLength > path.miterLimit + 1.0) {
       discard;
     }
   }
   fragColor = vColor;
+
+  if (path.antialiasing) {
+    // Feather one device pixel across the width only - segments abut lengthwise, which would seam.
+    // edgePixels is a signed device-pixel distance, and SMOOTH_EDGE_RADIUS is 0.5, so smoothedge
+    // ramps across exactly one pixel centered on the edge.
+    fragColor.a *= smoothedge(0.0, edgePixels);
+  }
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }

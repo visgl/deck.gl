@@ -24,10 +24,24 @@ const browserPlaywright = playwright({
   }
 });
 
-// Playwright provider with viewport configured for render tests
+// Playwright provider with viewport configured for render tests.
+// The WebGPU flags below are additive to chromiumLaunchArgs on purpose: dropping
+// --use-angle=swiftshader shifts WebGL rasterization enough to fail
+// 'column-lnglat-extruded-wireframe' at 97.88%. Vulkan compositing is what lets Dawn's swapchain
+// reach the screenshot compositor, and --enable-gpu stops headless forcing software rendering -
+// but its driver autodetection needs an X display, so this project must run under xvfb-run to
+// capture WebGPU. Without a display WebGL is unaffected and WebGPU captures blank.
+// See https://github.com/visgl/luma.gl/issues/2874
 const renderPlaywright = playwright({
   launchOptions: {
-    args: [...chromiumLaunchArgs, '--enable-unsafe-webgpu']
+    args: [
+      ...chromiumLaunchArgs,
+      '--enable-unsafe-webgpu',
+      '--ignore-gpu-blocklist',
+      '--enable-gpu',
+      '--enable-features=Vulkan',
+      '--use-vulkan=swiftshader'
+    ]
   },
   contextOptions: {
     viewport: {width: 1024, height: 768}

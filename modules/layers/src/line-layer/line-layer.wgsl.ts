@@ -42,6 +42,7 @@ struct LineUniforms {
   widthMinPixels: f32,
   widthMaxPixels: f32,
   useShortestPath: f32,
+  antialiasing: f32,
   widthUnits: i32,
 };
 
@@ -160,6 +161,17 @@ fn fragmentMain(
 
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
+
+  // Distance to the edge in device pixels, from the derivative of uv.y. Taken in uniform control
+  // flow, ahead of the picking discard below
+  let edgeCoord = abs(uv.y);
+  let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+
+  if (line.antialiasing != 0.0) {
+    // Feather one device pixel across the width, before premultiplication below. The ends are left
+    // hard - they abut neighbors
+    fragColor.a *= smoothedge(0.0, edgePixels);
+  }
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(pickingColor)) {

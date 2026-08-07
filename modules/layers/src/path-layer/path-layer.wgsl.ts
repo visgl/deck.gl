@@ -244,15 +244,43 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
 
-  if (varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength) {
-    if (varyings.vJointType > 0.5 && length(varyings.vCornerOffset) > 1.0) {
+  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
+  // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
+  // screen-space derivative converts the distance to the boundary into device pixels, which stays
+  // correct under perspective foreshortening and under extensions that rescale the stroke.
+  let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
+  let isRound = varyings.vJointType > 0.5;
+
+  // Distance to the silhouette in device pixels, from the derivative of the coordinate that
+  // bounds it. Computed before the discards below: derivatives need uniform control flow and are
+  // undefined after a discard in the quad. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+  var edgePixels = 0.0;
+  if (path.antialiasing != 0.0) {
+    let bodyCoord = abs(varyings.vPathPosition.x);
+    let cornerCoord = length(varyings.vCornerOffset);
+    // Both evaluated so each derivative stays on one field across the corner/body boundary
+    let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
+    let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+    edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
+  }
+
+  if (isCorner) {
+    if (isRound && length(varyings.vCornerOffset) > 1.0) {
       discard;
     }
-    if (varyings.vJointType < 0.5 && varyings.vMiterLength > path.miterLimit + 1.0) {
+    if (!isRound && varyings.vMiterLength > path.miterLimit + 1.0) {
       discard;
     }
   }
 
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  var color = varyings.vColor;
+
+  if (path.antialiasing != 0.0) {
+    // Feather one device pixel across the width only, before premultiplication. edgePixels is a
+    // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
+    color.a *= smoothedge(0.0, edgePixels);
+  }
+
+  return deckgl_premultiplied_alpha(color);
 }
 `;

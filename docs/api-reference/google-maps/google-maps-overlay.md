@@ -119,6 +119,14 @@ The constructor additionally accepts the following option:
 
 - `interleaved` (boolean) - When set to `false`, a dedicated deck.gl canvas is layered on top of the base map. If set to `true` and the Google Map is configured for Vector rendering, deck.gl layers are inserted into the Google Maps layer stack, sharing the same WebGL2RenderingContext. Default is `true`.
 
+## Remarks
+
+### Antialiasing
+
+With `interleaved: true` on a Vector map, deck.gl shares the WebGL context created by Google Maps, which does not provide multisampling and exposes no option to request it. Layers whose edges depend on it — most visibly [PathLayer](../layers/path-layer.md) and [LineLayer](../layers/line-layer.md) — render with hard, aliased edges. See [#7647](https://github.com/visgl/deck.gl/issues/7647).
+
+Set `antialiasing: true` on those layers to have them compute edge coverage in the shader instead. On composite layers the prop is named `lineAntialiasing` ([GeoJsonLayer](../layers/geojson-layer.md#lineantialiasing), [PolygonLayer](../layers/polygon-layer.md#lineantialiasing)).
+
 ## Methods
 
 #### `setMap` {#setmap}
