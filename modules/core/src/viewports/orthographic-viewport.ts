@@ -105,7 +105,7 @@ export default class OrthographicViewport extends Viewport {
     } = props;
     const zoomX = props.zoomX ?? (Array.isArray(zoom) ? zoom[0] : zoom);
     const zoomY = props.zoomY ?? (Array.isArray(zoom) ? zoom[1] : zoom);
-    const zoom_ = Math.min(zoomX, zoomY);
+    const zoom_ = Number.isFinite(props.zoom) ? (props.zoom as number) : Math.min(zoomX, zoomY);
     const scale = Math.pow(2, zoom_);
 
     let distanceScales;

@@ -45,15 +45,15 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `PathLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | 🚧 |
-| `@deck.gl/layers` | `TextLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/layers` | `TextLayer` | ✅ | 🚧 |
 | `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ✅ v9.4  |
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
+| `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
@@ -64,7 +64,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
@@ -75,7 +75,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `RasterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
-`GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
+`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering; text backgrounds and collision filtering still require WebGL.
 
 - `S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
 - `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 

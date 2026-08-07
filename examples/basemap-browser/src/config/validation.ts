@@ -55,6 +55,16 @@ const VALIDATION_RULES: ValidationRule[] = [
       message: 'Google Maps cannot render layers under map labels (no slot/beforeId support)',
       severity: 'info'
     })
+  },
+
+  // Mapbox does not expose a pixel ratio override for its shared canvas
+  {
+    check: d => d.basemap === 'mapbox' && d.interleaved && d.useDevicePixels !== true,
+    warning: () => ({
+      dimension: 'useDevicePixels',
+      message: 'Pixel ratio overrides have no effect with Mapbox in interleaved mode',
+      severity: 'warning'
+    })
   }
 ];
 

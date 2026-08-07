@@ -66,6 +66,7 @@ const background = [
 
 /** @param {{device?: import('@luma.gl/core').Device}} props */
 export default function App({device}) {
+  const isWebGPU = device?.type === 'webgpu';
   const layers = [
     new SimpleMeshLayer({
       id: 'mini-coopers',
@@ -99,7 +100,7 @@ export default function App({device}) {
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       layers={layers}
-      effects={[lightingEffect]}
+      effects={isWebGPU ? [] : [lightingEffect]}
     />
   );
 }
