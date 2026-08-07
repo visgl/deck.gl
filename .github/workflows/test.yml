@@ -89,6 +89,7 @@ jobs:
       - name: Run WebGPU tests
         env:
           RENDER_TEST_LOG_DEVICE: 'true'
+          DEBUG: pw:browser
         run: yarn test-webgpu
 
       - name: Upload render test failure images
