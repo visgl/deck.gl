@@ -41,7 +41,6 @@ export type PickingColorDecoder = (pickedColor: number[] | Uint8Array) =>
 
 export default class PickLayersPass extends LayersPass {
   private pickZ?: boolean;
-  private _isRenderSequenceActive: boolean = false;
   private _colorEncoderState: {
     byLayer: Map<Layer, EncodedPickingColors>;
     byAlpha: EncodedPickingColors[];
@@ -58,21 +57,6 @@ export default class PickLayersPass extends LayersPass {
     // When drawing to screen (debug mode), do not use the alpha channel so that result is always visible
     const stats = super._render(props);
     return {decodePickingColor: null, stats};
-  }
-
-  /** Preserve picking-color assignments across separately submitted viewport passes. */
-  beginRenderSequence(props: LayersPassRenderOptions | PickLayersPassRenderOptions): void {
-    if ('pickingFBO' in props) {
-      this.pickZ = props.pickZ;
-      this._resetColorEncoder(props.pickZ);
-      this._isRenderSequenceActive = true;
-    }
-  }
-
-  /** Release picking-color assignments after all viewport passes have been submitted. */
-  endRenderSequence(): void {
-    this._isRenderSequenceActive = false;
-    this._colorEncoderState = null;
   }
 
   // Private
@@ -92,18 +76,13 @@ export default class PickLayersPass extends LayersPass {
     pickZ,
     canvasContext,
     shaderModuleProps,
-    clearColor,
-    clearCanvas,
-    clearStack,
-    subViewport
+    clearColor
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats[];
   } {
     this.pickZ = pickZ;
-    const colorEncoderState = this._isRenderSequenceActive
-      ? this._colorEncoderState
-      : this._resetColorEncoder(pickZ);
+    const colorEncoderState = this._resetColorEncoder(pickZ);
     const scissorRect = [x, y, width, height];
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
@@ -117,7 +96,6 @@ export default class PickLayersPass extends LayersPass {
       layerFilter,
       views,
       viewports,
-      subViewport,
       onViewportActive,
       cullRect,
       effects: effects?.filter(e => e.useInPicking),
@@ -125,17 +103,13 @@ export default class PickLayersPass extends LayersPass {
       canvasContext,
       isPicking: true,
       shaderModuleProps,
-      clearCanvas,
-      clearStack,
-      clearColor: clearColor ?? (clearCanvas === false ? undefined : [0, 0, 0, 0]),
+      clearColor: clearColor ?? [0, 0, 0, 0],
       colorMask: 0xf,
       scissorRect
     });
 
     // Clear the temp field
-    if (!this._isRenderSequenceActive) {
-      this._colorEncoderState = null;
-    }
+    this._colorEncoderState = null;
     const decodePickingColor = colorEncoderState && decodeColor.bind(null, colorEncoderState);
     return {decodePickingColor, stats: renderStatus};
   }
@@ -228,9 +202,7 @@ function encodeColor(
   // TODO - combine small layers to better utilize the picking color space
   let entry = byLayer.get(layer);
   if (entry) {
-    if (!entry.viewports.includes(viewport)) {
-      entry.viewports.push(viewport);
-    }
+    entry.viewports.push(viewport);
     a = entry.a;
   } else {
     a = byLayer.size + 1;

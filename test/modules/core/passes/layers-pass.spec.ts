@@ -5,7 +5,6 @@
 import {test, expect, vi} from 'vitest';
 
 import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
-import {renderLayerPass} from '@deck.gl/core/lib/render-layer-pass';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
@@ -325,6 +324,8 @@ test('LayersPass#viewParameters', () => {
     })
   };
 
+  const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
+  const submit = vi.spyOn(device, 'submit');
   layersPass.render({
     viewports: [new Viewport({id: 'A'}), new Viewport({id: 'B'})],
     views,
@@ -333,6 +334,10 @@ test('LayersPass#viewParameters', () => {
     onError: err => expect(err).toBeFalsy()
   });
 
+  expect(beginRenderPass, 'each logical WebGL viewport owns a render pass').toHaveBeenCalledTimes(
+    2
+  );
+  expect(submit, 'all WebGL viewports are submitted together').toHaveBeenCalledOnce();
   expect(drawCalls, 'layer drawn once in each view').toHaveLength(2);
   expect(drawCalls[0].viewport, 'first viewport id').toBe('A');
   expect(drawCalls[0].parameters, 'view parameters are merged for view A').toMatchObject({
@@ -350,9 +355,13 @@ test('LayersPass#viewParameters', () => {
     blendColorSrcFactor: 'src-alpha',
     cullMode: 'none'
   });
+  beginRenderPass.mockRestore();
+  submit.mockRestore();
 });
 
-test('renderLayerPass#WebGPU renders and picks each repeated world separately', async ({skip}) => {
+test('LayersPass#WebGPU renders and picks each repeated world in a separate pass', async ({
+  skip
+}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -398,6 +407,7 @@ test('renderLayerPass#WebGPU renders and picks each repeated world separately', 
   const layerManager = new LayerManager(webgpuDevice, {viewport});
   const layersPass = new DrawLayersPass(webgpuDevice);
   const pickLayersPass = new PickLayersPass(webgpuDevice);
+  const beginRenderPass = vi.spyOn(webgpuDevice, 'beginRenderPass');
   const submit = vi.spyOn(webgpuDevice, 'submit');
 
   try {
@@ -407,9 +417,10 @@ test('renderLayerPass#WebGPU renders and picks each repeated world separately', 
       }
     });
     layerManager.setLayers([layer]);
+    beginRenderPass.mockClear();
     submit.mockClear();
 
-    const renderStats = renderLayerPass(layersPass, {
+    const renderStats = layersPass.render({
       target: framebuffer,
       viewports: [viewport],
       views: {[view.id]: view},
@@ -418,6 +429,7 @@ test('renderLayerPass#WebGPU renders and picks each repeated world separately', 
       pass: 'webgpu-repeat-regression'
     });
     expect(renderStats, 'one render result is returned for each world copy').toHaveLength(3);
+    expect(beginRenderPass, 'each world copy owns a render pass').toHaveBeenCalledTimes(3);
     expect(submit, 'each world copy is submitted in its own pass').toHaveBeenCalledTimes(3);
 
     colorTexture.readBuffer(readbackOptions, readbackBuffer);
@@ -433,8 +445,9 @@ test('renderLayerPass#WebGPU renders and picks each repeated world separately', 
       [255, 0, 0, 255]
     ]);
 
+    beginRenderPass.mockClear();
     submit.mockClear();
-    const {decodePickingColor, stats: pickingStats} = renderLayerPass(pickLayersPass, {
+    const {decodePickingColor, stats: pickingStats} = pickLayersPass.render({
       pickingFBO: framebuffer,
       deviceRect: {x: 0, y: 0, width, height},
       viewports: [viewport],
@@ -446,6 +459,7 @@ test('renderLayerPass#WebGPU renders and picks each repeated world separately', 
     });
 
     expect(pickingStats, 'one picking result is returned for each world copy').toHaveLength(3);
+    expect(beginRenderPass, 'each picked world owns a render pass').toHaveBeenCalledTimes(3);
     expect(submit, 'each world copy is picked in its own pass').toHaveBeenCalledTimes(3);
 
     colorTexture.readBuffer(readbackOptions, readbackBuffer);
@@ -466,6 +480,7 @@ test('renderLayerPass#WebGPU renders and picks each repeated world separately', 
       );
     }
   } finally {
+    beginRenderPass.mockRestore();
     submit.mockRestore();
     readbackBuffer.destroy();
     layerManager.finalize();
