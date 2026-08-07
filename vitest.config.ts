@@ -15,9 +15,12 @@ const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftsha
 const chromiumGpuLaunchArgs =
   renderTestDevice === 'webgl'
     ? chromiumLaunchArgs
-    : [...chromiumLaunchArgs, '--enable-unsafe-webgpu'];
+    : [...chromiumLaunchArgs, '--enable-unsafe-webgpu', '--use-webgpu-adapter=swiftshader'];
 const renderTestDefine = {
-  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null)
+  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null),
+  'import.meta.env.RENDER_TEST_LOG_DEVICE': JSON.stringify(
+    process.env.RENDER_TEST_LOG_DEVICE === 'true'
+  )
 };
 
 const headlessPlaywright = playwright({
