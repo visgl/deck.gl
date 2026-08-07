@@ -234,9 +234,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   state!: {
     fillModel?: Model;
+    strokeModel?: Model;
     wireframeModel?: Model;
     models?: Model[];
-    fillVertexCount: number;
     edgeDistance: number;
   };
 
@@ -320,13 +320,15 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     const instanceCount = this.getNumInstances();
     this.state.fillModel!.setInstanceCount(instanceCount);
+    this.state.strokeModel!.setInstanceCount(instanceCount);
     this.state.wireframeModel!.setInstanceCount(instanceCount);
 
     if (
       regenerateModels ||
       props.diskResolution !== oldProps.diskResolution ||
       props.vertices !== oldProps.vertices ||
-      (props.extruded || props.stroked) !== (oldProps.extruded || oldProps.stroked)
+      props.extruded !== oldProps.extruded ||
+      props.stroked !== oldProps.stroked
     ) {
       this._updateGeometry(props);
     }
@@ -370,6 +372,12 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       bufferLayout,
       isInstanced: true
     });
+    const strokeModel = new Model(this.context.device, {
+      ...shaders,
+      id: `${this.props.id}-stroke`,
+      bufferLayout,
+      isInstanced: true
+    });
     const wireframeModel = new Model(this.context.device, {
       ...shaders,
       id: `${this.props.id}-wireframe`,
@@ -379,8 +387,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     return {
       fillModel,
+      strokeModel,
       wireframeModel,
-      models: [wireframeModel, fillModel]
+      models: [wireframeModel, fillModel, strokeModel]
     };
   }
 
@@ -388,10 +397,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
     const positionAttribute = geometry.attributes.POSITION;
     const normalAttribute = geometry.attributes.NORMAL;
-
-    this.setState({
-      fillVertexCount: positionAttribute.value.length / 3
-    });
 
     // The fill model renders a triangle-strip with degenerate triangles and does not
     // use indices. Give it a separate Geometry without `indices` so that later buffer
@@ -404,6 +409,18 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       })
     );
 
+    if (!extruded && stroked) {
+      const fillVertexCount = positionAttribute.value.length / 3;
+      this._setStrokeGeometry(
+        new Geometry({
+          topology: 'triangle-strip',
+          // remove the cap
+          vertexCount: fillVertexCount - diskResolution - 1,
+          attributes: {POSITION: positionAttribute, NORMAL: normalAttribute}
+        })
+      );
+    }
+
     this._setWireframeGeometry(geometry);
   }
 
@@ -413,6 +430,14 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     });
     const fillModel = this.state.fillModel!;
     fillModel.setGeometry(fillGeometry);
+  }
+
+  protected _setStrokeGeometry(geometry: Geometry): void {
+    const strokeGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
+    const strokeModel = this.state.strokeModel!;
+    strokeModel.setGeometry(strokeGeometry);
   }
 
   protected _setWireframeGeometry(geometry: Geometry): void {
@@ -442,8 +467,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       angle
     } = this.props;
     const fillModel = this.state.fillModel!;
+    const strokeModel = this.state.strokeModel!;
     const wireframeModel = this.state.wireframeModel!;
-    const {fillVertexCount, edgeDistance} = this.state;
+    const {edgeDistance} = this.state;
 
     const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
@@ -473,8 +499,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
 
     if (filled) {
-      // model.setProps({isIndexed: false});
-      fillModel.setVertexCount(fillVertexCount);
       fillModel.shaderInputs.setProps({
         column: {
           ...columnProps,
@@ -485,17 +509,13 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
     if (!extruded && stroked) {
-      // model.setProps({isIndexed: false});
-      // The width of the stroke is achieved by flattening the side of the cylinder.
-      // Skip the last 1/3 of the vertices which is the top.
-      fillModel.setVertexCount((fillVertexCount * 2) / 3);
-      fillModel.shaderInputs.setProps({
+      strokeModel.shaderInputs.setProps({
         column: {
           ...columnProps,
           isStroke: true
         }
       });
-      fillModel.draw(this.context.renderPass);
+      strokeModel.draw(this.context.renderPass);
     }
   }
 }
