@@ -109,8 +109,6 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     const elevationCutoff = this.props.elevationCutoff || [-Infinity, Infinity];
     const fillModel = this.state.fillModel!;
 
-    fillModel.setVertexCount(this.state.fillVertexCount);
-
     const hexagonProps: Omit<HexagonProps, 'colorRange'> = {
       colorDomain: [
         Math.max(colorDomain[0], colorCutoff[0]), // instanceColorValue that maps to colorRange[0]
