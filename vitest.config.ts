@@ -6,11 +6,23 @@ import {getVitestConfig} from '@vis.gl/dev-tools';
 import {TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
+const renderTestDevice = process.env.RENDER_TEST_DEVICE;
+if (renderTestDevice && renderTestDevice !== 'webgl' && renderTestDevice !== 'webgpu') {
+  throw new Error(`Invalid RENDER_TEST_DEVICE: ${renderTestDevice}`);
+}
+
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+const chromiumGpuLaunchArgs =
+  renderTestDevice === 'webgl'
+    ? chromiumLaunchArgs
+    : [...chromiumLaunchArgs, '--enable-unsafe-webgpu'];
+const renderTestDefine = {
+  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null)
+};
 
 const headlessPlaywright = playwright({
   launchOptions: {
-    args: [...chromiumLaunchArgs, '--enable-unsafe-webgpu']
+    args: chromiumGpuLaunchArgs
   }
 });
 
@@ -27,7 +39,7 @@ const browserPlaywright = playwright({
 // Playwright provider with viewport configured for render tests
 const renderPlaywright = playwright({
   launchOptions: {
-    args: [...chromiumLaunchArgs, '--enable-unsafe-webgpu']
+    args: chromiumGpuLaunchArgs
   },
   contextOptions: {
     viewport: {width: 1024, height: 768}
@@ -257,6 +269,7 @@ const projects = [
       // Used by test-render
       {
         extends: true,
+        define: renderTestDefine,
         resolve: {alias: browserAliases},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,

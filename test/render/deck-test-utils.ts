@@ -34,6 +34,12 @@ export interface DeckTestContext {
   deck: Deck | null;
   container: HTMLDivElement | null;
   device?: Device;
+  deviceLoss?: DeviceLossState;
+}
+
+export interface DeviceLossState {
+  error: Error | null;
+  promise: Promise<Error>;
 }
 
 /**
@@ -75,12 +81,12 @@ function formatBrowserDiagnostics(
  * Creates the container element for Deck tests.
  * Call this in beforeAll.
  */
-export function createContainer(): HTMLDivElement {
+export function createContainer(id = 'deck-container'): HTMLDivElement {
   // Hide scrollbars to prevent them from appearing in screenshots
   document.body.style.cssText = 'margin: 0; padding: 0; overflow: hidden;';
 
   const container = document.createElement('div');
-  container.id = 'deck-container';
+  container.id = id;
   container.style.cssText = `position: absolute; left: 0; top: 0; width: ${WIDTH}px; height: ${HEIGHT}px;`;
   document.body.appendChild(container);
   return container;
@@ -105,6 +111,28 @@ export function finalizeDeck(ctx: DeckTestContext): void {
     ctx.deck.finalize();
     ctx.deck = null;
   }
+}
+
+function throwIfDeviceLost(ctx: DeckTestContext): void {
+  if (ctx.deviceLoss?.error) {
+    throw ctx.deviceLoss.error;
+  }
+}
+
+function failOnDeviceLoss<T>(operation: Promise<T>, ctx: DeckTestContext): Promise<T> {
+  const deviceLoss = ctx.deviceLoss;
+  if (!deviceLoss) {
+    return operation;
+  }
+  if (deviceLoss.error) {
+    return Promise.reject(deviceLoss.error);
+  }
+  return Promise.race([
+    operation,
+    deviceLoss.promise.then(error => {
+      throw error;
+    })
+  ]);
 }
 
 /**
@@ -171,6 +199,8 @@ export async function runRenderTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
+  throwIfDeviceLost(ctx);
+
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
 
@@ -178,60 +208,63 @@ export async function runRenderTest(
 
   // Create a new Deck instance for each test (like the old SnapshotTestRunner)
   // This ensures Deck enters a fresh render loop and properly handles async loading
-  await new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      reject(new Error('Timeout waiting for render to complete'));
-    }, timeout);
+  await failOnDeviceLoss(
+    new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Timeout waiting for render to complete'));
+      }, timeout);
 
-    const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
+      const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
 
-    ctx.deck = new Deck({
-      id: 'render-test-deck',
-      container: ctx.container!,
-      device: ctx.device,
-      width: WIDTH,
-      height: HEIGHT,
-      views: views || new MapView({}),
-      viewState,
-      layers,
-      effects: effects || [],
-      useDevicePixels: useDevicePixels ?? false,
-      debug: true,
+      ctx.deck = new Deck({
+        id: 'render-test-deck',
+        container: ctx.container!,
+        device: ctx.device,
+        width: WIDTH,
+        height: HEIGHT,
+        views: views || new MapView({}),
+        viewState,
+        layers,
+        effects: effects || [],
+        useDevicePixels: useDevicePixels ?? false,
+        debug: true,
 
-      onLoad: () => {
-        // Call onBeforeRender if provided
-        if (onBeforeRender) {
-          onBeforeRender({
+        onLoad: () => {
+          // Call onBeforeRender if provided
+          if (onBeforeRender) {
+            onBeforeRender({
+              deck: ctx.deck!,
+              // @ts-expect-error Accessing protected layerManager
+              layers: ctx.deck!.layerManager?.getLayers() || []
+            });
+          }
+        },
+
+        onAfterRender: () => {
+          // @ts-expect-error Accessing protected layerManager
+          const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
+
+          // Skip if no layers yet (Deck still initializing)
+          if (currentLayers.length === 0) {
+            return;
+          }
+
+          onAfterRenderCheck({
             deck: ctx.deck!,
-            // @ts-expect-error Accessing protected layerManager
-            layers: ctx.deck!.layerManager?.getLayers() || []
+            layers: currentLayers,
+            done: () => {
+              clearTimeout(timeoutId);
+              resolve();
+            }
           });
         }
-      },
-
-      onAfterRender: () => {
-        // @ts-expect-error Accessing protected layerManager
-        const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
-
-        // Skip if no layers yet (Deck still initializing)
-        if (currentLayers.length === 0) {
-          return;
-        }
-
-        onAfterRenderCheck({
-          deck: ctx.deck!,
-          layers: currentLayers,
-          done: () => {
-            clearTimeout(timeoutId);
-            resolve();
-          }
-        });
-      }
-    });
-  });
+      });
+    }),
+    ctx
+  );
 
   // Capture and diff screenshot
-  await captureAndDiffScreenshot(testCase, ctx);
+  await failOnDeviceLoss(captureAndDiffScreenshot(testCase, ctx), ctx);
 }
 
 /**
@@ -295,6 +328,8 @@ export async function updateDeckForTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
+  throwIfDeviceLost(ctx);
+
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
 
@@ -305,53 +340,56 @@ export async function updateDeckForTest(
   }
 
   // Use setProps on existing deck - keeps the animation loop running
-  await new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      reject(new Error('Timeout waiting for render to complete'));
-    }, timeout);
+  await failOnDeviceLoss(
+    new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Timeout waiting for render to complete'));
+      }, timeout);
 
-    const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
+      const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
 
-    ctx.deck!.setProps({
-      views: views || new MapView({}),
-      viewState,
-      layers,
-      effects: effects || [],
-      useDevicePixels: useDevicePixels ?? false,
+      ctx.deck!.setProps({
+        views: views || new MapView({}),
+        viewState,
+        layers,
+        effects: effects || [],
+        useDevicePixels: useDevicePixels ?? false,
 
-      // onBeforeRender is called before each render frame - used for timeline setup
-      // Always provide a function to clear any previous callback
-      onBeforeRender: () => {
-        if (onBeforeRender) {
-          onBeforeRender({
+        // onBeforeRender is called before each render frame - used for timeline setup
+        // Always provide a function to clear any previous callback
+        onBeforeRender: () => {
+          if (onBeforeRender) {
+            onBeforeRender({
+              deck: ctx.deck!,
+              // @ts-expect-error Accessing protected layerManager
+              layers: ctx.deck!.layerManager?.getLayers() || []
+            });
+          }
+        },
+
+        onAfterRender: () => {
+          // @ts-expect-error Accessing protected layerManager
+          const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
+
+          // Skip if no layers yet (Deck still initializing)
+          if (currentLayers.length === 0) {
+            return;
+          }
+
+          onAfterRenderCheck({
             deck: ctx.deck!,
-            // @ts-expect-error Accessing protected layerManager
-            layers: ctx.deck!.layerManager?.getLayers() || []
+            layers: currentLayers,
+            done: () => {
+              clearTimeout(timeoutId);
+              resolve();
+            }
           });
         }
-      },
-
-      onAfterRender: () => {
-        // @ts-expect-error Accessing protected layerManager
-        const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
-
-        // Skip if no layers yet (Deck still initializing)
-        if (currentLayers.length === 0) {
-          return;
-        }
-
-        onAfterRenderCheck({
-          deck: ctx.deck!,
-          layers: currentLayers,
-          done: () => {
-            clearTimeout(timeoutId);
-            resolve();
-          }
-        });
-      }
-    });
-  });
+      });
+    }),
+    ctx
+  );
 
   // Capture and diff screenshot
-  await captureAndDiffScreenshot(testCase, ctx);
+  await failOnDeviceLoss(captureAndDiffScreenshot(testCase, ctx), ctx);
 }

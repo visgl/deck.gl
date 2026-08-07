@@ -123,8 +123,7 @@ const testCases = [
         getColorWeight: x => x.SPACES,
         colorAggregation: 'MEAN',
         getElevationWeight: x => x.SPACES,
-        elevationAggregation: 'MAX',
-        gpuAggregation: true
+        elevationAggregation: 'MAX'
       })
     ],
     goldenImage: GOLDEN_IMAGE
