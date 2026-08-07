@@ -20,9 +20,10 @@ const chromiumGpuLaunchArgs =
   renderTestDevice === 'webgl'
     ? chromiumLaunchArgs
     : [
-        ...chromiumLaunchArgs,
         '--enable-unsafe-webgpu',
         '--use-webgpu-adapter=swiftshader',
+        '--use-gpu-in-tests',
+        '--enable-accelerated-2d-canvas',
         ...chromiumDiagnosticArgs
       ];
 const renderTestDefine = {
