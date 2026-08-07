@@ -421,7 +421,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       );
     }
 
-    this._setWireframeGeometry(geometry);
+    if (extruded) {
+      this._setWireframeGeometry(geometry);
+    }
   }
 
   protected _setFillGeometry(geometry: Geometry): void {
