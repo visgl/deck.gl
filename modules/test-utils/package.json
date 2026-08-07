@@ -37,13 +37,13 @@
     "src"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.3.3",
-    "@luma.gl/webgl": "^9.3.3"
+    "@luma.gl/test-utils": "^9.3.5",
+    "@luma.gl/webgl": "^9.3.5"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.3.0",
-    "@luma.gl/core": "~9.3.3",
-    "@luma.gl/engine": "~9.3.3",
+    "@luma.gl/core": "~9.3.5",
+    "@luma.gl/engine": "~9.3.5",
     "@probe.gl/test-utils": "^4.1.1",
     "vitest": "^4.0.18"
   },
