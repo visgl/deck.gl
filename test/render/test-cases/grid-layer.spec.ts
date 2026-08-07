@@ -140,7 +140,6 @@ const testCases = [
         colorAggregation: 'MEAN',
         getElevationWeight: x => x.SPACES,
         elevationAggregation: 'MAX',
-        gpuAggregation: false,
         elevationScale: 5
       })
     ],
@@ -158,7 +157,6 @@ const testCases = [
         colorAggregation: 'MEAN',
         getElevationWeight: x => x.SPACES,
         elevationAggregation: 'MAX',
-        gpuAggregation: true,
         elevationScale: 5
       })
     ],
