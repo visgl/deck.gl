@@ -10,6 +10,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   COORDINATE_SYSTEM,
+  CoordinateSystem,
   FilterContext,
   GetPickingInfoParams,
   Layer,
@@ -31,6 +32,30 @@ import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
+
+/**
+ * Numeric `COORDINATE_SYSTEM` values used by deck.gl before v9.3, still emitted on tile content by
+ * released versions of loaders such as `@loaders.gl/i3s`. Mapped back to the string constants that
+ * the layers understand.
+ */
+const LEGACY_COORDINATE_SYSTEMS: Record<number, CoordinateSystem> = {
+  [-1]: COORDINATE_SYSTEM.DEFAULT,
+  0: COORDINATE_SYSTEM.CARTESIAN,
+  1: COORDINATE_SYSTEM.LNGLAT,
+  2: COORDINATE_SYSTEM.METER_OFFSETS,
+  3: COORDINATE_SYSTEM.LNGLAT_OFFSETS
+};
+
+/** @internal Exported for testing. */
+export function normalizeCoordinateSystem(
+  coordinateSystem: CoordinateSystem | number
+): CoordinateSystem | number {
+  if (typeof coordinateSystem === 'number') {
+    // Unrecognized values are passed through so that the core reports `Invalid coordinateSystem`
+    return LEGACY_COORDINATE_SYSTEMS[coordinateSystem] ?? coordinateSystem;
+  }
+  return coordinateSystem;
+}
 
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
@@ -419,7 +444,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem,
+        coordinateSystem: normalizeCoordinateSystem(coordinateSystem),
         featureIds,
         _offset: 0
       }
