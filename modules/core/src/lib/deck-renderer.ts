@@ -14,6 +14,7 @@ import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type {Effect, PostRenderOptions} from './effect';
 import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass';
+import {renderLayerPass} from './render-layer-pass';
 
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
@@ -92,7 +93,7 @@ export default class DeckRenderer {
       renderOpts.clearColor = [0, 0, 0, 0];
       renderOpts.clearCanvas = true;
     }
-    const renderResult = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderResult = renderLayerPass(layerPass, {...renderOpts, target: outputBuffer});
     const renderStats = 'stats' in renderResult ? renderResult.stats : renderResult;
 
     if (renderOpts.effects) {

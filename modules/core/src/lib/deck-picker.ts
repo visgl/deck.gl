@@ -7,6 +7,7 @@ import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
 import PickLayersPass, {PickingColorDecoder} from '../passes/pick-layers-pass';
 import log from '../utils/log';
 import {getClosestObject, getUniqueObjects, PickedPixel} from './picking/query-object';
+import {renderLayerPass} from './render-layer-pass';
 import {
   processPickInfo,
   getLayerPickingInfo,
@@ -836,7 +837,7 @@ export default class DeckPicker {
       }
     }
 
-    const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
+    const {decodePickingColor, stats} = renderLayerPass(this.pickLayersPass, opts);
     this._updateStats(stats);
 
     const {x, y, width, height} = deviceRect;
@@ -1014,7 +1015,7 @@ export default class DeckPicker {
       }
     }
 
-    const {decodePickingColor, stats} = this.pickLayersPass.render(opts);
+    const {decodePickingColor, stats} = renderLayerPass(this.pickLayersPass, opts);
     this._updateStats(stats);
 
     // Read from an already rendered picking buffer

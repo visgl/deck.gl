@@ -5,8 +5,10 @@
 import {test, expect, vi} from 'vitest';
 
 import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
+import {renderLayerPass} from '@deck.gl/core/lib/render-layer-pass';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
+import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Buffer, Texture} from '@luma.gl/core';
@@ -350,7 +352,7 @@ test('LayersPass#viewParameters', () => {
   });
 });
 
-test('LayersPass#WebGPU renders each repeated world at its own offset', async ({skip}) => {
+test('renderLayerPass#WebGPU renders and picks each repeated world separately', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -390,10 +392,12 @@ test('LayersPass#WebGPU renders each repeated world at its own offset', async ({
     data: [{position: [0, 0]}],
     getPosition: point => point.position,
     getFillColor: [255, 0, 0, 255],
-    radiusMinPixels: 8
+    radiusMinPixels: 8,
+    pickable: true
   });
   const layerManager = new LayerManager(webgpuDevice, {viewport});
   const layersPass = new DrawLayersPass(webgpuDevice);
+  const pickLayersPass = new PickLayersPass(webgpuDevice);
   const submit = vi.spyOn(webgpuDevice, 'submit');
 
   try {
@@ -405,7 +409,7 @@ test('LayersPass#WebGPU renders each repeated world at its own offset', async ({
     layerManager.setLayers([layer]);
     submit.mockClear();
 
-    const renderStats = layersPass.render({
+    const renderStats = renderLayerPass(layersPass, {
       target: framebuffer,
       viewports: [viewport],
       views: {[view.id]: view},
@@ -414,7 +418,7 @@ test('LayersPass#WebGPU renders each repeated world at its own offset', async ({
       pass: 'webgpu-repeat-regression'
     });
     expect(renderStats, 'one render result is returned for each world copy').toHaveLength(3);
-    expect(submit, 'all world copies are submitted together').toHaveBeenCalledOnce();
+    expect(submit, 'each world copy is submitted in its own pass').toHaveBeenCalledTimes(3);
 
     colorTexture.readBuffer(readbackOptions, readbackBuffer);
     const pixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
@@ -428,6 +432,39 @@ test('LayersPass#WebGPU renders each repeated world at its own offset', async ({
       [255, 0, 0, 255],
       [255, 0, 0, 255]
     ]);
+
+    submit.mockClear();
+    const {decodePickingColor, stats: pickingStats} = renderLayerPass(pickLayersPass, {
+      pickingFBO: framebuffer,
+      deviceRect: {x: 0, y: 0, width, height},
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      pass: 'webgpu-repeat-picking-regression',
+      pickZ: false
+    });
+
+    expect(pickingStats, 'one picking result is returned for each world copy').toHaveLength(3);
+    expect(submit, 'each world copy is picked in its own pass').toHaveBeenCalledTimes(3);
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pickingPixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const pickedWorlds = subViewports.map(subViewport => {
+      const pixelIndex = Math.round(subViewport.project([0, 0])[0]) * 4;
+      return decodePickingColor?.(pickingPixels.subarray(pixelIndex, pixelIndex + 4));
+    });
+
+    expect(
+      pickedWorlds.map(pickedWorld => pickedWorld?.pickedLayer.id),
+      'each world copy decodes to the pickable layer'
+    ).toEqual([layer.id, layer.id, layer.id]);
+    for (const pickedWorld of pickedWorlds) {
+      expect(pickedWorld?.pickedObjectIndex, 'the selected object index is preserved').toBe(0);
+      expect(pickedWorld?.pickedViewports, 'the logical viewport is recorded exactly once').toEqual(
+        [viewport]
+      );
+    }
   } finally {
     submit.mockRestore();
     readbackBuffer.destroy();
