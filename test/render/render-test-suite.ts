@@ -47,6 +47,15 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
   deviceLoss: DeviceLossState;
 }> {
   let sharedContext = sharedDeviceContexts[deviceType];
+  if (sharedContext) {
+    const device = await sharedContext.device;
+    if (device.isLost || sharedContext.deviceLoss?.error) {
+      sharedContext.container.remove();
+      delete sharedDeviceContexts[deviceType];
+      sharedContext = undefined;
+    }
+  }
+
   if (!sharedContext) {
     const container = createContainer(`deck-container-${deviceType}`);
     sharedContext = {
@@ -115,7 +124,6 @@ export function runRenderTestSuite(
   options: RenderTestSuiteOptions = {}
 ): void {
   if (!isRenderTestDeviceEnabled(deviceType)) {
-    test.skip.each(testCases)(`$name:${deviceType}`, () => {});
     return;
   }
 

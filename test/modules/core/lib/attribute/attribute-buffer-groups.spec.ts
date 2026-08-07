@@ -17,7 +17,7 @@ let webgpuDevice: Device;
 beforeAll(async () => {
   const testDevice = await getWebGPUTestDevice();
   if (!testDevice) {
-    throw new Error('Attribute buffer group tests require WebGPU');
+    return;
   }
   webgpuDevice = testDevice;
 });
