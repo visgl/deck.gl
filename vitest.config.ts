@@ -12,25 +12,19 @@ if (renderTestDevice && renderTestDevice !== 'webgl' && renderTestDevice !== 'we
 }
 
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
-const chromiumDiagnosticArgs =
-  process.env.RENDER_TEST_LOG_DEVICE === 'true'
-    ? ['--enable-logging=stderr', '--v=1', '--enable-dawn-backend-validation']
-    : [];
 const chromiumGpuLaunchArgs =
   renderTestDevice === 'webgl'
     ? chromiumLaunchArgs
     : [
+        ...chromiumLaunchArgs,
         '--enable-unsafe-webgpu',
-        '--use-webgpu-adapter=swiftshader',
-        '--use-gpu-in-tests',
-        '--enable-accelerated-2d-canvas',
-        ...chromiumDiagnosticArgs
+        '--ignore-gpu-blocklist',
+        '--enable-gpu',
+        '--enable-features=Vulkan',
+        '--use-vulkan=swiftshader'
       ];
 const renderTestDefine = {
-  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null),
-  'import.meta.env.RENDER_TEST_LOG_DEVICE': JSON.stringify(
-    process.env.RENDER_TEST_LOG_DEVICE === 'true'
-  )
+  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null)
 };
 
 const headlessPlaywright = playwright({

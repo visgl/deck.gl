@@ -36,18 +36,6 @@ const sharedDeviceContexts =
   renderTestGlobal.__deckRenderTestDeviceContexts ||
   (renderTestGlobal.__deckRenderTestDeviceContexts = {});
 
-function instrumentDeviceDestroy(
-  device: NonNullable<DeckTestContext['device']>,
-  deviceType: TestDeviceType
-): void {
-  const destroy = device.destroy.bind(device);
-  device.destroy = () => {
-    // biome-ignore lint/suspicious/noConsole: CI instrumentation for unexpected device destruction.
-    console.error(new Error(`[render-test] ${deviceType} device.destroy() called`).stack);
-    destroy();
-  };
-}
-
 export function isRenderTestDeviceEnabled(deviceType: TestDeviceType): boolean {
   const enabledDeviceType = import.meta.env.RENDER_TEST_DEVICE as TestDeviceType | null;
   return !enabledDeviceType || enabledDeviceType === deviceType;
@@ -59,15 +47,12 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
   deviceLoss: DeviceLossState;
 }> {
   let sharedContext = sharedDeviceContexts[deviceType];
-  let createdDevice = false;
-  let recreatedDevice = false;
   if (sharedContext) {
     const device = await sharedContext.device;
     if (device.isLost || sharedContext.deviceLoss?.error) {
       sharedContext.container.remove();
       delete sharedDeviceContexts[deviceType];
       sharedContext = undefined;
-      recreatedDevice = true;
     }
   }
 
@@ -78,22 +63,9 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
       device: createTestDevice(deviceType, container)
     };
     sharedDeviceContexts[deviceType] = sharedContext;
-    createdDevice = true;
   }
 
   const device = await sharedContext.device;
-  if (createdDevice && import.meta.env.RENDER_TEST_LOG_DEVICE) {
-    instrumentDeviceDestroy(device, deviceType);
-    // biome-ignore lint/suspicious/noConsole: CI instrumentation for WebGPU adapter selection.
-    console.log(
-      `[render-test] ${recreatedDevice ? 'recreated' : 'created'} ${deviceType} device`,
-      JSON.stringify({
-        userAgent: navigator.userAgent,
-        info: device.info,
-        features: Array.from(device.features).sort()
-      })
-    );
-  }
   if (!sharedContext.deviceLoss) {
     const deviceLoss: DeviceLossState = {
       error: null,
