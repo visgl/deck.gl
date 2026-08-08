@@ -50,3 +50,73 @@ test('DeckRenderer#post processing renders to the supplied canvas framebuffer', 
   deckRenderer.finalize();
   framebuffer.destroy();
 });
+
+test('DeckRenderer#uses the configured postprocess color format', ({skip}) => {
+  const capabilities = device.getTextureFormatCapabilities('rgba16float');
+  if (!capabilities.render || !capabilities.filter) {
+    skip();
+  }
+
+  const framebuffer = device.createFramebuffer({
+    width: 60,
+    height: 40,
+    colorAttachments: ['rgba8unorm']
+  });
+  const canvasContext = {
+    getCurrentFramebuffer: () => framebuffer,
+    getDrawingBufferSize: () => [60, 40],
+    cssToDeviceRatio: () => 1
+  } as CanvasContext;
+  const effect: Effect = {
+    id: 'postprocess-effect',
+    props: {},
+    setup() {},
+    cleanup() {},
+    preRender() {},
+    postRender({target, swapBuffer}: PostRenderOptions) {
+      return target || swapBuffer;
+    }
+  };
+  const deckRenderer = new DeckRenderer(device);
+
+  deckRenderer.setProps({
+    layerFilter: null,
+    drawPickingColors: false,
+    postProcessColorFormat: 'rgba16float'
+  });
+  deckRenderer.renderLayers({
+    pass: 'screen',
+    layers: [],
+    viewports: [new Viewport({id: 'float-postprocess-view', width: 60, height: 40})],
+    views: {},
+    onViewportActive: () => {},
+    effects: [effect],
+    target: null,
+    canvasContext
+  });
+
+  const getRenderBufferFormats = () =>
+    // @ts-expect-error Access private state to verify the allocated attachment formats.
+    deckRenderer.renderBuffers.map(buffer => buffer.colorAttachments[0].texture.format);
+  expect(getRenderBufferFormats()).toEqual(['rgba16float', 'rgba16float']);
+
+  deckRenderer.setProps({
+    layerFilter: null,
+    drawPickingColors: false,
+    postProcessColorFormat: 'rgba8unorm'
+  });
+  deckRenderer.renderLayers({
+    pass: 'screen',
+    layers: [],
+    viewports: [new Viewport({id: 'unorm-postprocess-view', width: 60, height: 40})],
+    views: {},
+    onViewportActive: () => {},
+    effects: [effect],
+    target: null,
+    canvasContext
+  });
+  expect(getRenderBufferFormats()).toEqual(['rgba8unorm', 'rgba8unorm']);
+
+  deckRenderer.finalize();
+  framebuffer.destroy();
+});
