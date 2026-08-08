@@ -161,6 +161,38 @@ test('OrthographicController scroll zoom responds without transition lag', () =>
   ).toBeTruthy();
 });
 
+test('OrthographicController scroll zoom preserves the position under the pointer', () => {
+  const view = new OrthographicView({controller: true});
+  const controller = createTestController({
+    view,
+    initialViewState: {target: [0, 0, 0], zoom: 0, scrollZoom: true}
+  });
+  const pointer: [number, number] = [75, 50];
+  const positionBefore = view
+    .makeViewport({width: 100, height: 100, viewState: controller.props})!
+    .unproject(pointer);
+
+  controller.handleEvent({
+    type: 'wheel',
+    offsetCenter: {x: pointer[0], y: pointer[1]},
+    delta: 100,
+    srcEvent: {preventDefault() {}},
+    stopPropagation() {}
+  } as any);
+
+  const positionAfter = view
+    .makeViewport({width: 100, height: 100, viewState: controller.props})!
+    .unproject(pointer);
+  expect(positionAfter[0], 'pointer retains the same world X position').toBeCloseTo(
+    positionBefore[0]
+  );
+  expect(positionAfter[1], 'pointer retains the same world Y position').toBeCloseTo(
+    positionBefore[1]
+  );
+  expect(controller.props.target[0], 'off-center zoom updates target').not.toBe(0);
+  controller.finalize();
+});
+
 test('OrthographicController scroll zoom resets isZooming state', () => {
   const interactionStates: any[] = [];
   const controller = createTestController({
