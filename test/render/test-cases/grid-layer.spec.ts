@@ -123,8 +123,7 @@ const testCases = [
         getColorWeight: x => x.SPACES,
         colorAggregation: 'MEAN',
         getElevationWeight: x => x.SPACES,
-        elevationAggregation: 'MAX',
-        gpuAggregation: true
+        elevationAggregation: 'MAX'
       })
     ],
     goldenImage: GOLDEN_IMAGE
@@ -141,7 +140,6 @@ const testCases = [
         colorAggregation: 'MEAN',
         getElevationWeight: x => x.SPACES,
         elevationAggregation: 'MAX',
-        gpuAggregation: false,
         elevationScale: 5
       })
     ],
@@ -159,7 +157,6 @@ const testCases = [
         colorAggregation: 'MEAN',
         getElevationWeight: x => x.SPACES,
         elevationAggregation: 'MAX',
-        gpuAggregation: true,
         elevationScale: 5
       })
     ],
@@ -167,9 +164,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });
