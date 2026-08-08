@@ -108,10 +108,12 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     dashMode,
     highPrecisionDash = false
   }: Partial<PathStyleExtensionOptions> = {}) {
-    // `highPrecisionDash` is the old spelling of `dashMode: 'path'`; either one implies dash.
+    // `highPrecisionDash` is the old spelling of `dashMode: 'path'`. Naming a dashMode at all
+    // is a request for dashes - resolving `'segment'` to `dash: false` would make
+    // `{dashMode: 'segment'}` silently draw solid lines while `{dashMode: 'path'}` worked.
     const resolvedDashMode: DashMode = dashMode ?? (highPrecisionDash ? 'path' : 'segment');
     super({
-      dash: dash || highPrecisionDash || resolvedDashMode === 'path',
+      dash: dash || highPrecisionDash || dashMode !== undefined,
       offset,
       dashMode: resolvedDashMode,
       highPrecisionDash: resolvedDashMode === 'path'
