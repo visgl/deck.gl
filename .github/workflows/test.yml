@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  test-node:
+  test-coverage:
     runs-on: ubuntu-22.04
     permissions:
       checks: write
@@ -87,10 +87,7 @@ jobs:
         run: yarn build
 
       - name: Run WebGPU tests
-        env:
-          RENDER_TEST_LOG_DEVICE: 'true'
-          DEBUG: pw:browser
-        run: yarn test-webgpu
+        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-webgpu
 
       - name: Upload render test failure images
         if: failure()

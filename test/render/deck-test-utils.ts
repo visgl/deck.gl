@@ -60,23 +60,6 @@ export function createTestDevice(type: TestDeviceType, container: HTMLDivElement
   });
 }
 
-function formatBrowserDiagnostics(
-  diagnostics: Array<{level: string; text: string}>,
-  maxEntries = 10
-): string {
-  if (diagnostics.length === 0) {
-    return '';
-  }
-
-  const recentDiagnostics = diagnostics.slice(-maxEntries);
-  const lines = recentDiagnostics.map(({level, text}) => `- [${level}] ${text}`);
-  if (diagnostics.length > maxEntries) {
-    lines.unshift(`- ... ${diagnostics.length - maxEntries} earlier diagnostic(s) omitted`);
-  }
-
-  return `\nBrowser diagnostics:\n${lines.join('\n')}`;
-}
-
 /**
  * Creates the container element for Deck tests.
  * Call this in beforeAll.
@@ -113,21 +96,10 @@ export function finalizeDeck(ctx: DeckTestContext): void {
   }
 }
 
-async function getDeviceLossError(deviceLoss: DeviceLossState, error: Error): Promise<Error> {
-  const diagnostics = await commands.consumeBrowserDiagnostics();
-  const diagnosticsText = formatBrowserDiagnostics(diagnostics);
-  if (diagnosticsText && !error.message.includes('\nBrowser diagnostics:')) {
-    const errorWithDiagnostics = new Error(`${error.message}${diagnosticsText}`, {cause: error});
-    deviceLoss.error = errorWithDiagnostics;
-    return errorWithDiagnostics;
-  }
-  return error;
-}
-
-async function throwIfDeviceLost(ctx: DeckTestContext): Promise<void> {
+function throwIfDeviceLost(ctx: DeckTestContext): void {
   const deviceLoss = ctx.deviceLoss;
   if (deviceLoss?.error) {
-    throw await getDeviceLossError(deviceLoss, deviceLoss.error);
+    throw deviceLoss.error;
   }
 }
 
@@ -137,12 +109,12 @@ function failOnDeviceLoss<T>(operation: Promise<T>, ctx: DeckTestContext): Promi
     return operation;
   }
   if (deviceLoss.error) {
-    return getDeviceLossError(deviceLoss, deviceLoss.error).then(error => Promise.reject(error));
+    return Promise.reject(deviceLoss.error);
   }
   return Promise.race([
     operation,
-    deviceLoss.promise.then(async error => {
-      throw await getDeviceLossError(deviceLoss, error);
+    deviceLoss.promise.then(error => {
+      throw error;
     })
   ]);
 }
@@ -215,8 +187,6 @@ export async function runRenderTest(
 
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
-
-  await commands.resetBrowserDiagnostics();
 
   // Create a new Deck instance for each test (like the old SnapshotTestRunner)
   // This ensures Deck enters a fresh render loop and properly handles async loading
@@ -319,13 +289,9 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
 
   const result = await commands.captureAndDiffScreen(diffOptions);
 
-  const diagnostics = await commands.consumeBrowserDiagnostics();
-  const diagnosticsText = formatBrowserDiagnostics(diagnostics);
-
-  expect(
-    result.success,
-    `${name}: ${result.error || `match: ${result.matchPercentage}%`}${diagnosticsText}`
-  ).toBe(true);
+  expect(result.success, `${name}: ${result.error || `match: ${result.matchPercentage}%`}`).toBe(
+    true
+  );
 }
 
 /**
@@ -344,8 +310,6 @@ export async function updateDeckForTest(
 
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
-
-  await commands.resetBrowserDiagnostics();
 
   if (!ctx.deck) {
     throw new Error('Deck instance not found. Call createDeck() in beforeAll first.');
