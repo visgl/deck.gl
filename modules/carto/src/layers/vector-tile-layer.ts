@@ -24,7 +24,7 @@ import type {TilejsonResult} from '@carto/api-client';
 import {TilejsonPropType, mergeLoadOptions, mergeBoundaryData} from './utils';
 import {DEFAULT_TILE_SIZE} from '../constants';
 import {createPointsFromLines, createPointsFromPolygons} from './label-utils';
-import {createEmptyBinary} from '../utils';
+import {createEmptyBinary, getAuthFetchOptions} from '../utils';
 import PointLabelLayer from './point-label-layer';
 
 const MVT_BBOX: GeoBoundingBox = {west: 0, east: 1, south: 0, north: 1};
@@ -89,7 +89,7 @@ export default class VectorTileLayer<
   getLoadOptions(): any {
     const tileJSON = this.props.data as TilejsonResult;
     return mergeLoadOptions(super.getLoadOptions(), {
-      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      fetch: getAuthFetchOptions(tileJSON.accessToken),
       gis: {format: 'binary'} // Use binary for MVT loading
     });
   }

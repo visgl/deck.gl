@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {CompositeLayer, CompositeLayerProps, DefaultProps} from '@deck.gl/core';
+import {getAuthFetchOptions} from '../utils';
 import {H3HexagonLayer, H3HexagonLayerProps} from '@deck.gl/geo-layers';
 import H3Tileset2D, {getHexagonResolution} from './h3-tileset-2d';
 import SpatialIndexTileLayer, {SpatialIndexTileLayerProps} from './spatial-index-tile-layer';
@@ -49,7 +50,7 @@ export default class H3TileLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   getLoadOptions(): any {
     const tileJSON = this.props.data as TilejsonResult;
     return mergeLoadOptions(super.getLoadOptions(), {
-      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      fetch: getAuthFetchOptions(tileJSON.accessToken),
       cartoSpatialTile: {scheme: 'h3'}
     });
   }

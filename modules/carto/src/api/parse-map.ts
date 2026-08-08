@@ -19,7 +19,7 @@ import {
   negateAccessor,
   getMaxMarkerSize
 } from './layer-map';
-import {assert} from '../utils';
+import {assert, getAuthFetchOptions} from '../utils';
 import {KeplerMapConfig, MapDataset, MapLayerConfig, VisualChannels} from './types';
 
 export type ParseMapResult = {
@@ -365,8 +365,8 @@ function createChannelProps(
   return result;
 }
 
-function createLoadOptions(accessToken: string) {
+function createLoadOptions(accessToken: string | undefined) {
   return {
-    loadOptions: {core: {fetch: {headers: {Authorization: `Bearer ${accessToken}`}}}}
+    loadOptions: {core: {fetch: getAuthFetchOptions(accessToken)}}
   };
 }

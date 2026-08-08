@@ -5,6 +5,7 @@
 /* eslint-disable no-shadow */
 
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
+import {getAuthFetchOptions} from '../utils';
 import {
   TileLayer,
   _Tile2DHeader as Tile2DHeader,
@@ -292,7 +293,7 @@ export default class ClusterTileLayer<
     const tileJSON = this.props.data as TilejsonResult;
     const scheme = tileJSON && 'scheme' in tileJSON ? tileJSON.scheme : 'quadbin';
     return mergeLoadOptions(super.getLoadOptions(), {
-      fetch: {headers: {Authorization: `Bearer ${tileJSON.accessToken}`}},
+      fetch: getAuthFetchOptions(tileJSON.accessToken),
       cartoSpatialTile: {scheme}
     });
   }
