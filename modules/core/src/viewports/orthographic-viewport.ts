@@ -109,7 +109,8 @@ export default class OrthographicViewport extends Viewport {
     const scale = Math.pow(2, zoom_);
 
     let distanceScales;
-    if (zoomX !== zoomY) {
+    // Axis-specific zoom overrides the scalar base zoom independently on each axis.
+    if (zoomX !== zoom_ || zoomY !== zoom_) {
       const scaleX = Math.pow(2, zoomX);
       const scaleY = Math.pow(2, zoomY);
 
