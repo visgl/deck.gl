@@ -362,6 +362,17 @@ test('PathStyleExtension#dashMode', () => {
   expect(pathModeLayer.opts.dashMode, 'dashMode is respected').toBe('path');
   expect(pathModeLayer.opts.dash, 'dashMode path implies dash').toBe(true);
 
+  // Naming either mode is a request for dashes. Resolving 'segment' to dash: false would
+  // make {dashMode: 'segment'} silently draw solid lines while {dashMode: 'path'} worked.
+  const segmentModeLayer = new PathStyleExtension({dashMode: 'segment'});
+  expect(segmentModeLayer.opts.dashMode, 'dashMode is respected').toBe('segment');
+  expect(segmentModeLayer.opts.dash, 'dashMode segment implies dash').toBe(true);
+
+  // Omitting dashMode entirely still leaves dashing off unless asked for.
+  const offsetOnly = new PathStyleExtension({offset: true});
+  expect(offsetOnly.opts.dash, 'offset alone does not enable dash').toBe(false);
+  expect(offsetOnly.opts.dashMode, 'defaults to segment when unset').toBe('segment');
+
   // highPrecisionDash is the old spelling of dashMode: 'path'.
   const legacy = new PathStyleExtension({highPrecisionDash: true});
   expect(legacy.opts.dashMode, 'highPrecisionDash maps to dashMode path').toBe('path');
