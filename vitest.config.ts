@@ -6,7 +6,8 @@ import {getVitestConfig} from '@vis.gl/dev-tools';
 import {TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
-const renderTestDevice = process.env.RENDER_TEST_DEVICE;
+const renderTestDeviceValue = process.env.RENDER_TEST_DEVICE;
+const renderTestDevice = renderTestDeviceValue === 'null' ? undefined : renderTestDeviceValue;
 if (renderTestDevice && renderTestDevice !== 'webgl' && renderTestDevice !== 'webgpu') {
   throw new Error(`Invalid RENDER_TEST_DEVICE: ${renderTestDevice}`);
 }
