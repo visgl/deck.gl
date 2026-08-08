@@ -56,6 +56,12 @@ new GlobeView({
 
 - A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
 
+#### Multi-canvas rendering
+
+- [`Deck._canvases`](./api-reference/core/deck.md#_canvases) presents one shared layer stack into multiple HTML canvases.
+- [`View.canvasId`](./api-reference/core/view.md#canvasid) selects the canvas used for view layout, controllers, and picking.
+- Canvases are explicitly cleared when their views move or are removed.
+
 ### @deck.gl/geo-layers
 
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
