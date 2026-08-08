@@ -4,6 +4,7 @@
 
 import {clamp} from '@math.gl/core';
 import Controller from './controller';
+import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
@@ -177,31 +178,39 @@ class GlobeState extends MapState {
     }
 
     if (maxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
+      const screenExtents = getMaxBoundsExtents(
+        viewport,
+        [props.longitude, props.latitude],
+        maxBoundsRect
+      );
       const effectiveZoom = props.zoom - zoomAdjust(latitude);
       const lngSpan = maxBounds[1][0] - maxBounds[0][0];
       const latSpan = maxBounds[1][1] - maxBounds[0][1];
       if (latSpan > 0 && latSpan < 180) {
-        const halfHeightDegrees =
-          Math.min(pixelsToDegrees(props.height, effectiveZoom), latSpan) / 2;
+        const heightDegrees = Math.min(
+          pixelsToDegrees(maxBoundsRect.height, effectiveZoom),
+          latSpan
+        );
         props.latitude = clamp(
           props.latitude,
-          maxBounds[0][1] + halfHeightDegrees,
-          maxBounds[1][1] - halfHeightDegrees
+          maxBounds[0][1] + (heightDegrees * screenExtents.bottom) / maxBoundsRect.height,
+          maxBounds[1][1] - (heightDegrees * screenExtents.top) / maxBoundsRect.height
         );
       }
       if (lngSpan > 0 && lngSpan < 360) {
-        const halfWidthDegrees =
-          Math.min(
-            pixelsToDegrees(
-              props.width / Math.cos(props.latitude * DEGREES_TO_RADIANS),
-              effectiveZoom
-            ),
-            lngSpan
-          ) / 2;
+        const widthDegrees = Math.min(
+          pixelsToDegrees(
+            maxBoundsRect.width / Math.cos(props.latitude * DEGREES_TO_RADIANS),
+            effectiveZoom
+          ),
+          lngSpan
+        );
         props.longitude = clamp(
           props.longitude,
-          maxBounds[0][0] + halfWidthDegrees,
-          maxBounds[1][0] - halfWidthDegrees
+          maxBounds[0][0] + (widthDegrees * screenExtents.left) / maxBoundsRect.width,
+          maxBounds[1][0] - (widthDegrees * screenExtents.right) / maxBoundsRect.width
         );
       }
     }
@@ -219,6 +228,7 @@ class GlobeState extends MapState {
 
     const shouldApplyMaxBounds = maxBounds !== null && props.width > 0 && props.height > 0;
     if (shouldApplyMaxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const minLatitude = maxBounds[0][1];
       const maxLatitude = maxBounds[1][1];
       const fitLatitude =
@@ -231,10 +241,10 @@ class GlobeState extends MapState {
         Math.cos(fitLatitude * DEGREES_TO_RADIANS);
       const h = degreesToPixels(maxBounds[1][1] - maxBounds[0][1]);
       if (w > 0) {
-        minZoom = Math.max(minZoom, Math.log2(props.width / w) + ZOOM0);
+        minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.width / w) + ZOOM0);
       }
       if (h > 0) {
-        minZoom = Math.max(minZoom, Math.log2(props.height / h) + ZOOM0);
+        minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.height / h) + ZOOM0);
       }
       if (minZoom > maxZoom) minZoom = maxZoom;
     }

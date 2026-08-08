@@ -6,6 +6,7 @@
 import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {IViewState, type ConstraintContext} from './view-state';
+import type {MaxBoundsPadding} from './utils';
 import {ConstructorOf} from '../types/types';
 import {deepEqual} from '../utils/deep-equal';
 
@@ -94,6 +95,8 @@ export type ControllerOptions = {
     | [min: [number, number], max: [number, number]]
     | [min: [number, number, number], max: [number, number, number]]
     | null;
+  /** Padding inside the viewport used when fitting `maxBounds`. Default `0`. */
+  maxBoundsPadding?: MaxBoundsPadding;
   /** Enables elastic constraints during continuous interaction. Default `false`. */
   rubberBand?: boolean;
 };
@@ -201,7 +204,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
       getControllerState: (props, constraintContext) =>
-        new this.ControllerState({...props, constraintContext}),
+        new this.ControllerState({
+          ...props,
+          constraintContext,
+          makeViewport: opts.makeViewport
+        }),
       onViewStateChange: this._onTransition.bind(this),
       onStateChange: this._setInteractionState.bind(this)
     });
@@ -341,6 +348,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
    * Extract interactivity options
    */
   setProps(props: ControllerProps) {
+    if (props.maxBoundsPadding === undefined) {
+      props.maxBoundsPadding = null;
+    }
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
@@ -402,13 +412,14 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.keyboard = keyboard;
 
     // Normalize view state if maxBounds is defined
-    const dimensionChanged =
+    const constraintChanged =
       !oldProps ||
       oldProps.height !== props.height ||
       oldProps.width !== props.width ||
-      oldProps.maxBounds !== props.maxBounds;
-    if (dimensionChanged && props.maxBounds) {
-      // Dimensions changed, try re-normalize the props
+      oldProps.maxBounds !== props.maxBounds ||
+      oldProps.maxBoundsPadding !== props.maxBoundsPadding;
+    if (constraintChanged && props.maxBounds) {
+      // Constraint inputs changed, try re-normalize the props
       const controllerState = new this.ControllerState({...props, makeViewport: this.makeViewport});
       const normalizedProps = controllerState.getViewportProps();
       const changed = Object.keys(normalizedProps).some(

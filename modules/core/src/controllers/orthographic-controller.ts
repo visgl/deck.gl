@@ -5,6 +5,7 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
 import ViewState, {type ConstraintContext} from './view-state';
+import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
@@ -36,6 +37,8 @@ export type OrthographicStateProps = {
   minZoomY?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  /** Padding inside the viewport used when fitting `maxBounds`. Defaults to `0`. */
+  maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
   /** Enables elastic bounds and zoom constraints during interaction. Defaults to `false`. */
   rubberBand?: boolean;
 };
@@ -68,18 +71,23 @@ function normalizeZoom({
 function getAxisBounds(
   maxBounds: NonNullable<ControllerProps['maxBounds']>,
   index: number,
-  halfSize: number,
+  negativeExtent: number,
+  positiveExtent: number,
   target: number
 ) {
-  const minimum = maxBounds[0][index] + halfSize;
-  const maximum = maxBounds[1][index] - halfSize;
-  const midpoint = (maxBounds[0][index] + maxBounds[1][index]) / 2;
+  const minimum = maxBounds[0][index] + negativeExtent;
+  const maximum = maxBounds[1][index] - positiveExtent;
+  // An inverted interval has one stable resting target, including when asymmetric
+  // viewport padding means that target is not the geometric center of maxBounds.
+  const midpoint = (minimum + maximum) / 2;
   return {
     minimum,
     maximum,
     midpoint,
     settledTarget:
-      Number.isFinite(halfSize) && minimum <= maximum ? clamp(target, minimum, maximum) : midpoint
+      Number.isFinite(negativeExtent) && Number.isFinite(positiveExtent) && minimum <= maximum
+        ? clamp(target, minimum, maximum)
+        : midpoint
   };
 }
 
@@ -121,6 +129,7 @@ export class OrthographicState extends ViewState<
       maxZoomY = maxZoom,
 
       maxBounds = null,
+      maxBoundsPadding = null,
       rubberBand = false,
 
       /** Interaction states, required to calculate change during transform */
@@ -147,6 +156,7 @@ export class OrthographicState extends ViewState<
         minZoomY,
         maxZoomY,
         maxBounds,
+        maxBoundsPadding,
         rubberBand,
         ...{[CONSTRAINT_AROUND]: constraintAround}
       },
@@ -462,21 +472,42 @@ export class OrthographicState extends ViewState<
 
     const {maxBounds, rubberBand, target} = props;
     if (maxBounds) {
-      // only calculate center and zoom ranges at rotation=0
-      // to maintain visual stability when rotating
-      const halfWidth = props.width / 2 / 2 ** zoomX;
-      const halfHeight = props.height / 2 / 2 ** zoomY;
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      const viewport = this.makeViewport(props);
+      const screenExtents = getMaxBoundsExtents(viewport, target, maxBoundsRect);
+      const projectedTarget = viewport.project(target);
+      const pixelsPerUnit = [0, 1].map(index => {
+        const sampleTarget = target.slice();
+        sampleTarget[index] += 1;
+        const projectedDelta = viewport.project(sampleTarget)[index] - projectedTarget[index];
+        return Number.isFinite(projectedDelta)
+          ? projectedDelta
+          : 2 ** (index === 0 ? zoomX : zoomY) * (index === 0 ? 1 : -1);
+      });
+      const worldExtents = pixelsPerUnit.map((projectedDelta, index) => {
+        const negativeScreenExtent = index === 0 ? screenExtents.left : screenExtents.top;
+        const positiveScreenExtent = index === 0 ? screenExtents.right : screenExtents.bottom;
+        const scale = Math.abs(projectedDelta);
+        return projectedDelta >= 0
+          ? [negativeScreenExtent / scale, positiveScreenExtent / scale]
+          : [positiveScreenExtent / scale, negativeScreenExtent / scale];
+      });
       const constrainedTarget = target.slice();
 
-      for (const [index, halfSize] of [halfWidth, halfHeight].entries()) {
+      for (const [index, [negativeExtent, positiveExtent]] of worldExtents.entries()) {
         const {minimum, maximum, midpoint, settledTarget} = getAxisBounds(
           maxBounds,
           index,
-          halfSize,
+          negativeExtent,
+          positiveExtent,
           target[index]
         );
 
-        if (constraintContext?.mode !== 'preserve' && rubberBand && !Number.isFinite(halfSize)) {
+        if (
+          constraintContext?.mode !== 'preserve' &&
+          rubberBand &&
+          (!Number.isFinite(negativeExtent) || !Number.isFinite(positiveExtent))
+        ) {
           constrainedTarget[index] = midpoint;
           continue;
         }
@@ -486,7 +517,13 @@ export class OrthographicState extends ViewState<
           constraintContext?.mode === 'preserve'
             ? target[index]
             : shouldRubberBand
-              ? applyRubberBand(target[index], constrained, halfSize)
+              ? applyRubberBand(
+                  target[index],
+                  constrained,
+                  (index === 0 ? maxBoundsRect.width : maxBoundsRect.height) /
+                    2 /
+                    Math.abs(pixelsPerUnit[index])
+                )
               : constrained;
       }
 
@@ -507,17 +544,18 @@ export class OrthographicState extends ViewState<
     const shouldApplyMaxBounds = maxBounds !== null && props.width > 0 && props.height > 0;
 
     if (shouldApplyMaxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const bl = maxBounds[0];
       const tr = maxBounds[1];
       const w = tr[0] - bl[0];
       const h = tr[1] - bl[1];
       // ignore bound size of 0 or Infinity
       if (Number.isFinite(w) && w > 0) {
-        minZoomX = Math.max(minZoomX, Math.log2(props.width / w));
+        minZoomX = Math.max(minZoomX, Math.log2(maxBoundsRect.width / w));
         if (minZoomX > maxZoomX) minZoomX = maxZoomX;
       }
       if (Number.isFinite(h) && h > 0) {
-        minZoomY = Math.max(minZoomY, Math.log2(props.height / h));
+        minZoomY = Math.max(minZoomY, Math.log2(maxBoundsRect.height / h));
         if (minZoomY > maxZoomY) minZoomY = maxZoomY;
       }
     }

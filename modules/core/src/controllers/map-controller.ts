@@ -5,6 +5,7 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps, InteractionState} from './controller';
 import ViewState from './view-state';
+import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 import {mod} from '../utils/math-utils';
@@ -69,6 +70,7 @@ export type MapStateProps = {
   normalize?: boolean;
 
   maxBounds?: ControllerProps['maxBounds'];
+  maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };
 
 export type MapStateInternal = {
@@ -162,6 +164,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     assert(Number.isFinite(zoom)); // `zoom` must be supplied
 
     const maxBounds = options.maxBounds || (normalize ? WEB_MERCATOR_MAX_BOUNDS : null);
+    const maxBoundsPadding = options.maxBoundsPadding || null;
 
     super(
       {
@@ -179,7 +182,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         minPitch,
         normalize,
         position,
-        maxBounds
+        maxBounds,
+        maxBoundsPadding
       },
       {
         startPanLngLat,
@@ -454,15 +458,28 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     props.zoom = this._constrainZoom(props.zoom, props);
 
     if (maxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      // Resolve the semantic center through the viewport because view padding can
+      // place it away from the canvas' geometric center.
+      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
+      const screenExtents = getMaxBoundsExtents(
+        viewport,
+        [props.longitude, props.latitude],
+        maxBoundsRect
+      );
       const bl = lngLatToWorld(maxBounds[0]);
       const tr = lngLatToWorld(maxBounds[1]);
       // calculate center and zoom ranges at pitch=0 and bearing=0
       // to maintain visual stability when rotating
       const scale = 2 ** props.zoom;
-      const halfWidth = props.width / 2 / scale;
-      const halfHeight = props.height / 2 / scale;
-      const [minLng, minLat] = worldToLngLat([bl[0] + halfWidth, bl[1] + halfHeight]);
-      const [maxLng, maxLat] = worldToLngLat([tr[0] - halfWidth, tr[1] - halfHeight]);
+      const [minLng, minLat] = worldToLngLat([
+        bl[0] + screenExtents.left / scale,
+        bl[1] + screenExtents.bottom / scale
+      ]);
+      const [maxLng, maxLat] = worldToLngLat([
+        tr[0] - screenExtents.right / scale,
+        tr[1] - screenExtents.top / scale
+      ]);
       props.longitude = clamp(props.longitude, minLng, maxLng);
       props.latitude = clamp(props.latitude, minLat, maxLat);
     }
@@ -480,16 +497,17 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     let {minZoom} = props;
 
     if (shouldApplyMaxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const bl = lngLatToWorld(maxBounds[0]);
       const tr = lngLatToWorld(maxBounds[1]);
       const w = tr[0] - bl[0];
       const h = tr[1] - bl[1];
       // ignore bound size of 0 or Infinity
       if (Number.isFinite(w) && w > 0) {
-        minZoom = Math.max(minZoom, Math.log2(props.width / w));
+        minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.width / w));
       }
       if (Number.isFinite(h) && h > 0) {
-        minZoom = Math.max(minZoom, Math.log2(props.height / h));
+        minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.height / h));
       }
       if (minZoom > maxZoom) minZoom = maxZoom;
     }

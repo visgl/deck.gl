@@ -5,6 +5,7 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
+import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 import {mod} from '../utils/math-utils';
 
 import type Viewport from '../viewports/viewport';
@@ -25,6 +26,7 @@ export type OrbitStateProps = {
   maxRotationX?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };
 
 type OrbitStateInternal = {
@@ -62,6 +64,7 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
       maxZoom = Infinity,
 
       maxBounds = null,
+      maxBoundsPadding = null,
 
       /** Interaction states, required to calculate change during transform */
       // Model state when the pan operation first started
@@ -87,7 +90,8 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
         maxRotationX,
         minZoom,
         maxZoom,
-        maxBounds
+        maxBounds,
+        maxBoundsPadding
       },
       {
         startPanPosition,
@@ -404,12 +408,26 @@ export class OrbitState extends ViewState<OrbitState, OrbitStateProps, OrbitStat
     let {minZoom} = props;
 
     if (maxBounds && props.width > 0 && props.height > 0) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      const viewport = this.makeViewport({...props, zoom});
+      const screenExtents = getMaxBoundsExtents(viewport, props.target, maxBoundsRect);
+      // Orbit bounds are represented by a sphere around target, so fitting needs
+      // equal room on both sides of its projected center.
+      const availableDiameter = Math.max(
+        1,
+        Math.min(
+          screenExtents.left * 2,
+          screenExtents.right * 2,
+          screenExtents.top * 2,
+          screenExtents.bottom * 2
+        )
+      );
       const dx = maxBounds[1][0] - maxBounds[0][0];
       const dy = maxBounds[1][1] - maxBounds[0][1];
       const dz = (maxBounds[1][2] ?? 0) - (maxBounds[0][2] ?? 0);
       const maxDiameter = Math.sqrt(dx * dx + dy * dy + dz * dz);
       if (maxDiameter > 0) {
-        minZoom = Math.max(minZoom, Math.log2(Math.min(props.width, props.height) / maxDiameter));
+        minZoom = Math.max(minZoom, Math.log2(availableDiameter / maxDiameter));
         if (minZoom > maxZoom) minZoom = maxZoom;
       }
     }

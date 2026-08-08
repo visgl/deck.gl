@@ -29,6 +29,7 @@ type FirstPersonStateProps = {
   minPitch?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };
 
 type FirstPersonStateInternal = {
@@ -70,6 +71,7 @@ class FirstPersonState extends ViewState<
       minPitch = -90,
 
       maxBounds = null,
+      maxBoundsPadding = null,
 
       // Model state when the rotate operation first started
       startRotatePos,
@@ -91,7 +93,8 @@ class FirstPersonState extends ViewState<
         latitude,
         maxPitch,
         minPitch,
-        maxBounds
+        maxBounds,
+        maxBoundsPadding
       },
       {
         startRotatePos,

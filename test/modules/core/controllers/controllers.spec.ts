@@ -568,6 +568,110 @@ test('OrthographicController applies resistance beyond every edge', () => {
   }
 });
 
+test.each([
+  {
+    description: 'numeric pixels',
+    viewportSize: 100,
+    padding: {left: 25, right: 25, top: 25, bottom: 25},
+    expectedSize: 50
+  },
+  {
+    description: 'percentage expressions',
+    viewportSize: 200,
+    padding: {
+      left: '10%',
+      right: 'calc(20% - 10px)',
+      top: '10%',
+      bottom: 'calc(20% - 10px)'
+    },
+    expectedSize: 150,
+    expectedTarget: 40 / 3
+  },
+  {
+    description: 'padding larger than the viewport',
+    viewportSize: 100,
+    padding: {left: '60%', right: '60%', top: '60%', bottom: '60%'},
+    expectedSize: 1
+  }
+])(
+  'OrthographicController resolves maxBoundsPadding from $description',
+  ({viewportSize, padding, expectedSize, expectedTarget = 12.5}) => {
+    const boundsSize = 25;
+    const controller = createRubberBandController({
+      controller: {
+        maxBounds: [
+          [0, 0],
+          [boundsSize, boundsSize]
+        ],
+        maxBoundsPadding: padding
+      },
+      initialViewState: {
+        width: viewportSize,
+        height: viewportSize,
+        target: [boundsSize / 2, boundsSize / 2, 0],
+        zoom: -10
+      }
+    });
+
+    const expectedZoom = Math.log2(expectedSize / boundsSize);
+    expect(controller.props.zoomX, 'horizontal fit uses the padded width').toBeCloseTo(
+      expectedZoom
+    );
+    expect(controller.props.zoomY, 'vertical fit uses the padded height').toBeCloseTo(expectedZoom);
+    expect(controller.props.target, 'fitted bounds use the padded rectangle').toEqual([
+      expectedTarget,
+      expectedTarget,
+      0
+    ]);
+    controller.finalize();
+  }
+);
+
+test('OrthographicController resolves percentage maxBoundsPadding after resize', () => {
+  const controller = createRubberBandController({
+    controller: {
+      maxBounds: [
+        [0, 0],
+        [100, 100]
+      ],
+      maxBoundsPadding: {left: '25%', right: '25%', top: '25%', bottom: '25%'}
+    },
+    initialViewState: {width: 100, height: 100, target: [50, 50, 0], zoom: -10}
+  });
+  expect(controller.props.zoomX, 'padding initially resolves against 100 pixels').toBe(-1);
+
+  controller.setProps({...controller.props, width: 200, height: 200});
+  expect(controller.props.zoomX, 'padding is re-resolved against 200 pixels').toBe(0);
+
+  controller.setProps({...controller.props, maxBoundsPadding: null});
+  expect(controller.props.zoomX, 'changing only padding re-normalizes the fit').toBe(1);
+  controller.finalize();
+});
+
+test('OrthographicController fits maxBounds around the projected target', () => {
+  const controller = createTestController({
+    view: new OrthographicView({
+      // The semantic target projects to x=40 rather than the geometric center x=50.
+      padding: {left: 10, right: 30},
+      controller: {
+        maxBounds: [
+          [0, 0],
+          [200, 200]
+        ],
+        maxBoundsPadding: {left: 20}
+      }
+    }),
+    initialViewState: {width: 100, height: 100, target: [200, 100, 0], zoom: 0}
+  });
+
+  // The target box spans x=20..100, leaving 20px left and 60px right of
+  // the projected target. The right edge therefore constrains target.x to 140.
+  expect(controller.props.target, 'asymmetric padding uses the projected target anchor').toEqual([
+    140, 100, 0
+  ]);
+  controller.finalize();
+});
+
 test.each(
   [
     {description: 'exact fit', width: 100, span: 25, zoom: 2, maxZoom: 6},

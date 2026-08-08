@@ -29,6 +29,7 @@ The base Controller class supports the following options:
 * `dragMode` (string) - drag behavior without pressing function keys, one of `pan` and `rotate`.
 * `inertia` (boolean | number) - Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`.
 * `maxBounds` (`[min: number[], max: number[]]`) - constrain camera to the specified bounding box. Different type of views may handle this constraint differently.
+* `maxBoundsPadding` (`{left, right, top, bottom}`) - padding inside the viewport when fitting `maxBounds`. Numeric values are pixels; strings may be percentages or layout expressions. The remaining width and height are clamped to at least one pixel, and each side is measured from the projected view-state target so asymmetric view and bounds padding are respected. Default `0`.
 
 > **Mobile users:** See [Optimization for Mobile](../../developer-guide/tips-and-tricks.md#optimization-for-mobile) for CSS and browser event guards that help prevent native selection, tap highlight, and touch callout UI during repeated touch gestures.
 
