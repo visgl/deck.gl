@@ -4,11 +4,21 @@
 
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
-import ViewState from './view-state';
+import ViewState, {type ConstraintContext} from './view-state';
 
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import type {MjolnirGestureEvent} from 'mjolnir.js';
+
+/** Carries action-specific zoom intent without coupling it to constraint policy. */
+const CONSTRAINT_AROUND = Symbol('constraintAround');
+
+type ConstraintAround = {
+  [CONSTRAINT_AROUND]?: {
+    position: number[];
+    screenPosition: number[];
+  };
+};
 
 export type OrthographicStateProps = {
   width: number;
@@ -26,7 +36,11 @@ export type OrthographicStateProps = {
   minZoomY?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  /** Enables elastic bounds and zoom constraints during interaction. Defaults to `false`. */
+  rubberBand?: boolean;
 };
+
+const ZOOM_RUBBER_BAND_RANGE = 1;
 
 type OrthographicStateInternal = {
   startPanPosition?: number[];
@@ -51,6 +65,31 @@ function normalizeZoom({
   return {zoomX, zoomY};
 }
 
+function getAxisBounds(
+  maxBounds: NonNullable<ControllerProps['maxBounds']>,
+  index: number,
+  halfSize: number,
+  target: number
+) {
+  const minimum = maxBounds[0][index] + halfSize;
+  const maximum = maxBounds[1][index] - halfSize;
+  const midpoint = (maxBounds[0][index] + maxBounds[1][index]) / 2;
+  return {
+    minimum,
+    maximum,
+    midpoint,
+    settledTarget:
+      Number.isFinite(halfSize) && minimum <= maximum ? clamp(target, minimum, maximum) : midpoint
+  };
+}
+
+function applyRubberBand(value: number, constrainedValue: number, range: number): number {
+  const overshoot = value - constrainedValue;
+  return overshoot && Number.isFinite(overshoot)
+    ? constrainedValue + (overshoot * range) / (range + Math.abs(overshoot))
+    : constrainedValue;
+}
+
 export class OrthographicState extends ViewState<
   OrthographicState,
   OrthographicStateProps,
@@ -62,6 +101,7 @@ export class OrthographicState extends ViewState<
         maxZoom?: number;
         minZoom?: number;
         makeViewport: (props: Record<string, any>) => Viewport;
+        constraintContext?: ConstraintContext;
       }
   ) {
     const {
@@ -81,6 +121,7 @@ export class OrthographicState extends ViewState<
       maxZoomY = maxZoom,
 
       maxBounds = null,
+      rubberBand = false,
 
       /** Interaction states, required to calculate change during transform */
       // Model state when the pan operation first started
@@ -89,7 +130,7 @@ export class OrthographicState extends ViewState<
       startZoomPosition,
       startZoom
     } = options;
-
+    const {[CONSTRAINT_AROUND]: constraintAround} = options as typeof options & ConstraintAround;
     const {zoomX, zoomY} = normalizeZoom(options);
 
     super(
@@ -105,14 +146,17 @@ export class OrthographicState extends ViewState<
         maxZoomX,
         minZoomY,
         maxZoomY,
-        maxBounds
+        maxBounds,
+        rubberBand,
+        ...{[CONSTRAINT_AROUND]: constraintAround}
       },
       {
         startPanPosition,
         startZoomPosition,
         startZoom
       },
-      options.makeViewport
+      options.makeViewport,
+      options.constraintContext
     );
   }
 
@@ -120,17 +164,21 @@ export class OrthographicState extends ViewState<
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  panStart({pos}: {pos: [number, number]}): OrthographicState {
-    return this._getUpdatedState({
-      startPanPosition: this._unproject(pos)
-    });
+  panStart(
+    {pos}: {pos: [number, number]},
+    constraintContext?: ConstraintContext
+  ): OrthographicState {
+    return this._getUpdatedState({startPanPosition: this._unproject(pos)}, constraintContext);
   }
 
   /**
    * Pan
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
-  pan({pos, startPosition}: {pos: [number, number]; startPosition?: number[]}): OrthographicState {
+  pan(
+    {pos, startPosition}: {pos: [number, number]; startPosition?: number[]},
+    constraintContext?: ConstraintContext
+  ): OrthographicState {
     const startPanPosition = this.getState().startPanPosition || startPosition;
 
     if (!startPanPosition) {
@@ -140,17 +188,15 @@ export class OrthographicState extends ViewState<
     const viewport = this.makeViewport(this.getViewportProps());
     const newProps = viewport.panByPosition(startPanPosition, pos);
 
-    return this._getUpdatedState(newProps);
+    return this._getUpdatedState(newProps, constraintContext);
   }
 
   /**
    * End panning
    * Must call if `panStart()` was called
    */
-  panEnd(): OrthographicState {
-    return this._getUpdatedState({
-      startPanPosition: null
-    });
+  panEnd(constraintContext?: ConstraintContext): OrthographicState {
+    return this._getUpdatedState({startPanPosition: null}, constraintContext);
   }
 
   /**
@@ -185,12 +231,18 @@ export class OrthographicState extends ViewState<
    * Start zooming
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  zoomStart({pos}: {pos: [number, number]}): OrthographicState {
+  zoomStart(
+    {pos}: {pos: [number, number]},
+    constraintContext?: ConstraintContext
+  ): OrthographicState {
     const {zoomX, zoomY} = this.getViewportProps();
-    return this._getUpdatedState({
-      startZoomPosition: this._unproject(pos),
-      startZoom: [zoomX, zoomY]
-    });
+    return this._getUpdatedState(
+      {
+        startZoomPosition: this._unproject(pos),
+        startZoom: [zoomX, zoomY]
+      },
+      constraintContext
+    );
   }
 
   /**
@@ -201,15 +253,18 @@ export class OrthographicState extends ViewState<
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({
-    pos,
-    startPos,
-    scale
-  }: {
-    pos: [number, number];
-    startPos?: [number, number];
-    scale: number;
-  }): OrthographicState {
+  zoom(
+    {
+      pos,
+      startPos,
+      scale
+    }: {
+      pos: [number, number];
+      startPos?: [number, number];
+      scale: number;
+    },
+    constraintContext?: ConstraintContext
+  ): OrthographicState {
     let {startZoom, startZoomPosition} = this.getState();
     if (!startZoomPosition) {
       // We have two modes of zoom:
@@ -225,48 +280,52 @@ export class OrthographicState extends ViewState<
     if (!startZoomPosition) {
       return this;
     }
-    const newZoomProps = this._constrainZoom(this._calculateNewZoom({scale, startZoom}));
-    const zoomedViewport = this.makeViewport({...this.getViewportProps(), ...newZoomProps});
-
-    return this._getUpdatedState({
-      ...newZoomProps,
-      ...zoomedViewport.panByPosition(startZoomPosition, pos)
-    });
+    const newZoomProps = this._calculateNewZoom({scale, startZoom});
+    return this._getUpdatedState(
+      {
+        ...newZoomProps,
+        [CONSTRAINT_AROUND]: {position: startZoomPosition, screenPosition: pos}
+      },
+      constraintContext
+    );
   }
 
   /**
    * End zooming
    * Must call if `zoomStart()` was called
    */
-  zoomEnd(): OrthographicState {
-    return this._getUpdatedState({
-      startZoomPosition: null,
-      startZoom: null
-    });
+  zoomEnd(constraintContext?: ConstraintContext): OrthographicState {
+    return this._getUpdatedState(
+      {
+        startZoomPosition: null,
+        startZoom: null
+      },
+      constraintContext
+    );
   }
 
-  zoomIn(speed: number = 2): OrthographicState {
-    return this._getUpdatedState(this._calculateNewZoom({scale: speed}));
+  zoomIn(speed: number = 2, constraintContext?: ConstraintContext): OrthographicState {
+    return this._getUpdatedState(this._calculateNewZoom({scale: speed}), constraintContext);
   }
 
-  zoomOut(speed: number = 2): OrthographicState {
-    return this._getUpdatedState(this._calculateNewZoom({scale: 1 / speed}));
+  zoomOut(speed: number = 2, constraintContext?: ConstraintContext): OrthographicState {
+    return this._getUpdatedState(this._calculateNewZoom({scale: 1 / speed}), constraintContext);
   }
 
-  moveLeft(speed: number = 50): OrthographicState {
-    return this._panFromCenter([-speed, 0]);
+  moveLeft(speed: number = 50, constraintContext?: ConstraintContext): OrthographicState {
+    return this._panFromCenter([-speed, 0], constraintContext);
   }
 
-  moveRight(speed: number = 50): OrthographicState {
-    return this._panFromCenter([speed, 0]);
+  moveRight(speed: number = 50, constraintContext?: ConstraintContext): OrthographicState {
+    return this._panFromCenter([speed, 0], constraintContext);
   }
 
-  moveUp(speed: number = 50): OrthographicState {
-    return this._panFromCenter([0, -speed]);
+  moveUp(speed: number = 50, constraintContext?: ConstraintContext): OrthographicState {
+    return this._panFromCenter([0, -speed], constraintContext);
   }
 
-  moveDown(speed: number = 50): OrthographicState {
-    return this._panFromCenter([0, speed]);
+  moveDown(speed: number = 50, constraintContext?: ConstraintContext): OrthographicState {
+    return this._panFromCenter([0, speed], constraintContext);
   }
 
   rotateLeft(speed: number = 15): OrthographicState {
@@ -327,31 +386,73 @@ export class OrthographicState extends ViewState<
     };
   }
 
-  _panFromCenter(offset) {
+  _panFromCenter(offset, constraintContext?: ConstraintContext) {
     const {target} = this.getViewportProps();
     const center = this._project(target);
-    return this.pan({
-      startPosition: target,
-      pos: [center[0] + offset[0], center[1] + offset[1]]
-    });
+    return this.pan(
+      {
+        startPosition: target,
+        pos: [center[0] + offset[0], center[1] + offset[1]]
+      },
+      constraintContext
+    );
   }
 
-  _getUpdatedState(newProps): OrthographicState {
+  _getUpdatedState(newProps, constraintContext?: ConstraintContext): OrthographicState {
     // @ts-ignore
     return new this.constructor({
       makeViewport: this.makeViewport,
       ...this.getViewportProps(),
       ...this.getState(),
-      ...newProps
+      ...newProps,
+      constraintContext
     });
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
-  applyConstraints(props: Required<OrthographicStateProps>): Required<OrthographicStateProps> {
-    // Ensure zoom is within specified range
-    const {zoomX, zoomY} = this._constrainZoom(props, props);
+  applyConstraints(
+    props: Required<OrthographicStateProps>,
+    constraintContext?: ConstraintContext
+  ): Required<OrthographicStateProps> {
+    const internalProps = props as typeof props & ConstraintAround;
+    const constraintAround = internalProps[CONSTRAINT_AROUND];
+    delete internalProps[CONSTRAINT_AROUND];
+
+    // Reconciliation frames already describe the intended visual path. Applying
+    // hard limits here would collapse that path to its settled endpoint. Rebound
+    // intentionally follows the hard path; the controller animates to that result.
+    const normalizedZoom = normalizeZoom(props);
+    const constrainedZoom = this._constrainZoom(normalizedZoom, props);
+    const shouldRubberBand = props.rubberBand && constraintContext?.mode === 'elastic';
+    const {zoomX, zoomY} =
+      constraintContext?.mode === 'preserve'
+        ? normalizedZoom
+        : shouldRubberBand
+          ? {
+              zoomX: applyRubberBand(
+                normalizedZoom.zoomX,
+                constrainedZoom.zoomX,
+                ZOOM_RUBBER_BAND_RANGE
+              ),
+              zoomY: applyRubberBand(
+                normalizedZoom.zoomY,
+                constrainedZoom.zoomY,
+                ZOOM_RUBBER_BAND_RANGE
+              )
+            }
+          : constrainedZoom;
     props.zoomX = zoomX;
     props.zoomY = zoomY;
+
+    // Resolve the semantic zoom anchor only after zoom constraints have selected
+    // the displayed scale, otherwise the anchor would be calculated from raw intent.
+    if (constraintAround) {
+      const viewport = this.makeViewport({...props, zoomX, zoomY});
+      Object.assign(
+        props,
+        viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
+      );
+    }
     // Backward compatibility: update zoom to reflect new view state
     // zoom will always be ignored when zoomX and zoomY are specified, but legacy apps may still read zoom in `onViewStateChange`
     props.zoom =
@@ -359,22 +460,38 @@ export class OrthographicState extends ViewState<
         ? [props.zoomX, props.zoomY]
         : props.zoomX;
 
-    const {maxBounds, target} = props;
+    const {maxBounds, rubberBand, target} = props;
     if (maxBounds) {
       // only calculate center and zoom ranges at rotation=0
       // to maintain visual stability when rotating
       const halfWidth = props.width / 2 / 2 ** zoomX;
       const halfHeight = props.height / 2 / 2 ** zoomY;
-      const minX = maxBounds[0][0] + halfWidth;
-      const maxX = maxBounds[1][0] - halfWidth;
-      const minY = maxBounds[0][1] + halfHeight;
-      const maxY = maxBounds[1][1] - halfHeight;
-      const x = clamp(target[0], minX, maxX);
-      const y = clamp(target[1], minY, maxY);
-      if (x !== target[0] || y !== target[1]) {
-        props.target = target.slice();
-        props.target[0] = x;
-        props.target[1] = y;
+      const constrainedTarget = target.slice();
+
+      for (const [index, halfSize] of [halfWidth, halfHeight].entries()) {
+        const {minimum, maximum, midpoint, settledTarget} = getAxisBounds(
+          maxBounds,
+          index,
+          halfSize,
+          target[index]
+        );
+
+        if (constraintContext?.mode !== 'preserve' && rubberBand && !Number.isFinite(halfSize)) {
+          constrainedTarget[index] = midpoint;
+          continue;
+        }
+
+        const constrained = rubberBand ? settledTarget : clamp(target[index], minimum, maximum);
+        constrainedTarget[index] =
+          constraintContext?.mode === 'preserve'
+            ? target[index]
+            : shouldRubberBand
+              ? applyRubberBand(target[index], constrained, halfSize)
+              : constrained;
+      }
+
+      if (constrainedTarget[0] !== target[0] || constrainedTarget[1] !== target[1]) {
+        props.target = constrainedTarget;
       }
     }
     return props;

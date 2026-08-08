@@ -227,7 +227,8 @@ export default function App({
       views={new OrthographicView()}
       initialViewState={initialViewState}
       controller={{
-        maxBounds: contentBounds
+        maxBounds: contentBounds,
+        rubberBand: true
       }}
       layers={layers}
       layerFilter={layerFilter}
