@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.3
 
+#### deck.gl [v9.3.9] - Aug 8 2026
+
+- fix(core): OrthographicViewport distance scale (#10540)
+
 #### deck.gl [v9.3.8] - Aug 7 2026
 
 - feat(core): override size zoom in OrthographicView (#10532)
