@@ -832,6 +832,7 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 - `setPropsTime` - time spent setting deck properties
 - `layersCount` - total number of layers created recursively
 - `drawLayersCount` - number of layers drawn to screen in the last render pass
+- `updateLayersCount` - number of times layer update lifecycle methods are run
 - `updateAttributesCount` - number of times attribute buffers are updated
 - `updateAttributesTime` - time spent updating layer attributes
 - `framesRedrawn` - number of times the scene was rendered
