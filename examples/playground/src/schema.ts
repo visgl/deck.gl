@@ -805,6 +805,7 @@ type ScrollbarWidget = BaseWidgetProps &
     | 'startButtonAriaLabel'
     | 'endButtonAriaLabel'
     | 'captureWheel'
+    | 'contentBoundsPadding'
   > & {
     '@@type': 'ScrollbarWidget';
     contentBounds?: ContentBoundsValue | null;
