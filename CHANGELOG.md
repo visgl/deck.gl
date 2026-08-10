@@ -17,6 +17,75 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v9.4
+
+### deck.gl v9.4 Prereleases
+
+#### deck.gl [v9.4.0-alpha.2] - Jul 29 2026
+
+- fix: add npm metadata to all modules (#10358)
+- feat(jupyter-widget, pydeck): register `@deck.gl/extensions` for JSON `@@type` resolution (#10447)
+- feat(core): add explicit WebGPU buffer groups (#10151)
+- feat(core): add trackpad gesture support to controllers (#10459)
+- examples: update OpenSky Network URLs (#10465)
+- fix: update Zurich Summit 2026 event page map to HIL building (#10445)
+- feat(website): persist selected device tab (#10467)
+- feat(layers): add simple WebGPU layer ports (#10466)
+- fix(react): remove redundant initial render redraw (#10428)
+- feat(pydeck): register GlobeView canonical alias in jupyter-widget (#10451)
+- feat(aggregation-layers): port HexagonLayer to WebGPU (#10471)
+- feat(aggregation-layers): port ScreenGridLayer to WebGPU (#10472)
+- feat(layers): port BitmapLayer to WebGPU (#10470)
+- feat(pydeck): add lighting and post-processing effects (#10455)
+- refactor(core): make WebGPU shader props unconditional (#10479)
+- feat(website): pass device to example apps (#10480)
+- feat(layers): port PathLayer to WebGPU (#10113)
+- refactor(core): honor canvas contexts throughout render passes (#10474)
+- fix(core): position widgets relative to their canvas (#10491)
+- feat(aggregation-layers): port HeatmapLayer to WebGPU (#10483)
+- feat(layers): port SolidPolygonLayer to WebGPU (#10142)
+- chore: update luma.gl to 9.4.0-alpha.1 (#10478)
+- chore(test): enable render tests for WebGPU (#10493)
+- feat(website): enable WebGPU polygon-dependent examples (#10494)
+- fix(core): preserve WebGPU polygon side buffers (#10505)
+
+#### deck.gl [v9.4.0-alpha.1] - Jul 16 2026
+
+- fix(core): do not write View clearColor into the picking buffer (#10431)
+- feat(widgets): add zoomStep to ZoomWidget (#10426)
+- feat(core): upgrade mjolnir.js for DoubleClickDrag recognizer (#10416)
+- fix(mapbox): avoid crash when MapboxOverlay beforeId layer is removed (#10425)
+- fix(widgets): InfoWidget not rendering on hover/click (#10421)
+- fix(layers): Add missing `@types/geojson` dependency (#10268)
+- feat(core): Support multiple event managers (multi-canvas prep) (#10375)
+- fix(arcgis): update arcgis module to use RenderNode instead of externalRenderers (#10257)
+- fix(geo-layers): Pass zoomOffset through TerrainLayer to child TileLayer (#10382)
+- chore(deps): bump loaders.gl to ^4.4.3 (#10380)
+- refactor(geo-layers): prioritize tile requests by viewport center (#10364)
+- fix(layers): closed shapes with binary data and transition props (#10094)
+- fix(core): use correct mjolnir requireFailure key for recognizers (#10323)
+- feat(extensions): TerrainExtension GlobeView support (#10251)
+- feat(core): doubleClickDragZoom gesture (#10327)
+- chore(core): Adopt luma CanvasContext (#10228)
+- feat(core): Row index based picking (#10302)
+- fix(geo-layers): TerrainLayer GlobeView support (#10250)
+- feat(core): Remove redundant instance picking colors (#10275)
+- fix(core): Tile3DLayer renders correctly on GlobeView (#10252)
+- fix(heatmap): compilation failure on Qualcomm Adreno 660 (#10301)
+- feat(core): GlobeController with inertia, tilt & pan (#10298)
+- fix(extensions): MaskExtension compatible with TerrainExtension (#10187)
+- feat(carto): Clipped polygon labels (#10278)
+- feat(core): ViewProps.parameters (#10262)
+- feat(layers): add getPixelOffset prop to ScatterplotLayer (#10178)
+- fix(layers): GeoJsonLayer TypeScript types elevationScale as number (#10261)
+- fix(google-maps, arcgis): Wrap external FB handle (#10253)
+- fix(react): Align React widget names with pure js (#10239)
+- feat(widgets): ScrollbarWidget falls back to controller.maxBounds (#10236)
+- fix(widgets): ThemeWidget does not apply theme variables on initial add (#10238)
+- fix(widgets): CoordinateGeocoder edge case handling (#10235)
+- feat(widgets): unify viewId handling (#10234)
+- fix(widgets): SplitterWidget types (#10233)
+
 ## deck.gl v9.3
 
 ### deck.gl v9.3 Prereleases

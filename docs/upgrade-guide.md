@@ -2,6 +2,41 @@
 
 ## Upgrading to v9.4
 
+### pydeck lighting
+
+The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
+`lightSettings` layer prop, which deck.gl has not supported since v7. Use deck-level
+lighting effects instead:
+
+```python
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+pdk.Deck(layers=[layer], effects=[lighting])
+```
+
+### Controller touch gestures
+
+The `touchRotate` controller option is deprecated. Historically, `touchRotate: true` enabled two touchscreen gestures: a two-finger twist changed bearing, and a two-finger vertical drag changed pitch.
+
+`touchRotate: true` is now treated as an alias for `multiTouchDrag: 'rotate'`. This preserves the existing twist and vertical-drag behaviors, and also allows a horizontal two-finger drag to change bearing. If both options are supplied, `multiTouchDrag` takes precedence. Trackpad gestures still require the separate `trackpadGesture: true` opt-in.
+
+Use `multiTouchDrag: 'rotate'` instead:
+
+```ts
+// Before
+controller: {
+  touchRotate: true
+}
+
+// After
+controller: {
+  multiTouchDrag: 'rotate'
+}
+```
+
 #### `pickMultipleObjects()` pick depth limits
 
 For layers that use built-in shader instance ids instead of explicit picking index buffers, `pickMultipleObjects()` now only guarantees the default `depth` of 10 unique objects per layer. Applications that call `pickMultipleObjects()` with a custom `depth` above the default may receive duplicate results for these layers. Layers with explicit picking index buffers keep their previous buffer-mutation behavior.

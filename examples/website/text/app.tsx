@@ -8,6 +8,7 @@ import {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {MapView} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
@@ -51,11 +52,13 @@ const colorScale = scaleLog<Color>()
   ]);
 
 export default function App({
+  device,
   data,
   noOverlap = true,
   fontSize = 32,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: City[];
   noOverlap?: boolean;
   fontSize?: number;
@@ -97,11 +100,13 @@ export default function App({
       sizeMaxPixels: sizeMaxPixels * 2,
       sizeMinPixels: sizeMinPixels * 2
     },
-    extensions: [new CollisionFilterExtension()]
+    // CollisionFilterExtension has not been ported to WebGPU yet.
+    extensions: device?.type === 'webgpu' ? [] : [new CollisionFilterExtension()]
   });
 
   return (
     <DeckGL
+      device={device}
       views={new MapView({repeat: true})}
       layers={[textLayer]}
       initialViewState={INITIAL_VIEW_STATE}

@@ -2,15 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useEffect, useCallback, Children, isValidElement, cloneElement} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  Children,
+  isValidElement,
+  cloneElement
+} from 'react';
 import styled from 'styled-components';
 import InfoPanel from '../info-panel';
 import {loadData, joinPath} from '../../utils/data-utils';
 import {normalizeParam} from '../../utils/format-utils';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import { DeviceTabs } from '../device-tabs';
-import { useStore } from '../../store/device-store';
+import {DeviceTabs} from '../device-tabs';
+import {useStore} from '../../store/device-store';
 
 const DemoContainer = styled.div`
   height: 100%;
@@ -44,6 +51,37 @@ const MapTip = styled.div`
   }
 `;
 
+// The website caches one device per backend, and each device owns a canvas that is reused across
+// examples. Remember the website-owned canvas style so switching away and back does not reveal the
+// previous example's last frame or leave a reused canvas permanently hidden.
+const originalCanvasVisibility = new WeakMap();
+
+function useSharedDeviceCanvas(device) {
+  useEffect(() => {
+    const canvas = device?.getDefaultCanvasContext().canvas;
+    if (!(canvas instanceof HTMLCanvasElement)) {
+      return;
+    }
+
+    if (!originalCanvasVisibility.has(canvas)) {
+      originalCanvasVisibility.set(canvas, canvas.style.visibility);
+    }
+    canvas.style.visibility = 'hidden';
+
+    // DeckGL mounts the device's existing canvas and schedules its first draw in a child effect.
+    // Reveal it on the next frame, after that setup, so a cached frame from another example cannot
+    // flash while the canvas is moved into the new wrapper.
+    const animationFrame = requestAnimationFrame(() => {
+      canvas.style.visibility = originalCanvasVisibility.get(canvas) ?? '';
+    });
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      canvas.style.visibility = 'hidden';
+    };
+  }, [device]);
+}
+
 export default function makeExample(DemoComponent, {isInteractive = true, style} = {}) {
   const {parameters = {}, mapStyle} = DemoComponent;
   const defaultParams = Object.keys(parameters).reduce((acc, name) => {
@@ -57,8 +95,11 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     const [data, setData] = useState(defaultData);
     const [params, setParams] = useState(defaultParams);
     const [meta, setMeta] = useState({});
-    const device = useStore(state => state.device)
+    // Only demos that expose device tabs receive the shared device. Unsupported examples keep
+    // their existing, independently initialized WebGL path.
+    const device = useStore(state => (DemoComponent.hasDeviceTabs ? state.device : undefined));
     const baseUrl = useBaseUrl('/');
+    useSharedDeviceCanvas(device);
 
     const useParam = useCallback(newParameters => {
       const newParams = Object.keys(newParameters).reduce((acc, name) => {
@@ -121,14 +162,23 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
       <>
         {DemoComponent.hasDeviceTabs && <DeviceTabs />}
         <DemoContainer style={style}>
-          <DemoComponent
-            device={device}
-            data={data}
-            mapStyle={mapStyle || MAPBOX_STYLES.BLANK}
-            params={params}
-            useParam={useParam}
-            onStateChange={updateMeta}
-          />
+          {/*
+            Device creation is asynchronous. Unmount the current demo while a switch is pending;
+            otherwise two Deck instances can temporarily try to render into the same canvas.
+            The device key makes a completed switch create a fresh DeckGL lifecycle instead of
+            replacing a GPU backend inside an already initialized Deck.
+          */}
+          {(!DemoComponent.hasDeviceTabs || device) && (
+            <DemoComponent
+              key={device?.id}
+              device={device}
+              data={data}
+              mapStyle={mapStyle || MAPBOX_STYLES.BLANK}
+              params={params}
+              useParam={useParam}
+              onStateChange={updateMeta}
+            />
+          )}
           {isInteractive && (
             <InfoPanel
               title={DemoComponent.title}

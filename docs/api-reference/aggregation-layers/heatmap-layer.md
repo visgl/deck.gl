@@ -1,4 +1,5 @@
 # HeatmapLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {HeatmapLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
@@ -231,7 +232,7 @@ Method called to retrieve weight of each point. By default each point will use a
 
 ## Limitations
 
-The `HeatmapLayer` performs aggregation on the GPU. This feature is fully supported in evergreen desktop browsers, but limited in the following platforms due to partial WebGL support:
+The `HeatmapLayer` performs aggregation on the GPU. On WebGPU, it uses instanced quads and a 16-bit floating-point render target to preserve Gaussian kernel density estimation without requiring WebGL point sprites. On WebGL, this feature is fully supported in evergreen desktop browsers, but limited in the following platforms due to partial WebGL support:
 
 - iOS Safari: WebGL context does not support rendering to a float texture. The layer therefore falls back to an 8-bit low-precision mode, where weights must be integers and the accumulated weights in any pixel cannot exceed 255.
 

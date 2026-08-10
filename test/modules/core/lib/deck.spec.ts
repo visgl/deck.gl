@@ -155,6 +155,12 @@ test('Deck wires mjolnir requireFailure between recognizers', async () => {
           expect(requiredFailures('pan'), 'pan waits for multipan').toContain('multipan');
           expect(requiredFailures('click'), 'click waits for dblclick').toContain('dblclick');
 
+          const multipan = recognizers.find(r => r.options.event === 'multipan');
+          const pinch = recognizers.find(r => r.options.event === 'pinch');
+          expect(multipan.options.direction, 'multipan accepts movement in any direction').toBe(15);
+          expect(multipan.options.trackpad, 'multipan recognizes trackpad swipes').toBe(true);
+          expect(pinch.options.trackpad, 'pinch recognizes trackpad pinch').toBe(true);
+
           deck.finalize();
           resolve();
         } catch (error) {

@@ -5,6 +5,7 @@
 import {
   Layer,
   project32,
+  color,
   picking,
   UNIT,
   LayerProps,
@@ -20,14 +21,26 @@ import {
   gouraudMaterial,
   phongMaterial
 } from '@deck.gl/core';
-import {Geometry, Model} from '@luma.gl/engine';
+import type {BufferLayout} from '@luma.gl/core';
+import {Geometry, Model, makeInterleavedGeometry} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
+import {getColumnLayerWGSL as source} from './column-layer.wgsl';
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+
+const GEOMETRY_BUFFER_LAYOUT: BufferLayout = {
+  name: 'geometry',
+  stepMode: 'vertex',
+  byteStride: 24,
+  attributes: [
+    {attribute: 'positions', format: 'float32x3', byteOffset: 0},
+    {attribute: 'normals', format: 'float32x3', byteOffset: 12}
+  ]
+};
 
 const defaultProps: DefaultProps<ColumnLayerProps> = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -221,9 +234,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   state!: {
     fillModel?: Model;
+    strokeModel?: Model;
     wireframeModel?: Model;
     models?: Model[];
-    fillVertexCount: number;
     edgeDistance: number;
   };
 
@@ -237,8 +250,15 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     return super.getShaders({
       vs,
       fs,
+      source: source(flatShading),
       defines,
-      modules: [project32, flatShading ? phongMaterial : gouraudMaterial, picking, columnUniforms]
+      modules: [
+        project32,
+        color,
+        flatShading ? phongMaterial : gouraudMaterial,
+        picking,
+        columnUniforms
+      ]
     });
   }
 
@@ -300,13 +320,15 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     const instanceCount = this.getNumInstances();
     this.state.fillModel!.setInstanceCount(instanceCount);
+    this.state.strokeModel!.setInstanceCount(instanceCount);
     this.state.wireframeModel!.setInstanceCount(instanceCount);
 
     if (
       regenerateModels ||
       props.diskResolution !== oldProps.diskResolution ||
       props.vertices !== oldProps.vertices ||
-      (props.extruded || props.stroked) !== (oldProps.extruded || oldProps.stroked)
+      props.extruded !== oldProps.extruded ||
+      props.stroked !== oldProps.stroked
     ) {
       this._updateGeometry(props);
     }
@@ -339,11 +361,20 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   protected _getModels() {
     const shaders = this.getShaders();
-    const bufferLayout = this.getAttributeManager()!.getBufferLayouts();
+    const bufferLayout = [
+      ...this.getAttributeManager()!.getBufferLayouts(),
+      GEOMETRY_BUFFER_LAYOUT
+    ];
 
     const fillModel = new Model(this.context.device, {
       ...shaders,
       id: `${this.props.id}-fill`,
+      bufferLayout,
+      isInstanced: true
+    });
+    const strokeModel = new Model(this.context.device, {
+      ...shaders,
+      id: `${this.props.id}-stroke`,
       bufferLayout,
       isInstanced: true
     });
@@ -356,33 +387,67 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
     return {
       fillModel,
+      strokeModel,
       wireframeModel,
-      models: [wireframeModel, fillModel]
+      models: [wireframeModel, fillModel, strokeModel]
     };
   }
 
   protected _updateGeometry({diskResolution, vertices, extruded, stroked}) {
     const geometry = this.getGeometry(diskResolution, vertices, extruded || stroked);
-
-    this.setState({
-      fillVertexCount: geometry.attributes.POSITION.value.length / 3
-    });
-
-    const fillModel = this.state.fillModel!;
-    const wireframeModel = this.state.wireframeModel!;
+    const positionAttribute = geometry.attributes.POSITION;
+    const normalAttribute = geometry.attributes.NORMAL;
 
     // The fill model renders a triangle-strip with degenerate triangles and does not
     // use indices. Give it a separate Geometry without `indices` so that later buffer
     // layout rebuilds (e.g. binary-data transitions, HMR) cannot re-attach the
     // wireframe indices via `_setGeometryAttributes`.
-    const {POSITION, NORMAL} = geometry.attributes;
-    const fillGeometry = new Geometry({
-      topology: 'triangle-strip',
-      attributes: {POSITION, NORMAL}
-    });
-    fillModel.setGeometry(fillGeometry);
+    this._setFillGeometry(
+      new Geometry({
+        topology: 'triangle-strip',
+        attributes: {POSITION: positionAttribute, NORMAL: normalAttribute}
+      })
+    );
 
-    wireframeModel.setGeometry(geometry);
+    if (!extruded && stroked) {
+      const fillVertexCount = positionAttribute.value.length / 3;
+      this._setStrokeGeometry(
+        new Geometry({
+          topology: 'triangle-strip',
+          // remove the cap
+          vertexCount: fillVertexCount - diskResolution - 1,
+          attributes: {POSITION: positionAttribute, NORMAL: normalAttribute}
+        })
+      );
+    }
+
+    if (extruded) {
+      this._setWireframeGeometry(geometry);
+    }
+  }
+
+  protected _setFillGeometry(geometry: Geometry): void {
+    const fillGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
+    const fillModel = this.state.fillModel!;
+    fillModel.setGeometry(fillGeometry);
+  }
+
+  protected _setStrokeGeometry(geometry: Geometry): void {
+    const strokeGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
+    const strokeModel = this.state.strokeModel!;
+    strokeModel.setGeometry(strokeGeometry);
+  }
+
+  protected _setWireframeGeometry(geometry: Geometry): void {
+    const wireframeGeometry = makeInterleavedGeometry(geometry, {
+      attributes: ['POSITION', 'NORMAL']
+    });
+    const wireframeModel = this.state.wireframeModel!;
+    wireframeModel.setGeometry(wireframeGeometry);
     wireframeModel.setTopology('line-list');
   }
 
@@ -404,8 +469,9 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       angle
     } = this.props;
     const fillModel = this.state.fillModel!;
+    const strokeModel = this.state.strokeModel!;
     const wireframeModel = this.state.wireframeModel!;
-    const {fillVertexCount, edgeDistance} = this.state;
+    const {edgeDistance} = this.state;
 
     const columnProps: Omit<ColumnProps, 'isStroke'> = {
       radius,
@@ -435,8 +501,6 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
 
     if (filled) {
-      // model.setProps({isIndexed: false});
-      fillModel.setVertexCount(fillVertexCount);
       fillModel.shaderInputs.setProps({
         column: {
           ...columnProps,
@@ -447,17 +511,13 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
     // When drawing 2d: draw fill before stroke so that the outline is always on top
     if (!extruded && stroked) {
-      // model.setProps({isIndexed: false});
-      // The width of the stroke is achieved by flattening the side of the cylinder.
-      // Skip the last 1/3 of the vertices which is the top.
-      fillModel.setVertexCount((fillVertexCount * 2) / 3);
-      fillModel.shaderInputs.setProps({
+      strokeModel.shaderInputs.setProps({
         column: {
           ...columnProps,
           isStroke: true
         }
       });
-      fillModel.draw(this.context.renderPass);
+      strokeModel.draw(this.context.renderPass);
     }
   }
 }

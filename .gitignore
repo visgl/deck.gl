@@ -1,5 +1,6 @@
 build/
 dist/
+*.generated.json
 **/*.min.js
 node_modules/
 coverage/
@@ -13,6 +14,7 @@ test/**/__screenshots__/
 tsconfig.tsbuildinfo
 
 dist-demo/
+dist.webgl-only/
 dist-bundle.js
 
 examples/winds/data/*.html

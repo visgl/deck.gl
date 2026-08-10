@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>deck.gl - Gesture Timing</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'SF Mono', 'Fira Code', monospace; background: #1a1a2e; color: #e0e0e0; }
+      #app { display: flex; height: 100vh; }
+      #deck-container { flex: 1; position: relative; }
+      #panel {
+        width: 400px; overflow-y: auto; padding: 16px;
+        background: #16213e; border-left: 1px solid #334;
+        display: flex; flex-direction: column; gap: 16px;
+      }
+      h2 { margin: 0 0 8px; font-size: 14px; color: #8ab4f8; text-transform: uppercase; letter-spacing: 1px; }
+      .section { background: #0f3460; border-radius: 6px; padding: 12px; }
+      .toggle-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; font-size: 12px; }
+      .toggle-row input { cursor: pointer; }
+      .toggle-row .hint { color: #f88; font-size: 10px; margin-left: auto; }
+      .presets { display: flex; gap: 8px; flex-wrap: wrap; }
+      .presets button {
+        padding: 6px 12px; border: 1px solid #445; border-radius: 4px;
+        background: #1a1a3e; color: #e0e0e0; cursor: pointer; font-size: 11px; font-family: inherit;
+      }
+      .presets button:hover { background: #2a2a5e; }
+      .presets button.active { border-color: #8ab4f8; background: #1a2a4e; }
+      .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .stat-box { text-align: center; padding: 8px; background: #1a1a2e; border-radius: 4px; }
+      .stat-value { font-size: 20px; font-weight: bold; }
+      .stat-label { font-size: 10px; color: #888; margin-top: 2px; }
+      #event-log { flex: 1; overflow-y: auto; min-height: 200px; }
+      .log-entry {
+        display: flex; align-items: center; gap: 8px; padding: 4px 8px;
+        border-left: 3px solid #666; margin-bottom: 2px; font-size: 11px;
+        background: #0a0a1e; border-radius: 0 3px 3px 0;
+      }
+      .log-type { min-width: 110px; font-weight: bold; }
+      .log-delta { min-width: 70px; text-align: right; }
+      .log-time { color: #666; margin-left: auto; }
+      .color-green { color: #4caf50; border-left-color: #4caf50; }
+      .color-yellow { color: #ff9800; border-left-color: #ff9800; }
+      .color-red { color: #f44336; border-left-color: #f44336; }
+      .color-gray { color: #666; border-left-color: #666; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="deck-container"></div>
+      <div id="panel">
+        <div class="section" id="controls-section"></div>
+        <div class="section" id="presets-section"></div>
+        <div class="section" id="stats-section"></div>
+        <div class="section" id="event-log"></div>
+      </div>
+    </div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1087,7 +1087,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
 
     for (const eventType in EVENT_HANDLERS) {
-      eventManager.on(eventType, this._onEvent);
+      if (eventType === 'dblclick') {
+        // Use watch (passive) so the dblclick recognizer is only enabled by the
+        // controller's doubleClickZoom option — not by the picking system.
+        eventManager.watch(eventType, this._onEvent);
+      } else {
+        eventManager.on(eventType, this._onEvent);
+      }
     }
 
     return eventManager;
@@ -1286,7 +1292,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      normalizedViews[0].props.controller = this.props.controller;
+      // Clone the view so that ViewManager._diffViews detects the change
+      normalizedViews[0] = normalizedViews[0].clone({controller: this.props.controller});
     }
     return normalizedViews;
   }
@@ -1700,7 +1707,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     metrics.layersCount = this.layerManager?.layers.length ?? 0;
     metrics.drawLayersCount = stats.get('Layers rendered').lastSampleCount;
     metrics.pickLayersCount = stats.get('Layers picked').lastSampleCount;
-    metrics.updateAttributesCount = stats.get('Layers updated').count;
+    metrics.updateLayersCount = stats.get('Layer updates').count;
     metrics.updateAttributesCount = stats.get('Attributes updated').count;
 
     // Luma stats

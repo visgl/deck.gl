@@ -4,17 +4,33 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
-Release date: TBD
+Release date: July 2026
+
+deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
+
+Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
 ### Core Performance
 
-- Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, reducing memory usage and initialization times. (deck.gl now using shader builtins `instance_index` / `gl_InstanceID`). 
+- Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
+
+### WebGPU
+
+deck.gl v9.4 substantially expands its experimental WebGPU support. Newly supported layers include [`ArcLayer`](./api-reference/layers/arc-layer.md), [`ColumnLayer`](./api-reference/layers/column-layer.md), [`GridCellLayer`](./api-reference/layers/grid-cell-layer.md), [`PathLayer`](./api-reference/layers/path-layer.md), [`PolygonLayer`](./api-reference/layers/polygon-layer.md), [`SolidPolygonLayer`](./api-reference/layers/solid-polygon-layer.md), and [`TileLayer`](./api-reference/geo-layers/tile-layer.md), together with [`ScreenGridLayer`](./api-reference/aggregation-layers/screen-grid-layer.md), [`HexagonLayer`](./api-reference/aggregation-layers/hexagon-layer.md), [`ContourLayer`](./api-reference/aggregation-layers/contour-layer.md), and [`HeatmapLayer`](./api-reference/aggregation-layers/heatmap-layer.md). [`BitmapLayer`](./api-reference/layers/bitmap-layer.md) and [`GeoJsonLayer`](./api-reference/layers/geojson-layer.md) also gain partial WebGPU support.
+
+This release improves WebGPU attribute-buffer handling, adds WebGPU render-test coverage, and makes switching between WebGL2 and WebGPU more reliable in React and across website examples.
+
+The WebGPU-capable code is included by default so that adopting WebGPU does not require changing application imports. Applications that only target WebGL2 can instead configure their bundler to resolve the custom export condition `visgl:webgl-only`; supported deck.gl packages will then use alternate builds with WebGPU branches and WGSL shader sources removed, reducing their contribution to bundle size without changing the imported APIs. See [Building Apps](./developer-guide/building-apps.md#bundle-size) for details.
+
+WebGPU support remains experimental and is not yet recommended for production. Some layers and features remain unavailable or only partially supported. See the [WebGPU guide](./developer-guide/webgpu.md) for setup instructions, current limitations, and the complete compatibility matrix.
 
 ### Views and Controllers
 
+deck.gl v9.4 brings additional view and controller improvements on top of the substantial changes in v9.3.
+
 #### GlobeView
 
-`GlobeView`, while still experimental, is improved and nearing graduation: 
+[`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
@@ -22,11 +38,23 @@ Release date: TBD
 
 #### Views
 
-- Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.
+- [Views](./api-reference/core/view.md#parameters) now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with:
+
+```js
+new GlobeView({
+  parameters: {
+    cullMode: 'none'
+  }
+});
+```
 
 #### Controllers
 
-- New `doubleClickDragZoom` gesture on all controllers enables smooth zoom by double-clicking and dragging up/down.
+- All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
+
+#### View Layout
+
+- A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
 
 ### @deck.gl/geo-layers
 
@@ -35,11 +63,48 @@ Release date: TBD
 
 ### @deck.gl/arcgis
 
-- `DeckRenderer` now integrates with ArcGIS `SceneView` through the modern `RenderNode` API instead of the deprecated `externalRenderers`.
+- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
 
-### @deck.gl/widgets
+[ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 
-A new experimental `ViewLayout` system with a helper function `buildViewsFromViewLayout()` allows advanced nested and relative view layouts to be specified using a declarative layout tree.
+### pydeck
+
+deck.gl's Python bindings gain first-class support for [layer extensions](./api-reference/extensions/overview.md), available through a typed [`pydeck.Extension`](https://deckgl.readthedocs.io/en/latest/extension.html) wrapper:
+
+```python
+import pydeck as pdk
+
+layer = pdk.Layer(
+    "ScatterplotLayer",
+    data=df,
+    get_position="position",
+    get_filter_value="value",
+    filter_range=[0, 1],
+    extensions=[pdk.Extension("DataFilterExtension", filter_size=1)],
+)
+```
+
+pydeck also gains typed lighting and post-processing effects through `pydeck.Effect`:
+
+```python
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+contrast = pdk.Effect(
+    "PostProcessEffect",
+    module="brightnessContrast",
+    brightness=0.15,
+    contrast=0.3,
+)
+pdk.Deck(layers=[layer], effects=[lighting, contrast])
+```
+
+The obsolete `pydeck.LightSettings` API has been removed; it targeted a layer prop that
+deck.gl has not supported since v7. Explore the
+[pydeck gallery](https://deckgl.readthedocs.io/en/latest/) for runnable, live examples of
+all supported extensions, lights, and bundled post-processing modules.
 
 ## deck.gl v9.3
 

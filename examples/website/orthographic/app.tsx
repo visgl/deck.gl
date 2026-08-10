@@ -9,6 +9,7 @@ import {OrthographicView, FilterContext} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {scaleLinear} from 'd3-scale';
 import {minIndex, maxIndex} from 'd3-array';
@@ -103,9 +104,11 @@ function layerFilter({viewport, layer}: FilterContext) {
 }
 
 export default function App({
+  device,
   data,
   groupBy = 'Country'
 }: {
+  device?: Device;
   data?: Station[];
   groupBy?: 'Country' | 'Latitude';
 }) {
@@ -220,10 +223,12 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       views={new OrthographicView()}
       initialViewState={initialViewState}
       controller={{
-        maxBounds: contentBounds
+        maxBounds: contentBounds,
+        rubberBand: true
       }}
       layers={layers}
       layerFilter={layerFilter}

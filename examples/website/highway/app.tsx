@@ -6,6 +6,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {CSVLoader} from '@loaders.gl/csv';
@@ -130,11 +131,13 @@ function renderTooltip({
 }
 
 export default function App({
+  device,
   roads = DATA_URL.ROADS,
   year,
   accidents,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   roads?: string | Road[];
   accidents?: Accident[];
   year?: number;
@@ -183,6 +186,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       pickingRadius={5}
       initialViewState={INITIAL_VIEW_STATE}
