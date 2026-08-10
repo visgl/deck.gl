@@ -40,6 +40,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `dragMode`: default `'rotate'` (drag to rotate, shift/ctrl + drag to pan)
 - `keyboard`: arrow keys to pan, arrow keys with shift/ctrl down to rotate, +/- to zoom
 - `maxBounds` - constrains the target position within the specified bounding box `[[minX, minY, minZ], [maxX, maxY, maxZ]]`
+- `maxBoundsPadding` - padding inside the viewport when fitting `maxBounds`, using the same `{left, right, top, bottom}` format as view padding. Numeric values are pixels; strings may be percentages or layout expressions such as `calc(10% - 4px)`. The bounds sphere is fitted within the space around the projected `target`. Default `0`.
 
 ## Custom OrbitController
 
