@@ -242,6 +242,41 @@ test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
   attribute.delete();
 });
 
+test('Attribute#updateBuffer uploads a one-instance constant updater - webgpu', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+  const matrix = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
+  const attribute = new Attribute(webgpuDevice, {
+    id: 'instanceModelMatrix',
+    size: 12,
+    update: target => {
+      // Matrix attributes use this legacy constant-updater path when all transforms are static.
+      target.constant = true;
+      target.value = new Float32Array(matrix);
+    }
+  });
+
+  attribute.allocate(1);
+  attribute.updateBuffer({
+    numInstances: 1,
+    data: [0],
+    props: {},
+    context: null
+  });
+
+  const buffer = attribute.getValue().instanceModelMatrix as Buffer;
+  expect(buffer, 'constant updater is exposed as a buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync();
+  expect(
+    new Float32Array(bytes.buffer).slice(0, matrix.length),
+    'constant matrix is uploaded'
+  ).toEqual(matrix);
+
+  attribute.delete();
+});
+
 test('Attribute#allocate - partial', async () => {
   let positions = new Attribute(device, {
     id: 'positions',
