@@ -25,7 +25,7 @@ export type MaxBoundsRect = {
 
 export type MaxBoundsExtents = ResolvedPadding;
 
-/** Returns the on-screen rectangle available for fitting max bounds, with a one-pixel floor. */
+/** Returns the on-screen rectangle available for fitting max bounds. */
 export function getMaxBoundsRect(
   width: number,
   height: number,
@@ -35,16 +35,11 @@ export function getMaxBoundsRect(
   const right = getPosition(parsePosition(padding?.right ?? 0), width);
   const top = getPosition(parsePosition(padding?.top ?? 0), height);
   const bottom = getPosition(parsePosition(padding?.bottom ?? 0), height);
-  const availableWidth = Math.max(1, width - left - right);
-  const availableHeight = Math.max(1, height - top - bottom);
-  // Keep an over-constrained one-pixel box centered between the requested edges.
-  const centerX = (left + width - right) / 2;
-  const centerY = (top + height - bottom) / 2;
   return {
-    x: centerX - availableWidth / 2,
-    y: centerY - availableHeight / 2,
-    width: availableWidth,
-    height: availableHeight
+    x: left,
+    y: top,
+    width: width - left - right,
+    height: height - top - bottom
   };
 }
 

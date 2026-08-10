@@ -4,6 +4,7 @@
 
 import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
+import {getMaxBoundsRect} from './utils';
 import {mod} from '../utils/math-utils';
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
@@ -382,11 +383,14 @@ class FirstPersonState extends ViewState<
       props.bearing = mod(bearing + 180, 360) - 180;
     }
     if (maxBounds) {
-      const x = clamp(position[0], maxBounds[0][0], maxBounds[1][0]);
-      const y = clamp(position[1], maxBounds[0][1], maxBounds[1][1]);
-      const z = clamp(position[2] ?? 0, maxBounds[0][2] ?? 0, maxBounds[1][2] ?? 0);
-      if (x !== position[0] || y !== position[1] || z !== position[2]) {
-        props.position = [x, y, z];
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      if (maxBoundsRect.width >= 0 && maxBoundsRect.height >= 0) {
+        const x = clamp(position[0], maxBounds[0][0], maxBounds[1][0]);
+        const y = clamp(position[1], maxBounds[0][1], maxBounds[1][1]);
+        const z = clamp(position[2] ?? 0, maxBounds[0][2] ?? 0, maxBounds[1][2] ?? 0);
+        if (x !== position[0] || y !== position[1] || z !== position[2]) {
+          props.position = [x, y, z];
+        }
       }
     }
 

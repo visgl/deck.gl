@@ -480,8 +480,13 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         tr[0] - screenExtents.right / scale,
         tr[1] - screenExtents.top / scale
       ]);
-      props.longitude = clamp(props.longitude, minLng, maxLng);
-      props.latitude = clamp(props.latitude, minLat, maxLat);
+      // A negative target dimension is inverted and therefore has no legal interval.
+      if (maxBoundsRect.width >= 0) {
+        props.longitude = clamp(props.longitude, minLng, maxLng);
+      }
+      if (maxBoundsRect.height >= 0) {
+        props.latitude = clamp(props.latitude, minLat, maxLat);
+      }
     }
 
     return props;
@@ -503,10 +508,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       const w = tr[0] - bl[0];
       const h = tr[1] - bl[1];
       // ignore bound size of 0 or Infinity
-      if (Number.isFinite(w) && w > 0) {
+      if (maxBoundsRect.width > 0 && Number.isFinite(w) && w > 0) {
         minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.width / w));
       }
-      if (Number.isFinite(h) && h > 0) {
+      if (maxBoundsRect.height > 0 && Number.isFinite(h) && h > 0) {
         minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.height / h));
       }
       if (minZoom > maxZoom) minZoom = maxZoom;

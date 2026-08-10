@@ -493,8 +493,12 @@ export class OrthographicState extends ViewState<
           : [positiveScreenExtent / scale, negativeScreenExtent / scale];
       });
       const constrainedTarget = target.slice();
+      const targetDimensions = [maxBoundsRect.width, maxBoundsRect.height];
 
       for (const [index, [negativeExtent, positiveExtent]] of worldExtents.entries()) {
+        if (targetDimensions[index] < 0) {
+          continue;
+        }
         const {minimum, maximum, midpoint, settledTarget} = getAxisBounds(
           maxBounds,
           index,
@@ -550,11 +554,11 @@ export class OrthographicState extends ViewState<
       const w = tr[0] - bl[0];
       const h = tr[1] - bl[1];
       // ignore bound size of 0 or Infinity
-      if (Number.isFinite(w) && w > 0) {
+      if (maxBoundsRect.width > 0 && Number.isFinite(w) && w > 0) {
         minZoomX = Math.max(minZoomX, Math.log2(maxBoundsRect.width / w));
         if (minZoomX > maxZoomX) minZoomX = maxZoomX;
       }
-      if (Number.isFinite(h) && h > 0) {
+      if (maxBoundsRect.height > 0 && Number.isFinite(h) && h > 0) {
         minZoomY = Math.max(minZoomY, Math.log2(maxBoundsRect.height / h));
         if (minZoomY > maxZoomY) minZoomY = maxZoomY;
       }

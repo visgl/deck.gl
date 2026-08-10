@@ -427,3 +427,74 @@ test('maxBoundsPadding adjusts fitting across controller states', () => {
     padding
   );
 });
+
+test('negative maxBoundsPadding dimensions skip target constraints', () => {
+  const maxBoundsPadding = {left: 60, right: 60, top: 60, bottom: 60};
+  const geographicBounds = [
+    [-10, -10],
+    [10, 10]
+  ];
+
+  const MapViewState = new MapController({} as any).ControllerState;
+  const mapProps = new MapViewState({
+    width: 100,
+    height: 100,
+    longitude: 50,
+    latitude: 50,
+    zoom: -10,
+    minZoom: -20,
+    maxBounds: geographicBounds,
+    maxBoundsPadding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect([mapProps.longitude, mapProps.latitude], 'MapState leaves target unconstrained').toEqual([
+    50, 50
+  ]);
+
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+  const globeProps = new GlobeViewState({
+    width: 100,
+    height: 100,
+    longitude: 50,
+    latitude: 50,
+    zoom: -10,
+    minZoom: -20,
+    maxBounds: geographicBounds,
+    maxBoundsPadding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect(
+    [globeProps.longitude, globeProps.latitude],
+    'GlobeState leaves target unconstrained'
+  ).toEqual([50, 50]);
+
+  const OrbitViewState = new OrbitController({} as any).ControllerState;
+  const orbitProps = new OrbitViewState({
+    width: 100,
+    height: 100,
+    target: [100, 100, 100],
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    maxBoundsPadding,
+    makeViewport: (props: any) => new OrbitViewport(props)
+  }).getViewportProps();
+  expect(orbitProps.target, 'OrbitState leaves target unconstrained').toEqual([100, 100, 100]);
+
+  const FirstPersonViewState = new FirstPersonController({} as any).ControllerState;
+  const firstPersonProps = new FirstPersonViewState({
+    width: 100,
+    height: 100,
+    position: [100, 100, 100],
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    maxBoundsPadding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect(firstPersonProps.position, 'FirstPersonState leaves position unconstrained').toEqual([
+    100, 100, 100
+  ]);
+});

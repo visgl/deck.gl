@@ -573,7 +573,7 @@ test.each([
     description: 'numeric pixels',
     viewportSize: 100,
     padding: {left: 25, right: 25, top: 25, bottom: 25},
-    expectedSize: 50
+    expectedZoom: 1
   },
   {
     description: 'percentage expressions',
@@ -584,18 +584,18 @@ test.each([
       top: '10%',
       bottom: 'calc(20% - 10px)'
     },
-    expectedSize: 150,
+    expectedZoom: Math.log2(6),
     expectedTarget: 40 / 3
   },
   {
-    description: 'padding larger than the viewport',
+    description: 'negative remaining dimensions',
     viewportSize: 100,
     padding: {left: '60%', right: '60%', top: '60%', bottom: '60%'},
-    expectedSize: 1
+    expectedZoom: -10
   }
 ])(
   'OrthographicController resolves maxBoundsPadding from $description',
-  ({viewportSize, padding, expectedSize, expectedTarget = 12.5}) => {
+  ({viewportSize, padding, expectedZoom, expectedTarget = 12.5}) => {
     const boundsSize = 25;
     const controller = createRubberBandController({
       controller: {
@@ -613,7 +613,6 @@ test.each([
       }
     });
 
-    const expectedZoom = Math.log2(expectedSize / boundsSize);
     expect(controller.props.zoomX, 'horizontal fit uses the padded width').toBeCloseTo(
       expectedZoom
     );
@@ -626,6 +625,40 @@ test.each([
     controller.finalize();
   }
 );
+
+test.each([
+  {
+    description: 'zero remaining width',
+    padding: {left: 50, right: 50},
+    expectedTargetX: 25
+  },
+  {
+    description: 'negative remaining width',
+    padding: {left: 60, right: 60},
+    expectedTargetX: 100
+  }
+])('OrthographicController handles $description', ({padding, expectedTargetX}) => {
+  const controller = createRubberBandController({
+    controller: {
+      maxBounds: [
+        [0, 0],
+        [25, 25]
+      ],
+      maxBoundsPadding: padding
+    },
+    initialViewState: {
+      width: 100,
+      height: 100,
+      target: [100, 12.5, 0],
+      zoom: -10,
+      zoomAxis: 'X'
+    }
+  });
+
+  expect(controller.props.zoomX, 'non-positive width does not constrain zoom').toBe(-10);
+  expect(controller.props.target[0], 'target constraint follows width sign').toBe(expectedTargetX);
+  controller.finalize();
+});
 
 test('OrthographicController resolves percentage maxBoundsPadding after resize', () => {
   const controller = createRubberBandController({

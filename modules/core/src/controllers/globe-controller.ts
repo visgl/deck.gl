@@ -172,13 +172,20 @@ class GlobeState extends MapState {
     }
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
 
-    if (maxBounds) {
-      props.longitude = clamp(props.longitude, maxBounds[0][0], maxBounds[1][0]);
-      props.latitude = clamp(props.latitude, maxBounds[0][1], maxBounds[1][1]);
+    const maxBoundsRect = maxBounds
+      ? getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding)
+      : null;
+    if (maxBounds && maxBoundsRect) {
+      // A negative target dimension is inverted and therefore has no legal interval.
+      if (maxBoundsRect.width >= 0) {
+        props.longitude = clamp(props.longitude, maxBounds[0][0], maxBounds[1][0]);
+      }
+      if (maxBoundsRect.height >= 0) {
+        props.latitude = clamp(props.latitude, maxBounds[0][1], maxBounds[1][1]);
+      }
     }
 
-    if (maxBounds) {
-      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+    if (maxBounds && maxBoundsRect) {
       const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
       const screenExtents = getMaxBoundsExtents(
         viewport,
@@ -188,18 +195,24 @@ class GlobeState extends MapState {
       const effectiveZoom = props.zoom - zoomAdjust(latitude);
       const lngSpan = maxBounds[1][0] - maxBounds[0][0];
       const latSpan = maxBounds[1][1] - maxBounds[0][1];
-      if (latSpan > 0 && latSpan < 180) {
+      if (maxBoundsRect.height >= 0 && latSpan > 0 && latSpan < 180) {
         const heightDegrees = Math.min(
           pixelsToDegrees(maxBoundsRect.height, effectiveZoom),
           latSpan
         );
+        const bottomDegrees = maxBoundsRect.height
+          ? (heightDegrees * screenExtents.bottom) / maxBoundsRect.height
+          : pixelsToDegrees(screenExtents.bottom, effectiveZoom);
+        const topDegrees = maxBoundsRect.height
+          ? (heightDegrees * screenExtents.top) / maxBoundsRect.height
+          : pixelsToDegrees(screenExtents.top, effectiveZoom);
         props.latitude = clamp(
           props.latitude,
-          maxBounds[0][1] + (heightDegrees * screenExtents.bottom) / maxBoundsRect.height,
-          maxBounds[1][1] - (heightDegrees * screenExtents.top) / maxBoundsRect.height
+          maxBounds[0][1] + bottomDegrees,
+          maxBounds[1][1] - topDegrees
         );
       }
-      if (lngSpan > 0 && lngSpan < 360) {
+      if (maxBoundsRect.width >= 0 && lngSpan > 0 && lngSpan < 360) {
         const widthDegrees = Math.min(
           pixelsToDegrees(
             maxBoundsRect.width / Math.cos(props.latitude * DEGREES_TO_RADIANS),
@@ -207,10 +220,22 @@ class GlobeState extends MapState {
           ),
           lngSpan
         );
+        const leftDegrees = maxBoundsRect.width
+          ? (widthDegrees * screenExtents.left) / maxBoundsRect.width
+          : pixelsToDegrees(
+              screenExtents.left / Math.cos(props.latitude * DEGREES_TO_RADIANS),
+              effectiveZoom
+            );
+        const rightDegrees = maxBoundsRect.width
+          ? (widthDegrees * screenExtents.right) / maxBoundsRect.width
+          : pixelsToDegrees(
+              screenExtents.right / Math.cos(props.latitude * DEGREES_TO_RADIANS),
+              effectiveZoom
+            );
         props.longitude = clamp(
           props.longitude,
-          maxBounds[0][0] + (widthDegrees * screenExtents.left) / maxBoundsRect.width,
-          maxBounds[1][0] - (widthDegrees * screenExtents.right) / maxBoundsRect.width
+          maxBounds[0][0] + leftDegrees,
+          maxBounds[1][0] - rightDegrees
         );
       }
     }
@@ -240,10 +265,10 @@ class GlobeState extends MapState {
         degreesToPixels(maxBounds[1][0] - maxBounds[0][0]) *
         Math.cos(fitLatitude * DEGREES_TO_RADIANS);
       const h = degreesToPixels(maxBounds[1][1] - maxBounds[0][1]);
-      if (w > 0) {
+      if (maxBoundsRect.width > 0 && w > 0) {
         minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.width / w) + ZOOM0);
       }
-      if (h > 0) {
+      if (maxBoundsRect.height > 0 && h > 0) {
         minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.height / h) + ZOOM0);
       }
       if (minZoom > maxZoom) minZoom = maxZoom;

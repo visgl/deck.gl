@@ -95,7 +95,14 @@ export type ControllerOptions = {
     | [min: [number, number], max: [number, number]]
     | [min: [number, number, number], max: [number, number, number]]
     | null;
-  /** Padding inside the viewport used when fitting `maxBounds`. Default `0`. */
+  /**
+   * Padding inside the viewport when fitting `maxBounds`, in the shape of
+   * `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`)
+   * or absolute pixels. These values support the same CSS-style expressions
+   * (numbers/percentages/`px` with parentheses and `calc()` addition/subtraction)
+   * as view `x`, `y`, `width`, `height`, and `padding`. This can be used to move
+   * the target rectangle away from the center of the viewport. Default `0`.
+   */
   maxBoundsPadding?: MaxBoundsPadding;
   /** Enables elastic constraints during continuous interaction. Default `false`. */
   rubberBand?: boolean;
