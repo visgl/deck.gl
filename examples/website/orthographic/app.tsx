@@ -237,14 +237,12 @@ export default function App({
         new ScrollbarWidget({
           id: 'horizontal',
           placement: 'bottom-right',
-          orientation: 'horizontal',
-          contentBounds
+          orientation: 'horizontal'
         }),
         new ScrollbarWidget({
           id: 'vertical',
           placement: 'bottom-right',
-          orientation: 'vertical',
-          contentBounds
+          orientation: 'vertical'
         })
       ]}
     />
