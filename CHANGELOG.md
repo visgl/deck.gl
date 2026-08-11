@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.3
 
+#### deck.gl [v9.3.10] - Aug 11 2026
+
+- fix(layers): restore SDF text outlines (#10545)
+- fix(core): use correct stat for updateLayersCount metric (#10469)
+
 #### deck.gl [v9.3.9] - Aug 8 2026
 
 - fix(core): OrthographicViewport distance scale (#10540)
