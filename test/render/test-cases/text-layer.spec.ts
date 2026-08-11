@@ -99,6 +99,112 @@ async function loadPrepackedFontAtlas() {
   };
 }
 
+const sdfGlyphPadding = 10;
+const sdfRadius = 12;
+const sdfCutoff = 0.25;
+
+function getSignedDistanceToRectangle(x, y, {left, top, right, bottom}) {
+  const outsideX = Math.max(left - x, 0, x - right);
+  const outsideY = Math.max(top - y, 0, y - bottom);
+  if (outsideX > 0 || outsideY > 0) {
+    return Math.hypot(outsideX, outsideY);
+  }
+  return -Math.min(x - left, right - x, y - top, bottom - y);
+}
+
+function getSignedDistanceToCircle(x, y, centerX, centerY, radius) {
+  return Math.hypot(x - centerX, y - centerY) - radius;
+}
+
+const sdfGlyphDefinitions = {
+  H: {
+    width: 32,
+    height: 48,
+    advance: 40,
+    ascent: 38,
+    descent: 10,
+    getDistance: (x, y) =>
+      Math.min(
+        getSignedDistanceToRectangle(x, y, {left: 0, top: 0, right: 8, bottom: 48}),
+        getSignedDistanceToRectangle(x, y, {left: 24, top: 0, right: 32, bottom: 48}),
+        getSignedDistanceToRectangle(x, y, {left: 0, top: 20, right: 32, bottom: 28})
+      )
+  },
+  O: {
+    width: 40,
+    height: 40,
+    advance: 48,
+    ascent: 36,
+    descent: 4,
+    getDistance: (x, y) => Math.abs(getSignedDistanceToCircle(x, y, 20, 20, 16)) - 4
+  },
+  g: {
+    width: 32,
+    height: 48,
+    advance: 40,
+    ascent: 32,
+    descent: 16,
+    getDistance: (x, y) =>
+      Math.min(
+        Math.abs(getSignedDistanceToCircle(x, y, 16, 16, 12)) - 4,
+        getSignedDistanceToRectangle(x, y, {left: 24, top: 14, right: 32, bottom: 48}),
+        getSignedDistanceToRectangle(x, y, {left: 12, top: 40, right: 32, bottom: 48})
+      )
+  },
+  I: {
+    width: 14,
+    height: 48,
+    advance: 22,
+    ascent: 38,
+    descent: 10,
+    getDistance: (x, y) =>
+      Math.min(
+        getSignedDistanceToRectangle(x, y, {left: 0, top: 0, right: 14, bottom: 6}),
+        getSignedDistanceToRectangle(x, y, {left: 4, top: 0, right: 10, bottom: 48}),
+        getSignedDistanceToRectangle(x, y, {left: 0, top: 42, right: 14, bottom: 48})
+      )
+  },
+  '.': {
+    width: 10,
+    height: 10,
+    advance: 18,
+    ascent: 0,
+    descent: 10,
+    getDistance: (x, y) => getSignedDistanceToCircle(x, y, 5, 5, 5)
+  }
+};
+
+const sdfFontRenderer = {
+  measure: char => {
+    if (!char) {
+      return {advance: 0, width: 0, ascent: 38, descent: 16};
+    }
+    const {advance, width, ascent, descent} = sdfGlyphDefinitions[char];
+    return {advance, width, ascent, descent};
+  },
+  draw: char => {
+    const glyph = sdfGlyphDefinitions[char];
+    const width = glyph.width + sdfGlyphPadding * 2;
+    const height = glyph.height + sdfGlyphPadding * 2;
+    const imageData = new ImageData(width, height);
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const glyphX = x - sdfGlyphPadding + 0.5;
+        const glyphY = y - sdfGlyphPadding + 0.5;
+        const distance = glyph.getDistance(glyphX, glyphY);
+        const alpha = Math.max(
+          0,
+          Math.min(255, Math.round(255 - 255 * (distance / sdfRadius + sdfCutoff)))
+        );
+        imageData.data[(y * width + x) * 4 + 3] = alpha;
+      }
+    }
+
+    return {data: imageData, left: sdfGlyphPadding, top: sdfGlyphPadding};
+  }
+};
+
 const testCases = [
   {
     name: 'text-layer',
@@ -127,6 +233,42 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/text-layer.png'
+  },
+  {
+    name: 'text-layer-sdf-outline',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new TextLayer({
+        id: 'text-layer-sdf-outline',
+        data: [0],
+        _getFontRenderer: () => sdfFontRenderer,
+        fontFamily: 'Render Test SDF Variants',
+        characterSet: 'auto',
+        fontSettings: {
+          sdf: true,
+          fontSize: 64,
+          buffer: sdfGlyphPadding,
+          radius: sdfRadius,
+          cutoff: sdfCutoff,
+          smoothing: 0.1
+        },
+        getText: () => 'HOgI.',
+        getPosition: () => [-126, 0],
+        getColor: [255, 255, 255],
+        getSize: 96,
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'bottom',
+        getPixelOffset: [12, 0],
+        outlineWidth: 8,
+        outlineColor: [0, 128, 255, 255]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-sdf-outline.png',
+    imageDiffOptions: {threshold: 0.999}
   },
   {
     name: 'text-layer-meter-size',
