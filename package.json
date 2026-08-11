@@ -58,8 +58,8 @@
     "@types/pngjs": "^6.0.5",
     "@vis.gl/dev-tools": "2.0.0-alpha.6",
     "@vis.gl/ts-plugins": "2.0.0-alpha.6",
-    "@vitest/browser-playwright": "^4.0.18",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/browser-playwright": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "autoprefixer": "^10.5.4",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
@@ -69,13 +69,13 @@
     "postcss": "^8.5.25",
     "postcss-cli": "^11.0.1",
     "postcss-inline-svg": "^6.0.0",
-    "pre-commit": "^1.2.2",
+    "pre-commit": "^2.0.0",
     "puppeteer": "^24.26.1",
     "s2-geometry": "^1.2.10",
     "sharp": "^0.34.5",
     "tape": "^5.10.2",
     "vite-bundle-analyzer": "^1.3.6",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "pre-commit": [
     "test-fast",
