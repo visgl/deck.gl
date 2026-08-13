@@ -70,7 +70,7 @@
     "postcss": "^8.5.25",
     "postcss-cli": "^11.0.1",
     "postcss-inline-svg": "^6.0.0",
-    "pre-commit": "^1.2.2",
+    "pre-commit": "^2.0.0",
     "puppeteer": "^24.26.1",
     "s2-geometry": "^1.2.10",
     "sharp": "^0.34.5",
