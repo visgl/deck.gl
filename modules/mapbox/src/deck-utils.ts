@@ -157,8 +157,14 @@ export function drawLayerGroup(
   });
 }
 
-export function getProjection(map: Map): 'mercator' | 'globe' {
-  const projection = map.getProjection?.();
+export function getProjection(map: Map): 'mercator' | 'globe' | undefined {
+  let projection;
+  try {
+    projection = map.getProjection?.();
+  } catch (err) {
+    // getProjection() throws if style is not assigned
+    return undefined;
+  }
   const type =
     // maplibre projection spec
     projection?.type ||
