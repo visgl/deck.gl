@@ -186,6 +186,7 @@ const testCases = [
   },
   {
     name: 'path-dash',
+    skip: ['webgpu'],
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
@@ -219,6 +220,7 @@ const testCases = [
   },
   {
     name: 'path-dash-rounded',
+    skip: ['webgpu'],
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
@@ -256,6 +258,7 @@ const testCases = [
   },
   {
     name: 'path-offset',
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.71,
       longitude: -122.405,
@@ -333,9 +336,6 @@ function getGraticules(resolution) {
   return graticules;
 }
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });
