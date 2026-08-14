@@ -278,7 +278,8 @@ fn vertexMain(
     geometry.position = vec4<f32>(currentPosition, 1.0);
   }
 
-  geometry.uv = vec2<f32>(segmentRatio, segmentSide);
+  var uv = vec2<f32>(segmentRatio, segmentSide);
+  geometry.uv = uv;
   geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
 
   let widthPixels = clamp(
@@ -286,17 +287,26 @@ fn vertexMain(
     arc.widthMinPixels,
     arc.widthMaxPixels
   );
-  let offset = getExtrusionOffset(
+  var offset = getExtrusionOffset(
     (nextClip.xy - currentClip.xy) * indexDirection,
     segmentSide,
     widthPixels
   );
+  let halfWidthPixels = length(offset);
+  if (arc.antialiasing != 0.0 && halfWidthPixels > 0.0) {
+    // Keep the declared edge at abs(uv.y) == 1 while rasterizing the outer half of the centered
+    // one-device-pixel coverage ramp.
+    let coverageScale = 1.0 + 0.5 / project.devicePixelRatio / halfWidthPixels;
+    offset *= coverageScale;
+    uv.y *= coverageScale;
+  }
+  geometry.uv = uv;
 
   var output: Varyings;
   output.position = currentClip + vec4<f32>(project_pixel_size_to_clipspace(offset), 0.0, 0.0);
   let color = mix(attributes.instanceSourceColors, attributes.instanceTargetColors, segmentRatio);
   output.color = vec4<f32>(color.rgb, color.a * layer.opacity);
-  output.uv = geometry.uv;
+  output.uv = uv;
   output.pickingColor = geometry.pickingColor;
   output.isValid = isValid;
   return output;
@@ -304,11 +314,22 @@ fn vertexMain(
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
+  var edgePixels = 0.0;
+  if (arc.antialiasing != 0.0) {
+    let edgeCoord = abs(varyings.uv.y);
+    edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+  }
+
   if (varyings.isValid == 0.0) {
     discard;
   }
 
   var color = varyings.color;
+  if (arc.antialiasing != 0.0) {
+    // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
+    // two outer edges of the strip.
+    color.a *= smoothedge(0.0, edgePixels);
+  }
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;

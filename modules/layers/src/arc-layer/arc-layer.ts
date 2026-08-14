@@ -43,7 +43,8 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
+  antialiasing: false
 };
 
 /** All properties supported by ArcLayer. */
@@ -87,6 +88,15 @@ type _ArcLayerProps<DataT> = {
    * @default Number.MAX_SAFE_INTEGER
    */
   widthMaxPixels?: number;
+
+  /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where arcs overlap. Only the edges
+   * along the width of the arc are smoothed - the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
 
   /**
    * Method called to retrieve the source position of each object.
@@ -236,7 +246,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMaxPixels,
       greatCircle,
       wrapLongitude,
-      numSegments
+      numSegments,
+      antialiasing
     } = this.props;
     const arcProps: ArcProps = {
       numSegments,
@@ -244,6 +255,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthScale,
       widthMinPixels,
       widthMaxPixels,
+      antialiasing,
       greatCircle,
       useShortestPath: wrapLongitude
     };

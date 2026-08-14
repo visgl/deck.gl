@@ -12,6 +12,7 @@ struct ArcUniforms {
   widthScale: f32,
   widthMinPixels: f32,
   widthMaxPixels: f32,
+  antialiasing: f32,
   widthUnits: i32,
 };
 
@@ -26,6 +27,7 @@ layout(std140) uniform arcUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;
+  bool antialiasing;
   highp int widthUnits;
 } arc;
 `;
@@ -37,6 +39,7 @@ export type ArcProps = {
   widthScale: number;
   widthMinPixels: number;
   widthMaxPixels: number;
+  antialiasing: boolean;
   widthUnits: number;
 };
 
@@ -52,6 +55,7 @@ export const arcUniforms = {
     widthScale: 'f32',
     widthMinPixels: 'f32',
     widthMaxPixels: 'f32',
+    antialiasing: 'f32',
     widthUnits: 'i32'
   }
 } as const satisfies ShaderModule<ArcProps>;
