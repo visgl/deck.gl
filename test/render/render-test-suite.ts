@@ -7,6 +7,7 @@ import {
   createTestDevice,
   createContainer,
   createDeck,
+  removeContainer,
   finalizeDeck,
   runRenderTest,
   updateDeckForTest,
@@ -17,9 +18,22 @@ import {
 } from './deck-test-utils';
 import {OS} from './constants';
 
-type RenderTestSuiteOptions = {
+type BaseRenderTestSuiteOptions = {
   beforeAll?: () => void | Promise<void>;
 };
+
+type RenderTestSuiteOptions = BaseRenderTestSuiteOptions &
+  (
+    | {
+        deviceMode?: 'shared';
+        webgl?: never;
+      }
+    | {
+        deviceMode: 'isolated';
+        /** WebGL context attributes for the suite's isolated device. */
+        webgl?: {antialias?: boolean};
+      }
+  );
 
 type SharedDeviceContext = {
   container: HTMLDivElement;
@@ -29,16 +43,37 @@ type SharedDeviceContext = {
 
 type RenderTestGlobal = typeof globalThis & {
   __deckRenderTestDeviceContexts?: Partial<Record<TestDeviceType, SharedDeviceContext>>;
+  __deckRenderTestDeviceContainers?: Set<HTMLDivElement>;
 };
 
 const renderTestGlobal = globalThis as RenderTestGlobal;
 const sharedDeviceContexts =
   renderTestGlobal.__deckRenderTestDeviceContexts ||
   (renderTestGlobal.__deckRenderTestDeviceContexts = {});
+const deviceContextContainers =
+  renderTestGlobal.__deckRenderTestDeviceContainers ||
+  (renderTestGlobal.__deckRenderTestDeviceContainers = new Set());
+
+let isolatedDeviceContextCount = 0;
 
 export function isRenderTestDeviceEnabled(deviceType: TestDeviceType): boolean {
   const enabledDeviceType = import.meta.env.RENDER_TEST_DEVICE as TestDeviceType | null;
   return !enabledDeviceType || enabledDeviceType === deviceType;
+}
+
+function createDeviceLossState(
+  device: NonNullable<DeckTestContext['device']>,
+  label: string
+): DeviceLossState {
+  const deviceLoss: DeviceLossState = {
+    error: null,
+    promise: device.lost.then(({reason, message}) => {
+      const error = new Error(`${label} device lost (${reason})${message ? `: ${message}` : ''}`);
+      deviceLoss.error = error;
+      return error;
+    })
+  };
+  return deviceLoss;
 }
 
 async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
@@ -50,7 +85,8 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
   if (sharedContext) {
     const device = await sharedContext.device;
     if (device.isLost || sharedContext.deviceLoss?.error) {
-      sharedContext.container.remove();
+      deviceContextContainers.delete(sharedContext.container);
+      removeContainer(sharedContext.container);
       delete sharedDeviceContexts[deviceType];
       sharedContext = undefined;
     }
@@ -64,20 +100,11 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
     };
     sharedDeviceContexts[deviceType] = sharedContext;
   }
+  deviceContextContainers.add(sharedContext.container);
 
   const device = await sharedContext.device;
   if (!sharedContext.deviceLoss) {
-    const deviceLoss: DeviceLossState = {
-      error: null,
-      promise: device.lost.then(({reason, message}) => {
-        const error = new Error(
-          `Shared ${deviceType} device lost (${reason})${message ? `: ${message}` : ''}`
-        );
-        deviceLoss.error = error;
-        return error;
-      })
-    };
-    sharedContext.deviceLoss = deviceLoss;
+    sharedContext.deviceLoss = createDeviceLossState(device, `Shared ${deviceType}`);
   }
 
   return {
@@ -87,10 +114,36 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
   };
 }
 
-function activateSharedDeviceContext(deviceType: TestDeviceType): void {
-  for (const [type, context] of Object.entries(sharedDeviceContexts)) {
-    context!.container.style.display = type === deviceType ? 'block' : 'none';
+async function createIsolatedDeviceContext(
+  deviceType: TestDeviceType,
+  /**
+   * WebGL context attributes. Defaults to the browser's, which enables MSAA - pass
+   * `{antialias: false}` to test what applications get when a base map owns the context.
+   */
+  webgl?: {antialias?: boolean}
+): Promise<{
+  container: HTMLDivElement;
+  device: NonNullable<DeckTestContext['device']>;
+  deviceLoss: DeviceLossState;
+}> {
+  const contextId = isolatedDeviceContextCount++;
+  const container = createContainer(`deck-container-${deviceType}-isolated-${contextId}`);
+  deviceContextContainers.add(container);
+  try {
+    const device = await createTestDevice(deviceType, container, webgl);
+    return {container, device, deviceLoss: createDeviceLossState(device, `Isolated ${deviceType}`)};
+  } catch (error) {
+    deviceContextContainers.delete(container);
+    removeContainer(container);
+    throw error;
   }
+}
+
+function activateDeviceContext(container: HTMLDivElement): void {
+  for (const deviceContainer of deviceContextContainers) {
+    deviceContainer.style.display = deviceContainer === container ? 'block' : 'none';
+  }
+  container.style.display = 'block';
 }
 
 async function finalizeDeckAfterGPUWork(ctx: DeckTestContext): Promise<void> {
@@ -144,18 +197,21 @@ export function runRenderTestSuite(
     deck: null,
     container: null
   };
+  const isIsolated = options.deviceMode === 'isolated';
 
   beforeAll(async () => {
-    const sharedContext = await getSharedDeviceContext(deviceType);
-    ctx.container = sharedContext.container;
-    ctx.device = sharedContext.device;
-    ctx.deviceLoss = sharedContext.deviceLoss;
-    activateSharedDeviceContext(deviceType);
+    const deviceContext = isIsolated
+      ? await createIsolatedDeviceContext(deviceType, options.webgl)
+      : await getSharedDeviceContext(deviceType);
+    ctx.container = deviceContext.container;
+    ctx.device = deviceContext.device;
+    ctx.deviceLoss = deviceContext.deviceLoss;
+    activateDeviceContext(deviceContext.container);
     await options.beforeAll?.();
   });
 
   beforeEach(() => {
-    activateSharedDeviceContext(deviceType);
+    activateDeviceContext(ctx.container!);
   });
 
   afterEach(async () => {
@@ -163,10 +219,20 @@ export function runRenderTestSuite(
   });
 
   afterAll(async () => {
-    await finalizeDeckAfterGPUWork(ctx);
-    ctx.device = undefined;
-    ctx.deviceLoss = undefined;
-    ctx.container = null;
+    const device = ctx.device;
+    const container = ctx.container;
+    try {
+      await finalizeDeckAfterGPUWork(ctx);
+    } finally {
+      if (isIsolated) {
+        device?.destroy();
+        deviceContextContainers.delete(container!);
+        removeContainer(container);
+      }
+      ctx.device = undefined;
+      ctx.deviceLoss = undefined;
+      ctx.container = null;
+    }
   });
 
   registerTests(deviceTestCases, {os: OS.toLowerCase(), deviceType}, testCase =>
@@ -194,12 +260,12 @@ export function runPersistentRenderTestSuite(
     ctx.container = sharedContext.container;
     ctx.device = sharedContext.device;
     ctx.deviceLoss = sharedContext.deviceLoss;
-    activateSharedDeviceContext(deviceType);
+    activateDeviceContext(sharedContext.container);
     ctx.deck = createDeck(ctx.container, ctx.device);
   });
 
   beforeEach(() => {
-    activateSharedDeviceContext(deviceType);
+    activateDeviceContext(ctx.container!);
   });
 
   afterAll(async () => {
