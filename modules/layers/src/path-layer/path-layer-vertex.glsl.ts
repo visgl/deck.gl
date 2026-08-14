@@ -40,7 +40,7 @@ float flipIfTrue(bool flag) {
 // calculate line join positions
 vec3 getLineJoinOffset(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
-  vec2 width
+  vec2 width, float coverageScale
 ) {
   bool isEnd = positions.x > 0.0;
   // side of the segment - -1: left, 0: center, 1: right
@@ -117,13 +117,16 @@ vec3 getLineJoinOffset(
     vJointType = path.jointType;
   }
 
-  // Generate variables for fragment shader
+  // Generate variables for fragment shader. The physical stroke still ends at offsetVec; the
+  // scaled coordinates and vertices only extend its rasterized envelope to include the outer half
+  // of the centered coverage ramp.
+  vec2 coverageOffsetVec = offsetVec * coverageScale;
   vPathLength = L;
-  vCornerOffset = offsetVec;
+  vCornerOffset = coverageOffsetVec;
   vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
   vMiterLength = isCap ? isJoint : vMiterLength;
 
-  vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
+  vec2 offsetFromStartOfPath = coverageOffsetVec + deltaA * float(isEnd);
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
     dot(offsetFromStartOfPath, dir)
@@ -131,7 +134,7 @@ vec3 getLineJoinOffset(
   geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
-  vec3 offset = vec3(offsetVec * width * isValid, 0.0);
+  vec3 offset = vec3(coverageOffsetVec * width * isValid, 0.0);
 
   if (needsRotation) {
     offset = rotationMatrix * offset;
@@ -181,12 +184,17 @@ void main() {
 
     width = vec3(widthPixels, 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
+    vec2 coveragePadding = vec2(0.5 / project.devicePixelRatio);
+    float coverageScale = path.antialiasing && length(width.xy) > 0.0
+      ? length(width.xy + coveragePadding) / length(width.xy)
+      : 1.0;
 
     vec3 offset = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
-      project_pixel_size_to_clipspace(width.xy)
+      project_pixel_size_to_clipspace(width.xy),
+      coverageScale
     );
 
     DECKGL_FILTER_GL_POSITION(currPositionScreen, geometry);
@@ -199,8 +207,14 @@ void main() {
 
     width = vec3(project_pixel_size(widthPixels), 0.0);
     DECKGL_FILTER_SIZE(width, geometry);
+    vec2 coveragePadding = project_pixel_size(vec2(0.5 / project.devicePixelRatio));
+    float coverageScale = path.antialiasing && length(width.xy) > 0.0
+      ? length(width.xy + coveragePadding) / length(width.xy)
+      : 1.0;
 
-    vec3 offset = getLineJoinOffset(prevPosition, currPosition, nextPosition, width.xy);
+    vec3 offset = getLineJoinOffset(
+      prevPosition, currPosition, nextPosition, width.xy, coverageScale
+    );
     geometry.position = vec4(currPosition + offset, 1.0);
     gl_Position = project_common_position_to_clipspace(geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);

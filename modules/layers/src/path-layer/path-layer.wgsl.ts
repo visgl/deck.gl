@@ -58,6 +58,7 @@ fn getLineJoinOffset(
   currPoint: vec3<f32>,
   nextPoint: vec3<f32>,
   width: vec2<f32>,
+  coverageScale: f32,
   positions: vec2<f32>,
   instanceTypes: f32
 ) -> JoinResult {
@@ -123,22 +124,25 @@ fn getLineJoinOffset(
     jointType = path.capType;
   }
 
-  var miterLength = dot(offsetVec, miterVec * turnDirection);
+  let coverageOffsetVec = offsetVec * coverageScale;
+  var miterLength = dot(coverageOffsetVec, miterVec * turnDirection);
   miterLength = select(miterLength, isJoint, isCap);
 
-  let offsetFromStartOfPath = offsetVec + deltaA * select(0.0, 1.0, isEnd);
+  let offsetFromStartOfPath = coverageOffsetVec + deltaA * select(0.0, 1.0, isEnd);
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
     dot(offsetFromStartOfPath, dir)
   );
   let isValid = step(f32(instanceTypes), 3.5);
-  var offset = vec3<f32>(offsetVec * width * isValid, 0.0);
+  var offset = vec3<f32>(coverageOffsetVec * width * isValid, 0.0);
 
   if (path.billboard == 0.0 && rotationResult.needsRotation) {
     offset = rotationResult.transform * offset;
   }
 
-  return JoinResult(offset, offsetVec, miterLength, pathPosition, pathLength, jointType);
+  return JoinResult(
+    offset, coverageOffsetVec, miterLength, pathPosition, pathLength, jointType
+  );
 }
 
 @vertex
@@ -186,11 +190,17 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     nextPositionScreen = clipLine(nextPositionScreen, currPositionScreen);
     currPositionScreen = clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
+    let coverageScale = select(
+      1.0,
+      (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
+      path.antialiasing != 0.0 && widthPixels > 0.0
+    );
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
+      coverageScale,
       attributes.positions,
       attributes.instanceTypes
     );
@@ -214,11 +224,17 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       project_pixel_size_float(widthPixels),
       project_pixel_size_float(widthPixels)
     );
+    let coverageScale = select(
+      1.0,
+      (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
+      path.antialiasing != 0.0 && widthPixels > 0.0
+    );
     let join = getLineJoinOffset(
       prevPositionCommon,
       currPositionCommon,
       nextPositionCommon,
       width,
+      coverageScale,
       attributes.positions,
       attributes.instanceTypes
     );
@@ -244,15 +260,49 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
 
-  if (varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength) {
-    if (varyings.vJointType > 0.5 && length(varyings.vCornerOffset) > 1.0) {
+  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
+  // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
+  // screen-space derivative converts the distance to the boundary into device pixels, which stays
+  // correct under perspective foreshortening and under extensions that rescale the stroke.
+  let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
+  let isRound = varyings.vJointType > 0.5;
+
+  // Distance to the silhouette in device pixels, from the derivative of the coordinate that
+  // bounds it. Computed before the discards below: derivatives need uniform control flow and are
+  // undefined after a discard in the quad. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+  var edgePixels = 0.0;
+  if (path.antialiasing != 0.0) {
+    let bodyCoord = abs(varyings.vPathPosition.x);
+    let cornerCoord = length(varyings.vCornerOffset);
+    // Both evaluated so each derivative stays on one field across the corner/body boundary
+    let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
+    let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+    edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
+  }
+
+  if (isCorner) {
+    if (
+      isRound && select(
+        length(varyings.vCornerOffset) > 1.0,
+        edgePixels < -SMOOTH_EDGE_RADIUS,
+        path.antialiasing != 0.0
+      )
+    ) {
       discard;
     }
-    if (varyings.vJointType < 0.5 && varyings.vMiterLength > path.miterLimit + 1.0) {
+    if (!isRound && varyings.vMiterLength > path.miterLimit + 1.0) {
       discard;
     }
   }
 
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  var color = varyings.vColor;
+
+  if (path.antialiasing != 0.0) {
+    // Feather one device pixel across the width only, before premultiplication. edgePixels is a
+    // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
+    color.a *= smoothedge(0.0, edgePixels);
+  }
+
+  return deckgl_premultiplied_alpha(color);
 }
 `;

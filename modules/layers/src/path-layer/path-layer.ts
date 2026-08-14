@@ -63,6 +63,14 @@ type _PathLayerProps<DataT> = {
    */
   miterLimit?: number;
   /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where a path overlaps itself. Only
+   * the edges along the width of the path are smoothed - flat caps at the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
+  /**
    * If `true`, extrude the path in screen space (width always faces the camera).
    * If `false`, the width always faces up (z).
    * @default false
@@ -106,6 +114,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   jointRounded: false,
   capRounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
+  antialiasing: false,
   billboard: false,
   _pathType: null,
 
@@ -335,6 +344,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       jointRounded,
       capRounded,
       billboard,
+      antialiasing,
       miterLimit,
       widthUnits,
       widthScale,
@@ -347,6 +357,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       jointType: Number(jointRounded),
       capType: Number(capRounded),
       billboard,
+      antialiasing,
       widthUnits: UNIT[widthUnits],
       widthScale,
       miterLimit,
