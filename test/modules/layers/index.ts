@@ -24,3 +24,4 @@ import './scatterplot-layer.spec';
 import './path-antialiasing.spec';
 import './line-antialiasing.spec';
 import './arc-antialiasing.spec';
+import './antialiasing-composite.spec';
