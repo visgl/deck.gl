@@ -7,12 +7,14 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 const glslUniformBlock = `\
 layout(std140) uniform pointCloudUniforms {
   float radiusPixels;
+  bool antialiasing;
   highp int sizeUnits;
 } pointCloud;
 `;
 
 export type PointCloudProps = {
   radiusPixels: number;
+  antialiasing: boolean;
   sizeUnits: number;
 };
 
@@ -23,6 +25,7 @@ export const pointCloudUniforms = {
   fs: glslUniformBlock,
   uniformTypes: {
     radiusPixels: 'f32',
+    antialiasing: 'f32',
     sizeUnits: 'i32'
   }
 } as const satisfies ShaderModule<PointCloudProps>;

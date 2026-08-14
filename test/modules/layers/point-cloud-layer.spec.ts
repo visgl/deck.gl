@@ -54,6 +54,15 @@ test('PointCloudLayer#loaders.gl support', () => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.sizeUnits, 'sizeUnits uniform "pixels"').toBe(UNIT.pixels);
       }
+    },
+    {
+      updateProps: {
+        antialiasing: true
+      },
+      onAfterUpdate: ({layer}) => {
+        const uniforms = getLayerUniforms(layer);
+        expect(uniforms.antialiasing, 'antialiasing uniform').toBeTruthy();
+      }
     }
   ];
 

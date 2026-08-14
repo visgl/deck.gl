@@ -5,6 +5,7 @@
 export default /* wgsl */ `\
 struct PointCloudUniforms {
   radiusPixels: f32,
+  antialiasing: f32,
   sizeUnits: i32,
 };
 
@@ -42,18 +43,27 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   geometry.position = centerResult.commonPosition;
   geometry.normal = project_normal(attributes.instanceNormals);
 
-  // position on the containing square in [-1, 1] space
+  // Position on the enclosing triangle. Its edges are tangent to the unit circle.
   varyings.unitPosition = attributes.positions.xy;
   geometry.uv = varyings.unitPosition;
   geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
 
   // Find the center of the point and add the current vertex
-  let offset = vec3<f32>(
+  var offset = vec3<f32>(
     attributes.positions.xy *
       project_unit_size_to_pixel(pointCloudUniforms.radiusPixels, pointCloudUniforms.sizeUnits),
     0.0
   );
   // DECKGL_FILTER_SIZE(offset, geometry);
+  let triangleRadiusPixels = length(offset.xy);
+  if (pointCloudUniforms.antialiasing != 0.0 && triangleRadiusPixels > 0.0) {
+    // The triangle's inradius is half its vertex radius. Scaling its vertex radius by one device
+    // pixel therefore adds half a device pixel around all three tangent points.
+    let coverageScale = 1.0 + 1.0 / project.devicePixelRatio / triangleRadiusPixels;
+    offset *= coverageScale;
+    varyings.unitPosition *= coverageScale;
+    geometry.uv = varyings.unitPosition;
+  }
 
   varyings.position = centerResult.clipPosition;
   // DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
@@ -78,13 +88,22 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // geometry.uv = unitPosition.xy;
 
   let distToCenter = length(varyings.unitPosition);
-  if (distToCenter > 1.0) {
+  var edgePixels = 0.0;
+  if (pointCloudUniforms.antialiasing != 0.0) {
+    edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
+  }
+
+  if ((pointCloudUniforms.antialiasing == 0.0 && distToCenter > 1.0) || edgePixels < -0.5) {
     discard;
   }
 
   var fragColor: vec4<f32>;
 
   fragColor = varyings.vColor;
+
+  if (pointCloudUniforms.antialiasing != 0.0) {
+    fragColor.a *= smoothedge(0.0, edgePixels);
+  }
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {

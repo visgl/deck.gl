@@ -33,6 +33,7 @@ const DEFAULT_NORMAL = [0, 0, 1] as const;
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
+  antialiasing: false,
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
@@ -82,6 +83,14 @@ type _PointCloudLayerProps<DataT> = {
    * @default 10
    */
   pointSize?: number;
+
+  /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where points overlap.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
 
   /**
    * @deprecated Use `pointSize` instead
@@ -174,11 +183,12 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({uniforms}) {
-    const {pointSize, sizeUnits} = this.props;
+    const {pointSize, sizeUnits, antialiasing} = this.props;
     const model = this.state.model!;
     const pointCloudProps: PointCloudProps = {
       sizeUnits: UNIT[sizeUnits],
-      radiusPixels: pointSize
+      radiusPixels: pointSize,
+      antialiasing
     };
     model.shaderInputs.setProps({pointCloud: pointCloudProps});
     model.draw(this.context.renderPass);

@@ -19,7 +19,7 @@ void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.normal = project_normal(instanceNormals);
 
-  // position on the containing square in [-1, 1] space
+  // Position on the enclosing triangle. Its edges are tangent to the unit circle.
   unitPosition = positions.xy;
   geometry.uv = unitPosition;
   geometry.pickingColor = picking_getPickingColorFromInstanceID();
@@ -27,6 +27,15 @@ void main(void) {
   // Find the center of the point and add the current vertex
   vec3 offset = vec3(positions.xy * project_size_to_pixel(pointCloud.radiusPixels, pointCloud.sizeUnits), 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+  float triangleRadiusPixels = length(offset.xy);
+  if (pointCloud.antialiasing && triangleRadiusPixels > 0.0) {
+    // The triangle's inradius is half its vertex radius. Scaling its vertex radius by one device
+    // pixel therefore adds half a device pixel around all three tangent points.
+    float coverageScale = 1.0 + 1.0 / project.devicePixelRatio / triangleRadiusPixels;
+    offset.xy *= coverageScale;
+    unitPosition *= coverageScale;
+    geometry.uv = unitPosition;
+  }
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);

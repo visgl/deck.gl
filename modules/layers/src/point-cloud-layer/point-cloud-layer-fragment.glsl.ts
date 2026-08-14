@@ -17,12 +17,19 @@ void main(void) {
   geometry.uv = unitPosition.xy;
 
   float distToCenter = length(unitPosition);
+  float edgePixels = 0.0;
+  if (pointCloud.antialiasing) {
+    edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
+  }
 
-  if (distToCenter > 1.0) {
+  if ((!pointCloud.antialiasing && distToCenter > 1.0) || edgePixels < -0.5) {
     discard;
   }
 
   fragColor = vColor;
+  if (pointCloud.antialiasing) {
+    fragColor.a *= smoothedge(0.0, edgePixels);
+  }
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;
