@@ -80,7 +80,10 @@ const testCases = [
           attributes: {
             getPosition: new Float32Array(POINTCLOUD.flatMap(d => d.position)),
             getNormal: new Float32Array(POINTCLOUD.flatMap(d => d.normal)),
-            getColor: {value: new Uint8Array(POINTCLOUD.flatMap(d => d.color)), size: 3}
+            getColor: {
+              value: new Uint8Array(POINTCLOUD.flatMap(d => [...d.color, 255])),
+              size: 4
+            }
           }
         },
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
@@ -93,9 +96,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

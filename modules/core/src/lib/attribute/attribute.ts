@@ -231,7 +231,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         if (this.constant) {
           // Route constant updater output through the same path used by constant accessors
           // so WebGPU can materialize a real buffer while WebGL keeps a constant attribute.
-          this.setConstantValue(context, this.value);
+          const constantValue = this.value;
+          // The updater replaced the allocated CPU array without uploading it. Clear the
+          // cached value so WebGPU cannot mistake it for an already materialized buffer.
+          this.value = null;
+          this.setConstantValue(context, constantValue);
         } else {
           this.setData({
             value: this.value,

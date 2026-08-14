@@ -7,7 +7,9 @@ import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import {Timeline} from '@luma.gl/engine';
 import {config} from '@math.gl/core';
-import {LinearInterpolator, FlyToInterpolator} from '@deck.gl/core';
+import {LinearInterpolator, FlyToInterpolator, WebMercatorViewport} from '@deck.gl/core';
+
+const makeViewport = (props: Record<string, any>) => new WebMercatorViewport(props);
 
 /* global setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -130,7 +132,7 @@ const TEST_CASES = [
 
 test('TransitionManager#constructor', () => {
   const transitionManager = new TransitionManager({
-    getControllerState: props => new MapState(props)
+    getControllerState: props => new MapState({...props, makeViewport})
   });
   expect(transitionManager, 'TransitionManager constructor does not throw errors').toBeTruthy();
   expect(transitionManager.onViewStateChange, 'TransitionManager has callback').toBeTruthy();
@@ -143,7 +145,7 @@ test('TransitionManager#processViewStateChange', () => {
   TEST_CASES.forEach(testCase => {
     const transitionManager = new TransitionManager({
       timeline,
-      getControllerState: props => new MapState(props)
+      getControllerState: props => new MapState({...props, makeViewport})
     });
     transitionManager.processViewStateChange(testCase.initialProps);
 
@@ -189,7 +191,7 @@ test('TransitionManager#callbacks', () => {
 
   const transitionManager = new TransitionManager({
     timeline,
-    getControllerState: props => new MapState(props),
+    getControllerState: props => new MapState({...props, makeViewport}),
     onViewStateChange: ({viewState}) => {
       const newViewport = viewState;
       expect(
@@ -239,7 +241,7 @@ test('TransitionManager#auto#duration', () => {
   };
   const transitionManager = new TransitionManager({
     timeline,
-    getControllerState: props => new MapState(props)
+    getControllerState: props => new MapState({...props, makeViewport})
   });
   transitionManager.processViewStateChange(initialProps);
   transitionManager.processViewStateChange({

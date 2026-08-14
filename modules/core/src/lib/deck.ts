@@ -1707,7 +1707,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     metrics.layersCount = this.layerManager?.layers.length ?? 0;
     metrics.drawLayersCount = stats.get('Layers rendered').lastSampleCount;
     metrics.pickLayersCount = stats.get('Layers picked').lastSampleCount;
-    metrics.updateAttributesCount = stats.get('Layers updated').count;
+    metrics.updateLayersCount = stats.get('Layer updates').count;
     metrics.updateAttributesCount = stats.get('Attributes updated').count;
 
     // Luma stats
