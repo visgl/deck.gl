@@ -42,6 +42,7 @@ struct LineUniforms {
   widthMinPixels: f32,
   widthMaxPixels: f32,
   useShortestPath: f32,
+  antialiasing: f32,
   widthUnits: i32,
 };
 
@@ -115,7 +116,7 @@ fn vertexMain(
   let segmentIndex: f32 = positions.x;
   let p: vec4<f32> = sourcePos + segmentIndex * (targetPos - sourcePos);
   geometry.position = source_commonspace + segmentIndex * (target_commonspace - source_commonspace);
-  let uv: vec2<f32> = positions.xy;
+  var uv: vec2<f32> = positions.xy;
   geometry.uv = uv;
   geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
 
@@ -130,7 +131,16 @@ fn vertexMain(
   let offset: vec3<f32> = vec3<f32>(extrusion, 0.0);
 
   // Apply deck.gl filter functions.
-  let filteredOffset = deckgl_filter_size(offset, geometry);
+  var filteredOffset = deckgl_filter_size(offset, geometry);
+  let halfWidthPixels = length(filteredOffset.xy);
+  if (line.antialiasing != 0.0 && halfWidthPixels > 0.0) {
+    // Keep the declared edge at abs(uv.y) == 1 while rasterizing the outer half of the centered
+    // one-device-pixel coverage ramp.
+    let coverageScale = 1.0 + 0.5 / project.devicePixelRatio / halfWidthPixels;
+    filteredOffset *= coverageScale;
+    uv.y *= coverageScale;
+  }
+  geometry.uv = uv;
   let filteredP = deckgl_filter_gl_position(p, geometry);
 
   let clipOffset: vec2<f32> = project_pixel_size_to_clipspace(filteredOffset.xy);
@@ -160,6 +170,17 @@ fn fragmentMain(
 
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
+
+  // Distance to the edge in device pixels, from the derivative of uv.y. Taken in uniform control
+  // flow, ahead of the picking discard below
+  let edgeCoord = abs(uv.y);
+  let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+
+  if (line.antialiasing != 0.0) {
+    // Feather one device pixel across the width, before premultiplication below. The ends are left
+    // hard - they abut neighbors
+    fragColor.a *= smoothedge(0.0, edgePixels);
+  }
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(pickingColor)) {

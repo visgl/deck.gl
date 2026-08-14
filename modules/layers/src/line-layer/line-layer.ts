@@ -35,7 +35,8 @@ const defaultProps: DefaultProps<LineLayerProps> = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
+  antialiasing: false
 };
 
 /** All properties supported by LineLayer. */
@@ -67,6 +68,15 @@ type _LineLayerProps<DataT> = {
    * @default Number.MAX_SAFE_INTEGER
    */
   widthMaxPixels?: number;
+
+  /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where lines overlap. Only the edges
+   * along the width of the line are smoothed - the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
 
   /**
    * Source position of each object.
@@ -169,13 +179,15 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   draw({uniforms}): void {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude, antialiasing} =
+      this.props;
     const model = this.state.model!;
     const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
+      antialiasing,
       useShortestPath: wrapLongitude ? 1 : 0
     };
     model.shaderInputs.setProps({line: lineProps});
