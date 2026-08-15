@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+export function getShaderWGSL(antialiasing: boolean): string {
+  return /* wgsl */ `\
 const EPSILON: f32 = 0.001;
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 
@@ -58,7 +59,7 @@ fn getLineJoinOffset(
   currPoint: vec3<f32>,
   nextPoint: vec3<f32>,
   width: vec2<f32>,
-  coverageScale: f32,
+${antialiasing ? '  coverageScale: f32,\n' : ''}\
   positions: vec2<f32>,
   instanceTypes: f32
 ) -> JoinResult {
@@ -124,24 +125,28 @@ fn getLineJoinOffset(
     jointType = path.capType;
   }
 
-  let coverageOffsetVec = offsetVec * coverageScale;
-  var miterLength = dot(coverageOffsetVec, miterVec * turnDirection);
+${
+  antialiasing
+    ? /* wgsl */ `  let coverageOffsetVec = offsetVec * coverageScale;
+  var miterLength = dot(coverageOffsetVec, miterVec * turnDirection);`
+    : /* wgsl */ `  var miterLength = dot(offsetVec, miterVec * turnDirection);`
+}
   miterLength = select(miterLength, isJoint, isCap);
 
-  let offsetFromStartOfPath = coverageOffsetVec + deltaA * select(0.0, 1.0, isEnd);
+  let offsetFromStartOfPath = ${antialiasing ? 'coverageOffsetVec' : 'offsetVec'} + deltaA * select(0.0, 1.0, isEnd);
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
     dot(offsetFromStartOfPath, dir)
   );
   let isValid = step(f32(instanceTypes), 3.5);
-  var offset = vec3<f32>(coverageOffsetVec * width * isValid, 0.0);
+  var offset = vec3<f32>(${antialiasing ? 'coverageOffsetVec' : 'offsetVec'} * width * isValid, 0.0);
 
   if (path.billboard == 0.0 && rotationResult.needsRotation) {
     offset = rotationResult.transform * offset;
   }
 
   return JoinResult(
-    offset, coverageOffsetVec, miterLength, pathPosition, pathLength, jointType
+    offset, ${antialiasing ? 'coverageOffsetVec' : 'offsetVec'}, miterLength, pathPosition, pathLength, jointType
   );
 }
 
@@ -190,17 +195,21 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     nextPositionScreen = clipLine(nextPositionScreen, currPositionScreen);
     currPositionScreen = clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
-    let coverageScale = select(
+${
+  antialiasing
+    ? /* wgsl */ `    let coverageScale = select(
       1.0,
       (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
-      path.antialiasing != 0.0 && widthPixels > 0.0
-    );
+      widthPixels > 0.0
+    );`
+    : ''
+}
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
-      coverageScale,
+${antialiasing ? '      coverageScale,\n' : ''}\
       attributes.positions,
       attributes.instanceTypes
     );
@@ -224,17 +233,21 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       project_pixel_size_float(widthPixels),
       project_pixel_size_float(widthPixels)
     );
-    let coverageScale = select(
+${
+  antialiasing
+    ? /* wgsl */ `    let coverageScale = select(
       1.0,
       (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
-      path.antialiasing != 0.0 && widthPixels > 0.0
-    );
+      widthPixels > 0.0
+    );`
+    : ''
+}
     let join = getLineJoinOffset(
       prevPositionCommon,
       currPositionCommon,
       nextPositionCommon,
       width,
-      coverageScale,
+${antialiasing ? '      coverageScale,\n' : ''}\
       attributes.positions,
       attributes.instanceTypes
     );
@@ -260,7 +273,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
 
-  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
+${
+  antialiasing
+    ? /* wgsl */ `  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
   // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
   // screen-space derivative converts the distance to the boundary into device pixels, which stays
   // correct under perspective foreshortening and under extensions that rescale the stroke.
@@ -270,24 +285,15 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Distance to the silhouette in device pixels, from the derivative of the coordinate that
   // bounds it. Computed before the discards below: derivatives need uniform control flow and are
   // undefined after a discard in the quad. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
-  var edgePixels = 0.0;
-  if (path.antialiasing != 0.0) {
-    let bodyCoord = abs(varyings.vPathPosition.x);
-    let cornerCoord = length(varyings.vCornerOffset);
-    // Both evaluated so each derivative stays on one field across the corner/body boundary
-    let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
-    let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
-    edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
-  }
+  let bodyCoord = abs(varyings.vPathPosition.x);
+  let cornerCoord = length(varyings.vCornerOffset);
+  // Both evaluated so each derivative stays on one field across the corner/body boundary
+  let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
+  let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+  let edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
 
   if (isCorner) {
-    if (
-      isRound && select(
-        length(varyings.vCornerOffset) > 1.0,
-        edgePixels < -SMOOTH_EDGE_RADIUS,
-        path.antialiasing != 0.0
-      )
-    ) {
+    if (isRound && edgePixels < -SMOOTH_EDGE_RADIUS) {
       discard;
     }
     if (!isRound && varyings.vMiterLength > path.miterLimit + 1.0) {
@@ -297,12 +303,30 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   var color = varyings.vColor;
 
-  if (path.antialiasing != 0.0) {
-    // Feather one device pixel across the width only, before premultiplication. edgePixels is a
-    // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
-    color.a *= smoothedge(0.0, edgePixels);
+  // Feather one device pixel across the width only, before premultiplication. edgePixels is a
+  // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
+  color.a *= smoothedge(0.0, edgePixels);`
+    : /* wgsl */ `  if (
+    varyings.vPathPosition.y < 0.0 ||
+    varyings.vPathPosition.y > varyings.vPathLength
+  ) {
+    if (varyings.vJointType > 0.5 && length(varyings.vCornerOffset) > 1.0) {
+      discard;
+    }
+    if (
+      varyings.vJointType < 0.5 &&
+      varyings.vMiterLength > path.miterLimit + 1.0
+    ) {
+      discard;
+    }
   }
+
+  let color = varyings.vColor;`
+}
 
   return deckgl_premultiplied_alpha(color);
 }
 `;
+}
+
+export default getShaderWGSL(false);

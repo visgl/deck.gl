@@ -8,7 +8,7 @@ import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
-import source from './path-layer.wgsl';
+import {getShaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -145,10 +145,12 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
+    const {antialiasing} = this.props;
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: getShaderWGSL(antialiasing),
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, picking, pathUniforms]
     }); // 'project' module added by default.
   }
@@ -265,7 +267,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const {props, changeFlags} = params;
+    const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
 
@@ -302,7 +304,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
     }
 
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager!.invalidateAll();
@@ -344,7 +346,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       jointRounded,
       capRounded,
       billboard,
-      antialiasing,
       miterLimit,
       widthUnits,
       widthScale,
@@ -357,7 +358,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       jointType: Number(jointRounded),
       capType: Number(capRounded),
       billboard,
-      antialiasing,
       widthUnits: UNIT[widthUnits],
       widthScale,
       miterLimit,

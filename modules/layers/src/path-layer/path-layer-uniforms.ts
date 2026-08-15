@@ -12,7 +12,6 @@ struct PathUniforms {
   jointType: f32,
   capType: f32,
   miterLimit: f32,
-  antialiasing: f32,
   billboard: f32,
   widthUnits: i32,
 };
@@ -29,7 +28,6 @@ layout(std140) uniform pathUniforms {
   float jointType;
   float capType;
   float miterLimit;
-  bool antialiasing;
   bool billboard;
   highp int widthUnits;
 } path;
@@ -42,7 +40,6 @@ export type PathProps = {
   jointType: number;
   capType: number;
   miterLimit: number;
-  antialiasing: boolean;
   billboard: boolean;
   widthUnits: number;
 };
@@ -59,7 +56,6 @@ export const pathUniforms = {
     jointType: 'f32',
     capType: 'f32',
     miterLimit: 'f32',
-    antialiasing: 'f32',
     billboard: 'f32',
     widthUnits: 'i32'
   }
