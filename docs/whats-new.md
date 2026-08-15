@@ -10,6 +10,17 @@ deck.gl v9.4 is expected to be the final release in the v9 series. It brings tog
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
+### Dashed Lines
+
+[`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) has had a substantial repair and two additions.
+
+Most of it needs no code change. Dashes now render identically whether a path is billboarded or flat, stay evenly spaced on paths with elevation, keep their phase on long paths at high zoom, and no longer alias into moire or read as solid when a dash period approaches a pixel — coverage is prefiltered rather than tested once per fragment.
+
+Two new options change what a dash is measured against:
+
+- `dashMode: 'path'` runs the pattern continuously from the start of each path instead of restarting it at every vertex. Densely sampled geometry — GPS traces, generalized coastlines, circles built from short chords — previously rendered as solid lines, because no gap ever fell inside a segment. `highPrecisionDash` becomes a deprecated alias for it.
+- `dashUnits` selects what `getDashArray` is measured in. `'pixels'` holds a dash at a fixed size on screen even when `widthUnits: 'meters'` makes the stroke itself scale with zoom.
+
 ### Core Performance
 
 - Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
