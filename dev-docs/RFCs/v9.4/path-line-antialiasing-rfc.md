@@ -117,6 +117,23 @@ of thin strokes or points where the added edge pixels are a large fraction of th
 RFC makes no general performance comparison with framebuffer MSAA; applications that can choose
 either technique should benchmark representative data, viewport sizes and picking workloads.
 
+As one representative measurement, the PathLayer implementation was run on an Apple M1 Max
+(32 GPU cores), macOS 26.3 and Chrome 151.0.7922.138. The benchmark uses a 3840×2160 render target
+at device-pixel ratio 1, disables WebGL MSAA, warms each variant for 20 frames, then reports the
+median of 100 GPU timestamp queries. Shader compilation, attribute generation and query readback
+are outside the measured render passes; the picking case measures the picking-color pass without
+pixel readback.
+
+| workload | WebGL2 off | WebGL2 on | change | WebGPU off | WebGPU on | change |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 100K sparse 1px strokes | 2.550 ms | 2.602 ms | +2% | 0.738 ms | 0.775 ms | +5% |
+| 256 overlapping 64px strokes | 0.464 ms | 0.513 ms | +10% | 0.115 ms | 0.126 ms | +10% |
+| picking pass, 100K sparse 1px strokes | 2.791 ms | 2.884 ms | +3% | 0.763 ms | 0.772 ms | +1% |
+
+These synthetic results characterize one GPU and driver, not an application-wide cost guarantee.
+The repeatable browser benchmark is available in the implementation stack and can be run with
+`yarn bench-antialiasing`; it also reports p95 timings and the detected device information.
+
 ## Prior art
 
 This is long-standing and well-reported ground. The tracker history also shapes what this proposal
