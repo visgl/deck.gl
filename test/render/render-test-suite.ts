@@ -182,6 +182,18 @@ function registerTests(
   test.each(activeTests)(`$name:${environment['deviceType']}`, runTest);
 }
 
+function getRenderTestEnvironment(
+  deviceType: TestDeviceType,
+  options: RenderTestSuiteOptions = {}
+): Record<string, string> {
+  const webglAntialiasing = options.deviceMode !== 'isolated' || options.webgl?.antialias !== false;
+  return {
+    os: OS.toLowerCase(),
+    deviceType,
+    multisampling: deviceType === 'webgl' && webglAntialiasing ? 'msaa' : 'no-msaa'
+  };
+}
+
 export function runRenderTestSuite(
   testCases: TestCase[],
   deviceType: TestDeviceType,
@@ -235,7 +247,7 @@ export function runRenderTestSuite(
     }
   });
 
-  registerTests(deviceTestCases, {os: OS.toLowerCase(), deviceType}, testCase =>
+  registerTests(deviceTestCases, getRenderTestEnvironment(deviceType, options), testCase =>
     runRenderTest(testCase, ctx)
   );
 }
@@ -275,7 +287,7 @@ export function runPersistentRenderTestSuite(
     ctx.container = null;
   });
 
-  registerTests(deviceTestCases, {os: OS.toLowerCase(), deviceType}, testCase =>
+  registerTests(deviceTestCases, getRenderTestEnvironment(deviceType), testCase =>
     updateDeckForTest(testCase, ctx)
   );
 }
