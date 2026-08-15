@@ -228,8 +228,9 @@ void main(void) {
     getExtrusionOffset((next.xy - curr.xy) * indexDir, segmentSide, widthPixels),
     0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+#ifdef ANTIALIASING
   float halfWidthPixels = length(offset.xy);
-  if (arc.antialiasing && halfWidthPixels > 0.0) {
+  if (halfWidthPixels > 0.0) {
     // The coverage ramp is centered on the declared edge. Extend the rasterized envelope by half
     // a device pixel so fragments on the outside half of the ramp are generated too.
     float coverageScale = 1.0 + 0.5 / project.devicePixelRatio / halfWidthPixels;
@@ -237,6 +238,7 @@ void main(void) {
     uv.y *= coverageScale;
   }
   geometry.uv = uv;
+#endif
   DECKGL_FILTER_GL_POSITION(curr, geometry);
   gl_Position = curr + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
 

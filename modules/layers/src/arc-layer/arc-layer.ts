@@ -22,7 +22,7 @@ import {
 import {Model} from '@luma.gl/engine';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
-import source from './arc-layer.wgsl';
+import {getShaderWGSL} from './arc-layer.wgsl';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
@@ -160,10 +160,12 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getShaders() {
+    const {antialiasing} = this.props;
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: getShaderWGSL(antialiasing),
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, picking, arcUniforms]
     }); // 'project' module added by default.
   }
@@ -231,7 +233,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -246,8 +249,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMaxPixels,
       greatCircle,
       wrapLongitude,
-      numSegments,
-      antialiasing
+      numSegments
     } = this.props;
     const arcProps: ArcProps = {
       numSegments,
@@ -255,7 +257,6 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthScale,
       widthMinPixels,
       widthMaxPixels,
-      antialiasing,
       greatCircle,
       useShortestPath: wrapLongitude
     };

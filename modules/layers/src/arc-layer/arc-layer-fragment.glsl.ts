@@ -15,11 +15,10 @@ in float isValid;
 out vec4 fragColor;
 
 void main(void) {
-  float edgePixels = 0.0;
-  if (arc.antialiasing) {
-    float edgeCoord = abs(uv.y);
-    edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
-  }
+#ifdef ANTIALIASING
+  float edgeCoord = abs(uv.y);
+  float edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+#endif
 
   if (isValid == 0.0) {
     discard;
@@ -28,11 +27,11 @@ void main(void) {
   fragColor = vColor;
   geometry.uv = uv;
 
-  if (arc.antialiasing) {
-    // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
-    // two outer edges of the strip.
-    fragColor.a *= smoothedge(0.0, edgePixels);
-  }
+#ifdef ANTIALIASING
+  // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
+  // two outer edges of the strip.
+  fragColor.a *= smoothedge(0.0, edgePixels);
+#endif
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
