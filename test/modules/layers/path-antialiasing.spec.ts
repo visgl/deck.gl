@@ -71,6 +71,7 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   expect(defaultFragmentShader).not.toContain('fwidth');
   expect(getShaderWGSL(false)).not.toContain('coverageScale');
   expect(getShaderWGSL(false)).not.toContain('fwidth');
+  expect(getShaderWGSL(false)).toContain('return deckgl_premultiplied_alpha(varyings.vColor);');
   expect(pathUniforms.uniformTypes).not.toHaveProperty('antialiasing');
 
   expect(antialiasingVertexShader).toContain('coverageScale');

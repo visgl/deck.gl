@@ -319,12 +319,10 @@ ${
     ) {
       discard;
     }
-  }
-
-  let color = varyings.vColor;`
+  }`
 }
 
-  return deckgl_premultiplied_alpha(color);
+  return deckgl_premultiplied_alpha(${antialiasing ? 'color' : 'varyings.vColor'});
 }
 `;
 }
