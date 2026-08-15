@@ -9,6 +9,20 @@
   margin: 0;
 }
 
+/* Fill widgets (placement: 'fill') are appended to the map container instead of the control div,
+   so the control div is empty. Hide it to prevent it from taking up space in the corner. */
+.deck-widget-ctrl-fill {
+  display: none;
+}
+
+/* Prevent the basemap's control hover/active styles from leaking into deck widget buttons.
+   .mapboxgl-ctrl / .maplibregl-ctrl applies `background-color: rgba(0,0,0,5%)` on hover/active
+   with higher specificity than deck's button background. Reset it to deck's own background. */
+.deck-widget-ctrl button:not(:disabled):hover,
+.deck-widget-ctrl button:not(:disabled):active {
+  background-color: var(--button-background, #fff);
+}
+
 /* Common button container styles */
 .deck-widget-button,
 .deck-widget-button-group {

@@ -25,14 +25,25 @@ export class DeckWidgetControl implements IControl {
    * Called when the control is added to the map.
    * Creates a container element that will be positioned by Mapbox/MapLibre,
    * and sets the widget's _container prop so WidgetManager appends the widget here.
+   *
+   * For widgets with `placement: 'fill'` (e.g. TimelineWidget, SplitterWidget,
+   * ScrollbarWidget), the widget needs to span the entire map. The basemap's
+   * control container applies `transform: translate(0)` which makes it a small
+   * containing block, breaking `position: absolute; left: 0; right: 0`. To fix
+   * this, the widget's `_container` is set to the map's container element
+   * (which has `position: relative`), while the control div stays empty and
+   * hidden for IControl compliance.
    */
   onAdd(map: Map): HTMLElement {
     this._container = document.createElement('div');
     this._container.className = 'maplibregl-ctrl mapboxgl-ctrl deck-widget-ctrl';
 
-    // Set _container so WidgetManager appends the widget's rootElement here
-    // instead of in its own overlay container
-    this._widget.props._container = this._container;
+    if (this._widget.placement === 'fill') {
+      this._container.classList.add('deck-widget-ctrl-fill');
+      this._widget.props._container = map.getContainer() as HTMLDivElement;
+    } else {
+      this._widget.props._container = this._container;
+    }
 
     return this._container;
   }
@@ -41,10 +52,8 @@ export class DeckWidgetControl implements IControl {
    * Called when the control is removed from the map.
    */
   onRemove(): void {
-    // Clear the _container reference so widget doesn't try to append there
-    if (this._widget.props._container === this._container) {
-      this._widget.props._container = null;
-    }
+    // Clear the _container reference (either the control div or the map container)
+    this._widget.props._container = null;
     this._container?.remove();
     this._container = null;
   }
