@@ -137,6 +137,28 @@ Only effective if `getDashArray` is specified. If `true`, gaps between solid str
 
 ## Remarks
 
+### Which problem am I having?
+
+Dash behavior changed substantially in v9.4. Most of it is repair that arrives on upgrade with no code change; the rest is new behavior you have to ask for. If a dash is misbehaving, find the symptom here:
+
+| Symptom | Why | What resolves it |
+| --- | --- | --- |
+| A dashed path renders as a **solid line** | The pattern restarts at every vertex, so segments shorter than one dash period never contain a gap | `dashMode: 'path'` |
+| Dashes only appear once you **zoom in** | Same cause: zooming grows segments relative to the stroke | `dashMode: 'path'` |
+| The pattern **changes when the data is simplified** or re-sampled | Same cause: the dash follows the tessellation, not the stroke | `dashMode: 'path'` |
+| Gaps look **uneven from segment to segment** under `dashJustified` | Each segment is stretched independently | `dashMode: 'path'` with `dashJustified` |
+| Dash length **changes as you zoom** with `widthUnits: 'meters'` | Dash size is relative to the stroke, and the stroke scales | `dashUnits: 'pixels'` |
+| Billboarded dashes **differ from flat ones**, or render solid | The along-path coordinate was measured in different units per extrusion branch | Fixed in v9.4 |
+| Dashes **break up at joints** on paths with elevation | Distance was accumulated in 3D on the CPU but measured in 2D in the shader | Fixed in v9.4 |
+| Fine dashes **shimmer or read as solid** when zoomed out | A single per-fragment test aliases once a period approaches a pixel | Fixed in v9.4 |
+| The pattern **freezes mid-segment** on long paths at high zoom | Float32 cancellation when adding a large phase offset | Fixed in v9.4 |
+| A dashed `getOffset` line drifts **out of phase** with an unoffset one | The offset widening was not applied to the dash phase | Fixed in v9.4 |
+| `dashJustified` produced solid segments from `NaN` | A period count rounding to zero made the unit length infinite | Fixed in v9.4 |
+
+Note the last one is a numerical repair, not a visual one. A segment shorter than `dashSize` has no room for a gap and correctly renders solid both before and after. Justification does not rescue densely sampled paths — only `dashMode: 'path'` does.
+
+![Fixed in v9.4 without opt-in](../../images/path-style/path-style-dash-fixes.png)
+
 ### Limitations
 
 WebGL2 has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
@@ -144,6 +166,10 @@ WebGL2 has guaranteed support for up to 16 attributes per shader. The current im
 ### Tips on Rendering Dash Lines
 
 `dashMode` decides what the dash pattern is measured against, and `dashJustified` decides whether the pattern is stretched to finish cleanly at both ends. They compose, giving four combinations.
+
+![Comparison between dash modes](../../images/path-style/path-style-dash-modes.png)
+
+All four rows above draw one path whose segments are deliberately unequal, with its joints marked by ticks. Reading them top to bottom: `'segment'` begins a fresh dash at every joint; `'segment'` with `dashJustified` centres a half-dash on each joint; the two `'path'` rows run straight through the joints, because the pattern no longer knows where they are.
 
 #### `dashMode: 'segment'` (default)
 
@@ -155,11 +181,23 @@ Its limitation is that a dash then depends on how the path happens to be divided
 
 The pattern runs continuously from the start of each path, so it is invariant to how the path is tessellated: the same line dashes identically whether it is built from 2 vertices or 200. Choose this whenever paths contain many short segments, or whenever dashes must stay stable while the data is simplified or re-sampled.
 
+![dashMode and vertex density](../../images/path-style/path-style-dash-density.png)
+
+Both halves of that figure draw the same straight line six times, from 1, 2, 4, 12, 40 and 120 vertices. Under `'segment'` the last two have no gaps left to draw and come out solid; under `'path'` all six are identical.
+
 The cost is a CPU pass over the geometry to accumulate distance, plus one vertex attribute, so it uses more resources on large datasets.
 
 #### `dashJustified`
 
 Stretches the period so that a whole number of periods spans the run, starting half a dash in so both ends finish on a joint. Under `dashMode: 'segment'` the run is each individual segment, which guarantees sharp, well-defined corners for polyline shapes but can make gap sizes look uneven from one segment to the next. Under `dashMode: 'path'` the run is the entire path, which keeps the gaps even while still landing cleanly on both ends.
+
+### Dash Size and Zoom
+
+`dashUnits` decides what `getDashArray` is measured in. The default, `'widths'`, is relative to half the stroke width, so a dash scales with the line — including when `widthUnits: 'meters'` makes the line itself thicken as you zoom in. `'pixels'` pins a dash to the screen instead.
+
+![dashUnits across zoom levels](../../images/path-style/path-style-dash-units.png)
+
+Every row there uses `widthUnits: 'meters'`. The `'widths'` pairs double with each zoom level along with the stroke; the `'pixels'` pairs hold the same period at z12, z13 and z14. Red is flat, blue is billboarded, and the two agree throughout.
 
 ### Dash Anti-aliasing
 

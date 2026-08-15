@@ -19,24 +19,9 @@ import {PathStyleExtension} from '@deck.gl/extensions';
  * indistinguishable. Cases are laid out as horizontal strips stacked vertically, following
  * the `OrthographicView` convention already used by `path-layer.spec.ts`.
  *
- * IMPORTANT: the golden images committed alongside this file record how dashing behaves
- * *today*, defects included. They are a baseline to diff future work against, not a
- * statement of desired output. Measured from these goldens, with `getDashArray: [4, 5]`:
- *
- * - `path-dash-density-default`: the 1, 2 and 4 segment strips dash correctly at a 43.4px
- *   period; the 12 segment strip drifts to 55.4px; the 40 and 120 segment strips render
- *   **fully solid**. All six draw the identical straight line. Dash phase restarts at every
- *   vertex, so once a segment is shorter than one dash period nothing is ever discarded.
- * - `path-dash-density-justified`: same collapse to solid - justification is also computed
- *   per segment, so it does not rescue dense polylines.
- * - `path-dash-density-high-precision`: all six strips identical and correct. The
- *   continuous-arclength mechanism works; it is simply opt-in.
- * - `path-dash-billboard-map-z14`: flat dashes at a 34.8px period (correct for an 8px
- *   stroke); the billboard copy of the same geometry renders **solid** when dense and at a
- *   52.0px period - 1.5x too long - when sparse. `billboard: true` combined with
- *   `highPrecisionDash` is broken.
- * - `path-dash-3d-*`: dash length grows along a path that climbs in Z, because the CPU
- *   accumulates 3D distance while the shader coordinate measures 2D.
+ * This matrix was introduced at the bottom of the dash stack as an intentional record of
+ * the old defects. Each behavior layer updates or adds the goldens it owns, so at any stack
+ * position the committed images describe the behavior implemented at that position.
  */
 
 // Dash ends are the subject of these images, and pixelmatch discards antialiased pixels
@@ -224,6 +209,51 @@ function createDiagonalPath(
   return path;
 }
 
+// ---------------------------------------------------------------------------------------
+// Documentation figure panels
+//
+// These render the figures in docs/api-reference/extensions/path-style-extension.md. They
+// are ordinary golden tests so that a published figure cannot drift away from what the code
+// actually does - if a mode changes behavior, the panel fails here before the docs go stale.
+// scripts/dash-figures/compose.mjs crops and captions them.
+// ---------------------------------------------------------------------------------------
+
+/** Row spacing for figure panels, wider than the test strips so captions have room. */
+const FIGURE_ROW_SPACING = 96;
+
+/**
+ * Segment lengths for the mode-comparison figure, in world units, summing to STRIP_LENGTH.
+ *
+ * Deliberately uneven, and deliberately containing segments shorter than one dash period
+ * (63px at the width and dash array used below). An evenly divided path would make all four
+ * modes look nearly identical and teach the reader nothing; the short segments are where
+ * per-segment and per-path behavior visibly diverge.
+ */
+const FIGURE_SEGMENT_LENGTHS = [260, 90, 210, 160];
+
+function createUnevenPath(verticalPosition: number): number[][] {
+  const path: number[][] = [];
+  let horizontalPosition = -STRIP_LENGTH / 2;
+  path.push([horizontalPosition, verticalPosition]);
+  for (const length of FIGURE_SEGMENT_LENGTHS) {
+    horizontalPosition += length;
+    path.push([horizontalPosition, verticalPosition]);
+  }
+  return path;
+}
+
+/** The four dashMode x dashJustified combinations, top to bottom in the figure. */
+const FIGURE_MODES: {dashMode: 'segment' | 'path'; dashJustified: boolean}[] = [
+  {dashMode: 'segment', dashJustified: false},
+  {dashMode: 'segment', dashJustified: true},
+  {dashMode: 'path', dashJustified: false},
+  {dashMode: 'path', dashJustified: true}
+];
+
+function getFigureRowVerticalPosition(index: number): number {
+  return -((FIGURE_MODES.length - 1) * FIGURE_ROW_SPACING) / 2 + index * FIGURE_ROW_SPACING;
+}
+
 /** Vertical gap between the flat and billboard copies of a parity pair, in world units. */
 const PARITY_OFFSET = 16;
 
@@ -258,6 +288,55 @@ function billboardParityLayers(
 }
 
 const testCases: TestCase[] = [
+  // ---------------------------------------------------------------------------------------
+  // Figure panel: the four dash modes on one unevenly divided path, with its joints marked.
+  // Replaces the long-standing "Comparison between dash modes" image in the extension docs.
+  // ---------------------------------------------------------------------------------------
+  {
+    name: 'path-dash-figure-modes',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: [
+      ...FIGURE_MODES.map(
+        ({dashMode, dashJustified}, index) =>
+          new PathLayer({
+            id: `figure-modes-${dashMode}-${dashJustified}`,
+            data: [createUnevenPath(getFigureRowVerticalPosition(index))],
+            ...CARTESIAN,
+            // A wide stroke and a long period on purpose. One dash unit is half the stroke
+            // width, so this is a 63px period against segments of 260/90/210/160. At the 45px period used elsewhere in
+            // this file the four modes are nearly indistinguishable and the figure teaches
+            // nothing.
+            getWidth: 14,
+            getDashArray: [5, 4],
+            dashJustified,
+            extensions: [new PathStyleExtension({dashMode})]
+          })
+      ),
+      // Joint markers, in the spirit of the `o` annotations on the original figure. Ticks
+      // rather than dots: a marker sitting on the stroke has to be read against the dash it
+      // overlaps, while a tick crossing it reads at a glance, which is the whole point of
+      // the figure - seeing where each joint falls relative to the pattern.
+      new PathLayer({
+        id: 'figure-modes-joints',
+        data: FIGURE_MODES.flatMap((_, index) => {
+          const verticalPosition = getFigureRowVerticalPosition(index);
+          return createUnevenPath(verticalPosition).map(([horizontalPosition]) => [
+            [horizontalPosition, verticalPosition - 22],
+            [horizontalPosition, verticalPosition + 22]
+          ]);
+        }),
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: (path: number[][]) => path,
+        widthUnits: 'pixels' as const,
+        getWidth: 1.5,
+        getColor: [90, 90, 90]
+      })
+    ],
+    imageDiffOptions: DASH_DIFF_OPTIONS,
+    goldenImage: './test/render/golden-images/path-dash-figure-modes.png'
+  },
+
   // ---------------------------------------------------------------------------------------
   // Segment density: every strip is the same line, drawn with a different number of vertices
   // ---------------------------------------------------------------------------------------
@@ -728,6 +807,33 @@ const testCases: TestCase[] = [
       }))
     ),
     goldenImage: './test/render/golden-images/path-dash-offset-units.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
+  },
+  {
+    // The case above cannot see the offset/dash-phase interaction at all. The offset shaders
+    // rescale vDashOffset, and vDashOffset is zero in 'segment' mode, so scaling it changes
+    // nothing there. Only a continuous phase is carried across joints, so only dashMode
+    // 'path' exercises it - without this case the fix is invisible to the suite.
+    name: 'path-dash-offset-mode-path',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-mode-path',
+      // Four segments give three interior joints for a phase discontinuity to show up at.
+      // Spelled with the deprecated `highPrecisionDash` rather than `dashMode: 'path'` on
+      // purpose. It is the one option that names a continuous phase in both the current and
+      // the pre-9.4 API, so this case can be re-rendered against the old implementation for
+      // the before/after figure - and it keeps the deprecated alias covered by a render test.
+      // Offsets climb rather than staying near zero: the pre-9.4 error scaled with the
+      // widening factor, so a progression makes the drift legible instead of a few percent.
+      [0, 2, 4, 8].map((offset, index) => ({
+        data: [createStraightPath(4, getStripY(index, 4))],
+        getDashArray: [4, 5],
+        getOffset: offset,
+        extensions: [new PathStyleExtension({highPrecisionDash: true, offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-mode-path.png',
     imageDiffOptions: DASH_DIFF_OPTIONS
   },
 

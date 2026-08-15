@@ -13,6 +13,20 @@ import {PathStyleExtension} from '@deck.gl/extensions';
 // appear only past a zoom threshold, patterns that shift as segments change, billboard and
 // flat lines drifting apart - are all motion artifacts. Every row below draws the same
 // stroke, so any visible difference between rows is a bug.
+//
+// What each control is for:
+//
+// - `dash mode`     'segment' restarts the pattern at every vertex, so the 20 and 120
+//                   segment rows collapse to solid lines. 'path' should make all rows match.
+// - `dash units`    Set `width units` to 'meters' first, then zoom: 'widths' rows grow with
+//                   the stroke, 'pixels' rows hold their size on screen.
+// - `billboard`     'both' draws a red flat copy and a blue billboarded one of every row.
+//                   They should stay locked together at every zoom on flat geometry, and
+//                   are expected to diverge only on the 3D row and under pitch.
+// - `justified`     Watch the joints: dashes should finish cleanly at each end of the run,
+//                   which is per segment in 'segment' mode and the whole path in 'path'.
+// - `dash/gap size` Drag towards the bottom of the range to reach sub-pixel periods, where
+//                   the stroke should fade to an even tone rather than shimmer.
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.4,

@@ -2,6 +2,21 @@
 
 ## Upgrading to v9.4
 
+### PathStyleExtension dashes
+
+`highPrecisionDash` is deprecated in favour of `dashMode`. It still works and is now an alias for `dashMode: 'path'`, so no change is required:
+
+```ts
+// Before
+new PathStyleExtension({highPrecisionDash: true})
+// After
+new PathStyleExtension({dashMode: 'path'})
+```
+
+Dashed output changes slightly for some layers even without a code change, because several defects were fixed. Expect visual differences if you render dashes that are billboarded, that follow paths with a Z component, that use `getOffset`, or whose period approaches a pixel on screen. In every case the new output is the intended one; if you compare against stored screenshots, they will need regenerating.
+
+`getDashArray` is unchanged, but its documentation was wrong: the values are relative to *half* the stroke width, not the full width. `[4, 5]` on a 10 pixel stroke has always drawn a 20 pixel dash and a 25 pixel gap.
+
 ### pydeck lighting
 
 The obsolete `pydeck.LightSettings` binding has been removed. It serialized the

@@ -39,3 +39,6 @@ package-lock.json
 *.rar
 *.log
 .exit_code
+
+# Scratch renders for scripts/dash-figures
+.dash-figures/

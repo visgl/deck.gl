@@ -2,6 +2,27 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/**
+ * Dash shader injections for PathLayer, ScatterplotLayer and TextBackgroundLayer.
+ *
+ * Nearly every subtlety in the PathLayer half comes from the dash math straddling three
+ * coordinate spaces, so it is worth stating them once:
+ *
+ * 1. **Common space** — where `getDashOffsets` accumulates distance along a path on the CPU.
+ *    View-independent, and what `instanceDashOffsets` carries.
+ * 2. **Screen pixels** — the space the two extrusion branches can be reconciled in. At the
+ *    point the dash injections run, `width` is in common units for a flat path but already
+ *    in pixels for a billboarded one, and the billboard case additionally carries a
+ *    `project.focalDistance` factor that scales the half-width but not the segment delta.
+ *    `dashWidthPixels` is the one quantity correct in both, and everything divides through
+ *    it.
+ * 3. **Half-widths along the path** — the units of `vPathPosition.y`, which is what the
+ *    fragment shader actually tests the dash array against. One unit is `dashWidthPixels`
+ *    screen pixels by construction.
+ *
+ * Anything that mixes two of these without converting produces a dash that is subtly wrong in
+ * exactly one configuration, which is how the billboard and 3D defects went unnoticed.
+ */
 export type Defines = {
   // Defines passed externally
   /**
