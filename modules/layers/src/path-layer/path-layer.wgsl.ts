@@ -322,6 +322,9 @@ ${
   }`
 }
 
+  // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
+  // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
+  // DECKGL_FILTER_COLOR
   return deckgl_premultiplied_alpha(${antialiasing ? 'color' : 'varyings.vColor'});
 }
 `;

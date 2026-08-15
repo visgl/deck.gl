@@ -53,8 +53,7 @@ export const tripsShaderInjectionsWGSL = {
       1.0 - (trips.currentTime - varyings.vTime) / trips.trailLength;
   }`,
 
-  '  geometry.uv = varyings.vPathPosition;': /* wgsl */ `
-
+  '  // DECKGL_FILTER_COLOR': /* wgsl */ `
   if (
     varyings.vTime > trips.currentTime ||
     (trips.fadeTrail > 0.5 && varyings.vTime < trips.currentTime - trips.trailLength)

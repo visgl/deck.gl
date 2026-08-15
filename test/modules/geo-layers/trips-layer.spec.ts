@@ -9,7 +9,7 @@ import {TripsLayer} from '@deck.gl/geo-layers';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {trips} from 'deck.gl-test/data';
-import pathShaderSource from '@deck.gl/layers/path-layer/path-layer.wgsl';
+import pathShaderSource, {getShaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {tripsUniforms} from '@deck.gl/geo-layers/trips-layer/trips-layer-uniforms';
 import {
   packTripTimestamps,
@@ -59,6 +59,27 @@ test('TripsLayer#WebGPU shader extends PathLayer', () => {
   expect(source).toContain('trips.fadeTrail > 0.5');
   expect(source).toContain('var<uniform> trips: TripsUniforms');
   expect(source).not.toContain('in float instanceTimestamps');
+});
+
+test('TripsLayer#time-window discard follows PathLayer coverage derivatives', () => {
+  const shaderAssembler = new ShaderAssembler();
+  const {source} = shaderAssembler.assembleWGSLShader({
+    platformInfo: {
+      type: 'webgpu',
+      shaderLanguage: 'wgsl',
+      shaderLanguageVersion: 300,
+      gpu: 'test',
+      features: new Set()
+    },
+    source: getShaderWGSL(true),
+    modules: [tripsUniforms],
+    inject: tripsShaderInjectionsWGSL
+  });
+
+  expect(source.indexOf('fwidth(bodyCoord)')).toBeGreaterThan(-1);
+  expect(source.indexOf('varyings.vTime > trips.currentTime')).toBeGreaterThan(
+    source.indexOf('fwidth(bodyCoord)')
+  );
 });
 
 test('TripsLayer#initializes with a WebGPU device', async ({skip}) => {
