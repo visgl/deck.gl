@@ -25,7 +25,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
-import source from './point-cloud-layer.wgsl';
+import {getShaderWGSL} from './point-cloud-layer.wgsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 const DEFAULT_NORMAL = [0, 0, 1] as const;
@@ -136,10 +136,12 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
+    const {antialiasing} = this.props;
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: getShaderWGSL(antialiasing),
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
@@ -170,9 +172,9 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   updateState(params: UpdateParameters<this>): void {
-    const {changeFlags, props} = params;
+    const {changeFlags, props, oldProps} = params;
     super.updateState(params);
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -183,12 +185,11 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({uniforms}) {
-    const {pointSize, sizeUnits, antialiasing} = this.props;
+    const {pointSize, sizeUnits} = this.props;
     const model = this.state.model!;
     const pointCloudProps: PointCloudProps = {
       sizeUnits: UNIT[sizeUnits],
-      radiusPixels: pointSize,
-      antialiasing
+      radiusPixels: pointSize
     };
     model.shaderInputs.setProps({pointCloud: pointCloudProps});
     model.draw(this.context.renderPass);

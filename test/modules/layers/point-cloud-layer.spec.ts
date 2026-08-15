@@ -5,8 +5,13 @@
 import {test, expect} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {UNIT} from '@deck.gl/core';
+import {preprocess} from '@luma.gl/shadertools';
 
 import {PointCloudLayer} from '@deck.gl/layers';
+import pointCloudVertexShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-vertex.glsl';
+import pointCloudFragmentShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-fragment.glsl';
+import {getShaderWGSL} from '@deck.gl/layers/point-cloud-layer/point-cloud-layer.wgsl';
+import {pointCloudUniforms} from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-uniforms';
 
 test('PointCloudLayer#loaders.gl support', () => {
   const testCases = [
@@ -54,17 +59,56 @@ test('PointCloudLayer#loaders.gl support', () => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.sizeUnits, 'sizeUnits uniform "pixels"').toBe(UNIT.pixels);
       }
-    },
-    {
-      updateProps: {
-        antialiasing: true
-      },
-      onAfterUpdate: ({layer}) => {
-        const uniforms = getLayerUniforms(layer);
-        expect(uniforms.antialiasing, 'antialiasing uniform').toBeTruthy();
-      }
     }
   ];
 
   testLayer({Layer: PointCloudLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PointCloudLayer#antialiasing shader variants', () => {
+  let previousModel: object | undefined;
+
+  testLayer({
+    Layer: PointCloudLayer,
+    onError: error => expect(error, error?.message).toBeFalsy(),
+    testCases: [
+      {
+        props: {data: []},
+        onAfterUpdate: ({layer}) => {
+          previousModel = layer.getModels()[0];
+          expect(layer.getShaders().defines.ANTIALIASING).toBeUndefined();
+        }
+      },
+      {
+        updateProps: {antialiasing: true},
+        onAfterUpdate: ({layer}) => {
+          const model = layer.getModels()[0];
+          expect(model, 'model is recreated for the enabled variant').not.toBe(previousModel);
+          expect(layer.getShaders().defines.ANTIALIASING).toBe(1);
+        }
+      }
+    ]
+  });
+});
+
+test('PointCloudLayer#default shader preserves the pre-antialiasing fast path', () => {
+  const defaultVertexShader = preprocess(pointCloudVertexShader);
+  const defaultFragmentShader = preprocess(pointCloudFragmentShader);
+  const antialiasingVertexShader = preprocess(pointCloudVertexShader, {
+    defines: {ANTIALIASING: 1}
+  });
+  const antialiasingFragmentShader = preprocess(pointCloudFragmentShader, {
+    defines: {ANTIALIASING: 1}
+  });
+
+  expect(defaultVertexShader).not.toContain('coverageScale');
+  expect(defaultFragmentShader).not.toContain('fwidth');
+  expect(getShaderWGSL(false)).not.toContain('coverageScale');
+  expect(getShaderWGSL(false)).not.toContain('fwidth');
+  expect(pointCloudUniforms.uniformTypes).not.toHaveProperty('antialiasing');
+
+  expect(antialiasingVertexShader).toContain('coverageScale');
+  expect(antialiasingFragmentShader).toContain('fwidth');
+  expect(getShaderWGSL(true)).toContain('coverageScale');
+  expect(getShaderWGSL(true)).toContain('fwidth');
 });

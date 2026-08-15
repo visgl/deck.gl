@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+export function getShaderWGSL(antialiasing: boolean): string {
+  return /* wgsl */ `\
 struct PointCloudUniforms {
   radiusPixels: f32,
-  antialiasing: f32,
   sizeUnits: i32,
 };
 
@@ -49,21 +49,25 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
 
   // Find the center of the point and add the current vertex
-  var offset = vec3<f32>(
+  ${antialiasing ? 'var' : 'let'} offset = vec3<f32>(
     attributes.positions.xy *
       project_unit_size_to_pixel(pointCloudUniforms.radiusPixels, pointCloudUniforms.sizeUnits),
     0.0
   );
   // DECKGL_FILTER_SIZE(offset, geometry);
-  let triangleRadiusPixels = length(offset.xy);
-  if (pointCloudUniforms.antialiasing != 0.0 && triangleRadiusPixels > 0.0) {
+${
+  antialiasing
+    ? /* wgsl */ `  let triangleRadiusPixels = length(offset.xy);
+  if (triangleRadiusPixels > 0.0) {
     // The triangle's inradius is half its vertex radius. Scaling its vertex radius by one device
     // pixel therefore adds half a device pixel around all three tangent points.
     let coverageScale = 1.0 + 1.0 / project.devicePixelRatio / triangleRadiusPixels;
     offset *= coverageScale;
     varyings.unitPosition *= coverageScale;
     geometry.uv = varyings.unitPosition;
-  }
+  }`
+    : ''
+}
 
   varyings.position = centerResult.clipPosition;
   // DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
@@ -88,12 +92,12 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // geometry.uv = unitPosition.xy;
 
   let distToCenter = length(varyings.unitPosition);
-  var edgePixels = 0.0;
-  if (pointCloudUniforms.antialiasing != 0.0) {
-    edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
-  }
-
-  if ((pointCloudUniforms.antialiasing == 0.0 && distToCenter > 1.0) || edgePixels < -0.5) {
+${
+  antialiasing
+    ? /* wgsl */ `  let edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
+  if (edgePixels < -0.5) {`
+    : /* wgsl */ `  if (distToCenter > 1.0) {`
+}
     discard;
   }
 
@@ -101,9 +105,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   fragColor = varyings.vColor;
 
-  if (pointCloudUniforms.antialiasing != 0.0) {
-    fragColor.a *= smoothedge(0.0, edgePixels);
-  }
+${antialiasing ? '  fragColor.a *= smoothedge(0.0, edgePixels);\n' : ''}\
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
@@ -135,3 +137,6 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   return fragColor;
 }
 `;
+}
+
+export default getShaderWGSL(false);

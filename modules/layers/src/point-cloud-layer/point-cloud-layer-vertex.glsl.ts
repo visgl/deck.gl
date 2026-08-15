@@ -27,8 +27,9 @@ void main(void) {
   // Find the center of the point and add the current vertex
   vec3 offset = vec3(positions.xy * project_size_to_pixel(pointCloud.radiusPixels, pointCloud.sizeUnits), 0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+#ifdef ANTIALIASING
   float triangleRadiusPixels = length(offset.xy);
-  if (pointCloud.antialiasing && triangleRadiusPixels > 0.0) {
+  if (triangleRadiusPixels > 0.0) {
     // The triangle's inradius is half its vertex radius. Scaling its vertex radius by one device
     // pixel therefore adds half a device pixel around all three tangent points.
     float coverageScale = 1.0 + 1.0 / project.devicePixelRatio / triangleRadiusPixels;
@@ -36,6 +37,7 @@ void main(void) {
     unitPosition *= coverageScale;
     geometry.uv = unitPosition;
   }
+#endif
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
