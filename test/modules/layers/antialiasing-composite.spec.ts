@@ -36,11 +36,11 @@ const GEOJSON = {
   ]
 };
 
-/** Read the `antialiasing` uniform off whichever sub layer renders the stroke. */
+/** Read the compile-time antialiasing variant from whichever sub layer renders the stroke. */
 function strokeAntialiasing(subLayers) {
   const stroke = subLayers.find(l => l.constructor.layerName === 'PathLayer');
   expect(stroke, 'a PathLayer sub layer was rendered').toBeTruthy();
-  return stroke.getModels()[0].shaderInputs.getUniformValues().path.antialiasing;
+  return stroke.getShaders().defines.ANTIALIASING === 1;
 }
 
 test('PolygonLayer#lineAntialiasing forwards to the stroke sub layer', () => {
