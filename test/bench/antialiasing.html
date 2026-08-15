@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>deck.gl antialiasing GPU benchmark</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      body {
+        margin: 24px;
+        max-width: 1100px;
+      }
+      form,
+      table {
+        margin: 20px 0;
+      }
+      label {
+        margin-right: 20px;
+      }
+      button {
+        padding: 6px 16px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #8888;
+        padding: 8px;
+        text-align: right;
+      }
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+      #canvas-container {
+        height: 270px;
+        overflow: hidden;
+        position: relative;
+        width: 480px;
+      }
+      canvas {
+        height: 270px !important;
+        transform-origin: top left;
+        width: 480px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PathLayer antialiasing GPU benchmark</h1>
+    <p>
+      Uses luma.gl timestamp queries around deck.gl render passes. Run on hardware; software
+      adapters and virtualized browsers are not representative. Shader compilation, attribute
+      generation, picking-buffer readback, and timestamp-query readback are excluded from the
+      reported GPU durations.
+    </p>
+    <form id="controls">
+      <label>
+        Backend
+        <select id="backend">
+          <option value="webgl">WebGL2</option>
+          <option value="webgpu">WebGPU</option>
+        </select>
+      </label>
+      <label>
+        Samples
+        <input id="samples" type="number" min="10" max="1000" step="10" value="100" />
+      </label>
+      <button type="submit">Run benchmark</button>
+    </form>
+    <p id="status">Ready.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Workload</th>
+          <th>AA</th>
+          <th>Median GPU ms</th>
+          <th>p95 GPU ms</th>
+          <th>Relative median</th>
+        </tr>
+      </thead>
+      <tbody id="results"></tbody>
+    </table>
+    <div id="canvas-container"></div>
+    <script type="module" src="./antialiasing.js"></script>
+  </body>
+</html>
