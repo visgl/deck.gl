@@ -20,7 +20,7 @@ import {
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
-import {shaderWGSL as source} from './line-layer.wgsl';
+import {getShaderWGSL} from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
@@ -124,7 +124,14 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, source, modules: [project32, color, picking, lineUniforms]});
+    const {antialiasing} = this.props;
+    return super.getShaders({
+      vs,
+      fs,
+      source: getShaderWGSL(antialiasing),
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
+      modules: [project32, color, picking, lineUniforms]
+    });
   }
 
   // This layer has its own wrapLongitude logic
@@ -171,7 +178,8 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -179,15 +187,13 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   draw({uniforms}): void {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude, antialiasing} =
-      this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
     const model = this.state.model!;
     const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
       widthScale,
       widthMinPixels,
       widthMaxPixels,
-      antialiasing,
       useShortestPath: wrapLongitude ? 1 : 0
     };
     model.shaderInputs.setProps({line: lineProps});

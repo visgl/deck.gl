@@ -10,7 +10,6 @@ layout(std140) uniform lineUniforms {
   float widthMinPixels;
   float widthMaxPixels;
   float useShortestPath;
-  bool antialiasing;
   highp int widthUnits;
 } line;
 `;
@@ -20,7 +19,6 @@ export type LineProps = {
   widthMinPixels: number;
   widthMaxPixels: number;
   useShortestPath: number;
-  antialiasing: boolean;
   widthUnits: number;
 };
 
@@ -34,7 +32,6 @@ export const lineUniforms = {
     widthMinPixels: 'f32',
     widthMaxPixels: 'f32',
     useShortestPath: 'f32',
-    antialiasing: 'f32',
     widthUnits: 'i32'
   }
 } as const satisfies ShaderModule<LineProps>;
