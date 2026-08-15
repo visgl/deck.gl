@@ -20,7 +20,7 @@ prop" is `antialiasing: true`.
 | --- | --- | --- | --- | --- | --- |
 | Standalone canvas | yes | on by default | — | optional | nothing needed |
 | Standalone + `PostProcessEffect` ([#10404](https://github.com/visgl/deck.gl/issues/10404)) | **no** | no — bypassed | **yes** | yes | luma.gl#2741; this prop meanwhile |
-| Interleaved MapLibre / Mapbox | **no** | **yes** | no | yes | either; this prop is cheaper at 4K |
+| Interleaved MapLibre / Mapbox | **no** | **yes** | no | yes | either; benchmark for the workload |
 | Interleaved Google Maps vector ([#7647](https://github.com/visgl/deck.gl/issues/7647)) | **no** | no option exposed | no | yes | **this prop — only avenue** |
 | `@deck.gl/arcgis` | **no** | no | no — depth attachment | yes | **this prop — only avenue** |
 | App-supplied `_framebuffer` | **no** | no | if color-only | yes | whichever fits the target |
@@ -98,10 +98,24 @@ Where the framebuffer provides no multisampling there is no antialiasing from an
 covered pixel is fully opaque and the edge is a hard staircase.
 
 The third row is included to show the honest comparison: where MSAA *is* genuinely available it does
-most of the work, and analytic coverage is then a quality and cost improvement (continuous vs.
-quantized to the sample count) rather than a fix. The fourth row shows how easily that row stops
-applying — the canvas still has `antialias: true`, but a post-process effect has moved rasterization
-off it.
+most of the work, and analytic coverage is then a quality improvement (continuous vs. quantized to
+the sample count) rather than a fix. The fourth row shows how easily that row stops applying — the
+canvas still has `antialias: true`, but a post-process effect has moved rasterization off it. These
+pixel counts measure coverage quality, not GPU time.
+
+### Performance
+
+`antialiasing` selects a compile-time shader variant. The default `false` variant preserves the
+pre-feature shader: it has no analytic-coverage uniform, derivative calculation, coverage-envelope
+math or additional fragment branch. Changing the prop recreates the layer model and pays the
+one-time shader compilation and pipeline creation cost.
+
+The enabled variant extends the rasterized silhouette by half a device pixel, evaluates
+screen-space derivatives for covered fragments and blends partial-coverage pixels. Its relative
+cost is therefore workload- and backend-dependent, and is likely most noticeable for dense fields
+of thin strokes or points where the added edge pixels are a large fraction of the primitive. This
+RFC makes no general performance comparison with framebuffer MSAA; applications that can choose
+either technique should benchmark representative data, viewport sizes and picking workloads.
 
 ## Prior art
 
