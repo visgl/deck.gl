@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "vite --open",
-    "start-local": "node ../../../../node_modules/vite/bin/vite.js --config ../../../vite.config.local.mjs",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
     "build": "vite build"
   },
   "dependencies": {
@@ -13,7 +13,8 @@
     "deck.gl": "^9.4.0",
     "maplibre-gl": "^6.0.0",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^8.1.2"
   },
   "devDependencies": {
     "vite": "^7.3.3"

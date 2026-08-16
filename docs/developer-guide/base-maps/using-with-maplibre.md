@@ -89,42 +89,48 @@ map.addControl(deckOverlay);
   <TabItem value="react" label="React">
 
 ```tsx
-import React, {useEffect, useRef} from 'react';
-import {Map, setWorkerUrl} from 'maplibre-gl';
+import React from 'react';
+import {Map, useControl} from 'react-map-gl/maplibre';
+import {setWorkerUrl} from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import {MapLibreOverlay} from '@deck.gl/maplibre';
+import {MapLibreOverlay, MapLibreOverlayProps} from '@deck.gl/maplibre';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 setWorkerUrl(maplibreWorkerUrl);
 
+function DeckGLOverlay(props: MapLibreOverlayProps) {
+  const overlay = useControl<MapLibreOverlay>(() => new MapLibreOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
 function App() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const layers = [
+    new ScatterplotLayer({
+      id: 'deckgl-circle',
+      data: [
+        {position: [0.45, 51.47]}
+      ],
+      getPosition: d => d.position,
+      getFillColor: [255, 0, 0, 100],
+      getRadius: 1000,
+      beforeId: 'watername_ocean' // In interleaved mode render the layer under map labels
+    })
+  ];
 
-  useEffect(() => {
-    const map = new Map({
-      container: containerRef.current!,
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-      center: [0.45, 51.47],
-      zoom: 11
-    });
-    map.addControl(new MapLibreOverlay({
-      interleaved: true,
-      layers: [
-        new ScatterplotLayer({
-          id: 'deckgl-circle',
-          data: [{position: [0.45, 51.47]}],
-          getPosition: d => d.position,
-          getFillColor: [255, 0, 0, 100],
-          getRadius: 1000,
-          beforeId: 'watername_ocean'
-        })
-      ]
-    }));
-    return () => map.remove();
-  }, []);
-
-  return <div ref={containerRef} style={{width: '100%', height: '100%'}} />;
+  return (
+    <Map
+      initialViewState={{
+        longitude: 0.45,
+        latitude: 51.47,
+        zoom: 11
+      }}
+      mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+    >
+      <DeckGLOverlay layers={layers} interleaved />
+    </Map>
+  );
 }
 ```
 
@@ -220,11 +226,11 @@ function App() {
 
 ### react-map-gl
 
-[react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around maplibre-gl maintained by the vis.gl community.
+[react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around maplibre-gl maintained by the vis.gl community. If you'd like to use deck.gl together with maplibre-gl and React, this library is the recommended companion.
 
 All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration.
 
-react-map-gl v8 does not support MapLibre GL JS v6. The v6 React example above creates the MapLibre map directly and adds [MapLibreOverlay](../../api-reference/maplibre/overview.md#example) as a control.
+When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapLibreOverlay](../../api-reference/maplibre/overview.md#example) is used with react-map-gl's `useControl` hook.
 
 When you choose the reverse-controlled option, the `DeckGL` React component acts as the root component, and the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) is a child. In this case, `Map` will automatically interpret the deck.gl view state (i.e. latitude, longitude, zoom etc), so that deck.gl layers will render as a synchronized geospatial overlay over the underlying map.
 

@@ -6785,29 +6785,6 @@ mapbox-gl@^1.13.2:
     tinyqueue "^2.0.3"
     vt-pbf "^3.1.1"
 
-maplibre-gl@6.3.0:
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-6.3.0.tgz#cef15f7b6d2abc263ad7e98112d0c174d5ef3a21"
-  integrity sha512-F0Is48MTzn3DvOEidPjh68E0kuSA7hdzY1YIR0ypPtFgcif3WPtzI1oZFgsv9WtHmarQnbwIXfsf+EfQYvM00A==
-  dependencies:
-    "@mapbox/point-geometry" "^1.1.0"
-    "@mapbox/tiny-sdf" "^2.2.0"
-    "@mapbox/unitbezier" "^1.0.0"
-    "@mapbox/vector-tile" "^3.0.0"
-    "@maplibre/geojson-vt" "^6.1.1"
-    "@maplibre/maplibre-gl-style-spec" "^26.2.1"
-    "@maplibre/mlt" "^1.1.12"
-    "@maplibre/vt-pbf" "^4.3.2"
-    "@types/geojson" "^7946.0.16"
-    earcut "^3.2.3"
-    gl-matrix "^3.4.4"
-    kdbush "^4.1.0"
-    murmurhash-js "^1.0.0"
-    pbf "^5.1.2"
-    potpack "^2.1.0"
-    quickselect "^3.0.0"
-    tinyqueue "^3.0.0"
-
 maplibre-gl@^5.14.0:
   version "5.14.0"
   resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-5.14.0.tgz#4354d460e3bc5c11fbc5c5ae358dbe4561271720"
@@ -6835,6 +6812,29 @@ maplibre-gl@^5.14.0:
     potpack "^2.1.0"
     quickselect "^3.0.0"
     supercluster "^8.0.1"
+    tinyqueue "^3.0.0"
+
+maplibre-gl@^6.3.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-6.4.0.tgz#8787a167f68b355c3e889792523040f5bc612e72"
+  integrity sha512-pCgDUsaYFuZwIH37aV2qF4m03nZPlW79DlqC+cQ+48tpqiqW2SJyA7fEOcFrS5ilDK493f0X3LxiH17T5BqV7g==
+  dependencies:
+    "@mapbox/point-geometry" "^1.1.0"
+    "@mapbox/tiny-sdf" "^2.2.0"
+    "@mapbox/unitbezier" "^1.0.0"
+    "@mapbox/vector-tile" "^3.0.0"
+    "@maplibre/geojson-vt" "^6.1.1"
+    "@maplibre/maplibre-gl-style-spec" "^26.2.1"
+    "@maplibre/mlt" "^1.1.12"
+    "@maplibre/vt-pbf" "^4.3.2"
+    "@types/geojson" "^7946.0.16"
+    earcut "^3.2.3"
+    gl-matrix "^3.4.4"
+    kdbush "^4.1.0"
+    murmurhash-js "^1.0.0"
+    pbf "^5.1.2"
+    potpack "^2.1.0"
+    quickselect "^3.0.0"
     tinyqueue "^3.0.0"
 
 marked@~14.1.3:

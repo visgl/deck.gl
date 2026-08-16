@@ -37,6 +37,9 @@ export default defineConfig(async () => {
     server: {
       open: true,
       port: 8080
+    },
+    optimizeDeps: {
+      esbuildOptions: {target: 'es2022'}
     }
   };
 });
