@@ -5,14 +5,14 @@
   "license": "MIT",
   "scripts": {
     "start": "vite --open",
-    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "start-local": "node ../../../../node_modules/vite/bin/vite.js --config ../../../vite.config.local.mjs",
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/core": "^9.0.0",
-    "@deck.gl/layers": "^9.0.0",
-    "@deck.gl/mapbox": "^9.0.0",
-    "maplibre-gl": "^5.0.0"
+    "@deck.gl/core": "^9.4.0",
+    "@deck.gl/layers": "^9.4.0",
+    "@deck.gl/maplibre": "^9.4.0",
+    "maplibre-gl": "^6.0.0"
   },
   "devDependencies": {
     "vite": "^7.3.3"

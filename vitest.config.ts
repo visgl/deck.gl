@@ -90,6 +90,7 @@ const aliases = {
   '@deck.gl/jupyter-widget': resolve(rootDir, 'modules/jupyter-widget/src'),
   '@deck.gl/layers': resolve(rootDir, 'modules/layers/src'),
   '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
+  '@deck.gl/maplibre': resolve(rootDir, 'modules/maplibre/src'),
   '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
   '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
   '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),

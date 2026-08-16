@@ -83,6 +83,7 @@ A family of NPM modules are published as part of the deck.gl framework. The foll
     * `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
   + `@deck.gl/json` - Declarative interface that supports specifying deck.gl layers and views using a JSON format.
   + `@deck.gl/mapbox` - An integration with the [Mapbox custom layer](../api-reference/mapbox/overview.md) API.
+  + `@deck.gl/maplibre` - An integration with the [MapLibre GL JS v6 custom layer](../api-reference/maplibre/overview.md) API.
   + `@deck.gl/react` - React wrapper of deck.gl.
   + `@deck.gl/widgets` - Useful UI components.
   + `@deck.gl/test-utils` - Testing utilities.
@@ -101,4 +102,4 @@ yarn add @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers @deck.gl/reac
 
 While installing submodules separately affords applications the maximum control over the dependencies that it pulls in, the submodule versions are expected to be synchronized manually in order to produce consistent results.
 
-The `deck.gl` master module includes all submodules except for `@deck.gl/test-utils`. Most bundling solutions (Webpack, Rollup etc.) offer tree-shaking capabilities that exclude unused exports from a production build.
+The `deck.gl` master module includes all submodules except for `@deck.gl/maplibre` and `@deck.gl/test-utils`. Most bundling solutions (Webpack, Rollup etc.) offer tree-shaking capabilities that exclude unused exports from a production build.

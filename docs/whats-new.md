@@ -65,6 +65,10 @@ new GlobeView({
 
 - [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
 
+### @deck.gl/maplibre
+
+- New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module supports overlaid and interleaved rendering with MapLibre GL JS v6 using only public MapLibre APIs.
+
 [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 
 ### pydeck
