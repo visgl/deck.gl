@@ -35,7 +35,7 @@
   ],
   "sideEffects": false,
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.0-beta.2",
+    "@deck.gl/core": "~9.4.0-alpha.2",
     "@luma.gl/core": "~9.4.0-alpha.4",
     "maplibre-gl": "^6.0.0"
   },
