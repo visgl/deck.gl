@@ -77,9 +77,18 @@ const testCases = [
   createMVTLayer('mvt-with-holes-binary', {binary: true, holes: true})
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+  const deviceTestCases =
+    deviceType === 'webgpu'
+      ? testCases.map(testCase =>
+          testCase.goldenImage.endsWith('/mvt-layer.png')
+            ? {
+                ...testCase,
+                // WebGPU and WebGL rasterize the dense one-pixel county outlines differently.
+                imageDiffOptions: {threshold: 0.94}
+              }
+            : testCase
+        )
+      : testCases;
+  runRenderTestSuite(deviceTestCases as TestCase[], deviceType);
 });

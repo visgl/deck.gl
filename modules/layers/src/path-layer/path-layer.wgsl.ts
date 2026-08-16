@@ -179,7 +179,13 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   if (path.billboard != 0.0) {
     var prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
-    var currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET);
+    let currProjection = project_position_to_clipspace_and_commonspace(
+      currPosition,
+      currPosition64Low,
+      ZERO_OFFSET
+    );
+    geometry.position = currProjection.commonPosition;
+    var currPositionScreen = currProjection.clipPosition;
     var nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64Low, ZERO_OFFSET);
 
     prevPositionScreen = clipLine(prevPositionScreen, currPositionScreen);
@@ -233,6 +239,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
+  CLIP_POSITION(&varyings.position, geometry.position.xy, geometry.worldPosition.xy);
+
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
     attributes.instanceColors.a * layer.opacity
@@ -252,6 +260,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
       discard;
     }
   }
+
+  CLIP_COLOR();
 
   return deckgl_premultiplied_alpha(varyings.vColor);
 }

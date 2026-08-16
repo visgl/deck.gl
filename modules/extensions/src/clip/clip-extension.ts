@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import {
+  clipShaderPlugin,
+  type ClipShaderPluginProps,
+  type ShaderModule
+} from '@luma.gl/shadertools';
 import {LayerExtension} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
@@ -109,21 +113,19 @@ export default class ClipExtension extends LayerExtension {
     }
     this.state.clipByInstance = clipByInstance;
 
+    if (this.context.device.type === 'webgpu') {
+      return {plugins: [clipShaderPlugin]};
+    }
+
     return clipByInstance
-      ? {
-          modules: [shaderModuleVs],
-          inject: injectionVs
-        }
-      : {
-          modules: [shaderModuleFs],
-          inject: injectionFs
-        };
+      ? {modules: [shaderModuleVs], inject: injectionVs}
+      : {modules: [shaderModuleFs], inject: injectionFs};
   }
 
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as ClipModuleProps;
+    const clipProps = {} as ClipModuleProps & ClipShaderPluginProps;
     if (this.state.clipByInstance) {
       clipProps.bounds = clipBounds;
     } else {
@@ -136,6 +138,10 @@ export default class ClipExtension extends LayerExtension {
         Math.max(corner0[0], corner1[0]),
         Math.max(corner0[1], corner1[1])
       ];
+    }
+
+    if (this.context.device.type === 'webgpu') {
+      clipProps.mode = this.state.clipByInstance ? 'instance' : 'geometry';
     }
 
     this.setShaderModuleProps({clip: clipProps});
