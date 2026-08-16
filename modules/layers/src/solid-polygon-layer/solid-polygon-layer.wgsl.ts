@@ -39,6 +39,8 @@ function getSolidPolygonFragmentMain() {
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0, 0.0);
 
+  CLIP_COLOR();
+
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
@@ -119,6 +121,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   );
   outp.vColor = apply_polygon_color(colors, normal, geometry.position);
   outp.pickingColor = geometry.pickingColor;
+
+  CLIP_POSITION(&outp.position, geometry.position.xy, geometry.worldPosition.xy);
 
   return outp;
 }
@@ -209,6 +213,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   );
   outp.vColor = apply_polygon_color(colors, normal, geometry.position);
   outp.pickingColor = geometry.pickingColor;
+
+  CLIP_POSITION(&outp.position, geometry.position.xy, geometry.worldPosition.xy);
 
   return outp;
 }
