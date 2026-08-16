@@ -27,6 +27,12 @@ export interface TestCase {
   imageDiffOptions?: {
     threshold?: number;
     tolerance?: number;
+    /**
+     * pixelmatch detects antialiased pixels and excludes them from the mismatch count by
+     * default, which makes a diff blind to changes that only affect edge coverage. Set to
+     * `true` when antialiasing itself is what the test is checking.
+     */
+    includeAA?: boolean;
   };
 }
 
@@ -45,10 +51,19 @@ export interface DeviceLossState {
 /**
  * Creates a device and canvas for a render test.
  */
-export function createTestDevice(type: TestDeviceType, container: HTMLDivElement): Promise<Device> {
+export function createTestDevice(
+  type: TestDeviceType,
+  container: HTMLDivElement,
+  /**
+   * WebGL context attributes. Defaults to the browser's, which enables MSAA - pass
+   * `{antialias: false}` to test what applications get when a base map owns the context.
+   */
+  webgl?: {antialias?: boolean}
+): Promise<Device> {
   return luma.createDevice({
     type,
     adapters: type === 'webgl' ? [webgl2Adapter] : [webgpuAdapter],
+    webgl,
     createCanvasContext: {
       container,
       width: WIDTH,
@@ -281,6 +296,7 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
     region,
     threshold: imageDiffOptions?.threshold ?? 0.99,
     tolerance: 0.1,
+    includeAA: imageDiffOptions?.includeAA ?? false,
     includeEmpty: false,
     platform: OS,
     saveOnFail: true,
