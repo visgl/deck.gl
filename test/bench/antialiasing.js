@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView} from '@deck.gl/core';
-import {ArcLayer, LineLayer, PathLayer} from '@deck.gl/layers';
+import {ArcLayer, LineLayer, PathLayer, PointCloudLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 
 const WIDTH = 3840;
@@ -15,6 +15,7 @@ const thinPaths = createThinPaths();
 const thickPaths = createThickPaths();
 const thinLines = thinPaths.map(({path}) => ({sourcePosition: path[0], targetPosition: path[1]}));
 const sparseArcs = createSparseArcs();
+const sparsePoints = thinPaths.map(({path}) => ({position: path[0]}));
 
 const workloads = [
   {
@@ -56,6 +57,14 @@ const workloads = [
     width: 1,
     picking: false,
     createLayer: createArcLayer
+  },
+  {
+    id: 'point-cloud-small-points',
+    label: 'PointCloudLayer small primitives: 100K sparse 2px points',
+    data: sparsePoints,
+    pointSize: 1,
+    picking: false,
+    createLayer: createPointCloudLayer
   }
 ];
 
@@ -212,6 +221,21 @@ function createArcLayer(workload, antialiasing) {
     getHeight: 0.25,
     widthUnits: 'pixels',
     numSegments: 50,
+    pickable: workload.picking,
+    antialiasing
+  });
+}
+
+function createPointCloudLayer(workload, antialiasing) {
+  return new PointCloudLayer({
+    id: getLayerId(workload, antialiasing),
+    data: workload.data,
+    getPosition: object => object.position,
+    getNormal: [0, 0, 1],
+    getColor: [20, 100, 220, 180],
+    pointSize: workload.pointSize,
+    sizeUnits: 'pixels',
+    material: false,
     pickable: workload.picking,
     antialiasing
   });
