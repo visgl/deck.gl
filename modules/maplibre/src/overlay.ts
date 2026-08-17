@@ -16,13 +16,13 @@ import {resolveMapLibreLayerGroups} from './resolve-layer-groups';
 
 import type {DeckProps} from '@deck.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {
-  ControlPosition,
-  IControl,
-  Map as MapLibreMap,
-  MapMouseEvent,
-  MapMovementEvent
-} from 'maplibre-gl';
+import type {ControlPosition, IControl, Map as MapLibreMap} from 'maplibre-gl';
+
+type MapLibreInputEvent = {
+  type: string;
+  originalEvent?: Event;
+  point?: {x: number; y: number};
+};
 
 /** Properties for MapLibreOverlay. */
 export type MapLibreOverlayProps = Omit<
@@ -303,7 +303,7 @@ export default class MapLibreOverlay implements IControl {
   };
 
   // eslint-disable-next-line complexity
-  private _handleMouseEvent = (event: MapMouseEvent | MapMovementEvent) => {
+  private _handleMouseEvent = (event: MapLibreInputEvent) => {
     const deck = this._deck;
     if (!deck || !deck.isInitialized) {
       return;
@@ -314,16 +314,16 @@ export default class MapLibreOverlay implements IControl {
       deltaX?: number;
       deltaY?: number;
       offsetCenter: {x: number; y: number};
-      srcEvent: MapMouseEvent | MapMovementEvent;
+      srcEvent: MapLibreInputEvent;
       tapCount?: number;
     } = {
       type: event.type,
-      offsetCenter: 'point' in event ? event.point : {x: 0, y: 0},
+      offsetCenter: event.point || {x: 0, y: 0},
       srcEvent: event
     };
 
     const lastDown = this._lastMouseDownPoint;
-    if (!('point' in event) && lastDown && event.originalEvent instanceof MouseEvent) {
+    if (!event.point && lastDown && event.originalEvent instanceof MouseEvent) {
       mockEvent.deltaX = event.originalEvent.clientX - lastDown.clientX;
       mockEvent.deltaY = event.originalEvent.clientY - lastDown.clientY;
       mockEvent.offsetCenter = {

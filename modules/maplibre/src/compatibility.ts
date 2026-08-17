@@ -2,32 +2,28 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Map as MapLibreMap} from 'maplibre-gl';
-
 export type MapLibreRenderParameters = {
   farZ: number;
   nearZ: number;
 };
 
-type CompatibleMapLibreMap = Omit<MapLibreMap, 'getCenterElevation' | 'getProjection'> & {
+type CompatibleMapLibreMap = {
   getCenterElevation?: () => number;
   getCameraTargetElevation?: () => number;
-  getProjection?: () => {type?: string} | undefined;
+  getProjection?: () => {type?: unknown} | undefined;
 };
 
-export function getMapLibreElevation(map: MapLibreMap): number | undefined {
-  const compatibleMap = map as CompatibleMapLibreMap;
-  if (compatibleMap.getCenterElevation) {
-    return compatibleMap.getCenterElevation();
+export function getMapLibreElevation(map: CompatibleMapLibreMap): number | undefined {
+  if (map.getCenterElevation) {
+    return map.getCenterElevation();
   }
-  return compatibleMap.getCameraTargetElevation?.();
+  return map.getCameraTargetElevation?.();
 }
 
-export function getMapLibreProjection(map: MapLibreMap): 'mercator' | 'globe' {
-  const compatibleMap = map as CompatibleMapLibreMap;
+export function getMapLibreProjection(map: CompatibleMapLibreMap): 'mercator' | 'globe' {
   let type: unknown = 'mercator';
   try {
-    type = compatibleMap.getProjection?.()?.type || 'mercator';
+    type = map.getProjection?.()?.type || 'mercator';
   } catch {
     // getProjection throws before a style is assigned
   }

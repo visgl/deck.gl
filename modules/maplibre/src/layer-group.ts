@@ -39,7 +39,7 @@ export default class MapLibreLayerGroup implements CustomLayerInterface {
   }
 
   render(
-    _gl: WebGL2RenderingContext,
+    _gl: WebGLRenderingContext | WebGL2RenderingContext,
     parametersOrMatrix: unknown,
     legacyParameters?: unknown
   ): void {

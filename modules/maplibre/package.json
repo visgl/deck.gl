@@ -42,7 +42,7 @@
   "devDependencies": {
     "maplibre-gl": "^6.3.0",
     "maplibre-gl-v4": "npm:maplibre-gl@4.5.1",
-    "maplibre-gl-v5": "npm:maplibre-gl@5.24.0",
-    "maplibre-gl-v6": "npm:maplibre-gl@6.4.0"
+    "maplibre-gl-v5": "npm:maplibre-gl@5.0.0",
+    "maplibre-gl-v6": "npm:maplibre-gl@6.0.0"
   }
 }

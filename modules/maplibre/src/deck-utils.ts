@@ -39,9 +39,7 @@ export function createMapLibreInterleavedDeck(map: MapLibreMap, props: DeckProps
 
   const gl = map.getCanvas().getContext('webgl2');
   if (!gl) {
-    throw new Error(
-      'MapLibreOverlay cannot interleave with the active MapLibre renderer. This release supports WebGL2.'
-    );
+    throw new Error('MapLibreOverlay interleaved rendering requires WebGL2.');
   }
 
   const {device: _, ...deckProps} = props;

@@ -16,7 +16,7 @@ When using deck.gl and MapLibre, there are three options you can choose from: in
 
 The [interleaved](../../get-started/using-with-map.md#interleaved) mode renders deck.gl layers into the WebGL2 context created by MapLibre. If you need to mix deck.gl layers with MapLibre layers, e.g. having deck.gl surfaces below text labels, or objects occluding each other correctly in 3D, then you have to use this option.
 
-Interleaving is supported by using [MapLibreOverlay](../../api-reference/maplibre/overview.md) with `interleaved: true`. It requires MapLibre's WebGL2 renderer. See [compatibility](../../api-reference/maplibre/overview.md#compatibility).
+Interleaving is supported by using [MapLibreOverlay](../../api-reference/maplibre/overview.md) with `interleaved: true`. It only works when WebGL2 is available. See [compatibility](../../api-reference/maplibre/overview.md#compatibility).
 
 
 ### Overlaid

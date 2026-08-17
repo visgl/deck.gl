@@ -16,15 +16,23 @@ const webglTest = device.type === 'webgl' ? test : test.skip;
 
 function waitForRender(condition: () => boolean, update?: () => void): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    let animationFrame = 0;
+    let finished = false;
     const timeout = setTimeout(() => {
+      finished = true;
+      cancelAnimationFrame(animationFrame);
       reject(new Error('MapLibre render timed out'));
     }, 5000);
     const check = () => {
+      if (finished) {
+        return;
+      }
       if (condition()) {
+        finished = true;
         clearTimeout(timeout);
         resolve();
       } else {
-        requestAnimationFrame(check);
+        animationFrame = requestAnimationFrame(check);
       }
     };
     update?.();
@@ -48,9 +56,51 @@ function readCenterPixel(gl: WebGL2RenderingContext): number[] {
 
 const MAPLIBRE_VERSIONS = [
   {version: '4.5.1', MapClass: MapLibreV4Map},
-  {version: '5.24.0', MapClass: MapLibreV5Map},
-  {version: '6.4.0', MapClass: MapLibreV6Map}
+  {version: '5.0.0', MapClass: MapLibreV5Map},
+  {version: '6.0.0', MapClass: MapLibreV6Map}
 ];
+
+test('MapLibreOverlay overlaid uses only public MapLibre APIs', () => {
+  const container = document.createElement('div');
+  Object.defineProperties(container, {
+    clientWidth: {value: 800},
+    clientHeight: {value: 600}
+  });
+  const map = {
+    get transform(): never {
+      throw new Error('MapLibre private API accessed: transform');
+    },
+    get painter(): never {
+      throw new Error('MapLibre private API accessed: painter');
+    },
+    get style(): never {
+      throw new Error('MapLibre private API accessed: style');
+    },
+    getCenter: () => ({lng: -122.45, lat: 37.78}),
+    getZoom: () => 14,
+    getBearing: () => 0,
+    getPitch: () => 0,
+    getPadding: () => ({left: 0, right: 0, top: 0, bottom: 0}),
+    getRenderWorldCopies: () => true,
+    getCenterElevation: () => 125,
+    getProjection: () => {
+      throw new Error('Style is not loaded');
+    },
+    getContainer: () => container,
+    on() {},
+    off() {}
+  } as unknown as Parameters<MapLibreOverlay['onAdd']>[0];
+  const overlay = new MapLibreOverlay({device, layers: []});
+
+  overlay.onAdd(map);
+
+  expect(overlay._deck).toBeTruthy();
+  expect(overlay._deck!.props.viewState.position).toEqual([0, 0, 125]);
+  expect(overlay._deck!.props.views.id).toBe('maplibre');
+
+  overlay.onRemove(map);
+  expect(overlay._deck).toBeFalsy();
+});
 
 for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
   webglTest(`MapLibreOverlay renders with MapLibre ${version}`, async () => {

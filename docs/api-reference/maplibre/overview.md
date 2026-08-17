@@ -1,6 +1,6 @@
 # MapLibreOverlay
 
-`MapLibreOverlay` renders deck.gl layers over MapLibre GL JS v4.5.1, v5, and v6 using MapLibre's public APIs.
+`@deck.gl/maplibre` is the recommended deck.gl integration for MapLibre GL JS v4.5.1, v5, and v6. Its `MapLibreOverlay` renders deck.gl layers using MapLibre's public APIs.
 
 The module supports both [overlaid and interleaved](../../get-started/using-with-map.md#base-maps-renderers) rendering. Interleaved mode inserts deck.gl layers into the MapLibre style and shares its WebGL2 context.
 
@@ -87,7 +87,7 @@ new ScatterplotLayer({
 ## Compatibility
 
 - MapLibre GL JS v4.5.1, v5, and v6 are supported.
-- Interleaved mode requires MapLibre's WebGL2 renderer.
+- Interleaved mode only works when WebGL2 is available.
 - Camera target elevation is synchronized. deck.gl layers are not draped over MapLibre terrain.
 - Mercator is supported. Globe integration uses deck.gl's experimental [`GlobeView`](../core/globe-view.md) and inherits its [known layer limitations](https://github.com/visgl/deck.gl/issues/10519).
 - Non-default vertical field of view and camera roll are not synchronized.
