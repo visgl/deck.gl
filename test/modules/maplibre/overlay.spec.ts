@@ -54,6 +54,8 @@ function readCenterPixel(gl: WebGL2RenderingContext): number[] {
   return Array.from(pixel);
 }
 
+// Aliases in modules/maplibre/package.json pin the earliest supported release of each major.
+// Add an alias, import, and entry here when supporting a new major.
 const MAPLIBRE_VERSIONS = [
   {version: '4.5.1', MapClass: MapLibreV4Map},
   {version: '5.0.0', MapClass: MapLibreV5Map},
