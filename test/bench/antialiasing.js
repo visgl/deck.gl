@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView} from '@deck.gl/core';
-import {PathLayer} from '@deck.gl/layers';
+import {LineLayer, PathLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 
 const WIDTH = 3840;
@@ -13,6 +13,7 @@ const QUERY_TIMEOUT = 5000;
 
 const thinPaths = createThinPaths();
 const thickPaths = createThickPaths();
+const thinLines = thinPaths.map(({path}) => ({sourcePosition: path[0], targetPosition: path[1]}));
 
 const workloads = [
   {
@@ -20,21 +21,32 @@ const workloads = [
     label: 'PathLayer vertex-bound: 100K sparse 1px strokes',
     data: thinPaths,
     width: 1,
-    picking: false
+    picking: false,
+    createLayer: createPathLayer
   },
   {
     id: 'path-thick-overdraw',
     label: 'PathLayer fragment-bound: 256 overlapping 64px strokes',
     data: thickPaths,
     width: 64,
-    picking: false
+    picking: false,
+    createLayer: createPathLayer
   },
   {
     id: 'path-picking',
     label: 'PathLayer picking pass: 100K sparse 1px strokes',
     data: thinPaths,
     width: 1,
-    picking: true
+    picking: true,
+    createLayer: createPathLayer
+  },
+  {
+    id: 'line-thin-strokes',
+    label: 'LineLayer vertex-bound: 100K sparse 1px strokes',
+    data: thinLines,
+    width: 1,
+    picking: false,
+    createLayer: createLineLayer
   }
 ];
 
@@ -117,7 +129,7 @@ async function createDeck(backend) {
 }
 
 async function runWorkload(deck, workload, sampleCount) {
-  const layers = [false, true].map(antialiasing => createPathLayer(workload, antialiasing));
+  const layers = [false, true].map(antialiasing => workload.createLayer(workload, antialiasing));
   let activeLayerId;
 
   deck.setProps({layers});
@@ -160,6 +172,20 @@ function createPathLayer(workload, antialiasing) {
     widthUnits: 'pixels',
     jointRounded: false,
     capRounded: false,
+    pickable: workload.picking,
+    antialiasing
+  });
+}
+
+function createLineLayer(workload, antialiasing) {
+  return new LineLayer({
+    id: getLayerId(workload, antialiasing),
+    data: workload.data,
+    getSourcePosition: object => object.sourcePosition,
+    getTargetPosition: object => object.targetPosition,
+    getColor: [20, 100, 220, 180],
+    getWidth: workload.width,
+    widthUnits: 'pixels',
     pickable: workload.picking,
     antialiasing
   });
