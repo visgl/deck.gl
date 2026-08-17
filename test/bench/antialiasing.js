@@ -16,22 +16,22 @@ const thickPaths = createThickPaths();
 
 const workloads = [
   {
-    id: 'thin-strokes',
-    label: 'Vertex-bound: 100K sparse 1px strokes',
+    id: 'path-thin-strokes',
+    label: 'PathLayer vertex-bound: 100K sparse 1px strokes',
     data: thinPaths,
     width: 1,
     picking: false
   },
   {
-    id: 'thick-overdraw',
-    label: 'Fragment-bound: 256 overlapping 64px strokes',
+    id: 'path-thick-overdraw',
+    label: 'PathLayer fragment-bound: 256 overlapping 64px strokes',
     data: thickPaths,
     width: 64,
     picking: false
   },
   {
-    id: 'picking',
-    label: 'Picking pass: 100K sparse 1px strokes',
+    id: 'path-picking',
+    label: 'PathLayer picking pass: 100K sparse 1px strokes',
     data: thinPaths,
     width: 1,
     picking: true
@@ -72,12 +72,8 @@ async function runBenchmark() {
 
     const results = [];
     for (const workload of workloads) {
-      const workloadResults = [];
-      for (const antialiasing of [false, true]) {
-        statusElement.textContent = `Running ${workload.label}, AA ${antialiasing ? 'on' : 'off'}…`;
-        const samples = await runWorkload(deck, workload, antialiasing, sampleCount);
-        workloadResults.push({workload, antialiasing, samples, ...summarize(samples)});
-      }
+      statusElement.textContent = `Running ${workload.label}, alternating AA off/on…`;
+      const workloadResults = await runWorkload(deck, workload, sampleCount);
       appendResults(workloadResults);
       results.push(...workloadResults);
     }
@@ -120,9 +116,43 @@ async function createDeck(backend) {
   return deck;
 }
 
-async function runWorkload(deck, workload, antialiasing, sampleCount) {
-  const layer = new PathLayer({
-    id: 'path-antialiasing-benchmark',
+async function runWorkload(deck, workload, sampleCount) {
+  const layers = [false, true].map(antialiasing => createPathLayer(workload, antialiasing));
+  let activeLayerId;
+
+  deck.setProps({layers});
+  deck.layerManager.updateLayers();
+  deck.deckRenderer.setProps({
+    layerFilter: ({layer}) => layer.id === activeLayerId,
+    drawPickingColors: workload.picking
+  });
+
+  for (let index = 0; index < WARMUP_SAMPLES; index++) {
+    for (const antialiasing of getComparisonOrder(index)) {
+      activeLayerId = getLayerId(workload, antialiasing);
+      await measureFrame(deck, workload);
+    }
+  }
+
+  const samplesByVariant = new Map([
+    [false, []],
+    [true, []]
+  ]);
+  for (let index = 0; index < sampleCount; index++) {
+    for (const antialiasing of getComparisonOrder(index)) {
+      activeLayerId = getLayerId(workload, antialiasing);
+      samplesByVariant.get(antialiasing).push(await measureFrame(deck, workload));
+    }
+  }
+  return [false, true].map(antialiasing => {
+    const samples = samplesByVariant.get(antialiasing);
+    return {workload, antialiasing, samples, ...summarize(samples)};
+  });
+}
+
+function createPathLayer(workload, antialiasing) {
+  return new PathLayer({
+    id: getLayerId(workload, antialiasing),
     data: workload.data,
     getPath: object => object.path,
     getColor: [20, 100, 220, 180],
@@ -133,24 +163,14 @@ async function runWorkload(deck, workload, antialiasing, sampleCount) {
     pickable: workload.picking,
     antialiasing
   });
+}
 
-  deck.setProps({layers: [layer]});
-  deck.layerManager.updateLayers();
-  deck.deckRenderer.setProps({
-    layerFilter: deck.props.layerFilter,
-    drawPickingColors: workload.picking
-  });
-  await measureFrame(deck, workload);
+function getLayerId(workload, antialiasing) {
+  return `${workload.id}-${antialiasing ? 'on' : 'off'}`;
+}
 
-  for (let index = 0; index < WARMUP_SAMPLES; index++) {
-    await measureFrame(deck, workload);
-  }
-
-  const samples = [];
-  for (let index = 0; index < sampleCount; index++) {
-    samples.push(await measureFrame(deck, workload));
-  }
-  return samples;
+function getComparisonOrder(index) {
+  return index % 2 === 0 ? [false, true] : [true, false];
 }
 
 async function measureFrame(deck, workload) {

@@ -51,12 +51,13 @@
     </style>
   </head>
   <body>
-    <h1>PathLayer antialiasing GPU benchmark</h1>
+    <h1>deck.gl antialiasing GPU benchmark</h1>
     <p>
       Uses luma.gl timestamp queries around deck.gl render passes. Run on hardware; software
       adapters and virtualized browsers are not representative. Shader compilation, attribute
       generation, picking-buffer readback, and timestamp-query readback are excluded from the
-      reported GPU durations.
+      reported GPU durations. The benchmark alternates the AA-off and AA-on draw order on each
+      iteration to reduce ordering and thermal bias.
     </p>
     <form id="controls">
       <label>
