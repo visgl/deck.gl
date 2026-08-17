@@ -12,6 +12,7 @@ test('standalone#imports', () => {
   expect(deckgl.WebMercatorViewport, 'WebMercatorViewport class is exported').toBeTruthy();
   expect(deckgl.Layer, 'Layer class is exported').toBeTruthy();
   expect(deckgl.ScatterplotLayer, 'ScatterplotLayer class is exported').toBeTruthy();
+  expect(deckgl.MapLibreOverlay, 'MapLibreOverlay class is exported').toBeTruthy();
 
   expect(globalThis.deck, 'deck namespace is exported').toBeTruthy();
   expect(globalThis.luma, 'luma namespace is exported').toBeTruthy();

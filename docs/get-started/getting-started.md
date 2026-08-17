@@ -102,4 +102,4 @@ yarn add @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers @deck.gl/reac
 
 While installing submodules separately affords applications the maximum control over the dependencies that it pulls in, the submodule versions are expected to be synchronized manually in order to produce consistent results.
 
-The `deck.gl` master module includes all submodules except for `@deck.gl/maplibre` and `@deck.gl/test-utils`. Most bundling solutions (Webpack, Rollup etc.) offer tree-shaking capabilities that exclude unused exports from a production build.
+The `deck.gl` master module includes all submodules except for `@deck.gl/test-utils`. Most bundling solutions (Webpack, Rollup etc.) offer tree-shaking capabilities that exclude unused exports from a production build.
