@@ -129,6 +129,7 @@ const optimizeDepsConfig = {
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',
+    // MapLibre v4 and v5 bundled entrypoints require dependency optimization
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
@@ -137,6 +138,7 @@ const optimizeDepsConfig = {
     '@loaders.gl/images',
     'd3-hexbin'
   ],
+  // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
   exclude: ['maplibre-gl-v6']
 };
 
