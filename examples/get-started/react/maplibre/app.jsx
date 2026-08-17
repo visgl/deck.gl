@@ -78,7 +78,7 @@ function Root() {
           {selected.properties.name} ({selected.properties.abbrev})
         </Popup>
       )}
-      <DeckGLOverlay layers={layers} interleaved />
+      <DeckGLOverlay layers={layers} /* interleaved*/ />
       <NavigationControl position="top-left" />
     </Map>
   );
