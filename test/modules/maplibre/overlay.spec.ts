@@ -2,111 +2,38 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {BitmapLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
-import {Map} from 'maplibre-gl';
+import {device} from '@deck.gl/test-utils';
+import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
+import {Map as MapLibreV5Map} from 'maplibre-gl-v5';
+import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
 import {test, expect} from 'vitest';
 
-import MockMapLibreMap, {device} from './map-mock';
+import type {Map as MapLibreMap} from 'maplibre-gl-v6';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
-function waitForMapRender(map: Map, condition: () => boolean, update?: () => void): Promise<void> {
+function waitForRender(condition: () => boolean, update?: () => void): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
-      map.off('render', onRender);
       reject(new Error('MapLibre render timed out'));
     }, 5000);
-    const onRender = () => {
+    const check = () => {
       if (condition()) {
         clearTimeout(timeout);
-        map.off('render', onRender);
         resolve();
+      } else {
+        requestAnimationFrame(check);
       }
     };
-    map.on('render', onRender);
     update?.();
-    map.triggerRepaint();
+    check();
   });
 }
 
-test('MapLibreOverlay overlaid uses only public MapLibre APIs', async () => {
-  const map = new MockMapLibreMap({
-    center: {lng: -122.45, lat: 37.78},
-    zoom: 14,
-    centerElevation: 125
-  });
-  map.getProjection = () => {
-    throw new Error('Style is not loaded');
-  };
-  const overlay = new MapLibreOverlay({
-    device,
-    layers: [new ScatterplotLayer({id: 'points'})]
-  });
-
-  map.addControl(overlay);
-
-  const deck = overlay._deck;
-  expect(deck).toBeTruthy();
-  expect(deck.props.viewState.position).toEqual([0, 0, 125]);
-  expect(deck.props.views.id).toBe('maplibre');
-
-  map.removeControl(overlay);
-  expect(overlay._deck).toBeFalsy();
-});
-
-webglTest('MapLibreOverlay interleaved renders a bitmap using the v6 public API', async () => {
-  const container = document.createElement('div');
-  Object.assign(container.style, {width: '400px', height: '300px'});
-  document.body.append(container);
-
-  const map = new Map({
-    container,
-    style: {
-      version: 8,
-      sources: {},
-      layers: [{id: 'labels', type: 'background'}]
-    },
-    center: [-122.45, 37.78],
-    zoom: 14,
-    attributionControl: false
-  });
-  await map.once('load');
-
-  let bitmapDrawCount = 0;
-  class TrackedBitmapLayer extends BitmapLayer {
-    static layerName = 'TrackedBitmapLayer';
-
-    override draw(parameters: Parameters<BitmapLayer['draw']>[0]): void {
-      bitmapDrawCount++;
-      super.draw(parameters);
-    }
-  }
-
-  const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
-  const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
-  const overlay = new MapLibreOverlay({
-    interleaved: true,
-    layers: [
-      new TrackedBitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'}),
-      new TrackedBitmapLayer({id: 'above-labels', image, bounds})
-    ]
-  });
-
-  map.addControl(overlay);
-  await waitForMapRender(map, () => Boolean(overlay._deck?.isInitialized && bitmapDrawCount > 0));
-
-  expect(map.getLayer('deck-maplibre-layer-group-last')).toBeTruthy();
-  expect(map.getLayersOrder()).toEqual([
-    'deck-maplibre-layer-group-before:labels',
-    'labels',
-    'deck-maplibre-layer-group-last'
-  ]);
-  expect(overlay._deck).toBeTruthy();
-  expect(overlay.getCanvas()).toBe(map.getCanvas());
-
-  const gl = map.getCanvas().getContext('webgl2')!;
-  const centerPixel = new Uint8Array(4);
+function readCenterPixel(gl: WebGL2RenderingContext): number[] {
+  const pixel = new Uint8Array(4);
   gl.readPixels(
     Math.floor(gl.drawingBufferWidth / 2),
     Math.floor(gl.drawingBufferHeight / 2),
@@ -114,25 +41,97 @@ webglTest('MapLibreOverlay interleaved renders a bitmap using the v6 public API'
     1,
     gl.RGBA,
     gl.UNSIGNED_BYTE,
-    centerPixel
+    pixel
   );
-  expect(Array.from(centerPixel)).toEqual([255, 0, 0, 255]);
+  return Array.from(pixel);
+}
 
-  const previousDrawCount = bitmapDrawCount;
-  await waitForMapRender(
-    map,
-    () => bitmapDrawCount > previousDrawCount,
-    () => {
+const MAPLIBRE_VERSIONS = [
+  {version: '4.5.1', MapClass: MapLibreV4Map},
+  {version: '5.24.0', MapClass: MapLibreV5Map},
+  {version: '6.4.0', MapClass: MapLibreV6Map}
+];
+
+for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
+  webglTest(`MapLibreOverlay renders with MapLibre ${version}`, async () => {
+    const container = document.createElement('div');
+    Object.assign(container.style, {width: '400px', height: '300px'});
+    document.body.append(container);
+
+    const map = new MapClass({
+      container,
+      style: {
+        version: 8,
+        sources: {},
+        layers: [{id: 'labels', type: 'background'}]
+      },
+      center: [-122.45, 37.78],
+      zoom: 14,
+      attributionControl: false
+    }) as unknown as MapLibreMap;
+    await new Promise<void>(resolve => map.once('load', () => resolve()));
+
+    for (const interleaved of [false, true]) {
+      map.jumpTo({center: [-122.45, 37.78], zoom: 14});
+      let centerPixel: number[] = [];
+      const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
+      const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
+      const overlay = new MapLibreOverlay({
+        interleaved,
+        device: interleaved ? undefined : device,
+        onAfterRender: ({gl}) => {
+          if (!gl || interleaved) {
+            return;
+          }
+          const renderedPixel = readCenterPixel(gl);
+          if (renderedPixel[0] === 255) {
+            centerPixel = renderedPixel;
+          }
+        },
+        layers: [
+          new BitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'}),
+          new BitmapLayer({id: 'above-labels', image, bounds})
+        ]
+      });
+
+      map.addControl(overlay);
+      map.triggerRepaint();
+      await waitForRender(() => {
+        if (interleaved) {
+          const renderedPixel = readCenterPixel(map.getCanvas().getContext('webgl2')!);
+          if (renderedPixel[0] === 255) {
+            centerPixel = renderedPixel;
+          }
+        }
+        return Boolean(overlay._deck?.isInitialized && centerPixel[0] === 255);
+      });
+
+      expect(overlay._deck).toBeTruthy();
+      expect(overlay.getCanvas() === map.getCanvas()).toBe(interleaved);
+      if (interleaved) {
+        expect(map.getLayersOrder()).toEqual([
+          'deck-maplibre-layer-group-before:labels',
+          'labels',
+          'deck-maplibre-layer-group-last'
+        ]);
+      }
+
+      expect(centerPixel).toEqual([255, 0, 0, 255]);
+
       map.jumpTo({center: [-122.4, 37.8], zoom: 12});
-    }
-  );
-  const viewState = overlay._deck!.props.viewState;
-  expect(viewState.longitude).toBeCloseTo(map.getCenter().lng);
-  expect(viewState.latitude).toBeCloseTo(map.getCenter().lat);
-  expect(viewState.zoom).toBe(map.getZoom());
+      map.triggerRepaint();
+      await waitForRender(() => overlay._deck!.props.viewState.zoom === map.getZoom());
 
-  map.removeControl(overlay);
-  expect(overlay._deck).toBeFalsy();
-  map.remove();
-  container.remove();
-});
+      const viewState = overlay._deck!.props.viewState;
+      expect(viewState.longitude).toBeCloseTo(map.getCenter().lng);
+      expect(viewState.latitude).toBeCloseTo(map.getCenter().lat);
+      expect(viewState.zoom).toBe(map.getZoom());
+
+      map.removeControl(overlay);
+      expect(overlay._deck).toBeFalsy();
+    }
+
+    map.remove();
+    container.remove();
+  });
+}

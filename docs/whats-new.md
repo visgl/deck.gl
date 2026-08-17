@@ -67,7 +67,7 @@ new GlobeView({
 
 ### @deck.gl/maplibre
 
-- New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module supports overlaid and interleaved rendering with MapLibre GL JS v6 using only public MapLibre APIs.
+- New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module supports overlaid and interleaved rendering with MapLibre GL JS v4.5.1, v5, and v6 using only public MapLibre APIs.
 
 [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 

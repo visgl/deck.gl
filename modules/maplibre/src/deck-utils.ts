@@ -4,11 +4,16 @@
 
 import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
 
+import {
+  getMapLibreElevation,
+  getMapLibreProjection,
+  type MapLibreRenderParameters
+} from './compatibility';
 import {getMapLibreLayerGroupId} from './layer-utils';
 
 import type {DeckProps, Layer, MapViewState, Viewport} from '@deck.gl/core';
 import type {Parameters} from '@luma.gl/core';
-import type {CustomRenderMethodInput, Map as MapLibreMap} from 'maplibre-gl';
+import type {Map as MapLibreMap} from 'maplibre-gl';
 import type MapLibreLayerGroup from './layer-group';
 import type {MapLibreLayerProps} from './layer-utils';
 
@@ -26,8 +31,6 @@ type MapLibreDeckState = {
 };
 
 const MAPLIBRE_DECK_STATES = new WeakMap<MapLibreMap, MapLibreDeckState>();
-
-type MapLibreRenderParameters = Pick<CustomRenderMethodInput, 'farZ' | 'nearZ'>;
 
 export function createMapLibreInterleavedDeck(map: MapLibreMap, props: DeckProps): Deck {
   if (MAPLIBRE_DECK_STATES.has(map)) {
@@ -72,22 +75,6 @@ export function getMapLibreDefaultParameters(_map: MapLibreMap, interleaved: boo
     : {};
 }
 
-export function getMapLibreProjection(map: MapLibreMap): 'mercator' | 'globe' {
-  let type: unknown = 'mercator';
-  try {
-    type = map.getProjection()?.type || 'mercator';
-  } catch {
-    // getProjection throws before a style is assigned
-  }
-  if (type === 'globe') {
-    return 'globe';
-  }
-  if (type !== 'mercator') {
-    throw new Error(`Unsupported MapLibre projection: ${String(type)}`);
-  }
-  return 'mercator';
-}
-
 export function getMapLibreDefaultView(map: MapLibreMap): GlobeView | MapView {
   return getMapLibreProjection(map) === 'globe'
     ? new GlobeView({id: MAPLIBRE_VIEW_ID})
@@ -118,29 +105,12 @@ export function getMapLibreViewState(map: MapLibreMap): MapViewState & {
     repeat: map.getRenderWorldCopies()
   };
 
-  const elevation = map.getCenterElevation();
-  if (Number.isFinite(elevation)) {
+  const elevation = getMapLibreElevation(map);
+  if (typeof elevation === 'number' && Number.isFinite(elevation)) {
     viewState.position = [0, 0, elevation];
   }
 
   return viewState;
-}
-
-export function isMapLibreRenderParameters(value: unknown): value is MapLibreRenderParameters {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-  const parameters = value as Partial<MapLibreRenderParameters>;
-  return Number.isFinite(parameters.nearZ) && Number.isFinite(parameters.farZ);
-}
-
-export function getMapLibreRenderParameters(value: unknown): MapLibreRenderParameters {
-  if (isMapLibreRenderParameters(value)) {
-    return value;
-  }
-  throw new Error(
-    'MapLibreOverlay requires public custom-layer render parameters from MapLibre GL JS v6'
-  );
 }
 
 export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {

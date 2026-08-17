@@ -7,11 +7,11 @@ import {
   createMapLibreInterleavedDeck,
   getMapLibreDefaultParameters,
   getMapLibreDefaultView,
-  getMapLibreProjection,
   getMapLibreViewState,
   MAPLIBRE_VIEW_ID,
   removeMapLibreDeckInstance
 } from './deck-utils';
+import {getMapLibreProjection} from './compatibility';
 import {resolveMapLibreLayerGroups} from './resolve-layer-groups';
 
 import type {DeckProps} from '@deck.gl/core';

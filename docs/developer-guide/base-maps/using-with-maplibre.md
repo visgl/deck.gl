@@ -6,7 +6,7 @@
 
 [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) is a powerful open-source library that uses WebGL to render interactive maps from vector tiles in a browser. deck.gl's `MapView` can sync perfectly with the camera of MapLibre, at every zoom level and rotation angle.
 
-MapLibre GL JS v6 applications should use `MapLibreOverlay` from `@deck.gl/maplibre`. Applications using MapLibre GL JS v4 or v5 can continue to use `MapboxOverlay` from `@deck.gl/mapbox`.
+MapLibre GL JS v4.5.1, v5, and v6 applications should use `MapLibreOverlay` from `@deck.gl/maplibre`.
 
 ## Integration Modes
 
@@ -16,7 +16,7 @@ When using deck.gl and MapLibre, there are three options you can choose from: in
 
 The [interleaved](../../get-started/using-with-map.md#interleaved) mode renders deck.gl layers into the WebGL2 context created by MapLibre. If you need to mix deck.gl layers with MapLibre layers, e.g. having deck.gl surfaces below text labels, or objects occluding each other correctly in 3D, then you have to use this option.
 
-Interleaving is supported by using [MapLibreOverlay](../../api-reference/maplibre/overview.md) with `interleaved: true`. It currently supports MapLibre's WebGL2 renderer. See [compatibility](../../api-reference/maplibre/overview.md#compatibility).
+Interleaving is supported by using [MapLibreOverlay](../../api-reference/maplibre/overview.md) with `interleaved: true`. It requires MapLibre's WebGL2 renderer. See [compatibility](../../api-reference/maplibre/overview.md#compatibility).
 
 
 ### Overlaid

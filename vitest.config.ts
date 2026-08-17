@@ -129,12 +129,15 @@ const optimizeDepsConfig = {
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',
+    'maplibre-gl-v4',
+    'maplibre-gl-v5',
     // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'
-  ]
+  ],
+  exclude: ['maplibre-gl-v6']
 };
 
 // Server configuration for serving test data files with correct MIME types
