@@ -24,6 +24,13 @@ void main(void) {
     discard;
   }
 
+#ifdef ANTIALIASING
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+#endif
+
   fragColor = vColor;
   geometry.uv = uv;
 

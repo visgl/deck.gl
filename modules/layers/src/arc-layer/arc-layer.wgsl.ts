@@ -330,6 +330,15 @@ ${
     discard;
   }
 
+${
+  antialiasing
+    ? /* wgsl */ `  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+`
+    : ''
+}
   var color = varyings.color;
 ${
   antialiasing
