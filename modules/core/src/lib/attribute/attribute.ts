@@ -311,9 +311,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       }
       buffer.write(bufferValue);
       this.state.layoutChanged ||= !wasConstant;
+      // `constant` is the legacy updater signal; persistent state lives in DataColumn.isConstant.
+      this.constant = false;
     }
-    // `constant` is the legacy updater signal; persistent state lives in DataColumn.isConstant.
-    this.constant = false;
 
     if (hasChanged) {
       this.setNeedsRedraw();
