@@ -117,22 +117,34 @@ of thin strokes or points where the added edge pixels are a large fraction of th
 RFC makes no general performance comparison with framebuffer MSAA; applications that can choose
 either technique should benchmark representative data, viewport sizes and picking workloads.
 
-As one representative measurement, the PathLayer implementation was run on an Apple M1 Max
-(32 GPU cores), macOS 26.3 and Chrome 151.0.7922.138. The benchmark uses a 3840×2160 render target
-at device-pixel ratio 1, disables WebGL MSAA, warms each variant for 20 frames, then reports the
-median of 100 GPU timestamp queries. Shader compilation, attribute generation and query readback
-are outside the measured render passes; the picking case measures the picking-color pass without
-pixel readback.
+The implementation stack was measured on an Apple M1 Max (32 GPU cores), macOS 26.3 and headless
+Chrome 151.0.7922.138 using hardware acceleration. The benchmark uses a 3840×2160 render target at
+device-pixel ratio 1, disables WebGL MSAA, warms each variant for 20 frames, then reports the median
+of 100 GPU timestamp queries. AA-off and AA-on draw order alternates on each iteration to reduce
+ordering and thermal bias. Shader compilation, attribute generation and query readback are outside
+the measured render passes; the picking case measures the picking-color pass without pixel readback.
 
-| workload | WebGL2 off | WebGL2 on | change | WebGPU off | WebGPU on | change |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100K sparse 1px strokes | 2.550 ms | 2.602 ms | +2% | 0.738 ms | 0.775 ms | +5% |
-| 256 overlapping 64px strokes | 0.464 ms | 0.513 ms | +10% | 0.115 ms | 0.126 ms | +10% |
-| picking pass, 100K sparse 1px strokes | 2.791 ms | 2.884 ms | +3% | 0.763 ms | 0.772 ms | +1% |
+| workload | WebGL2 added GPU time | change | WebGPU added GPU time | change |
+| --- | ---: | ---: | ---: | ---: |
+| PathLayer: 100K sparse 1px strokes | +0.052 ms | +2.0% | no measurable change | — |
+| PathLayer: 256 overlapping 64px strokes | +0.050 ms | +10.8% | +0.043 ms | +12.5% |
+| PathLayer: picking, 100K sparse 1px strokes | +0.223 ms | +8.0% | no measurable change | — |
+| LineLayer: 100K sparse 1px segments | +0.001 ms | +0.2% | +0.004 ms | +1.0% |
+| ArcLayer: 10K sparse 1px arcs, 50 segments | +0.139 ms | +21.2% | +0.025 ms | +3.7% |
+| PointCloudLayer: 100K sparse 2px points | +0.177 ms | +6.6% | +0.047 ms | +3.1% |
+
+The large ArcLayer WebGL percentage reflects its small 0.656 ms baseline; the absolute addition is
+0.139 ms. If an application were already exactly GPU-bound at 60 FPS, these normal-rendering deltas
+would imply 59.37–60 FPS on WebGL2 and 59.83–60 FPS on WebGPU. At 120 FPS they imply
+117.50–119.99 FPS and 119.33–120 FPS, respectively. An application with enough headroom to remain
+inside its 16.67 ms or 8.33 ms frame budget stays at 60 or 120 FPS. Picking cost is paid only when a
+picking pass runs, and composite layers reuse the underlying PathLayer shader rather than adding a
+separate AA pass.
 
 These synthetic results characterize one GPU and driver, not an application-wide cost guarantee.
 The repeatable browser benchmark is available in the implementation stack and can be run with
-`yarn bench-antialiasing`; it also reports p95 timings and the detected device information.
+`yarn bench-antialiasing`; it also reports the raw off/on durations, p95 timings and detected device
+information.
 
 ## Prior art
 
