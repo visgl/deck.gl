@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 
@@ -10,6 +10,7 @@ import {TextBackgroundProps, textBackgroundUniforms} from './text-background-lay
 import {TextModuleProps, textUniforms} from '../text-uniforms';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
+import source from './text-background-layer.wgsl';
 
 import type {
   LayerProps,
@@ -84,7 +85,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, picking, textBackgroundUniforms, textUniforms]
+      source,
+      modules: [project32, color, picking, textBackgroundUniforms, textUniforms]
     });
   }
 
@@ -97,29 +99,35 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         accessor: 'getPosition'
       },
+      // Interleave six inputs to stay below WebGPU's portable vertex-buffer and storage-buffer limits.
       instanceSizes: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getSize',
         defaultValue: 1
       },
       instanceAngles: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getAngle'
       },
       instanceRects: {
         size: 4,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getBoundingRect'
       },
       instanceClipRect: {
         size: 4,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getClipRect',
         defaultValue: [0, 0, -1, -1]
       },
       instancePixelOffsets: {
         size: 2,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getPixelOffset'
       },
       instanceFillColors: {
@@ -139,6 +147,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceLineWidths: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getLineWidth',
         defaultValue: 1
       }
