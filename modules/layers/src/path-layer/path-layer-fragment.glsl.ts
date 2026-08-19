@@ -39,11 +39,12 @@ void main(void) {
   float cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
   float edgePixels = isRound && isCorner ? cornerPixels : bodyPixels;
 
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+
   if (isCorner) {
-    // if joint is rounded, test distance from the corner
-    if (isRound && edgePixels < -SMOOTH_EDGE_RADIUS) {
-      discard;
-    }
     // trim miter
     if (!isRound && vMiterLength > path.miterLimit + 1.0) {
       discard;

@@ -292,10 +292,12 @@ ${
   let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
   let edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
 
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+
   if (isCorner) {
-    if (isRound && edgePixels < -SMOOTH_EDGE_RADIUS) {
-      discard;
-    }
     if (!isRound && varyings.vMiterLength > path.miterLimit + 1.0) {
       discard;
     }
