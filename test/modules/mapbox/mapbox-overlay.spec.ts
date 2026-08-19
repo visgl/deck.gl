@@ -42,6 +42,28 @@ class TestScatterplotLayer extends ScatterplotLayer {
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
 
+test('MapboxOverlay#overlaid passes pixelSizeSource css-dpr', () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    device,
+    layers: [new ScatterplotLayer()]
+  });
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  expect(deck, 'Deck instance is created').toBeTruthy();
+  expect(
+    deck.props.deviceProps?.createCanvasContext?.pixelSizeSource,
+    'pixelSizeSource is css-dpr in overlaid mode'
+  ).toBe('css-dpr');
+
+  map.removeControl(overlay);
+});
+
 test('MapboxOverlay#overlaid', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
@@ -364,6 +386,25 @@ webglTest('MapboxOverlay#interleaved', async () => {
 
   expect(overlay._deck, 'Deck instance is created').toBeTruthy();
   await renderPromise;
+});
+
+test('MapboxOverlay#interleaved drops useDevicePixels', () => {
+  // The base map owns the drawing buffer size in interleaved mode, so useDevicePixels cannot apply
+  const interleaved = new MapboxOverlay({interleaved: true, useDevicePixels: 1.5});
+  expect(
+    'useDevicePixels' in interleaved._props,
+    'useDevicePixels is dropped in interleaved mode'
+  ).toBeFalsy();
+
+  // setProps must drop it too, even though `interleaved` is not in the partial props
+  interleaved.setProps({useDevicePixels: 1.5});
+  expect(
+    'useDevicePixels' in interleaved._props,
+    'useDevicePixels is dropped by setProps in interleaved mode'
+  ).toBeFalsy();
+
+  const overlaid = new MapboxOverlay({useDevicePixels: 1.5});
+  expect(overlaid._props.useDevicePixels, 'useDevicePixels is kept in overlaid mode').toBe(1.5);
 });
 
 webglTest('MapboxOverlay#interleaved#remove and add', () => {

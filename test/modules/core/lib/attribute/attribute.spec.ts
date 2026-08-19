@@ -25,6 +25,51 @@ test('Attribute#constructor', () => {
   expect(() => new Attribute(device, {size: 1}), 'Attribute missing update option').toThrow();
 });
 
+const WEBGL_ONLY_X3_TYPES = [
+  'uint8',
+  'sint8',
+  'unorm8',
+  'snorm8',
+  'uint16',
+  'sint16',
+  'unorm16',
+  'snorm16'
+] as const;
+
+test.each(WEBGL_ONLY_X3_TYPES)(
+  'Attribute#getBufferLayout uses the WebGL-only suffix for %s x3',
+  type => {
+    const attribute = new Attribute(device, {
+      size: 3,
+      type,
+      accessor: 'a'
+    });
+
+    expect(attribute.getBufferLayout().attributes[0].format).toBe(`${type}x3-webgl`);
+
+    attribute.delete();
+  }
+);
+
+test.each([
+  {type: 'float32', size: 3, format: 'float32x3'},
+  {type: 'unorm16', size: 2, format: 'unorm16x2'},
+  {type: 'unorm16', size: 4, format: 'unorm16x4'}
+] as const)(
+  'Attribute#getBufferLayout does not use the WebGL-only suffix for $type x$size',
+  ({type, size, format}) => {
+    const attribute = new Attribute(device, {
+      size,
+      type,
+      accessor: 'a'
+    });
+
+    expect(attribute.getBufferLayout().attributes[0].format).toBe(format);
+
+    attribute.delete();
+  }
+);
+
 test('Attribute#delete', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
   attribute.setData(new Float32Array(4));
@@ -197,6 +242,41 @@ test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
   attribute.delete();
 });
 
+test('Attribute#updateBuffer uploads a one-instance constant updater - webgpu', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+  const matrix = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
+  const attribute = new Attribute(webgpuDevice, {
+    id: 'instanceModelMatrix',
+    size: 12,
+    update: target => {
+      // Matrix attributes use this legacy constant-updater path when all transforms are static.
+      target.constant = true;
+      target.value = new Float32Array(matrix);
+    }
+  });
+
+  attribute.allocate(1);
+  attribute.updateBuffer({
+    numInstances: 1,
+    data: [0],
+    props: {},
+    context: null
+  });
+
+  const buffer = attribute.getValue().instanceModelMatrix as Buffer;
+  expect(buffer, 'constant updater is exposed as a buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync();
+  expect(
+    new Float32Array(bytes.buffer).slice(0, matrix.length),
+    'constant matrix is uploaded'
+  ).toEqual(matrix);
+
+  attribute.delete();
+});
+
 test('Attribute#allocate - partial', async () => {
   let positions = new Attribute(device, {
     id: 'positions',
@@ -342,15 +422,15 @@ test('Attribute#updateBuffer', () => {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
         255, 0, 0, 255,
         128, 128, 128, 128,
         255, 255, 255, 255,
-        0, 0, 0, 128, 
+        0, 0, 0, 128,
         0, 0, 0, 255
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
         255, 0, 0, 255, 255, 0, 0, 255,
         128, 128, 128, 128,
@@ -377,14 +457,14 @@ test('Attribute#updateBuffer', () => {
         size: 3,
         accessor: (_, {index}) => [index, 0, 0]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
         0, 0, 0,
         1, 0, 0,
         2, 0, 0,
         3, 0, 0
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
         0, 0, 0, 0, 0, 0,
         1, 0, 0,
@@ -567,7 +647,7 @@ test('Attribute#standard accessor - variable width', () => {
         defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       result: [
         255, 0, 0, 255,
         255, 255, 0, 255,

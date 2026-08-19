@@ -68,6 +68,20 @@ function getDimensionsFromUrl(): Partial<Dimensions> {
     result.stressTest = stressTest;
   }
 
+  if (params.has('useDevicePixels')) {
+    const udp = params.get('useDevicePixels');
+    if (udp === 'true') {
+      result.useDevicePixels = true;
+    } else if (udp === 'false') {
+      result.useDevicePixels = false;
+    } else {
+      const num = Number(udp);
+      if (Number.isFinite(num) && num > 0) {
+        result.useDevicePixels = num;
+      }
+    }
+  }
+
   return result;
 }
 
@@ -81,6 +95,7 @@ function setUrlFromDimensions(dimensions: Dimensions) {
   params.set('multiView', String(dimensions.multiView));
   params.set('maskDemo', String(dimensions.maskDemo));
   params.set('stressTest', dimensions.stressTest);
+  params.set('useDevicePixels', String(dimensions.useDevicePixels));
   const newUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', newUrl);
 }
@@ -106,6 +121,12 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
     () => buildConfig(dimensions, handleViewStateChange),
     [dimensions, handleViewStateChange]
   );
+  const displayedPixelRatioOverride =
+    dimensions.useDevicePixels === true
+      ? 'unset'
+      : dimensions.useDevicePixels === false
+        ? 1
+        : dimensions.useDevicePixels;
 
   // Update a single dimension
   const updateDimension = useCallback(
@@ -259,6 +280,20 @@ export default function ControlPanel({onConfigChange}: ControlPanelProps) {
               onChange={() => updateDimension('maskDemo', !dimensions.maskDemo)}
             />
             Mask Extension Demo
+          </label>
+        </div>
+
+        {/* Pixel Ratio Override */}
+        <div className="section">
+          <label>
+            <input
+              type="checkbox"
+              checked={dimensions.useDevicePixels !== true}
+              onChange={() =>
+                updateDimension('useDevicePixels', dimensions.useDevicePixels === true ? 1.5 : true)
+              }
+            />
+            Pixel Ratio Override: {displayedPixelRatioOverride}
           </label>
         </div>
 

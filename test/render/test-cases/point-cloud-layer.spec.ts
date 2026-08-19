@@ -2,43 +2,100 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './point-cloud-layer';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import {OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {PointCloudLayer} from '@deck.gl/layers';
+import {getPointCloud, positionOrigin} from 'deck.gl-test/data';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+const POINTCLOUD = getPointCloud();
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
+const testCases = [
+  {
+    name: 'pointcloud-identity',
+    views: [
+      new OrbitView({
+        fov: 30,
+        orbitAxis: 'Y'
+      })
+    ],
+    viewState: {
+      rotationX: 15,
+      rotationOrbit: 30
+    },
+    layers: [
+      new PointCloudLayer({
+        id: 'pointcloud-identity',
+        data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
+        opacity: 0.8,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPosition: d => d.position,
+        getNormal: d => [0, 0.5, 0.2],
+        getColor: d => [255, 255, 0, 128],
+        pointSize: 50
+      })
+    ],
+    goldenImage: './test/render/golden-images/pointcloud-identity.png'
+  },
+  {
+    name: 'pointcloud-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PointCloudLayer({
+        id: 'pointcloud-lnglat',
+        data: POINTCLOUD,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateOrigin: positionOrigin,
+        getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
+        getNormal: d => d.normal,
+        getColor: d => d.color,
+        pointSize: 1.333333,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/pointcloud-lnglat.png'
+  },
+  {
+    name: 'pointcloud-meter',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new PointCloudLayer({
+        id: 'pointcloud-meter',
+        data: {
+          length: POINTCLOUD.length,
+          attributes: {
+            getPosition: new Float32Array(POINTCLOUD.flatMap(d => d.position)),
+            getNormal: new Float32Array(POINTCLOUD.flatMap(d => d.normal)),
+            getColor: {
+              value: new Uint8Array(POINTCLOUD.flatMap(d => [...d.color, 255])),
+              size: 4
+            }
+          }
+        },
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: positionOrigin,
+        pointSize: 1.333333,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/pointcloud-meter.png'
+  }
+];
 
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });

@@ -1,4 +1,5 @@
 # ArcLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ArcLayerDemo} from '@site/src/doc-demos/layers';
 

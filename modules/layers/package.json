@@ -3,7 +3,7 @@
   "description": "deck.gl core layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.4.0-alpha.1",
+  "version": "9.4.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -26,12 +26,17 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/index.js",
+        "require": "./dist.webgl-only/index.cjs"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist",
+    "dist.webgl-only",
     "src",
     "dist.min.js"
   ],
@@ -43,7 +48,7 @@
   "dependencies": {
     "@loaders.gl/images": "^4.4.3",
     "@loaders.gl/schema": "^4.4.3",
-    "@luma.gl/shadertools": "^9.3.3",
+    "@luma.gl/shadertools": "^9.4.0-alpha.4",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^4.1.0",
     "@math.gl/polygon": "^4.1.0",
@@ -54,8 +59,8 @@
   "peerDependencies": {
     "@deck.gl/core": "~9.3.0-beta.2",
     "@loaders.gl/core": "^4.4.3",
-    "@luma.gl/core": "~9.3.3",
-    "@luma.gl/engine": "~9.3.3"
+    "@luma.gl/core": "~9.4.0-alpha.4",
+    "@luma.gl/engine": "~9.4.0-alpha.4"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

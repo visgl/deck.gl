@@ -40,6 +40,7 @@ export type Dimensions = {
   multiView: boolean;
   maskDemo: boolean;
   stressTest: StressTest;
+  useDevicePixels: boolean | number;
 };
 
 // ===== Validation Types =====
@@ -69,6 +70,7 @@ export type Config = {
   multiView: boolean;
   maskDemo: boolean;
   stressTest: StressTest;
+  useDevicePixels: boolean | number;
 
   // Computed configuration
   mapStyle: string;

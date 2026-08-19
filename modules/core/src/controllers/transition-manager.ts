@@ -4,12 +4,14 @@
 
 import Transition, {TransitionSettings as BaseTransitionSettings} from '../transitions/transition';
 import TransitionInterpolator from '../transitions/transition-interpolator';
-import type {IViewState} from './view-state';
+import type {ConstraintContext, IViewState} from './view-state';
 
 import type {Timeline} from '@luma.gl/engine';
 import type {InteractionState} from './controller';
 
 const noop = () => {};
+const PRESERVE_CONSTRAINT_CONTEXT: ConstraintContext = {mode: 'preserve'};
+const HARD_CONSTRAINT_CONTEXT: ConstraintContext = {mode: 'hard'};
 
 // Enums cannot be directly exported as they are not transpiled correctly into ES5, see https://github.com/visgl/deck.gl/issues/7130
 export const TRANSITION_EVENTS = {
@@ -49,7 +51,7 @@ type TransitionSettings = BaseTransitionSettings & {
 };
 
 export default class TransitionManager<ControllerState extends IViewState<ControllerState>> {
-  getControllerState: (props: any) => ControllerState;
+  getControllerState: (props: any, constraintContext?: ConstraintContext) => ControllerState;
   props?: TransitionProps;
   propsInTransition: Record<string, any> | null;
   transition: Transition;
@@ -61,7 +63,7 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
 
   constructor(opts: {
     timeline: Timeline;
-    getControllerState: (props: any) => ControllerState;
+    getControllerState: (props: any, constraintContext?: ConstraintContext) => ControllerState;
     onViewStateChange?: (params: {
       viewState: Record<string, any>;
       oldViewState: Record<string, any>;
@@ -168,8 +170,11 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
   }
 
   _triggerTransition(startProps: TransitionProps, endProps: TransitionProps): void {
-    const startViewstate = this.getControllerState(startProps);
-    const endViewStateProps = this.getControllerState(endProps).shortestPathFrom(startViewstate);
+    const startViewstate = this.getControllerState(startProps, PRESERVE_CONSTRAINT_CONTEXT);
+    const endViewStateProps = this.getControllerState(
+      endProps,
+      HARD_CONSTRAINT_CONTEXT
+    ).shortestPathFrom(startViewstate);
 
     // update transitionDuration for 'auto' mode
     const transitionInterpolator = endProps.transitionInterpolator as TransitionInterpolator;
@@ -231,10 +236,13 @@ export default class TransitionManager<ControllerState extends IViewState<Contro
 
     // This gurantees all props (e.g. bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.propsInTransition = this.getControllerState({
-      ...this.props,
-      ...viewport
-    }).getViewportProps();
+    this.propsInTransition = this.getControllerState(
+      {
+        ...this.props,
+        ...viewport
+      },
+      PRESERVE_CONSTRAINT_CONTEXT
+    ).getViewportProps();
 
     this.onViewStateChange({
       viewState: this.propsInTransition,

@@ -56,7 +56,7 @@ def cdn_picker(offline=False):
 
 def widget_css_picker():
     if os.getenv("PYDECK_DEV_PORT"):
-        stylesheet_path = realpath(join(dirname(__file__), "../../../../modules/widgets/src/stylesheet.css"))
+        stylesheet_path = realpath(join(dirname(__file__), "../../../../modules/widgets/dist/stylesheet.css"))
         if os.path.exists(stylesheet_path):
             with open(stylesheet_path, "r", encoding="utf-8") as file:
                 return "<style>\n{}\n</style>".format(file.read())
