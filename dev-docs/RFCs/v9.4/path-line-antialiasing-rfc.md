@@ -353,8 +353,8 @@ the feature completely disabled, which is how the first attempt behaved:
 2. **`includeAA: true` in the image diff.** This is the decisive one. pixelmatch detects
    antialiased pixels and excludes them from the mismatch count by default, and this prop changes
    nothing *but* antialiased pixels — so the diff is structurally blind to it regardless of MSAA or
-   geometry. `TestCase.imageDiffOptions` now threads it through, and also honours `tolerance`, which
-   was previously declared but ignored.
+   geometry. `TestCase.imageDiffOptions` now threads it through. The render-test harness still uses
+   a hardcoded `tolerance` value; making the declared option configurable is not part of this change.
 3. **A scene dense with thin shallow diagonals, and a tightened `threshold`.** The prop only changes
    edge pixels, so edges must be a large enough fraction of the frame to register.
 
