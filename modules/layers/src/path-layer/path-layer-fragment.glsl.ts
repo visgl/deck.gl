@@ -31,7 +31,7 @@ void main(void) {
 
   // Distance to the silhouette in device pixels, from the derivative of the coordinate that
   // bounds it. Computed before the discards below: derivatives are undefined once an invocation
-  // in the quad has been discarded. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+  // in the quad has been discarded. See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
   float bodyCoord = abs(vPathPosition.x);
   float cornerCoord = length(vCornerOffset);
   // Both evaluated so each derivative stays on one field across the corner/body boundary

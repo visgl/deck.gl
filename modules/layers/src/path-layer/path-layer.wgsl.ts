@@ -284,7 +284,7 @@ ${
 
   // Distance to the silhouette in device pixels, from the derivative of the coordinate that
   // bounds it. Computed before the discards below: derivatives need uniform control flow and are
-  // undefined after a discard in the quad. See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+  // undefined after a discard in the quad. See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
   let bodyCoord = abs(varyings.vPathPosition.x);
   let cornerCoord = length(varyings.vCornerOffset);
   // Both evaluated so each derivative stays on one field across the corner/body boundary

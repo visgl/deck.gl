@@ -13,7 +13,7 @@ import {PathLayer} from '@deck.gl/layers';
 // On the default render-test device MSAA smooths the strokes either way and this test passes even
 // with the feature removed. `includeAA: true` is equally load-bearing - pixelmatch drops
 // antialiased pixels from the mismatch count by default, and this prop changes nothing else.
-// See dev-docs/RFCs/v9.4/path-line-antialiasing-rfc.md
+// See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
 
 // Thin shallow diagonals: the worst case for aliasing, and the bulk of the edge pixels the image
 // diff depends on. Axis-aligned edges land on pixel boundaries and never partially cover.
