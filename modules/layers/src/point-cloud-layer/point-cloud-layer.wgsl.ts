@@ -95,7 +95,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 ${
   antialiasing
     ? /* wgsl */ `  let edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
-  if (edgePixels < -0.5) {`
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {`
     : /* wgsl */ `  if (distToCenter > 1.0) {`
 }
     discard;

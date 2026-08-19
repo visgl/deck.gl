@@ -20,7 +20,7 @@ void main(void) {
 
 #ifdef ANTIALIASING
   float edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
-  if (edgePixels < -0.5) {
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
 #else
   if (distToCenter > 1.0) {
 #endif
