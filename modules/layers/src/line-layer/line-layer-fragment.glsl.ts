@@ -23,6 +23,10 @@ void main(void) {
   // hard - they abut neighboring segments. See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
   float edgeCoord = abs(uv.y);
   float edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
   fragColor.a *= smoothedge(0.0, edgePixels);
 #endif
 

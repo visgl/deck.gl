@@ -182,6 +182,11 @@ ${
   let edgeCoord = abs(uv.y);
   let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
 
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+
   // Feather one device pixel across the width, before premultiplication below. The ends are left
   // hard - they abut neighbors
   fragColor.a *= smoothedge(0.0, edgePixels);`

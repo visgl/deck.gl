@@ -65,6 +65,8 @@ test('LineLayer#default shader preserves the pre-antialiasing fast path', () => 
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
+  expect(antialiasingFragmentShader).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
   expect(getShaderWGSL(true)).toContain('coverageScale');
   expect(getShaderWGSL(true)).toContain('fwidth');
+  expect(getShaderWGSL(true)).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });
