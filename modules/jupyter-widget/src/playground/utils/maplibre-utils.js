@@ -4,7 +4,7 @@
 
 /* eslint-disable import/namespace */
 import {log} from '@deck.gl/core';
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {Map, NavigationControl} from 'maplibre-gl';
 
 export function createMapLibreDeckOverlay({
@@ -36,7 +36,7 @@ export function createMapLibreDeckOverlay({
   });
 
   // Create deck overlay with interleaved mode for globe
-  const deckOverlay = new MapboxOverlay({
+  const deckOverlay = new MapLibreOverlay({
     interleaved: mapProjection === 'globe',
     layers,
     getTooltip,
