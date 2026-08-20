@@ -177,7 +177,7 @@ describe('LineLayer render tests', () => {
   });
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('LineLayer#antialiasing', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('LineLayer#antialiasing', () => {
   test('adds analytic coverage where the context provides none', async () => {
     const off = await measureAntialiasingCoverage(false);
     const on = await measureAntialiasingCoverage(true);
@@ -190,7 +190,7 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('LineLayer#antialiasing', (
   }, 60000);
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('LineLayer#antialiasing on WebGPU', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))('LineLayer#antialiasing on WebGPU', () => {
   test('coverage is applied before premultiplication', async () => {
     const {partial, worstOvershoot} = await measureWebGPUEdges([
       new LineLayer({
