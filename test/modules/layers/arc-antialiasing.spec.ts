@@ -8,7 +8,7 @@ import {ArcLayer} from '@deck.gl/layers';
 import {preprocess} from '@luma.gl/shadertools';
 import arcVertexShader from '@deck.gl/layers/arc-layer/arc-layer-vertex.glsl';
 import arcFragmentShader from '@deck.gl/layers/arc-layer/arc-layer-fragment.glsl';
-import arcShaderWGSL from '@deck.gl/layers/arc-layer/arc-layer.wgsl';
+import {shaderWGSL} from '@deck.gl/layers/arc-layer/arc-layer.wgsl';
 import {arcUniforms} from '@deck.gl/layers/arc-layer/arc-layer-uniforms';
 
 const ARC_DATA = [{sourcePosition: [-122.45, 37.78], targetPosition: [-122.44, 37.79]}];
@@ -46,8 +46,8 @@ test('ArcLayer#default shader preserves the pre-antialiasing fast path', () => {
   const antialiasingFragmentShader = preprocess(arcFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
-  const defaultShaderWGSL = preprocess(arcShaderWGSL);
-  const antialiasingShaderWGSL = preprocess(arcShaderWGSL, {defines: {ANTIALIASING: 1}});
+  const defaultShaderWGSL = preprocess(shaderWGSL);
+  const antialiasingShaderWGSL = preprocess(shaderWGSL, {defines: {ANTIALIASING: 1}});
 
   expect(defaultVertexShader).not.toContain('coverageScale');
   expect(defaultFragmentShader).not.toContain('fwidth');
