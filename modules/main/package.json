@@ -53,6 +53,7 @@
     "@deck.gl/json": "9.4.0-alpha.2",
     "@deck.gl/layers": "9.4.0-alpha.2",
     "@deck.gl/mapbox": "9.4.0-alpha.2",
+    "@deck.gl/maplibre": "9.4.0-alpha.2",
     "@deck.gl/mesh-layers": "9.4.0-alpha.2",
     "@deck.gl/react": "9.4.0-alpha.2",
     "@deck.gl/widgets": "9.4.0-alpha.2",
@@ -62,11 +63,15 @@
   },
   "peerDependencies": {
     "@arcgis/core": "^4.0.0",
+    "maplibre-gl": "^4.5.1 || ^5.0.0 || ^6.0.0",
     "react": ">=16.3.0",
     "react-dom": ">=16.3.0"
   },
   "peerDependenciesMeta": {
     "@arcgis/core": {
+      "optional": true
+    },
+    "maplibre-gl": {
       "optional": true
     },
     "react": {

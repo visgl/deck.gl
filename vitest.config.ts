@@ -90,6 +90,7 @@ const aliases = {
   '@deck.gl/jupyter-widget': resolve(rootDir, 'modules/jupyter-widget/src'),
   '@deck.gl/layers': resolve(rootDir, 'modules/layers/src'),
   '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
+  '@deck.gl/maplibre': resolve(rootDir, 'modules/maplibre/src'),
   '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
   '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
   '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),
@@ -128,12 +129,16 @@ const optimizeDepsConfig = {
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',
+    'maplibre-gl-v4',
+    'maplibre-gl-v5',
     // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'
-  ]
+  ],
+  // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
+  exclude: ['maplibre-gl-v6']
 };
 
 // Server configuration for serving test data files with correct MIME types
