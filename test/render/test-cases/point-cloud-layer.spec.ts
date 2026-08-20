@@ -236,7 +236,7 @@ describe('PointCloudLayer render tests', () => {
   });
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('PointCloudLayer#antialiasing', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('PointCloudLayer#antialiasing', () => {
   test('adds analytic coverage where the context provides none', async () => {
     const off = await measureAntialiasingCoverage(false);
     const on = await measureAntialiasingCoverage(true);
@@ -252,7 +252,7 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('PointCloudLayer#antialiasi
   }, 60000);
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))(
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))(
   'PointCloudLayer#antialiasing on WebGPU',
   () => {
     test('coverage is applied before premultiplication', async () => {
