@@ -5,7 +5,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {Map, useControl} from 'react-map-gl/maplibre';
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import {
   GeohashLayer,
   H3HexagonLayer,

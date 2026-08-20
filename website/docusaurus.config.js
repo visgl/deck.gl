@@ -70,6 +70,7 @@ const config = {
             '@deck.gl/json': resolve('../modules/json/dist'),
             '@deck.gl/layers': resolve('../modules/layers/dist'),
             '@deck.gl/mapbox': resolve('../modules/mapbox/dist'),
+            '@deck.gl/maplibre': resolve('../modules/maplibre/dist'),
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),

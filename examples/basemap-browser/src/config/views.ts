@@ -37,7 +37,7 @@ export function buildViews(): View[] {
  * Layer filter for multi-view mode.
  * Routes layers to appropriate viewports.
  *
- * Uses exclusion logic since MapboxOverlay's internal viewport ID varies.
+ * Uses exclusion logic since the base map overlay's internal viewport ID varies.
  */
 export function getMultiViewLayerFilter({layer, viewport}: {layer: Layer; viewport: any}): boolean {
   const viewportId = viewport.id;
