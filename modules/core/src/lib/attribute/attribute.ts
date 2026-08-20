@@ -292,14 +292,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const hasChanged = this.setData({constant: true, value: transformedValue});
     if (this.device.type === 'webgpu') {
       let bufferValue = this.state.constantValue;
-      if (this.doublePrecision && this.settings.defaultType === Float64Array) {
-        if (bufferValue instanceof Float64Array) {
-          bufferValue = toDoublePrecisionArray(bufferValue, {size: this.size});
-        } else {
-          const expandedValue = new Float32Array(this.size * 2);
-          expandedValue.set(bufferValue, 0);
-          bufferValue = expandedValue;
-        }
+      if (
+        this.doublePrecision &&
+        (bufferValue instanceof Float32Array || bufferValue instanceof Float64Array)
+      ) {
+        // A zero low tuple must be present in the buffer on WebGPU even when the source is fp32.
+        bufferValue = toDoublePrecisionArray(bufferValue, {size: this.size});
         this.setAccessor({
           ...this.getAccessor(),
           stride: this.size * 2 * Float32Array.BYTES_PER_ELEMENT

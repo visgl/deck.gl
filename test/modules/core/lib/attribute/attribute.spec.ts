@@ -1175,6 +1175,42 @@ describe('Attribute#doublePrecision', () => {
     buffer.delete();
     attribute.delete();
   });
+
+  test('Attribute#doublePrecision#fp64:false interleaves zero lows on WebGPU', async ({skip}) => {
+    const webgpuDevice = await getWebGPUTestDevice();
+    if (!webgpuDevice) {
+      skip();
+    }
+    const attribute = new Attribute(webgpuDevice, {
+      id: 'positions',
+      type: 'float64',
+      fp64: false,
+      size: 3,
+      accessor: 'getPosition'
+    });
+
+    attribute.allocate(2);
+    attribute.updateBuffer({
+      numInstances: 2,
+      data: [0, 1],
+      props: {
+        getPosition: d => [d, 1, 2]
+      }
+    });
+
+    const bufferLayout = attribute.getBufferLayout();
+    expect(bufferLayout.byteStride).toBe(24);
+    expect(bufferLayout.attributes?.map(a => a.byteOffset)).toEqual([0, 12]);
+    expect(attribute.getValue().positions64Low).toBe(attribute.getBuffer());
+
+    const buffer = attribute.getBuffer()!;
+    const bytes = await buffer.readAsync(0, 48);
+    expect(new Float32Array(bytes.buffer, bytes.byteOffset, 12)).toEqual(
+      new Float32Array([0, 1, 2, 0, 0, 0, 1, 1, 2, 0, 0, 0])
+    );
+
+    attribute.delete();
+  });
 });
 
 test('Attribute#updateBuffer', () => {
