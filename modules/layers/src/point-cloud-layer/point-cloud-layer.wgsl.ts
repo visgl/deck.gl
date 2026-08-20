@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+export const shaderWGSL = /* wgsl */ `\
 struct PointCloudUniforms {
   radiusPixels: f32,
   sizeUnits: i32,

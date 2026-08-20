@@ -25,7 +25,7 @@ import {Model, Geometry} from '@luma.gl/engine';
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
-import source from './point-cloud-layer.wgsl';
+import {shaderWGSL} from './point-cloud-layer.wgsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 const DEFAULT_NORMAL = [0, 0, 1] as const;
@@ -140,7 +140,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: shaderWGSL,
       defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, gouraudMaterial, picking, pointCloudUniforms]
     });

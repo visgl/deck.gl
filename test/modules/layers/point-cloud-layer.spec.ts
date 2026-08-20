@@ -10,7 +10,7 @@ import {preprocess} from '@luma.gl/shadertools';
 import {PointCloudLayer} from '@deck.gl/layers';
 import pointCloudVertexShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-vertex.glsl';
 import pointCloudFragmentShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-fragment.glsl';
-import pointCloudShaderWGSL from '@deck.gl/layers/point-cloud-layer/point-cloud-layer.wgsl';
+import {shaderWGSL} from '@deck.gl/layers/point-cloud-layer/point-cloud-layer.wgsl';
 import {pointCloudUniforms} from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-uniforms';
 
 test('PointCloudLayer#loaders.gl support', () => {
@@ -100,8 +100,8 @@ test('PointCloudLayer#default shader preserves the pre-antialiasing fast path', 
   const antialiasingFragmentShader = preprocess(pointCloudFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
-  const defaultShaderWGSL = preprocess(pointCloudShaderWGSL);
-  const antialiasingShaderWGSL = preprocess(pointCloudShaderWGSL, {
+  const defaultShaderWGSL = preprocess(shaderWGSL);
+  const antialiasingShaderWGSL = preprocess(shaderWGSL, {
     defines: {ANTIALIASING: 1}
   });
 
