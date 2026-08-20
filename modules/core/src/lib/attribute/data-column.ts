@@ -219,6 +219,11 @@ export default class DataColumn<Options, State> {
     this.state.numInstances = n;
   }
 
+  /** @internal Whether this column's GPU buffer contains interleaved high and low components. */
+  get isDoublePrecisionBuffer(): boolean {
+    return this._shouldSplitDoublePrecisionValue(this.value);
+  }
+
   delete(): void {
     if (this._buffer) {
       this._buffer.delete();
@@ -255,7 +260,7 @@ export default class DataColumn<Options, State> {
       result[attributeName] = this.getBuffer();
     }
     if (this.doublePrecision) {
-      if (this._shouldSplitDoublePrecisionValue(this.value)) {
+      if (this.isDoublePrecisionBuffer) {
         // WebGPU cannot override the low part with a constant. Float32 sources are therefore
         // uploaded as interleaved high/zero-low rows and share this buffer with the low attribute.
         result[`${attributeName}64Low`] = result[attributeName];

@@ -167,7 +167,7 @@ void main(void) {
 `;
 
 function useFp64(attribute: Attribute): boolean {
-  return attribute.doublePrecision && attribute.value instanceof Float64Array;
+  return attribute.isDoublePrecisionBuffer;
 }
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
