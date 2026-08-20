@@ -527,7 +527,7 @@ describe('PathLayer render tests', () => {
   });
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () => {
   test('adds analytic coverage where the context provides none', async () => {
     const off = await measureAntialiasingCoverage({antialiasing: false});
     const on = await measureAntialiasingCoverage({antialiasing: true});
@@ -581,7 +581,7 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', (
   }, 60000);
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('PathLayer#antialiasing on WebGPU', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))('PathLayer#antialiasing on WebGPU', () => {
   test('coverage is applied before premultiplication', async () => {
     const {partial, worstOvershoot} = await measureWebGPUEdges([
       new PathLayer({
