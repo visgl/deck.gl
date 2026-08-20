@@ -40,7 +40,7 @@ function createAntialiasingVariant(antialiasing: boolean): LineLayer {
 
 const antialiasingTestCase: TestCase = {
   name: 'line-antialiasing',
-  skip: ['msaa', 'webgpu'],
+  skip: ['msaa'],
   views: new OrthographicView(),
   viewState: {target: [0, 0, 0], zoom: 0},
   layers: [createAntialiasingVariant(false), createAntialiasingVariant(true)],
