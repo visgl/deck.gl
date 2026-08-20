@@ -11,20 +11,6 @@ struct PointCloudUniforms {
 @group(0) @binding(0)
 var<uniform> pointCloudUniforms: PointCloudUniforms;
 
-struct ConstantAttributes {
-  instanceNormals: vec3<f32>,
-  instanceColors: vec4<f32>,
-  instancePositions: vec3<f32>,
-  instancePositions64Low: vec3<f32>
-};
-
-const constants = ConstantAttributes(
-  vec3<f32>(1.0, 0.0, 0.0),
-  vec4<f32>(0.0, 0.0, 0.0, 1.0),
-  vec3<f32>(0.0),
-  vec3<f32>(0.0)
-);
-
 struct Attributes {
   @builtin(instance_index) instanceIndex : u32,
   @builtin(vertex_index) vertexIndex : u32,
