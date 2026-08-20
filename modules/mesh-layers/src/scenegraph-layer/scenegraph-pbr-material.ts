@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {lighting, pbrMaterial} from '@luma.gl/shadertools';
+import {ibl, lighting, pbrMaterial} from '@luma.gl/shadertools';
 
 import type {
   PBRMaterialBindings,
@@ -32,6 +32,6 @@ const source = (pbrMaterial.source as string)
 
 export const scenegraphPbrMaterial = {
   ...pbrMaterial,
-  dependencies: [lighting],
+  dependencies: [lighting, ibl],
   source
 } as const satisfies ShaderModule<PBRMaterialProps, PBRMaterialUniforms, PBRMaterialBindings>;
