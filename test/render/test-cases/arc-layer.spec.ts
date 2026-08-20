@@ -392,7 +392,7 @@ describe('ArcLayer render tests', () => {
   });
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('ArcLayer#antialiasing', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('ArcLayer#antialiasing', () => {
   test('adds analytic coverage where the context provides none', async () => {
     const off = await measureAntialiasingCoverage(false);
     const on = await measureAntialiasingCoverage(true);
@@ -405,7 +405,7 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgl'))('ArcLayer#antialiasing', ()
   }, 60000);
 });
 
-describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('ArcLayer#antialiasing on WebGPU', () => {
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))('ArcLayer#antialiasing on WebGPU', () => {
   test('coverage is applied before premultiplication', async () => {
     const {partial, worstOvershoot} = await measureWebGPUEdges(
       [
