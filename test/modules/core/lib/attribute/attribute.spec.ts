@@ -211,7 +211,7 @@ test('Attribute#setConstantValue', () => {
   expect(attribute.getValue().colors, 'constant value is normalized').toEqual([1, 1, 0]);
 });
 
-test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
+test('Attribute#setConstantValue keeps one constant value - webgpu', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -223,26 +223,25 @@ test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
   });
 
   attribute.numInstances = 2;
-  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant materializes a buffer').toBe(
-    true
-  );
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant is accepted').toBe(true);
 
-  expect(attribute.state.constant, 'webgpu constant is materialized as a buffer').toBeFalsy();
-  expect(attribute.value, 'repeated attribute value is generated').toEqual([1, 2, 3, 1, 2, 3]);
-  expect(
-    attribute.getValue().positions instanceof Buffer,
-    'webgpu constant is exposed as a buffer'
-  ).toBeTruthy();
+  expect(attribute.state.constant, 'webgpu constant remains constant').toBeTruthy();
+  expect(attribute.value, 'only one attribute value is retained').toEqual([1, 2, 3]);
+  const buffer = attribute.getValue().positions as Buffer;
+  expect(buffer, 'webgpu constant is exposed as a one-row buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync(0, 12);
+  expect(new Float32Array(bytes.buffer, bytes.byteOffset, 3)).toEqual(new Float32Array([1, 2, 3]));
+  expect(attribute.getBufferLayout().byteStride, 'constant buffer broadcasts its row').toBe(0);
+  expect(attribute.getConstantValue(), 'raw constant is retained for buffer grouping').toEqual([
+    1, 2, 3
+  ]);
 
-  expect(
-    attribute.setConstantValue(this, [1, 2, 3]),
-    'same emulated constant does not regenerate the buffer'
-  ).toBe(false);
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'same constant remains valid').toBe(true);
 
   attribute.delete();
 });
 
-test('Attribute#updateBuffer uploads a one-instance constant updater - webgpu', async ({skip}) => {
+test('Attribute#updateBuffer keeps a one-instance constant updater - webgpu', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -266,13 +265,12 @@ test('Attribute#updateBuffer uploads a one-instance constant updater - webgpu', 
     context: null
   });
 
+  expect(attribute.isConstant, 'constant updater remains constant').toBeTruthy();
   const buffer = attribute.getValue().instanceModelMatrix as Buffer;
-  expect(buffer, 'constant updater is exposed as a buffer').toBeInstanceOf(Buffer);
-  const bytes = await buffer.readAsync();
-  expect(
-    new Float32Array(bytes.buffer).slice(0, matrix.length),
-    'constant matrix is uploaded'
-  ).toEqual(matrix);
+  expect(buffer, 'constant updater is exposed as a one-row buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync(0, matrix.byteLength);
+  expect(new Float32Array(bytes.buffer, bytes.byteOffset, matrix.length)).toEqual(matrix);
+  expect(attribute.getBufferLayout().byteStride).toBe(0);
 
   attribute.delete();
 });

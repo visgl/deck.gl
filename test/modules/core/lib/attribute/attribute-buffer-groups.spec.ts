@@ -206,6 +206,81 @@ test('AttributeManager buffer groups pack IconLayer-style shader attributes', as
   expect(deleteSpy).not.toHaveBeenCalled();
 });
 
+test('AttributeManager buffer groups broadcast constant inputs', async () => {
+  if (!webgpuDevice) return;
+
+  const attributeManager = new AttributeManager(webgpuDevice);
+  attributeManager.addInstanced({
+    varying: {size: 1, accessor: 'getVarying', bufferGroup: 'group-a'},
+    constant: {size: 1, accessor: 'getConstant', bufferGroup: 'group-a'},
+    color: {
+      size: 4,
+      type: 'unorm8',
+      accessor: 'getColor',
+      bufferGroup: 'group-a'
+    }
+  });
+  attributeManager.update({
+    numInstances: 2,
+    data: [{varying: 1}, {varying: 2}],
+    props: {
+      getVarying: (object: {varying: number}) => object.varying,
+      getConstant: 9,
+      getColor: [255, 128, 0, 255]
+    },
+    transitions: {},
+    buffers: {},
+    context: {}
+  });
+
+  const attributes = attributeManager.getAttributes();
+  expect(attributes.constant.isConstant).toBeTruthy();
+  expect(attributes.color.isConstant).toBeTruthy();
+  expect(attributes.constant.getBuffer()?.byteLength).toBe(4);
+  expect(attributes.color.getBuffer()?.byteLength).toBe(4);
+
+  const bindings = attributeManager.getBufferGroupBindings(attributes, {isInstanced: true});
+  expect(bindings.bufferLayouts.map(layout => layout.name)).toEqual(['group-a']);
+  expect(bindings.bufferLayouts[0].byteStride).toBe(12);
+
+  const packedBytes = await bindings.buffers['group-a'].readAsync(0, 24);
+  const dataView = new DataView(packedBytes.buffer, packedBytes.byteOffset, packedBytes.byteLength);
+  expect(dataView.getFloat32(0, true)).toBe(1);
+  expect(dataView.getFloat32(4, true)).toBe(9);
+  expect(Array.from(packedBytes.slice(8, 12))).toEqual([255, 128, 0, 255]);
+  expect(dataView.getFloat32(12, true)).toBe(2);
+  expect(dataView.getFloat32(16, true)).toBe(9);
+  expect(Array.from(packedBytes.slice(20, 24))).toEqual([255, 128, 0, 255]);
+
+  attributeManager.finalize();
+});
+
+test('AttributeManager all-constant buffer groups use one row with zero stride', async () => {
+  if (!webgpuDevice) return;
+
+  const attributeManager = new AttributeManager(webgpuDevice);
+  addSimpleGroup(attributeManager);
+  attributeManager.update({
+    numInstances: 2,
+    data: [{}, {}],
+    props: {getA: 3, getB: 4},
+    transitions: {},
+    buffers: {},
+    context: {}
+  });
+
+  const bindings = attributeManager.getBufferGroupBindings(attributeManager.getAttributes(), {
+    isInstanced: true
+  });
+  expect(bindings.bufferLayouts[0].byteStride).toBe(0);
+  const packedBytes = await bindings.buffers['group-a'].readAsync(0, 8);
+  expect(Array.from(new Float32Array(packedBytes.buffer, packedBytes.byteOffset, 2))).toEqual([
+    3, 4
+  ]);
+
+  attributeManager.finalize();
+});
+
 test('AttributeManager buffer groups are shared across model step modes', () => {
   if (!webgpuDevice) return;
 

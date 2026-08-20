@@ -228,7 +228,7 @@ export default class DataColumn<Options, State> {
   }
 
   getBuffer(): Buffer | null {
-    if (this.state.constant) {
+    if (this.state.constant && this.device.type !== 'webgpu') {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
@@ -241,7 +241,9 @@ export default class DataColumn<Options, State> {
     const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
       const value = this.value as TypedArray;
-      if (options) {
+      if (this.device.type === 'webgpu' && this._buffer) {
+        result[attributeName] = this._buffer;
+      } else if (options) {
         const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
         const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
         const size = shaderAttributeDef.size || this.size;
@@ -254,6 +256,10 @@ export default class DataColumn<Options, State> {
     }
     if (this.doublePrecision) {
       if (this.value instanceof Float64Array) {
+        result[`${attributeName}64Low`] = result[attributeName];
+      } else if (this.device.type === 'webgpu' && this.settings.defaultType === Float64Array) {
+        // WebGPU reads the zero low parts from the interleaved source buffer because it cannot
+        // override this shader attribute with a constant as WebGL does.
         result[`${attributeName}64Low`] = result[attributeName];
       } else {
         // Disable fp64 low part
@@ -271,7 +277,9 @@ export default class DataColumn<Options, State> {
     const attributes: (BufferAttributeLayout | null)[] = [];
     const result: BufferLayout = {
       name: this.id,
-      byteStride: getStride(accessor)
+      // WebGPU has no constant vertex attributes. A one-row buffer with zero stride provides
+      // equivalent broadcast semantics without scaling allocation with the instance count.
+      byteStride: this.device.type === 'webgpu' && this.state.constant ? 0 : getStride(accessor)
     };
 
     if (this.doublePrecision) {
@@ -432,6 +440,24 @@ export default class DataColumn<Options, State> {
 
       if (this.doublePrecision && value instanceof Float64Array) {
         value = toDoublePrecisionArray(value, accessor);
+      } else if (
+        this.doublePrecision &&
+        this.device.type === 'webgpu' &&
+        this.settings.defaultType === Float64Array
+      ) {
+        // A float32 binary position has no low parts. Interleave zeros into the same buffer so
+        // both fp64 shader attributes share one vertex-buffer slot on WebGPU.
+        const sourceValue = value;
+        const expandedValue = new Float32Array(sourceValue.length * 2);
+        const size = accessor.size;
+        for (let sourceIndex = 0, targetIndex = 0; sourceIndex < sourceValue.length; ) {
+          for (let componentIndex = 0; componentIndex < size; componentIndex++) {
+            expandedValue[targetIndex + componentIndex] = sourceValue[sourceIndex++];
+          }
+          targetIndex += size * 2;
+        }
+        value = expandedValue;
+        accessor.stride = size * 2 * Float32Array.BYTES_PER_ELEMENT;
       }
       if (this.settings.isIndexed) {
         const ArrayType = this.settings.defaultType;
