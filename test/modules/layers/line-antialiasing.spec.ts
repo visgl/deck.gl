@@ -8,7 +8,7 @@ import {LineLayer} from '@deck.gl/layers';
 import {preprocess} from '@luma.gl/shadertools';
 import lineVertexShader from '@deck.gl/layers/line-layer/line-layer-vertex.glsl';
 import lineFragmentShader from '@deck.gl/layers/line-layer/line-layer-fragment.glsl';
-import {getShaderWGSL} from '@deck.gl/layers/line-layer/line-layer.wgsl';
+import lineShaderWGSL from '@deck.gl/layers/line-layer/line-layer.wgsl';
 import {lineUniforms} from '@deck.gl/layers/line-layer/line-layer-uniforms';
 
 const LINE_DATA = [{sourcePosition: [-122.45, 37.78], targetPosition: [-122.44, 37.79]}];
@@ -56,17 +56,19 @@ test('LineLayer#default shader preserves the pre-antialiasing fast path', () => 
   const antialiasingFragmentShader = preprocess(lineFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
+  const defaultShaderWGSL = preprocess(lineShaderWGSL);
+  const antialiasingShaderWGSL = preprocess(lineShaderWGSL, {defines: {ANTIALIASING: 1}});
 
   expect(defaultVertexShader).not.toContain('coverageScale');
   expect(defaultFragmentShader).not.toContain('fwidth');
-  expect(getShaderWGSL(false)).not.toContain('coverageScale');
-  expect(getShaderWGSL(false)).not.toContain('fwidth');
+  expect(defaultShaderWGSL).not.toContain('coverageScale');
+  expect(defaultShaderWGSL).not.toContain('fwidth');
   expect(lineUniforms.uniformTypes).not.toHaveProperty('antialiasing');
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
   expect(antialiasingFragmentShader).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
-  expect(getShaderWGSL(true)).toContain('coverageScale');
-  expect(getShaderWGSL(true)).toContain('fwidth');
-  expect(getShaderWGSL(true)).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
+  expect(antialiasingShaderWGSL).toContain('coverageScale');
+  expect(antialiasingShaderWGSL).toContain('fwidth');
+  expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });

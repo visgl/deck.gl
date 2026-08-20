@@ -20,7 +20,7 @@ import {
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
-import {getShaderWGSL} from './line-layer.wgsl';
+import source from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
@@ -128,7 +128,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(antialiasing),
+      source,
       defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, picking, lineUniforms]
     });
