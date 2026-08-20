@@ -2,7 +2,7 @@
 
 - **Authors**: Chris Gervang
 - **Date**: Aug 2, 2026
-- **Status**: Proposed
+- **Status**: Implemented
 
 Summary: `PathLayer`, `LineLayer`, `ArcLayer`, and `PointCloudLayer` have no antialiasing of their
 own; their edges are smoothed entirely by the framebuffer's MSAA. This RFC proposes an opt-in
