@@ -46,7 +46,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/layers` | `PathLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/layers` | `TextLayer` | ✅ | 🚧 |
+| `@deck.gl/layers` | `TextLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ v9.4 |
