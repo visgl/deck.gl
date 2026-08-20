@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-const shaderWGSL = /* wgsl */ `\
+export const shaderWGSL = /* wgsl */ `\
 // ---------- Helper Structures & Functions ----------
 
 // Placeholder filter functions.
@@ -224,6 +224,3 @@ fn fragmentMain(
   return fragColor;
 }
 `;
-
-export {shaderWGSL};
-export default shaderWGSL;
