@@ -8,7 +8,7 @@ import {PathLayer} from '@deck.gl/layers';
 import {preprocess} from '@luma.gl/shadertools';
 import pathVertexShader from '@deck.gl/layers/path-layer/path-layer-vertex.glsl';
 import pathFragmentShader from '@deck.gl/layers/path-layer/path-layer-fragment.glsl';
-import pathShaderWGSL from '@deck.gl/layers/path-layer/path-layer.wgsl';
+import {shaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {pathUniforms} from '@deck.gl/layers/path-layer/path-layer-uniforms';
 
 const PATH_DATA = [
@@ -66,8 +66,8 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   const antialiasingFragmentShader = preprocess(pathFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
-  const defaultShaderWGSL = preprocess(pathShaderWGSL);
-  const antialiasingShaderWGSL = preprocess(pathShaderWGSL, {defines: {ANTIALIASING: 1}});
+  const defaultShaderWGSL = preprocess(shaderWGSL);
+  const antialiasingShaderWGSL = preprocess(shaderWGSL, {defines: {ANTIALIASING: 1}});
 
   expect(defaultVertexShader).not.toContain('coverageScale');
   expect(defaultFragmentShader).not.toContain('fwidth');

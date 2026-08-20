@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+export const shaderWGSL = /* wgsl */ `\
 const EPSILON: f32 = 0.001;
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 
