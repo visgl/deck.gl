@@ -10,7 +10,7 @@ import {preprocess} from '@luma.gl/shadertools';
 import {PointCloudLayer} from '@deck.gl/layers';
 import pointCloudVertexShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-vertex.glsl';
 import pointCloudFragmentShader from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-fragment.glsl';
-import {getShaderWGSL} from '@deck.gl/layers/point-cloud-layer/point-cloud-layer.wgsl';
+import pointCloudShaderWGSL from '@deck.gl/layers/point-cloud-layer/point-cloud-layer.wgsl';
 import {pointCloudUniforms} from '@deck.gl/layers/point-cloud-layer/point-cloud-layer-uniforms';
 
 test('PointCloudLayer#loaders.gl support', () => {
@@ -100,17 +100,21 @@ test('PointCloudLayer#default shader preserves the pre-antialiasing fast path', 
   const antialiasingFragmentShader = preprocess(pointCloudFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
+  const defaultShaderWGSL = preprocess(pointCloudShaderWGSL);
+  const antialiasingShaderWGSL = preprocess(pointCloudShaderWGSL, {
+    defines: {ANTIALIASING: 1}
+  });
 
   expect(defaultVertexShader).not.toContain('coverageScale');
   expect(defaultFragmentShader).not.toContain('fwidth');
-  expect(getShaderWGSL(false)).not.toContain('coverageScale');
-  expect(getShaderWGSL(false)).not.toContain('fwidth');
+  expect(defaultShaderWGSL).not.toContain('coverageScale');
+  expect(defaultShaderWGSL).not.toContain('fwidth');
   expect(pointCloudUniforms.uniformTypes).not.toHaveProperty('antialiasing');
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
   expect(antialiasingFragmentShader).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
-  expect(getShaderWGSL(true)).toContain('coverageScale');
-  expect(getShaderWGSL(true)).toContain('fwidth');
-  expect(getShaderWGSL(true)).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
+  expect(antialiasingShaderWGSL).toContain('coverageScale');
+  expect(antialiasingShaderWGSL).toContain('fwidth');
+  expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });
