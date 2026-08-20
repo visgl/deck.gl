@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export function getShaderWGSL(antialiasing: boolean): string {
-  return /* wgsl */ `\
+export default /* wgsl */ `\
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 
 struct Attributes {
@@ -287,14 +286,17 @@ fn vertexMain(
     arc.widthMinPixels,
     arc.widthMaxPixels
   );
-  ${antialiasing ? 'var' : 'let'} offset = getExtrusionOffset(
+#ifdef ANTIALIASING
+  var offset = getExtrusionOffset(
+#else
+  let offset = getExtrusionOffset(
+#endif
     (nextClip.xy - currentClip.xy) * indexDirection,
     segmentSide,
     widthPixels
   );
-${
-  antialiasing
-    ? /* wgsl */ `  let halfWidthPixels = length(offset);
+#ifdef ANTIALIASING
+  let halfWidthPixels = length(offset);
   if (halfWidthPixels > 0.0) {
     // Keep the declared edge at abs(uv.y) == 1 while rasterizing the outer half of the centered
     // one-device-pixel coverage ramp.
@@ -302,9 +304,7 @@ ${
     offset *= coverageScale;
     geometry.uv.y *= coverageScale;
   }
-`
-    : ''
-}
+#endif
 
   var output: Varyings;
   output.position = currentClip + vec4<f32>(project_pixel_size_to_clipspace(offset), 0.0, 0.0);
@@ -318,35 +318,27 @@ ${
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
-${
-  antialiasing
-    ? /* wgsl */ `  let edgeCoord = abs(varyings.uv.y);
+#ifdef ANTIALIASING
+  let edgeCoord = abs(varyings.uv.y);
   let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
-`
-    : ''
-}
+#endif
 
   if (varyings.isValid == 0.0) {
     discard;
   }
 
-${
-  antialiasing
-    ? /* wgsl */ `  // Fragments outside the coverage ramp must not write depth or picking colors.
+#ifdef ANTIALIASING
+  // Fragments outside the coverage ramp must not write depth or picking colors.
   if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
     discard;
   }
-`
-    : ''
-}
+#endif
   var color = varyings.color;
-${
-  antialiasing
-    ? /* wgsl */ `  // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
+#ifdef ANTIALIASING
+  // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
   // two outer edges of the strip.
-  color.a *= smoothedge(0.0, edgePixels);`
-    : ''
-}
+  color.a *= smoothedge(0.0, edgePixels);
+#endif
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
@@ -370,6 +362,3 @@ ${
   return deckgl_premultiplied_alpha(color);
 }
 `;
-}
-
-export default getShaderWGSL(false);

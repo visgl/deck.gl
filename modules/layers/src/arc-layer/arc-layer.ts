@@ -22,7 +22,7 @@ import {
 import {Model} from '@luma.gl/engine';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
-import {getShaderWGSL} from './arc-layer.wgsl';
+import source from './arc-layer.wgsl';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
@@ -164,7 +164,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(antialiasing),
+      source,
       defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, picking, arcUniforms]
     }); // 'project' module added by default.
