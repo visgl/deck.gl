@@ -296,6 +296,13 @@
       },
       {
         "type": "category",
+        "label": "@deck.gl/maplibre",
+        "items": [
+          "api-reference/maplibre/overview"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@deck.gl/react",
         "items": [
           "api-reference/react/overview",

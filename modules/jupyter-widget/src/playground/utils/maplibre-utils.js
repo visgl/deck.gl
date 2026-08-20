@@ -4,8 +4,8 @@
 
 /* eslint-disable import/namespace */
 import {log} from '@deck.gl/core';
-import {MapboxOverlay} from '@deck.gl/mapbox';
-import maplibregl from 'maplibre-gl';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
+import {Map, NavigationControl} from 'maplibre-gl';
 
 export function createMapLibreDeckOverlay({
   container,
@@ -26,7 +26,7 @@ export function createMapLibreDeckOverlay({
   log.info('Using MapLibre')();
 
   // Create MapLibre map
-  const map = new maplibregl.Map({
+  const map = new Map({
     container,
     style: mapStyle,
     center: [initialViewState.longitude, initialViewState.latitude],
@@ -36,7 +36,7 @@ export function createMapLibreDeckOverlay({
   });
 
   // Create deck overlay with interleaved mode for globe
-  const deckOverlay = new MapboxOverlay({
+  const deckOverlay = new MapLibreOverlay({
     interleaved: mapProjection === 'globe',
     layers,
     getTooltip,
@@ -54,7 +54,7 @@ export function createMapLibreDeckOverlay({
       map.setProjection({type: 'globe'});
     }
     map.addControl(deckOverlay);
-    map.addControl(new maplibregl.NavigationControl());
+    map.addControl(new NavigationControl());
   });
 
   // Handle view state change events
