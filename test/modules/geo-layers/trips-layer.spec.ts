@@ -9,7 +9,7 @@ import {TripsLayer} from '@deck.gl/geo-layers';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {trips} from 'deck.gl-test/data';
-import pathShaderSource, {getShaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
+import pathShaderSource from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {tripsUniforms} from '@deck.gl/geo-layers/trips-layer/trips-layer-uniforms';
 import {
   packTripTimestamps,
@@ -71,7 +71,8 @@ test('TripsLayer#time-window discard follows PathLayer coverage derivatives', ()
       gpu: 'test',
       features: new Set()
     },
-    source: getShaderWGSL(true),
+    source: pathShaderSource,
+    defines: {ANTIALIASING: 1},
     modules: [tripsUniforms],
     inject: tripsShaderInjectionsWGSL
   });

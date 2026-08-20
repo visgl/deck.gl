@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export function getShaderWGSL(antialiasing: boolean): string {
-  return /* wgsl */ `\
+export default /* wgsl */ `\
 const EPSILON: f32 = 0.001;
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 
@@ -59,7 +58,9 @@ fn getLineJoinOffset(
   currPoint: vec3<f32>,
   nextPoint: vec3<f32>,
   width: vec2<f32>,
-${antialiasing ? '  coverageScale: f32,\n' : ''}\
+#ifdef ANTIALIASING
+  coverageScale: f32,
+#endif
   positions: vec2<f32>,
   instanceTypes: f32
 ) -> JoinResult {
@@ -125,29 +126,41 @@ ${antialiasing ? '  coverageScale: f32,\n' : ''}\
     jointType = path.capType;
   }
 
-${
-  antialiasing
-    ? /* wgsl */ `  let coverageOffsetVec = offsetVec * coverageScale;
-  var miterLength = dot(coverageOffsetVec, miterVec * turnDirection);`
-    : /* wgsl */ `  var miterLength = dot(offsetVec, miterVec * turnDirection);`
-}
+#ifdef ANTIALIASING
+  let coverageOffsetVec = offsetVec * coverageScale;
+  var miterLength = dot(coverageOffsetVec, miterVec * turnDirection);
+#else
+  var miterLength = dot(offsetVec, miterVec * turnDirection);
+#endif
   miterLength = select(miterLength, isJoint, isCap);
 
-  let offsetFromStartOfPath = ${antialiasing ? 'coverageOffsetVec' : 'offsetVec'} + deltaA * select(0.0, 1.0, isEnd);
+#ifdef ANTIALIASING
+  let offsetFromStartOfPath = coverageOffsetVec + deltaA * select(0.0, 1.0, isEnd);
+#else
+  let offsetFromStartOfPath = offsetVec + deltaA * select(0.0, 1.0, isEnd);
+#endif
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
     dot(offsetFromStartOfPath, dir)
   );
   let isValid = step(f32(instanceTypes), 3.5);
-  var offset = vec3<f32>(${antialiasing ? 'coverageOffsetVec' : 'offsetVec'} * width * isValid, 0.0);
+#ifdef ANTIALIASING
+  var offset = vec3<f32>(coverageOffsetVec * width * isValid, 0.0);
+#else
+  var offset = vec3<f32>(offsetVec * width * isValid, 0.0);
+#endif
 
   if (path.billboard == 0.0 && rotationResult.needsRotation) {
     offset = rotationResult.transform * offset;
   }
 
+#ifdef ANTIALIASING
   return JoinResult(
-    offset, ${antialiasing ? 'coverageOffsetVec' : 'offsetVec'}, miterLength, pathPosition, pathLength, jointType
+    offset, coverageOffsetVec, miterLength, pathPosition, pathLength, jointType
   );
+#else
+  return JoinResult(offset, offsetVec, miterLength, pathPosition, pathLength, jointType);
+#endif
 }
 
 @vertex
@@ -195,21 +208,21 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     nextPositionScreen = clipLine(nextPositionScreen, currPositionScreen);
     currPositionScreen = clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
-${
-  antialiasing
-    ? /* wgsl */ `    let coverageScale = select(
+#ifdef ANTIALIASING
+    let coverageScale = select(
       1.0,
       (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
       widthPixels > 0.0
-    );`
-    : ''
-}
+    );
+#endif
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
-${antialiasing ? '      coverageScale,\n' : ''}\
+#ifdef ANTIALIASING
+      coverageScale,
+#endif
       attributes.positions,
       attributes.instanceTypes
     );
@@ -233,21 +246,21 @@ ${antialiasing ? '      coverageScale,\n' : ''}\
       project_pixel_size_float(widthPixels),
       project_pixel_size_float(widthPixels)
     );
-${
-  antialiasing
-    ? /* wgsl */ `    let coverageScale = select(
+#ifdef ANTIALIASING
+    let coverageScale = select(
       1.0,
       (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
       widthPixels > 0.0
-    );`
-    : ''
-}
+    );
+#endif
     let join = getLineJoinOffset(
       prevPositionCommon,
       currPositionCommon,
       nextPositionCommon,
       width,
-${antialiasing ? '      coverageScale,\n' : ''}\
+#ifdef ANTIALIASING
+      coverageScale,
+#endif
       attributes.positions,
       attributes.instanceTypes
     );
@@ -273,9 +286,8 @@ ${antialiasing ? '      coverageScale,\n' : ''}\
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
 
-${
-  antialiasing
-    ? /* wgsl */ `  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
+#ifdef ANTIALIASING
+  // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
   // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
   // screen-space derivative converts the distance to the boundary into device pixels, which stays
   // correct under perspective foreshortening and under extensions that rescale the stroke.
@@ -307,8 +319,9 @@ ${
 
   // Feather one device pixel across the width only, before premultiplication. edgePixels is a
   // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
-  color.a *= smoothedge(0.0, edgePixels);`
-    : /* wgsl */ `  if (
+  color.a *= smoothedge(0.0, edgePixels);
+#else
+  if (
     varyings.vPathPosition.y < 0.0 ||
     varyings.vPathPosition.y > varyings.vPathLength
   ) {
@@ -321,15 +334,16 @@ ${
     ) {
       discard;
     }
-  }`
-}
+  }
+#endif
 
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
   // DECKGL_FILTER_COLOR
-  return deckgl_premultiplied_alpha(${antialiasing ? 'color' : 'varyings.vColor'});
+#ifdef ANTIALIASING
+  return deckgl_premultiplied_alpha(color);
+#else
+  return deckgl_premultiplied_alpha(varyings.vColor);
+#endif
 }
 `;
-}
-
-export default getShaderWGSL(false);

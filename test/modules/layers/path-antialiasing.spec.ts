@@ -8,7 +8,7 @@ import {PathLayer} from '@deck.gl/layers';
 import {preprocess} from '@luma.gl/shadertools';
 import pathVertexShader from '@deck.gl/layers/path-layer/path-layer-vertex.glsl';
 import pathFragmentShader from '@deck.gl/layers/path-layer/path-layer-fragment.glsl';
-import {getShaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
+import pathShaderWGSL from '@deck.gl/layers/path-layer/path-layer.wgsl';
 import {pathUniforms} from '@deck.gl/layers/path-layer/path-layer-uniforms';
 
 const PATH_DATA = [
@@ -66,18 +66,20 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   const antialiasingFragmentShader = preprocess(pathFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
+  const defaultShaderWGSL = preprocess(pathShaderWGSL);
+  const antialiasingShaderWGSL = preprocess(pathShaderWGSL, {defines: {ANTIALIASING: 1}});
 
   expect(defaultVertexShader).not.toContain('coverageScale');
   expect(defaultFragmentShader).not.toContain('fwidth');
-  expect(getShaderWGSL(false)).not.toContain('coverageScale');
-  expect(getShaderWGSL(false)).not.toContain('fwidth');
-  expect(getShaderWGSL(false)).toContain('return deckgl_premultiplied_alpha(varyings.vColor);');
+  expect(defaultShaderWGSL).not.toContain('coverageScale');
+  expect(defaultShaderWGSL).not.toContain('fwidth');
+  expect(defaultShaderWGSL).toContain('return deckgl_premultiplied_alpha(varyings.vColor);');
   expect(pathUniforms.uniformTypes).not.toHaveProperty('antialiasing');
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
   expect(antialiasingFragmentShader).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
-  expect(getShaderWGSL(true)).toContain('coverageScale');
-  expect(getShaderWGSL(true)).toContain('fwidth');
-  expect(getShaderWGSL(true)).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
+  expect(antialiasingShaderWGSL).toContain('coverageScale');
+  expect(antialiasingShaderWGSL).toContain('fwidth');
+  expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });
