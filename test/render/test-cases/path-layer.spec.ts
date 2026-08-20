@@ -409,6 +409,7 @@ function createAntialiasingGoldenVariant(antialiasing: boolean) {
 const antialiasingGoldenTestCases: TestCase[] = [
   {
     name: 'path-antialiasing',
+    skip: ['msaa'],
     views: new OrthographicView(),
     viewState: {target: [0, 0, 0], zoom: 0},
     layers: [...createAntialiasingGoldenVariant(false), ...createAntialiasingGoldenVariant(true)],
@@ -515,7 +516,7 @@ async function measureAntialiasingCoverage(layerProps: Record<string, unknown>):
 
 describe('PathLayer render tests', () => {
   describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
-    runRenderTestSuite(testCases as TestCase[], deviceType);
+    runRenderTestSuite([...testCases, ...antialiasingGoldenTestCases] as TestCase[], deviceType);
   });
 
   describe('webgl-no-msaa', () => {
