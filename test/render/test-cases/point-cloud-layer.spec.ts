@@ -123,6 +123,7 @@ function createAntialiasingGoldenVariant(antialiasing: boolean): PointCloudLayer
 const antialiasingGoldenTestCases: TestCase[] = [
   {
     name: 'point-cloud-antialiasing',
+    skip: ['msaa'],
     views: new OrthographicView(),
     viewState: {target: [0, 0, 0], zoom: 0},
     layers: [createAntialiasingGoldenVariant(false), createAntialiasingGoldenVariant(true)],
@@ -224,7 +225,7 @@ async function measureAntialiasingCoverage(antialiasing: boolean): Promise<Cover
 
 describe('PointCloudLayer render tests', () => {
   describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
-    runRenderTestSuite(testCases as TestCase[], deviceType);
+    runRenderTestSuite([...testCases, ...antialiasingGoldenTestCases] as TestCase[], deviceType);
   });
 
   describe('webgl-no-msaa', () => {
