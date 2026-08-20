@@ -2,19 +2,20 @@
   <head>
     <title>Interleaving deck.gl with MapLibre layers using MapLibreOverlay</title>
     
-    <script src="https://unpkg.com/deck.gl@^9.0.0-beta.5/dist.min.js"></script>
-    <script src="https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^9.4.0-alpha.2/dist.min.js"></script>
 
-    <link href="https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <link href="https://unpkg.com/maplibre-gl@^6.0.0/dist/maplibre-gl.css" rel="stylesheet" />
   </head>
 
   <body style="margin:0"></body>
 
-  <script type="text/javascript">
+  <script type="module">
+
+    import {MapLibreMap} from 'https://unpkg.com/maplibre-gl@^6.0.0/dist/maplibre-gl.mjs';
 
     const {MapLibreOverlay, ScatterplotLayer, ArcLayer} = deck;
 
-    const map = new maplibregl.Map({
+    const map = new MapLibreMap({
       container: document.body,
       style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: [-122.4, 37.79],

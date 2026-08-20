@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@deck.gl/maplibre": "^9.4.0",
+    "@deck.gl/maplibre": "^9.4.0-alpha.2",
     "deck.gl": "^9.4.0",
     "maplibre-gl": "^6.0.0",
     "react": "^18.0.0",
