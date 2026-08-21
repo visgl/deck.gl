@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {floatEquals, vecEquals} from '../../../utils/utils';
-import {getFrustumPlanes, toDoublePrecisionArray} from '@deck.gl/core/utils/math-utils';
+import {getFrustumPlanes, toDoublePrecisionArrayCPU} from '@deck.gl/core/utils/math-utils';
 import {equals, Matrix4} from '@math.gl/core';
 
 const ROOT2 = 0.7071;
@@ -58,31 +58,26 @@ test('getFrustumPlanes#tests', () => {
   }
 });
 
-function fromDoublePrecisionArray(array, size) {
-  const result = [];
-  let i = 0;
-  while (i < array.length) {
-    result.push(array[i] + array[i + size]);
-    i++;
-    if (i % size === 0) {
-      i += size;
+function fromDoublePrecisionArray(array: Float32Array, size: number): number[] {
+  const result: number[] = [];
+  let index = 0;
+  while (index < array.length) {
+    result.push(array[index] + array[index + size]);
+    index++;
+    if (index % size === 0) {
+      index += size;
     }
   }
   return result;
 }
 
-test('toDoublePrecisionArray', () => {
-  const array = Array.from({length: 10}, (d, i) => i + Math.PI);
-  let array64 = toDoublePrecisionArray(array, {size: 2});
-  expect(array64 instanceof Float32Array, 'returns correct type').toBeTruthy();
-  expect(array64.length, 'returns correct length').toBe(20);
-  expect(equals(fromDoublePrecisionArray(array64, 2), array), 'array reconstructs ok').toBeTruthy();
+test('toDoublePrecisionArrayCPU', () => {
+  const source = Float64Array.from({length: 10}, (value, index) => index + Math.PI);
+  let result = toDoublePrecisionArrayCPU(source, {size: 2});
+  expect(result.length).toBe(20);
+  expect(equals(fromDoublePrecisionArray(result, 2), source)).toBeTruthy();
 
-  array64 = toDoublePrecisionArray(array, {size: 2, startIndex: 4, endIndex: 8});
-  expect(array64 instanceof Float32Array, 'returns correct type').toBeTruthy();
-  expect(array64.length, 'returns correct length').toBe(8);
-  expect(
-    equals(fromDoublePrecisionArray(array64, 2), array.slice(4, 8)),
-    'array reconstructs ok'
-  ).toBeTruthy();
+  result = toDoublePrecisionArrayCPU(source, {size: 2, startIndex: 4, endIndex: 8});
+  expect(result.length).toBe(8);
+  expect(equals(fromDoublePrecisionArray(result, 2), source.slice(4, 8))).toBeTruthy();
 });
