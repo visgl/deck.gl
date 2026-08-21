@@ -32,19 +32,12 @@ function registerBackend(device: Device): void {
     return;
   }
 
-  switch (device.type) {
-    case 'webgl':
-      backendRegistry.add('webgl', {fround: webglFround, interleave: webglInterleave});
-      break;
-    case 'webgpu':
-      backendRegistry.add('webgpu', {fround: webgpuFround, interleave: webgpuInterleave});
-      break;
-    case 'null':
-      // NullDevice executes the same operation graph against CPU-backed buffers.
-      backendRegistry.add('null', {fround: cpuFround, interleave: cpuInterleave});
-      break;
-    default:
-      throw new Error(`Unsupported device type ${device.type}`);
+  if (device.type === 'webgpu') {
+    backendRegistry.add('webgpu', {fround: webgpuFround, interleave: webgpuInterleave});
+  } else if (device.type === 'webgl') {
+    backendRegistry.add('webgl', {fround: webglFround, interleave: webglInterleave});
+  } else {
+    throw new Error(`Unsupported device type ${device.type}`);
   }
   registeredBackendTypes.add(device.type);
 }
