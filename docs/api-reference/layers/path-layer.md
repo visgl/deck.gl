@@ -217,6 +217,14 @@ If `false`, the width always faces up.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `jointRounded` is `false`.
 
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+When enabled, this prop computes edge coverage in the shader. When disabled, the layer relies on render-target multisampling. Shader-computed coverage can cause artifacts where a path overlaps itself. Only the edges along the width of the path are smoothed — flat caps at the two ends of a path are not; set `capRounded` to `true` if those need smoothing.
+
+Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
+
 #### `_pathType` (object, optional) {#_pathtype}
 
 * Default: `null`
