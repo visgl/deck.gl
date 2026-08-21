@@ -1,6 +1,6 @@
 {
   "name": "project-website",
-  "version": "9.3.0-beta.2",
+  "version": "9.4.0-alpha.2",
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
@@ -12,7 +12,7 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "write-heading-ids": "node --loader ts-node/esm ../scripts/write-heading-ids.ts"
+    "write-heading-ids": "node ../scripts/write-heading-ids.mjs"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
@@ -48,9 +48,10 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.28.6",
-    "@docusaurus/core": "^3.6.3",
-    "@docusaurus/plugin-content-docs": "^3.6.3",
-    "@docusaurus/preset-classic": "^3.6.3",
+    "@docusaurus/core": "^3.10.0",
+    "@docusaurus/faster": "^3.10.0",
+    "@docusaurus/plugin-content-docs": "^3.10.0",
+    "@docusaurus/preset-classic": "^3.10.0",
     "@mdx-js/react": "^3.1.0",
     "algoliasearch": "^4.18.0",
     "algoliasearch-helper": "^3.13.3",

@@ -280,7 +280,10 @@ fn project_position_vec2_f32(position: vec2<f32>) -> vec2<f32> {
 
 // Transforms a common space position to clip space.
 fn project_common_position_to_clipspace_with_projection(position: vec4<f32>, viewProjectionMatrix: mat4x4<f32>, center: vec4<f32>) -> vec4<f32> {
-  return viewProjectionMatrix * position + center;
+  var clipPosition = viewProjectionMatrix * position + center;
+  // deck.gl projection matrices use WebGL's [-w, w] depth range; WebGPU clips z to [0, w].
+  clipPosition.z = (clipPosition.z + clipPosition.w) * 0.5;
+  return clipPosition;
 }
 
 // Uses the project viewProjectionMatrix and center.

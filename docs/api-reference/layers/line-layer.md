@@ -196,6 +196,14 @@ The minimum line width in pixels. This prop can be used to prevent the line from
 
 The maximum line width in pixels. This prop can be used to prevent the line from getting to thick when zoomed in.
 
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+When enabled, this prop computes edge coverage in the shader. When disabled, the layer relies on render-target multisampling. Shader-computed coverage can cause artifacts where lines overlap. Only the edges along the width of the line are smoothed — the two ends are not.
+
+Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
+
 
 ### Data Accessors
 

@@ -41,6 +41,7 @@
     "@deck.gl/json": "9.4.0-alpha.2",
     "@deck.gl/layers": "9.4.0-alpha.2",
     "@deck.gl/mapbox": "9.4.0-alpha.2",
+    "@deck.gl/maplibre": "9.4.0-alpha.2",
     "@deck.gl/mesh-layers": "9.4.0-alpha.2",
     "@deck.gl/widgets": "9.4.0-alpha.2",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4",

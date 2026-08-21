@@ -491,6 +491,7 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
   },
   {
     name: 'text-layer-background-dash',
+    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0
@@ -560,10 +561,7 @@ TextLayer is a CompositeLayer that wraps around the IconLayer. It automatically 
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType, {
     beforeAll: loadPrepackedFontAtlas
   });

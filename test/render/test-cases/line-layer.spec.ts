@@ -2,15 +2,53 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {describe} from 'vitest';
-import {runRenderTestSuite} from '../render-test-suite';
+import {describe, expect, test} from 'vitest';
+import {luma} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
+import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
 /* eslint-disable callback-return */
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
 import {routes} from 'deck.gl-test/data';
 
-const testCases = [
+// Thin shallow diagonals make shader-computed coverage visible in the golden. The case runs only
+// in the isolated no-MSAA suite below; with MSAA enabled the browser smooths both variants.
+const ANTIALIASING_LINES = Array.from({length: 38}, (_, index) => ({
+  sourcePosition: [-170, -210 + index * 11],
+  targetPosition: [170, -204 + index * 11]
+}));
+
+function createAntialiasingVariant(antialiasing: boolean): LineLayer {
+  const xOffset = antialiasing ? 200 : -200;
+  return new LineLayer({
+    id: `line-antialiasing-${antialiasing ? 'on' : 'off'}`,
+    data: ANTIALIASING_LINES.map(({sourcePosition, targetPosition}) => ({
+      sourcePosition: [sourcePosition[0] + xOffset, sourcePosition[1]],
+      targetPosition: [targetPosition[0] + xOffset, targetPosition[1]]
+    })),
+    getSourcePosition: data => data.sourcePosition,
+    getTargetPosition: data => data.targetPosition,
+    getColor: (_, {index}) => (index % 2 ? [20, 20, 20] : [0, 90, 200]),
+    getWidth: 2,
+    widthUnits: 'pixels',
+    antialiasing
+  });
+}
+
+const antialiasingTestCase: TestCase = {
+  name: 'line-antialiasing',
+  skip: ['msaa'],
+  views: new OrthographicView(),
+  viewState: {target: [0, 0, 0], zoom: 0},
+  layers: [createAntialiasingVariant(false), createAntialiasingVariant(true)],
+  imageDiffOptions: {threshold: 0.998, includeAA: true},
+  goldenImage: './test/render/golden-images/line-antialiasing.png'
+};
+
+const testCases: TestCase[] = [
   {
     name: 'line-lnglat',
     viewState: {
@@ -34,12 +72,140 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/line-lnglat.png'
-  }
+  },
+  antialiasingTestCase
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+const ANTIALIASING_TEST_WIDTH = 240;
+const ANTIALIASING_TEST_HEIGHT = 180;
+const ANTIALIASING_MEASURE_LINES = [0, 1, 2, 3].map(index => ({
+  sourcePosition: [-110, -70 + index * 42],
+  targetPosition: [110, -64 + index * 51]
+}));
+
+type Coverage = {solid: number; partial: number; levels: number; minimumPartial: number};
+
+async function measureAntialiasingCoverage(antialiasing: boolean): Promise<Coverage> {
+  const container = document.createElement('div');
+  container.style.cssText =
+    `position:absolute;top:0;left:0;width:${ANTIALIASING_TEST_WIDTH}px;` +
+    `height:${ANTIALIASING_TEST_HEIGHT}px;`;
+  document.body.appendChild(container);
+
+  const device = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    webgl: {antialias: false},
+    createCanvasContext: {
+      container,
+      width: ANTIALIASING_TEST_WIDTH,
+      height: ANTIALIASING_TEST_HEIGHT,
+      useDevicePixels: false,
+      autoResize: true
+    }
+  });
+
+  const deck = new Deck({
+    device,
+    container,
+    width: ANTIALIASING_TEST_WIDTH,
+    height: ANTIALIASING_TEST_HEIGHT,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+
+  const coverage = await new Promise<Coverage>(resolve => {
+    deck.setProps({
+      layers: [
+        new LineLayer({
+          id: 'line-antialiasing',
+          data: ANTIALIASING_MEASURE_LINES,
+          getColor: [20, 20, 20],
+          getWidth: 2,
+          widthUnits: 'pixels',
+          antialiasing
+        })
+      ],
+      onAfterRender: () => {
+        const gl = (device as any).gl;
+        const pixels = new Uint8Array(ANTIALIASING_TEST_WIDTH * ANTIALIASING_TEST_HEIGHT * 4);
+        gl.readPixels(
+          0,
+          0,
+          ANTIALIASING_TEST_WIDTH,
+          ANTIALIASING_TEST_HEIGHT,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          pixels
+        );
+        let solid = 0;
+        let partial = 0;
+        let minimumPartial = 255;
+        const levels = new Set<number>();
+        for (let index = 3; index < pixels.length; index += 4) {
+          const alpha = pixels[index];
+          if (alpha === 255) {
+            solid++;
+          } else if (alpha > 0) {
+            partial++;
+            minimumPartial = Math.min(minimumPartial, alpha);
+            levels.add(alpha);
+          }
+        }
+        resolve({solid, partial, levels: levels.size, minimumPartial});
+      }
+    });
+  });
+
+  deck.finalize();
+  device.destroy();
+  container.remove();
+  return coverage;
+}
+
+describe('LineLayer render tests', () => {
+  describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+    runRenderTestSuite(testCases, deviceType);
+  });
+
+  describe('webgl-no-msaa', () => {
+    runRenderTestSuite([antialiasingTestCase], 'webgl', {
+      deviceMode: 'isolated',
+      webgl: {antialias: false}
+    });
+  });
+});
+
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('LineLayer#antialiasing', () => {
+  test('adds analytic coverage where the context provides none', async () => {
+    const off = await measureAntialiasingCoverage(false);
+    const on = await measureAntialiasingCoverage(true);
+
+    expect(off.solid, 'lines were drawn').toBeGreaterThan(500);
+    expect(off.partial, 'non-MSAA lines have hard edges by default').toBe(0);
+    expect(on.partial, 'analytic antialiasing feathers the line edges').toBeGreaterThan(300);
+    expect(on.levels, 'coverage is continuous').toBeGreaterThan(40);
+    expect(on.minimumPartial, 'the full centered coverage ramp is rasterized').toBeLessThan(96);
+  }, 60000);
+});
+
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))('LineLayer#antialiasing on WebGPU', () => {
+  test('coverage is applied before premultiplication', async () => {
+    const {partial, worstOvershoot} = await measureWebGPUEdges([
+      new LineLayer({
+        id: 'webgpu-line-antialiasing',
+        data: ANTIALIASING_MEASURE_LINES,
+        getColor: STROKE_COLOR,
+        getWidth: 2,
+        widthUnits: 'pixels',
+        antialiasing: true
+      })
+    ]);
+
+    expect(partial, `lines should be feathered (got ${partial} partial pixels)`).toBeGreaterThan(
+      300
+    );
+    expect(worstOvershoot, 'premultiplied red should track alpha').toBeLessThanOrEqual(2);
+  }, 60000);
 });

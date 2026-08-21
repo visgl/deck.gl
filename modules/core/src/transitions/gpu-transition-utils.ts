@@ -59,8 +59,8 @@ export function cycleBuffers(buffers: Buffer[]): void {
 }
 
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
-  const {doublePrecision, settings, value, size} = attribute;
-  const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
+  const {settings, value, size} = attribute;
+  const multiplier = attribute.isDoublePrecisionBuffer ? 2 : 1;
   let maxVertexOffset = 0;
   const {shaderAttributes} = attribute.settings;
   if (shaderAttributes) {
@@ -123,8 +123,7 @@ export function padBuffer({
 }): Buffer {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
   // its `size` and `elementOffset`?
-  const precisionMultiplier =
-    attribute.doublePrecision && attribute.value instanceof Float64Array ? 2 : 1;
+  const precisionMultiplier = attribute.isDoublePrecisionBuffer ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
   const byteOffset = attribute.byteOffset;
   // Transform feedback can only write to float varyings

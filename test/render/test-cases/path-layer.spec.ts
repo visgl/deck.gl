@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {describe} from 'vitest';
-import {runRenderTestSuite} from '../render-test-suite';
+import {describe, expect, test} from 'vitest';
+import {luma} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
+import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
-import {COORDINATE_SYSTEM, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, Deck, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {zigzag, zigzag3D, meterPaths, positionOrigin} from 'deck.gl-test/data';
@@ -186,6 +189,7 @@ const testCases = [
   },
   {
     name: 'path-dash',
+    skip: ['webgpu'],
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
@@ -219,6 +223,7 @@ const testCases = [
   },
   {
     name: 'path-dash-rounded',
+    skip: ['webgpu'],
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
@@ -256,6 +261,7 @@ const testCases = [
   },
   {
     name: 'path-offset',
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.71,
       longitude: -122.405,
@@ -333,9 +339,268 @@ function getGraticules(resolution) {
   return graticules;
 }
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+// `antialiasing` exists for contexts created without multisampling - notably interleaved rendering
+// into a base map, since MapLibre and Mapbox create their WebGL context with `antialias: false`.
+// Both the isolated no-MSAA device and `includeAA: true` are required for this golden to
+// distinguish shader coverage from browser multisampling and pixelmatch's default AA filtering.
+// See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
+const ANTIALIASING_GOLDEN_DIAGONALS = Array.from({length: 20}, (_, index) => ({
+  path: [
+    [-170, -210 + index * 10],
+    [170, -210 + index * 10 + 6]
+  ]
+}));
+
+const ANTIALIASING_GOLDEN_ZIGZAG = [
+  {
+    path: [
+      [-170, 20],
+      [-60, 100],
+      [50, 20],
+      [170, 90]
+    ]
+  }
+];
+
+function offsetAntialiasingPaths(xOffset: number, paths: {path: number[][]}[]) {
+  return paths.map(data => ({path: data.path.map(([x, y]) => [x + xOffset, y])}));
+}
+
+function createAntialiasingGoldenVariant(antialiasing: boolean) {
+  const xOffset = antialiasing ? 200 : -200;
+  const suffix = antialiasing ? 'on' : 'off';
+  return [
+    new PathLayer({
+      id: `path-aa-diagonals-${suffix}`,
+      data: offsetAntialiasingPaths(xOffset, ANTIALIASING_GOLDEN_DIAGONALS),
+      getPath: data => data.path,
+      getColor: [20, 20, 20],
+      getWidth: 2,
+      widthUnits: 'pixels',
+      antialiasing
+    }),
+    new PathLayer({
+      id: `path-aa-rounded-${suffix}`,
+      data: offsetAntialiasingPaths(xOffset, ANTIALIASING_GOLDEN_ZIGZAG),
+      getPath: data => data.path,
+      getColor: [200, 60, 0],
+      getWidth: 7,
+      widthUnits: 'pixels',
+      jointRounded: true,
+      capRounded: true,
+      antialiasing
+    }),
+    new PathLayer({
+      id: `path-aa-miter-${suffix}`,
+      data: offsetAntialiasingPaths(xOffset, ANTIALIASING_GOLDEN_ZIGZAG).map(data => ({
+        path: data.path.map(([x, y]) => [x, y + 110])
+      })),
+      getPath: data => data.path,
+      getColor: [0, 90, 200],
+      getWidth: 7,
+      widthUnits: 'pixels',
+      jointRounded: false,
+      capRounded: false,
+      antialiasing
+    })
+  ];
+}
+
+const antialiasingGoldenTestCases: TestCase[] = [
+  {
+    name: 'path-antialiasing',
+    skip: ['msaa'],
+    views: new OrthographicView(),
+    viewState: {target: [0, 0, 0], zoom: 0},
+    layers: [...createAntialiasingGoldenVariant(false), ...createAntialiasingGoldenVariant(true)],
+    imageDiffOptions: {threshold: 0.998, includeAA: true},
+    goldenImage: './test/render/golden-images/path-antialiasing.png'
+  }
+];
+
+const ANTIALIASING_TEST_WIDTH = 240;
+const ANTIALIASING_TEST_HEIGHT = 180;
+const ANTIALIASING_MEASURE_DIAGONALS = [0, 1, 2, 3].map(index => ({
+  path: [
+    [-110, -70 + index * 42],
+    [110, -70 + index * 42 + 6 + index * 9]
+  ]
+}));
+
+type Coverage = {solid: number; partial: number; levels: number; minimumPartial: number};
+
+function createAntialiasingTestContainer(): HTMLDivElement {
+  const container = document.createElement('div');
+  container.style.cssText =
+    `position:absolute;top:0;left:0;width:${ANTIALIASING_TEST_WIDTH}px;` +
+    `height:${ANTIALIASING_TEST_HEIGHT}px;`;
+  document.body.appendChild(container);
+  return container;
+}
+
+/** Render one PathLayer into a context without MSAA and measure the resulting coverage. */
+async function measureAntialiasingCoverage(layerProps: Record<string, unknown>): Promise<Coverage> {
+  const container = createAntialiasingTestContainer();
+  const device = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    webgl: {antialias: false},
+    createCanvasContext: {
+      container,
+      width: ANTIALIASING_TEST_WIDTH,
+      height: ANTIALIASING_TEST_HEIGHT,
+      useDevicePixels: false,
+      autoResize: true
+    }
+  });
+
+  const deck = new Deck({
+    device,
+    container,
+    width: ANTIALIASING_TEST_WIDTH,
+    height: ANTIALIASING_TEST_HEIGHT,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+
+  const coverage = await new Promise<Coverage>(resolve => {
+    deck.setProps({
+      layers: [
+        new PathLayer({
+          id: 'path-antialiasing',
+          data: ANTIALIASING_MEASURE_DIAGONALS,
+          getPath: data => data.path,
+          getColor: [20, 20, 20],
+          getWidth: 2,
+          widthUnits: 'pixels',
+          ...layerProps
+        })
+      ],
+      onAfterRender: () => {
+        const gl = (device as any).gl;
+        const pixels = new Uint8Array(ANTIALIASING_TEST_WIDTH * ANTIALIASING_TEST_HEIGHT * 4);
+        gl.readPixels(
+          0,
+          0,
+          ANTIALIASING_TEST_WIDTH,
+          ANTIALIASING_TEST_HEIGHT,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          pixels
+        );
+        let solid = 0;
+        let partial = 0;
+        let minimumPartial = 255;
+        const levels = new Set<number>();
+        for (let index = 3; index < pixels.length; index += 4) {
+          const alpha = pixels[index];
+          if (alpha === 255) {
+            solid++;
+          } else if (alpha > 0) {
+            partial++;
+            minimumPartial = Math.min(minimumPartial, alpha);
+            levels.add(alpha);
+          }
+        }
+        resolve({solid, partial, levels: levels.size, minimumPartial});
+      }
+    });
+  });
+
+  deck.finalize();
+  device.destroy();
+  container.remove();
+  return coverage;
+}
+
+describe('PathLayer render tests', () => {
+  describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+    runRenderTestSuite([...testCases, ...antialiasingGoldenTestCases] as TestCase[], deviceType);
+  });
+
+  describe('webgl-no-msaa', () => {
+    runRenderTestSuite(antialiasingGoldenTestCases, 'webgl', {
+      deviceMode: 'isolated',
+      webgl: {antialias: false}
+    });
+  });
+});
+
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () => {
+  test('adds analytic coverage where the context provides none', async () => {
+    const off = await measureAntialiasingCoverage({antialiasing: false});
+    const on = await measureAntialiasingCoverage({antialiasing: true});
+
+    expect(off.solid, 'strokes were drawn').toBeGreaterThan(500);
+    expect(on.solid, 'strokes were drawn').toBeGreaterThan(200);
+    expect(
+      off.partial,
+      `antialiasing:false in a non-MSAA context should produce no partial coverage ` +
+        `(got ${off.partial} partial pixels)`
+    ).toBe(0);
+    expect(
+      on.partial,
+      `antialiasing:true should feather the edges (got ${on.partial} partial pixels)`
+    ).toBeGreaterThan(300);
+    expect(
+      on.levels,
+      `coverage should be continuous, not quantized (got ${on.levels} distinct alpha levels)`
+    ).toBeGreaterThan(40);
+    expect(
+      on.minimumPartial,
+      `the rasterized envelope should include the outer half of the coverage ramp ` +
+        `(minimum alpha ${on.minimumPartial})`
+    ).toBeLessThan(96);
+  }, 60000);
+
+  test('feather survives an extension that rescales the stroke', async () => {
+    const on = await measureAntialiasingCoverage({antialiasing: true});
+    const onOffset = await measureAntialiasingCoverage({
+      antialiasing: true,
+      getOffset: 1,
+      extensions: [new PathStyleExtension({offset: true})]
+    });
+
+    expect(onOffset.solid, 'offset strokes were drawn').toBeGreaterThan(200);
+    expect(
+      onOffset.partial,
+      `offset stroke should still be feathered (got ${onOffset.partial} partial pixels)`
+    ).toBeGreaterThan(200);
+    expect(
+      onOffset.levels,
+      `offset coverage should be continuous (got ${onOffset.levels} distinct alpha levels)`
+    ).toBeGreaterThan(40);
+
+    const ratio = onOffset.partial / on.partial;
+    expect(
+      ratio,
+      `offset feather should be comparable to un-offset (on=${on.partial}, ` +
+        `offset=${onOffset.partial}, ratio=${ratio.toFixed(3)})`
+    ).toBeGreaterThan(0.35);
+  }, 60000);
+});
+
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))('PathLayer#antialiasing on WebGPU', () => {
+  test('coverage is applied before premultiplication', async () => {
+    const {partial, worstOvershoot} = await measureWebGPUEdges([
+      new PathLayer({
+        id: 'webgpu-path-antialiasing',
+        data: ANTIALIASING_MEASURE_DIAGONALS,
+        getPath: data => data.path,
+        getColor: STROKE_COLOR,
+        getWidth: 2,
+        widthUnits: 'pixels',
+        antialiasing: true
+      })
+    ]);
+
+    expect(partial, `strokes should be feathered (got ${partial} partial pixels)`).toBeGreaterThan(
+      300
+    );
+    expect(
+      worstOvershoot,
+      `premultiplied red should track alpha (worst overshoot ${worstOvershoot})`
+    ).toBeLessThanOrEqual(2);
+  }, 60000);
 });

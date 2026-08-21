@@ -18,6 +18,18 @@ void main(void) {
 
   fragColor = vColor;
 
+#ifdef ANTIALIASING
+  // Feather one device pixel across the width, from the derivative of uv.y. The ends are left
+  // hard - they abut neighboring segments. See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
+  float edgeCoord = abs(uv.y);
+  float edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+  fragColor.a *= smoothedge(0.0, edgePixels);
+#endif
+
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;
