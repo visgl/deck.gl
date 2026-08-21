@@ -10,7 +10,6 @@ import {
   GPUDataEvaluator,
   interleave
 } from '@luma.gl/gpgpu';
-import {fround as cpuFround, interleave as cpuInterleave} from '@luma.gl/gpgpu/cpu';
 import {fround as webglFround, interleave as webglInterleave} from '@luma.gl/gpgpu/webgl';
 import {fround as webgpuFround, interleave as webgpuInterleave} from '@luma.gl/gpgpu/webgpu';
 import {toDoublePrecisionArrayCPU} from './math-utils';
