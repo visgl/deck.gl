@@ -338,6 +338,34 @@ test('Attribute#allocate - partial', async () => {
   positions.delete();
 });
 
+test('Attribute#allocate - partial preserves GPU data during reallocation', async () => {
+  const positions = new Attribute(device, {
+    id: 'positions',
+    update: attribute => {
+      attribute.value[0] = 180;
+      attribute.value[1] = 90;
+    },
+    size: 2
+  });
+
+  positions.allocate(1);
+  positions.updateBuffer({});
+  const oldValue = positions.value;
+  oldValue[0] = -1;
+
+  positions.setNeedsUpdate('test', {startRow: 1, endRow: 2});
+  positions.allocate(oldValue.length / 2 + 1);
+
+  expect(positions.value[0], 'CPU allocation copies the raw CPU value').toBe(-1);
+  const bytes = await positions.buffer.readAsync(0, 8);
+  expect(
+    new Float32Array(bytes.buffer, bytes.byteOffset, 2),
+    'GPU allocation copies the previous GPU contents'
+  ).toEqual(new Float32Array([180, 90]));
+
+  positions.delete();
+});
+
 test('Attribute#shaderAttributes', () => {
   const update = () => {};
 
@@ -1197,6 +1225,11 @@ describe('Attribute#doublePrecision', () => {
         getPosition: d => [d, 1, 2]
       }
     });
+
+    expect(attribute.value).toBeInstanceOf(Float32Array);
+    expect(attribute.value.slice(0, 6), 'attribute retains uninterleaved source data').toEqual(
+      new Float32Array([0, 1, 2, 1, 1, 2])
+    );
 
     const bufferLayout = attribute.getBufferLayout();
     expect(bufferLayout.byteStride).toBe(24);

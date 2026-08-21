@@ -9,6 +9,7 @@ import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';
 import './array-utils.spec';
+import './buffer-utils.spec';
 import './iterable-utils.spec';
 import './range.spec';
 import './math-utils.spec';
