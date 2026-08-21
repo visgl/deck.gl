@@ -22,7 +22,8 @@ out vec4 fragColor;
 
 void main(void) {
   #ifdef LIGHTING_PBR
-    fragColor = vColor * pbr_filterColor(vec4(0));
+    // Vertex color is part of the material base color and must be applied before lighting.
+    fragColor = pbr_filterColor(vColor);
     geometry.uv = pbr_vUV0;
   #else
     #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
