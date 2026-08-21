@@ -50,7 +50,7 @@ deck.gl v9.4 brings additional view and controller improvements on top of the su
 - All [controllers](./api-reference/core/controller.md) now support `doubleClickDragZoom` for continuous zooming by double-clicking or double-tapping and dragging vertically.
 - The new `trackpadGesture` option enables native trackpad gestures, including two-finger pan, pinch-to-zoom, and rotate where supported.
 - The new `maxBoundsPadding` option fits `maxBounds` within a padded or asymmetrically positioned viewport region, with support for pixels, percentages, and CSS-style layout expressions.
-- `OrthographicController` now supports `rubberBand`, allowing pan and zoom interactions to temporarily overshoot their constraints before easing back on release.
+- `OrthographicController` and `MapController` now support `rubberBand`, allowing pan and zoom interactions to temporarily overshoot their constraints before easing back on release.
 
 ### @deck.gl/maplibre
 
