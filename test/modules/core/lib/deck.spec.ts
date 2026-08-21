@@ -683,15 +683,6 @@ test('Deck#multi-canvas configuration', () => {
   expect(
     () =>
       new Deck({
-        // @ts-expect-error testing runtime validation for JavaScript callers
-        canvas: [],
-        layers: []
-      })
-  ).toThrow('`canvas` accepts one canvas. Use `_canvases` for multi-canvas mode.');
-
-  expect(
-    () =>
-      new Deck({
         canvas: document.createElement('canvas'),
         _canvases: [],
         layers: []
@@ -867,11 +858,11 @@ webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
   });
   await waitForRender(deck);
 
-  expect(renderCalls).toEqual([['left']]);
+  expect(renderCalls).toEqual([['left'], []]);
   expect(presentCalls).toEqual({a: 1, b: 1});
   const orphanClearPass = beginRenderPass.mock.calls
     .map(([renderPass]) => renderPass)
-    .find(renderPass => renderPass.id === 'screen-deck-test-orphan-canvas-b');
+    .find(renderPass => renderPass.framebuffer === targetB.presentationContext.getCurrentFramebuffer());
   expect(orphanClearPass?.framebuffer, 'orphan canvas clears its own framebuffer').toBe(
     targetB.presentationContext.getCurrentFramebuffer()
   );

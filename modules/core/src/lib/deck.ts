@@ -1120,10 +1120,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _createCanvas(props: DeckProps<ViewsT>): HTMLCanvasElement {
     let canvas = props.canvas;
 
-    if (Array.isArray(canvas)) {
-      throw new Error('Array-valued `canvas` cannot create a single device canvas.');
-    }
-
     // TODO EventManager should accept element id
     if (typeof canvas === 'string') {
       canvas = document.getElementById(canvas) as HTMLCanvasElement;
@@ -1166,10 +1162,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Keep the existing single-canvas API separate from incompatible multi-canvas options. */
   private _validateCanvasConfiguration(props: DeckProps<ViewsT>): void {
-    if (Array.isArray(props.canvas)) {
-      throw new Error('`canvas` accepts one canvas. Use `_canvases` for multi-canvas mode.');
-    }
-
     if (!Array.isArray(props._canvases)) {
       return;
     }
@@ -1273,14 +1265,14 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._restoreDeviceResizeHandler();
 
     const onResize: NonNullable<DeviceProps['onResize']> = canvasContext => {
-      if (canvasContext === this._canvasContext && this._canvasContext) {
+      if (this._isMultiCanvasMode()) {
+        this._updateMultiCanvasDimensions();
+      } else if (canvasContext === this._canvasContext && this._canvasContext) {
         // Deck owns resize handling for the active render CanvasContext. Applications should use
         // DeckProps.onResize instead of the lower-level luma device callback while Deck is active.
         this._onCanvasContextResize(this._canvasContext, {
           syncDrawingBuffer: this._deviceResizeHandler?.syncDrawingBuffer
         });
-      } else if (this._isMultiCanvasMode()) {
-        this._updateMultiCanvasDimensions();
       }
     };
 
@@ -1441,7 +1433,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       width: this.width,
       height: this.height
     });
-    this.layerManager?.activateViewport(this.getViewports()[0]);
   }
 
   private _createAnimationLoop(
@@ -1788,7 +1779,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
           viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
         );
         if (!canvasViewports.length) {
-          this._clearCanvasTarget(canvasId, `screen-${canvasId}`);
+          const target = this._canvasManager.targets[canvasId];
+          this._resizeForCanvasTarget(canvasId);
+          this.deckRenderer?.renderLayers({
+            ...opts,
+            canvasContext: target.presentationContext,
+            target: target.presentationContext.getCurrentFramebuffer(),
+            viewports: [],
+            clearCanvas: true
+          });
+          target.presentationContext.present();
           continue;
         }
 
@@ -1817,29 +1817,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
-  }
-
-  /** Clear and present a canvas that currently has no mapped viewports. */
-  private _clearCanvasTarget(canvasId: string, renderPassId: string): void {
-    const target = this._canvasManager.targets[canvasId];
-    if (!target || !this.device) {
-      return;
-    }
-
-    this._resizeForCanvasTarget(canvasId);
-    const framebuffer = target.presentationContext.getCurrentFramebuffer();
-    const [width, height] = target.presentationContext.getDrawingBufferSize();
-    const renderPass = this.device.beginRenderPass({
-      id: renderPassId,
-      framebuffer,
-      parameters: {viewport: [0, 0, width, height]},
-      clearColor: [0, 0, 0, 0],
-      clearDepth: 1,
-      clearStencil: 0
-    });
-    renderPass.end();
-    this.device.submit();
-    target.presentationContext.present();
   }
 
   // Callbacks
