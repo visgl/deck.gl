@@ -9,7 +9,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const lightCodeTheme = prismThemes.nightOwlLight;
 const darkCodeTheme = prismThemes.nightOwl;
 
-const webpack = require('webpack');
+const {rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 
@@ -29,6 +29,12 @@ const config = {
   organizationName: 'visgl', // Usually your GitHub org/user name.
   projectName: 'deck.gl', // Usually your repo name.
   trailingSlash: false,
+  future: {
+    v4: {
+      removeLegacyPostBuildHeadAttribute: true
+    },
+    faster: true
+  },
 
   presets: [
     [
@@ -95,13 +101,13 @@ const config = {
           }
         },
         plugins: [
-          new webpack.EnvironmentPlugin([
+          new rspack.EnvironmentPlugin([
             'MapboxAccessToken',
             'GoogleMapsAPIKey',
             'GoogleMapsMapId'
           ]),
           // These modules break server side bundling
-          new webpack.IgnorePlugin({
+          new rspack.IgnorePlugin({
             resourceRegExp: /asciify-image/
           })
         ],

@@ -1,12 +1,12 @@
 /**
  * This script adds custom heading ids to all files in the docs directory.
  * The headings in our API reference may have format such as
- 
+
     + ### `opacity` (Number, optional)
     + ### `opacity?: number`
     + ### `getPosition` ([Function](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
     + ### `needsRedraw(options?: {clearRedrawFlags?: boolean}): string | false`
-  
+
  * The default generated hash id by Docusaurus will be something like:
 
     + #-opacity-number-optional
@@ -23,21 +23,21 @@
     + #needsredraw
 
  */
-import { promises as fs } from 'fs'
-import path from 'path';
-import { fileURLToPath } from 'url';
+import {promises as fs} from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
-const docsDir: string = path.resolve(__dirname, '../docs');
+const docsDirectory = path.resolve(dirname, '../docs');
 /** Should match if the line is a header */
 const headerTest = /^(#+)\s+(?<headerContent>.*?)\s*(?<customId>\{#[\w\-]+\})?$/;
 /** Should match if the header describes an API */
 const apiTest = /^`((?<code>\w+)[^`]*)`\s*(\(.*?\)|$)/;
 
 test();
-main();
+await main();
 
 /** Test that getCustomId handles different formats correctly */
 function test() {
@@ -79,52 +79,55 @@ function test() {
 
 /** Traverse all files in the docs directory, append custom ids if necessary */
 async function main() {
-  const files = await listFiles(docsDir, '.md');
-  for (const f of files) {
-    await processFile(f);
+  const files = await listFiles(docsDirectory, '.md');
+  for (const file of files) {
+    await processFile(file);
   }
 }
 
 /** Parse a single line of text in a .md file.
  * @returns new content in 3 parts if custom id is needed, null otherwise.
  */
-function getCustomId(line: string): [hash: string, headerContent: string, customId: string] | null {
-  const m = line.trim().match(headerTest);
-  if (!m) {
+function getCustomId(line) {
+  const match = line.trim().match(headerTest);
+  if (!match) {
     return null;
   }
-  const m1 = m.groups!.headerContent.match(apiTest);
-  if (!m1) {
+  const apiMatch = match.groups.headerContent.match(apiTest);
+  if (!apiMatch) {
     return null;
   }
-  const customId = m1.groups!.code.toLowerCase();
-  return [m[1], m[2], `{#${customId}}`];
+  const customId = apiMatch.groups.code.toLowerCase();
+  return [match[1], match[2], `{#${customId}}`];
 }
 
 /** Process a md file. Rewrites the file content if custom ids are needed. */
-async function processFile(path: string): Promise<void> {
-  const context = await fs.readFile(path, {encoding: 'utf-8'});
+async function processFile(filePath) {
+  const context = await fs.readFile(filePath, {encoding: 'utf-8'});
   let changed = false;
   const lines = context.split('\n').map(line => {
     const customId = getCustomId(line);
     if (customId) {
-      changed = true;
-      return customId.join(' ');
+      const updatedLine = customId.join(' ');
+      if (updatedLine !== line) {
+        changed = true;
+        return updatedLine;
+      }
     }
     return line;
   });
   if (changed) {
-    console.log(path);
-    await fs.writeFile(path, lines.join('\n'));
+    console.log(filePath);
+    await fs.writeFile(filePath, lines.join('\n'));
   }
 }
 
 /** Recursively get all files within the given directory. */
-async function listFiles(path: string, extension: string): Promise<string[]> {
-  const result: string[] = [];
-  const items = await fs.readdir(path);
+async function listFiles(directoryPath, extension) {
+  const result = [];
+  const items = await fs.readdir(directoryPath);
   for (const item of items) {
-    const itemPath = `${path}/${item}`;
+    const itemPath = `${directoryPath}/${item}`;
     const info = await fs.lstat(itemPath);
     if (item.endsWith(extension) && info.isFile()) {
       result.push(itemPath);
@@ -138,7 +141,7 @@ async function listFiles(path: string, extension: string): Promise<string[]> {
 
 /* Test utils */
 
-function expect(value1: any, value2: any, message: string) {
+function expect(value1, value2, message) {
   if (value1 === value2) {
     console.log('Ok', message, value2 || '');
   } else {
