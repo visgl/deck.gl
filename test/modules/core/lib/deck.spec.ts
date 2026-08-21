@@ -601,6 +601,84 @@ webglTest('Deck#multi-canvas presentation', async () => {
   parent.remove();
 });
 
+webglTest('Deck#multi-canvas recreates device-bound targets', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.id = 'deck-test-device-canvas';
+  canvas.width = 64;
+  canvas.height = 64;
+  document.body.appendChild(canvas);
+
+  const deck = new Deck({
+    width: 64,
+    height: 64,
+    _canvases: [canvas],
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  // @ts-expect-error testing private state
+  const canvasManager = deck._canvasManager;
+  const oldTarget = canvasManager.targets['deck-test-device-canvas'];
+  const destroyPresentationContext = vi.spyOn(oldTarget.presentationContext, 'destroy');
+  const replacementPresentationContext = {
+    destroy: vi.fn()
+  };
+  const replacementDevice = {
+    createPresentationContext: vi.fn(() => replacementPresentationContext)
+  };
+
+  canvasManager.syncCanvasEntries({
+    device: replacementDevice,
+    canvases: [canvas],
+    useDevicePixels: true
+  });
+
+  expect(destroyPresentationContext).toHaveBeenCalledOnce();
+  expect(replacementDevice.createPresentationContext).toHaveBeenCalledOnce();
+  expect(canvasManager.targets['deck-test-device-canvas'].presentationContext).toBe(
+    replacementPresentationContext
+  );
+
+  finalizeOwnedDeck(deck);
+  canvas.remove();
+});
+
+webglTest('Deck#multi-canvas isolates shared event roots', async () => {
+  const eventRoot = document.createElement('div');
+  eventRoot.className = 'deck-events-root';
+  document.body.appendChild(eventRoot);
+
+  const canvasA = document.createElement('canvas');
+  canvasA.id = 'deck-test-shared-event-root-a';
+  canvasA.width = 64;
+  canvasA.height = 64;
+  eventRoot.appendChild(canvasA);
+
+  const canvasB = document.createElement('canvas');
+  canvasB.id = 'deck-test-shared-event-root-b';
+  canvasB.width = 64;
+  canvasB.height = 64;
+  eventRoot.appendChild(canvasB);
+
+  const deck = new Deck({
+    width: 64,
+    height: 64,
+    _canvases: [canvasA, canvasB],
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: []
+  });
+
+  await waitForRender(deck);
+
+  expect(deck.getEventManager('deck-test-shared-event-root-a')?.getElement()).toBe(canvasA);
+  expect(deck.getEventManager('deck-test-shared-event-root-b')?.getElement()).toBe(canvasB);
+
+  finalizeOwnedDeck(deck);
+  eventRoot.remove();
+});
+
 test('Deck#multi-canvas configuration', () => {
   expect(
     () =>

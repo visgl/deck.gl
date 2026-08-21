@@ -15,6 +15,8 @@ import type {EventManager} from 'mjolnir.js';
 export type CanvasEntry = {
   /** Stable id used to route views, input events, and picking to this canvas. */
   id: string;
+  /** Device that owns this target's presentation context. */
+  device: Device;
   /** Existing HTML canvas receiving the rendered presentation. */
   canvas: HTMLCanvasElement;
   /** Custom `.deck-events-root` ancestor or canvas used for event handling. */
@@ -85,11 +87,26 @@ export default class CanvasManager {
     const normalizedCanvases = this._normalizeCanvasList(props.canvases);
     const nextTargets: Record<string, CanvasEntry> = {};
     const nextOrder: string[] = [];
+    const eventRootCounts = new Map<HTMLElement, number>();
+
+    for (const {canvas} of normalizedCanvases) {
+      const eventRoot = this._getEventRoot(canvas);
+      eventRootCounts.set(eventRoot, (eventRootCounts.get(eventRoot) || 0) + 1);
+    }
 
     for (const {id, canvas} of normalizedCanvases) {
-      const eventRoot = this._getEventRoot(canvas);
+      const resolvedEventRoot = this._getEventRoot(canvas);
+      // A shared event root would dispatch every event to every target's controller. In that
+      // ambiguous case, listen directly on each canvas to keep input local to its target.
+      const eventRoot =
+        eventRootCounts.get(resolvedEventRoot) === 1 ? resolvedEventRoot : canvas;
       let target = this.targets[id];
-      if (!target || target.canvas !== canvas || target.eventRoot !== eventRoot) {
+      if (
+        !target ||
+        target.device !== props.device ||
+        target.canvas !== canvas ||
+        target.eventRoot !== eventRoot
+      ) {
         target?.eventManager.destroy();
         target?.presentationContext.destroy();
 
@@ -101,6 +118,7 @@ export default class CanvasManager {
         });
         target = {
           id,
+          device: props.device,
           canvas,
           eventRoot,
           presentationContext,
