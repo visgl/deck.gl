@@ -6,6 +6,23 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: August 2026
 
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/antialiasing.png?raw=true" />
+        <p><i>Analytic antialiasing</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/rubberband.gif?raw=true" />
+        <p><i>Controller maxBounds + rubberBand</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
@@ -20,9 +37,9 @@ WebGPU support remains experimental and is not yet recommended for production. S
 
 ### Views and Controllers
 
-deck.gl v9.4 brings additional view and controller improvements on top of the substantial changes in v9.3.
+deck.gl v9.4 brings numerous view and controller improvements on top of the substantial changes in v9.3.
 
-**GlobeView**
+**GlobeView compatibility and UX**
 
 [`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
@@ -30,8 +47,9 @@ deck.gl v9.4 brings additional view and controller improvements on top of the su
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - Pointer-anchored zoom now rotates the camera frame like a physical ball, keeping steering smooth and consistent around the poles while allowing bearing to evolve naturally.
+- [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
-**Views**
+**View management**
 
 - [Views](./api-reference/core/view.md#parameters) now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with:
 
@@ -45,7 +63,11 @@ deck.gl v9.4 brings additional view and controller improvements on top of the su
 
 - A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
 
-**Controllers**
+**Multi-canvas support**
+
+New experimental multi-canvas foundations allow integrations to associate each `View` with a presentation canvas using `canvasId`. `Deck.getEventManager(viewId)` resolves the event manager responsible for a particular view, enabling view-scoped interaction across multiple canvases. This API is experimental and may change as multi-canvas support evolves.
+
+**New controller options**
 
 - All [controllers](./api-reference/core/controller.md) now support `doubleClickDragZoom` for continuous zooming by double-clicking or double-tapping and dragging vertically.
 - The new `trackpadGesture` option enables native trackpad gestures, including two-finger pan, pinch-to-zoom, and rotate where supported.
@@ -54,19 +76,28 @@ deck.gl v9.4 brings additional view and controller improvements on top of the su
 
 ### @deck.gl/maplibre
 
-- New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module supports overlaid and interleaved rendering with MapLibre GL JS v4.5.1, v5, and v6 using only public MapLibre APIs.
+New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked from the former `@deck.gl/mapbox` module. It provides support for overlaid and interleaved rendering with MapLibre GL JS v4, v5, and the recently released v6.
 
 ### Other Improvements
+
+Better performance, and new layer and widget features.
 
 - Picking performance has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
-- [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
+- [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md#getpixeloffset) adds a transition-enabled `getPixelOffset` accessor for positioning circles in screen space.
+- [OrthographicView](./api-reference/core/orthographic-view.md#common-size-resolution) allows `zoom` to control the size of geometry in common units independently from positional `zoomX` and `zoomY`.
 - [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
+- Built-in widget buttons now use [styled, customizable tooltips](./api-reference/widgets/tooltips.md) that support text, HTML content, theming, and per-button disabling.
+- Built-in widget icons now use Google Material Symbols, with a new [`--icon-size`](./api-reference/widgets/styling.md#size) theme variable for consistent sizing.
+- [ScrollbarWidget](./api-reference/widgets/scrollbar-widget.md) now supports `contentBoundsPadding` to align its scroll range with padded content bounds. When explicit values are omitted, `contentBounds` and `contentBoundsPadding` fall back to the target view controller's `maxBounds` and `maxBoundsPadding`, respectively.
+- `@deck.gl/arcgis`'s [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
 
 ### pydeck
 
 deck.gl's Python bindings gain first-class support for [layer extensions](./api-reference/extensions/overview.md), available through a typed [`pydeck.Extension`](https://deckgl.readthedocs.io/en/latest/extension.html) wrapper, as well as lighting and post-processing effects through `pydeck.Effect`.
+
+The Jupyter integration now recognizes the canonical `GlobeView` type name while retaining `_GlobeView` as a backwards-compatible alias.
 
 ```python
 import pydeck as pdk
