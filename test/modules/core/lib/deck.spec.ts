@@ -548,6 +548,10 @@ webglTest('Deck#multi-canvas presentation', async () => {
   expect(deck.eventManagers['deck-test-canvas-b'].getElement()).toBe(eventRootB);
   expect(deck.getEventManager('left')?.getElement()).toBe(eventRootA);
   expect(deck.getEventManager('right')?.getElement()).toBe(eventRootB);
+  // @ts-expect-error testing private state
+  expect(deck.getCanvasContext('right')).toBe(
+    deck._canvasManager.targets['deck-test-canvas-b'].presentationContext
+  );
   expect(deck.getViewports({x: 0, y: 0, canvasId: 'deck-test-canvas-a'}).map(v => v.id)).toEqual([
     'left'
   ]);
@@ -862,7 +866,9 @@ webglTest('Deck#multi-canvas clears orphaned canvases', async () => {
   expect(presentCalls).toEqual({a: 1, b: 1});
   const orphanClearPass = beginRenderPass.mock.calls
     .map(([renderPass]) => renderPass)
-    .find(renderPass => renderPass.framebuffer === targetB.presentationContext.getCurrentFramebuffer());
+    .find(
+      renderPass => renderPass.framebuffer === targetB.presentationContext.getCurrentFramebuffer()
+    );
   expect(orphanClearPass?.framebuffer, 'orphan canvas clears its own framebuffer').toBe(
     targetB.presentationContext.getCurrentFramebuffer()
   );

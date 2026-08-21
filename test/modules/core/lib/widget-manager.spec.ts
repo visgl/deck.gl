@@ -242,10 +242,15 @@ test('WidgetManager#onRedraw#without viewId uses parent size', () => {
 
 test('WidgetManager#onRedraw#viewId uses canvas offset', () => {
   const parentElement = document.createElement('div');
+  const canvasContext = {
+    getCSSSize: () => [400, 300],
+    getPosition: () => [300, 200],
+    updatePosition() {}
+  };
+  parentElement.getBoundingClientRect = () => ({left: 0, top: 0}) as DOMRect;
   const widgetManager = new WidgetManager({
-    deck: mockDeckInstance,
-    parentElement,
-    getCanvasBounds: () => ({x: 300, y: 200, width: 400, height: 300})
+    deck: {...mockDeckInstance, getCanvasContext: () => canvasContext},
+    parentElement
   });
 
   const widget = new TestWidget({id: 'A', viewId: 'minimap'});

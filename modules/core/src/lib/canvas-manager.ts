@@ -98,8 +98,7 @@ export default class CanvasManager {
       const resolvedEventRoot = this._getEventRoot(canvas);
       // A shared event root would dispatch every event to every target's controller. In that
       // ambiguous case, listen directly on each canvas to keep input local to its target.
-      const eventRoot =
-        eventRootCounts.get(resolvedEventRoot) === 1 ? resolvedEventRoot : canvas;
+      const eventRoot = eventRootCounts.get(resolvedEventRoot) === 1 ? resolvedEventRoot : canvas;
       let target = this.targets[id];
       if (
         !target ||

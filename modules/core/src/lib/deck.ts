@@ -709,6 +709,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this.canvas;
   }
 
+  /** Get the canvas context associated with a view or the default Deck canvas. */
+  getCanvasContext(viewId?: string): CanvasContext | PresentationContext | null {
+    const canvasId = viewId ? this.viewManager?.getCanvasId(viewId) : undefined;
+    return this._getCanvasContext(canvasId);
+  }
+
   /** Get the event manager associated with a view or the default Deck canvas. */
   getEventManager(viewId?: string): EventManager | null {
     if (!viewId || !this.viewManager) {
@@ -1320,24 +1326,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return this._canvasManager.getTarget(canvasId)?.presentationContext || this._canvasContext;
   }
 
-  /** Resolves a view's presentation-canvas bounds relative to the shared widget root. */
-  private _getCanvasBounds(
-    viewport?: Viewport | null,
-    parentElement?: HTMLElement | null
-  ): {x: number; y: number; width: number; height: number} {
-    const canvasId = viewport ? this.viewManager?.getCanvasId(viewport.id) : undefined;
-    const canvasContext = this._getCanvasContext(canvasId);
-    const [width, height] = canvasContext?.getCSSSize() || [this.width, this.height];
-    const parentRect = parentElement?.getBoundingClientRect();
-    if (!canvasContext || !parentRect) {
-      return {x: 0, y: 0, width, height};
-    }
-
-    canvasContext.updatePosition();
-    const [x, y] = canvasContext.getPosition();
-    return {x: x - parentRect.left, y: y - parentRect.top, width, height};
-  }
-
   /** Resize the offscreen default canvas context to match a presentation target. */
   private _resizeForCanvasTarget(canvasId?: string): void {
     const target = this._canvasManager.getTarget(canvasId);
@@ -1726,8 +1714,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.widgetManager = new WidgetManager({
       deck: this,
-      parentElement: widgetParent,
-      getCanvasBounds: viewport => this._getCanvasBounds(viewport, widgetParent)
+      parentElement: widgetParent
     });
     this.widgetManager.addDefault(new TooltipWidget());
 

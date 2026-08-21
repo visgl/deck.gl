@@ -63,6 +63,8 @@ Notes:
 * In multi-canvas mode, each canvas gets its own event manager and controller routing.
 * `_canvases: []` keeps the offscreen-backed device path active but does not create any presentation targets.
 
+Use `deck.getCanvasContext(viewId)` to access the presentation context assigned to a view. Canvas identifiers remain an internal presentation-target detail; Deck APIs that associate resources with a view accept its view id.
+
 #### `device` ([Device](https://luma.gl/docs/api-reference/core/device)) {#device}
 
 luma.gl Device used to manage the application's connection with the GPU. Will be auto-created if not supplied.
@@ -632,6 +634,25 @@ Notes:
 
 * See the [canvas](#canvas) prop for more information.
 * In multi-canvas mode, this returns the first configured presentation canvas.
+
+#### `getCanvasContext` {#getcanvascontext}
+
+Get the canvas context associated with a view, or the default Deck canvas when no view id is supplied.
+
+```js
+deck.getCanvasContext(viewId)
+```
+
+Parameters:
+
+* `viewId` (string, optional) - the id of the view whose presentation context to retrieve.
+
+Returns:
+
+* A luma.gl `CanvasContext` or `PresentationContext`, or `null` when no matching canvas is available.
+
+In multi-canvas mode, the context is resolved from the view's `canvasId`. This lets view-bound
+components use a view id without depending on presentation-target identifiers.
 
 #### `getViews` {#getviews}
 
