@@ -9,7 +9,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const lightCodeTheme = prismThemes.nightOwlLight;
 const darkCodeTheme = prismThemes.nightOwl;
 
-const {rspack} = require('@docusaurus/faster');
+const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 
@@ -33,7 +33,37 @@ const config = {
     v4: {
       removeLegacyPostBuildHeadAttribute: true
     },
-    faster: true
+    faster: {
+      // Use a custom SWC loader below so styled-components receives stable SSR component IDs.
+      swcJsLoader: false,
+      swcJsMinimizer: true,
+      swcHtmlMinimizer: true,
+      lightningCssMinimizer: true,
+      mdxCrossCompilerCache: true,
+      rspackBundler: true,
+      rspackPersistentCache: true,
+      ssgWorkerThreads: true,
+      gitEagerVcs: true
+    }
+  },
+
+  webpack: {
+    jsLoader(isServer) {
+      const options = getSwcLoaderOptions({isServer, bundlerName: 'rspack'});
+      options.jsc.experimental = {
+        plugins: [
+          [
+            require.resolve('@swc/plugin-styled-components'),
+            {displayName: true, ssr: true}
+          ]
+        ]
+      };
+
+      return {
+        loader: 'builtin:swc-loader',
+        options
+      };
+    }
   },
 
   presets: [
