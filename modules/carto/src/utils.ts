@@ -150,3 +150,20 @@ export function copyNumericProps(
     targetProps[prop].value[targetIndex] = sourceProps[prop].value[sourceIndex];
   });
 }
+
+/**
+ * Fetch options carrying the CARTO Authorization header, or none when no
+ * access token is present — e.g. a source created with the api-client's
+ * session auth mode, where tile URLs are same-origin and authenticated by a
+ * cookie. Emitting `Bearer undefined` would defeat such server-side session
+ * handling, which engages only when the Authorization header is absent.
+ */
+export function getAuthFetchOptions(accessToken: string | undefined): {
+  headers?: Record<string, string>;
+  credentials?: RequestCredentials;
+} {
+  if (!accessToken) {
+    return {credentials: 'same-origin'};
+  }
+  return {headers: {Authorization: `Bearer ${accessToken}`}};
+}
