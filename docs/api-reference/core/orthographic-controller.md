@@ -47,8 +47,22 @@ Also accepts additional options:
 
 - `zoomAxis` (string) - which axes to apply zoom to. Affects scroll, keyboard +/- and double tap. One of `X` (zoom along the X axis only), `Y` (zoom along the Y axis only), `all`. Default `all`. If this option is set to `X` or `Y`, `viewState.zoom` must be an array to enable independent zoom for each axis.
 - `maxBounds` - constrains the target position within the specified bounding box `[[minX, minY], [maxX, maxY]]`
+- `maxBoundsAlignment` (`{x, y}`) - aligns bounded content when an axis remains smaller than the viewport after applying the existing zoom constraints. Each axis accepts `start`, `center`, or `end`. `start` aligns the minimum world coordinate and `end` aligns the maximum world coordinate, so their visual direction on the Y axis depends on `flipY`. This option does not change zoom. An omitted axis retains the default `maxBounds` behavior.
 - `maxBoundsPadding` - padding inside the viewport when fitting `maxBounds`, using the same `{left, right, top, bottom}` format as view padding. Numeric values are pixels; strings may be percentages or layout expressions such as `calc(10% - 4px)`. Each side is measured from the projected `target`, including any view padding. Default `0`.
 - `rubberBand` (boolean) - allows continuous pan and zoom interactions to temporarily overshoot `maxBounds`, `minZoom`, and `maxZoom` with increasing resistance. On release, the view returns within constraints using a 300 ms exponential ease-out independently of `inertia`. Default `false`.
+
+For example, a timeline that zooms only along X can keep short vertical content aligned to its minimum Y bound:
+
+```js
+new OrthographicView({
+  controller: {
+    maxBounds: contentBounds,
+    maxBoundsAlignment: {y: 'start'}
+  }
+});
+```
+
+Alignment applies to the area remaining after `maxBoundsPadding`. If the bounded content fills or exceeds the viewport on an axis, the controller uses ordinary target clamping on that axis.
 
 ## Custom OrthographicController
 

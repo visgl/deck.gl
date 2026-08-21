@@ -61,6 +61,19 @@ const view = new OrthographicView({id: '2d-scene', controller: true});
 
 Visit the [OrthographicController](./orthographic-controller.md) documentation for a full list of supported options.
 
+Bounded charts and timelines can use the controller's `maxBoundsAlignment` option to place content that remains smaller than the viewport on either world axis:
+
+```js
+const view = new OrthographicView({
+  controller: {
+    maxBounds: contentBounds,
+    maxBoundsAlignment: {x: 'center', y: 'start'}
+  }
+});
+```
+
+This alignment changes only the constrained target. It does not alter the orthographic projection or the existing `maxBounds` zoom behavior.
+
 
 ## Remarks
 
