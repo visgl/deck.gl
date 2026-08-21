@@ -113,12 +113,16 @@ const config = {
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
+            // Explicit subpaths must precede the namespace alias, which otherwise bypasses
+            // package exports and resolves them as nonexistent directories.
             '@luma.gl/webgl/constants': resolve(
               '../node_modules/@luma.gl/webgl/dist/constants'
             ),
             '@luma.gl/gpgpu/webgpu': resolve(
               '../node_modules/@luma.gl/gpgpu/dist/operations/webgpu'
             ),
+            '@luma.gl/gpgpu/gpu-data': resolve('../node_modules/@luma.gl/gpgpu/dist/gpu-data'),
+            '@luma.gl/shadertools/wgsl': resolve('../node_modules/@luma.gl/shadertools/dist/wgsl'),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
             '@math.gl': resolve('../node_modules/@math.gl'),
             '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
