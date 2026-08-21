@@ -166,6 +166,15 @@ type _GeoJsonLayerStrokeProps<FeaturePropertiesT> = {
   lineCapRounded?: boolean;
 
   /**
+   * If `true`, lines are rendered with smoothed edges. If `false`, lines are rendered with rough
+   * edges. Antialiasing can cause artifacts where a line overlaps itself. Only the edges along the
+   * width of the line are smoothed - flat caps at the two ends are not.
+   *
+   * @default false
+   */
+  lineAntialiasing?: boolean;
+
+  /**
    * If `true`, extrude the line in screen space (width always faces the camera).
    * If `false`, the width always faces up.
    *
