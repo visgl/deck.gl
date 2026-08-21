@@ -429,6 +429,87 @@ test('OrthographicController keeps maxBounds hard by default', () => {
   }
 });
 
+test('OrthographicController keeps hard panning at an aligned undersized bound', () => {
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        maxBounds: [
+          [0, 0],
+          [200, 25]
+        ],
+        maxBoundsAlignment: {y: 'start'}
+      }
+    }),
+    initialViewState: {target: [100, 0, 0], zoom: 0, zoomAxis: 'X'}
+  });
+
+  expect(controller.props.target, 'initial state aligns the minimum Y bound').toEqual([100, 50, 0]);
+  controller.handleEvent(makeGestureEvent('panstart') as any);
+  controller.handleEvent(makeGestureEvent('panmove', {y: 200}) as any);
+  expect(controller.props.target, 'hard panning keeps the aligned axis fixed').toEqual([100, 50]);
+  controller.handleEvent(makeGestureEvent('panend', {y: 200}) as any);
+  controller.finalize();
+});
+
+test('OrthographicController re-normalizes changed maxBoundsAlignment', () => {
+  const viewStateChanges: Record<string, any>[] = [];
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        maxBounds: [
+          [0, 0],
+          [200, 25]
+        ],
+        maxBoundsAlignment: {y: 'start'}
+      }
+    }),
+    initialViewState: {target: [100, 0, 0], zoom: 0, zoomAxis: 'X'},
+    onViewStateChange: ({viewState}) => {
+      viewStateChanges.push(viewState);
+    }
+  });
+  viewStateChanges.length = 0;
+
+  controller.setProps({...controller.props, maxBoundsAlignment: {y: 'end'}});
+  expect(controller.props.target, 'changing alignment publishes the new anchor').toEqual([
+    100, -25, 0
+  ]);
+  expect(viewStateChanges, 'one semantic alignment update is emitted').toHaveLength(1);
+
+  controller.setProps({...controller.props, maxBoundsAlignment: {y: 'end'}});
+  expect(viewStateChanges, 'equivalent alignment objects do not emit updates').toHaveLength(1);
+  controller.finalize();
+});
+
+test('OrthographicController rubber-bands around an aligned undersized bound', () => {
+  const controller = createTestController({
+    view: new OrthographicView({
+      controller: {
+        maxBounds: [
+          [0, 0],
+          [200, 25]
+        ],
+        maxBoundsAlignment: {y: 'start'},
+        rubberBand: true
+      }
+    }),
+    initialViewState: {target: [100, 0, 0], zoom: 0, zoomAxis: 'X'}
+  });
+
+  expect(controller.props.target[1], 'initial state uses the aligned anchor').toBe(50);
+  controller.handleEvent(makeGestureEvent('panstart') as any);
+  controller.handleEvent(makeGestureEvent('panmove', {y: 200}) as any);
+  expect(controller.props.target[1], 'dragging can overshoot the aligned anchor').toBeLessThan(50);
+  expect(controller.props.target[1], 'overshoot is resisted').toBeGreaterThan(-100);
+
+  controller.handleEvent(makeGestureEvent('panend', {y: 200}) as any);
+  const transition = controller.transitionManager.transition;
+  expect(transition.inProgress, 'release starts a rebound').toBe(true);
+  advanceRubberBandTransition(controller, transition.settings.duration);
+  expect(controller.props.target, 'rebound settles at the same aligned anchor').toEqual([100, 50]);
+  controller.finalize();
+});
+
 test.each([
   {description: 'maxZoom', scale: 4, expectedElasticZoom: 1.5, expectedSettledZoom: 1},
   {description: 'minZoom', scale: 0.25, expectedElasticZoom: -1.5, expectedSettledZoom: -1}
