@@ -25,6 +25,14 @@ export type MaxBoundsRect = {
 
 export type MaxBoundsExtents = ResolvedPadding;
 
+/** Applies asymptotic resistance to a value beyond its constrained limit. */
+export function applyRubberBand(value: number, constrainedValue: number, range: number): number {
+  const overshoot = value - constrainedValue;
+  return overshoot && Number.isFinite(overshoot)
+    ? constrainedValue + (overshoot * range) / (range + Math.abs(overshoot))
+    : constrainedValue;
+}
+
 /** Returns the on-screen rectangle available for fitting max bounds. */
 export function getMaxBoundsRect(
   width: number,

@@ -5,7 +5,7 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
 import ViewState, {type ConstraintContext} from './view-state';
-import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
+import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
@@ -89,13 +89,6 @@ function getAxisBounds(
         ? clamp(target, minimum, maximum)
         : midpoint
   };
-}
-
-function applyRubberBand(value: number, constrainedValue: number, range: number): number {
-  const overshoot = value - constrainedValue;
-  return overshoot && Number.isFinite(overshoot)
-    ? constrainedValue + (overshoot * range) / (range + Math.abs(overshoot))
-    : constrainedValue;
 }
 
 export class OrthographicState extends ViewState<
