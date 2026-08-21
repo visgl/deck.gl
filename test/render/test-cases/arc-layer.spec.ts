@@ -2,10 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {describe} from 'vitest';
-import {runRenderTestSuite} from '../render-test-suite';
+import {describe, expect, test} from 'vitest';
+import {luma} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
+import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
+import {COORDINATE_SYSTEM, Deck, MapView, OrthographicView} from '@deck.gl/core';
 import {ArcLayer} from '@deck.gl/layers';
 
 import * as dataSamples from 'deck.gl-test/data';
@@ -245,6 +249,183 @@ const testCases = [
   }
 ];
 
-describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+// Render without MSAA and include antialiased pixels in the diff. Both settings are required for
+// the golden to distinguish shader coverage from the browser's default multisampling.
+const ANTIALIASING_GOLDEN_ARCS = Array.from({length: 18}, (_, index) => ({
+  sourcePosition: [-170, -210 + index * 24, 0],
+  targetPosition: [170, -204 + index * 24, 0]
+}));
+
+function createAntialiasingGoldenVariant(antialiasing: boolean): ArcLayer {
+  const xOffset = antialiasing ? 200 : -200;
+  return new ArcLayer({
+    id: `arc-antialiasing-${antialiasing ? 'on' : 'off'}`,
+    data: ANTIALIASING_GOLDEN_ARCS.map(({sourcePosition, targetPosition}) => ({
+      sourcePosition: [sourcePosition[0] + xOffset, sourcePosition[1], 0],
+      targetPosition: [targetPosition[0] + xOffset, targetPosition[1], 0]
+    })),
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    getSourcePosition: data => data.sourcePosition,
+    getTargetPosition: data => data.targetPosition,
+    getSourceColor: [200, 60, 0],
+    getTargetColor: [0, 90, 200],
+    getWidth: 2,
+    getHeight: 0.2,
+    getTilt: 90,
+    widthUnits: 'pixels',
+    numSegments: 50,
+    antialiasing
+  });
+}
+
+const antialiasingGoldenTestCases: TestCase[] = [
+  {
+    name: 'arc-antialiasing',
+    skip: ['msaa'],
+    views: new OrthographicView(),
+    viewState: {target: [0, 0, 0], zoom: 0},
+    layers: [createAntialiasingGoldenVariant(false), createAntialiasingGoldenVariant(true)],
+    imageDiffOptions: {threshold: 0.998, includeAA: true},
+    goldenImage: './test/render/golden-images/arc-antialiasing.png'
+  }
+];
+
+const ANTIALIASING_TEST_WIDTH = 240;
+const ANTIALIASING_TEST_HEIGHT = 180;
+const ANTIALIASING_MEASURE_ARCS = [0, 1, 2, 3].map(index => ({
+  sourcePosition: [-122.49, 37.73 + index * 0.015],
+  targetPosition: [-122.41, 37.732 + index * 0.018]
+}));
+
+type Coverage = {solid: number; partial: number; levels: number; minimumPartial: number};
+
+async function measureAntialiasingCoverage(antialiasing: boolean): Promise<Coverage> {
+  const container = document.createElement('div');
+  container.style.cssText =
+    `position:absolute;top:0;left:0;width:${ANTIALIASING_TEST_WIDTH}px;` +
+    `height:${ANTIALIASING_TEST_HEIGHT}px;`;
+  document.body.appendChild(container);
+
+  const device = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    webgl: {antialias: false},
+    createCanvasContext: {
+      container,
+      width: ANTIALIASING_TEST_WIDTH,
+      height: ANTIALIASING_TEST_HEIGHT,
+      useDevicePixels: false,
+      autoResize: true
+    }
+  });
+
+  const deck = new Deck({
+    device,
+    container,
+    width: ANTIALIASING_TEST_WIDTH,
+    height: ANTIALIASING_TEST_HEIGHT,
+    useDevicePixels: false,
+    initialViewState: {longitude: -122.45, latitude: 37.76, zoom: 11}
+  });
+
+  const coverage = await new Promise<Coverage>(resolve => {
+    deck.setProps({
+      layers: [
+        new ArcLayer({
+          id: 'arc-antialiasing',
+          data: ANTIALIASING_MEASURE_ARCS,
+          getSourceColor: [20, 20, 20],
+          getTargetColor: [20, 20, 20],
+          getWidth: 2,
+          getHeight: 0.4,
+          widthUnits: 'pixels',
+          antialiasing
+        })
+      ],
+      onAfterRender: () => {
+        const gl = (device as any).gl;
+        const pixels = new Uint8Array(ANTIALIASING_TEST_WIDTH * ANTIALIASING_TEST_HEIGHT * 4);
+        gl.readPixels(
+          0,
+          0,
+          ANTIALIASING_TEST_WIDTH,
+          ANTIALIASING_TEST_HEIGHT,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          pixels
+        );
+        let solid = 0;
+        let partial = 0;
+        let minimumPartial = 255;
+        const levels = new Set<number>();
+        for (let index = 3; index < pixels.length; index += 4) {
+          const alpha = pixels[index];
+          if (alpha === 255) {
+            solid++;
+          } else if (alpha > 0) {
+            partial++;
+            minimumPartial = Math.min(minimumPartial, alpha);
+            levels.add(alpha);
+          }
+        }
+        resolve({solid, partial, levels: levels.size, minimumPartial});
+      }
+    });
+  });
+
+  deck.finalize();
+  device.destroy();
+  container.remove();
+  return coverage;
+}
+
+describe('ArcLayer render tests', () => {
+  describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+    runRenderTestSuite([...testCases, ...antialiasingGoldenTestCases] as TestCase[], deviceType);
+  });
+
+  describe('webgl-no-msaa', () => {
+    runRenderTestSuite(antialiasingGoldenTestCases, 'webgl', {
+      deviceMode: 'isolated',
+      webgl: {antialias: false}
+    });
+  });
+});
+
+describe.runIf(isRenderTestDeviceEnabled('webgl'))('ArcLayer#antialiasing', () => {
+  test('adds analytic coverage where the context provides none', async () => {
+    const off = await measureAntialiasingCoverage(false);
+    const on = await measureAntialiasingCoverage(true);
+
+    expect(off.solid, 'arcs were drawn').toBeGreaterThan(500);
+    expect(off.partial, 'non-MSAA arcs have hard edges by default').toBe(0);
+    expect(on.partial, 'analytic antialiasing feathers the arc edges').toBeGreaterThan(300);
+    expect(on.levels, 'coverage is continuous').toBeGreaterThan(40);
+    expect(on.minimumPartial, 'the full centered coverage ramp is rasterized').toBeLessThan(96);
+  }, 60000);
+});
+
+describe.runIf(isRenderTestDeviceEnabled('webgpu'))('ArcLayer#antialiasing on WebGPU', () => {
+  test('coverage is applied before premultiplication', async () => {
+    const {partial, worstOvershoot} = await measureWebGPUEdges(
+      [
+        new ArcLayer({
+          id: 'webgpu-arc-antialiasing',
+          data: ANTIALIASING_MEASURE_ARCS,
+          getSourceColor: STROKE_COLOR,
+          getTargetColor: STROKE_COLOR,
+          getWidth: 2,
+          getHeight: 0.4,
+          antialiasing: true
+        })
+      ],
+      new MapView(),
+      {longitude: -122.45, latitude: 37.76, zoom: 11}
+    );
+
+    expect(partial, `arcs should be feathered (got ${partial} partial pixels)`).toBeGreaterThan(
+      300
+    );
+    expect(worstOvershoot, 'premultiplied red should track alpha').toBeLessThanOrEqual(2);
+  }, 60000);
 });

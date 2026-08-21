@@ -22,7 +22,7 @@ import {
 import {Model} from '@luma.gl/engine';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
-import source from './arc-layer.wgsl';
+import {shaderWGSL} from './arc-layer.wgsl';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
@@ -43,7 +43,8 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
+  antialiasing: false
 };
 
 /** All properties supported by ArcLayer. */
@@ -87,6 +88,15 @@ type _ArcLayerProps<DataT> = {
    * @default Number.MAX_SAFE_INTEGER
    */
   widthMaxPixels?: number;
+
+  /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where arcs overlap. Only the edges
+   * along the width of the arc are smoothed - the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
 
   /**
    * Method called to retrieve the source position of each object.
@@ -150,10 +160,12 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getShaders() {
+    const {antialiasing} = this.props;
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: shaderWGSL,
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, picking, arcUniforms]
     }); // 'project' module added by default.
   }
@@ -221,7 +233,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView} from '@deck.gl/core';
-import {LineLayer, PathLayer} from '@deck.gl/layers';
+import {ArcLayer, LineLayer, PathLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 
 const WIDTH = 3840;
@@ -14,6 +14,7 @@ const QUERY_TIMEOUT = 5000;
 const thinPaths = createThinPaths();
 const thickPaths = createThickPaths();
 const thinLines = thinPaths.map(({path}) => ({sourcePosition: path[0], targetPosition: path[1]}));
+const sparseArcs = createSparseArcs();
 
 const workloads = [
   {
@@ -47,6 +48,14 @@ const workloads = [
     width: 1,
     picking: false,
     createLayer: createLineLayer
+  },
+  {
+    id: 'arc-thin-strokes',
+    label: 'ArcLayer vertex-bound: 10K sparse 1px arcs with 50 segments',
+    data: sparseArcs,
+    width: 1,
+    picking: false,
+    createLayer: createArcLayer
   }
 ];
 
@@ -191,6 +200,23 @@ function createLineLayer(workload, antialiasing) {
   });
 }
 
+function createArcLayer(workload, antialiasing) {
+  return new ArcLayer({
+    id: getLayerId(workload, antialiasing),
+    data: workload.data,
+    getSourcePosition: object => object.sourcePosition,
+    getTargetPosition: object => object.targetPosition,
+    getSourceColor: [20, 100, 220, 180],
+    getTargetColor: [20, 100, 220, 180],
+    getWidth: workload.width,
+    getHeight: 0.25,
+    widthUnits: 'pixels',
+    numSegments: 50,
+    pickable: workload.picking,
+    antialiasing
+  });
+}
+
 function getLayerId(workload, antialiasing) {
   return `${workload.id}-${antialiasing ? 'on' : 'off'}`;
 }
@@ -291,6 +317,21 @@ function createThickPaths() {
         [-WIDTH / 2, -HEIGHT / 2 + offset],
         [WIDTH / 2, HEIGHT / 2 + offset]
       ]
+    };
+  });
+}
+
+function createSparseArcs() {
+  const columns = 100;
+  const rows = 100;
+  return Array.from({length: columns * rows}, (_, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    const x = -WIDTH / 2 + 20 + column * ((WIDTH - 40) / columns);
+    const y = -HEIGHT / 2 + 12 + row * ((HEIGHT - 24) / rows);
+    return {
+      sourcePosition: [x, y],
+      targetPosition: [x + 20, y + 4]
     };
   });
 }
