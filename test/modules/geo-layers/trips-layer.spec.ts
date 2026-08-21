@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {TripsLayer} from '@deck.gl/geo-layers';
-import {ShaderAssembler} from '@luma.gl/shadertools';
+import {WGSLShaderAssembler} from '@luma.gl/shadertools';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {trips} from 'deck.gl-test/data';
 import {shaderWGSL as pathShaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';
@@ -37,7 +37,7 @@ test('TripsLayer#WebGPU shader extends PathLayer', () => {
     expect(pathShaderWGSL).toContain(insertionPoint);
   }
 
-  const shaderAssembler = new ShaderAssembler();
+  const shaderAssembler = new WGSLShaderAssembler();
   const {source} = shaderAssembler.assembleWGSLShader({
     platformInfo: {
       type: 'webgpu',
@@ -62,7 +62,7 @@ test('TripsLayer#WebGPU shader extends PathLayer', () => {
 });
 
 test('TripsLayer#time-window discard follows PathLayer coverage derivatives', () => {
-  const shaderAssembler = new ShaderAssembler();
+  const shaderAssembler = new WGSLShaderAssembler();
   const {source} = shaderAssembler.assembleWGSLShader({
     platformInfo: {
       type: 'webgpu',
