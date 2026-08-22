@@ -35,7 +35,8 @@ import {PathStyleExtension} from '@deck.gl/extensions';
  *   stroke); the billboard copy of the same geometry renders **solid** when dense and at a
  *   52.0px period - 1.5x too long - when sparse. `billboard: true` combined with
  *   `highPrecisionDash` is broken.
- * - `path-dash-3d-*`: dash length grows along a path that climbs in Z, because the CPU
+ * - `path-dash-3d-*`: every row has identical screen geometry under an orthographic
+ *   `MapView`, but dash phase jumps at segment joints as elevation increases because the CPU
  *   accumulates 3D distance while the shader coordinate measures 2D.
  */
 
@@ -110,12 +111,10 @@ function createDiagonalPath(
 /**
  * A geographic line that climbs steadily in Z.
  *
- * Note this cannot fully isolate the 2D-vs-3D arclength defect: `MapView` is a perspective
- * projection at every pitch, so raising a path also displaces it on screen, and
- * `OrthographicView` - which would be a true parallel projection - clips almost any Z at
- * this scale. What the resulting image does show is whether the dash period stays uniform
- * *along* each drawn line, which is the property the fix has to restore. Compare each row
- * against the `heightMeters: 0` row drawn in the same style.
+ * The 3D render cases use an orthographic `MapView` at pitch 0. Elevation therefore changes
+ * neither the line's position nor its scale on screen, so any difference between rows is
+ * attributable to arclength alone. The elevated camera keeps the full path inside the clip
+ * volume while retaining geographic coordinates and elevations in meters.
  */
 function createClimbingPath(
   segments: number,
@@ -131,6 +130,16 @@ function createClimbingPath(
 }
 
 const MAP_CENTER = [-122.4, 37.78];
+const DASH_ELEVATION_ZOOM = 16;
+const DASH_ELEVATION_HEIGHTS = [0, 300, 720, 900];
+const DASH_ELEVATION_VIEW = new MapView({orthographic: true, altitude: 3});
+const DASH_ELEVATION_VIEW_STATE = {
+  longitude: MAP_CENTER[0],
+  latitude: MAP_CENTER[1],
+  zoom: DASH_ELEVATION_ZOOM,
+  pitch: 0,
+  bearing: 0
+};
 
 // Web Mercator at a given zoom is 512 * 2^zoom pixels around the world, so a degree of
 // longitude is (512 * 2^zoom) / 360 pixels; a degree of latitude covers
@@ -161,6 +170,27 @@ function createGeographicPath(
     path.push([MAP_CENTER[0] - span / 2 + (span * pointIndex) / segments, latitude]);
   }
   return path;
+}
+
+function createElevationLayers(
+  layerIdentifier: string,
+  {billboard = false, antialiasing = false}: {billboard?: boolean; antialiasing?: boolean} = {}
+): PathLayer[] {
+  return DASH_ELEVATION_HEIGHTS.map(
+    (heightMeters, index) =>
+      new PathLayer({
+        id: `${layerIdentifier}-${heightMeters}`,
+        data: [createClimbingPath(40, DASH_ELEVATION_ZOOM, -getStripY(index, 4), heightMeters)],
+        getPath: (path: number[][]) => path,
+        billboard,
+        antialiasing,
+        widthUnits: 'pixels' as const,
+        getWidth: 8,
+        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+        getDashArray: [4, 5],
+        extensions: [new PathStyleExtension({highPrecisionDash: true})]
+      })
+  );
 }
 
 const CARTESIAN = {
@@ -504,34 +534,25 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
-  // 3D paths: CPU offsets measure 3D distance, the shader coordinate measures 2D
+  // 3D paths. Every row draws the identical geographic line on screen - Z is invisible in
+  // an orthographic MapView at pitch 0 - so they should carry identical dash patterns. The
+  // CPU accumulates 3D distance between segment starts; if the shader coordinate advances
+  // at the 2D rate within each elevated segment, the two disagree at each of the 40 joints.
   // ---------------------------------------------------------------------------------------
-  // Elevation displaces a path radially on screen under perspective, so these are kept to
-  // one style per image with generous separation rather than packed into a single frame.
   ...[false, true].map(billboard => ({
     name: `path-dash-3d-${billboard ? 'billboard' : 'flat'}`,
-    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom: 13, pitch: 30, bearing: 0},
-    layers: [
-      // [height in meters, vertical offset in pixels]
-      [0, 120],
-      [900, -20],
-      [2700, -170]
-    ].map(
-      ([heightMeters, offsetPixels]) =>
-        new PathLayer({
-          id: `path-dash-3d-${heightMeters}`,
-          data: [createClimbingPath(40, 13, offsetPixels, heightMeters)],
-          getPath: (path: number[][]) => path,
-          billboard,
-          widthUnits: 'pixels' as const,
-          getWidth: 8,
-          getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-          getDashArray: [4, 5],
-          extensions: [new PathStyleExtension({highPrecisionDash: true})]
-        })
-    ),
+    views: DASH_ELEVATION_VIEW,
+    viewState: DASH_ELEVATION_VIEW_STATE,
+    layers: createElevationLayers('path-dash-3d', {billboard}),
     goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`
   })),
+  {
+    name: 'path-dash-3d-flat-antialiasing',
+    views: DASH_ELEVATION_VIEW,
+    viewState: DASH_ELEVATION_VIEW_STATE,
+    layers: createElevationLayers('path-dash-3d-antialiasing', {antialiasing: true}),
+    goldenImage: './test/render/golden-images/path-dash-3d-flat-antialiasing.png'
+  },
 
   // ---------------------------------------------------------------------------------------
   // Offset extension combined with dashing

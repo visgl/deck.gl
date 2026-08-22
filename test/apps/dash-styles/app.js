@@ -13,11 +13,27 @@ import {PathStyleExtension} from '@deck.gl/extensions';
 // appear only past a zoom threshold, patterns that shift as segments change, billboard and
 // flat lines drifting apart - are all motion artifacts. Every row below draws the same
 // stroke, so any visible difference between rows is a bug.
+//
+// Use the `scene` control to switch to the four-path 3D elevation fixture from the render
+// matrix. At pitch 0 its orthographic MapView gives every path identical screen geometry;
+// drag to pitch or rotate the view to inspect the actual climbs from different angles.
 
-const INITIAL_VIEW_STATE = {
+const MAP_CENTER = [-122.4, 37.78];
+const MATRIX_INITIAL_VIEW_STATE = {
   longitude: -122.4,
   latitude: 37.78,
   zoom: 13,
+  pitch: 0,
+  bearing: 0
+};
+const ELEVATION_ZOOM = 16;
+const ELEVATION_HEIGHTS = [0, 300, 720, 900];
+const ELEVATION_ROW_SPACING_PIXELS = 62;
+const ELEVATION_SPAN_PIXELS = 880;
+const ELEVATION_INITIAL_VIEW_STATE = {
+  longitude: MAP_CENTER[0],
+  latitude: MAP_CENTER[1],
+  zoom: ELEVATION_ZOOM,
   pitch: 0,
   bearing: 0
 };
@@ -30,16 +46,6 @@ function createStraightPath(segments, latitude) {
   const path = [];
   for (let pointIndex = 0; pointIndex <= segments; pointIndex++) {
     path.push([-122.48 + (LONGITUDE_SPAN * pointIndex) / segments, latitude]);
-  }
-  return path;
-}
-
-/** A line that climbs in Z, so 2D and 3D arclength disagree. */
-function createClimbingPath(segments, latitude, height) {
-  const path = [];
-  for (let pointIndex = 0; pointIndex <= segments; pointIndex++) {
-    const fraction = pointIndex / segments;
-    path.push([-122.48 + LONGITUDE_SPAN * fraction, latitude, height * fraction]);
   }
   return path;
 }
@@ -59,11 +65,11 @@ const ROWS = [
   ['1 segment', latitude => createStraightPath(1, latitude)],
   ['4 segments', latitude => createStraightPath(4, latitude)],
   ['20 segments', latitude => createStraightPath(20, latitude)],
-  ['120 segments', latitude => createStraightPath(120, latitude)],
-  ['3D climb', latitude => createClimbingPath(40, latitude, 1500)]
+  ['120 segments', latitude => createStraightPath(120, latitude)]
 ];
 
 const state = {
+  scene: 'segment matrix',
   dashSize: 4,
   gapSize: 5,
   dashMode: 'segment',
@@ -76,6 +82,12 @@ const state = {
 };
 
 const CONTROLS = [
+  {
+    key: 'scene',
+    type: 'select',
+    label: 'scene',
+    options: ['segment matrix', '3D elevation']
+  },
   {key: 'dashSize', type: 'range', label: 'dash size', min: 0.25, max: 16, step: 0.25},
   {key: 'gapSize', type: 'range', label: 'gap size', min: 0.25, max: 16, step: 0.25},
   {key: 'width', type: 'range', label: 'stroke width', min: 1, max: 40, step: 1},
@@ -141,7 +153,7 @@ function buildControls(onChange) {
       if (control.type === 'range') {
         readout.textContent = state[control.key];
       }
-      onChange();
+      onChange(control.key);
     });
 
     label.appendChild(input);
@@ -171,11 +183,94 @@ function dashExtension() {
   });
 }
 
-function buildLayers() {
+function getLongitudePerPixel(zoom) {
+  return 360 / (512 * 2 ** zoom);
+}
+
+function getLatitudePerPixel(zoom) {
+  return getLongitudePerPixel(zoom) * Math.cos((MAP_CENTER[1] * Math.PI) / 180);
+}
+
+/**
+ * Matches the 3D render-test fixture: 40 geographic segments spanning 880 screen pixels at
+ * zoom 16, with elevation increasing linearly from zero to `heightMeters`.
+ */
+function createElevationPath(offsetPixels, heightMeters) {
+  const longitudeSpan = ELEVATION_SPAN_PIXELS * getLongitudePerPixel(ELEVATION_ZOOM);
+  const latitude = MAP_CENTER[1] + offsetPixels * getLatitudePerPixel(ELEVATION_ZOOM);
+  const path = [];
+  for (let pointIndex = 0; pointIndex <= 40; pointIndex++) {
+    const fraction = pointIndex / 40;
+    path.push([
+      MAP_CENTER[0] - longitudeSpan / 2 + longitudeSpan * fraction,
+      latitude,
+      heightMeters * fraction
+    ]);
+  }
+  return path;
+}
+
+function buildElevationLayers() {
   const layers = [];
   const extensions = [dashExtension()];
   const variants = billboardVariants();
-  const topLatitude = INITIAL_VIEW_STATE.latitude + ROW_SPACING * 2.5;
+
+  ELEVATION_HEIGHTS.forEach((heightMeters, rowIndex) => {
+    const baselineOffsetPixels =
+      ((ELEVATION_HEIGHTS.length - 1) / 2 - rowIndex) * ELEVATION_ROW_SPACING_PIXELS;
+
+    variants.forEach((billboard, variantIndex) => {
+      // A single selected style uses the exact golden geometry. When both are requested,
+      // separate the red and blue copies just enough to keep either from hiding the other.
+      const comparisonOffsetPixels = variants.length > 1 ? (variantIndex - 0.5) * 12 : 0;
+      layers.push(
+        new PathLayer({
+          id: `elevation-${heightMeters}-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          data: [createElevationPath(baselineOffsetPixels + comparisonOffsetPixels, heightMeters)],
+          getPath: path => path,
+          billboard,
+          widthUnits: state.widthUnits,
+          getWidth: state.widthUnits === 'meters' ? state.width * 8 : state.width,
+          widthMinPixels: 1,
+          getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+          getDashArray: [state.dashSize, state.gapSize],
+          dashJustified: state.dashJustified,
+          capRounded: state.capRounded,
+          jointRounded: state.capRounded,
+          extensions
+        })
+      );
+    });
+
+    const labelLongitude =
+      MAP_CENTER[0] - (ELEVATION_SPAN_PIXELS / 2 + 14) * getLongitudePerPixel(ELEVATION_ZOOM);
+    const labelLatitude =
+      MAP_CENTER[1] + baselineOffsetPixels * getLatitudePerPixel(ELEVATION_ZOOM);
+    layers.push(
+      new TextLayer({
+        id: `elevation-label-${heightMeters}`,
+        data: [{position: [labelLongitude, labelLatitude, 0], text: `${heightMeters} m`}],
+        getPosition: datum => datum.position,
+        getText: datum => datum.text,
+        getSize: 11,
+        getColor: [60, 60, 60],
+        getTextAnchor: 'end',
+        getAlignmentBaseline: 'center',
+        fontFamily: 'Monaco, monospace',
+        outlineWidth: 2,
+        outlineColor: [255, 255, 255]
+      })
+    );
+  });
+
+  return layers;
+}
+
+function buildSegmentMatrixLayers() {
+  const layers = [];
+  const extensions = [dashExtension()];
+  const variants = billboardVariants();
+  const topLatitude = MATRIX_INITIAL_VIEW_STATE.latitude + ROW_SPACING * 2.5;
 
   ROWS.forEach(([label, buildPath], rowIndex) => {
     variants.forEach((billboard, variantIndex) => {
@@ -251,6 +346,20 @@ function buildLayers() {
   return layers;
 }
 
+function buildLayers() {
+  return state.scene === '3D elevation' ? buildElevationLayers() : buildSegmentMatrixLayers();
+}
+
+function getView() {
+  return new MapView({orthographic: state.scene === '3D elevation', altitude: 3});
+}
+
+function getInitialViewState() {
+  return state.scene === '3D elevation'
+    ? {...ELEVATION_INITIAL_VIEW_STATE}
+    : {...MATRIX_INITIAL_VIEW_STATE};
+}
+
 const readout = document.getElementById('readout');
 
 function updateReadout(viewState) {
@@ -258,18 +367,35 @@ function updateReadout(viewState) {
   // One dash unit is half the stroke width - see the extension docs.
   const halfWidthPixels = state.widthUnits === 'pixels' ? state.width / 2 : null;
   const periodPixels = halfWidthPixels === null ? null : (period * halfWidthPixels).toFixed(1);
+  const orientation =
+    state.scene === '3D elevation'
+      ? `  |  pitch ${viewState.pitch.toFixed(1)}°  |  bearing ${viewState.bearing.toFixed(1)}°`
+      : '';
   readout.textContent =
-    `zoom ${viewState.zoom.toFixed(2)}  |  dash period ${period} half-widths` +
+    `zoom ${viewState.zoom.toFixed(2)}${orientation}  |  dash period ${period} half-widths` +
     (periodPixels === null ? '' : ` (~${periodPixels}px)`);
 }
 
+let currentViewState = getInitialViewState();
 const deck = new Deck({
-  views: new MapView({}),
-  initialViewState: INITIAL_VIEW_STATE,
+  views: getView(),
+  viewState: currentViewState,
   controller: true,
   layers: buildLayers(),
-  onViewStateChange: ({viewState}) => updateReadout(viewState)
+  onViewStateChange: ({viewState}) => {
+    currentViewState = viewState;
+    deck.setProps({viewState});
+    updateReadout(viewState);
+  }
 });
 
-buildControls(() => deck.setProps({layers: buildLayers()}));
-updateReadout(INITIAL_VIEW_STATE);
+buildControls(changedControl => {
+  if (changedControl === 'scene') {
+    currentViewState = getInitialViewState();
+    deck.setProps({views: getView(), viewState: currentViewState, layers: buildLayers()});
+  } else {
+    deck.setProps({layers: buildLayers()});
+  }
+  updateReadout(currentViewState);
+});
+updateReadout(currentViewState);
