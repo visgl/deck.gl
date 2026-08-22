@@ -125,6 +125,10 @@ float dashPatternCoverage(
       // At least one whole period per segment: a segment shorter than half a period rounds
       // to zero periods, which made unitLength infinite and rendered the segment solid.
       unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
+      // A very short segment can make the justified period shorter than the requested dash.
+      // Treat that period as fully solid, matching the hard interval test and keeping the
+      // coverage integral and duty cycle bounded by one.
+      solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
     }
 
