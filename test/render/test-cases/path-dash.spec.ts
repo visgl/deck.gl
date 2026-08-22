@@ -347,51 +347,20 @@ const testCases: TestCase[] = [
     dashJustified: true,
     extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
-  // Whole-path justification must derive its period from each path's own arclength and
-  // stroke width. These variants deliberately change length, width and shape; every path
-  // should still begin and end with half a dash and contain only complete periods between.
-  {
-    name: 'path-dash-mode-path-justified-variants',
-    views: new OrthographicView(),
-    viewState: ORTHO_VIEW_STATE,
-    layers: createStripLayers('path-dash-mode-path-justified-variants', [
-      {
-        data: [createStraightPath(40, getStripY(0, 4), 720)],
-        getWidth: 6,
-        getDashArray: [4, 5],
-        dashJustified: true,
-        extensions: [new PathStyleExtension({dashMode: 'path'})]
-      },
-      {
-        data: [createStraightPath(40, getStripY(1, 4), 540)],
-        getWidth: 12,
-        getDashArray: [4, 5],
-        dashJustified: true,
-        extensions: [new PathStyleExtension({dashMode: 'path'})]
-      },
-      {
-        data: [createZigzagPath(16, getStripY(2, 4), 14)],
-        getWidth: 8,
-        getDashArray: [3, 2],
-        dashJustified: true,
-        extensions: [new PathStyleExtension({dashMode: 'path'})]
-      },
-      {
-        data: [createDiagonalPath(40, getStripY(3, 4), 12)],
-        getWidth: 16,
-        getDashArray: [2, 3],
-        dashJustified: true,
-        extensions: [new PathStyleExtension({dashMode: 'path'})]
-      }
-    ]),
-    goldenImage: './test/render/golden-images/path-dash-mode-path-justified-variants.png',
-    imageDiffOptions: DASH_DIFF_OPTIONS
-  },
-
-  // Matched control for the path-mode variants added later in the stack. This captures the
-  // existing per-segment behavior on the same four paths without justification.
+  // Matched variants isolate segment mode, continuous path mode, and whole-path
+  // justification on exactly the same geometry and style inputs.
   createPathVariantsCase('path-dash-variants-default', {
     extensions: [new PathStyleExtension({dash: true})]
+  }),
+  createPathVariantsCase('path-dash-variants-mode-path', {
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Whole-path justification must derive its period from each path's own arclength and
+  // stroke width. Every path should begin and end with half a dash and contain only complete
+  // periods between.
+  createPathVariantsCase('path-dash-mode-path-justified-variants', {
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
 
   // ---------------------------------------------------------------------------------------
