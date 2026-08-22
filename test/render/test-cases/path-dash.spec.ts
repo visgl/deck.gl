@@ -89,6 +89,24 @@ function createZigzagPath(
   return path;
 }
 
+/** A straight line at `angleDegrees`, split into equal collinear segments. */
+function createDiagonalPath(
+  segments: number,
+  verticalPosition: number,
+  angleDegrees: number = 27
+): number[][] {
+  const radians = (angleDegrees * Math.PI) / 180;
+  const path: number[][] = [];
+  for (let pointIndex = 0; pointIndex <= segments; pointIndex++) {
+    const fraction = pointIndex / segments - 0.5;
+    path.push([
+      Math.cos(radians) * STRIP_LENGTH * fraction,
+      verticalPosition + Math.sin(radians) * STRIP_LENGTH * fraction
+    ]);
+  }
+  return path;
+}
+
 /**
  * A geographic line that climbs steadily in Z.
  *
@@ -191,6 +209,44 @@ function createSegmentDensityCase(name: string, dashProperties: Record<string, a
   };
 }
 
+/**
+ * Four paths that deliberately vary length, width, dash array and shape. Later stack layers
+ * reuse this exact fixture to isolate the effects of path mode and whole-path justification.
+ */
+function createPathVariantsCase(name: string, layerProperties: Record<string, any>): TestCase {
+  return {
+    name,
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      name,
+      [
+        {
+          data: [createStraightPath(40, getStripY(0, 4), 720)],
+          getWidth: 6,
+          getDashArray: [4, 5]
+        },
+        {
+          data: [createStraightPath(40, getStripY(1, 4), 540)],
+          getWidth: 12,
+          getDashArray: [4, 5]
+        },
+        {
+          data: [createZigzagPath(16, getStripY(2, 4), 14)],
+          getWidth: 8,
+          getDashArray: [3, 2]
+        },
+        {
+          data: [createDiagonalPath(40, getStripY(3, 4), 12)],
+          getWidth: 16,
+          getDashArray: [2, 3]
+        }
+      ].map(pathProperties => ({...pathProperties, ...layerProperties}))
+    ),
+    goldenImage: `./test/render/golden-images/${name}.png`
+  };
+}
+
 /** Vertical gap between the flat and billboard copies of a parity pair, in world units. */
 const PARITY_OFFSET = 16;
 
@@ -241,6 +297,12 @@ const testCases: TestCase[] = [
   createSegmentDensityCase('path-dash-density-rounded', {
     capRounded: true,
     jointRounded: true,
+    extensions: [new PathStyleExtension({dash: true})]
+  }),
+
+  // Matched control for the path-mode variants added later in the stack. This captures the
+  // existing per-segment behavior on the same four paths without justification.
+  createPathVariantsCase('path-dash-variants-default', {
     extensions: [new PathStyleExtension({dash: true})]
   }),
 
