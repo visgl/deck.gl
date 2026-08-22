@@ -35,6 +35,8 @@ built from, with `getDashArray: [4, 5]` on a 10px stroke:
 | --- | --- | --- | --- | --- | --- | --- |
 | measured dash period | 43.4px | 43.4px | 43.4px | 55.4px | **solid** | **solid** |
 
+![dashMode and vertex density](../../../docs/images/path-style/path-style-dash-density.png)
+
 This is not an edge case. Densely sampled geometry is the norm for GPS traces, generalized
 coastlines, routing output, and any circle or arc approximated by short chords. The failure
 is also confusing to diagnose from the outside, because zooming in eventually makes segments
@@ -209,6 +211,18 @@ One internal change: `instanceDashOffsets` widens from a `float` to a `vec2` car
 `[distance from the start of the path, total length of the path]`, the second component
 being what whole-path justification needs. A `vec2` still occupies one attribute slot, so the
 16-attribute ceiling is not made tighter.
+
+## Figures
+
+The figures in the extension docs are generated from render-test goldens by
+`scripts/dash-figures/compose.mjs`, so a published figure cannot drift from what the code
+does. Before/after panels come from `scripts/dash-figures/capture-before.sh`, which reverts
+only the three behavior-carrying sources and re-renders — the spec and its geometry stay
+current, so both halves of a pair draw the identical scene.
+
+A symptom-to-resolution table in the extension docs separates what upgrading fixes from what
+needs a prop. Six of the eleven listed symptoms resolve on upgrade; five need `dashMode` or
+`dashUnits`.
 
 ## Testing
 
