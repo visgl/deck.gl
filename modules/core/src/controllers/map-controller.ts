@@ -4,7 +4,11 @@
 
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps, InteractionState} from './controller';
-import ViewState, {type ConstraintContext} from './view-state';
+import ViewState, {
+  CONSTRAINT_AROUND,
+  type ConstraintAround,
+  type ConstraintContext
+} from './view-state';
 import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
@@ -21,16 +25,6 @@ const WEB_MERCATOR_MAX_BOUNDS = [
   [Infinity, 90]
 ] satisfies ControllerProps['maxBounds'];
 const ZOOM_RUBBER_BAND_RANGE = 1;
-
-/** Carries the geographic zoom anchor until the displayed zoom is constrained. */
-const CONSTRAINT_AROUND = Symbol('constraintAround');
-
-type ConstraintAround = {
-  [CONSTRAINT_AROUND]?: {
-    position: [number, number];
-    screenPosition: [number, number];
-  };
-};
 
 /** The web mercator utility `lngLatToWorld` throws if invalid coordinates are provided.
  * This wrapper clamps user input to calculate common positions safely. */

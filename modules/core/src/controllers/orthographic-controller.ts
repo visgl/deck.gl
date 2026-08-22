@@ -4,22 +4,16 @@
 
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
-import ViewState, {type ConstraintContext} from './view-state';
+import ViewState, {
+  CONSTRAINT_AROUND,
+  type ConstraintAround,
+  type ConstraintContext
+} from './view-state';
 import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import type {MjolnirGestureEvent} from 'mjolnir.js';
-
-/** Carries action-specific zoom intent without coupling it to constraint policy. */
-const CONSTRAINT_AROUND = Symbol('constraintAround');
-
-type ConstraintAround = {
-  [CONSTRAINT_AROUND]?: {
-    position: number[];
-    screenPosition: number[];
-  };
-};
 
 export type OrthographicStateProps = {
   width: number;
@@ -47,7 +41,7 @@ const ZOOM_RUBBER_BAND_RANGE = 1;
 
 type OrthographicStateInternal = {
   startPanPosition?: number[];
-  startZoomPosition?: number[];
+  startZoomPosition?: [number, number];
   startZoom?: number[];
 };
 
@@ -353,9 +347,10 @@ export class OrthographicState extends ViewState<
     const viewport = this.makeViewport(this.getViewportProps());
     return viewport.project(pos);
   }
-  _unproject(pos: number[]): number[] {
+  _unproject(pos: number[]): [number, number] {
     const viewport = this.makeViewport(this.getViewportProps());
-    return viewport.unproject(pos);
+    const [x, y] = viewport.unproject(pos);
+    return [x, y];
   }
 
   // Calculates new zoom
