@@ -43,6 +43,14 @@ const deckgl = new Deck({
 });
 ```
 
+## Remarks
+
+### Antialiasing
+
+Adding a post-processing effect redirects layer rendering into an offscreen framebuffer, which is not multisampled. Layers whose edges depend on the canvas' MSAA — including [PathLayer](../layers/path-layer.md), [LineLayer](../layers/line-layer.md), [ArcLayer](../layers/arc-layer.md), and [PointCloudLayer](../layers/point-cloud-layer.md) — therefore render with hard, aliased edges once any effect is added, even though the canvas itself was created with `antialias: true`. See [#10404](https://github.com/visgl/deck.gl/issues/10404).
+
+Set `antialiasing: true` on those layers to have them compute edge coverage in the shader instead. On composite layers the prop is named `lineAntialiasing` ([GeoJsonLayer](../layers/geojson-layer.md#lineantialiasing), [PolygonLayer](../layers/polygon-layer.md#lineantialiasing)).
+
 ## Source
 
 [/modules/core/src/effects/post-process-effect.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/post-process-effect.ts)

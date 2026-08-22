@@ -119,7 +119,8 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
   fragmentInputs.pbr_vUV0 = inputs.pbrUV;
   fragmentInputs.pbr_vUV1 = vec2<f32>(0.0);
   fragmentInputs.pbr_vNormal = inputs.pbrNormal;
-  fragColor = fragColor * pbr_filterColor(vec4<f32>(0.0));
+  // Vertex color is part of the material base color and must be applied before lighting.
+  fragColor = pbr_filterColor(fragColor);
 #else
 #ifdef HAS_BASECOLORMAP
   fragColor =

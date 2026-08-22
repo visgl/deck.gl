@@ -92,3 +92,9 @@ new ScatterplotLayer({
 - Mercator is supported. Globe integration uses deck.gl's experimental [`GlobeView`](../core/globe-view.md). With default back-face culling, `TextLayer` and non-billboard `IconLayer` do not render. Disabling culling makes them visible, but non-billboard icons render rotated 180°.
 - Non-default vertical field of view and camera roll are not synchronized.
 - One interleaved overlay may be attached to a map.
+
+### Antialiasing
+
+MapLibre creates its WebGL context with `antialias: false` by default. In interleaved mode, deck.gl shares that context, so layers whose edges depend on MSAA — including [PathLayer](../layers/path-layer.md), [LineLayer](../layers/line-layer.md), [ArcLayer](../layers/arc-layer.md), and [PointCloudLayer](../layers/point-cloud-layer.md) — render with hard, aliased edges.
+
+Set `antialiasing: true` on those layers to have them compute edge coverage in the shader instead. On composite layers the prop is named `lineAntialiasing` ([GeoJsonLayer](../layers/geojson-layer.md#lineantialiasing), [PolygonLayer](../layers/polygon-layer.md#lineantialiasing)). Alternatively, set `antialias: true` when creating the MapLibre map to enable MSAA for the shared context.
