@@ -573,6 +573,40 @@ const testCases: TestCase[] = [
     imageDiffOptions: DASH_DIFF_OPTIONS
   })),
 
+  // ---------------------------------------------------------------------------------------
+  // dashUnits. widthUnits is 'meters' here, so the stroke itself thickens with zoom. The
+  // 'widths' rows are relative to the stroke and so grow with it, while the 'pixels' rows
+  // must hold exactly the same dash period at z12, z13 and z14. Comparing the three golden
+  // images against each other is the assertion.
+  // ---------------------------------------------------------------------------------------
+  ...[12, 13, 14].map(zoom => ({
+    name: `path-dash-units-z${zoom}`,
+    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
+    layers: [
+      // [dashUnits, dash array, vertical offset in pixels]
+      ['widths', [4, 5], 150],
+      ['widths', [4, 5], 90],
+      ['pixels', [20, 25], -90],
+      ['pixels', [20, 25], -150]
+    ].map(([dashUnits, dashArray, offsetPixels], index) => {
+      const billboard = index % 2 === 1;
+      return new PathLayer({
+        id: `units-${dashUnits}-${billboard ? 'billboard' : 'flat'}`,
+        data: [createGeographicPath(120, zoom, offsetPixels as number)],
+        getPath: (path: number[][]) => path,
+        billboard,
+        widthUnits: 'meters' as const,
+        getWidth: 60,
+        widthMinPixels: 2,
+        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+        getDashArray: dashArray,
+        dashUnits,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      });
+    }),
+    goldenImage: `./test/render/golden-images/path-dash-units-z${zoom}.png`
+  })),
+
   // Pitched MapView - flat and billboard are EXPECTED to diverge toward the horizon
   {
     name: 'path-dash-billboard-pitched',
@@ -677,6 +711,23 @@ const testCases: TestCase[] = [
       }))
     ),
     goldenImage: './test/render/golden-images/path-dash-offset-mode-path-justified.png',
+    imageDiffOptions: DASH_DIFF_OPTIONS
+  },
+  {
+    name: 'path-dash-offset-units',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-units',
+      [0, 1, 2, -2].map((offset, index) => ({
+        data: [createStraightPath(40, getStripY(index, 4))],
+        getDashArray: [20, 25],
+        dashUnits: 'pixels',
+        getOffset: offset,
+        extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-units.png',
     imageDiffOptions: DASH_DIFF_OPTIONS
   },
 
