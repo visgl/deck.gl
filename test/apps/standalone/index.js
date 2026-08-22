@@ -54,7 +54,7 @@ const nonGeoExample = new deck.DeckGL({
   layers: [
     new deck.PointCloudLayer({
       id: 'pointCloud',
-      coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: 'cartesian',
       opacity: 1,
       data: points,
       getPosition: d => d.position,
