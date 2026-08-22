@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
+import type {CanvasContext, Device, PresentationContext, TextureFormatColor} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
@@ -19,6 +19,8 @@ const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 type LayerFilter = ((context: FilterContext) => boolean) | null;
 
+export type PostProcessColorFormat = Extract<TextureFormatColor, 'rgba8unorm' | 'rgba16float'>;
+
 export default class DeckRenderer {
   device: Device;
   layerFilter: LayerFilter;
@@ -31,6 +33,7 @@ export default class DeckRenderer {
   private _needsRedraw: string | false;
   private renderBuffers: Framebuffer[];
   private lastPostProcessEffect: string | null;
+  private postProcessColorFormat: PostProcessColorFormat;
 
   constructor(device: Device, opts: {stats?: Stats} = {}) {
     this.device = device;
@@ -43,9 +46,14 @@ export default class DeckRenderer {
     this._needsRedraw = 'Initial render';
     this.renderBuffers = [];
     this.lastPostProcessEffect = null;
+    this.postProcessColorFormat = 'rgba8unorm';
   }
 
-  setProps(props: {layerFilter: LayerFilter; drawPickingColors: boolean}) {
+  setProps(props: {
+    layerFilter: LayerFilter;
+    drawPickingColors: boolean;
+    postProcessColorFormat?: PostProcessColorFormat;
+  }) {
     if (this.layerFilter !== props.layerFilter) {
       this.layerFilter = props.layerFilter;
       this._needsRedraw = 'layerFilter changed';
@@ -54,6 +62,13 @@ export default class DeckRenderer {
     if (this.drawPickingColors !== props.drawPickingColors) {
       this.drawPickingColors = props.drawPickingColors;
       this._needsRedraw = 'drawPickingColors changed';
+    }
+
+    const postProcessColorFormat = props.postProcessColorFormat || 'rgba8unorm';
+    if (this.postProcessColorFormat !== postProcessColorFormat) {
+      this.postProcessColorFormat = postProcessColorFormat;
+      this._deleteRenderBuffers();
+      this._needsRedraw = 'postProcessColorFormat changed';
     }
   }
 
@@ -119,6 +134,10 @@ export default class DeckRenderer {
   }
 
   finalize() {
+    this._deleteRenderBuffers();
+  }
+
+  private _deleteRenderBuffers() {
     const {renderBuffers} = this;
     for (const buffer of renderBuffers) {
       buffer.delete();
@@ -156,11 +175,19 @@ export default class DeckRenderer {
     const size = canvasContext.getDrawingBufferSize();
     const [width, height] = size;
     if (renderBuffers.length === 0) {
+      const {postProcessColorFormat} = this;
+      const capabilities = this.device.getTextureFormatCapabilities(postProcessColorFormat);
+      if (!capabilities.render || !capabilities.filter) {
+        throw new Error(
+          `Postprocess color format ${postProcessColorFormat} must be renderable and filterable on this device`
+        );
+      }
       [0, 1].map(i => {
         const texture = this.device.createTexture({
           sampler: {minFilter: 'linear', magFilter: 'linear'},
           width,
-          height
+          height,
+          format: postProcessColorFormat
         });
         renderBuffers.push(
           this.device.createFramebuffer({
