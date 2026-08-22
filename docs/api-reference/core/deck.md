@@ -572,6 +572,7 @@ Called right after the canvas rerenders.
 Receives arguments:
 
 * `gl` - the WebGL context.
+* `pass` (string) - the render pass type. `'screen'` for the main canvas render, `'picking'` for mouse picking passes, `'shadow'` for shadow map passes.
 
 
 #### `onError` (Function) {#onerror}
@@ -688,6 +689,17 @@ deck.redraw(true);
 Parameters:
 
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
+
+
+#### `hasActiveTransitions` {#hasactivetransitions}
+
+Returns `true` if any viewport or layer uniform transitions are currently in progress.
+
+```ts
+if (!deck.hasActiveTransitions()) {
+  captureFrame();
+}
+```
 
 
 #### `pickObjectAsync` {#pickobjectasync}
