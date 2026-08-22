@@ -33,7 +33,9 @@ type SDFDashStyleProps = {
 
 export type PathStyleExtensionProps<DataT = any> = {
   /**
-   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
+   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to *half*
+   * the width of the path, so `[4, 5]` on a path 10 pixels wide draws 20 pixel dashes separated
+   * by 25 pixel gaps.
    * Requires the `dash` option to be on.
    */
   getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
@@ -135,6 +137,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     const defines: Defines = {};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
+      defines.DASH_ENABLED = true;
       if (extension.opts.highPrecisionDash) {
         defines.HIGH_PRECISION_DASH = true;
       }

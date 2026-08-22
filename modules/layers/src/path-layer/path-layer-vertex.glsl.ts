@@ -83,6 +83,20 @@ vec3 getLineJoinOffset(
   // length of the segment
   float L = isEnd ? lenA : lenB;
 
+  // Extrusion happens in the XY plane, so L above is a 2D length and vPathPosition.y below
+  // measures 2D distance along the segment. For a path that also moves in Z the true arc
+  // length is longer by this ratio. Scaling vPathLength and vPathPosition.y by it makes the
+  // coordinate measure real 3D distance - which is what CPU-side dash offsets accumulate -
+  // while leaving the joint tests in the fragment shader unchanged, since they compare the
+  // two against each other and both are scaled alike.
+  // Billboard mode is excluded: it extrudes in clip space, where the perspective divide has
+  // already reduced the segment to its screen projection.
+  vec3 currDelta3 = isEnd ? deltaA3 : deltaB3;
+  float currLength2D = length(currDelta3.xy);
+  float arcLengthRatio = (!path.billboard && currLength2D > 0.0)
+    ? length(currDelta3) / max(currLength2D, EPSILON)
+    : 1.0;
+
   // A = angle of the corner
   float sinHalfA = abs(dot(miterVec, perp));
   float cosHalfA = abs(dot(dirA, miterVec));
@@ -124,7 +138,7 @@ vec3 getLineJoinOffset(
   // The physical stroke still ends at offsetVec; the scaled coordinates and vertices only extend
   // its rasterized envelope to include the outer half of the centered coverage ramp.
   vec2 coverageOffsetVec = offsetVec * coverageScale;
-  vPathLength = L;
+  vPathLength = L * arcLengthRatio;
   vCornerOffset = coverageOffsetVec;
   vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
   vMiterLength = isCap ? isJoint : vMiterLength;
@@ -132,7 +146,7 @@ vec3 getLineJoinOffset(
   vec2 offsetFromStartOfPath = coverageOffsetVec + deltaA * float(isEnd);
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
-    dot(offsetFromStartOfPath, dir)
+    dot(offsetFromStartOfPath, dir) * arcLengthRatio
   );
   geometry.uv = vPathPosition;
 
@@ -140,7 +154,7 @@ vec3 getLineJoinOffset(
   vec3 offset = vec3(coverageOffsetVec * width * isValid, 0.0);
 #else
   // Generate variables for fragment shader
-  vPathLength = L;
+  vPathLength = L * arcLengthRatio;
   vCornerOffset = offsetVec;
   vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
   vMiterLength = isCap ? isJoint : vMiterLength;
@@ -148,7 +162,7 @@ vec3 getLineJoinOffset(
   vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
-    dot(offsetFromStartOfPath, dir)
+    dot(offsetFromStartOfPath, dir) * arcLengthRatio
   );
   geometry.uv = vPathPosition;
 
