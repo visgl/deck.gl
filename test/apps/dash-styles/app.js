@@ -185,7 +185,7 @@ function buildLayers() {
 
       layers.push(
         new PathLayer({
-          id: `row-${rowIndex}-${billboard ? 'billboard' : 'flat'}`,
+          id: `row-${rowIndex}-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
           data: [buildPath(latitude)],
           getPath: path => path,
           billboard,
@@ -224,7 +224,7 @@ function buildLayers() {
     billboardVariants().forEach((billboard, variantIndex) => {
       layers.push(
         new PathLayer({
-          id: `circle-${billboard ? 'billboard' : 'flat'}`,
+          id: `circle-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
           data: [
             createCirclePath(
               120,
