@@ -295,7 +295,7 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
     goldenImage: resolvedGoldenImage,
     region,
     threshold: imageDiffOptions?.threshold ?? 0.99,
-    tolerance: 0.1,
+    tolerance: imageDiffOptions?.tolerance ?? 0.1,
     includeAA: imageDiffOptions?.includeAA ?? false,
     includeEmpty: false,
     platform: OS,
