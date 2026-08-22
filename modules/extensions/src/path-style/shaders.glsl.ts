@@ -155,9 +155,12 @@ float dashPatternCoverage(
       // end rather than the 1D position along the path. Only filter fragments in the gap;
       // PathLayer already antialiases the ordinary sides of the solid stroke.
       float distanceAlongGap = min(unitOffset - solidLength, unitLength - unitOffset);
+      // Clamp before taking the derivative so the distance stays continuous across the
+      // wrapped period boundary. Evaluate fwidth for every fragment in the quad; derivatives
+      // are undefined inside the non-uniform gap branch below.
+      float distanceToEnd = length(vec2(max(distanceAlongGap, 0.0), vPathPosition.x));
+      float edgeWidth = max(fwidth(distanceToEnd), 0.0001);
       if (distanceAlongGap > 0.0) {
-        float distanceToEnd = length(vec2(distanceAlongGap, vPathPosition.x));
-        float edgeWidth = max(fwidth(distanceToEnd), 0.0001);
         dashCoverage = 1.0 - smoothstep(1.0 - edgeWidth, 1.0 + edgeWidth, distanceToEnd);
       }
       // That smoothstep resolves one dash end at a time, so it stops meaning anything once a
