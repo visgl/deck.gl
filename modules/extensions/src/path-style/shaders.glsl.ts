@@ -130,6 +130,7 @@ float dashPatternCoverage(
 
     float alongPath = vPathPosition.y + offset;
     float unitOffset = mod(alongPath, unitLength);
+    float filterWidth = max(fwidth(alongPath), 0.0001);
 
     // Picking stays a hard in-or-out test. A blended picking colour decodes to the wrong
     // index, and dashGapPickable is defined in terms of whole gaps rather than coverage.
@@ -148,9 +149,7 @@ float dashPatternCoverage(
         discard;
       }
     } else if (path.capType <= 0.5) {
-      dashCoverage = dashPatternCoverage(
-        alongPath, solidLength, unitLength, max(fwidth(alongPath), 0.0001)
-      );
+      dashCoverage = dashPatternCoverage(alongPath, solidLength, unitLength, filterWidth);
     } else {
       // Rounded caps: the dash end is an arc, so resolve the 2D distance to the nearer solid
       // end rather than the 1D position along the path. Only filter fragments in the gap;
@@ -162,10 +161,10 @@ float dashPatternCoverage(
         dashCoverage = 1.0 - smoothstep(1.0 - edgeWidth, 1.0 + edgeWidth, distanceToEnd);
       }
       // That smoothstep resolves one dash end at a time, so it stops meaning anything once a
-      // whole period fits inside a pixel. Fade to the duty cycle over the same range the
-      // square-cap path converges on by itself.
-      float subPixel = clamp(max(fwidth(alongPath), 0.0001) / unitLength, 0.0, 1.0);
-      dashCoverage = mix(dashCoverage, solidLength / unitLength, subPixel);
+      // whole period fits inside the filter footprint. Start fading only at that boundary;
+      // blending resolvable periods would attenuate the solid body of every rounded dash.
+      float subPixelBlend = smoothstep(unitLength, 2.0 * unitLength, filterWidth);
+      dashCoverage = mix(dashCoverage, solidLength / unitLength, subPixelBlend);
     }
 
     // Fully transparent fragments would still write depth and occlude whatever is behind.
