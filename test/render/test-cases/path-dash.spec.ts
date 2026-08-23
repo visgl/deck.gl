@@ -140,6 +140,12 @@ const DASH_ELEVATION_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
+const DASH_ELEVATION_PITCHED_VIEW_STATE = {
+  ...DASH_ELEVATION_VIEW_STATE,
+  zoom: DASH_ELEVATION_ZOOM - 1,
+  pitch: 45,
+  bearing: 20
+};
 
 // Web Mercator at a given zoom is 512 * 2^zoom pixels around the world, so a degree of
 // longitude is (512 * 2^zoom) / 360 pixels; a degree of latitude covers
@@ -546,6 +552,32 @@ const testCases: TestCase[] = [
     layers: createElevationLayers('path-dash-3d', {billboard}),
     goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`
   })),
+  {
+    // Rounded caps make phase discontinuities at data vertices visible as wedges cut out of
+    // the circles. This pitched 3D billboard case keeps those segment-boundary artifacts easy
+    // to inspect as behavior changes through the stack.
+    name: 'path-dash-3d-billboard-pitched-rounded',
+    views: DASH_ELEVATION_VIEW,
+    viewState: DASH_ELEVATION_PITCHED_VIEW_STATE,
+    layers: DASH_ELEVATION_HEIGHTS.map(
+      (heightMeters, index) =>
+        new PathLayer({
+          id: `path-dash-3d-billboard-pitched-rounded-${heightMeters}`,
+          data: [createClimbingPath(40, DASH_ELEVATION_ZOOM, -getStripY(index, 4), heightMeters)],
+          getPath: (path: number[][]) => path,
+          billboard: true,
+          widthUnits: 'pixels' as const,
+          getWidth: 29,
+          getColor: [0, 90, 200],
+          // Equivalent to a 4px dash and a 45.25px nominal gap on a 29px stroke.
+          getDashArray: [4 / 14.5, 45.25 / 14.5],
+          capRounded: true,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        })
+    ),
+    goldenImage: './test/render/golden-images/path-dash-3d-billboard-pitched-rounded.png',
+    imageDiffOptions: {threshold: 0.999}
+  },
   {
     name: 'path-dash-3d-flat-antialiasing',
     views: DASH_ELEVATION_VIEW,
