@@ -41,7 +41,7 @@ float flipIfTrue(bool flag) {
 vec3 getLineJoinOffset(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   vec2 width,
-  float sourceArcLengthRatio
+  float sourcePathLength
 #ifdef ANTIALIASING
   , float coverageScale
 #endif
@@ -91,11 +91,17 @@ vec3 getLineJoinOffset(
   // while leaving the joint tests in the fragment shader unchanged, since they compare the
   // two against each other and both are scaled alike.
   // Billboard mode extrudes in clip space, where the perspective divide has already reduced
-  // the segment to its screen projection, so its common-space ratio is supplied by the caller.
+  // the segment to its screen projection, so its complete common-space length is supplied by
+  // the caller.
   vec3 currDelta3 = isEnd ? deltaA3 : deltaB3;
   float currLength2D = length(currDelta3.xy);
-  float arcLengthRatio = sourceArcLengthRatio;
-  if (!path.billboard && currLength2D > 0.0) {
+  float arcLengthRatio = 1.0;
+  if (path.billboard && L > 0.0) {
+    // The billboard segment was measured after projection, while the CPU dash offset is true
+    // 3D common-space arclength. Derive the ratio from the complete target length so the local
+    // coordinate ends at exactly the next segment's CPU phase, including in a pitched view.
+    arcLengthRatio = sourcePathLength / L;
+  } else if (currLength2D > 0.0) {
     // Do not clamp a valid denominator to EPSILON: high-zoom Web Mercator deltas are often
     // smaller than that in common space, and changing their scale corrupts even flat paths.
     arcLengthRatio = length(currDelta3) / currLength2D;
@@ -238,17 +244,16 @@ void main() {
     vec3 currentDeltaCommon = isEnd > 0.0
       ? geometry.position.xyz - prevPositionCommon.xyz
       : nextPositionCommon.xyz - geometry.position.xyz;
-    float currentLength2DCommon = length(currentDeltaCommon.xy);
-    float billboardArcLengthRatio = currentLength2DCommon > 0.0
-      ? length(currentDeltaCommon) / currentLength2DCommon
-      : 1.0;
+    float billboardPathLength = width.x > 0.0
+      ? length(currentDeltaCommon) * project.scale / (width.x * project.focalDistance)
+      : 0.0;
 
     vec3 offset = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(width.xy),
-      billboardArcLengthRatio
+      billboardPathLength
 #ifdef ANTIALIASING
       ,
       coverageScale

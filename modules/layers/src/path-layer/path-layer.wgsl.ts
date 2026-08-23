@@ -58,7 +58,7 @@ fn getLineJoinOffset(
   currPoint: vec3<f32>,
   nextPoint: vec3<f32>,
   width: vec2<f32>,
-  sourceArcLengthRatio: f32,
+  sourcePathLength: f32,
 #ifdef ANTIALIASING
   coverageScale: f32,
 #endif
@@ -103,15 +103,17 @@ fn getLineJoinOffset(
   // the coordinate measure real 3D distance while leaving the joint tests unchanged, since
   // they compare the two against each other and both are scaled alike. Billboard mode
   // extrudes in clip space, where the perspective divide has already reduced the segment to
-  // its screen projection, so its common-space ratio is supplied by the caller. Mirrors
-  // path-layer-vertex.glsl.ts.
+  // its screen projection, so its complete common-space length is supplied by the caller.
+  // Mirrors path-layer-vertex.glsl.ts.
   let currDelta3 = select(deltaB3, deltaA3, isEnd);
   let currLength2D = length(currDelta3.xy);
   // Do not clamp a valid denominator to EPSILON: high-zoom Web Mercator deltas are often
   // smaller than that in common space, and changing their scale corrupts even flat paths.
   let safeLength2D = select(1.0, currLength2D, currLength2D > 0.0);
-  var arcLengthRatio = sourceArcLengthRatio;
-  if (path.billboard == 0.0 && currLength2D > 0.0) {
+  var arcLengthRatio = 1.0;
+  if (path.billboard != 0.0 && segmentLength2D > 0.0) {
+    arcLengthRatio = sourcePathLength / segmentLength2D;
+  } else if (currLength2D > 0.0) {
     arcLengthRatio = length(currDelta3) / safeLength2D;
   }
   let pathLength = segmentLength2D * arcLengthRatio;
@@ -252,19 +254,17 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       currPositionCommon - prevPositionCommon,
       isEnd > 0.0
     );
-    let currentLength2DCommon = length(currentDeltaCommon.xy);
-    let safeLength2DCommon = select(1.0, currentLength2DCommon, currentLength2DCommon > 0.0);
-    let billboardArcLengthRatio = select(
-      1.0,
-      length(currentDeltaCommon) / safeLength2DCommon,
-      currentLength2DCommon > 0.0
+    let billboardPathLength = select(
+      0.0,
+      length(currentDeltaCommon) * project.scale / (widthPixels * project.focalDistance),
+      widthPixels > 0.0
     );
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
-      billboardArcLengthRatio,
+      billboardPathLength,
 #ifdef ANTIALIASING
       coverageScale,
 #endif
