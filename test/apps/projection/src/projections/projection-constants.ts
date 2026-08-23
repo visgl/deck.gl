@@ -1,0 +1,6 @@
+export const UINT32_MAX = 0xffffffff;
+export const INVALID_QUANTIZED_COORDINATE = UINT32_MAX;
+export const EARTH_RADIUS_METERS = 6378137;
+export const ALTITUDE_UNITS_PER_METER = 128;
+export const QUANTIZED_SEA_LEVEL = 0x40000000;
+export const PROJECTION_WORKGROUP_SIZE = 64;

@@ -1,16 +1,33 @@
 {
+  "name": "luma.gl-test-projection",
+  "version": "9.3.0",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "start": "vite --open",
-    "start-local": "vite --config ../vite.config.local.mjs"
+    "start": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
-    "deck.gl": "^9.0.0",
-    "maplibre-gl": "5.0.0-pre.1",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "@vis.gl/react-maplibre": "^1.0.0-alpha.4"
+    "@deck.gl/core": "9.3.0",
+    "@deck.gl/layers": "9.3.0",
+    "@luma.gl/core": "9.4.0-beta.2",
+    "@luma.gl/engine": "9.4.0-beta.2",
+    "@luma.gl/gpgpu": "9.4.0-beta.2",
+    "@luma.gl/shadertools": "9.4.0-beta.2",
+    "@luma.gl/webgl": "9.4.0-beta.2",
+    "@luma.gl/webgpu": "9.4.0-beta.2",
+    "@math.gl/proj4": "^4.1.0",
+    "apache-arrow": "^17.0.0"
   },
   "devDependencies": {
-    "vite": "^7.3.1"
+    "typescript": "^5.9.3",
+    "vite": "6.1.0"
+  },
+  "resolutions": {
+    "@luma.gl/core": "9.4.0-beta.2",
+    "@luma.gl/engine": "9.4.0-beta.2",
+    "@luma.gl/shadertools": "9.4.0-beta.2",
+    "@luma.gl/webgl": "9.4.0-beta.2"
   }
 }
