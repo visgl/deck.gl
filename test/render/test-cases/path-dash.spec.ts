@@ -273,7 +273,8 @@ function createPathVariantsCase(name: string, layerProperties: Record<string, an
           getDashArray: [3, 2]
         },
         {
-          data: [createDiagonalPath(40, getStripY(3, 4), 12)],
+          // Keep the diagonal within its row so it remains visually separate from the zigzag.
+          data: [createDiagonalPath(40, getStripY(3, 4), 5)],
           getWidth: 16,
           getDashArray: [2, 3]
         }
