@@ -198,53 +198,62 @@ export default class GlobeViewport extends Viewport {
 
   /**
    * Builds the screen-pixel → globe-center ray and the intermediate ray/sphere
-   * math reused by `unproject` (intersection point) and the public hit-test
-   * helpers used by `panByPosition`. One function so the same
+   * math reused by `unproject` and anchored zoom. One function so the same
    * pixelUnprojectionMatrix work isn't duplicated.
    */
   private _getRayToGlobe(
-    xy: number[],
+    screenPosition: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
   ): {
-    coord0: number[];
-    coord1: number[];
+    rayStartPosition: number[];
+    rayEndPosition: number[];
     radius: number;
     rayLengthSquared: number;
-    coord0LengthSquared: number;
+    rayStartDistanceSquared: number;
     distanceToCenterSquared: number;
   } {
-    const [x, y] = xy;
-    const y2 = topLeft ? y : this.height - y;
+    const [screenX, screenY] = screenPosition;
+    const adjustedScreenY = topLeft ? screenY : this.height - screenY;
     const {pixelUnprojectionMatrix} = this;
 
-    const coord0 = transformVector(pixelUnprojectionMatrix, [x, y2, -1, 1]);
-    const coord1 = transformVector(pixelUnprojectionMatrix, [x, y2, 1, 1]);
+    const rayStartPosition = transformVector(pixelUnprojectionMatrix, [
+      screenX,
+      adjustedScreenY,
+      -1,
+      1
+    ]);
+    const rayEndPosition = transformVector(pixelUnprojectionMatrix, [
+      screenX,
+      adjustedScreenY,
+      1,
+      1
+    ]);
 
     const radius = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
-    const rayLengthSquared = vec3.sqrLen(vec3.sub([], coord0, coord1));
-    const coord0LengthSquared = vec3.sqrLen(coord0);
-    const coord1LengthSquared = vec3.sqrLen(coord1);
+    const rayLengthSquared = vec3.sqrLen(vec3.sub([], rayStartPosition, rayEndPosition));
+    const rayStartDistanceSquared = vec3.sqrLen(rayStartPosition);
+    const rayEndDistanceSquared = vec3.sqrLen(rayEndPosition);
     const triangleAreaSquared =
-      (4 * coord0LengthSquared * coord1LengthSquared -
-        (rayLengthSquared - coord0LengthSquared - coord1LengthSquared) ** 2) /
+      (4 * rayStartDistanceSquared * rayEndDistanceSquared -
+        (rayLengthSquared - rayStartDistanceSquared - rayEndDistanceSquared) ** 2) /
       16;
     const distanceToCenterSquared = (4 * triangleAreaSquared) / rayLengthSquared;
 
     return {
-      coord0,
-      coord1,
+      rayStartPosition,
+      rayEndPosition,
       radius,
       rayLengthSquared,
-      coord0LengthSquared,
+      rayStartDistanceSquared,
       distanceToCenterSquared
     };
   }
 
   private _getRayDistanceToGlobeCenterRatio(
-    xy: number[],
+    screenPosition: number[],
     options?: {topLeft?: boolean; targetZ?: number}
   ): number {
-    const {distanceToCenterSquared, radius} = this._getRayToGlobe(xy, options);
+    const {distanceToCenterSquared, radius} = this._getRayToGlobe(screenPosition, options);
 
     return Math.sqrt(Math.max(0, distanceToCenterSquared)) / radius;
   }
@@ -266,18 +275,23 @@ export default class GlobeViewport extends Viewport {
       // since we don't know the correct projected z value for the point,
       // unproject two points to get a line and then find the point on that line that intersects with the sphere
       const {
-        coord0,
-        coord1,
+        rayStartPosition,
+        rayEndPosition,
         radius,
         rayLengthSquared,
-        coord0LengthSquared,
+        rayStartDistanceSquared,
         distanceToCenterSquared
       } = this._getRayToGlobe(xyz, {topLeft, targetZ});
-      const r0 = Math.sqrt(coord0LengthSquared - distanceToCenterSquared);
-      const dr = Math.sqrt(Math.max(0, radius * radius - distanceToCenterSquared));
-      const t = (r0 - dr) / Math.sqrt(rayLengthSquared);
+      const rayStartToClosestApproach = Math.sqrt(
+        rayStartDistanceSquared - distanceToCenterSquared
+      );
+      const closestApproachToIntersection = Math.sqrt(
+        Math.max(0, radius * radius - distanceToCenterSquared)
+      );
+      const intersectionRatio =
+        (rayStartToClosestApproach - closestApproachToIntersection) / Math.sqrt(rayLengthSquared);
 
-      coord = vec3.lerp([], coord0, coord1, t);
+      coord = vec3.lerp([], rayStartPosition, rayEndPosition, intersectionRatio);
     }
     const [X, Y, Z] = this.unprojectPosition(coord);
 
@@ -319,20 +333,24 @@ export default class GlobeViewport extends Viewport {
 
   /**
    * Pan the globe to place geographic coordinates at a screen pixel.
-   * When `startPixel` is supplied, applies the delta-based movement used by globe dragging.
-   * @param coords - Geographic anchor, or the starting longitude, latitude and zoom.
-   * @param pixel - Current screen position.
-   * @param startPixel - Screen position where a drag started.
+   * When `dragStartPosition` is supplied, applies the delta-based movement used by globe dragging.
+   * @param coordinates - Geographic anchor, or the starting longitude, latitude and zoom.
+   * @param screenPosition - Current screen position.
+   * @param dragStartPosition - Screen position where a drag started.
    * @returns Updated viewport options.
    */
-  panByPosition(coords: number[], pixel: number[], startPixel?: number[]): GlobeViewportOptions {
-    if (!startPixel) {
-      const distanceRatio = this._getRayDistanceToGlobeCenterRatio(pixel);
+  panByPosition(
+    coordinates: number[],
+    screenPosition: number[],
+    dragStartPosition?: number[]
+  ): GlobeViewportOptions {
+    if (!dragStartPosition) {
+      const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
       if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
         return {longitude: this.longitude, latitude: this.latitude};
       }
 
-      const currentAtPixel = this.unproject(pixel);
+      const currentCoordinates = this.unproject(screenPosition);
       const edgeProgress = Math.max(
         0,
         Math.min(
@@ -342,27 +360,27 @@ export default class GlobeViewport extends Viewport {
         )
       );
       const anchorStrength = 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
-      const longitudeDelta = mod(coords[0] - currentAtPixel[0] + 180, 360) - 180;
+      const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
       const longitude = this.longitude + longitudeDelta * anchorStrength;
       const latitude = Math.max(
-        Math.min(this.latitude + (coords[1] - currentAtPixel[1]) * anchorStrength, 90),
+        Math.min(this.latitude + (coordinates[1] - currentCoordinates[1]) * anchorStrength, 90),
         -90
       );
 
       return {longitude, latitude};
     }
 
-    const [startLng, startLat, startZoom] = coords;
+    const [startLongitude, startLatitude, startZoom] = coordinates;
     // Scale rotation speed inversely with zoom, to approximate constant panning speed
     const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
     const rotationSpeed = 0.25 / scale;
 
-    const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
-    let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
+    const longitude = startLongitude + rotationSpeed * (dragStartPosition[0] - screenPosition[0]);
+    let latitude = startLatitude - rotationSpeed * (dragStartPosition[1] - screenPosition[1]);
     latitude = Math.max(Math.min(latitude, 90), -90);
-    const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
-    out.zoom += zoomAdjust(out.latitude);
-    return out;
+    const nextViewState = {longitude, latitude, zoom: startZoom - zoomAdjust(startLatitude)};
+    nextViewState.zoom += zoomAdjust(nextViewState.latitude);
+    return nextViewState;
   }
 }
 
