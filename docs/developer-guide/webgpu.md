@@ -36,7 +36,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | Module | Layer | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/layers` | `ArcLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/layers` | `BitmapLayer` | ✅ | 🚧 |
+| `@deck.gl/layers` | `BitmapLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `IconLayer` | ✅ | ✅ v9.3 |
 | `@deck.gl/layers` | `LineLayer` | ✅ | ✅ v9.2 |
 | `@deck.gl/layers` | `PointCloudLayer` | ✅ | ✅ v9.2 |
@@ -45,28 +45,28 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/layers` | `GridCellLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `PathLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `PolygonLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | 🚧 |
-| `@deck.gl/layers` | `TextLayer` | ✅ | ❌ |
+| `@deck.gl/layers` | `GeoJsonLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/layers` | `TextLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/layers` | `SolidPolygonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `ScreenGridLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/aggregation-layers` | `ContourLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ❌ |
+| `@deck.gl/aggregation-layers` | `GridLayer` | ✅ | ✅ v9.4  |
 | `@deck.gl/aggregation-layers` | `HeatmapLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ❌ |
-| `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ |
+| `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `S2Layer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `S2Layer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
+| `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
-| `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `HeatmapTileLayer` | ✅ | ❌ |
@@ -75,9 +75,12 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/carto` | `RasterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `VectorTileLayer` | ✅ | ❌ |
 
-`GeoJsonLayer` supports polygon and line rendering on WebGPU; text point rendering still depends on `TextLayer` support.
+`GeoJsonLayer` supports polygon, line, and text point rendering on WebGPU. `TextLayer` supports glyph rendering; text backgrounds and collision filtering still require WebGL.
 
-`A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
+- `S2Layer`, `QuadkeyLayer`, and `GeohashLayer` inherit their WebGPU rendering from `PolygonLayer`, including extruded, stroked, and wireframe cells.
+- `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 
+- `H3ClusterLayer` renders through the polygon path.
+- `A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
 
 ## Extensions
 
@@ -108,12 +111,12 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Feature | Status | Comment |
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
-| Picking | ❌ | `Deck` currently skips picking on WebGPU, including hover and click picking paths. |
+| Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
 | Shader hooks / layer extensions | ❌ | deck.gl's WGSL shader hook list is currently empty, so injection-based extensions are not yet portable. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
-| Constant attributes | 🚧 | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
+| Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |
-| Base map overlays | ❌ | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
+| Base map overlays |  🚧 | Transparent overlay integration still requires premultiplied-alpha work across deck and the base map stack. |
 | Base map interleaving | ❌ | No current base map integration path supports WebGPU interleaving. |
 
 ## Background

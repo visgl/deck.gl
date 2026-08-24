@@ -12,14 +12,19 @@ import {getBaseMapViewState} from '../../config';
 function GoogleMapsDeckOverlay({
   layers,
   interleaved,
+  useDevicePixels,
   onViewStateChange
 }: {
   layers: any[];
   interleaved: boolean;
+  useDevicePixels?: boolean | number;
   onViewStateChange?: (vs: InitialViewState) => void;
 }) {
   const map = useMap();
-  const overlay = useMemo(() => new GoogleMapsOverlay({interleaved}), [interleaved]);
+  const overlay = useMemo(
+    () => new GoogleMapsOverlay({interleaved, useDevicePixels}),
+    [interleaved, useDevicePixels]
+  );
 
   useEffect(() => {
     if (map) {
@@ -62,7 +67,7 @@ export default function GoogleMapsComponent({config}: GoogleMapsComponentProps) 
   // eslint-disable-next-line no-process-env
   const mapId = process.env.GoogleMapsMapId || 'DEMO_MAP_ID';
 
-  const {initialViewState, layers, interleaved, onViewStateChange} = config;
+  const {initialViewState, layers, interleaved, useDevicePixels, onViewStateChange} = config;
   const viewState = getBaseMapViewState(initialViewState);
 
   return (
@@ -79,6 +84,7 @@ export default function GoogleMapsComponent({config}: GoogleMapsComponentProps) 
           <GoogleMapsDeckOverlay
             layers={layers}
             interleaved={interleaved}
+            useDevicePixels={useDevicePixels}
             onViewStateChange={onViewStateChange}
           />
         </GoogleMap>

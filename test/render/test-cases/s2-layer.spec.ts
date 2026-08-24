@@ -43,7 +43,7 @@ const testCases = [
     },
     layers: [
       new S2Layer({
-        // prettier-ignore
+        // biome-ignore format: preserve layout
         data: [
           '04', '0c', '14', '1c', '24', '2c', '34', '3c',
           '44', '4c', '54', '5c', '64', '6c', '74', '7c',
@@ -83,9 +83,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

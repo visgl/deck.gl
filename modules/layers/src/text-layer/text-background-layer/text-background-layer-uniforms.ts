@@ -4,6 +4,21 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct TextBackgroundUniforms {
+  billboard: f32,
+  sizeScale: f32,
+  sizeMinPixels: f32,
+  sizeMaxPixels: f32,
+  borderRadius: vec4<f32>,
+  padding: vec4<f32>,
+  sizeUnits: i32,
+  stroked: f32,
+};
+
+@group(0) @binding(auto) var<uniform> textBackground: TextBackgroundUniforms;
+`;
+
 const uniformBlock = `\
 layout(std140) uniform textBackgroundUniforms {
   bool billboard;
@@ -30,6 +45,7 @@ export type TextBackgroundProps = {
 
 export const textBackgroundUniforms = {
   name: 'textBackground',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   fs: uniformBlock,
   uniformTypes: {

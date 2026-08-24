@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
@@ -17,24 +17,32 @@ export function mount(container: HTMLElement, config: Config): () => void {
     multiView,
     views,
     layerFilter,
+    useDevicePixels,
     onViewStateChange
   } = config;
 
   // For multi-view, extract the mapbox view state for the base map
   const mapInitialViewState = getBaseMapViewState(initialViewState);
 
-  const map = new maplibregl.Map({
+  const mapOpts: maplibregl.MapOptions = {
     container,
     style: mapStyle,
     center: [mapInitialViewState.longitude, mapInitialViewState.latitude],
     zoom: mapInitialViewState.zoom,
     bearing: mapInitialViewState.bearing || 0,
     pitch: mapInitialViewState.pitch || 0
-  });
+  };
+  if (typeof useDevicePixels === 'number') {
+    mapOpts.pixelRatio = useDevicePixels;
+  } else if (useDevicePixels === false) {
+    mapOpts.pixelRatio = 1;
+  }
+  const map = new maplibregl.Map(mapOpts);
 
   const overlayConfig: any = {
     interleaved,
-    layers
+    layers,
+    useDevicePixels
   };
 
   if (multiView && views) {
@@ -45,7 +53,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
     overlayConfig.layerFilter = layerFilter;
   }
 
-  const deckOverlay = new MapboxOverlay(overlayConfig);
+  const deckOverlay = new MapLibreOverlay(overlayConfig);
 
   let cancelled = false;
 

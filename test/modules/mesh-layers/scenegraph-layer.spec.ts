@@ -7,6 +7,7 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 import {project32} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import source from '@deck.gl/mesh-layers/scenegraph-layer/scenegraph-layer.wgsl';
 import {CubeGeometry, Model, GroupNode, ModelNode} from '@luma.gl/engine';
 import {GLTFAnimator} from '@luma.gl/gltf';
 
@@ -57,6 +58,15 @@ class MockGLTFAnimator extends GLTFAnimator {
     });
   }
 }
+
+test('ScenegraphLayer#WebGPU shader preserves instance picking and highlighting', () => {
+  expect(source).toContain('@location(5) pickingColor: vec3<f32>');
+  expect(source).toContain('outputs.pickingColor = geometry.pickingColor');
+  expect(source).toContain('picking.isActive > 0.5');
+  expect(source).toContain('picking_isColorValid(inputs.pickingColor)');
+  expect(source).toContain('return vec4<f32>(inputs.pickingColor, 1.0)');
+  expect(source).toContain('picking.isHighlightActive > 0.5');
+});
 
 test('ScenegraphLayer#tests', () => {
   const testCases = generateLayerTests({

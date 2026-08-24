@@ -8,7 +8,7 @@ import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
-import source from './path-layer.wgsl';
+import {shaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -63,6 +63,14 @@ type _PathLayerProps<DataT> = {
    */
   miterLimit?: number;
   /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where a path overlaps itself. Only
+   * the edges along the width of the path are smoothed - flat caps at the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
+  /**
    * If `true`, extrude the path in screen space (width always faces the camera).
    * If `false`, the width always faces up (z).
    * @default false
@@ -106,6 +114,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   jointRounded: false,
   capRounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
+  antialiasing: false,
   billboard: false,
   _pathType: null,
 
@@ -136,10 +145,12 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
+    const {antialiasing} = this.props;
     return super.getShaders({
       vs,
       fs,
-      source,
+      source: shaderWGSL,
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [project32, color, picking, pathUniforms]
     }); // 'project' module added by default.
   }
@@ -256,7 +267,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const {props, changeFlags} = params;
+    const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
 
@@ -293,7 +304,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
     }
 
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager!.invalidateAll();
@@ -373,7 +384,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
      *                                   /     :     o
      */
 
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     const SEGMENT_INDICES = [
       // start corner
       0, 1, 2,
@@ -386,7 +397,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     // [0] position on segment - 0: start, 1: end
     // [1] side of path - -1: left, 0: center (joint), 1: right
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     const SEGMENT_POSITIONS = [
       // bevel start corner
       0, 0,

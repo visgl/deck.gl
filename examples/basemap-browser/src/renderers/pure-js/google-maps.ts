@@ -47,7 +47,7 @@ function loadGoogleMapsAPI(apiKey: string): Promise<any> {
 }
 
 export function mount(container: HTMLElement, config: Config): () => void {
-  const {initialViewState, layers, interleaved, onViewStateChange} = config;
+  const {initialViewState, layers, interleaved, useDevicePixels, onViewStateChange} = config;
   const viewState = getBaseMapViewState(initialViewState);
 
   // eslint-disable-next-line no-process-env
@@ -84,7 +84,8 @@ export function mount(container: HTMLElement, config: Config): () => void {
 
       overlay = new GoogleMapsOverlay({
         interleaved,
-        layers
+        layers,
+        useDevicePixels
       });
 
       overlay.setMap(map);

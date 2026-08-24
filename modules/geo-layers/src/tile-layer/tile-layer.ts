@@ -197,13 +197,15 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   state!: {
     tileset: Tileset2D | null;
     isLoaded: boolean;
+    isGlobeView: boolean;
     frameNumber?: number;
   };
 
   initializeState() {
     this.state = {
       tileset: null,
-      isLoaded: false
+      isLoaded: false,
+      isGlobeView: this.context.viewport instanceof _GlobeViewport
     };
   }
 
@@ -230,6 +232,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   updateState({changeFlags}: UpdateParameters<this>) {
     let {tileset} = this.state;
+    const isGlobeView = this.context.viewport instanceof _GlobeViewport;
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
       changeFlags.dataChanged ||
@@ -252,6 +255,15 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           tile.layers = null;
         });
       }
+    }
+
+    if (tileset && isGlobeView !== this.state.isGlobeView) {
+      // Bitmap image coordinates depend on the projection. Recreate cached sublayers when the
+      // view switches between GlobeView and another projection so the override is not stale.
+      tileset.tiles.forEach(tile => {
+        tile.layers = null;
+      });
+      this.setState({isGlobeView});
     }
 
     this._updateTileset();
@@ -451,6 +463,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (
       !(this.context.viewport instanceof _GlobeViewport) ||
       !(layer instanceof BitmapLayer) ||
+      !Number.isFinite(layer.props.bounds[0]) ||
       (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
     ) {
       return null;

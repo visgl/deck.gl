@@ -294,6 +294,122 @@ test('TileLayer#GlobeView:custom BitmapLayer image coordinate system', async () 
   });
 });
 
+test('TileLayer#GlobeView:preserves custom BitmapLayer quad bounds', async () => {
+  class CustomBitmapLayer extends BitmapLayer {
+    static layerName = 'CustomBitmapLayer';
+  }
+
+  const testViewport = new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+
+  const renderSubLayers = props => {
+    const {west, south, east, north} = props.tile.bbox;
+    return new CustomBitmapLayer(props, {
+      id: `${props.id}-custom-bitmap`,
+      image: '/test/data/icon-atlas.png',
+      bounds: [
+        [west, north],
+        [west, south],
+        [east, south],
+        [east, north]
+      ]
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases: [
+      {
+        title: 'leaves quad-bound BitmapLayer image coordinates unchanged',
+        props: {
+          getTileData: () => ({}),
+          renderSubLayers
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe('default');
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TileLayer#BitmapLayer image coordinates update when the projection changes', async () => {
+  const mapViewport = new WebMercatorViewport({
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 0,
+    zoom: 2
+  });
+  const globeViewport = new GlobeView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }
+  });
+
+  const renderSubLayers = props => {
+    const {west, south, east, north} = props.tile.bbox;
+    return new BitmapLayer(props, {
+      id: `${props.id}-bitmap`,
+      image: '/test/data/icon-atlas.png',
+      bounds: [west, south, east, north]
+    });
+  };
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: mapViewport,
+    testCases: [
+      {
+        title: 'MapView uses default image coordinates',
+        props: {
+          getTileData: () => ({}),
+          renderSubLayers
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe('default');
+          }
+        }
+      },
+      {
+        title: 'GlobeView switches image coordinates to Web Mercator',
+        viewport: globeViewport,
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe(COORDINATE_SYSTEM.CARTESIAN);
+          }
+        }
+      },
+      {
+        title: 'MapView restores default image coordinates',
+        viewport: mapViewport,
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (layer.isLoaded) {
+            expect(subLayers[0].props._imageCoordinateSystem).toBe('default');
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
 test('TileLayer#GlobeView:leaves non-Bitmap sublayers unchanged', async () => {
   const testViewport = new GlobeView().makeViewport({
     width: 100,

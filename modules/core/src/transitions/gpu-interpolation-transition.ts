@@ -167,7 +167,7 @@ void main(void) {
 `;
 
 function useFp64(attribute: Attribute): boolean {
-  return attribute.doublePrecision && attribute.value instanceof Float64Array;
+  return attribute.isDoublePrecisionBuffer;
 }
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
@@ -197,7 +197,6 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
           ]
         }
       ],
-      // @ts-expect-error fp64 module only sets ONE uniform via defaultUniforms
       modules: [fp64arithmetic, interpolationUniforms],
       defines: {
         // @ts-expect-error TODO fix luma type

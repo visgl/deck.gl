@@ -211,7 +211,7 @@ test('Attribute#setConstantValue', () => {
   expect(attribute.getValue().colors, 'constant value is normalized').toEqual([1, 1, 0]);
 });
 
-test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
+test('Attribute#setConstantValue keeps one constant value - webgpu', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -223,21 +223,54 @@ test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
   });
 
   attribute.numInstances = 2;
-  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant materializes a buffer').toBe(
-    true
-  );
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant is accepted').toBe(true);
 
-  expect(attribute.state.constant, 'webgpu constant is materialized as a buffer').toBeFalsy();
-  expect(attribute.value, 'repeated attribute value is generated').toEqual([1, 2, 3, 1, 2, 3]);
-  expect(
-    attribute.getValue().positions instanceof Buffer,
-    'webgpu constant is exposed as a buffer'
-  ).toBeTruthy();
+  expect(attribute.state.constant, 'webgpu constant remains constant').toBeTruthy();
+  expect(attribute.value, 'only one attribute value is retained').toEqual([1, 2, 3]);
+  const buffer = attribute.getValue().positions as Buffer;
+  expect(buffer, 'webgpu constant is exposed as a one-row buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync(0, 12);
+  expect(new Float32Array(bytes.buffer, bytes.byteOffset, 3)).toEqual(new Float32Array([1, 2, 3]));
+  expect(attribute.getBufferLayout().byteStride, 'constant buffer broadcasts its row').toBe(0);
+  expect(attribute.getConstantValue(), 'raw constant is retained for buffer grouping').toEqual([
+    1, 2, 3
+  ]);
 
-  expect(
-    attribute.setConstantValue(this, [1, 2, 3]),
-    'same emulated constant does not regenerate the buffer'
-  ).toBe(false);
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'same constant remains valid').toBe(true);
+
+  attribute.delete();
+});
+
+test('Attribute#updateBuffer keeps a one-instance constant updater - webgpu', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+  const matrix = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
+  const attribute = new Attribute(webgpuDevice, {
+    id: 'instanceModelMatrix',
+    size: 12,
+    update: target => {
+      // Matrix attributes use this legacy constant-updater path when all transforms are static.
+      target.constant = true;
+      target.value = new Float32Array(matrix);
+    }
+  });
+
+  attribute.allocate(1);
+  attribute.updateBuffer({
+    numInstances: 1,
+    data: [0],
+    props: {},
+    context: null
+  });
+
+  expect(attribute.isConstant, 'constant updater remains constant').toBeTruthy();
+  const buffer = attribute.getValue().instanceModelMatrix as Buffer;
+  expect(buffer, 'constant updater is exposed as a one-row buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync(0, matrix.byteLength);
+  expect(new Float32Array(bytes.buffer, bytes.byteOffset, matrix.length)).toEqual(matrix);
+  expect(attribute.getBufferLayout().byteStride).toBe(0);
 
   attribute.delete();
 });
@@ -387,15 +420,15 @@ test('Attribute#updateBuffer', () => {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
         255, 0, 0, 255,
         128, 128, 128, 128,
         255, 255, 255, 255,
-        0, 0, 0, 128, 
+        0, 0, 0, 128,
         0, 0, 0, 255
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
         255, 0, 0, 255, 255, 0, 0, 255,
         128, 128, 128, 128,
@@ -422,14 +455,14 @@ test('Attribute#updateBuffer', () => {
         size: 3,
         accessor: (_, {index}) => [index, 0, 0]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
         0, 0, 0,
         1, 0, 0,
         2, 0, 0,
         3, 0, 0
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
         0, 0, 0, 0, 0, 0,
         1, 0, 0,
@@ -612,7 +645,7 @@ test('Attribute#standard accessor - variable width', () => {
         defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       result: [
         255, 0, 0, 255,
         255, 255, 0, 255,
@@ -1140,6 +1173,42 @@ describe('Attribute#doublePrecision', () => {
     validateShaderAttributes(attribute, false);
 
     buffer.delete();
+    attribute.delete();
+  });
+
+  test('Attribute#doublePrecision#fp64:false interleaves zero lows on WebGPU', async ({skip}) => {
+    const webgpuDevice = await getWebGPUTestDevice();
+    if (!webgpuDevice) {
+      skip();
+    }
+    const attribute = new Attribute(webgpuDevice, {
+      id: 'positions',
+      type: 'float64',
+      fp64: false,
+      size: 3,
+      accessor: 'getPosition'
+    });
+
+    attribute.allocate(2);
+    attribute.updateBuffer({
+      numInstances: 2,
+      data: [0, 1],
+      props: {
+        getPosition: d => [d, 1, 2]
+      }
+    });
+
+    const bufferLayout = attribute.getBufferLayout();
+    expect(bufferLayout.byteStride).toBe(24);
+    expect(bufferLayout.attributes?.map(a => a.byteOffset)).toEqual([0, 12]);
+    expect(attribute.getValue().positions64Low).toBe(attribute.getBuffer());
+
+    const buffer = attribute.getBuffer()!;
+    const bytes = await buffer.readAsync(0, 48);
+    expect(new Float32Array(bytes.buffer, bytes.byteOffset, 12)).toEqual(
+      new Float32Array([0, 1, 2, 0, 0, 0, 1, 1, 2, 0, 0, 0])
+    );
+
     attribute.delete();
   });
 });

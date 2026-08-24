@@ -76,6 +76,21 @@ function redrawDeck(thisRef: DeckInstanceRef<any>) {
   }
 }
 
+// luma.gl initially gives a detached canvas a small placeholder size. Do not mount a basemap
+// against that temporary viewport: MapLibre would initialize its own canvas at 1 x 1 pixels.
+function deckSizeMatchesContainer(
+  thisRef: DeckInstanceRef<any>,
+  container: HTMLElement | null
+): boolean {
+  const deck = thisRef.deck;
+  return Boolean(
+    deck &&
+      container &&
+      deck.width === container.clientWidth &&
+      deck.height === container.clientHeight
+  );
+}
+
 function createDeckInstance<ViewsT extends ViewOrViews>(
   thisRef: DeckInstanceRef<ViewsT>,
   DeckClass: typeof Deck,
@@ -83,29 +98,37 @@ function createDeckInstance<ViewsT extends ViewOrViews>(
 ): Deck<ViewsT> {
   const deck = new DeckClass({
     ...props,
-    // The Deck's animation loop is independent from React's render cycle, causing potential
-    // synchronization issues. We provide this custom render function to make sure that React
-    // and Deck update on the same schedule.
-    // TODO(ibgreen) - Hack to enable WebGPU as it needs to render quickly to avoid CanvasContext texture from going stale
-    _customRender:
-      props.deviceProps?.adapters?.[0]?.type === 'webgpu'
-        ? undefined
-        : redrawReason => {
-            // Save the dirty flag for later
-            thisRef.redrawReason = redrawReason;
+    // Keep one authoritative render callback for both backends. Deck calls `_customRender` from
+    // its animation loop whenever its viewport or layers become dirty; this is also the point
+    // where React children must be synchronized with the viewport used to draw those layers.
+    _customRender: redrawReason => {
+      thisRef.redrawReason = redrawReason;
+      // `deviceProps` describes the requested adapter, not necessarily the adapter that was
+      // initialized. Read the resolved device here, after Deck's animation loop has initialized
+      // it, so fallback from WebGPU to WebGL keeps the WebGL synchronization path.
+      // @ts-expect-error accessing protected device
+      const isWebGPU = deck.device?.type === 'webgpu';
 
-            // Viewport/view state is passed to child components as props.
-            // If they have changed, we need to trigger a React rerender to update children props.
-            const viewports = deck.getViewports();
-            if (thisRef.lastRenderedViewports !== viewports) {
-              // Viewports have changed, update children props first.
-              // This will delay the Deck canvas redraw till after React update (in useLayoutEffect)
-              // so that the canvas does not get rendered before the child components update.
-              thisRef.forceUpdate();
-            } else {
-              redrawDeck(thisRef);
-            }
-          }
+      const viewports = deck.getViewports();
+      if (thisRef.lastRenderedViewports !== viewports) {
+        // Do not initialize a map against the detached WebGPU canvas's temporary 1 x 1 viewport.
+        // The next resize invalidates Deck again and repeats this callback with the final size.
+        if (!isWebGPU || deckSizeMatchesContainer(thisRef, props.parent || null)) {
+          thisRef.forceUpdate();
+        }
+
+        if (!isWebGPU) {
+          // WebGL may defer drawing until React's layout effect so its DOM children and canvas
+          // appear in the same frame. Keep master behavior unchanged for the existing backend.
+          return;
+        }
+      }
+
+      // WebGPU's current canvas texture is valid only for this animation frame. Draw now, even
+      // when React still has a pending viewport update; waiting for a layout effect would reuse
+      // an expired texture. React children catch up through the forceUpdate scheduled above.
+      redrawDeck(thisRef);
+    }
   });
   return deck;
 }
@@ -145,6 +168,9 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
       return null;
     }
     thisRef.viewStateUpdateRequested = null;
+    // Deck marks the new viewport dirty and schedules `_customRender`; do not start a competing
+    // React update here. Keeping redraw ownership in one callback handles both controlled and
+    // uncontrolled view state without making WebGPU a separate synchronization path.
     return props.onViewStateChange?.(params);
   };
 

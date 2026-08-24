@@ -20,6 +20,8 @@ deck.gl v9.4 substantially expands its experimental WebGPU support. Newly suppor
 
 This release improves WebGPU attribute-buffer handling, adds WebGPU render-test coverage, and makes switching between WebGL2 and WebGPU more reliable in React and across website examples.
 
+The WebGPU-capable code is included by default so that adopting WebGPU does not require changing application imports. Applications that only target WebGL2 can instead configure their bundler to resolve the custom export condition `visgl:webgl-only`; supported deck.gl packages will then use alternate builds with WebGPU branches and WGSL shader sources removed, reducing their contribution to bundle size without changing the imported APIs. See [Building Apps](./developer-guide/building-apps.md#bundle-size) for details.
+
 WebGPU support remains experimental and is not yet recommended for production. Some layers and features remain unavailable or only partially supported. See the [WebGPU guide](./developer-guide/webgpu.md) for setup instructions, current limitations, and the complete compatibility matrix.
 
 ### Views and Controllers
@@ -62,6 +64,10 @@ new GlobeView({
 ### @deck.gl/arcgis
 
 - [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
+
+### @deck.gl/maplibre
+
+- New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module supports overlaid and interleaved rendering with MapLibre GL JS v4.5.1, v5, and v6 using only public MapLibre APIs.
 
 [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 

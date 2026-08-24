@@ -245,6 +245,12 @@ Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+#### `lineAntialiasing` (boolean, optional) {#lineantialiasing}
+
+* Default: `false`
+
+If `true`, the stroke is rendered with smoothed edges. If `false`, it is rendered with rough edges. Antialiasing can cause artifacts where the stroke overlaps itself. Forwarded to the underlying [PathLayer](./path-layer.md#antialiasing).
+
 #### `material` (Material, optional) {#material}
 
 * Default: `true`

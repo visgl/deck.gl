@@ -38,6 +38,7 @@ const testCases = [
   },
   {
     name: 'polygon-lnglat-64',
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -62,6 +63,7 @@ const testCases = [
   },
   {
     name: 'polygon-dash',
+    skip: ['webgpu'],
     views: new OrthographicView(),
     viewState: {
       target: [0, 0, 0],
@@ -94,6 +96,7 @@ const testCases = [
   },
   {
     name: 'polygon-pattern-mask',
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.75,
       longitude: -122.43,
@@ -122,6 +125,7 @@ const testCases = [
   },
   {
     name: 'polygon-pattern',
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.75,
       longitude: -122.43,
@@ -225,9 +229,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

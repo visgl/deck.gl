@@ -8,42 +8,37 @@ import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 
 function expectUniqueGeometryLayout(layer: ColumnLayer): void {
-  for (const model of layer.getModels()) {
-    const bufferNames = model.bufferLayout.map(layout => layout.name);
-    expect(new Set(bufferNames).size, `${model.id} has unique buffer layouts`).toBe(
-      bufferNames.length
-    );
-    expect(
-      bufferNames.filter(name => name === 'geometry'),
-      `${model.id} has one geometry buffer layout`
-    ).toHaveLength(1);
+  const model = layer.state.fillModel!;
+  const bufferNames = model.bufferLayout.map(layout => layout.name);
+  expect(new Set(bufferNames).size, `${model.id} has unique buffer layouts`).toBe(
+    bufferNames.length
+  );
+  expect(
+    bufferNames.filter(name => name === 'geometry'),
+    `${model.id} has one geometry buffer layout`
+  ).toHaveLength(1);
 
-    const geometryLayout = model.bufferLayout.find(layout => layout.name === 'geometry');
-    const attachedGeometryLayout = model._gpuGeometry?.bufferLayout.find(
-      layout => layout.name === 'geometry'
-    );
-    expect(
-      geometryLayout?.attributes?.map(attribute => attribute.attribute),
-      `${model.id} geometry attributes`
-    ).toEqual(['positions', 'normals']);
-    expect(
-      attachedGeometryLayout,
-      `${model.id} has an attached geometry buffer layout`
-    ).toBeTruthy();
-    expect(geometryLayout, `${model.id} layout matches its attached geometry`).toEqual(
-      attachedGeometryLayout
-    );
+  const geometryLayout = model.bufferLayout.find(layout => layout.name === 'geometry');
+  const attachedGeometryLayout = model._gpuGeometry?.bufferLayout.find(
+    layout => layout.name === 'geometry'
+  );
+  expect(
+    geometryLayout?.attributes?.map(attribute => attribute.attribute),
+    `${model.id} geometry attributes`
+  ).toEqual(['positions', 'normals']);
+  expect(attachedGeometryLayout, `${model.id} has an attached geometry buffer layout`).toBeTruthy();
+  expect(geometryLayout, `${model.id} layout matches its attached geometry`).toEqual(
+    attachedGeometryLayout
+  );
 
-    const pipelineBufferNames = model.pipeline.bufferLayout.map(layout => layout.name);
-    expect(
-      new Set(pipelineBufferNames).size,
-      `${model.id} pipeline has unique buffer layouts`
-    ).toBe(pipelineBufferNames.length);
-    expect(
-      pipelineBufferNames.filter(name => name === 'geometry'),
-      `${model.id} pipeline has one geometry buffer layout`
-    ).toHaveLength(1);
-  }
+  const pipelineBufferNames = model.pipeline.bufferLayout.map(layout => layout.name);
+  expect(new Set(pipelineBufferNames).size, `${model.id} pipeline has unique buffer layouts`).toBe(
+    pipelineBufferNames.length
+  );
+  expect(
+    pipelineBufferNames.filter(name => name === 'geometry'),
+    `${model.id} pipeline has one geometry buffer layout`
+  ).toHaveLength(1);
 }
 
 // Regression test for #9463 / #10021: with binary data the fill model must
