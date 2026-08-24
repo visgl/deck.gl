@@ -27,11 +27,11 @@ webglTest('PathStyleExtension#rounded dash picking', async () => {
   const canvas = document.createElement('canvas');
   canvas.width = 200;
   canvas.height = 100;
-  const gl = canvas.getContext('webgl2');
-  expect(gl, 'WebGL2 context is created').toBeTruthy();
+  const webglContext = canvas.getContext('webgl2');
+  expect(webglContext, 'WebGL2 context is created').toBeTruthy();
 
   const deck = new Deck({
-    gl: gl!,
+    gl: webglContext!,
     width: 200,
     height: 100,
     views: new OrthographicView(),
@@ -64,6 +64,7 @@ webglTest('PathStyleExtension#rounded dash picking', async () => {
     expect(deck.pickObject({x: 80, y: 50}), 'middle of a rounded gap is not pickable').toBeNull();
   } finally {
     deck.finalize();
+    webglContext!.getExtension('WEBGL_lose_context')?.loseContext();
   }
 });
 
