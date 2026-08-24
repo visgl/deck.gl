@@ -320,8 +320,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   /** Resolves the zoom anchor for pointer-based controls. */
-  protected getZoomPosition(pos: [number, number]): [number, number] {
-    return this.zoomAround === 'center' ? [this.props.width / 2, this.props.height / 2] : pos;
+  protected getZoomPosition(position: [number, number]): [number, number] {
+    return this.zoomAround === 'center' ? [this.props.width / 2, this.props.height / 2] : position;
   }
 
   isPointInBounds(pos: [number, number], event: MjolnirEvent): boolean {
