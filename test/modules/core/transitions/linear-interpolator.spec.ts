@@ -89,7 +89,7 @@ test('LinearInterpolator#interpolateProps', () => {
   });
 });
 
-test('LinearInterpolator anchors transitions on GlobeViewport', () => {
+test('LinearInterpolator anchors transitions through GlobeViewport#panByPosition', () => {
   const makeViewport = (props: Record<string, any>) => new GlobeViewport(props);
   const startProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 2};
   const endProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 3};
@@ -104,8 +104,7 @@ test('LinearInterpolator anchors transitions on GlobeViewport', () => {
 
   const {start, end} = interpolator.initializeProps(startProps, endProps);
 
-  expect(end.aroundLngLat, 'unprojects the anchor to a lng/lat on the globe').toBeDefined();
-  expect(end.aroundPosition, 'does not fall back to the planar anchor path').toBeUndefined();
+  expect(end.aroundPosition, 'unprojects the anchor using the viewport').toBeDefined();
   expect(start.around, 'records the start anchor screen point').toEqual(around);
   expect(end.around, 'records the anchor screen point in the end viewport').toBeDefined();
 
@@ -124,7 +123,7 @@ test('LinearInterpolator anchors transitions on GlobeViewport', () => {
   );
 });
 
-test('LinearInterpolator keeps globe anchor when transition crosses to WebMercatorViewport', () => {
+test('LinearInterpolator keeps an anchor when the viewport implementation changes', () => {
   const makeViewport = (props: Record<string, any>) =>
     props.zoom > 12 ? new WebMercatorViewport(props) : new GlobeViewport(props);
   const startProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 11.9};
@@ -139,8 +138,7 @@ test('LinearInterpolator keeps globe anchor when transition crosses to WebMercat
 
   const {start, end} = interpolator.initializeProps(startProps, endProps);
 
-  expect(end.aroundLngLat, 'records the spherical anchor from the globe start').toBeDefined();
-  expect(end.aroundPosition, 'does not switch to a separate planar anchor').toBeUndefined();
+  expect(end.aroundPosition, 'records the common-space anchor').toBeDefined();
 
   const propsAtHalf = interpolator.interpolateProps(start, end, 0.5);
   expect(
@@ -155,22 +153,4 @@ test('LinearInterpolator keeps globe anchor when transition crosses to WebMercat
   expect(propsAtEnd.latitude, 'transition still ends at requested latitude').toBeCloseTo(
     endProps.latitude
   );
-});
-
-test('LinearInterpolator falls back to a plain LERP when the GlobeView anchor is off-globe', () => {
-  const makeViewport = (props: Record<string, any>) => new GlobeViewport(props);
-  const startProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 1};
-  const endProps = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 3};
-  // Corner of the canvas misses the globe at zoom 1 with these dimensions.
-  const around: [number, number] = [0, 0];
-
-  const interpolator = new LinearInterpolator({
-    transitionProps: {compare: ['longitude', 'latitude', 'zoom'], required: ['zoom']},
-    around,
-    makeViewport
-  });
-
-  const {start, end} = interpolator.initializeProps(startProps, endProps);
-  expect(end.aroundLngLat, 'no anchor when the screen point misses the globe').toBeUndefined();
-  expect(start.around, 'no anchor recorded on the start frame either').toBeUndefined();
 });

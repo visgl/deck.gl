@@ -6,20 +6,19 @@ import {Matrix4, vec3, vec4} from '@math.gl/core';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
+import {mod} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
 // Where along the screen-pixel-to-globe-center distance ratio the anchored
-// zoom starts losing strength. Below this ratio the anchor pins exactly; from
+// zoom starts losing strength. Below this ratio the anchor uses full correction; from
 // here to the limb (ratio = 1) the anchor blends toward MIN_STRENGTH so a
 // near-edge pixel doesn't snap the camera across the globe.
 const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
 const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
-// Allow a small grace band outside the rendered sphere so pointer zoom does not
-// immediately fall back to center anchoring when the cursor grazes the limb.
-export const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
+const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -200,7 +199,7 @@ export default class GlobeViewport extends Viewport {
   /**
    * Builds the screen-pixel → globe-center ray and the intermediate ray/sphere
    * math reused by `unproject` (intersection point) and the public hit-test
-   * helpers (`isPointOnGlobe`, `panByGlobeAnchor`). One function so the same
+   * helpers used by `panByPosition`. One function so the same
    * pixelUnprojectionMatrix work isn't duplicated.
    */
   private _getRayToGlobe(
@@ -248,17 +247,6 @@ export default class GlobeViewport extends Viewport {
     const {distanceToCenterSquared, radius} = this._getRayToGlobe(xy, options);
 
     return Math.sqrt(Math.max(0, distanceToCenterSquared)) / radius;
-  }
-
-  isPointOnGlobe(
-    xy: number[],
-    {
-      topLeft = true,
-      targetZ,
-      maxDistanceRatio = 1
-    }: {topLeft?: boolean; targetZ?: number; maxDistanceRatio?: number} = {}
-  ): boolean {
-    return this._getRayDistanceToGlobeCenterRatio(xy, {topLeft, targetZ}) <= maxDistanceRatio;
   }
 
   unproject(
@@ -330,17 +318,41 @@ export default class GlobeViewport extends Viewport {
   }
 
   /**
-   * Pan the globe using delta-based movement
-   * @param coords - the geographic coordinates where the pan started
-   * @param pixel - the current screen position
-   * @param startPixel - the screen position where the pan started
-   * @returns updated viewport options with new longitude/latitude
+   * Pan the globe to place geographic coordinates at a screen pixel.
+   * When `startPixel` is supplied, applies the delta-based movement used by globe dragging.
+   * @param coords - Geographic anchor, or the starting longitude, latitude and zoom.
+   * @param pixel - Current screen position.
+   * @param startPixel - Screen position where a drag started.
+   * @returns Updated viewport options.
    */
-  panByPosition(
-    [startLng, startLat, startZoom]: number[],
-    pixel: number[],
-    startPixel: number[]
-  ): GlobeViewportOptions {
+  panByPosition(coords: number[], pixel: number[], startPixel?: number[]): GlobeViewportOptions {
+    if (!startPixel) {
+      const distanceRatio = this._getRayDistanceToGlobeCenterRatio(pixel);
+      if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+        return {longitude: this.longitude, latitude: this.latitude};
+      }
+
+      const currentAtPixel = this.unproject(pixel);
+      const edgeProgress = Math.max(
+        0,
+        Math.min(
+          1,
+          (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
+            (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+        )
+      );
+      const anchorStrength = 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
+      const longitudeDelta = mod(coords[0] - currentAtPixel[0] + 180, 360) - 180;
+      const longitude = this.longitude + longitudeDelta * anchorStrength;
+      const latitude = Math.max(
+        Math.min(this.latitude + (coords[1] - currentAtPixel[1]) * anchorStrength, 90),
+        -90
+      );
+
+      return {longitude, latitude};
+    }
+
+    const [startLng, startLat, startZoom] = coords;
     // Scale rotation speed inversely with zoom, to approximate constant panning speed
     const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
     const rotationSpeed = 0.25 / scale;
@@ -351,35 +363,6 @@ export default class GlobeViewport extends Viewport {
     const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
     out.zoom += zoomAdjust(out.latitude);
     return out;
-  }
-
-  /**
-   * Pan the globe so that a known geographic point remains under a screen pixel.
-   * Used for cursor/touch-anchored zoom when the pointer is on the globe surface.
-   */
-  panByGlobeAnchor(anchorLngLat: number[], pixel: number[]): GlobeViewportOptions {
-    const distanceRatio = this._getRayDistanceToGlobeCenterRatio(pixel);
-    if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
-      return {longitude: this.longitude, latitude: this.latitude};
-    }
-
-    const currentAtPixel = this.unproject(pixel);
-    const edgeProgress = Math.max(
-      0,
-      Math.min(
-        1,
-        (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
-          (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
-      )
-    );
-    const anchorStrength = 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
-    const longitude = this.longitude + (anchorLngLat[0] - currentAtPixel[0]) * anchorStrength;
-    const latitude = Math.max(
-      Math.min(this.latitude + (anchorLngLat[1] - currentAtPixel[1]) * anchorStrength, 90),
-      -90
-    );
-
-    return {longitude, latitude};
   }
 }
 
