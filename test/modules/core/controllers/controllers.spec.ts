@@ -361,6 +361,95 @@ test('GlobeController', async () => {
   );
 });
 
+const ZOOM_AROUND_CASES = [
+  {
+    title: 'MapController',
+    ViewClass: MapView,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    getPosition: props => [props.longitude, props.latitude]
+  },
+  {
+    title: 'OrbitController',
+    ViewClass: OrbitView,
+    initialViewState: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 0, zoom: 1},
+    getPosition: props => props.target
+  },
+  {
+    title: 'OrthographicController',
+    ViewClass: OrthographicView,
+    initialViewState: {target: [0, 0, 0], zoom: 1},
+    getPosition: props => props.target
+  },
+  {
+    title: 'FirstPersonController',
+    ViewClass: FirstPersonView,
+    initialViewState: {position: [0, 0, 1], bearing: 0, pitch: 0},
+    getPosition: props => props.position
+  }
+];
+
+const makeWheelEvent = () => ({
+  type: 'wheel',
+  pointerType: 'mouse',
+  offsetCenter: {x: 75, y: 25},
+  delta: -10,
+  srcEvent: {preventDefault() {}},
+  stopPropagation() {}
+});
+
+test.each(ZOOM_AROUND_CASES)('$title applies shared zoomAround option', testCase => {
+  const makeController = (zoomAround: 'center' | 'pointer') =>
+    createTestController({
+      view: new testCase.ViewClass({controller: {zoomAround}}),
+      initialViewState: testCase.initialViewState
+    });
+
+  const centerZoomController = makeController('center');
+  const pointerZoomController = makeController('pointer');
+
+  centerZoomController.handleEvent(makeWheelEvent() as any);
+  pointerZoomController.handleEvent(makeWheelEvent() as any);
+
+  expect(
+    testCase.getPosition(pointerZoomController.props),
+    'pointer and center anchors produce different camera positions'
+  ).not.toEqual(testCase.getPosition(centerZoomController.props));
+});
+
+test('Controller defaults zoomAround to pointer', () => {
+  const makeController = controller =>
+    createTestController({
+      view: new MapView({controller}),
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1}
+    });
+  const defaultController = makeController(true);
+  const pointerController = makeController({zoomAround: 'pointer'});
+
+  defaultController.handleEvent(makeWheelEvent() as any);
+  pointerController.handleEvent(makeWheelEvent() as any);
+
+  expect(defaultController.props.longitude, 'default longitude matches pointer mode').toBeCloseTo(
+    pointerController.props.longitude
+  );
+  expect(defaultController.props.latitude, 'default latitude matches pointer mode').toBeCloseTo(
+    pointerController.props.latitude
+  );
+});
+
+test('Controller applies updated zoomAround option without recreating the view', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {zoomAround: 'center'}}),
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+
+  controller.handleEvent(makeWheelEvent() as any);
+  expect(controller.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+
+  controller.setProps({...controller.props, zoomAround: 'pointer'});
+  controller.handleEvent(makeWheelEvent() as any);
+  expect(controller.props.longitude, 'pointer zoom adjusts longitude').not.toBeCloseTo(0);
+});
+
 test('GlobeController initializes multipan like pointer pan', () => {
   const controller = createTestController({
     view: new GlobeView({controller: {multiTouchDrag: 'pan'}}),
