@@ -1,0 +1,48 @@
+{
+  "name": "@deck.gl/maplibre",
+  "description": "Use deck.gl layers with MapLibre GL JS",
+  "license": "MIT",
+  "type": "module",
+  "version": "9.4.0-alpha.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "maplibre",
+    "overlay"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/deck.gl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "@deck.gl/core": "~9.4.0-alpha.2",
+    "@luma.gl/core": "~9.4.0-beta.3",
+    "maplibre-gl": "^4.5.1 || ^5.0.0 || ^6.0.0"
+  },
+  "devDependencies": {
+    "maplibre-gl": "^6.3.0",
+    "maplibre-gl-v4": "npm:maplibre-gl@4.5.1",
+    "maplibre-gl-v5": "npm:maplibre-gl@5.0.0",
+    "maplibre-gl-v6": "npm:maplibre-gl@6.0.0"
+  }
+}

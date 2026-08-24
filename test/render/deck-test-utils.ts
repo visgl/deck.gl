@@ -5,11 +5,17 @@
 import {expect} from 'vitest';
 import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
+import {luma} from '@luma.gl/core';
+import type {Device} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import {webgpuAdapter} from '@luma.gl/webgpu';
 import {WIDTH, HEIGHT, OS} from './constants';
+
+export type TestDeviceType = 'webgl' | 'webgpu';
 
 export interface TestCase {
   name: string;
-  skip?: boolean;
+  skip?: boolean | string[];
   views?: any;
   viewState: any;
   layers: any[];
@@ -21,41 +27,64 @@ export interface TestCase {
   imageDiffOptions?: {
     threshold?: number;
     tolerance?: number;
+    /**
+     * pixelmatch detects antialiased pixels and excludes them from the mismatch count by
+     * default, which makes a diff blind to changes that only affect edge coverage. Set to
+     * `true` when antialiasing itself is what the test is checking.
+     */
+    includeAA?: boolean;
   };
 }
 
 export interface DeckTestContext {
   deck: Deck | null;
   container: HTMLDivElement | null;
+  device?: Device;
+  deviceLoss?: DeviceLossState;
 }
 
-function formatBrowserDiagnostics(
-  diagnostics: Array<{level: string; text: string}>,
-  maxEntries = 10
-): string {
-  if (diagnostics.length === 0) {
-    return '';
-  }
+export interface DeviceLossState {
+  error: Error | null;
+  promise: Promise<Error>;
+}
 
-  const recentDiagnostics = diagnostics.slice(-maxEntries);
-  const lines = recentDiagnostics.map(({level, text}) => `- [${level}] ${text}`);
-  if (diagnostics.length > maxEntries) {
-    lines.unshift(`- ... ${diagnostics.length - maxEntries} earlier diagnostic(s) omitted`);
-  }
-
-  return `\nBrowser diagnostics:\n${lines.join('\n')}`;
+/**
+ * Creates a device and canvas for a render test.
+ */
+export function createTestDevice(
+  type: TestDeviceType,
+  container: HTMLDivElement,
+  /**
+   * WebGL context attributes. Defaults to the browser's, which enables MSAA - pass
+   * `{antialias: false}` to test what applications get when a base map owns the context.
+   */
+  webgl?: {antialias?: boolean}
+): Promise<Device> {
+  return luma.createDevice({
+    type,
+    adapters: type === 'webgl' ? [webgl2Adapter] : [webgpuAdapter],
+    webgl,
+    createCanvasContext: {
+      container,
+      width: WIDTH,
+      height: HEIGHT,
+      useDevicePixels: false,
+      autoResize: true,
+      alphaMode: type === 'webgpu' ? 'premultiplied' : undefined
+    }
+  });
 }
 
 /**
  * Creates the container element for Deck tests.
  * Call this in beforeAll.
  */
-export function createContainer(): HTMLDivElement {
+export function createContainer(id = 'deck-container'): HTMLDivElement {
   // Hide scrollbars to prevent them from appearing in screenshots
   document.body.style.cssText = 'margin: 0; padding: 0; overflow: hidden;';
 
   const container = document.createElement('div');
-  container.id = 'deck-container';
+  container.id = id;
   container.style.cssText = `position: absolute; left: 0; top: 0; width: ${WIDTH}px; height: ${HEIGHT}px;`;
   document.body.appendChild(container);
   return container;
@@ -80,6 +109,29 @@ export function finalizeDeck(ctx: DeckTestContext): void {
     ctx.deck.finalize();
     ctx.deck = null;
   }
+}
+
+function throwIfDeviceLost(ctx: DeckTestContext): void {
+  const deviceLoss = ctx.deviceLoss;
+  if (deviceLoss?.error) {
+    throw deviceLoss.error;
+  }
+}
+
+function failOnDeviceLoss<T>(operation: Promise<T>, ctx: DeckTestContext): Promise<T> {
+  const deviceLoss = ctx.deviceLoss;
+  if (!deviceLoss) {
+    return operation;
+  }
+  if (deviceLoss.error) {
+    return Promise.reject(deviceLoss.error);
+  }
+  return Promise.race([
+    operation,
+    deviceLoss.promise.then(error => {
+      throw error;
+    })
+  ]);
 }
 
 /**
@@ -108,10 +160,11 @@ export function defaultOnAfterRender({
  * Creates a Deck instance for reuse across multiple tests.
  * Use with updateDeckForTest() for tests that need the animation loop to keep running.
  */
-export function createDeck(container: HTMLDivElement): Deck {
+export function createDeck(container: HTMLDivElement, device?: Device): Deck {
   return new Deck({
     id: 'render-test-deck',
     container,
+    device,
     width: WIDTH,
     height: HEIGHT,
     useDevicePixels: false,
@@ -145,66 +198,70 @@ export async function runRenderTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
+  await throwIfDeviceLost(ctx);
+
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
 
-  await commands.resetBrowserDiagnostics();
-
   // Create a new Deck instance for each test (like the old SnapshotTestRunner)
   // This ensures Deck enters a fresh render loop and properly handles async loading
-  await new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      reject(new Error('Timeout waiting for render to complete'));
-    }, timeout);
+  await failOnDeviceLoss(
+    new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Timeout waiting for render to complete'));
+      }, timeout);
 
-    const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
+      const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
 
-    ctx.deck = new Deck({
-      id: 'render-test-deck',
-      container: ctx.container!,
-      width: WIDTH,
-      height: HEIGHT,
-      views: views || new MapView({}),
-      viewState,
-      layers,
-      effects: effects || [],
-      useDevicePixels: useDevicePixels ?? false,
-      debug: true,
+      ctx.deck = new Deck({
+        id: 'render-test-deck',
+        container: ctx.container!,
+        device: ctx.device,
+        width: WIDTH,
+        height: HEIGHT,
+        views: views || new MapView({}),
+        viewState,
+        layers,
+        effects: effects || [],
+        useDevicePixels: useDevicePixels ?? false,
+        debug: true,
 
-      onLoad: () => {
-        // Call onBeforeRender if provided
-        if (onBeforeRender) {
-          onBeforeRender({
+        onLoad: () => {
+          // Call onBeforeRender if provided
+          if (onBeforeRender) {
+            onBeforeRender({
+              deck: ctx.deck!,
+              // @ts-expect-error Accessing protected layerManager
+              layers: ctx.deck!.layerManager?.getLayers() || []
+            });
+          }
+        },
+
+        onAfterRender: () => {
+          // @ts-expect-error Accessing protected layerManager
+          const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
+
+          // Skip if no layers yet (Deck still initializing)
+          if (currentLayers.length === 0) {
+            return;
+          }
+
+          onAfterRenderCheck({
             deck: ctx.deck!,
-            // @ts-expect-error Accessing protected layerManager
-            layers: ctx.deck!.layerManager?.getLayers() || []
+            layers: currentLayers,
+            done: () => {
+              clearTimeout(timeoutId);
+              resolve();
+            }
           });
         }
-      },
-
-      onAfterRender: () => {
-        // @ts-expect-error Accessing protected layerManager
-        const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
-
-        // Skip if no layers yet (Deck still initializing)
-        if (currentLayers.length === 0) {
-          return;
-        }
-
-        onAfterRenderCheck({
-          deck: ctx.deck!,
-          layers: currentLayers,
-          done: () => {
-            clearTimeout(timeoutId);
-            resolve();
-          }
-        });
-      }
-    });
-  });
+      });
+    }),
+    ctx
+  );
 
   // Capture and diff screenshot
-  await captureAndDiffScreenshot(testCase, ctx);
+  await failOnDeviceLoss(captureAndDiffScreenshot(testCase, ctx), ctx);
 }
 
 /**
@@ -213,13 +270,33 @@ export async function runRenderTest(
  */
 async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext): Promise<void> {
   const {name, goldenImage, imageDiffOptions} = testCase;
+  const goldenImagePath = goldenImage.split('golden-images/').at(-1)!;
+  const deviceType = ctx.device?.type ?? 'webgl';
+  const osName = OS.toLowerCase();
+  const candidateDirectories = [
+    `./test/render/golden-images/platform-overrides/${osName}/${deviceType}`,
+    `./test/render/golden-images/platform-overrides/${deviceType}`,
+    `./test/render/golden-images/platform-overrides/${osName}`,
+    './test/render/golden-images'
+  ];
+  const resolvedGoldenImage = await commands.findGoldenImage({
+    goldenImage: goldenImagePath,
+    candidateDirectories
+  });
+
+  if (!resolvedGoldenImage) {
+    throw new Error(
+      `${name}: Golden image "${goldenImagePath}" not found in ${candidateDirectories.join(', ')}`
+    );
+  }
 
   const region = getCanvasRegion(ctx.deck);
   const diffOptions = {
-    goldenImage,
+    goldenImage: resolvedGoldenImage,
     region,
     threshold: imageDiffOptions?.threshold ?? 0.99,
     tolerance: 0.1,
+    includeAA: imageDiffOptions?.includeAA ?? false,
     includeEmpty: false,
     platform: OS,
     saveOnFail: true,
@@ -228,29 +305,9 @@ async function captureAndDiffScreenshot(testCase: TestCase, ctx: DeckTestContext
 
   const result = await commands.captureAndDiffScreen(diffOptions);
 
-  // If failed, try platform-specific golden image
-  let finalResult = result;
-  if (!result.success) {
-    const platformGoldenImage = goldenImage.replace(
-      'golden-images/',
-      `golden-images/platform-overrides/${OS.toLowerCase()}/`
-    );
-    const platformResult = await commands.captureAndDiffScreen({
-      ...diffOptions,
-      goldenImage: platformGoldenImage
-    });
-    if (platformResult.success) {
-      finalResult = platformResult;
-    }
-  }
-
-  const diagnostics = await commands.consumeBrowserDiagnostics();
-  const diagnosticsText = formatBrowserDiagnostics(diagnostics);
-
-  expect(
-    finalResult.success,
-    `${name}: ${finalResult.error || `match: ${finalResult.matchPercentage}%`}${diagnosticsText}`
-  ).toBe(true);
+  expect(result.success, `${name}: ${result.error || `match: ${result.matchPercentage}%`}`).toBe(
+    true
+  );
 }
 
 /**
@@ -265,63 +322,66 @@ export async function updateDeckForTest(
   ctx: DeckTestContext,
   timeout = 60000
 ): Promise<void> {
+  await throwIfDeviceLost(ctx);
+
   const {views, viewState, layers, effects, useDevicePixels, onBeforeRender, onAfterRender} =
     testCase;
-
-  await commands.resetBrowserDiagnostics();
 
   if (!ctx.deck) {
     throw new Error('Deck instance not found. Call createDeck() in beforeAll first.');
   }
 
   // Use setProps on existing deck - keeps the animation loop running
-  await new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      reject(new Error('Timeout waiting for render to complete'));
-    }, timeout);
+  await failOnDeviceLoss(
+    new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Timeout waiting for render to complete'));
+      }, timeout);
 
-    const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
+      const onAfterRenderCheck = onAfterRender || defaultOnAfterRender;
 
-    ctx.deck!.setProps({
-      views: views || new MapView({}),
-      viewState,
-      layers,
-      effects: effects || [],
-      useDevicePixels: useDevicePixels ?? false,
+      ctx.deck!.setProps({
+        views: views || new MapView({}),
+        viewState,
+        layers,
+        effects: effects || [],
+        useDevicePixels: useDevicePixels ?? false,
 
-      // onBeforeRender is called before each render frame - used for timeline setup
-      // Always provide a function to clear any previous callback
-      onBeforeRender: () => {
-        if (onBeforeRender) {
-          onBeforeRender({
+        // onBeforeRender is called before each render frame - used for timeline setup
+        // Always provide a function to clear any previous callback
+        onBeforeRender: () => {
+          if (onBeforeRender) {
+            onBeforeRender({
+              deck: ctx.deck!,
+              // @ts-expect-error Accessing protected layerManager
+              layers: ctx.deck!.layerManager?.getLayers() || []
+            });
+          }
+        },
+
+        onAfterRender: () => {
+          // @ts-expect-error Accessing protected layerManager
+          const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
+
+          // Skip if no layers yet (Deck still initializing)
+          if (currentLayers.length === 0) {
+            return;
+          }
+
+          onAfterRenderCheck({
             deck: ctx.deck!,
-            // @ts-expect-error Accessing protected layerManager
-            layers: ctx.deck!.layerManager?.getLayers() || []
+            layers: currentLayers,
+            done: () => {
+              clearTimeout(timeoutId);
+              resolve();
+            }
           });
         }
-      },
-
-      onAfterRender: () => {
-        // @ts-expect-error Accessing protected layerManager
-        const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
-
-        // Skip if no layers yet (Deck still initializing)
-        if (currentLayers.length === 0) {
-          return;
-        }
-
-        onAfterRenderCheck({
-          deck: ctx.deck!,
-          layers: currentLayers,
-          done: () => {
-            clearTimeout(timeoutId);
-            resolve();
-          }
-        });
-      }
-    });
-  });
+      });
+    }),
+    ctx
+  );
 
   // Capture and diff screenshot
-  await captureAndDiffScreenshot(testCase, ctx);
+  await failOnDeviceLoss(captureAndDiffScreenshot(testCase, ctx), ctx);
 }

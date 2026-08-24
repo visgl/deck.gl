@@ -1,5 +1,5 @@
 # PointCloudLayer
-[webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {PointCloudLayerDemo} from '@site/src/doc-demos/layers';
 
@@ -185,6 +185,14 @@ The units of the point size, one of `'meters'`, `'common'`, and `'pixels'`. See 
 * Default: `10`
 
 Global radius of all points, in units specified by `sizeUnits` (default pixels).
+
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+When enabled, this prop computes edge coverage in the shader. When disabled, the layer relies on render-target multisampling. Shader-computed coverage can cause artifacts where points overlap.
+
+Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
 
 #### `material` (Material, optional) {#material}
 

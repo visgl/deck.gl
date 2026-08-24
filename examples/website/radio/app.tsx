@@ -10,6 +10,7 @@ import {MapView, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
@@ -133,10 +134,12 @@ function getTooltipText(
 
 /* eslint-disable react/no-deprecated */
 export default function App({
+  device,
   data,
   mapStyle = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
   showMinimap = true
 }: {
+  device?: Device;
   data?: Station[];
   mapStyle?: string;
   showMinimap?: boolean;
@@ -256,6 +259,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       views={showMinimap ? [mainView, minimapView] : mainView}
       viewState={viewState}

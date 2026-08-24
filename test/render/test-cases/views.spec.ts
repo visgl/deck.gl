@@ -2,43 +2,197 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
+import {SphereGeometry} from '@luma.gl/engine';
 import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './views';
+  COORDINATE_SYSTEM,
+  _GlobeView as GlobeView,
+  OrthographicView,
+  MapView,
+  FirstPersonView
+} from '@deck.gl/core';
+import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
+import {MVTLayer} from '@deck.gl/geo-layers';
+import {MVTLoader} from '@loaders.gl/mvt';
+import {parseColor} from '../../../examples/layer-browser/src/utils/color';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import * as dataSamples from 'deck.gl-test/data';
+import {getRes0Cells, cellToLatLng} from 'h3-js';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+const EARTH_RADIUS_METERS = 6.3e6;
+const testCases = [
+  {
+    name: 'first-person',
+    views: [
+      new FirstPersonView({
+        fovy: 75,
+        near: 10,
+        far: 100000,
+        focalDistance: 10
+      })
+    ],
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      altitude: 20,
+      bearing: 270
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'first-person',
+        data: dataSamples.geojson,
+        opacity: 0.8,
+        getPointRadius: 500,
+        getFillColor: f => parseColor(f.properties.fill),
+        getLineColor: f => parseColor(f.properties.stroke),
+        extruded: true,
+        wireframe: true,
+        getElevation: 500,
+        lineWidthScale: 10,
+        lineWidthMinPixels: 1
+      })
+    ],
+    goldenImage: './test/render/golden-images/first-person.png'
+  },
+  {
+    name: 'orthographic-64bit',
+    views: new OrthographicView(),
+    viewState: {
+      target: [10000 - 122.4, 10000 + 37.75, 0],
+      zoom: 14
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'orthographic-64',
+        opacity: 0.1,
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        data: dataSamples.getPoints100K().map(p => [p[0] + 10000, p[1] + 10000]),
+        getPosition: d => d,
+        getRadius: 0,
+        radiusMinPixels: 6
+      })
+    ],
+    goldenImage: './test/render/golden-images/orthographic-64.png'
+  },
+  {
+    name: 'map-repeat',
+    views: new MapView({repeat: true}),
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: getRes0Cells(),
+        getPosition: d => cellToLatLng(d).reverse(),
+        radiusMinPixels: 4,
+        getFillColor: [255, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/map-repeat.png'
+  },
+  ...[true, false].map(binary => {
+    const id = `globe-mvt${binary ? '-binary' : ''}`;
+    return {
+      name: id,
+      views: new GlobeView(),
+      viewState: {
+        longitude: -100,
+        latitude: 80,
+        zoom: -1
+      },
+      layers: [
+        new SimpleMeshLayer({
+          id: 'earth-sphere',
+          data: [{position: [0, 0, 0]}],
+          mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          getColor: [255, 255, 255]
+        }),
+        new MVTLayer({
+          id,
+          data: ['/test/data/mvt-tiles/{z}/{x}/{y}.mvt'],
+          maxZoom: 3,
+          minZoom: 3,
+          extent: [-180, -80, 180, 80],
+          stroked: false,
+          getFillColor: [0, 0, 0],
+          onTileError: error => {
+            //ignore missing tiles
+          },
+          lineWidthMinPixels: 1,
+          binary,
+          loaders: [MVTLoader],
+          loadOptions: {
+            core: {
+              worker: false
+            }
+          }
+        })
+      ],
+      goldenImage: `./test/render/golden-images/globe-mvt.png`
+    };
+  }),
+  {
+    name: 'multi-view',
+    views: [
+      new MapView({id: 'background', clear: true, clearColor: [0, 0, 255, 128]}),
+      new MapView({
+        id: 'transparent',
+        x: 0,
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clear: true
+      }),
+      new MapView({
+        id: 'green',
+        x: '50%',
+        y: 0,
+        width: '50%',
+        height: '50%',
+        clear: true,
+        clearColor: [0, 255, 0]
+      }),
+      new MapView({
+        id: 'clearing-color-disabled',
+        x: 0,
+        y: '50%',
+        width: '50%',
+        height: '50%',
+        clear: true,
+        clearColor: false
+      }),
+      new MapView({id: 'default', x: '50%', y: '50%', width: '50%', height: '50%'})
+    ],
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        data: getRes0Cells(),
+        getPosition: d => cellToLatLng(d).reverse(),
+        radiusMinPixels: 4,
+        getFillColor: [0, 0, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/multi-view.png'
+  }
+];
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
-
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });

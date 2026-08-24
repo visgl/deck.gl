@@ -5,13 +5,20 @@
 /* eslint-disable max-statements, complexity */
 import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {IViewState} from './view-state';
+import {IViewState, type ConstraintContext} from './view-state';
+import type {MaxBoundsPadding} from './utils';
 import {ConstructorOf} from '../types/types';
 import {deepEqual} from '../utils/deep-equal';
 
 import type Viewport from '../viewports/viewport';
 
-import type {EventManager, MjolnirEvent, MjolnirGestureEvent, MjolnirWheelEvent, MjolnirKeyEvent} from 'mjolnir.js';
+import type {
+  EventManager,
+  MjolnirEvent,
+  MjolnirGestureEvent,
+  MjolnirWheelEvent,
+  MjolnirKeyEvent
+} from 'mjolnir.js';
 import type {Timeline} from '@luma.gl/engine';
 
 const NO_TRANSITION_PROPS = {
@@ -19,26 +26,35 @@ const NO_TRANSITION_PROPS = {
 } as const;
 
 const DEFAULT_INERTIA = 300;
-const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
+const REBOUND_DURATION = 300;
+const INERTIA_EASING = (t: number): number => 1 - (1 - t) * (1 - t);
+const EASE_OUT_EXPONENTIAL = (t: number): number => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
   PINCH: ['pinchstart', 'pinchmove', 'pinchend'],
   MULTI_PAN: ['multipanstart', 'multipanmove', 'multipanend'],
   DOUBLE_CLICK: ['dblclick'],
-  DOUBLE_CLICK_DRAG: ['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend', 'dblclickdragcancel'],
+  DOUBLE_CLICK_DRAG: [
+    'dblclickdragstart',
+    'dblclickdragmove',
+    'dblclickdragend',
+    'dblclickdragcancel'
+  ],
   KEYBOARD: ['keydown']
 } as const;
 
 /** Configuration of how user input is handled */
 export type ControllerOptions = {
   /** Enable zooming with mouse wheel. Default `true`. */
-  scrollZoom?: boolean | {
-    /** Scaler that translates wheel delta to the change of viewport scale. Default `0.01`. */
-    speed?: number;
-    /** Smoothly transition to the new zoom. If enabled, will provide a slightly lagged but smoother experience. Default `false`. */
-    smooth?: boolean
-  };
+  scrollZoom?:
+    | boolean
+    | {
+        /** Scaler that translates wheel delta to the change of viewport scale. Default `0.01`. */
+        speed?: number;
+        /** Smoothly transition to the new zoom. If enabled, will provide a slightly lagged but smoother experience. Default `false`. */
+        smooth?: boolean;
+      };
   /** Enable panning with pointer drag. Default `true` */
   dragPan?: boolean;
   /** Enable rotating with pointer drag. Default `true` */
@@ -49,8 +65,14 @@ export type ControllerOptions = {
   doubleClickDragZoom?: boolean;
   /** Enable zooming with multi-touch pinch. Default `true` */
   touchZoom?: boolean;
-  /** Enable rotating with multi-touch. Use two-finger rotating gesture for horizontal and three-finger swiping gesture for vertical rotation. Default `false` */
+  /** Enable rotating with multi-touch. Default `false`.
+   * @deprecated Use `multiTouchDrag: 'rotate'`.
+   */
   touchRotate?: boolean;
+  /** Behavior of two-pointer translation gestures. Default disabled. */
+  multiTouchDrag?: 'pan' | 'rotate' | null;
+  /** Enable gestures synthesized from trackpad input. Default `false`. */
+  trackpadGesture?: boolean;
   /** Enable interaction with keyboard. Default `true`. */
   keyboard?:
     | boolean
@@ -71,7 +93,21 @@ export type ControllerOptions = {
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
   /** Bounding box of content that the controller is constrained in */
-  maxBounds?: [min: [number, number], max: [number, number]] | [min: [number, number, number], max: [number, number, number]] | null;
+  maxBounds?:
+    | [min: [number, number], max: [number, number]]
+    | [min: [number, number, number], max: [number, number, number]]
+    | null;
+  /**
+   * Padding inside the viewport when fitting `maxBounds`, in the shape of
+   * `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`)
+   * or absolute pixels. These values support the same CSS-style expressions
+   * (numbers/percentages/`px` with parentheses and `calc()` addition/subtraction)
+   * as view `x`, `y`, `width`, `height`, and `padding`. This can be used to move
+   * the target rectangle away from the center of the viewport. Default `0`.
+   */
+  maxBoundsPadding?: MaxBoundsPadding;
+  /** Enables elastic constraints during continuous interaction. Default `false`. */
+  rubberBand?: boolean;
 };
 
 export type ControllerProps = {
@@ -85,7 +121,8 @@ export type ControllerProps = {
   width: number;
   /** Viewport height */
   height: number;
-} & ControllerOptions & TransitionProps;
+} & ControllerOptions &
+  TransitionProps;
 
 /** The state of a controller */
 export type InteractionState = {
@@ -101,7 +138,7 @@ export type InteractionState = {
   isZooming?: boolean;
   /** World coordinate [lng, lat, altitude] of rotation pivot point when rotating */
   rotationPivotPosition?: [number, number, number];
-}
+};
 
 /** Parameters passed to the onViewStateChange callback */
 export type ViewStateChangeParameters<ViewStateT = any> = {
@@ -112,7 +149,7 @@ export type ViewStateChangeParameters<ViewStateT = any> = {
   interactionState: InteractionState;
   /** The current view state */
   oldViewState?: ViewStateT;
-}
+};
 
 const pinchEventWorkaround: any = {};
 
@@ -139,6 +176,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   private _customEvents: string[] = [];
   private _eventStartBlocked: any = null;
   private _panMove: boolean = false;
+  private _multiPanMode: 'pan' | 'rotate' | null = null;
+  private _multiPanStartCenter: {x: number; y: number} | null = null;
   private _doubleClickDragAnchor: [number, number] | null = null;
   private _suppressDoubleClickUntil: number = 0;
 
@@ -152,6 +191,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected doubleClickDragZoom: boolean = true;
   protected touchZoom: boolean = true;
   protected touchRotate: boolean = false;
+  protected multiTouchDrag: 'pan' | 'rotate' | null = null;
+  protected trackpadGesture: boolean = false;
   protected keyboard:
     | boolean
     | {
@@ -162,7 +203,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       } = true;
 
   constructor(opts: {
-    timeline: Timeline,
+    timeline: Timeline;
     eventManager: EventManager;
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
@@ -171,7 +212,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
-      getControllerState: props => new this.ControllerState(props),
+      getControllerState: (props, constraintContext) =>
+        new this.ControllerState({
+          ...props,
+          constraintContext,
+          makeViewport: opts.makeViewport
+        }),
       onViewStateChange: this._onTransition.bind(this),
       onStateChange: this._setInteractionState.bind(this)
     });
@@ -222,11 +268,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       case 'panend':
         return this._onPanEnd(event);
       case 'pinchstart':
-        return eventStartBlocked ? false : this._onPinchStart(event);
+        return eventStartBlocked || !this._isTrackpadGestureAllowed(event)
+          ? false
+          : this._onPinchStart(event);
       case 'pinchmove':
-        return this._onPinch(event);
+        return this._isTrackpadGestureAllowed(event) ? this._onPinch(event) : false;
       case 'pinchend':
-        return this._onPinchEnd(event);
+        return this._isTrackpadGestureAllowed(event) ? this._onPinchEnd(event) : false;
       case 'multipanstart':
         return eventStartBlocked ? false : this._onMultiPanStart(event);
       case 'multipanmove':
@@ -254,15 +302,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   /* Event utils */
   // Event object: http://hammerjs.github.io/api/#event-object
   get controllerState(): ControllerState {
-    this._controllerState = this._controllerState || new this.ControllerState({
-      makeViewport: this.makeViewport,
-      ...this.state,
-      ...this.props
-    });
+    this._controllerState =
+      this._controllerState ||
+      new this.ControllerState({
+        makeViewport: this.makeViewport,
+        ...this.props,
+        ...this.state
+      });
     return this._controllerState;
   }
 
-  getCenter(event: MjolnirGestureEvent | MjolnirWheelEvent) : [number, number] {
+  getCenter(event: MjolnirGestureEvent | MjolnirWheelEvent): [number, number] {
     const {x, y} = this.props;
     const {offsetCenter} = event;
     return [offsetCenter.x - x, offsetCenter.y - y];
@@ -307,6 +357,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
    * Extract interactivity options
    */
   setProps(props: ControllerProps) {
+    if (props.maxBoundsPadding === undefined) {
+      props.maxBoundsPadding = null;
+    }
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
@@ -321,7 +374,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.transitionManager.processViewStateChange(props);
 
     const {inertia} = props;
-    this.inertia = Number.isFinite(inertia) ? (inertia as number) : (inertia === true ? DEFAULT_INERTIA : 0);
+    this.inertia = Number.isFinite(inertia)
+      ? (inertia as number)
+      : inertia === true
+        ? DEFAULT_INERTIA
+        : 0;
 
     // TODO - make sure these are not reset on every setProps
     const {
@@ -332,6 +389,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       doubleClickDragZoom = false,
       touchZoom = true,
       touchRotate = false,
+      multiTouchDrag = touchRotate ? 'rotate' : null,
+      trackpadGesture = false,
       keyboard = true
     } = props;
 
@@ -340,8 +399,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     // We always need the pan events to set the correct isDragging state, even if dragPan & dragRotate are both false
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive);
-    this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
-    this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && touchRotate);
+    this.toggleEvents(
+      EVENT_TYPES.PINCH,
+      isInteractive && (touchZoom || multiTouchDrag === 'rotate')
+    );
+    this.toggleEvents(EVENT_TYPES.MULTI_PAN, isInteractive && Boolean(multiTouchDrag));
     this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK, isInteractive && doubleClickZoom);
     this.toggleEvents(EVENT_TYPES.DOUBLE_CLICK_DRAG, isInteractive && doubleClickDragZoom);
     this.toggleEvents(EVENT_TYPES.KEYBOARD, isInteractive && keyboard);
@@ -353,16 +415,25 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.doubleClickZoom = doubleClickZoom;
     this.doubleClickDragZoom = doubleClickDragZoom;
     this.touchZoom = touchZoom;
-    this.touchRotate = touchRotate;
+    this.touchRotate = multiTouchDrag === 'rotate';
+    this.multiTouchDrag = multiTouchDrag;
+    this.trackpadGesture = trackpadGesture;
     this.keyboard = keyboard;
 
     // Normalize view state if maxBounds is defined
-    const dimensionChanged = !oldProps || oldProps.height !== props.height || oldProps.width !== props.width || oldProps.maxBounds !== props.maxBounds;
-    if (dimensionChanged && props.maxBounds) {
-      // Dimensions changed, try re-normalize the props
+    const constraintChanged =
+      !oldProps ||
+      oldProps.height !== props.height ||
+      oldProps.width !== props.width ||
+      oldProps.maxBounds !== props.maxBounds ||
+      oldProps.maxBoundsPadding !== props.maxBoundsPadding;
+    if (constraintChanged && props.maxBounds) {
+      // Constraint inputs changed, try re-normalize the props
       const controllerState = new this.ControllerState({...props, makeViewport: this.makeViewport});
       const normalizedProps = controllerState.getViewportProps();
-      const changed = Object.keys(normalizedProps).some(key => !deepEqual(normalizedProps[key], props[key], 1));
+      const changed = Object.keys(normalizedProps).some(
+        key => !deepEqual(normalizedProps[key], props[key], 1)
+      );
       if (changed) {
         // some props are updated after normalization
         this.updateViewport(controllerState);
@@ -395,7 +466,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   /* Callback util */
   // formats map state and invokes callback function
-  protected updateViewport(newControllerState: ControllerState, extraProps: Record<string, any> | null = null, interactionState: InteractionState = {}) {
+  protected updateViewport(
+    newControllerState: ControllerState,
+    extraProps: Record<string, any> | null = null,
+    interactionState: InteractionState = {}
+  ) {
     const viewState = {...newControllerState.getViewportProps(), ...extraProps};
 
     // TODO - to restore diffing, we need to include interactionState
@@ -409,18 +484,65 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (changed) {
       const oldViewState = this.controllerState && this.controllerState.getViewportProps();
       if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState: this._interactionState, oldViewState, viewId: this.props.id});
+        this.onViewStateChange({
+          viewState,
+          interactionState: this._interactionState,
+          oldViewState,
+          viewId: this.props.id
+        });
       }
     }
   }
 
-  private _onTransition(params: {viewState: Record<string, any>, oldViewState: Record<string, any>}) {
-    this.onViewStateChange({...params, interactionState: this._interactionState, viewId: this.props.id});
+  private _onTransition(params: {
+    viewState: Record<string, any>;
+    oldViewState: Record<string, any>;
+  }) {
+    this.onViewStateChange({
+      ...params,
+      interactionState: this._interactionState,
+      viewId: this.props.id
+    });
   }
 
   private _setInteractionState(newStates: InteractionState) {
     Object.assign(this._interactionState, newStates);
     this.onStateChange(this._interactionState);
+  }
+
+  /** Maps a semantic input lifecycle to the constraint policy seen by controller state. */
+  protected _getConstraintContext(
+    _action: 'pan' | 'rotate' | 'zoom',
+    phase: 'start' | 'update' | 'end'
+  ): ConstraintContext {
+    if (!this.props.rubberBand) {
+      return {mode: 'hard'};
+    }
+    return {mode: phase === 'update' ? 'elastic' : phase === 'end' ? 'rebound' : 'hard'};
+  }
+
+  /** Returns a rebound transition when hard resolution changed the displayed viewport props. */
+  private _getReboundTransition(
+    constraintContext: ConstraintContext,
+    nextControllerState: ControllerState
+  ): TransitionProps | null {
+    if (constraintContext.mode !== 'rebound') {
+      return null;
+    }
+
+    const nextViewportProps = nextControllerState.getViewportProps();
+    // At interaction end controllerState is reconstructed without the preceding elastic context.
+    // Compare the hard-resolved destination with the displayed props to detect visible overshoot.
+    const shouldRebound = Object.keys(nextViewportProps).some(
+      key => !deepEqual(this.props[key], nextViewportProps[key], 1)
+    );
+    return shouldRebound
+      ? {
+          ...this._getTransitionProps(),
+          transitionDuration: REBOUND_DURATION,
+          transitionEasing: EASE_OUT_EXPONENTIAL
+        }
+      : null;
   }
 
   /* Event handlers */
@@ -436,9 +558,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       alternateMode = !alternateMode;
     }
 
-    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos
-    });
+    const action = alternateMode ? 'pan' : 'rotate';
+    const constraintContext = this._getConstraintContext(action, 'start');
+    const newControllerState = alternateMode
+      ? this.controllerState.panStart({pos}, constraintContext)
+      : this.controllerState.rotateStart({pos}, constraintContext);
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
@@ -466,7 +590,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
     const pos = this.getCenter(event);
-    const newControllerState = this.controllerState.pan({pos});
+    const newControllerState = this.controllerState.pan(
+      {pos},
+      this._getConstraintContext('pan', 'update')
+    );
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isPanning: true
@@ -496,10 +623,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         }
       );
     } else {
-      const newControllerState = this.controllerState.panEnd();
-      this.updateViewport(newControllerState, null, {
+      const currentControllerState = this.controllerState;
+      const constraintContext = this._getConstraintContext('pan', 'end');
+      const newControllerState = currentControllerState.panEnd(constraintContext);
+      const reboundTransition = this._getReboundTransition(constraintContext, newControllerState);
+      this.updateViewport(newControllerState, reboundTransition, {
         isDragging: false,
-        isPanning: false
+        isPanning: Boolean(reboundTransition)
       });
     }
     return true;
@@ -513,7 +643,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     const pos = this.getCenter(event);
-    const newControllerState = this.controllerState.rotate({pos});
+    const newControllerState = this.controllerState.rotate(
+      {pos},
+      this._getConstraintContext('rotate', 'update')
+    );
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isRotating: true
@@ -543,10 +676,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         }
       );
     } else {
-      const newControllerState = this.controllerState.rotateEnd();
-      this.updateViewport(newControllerState, null, {
+      const currentControllerState = this.controllerState;
+      const constraintContext = this._getConstraintContext('rotate', 'end');
+      const newControllerState = currentControllerState.rotateEnd(constraintContext);
+      const reboundTransition = this._getReboundTransition(constraintContext, newControllerState);
+      this.updateViewport(newControllerState, reboundTransition, {
         isDragging: false,
-        isRotating: false
+        isRotating: Boolean(reboundTransition)
       });
     }
     return true;
@@ -555,6 +691,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   // Default handler for the `wheel` event.
   protected _onWheel(event: MjolnirWheelEvent): boolean {
     if (!this.scrollZoom) {
+      return false;
+    }
+    if (this.trackpadGesture && event.device !== 'mouse') {
       return false;
     }
 
@@ -578,14 +717,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       : NO_TRANSITION_PROPS;
 
     const newControllerState = this.controllerState.zoom({pos, scale});
-    this.updateViewport(
-      newControllerState,
-      transitionProps,
-      {
-        isZooming: true,
-        isPanning: true
-      }
-    );
+    this.updateViewport(newControllerState, transitionProps, {
+      isZooming: true,
+      isPanning: true
+    });
 
     // When there's no transition (duration = 0), immediately reset interaction state
     // since _onTransitionEnd callback won't fire
@@ -596,64 +731,90 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
-    const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos, event)) {
+    const {multiTouchDrag} = this;
+    if (!multiTouchDrag || !this._isMultiPanEventAllowed(event, multiTouchDrag)) {
       return false;
     }
-    const newControllerState = this.controllerState.rotateStart({pos});
+
+    const currentCenter = event.offsetCenter;
+    if (!this.isPointInBounds(this.getCenter(event), event)) {
+      return false;
+    }
+
+    const isTrackpad = event.pointerType === 'trackpad';
+    const startCenter = {
+      x: currentCenter.x - (isTrackpad ? 0 : event.deltaX),
+      y: currentCenter.y - (isTrackpad ? 0 : event.deltaY)
+    };
+    const startEvent = {...event, offsetCenter: startCenter};
+    const pos = this.getCenter(startEvent);
+    const newControllerState =
+      multiTouchDrag === 'pan'
+        ? this.controllerState.panStart({pos}, this._getConstraintContext('pan', 'start'))
+        : this.controllerState.rotateStart({pos}, this._getConstraintContext('rotate', 'start'));
+
+    this._multiPanMode = multiTouchDrag;
+    this._multiPanStartCenter = startCenter;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
   }
 
   protected _onMultiPan(event: MjolnirGestureEvent): boolean {
-    if (!this.touchRotate) {
-      return false;
-    }
-    if (!this.isDragging()) {
+    const {mode, event: panEvent} = this._getMultiPanEvent(event);
+    if (!mode || !panEvent || !this.isDragging()) {
       return false;
     }
 
-    const pos = this.getCenter(event);
-    pos[0] -= event.deltaX;
-
-    const newControllerState = this.controllerState.rotate({pos});
-    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
-      isDragging: true,
-      isRotating: true
-    });
-    return true;
+    return mode === 'pan' ? this._onPanMove(panEvent) : this._onPanRotate(panEvent);
   }
 
   protected _onMultiPanEnd(event: MjolnirGestureEvent): boolean {
-    if (!this.isDragging()) {
+    const {mode, event: panEvent} = this._getMultiPanEvent(event);
+    if (!mode || !panEvent || !this.isDragging()) {
+      this._resetMultiPan();
       return false;
     }
-    const {inertia} = this;
-    if (this.touchRotate && inertia && event.velocityY) {
-      const pos = this.getCenter(event);
-      const endPos: [number, number] = [pos[0], (pos[1] += (event.velocityY * inertia) / 2)];
-      const newControllerState = this.controllerState.rotate({pos: endPos});
-      this.updateViewport(
-        newControllerState,
-        {
-          ...this._getTransitionProps(),
-          transitionDuration: inertia,
-          transitionEasing: INERTIA_EASING
-        },
-        {
-          isDragging: false,
-          isRotating: true
-        }
-      );
-      this.blockEvents(inertia);
-    } else {
-      const newControllerState = this.controllerState.rotateEnd();
-      this.updateViewport(newControllerState, null, {
-        isDragging: false,
-        isRotating: false
-      });
+
+    const handled = mode === 'pan' ? this._onPanMoveEnd(panEvent) : this._onPanRotateEnd(panEvent);
+    this._resetMultiPan();
+    return handled;
+  }
+
+  private _isTrackpadGestureAllowed(event: MjolnirGestureEvent): boolean {
+    return event.pointerType !== 'trackpad' || this.trackpadGesture;
+  }
+
+  private _isMultiPanEventAllowed(event: MjolnirGestureEvent, mode: 'pan' | 'rotate'): boolean {
+    if (event.pointerType === 'trackpad') {
+      return this.trackpadGesture && (mode === 'pan' ? this.dragPan : this.dragRotate);
     }
-    return true;
+    return event.pointerType === 'touch' && (mode === 'pan' ? this.dragPan : this.dragRotate);
+  }
+
+  private _getMultiPanEvent(event: MjolnirGestureEvent): {
+    mode: 'pan' | 'rotate' | null;
+    event: MjolnirGestureEvent | null;
+  } {
+    const mode = this._multiPanMode;
+    const startCenter = this._multiPanStartCenter;
+    if (!mode || !startCenter) {
+      return {mode: null, event: null};
+    }
+    return {
+      mode,
+      event: {
+        ...event,
+        offsetCenter: {
+          x: startCenter.x + event.deltaX,
+          y: startCenter.y + event.deltaY
+        }
+      }
+    };
+  }
+
+  private _resetMultiPan(): void {
+    this._multiPanMode = null;
+    this._multiPanStartCenter = null;
   }
 
   // Default handler for the `pinchstart` event.
@@ -664,7 +825,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
 
-    const newControllerState = this.controllerState.zoomStart({pos}).rotateStart({pos});
+    const newControllerState = this.controllerState
+      .zoomStart({pos}, this._getConstraintContext('zoom', 'start'))
+      .rotateStart({pos}, this._getConstraintContext('rotate', 'start'));
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     pinchEventWorkaround._startPinchRotation = event.rotation;
     pinchEventWorkaround._lastPinchEvent = event;
@@ -685,13 +848,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (this.touchZoom) {
       const {scale} = event;
       const pos = this.getCenter(event);
-      newControllerState = newControllerState.zoom({pos, scale});
+      newControllerState = newControllerState.zoom(
+        {pos, scale},
+        this._getConstraintContext('zoom', 'update')
+      );
     }
     if (this.touchRotate) {
       const {rotation} = event;
-      newControllerState = newControllerState.rotate({
-        deltaAngleX: pinchEventWorkaround._startPinchRotation - rotation
-      });
+      newControllerState = newControllerState.rotate(
+        {deltaAngleX: pinchEventWorkaround._startPinchRotation - rotation},
+        this._getConstraintContext('rotate', 'update')
+      );
     }
 
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
@@ -735,12 +902,21 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       );
       this.blockEvents(inertia);
     } else {
-      const newControllerState = this.controllerState.zoomEnd().rotateEnd();
-      this.updateViewport(newControllerState, null, {
+      const currentControllerState = this.controllerState;
+      const zoomConstraintContext = this._getConstraintContext('zoom', 'end');
+      const rotateConstraintContext = this._getConstraintContext('rotate', 'end');
+      const newControllerState = currentControllerState
+        .zoomEnd(zoomConstraintContext)
+        .rotateEnd(rotateConstraintContext);
+      const reboundTransition = this._getReboundTransition(
+        this.touchZoom ? zoomConstraintContext : rotateConstraintContext,
+        newControllerState
+      );
+      this.updateViewport(newControllerState, reboundTransition, {
         isDragging: false,
-        isPanning: false,
-        isZooming: false,
-        isRotating: false
+        isPanning: Boolean(reboundTransition) && this.touchZoom,
+        isZooming: Boolean(reboundTransition) && this.touchZoom,
+        isRotating: Boolean(reboundTransition) && this.touchRotate
       });
     }
     pinchEventWorkaround._startPinchRotation = null;
@@ -785,9 +961,15 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     this._doubleClickDragAnchor = pos;
-    let newControllerState = this.controllerState.zoomStart({pos});
+    let newControllerState = this.controllerState.zoomStart(
+      {pos},
+      this._getConstraintContext('zoom', 'start')
+    );
     if (event.scale !== 1) {
-      newControllerState = newControllerState.zoom({pos, scale: event.scale});
+      newControllerState = newControllerState.zoom(
+        {pos, scale: event.scale},
+        this._getConstraintContext('zoom', 'update')
+      );
     }
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
@@ -803,7 +985,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
 
-    const newControllerState = this.controllerState.zoom({pos, scale: event.scale});
+    const newControllerState = this.controllerState.zoom(
+      {pos, scale: event.scale},
+      this._getConstraintContext('zoom', 'update')
+    );
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isPanning: true,
@@ -813,16 +998,20 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   protected _onDoubleClickDragEnd(_event: MjolnirGestureEvent): boolean {
-    if (!this._doubleClickDragAnchor) {
+    const pos = this._doubleClickDragAnchor;
+    if (!pos) {
       return false;
     }
 
     this._doubleClickDragAnchor = null;
-    const newControllerState = this.controllerState.zoomEnd();
-    this.updateViewport(newControllerState, null, {
+    const currentControllerState = this.controllerState;
+    const constraintContext = this._getConstraintContext('zoom', 'end');
+    const newControllerState = currentControllerState.zoomEnd(constraintContext);
+    const reboundTransition = this._getReboundTransition(constraintContext, newControllerState);
+    this.updateViewport(newControllerState, reboundTransition, {
       isDragging: false,
-      isPanning: false,
-      isZooming: false
+      isPanning: Boolean(reboundTransition),
+      isZooming: Boolean(reboundTransition)
     });
     this._suppressDoubleClickUntil = Date.now() + 100;
     this.blockEvents(100);
@@ -836,7 +1025,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
     const funcKey = this.isFunctionKeyPressed(event);
     // @ts-ignore
-    const {zoomSpeed, moveSpeed, rotateSpeedX, rotateSpeedY} = this.keyboard === true ? {} : this.keyboard;
+    const {zoomSpeed, moveSpeed, rotateSpeedX, rotateSpeedY} =
+      this.keyboard === true ? {} : this.keyboard;
     const {controllerState} = this;
     let newControllerState;
     const interactionState: InteractionState = {};
@@ -907,13 +1097,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     // Enables Transitions on double-click/tap and key-down events.
     return opts
       ? {
-        ...transition,
-        transitionInterpolator: new LinearInterpolator({
-          ...opts,
-          ...(transition.transitionInterpolator as LinearInterpolator).opts,
-          makeViewport: this.controllerState.makeViewport
-        })
-      }
+          ...transition,
+          transitionInterpolator: new LinearInterpolator({
+            ...opts,
+            ...(transition.transitionInterpolator as LinearInterpolator).opts,
+            makeViewport: this.controllerState.makeViewport
+          })
+        }
       : transition;
   }
 }

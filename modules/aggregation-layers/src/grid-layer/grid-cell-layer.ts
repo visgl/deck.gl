@@ -7,6 +7,7 @@ import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {CubeGeometry} from '@luma.gl/engine';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
+import source from './grid-cell-layer.wgsl';
 import vs from './grid-cell-layer-vertex.glsl';
 import {GridProps, gridUniforms} from './grid-layer-uniforms';
 import type {ScaleType} from '../common/types';
@@ -37,7 +38,7 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   getShaders() {
     const shaders = super.getShaders();
     shaders.modules.push(gridUniforms);
-    return {...shaders, vs};
+    return {...shaders, source, vs};
   }
 
   initializeState() {
@@ -97,7 +98,7 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
 
   protected _updateGeometry() {
     const geometry = new CubeGeometry();
-    this.state.fillModel!.setGeometry(geometry);
+    this._setFillGeometry(geometry);
   }
 
   draw({uniforms}) {
