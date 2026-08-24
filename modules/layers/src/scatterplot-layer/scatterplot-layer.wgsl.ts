@@ -20,45 +20,7 @@ struct ScatterplotUniforms {
   lineWidthUnits: i32,
 };
 
-struct ConstantAttributeUniforms {
- instancePositions: vec3<f32>,
- instancePositions64Low: vec3<f32>,
- instanceRadius: f32,
- instanceLineWidths: f32,
- instanceFillColors: vec4<f32>,
- instanceLineColors: vec4<f32>,
- instancePixelOffset: vec2<f32>,
-
- instancePositionsConstant: i32,
- instancePositions64LowConstant: i32,
- instanceRadiusConstant: i32,
- instanceLineWidthsConstant: i32,
- instanceFillColorsConstant: i32,
- instanceLineColorsConstant: i32,
- instancePixelOffsetConstant: i32
-};
-
 @group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
-
-struct ConstantAttributes {
-  instancePositions: vec3<f32>,
-  instancePositions64Low: vec3<f32>,
-  instanceRadius: f32,
-  instanceLineWidths: f32,
-  instanceFillColors: vec4<f32>,
-  instanceLineColors: vec4<f32>,
-  instancePixelOffset: vec2<f32>
-};
-
-const constants = ConstantAttributes(
-  vec3<f32>(0.0),
-  vec3<f32>(0.0),
-  0.0,
-  0.0,
-  vec4<f32>(0.0, 0.0, 0.0, 1.0),
-  vec4<f32>(0.0, 0.0, 0.0, 1.0),
-  vec2<f32>(0.0)
-);
 
 struct Attributes {
   @builtin(instance_index) instanceIndex : u32,

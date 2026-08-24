@@ -48,6 +48,8 @@ export type RefinementStrategy =
   | 'no-overlap'
   | 'best-available'
   | RefinementStrategyFunction;
+
+/** Controls whether lower-resolution ancestor tiles are prefetched for coverage. */
 export type LODStrategy = 'none' | 'coverage';
 
 const DEFAULT_CACHE_SCALE = 5;

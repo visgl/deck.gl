@@ -6,8 +6,8 @@ Over 33,000 power plants of the world plotted by their production capacity (give
 and fuel type (green if renewable) on a MapLibre globe view.
 
 This example demonstrates using MapLibre's globe projection with deck.gl layers by setting
-map_provider='maplibre' and map_projection='globe'. The globe view uses MapLibre's
-MapboxOverlay with interleaved rendering for optimal performance.
+map_provider='maplibre' and map_projection='globe'. The globe view uses MapLibreOverlay
+with interleaved rendering for optimal performance.
 """
 
 import pydeck as pdk

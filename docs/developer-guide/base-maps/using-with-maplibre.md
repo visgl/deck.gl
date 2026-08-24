@@ -6,6 +6,8 @@
 
 [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) is a powerful open-source library that uses WebGL to render interactive maps from vector tiles in a browser. deck.gl's `MapView` can sync perfectly with the camera of MapLibre, at every zoom level and rotation angle.
 
+MapLibre GL JS v4.5.1, v5, and v6 applications should use `MapLibreOverlay` from `@deck.gl/maplibre`.
+
 ## Integration Modes
 
 When using deck.gl and MapLibre, there are three options you can choose from: interleaved, overlaid, and reverse-controlled.
@@ -14,14 +16,14 @@ When using deck.gl and MapLibre, there are three options you can choose from: in
 
 The [interleaved](../../get-started/using-with-map.md#interleaved) mode renders deck.gl layers into the WebGL2 context created by MapLibre. If you need to mix deck.gl layers with MapLibre layers, e.g. having deck.gl surfaces below text labels, or objects occluding each other correctly in 3D, then you have to use this option.
 
-Interleaving is supported by using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay.md) with `interleaved: true`. It requires WebGL2 and therefore only works with `maplibre-gl@>3`. See [compatibility](../../api-reference/mapbox/overview#interleaved-renderer-compatibility) and [limitations](../../api-reference/mapbox/overview.md#limitations).
+Interleaving is supported by using [MapLibreOverlay](../../api-reference/maplibre/overview.md) with `interleaved: true`. It only works when WebGL2 is available. See [compatibility](../../api-reference/maplibre/overview.md#compatibility).
 
 
 ### Overlaid
 
 The [overlaid](../../get-started/using-with-map.md#overlaid) mode renders deck.gl in a separate canvas inside the MapLibre's controls container. If your use case does not require interleaving, but you still want to use certain features of maplibre-gl, such as maplibre-gl controls (e.g. `NavigationControl`, `Popup`) or plugins (e.g. [navigation directions](https://github.com/mapbox/mapbox-gl-directions), [mapbox-gl-draw](https://maplibre.org/maplibre-gl-js/docs/examples/mapbox-gl-draw/)), then you should use this option.
 
-This is supported by using [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay.md) with `interleaved: false`.
+This is supported by using [MapLibreOverlay](../../api-reference/maplibre/overview.md) with `interleaved: false`.
 
 
 ### Reverse Controlled
@@ -35,7 +37,9 @@ You cannot use maplibre-gl controls and plugins with this option. Instead, use t
 
 ### Example: interleaved or overlaid
 
-Both the interleaved and the overlaid options are supported by the [@deck.gl/mapbox](../../api-reference/mapbox/overview.md) module. This is recommended approach for developers coming from the MapLibre ecosystem, as it can easily switch between interleaved and overlaid rendering, as well as being compatible with other MapLibre controls and plugins.
+Both the interleaved and overlaid options are supported by the [`@deck.gl/maplibre`](../../api-reference/maplibre/overview.md) module. It is compatible with MapLibre controls and plugins.
+
+The examples below use Vite's worker URL import. See the [MapLibre installation guide](https://maplibre.org/maplibre-gl-js/docs/#installation) for other bundlers.
 
 
 import Tabs from '@theme/Tabs';
@@ -45,10 +49,13 @@ import TabItem from '@theme/TabItem';
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {Map} from 'maplibre-gl';
+import {Map, setWorkerUrl} from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+setWorkerUrl(maplibreWorkerUrl);
 
 const map = new Map({
   container: 'map',
@@ -59,7 +66,7 @@ const map = new Map({
 
 await map.once('load');
 
-const deckOverlay = new MapboxOverlay({
+const deckOverlay = new MapLibreOverlay({
   interleaved: true,
   layers: [
     new ScatterplotLayer({
@@ -84,13 +91,16 @@ map.addControl(deckOverlay);
 ```tsx
 import React from 'react';
 import {Map, useControl} from 'react-map-gl/maplibre';
-import {MapboxOverlay} from '@deck.gl/mapbox';
-import {DeckProps} from '@deck.gl/core';
+import {setWorkerUrl} from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+import {MapLibreOverlay, MapLibreOverlayProps} from '@deck.gl/maplibre';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-function DeckGLOverlay(props: DeckProps) {
-  const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
+setWorkerUrl(maplibreWorkerUrl);
+
+function DeckGLOverlay(props: MapLibreOverlayProps) {
+  const overlay = useControl<MapLibreOverlay>(() => new MapLibreOverlay(props));
   overlay.setProps(props);
   return null;
 }
@@ -220,7 +230,7 @@ function App() {
 
 All the [examples on this website](https://github.com/visgl/deck.gl/tree/master/examples/website) are implemented using the React integration.
 
-When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapboxOverlay](../../api-reference/mapbox/mapbox-overlay#example) is used with react-map-gl's `useControl` hook. 
+When you choose the interleaved or overlaid option, the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) React component acts as the root component, and [MapLibreOverlay](../../api-reference/maplibre/overview.md#example) is used with react-map-gl's `useControl` hook.
 
 When you choose the reverse-controlled option, the `DeckGL` React component acts as the root component, and the react-map-gl [Map](https://visgl.github.io/react-map-gl/docs/api-reference/map) is a child. In this case, `Map` will automatically interpret the deck.gl view state (i.e. latitude, longitude, zoom etc), so that deck.gl layers will render as a synchronized geospatial overlay over the underlying map.
 

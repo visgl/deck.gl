@@ -19,6 +19,7 @@ export class Tile2DHeader<DataT = any> {
   index: TileIndex;
   isVisible: boolean;
   isSelected: boolean;
+  /** Whether this tile is being requested as lower-resolution coverage. */
   isPrefetch: boolean;
   parent: Tile2DHeader | null;
   children: Tile2DHeader[] | null;
@@ -120,6 +121,7 @@ export class Tile2DHeader<DataT = any> {
     this._abortController = new AbortController();
     const {signal} = this._abortController;
 
+    // @ts-expect-error (2345) loaders.gl's RequestScheduler callback type is too narrow.
     const requestToken = await requestScheduler.scheduleRequest(this, getRequestPriority);
 
     if (!requestToken) {

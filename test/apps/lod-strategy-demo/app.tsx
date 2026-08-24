@@ -355,7 +355,7 @@ function DemoPane({
   const layer = useMemo(
     () =>
       new TileLayer<DemoTile>({
-        id: `${mode}-tiles`,
+        id: `${mode}-tiles-${generation}`,
         minZoom: 0,
         maxZoom: 20,
         tileSize: 512,

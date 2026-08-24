@@ -3,3 +3,4 @@ public
 report*.json
 build
 .docusaurus
+.swc

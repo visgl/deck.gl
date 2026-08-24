@@ -3,7 +3,7 @@
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.0-beta.2",
+  "version": "9.4.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -17,18 +17,27 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/index.js",
+        "require": "./dist.webgl-only/index.cjs"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist",
+    "dist.webgl-only",
     "src",
     "dist.min.js"
   ],
@@ -46,8 +55,8 @@
     "@loaders.gl/terrain": "^4.4.3",
     "@loaders.gl/tiles": "^4.4.3",
     "@loaders.gl/wms": "^4.4.3",
-    "@luma.gl/gltf": "^9.3.3",
-    "@luma.gl/shadertools": "^9.3.3",
+    "@luma.gl/gltf": "^9.4.0-beta.2",
+    "@luma.gl/shadertools": "^9.4.0-beta.2",
     "@math.gl/core": "^4.1.0",
     "@math.gl/culling": "^4.1.0",
     "@math.gl/web-mercator": "^4.1.0",
@@ -62,8 +71,8 @@
     "@deck.gl/layers": "~9.3.0-beta.2",
     "@deck.gl/mesh-layers": "~9.3.0-beta.2",
     "@loaders.gl/core": "^4.4.3",
-    "@luma.gl/core": "~9.3.3",
-    "@luma.gl/engine": "~9.3.3"
+    "@luma.gl/core": "~9.4.0-beta.2",
+    "@luma.gl/engine": "~9.4.0-beta.2"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

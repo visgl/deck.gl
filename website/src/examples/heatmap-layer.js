@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class HeatmapDemo extends Component {
   static title = 'Uber Pickup Locations In NewYork City';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
     worker: '/workers/screen-grid-data-decoder.js'

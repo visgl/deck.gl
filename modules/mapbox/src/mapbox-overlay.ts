@@ -57,9 +57,11 @@ export default class MapboxOverlay implements IControl {
 
   /** Filter out props to pass to Deck **/
   filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
-    const {interleaved = false, useDevicePixels, ...deckProps} = props;
-    if (!interleaved && useDevicePixels !== undefined) {
-      // useDevicePixels cannot be used in interleaved mode
+    const {interleaved: _, useDevicePixels, ...deckProps} = props;
+    // In interleaved mode the base map owns the WebGL context and the canvas drawing buffer size,
+    // so useDevicePixels cannot be applied and is dropped here. Use MapLibre's `pixelRatio` map
+    // option instead. Mapbox GL JS has no equivalent option.
+    if (!this._interleaved && useDevicePixels !== undefined) {
       (deckProps as MapboxOverlayProps).useDevicePixels = useDevicePixels;
     }
     return deckProps;
@@ -108,6 +110,15 @@ export default class MapboxOverlay implements IControl {
     this._deck = new Deck<any>({
       ...this._props,
       parent: container,
+      deviceProps: {
+        ...this._props.deviceProps,
+        createCanvasContext: {
+          ...(typeof this._props.deviceProps?.createCanvasContext === 'object'
+            ? this._props.deviceProps.createCanvasContext
+            : undefined),
+          pixelSizeSource: 'css-dpr'
+        }
+      },
       parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
       views: this._getViews(map),
       viewState: getViewState(map)

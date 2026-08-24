@@ -1,4 +1,5 @@
 # TileLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {TileLayerDemo} from '@site/src/doc-demos/geo-layers';
 
@@ -326,7 +327,7 @@ Controls whether the layer prefetches lower-resolution tiles to provide instant 
 
 Use `'coverage'` when your application involves frequent camera movement (e.g. animated transitions, user exploration) and visual continuity matters more than minimizing network requests. Use `'none'` when bandwidth is constrained, tiles are expensive to fetch, or the viewport is mostly static.
 
-Note: The `'coverage'` strategy is designed for geospatial views (e.g. `MapView`) where tiles follow a power-of-2 hierarchy. It is not recommended for non-geospatial views (e.g. `FirstPersonView`, `OrthographicView`) where viewport movement patterns differ and ancestor tiles may not provide meaningful coverage.
+Note: The `'coverage'` strategy is designed for geospatial views (e.g. `MapView`, `GlobeView`) where tiles follow a power-of-2 hierarchy. It is not recommended for non-geospatial views (e.g. `FirstPersonView`, `OrthographicView`) where viewport movement patterns differ and ancestor tiles may not provide meaningful coverage.
 
 - Default: `'none'`
 

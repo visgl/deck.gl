@@ -3,7 +3,7 @@
   "description": "deck.gl core library",
   "license": "MIT",
   "type": "module",
-  "version": "9.3.0-beta.2",
+  "version": "9.4.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -17,18 +17,27 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/index.js",
+        "require": "./dist.webgl-only/index.cjs"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist",
+    "dist.webgl-only",
     "src",
     "debug.min.js",
     "dist.min.js"
@@ -42,10 +51,11 @@
   "dependencies": {
     "@loaders.gl/core": "^4.4.3",
     "@loaders.gl/images": "^4.4.3",
-    "@luma.gl/core": "^9.3.3",
-    "@luma.gl/engine": "^9.3.3",
-    "@luma.gl/shadertools": "^9.3.3",
-    "@luma.gl/webgl": "^9.3.3",
+    "@luma.gl/core": "^9.4.0-beta.2",
+    "@luma.gl/engine": "^9.4.0-beta.2",
+    "@luma.gl/gpgpu": "^9.4.0-beta.2",
+    "@luma.gl/shadertools": "^9.4.0-beta.2",
+    "@luma.gl/webgl": "^9.4.0-beta.2",
     "@math.gl/core": "^4.1.0",
     "@math.gl/sun": "^4.1.0",
     "@math.gl/types": "^4.1.0",
@@ -55,7 +65,7 @@
     "@probe.gl/stats": "^4.1.1",
     "@types/offscreencanvas": "^2019.6.4",
     "gl-matrix": "^3.0.0",
-    "mjolnir.js": "^3.0.1"
+    "mjolnir.js": "^3.1.0-beta.3"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

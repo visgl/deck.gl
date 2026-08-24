@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {Layer, project32, color, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
+import {shaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 
@@ -62,6 +63,14 @@ type _PathLayerProps<DataT> = {
    */
   miterLimit?: number;
   /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where a path overlaps itself. Only
+   * the edges along the width of the path are smoothed - flat caps at the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
+  /**
    * If `true`, extrude the path in screen space (width always faces the camera).
    * If `false`, the width always faces up (z).
    * @default false
@@ -105,6 +114,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   jointRounded: false,
   capRounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
+  antialiasing: false,
   billboard: false,
   _pathType: null,
 
@@ -135,7 +145,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, pathUniforms]}); // 'project' module added by default.
+    const {antialiasing} = this.props;
+    return super.getShaders({
+      vs,
+      fs,
+      source: shaderWGSL,
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
+      modules: [project32, color, picking, pathUniforms]
+    }); // 'project' module added by default.
   }
 
   get wrapLongitude(): boolean {
@@ -143,43 +160,73 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   getBounds(): [number[], number[]] | null {
+    if (this.context.device.type === 'webgpu') {
+      return null;
+    }
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 
   initializeState() {
     const noAlloc = true;
+    const isWebGPU = this.context.device.type === 'webgpu';
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager!.addInstanced({
-      vertexPositions: {
-        size: 3,
-        // Start filling buffer from 1 vertex in
-        vertexOffset: 1,
-        type: 'float64',
-        fp64: this.use64bitPositions(),
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPath',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        update: this.calculatePositions,
-        noAlloc,
-        shaderAttributes: {
-          instanceLeftPositions: {
-            vertexOffset: 0
-          },
-          instanceStartPositions: {
-            vertexOffset: 1
-          },
-          instanceEndPositions: {
-            vertexOffset: 2
-          },
-          instanceRightPositions: {
-            vertexOffset: 3
+      ...(isWebGPU
+        ? {
+            // WebGPU cannot express WebGL's vertexOffset window in one vertex buffer layout.
+            // Pack each segment's [left, start, end, right] high and low position parts instead.
+            instancePositions: {
+              size: 24,
+              type: 'float32',
+              transition: false,
+              accessor: 'getPath',
+              // eslint-disable-next-line @typescript-eslint/unbound-method
+              update: this.calculateWebGPUPositions,
+              shaderAttributes: {
+                instanceLeftPositions: {size: 3, elementOffset: 0},
+                instanceStartPositions: {size: 3, elementOffset: 3},
+                instanceEndPositions: {size: 3, elementOffset: 6},
+                instanceRightPositions: {size: 3, elementOffset: 9},
+                instanceLeftPositions64Low: {size: 3, elementOffset: 12},
+                instanceStartPositions64Low: {size: 3, elementOffset: 15},
+                instanceEndPositions64Low: {size: 3, elementOffset: 18},
+                instanceRightPositions64Low: {size: 3, elementOffset: 21}
+              },
+              noAlloc
+            }
           }
-        }
-      },
+        : {
+            vertexPositions: {
+              size: 3,
+              // Start filling buffer from 1 vertex in
+              vertexOffset: 1,
+              type: 'float64',
+              fp64: this.use64bitPositions(),
+              transition: ATTRIBUTE_TRANSITION,
+              accessor: 'getPath',
+              // eslint-disable-next-line @typescript-eslint/unbound-method
+              update: this.calculatePositions,
+              noAlloc,
+              shaderAttributes: {
+                instanceLeftPositions: {
+                  vertexOffset: 0
+                },
+                instanceStartPositions: {
+                  vertexOffset: 1
+                },
+                instanceEndPositions: {
+                  vertexOffset: 2
+                },
+                instanceRightPositions: {
+                  vertexOffset: 3
+                }
+              }
+            }
+          }),
       instanceTypes: {
         size: 1,
-        type: 'uint8',
+        type: isWebGPU ? 'float32' : 'uint8',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateSegmentTypes,
         noAlloc
@@ -187,35 +234,40 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
-        transition: ATTRIBUTE_TRANSITION,
-        defaultValue: 1
+        transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
+        defaultValue: 1,
+        bufferGroup: 'path-instance-data'
       },
       instanceColors: {
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
-        transition: ATTRIBUTE_TRANSITION,
-        defaultValue: DEFAULT_COLOR
+        transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
+        defaultValue: DEFAULT_COLOR,
+        bufferGroup: 'path-instance-data'
       },
       /** Source path row for each generated segment/joint instance. */
       rowIndexes: {
         size: 1,
         type: 'uint32',
-        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index)
+        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index),
+        // AttributeManager only materializes buffer groups on WebGPU, so WebGL keeps its layout.
+        bufferGroup: 'path-instance-data'
       }
     });
     /* eslint-enable max-len */
 
     this.setState({
       pathTesselator: new PathTesselator({
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        isWebGPU
       })
     });
   }
 
   updateState(params: UpdateParameters<this>) {
     super.updateState(params);
-    const {props, changeFlags} = params;
+    const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
 
@@ -252,7 +304,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
     }
 
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       attributeManager!.invalidateAll();
@@ -332,7 +384,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
      *                                   /     :     o
      */
 
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     const SEGMENT_INDICES = [
       // start corner
       0, 1, 2,
@@ -345,7 +397,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     // [0] position on segment - 0: start, 1: end
     // [1] side of path - -1: left, 0: center (joint), 1: right
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     const SEGMENT_POSITIONS = [
       // bevel start corner
       0, 0,
@@ -388,5 +440,39 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = pathTesselator.get('segmentTypes');
+  }
+
+  protected calculateWebGPUPositions(attribute) {
+    const {pathTesselator} = this.state;
+    const value = pathTesselator.get('positions');
+
+    if (!value) {
+      attribute.value = null;
+      return;
+    }
+
+    const numInstances = pathTesselator.instanceCount;
+    const result = new Float32Array(numInstances * 24);
+    // WebGL reads a padded neighbor window using `vertexOffset: 1`; this materializes
+    // the same [-1, 0, 1, 2] access pattern explicitly for the WebGPU layout.
+    const neighborOffsets = [-1, 0, 1, 2];
+
+    for (let i = 0; i < numInstances; i++) {
+      const targetIndex = i * 24;
+      for (let vertexOffset = 0; vertexOffset < 4; vertexOffset++) {
+        const sourceVertex = i + neighborOffsets[vertexOffset];
+        const targetOffset = targetIndex + vertexOffset * 3;
+        for (let j = 0; j < 3; j++) {
+          const position =
+            sourceVertex >= 0 && sourceVertex < numInstances ? value[sourceVertex * 3 + j] : 0;
+          const highPart = Math.fround(position);
+          result[targetOffset + j] = highPart;
+          result[targetOffset + j + 12] = position - highPart;
+        }
+      }
+    }
+
+    attribute.startIndices = pathTesselator.vertexStarts;
+    attribute.value = result;
   }
 }

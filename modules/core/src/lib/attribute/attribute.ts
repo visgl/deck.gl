@@ -12,6 +12,7 @@ import DataColumn, {
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
+import {toDoublePrecisionArray} from '../../utils/math-utils';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
@@ -49,6 +50,12 @@ export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
+  /**
+   * @internal
+   * WebGPU-only hint to publish compatible CPU-backed attributes through one shared vertex
+   * buffer. WebGL and unsupported grouped states retain the legacy standalone buffer path.
+   */
+  bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
@@ -59,6 +66,8 @@ export type BinaryAttribute = Partial<BufferAccessor> & {value?: TypedArray; buf
 
 type AttributeInternalState = {
   startIndices: NumericArray | null;
+  /** One unnormalized row retained for WebGPU buffer-group interleaving. */
+  constantValue: TypedArray | null;
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
   /** External binary supplied via accessor name */
@@ -77,6 +86,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   constructor(device: Device, opts: AttributeOptions) {
     super(device, opts, {
       startIndices: null,
+      constantValue: null,
       lastExternalBuffer: null,
       binaryValue: null,
       binaryAccessor: null,
@@ -182,7 +192,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     if (settings.update) {
+      const wasConstant = this.isConstant;
       super.allocate(numInstances, state.updateRanges !== range.FULL);
+      state.layoutChanged ||= wasConstant && this.device.type === 'webgpu';
       return true;
     }
 
@@ -223,9 +235,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
         if (this.constant) {
-          // Route constant updater output through the same path used by constant accessors
-          // so WebGPU can materialize a real buffer while WebGL keeps a constant attribute.
-          this.setConstantValue(context, this.value);
+          // Route legacy constant updater output through the same path used by constant accessors.
+          const constantValue = this.value;
+          this.value = null;
+          this.setConstantValue(context, constantValue);
         } else {
           this.setData({
             value: this.value,
@@ -265,73 +278,51 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
+    const wasConstant = this.isConstant;
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
-
-    if (this.device.type === 'webgpu') {
-      // WebGPU has no equivalent of WebGL constant vertex attributes, so we expand the
-      // constant into a full per-instance buffer before passing it to luma.gl.
-      return this.setConstantBufferValue(transformedValue, this.numInstances);
-    }
-
-    // WebGL can bind the normalized/transformed value directly as a constant attribute.
-    const hasChanged = this.setData({constant: true, value: transformedValue});
-
-    if (hasChanged) {
-      this.setNeedsRedraw();
-    }
-    this.clearNeedsUpdate();
-    return true;
-  }
-
-  setConstantBufferValue(value: any, numInstances: number): boolean {
     const ArrayType = this.settings.defaultType;
-    const constantValue = this._normalizeValue(value, new ArrayType(this.size), 0) as TypedArray;
-    if (this._hasConstantBufferValue(constantValue, numInstances)) {
-      // The emulated buffer already matches this constant, so avoid a redundant upload.
+    // DataColumn normalizes constants for shader consumption. Buffer grouping needs the original
+    // vertex-format bytes so that interleaving preserves integer and normalized attribute formats.
+    this.state.constantValue = this._normalizeValue(
+      transformedValue,
+      new ArrayType(this.size),
+      0
+    ) as TypedArray;
+    const hasChanged = this.setData({constant: true, value: transformedValue});
+    if (this.device.type === 'webgpu') {
+      let bufferValue = this.state.constantValue;
+      if (
+        this.doublePrecision &&
+        (bufferValue instanceof Float32Array || bufferValue instanceof Float64Array)
+      ) {
+        // A zero low tuple must be present in the buffer on WebGPU even when the source is fp32.
+        bufferValue = toDoublePrecisionArray(bufferValue, {size: this.size});
+        this.setAccessor({
+          ...this.getAccessor(),
+          stride: this.size * 2 * Float32Array.BYTES_PER_ELEMENT
+        });
+      }
+      let buffer = this._buffer;
+      if (!buffer || buffer.byteLength < bufferValue.byteLength) {
+        buffer = this._createBuffer(bufferValue.byteLength);
+      }
+      buffer.write(bufferValue);
+      this.state.layoutChanged ||= !wasConstant;
+      // `constant` is the legacy updater signal; persistent state lives in DataColumn.isConstant.
       this.constant = false;
-      this.clearNeedsUpdate();
-      return false;
     }
-
-    const repeatedValue = new ArrayType(Math.max(numInstances, 1) * this.size);
-
-    for (let i = 0; i < repeatedValue.length; i += this.size) {
-      repeatedValue.set(constantValue, i);
-    }
-
-    const hasChanged = this.setData({value: repeatedValue});
-    this.constant = false;
-    this.clearNeedsUpdate();
 
     if (hasChanged) {
       this.setNeedsRedraw();
     }
-
-    return hasChanged;
+    this.clearNeedsUpdate();
+    return true;
   }
 
-  private _hasConstantBufferValue(value: NumericArray, numInstances: number): boolean {
-    const currentValue = this.value;
-    const expectedLength = Math.max(numInstances, 1) * this.size;
-
-    if (
-      !ArrayBuffer.isView(currentValue) ||
-      currentValue.length !== expectedLength ||
-      currentValue.length % this.size !== 0
-    ) {
-      return false;
-    }
-
-    for (let i = 0; i < currentValue.length; i += this.size) {
-      for (let j = 0; j < this.size; j++) {
-        if (currentValue[i + j] !== value[j]) {
-          return false;
-        }
-      }
-    }
-
-    return true;
+  /** Returns one row in its vertex-buffer representation for WebGPU buffer grouping. */
+  getConstantValue(): TypedArray | null {
+    return this.isConstant ? this.state.constantValue : null;
   }
 
   // Use external buffer
