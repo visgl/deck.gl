@@ -233,8 +233,9 @@ test('TileLayer#GlobeView:BitmapLayer image coordinate system', async () => {
     viewport: testViewport,
     testCases: [
       {
-        title: 'preserves default image coordinates for custom getTileData imagery',
+        title: 'preserves default image coordinates without opt-in',
         props: {
+          data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => ({}),
           renderSubLayers
         },
@@ -245,10 +246,11 @@ test('TileLayer#GlobeView:BitmapLayer image coordinate system', async () => {
         }
       },
       {
-        title: 'defaults XYZ BitmapLayer image coordinates to Web Mercator',
+        title: 'reprojects opted-in BitmapLayer image coordinates to Web Mercator',
         props: {
           data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => ({}),
+          reprojectBitmapTiles: true,
           renderSubLayers
         },
         onAfterUpdate: ({layer, subLayers}) => {
@@ -295,6 +297,7 @@ test('TileLayer#GlobeView:custom BitmapLayer image coordinate system', async () 
         props: {
           data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => ({}),
+          reprojectBitmapTiles: true,
           renderSubLayers
         },
         onAfterUpdate: ({layer, subLayers}) => {
@@ -346,6 +349,7 @@ test('TileLayer#GlobeView:preserves custom BitmapLayer quad bounds', async () =>
         props: {
           data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => ({}),
+          reprojectBitmapTiles: true,
           renderSubLayers
         },
         onAfterUpdate: ({layer, subLayers}) => {
@@ -395,6 +399,7 @@ test('TileLayer#BitmapLayer image coordinates update when the projection changes
         props: {
           data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => ({}),
+          reprojectBitmapTiles: true,
           renderSubLayers
         },
         onAfterUpdate: ({layer, subLayers}) => {
@@ -453,6 +458,7 @@ test('TileLayer#GlobeView:leaves non-Bitmap sublayers unchanged', async () => {
         props: {
           data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => [{position: [0, 0]}],
+          reprojectBitmapTiles: true,
           renderSubLayers
         },
         onAfterUpdate: ({layer, subLayers}) => {
@@ -497,6 +503,7 @@ test('TileLayer#GlobeView:preserves explicit BitmapLayer image coordinate system
         props: {
           data: 'https://example.com/{z}/{x}/{y}.png',
           getTileData: () => ({}),
+          reprojectBitmapTiles: true,
           renderSubLayers: renderSubLayersWithExplicitImageCoordinateSystem
         },
         onAfterUpdate: ({layer, subLayers}) => {

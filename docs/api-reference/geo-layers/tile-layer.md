@@ -346,6 +346,12 @@ If `debounceTime > 0`, tile requests are queued until a period of at least `debo
 
 ### Render Options
 
+#### `reprojectBitmapTiles` (boolean, optional) {#reprojectbitmaptiles}
+
+Whether rectangular `BitmapLayer` sublayers contain Web Mercator imagery that should be reprojected when rendered in `GlobeView`. Enable this for standard XYZ/TMS raster basemaps. Leave it disabled for imagery encoded directly in longitude/latitude or another projection.
+
+- Default: `false`
+
 #### `renderSubLayers` (Function, optional) {#rendersublayers}
 
 Renders one or an array of Layer instances with all the `TileLayer` props and the following props:

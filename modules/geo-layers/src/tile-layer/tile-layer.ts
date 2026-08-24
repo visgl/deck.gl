@@ -53,6 +53,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   maxRequests: 6,
   debounceTime: 0,
   zoomOffset: 0,
+  reprojectBitmapTiles: false,
   visibleMinZoom: null,
   visibleMaxZoom: null
 };
@@ -153,6 +154,14 @@ type _TileLayerProps<DataT> = {
    * @default 0
    */
   zoomOffset?: number;
+
+  /**
+   * Whether rectangular BitmapLayer sublayers contain Web Mercator imagery that should be
+   * reprojected when rendered in GlobeView.
+   *
+   * @default false
+   */
+  reprojectBitmapTiles?: boolean;
 
   /**
    * The minimum zoom level at which tiles are visible.
@@ -457,13 +466,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
-    // BitmapLayer and subclasses draw URL-template tile imagery over lng/lat bounds. XYZ/TMS
-    // imagery is encoded in WebMercator, so default GlobeView bitmap sublayers need UV
-    // reprojection. Custom getTileData imagery is not assumed to use that projection.
+    // BitmapLayer and subclasses draw opted-in WebMercator imagery over lng/lat bounds.
+    // Other bitmap projections and layer types are left unchanged.
     if (
       !(this.context.viewport instanceof _GlobeViewport) ||
       !(layer instanceof BitmapLayer) ||
-      !isWebMercatorTileData(this.props.data) ||
+      !this.props.reprojectBitmapTiles ||
       !Number.isFinite(layer.props.bounds[0]) ||
       (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
     ) {
@@ -486,17 +494,4 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       modelMatrix ? new Matrix4(modelMatrix) : null
     );
   }
-}
-
-function isWebMercatorTileData(data: URLTemplate): boolean {
-  const urlTemplates = Array.isArray(data) ? data : [data];
-  return (
-    urlTemplates.length > 0 &&
-    urlTemplates.every(
-      urlTemplate =>
-        typeof urlTemplate === 'string' &&
-        urlTemplate.includes('{x}') &&
-        (urlTemplate.includes('{y}') || urlTemplate.includes('{-y}'))
-    )
-  );
 }
