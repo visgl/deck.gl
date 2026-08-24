@@ -29,7 +29,7 @@ type PackedGroup = {
 };
 
 type PackedGroupState = {
-  packed: GPUDataEvaluator;
+  buffer: Buffer;
   layoutKey: string;
 };
 
@@ -88,7 +88,7 @@ export default class AttributeBufferGroups {
   /** Deletes shared buffers created by this helper. */
   finalize(): void {
     for (const state of Object.values(this.packedBuffers)) {
-      state.packed.destroy();
+      state.buffer.destroy();
     }
     this.packedBuffers = {};
   }
@@ -290,6 +290,7 @@ export default class AttributeBufferGroups {
   }
 
   private _getPackedBuffer(group: PackedGroup, upload: boolean): Buffer {
+    const byteLength = group.rowCount * group.byteStride;
     // Step mode is pipeline metadata; it does not change the packed buffer contents. A layer may
     // share one group across instanced and non-instanced models, as SolidPolygonLayer does for
     // its side and top models.
@@ -297,35 +298,42 @@ export default class AttributeBufferGroups {
       byteStride: group.layout.byteStride,
       attributes: group.layout.attributes
     });
-    const state: PackedGroupState | undefined = this.packedBuffers[group.id];
+    let state: PackedGroupState | undefined = this.packedBuffers[group.id];
 
-    if (!state || state.layoutKey !== layoutKey) {
+    if (!state || state.buffer.byteLength < byteLength || state.layoutKey !== layoutKey) {
+      state?.buffer.destroy();
+      state = {
+        buffer: this.device.createBuffer({
+          id: `${this.id}-${group.id}`,
+          usage: Buffer.VERTEX | Buffer.STORAGE | Buffer.COPY_DST | Buffer.COPY_SRC,
+          byteLength
+        }),
+        layoutKey
+      };
+      this.packedBuffers[group.id] = state;
       upload = true;
     }
 
     if (upload) {
-      if (state) {
-        state.packed.destroy();
-        delete this.packedBuffers[group.id];
-      }
-      const packed = this._interleavePackedGroup(group);
-      this.packedBuffers[group.id] = {packed, layoutKey};
-      return packed.buffer;
+      this._interleavePackedGroup(group, state.buffer);
     }
 
-    if (!state) {
-      throw new Error(`Attribute buffer group ${group.id} has no packed buffer`);
-    }
-    return state.packed.buffer;
+    return state.buffer;
   }
 
-  private _interleavePackedGroup(group: PackedGroup): GPUDataEvaluator {
+  private _interleavePackedGroup(group: PackedGroup, targetBuffer: Buffer): void {
     const evaluators = group.attributes.map(attribute =>
       this._getInterleaveInput(group, attribute)
     );
     const packed = interleaveTables(...evaluators);
-    cleanEvaluateSync(this.device, packed);
-    return packed;
+    // AttributeBufferGroups owns the packed vertex buffer. The evaluator only writes into it and
+    // must never transfer that buffer into luma's reusable evaluator pool.
+    packed.setTargetBuffer({buffer: targetBuffer});
+    try {
+      cleanEvaluateSync(this.device, packed);
+    } finally {
+      packed.destroy();
+    }
   }
 
   private _getInterleaveInput(group: PackedGroup, attribute: Attribute): GPUDataEvaluator {

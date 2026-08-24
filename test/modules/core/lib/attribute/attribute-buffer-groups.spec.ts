@@ -152,7 +152,7 @@ test('AttributeManager buffer groups pack IconLayer-style shader attributes', as
 
   let bindings = attributeManager.getBufferGroupBindings(attributes, {isInstanced: true});
   const packedBuffer = bindings.buffers['group-a'];
-  const deleteSpy = vi.spyOn(packedBuffer, 'delete');
+  const destroySpy = vi.spyOn(packedBuffer, 'destroy');
   let packedBytes = await packedBuffer.readAsync(0, 72);
   let dataView = new DataView(packedBytes.buffer, packedBytes.byteOffset, packedBytes.byteLength);
 
@@ -193,17 +193,14 @@ test('AttributeManager buffer groups pack IconLayer-style shader attributes', as
     {isInstanced: true}
   );
   expect(bindings.buffers['group-a']).toBe(packedBuffer);
+  expect(destroySpy, 'repacking keeps the Deck-owned target buffer alive').not.toHaveBeenCalled();
   packedBytes = await packedBuffer.readAsync(0, 72);
   dataView = new DataView(packedBytes.buffer, packedBytes.byteOffset, packedBytes.byteLength);
   expect(dataView.getFloat32(0, true)).toBe(3);
   expect(dataView.getFloat32(4, true), 'untouched column is repacked').toBe(10);
 
-  const packedEvaluator = (attributeManager as any).attributeBufferGroups.packedBuffers['group-a']
-    .packed;
-  const destroySpy = vi.spyOn(packedEvaluator, 'destroy');
   attributeManager.finalize();
-  expect(destroySpy).toHaveBeenCalled();
-  expect(deleteSpy).not.toHaveBeenCalled();
+  expect(destroySpy, 'finalize destroys the Deck-owned target buffer').toHaveBeenCalledOnce();
 });
 
 test('AttributeManager buffer groups broadcast constant inputs', async () => {
@@ -299,7 +296,7 @@ test('AttributeManager buffer groups are shared across model step modes', () => 
     isInstanced: true
   });
   const packedBuffer = instancedBindings.buffers['group-a'];
-  const deleteSpy = vi.spyOn(packedBuffer, 'delete');
+  const destroySpy = vi.spyOn(packedBuffer, 'destroy');
 
   const vertexBindings = attributeManager.getBufferGroupBindings(attributes, {
     isInstanced: false
@@ -308,9 +305,10 @@ test('AttributeManager buffer groups are shared across model step modes', () => 
   expect(instancedBindings.bufferLayouts[0].stepMode).toBe('instance');
   expect(vertexBindings.bufferLayouts[0].stepMode).toBe('vertex');
   expect(vertexBindings.buffers['group-a']).toBe(packedBuffer);
-  expect(deleteSpy).not.toHaveBeenCalled();
+  expect(destroySpy).not.toHaveBeenCalled();
 
   attributeManager.finalize();
+  expect(destroySpy).toHaveBeenCalledOnce();
 });
 
 test('AttributeManager buffer groups fall back for transitions and external buffers', () => {
