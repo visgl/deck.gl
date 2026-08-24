@@ -57,7 +57,7 @@
       },
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-webgpu",
-        "webGPUEnabled": true
+        "webGPUEnabled": false
       },
       {
         "transform": "@vis.gl/ts-plugins/ts-transform-append-extension",
