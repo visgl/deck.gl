@@ -59,6 +59,13 @@ for source in "${SOURCE_FILES[@]}"; do
   fi
 done
 
+# Capture and composition are deliberately separate commands. Invalidate only the three files
+# consumed by the compositor before starting, so a failed or interrupted capture cannot leave a
+# previous run looking current. Other files in an explicitly supplied output directory are kept.
+for panel_name in "${REQUIRED_PANEL_NAMES[@]}"; do
+  rm -f "$OUTPUT_DIRECTORY/$panel_name.png"
+done
+
 CAPTURE_DIRECTORY="$(mktemp -d "${TMPDIR:-/tmp}/deck-dash-before.XXXXXX")"
 
 cleanup() {
