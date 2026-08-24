@@ -6,6 +6,11 @@
 // Unlike node setup, we don't need JSDOM polyfills here
 
 import {registerTypedArrayEquality} from './typed-array-equality';
+import {GPUDataEvaluator} from '@luma.gl/gpgpu';
+
+// Tests assert that layer finalization releases every GPU resource. Disable the evaluator cache so
+// recycled temporary buffers do not outlive the test that created them.
+GPUDataEvaluator.bufferPoolSize = 0;
 
 // Register custom equality tester for typed arrays (tape compatibility)
 registerTypedArrayEquality();
