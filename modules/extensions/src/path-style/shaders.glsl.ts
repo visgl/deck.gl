@@ -112,6 +112,7 @@ float dashPatternCoverage(
     // o--    ----    ----    ----    --o--      --o--     ----     --o
     'fs:#main-start': `
   float dashCoverage = 1.0;
+  bool shouldDiscardDash = false;
 
   float solidLength = vDashArray.x;
   float gapLength = vDashArray.y;
@@ -150,7 +151,7 @@ float dashPatternCoverage(
         )) > 1.0;
       }
       if (inGap && !pathStyle.dashGapPickable) {
-        discard;
+        shouldDiscardDash = true;
       }
     } else if (path.capType <= 0.5) {
       dashCoverage = dashPatternCoverage(alongPath, solidLength, unitLength, filterWidth);
@@ -175,13 +176,17 @@ float dashPatternCoverage(
     }
 
     // Fully transparent fragments would still write depth and occlude whatever is behind.
-    if (dashCoverage < 0.004) {
-      discard;
-    }
+    shouldDiscardDash = shouldDiscardDash || dashCoverage < 0.004;
   }
 `,
 
     'fs:#main-end': `
+  // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
+  // #main-start can remove helper invocations and make those derivatives undefined, so all
+  // dash-related termination is deferred until the layer has completed that work.
+  if (shouldDiscardDash) {
+    discard;
+  }
   fragColor.a *= dashCoverage;
 `
   }
