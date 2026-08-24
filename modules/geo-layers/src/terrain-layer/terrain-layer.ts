@@ -442,12 +442,12 @@ const isTileSetURL = (url: string): boolean =>
 function remapTerrainMeshToWebMercatorTile(mesh: MeshAttributes, bounds: Bounds): MeshAttributes {
   // The terrain loader returns {attributes: MeshAttributes, header?: ...} at runtime.
   // MeshAttributes is typed as an index type so we use a cast to access the nested fields.
-  const attrs = (mesh as any).attributes as MeshAttributes | undefined;
-  const positionAttribute = attrs?.POSITION;
-  const texCoordAttribute = attrs?.TEXCOORD_0;
+  const attributes = (mesh as any).attributes as MeshAttributes | undefined;
+  const positionAttribute = attributes?.POSITION;
+  const textureCoordinateAttribute = attributes?.TEXCOORD_0;
   const positions = positionAttribute?.value;
-  const texCoords = texCoordAttribute?.value;
-  if (!positions || !texCoords) {
+  const textureCoordinates = textureCoordinateAttribute?.value;
+  if (!positions || !textureCoordinates) {
     return mesh;
   }
 
@@ -456,16 +456,16 @@ function remapTerrainMeshToWebMercatorTile(mesh: MeshAttributes, bounds: Bounds)
   const southY = lngLatToMercatorWorldY(south);
   const remappedPositions = new Float32Array(positions);
 
-  for (let i = 0; i < texCoords.length / 2; i++) {
-    const v = texCoords[i * 2 + 1];
-    const mercatorY = northY + (southY - northY) * v;
-    remappedPositions[i * 3 + 1] = worldToLngLat([0, mercatorY])[1];
+  for (let vertexIndex = 0; vertexIndex < textureCoordinates.length / 2; vertexIndex++) {
+    const textureV = textureCoordinates[vertexIndex * 2 + 1];
+    const mercatorY = northY + (southY - northY) * textureV;
+    remappedPositions[vertexIndex * 3 + 1] = worldToLngLat([0, mercatorY])[1];
   }
 
   return {
     ...(mesh as any),
     attributes: {
-      ...attrs,
+      ...attributes,
       POSITION: {
         ...positionAttribute,
         value: remappedPositions

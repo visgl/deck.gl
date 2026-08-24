@@ -457,12 +457,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
-    // BitmapLayer and subclasses draw tile imagery over lng/lat bounds. XYZ imagery is encoded
-    // in WebMercator, so default GlobeView bitmap sublayers need UV reprojection; other layer
-    // types do not share this image-coordinate contract and are left unchanged.
+    // BitmapLayer and subclasses draw URL-template tile imagery over lng/lat bounds. XYZ/TMS
+    // imagery is encoded in WebMercator, so default GlobeView bitmap sublayers need UV
+    // reprojection. Custom getTileData imagery is not assumed to use that projection.
     if (
       !(this.context.viewport instanceof _GlobeViewport) ||
       !(layer instanceof BitmapLayer) ||
+      !isWebMercatorTileData(this.props.data) ||
       !Number.isFinite(layer.props.bounds[0]) ||
       (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
     ) {
@@ -485,4 +486,17 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       modelMatrix ? new Matrix4(modelMatrix) : null
     );
   }
+}
+
+function isWebMercatorTileData(data: URLTemplate): boolean {
+  const urlTemplates = Array.isArray(data) ? data : [data];
+  return (
+    urlTemplates.length > 0 &&
+    urlTemplates.every(
+      urlTemplate =>
+        typeof urlTemplate === 'string' &&
+        urlTemplate.includes('{x}') &&
+        (urlTemplate.includes('{y}') || urlTemplate.includes('{-y}'))
+    )
+  );
 }
