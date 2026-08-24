@@ -758,6 +758,35 @@ const testCases: TestCase[] = [
   createDashUnitWidthCase('meters', [30, 38]),
   createDashUnitWidthCase('common', [4 / 2 ** DASH_UNIT_WIDTH_ZOOM, 5 / 2 ** DASH_UNIT_WIDTH_ZOOM]),
 
+  {
+    // A round cap extends half the stroke width beyond each dash endpoint. On a 29px stroke,
+    // neighboring caps therefore close a nominal gap at or below 29px; a larger gap retains
+    // only the excess as visible whitespace. Square rows preserve the literal interval and
+    // make that geometric boundary explicit.
+    name: 'path-dash-units-rounded-cap-overlap',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-units-rounded-cap-overlap',
+      [
+        {gapSize: 5, capRounded: false},
+        {gapSize: 5, capRounded: true},
+        {gapSize: 29, capRounded: false},
+        {gapSize: 29, capRounded: true},
+        {gapSize: 45, capRounded: false},
+        {gapSize: 45, capRounded: true}
+      ].map(({gapSize, capRounded}, index) => ({
+        data: [createStraightPath(1, getStripY(index, 6))],
+        getWidth: 29,
+        getDashArray: [4, gapSize],
+        dashUnits: 'pixels',
+        capRounded,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-units-rounded-cap-overlap.png'
+  },
+
   // Pitched MapView - flat and billboard are EXPECTED to diverge toward the horizon
   {
     name: 'path-dash-billboard-pitched',

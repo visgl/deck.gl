@@ -40,23 +40,6 @@ const ELEVATION_INITIAL_VIEW_STATE = {
 
 const ROW_SPACING = 0.004;
 const LONGITUDE_SPAN = 0.16;
-const INITIAL_COMMON_UNITS_PER_PIXEL = 1 / 2 ** MATRIX_INITIAL_VIEW_STATE.zoom;
-
-// Each unit needs a useful control range. These presets produce roughly comparable patterns
-// at the initial view, but the values remain literal after selection: changing stroke width
-// never changes the dash array.
-const DASH_UNIT_PRESETS = {
-  widths: {dashSize: 4, gapSize: 5, min: 0.25, max: 16, step: 0.25},
-  pixels: {dashSize: 4, gapSize: 5, min: 0.25, max: 64, step: 0.25},
-  meters: {dashSize: 60, gapSize: 76, min: 2, max: 256, step: 2},
-  common: {
-    dashSize: 4 * INITIAL_COMMON_UNITS_PER_PIXEL,
-    gapSize: 5 * INITIAL_COMMON_UNITS_PER_PIXEL,
-    min: 0.25 * INITIAL_COMMON_UNITS_PER_PIXEL,
-    max: 64 * INITIAL_COMMON_UNITS_PER_PIXEL,
-    step: 0.25 * INITIAL_COMMON_UNITS_PER_PIXEL
-  }
-};
 
 /** A straight horizontal line at `latitude`, split into `segments` equal collinear pieces. */
 function createStraightPath(segments, latitude) {
@@ -87,11 +70,12 @@ const ROWS = [
 
 const state = {
   scene: 'segment matrix',
-  dashSize: DASH_UNIT_PRESETS.widths.dashSize,
-  gapSize: DASH_UNIT_PRESETS.widths.gapSize,
+  dashSize: 4,
+  gapSize: 5,
   dashMode: 'segment',
   dashJustified: false,
   capRounded: false,
+  jointRounded: false,
   widthUnits: 'pixels',
   dashUnits: 'widths',
   width: 8,
@@ -106,22 +90,8 @@ const CONTROLS = [
     label: 'scene',
     options: ['segment matrix', '3D elevation']
   },
-  {
-    key: 'dashSize',
-    type: 'range',
-    label: 'dash size',
-    min: DASH_UNIT_PRESETS.widths.min,
-    max: DASH_UNIT_PRESETS.widths.max,
-    step: DASH_UNIT_PRESETS.widths.step
-  },
-  {
-    key: 'gapSize',
-    type: 'range',
-    label: 'gap size',
-    min: DASH_UNIT_PRESETS.widths.min,
-    max: DASH_UNIT_PRESETS.widths.max,
-    step: DASH_UNIT_PRESETS.widths.step
-  },
+  {key: 'dashSize', type: 'number', label: 'dash size', min: 0, step: 'any'},
+  {key: 'gapSize', type: 'number', label: 'gap size', min: 0, step: 'any'},
   {key: 'width', type: 'range', label: 'stroke width', min: 1, max: 40, step: 1},
   {key: 'dashMode', type: 'select', label: 'dash mode', options: ['segment', 'path']},
   {key: 'widthUnits', type: 'select', label: 'width units', options: ['pixels', 'meters']},
@@ -134,28 +104,9 @@ const CONTROLS = [
   {key: 'billboard', type: 'select', label: 'billboard', options: ['both', 'off', 'on']},
   {key: 'dashJustified', type: 'checkbox', label: 'justified'},
   {key: 'capRounded', type: 'checkbox', label: 'rounded caps'},
+  {key: 'jointRounded', type: 'checkbox', label: 'rounded joints'},
   {key: 'showCircle', type: 'checkbox', label: 'dense circle'}
 ];
-
-const dashValueControls = {};
-
-function formatControlValue(key, value) {
-  const isDashValue = key === 'dashSize' || key === 'gapSize';
-  return isDashValue && state.dashUnits === 'common' ? value.toPrecision(4) : value;
-}
-
-function applyDashUnitPreset() {
-  const preset = DASH_UNIT_PRESETS[state.dashUnits];
-  for (const key of ['dashSize', 'gapSize']) {
-    const {input, readout} = dashValueControls[key];
-    state[key] = preset[key];
-    input.min = preset.min;
-    input.max = preset.max;
-    input.step = preset.step;
-    input.value = preset[key];
-    readout.textContent = formatControlValue(key, preset[key]);
-  }
-}
 
 function buildControls(onChange) {
   const container = document.getElementById('controls');
@@ -181,35 +132,34 @@ function buildControls(onChange) {
       input = document.createElement('input');
       input.type = 'checkbox';
       input.checked = state[control.key];
-    } else {
+    } else if (control.type === 'range') {
       input = document.createElement('input');
       input.type = 'range';
       input.min = control.min;
       input.max = control.max;
       input.step = control.step;
       input.value = state[control.key];
+    } else {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.min = control.min;
+      input.step = control.step;
+      input.value = state[control.key];
     }
 
     const readout = document.createElement('span');
     readout.className = 'value';
-    readout.textContent =
-      control.type === 'range' ? formatControlValue(control.key, state[control.key]) : '';
-
-    if (control.key === 'dashSize' || control.key === 'gapSize') {
-      dashValueControls[control.key] = {input, readout};
-    }
+    readout.textContent = control.type === 'range' ? state[control.key] : '';
 
     input.addEventListener('input', () => {
       state[control.key] =
         control.type === 'checkbox'
           ? input.checked
-          : control.type === 'range'
+          : control.type === 'range' || control.type === 'number'
             ? Number(input.value)
             : input.value;
-      if (control.key === 'dashUnits') {
-        applyDashUnitPreset();
-      } else if (control.type === 'range') {
-        readout.textContent = formatControlValue(control.key, state[control.key]);
+      if (control.type === 'range') {
+        readout.textContent = state[control.key];
       }
       onChange(control.key);
     });
@@ -298,7 +248,7 @@ function buildElevationLayers() {
           dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
-          jointRounded: state.capRounded,
+          jointRounded: state.jointRounded,
           extensions
         })
       );
@@ -354,7 +304,7 @@ function buildSegmentMatrixLayers() {
           dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
-          jointRounded: state.capRounded,
+          jointRounded: state.jointRounded,
           extensions
         })
       );
@@ -400,7 +350,7 @@ function buildSegmentMatrixLayers() {
           dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
-          jointRounded: state.capRounded,
+          jointRounded: state.jointRounded,
           extensions
         })
       );
