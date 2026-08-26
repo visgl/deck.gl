@@ -375,13 +375,14 @@ export default class GlobeViewport extends Viewport {
     dragStartPosition?: number[]
   ): GlobeViewportOptions {
     if (!dragStartPosition) {
-      const anchorStrength = this.getZoomAnchorStrength(screenPosition);
+      let anchorStrength = this.getZoomAnchorStrength(screenPosition);
       if (anchorStrength === 0) {
         return {longitude: this.longitude, latitude: this.latitude};
       }
 
       const currentCoordinates = this.unproject(screenPosition);
       const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
+      const latitudeDelta = coordinates[1] - currentCoordinates[1];
       const crossesPole =
         Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90;
       if (isGlobeNorthUp(this.bearing) && crossesPole) {
@@ -390,11 +391,16 @@ export default class GlobeViewport extends Viewport {
         // reversing longitude. Continue zooming around center in either case.
         return {longitude: this.longitude, latitude: this.latitude};
       }
+      if (isGlobeNorthUp(this.bearing) && latitudeDelta !== 0) {
+        // Longitude and latitude are one coupled correction. If north-up runs
+        // out of latitude headroom, scale both axes together instead of
+        // clipping latitude while applying the full sideways rotation.
+        const latitudeLimit = latitudeDelta > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
+        const latitudeConstraintStrength = (latitudeLimit - this.latitude) / latitudeDelta;
+        anchorStrength = Math.min(anchorStrength, Math.max(0, latitudeConstraintStrength));
+      }
       const longitude = this.longitude + longitudeDelta * anchorStrength;
-      const latitude = Math.max(
-        Math.min(this.latitude + (coordinates[1] - currentCoordinates[1]) * anchorStrength, 90),
-        -90
-      );
+      const latitude = Math.max(Math.min(this.latitude + latitudeDelta * anchorStrength, 90), -90);
 
       return {longitude, latitude};
     }

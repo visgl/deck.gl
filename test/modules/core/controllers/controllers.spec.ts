@@ -529,6 +529,37 @@ test('GlobeController keeps pointer zoom stable when the anchor crosses a pole',
   }
 });
 
+test('GlobeController bounds pointer correction at the north-up latitude limit', () => {
+  for (const latitude of [-85, 85]) {
+    const controller = createTestController({
+      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      initialViewState: {
+        width: 1280,
+        height: 720,
+        longitude: 0,
+        latitude,
+        zoom: 5,
+        minZoom: 0
+      }
+    });
+    const wheelEvent = makeWheelEvent();
+    wheelEvent.offsetCenter = {x: 840, y: latitude > 0 ? 80 : 640};
+    wheelEvent.delta = -60;
+
+    let previousLongitude = controller.props.longitude;
+    for (let index = 0; index < 16; index++) {
+      controller.handleEvent(wheelEvent as any);
+      const longitudeDelta = ((controller.props.longitude - previousLongitude + 540) % 360) - 180;
+
+      expect(
+        Math.abs(longitudeDelta),
+        'a clipped latitude correction does not rotate sideways'
+      ).toBeLessThan(2);
+      previousLongitude = controller.props.longitude;
+    }
+  }
+});
+
 test('GlobeController keeps continuous pinch zoom stable across a pole', () => {
   for (const latitude of [-75, 75]) {
     const controller = createTestController({
