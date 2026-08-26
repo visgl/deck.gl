@@ -10,16 +10,13 @@ deck.gl v9.4 is expected to be the final release in the v9 series. It brings tog
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
-### Dashed Lines
+### Path styling in 2D and 3D
 
-[`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) has had a substantial repair and two additions.
+[`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) is now a dependable stroke-style system for flat, elevated, billboarded, and offset paths. Existing dash patterns now agree between flat and billboard extrusion, advance through true 3D distance without phase seams, preserve phase on long and offset paths, and prefilter fine patterns instead of shimmering or becoming falsely solid. These rendering fixes apply automatically.
 
-Most of it needs no code change. Dashes now render identically whether a path is billboarded or flat, stay evenly spaced on paths with elevation, keep their phase on long paths at high zoom, and no longer alias into moire or read as solid when a dash period approaches a pixel.
+Two opt-in controls define the intended pattern. `dashMode: 'path'` runs phase continuously along the complete path, so the pattern is independent of source-vertex density and remains stable when geometry is simplified or resampled. `dashUnits` makes pattern lengths proportional to the stroke, fixed in screen pixels, measured in meters, or expressed in deck.gl common-space units. Existing `dashJustified`, `dashGapPickable`, and `getOffset` compose with those controls for endpoint fitting, whole-object interaction, and parallel strokes from a shared centerline.
 
-Two new options change what a dash is measured against:
-
-- `dashMode: 'path'` runs the pattern continuously from the start of each path instead of restarting it at every vertex. Densely sampled geometry now renders a continuous dash pattern across segment boundaries. `highPrecisionDash` becomes a deprecated alias for it.
-- `dashUnits` selects what `getDashArray` is measured in. `'pixels'` holds a dash at a fixed size on screen even when `widthUnits: 'meters'` makes the stroke itself scale with zoom.
+`highPrecisionDash` remains available as a deprecated alias for `dashMode: 'path'`.
 
 ### Core Performance
 

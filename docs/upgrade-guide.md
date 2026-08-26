@@ -13,9 +13,11 @@ new PathStyleExtension({highPrecisionDash: true})
 new PathStyleExtension({dashMode: 'path'})
 ```
 
-Several dash rendering defects were fixed. See [PathStyleExtension dash troubleshooting](./api-reference/extensions/path-style-extension.md#which-problem-am-i-having) for the affected cases.
+Several rendering defects are fixed automatically; no code change is required. Billboard scaling, 3D arclength, long-path phase, dash phase on offset strokes, short justified runs, and fine-pattern coverage can change pixels while preserving the intended style. Applications that compare stored images should regenerate affected screenshots after upgrading.
 
-`getDashArray` is unchanged. Its documentation now correctly states that values are relative to *half* the stroke width; `[4, 5]` on a 10 pixel stroke draws a 20 pixel dash and a 25 pixel gap.
+`getDashArray` is unchanged. Its documentation now correctly states that values are relative to *half* the stroke width: `[4, 5]` on a 10-pixel stroke draws a 20-pixel dash and a 25-pixel gap.
+
+See [PathStyleExtension migration and troubleshooting](./api-reference/extensions/path-style-extension.md#migration-and-troubleshooting) for symptom-specific guidance.
 
 ### pydeck lighting
 

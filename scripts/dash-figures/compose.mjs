@@ -195,13 +195,13 @@ async function buildFigures(options) {
         'Ticks mark the joints. Rows: segment; segment + justified; path; path + justified.',
         {height: SUBCAPTION_HEIGHT, size: 13, weight: 400, tone: '#555555'}
       ),
-      await createPanel(getGoldenPath('path-dash-figure-modes'))
+      await createPanel(getGoldenPath('path-dash-mode-combinations'))
     ],
 
     'path-style-dash-density': async () => [
       await createCaption('dashMode and vertex density'),
       await createCaption(
-        'The same straight line drawn from 1, 2, 4, 12, 40 and 120 vertices, top to bottom.',
+        'The same straight line drawn from 1, 2, 4, 12, 40 and 120 segments, top to bottom.',
         {height: SUBCAPTION_HEIGHT, size: 13, weight: 400, tone: '#555555'}
       ),
       await createCaption("dashMode: 'segment' — the last two rows have no gaps left to draw", {
