@@ -385,7 +385,6 @@ export default function App({
           placement="top"
           offset={14}
           closeButton
-          closeOnClickOutside
           onOpenChange={isOpen => !isOpen && setSelectedAsset(null)}
           style={{pointerEvents: 'auto', boxShadow: '0 8px 28px rgba(0, 0, 0, 0.35)'}}
         />
