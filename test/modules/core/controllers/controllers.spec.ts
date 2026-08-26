@@ -13,6 +13,7 @@ import {
   _GlobeView as GlobeView
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import testController, {createTestController} from './test-controller';
 
@@ -494,6 +495,118 @@ test('GlobeController falls back to center zoom when the pointer is off the glob
   expect(controller.props.longitude, 'off-globe zoom preserves longitude').toBeCloseTo(0);
   expect(controller.props.latitude, 'off-globe zoom preserves latitude').toBeCloseTo(0);
   expect(controller.props.zoom, 'off-globe zoom still changes scale').not.toBeCloseTo(1);
+});
+
+test('GlobeController keeps pointer zoom stable when the anchor crosses a pole', () => {
+  for (const latitude of [-75, 75]) {
+    const controller = createTestController({
+      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      initialViewState: {
+        width: 1280,
+        height: 720,
+        longitude: 0,
+        latitude,
+        zoom: 5,
+        minZoom: 0
+      }
+    });
+    const wheelEvent = makeWheelEvent();
+    wheelEvent.offsetCenter = {x: 640, y: latitude > 0 ? 80 : 640};
+    wheelEvent.delta = -60;
+
+    let previousLongitude = controller.props.longitude;
+    for (let index = 0; index < 16; index++) {
+      controller.handleEvent(wheelEvent as any);
+      const longitudeDelta = ((controller.props.longitude - previousLongitude + 540) % 360) - 180;
+
+      expect(Math.abs(longitudeDelta), 'zoom does not spin across the pole').toBeLessThan(30);
+      expect(
+        Math.abs(controller.props.latitude),
+        'latitude stays below the north-up limit'
+      ).toBeLessThanOrEqual(MAX_LATITUDE);
+      previousLongitude = controller.props.longitude;
+    }
+  }
+});
+
+test('GlobeController keeps continuous pinch zoom stable across a pole', () => {
+  for (const latitude of [-75, 75]) {
+    const controller = createTestController({
+      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      initialViewState: {
+        width: 1280,
+        height: 720,
+        longitude: 0,
+        latitude,
+        zoom: 5,
+        minZoom: 0
+      }
+    });
+    const pointer = {x: 640, y: latitude > 0 ? 80 : 640};
+    const makePinchEvent = (type: string, scale: number) => ({
+      ...makeGestureEvent(type, pointer),
+      scale,
+      rotation: 0,
+      deltaTime: type === 'pinchstart' ? 0 : 16
+    });
+    controller.handleEvent(makePinchEvent('pinchstart', 1) as any);
+
+    const getEffectiveZoom = () =>
+      controller.props.zoom -
+      Math.log2(Math.PI * Math.cos((controller.props.latitude * Math.PI) / 180));
+    let previousLongitude = controller.props.longitude;
+    let previousLatitude = controller.props.latitude;
+    let previousEffectiveZoom = getEffectiveZoom();
+    for (let index = 1; index <= 24; index++) {
+      controller.handleEvent(makePinchEvent('pinchmove', Math.pow(0.85, index)) as any);
+      const longitudeDelta = ((controller.props.longitude - previousLongitude + 540) % 360) - 180;
+      const latitudeDelta = controller.props.latitude - previousLatitude;
+      const effectiveZoom = getEffectiveZoom();
+
+      expect(Math.abs(longitudeDelta), 'pinch does not spin across the pole').toBeLessThan(30);
+      expect(Math.abs(latitudeDelta), 'pinch does not jump across the globe').toBeLessThan(10);
+      expect(effectiveZoom, 'pinch-out scale does not reverse').toBeLessThanOrEqual(
+        previousEffectiveZoom
+      );
+      expect(
+        Math.abs(controller.props.latitude),
+        'pinch latitude stays below the north-up limit'
+      ).toBeLessThanOrEqual(MAX_LATITUDE);
+      previousLongitude = controller.props.longitude;
+      previousLatitude = controller.props.latitude;
+      previousEffectiveZoom = effectiveZoom;
+    }
+    controller.handleEvent(makePinchEvent('pinchend', Math.pow(0.85, 24)) as any);
+  }
+});
+
+test('GlobeController preserves pointer zoom in free rotation mode', () => {
+  const makeController = (zoomAround: 'pointer' | 'center') =>
+    createTestController({
+      view: new GlobeView({controller: {zoomAround}}),
+      initialViewState: {
+        width: 1280,
+        height: 720,
+        longitude: 0,
+        latitude: 90,
+        bearing: 45,
+        zoom: 5,
+        minZoom: 0
+      }
+    });
+  const pointerController = makeController('pointer');
+  const centerController = makeController('center');
+  const wheelEvent = makeWheelEvent();
+  wheelEvent.offsetCenter = {x: 840, y: 160};
+  wheelEvent.delta = -60;
+
+  pointerController.handleEvent(wheelEvent as any);
+  centerController.handleEvent(wheelEvent as any);
+
+  expect(
+    pointerController.props.longitude,
+    'free rotation keeps the requested pointer anchor'
+  ).not.toBeCloseTo(centerController.props.longitude);
 });
 
 test('GlobeController initializes multipan like pointer pan', () => {

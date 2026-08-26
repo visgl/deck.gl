@@ -10,6 +10,7 @@ import {mod} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
+const NORTH_UP_BEARING_THRESHOLD = 1;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
 // Where along the screen-pixel-to-globe-center distance ratio the anchored
@@ -19,6 +20,12 @@ export const GLOBE_RADIUS = 256;
 const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
 const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
 const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
+
+/** Returns whether a globe bearing uses the default north-up constraints. @internal */
+export function isGlobeNorthUp(bearing: number): boolean {
+  const normalizedBearing = mod(bearing + 180, 360) - 180;
+  return Math.abs(normalizedBearing) < NORTH_UP_BEARING_THRESHOLD;
+}
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -375,6 +382,14 @@ export default class GlobeViewport extends Viewport {
 
       const currentCoordinates = this.unproject(screenPosition);
       const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
+      const crossesPole =
+        Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90;
+      if (isGlobeNorthUp(this.bearing) && crossesPole) {
+        // A zoom gesture keeps its original geographic anchor. Once the
+        // pointer crosses a pole it can reappear in the opposite hemisphere,
+        // reversing longitude. Continue zooming around center in either case.
+        return {longitude: this.longitude, latitude: this.latitude};
+      }
       const longitude = this.longitude + longitudeDelta * anchorStrength;
       const latitude = Math.max(
         Math.min(this.latitude + (coordinates[1] - currentCoordinates[1]) * anchorStrength, 90),

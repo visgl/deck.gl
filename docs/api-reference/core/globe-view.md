@@ -77,7 +77,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
 
-When `bearing` is `0` (the default), north is always kept pointing up and the globe behaves like a traditional desk globe — horizontal drag changes longitude, vertical drag changes latitude, and the polar axis stays fixed. When the user changes the bearing (via shift+drag or right-click drag), the globe enters free rotation mode where bearing evolves naturally to avoid orientation discontinuities near the poles.
+When `bearing` is `0` (the default), north is always kept pointing up and the globe behaves like a traditional desk globe — horizontal drag changes longitude, vertical drag changes latitude, and the polar axis stays fixed. In this mode the controller constrains the viewport center to approximately `±85.05°` latitude so interactions cannot cross a pole and turn the globe upside down. When the user changes the bearing (via shift+drag or right-click drag), the globe enters free rotation mode where bearing evolves naturally to avoid orientation discontinuities near the poles.
 
 
 ## Controller
