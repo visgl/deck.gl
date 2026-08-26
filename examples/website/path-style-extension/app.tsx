@@ -35,7 +35,7 @@ type AssetDetail = {
 type AssetStyle = {
   widthMeters?: number;
   widthPixels?: number;
-  colorRole?: 'whiteMarking' | 'yellowMarking';
+  colorRole?: 'asphalt' | 'sidewalk' | 'curb' | 'pavementSymbol' | 'whiteMarking' | 'yellowMarking';
   dashMeters?: DashPattern;
   dashPixels?: DashPattern;
   dashMode?: 'path';
@@ -71,8 +71,7 @@ type SelectedAsset = {
 
 type Snapshot = {
   assets: {
-    roadSurfaces: StyledPathAsset[];
-    sidewalks: StyledPathAsset[];
+    surfacePaths: StyledPathAsset[];
     backgroundPaths: PathAsset[];
     laneBands: StyledPathAsset[];
     bikePanels: PolygonAsset[];
@@ -80,8 +79,7 @@ type Snapshot = {
     transversePolygons: PolygonAsset[];
     transversePaths: StyledPathAsset[];
     longitudinalMarkings: StyledPathAsset[];
-    curbs: PathAsset[];
-    symbols: PathAsset[];
+    detailPaths: StyledPathAsset[];
   };
 };
 
@@ -90,6 +88,7 @@ export const ROAD_STYLE = {
   vehicleLane: [90, 103, 111, 42] as Color,
   sidewalk: [183, 178, 165, 255] as Color,
   curb: [229, 222, 205, 220] as Color,
+  pavementSymbol: [232, 232, 218, 220] as Color,
   whiteMarking: [247, 244, 226, 245] as Color,
   yellowMarking: [244, 195, 73, 250] as Color,
   bikePanel: [42, 146, 99, 175] as Color
@@ -239,23 +238,12 @@ export default function App({
 
   const layers = [
     new PathLayer<StyledPathAsset>({
-      id: 'road-surfaces',
-      data: SNAPSHOT.assets.roadSurfaces,
+      id: 'context-surfaces',
+      data: SNAPSHOT.assets.surfacePaths,
       getPath: asset => asset.path,
       getWidth: asset => asset.style.widthMeters || 0,
       widthUnits: 'meters',
-      getColor: ROAD_STYLE.asphalt,
-      capRounded: false,
-      jointRounded: true,
-      ...interactiveProps
-    }),
-    new PathLayer<StyledPathAsset>({
-      id: 'sidewalks',
-      data: SNAPSHOT.assets.sidewalks,
-      getPath: asset => asset.path,
-      getWidth: asset => asset.style.widthMeters || 0,
-      widthUnits: 'meters',
-      getColor: ROAD_STYLE.sidewalk,
+      getColor: asset => ROAD_STYLE[asset.style.colorRole || 'asphalt'],
       capRounded: false,
       jointRounded: true,
       ...interactiveProps
@@ -349,30 +337,17 @@ export default function App({
       ...interactiveProps,
       extensions: [DASH_EXTENSION]
     }),
-    new PathLayer<PathAsset>({
-      id: 'curbs-and-separators',
-      data: SNAPSHOT.assets.curbs,
+    new PathLayer<StyledPathAsset>({
+      id: 'context-details',
+      data: SNAPSHOT.assets.detailPaths,
       getPath: asset => asset.path,
-      getWidth: 0.12,
+      getWidth: asset => asset.style.widthMeters || 0,
       widthUnits: 'meters',
-      widthMinPixels: 0.8,
+      widthMinPixels: 0.75,
       widthMaxPixels: 3,
       capRounded: true,
       jointRounded: true,
-      getColor: ROAD_STYLE.curb,
-      ...interactiveProps
-    }),
-    new PathLayer<PathAsset>({
-      id: 'pavement-symbols',
-      data: SNAPSHOT.assets.symbols,
-      getPath: asset => asset.path,
-      getWidth: 0.1,
-      widthUnits: 'meters',
-      widthMinPixels: 0.7,
-      widthMaxPixels: 3,
-      capRounded: true,
-      jointRounded: true,
-      getColor: [232, 232, 218, 220],
+      getColor: asset => ROAD_STYLE[asset.style.colorRole || 'curb'],
       ...interactiveProps
     })
   ];
