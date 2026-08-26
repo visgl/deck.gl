@@ -14,14 +14,14 @@ node /path/to/deck.gl/scripts/dash-figures/compose.mjs
 
 The capture script defaults to the exact `master` commit used to compose the checked-in figures.
 Pass another Git ref as its first argument only when intentionally updating that comparison. The
-three shader sources it temporarily replaces must be clean; they are restored on exit even when the
-render command fails or is interrupted.
+three implementation sources it temporarily replaces must be clean; they are restored on exit
+even when the render command fails or is interrupted.
 
 ## Inputs
 
 | Output | Render-test inputs |
 | --- | --- |
-| `path-style-dash-modes.png` | `path-dash-figure-modes` |
+| `path-style-dash-modes.png` | `path-dash-mode-combinations` |
 | `path-style-dash-density.png` | `path-dash-density-default`, `path-dash-density-mode-path` |
 | `path-style-dash-units.png` | `path-dash-units-z12`, `path-dash-units-z13`, `path-dash-units-z14` |
 | `path-style-dash-fixes.png` | Before and after panels for `path-dash-subpixel-square`, `path-dash-billboard-map-z14`, and `path-dash-3d-flat` |
