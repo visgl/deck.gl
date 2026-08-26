@@ -8,7 +8,6 @@ import {
   CompositeLayerProps,
   COORDINATE_SYSTEM,
   DefaultProps,
-  _GlobeViewport as GlobeViewport,
   Layer,
   LayersList,
   log,
@@ -256,7 +255,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       topRight = [bbox.right, bbox.top];
     }
     const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-    const isGlobe = viewport instanceof GlobeViewport;
+    const isGlobe = Boolean(viewport.resolution);
     const overlappedBounds = getOverlappedBounds(bounds, this.props.tileSize, isGlobe);
 
     const terrainPromise =
@@ -304,7 +303,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
-    const isGlobe = viewport instanceof GlobeViewport;
+    const isGlobe = Boolean(viewport.resolution);
     const boundingBox = mesh?.header?.boundingBox;
     const hasLngLatBounds =
       boundingBox &&
