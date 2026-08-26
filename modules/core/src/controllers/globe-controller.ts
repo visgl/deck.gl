@@ -11,7 +11,7 @@ import type {MapStateInternal} from './map-controller';
 import {CONSTRAINT_AROUND, type ConstraintAround} from './view-state';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
+import GlobeViewport, {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
 import {
   Globe,
   type CameraFrame,
@@ -299,6 +299,17 @@ export default class GlobeController extends Controller<MapState> {
   };
 
   dragMode: 'pan' | 'rotate' = 'pan';
+
+  protected getZoomPosition(position: [number, number]): [number, number] {
+    const zoomPosition = super.getZoomPosition(position);
+    const viewport = this.makeViewport(this.controllerState.getViewportProps()) as GlobeViewport;
+
+    if (viewport.getZoomAnchorStrength(zoomPosition) > 0) {
+      return zoomPosition;
+    }
+
+    return viewport.project([viewport.longitude, viewport.latitude]) as [number, number];
+  }
 
   // Ring buffer tracking globe position during pan for inertia velocity
   private _panHistory: Array<{longitude: number; latitude: number; timestamp: number}> = [];

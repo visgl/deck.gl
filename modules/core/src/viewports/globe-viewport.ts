@@ -258,6 +258,29 @@ export default class GlobeViewport extends Viewport {
     return Math.sqrt(Math.max(0, distanceToCenterSquared)) / radius;
   }
 
+  /**
+   * Returns how strongly a screen position should anchor zoom on the visible globe.
+   * A value of `0` means that the controller should fall back to center zoom.
+   * @param screenPosition - Screen position to evaluate.
+   * @returns Anchor strength from `0` to `1`.
+   */
+  getZoomAnchorStrength(screenPosition: number[]): number {
+    const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
+    if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+      return 0;
+    }
+
+    const edgeProgress = Math.max(
+      0,
+      Math.min(
+        1,
+        (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
+          (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+      )
+    );
+    return 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
+  }
+
   unproject(
     xyz: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
@@ -345,21 +368,12 @@ export default class GlobeViewport extends Viewport {
     dragStartPosition?: number[]
   ): GlobeViewportOptions {
     if (!dragStartPosition) {
-      const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
-      if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+      const anchorStrength = this.getZoomAnchorStrength(screenPosition);
+      if (anchorStrength === 0) {
         return {longitude: this.longitude, latitude: this.latitude};
       }
 
       const currentCoordinates = this.unproject(screenPosition);
-      const edgeProgress = Math.max(
-        0,
-        Math.min(
-          1,
-          (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
-            (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
-        )
-      );
-      const anchorStrength = 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
       const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
       const longitude = this.longitude + longitudeDelta * anchorStrength;
       const latitude = Math.max(
