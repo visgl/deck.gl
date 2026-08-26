@@ -284,6 +284,40 @@ function createPathVariantsCase(name: string, layerProperties: Record<string, an
   };
 }
 
+/** Vertical spacing for comparing mode combinations on one unevenly divided path. */
+const MODE_COMBINATION_ROW_SPACING = 96;
+
+/** Unequal segment lengths that include runs shorter than the configured dash period. */
+const MODE_COMBINATION_SEGMENT_LENGTHS = [260, 90, 210, 160];
+
+const DASH_MODE_COMBINATIONS: {
+  dashMode: 'segment' | 'path';
+  dashJustified: boolean;
+}[] = [
+  {dashMode: 'segment', dashJustified: false},
+  {dashMode: 'segment', dashJustified: true},
+  {dashMode: 'path', dashJustified: false},
+  {dashMode: 'path', dashJustified: true}
+];
+
+function createUnevenPath(verticalPosition: number): number[][] {
+  const path: number[][] = [];
+  let horizontalPosition = -STRIP_LENGTH / 2;
+  path.push([horizontalPosition, verticalPosition]);
+  for (const segmentLength of MODE_COMBINATION_SEGMENT_LENGTHS) {
+    horizontalPosition += segmentLength;
+    path.push([horizontalPosition, verticalPosition]);
+  }
+  return path;
+}
+
+function getModeCombinationVerticalPosition(index: number): number {
+  return (
+    -((DASH_MODE_COMBINATIONS.length - 1) * MODE_COMBINATION_ROW_SPACING) / 2 +
+    index * MODE_COMBINATION_ROW_SPACING
+  );
+}
+
 /** Vertical gap between the flat and billboard copies of a parity pair, in world units. */
 const PARITY_OFFSET = 16;
 
@@ -362,6 +396,44 @@ const testCases: TestCase[] = [
     dashJustified: true,
     extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
+  {
+    // Compare the complete dashMode x dashJustified state space on identical geometry.
+    // Unequal segments and joint markers make each phase domain visibly distinct.
+    name: 'path-dash-mode-combinations',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: [
+      ...DASH_MODE_COMBINATIONS.map(
+        ({dashMode, dashJustified}, index) =>
+          new PathLayer({
+            id: `mode-combinations-${dashMode}-${dashJustified}`,
+            data: [createUnevenPath(getModeCombinationVerticalPosition(index))],
+            ...CARTESIAN,
+            // One dash unit is half the 14px stroke width, yielding a 63px period.
+            getWidth: 14,
+            getDashArray: [5, 4],
+            dashJustified,
+            extensions: [new PathStyleExtension({dashMode})]
+          })
+      ),
+      new PathLayer({
+        id: 'mode-combinations-joints',
+        data: DASH_MODE_COMBINATIONS.flatMap((_, index) => {
+          const verticalPosition = getModeCombinationVerticalPosition(index);
+          return createUnevenPath(verticalPosition).map(([horizontalPosition]) => [
+            [horizontalPosition, verticalPosition - 22],
+            [horizontalPosition, verticalPosition + 22]
+          ]);
+        }),
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: (path: number[][]) => path,
+        widthUnits: 'pixels' as const,
+        getWidth: 1.5,
+        getColor: [90, 90, 90]
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-dash-mode-combinations.png'
+  },
 
   // ---------------------------------------------------------------------------------------
   // Dash arrays, from long dashes down to sub-pixel periods
