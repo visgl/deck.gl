@@ -11,7 +11,7 @@ import type {MapStateInternal} from './map-controller';
 import {CONSTRAINT_AROUND, type ConstraintAround} from './view-state';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {zoomAdjust, GLOBE_RADIUS, isGlobeNorthUp} from '../viewports/globe-viewport';
+import GlobeViewport, {zoomAdjust, GLOBE_RADIUS, isGlobeNorthUp} from '../viewports/globe-viewport';
 import {
   Globe,
   type CameraFrame,
@@ -161,11 +161,21 @@ class GlobeState extends MapState {
     props.zoom = this._constrainZoom(props.zoom, props);
 
     if (constraintAround) {
-      const viewport = this.makeViewport(props);
-      Object.assign(
-        props,
-        viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
-      );
+      const viewport = this.makeViewport(props) as GlobeViewport;
+      const anchorStrength = viewport.getZoomAnchorStrength(constraintAround.screenPosition);
+      if (anchorStrength > 0) {
+        const currentCoordinates = viewport.unproject(constraintAround.screenPosition);
+        const cameraFrame = Globe.cameraFrame(props.longitude, props.latitude, props.bearing || 0);
+        const rotatedFrame = Globe.rotateFrameToMatch(
+          cameraFrame,
+          [currentCoordinates[0], currentCoordinates[1]],
+          [constraintAround.position[0], constraintAround.position[1]],
+          anchorStrength
+        );
+        props.longitude = rotatedFrame.longitude;
+        props.latitude = rotatedFrame.latitude;
+        props.bearing = rotatedFrame.bearing;
+      }
     }
 
     if (props.longitude < -180 || props.longitude > 180) {

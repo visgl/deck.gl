@@ -13,12 +13,9 @@ const RADIANS_TO_DEGREES = 180 / Math.PI;
 const NORTH_UP_BEARING_THRESHOLD = 1;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
-// Where along the screen-pixel-to-globe-center distance ratio the anchored
-// zoom starts losing strength. Below this ratio the anchor uses full correction; from
-// here to the limb (ratio = 1) the anchor blends toward MIN_STRENGTH so a
-// near-edge pixel doesn't snap the camera across the globe.
+// Pointer correction depends on distance from the screen-space limb, not latitude.
+// Smoothly release edge and off-globe anchors so they converge to center without a snap.
 const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
-const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
 const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
 
 /** Returns whether a globe bearing uses the default north-up constraints. @internal */
@@ -273,7 +270,7 @@ export default class GlobeViewport extends Viewport {
    */
   getZoomAnchorStrength(screenPosition: number[]): number {
     const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
-    if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+    if (distanceRatio >= GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
       return 0;
     }
 
@@ -282,10 +279,11 @@ export default class GlobeViewport extends Viewport {
       Math.min(
         1,
         (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
-          (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+          (GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
       )
     );
-    return 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
+    const smoothProgress = edgeProgress * edgeProgress * (3 - 2 * edgeProgress);
+    return 1 - smoothProgress;
   }
 
   unproject(
