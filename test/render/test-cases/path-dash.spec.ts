@@ -608,6 +608,26 @@ const testCases: TestCase[] = [
     ),
     goldenImage: './test/render/golden-images/path-dash-offset.png'
   },
+  {
+    // The case above uses segment-local phase, where vDashOffset is zero. Only a
+    // continuous phase can expose drift introduced when offset geometry widens the stroke.
+    name: 'path-dash-offset-mode-path',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-mode-path',
+      // Four segments provide three joints where a phase discontinuity can appear.
+      // highPrecisionDash is intentionally used because it is the continuous-path spelling
+      // available before this stack adds dashMode. Increasing offsets make the defect visible.
+      [0, 2, 4, 8].map((offset, index) => ({
+        data: [createStraightPath(4, getStripY(index, 4))],
+        getDashArray: [4, 5],
+        getOffset: offset,
+        extensions: [new PathStyleExtension({highPrecisionDash: true, offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-mode-path.png'
+  },
 
   // ---------------------------------------------------------------------------------------
   // Resolution: the same content supersampled, to catch aliasing in the dash test
