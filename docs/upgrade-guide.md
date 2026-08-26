@@ -13,9 +13,9 @@ new PathStyleExtension({highPrecisionDash: true})
 new PathStyleExtension({dashMode: 'path'})
 ```
 
-Dashed output changes slightly for some layers even without a code change, because several defects were fixed. Expect visual differences if you render dashes that are billboarded, that follow paths with a Z component, that use `getOffset`, or whose period approaches a pixel on screen. In every case the new output is the intended one; if you compare against stored screenshots, they will need regenerating.
+Several dash rendering defects were fixed. See [PathStyleExtension dash troubleshooting](./api-reference/extensions/path-style-extension.md#which-problem-am-i-having) for the affected cases.
 
-`getDashArray` is unchanged, but its documentation was wrong: the values are relative to *half* the stroke width, not the full width. `[4, 5]` on a 10 pixel stroke has always drawn a 20 pixel dash and a 25 pixel gap.
+`getDashArray` is unchanged. Its documentation now correctly states that values are relative to *half* the stroke width; `[4, 5]` on a 10 pixel stroke draws a 20 pixel dash and a 25 pixel gap.
 
 ### pydeck lighting
 

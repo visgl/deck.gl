@@ -14,11 +14,11 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) has had a substantial repair and two additions.
 
-Most of it needs no code change. Dashes now render identically whether a path is billboarded or flat, stay evenly spaced on paths with elevation, keep their phase on long paths at high zoom, and no longer alias into moire or read as solid when a dash period approaches a pixel — coverage is prefiltered rather than tested once per fragment.
+Most of it needs no code change. Dashes now render identically whether a path is billboarded or flat, stay evenly spaced on paths with elevation, keep their phase on long paths at high zoom, and no longer alias into moire or read as solid when a dash period approaches a pixel.
 
 Two new options change what a dash is measured against:
 
-- `dashMode: 'path'` runs the pattern continuously from the start of each path instead of restarting it at every vertex. Densely sampled geometry — GPS traces, generalized coastlines, circles built from short chords — previously rendered as solid lines, because no gap ever fell inside a segment. `highPrecisionDash` becomes a deprecated alias for it.
+- `dashMode: 'path'` runs the pattern continuously from the start of each path instead of restarting it at every vertex. Densely sampled geometry now renders a continuous dash pattern across segment boundaries. `highPrecisionDash` becomes a deprecated alias for it.
 - `dashUnits` selects what `getDashArray` is measured in. `'pixels'` holds a dash at a fixed size on screen even when `widthUnits: 'meters'` makes the stroke itself scale with zoom.
 
 ### Core Performance
