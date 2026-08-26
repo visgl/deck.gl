@@ -17,6 +17,21 @@ import {PathStyleExtension} from '@deck.gl/extensions';
 // Use the `scene` control to switch to the four-path 3D elevation fixture from the render
 // matrix. At pitch 0 its orthographic MapView gives every path identical screen geometry;
 // drag to pitch or rotate the view to inspect the actual climbs from different angles.
+//
+// What each control is for:
+//
+// - `scene`         '3D elevation' reproduces the 0, 300, 720 and 900 meter golden fixture.
+// - `dash mode`     'segment' restarts the pattern at every vertex, so the 20 and 120
+//                   segment rows collapse to solid lines. 'path' should make all rows match.
+// - `dash units`    Set `width units` to 'meters' first, then zoom: 'widths' rows grow with
+//                   the stroke, while 'pixels' rows hold their size on screen.
+// - `billboard`     'both' draws a red flat copy and a blue billboarded one of every row.
+//                   They stay aligned on flat geometry; pitch and elevation make their
+//                   extrusion geometrically different.
+// - `justified`     Dashes finish cleanly at each end of the active run: per segment in
+//                   'segment' mode and across the complete path in 'path' mode.
+// - `dash/gap size` Drag toward the bottom of the range to reach subpixel periods, where
+//                   the stroke should fade to an even tone rather than shimmer.
 
 const MAP_CENTER = [-122.4, 37.78];
 const MATRIX_INITIAL_VIEW_STATE = {

@@ -19,25 +19,9 @@ import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
  * indistinguishable. Cases are laid out as horizontal strips stacked vertically, following
  * the `OrthographicView` convention already used by `path-layer.spec.ts`.
  *
- * IMPORTANT: the golden images committed alongside this file record how dashing behaves
- * *today*, defects included. They are a baseline to diff future work against, not a
- * statement of desired output. Measured from these goldens, with `getDashArray: [4, 5]`:
- *
- * - `path-dash-density-default`: the 1, 2 and 4 segment strips dash correctly at a 43.4px
- *   period; the 12 segment strip drifts to 55.4px; the 40 and 120 segment strips render
- *   **fully solid**. All six draw the identical straight line. Dash phase restarts at every
- *   vertex, so once a segment is shorter than one dash period nothing is ever discarded.
- * - `path-dash-density-justified`: same collapse to solid - justification is also computed
- *   per segment, so it does not rescue dense polylines.
- * - `path-dash-density-high-precision`: all six strips identical and correct. The
- *   continuous-arclength mechanism works; it is simply opt-in.
- * - `path-dash-billboard-map-z14`: flat dashes at a 34.8px period (correct for an 8px
- *   stroke); the billboard copy of the same geometry renders **solid** when dense and at a
- *   52.0px period - 1.5x too long - when sparse. `billboard: true` combined with
- *   `highPrecisionDash` is broken.
- * - `path-dash-3d-*`: every row has identical screen geometry under an orthographic
- *   `MapView`, but dash phase jumps at segment joints as elevation increases because the CPU
- *   accumulates 3D distance while the shader coordinate measures 2D.
+ * This matrix was introduced at the bottom of the dash stack as an intentional record of
+ * the old defects. Each behavior layer updates or adds the goldens it owns, so at any stack
+ * position the committed images describe the behavior implemented at that position.
  */
 
 const STRIP_LENGTH = 720;

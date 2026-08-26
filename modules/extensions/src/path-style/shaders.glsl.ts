@@ -2,6 +2,23 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+/**
+ * Dash shader injections for PathLayer, ScatterplotLayer and TextBackgroundLayer.
+ *
+ * PathLayer dash math crosses three coordinate spaces:
+ *
+ * 1. **Common space** — `getDashOffsets` accumulates distance along a path on the CPU,
+ *    and `instanceDashOffsets` carries it to the shader.
+ * 2. **Screen pixels** — the common basis for reconciling flat and billboard extrusion.
+ *    At the dash injection point, `width` is in common units for a flat path but pixels for
+ *    a billboarded path, whose conversion also includes `project.focalDistance`.
+ *    `dashWidthPixels` is correct in both branches.
+ * 3. **Half-widths along the path** — the units of `vPathPosition.y`, tested by the fragment
+ *    shader. One unit spans `dashWidthPixels` screen pixels.
+ *
+ * Convert explicitly whenever a value crosses these spaces. Mixing them directly makes dash
+ * period or phase depend on billboard, elevation, or offset configuration.
+ */
 export type Defines = {
   // Defines passed externally
   /**
