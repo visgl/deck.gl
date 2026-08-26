@@ -58,7 +58,7 @@ const layer = new PolygonLayer({
 | Intent | Extension options | Layer properties |
 | --- | --- | --- |
 | Planned, uncertain, or hidden route | `{dashMode: 'path'}` | `dashUnits: 'pixels'` |
-| Physical lane marks, sleepers, or measured intervals | `{dashMode: 'path'}` | `dashUnits: 'meters'` |
+| Physical lane marks, railway ties, or measured intervals | `{dashMode: 'path'}` | `dashUnits: 'meters'` |
 | Patterned edges whose vertices are intentional boundaries | `{dashMode: 'segment'}` | `dashJustified: true` |
 | One pattern fitted across a complete route | `{dashMode: 'path'}` | `dashJustified: true` |
 | Parallel rails, lanes, shoulders, or casings | `{offset: true}` | `getOffset` |
