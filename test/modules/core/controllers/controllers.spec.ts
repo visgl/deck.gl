@@ -442,6 +442,31 @@ test('Controller defaults zoomAround to pointer', () => {
   );
 });
 
+test('Controller center zoom preserves the padded viewport center', () => {
+  const view = new MapView({
+    controller: {zoomAround: 'center'},
+    padding: {left: 40, right: 0, top: 10, bottom: 30}
+  });
+  const controller = createTestController({
+    view,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const viewport = view.makeViewport({
+    width: controller.props.width,
+    height: controller.props.height,
+    viewState: controller.props
+  })!;
+
+  const paddedCenter = viewport.project([0, 0]);
+  expect(paddedCenter[0], 'padding offsets the semantic center horizontally').toBeCloseTo(70);
+  expect(paddedCenter[1], 'padding offsets the semantic center vertically').toBeCloseTo(40);
+
+  controller.handleEvent(makeWheelEvent() as any);
+
+  expect(controller.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+  expect(controller.props.latitude, 'center zoom preserves latitude').toBeCloseTo(0);
+});
+
 test('Controller applies updated zoomAround option without recreating the view', () => {
   const controller = createTestController({
     view: new MapView({controller: {zoomAround: 'center'}}),
