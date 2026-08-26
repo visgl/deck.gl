@@ -20,66 +20,48 @@ type Position = [longitude: number, latitude: number];
 type DashPattern = [dash: number, gap: number];
 export type MeasurementMode = 'physical' | 'screen';
 
-type GeoJsonGeometry = {
-  type: 'Point' | 'LineString' | 'MultiLineString';
-  coordinates: Position | Position[] | Position[][];
-};
-
-type GeoJsonFeature = {
-  type: 'Feature';
-  geometry: GeoJsonGeometry;
-  properties: Record<string, string | number | null>;
-};
-
-type FeatureCollection = {
-  type: 'FeatureCollection';
-  features: GeoJsonFeature[];
-};
-
 type SourceRef = {
   provider: string;
-  itemId: string;
-  layerId: number;
   layerName: string;
   objectId: string | number;
+  url: string;
+};
+
+type AssetDetail = {
+  label: string;
+  value: string | number;
+};
+
+type AssetStyle = {
+  widthMeters?: number;
+  widthPixels?: number;
+  colorRole?: 'whiteMarking' | 'yellowMarking';
+  dashMeters?: DashPattern;
+  dashPixels?: DashPattern;
+  dashMode?: 'path';
+  dashJustified?: boolean;
+  dashGapPickable?: boolean;
+  offset?: number;
 };
 
 type InspectableAsset = {
   id: string;
   label: string;
   source: SourceRef[];
-  properties: Record<string, string | number | null>;
-  derived: boolean;
-  derivation?: {
-    operation: string;
-    parameters: Record<string, string | number | boolean | null>;
-    representation: string;
-  };
-  renderDetails?: Record<string, string | number | boolean>;
+  details: AssetDetail[];
+  style?: AssetStyle;
 };
 
-type SourcePath = InspectableAsset & {
+type PathAsset = InspectableAsset & {
   path: Position[];
 };
 
-type SourcePolygon = InspectableAsset & {
+type StyledPathAsset = PathAsset & {
+  style: AssetStyle;
+};
+
+type PolygonAsset = InspectableAsset & {
   polygon: Position[];
-};
-
-type LaneBand = InspectableAsset & {
-  path: Position[];
-  widthMeters: number;
-  offsetWidths: number;
-  kind: 'vehicle';
-};
-
-type CrosswalkGuide = InspectableAsset & {
-  path: Position[];
-  widthMeters: number;
-  dashMeters: DashPattern;
-  dashPixels: DashPattern;
-  justified: boolean;
-  transverseMarkingObjectIds: Array<string | number>;
 };
 
 type SelectedAsset = {
@@ -88,12 +70,18 @@ type SelectedAsset = {
 };
 
 type Snapshot = {
-  generatedAt: string;
-  layers: Record<string, FeatureCollection>;
-  derived: {
-    laneBands: LaneBand[];
-    crosswalkGuides: CrosswalkGuide[];
-    symbolPaths: SourcePath[];
+  assets: {
+    roadSurfaces: StyledPathAsset[];
+    sidewalks: StyledPathAsset[];
+    backgroundPaths: PathAsset[];
+    laneBands: StyledPathAsset[];
+    bikePanels: PolygonAsset[];
+    crosswalks: StyledPathAsset[];
+    transversePolygons: PolygonAsset[];
+    transversePaths: StyledPathAsset[];
+    longitudinalMarkings: StyledPathAsset[];
+    curbs: PathAsset[];
+    symbols: PathAsset[];
   };
 };
 
@@ -125,162 +113,15 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 const SNAPSHOT = ROAD_DIAGRAM_DATA as unknown as Snapshot;
-const FEET_TO_METERS = 0.3048;
-const INCHES_TO_METERS = 0.0254;
-const DEFAULT_MARKING_WIDTH_METERS = 0.15;
-const DEFAULT_MARKING_WIDTH_PIXELS = 2;
-const SEATTLE_SERVICE_ROOT = 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services';
+const CROSSWALK_STYLE = SNAPSHOT.assets.crosswalks[0].style;
+const LONGITUDINAL_STYLE = SNAPSHOT.assets.longitudinalMarkings[0].style;
 
-const SOURCE_SERVICE_URLS: Record<string, string> = {
-  e7c54ba0f1b24128a9cb2a95912a5194: `${SEATTLE_SERVICE_ROOT}/SDOT_Channelization_view/FeatureServer`,
-  f91318f1cc43489fb0e7aca2fde22899: `${SEATTLE_SERVICE_ROOT}/Seattle_Streets_1/FeatureServer`,
-  '20abc2269f6f4283a53cf31b93de718f': `${SEATTLE_SERVICE_ROOT}/Sidewalks_CDL/FeatureServer`,
-  '53635945962e42b9a1f4473557176861': `${SEATTLE_SERVICE_ROOT}/Marked_Crosswalks_CDL/FeatureServer`,
-  bf36bd11b499489d8cc1d491b72eb712: `${SEATTLE_SERVICE_ROOT}/SDOT_Bike_Facilities/FeatureServer`
-};
-
-const DASH_EXTENSION = new PathStyleExtension({dashMode: 'path'});
+const DASH_EXTENSION = new PathStyleExtension({dashMode: LONGITUDINAL_STYLE.dashMode});
 const OFFSET_EXTENSION = new PathStyleExtension({offset: true});
-const CROSSWALK_EXTENSION = new PathStyleExtension({dash: true, dashMode: 'path'});
-
-const SOURCE_METADATA: Record<string, {layerName: string; itemId: string; layerId: number}> = {
-  verticalElements: {
-    layerName: 'VerticalElements',
-    itemId: 'e7c54ba0f1b24128a9cb2a95912a5194',
-    layerId: 0
-  },
-  background: {
-    layerName: 'GENBKGRND',
-    itemId: 'e7c54ba0f1b24128a9cb2a95912a5194',
-    layerId: 2
-  },
-  panelMarkings: {
-    layerName: 'PanelMarkings',
-    itemId: 'e7c54ba0f1b24128a9cb2a95912a5194',
-    layerId: 3
-  },
-  longitudinalMarkings: {
-    layerName: 'Longitudinal_Markings',
-    itemId: 'e7c54ba0f1b24128a9cb2a95912a5194',
-    layerId: 4
-  },
-  transverseMarkings: {
-    layerName: 'TransverseMarkings',
-    itemId: 'e7c54ba0f1b24128a9cb2a95912a5194',
-    layerId: 5
-  },
-  symbols: {
-    layerName: 'Legend_and_Symbols',
-    itemId: 'e7c54ba0f1b24128a9cb2a95912a5194',
-    layerId: 6
-  },
-  streets: {
-    layerName: 'Seattle Streets',
-    itemId: 'f91318f1cc43489fb0e7aca2fde22899',
-    layerId: 0
-  },
-  sidewalks: {
-    layerName: 'Sidewalks',
-    itemId: '20abc2269f6f4283a53cf31b93de718f',
-    layerId: 0
-  }
-};
-
-function getSourceReference(layerKey: string, feature: GeoJsonFeature): SourceRef {
-  const metadata = SOURCE_METADATA[layerKey];
-  return {
-    provider: 'City of Seattle Department of Transportation',
-    itemId: metadata.itemId,
-    layerId: metadata.layerId,
-    layerName: metadata.layerName,
-    objectId: feature.properties.OBJECTID as string | number
-  };
-}
-
-function getLinePaths(geometry: GeoJsonGeometry): Position[][] {
-  if (geometry.type === 'LineString') {
-    return [geometry.coordinates as Position[]];
-  }
-  if (geometry.type === 'MultiLineString') {
-    return geometry.coordinates as Position[][];
-  }
-  return [];
-}
-
-function createSourcePaths(layerKey: string, label: string): SourcePath[] {
-  return SNAPSHOT.layers[layerKey].features.flatMap(feature =>
-    getLinePaths(feature.geometry).map((path, pathIndex) => ({
-      id: `${layerKey}-${feature.properties.OBJECTID}-${pathIndex}`,
-      label,
-      path,
-      source: [getSourceReference(layerKey, feature)],
-      properties: feature.properties,
-      derived: false
-    }))
-  );
-}
-
-function isClosedPath(path: Position[]): boolean {
-  const first = path[0];
-  const last = path.at(-1);
-  return Boolean(path.length >= 4 && last && first[0] === last[0] && first[1] === last[1]);
-}
-
-function getPathLengthMeters(path: Position[]): number {
-  let lengthMeters = 0;
-  for (let index = 1; index < path.length; index++) {
-    const start = path[index - 1];
-    const end = path[index];
-    const latitudeRadians = (((start[1] + end[1]) / 2) * Math.PI) / 180;
-    const x = (end[0] - start[0]) * 111320 * Math.cos(latitudeRadians);
-    const y = (end[1] - start[1]) * 110540;
-    lengthMeters += Math.hypot(x, y);
-  }
-  return lengthMeters;
-}
-
-function getSidewalkWidthMeters(asset: SourcePath): number {
-  return Math.max(1.5, Number(asset.properties.SW_WIDTH || 72) * INCHES_TO_METERS);
-}
-
-function createSourcePolygons(layerKey: string, label: string): SourcePolygon[] {
-  return createSourcePaths(layerKey, label)
-    .filter(asset => isClosedPath(asset.path))
-    .map(asset => ({...asset, polygon: asset.path}));
-}
-
-export function parseDashPattern(value: string | number | null): DashPattern {
-  if (!value || /^solid$/i.test(String(value).trim())) {
-    return [0, 0];
-  }
-  const match = String(value)
-    .trim()
-    .match(/^(\d+(?:\.\d+)?)'\s*(?:dash)?\s*[,/]?\s*(\d+(?:\.\d+)?)'\s*(?:skip|pattern)$/i);
-  if (!match) {
-    return [0, 0];
-  }
-  return [Number(match[1]) * FEET_TO_METERS, Number(match[2]) * FEET_TO_METERS];
-}
-
-function getScreenDashPattern(pattern: DashPattern): DashPattern {
-  if (!pattern[0] || !pattern[1]) {
-    return [0, 0];
-  }
-  const dashPixels = pattern[0] <= 0.7 ? 4 : 6;
-  return [dashPixels, dashPixels * (pattern[1] / pattern[0])];
-}
-
-function parseMarkingWidth(value: string | number | null): number | null {
-  if (typeof value === 'number' && value > 0) {
-    return value * INCHES_TO_METERS;
-  }
-  const match = String(value || '').match(/^(\d+(?:\.\d+)?)\s*(?:"|in)$/i);
-  return match ? Number(match[1]) * INCHES_TO_METERS : null;
-}
-
-function getMarkingColor(asset: SourcePath): Color {
-  return asset.properties.Color === 'Yellow' ? ROAD_STYLE.yellowMarking : ROAD_STYLE.whiteMarking;
-}
+const CROSSWALK_EXTENSION = new PathStyleExtension({
+  dash: true,
+  dashMode: CROSSWALK_STYLE.dashMode
+});
 
 function escapeHtml(value: unknown): string {
   return String(value)
@@ -291,20 +132,18 @@ function escapeHtml(value: unknown): string {
     .replaceAll("'", '&#039;');
 }
 
-function getSourceUrl(reference: SourceRef): string {
-  const serviceUrl = SOURCE_SERVICE_URLS[reference.itemId];
-  if (serviceUrl) {
-    return `${serviceUrl}/${reference.layerId}/${encodeURIComponent(reference.objectId)}`;
-  }
-  return `https://www.arcgis.com/home/item.html?id=${encodeURIComponent(reference.itemId)}`;
-}
-
-function isCrosswalkGuide(asset: InspectableAsset): asset is CrosswalkGuide {
-  return 'dashMeters' in asset;
-}
-
 function scaleDashPattern(pattern: DashPattern, dashScale: number): DashPattern {
   return pattern.map(value => value * dashScale) as DashPattern;
+}
+
+function getDashPattern(
+  asset: InspectableAsset,
+  measurementMode: MeasurementMode,
+  dashScale: number
+): DashPattern {
+  const pattern =
+    measurementMode === 'physical' ? asset.style?.dashMeters : asset.style?.dashPixels;
+  return scaleDashPattern(pattern || [0, 0], dashScale);
 }
 
 function hasDashPattern(pattern: DashPattern): boolean {
@@ -322,56 +161,41 @@ function createPopupHtml(
   measurementMode: MeasurementMode,
   dashScale: number
 ): string {
-  const detailRows: Array<[string, string | number | null | undefined]> = [
-    ['Type', asset.properties.Type || asset.properties.MARKING_TYPE],
-    ['Color', asset.properties.Color],
-    ['Width', asset.properties.Width],
-    ['Material', asset.properties.Material]
-  ];
-
-  let extensionUsage = '';
-  if (isCrosswalkGuide(asset)) {
-    const sourcePattern = measurementMode === 'physical' ? asset.dashMeters : asset.dashPixels;
-    extensionUsage = `${formatDashPattern(
-      scaleDashPattern(sourcePattern, dashScale),
-      measurementMode
-    )} · justified`;
-  } else {
-    const sourcePattern = parseDashPattern(asset.properties.Type);
-    const pattern =
-      measurementMode === 'physical' ? sourcePattern : getScreenDashPattern(sourcePattern);
-    if (hasDashPattern(pattern)) {
-      extensionUsage = `${formatDashPattern(
-        scaleDashPattern(pattern, dashScale),
-        measurementMode
-      )} · continuous · gaps pickable`;
+  const pattern = getDashPattern(asset, measurementMode, dashScale);
+  const extensionDetails: string[] = [];
+  if (hasDashPattern(pattern)) {
+    extensionDetails.push(formatDashPattern(pattern, measurementMode));
+    if (asset.style?.dashJustified) {
+      extensionDetails.push('justified');
+    } else if (asset.style?.dashMode === 'path') {
+      extensionDetails.push('continuous');
     }
+    if (asset.style?.dashGapPickable) {
+      extensionDetails.push('gaps pickable');
+    }
+  } else if (asset.style?.offset !== undefined) {
+    const offset = asset.style.offset;
+    extensionDetails.push(`Offset ${offset > 0 ? '+' : ''}${offset}× path width`);
   }
 
-  if (!extensionUsage && asset.renderDetails?.offset !== undefined) {
-    const offset = Number(asset.renderDetails.offset);
-    extensionUsage = `Offset ${offset > 0 ? '+' : ''}${offset}× path width`;
-  }
-
-  const details = detailRows
-    .filter(([, value]) => value !== null && value !== undefined && value !== '')
+  const details = asset.details
     .map(
-      ([label, value]) =>
-        `<div><span style="color:#63757d">${escapeHtml(label)}:</span> ${escapeHtml(value)}</div>`
+      detail =>
+        `<div><span style="color:#63757d">${escapeHtml(detail.label)}:</span> ${escapeHtml(detail.value)}</div>`
     )
     .join('');
   const sources = asset.source
     .map(
       reference =>
-        `<a href="${escapeHtml(getSourceUrl(reference))}" target="_blank" rel="noopener noreferrer" ` +
+        `<a href="${escapeHtml(reference.url)}" target="_blank" rel="noopener noreferrer" ` +
         `style="color:#006dc7;text-decoration:underline">${escapeHtml(reference.layerName)} / ${escapeHtml(
           reference.objectId
         )}</a>`
     )
     .join('<br>');
-  const extension = extensionUsage
+  const extension = extensionDetails.length
     ? `<div style="margin-top:8px"><div style="color:#63757d">PathStyleExtension</div>` +
-      `<div>${escapeHtml(extensionUsage)}</div></div>`
+      `<div>${escapeHtml(extensionDetails.join(' · '))}</div></div>`
     : '';
 
   return (
@@ -384,39 +208,11 @@ function createPopupHtml(
   );
 }
 
-const ROAD_APPROACHES = createSourcePaths('streets', 'Street surface');
-const SIDEWALKS = createSourcePaths('sidewalks', 'Sidewalk');
-const SIDEWALK_CORRIDORS = SIDEWALKS.filter(
-  sidewalk => getPathLengthMeters(sidewalk.path) >= getSidewalkWidthMeters(sidewalk) * 2
-);
-const BACKGROUND_PATHS = createSourcePaths('background', 'Source drafting line');
-const VERTICAL_ELEMENTS = createSourcePaths('verticalElements', 'Curb or separator');
-const PANEL_POLYGONS = createSourcePolygons('panelMarkings', 'Bicycle panel');
-const LONGITUDINAL_MARKINGS = createSourcePaths('longitudinalMarkings', 'Longitudinal marking');
-const CROSSWALK_GUIDES = SNAPSHOT.derived.crosswalkGuides.map(crosswalk => ({
-  ...crosswalk,
-  label: 'Crosswalk',
-  renderDetails: {dashArray: crosswalk.dashMeters.join(', '), justified: true}
-}));
-const REPLACED_TRANSVERSE_MARKING_OBJECT_IDS = new Set(
-  CROSSWALK_GUIDES.flatMap(crosswalk => crosswalk.transverseMarkingObjectIds)
-);
-const TRANSVERSE_POLYGONS = createSourcePolygons('transverseMarkings', 'Transverse marking').filter(
-  asset => !REPLACED_TRANSVERSE_MARKING_OBJECT_IDS.has(asset.source[0].objectId)
-);
-const TRANSVERSE_PATHS = createSourcePaths('transverseMarkings', 'Transverse marking').filter(
-  asset => !isClosedPath(asset.path)
-);
-const SYMBOL_PATHS = SNAPSHOT.derived.symbolPaths;
-const LANE_BANDS = SNAPSHOT.derived.laneBands.map(lane => ({
-  ...lane,
-  label: 'Vehicle lane',
-  properties: {},
-  renderDetails: {offset: lane.offsetWidths}
-}));
-
 function getAssetPosition(asset: InspectableAsset): Position {
-  const positionedAsset = asset as Partial<SourcePath & SourcePolygon>;
+  const positionedAsset = asset as InspectableAsset & {
+    path?: Position[];
+    polygon?: Position[];
+  };
   const positions = positionedAsset.path || positionedAsset.polygon;
   return (
     positions?.[Math.floor(positions.length / 2)] || [
@@ -439,141 +235,113 @@ export default function App({
 }) {
   const [selectedAsset, setSelectedAsset] = useState<SelectedAsset | null>(null);
   const dashUnits: DashUnits = measurementMode === 'physical' ? 'meters' : 'pixels';
-  const interactiveProps = {
-    pickable: true
-  };
-
-  const longitudinalAssets = LONGITUDINAL_MARKINGS.map(asset => {
-    const dashMeters = parseDashPattern(asset.properties.Type);
-    const sourcePattern =
-      measurementMode === 'physical' ? dashMeters : getScreenDashPattern(dashMeters);
-    return {
-      ...asset,
-      renderDetails: {
-        dashArray: scaleDashPattern(sourcePattern, dashScale).join(', '),
-        dashUnits,
-        justified: false,
-        gapPickable: true
-      }
-    };
-  });
+  const interactiveProps = {pickable: true};
 
   const layers = [
-    new PathLayer<SourcePath>({
+    new PathLayer<StyledPathAsset>({
       id: 'road-surfaces',
-      data: ROAD_APPROACHES,
+      data: SNAPSHOT.assets.roadSurfaces,
       getPath: asset => asset.path,
-      getWidth: asset => Number(asset.properties.SURFACEWIDTH || 0) * FEET_TO_METERS,
+      getWidth: asset => asset.style.widthMeters || 0,
       widthUnits: 'meters',
       getColor: ROAD_STYLE.asphalt,
       capRounded: false,
       jointRounded: true,
       ...interactiveProps
     }),
-    new PathLayer<SourcePath>({
+    new PathLayer<StyledPathAsset>({
       id: 'sidewalks',
-      data: SIDEWALK_CORRIDORS,
+      data: SNAPSHOT.assets.sidewalks,
       getPath: asset => asset.path,
-      getWidth: getSidewalkWidthMeters,
+      getWidth: asset => asset.style.widthMeters || 0,
       widthUnits: 'meters',
       getColor: ROAD_STYLE.sidewalk,
       capRounded: false,
       jointRounded: true,
       ...interactiveProps
     }),
-    new PathLayer<SourcePath>({
+    new PathLayer<PathAsset>({
       id: 'source-background',
-      data: BACKGROUND_PATHS,
+      data: SNAPSHOT.assets.backgroundPaths,
       getPath: asset => asset.path,
       getWidth: 1,
       widthUnits: 'pixels',
       getColor: [138, 146, 144, 100],
       pickable: false
     }),
-    new PathLayer<LaneBand, PathStyleExtensionProps<LaneBand>>({
+    new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
       id: 'derived-lane-bands',
-      data: LANE_BANDS,
-      getPath: lane => lane.path,
-      getWidth: lane => lane.widthMeters,
+      data: SNAPSHOT.assets.laneBands,
+      getPath: asset => asset.path,
+      getWidth: asset => asset.style.widthMeters || 0,
       widthUnits: 'meters',
       getColor: ROAD_STYLE.vehicleLane,
-      getOffset: lane => lane.offsetWidths,
+      getOffset: asset => asset.style.offset || 0,
       capRounded: false,
       jointRounded: true,
       ...interactiveProps,
       extensions: [OFFSET_EXTENSION]
     }),
-    new PolygonLayer<SourcePolygon>({
+    new PolygonLayer<PolygonAsset>({
       id: 'bike-panels',
-      data: PANEL_POLYGONS,
+      data: SNAPSHOT.assets.bikePanels,
       getPolygon: asset => asset.polygon,
       filled: true,
       stroked: false,
       getFillColor: ROAD_STYLE.bikePanel,
       ...interactiveProps
     }),
-    new PathLayer<CrosswalkGuide, PathStyleExtensionProps<CrosswalkGuide>>({
+    new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
       id: `justified-crosswalk-guides-${measurementMode}`,
-      data: CROSSWALK_GUIDES,
+      data: SNAPSHOT.assets.crosswalks,
       getPath: asset => asset.path,
-      getWidth: asset => (measurementMode === 'physical' ? asset.widthMeters : 18),
+      getWidth: asset =>
+        (measurementMode === 'physical' ? asset.style.widthMeters : asset.style.widthPixels) || 0,
       widthUnits: measurementMode === 'physical' ? 'meters' : 'pixels',
       getColor: ROAD_STYLE.whiteMarking,
-      getDashArray: asset =>
-        scaleDashPattern(
-          measurementMode === 'physical' ? asset.dashMeters : asset.dashPixels,
-          dashScale
-        ),
-      updateTriggers: {getDashArray: [dashScale]},
+      getDashArray: asset => getDashPattern(asset, measurementMode, dashScale),
+      updateTriggers: {getDashArray: [measurementMode, dashScale]},
       dashUnits,
-      dashJustified: true,
-      dashGapPickable: true,
+      dashJustified: CROSSWALK_STYLE.dashJustified,
+      dashGapPickable: CROSSWALK_STYLE.dashGapPickable,
       capRounded: false,
       jointRounded: false,
       ...interactiveProps,
       extensions: [CROSSWALK_EXTENSION]
     }),
-    new PolygonLayer<SourcePolygon>({
+    new PolygonLayer<PolygonAsset>({
       id: 'explicit-transverse-markings',
-      data: TRANSVERSE_POLYGONS,
+      data: SNAPSHOT.assets.transversePolygons,
       getPolygon: asset => asset.polygon,
       filled: true,
       stroked: false,
       getFillColor: ROAD_STYLE.whiteMarking,
       ...interactiveProps
     }),
-    new PathLayer<SourcePath, PathStyleExtensionProps<SourcePath>>({
+    new PathLayer<StyledPathAsset>({
       id: 'open-transverse-markings',
-      data: TRANSVERSE_PATHS,
+      data: SNAPSHOT.assets.transversePaths,
       getPath: asset => asset.path,
-      getWidth: DEFAULT_MARKING_WIDTH_METERS,
+      getWidth: asset => asset.style.widthMeters || 0,
       widthUnits: 'meters',
       widthMinPixels: 1,
       getColor: ROAD_STYLE.whiteMarking,
       ...interactiveProps
     }),
-    new PathLayer<SourcePath, PathStyleExtensionProps<SourcePath>>({
+    new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
       id: `longitudinal-markings-${measurementMode}`,
-      data: longitudinalAssets,
+      data: SNAPSHOT.assets.longitudinalMarkings,
       getPath: asset => asset.path,
       getWidth: asset =>
-        measurementMode === 'physical'
-          ? parseMarkingWidth(asset.properties.Width) || DEFAULT_MARKING_WIDTH_METERS
-          : DEFAULT_MARKING_WIDTH_PIXELS,
+        (measurementMode === 'physical' ? asset.style.widthMeters : asset.style.widthPixels) || 0,
       widthUnits: measurementMode === 'physical' ? 'meters' : 'pixels',
       widthMinPixels: 1,
-      getColor: getMarkingColor,
-      getDashArray: asset => {
-        const pattern = parseDashPattern(asset.properties.Type);
-        return scaleDashPattern(
-          measurementMode === 'physical' ? pattern : getScreenDashPattern(pattern),
-          dashScale
-        );
-      },
-      updateTriggers: {getDashArray: [dashScale]},
+      getColor: asset => ROAD_STYLE[asset.style.colorRole || 'whiteMarking'],
+      getDashArray: asset => getDashPattern(asset, measurementMode, dashScale),
+      updateTriggers: {getDashArray: [measurementMode, dashScale]},
       dashUnits,
-      dashJustified: false,
-      dashGapPickable: true,
+      dashJustified: LONGITUDINAL_STYLE.dashJustified,
+      dashGapPickable: LONGITUDINAL_STYLE.dashGapPickable,
       capRounded: false,
       jointRounded: false,
       autoHighlight: true,
@@ -581,9 +349,9 @@ export default function App({
       ...interactiveProps,
       extensions: [DASH_EXTENSION]
     }),
-    new PathLayer<SourcePath>({
+    new PathLayer<PathAsset>({
       id: 'curbs-and-separators',
-      data: VERTICAL_ELEMENTS,
+      data: SNAPSHOT.assets.curbs,
       getPath: asset => asset.path,
       getWidth: 0.12,
       widthUnits: 'meters',
@@ -594,9 +362,9 @@ export default function App({
       getColor: ROAD_STYLE.curb,
       ...interactiveProps
     }),
-    new PathLayer<SourcePath>({
+    new PathLayer<PathAsset>({
       id: 'pavement-symbols',
-      data: SYMBOL_PATHS,
+      data: SNAPSHOT.assets.symbols,
       getPath: asset => asset.path,
       getWidth: 0.1,
       widthUnits: 'meters',
