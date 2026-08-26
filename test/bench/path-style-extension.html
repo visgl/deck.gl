@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>deck.gl PathStyleExtension GPU benchmark</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      body {
+        margin: 24px;
+        max-width: 1200px;
+      }
+      form,
+      table {
+        margin: 20px 0;
+      }
+      label {
+        margin-right: 20px;
+      }
+      button {
+        padding: 6px 16px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #8888;
+        padding: 8px;
+        text-align: right;
+      }
+      th:first-child,
+      td:first-child,
+      th:nth-child(2),
+      td:nth-child(2) {
+        text-align: left;
+      }
+      #canvas-container {
+        height: 270px;
+        overflow: hidden;
+        position: relative;
+        width: 480px;
+      }
+      canvas {
+        height: 270px !important;
+        transform-origin: top left;
+        width: 480px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PathStyleExtension GPU benchmark</h1>
+    <p>
+      Uses WebGL2 timestamp queries around deck.gl render passes. Run on hardware; software
+      adapters and virtualized browsers are not representative. Shader compilation, attribute
+      generation, and timestamp-query readback are excluded from reported GPU durations. The
+      benchmark rotates and reverses variant order to reduce ordering and thermal bias.
+    </p>
+    <p>
+      Offset-enabled variants use a zero offset so they measure the extension capability without
+      changing screen coverage. CPU path-phase generation for 100K segments is measured on the
+      <a href="./path-style-extension-cpu.html">CPU benchmark page</a>; segment mode has no phase
+      pass.
+    </p>
+    <form id="controls">
+      <label>
+        Samples
+        <input id="samples" type="number" min="10" max="500" step="10" value="30" />
+      </label>
+      <button type="submit">Run benchmark</button>
+    </form>
+    <p id="status">Ready.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Workload</th>
+          <th>Variant</th>
+          <th>Median GPU ms</th>
+          <th>p95 GPU ms</th>
+          <th>vs plain</th>
+          <th>vs segment dash</th>
+        </tr>
+      </thead>
+      <tbody id="results"></tbody>
+    </table>
+    <div id="canvas-container"></div>
+    <script type="module" src="./path-style-extension-gpu.js"></script>
+  </body>
+</html>
