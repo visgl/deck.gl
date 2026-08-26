@@ -20,6 +20,7 @@ import type {
   MjolnirKeyEvent
 } from 'mjolnir.js';
 import type {Timeline} from '@luma.gl/engine';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -321,7 +322,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   /** Resolves the zoom anchor for pointer-based controls. */
   protected getZoomPosition(position: [number, number]): [number, number] {
-    return this.zoomAround === 'center' ? [this.props.width / 2, this.props.height / 2] : position;
+    if (this.zoomAround === 'pointer') {
+      return position;
+    }
+
+    const viewport = this.makeViewport(this.controllerState.getViewportProps());
+    const [centerX, centerY] = worldToPixels(viewport.center, viewport.pixelProjectionMatrix);
+    return [centerX, centerY];
   }
 
   isPointInBounds(pos: [number, number], event: MjolnirEvent): boolean {
