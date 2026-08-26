@@ -4,9 +4,8 @@
 
 import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {LayerManager, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
-import {_GlobeView as GlobeView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 import {

@@ -12,11 +12,9 @@ import {
   GetPickingInfoParams,
   DefaultProps,
   FilterContext,
-  COORDINATE_SYSTEM,
-  _flatten as flatten,
-  _GlobeViewport
+  _flatten as flatten
 } from '@deck.gl/core';
-import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
 import type {TileLoadProps, ZRange} from '../tileset-2d/index';
@@ -53,7 +51,6 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   maxRequests: 6,
   debounceTime: 0,
   zoomOffset: 0,
-  reprojectBitmapTiles: false,
   visibleMinZoom: null,
   visibleMaxZoom: null
 };
@@ -156,14 +153,6 @@ type _TileLayerProps<DataT> = {
   zoomOffset?: number;
 
   /**
-   * Whether rectangular BitmapLayer sublayers contain Web Mercator imagery that should be
-   * reprojected when rendered in GlobeView.
-   *
-   * @default false
-   */
-  reprojectBitmapTiles?: boolean;
-
-  /**
    * The minimum zoom level at which tiles are visible.
    * When the viewport zoom is below this level, no tiles are rendered.
    *
@@ -206,15 +195,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   state!: {
     tileset: Tileset2D | null;
     isLoaded: boolean;
-    isGlobeView: boolean;
     frameNumber?: number;
   };
 
   initializeState() {
     this.state = {
       tileset: null,
-      isLoaded: false,
-      isGlobeView: this.context.viewport instanceof _GlobeViewport
+      isLoaded: false
     };
   }
 
@@ -241,7 +228,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   updateState({changeFlags}: UpdateParameters<this>) {
     let {tileset} = this.state;
-    const isGlobeView = this.context.viewport instanceof _GlobeViewport;
     const propsChanged = changeFlags.propsOrDataChanged || changeFlags.updateTriggersChanged;
     const dataChanged =
       changeFlags.dataChanged ||
@@ -264,15 +250,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           tile.layers = null;
         });
       }
-    }
-
-    if (tileset && isGlobeView !== this.state.isGlobeView) {
-      // Bitmap image coordinates depend on the projection. Recreate cached sublayers when the
-      // view switches between GlobeView and another projection so the override is not stale.
-      tileset.tiles.forEach(tile => {
-        tile.layers = null;
-      });
-      this.setState({isGlobeView});
     }
 
     this._updateTileset();
@@ -444,14 +421,12 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           _offset: 0,
           tile
         });
-        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer => {
-          const globeBitmapProps = this._getGlobeBitmapLayerProps(layer);
-          return layer.clone({
+        tile.layers = (flatten(layers, Boolean) as Layer<{tile?: Tile2DHeader}>[]).map(layer =>
+          layer.clone({
             tile,
-            ...globeBitmapProps,
             ...subLayerProps
-          });
-        });
+          })
+        );
       } else if (
         subLayerProps &&
         tile.layers[0] &&
@@ -463,26 +438,6 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
       return tile.layers;
     });
-  }
-
-  private _getGlobeBitmapLayerProps(layer: Layer): Record<string, unknown> | null {
-    // BitmapLayer and subclasses draw opted-in WebMercator imagery over lng/lat bounds.
-    // Other bitmap projections and layer types are left unchanged.
-    if (
-      !(this.context.viewport instanceof _GlobeViewport) ||
-      !(layer instanceof BitmapLayer) ||
-      !this.props.reprojectBitmapTiles ||
-      !Number.isFinite(layer.props.bounds[0]) ||
-      (layer.props as Record<string, unknown>)._imageCoordinateSystem !== 'default'
-    ) {
-      return null;
-    }
-
-    return {
-      // XYZ/slippy tile imagery is Web Mercator encoded. In GlobeView, BitmapLayer
-      // positions the mesh in lng/lat, so the image needs Mercator-to-lnglat UV conversion.
-      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
-    };
   }
 
   filterSubLayer({layer, cullRect}: FilterContext) {
