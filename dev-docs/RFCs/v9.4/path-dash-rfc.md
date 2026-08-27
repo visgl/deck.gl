@@ -1,4 +1,4 @@
-# RFC: Segment-invariant dashes for PathStyleExtension
+# RFC: Stable dash patterns for PathStyleExtension
 
 * Authors: Chris Gervang
 * Date: August, 2026
@@ -6,239 +6,316 @@
 
 ## Summary
 
-This RFC proposes two additions to `PathStyleExtension`, both aimed at the same complaint —
-that a dash is not reliably a dash:
+- **New:** `dashMode` selects whether pattern phase restarts at each source segment or continues
+  across the complete path. Path mode keeps phase stable when geometry is resampled.
+- **New:** `dashUnits` selects whether pattern lengths scale with stroke width, remain fixed in
+  screen pixels, represent meters, or use common-space units. This makes zoom behavior explicit.
+- **Fixed automatically:** Existing dashed paths now keep coherent phase and coverage across
+  elevation, billboard extrusion, offsets, long paths, and subpixel patterns. These repairs do not
+  require application changes.
+- **Existing and composable:** `dashJustified` still fits periods to endpoints, and `getOffset`
+  still places parallel strokes around one centerline. Both compose with the new controls.
+- **Deprecated:** `highPrecisionDash` remains compatible as an alias for `dashMode: 'path'`.
+- **Unchanged defaults:** Omitting the new options preserves segment phase and width-relative dash
+  lengths.
 
-* `dashMode`, which decouples the dash pattern from the tessellation of the path it is drawn
-  on, deprecating `highPrecisionDash` in its favour.
-* `dashUnits`, which decouples the dash size from the stroke width, so a dash can be held
-  constant on screen.
+Together, these changes let a simple path express screen-space symbols, physical repetition,
+fitted edge patterns, and parallel strokes while retaining the existing mode and unit defaults.
 
-They are independent and can be adopted separately. The first is about *where* dashes fall
-along a path; the second is about *how large* they are.
+## Motivation and background
 
-## Background
+Dashes commonly encode planned, uncertain, hidden, intermittent, or unavailable states. They
+also represent repeated physical structure, such as lane markings or railway ties. In either
+case, the pattern must retain its meaning as geometry is resampled, the camera zooms, or the path
+moves through three dimensions. A dash is therefore a property of the stroke, not of the
+incidental tessellation used to draw it.
 
-A dash is a property of a stroke. It is not a property of how the geometry underneath that
-stroke happens to be divided into segments — but in deck.gl today, it is.
+`PathLayer` gives the fragment shader an along-segment coordinate that restarts at every vertex,
+and the dash shader tests `mod(alongSegment + offset, unitLength)` against the dash size. With
+`offset` fixed at zero, the pattern restarts at every vertex too. Once a segment is no longer than
+the solid dash interval, the modulo never reaches the gap, no fragment is discarded, and the path
+renders as a solid line.
 
-`PathLayer` gives the fragment shader an along-segment coordinate that restarts at every
-vertex, and the dash shader tests `mod(alongSegment + offset, unitLength)` against the dash
-size. With `offset` fixed at zero, the pattern restarts at every vertex too. Once a segment
-is shorter than one dash period, the modulo never leaves the solid part of the pattern, no
-fragment is discarded, and the path renders as a solid line.
-
-Six strips drawing the *identical* straight line, differing only in how many vertices it is
-built from, with `getDashArray: [4, 5]` on a 10px stroke:
+Six strips drawing the *identical* straight line, differing only in how many segments it is built
+from, with `getDashArray: [4, 5]` on a 10px stroke:
 
 | segments | 1 | 2 | 4 | 12 | 40 | 120 |
 | --- | --- | --- | --- | --- | --- | --- |
 | measured dash period | 43.4px | 43.4px | 43.4px | 55.4px | **solid** | **solid** |
 
-This is not an edge case. Densely sampled geometry is the norm for GPS traces, generalized
-coastlines, routing output, and any circle or arc approximated by short chords. The failure
-is also confusing to diagnose from the outside, because zooming in eventually makes segments
-long relative to the stroke and the dashes reappear — so it presents as "dashes only show up
-when I zoom in", which sounds like a resolution problem rather than a tessellation one.
+![dashMode and vertex density](../../../docs/images/path-style/path-style-dash-density.png)
 
-`dashJustified` does not rescue it. Justification is also computed per segment, so on the
-same six strips it collapses in exactly the same way.
+This is common with GPS traces, generalized coastlines, routing output, and circles or arcs
+approximated by short chords. It is also confusing to diagnose because zooming in eventually
+makes segments long relative to a width-relative pattern and the gaps reappear.
+
+`dashJustified` does not make segment phase continuous. It fits each segment independently, so
+the same dense geometry can still appear solid.
 
 ### What already exists
 
-`highPrecisionDash` is an existing opt-in that does address this. It adds a vertex attribute
-whose value is the distance from the start of the path, accumulated on the CPU in
-`getDashOffsets`, and feeds that in as the dash phase. On the six strips above it produces
-six identical, correct results.
+`highPrecisionDash` is an existing opt-in that accumulates distance from the start of the path on
+the CPU in `getDashOffsets`, stores it in a vertex attribute, and uses it as dash phase. On the six
+strips above it produces six identical patterns.
 
-So the underlying mechanism is present and works. What it lacks is the framing, the
-discoverability, and the robustness:
+The mechanism works, but the old API and implementation have several shortcomings:
 
-- **The name describes an implementation, not an outcome.** "High precision" suggests a
-  quality knob for people already unhappy with their dashes, not the fix for a line that is
-  rendering solid. Nothing about it says "this is what makes a dash independent of vertex
-  count".
-- **The docs undersell it.** They describe it as improving "dash rendering quality in
-  certain circumstances", list it third of three modes, and lead with a performance warning.
-- **It was mutually exclusive with `dashJustified`**, which overrode it outright.
-- **It was broken in two configurations** — under `billboard: true` and on paths with a Z
-  component. Both are fixed separately from this proposal; they are noted here because they
-  are the reason "just tell people to use `highPrecisionDash`" was not a sufficient answer.
+- **The name describes an implementation rather than an outcome.** “High precision” does not say
+  that phase continues across source vertices.
+- **The behavior is hard to discover.** Existing documentation leads with cost rather than the
+  type of path that needs it.
+- **It was mutually exclusive with `dashJustified`.** Justification overrode continuous phase.
+- **It was unreliable in important configurations.** Billboard extrusion, elevation, offsets,
+  long accumulated paths, and subpixel patterns exposed independent rendering defects addressed
+  in the surrounding v9.4 work.
+- **Pattern length was only stroke-relative.** A screen-space symbol or physical interval could
+  not be expressed independently of stroke width.
 
-## Proposal
+## Design model
+
+Path styling is easier to reason about as four independent questions:
+
+| Design dimension | API |
+| --- | --- |
+| Phase domain: where does repetition continue? | `dashMode` |
+| Length measure: what does one pattern unit mean? | `dashUnits` |
+| Endpoint fitting: should a run finish cleanly? | `dashJustified` |
+| Parallel placement: where is the stroke relative to its centerline? | existing `getOffset` |
+
+### Phase domain
+
+`dashMode: 'segment'` makes every source vertex an intentional pattern boundary. This is useful
+for independent polygon edges or structural panels and avoids CPU distance accumulation.
+
+`dashMode: 'path'` treats source vertices as tessellation points inside one conceptual stroke. A
+route, trace, or trajectory then retains one phase as geometry is densified, simplified, or
+resampled.
+
+### Length measure
+
+`dashUnits` separates pattern length from phase. Stroke-relative units express a visual line
+style, pixels express screen-space symbology, meters express physical repetition, and common
+units express application common-coordinate-space measurements.
+
+These choices intentionally behave differently under zoom. The API makes that choice explicit;
+it does not force every pattern to remain the same size on screen.
+
+### Endpoint fitting
+
+`dashJustified` adjusts the gap so a whole number of periods spans the active run, with a
+half-dash centered at each endpoint. The active run follows `dashMode`: one source segment or the
+complete path. Because fitting can lengthen or shorten gaps, it is not appropriate when exact
+measured spacing must be preserved.
+
+### Parallel placement
+
+`getOffset` is not changed by this RFC, but it belongs to the same stroke model. A path may be
+repeated on either side of its centerline, and dash phase and period must remain consistent on the
+offset geometry. The v9.4 alignment fixes make that composition reliable.
+
+## API proposal
 
 ### `dashMode`
 
 A constructor option on `PathStyleExtension`:
 
 ```js
-new PathStyleExtension({dash: true, dashMode: 'path'})
+new PathStyleExtension({dashMode: 'path'});
 ```
 
 | value | behavior |
 | --- | --- |
-| `'segment'` (default) | The pattern restarts at every vertex. Today's behavior. |
-| `'path'` | The pattern runs continuously from the start of each path, invariant to how the path is tessellated. |
+| `'segment'` (default) | The pattern restarts at every source vertex. |
+| `'path'` | The pattern runs continuously from the start of each path. |
 
-`'segment'` remains the default. It is cheaper, it renders dashes at exactly the specified
-lengths, and it is correct for data made of long disjoint paths — which is what the existing
-default serves well. Changing the default would impose a CPU pass and a vertex attribute on
-every existing user to fix a problem only some of them have.
+Supplying either mode enables dashing. Omitting `dashMode` keeps the resolved phase mode at
+`'segment'` but does not enable the dash capability unless `dash: true` or
+`highPrecisionDash: true` is supplied. This preserves offset-only construction.
 
-`dashMode` is a **constructor option rather than a layer prop** because `'path'` allocates a
-vertex attribute, and attributes are declared in `initializeState` before any prop is read.
-`dashJustified`, `dashGapPickable` and `dashUnits` are uniform-driven and so remain layer
-props, changeable per frame.
+`'segment'` remains the default because it preserves existing output, needs no CPU pass, and
+allocates no path-distance attribute. Changing the default would impose both cost and output
+changes on existing users.
 
-### `dashJustified` composes rather than overrides
+`dashMode` is a constructor option rather than a layer prop because `'path'` allocates a vertex
+attribute. Attributes are declared in `initializeState` before layer props are read.
 
-Justification stretches the period so a whole number of periods spans a run, starting half a
-dash in so both ends finish on a joint. The run it applies to now follows `dashMode`:
+### `dashJustified` composition
 
-| | run being justified |
+The run fitted by justification follows `dashMode`:
+
+| mode | run being fitted |
 | --- | --- |
-| `dashMode: 'segment'` | each segment |
-| `dashMode: 'path'` | the entire path |
+| `dashMode: 'segment'` | each source segment |
+| `dashMode: 'path'` | the complete path |
 
-Per-segment justification guarantees sharp corners on polyline shapes, which is why it
-exists, but it stretches each segment by a different amount and the gaps look uneven.
-Whole-path justification keeps the gaps even and still lands cleanly on both ends. Neither
-is strictly better, so both remain reachable.
+Per-segment fitting gives intentional corners well-defined boundaries but may choose a different
+gap for every segment. Whole-path fitting uses one period across interior vertices while still
+finishing cleanly at the path endpoints.
 
-### `highPrecisionDash` is deprecated
+### `highPrecisionDash` deprecation
 
-It becomes an alias for `dashMode: 'path'` and keeps working unchanged. There is no reason
-to break it; it is the same capability under a name that describes the mechanism instead of
-the result.
+`highPrecisionDash` becomes an alias for `dashMode: 'path'` and continues to work. The new name
+describes the phase domain instead of the implementation mechanism.
 
 ### `dashUnits`
 
-A layer prop selecting what `getDashArray` is measured in:
+A layer prop selects what `getDashArray` measures:
 
 | value | one dash unit is |
 | --- | --- |
-| `'widths'` (default) | half the stroke width |
+| `'widths'` (default) | half the effective stroke width |
 | `'pixels'` | one screen pixel |
-| `'meters'` | one metre on the ground |
-| `'common'` | one deck.gl common-space unit |
+| `'meters'` | one meter in the layer's geospatial coordinate system |
+| `'common'` | one deck.gl common-coordinate-space unit |
 
-`getDashArray` has only ever been relative to half the stroke width. That is a reasonable
-default — dashes stay proportional to the line, which is also what `line-dasharray` does in
-MapLibre and what `stroke-dasharray` does in SVG when the stroke is scaled. But `PathLayer`
-defaults to `widthUnits: 'meters'`, so the stroke thickens as the user zooms in, and the
-dashes lengthen with it. Measured on a stroke with `widthUnits: 'meters'`:
+`getDashArray` has historically been relative to half the stroke width. This remains a useful
+default because the pattern scales with the line. With the `PathLayer` default of
+`widthUnits: 'meters'`, both the stroke and a width-relative pattern grow on screen as the user
+zooms in.
+
+Measured on a stroke with `widthUnits: 'meters'`:
 
 | `dashUnits` | z12 | z13 | z14 |
 | --- | --- | --- | --- |
 | `'widths'` | 17.6px | 34.7px | 67.9px |
 | `'pixels'` | 43.6px | 43.6px | 43.6px |
 
-Both behaviors are wanted. A dash that scales with the line is right for a stroke that
-represents a real width; a dash fixed on screen is right when the dash is a legend — "this
-boundary is disputed", "this segment is planned" — and should read the same at every zoom.
-Until now only the first was reachable.
+Both results are intentional. Widths are appropriate when dashes belong to the line style;
+pixels are appropriate when the pattern is a screen-space symbol. Meters and common units cover
+physical and application-coordinate measurements.
 
-This is a **layer prop rather than a constructor option** because it is uniform-driven and
-allocates nothing, so it can vary per frame.
+`dashUnits` is a layer prop because it is uniform-driven, allocates no attribute, and may vary per
+frame.
 
-`'widths'` remains the default, so nothing changes for existing users.
+The prop applies to `PathLayer` and composites that render paths. `ScatterplotLayer` outlines and
+`TextLayer` backgrounds use separate signed-distance-field shaders and remain width-relative.
 
-This proposal applies `dashUnits` to `PathLayer` and composite layers that render paths.
-`ScatterplotLayer` outlines and `TextLayer` backgrounds use separate signed-distance-field
-shaders and continue to interpret `getDashArray` relative to their stroke width. Supporting
-absolute units there would require layer-specific perimeter conversions and is left as future
-work.
+## Compatibility and migration
+
+The additions are backward compatible. `dashMode` resolves to `'segment'` when omitted,
+`dashUnits` defaults to `'widths'`, and `highPrecisionDash` remains supported. Existing users do
+not need to opt into the automatic billboard, 3D, offset, long-path, justification, or coverage
+fixes.
+
+Applications that compare stored images may need to regenerate affected screenshots because the
+automatic fixes can change pixels while preserving the intended style.
+
+One internal change widens `instanceDashOffsets` from a `float` to a `vec2` containing distance
+from the path start and total path length. A `vec2` still occupies one vertex attribute slot, so
+the WebGL attribute ceiling is unchanged.
 
 ## Prior art
 
-**MapLibre / Mapbox** accumulate distance along the whole line on the CPU into an
-`a_linesofar` vertex attribute, which is the same approach `dashMode: 'path'` takes. They
-have no per-segment mode at all — `line-dasharray` is always continuous. That is the right
-default for a renderer whose input is exclusively vector tiles, where geometry is heavily
-sampled and the per-segment behavior would be useless. deck.gl accepts arbitrary
-application data and has shipped the per-segment behavior for years, so it keeps both.
+**MapLibre / Mapbox** accumulate distance along each line on the CPU and encode `linesofar` in
+vertex data. Their line dash arrays are width-relative and continuous along line geometry. A
+renderer focused on tiled line data does not need deck.gl's intentional per-segment mode; deck.gl
+accepts arbitrary application paths and retains both phase domains.
 
-**SVG** `stroke-dasharray` is continuous along the whole subpath, and `pathLength` lets an
-author restate the length the pattern is measured against. There is no notion of a dash that
-resets per segment; a dashed SVG polyline behaves like `dashMode: 'path'`.
+**SVG** repeats `stroke-dasharray` continuously along each subpath. A new subpath resets the
+pattern, but vertices within one polyline do not. This matches `dashMode: 'path'` for one deck.gl
+path.
 
-The consistent lesson from both is that continuous-along-the-path is what authors expect a
-dash to mean. deck.gl's per-segment behavior is the unusual one, which supports exposing the
-alternative under a name that says what it does.
+Both systems establish continuous path phase as the common author expectation. deck.gl keeps
+segment phase for data whose source vertices are meaningful boundaries.
 
 ## Alternatives considered
 
-**Make `'path'` the default.** Best-looking default and matches every comparable renderer,
-but every dashed layer would pay a CPU pass over its geometry and one more vertex attribute,
-against a documented ceiling of 16. Rejected as a change to impose silently; worth revisiting
-for a major version.
+**Make `'path'` the default.** This matches comparable renderers and handles resampled paths well,
+but every dashed layer would pay for a CPU pass and another vertex attribute. It would also change
+existing output. Rejected for a compatible release.
 
-**Fix `'segment'` to not collapse.** There is nothing to fix. Restarting the pattern per
-segment is a coherent behavior that some data wants; the pathology is only that it is the
-sole option.
+**Change segment mode so short segments never appear solid.** Restarting a pattern at every
+vertex is coherent behavior when those vertices are intended boundaries. The issue is choosing
+the wrong phase domain, not an invalid segment implementation.
 
-**Derive the distance on the GPU instead of the CPU.** The vertex shader sees only the four
-positions around the current segment, so a running total along the path is not available to
-it. A prefix sum in a compute pass would work on WebGPU but not WebGL2, and would not remove
-the attribute.
+**Derive complete-path distance on the GPU.** The vertex shader sees the current segment, not a
+prefix sum over the path. A compute pass could supply one on WebGPU but would not support WebGL2 or
+remove the result attribute.
 
-**Name it `dashContinuous: boolean`.** Two booleans (`dashContinuous`, `dashJustified`)
-describe four states, two of which are only meaningful in combination. A named mode reads
-better at the call site and leaves room for a future third mode.
+**Name the option `dashContinuous: boolean`.** A named phase domain composes more clearly with
+justification and leaves room for future modes.
 
-**Keep the name `highPrecisionDash`.** The behavior is not about precision, and the name is
-the main reason the existing capability goes unused by people hitting exactly the problem it
-solves.
+**Keep the name `highPrecisionDash`.** The behavior is about phase domain rather than numeric
+precision, and the old name makes the intended use difficult to discover.
 
-**Reuse deck.gl's existing `Unit` type for `dashUnits`.** `Unit` is
-`'meters' | 'common' | 'pixels'` and has no member for "relative to the stroke", which is
-both the default and the only behavior that exists today. Extending `Unit` itself would give
-every other `*Units` prop in the library a value that means nothing to it.
+**Reuse deck.gl's existing `Unit` type.** `Unit` contains `'meters'`, `'common'`, and `'pixels'`
+but cannot express the existing stroke-relative behavior. Extending it with `'widths'` would add a
+meaningless value to unrelated unit props.
 
-**Express screen-constant dashes as `dashUnits: 'pixels'` versus a boolean like
-`dashScreenSpace`.** A boolean covers two of the four cases and leaves no room for the
-ground-relative ones, which fall out of the same conversion for free.
+**Use a boolean such as `dashScreenSpace`.** A boolean covers widths and pixels but cannot express
+meters or common units.
 
-## Compatibility
+## Implementation and testing notes
 
-Additive. `dashMode` defaults to `'segment'` and `dashUnits` defaults to `'widths'`, both of
-which are the existing behavior; `highPrecisionDash` continues to work. No golden image
-changes from either proposal alone.
+### Coordinate conversion
 
-One internal change: `instanceDashOffsets` widens from a `float` to a `vec2` carrying
-`[distance from the start of the path, total length of the path]`, the second component
-being what whole-path justification needs. A `vec2` still occupies one attribute slot, so the
-16-attribute ceiling is not made tighter.
+CPU path distance is accumulated in common space, flat and billboard extrusion meet in screen
+pixels, and the fragment shader tests a coordinate normalized by half-width. The shader first
+computes how many screen pixels one along-path coordinate unit spans, converts the selected dash
+unit into pixels, and divides the two. This keeps unit conversion independent of extrusion branch.
 
-## Testing
+Long-path phase is reduced modulo the active period in the vertex shader before it is combined
+with the smaller segment-local coordinate. This avoids Float32 cancellation at high zoom.
 
-`test/render/test-cases/path-dash.spec.ts` renders the six-strip segment-density case under
-each mode. All six strips draw the identical line, so the assertion is simply that the image
-shows six identical strips — a defect in either mode shows up as one strip differing from
-its neighbours.
+### Figures
 
-`dashUnits` is covered by rendering the same content at z12, z13 and z14 with
-`widthUnits: 'meters'`. The assertion is a comparison *between* the three images: the
-`'widths'` rows should double with each level, and the `'pixels'` rows should not move.
+The figures in the extension docs are generated from render-test goldens by
+`scripts/dash-figures/compose.mjs`, so a published figure is tied to tested output. Before/after
+panels come from `scripts/dash-figures/capture-before.sh`, which temporarily replaces only the
+three behavior-carrying sources and renders the current scenes. Both sides therefore use identical
+geometry and test configuration.
 
-One trap is worth recording, since it cost a round here and is easy to repeat. pixelmatch
-excludes antialiased pixels from its mismatch count unless `includeAA` is set. Any dash
-change that only alters edge coverage is therefore invisible to a golden diff by default —
-the prefiltered-coverage work in this series initially passed all but two of its own goldens
-with the feature reverted. Cases whose subject is edge coverage must set
-`imageDiffOptions.includeAA`, and must put enough affected pixels on screen to clear the
-mismatch threshold: horizontal strips have dash ends that land on exact pixel columns and
-produce no partial coverage at all, so a diagonal case is required.
+### Performance benchmarks
+
+The benchmark suite includes two standalone pages for identifying major extension costs:
+
+- `test/bench/path-style-extension-cpu.html` measures continuous-path phase generation for
+  100,000 segments. Segment mode is the control because it performs no CPU phase pass.
+- `test/bench/path-style-extension.html` uses WebGL2 timestamp queries at 3840 by 2160 pixels. It
+  compares plain paths, segment dashing, path dashing, alternate units, justification, and offset
+  capability across a sparse workload and a deliberately fragment-heavy workload.
+
+In one 20-sample run on an Apple M1 Max through ANGLE Metal, enabling segment dashing added about
+8% to the median GPU time for 100,000 sparse strokes and 43% for 256 overlapping 64-pixel strokes.
+The new path, units, justification, and offset controls added no more than 4% beyond segment
+dashing in those workloads. Continuous phase generation for a 100,000-segment path took about
+1.6 ms for nested XYZ positions and 3.3 ms for flat XYZ positions. These measurements are
+hardware- and workload-specific; the checked-in pages are the reproducible comparison rather than
+a fixed performance guarantee.
+
+### Render coverage
+
+`test/render/test-cases/path-dash.spec.ts` covers:
+
+- identical paths at six vertex densities;
+- all four `dashMode` and `dashJustified` combinations;
+- width-, pixel-, meter-, and common-unit patterns;
+- flat and billboard extrusion across zoom;
+- 3D arclength and joints;
+- offset phase and period;
+- long paths, fine patterns, rounded ends, and picking.
+
+One test-harness detail is important: pixelmatch excludes antialiased pixels from mismatch counts
+unless `includeAA` is enabled. Horizontal dash ends can also land on exact pixel columns and show
+no partial coverage. Coverage tests therefore enable antialiased comparison and include a dense
+diagonal case, ensuring a reverted prefilter fails above the mismatch threshold.
 
 ## Limitations and future work
 
-- **`ScatterplotLayer` and `TextBackgroundLayer` are unaffected.** Their strokes are single
-  continuous outlines with no segment joints, so `dashMode` has nothing to select between.
-  They do have a related defect — the pattern does not join cleanly where the outline closes,
-  since the perimeter is rarely an integer number of periods — which whole-path justification
-  is the natural fix for. Out of scope here.
-- **WebGPU.** `PathLayer` has a WGSL source, but `PathStyleExtension` injects GLSL only, so
-  dashes silently do nothing on a WebGPU device. Porting the extension is a separate effort.
-- **Very long paths.** The phase is reduced modulo the dash period in the vertex shader, so
-  fp32 precision no longer limits path length in practice. The remaining limit is the fp32
-  accumulation of the distance itself on the CPU.
+- **WebGPU.** `PathStyleExtension` injects GLSL and has no WGSL implementation.
+- **SDF-backed outlines.** `ScatterplotLayer` and `TextBackgroundLayer` remain width-relative and
+  do not expose these path-specific phase or fitting controls.
+- **One interval pair.** `getDashArray` represents one `[dash, gap]` pair, not an arbitrary
+  multi-phase dash-dot sequence.
+- **Attribute budget.** Path-continuous phase consumes one vertex attribute in addition to the
+  dash-array and offset attributes.
+- **Very long paths.** Vertex-shader phase reduction removes the practical local-coordinate
+  freeze, but CPU distance still accumulates in Float32 storage.
+
+Potential follow-up work, without commitment in this RFC:
+
+- absolute `offsetUnits` for rail gauges, shoulders, and corridor edges;
+- arbitrary repeating interval arrays for multi-phase patterns;
+- WGSL support for `PathStyleExtension`;
+- absolute units for SDF-backed ScatterplotLayer and TextBackgroundLayer outlines;
+- reusable repeated-symbol strokes beyond rectangular dash fragments.
