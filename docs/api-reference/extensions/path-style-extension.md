@@ -1,23 +1,10 @@
 # PathStyleExtension
 
-`PathStyleExtension` turns a path into a configurable stroke. A repeating pattern can restart
-at each source segment or continue across the whole path; its dimensions can scale with the
-stroke, remain fixed on screen, be measured in meters, or use deck.gl common-space units; the
-pattern can be fitted to its endpoints; and the stroke can be shifted to either side of its
-centerline.
+The `PathStyleExtension` adds selected features to the [PathLayer](../layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md).
 
-These choices support planned or uncertain routes, hidden or interrupted alignments, physical
-markings and repeated structures, parallel lanes and rails, and familiar plotting line styles.
-In v9.4, these controls and rendering fixes keep stroke semantics reliable across dense geometry,
-zoom, elevation, billboard extrusion, offsets, and long paths.
+It also supports dashed strokes on [ScatterplotLayer](../layers/scatterplot-layer.md) and [TextLayer](../layers/text-layer.md) backgrounds (via the `dash` option).
 
-The extension supports [PathLayer](../layers/path-layer.md) and composite layers that render paths,
-including [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md).
-Its dash capability also supports [ScatterplotLayer](../layers/scatterplot-layer.md) outlines and
-[TextLayer](../layers/text-layer.md) backgrounds, subject to the limitations below.
-
-> Note: In v8.0, the `getDashArray` and `dashJustified` props were removed from `PathLayer` and
-> moved into this extension.
+> Note: In v8.0, the `getDashArray` and `dashJustified` props are removed from the `PathLayer` and moved into this extension.
 
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
@@ -44,6 +31,9 @@ const layer = new PolygonLayer({
 
 ## Design a stroke
 
+`PathStyleExtension` composes six independent stroke decisions. Choose them from the intended
+stroke semantics instead of from how the source path is tessellated.
+
 | Design question | API |
 | --- | --- |
 | What repeats along the stroke? | `getDashArray` |
@@ -63,10 +53,6 @@ const layer = new PolygonLayer({
 | One pattern fitted across a complete route | `{dashMode: 'path'}` | `dashJustified: true` |
 | Parallel rails, lanes, shoulders, or casings | `{offset: true}` | `getOffset` |
 | Dense GPS, routing, or XYZ paths | `{dashMode: 'path'}` | Use `billboard: true` when the stroke must face the camera |
-
-These are starting points, not required combinations. Choose `dashUnits` from the meaning the
-pattern should have, and use separate layer instances when strokes need different capabilities or
-the WebGL attribute budget is tight.
 
 ## Installation
 
@@ -114,12 +100,11 @@ new PathStyleExtension({dash, dashMode, offset, highPrecisionDash});
 
 ## Layer Properties
 
-When added to a layer via the `extensions` prop, `PathStyleExtension` adds the following
-properties to the layer.
+When added to a layer via the `extensions` prop, `PathStyleExtension` adds the following properties to the layer.
 
 #### `getDashArray` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getdasharray}
 
-Must be specified if the dash capability is enabled.
+Must be specified if the `dash` capability is enabled.
 
 The dash array to draw each path with: `[dashSize, gapSize]` in the units selected by
 `dashUnits`. By default, one unit is half the path width. A `getDashArray` of `[4, 5]` on a
