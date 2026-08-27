@@ -176,7 +176,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         ? {
             // WebGPU cannot express WebGL's vertexOffset window in one vertex buffer layout.
             // Pack each segment's [left, start, end, right] high and low position parts instead.
-            instancePositions: {
+            pathPositions: {
               size: 24,
               type: 'float32',
               transition: false,

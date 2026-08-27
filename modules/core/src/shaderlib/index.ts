@@ -21,7 +21,8 @@ const SHADER_HOOKS_GLSL = [
 ];
 
 const SHADER_HOOKS_WGSL = [
-  // Not yet supported
+  'vs:CLIP_POSITION(position: ptr<function, vec4<f32>>, geometryCoordinates: vec2<f32>, instanceCoordinates: vec2<f32>)',
+  'fs:CLIP_COLOR()'
 ];
 
 export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {

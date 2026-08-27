@@ -209,32 +209,37 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         size: 1,
         transition: true,
         accessor: 'getRadius',
-        defaultValue: 1
+        defaultValue: 1,
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
         transition: true,
         type: 'unorm8',
         accessor: 'getFillColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: [0, 0, 0, 255],
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
         transition: true,
         type: 'unorm8',
         accessor: 'getLineColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: [0, 0, 0, 255],
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
         size: 1,
         transition: true,
         accessor: 'getLineWidth',
-        defaultValue: 1
+        defaultValue: 1,
+        bufferGroup: 'scatterplot-instance-data'
       },
       instancePixelOffset: {
         size: 2,
         transition: true,
-        accessor: 'getPixelOffset'
+        accessor: 'getPixelOffset',
+        bufferGroup: 'scatterplot-instance-data'
       },
       ...attributes
     });
