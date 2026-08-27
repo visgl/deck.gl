@@ -526,10 +526,7 @@ webglTest('Deck#multi-canvas presentation', async () => {
       left: {longitude: 0, latitude: 0, zoom: 1},
       right: {longitude: 10, latitude: 10, zoom: 1}
     },
-    views: [
-      new MapView({id: 'left', canvasId: 'deck-test-canvas-a'}),
-      new MapView({id: 'right', canvasId: 'deck-test-canvas-b'})
-    ],
+    views: [new MapView({id: 'left'}), new MapView({id: 'right', canvasId: 'deck-test-canvas-b'})],
     layers: [],
     widgets: [leftWidget, rightWidget]
   });
@@ -548,6 +545,10 @@ webglTest('Deck#multi-canvas presentation', async () => {
   expect(deck.eventManagers['deck-test-canvas-b'].getElement()).toBe(eventRootB);
   expect(deck.getEventManager('left')?.getElement()).toBe(eventRootA);
   expect(deck.getEventManager('right')?.getElement()).toBe(eventRootB);
+  // @ts-expect-error testing private state
+  expect(deck.getCanvasContext('left')).toBe(
+    deck._canvasManager.targets['deck-test-canvas-a'].presentationContext
+  );
   // @ts-expect-error testing private state
   expect(deck.getCanvasContext('right')).toBe(
     deck._canvasManager.targets['deck-test-canvas-b'].presentationContext

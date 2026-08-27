@@ -496,9 +496,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._canvasManager.finalize();
     if (this._isMultiCanvasMode()) {
       this.canvas = null;
-    }
-
-    if (!this._isMultiCanvasMode() && this.canvas && this.canvas === this._ownedCanvas) {
+    } else if (this.canvas && this.canvas === this._ownedCanvas) {
       // remove internally created canvas
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
@@ -711,7 +709,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   /** Get the canvas context associated with a view or the default Deck canvas. */
   getCanvasContext(viewId?: string): CanvasContext | PresentationContext | null {
-    const canvasId = viewId ? this.viewManager?.getCanvasId(viewId) : undefined;
+    const canvasId = viewId ? this.viewManager?.getView(viewId)?.props.canvasId : undefined;
     return this._getCanvasContext(canvasId);
   }
 
@@ -1174,17 +1172,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     assert(!props.canvas);
 
-    if (props.gl) {
-      throw new Error(
-        '`_canvases` is not supported with `gl`. Do not supply `gl`; let Deck create the device.'
-      );
-    }
-
-    if (props.device?.canvasContext && !props.device.getDefaultCanvasContext().offscreenCanvas) {
-      throw new Error(
-        '`_canvases` requires an offscreen-backed default canvas context when using an external device.'
-      );
-    }
+    assert(!props.gl);
+    assert(!props.device?.canvasContext || props.device.getDefaultCanvasContext().offscreenCanvas);
   }
 
   private _createEventManager(root: HTMLElement): EventManager {
@@ -1676,7 +1665,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       timeline,
       eventManager: this.eventManager,
       eventManagers: this.eventManagers,
-      getCanvasContext: this._isMultiCanvasMode() ? this._getCanvasContext.bind(this) : undefined,
+      getCanvasContext: this._isMultiCanvasMode() ? this.getCanvasContext.bind(this) : undefined,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
       pickPosition: this._pickPositionForController.bind(this),
