@@ -66,6 +66,11 @@
       <a href="./path-style-extension-cpu.html">CPU benchmark page</a>; segment mode has no phase
       pass.
     </p>
+    <p>
+      “Pass-only FPS” is <code>1000 / median GPU ms</code> and is useful for comparing these
+      isolated render passes; it is not whole-application FPS. The 60 Hz and 120 Hz columns show
+      how much of those frame budgets the added time versus a plain PathLayer would consume.
+    </p>
     <form id="controls">
       <label>
         Samples
@@ -81,6 +86,10 @@
           <th>Variant</th>
           <th>Median GPU ms</th>
           <th>p95 GPU ms</th>
+          <th>Added vs plain ms</th>
+          <th>Pass-only FPS</th>
+          <th>Added 60 Hz budget</th>
+          <th>Added 120 Hz budget</th>
           <th>vs plain</th>
           <th>vs segment dash</th>
         </tr>

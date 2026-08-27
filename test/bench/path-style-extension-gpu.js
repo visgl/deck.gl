@@ -220,29 +220,42 @@ function percentile(sorted, fraction) {
 }
 
 function appendResults(results) {
-  const plainMedian = results.find(result => result.variant.id === 'plain').median;
-  const segmentMedian = results.find(result => result.variant.id === 'segment-widths').median;
   for (const result of results) {
+    const metrics = getDerivedMetrics(result, results);
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${result.workload.label}</td>
       <td>${result.variant.label}</td>
       <td>${result.median.toFixed(3)}</td>
       <td>${result.p95.toFixed(3)}</td>
-      <td>${(result.median / plainMedian).toFixed(2)}×</td>
-      <td>${(result.median / segmentMedian).toFixed(2)}×</td>
+      <td>${metrics.addedGpuMs.toFixed(3)}</td>
+      <td>${metrics.passOnlyFps.toFixed(0)}</td>
+      <td>${metrics.percentOf60HzBudget.toFixed(2)}%</td>
+      <td>${metrics.percentOf120HzBudget.toFixed(2)}%</td>
+      <td>${metrics.relativeToPlain.toFixed(2)}×</td>
+      <td>${metrics.relativeToSegment.toFixed(2)}×</td>
     `;
     resultsElement.appendChild(row);
   }
 }
 
 function logResults(deviceInfo, sampleCount, results) {
-  const output = results.map(result => ({
-    workload: result.workload.id,
-    variant: result.variant.id,
-    medianGpuMs: Number(result.median.toFixed(3)),
-    p95GpuMs: Number(result.p95.toFixed(3))
-  }));
+  const output = results.map(result => {
+    const workloadResults = results.filter(
+      candidate => candidate.workload.id === result.workload.id
+    );
+    const metrics = getDerivedMetrics(result, workloadResults);
+    return {
+      workload: result.workload.id,
+      variant: result.variant.id,
+      medianGpuMs: Number(result.median.toFixed(3)),
+      p95GpuMs: Number(result.p95.toFixed(3)),
+      addedGpuMs: Number(metrics.addedGpuMs.toFixed(3)),
+      passOnlyFps: Number(metrics.passOnlyFps.toFixed(0)),
+      percentOf60HzBudget: Number(metrics.percentOf60HzBudget.toFixed(2)),
+      percentOf120HzBudget: Number(metrics.percentOf120HzBudget.toFixed(2))
+    };
+  });
   console.log(
     JSON.stringify(
       {deviceInfo, width: WIDTH, height: HEIGHT, sampleCount, results: output},
@@ -251,6 +264,20 @@ function logResults(deviceInfo, sampleCount, results) {
     )
   );
   console.table(output);
+}
+
+function getDerivedMetrics(result, results) {
+  const plainMedian = results.find(candidate => candidate.variant.id === 'plain').median;
+  const segmentMedian = results.find(candidate => candidate.variant.id === 'segment-widths').median;
+  const addedGpuMs = result.median - plainMedian;
+  return {
+    addedGpuMs,
+    passOnlyFps: 1000 / result.median,
+    percentOf60HzBudget: (addedGpuMs / (1000 / 60)) * 100,
+    percentOf120HzBudget: (addedGpuMs / (1000 / 120)) * 100,
+    relativeToPlain: result.median / plainMedian,
+    relativeToSegment: result.median / segmentMedian
+  };
 }
 
 function createThinPaths() {
