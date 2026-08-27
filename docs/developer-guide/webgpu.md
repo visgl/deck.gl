@@ -63,7 +63,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
 | `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
@@ -81,6 +81,7 @@ The table below covers the public layer exports from the layer packages. It is d
 - `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 
 - `H3ClusterLayer` renders through the polygon path.
 - `A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
+- `Tile3DLayer` supports point-cloud, glTF scenegraph, and I3S mesh tile content on WebGPU.
 
 ## Extensions
 
