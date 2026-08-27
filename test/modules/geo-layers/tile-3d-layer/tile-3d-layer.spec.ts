@@ -6,7 +6,26 @@ import {test, expect} from 'vitest';
 
 import {LayerTestCase, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-3d-layer';
+import {COORDINATE_SYSTEM, WebMercatorViewport} from '@deck.gl/core';
+
+test('Tile3DLayer#normalizeCoordinateSystem', () => {
+  // Loaders that predate the v9.3 string constants report numeric values, see issue #10368
+  expect(normalizeCoordinateSystem(-1)).toBe(COORDINATE_SYSTEM.DEFAULT);
+  expect(normalizeCoordinateSystem(0)).toBe(COORDINATE_SYSTEM.CARTESIAN);
+  expect(normalizeCoordinateSystem(1)).toBe(COORDINATE_SYSTEM.LNGLAT);
+  expect(normalizeCoordinateSystem(2)).toBe(COORDINATE_SYSTEM.METER_OFFSETS);
+  expect(normalizeCoordinateSystem(3)).toBe(COORDINATE_SYSTEM.LNGLAT_OFFSETS);
+
+  // String constants pass through untouched
+  expect(normalizeCoordinateSystem(COORDINATE_SYSTEM.METER_OFFSETS)).toBe(
+    COORDINATE_SYSTEM.METER_OFFSETS
+  );
+  expect(normalizeCoordinateSystem(COORDINATE_SYSTEM.LNGLAT)).toBe(COORDINATE_SYSTEM.LNGLAT);
+
+  // Unknown numeric values are passed through so that the core validation reports them
+  expect(normalizeCoordinateSystem(42)).toBe(42);
+});
 
 test('Tile3DLayer', async () => {
   const testCases: LayerTestCase<Tile3DLayer>[] = [
