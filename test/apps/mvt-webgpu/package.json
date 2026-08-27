@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/geo-layers": "^9.0.0",
+    "@loaders.gl/mvt": "^4.0.0",
+    "@luma.gl/webgpu": "^9.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
