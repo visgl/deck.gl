@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  clipShaderPlugin,
-  type ClipShaderPluginProps,
-  type ShaderModule
-} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shadertools';
 import {LayerExtension} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
@@ -40,6 +36,11 @@ bool clip_isInBounds(vec2 position) {
 
 export type ClipModuleProps = {
   bounds: Readonly<[number, number, number, number]>;
+};
+
+type WebGPUClipModuleProps = ClipModuleProps & {
+  enabled?: boolean;
+  mode?: 'instance' | 'geometry';
 };
 
 /*
@@ -114,7 +115,7 @@ export default class ClipExtension extends LayerExtension {
     this.state.clipByInstance = clipByInstance;
 
     if (this.context.device.type === 'webgpu') {
-      return {plugins: [clipShaderPlugin]};
+      return {};
     }
 
     return clipByInstance
@@ -131,7 +132,7 @@ export default class ClipExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as ClipModuleProps & ClipShaderPluginProps;
+    const clipProps = {} as WebGPUClipModuleProps;
     if (this.state.clipByInstance) {
       clipProps.bounds = clipBounds;
     } else {
@@ -147,6 +148,7 @@ export default class ClipExtension extends LayerExtension {
     }
 
     if (this.context.device.type === 'webgpu') {
+      clipProps.enabled = true;
       clipProps.mode = this.state.clipByInstance ? 'instance' : 'geometry';
     }
 

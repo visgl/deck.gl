@@ -7,8 +7,6 @@ import {project, phongMaterial} from '@deck.gl/core';
 import {mergeShaders} from '@deck.gl/core/utils/shader';
 
 const TEST_SHADERS = {vs: 'vs', fs: 'fs'};
-const TEST_PLUGIN_1 = {name: 'test-plugin-1'};
-const TEST_PLUGIN_2 = {name: 'test-plugin-2'};
 
 const TEST_CASES = [
   {
@@ -21,7 +19,6 @@ const TEST_CASES = [
     input: {
       defines: {DRAW: 1},
       modules: [project],
-      plugins: [TEST_PLUGIN_1],
       inject: {'fs#main-start': 'discard;'}
     },
     output: {
@@ -29,7 +26,6 @@ const TEST_CASES = [
       fs: 'fs',
       defines: {DRAW: 1},
       modules: [project],
-      plugins: [TEST_PLUGIN_1],
       inject: {'fs#main-start': 'discard;'}
     }
   },
@@ -39,7 +35,6 @@ const TEST_CASES = [
       vs: 'vs-v2',
       defines: {DRAW: 0, EXTRUDE: 1},
       modules: [phongMaterial],
-      plugins: [TEST_PLUGIN_2],
       inject: {'fs#main-end': 'filter_pickingColor(gl_FragColor);'}
     },
     output: {
@@ -47,7 +42,6 @@ const TEST_CASES = [
       fs: 'fs',
       defines: {DRAW: 0, EXTRUDE: 1},
       modules: [project, phongMaterial],
-      plugins: [TEST_PLUGIN_1, TEST_PLUGIN_2],
       inject: {'fs#main-start': 'discard;', 'fs#main-end': 'filter_pickingColor(gl_FragColor);'}
     }
   }

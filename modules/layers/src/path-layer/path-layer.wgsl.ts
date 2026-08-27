@@ -39,6 +39,7 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
+  @location(6) clipCoordinates: vec2<f32>,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -281,7 +282,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
-  CLIP_POSITION(&varyings.position, geometry.position.xy, geometry.worldPosition.xy);
+  varyings.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
@@ -293,8 +295,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
-
-  CLIP_COLOR();
 
 #ifdef ANTIALIASING
   // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
@@ -349,7 +349,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
-  // DECKGL_FILTER_COLOR
+  clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
   return deckgl_premultiplied_alpha(color);
 #else

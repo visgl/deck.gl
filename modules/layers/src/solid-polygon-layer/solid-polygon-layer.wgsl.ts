@@ -39,7 +39,7 @@ function getSolidPolygonFragmentMain() {
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0, 0.0);
 
-  CLIP_COLOR();
+  clip_filterColor(inp.clipCoordinates);
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(inp.pickingColor)) {
@@ -89,6 +89,7 @@ struct Varyings {
   @builtin(position) position: vec4<f32>,
   @location(0) vColor: vec4<f32>,
   @location(1) pickingColor: vec3<f32>,
+  @location(2) clipCoordinates: vec2<f32>,
 };
 
 @vertex
@@ -122,7 +123,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.vColor = apply_polygon_color(colors, normal, geometry.position);
   outp.pickingColor = geometry.pickingColor;
 
-  CLIP_POSITION(&outp.position, geometry.position.xy, geometry.worldPosition.xy);
+  outp.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&outp.position, geometry.worldPosition.xy);
 
   return outp;
 }
@@ -154,6 +156,7 @@ struct Varyings {
   @builtin(position) position: vec4<f32>,
   @location(0) vColor: vec4<f32>,
   @location(1) pickingColor: vec3<f32>,
+  @location(2) clipCoordinates: vec2<f32>,
 };
 
 @vertex
@@ -162,6 +165,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.position = vec4<f32>(0.0);
   outp.vColor = vec4<f32>(0.0);
   outp.pickingColor = picking_getPickingColorFromIndex(attributes.rowIndexes);
+  outp.clipCoordinates = vec2<f32>(0.0);
 
   if (attributes.vertexValid < 0.5) {
     return outp;
@@ -214,7 +218,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.vColor = apply_polygon_color(colors, normal, geometry.position);
   outp.pickingColor = geometry.pickingColor;
 
-  CLIP_POSITION(&outp.position, geometry.position.xy, geometry.worldPosition.xy);
+  outp.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&outp.position, geometry.worldPosition.xy);
 
   return outp;
 }

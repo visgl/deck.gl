@@ -44,6 +44,7 @@ struct Varyings {
   @location(3) innerUnitRadius: f32,
   @location(4) outerRadiusPixels: f32,
   @location(5) pickingColor: vec3<f32>,
+  @location(6) clipCoordinates: vec2<f32>,
 };
 
 @vertex
@@ -101,6 +102,10 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     // DECKGL_FILTER_SIZE(offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
     varyings.position = vec4<f32>(varyings.position.x + clipPixels.x, varyings.position.y + clipPixels.y, varyings.position.z, varyings.position.w);
+    geometry.position = vec4<f32>(
+      geometry.position.xy + project_pixel_size_vec2(offset.xy),
+      geometry.position.zw
+    );
   } else {
     var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
@@ -115,7 +120,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
   }
 
-  CLIP_POSITION(&varyings.position, geometry.position.xy, geometry.worldPosition.xy);
+  varyings.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   // Apply opacity to instance color, or return instance picking color
   varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
@@ -168,7 +174,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   fragColor.a *= inCircle;
 
-  CLIP_COLOR();
+  clip_filterColor(varyings.clipCoordinates);
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
