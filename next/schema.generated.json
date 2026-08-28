@@ -98,7 +98,7 @@
               },
               "canvasId": {
                 "type": "string",
-                "description": "Optional id of the presentation canvas associated with this view. Integrations that render views into multiple canvases can use this id to route view-scoped resources such as event managers."
+                "description": "The id of the presentation canvas this view should render into when `Deck` is using multi-canvas presentation.\n\nWhen not supplied, the view renders into the first configured canvas."
               },
               "x": {
                 "type": [
@@ -573,7 +573,7 @@
               },
               "canvasId": {
                 "type": "string",
-                "description": "Optional id of the presentation canvas associated with this view. Integrations that render views into multiple canvases can use this id to route view-scoped resources such as event managers."
+                "description": "The id of the presentation canvas this view should render into when `Deck` is using multi-canvas presentation.\n\nWhen not supplied, the view renders into the first configured canvas."
               },
               "x": {
                 "type": [
@@ -1039,7 +1039,7 @@
               },
               "canvasId": {
                 "type": "string",
-                "description": "Optional id of the presentation canvas associated with this view. Integrations that render views into multiple canvases can use this id to route view-scoped resources such as event managers."
+                "description": "The id of the presentation canvas this view should render into when `Deck` is using multi-canvas presentation.\n\nWhen not supplied, the view renders into the first configured canvas."
               },
               "x": {
                 "type": [
@@ -1503,7 +1503,7 @@
               },
               "canvasId": {
                 "type": "string",
-                "description": "Optional id of the presentation canvas associated with this view. Integrations that render views into multiple canvases can use this id to route view-scoped resources such as event managers."
+                "description": "The id of the presentation canvas this view should render into when `Deck` is using multi-canvas presentation.\n\nWhen not supplied, the view renders into the first configured canvas."
               },
               "x": {
                 "type": [
