@@ -37,8 +37,8 @@
     "src"
   ],
   "dependencies": {
-    "@luma.gl/test-utils": "^9.3.5",
-    "@luma.gl/webgl": "^9.3.5"
+    "@luma.gl/test-utils": "~9.3.5",
+    "@luma.gl/webgl": "~9.3.5"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.3.0",
