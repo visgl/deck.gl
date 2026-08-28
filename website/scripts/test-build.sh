@@ -19,6 +19,5 @@ docusaurus build
 # build gallery (scripting) examples
 (
   cd ../examples/gallery
-  yarn
   yarn build
 )
