@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.3
 
+#### deck.gl [v9.3.11] - Aug 28 2026
+
+- Lock luma.gl to 9.3 minor release
+
 #### deck.gl [v9.3.10] - Aug 11 2026
 
 - fix(layers): restore SDF text outlines (#10545)
