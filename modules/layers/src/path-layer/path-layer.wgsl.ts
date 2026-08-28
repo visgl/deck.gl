@@ -39,7 +39,8 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
-  @location(6) clipCoordinates: vec2<f32>,
+  // Location 6 is reserved for TripsLayer's injected vTime varying.
+  @location(7) clipCoordinates: vec2<f32>,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -349,6 +350,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
+  // DECKGL_FILTER_COLOR
   clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
   return deckgl_premultiplied_alpha(color);
