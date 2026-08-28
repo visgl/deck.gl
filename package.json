@@ -34,7 +34,7 @@
     "test-ci": "RENDER_TEST_DEVICE=webgl ocular-test node headless render --coverage",
     "test-browser": "ocular-test browser",
     "test-tape-compat": "ocular-test tape-compat",
-    "test-website": "cd website && yarn && yarn test-build && cd ..",
+    "test-website": "cd website && yarn install --immutable && yarn test-build && cd ..",
     "bench": "vite --config test/bench/vite.config.mjs --open /browser.html",
     "metrics": "ocular-metrics",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
@@ -86,5 +86,5 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@4.15.0"
 }
