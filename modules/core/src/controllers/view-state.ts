@@ -12,6 +12,16 @@ export type ConstraintContext = {
   mode: ConstraintMode;
 };
 
+/** Carries a zoom anchor until constraints have selected the displayed scale. */
+export const CONSTRAINT_AROUND = Symbol('constraintAround');
+
+export type ConstraintAround = {
+  [CONSTRAINT_AROUND]?: {
+    position: [number, number] | [number, number, number];
+    screenPosition: [number, number];
+  };
+};
+
 export default abstract class ViewState<
   T,
   Props extends Record<string, any>,

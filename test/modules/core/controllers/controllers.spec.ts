@@ -264,6 +264,90 @@ test('MapController disables double-click drag zoom', () => {
   expect(controller.props.zoom, 'double-click drag zoom stays disabled').toBe(10);
 });
 
+const MAP_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [-10, -10],
+  [10, 10]
+];
+
+function createMapRubberBandController({
+  controller: controllerOptions,
+  initialViewState,
+  ...options
+}: RubberBandControllerOptions = {}) {
+  return createTestController({
+    ...options,
+    view: new MapView({
+      controller: {maxBounds: MAP_MAX_BOUNDS, rubberBand: true, ...controllerOptions}
+    }),
+    initialViewState: {longitude: 0, latitude: 0, zoom: 4, ...initialViewState}
+  });
+}
+
+test('MapState constrains and releases elastic panning', () => {
+  const controller = createMapRubberBandController();
+  const startedState = controller.controllerState.panStart({pos: [50, 50]}, {mode: 'hard'});
+  const hardLongitude = startedState
+    .pan({pos: [400, 50]}, {mode: 'hard'})
+    .getViewportProps().longitude;
+  const elasticState = startedState.pan({pos: [400, 50]}, {mode: 'elastic'});
+  const elasticLongitude = elasticState.getViewportProps().longitude;
+  const rawLongitude = startedState
+    .pan({pos: [400, 50]}, {mode: 'preserve'})
+    .getViewportProps().longitude;
+
+  expect(elasticLongitude, 'elastic panning temporarily exceeds the edge').toBeLessThan(
+    hardLongitude
+  );
+  expect(elasticLongitude, 'elastic panning resists the raw displacement').toBeGreaterThan(
+    rawLongitude
+  );
+  expect(
+    elasticState.panEnd({mode: 'rebound'}).getViewportProps().longitude,
+    'panEnd returns to the nearest valid edge'
+  ).toBeCloseTo(hardLongitude);
+  controller.finalize();
+});
+
+test('MapController springs overscroll back within maxBounds', () => {
+  const interactionStates: any[] = [];
+  const controller = createMapRubberBandController({
+    onStateChange: state => interactionStates.push({...state})
+  });
+  const settledLongitude = controller.controllerState
+    .panStart({pos: [50, 50]}, {mode: 'hard'})
+    .pan({pos: [400, 50]}, {mode: 'hard'})
+    .getViewportProps().longitude;
+
+  panRubberBand(controller, {x: 400});
+  expect(controller.props.longitude, 'panning temporarily exceeds maxBounds').toBeLessThan(
+    settledLongitude
+  );
+  controller.handleEvent(makeGestureEvent('panend', {x: 400}) as any);
+
+  expect(controller.transitionManager.transition.inProgress, 'release starts a rebound').toBe(true);
+  advanceRubberBandTransition(controller, 300);
+  expect(controller.props.longitude, 'the view settles at the constrained edge').toBeCloseTo(
+    settledLongitude
+  );
+  expectRubberBandInteractionEnded(interactionStates);
+  controller.finalize();
+});
+
+test('MapController rubber-bands continuous zoom limits', () => {
+  const controller = createMapRubberBandController({
+    controller: {maxBounds: null},
+    initialViewState: {zoom: 0.5, minZoom: 0, maxZoom: 1}
+  });
+  const endEvent = pinchRubberBand(controller, 4);
+
+  expect(controller.props.zoom, 'pinch zoom temporarily exceeds maxZoom').toBeGreaterThan(1);
+  expect(controller.props.zoom, 'elastic zoom resists the raw zoom').toBeLessThan(2.5);
+  controller.handleEvent(endEvent as any);
+  advanceRubberBandTransition(controller, 300);
+  expect(controller.props.zoom, 'zoom settles at maxZoom').toBeCloseTo(1);
+  controller.finalize();
+});
+
 test('GlobeController', async () => {
   await testController(
     GlobeView,

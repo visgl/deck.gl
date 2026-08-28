@@ -9,7 +9,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const lightCodeTheme = prismThemes.nightOwlLight;
 const darkCodeTheme = prismThemes.nightOwl;
 
-const {rspack} = require('@docusaurus/faster');
+const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
 
@@ -33,7 +33,37 @@ const config = {
     v4: {
       removeLegacyPostBuildHeadAttribute: true
     },
-    faster: true
+    faster: {
+      // Use a custom SWC loader below so styled-components receives stable SSR component IDs.
+      swcJsLoader: false,
+      swcJsMinimizer: true,
+      swcHtmlMinimizer: true,
+      lightningCssMinimizer: true,
+      mdxCrossCompilerCache: true,
+      rspackBundler: true,
+      rspackPersistentCache: true,
+      ssgWorkerThreads: true,
+      gitEagerVcs: true
+    }
+  },
+
+  webpack: {
+    jsLoader(isServer) {
+      const options = getSwcLoaderOptions({isServer, bundlerName: 'rspack'});
+      options.jsc.experimental = {
+        plugins: [
+          [
+            require.resolve('@swc/plugin-styled-components'),
+            {displayName: true, ssr: true}
+          ]
+        ]
+      };
+
+      return {
+        loader: 'builtin:swc-loader',
+        options
+      };
+    }
   },
 
   presets: [
@@ -83,12 +113,16 @@ const config = {
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom'),
+            // Explicit subpaths must precede the namespace alias, which otherwise bypasses
+            // package exports and resolves them as nonexistent directories.
             '@luma.gl/webgl/constants': resolve(
               '../node_modules/@luma.gl/webgl/dist/constants'
             ),
             '@luma.gl/gpgpu/webgpu': resolve(
               '../node_modules/@luma.gl/gpgpu/dist/operations/webgpu'
             ),
+            '@luma.gl/gpgpu/gpu-data': resolve('../node_modules/@luma.gl/gpgpu/dist/gpu-data'),
+            '@luma.gl/shadertools/wgsl': resolve('../node_modules/@luma.gl/shadertools/dist/wgsl'),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
             '@math.gl': resolve('../node_modules/@math.gl'),
             '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
