@@ -120,6 +120,19 @@ export default class LayersPass extends Pass {
 
     const renderStats: RenderStats[] = [];
 
+    if (!viewports.length) {
+      const renderPass = this.device.beginRenderPass({
+        framebuffer,
+        parameters,
+        clearColor: clearColor as NumberArray4,
+        clearDepth,
+        clearStencil
+      });
+      renderPass.end();
+      this.device.submit();
+      return renderStats;
+    }
+
     try {
       for (const viewport of viewports) {
         onViewportActive?.(viewport);
