@@ -312,7 +312,8 @@ test('ViewManager#layouts and filters views by canvas', () => {
     },
     width: 1,
     height: 1,
-    getCanvasContext: canvasId => canvasContexts[canvasId || 'left-canvas'] || null,
+    getCanvasContext: viewId =>
+      canvasContexts[viewId === 'right' ? 'right-canvas' : 'left-canvas'] || null,
     eventManager: leftEventManager,
     eventManagers: {
       'left-canvas': leftEventManager,

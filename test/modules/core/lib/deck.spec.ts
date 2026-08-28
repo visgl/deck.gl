@@ -671,14 +671,21 @@ webglTest('Deck#multi-canvas isolates shared event roots', async () => {
     width: 64,
     height: 64,
     _canvases: [canvasA, canvasB],
-    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    initialViewState: {
+      left: {longitude: 0, latitude: 0, zoom: 1},
+      right: {longitude: 0, latitude: 0, zoom: 1}
+    },
+    views: [
+      new MapView({id: 'left', canvasId: canvasA.id}),
+      new MapView({id: 'right', canvasId: canvasB.id})
+    ],
     layers: []
   });
 
   await waitForRender(deck);
 
-  expect(deck.getEventManager('deck-test-shared-event-root-a')?.getElement()).toBe(canvasA);
-  expect(deck.getEventManager('deck-test-shared-event-root-b')?.getElement()).toBe(canvasB);
+  expect(deck.getEventManager('left')?.getElement()).toBe(canvasA);
+  expect(deck.getEventManager('right')?.getElement()).toBe(canvasB);
 
   finalizeOwnedDeck(deck);
   eventRoot.remove();
