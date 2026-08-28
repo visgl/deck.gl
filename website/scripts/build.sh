@@ -43,7 +43,6 @@ BABEL_ENV=esm npx babel ../examples/pydeck/src/pyodide-worker.ts --out-file ./$O
 # build gallery (scripting) examples
 (
   cd ../examples/gallery
-  yarn
   yarn build
 )
 mkdir $OUTPUT_DIR/gallery
