@@ -321,10 +321,20 @@ test('PathStyleExtension#shader defines', () => {
         extensions: [new PathStyleExtension({offset: true})]
       },
       onAfterUpdate: ({layer}) => {
+        const shaders = layer.getShaders();
         expect(
-          layer.getShaders().defines.DASH_ENABLED,
+          shaders.defines.DASH_ENABLED,
           'DASH_ENABLED is unset when only offset is enabled'
         ).toBeUndefined();
+        const pathStyleModule = shaders.modules.find(module => module.name === 'pathStyle')!;
+        expect(
+          pathStyleModule.inject?.['fs:#main-start'],
+          'offset does not reject fragments before PathLayer evaluates derivatives'
+        ).toBeUndefined();
+        expect(
+          pathStyleModule.inject?.['fs:#main-end'],
+          'non-AA offset retains a deferred hard clip'
+        ).toContain('#ifndef ANTIALIASING');
       }
     },
     {
@@ -340,6 +350,16 @@ test('PathStyleExtension#shader defines', () => {
           defines.HIGH_PRECISION_DASH,
           'HIGH_PRECISION_DASH is off by default'
         ).toBeUndefined();
+        const pathStyleModule = layer
+          .getShaders()
+          .modules.find(module => module.name === 'pathStyle')!;
+        const fragmentStart = pathStyleModule.inject?.['fs:#main-start'];
+        expect(fragmentStart, 'rounded caps use a signed pixel-distance ramp').toContain(
+          'smoothedge(0.0, capEdgePixels)'
+        );
+        expect(fragmentStart, 'coverage is bounded before deferred rejection').toContain(
+          'dashCoverage = clamp(dashCoverage, 0.0, 1.0)'
+        );
       }
     },
     {

@@ -164,9 +164,9 @@ float dashPatternCoverage(
       // wrapped period boundary. Evaluate fwidth for every fragment in the quad; derivatives
       // are undefined inside the non-uniform gap branch below.
       float distanceToEnd = length(vec2(max(distanceAlongGap, 0.0), vPathPosition.x));
-      float edgeWidth = max(fwidth(distanceToEnd), 0.0001);
+      float capEdgePixels = (1.0 - distanceToEnd) / max(fwidth(distanceToEnd), 1e-6);
       if (distanceAlongGap > 0.0) {
-        dashCoverage = 1.0 - smoothstep(1.0 - edgeWidth, 1.0 + edgeWidth, distanceToEnd);
+        dashCoverage = smoothedge(0.0, capEdgePixels);
       }
       // That smoothstep resolves one dash end at a time, so it stops meaning anything once a
       // whole period fits inside the filter footprint. Start fading only at that boundary;
@@ -175,8 +175,9 @@ float dashPatternCoverage(
       dashCoverage = mix(dashCoverage, solidLength / unitLength, subPixelBlend);
     }
 
+    dashCoverage = clamp(dashCoverage, 0.0, 1.0);
     // Fully transparent fragments would still write depth and occlude whatever is behind.
-    shouldDiscardDash = shouldDiscardDash || dashCoverage < 0.004;
+    shouldDiscardDash = shouldDiscardDash || dashCoverage <= 0.0;
   }
 `,
 
@@ -428,12 +429,15 @@ in float instanceOffsets;
   vDashOffset *= offsetWidth;
 #endif
 `,
-    'fs:#main-start': `
-  float isInside;
-  isInside = step(-1.0, vPathPosition.x) * step(vPathPosition.x, 1.0);
-  if (isInside == 0.0) {
+    'fs:#main-end': `
+#ifndef ANTIALIASING
+  // With analytic antialiasing, PathLayer evaluates this boundary using the remapped
+  // vPathPosition and retains the complete centered coverage ramp. The hard clip remains for
+  // the original non-AA path.
+  if (abs(vPathPosition.x) > 1.0) {
     discard;
   }
+#endif
 `
   }
 };
