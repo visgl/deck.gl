@@ -93,7 +93,7 @@ test('PathStyleExtension#offset-only shader module', () => {
         props: {
           id: 'path-offset-only-test',
           data: FIXTURES.zigzag,
-          getPath: d => d.path,
+          getPath: dataPoint => dataPoint.path,
           getOffset: 1,
           extensions: [new PathStyleExtension({offset: true})]
         },
@@ -108,7 +108,7 @@ test('PathStyleExtension#offset-only shader module', () => {
         }
       }
     ],
-    onError: err => expect(err).toBeFalsy()
+    onError: error => expect(error).toBeFalsy()
   });
 });
 
