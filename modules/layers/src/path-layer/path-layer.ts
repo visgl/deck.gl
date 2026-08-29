@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, color, picking, UNIT} from '@deck.gl/core';
+import {Layer, WebMercatorViewport, project, project32, color, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
@@ -24,6 +24,7 @@ import type {
   GetPickingInfoParams,
   PickingInfo,
   DefaultProps,
+  ProjectUniforms,
   Viewport
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
@@ -134,7 +135,7 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
-type PathProjectionScale = [number, number, number] | null;
+type PathProjectionScale = number[] | null;
 
 function getPathProjectionScale(viewport: Viewport): PathProjectionScale {
   if (viewport.isGeospatial) {
@@ -150,7 +151,12 @@ function pathProjectionScalesEqual(
 ): boolean {
   return (
     left === right ||
-    Boolean(left && right && left[0] === right[0] && left[1] === right[1] && left[2] === right[2])
+    Boolean(
+      left &&
+        right &&
+        left.length === right.length &&
+        left.every((value, index) => value === right[index])
+    )
   );
 }
 
@@ -197,13 +203,48 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 
+  private getPathProjectionScale(viewport: Viewport): PathProjectionScale {
+    const coordinateSystem = this.props.coordinateSystem;
+    const hasDashMetrics = Boolean(this.getAttributeManager()?.getAttributes().instanceDashOffsets);
+    const trackViewportScale =
+      hasDashMetrics &&
+      viewport instanceof WebMercatorViewport &&
+      viewport.zoom >= 12 &&
+      // Offset coordinate systems use their fixed coordinateOrigin as the projection origin.
+      // Default/lnglat and preprojected Cartesian paths follow the viewport center instead.
+      (coordinateSystem === 'default' ||
+        coordinateSystem === 'lnglat' ||
+        coordinateSystem === 'cartesian');
+
+    if (trackViewportScale) {
+      const projectUniforms = project.getUniforms({
+        viewport,
+        coordinateSystem,
+        coordinateOrigin: this.props.coordinateOrigin,
+        autoWrapLongitude: this.wrapLongitude
+      }) as ProjectUniforms;
+      return [
+        projectUniforms.coordinateOrigin[1],
+        projectUniforms.commonOrigin[1],
+        ...projectUniforms.commonUnitsPerWorldUnit,
+        ...projectUniforms.commonUnitsPerWorldUnit2,
+        projectUniforms.commonUnitsPerMeter[2]
+      ];
+    }
+
+    return getPathProjectionScale(viewport);
+  }
+
   shouldUpdateState(params: UpdateParameters<this>): boolean {
     const {viewport} = this.context;
     return (
       super.shouldUpdateState(params) ||
       this.state?.tessellationProjectionMode !== viewport.projectionMode ||
       this.state?.tessellationResolution !== viewport.resolution ||
-      !pathProjectionScalesEqual(this.state?.pathProjectionScale, getPathProjectionScale(viewport))
+      !pathProjectionScalesEqual(
+        this.state?.pathProjectionScale,
+        this.getPathProjectionScale(viewport)
+      )
     );
   }
 
@@ -305,7 +346,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }),
       tessellationProjectionMode: this.context.viewport.projectionMode,
       tessellationResolution: this.context.viewport.resolution,
-      pathProjectionScale: getPathProjectionScale(this.context.viewport)
+      pathProjectionScale: this.getPathProjectionScale(this.context.viewport)
     });
   }
 
@@ -318,7 +359,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const tessellationViewportChanged =
       this.state.tessellationProjectionMode !== viewport.projectionMode ||
       this.state.tessellationResolution !== viewport.resolution;
-    const pathProjectionScale = getPathProjectionScale(viewport);
+    const pathProjectionScale = this.getPathProjectionScale(viewport);
     const pathProjectionScaleChanged = !pathProjectionScalesEqual(
       this.state.pathProjectionScale,
       pathProjectionScale

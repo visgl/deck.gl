@@ -230,6 +230,7 @@ export default class DataColumn<Options, State> {
       this._buffer = null;
     }
     typedArrayManager.release(this.state.allocatedValue);
+    this.state.allocatedValue = null;
   }
 
   getBuffer(): Buffer | null {

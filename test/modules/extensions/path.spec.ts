@@ -8,8 +8,11 @@ import {
   Deck,
   OrthographicView,
   OrthographicViewport,
+  WebMercatorViewport,
+  project,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
+import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {
   PathLayer,
@@ -20,6 +23,7 @@ import {
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {preprocess} from '@luma.gl/shadertools';
 import {dashShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
+import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -190,7 +194,7 @@ test('PathStyleExtension#offset-only shader module', () => {
         props: {
           id: 'path-offset-only-test',
           data: FIXTURES.zigzag,
-          getPath: d => d.path,
+          getPath: dataPoint => dataPoint.path,
           getOffset: 1,
           extensions: [new PathStyleExtension({offset: true})]
         },
@@ -205,7 +209,7 @@ test('PathStyleExtension#offset-only shader module', () => {
         }
       }
     ],
-    onError: err => expect(err).toBeFalsy()
+    onError: error => expect(error).toBeFalsy()
   });
 });
 
@@ -652,8 +656,16 @@ test('PathStyleExtension#synchronizes live dash mode changes', () => {
 });
 
 test('PathStyleExtension#dash phase follows normalized path geometry', () => {
+  const antimeridianViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: 180,
+    latitude: 0,
+    zoom: 14
+  });
   testLayer({
     Layer: PathLayer,
+    viewport: antimeridianViewport,
     testCases: [
       {
         props: {
@@ -678,8 +690,8 @@ test('PathStyleExtension#dash phase follows normalized path geometry', () => {
           expect(getDashPhase(offsets, 1), 'invalid antimeridian separator remains zero').toBe(0);
           expect(
             getDashPhase(offsets, 2),
-            'second subpath carries phase across the cut'
-          ).toBeGreaterThan(0);
+            'second subpath carries the short crossing phase'
+          ).toBeCloseTo(5120 / 360, 5);
           expect(getDashPhase(offsets, 3), 'trailing invalid instance remains zero').toBe(0);
         }
       }
@@ -908,6 +920,124 @@ test('PathStyleExtension#dash phase tracks identity projection scale', () => {
         onAfterUpdate: ({layer}) => {
           const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
           expect(metrics, 'translation does not rebuild common-space metrics').toBe(stableMetrics);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () => {
+  const path = [
+    [-122.46, 37.9, 0],
+    [-122.45, 37.91, 1e8],
+    [-122.44, 37.92, 0]
+  ];
+  const baseViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 14
+  });
+  const latitudePannedViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.45,
+    latitude: 38,
+    zoom: 14
+  });
+  const longitudePannedViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.2,
+    latitude: 38,
+    zoom: 14
+  });
+  const zoomedViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.2,
+    latitude: 38,
+    zoom: 15
+  });
+  const getExpectedSegmentLength = (viewport: WebMercatorViewport): number => {
+    const uniforms = project.getUniforms({
+      viewport,
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+    }) as ProjectUniforms;
+    const projectPosition = (position: number[]): [number, number, number] => {
+      const offset = vec3.sub([], position, uniforms.coordinateOrigin);
+      const scale = vec3.scaleAndAdd(
+        [],
+        uniforms.commonUnitsPerWorldUnit,
+        uniforms.commonUnitsPerWorldUnit2,
+        offset[1]
+      );
+      return vec3.multiply([], offset, scale) as [number, number, number];
+    };
+    return vec3.dist(projectPosition(path[0]), projectPosition(path[1]));
+  };
+
+  let baseLength = 0;
+  let stableMetrics: Float32Array | null = null;
+  let stableProjectionScale: number[] | null = null;
+
+  testLayer({
+    Layer: PathLayer,
+    viewport: baseViewport,
+    testCases: [
+      {
+        viewport: baseViewport,
+        props: {
+          id: 'web-mercator-projection-dash-metrics',
+          data: [path],
+          getPath: pathData => pathData,
+          coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          baseLength = getDashPhase(metrics, 1);
+          expect(baseLength, 'base phase matches shader auto-offset projection').toBeCloseTo(
+            getExpectedSegmentLength(baseViewport),
+            3
+          );
+        }
+      },
+      {
+        viewport: latitudePannedViewport,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(getDashPhase(metrics, 1), 'latitude pan refreshes shader-scale phase').toBeCloseTo(
+            getExpectedSegmentLength(latitudePannedViewport),
+            3
+          );
+          expect(getDashPhase(metrics, 1), 'latitude pan changes elevated phase').not.toBe(
+            baseLength
+          );
+          stableMetrics = metrics;
+          stableProjectionScale = layer.state.pathProjectionScale;
+        }
+      },
+      {
+        viewport: longitudePannedViewport,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics, 'longitude-only pan preserves dash metrics').toBe(stableMetrics);
+          expect(layer.state.pathProjectionScale, 'longitude-only pan avoids layer updates').toBe(
+            stableProjectionScale
+          );
+        }
+      },
+      {
+        viewport: zoomedViewport,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics, 'same-mode zoom preserves common-space dash metrics').toBe(stableMetrics);
+          expect(layer.state.pathProjectionScale, 'same-mode zoom avoids layer updates').toBe(
+            stableProjectionScale
+          );
         }
       }
     ],
