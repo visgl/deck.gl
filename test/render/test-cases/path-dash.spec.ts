@@ -463,9 +463,10 @@ const testCases: TestCase[] = [
   // ---------------------------------------------------------------------------------------
   // Sub-pixel dash periods. The stroke is 10px wide, so one dash unit is 5px and the last
   // strips put a whole period well inside a single pixel. A per-fragment comparison cannot
-  // represent that and aliases into moire or reads as solid depending on where the phase
-  // lands; prefiltered coverage should instead fade each strip toward a uniform 50% alpha,
-  // since every pattern here has an even duty cycle.
+  // represent that and aliases into moire or reads as solid depending on where the phase lands.
+  // Square caps should fade toward their 50% interval duty cycle. Rounded caps should preserve
+  // capsule area per scanline: the center becomes opaque where neighboring caps close the gap,
+  // while coverage falls toward the square duty cycle at the lateral edge.
   // ---------------------------------------------------------------------------------------
   ...[false, true].map(capRounded => ({
     name: `path-dash-subpixel-${capRounded ? 'rounded' : 'square'}`,

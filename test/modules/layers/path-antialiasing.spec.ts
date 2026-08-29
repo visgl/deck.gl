@@ -66,8 +66,10 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   const antialiasingFragmentShader = preprocess(pathFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
+  const dashVertexShader = preprocess(pathVertexShader, {defines: {DASH_ENABLED: 1}});
   const defaultShaderWGSL = preprocess(shaderWGSL);
   const antialiasingShaderWGSL = preprocess(shaderWGSL, {defines: {ANTIALIASING: 1}});
+  const dashShaderWGSL = preprocess(shaderWGSL, {defines: {DASH_ENABLED: 1}});
 
   expect(defaultVertexShader).not.toContain('coverageScale');
   expect(defaultFragmentShader).not.toContain('fwidth');
@@ -75,6 +77,27 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   expect(defaultShaderWGSL).not.toContain('fwidth');
   expect(defaultShaderWGSL).toContain('return deckgl_premultiplied_alpha(varyings.vColor);');
   expect(pathUniforms.uniformTypes).not.toHaveProperty('antialiasing');
+
+  for (const shader of [
+    defaultVertexShader,
+    antialiasingVertexShader,
+    defaultShaderWGSL,
+    antialiasingShaderWGSL
+  ]) {
+    expect(shader).not.toContain('sourcePathLength');
+    expect(shader).not.toContain('currLength2D');
+    expect(shader).not.toContain('arcLengthRatio');
+    expect(shader).not.toContain('currentDeltaCommon');
+    expect(shader).not.toContain('billboardPathLength');
+  }
+
+  for (const shader of [dashVertexShader, dashShaderWGSL]) {
+    expect(shader).toContain('sourcePathLength');
+    expect(shader).toContain('currLength2D');
+    expect(shader).toContain('arcLengthRatio');
+    expect(shader).toContain('currentDeltaCommon');
+    expect(shader).toContain('billboardPathLength');
+  }
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');

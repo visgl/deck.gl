@@ -182,6 +182,27 @@ Remarks:
 * Widget UI with dynamic positioning, such as an `InfoWidget`, may not expose the `placement` prop as they control positioning internally.
 * For more information about using multiple deck.gl views, see the [Using Multiple Views](../../developer-guide/views.md#using-multiple-views) guide.
 
+### Using with Multiple Canvases
+
+When [`Deck._canvases`](../core/deck.md#_canvases) is supplied, deck.gl still mounts generated widget DOM under one shared `.deck-widget-container`. A widget's `viewId` selects the view used for positioning and event handling; that view's [`canvasId`](../core/view.md#canvasid) determines which presentation-canvas bounds offset the view container. The widget is not reparented into the canvas element.
+
+```ts
+new Deck({
+  parent: document.getElementById('deck-root'),
+  _canvases: ['canvas-london', 'canvas-tokyo'],
+  views: [
+    new MapView({id: 'london', canvasId: 'canvas-london'}),
+    new MapView({id: 'tokyo', canvasId: 'canvas-tokyo'})
+  ],
+  widgets: [
+    new ZoomWidget({viewId: 'london'}),
+    new ZoomWidget({id: 'tokyo-zoom', viewId: 'tokyo'})
+  ]
+});
+```
+
+Widgets without a `viewId` stay in the root widget container and are positioned relative to the shared parent, not a specific presentation canvas. Use a common `parent` that covers the presentation canvases when deck-managed widgets need to span them. To opt out of deck-managed positioning, supply an HTMLElement through [`_container`](../core/widget.md#_container).
+
 ## Controlled vs Uncontrolled Mode
 
 Many deck.gl widgets support both controlled and uncontrolled modes, similar to React form components.
