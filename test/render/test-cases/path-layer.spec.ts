@@ -598,6 +598,47 @@ describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () 
         `offset=${onOffset.partial}, ratio=${ratio.toFixed(3)})`
     ).toBeGreaterThan(0.75);
   }, 60000);
+
+  test('rounded offset coverage stays inside the remapped stroke width', async () => {
+    const roundedProps = {
+      data: [
+        {
+          path: [
+            [-30, -10],
+            [0, 10],
+            [30, -10]
+          ]
+        }
+      ],
+      getWidth: 12,
+      jointRounded: true,
+      capRounded: true
+    };
+    const rounded = await measureAntialiasingCoverage({
+      ...roundedProps,
+      antialiasing: true
+    });
+    const roundedOffset = await measureAntialiasingCoverage({
+      ...roundedProps,
+      antialiasing: true,
+      getOffset: 1,
+      extensions: [new PathStyleExtension({offset: true})]
+    });
+
+    const solidRatio = roundedOffset.solid / rounded.solid;
+    const partialRatio = roundedOffset.partial / rounded.partial;
+    expect(roundedOffset.solid, 'rounded offset stroke was drawn').toBeGreaterThan(200);
+    expect(
+      solidRatio,
+      `rounded offset envelope does not expose widened corner geometry ` +
+        `(ratio=${solidRatio.toFixed(3)})`
+    ).toBeLessThan(1.75);
+    expect(
+      partialRatio,
+      `rounded offset feather stays bounded by the remapped stroke width ` +
+        `(ratio=${partialRatio.toFixed(3)})`
+    ).toBeLessThan(1.75);
+  }, 60000);
 });
 
 describe.runIf(isRenderTestDeviceEnabled('webgpu'))('PathLayer#antialiasing on WebGPU', () => {
