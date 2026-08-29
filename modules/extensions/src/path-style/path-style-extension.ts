@@ -64,35 +64,38 @@ export type PathStyleExtensionProps<DataT = any> = {
 /** How the dash pattern is positioned along a path. */
 export type DashMode = 'segment' | 'path';
 
+/** Options for configuring a {@link PathStyleExtension}. */
 export type PathStyleExtensionOptions = {
   /**
    * Add capability to render dashed lines.
    * @default false
    */
-  dash: boolean;
+  dash?: boolean;
   /**
    * Add capability to offset lines.
    * @default false
    */
-  offset: boolean;
+  offset?: boolean;
   /**
    * How the dash pattern is positioned along a path. `'path'` keeps dashes continuous across
    * rendered segments, at the cost of a vertex attribute and a CPU pass over the geometry.
    * @default 'segment'
    */
-  dashMode: DashMode;
+  dashMode?: DashMode;
   /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
    * @deprecated Use `dashMode: 'path'` instead, which this is now an alias for.
    * @default false
    */
-  highPrecisionDash: boolean;
+  highPrecisionDash?: boolean;
 };
+
+type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
-export default class PathStyleExtension extends LayerExtension<PathStyleExtensionOptions> {
+export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'PathStyleExtension';
 
@@ -101,7 +104,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     offset = false,
     dashMode,
     highPrecisionDash = false
-  }: Partial<PathStyleExtensionOptions> = {}) {
+  }: PathStyleExtensionOptions = {}) {
     const resolvedDashMode: DashMode = dashMode ?? (highPrecisionDash ? 'path' : 'segment');
     super({
       dash: dash || highPrecisionDash || dashMode !== undefined,
@@ -348,6 +351,13 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     }
   }
 
+  /**
+   * Calculates the distance from the start of a path to each rendered segment.
+   *
+   * The final entry is zero because PathLayer reserves the final vertex as invalid padding.
+   * This scalar return shape is retained for compatibility; path-mode rendering uses an
+   * internal attribute containing both each segment offset and the total path length.
+   */
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
     const result = [0];
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;

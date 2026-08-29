@@ -21,6 +21,8 @@ import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
+import type {PathStyleExtensionOptions} from '@deck.gl/extensions';
+
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 async function waitForRender(deck: Deck): Promise<void> {
@@ -427,6 +429,11 @@ test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
 });
 
 test('PathStyleExtension#dashMode', () => {
+  const optionalOptions: PathStyleExtensionOptions = {};
+  expect(new PathStyleExtension(optionalOptions).opts.dash, 'exported options are optional').toBe(
+    false
+  );
+
   // 'path' allocates the offsets attribute; 'segment' must not pay for it.
   const segmentLayer = new PathStyleExtension({dash: true});
   expect(segmentLayer.opts.dashMode, 'defaults to segment').toBe('segment');
@@ -450,6 +457,30 @@ test('PathStyleExtension#dashMode', () => {
   const legacy = new PathStyleExtension({highPrecisionDash: true});
   expect(legacy.opts.dashMode, 'highPrecisionDash maps to dashMode path').toBe('path');
   expect(legacy.opts.dash, 'highPrecisionDash implies dash').toBe(true);
+
+  const explicitSegment = new PathStyleExtension({
+    dashMode: 'segment',
+    highPrecisionDash: true
+  });
+  expect(explicitSegment.opts.dashMode, 'explicit segment mode wins over the legacy alias').toBe(
+    'segment'
+  );
+  expect(
+    explicitSegment.opts.highPrecisionDash,
+    'resolved legacy option reflects explicit segment mode'
+  ).toBe(false);
+
+  const explicitPath = new PathStyleExtension({
+    dashMode: 'path',
+    highPrecisionDash: false
+  });
+  expect(explicitPath.opts.dashMode, 'explicit path mode wins over a false legacy alias').toBe(
+    'path'
+  );
+  expect(
+    explicitPath.opts.highPrecisionDash,
+    'resolved legacy option reflects explicit path mode'
+  ).toBe(true);
 
   const testCases = [
     {
