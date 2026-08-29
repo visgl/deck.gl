@@ -239,8 +239,8 @@ Dash behavior changed substantially in v9.4. Automatic rendering repairs need no
 
 | Symptom | Why | What resolves it |
 | --- | --- | --- |
-| A dashed path renders as a **solid line** | The pattern restarts at every vertex, so segments no longer than `dashSize` never reach a gap | `dashMode: 'path'` |
-| Dashes only appear once you **zoom in** | Zooming grows segments relative to a width-relative pattern | `dashMode: 'path'` |
+| A dashed path renders as a **solid line** | The pattern restarts at every rendered boundary, so segments no longer than `dashSize` never reach a gap | `dashMode: 'path'` |
+| Dashes only appear once you **zoom in** | Zooming grows rendered segments relative to a width-relative pattern | `dashMode: 'path'` |
 | The pattern **changes when the data is simplified** or resampled | The phase restarts at rendered segment boundaries rather than following the conceptual stroke | `dashMode: 'path'` |
 | Gaps look **uneven from segment to segment** under `dashJustified` | Each segment is fitted independently | `dashMode: 'path'` with `dashJustified` |
 | Dash length **changes as you zoom** with `widthUnits: 'meters'` | Width-relative dashes scale with the stroke | `dashUnits: 'pixels'` for a screen-space pattern |
