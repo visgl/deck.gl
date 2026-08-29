@@ -4,10 +4,12 @@
 
 import {
   LayerExtension,
+  WebMercatorViewport,
+  project,
   _deepEqual as deepEqual,
   _mergeShaders as mergeShaders
 } from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
+import {vec3, vec4} from '@math.gl/core';
 import {
   dashShaders,
   Defines,
@@ -16,7 +18,14 @@ import {
   textBackgroundDashShaders
 } from './shaders.glsl';
 
-import type {Accessor, Attribute, Layer, LayerContext, UpdateParameters} from '@deck.gl/core';
+import type {
+  Accessor,
+  Attribute,
+  Layer,
+  LayerContext,
+  ProjectUniforms,
+  UpdateParameters
+} from '@deck.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
@@ -125,6 +134,55 @@ type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
 const PATH_STYLE_ATTRIBUTES = ['instanceDashArrays', 'instanceDashOffsets', 'instanceOffsets'];
+
+function projectRenderedPathPosition(
+  layer: Layer<PathStyleExtensionProps>,
+  position: number[],
+  projectUniforms: ProjectUniforms
+): [number, number, number] {
+  const viewport = layer.context.viewport;
+  if (!(viewport instanceof WebMercatorViewport) || viewport.zoom < 12) {
+    return layer.projectPosition(position, {autoOffset: false});
+  }
+
+  // High-zoom Web Mercator shaders use a center-relative Taylor projection for precision.
+  // Layer#projectPosition deliberately returns the exact, viewport-independent projection,
+  // so reproduce project_position here to keep CPU phase continuous with each GPU segment.
+  const positionWorld = vec4.transformMat4(
+    [],
+    [position[0], position[1], position[2] || 0, 1],
+    projectUniforms.modelMatrix
+  );
+  const coordinateSystem =
+    layer.props.coordinateSystem === 'default' ? 'lnglat' : layer.props.coordinateSystem;
+
+  if (coordinateSystem === 'lnglat') {
+    if (Math.abs(positionWorld[1] - projectUniforms.coordinateOrigin[1]) > 0.25) {
+      let longitude = positionWorld[0];
+      if (projectUniforms.wrapLongitude) {
+        longitude = ((((longitude + 180) % 360) + 360) % 360) - 180;
+      }
+      const commonPosition = viewport.projectPosition([longitude, positionWorld[1], 0]);
+      return [
+        commonPosition[0] - projectUniforms.commonOrigin[0],
+        commonPosition[1] - projectUniforms.commonOrigin[1],
+        positionWorld[2] * projectUniforms.commonUnitsPerMeter[2]
+      ];
+    }
+    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+  } else if (coordinateSystem === 'cartesian') {
+    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+  }
+
+  const deltaLatitude = positionWorld[1];
+  const scale = vec3.scaleAndAdd(
+    [],
+    projectUniforms.commonUnitsPerWorldUnit,
+    projectUniforms.commonUnitsPerWorldUnit2,
+    deltaLatitude
+  );
+  return vec3.multiply([], positionWorld, scale) as [number, number, number];
+}
 
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
 export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
@@ -381,6 +439,14 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     }
 
     const sourcePosition = new Array(3);
+    const projectUniforms = project.getUniforms({
+      viewport: this.context.viewport,
+      modelMatrix: this.props.modelMatrix,
+      coordinateSystem: this.props.coordinateSystem,
+      coordinateOrigin: this.props.coordinateOrigin,
+      // PathLayer normalizes/cuts wrapped paths on the CPU; its shader never wraps again.
+      autoWrapLongitude: this.wrapLongitude
+    }) as ProjectUniforms;
     const readPosition = (vertexIndex: number): number[] => {
       if (usePackedPositions) {
         sourcePosition[0] = packedPositions[vertexIndex * 3];
@@ -413,8 +479,12 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
         const start =
           segmentIndex === previousSegment + 1 && previousEnd
             ? previousEnd
-            : this.projectPosition(readPosition(segmentIndex), {autoOffset: false});
-        const end = this.projectPosition(readPosition(segmentIndex + 1), {autoOffset: false});
+            : projectRenderedPathPosition(this, readPosition(segmentIndex), projectUniforms);
+        const end = projectRenderedPathPosition(
+          this,
+          readPosition(segmentIndex + 1),
+          projectUniforms
+        );
         phase += vec3.dist(start, end);
         previousSegment = segmentIndex;
         previousEnd = end;
