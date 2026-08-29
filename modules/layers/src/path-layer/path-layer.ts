@@ -170,7 +170,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   state!: {
     model?: Model;
     pathTesselator: PathTesselator;
-    tessellationProjectionMode: number;
     tessellationResolution?: number;
     pathProjectionScale: PathProjectionScale;
   };
@@ -206,8 +205,11 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   private getPathProjectionScale(viewport: Viewport): PathProjectionScale {
     const coordinateSystem = this.props.coordinateSystem;
     const hasDashMetrics = Boolean(this.getAttributeManager()?.getAttributes().instanceDashOffsets);
+    if (!hasDashMetrics) {
+      return null;
+    }
+
     const trackViewportScale =
-      hasDashMetrics &&
       viewport instanceof WebMercatorViewport &&
       viewport.zoom >= 12 &&
       // Offset coordinate systems use their fixed coordinateOrigin as the projection origin.
@@ -224,6 +226,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         autoWrapLongitude: this.wrapLongitude
       }) as ProjectUniforms;
       return [
+        viewport.projectionMode,
         projectUniforms.coordinateOrigin[1],
         projectUniforms.commonOrigin[1],
         ...projectUniforms.commonUnitsPerWorldUnit,
@@ -232,14 +235,16 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       ];
     }
 
-    return getPathProjectionScale(viewport);
+    const projectionScale = getPathProjectionScale(viewport);
+    return projectionScale
+      ? [viewport.projectionMode, ...projectionScale]
+      : [viewport.projectionMode];
   }
 
   shouldUpdateState(params: UpdateParameters<this>): boolean {
     const {viewport} = this.context;
     return (
       super.shouldUpdateState(params) ||
-      this.state?.tessellationProjectionMode !== viewport.projectionMode ||
       this.state?.tessellationResolution !== viewport.resolution ||
       !pathProjectionScalesEqual(
         this.state?.pathProjectionScale,
@@ -344,7 +349,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         fp64: this.use64bitPositions(),
         isWebGPU
       }),
-      tessellationProjectionMode: this.context.viewport.projectionMode,
       tessellationResolution: this.context.viewport.resolution,
       pathProjectionScale: this.getPathProjectionScale(this.context.viewport)
     });
@@ -356,9 +360,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const attributeManager = this.getAttributeManager();
     const {viewport} = this.context;
-    const tessellationViewportChanged =
-      this.state.tessellationProjectionMode !== viewport.projectionMode ||
-      this.state.tessellationResolution !== viewport.resolution;
+    const tessellationResolutionChanged = this.state.tessellationResolution !== viewport.resolution;
     const pathProjectionScale = this.getPathProjectionScale(viewport);
     const pathProjectionScaleChanged = !pathProjectionScalesEqual(
       this.state.pathProjectionScale,
@@ -373,7 +375,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
       props.wrapLongitude !== oldProps.wrapLongitude ||
-      tessellationViewportChanged;
+      tessellationResolutionChanged;
     const geometryChanged = changeFlags.dataChanged || geometryConfigurationChanged;
 
     if (geometryChanged) {
@@ -397,7 +399,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.setState({
         numInstances: pathTesselator.instanceCount,
         startIndices: pathTesselator.vertexStarts,
-        tessellationProjectionMode: viewport.projectionMode,
         tessellationResolution: viewport.resolution,
         pathProjectionScale
       });
