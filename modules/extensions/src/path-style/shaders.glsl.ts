@@ -113,6 +113,10 @@ float dashPatternCoverage(
     'fs:#main-start': `
   float dashCoverage = 1.0;
   bool shouldDiscardDash = false;
+  bool inRoundedDashGap = false;
+  float roundedDashResolvedCoverage = 1.0;
+  float roundedDashSubPixelBlend = 0.0;
+  float roundedDashDutyCycle = 1.0;
 
   float solidLength = vDashArray.x;
   float gapLength = vDashArray.y;
@@ -166,12 +170,15 @@ float dashPatternCoverage(
       float distanceToEnd = length(vec2(max(distanceAlongGap, 0.0), vPathPosition.x));
       float capEdgePixels = (1.0 - distanceToEnd) / max(fwidth(distanceToEnd), 1e-6);
       if (distanceAlongGap > 0.0) {
-        dashCoverage = smoothedge(0.0, capEdgePixels);
+        inRoundedDashGap = true;
+        roundedDashResolvedCoverage = smoothedge(0.0, capEdgePixels);
+        dashCoverage = roundedDashResolvedCoverage;
       }
       // That smoothstep resolves one dash end at a time, so it stops meaning anything once a
       // whole period fits inside the filter footprint. Start fading only at that boundary;
       // blending resolvable periods would attenuate the solid body of every rounded dash.
       float subPixelBlend = smoothstep(unitLength, 2.0 * unitLength, filterWidth);
+      roundedDashSubPixelBlend = subPixelBlend;
       // At sub-pixel scale, preserve the area of the repeated capsule rather than falling
       // back to the rectangular duty cycle. Each scanline contains the solid body plus the
       // two circular cap intrusions, capped when neighboring caps overlap across the gap.
@@ -183,6 +190,7 @@ float dashPatternCoverage(
         0.0,
         1.0
       );
+      roundedDashDutyCycle = roundedDutyCycle;
       dashCoverage = mix(dashCoverage, roundedDutyCycle, subPixelBlend);
     }
 
@@ -196,6 +204,22 @@ float dashPatternCoverage(
   // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
   // #main-start can remove helper invocations and make those derivatives undefined, so all
   // dash-related termination is deferred until the layer has completed that work.
+  #ifdef ANTIALIASING
+  if (inRoundedDashGap) {
+    // The rounded dash cap and PathLayer silhouette are two geometric constraints on the
+    // same fragment. Intersect their coverage instead of multiplying two edge ramps; at the
+    // cap/body shoulder both ramps are half covered and multiplication would create a dark
+    // quarter-covered notch. Keep the sub-pixel duty cycle separable from the path silhouette.
+    float pathCoverage = smoothedge(0.0, edgePixels);
+    float resolvedCapMultiplier =
+      min(pathCoverage, roundedDashResolvedCoverage) / max(pathCoverage, 1e-6);
+    dashCoverage = mix(
+      resolvedCapMultiplier,
+      roundedDashDutyCycle,
+      roundedDashSubPixelBlend
+    );
+  }
+  #endif
   if (shouldDiscardDash) {
     discard;
   }
