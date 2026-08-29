@@ -39,6 +39,8 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
+  // Location 6 is reserved for TripsLayer's injected vTime varying.
+  @location(7) clipCoordinates: vec2<f32>,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -231,6 +233,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     let nextProjection = project_position_to_clipspace_and_commonspace(
       nextPosition, nextPosition64Low, ZERO_OFFSET
     );
+    geometry.position = currProjection.commonPosition;
     let prevPositionCommon = prevProjection.commonPosition.xyz;
     let currPositionCommon = currProjection.commonPosition.xyz;
     let nextPositionCommon = nextProjection.commonPosition.xyz;
@@ -321,6 +324,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
+  varyings.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
+
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
     attributes.instanceColors.a * layer.opacity
@@ -386,6 +392,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
   // DECKGL_FILTER_COLOR
+  clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
   return deckgl_premultiplied_alpha(color);
 #else
