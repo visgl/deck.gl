@@ -5,6 +5,7 @@
 /* eslint-disable no-console, no-invalid-this */
 
 import {PathStyleExtension} from '@deck.gl/extensions';
+import {OrthographicViewport} from '@deck.gl/core';
 import PathTesselator from '@deck.gl/layers/path-layer/path-tesselator';
 
 const SEGMENT_COUNT = 100_000;
@@ -24,7 +25,9 @@ const pathTesselator = new PathTesselator({
 const DASH_METRICS_CONTEXT = {
   ...PROJECTION_CONTEXT,
   props: {...PROJECTION_CONTEXT.props, data: [NESTED_PATH]},
-  state: {pathTesselator}
+  state: {pathTesselator},
+  context: {viewport: new OrthographicViewport({width: 1, height: 1})},
+  wrapLongitude: false
 };
 const DASH_METRICS_ATTRIBUTE = {
   size: 2,
