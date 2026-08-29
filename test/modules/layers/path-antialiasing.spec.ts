@@ -101,8 +101,10 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
+  expect(antialiasingFragmentShader).toContain('min(cornerPixels, bodyPixels)');
   expect(antialiasingFragmentShader).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
   expect(antialiasingShaderWGSL).toContain('coverageScale');
   expect(antialiasingShaderWGSL).toContain('fwidth');
+  expect(antialiasingShaderWGSL).toContain('min(cornerPixels, bodyPixels)');
   expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });
