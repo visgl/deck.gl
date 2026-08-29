@@ -27,8 +27,8 @@ const DASH_METRICS_CONTEXT = {
   state: {pathTesselator}
 };
 const DASH_METRICS_ATTRIBUTE = {
-  size: 1,
-  value: new Float32Array(pathTesselator.instanceCount),
+  size: 2,
+  value: new Float32Array(pathTesselator.instanceCount * 2),
   startIndices: null
 };
 const FULL_PATH_RANGE = {startRow: 0, endRow: 1};
@@ -36,13 +36,13 @@ const FULL_PATH_RANGE = {startRow: 0, endRow: 1};
 export default function pathStyleExtensionBench(suite) {
   suite
     .group('PATH STYLE EXTENSION CPU PHASE (100K SEGMENTS)')
-    .add('production normalized path metrics', {minIterations: 3}, () =>
+    .add("dashMode 'path'#normalized rendered geometry", {minIterations: 3}, () =>
       calculateDashMetrics.call(DASH_METRICS_CONTEXT, DASH_METRICS_ATTRIBUTE, FULL_PATH_RANGE)
     )
-    .add('highPrecisionDash#nested positions', {minIterations: 3}, () =>
+    .add('getDashOffsets compatibility#nested positions', {minIterations: 3}, () =>
       getDashOffsets.call(PROJECTION_CONTEXT, NESTED_PATH)
     )
-    .add('highPrecisionDash#flat positions', {minIterations: 3}, () =>
+    .add('getDashOffsets compatibility#flat positions', {minIterations: 3}, () =>
       getDashOffsets.call(PROJECTION_CONTEXT, FLAT_PATH)
     );
 }
