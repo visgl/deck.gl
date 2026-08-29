@@ -360,6 +360,9 @@ test('PathStyleExtension#shader defines', () => {
         expect(fragmentStart, 'coverage is bounded before deferred rejection').toContain(
           'dashCoverage = clamp(dashCoverage, 0.0, 1.0)'
         );
+        expect(fragmentStart, 'sub-pixel rounded dashes preserve capsule area').toContain(
+          'boundedSolidLength + min(effectiveGap, capSpan)'
+        );
       }
     },
     {

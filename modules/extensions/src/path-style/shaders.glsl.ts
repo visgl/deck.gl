@@ -172,7 +172,18 @@ float dashPatternCoverage(
       // whole period fits inside the filter footprint. Start fading only at that boundary;
       // blending resolvable periods would attenuate the solid body of every rounded dash.
       float subPixelBlend = smoothstep(unitLength, 2.0 * unitLength, filterWidth);
-      dashCoverage = mix(dashCoverage, solidLength / unitLength, subPixelBlend);
+      // At sub-pixel scale, preserve the area of the repeated capsule rather than falling
+      // back to the rectangular duty cycle. Each scanline contains the solid body plus the
+      // two circular cap intrusions, capped when neighboring caps overlap across the gap.
+      float boundedSolidLength = min(solidLength, unitLength);
+      float effectiveGap = max(unitLength - boundedSolidLength, 0.0);
+      float capSpan = 2.0 * sqrt(max(1.0 - vPathPosition.x * vPathPosition.x, 0.0));
+      float roundedDutyCycle = clamp(
+        (boundedSolidLength + min(effectiveGap, capSpan)) / unitLength,
+        0.0,
+        1.0
+      );
+      dashCoverage = mix(dashCoverage, roundedDutyCycle, subPixelBlend);
     }
 
     dashCoverage = clamp(dashCoverage, 0.0, 1.0);
