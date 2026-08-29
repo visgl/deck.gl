@@ -14,9 +14,11 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) is now a dependable stroke-style system for flat, elevated, billboarded, and offset paths. Existing dash patterns now agree between flat and billboard extrusion, advance through true 3D distance without phase seams, preserve phase on long and offset paths, and prefilter fine patterns instead of shimmering or becoming falsely solid. These rendering fixes apply automatically.
 
-Two opt-in controls define the intended pattern. `dashMode: 'path'` runs phase continuously along the complete path, so the pattern is independent of source-vertex density and remains stable when geometry is simplified or resampled. `dashUnits` makes pattern lengths proportional to the stroke, fixed in screen pixels, measured in meters, or expressed in deck.gl common-space units. Existing `dashJustified`, `dashGapPickable`, and `getOffset` compose with those controls for endpoint fitting, whole-object interaction, and parallel strokes from a shared centerline.
+Two opt-in controls define the intended pattern. `dashMode: 'path'` runs phase continuously along the complete normalized path, including generated subdivisions and antimeridian cuts, so rendered-segment density no longer resets the pattern. `dashUnits` makes pattern lengths proportional to the stroke, nominally zoom-stable in projected pixels, measured in projection-local meters, or expressed in deck.gl common-space units. Pixel units are exact for flat or orthographic paths and approximate under pitch, perspective, or elevation. Existing `dashJustified`, `dashGapPickable`, and `getOffset` compose with those controls for endpoint fitting, whole-object interaction, and parallel strokes from a shared centerline.
 
 `highPrecisionDash` remains available as a deprecated alias for `dashMode: 'path'`.
+
+`PathStyleExtension` remains WebGL-only in v9.4 because its dash and offset hooks inject GLSL and do not yet have a WGSL implementation.
 
 ### Core Performance
 
