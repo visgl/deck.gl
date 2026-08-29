@@ -1003,12 +1003,81 @@ test('PathStyleExtension#dash phase tracks identity projection scale', () => {
   });
 });
 
+test('PathLayer#projection mode changes preserve tessellated geometry', () => {
+  const lowZoomViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 11.99
+  });
+  const autoOffsetViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 12
+  });
+  let vertexStarts: number[] | null = null;
+
+  expect(
+    autoOffsetViewport.projectionMode,
+    'test viewports cross the auto-offset projection boundary'
+  ).not.toBe(lowZoomViewport.projectionMode);
+
+  testLayer({
+    Layer: PathLayer,
+    viewport: lowZoomViewport,
+    testCases: [
+      {
+        viewport: lowZoomViewport,
+        props: {
+          id: 'path-projection-mode-tessellation',
+          data: [
+            [
+              [-122.46, 37.9, 0],
+              [-122.45, 37.91, 1e8],
+              [-122.44, 37.92, 0]
+            ]
+          ],
+          getPath: path => path
+        },
+        onAfterUpdate: ({layer}) => {
+          vertexStarts = layer.state.pathTesselator.vertexStarts;
+        }
+      },
+      {
+        viewport: autoOffsetViewport,
+        spies: ['updateState'],
+        onAfterUpdate: ({layer, spies}) => {
+          expect(
+            layer.state.pathTesselator.vertexStarts,
+            'projection mode does not rebuild undashed path geometry'
+          ).toBe(vertexStarts);
+          expect(
+            spies.updateState,
+            'projection mode alone does not update an undashed PathLayer'
+          ).not.toHaveBeenCalled();
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
 test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () => {
   const path = [
     [-122.46, 37.9, 0],
     [-122.45, 37.91, 1e8],
     [-122.44, 37.92, 0]
   ];
+  const lowZoomViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 11.99
+  });
   const baseViewport = new WebMercatorViewport({
     width: 800,
     height: 600,
@@ -1055,16 +1124,18 @@ test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () =
     return vec3.dist(projectPosition(path[0]), projectPosition(path[1]));
   };
 
+  let lowZoomLength = 0;
   let baseLength = 0;
+  let vertexStarts: number[] | null = null;
   let stableMetrics: Float32Array | null = null;
   let stableProjectionScale: number[] | null = null;
 
   testLayer({
     Layer: PathLayer,
-    viewport: baseViewport,
+    viewport: lowZoomViewport,
     testCases: [
       {
-        viewport: baseViewport,
+        viewport: lowZoomViewport,
         props: {
           id: 'web-mercator-projection-dash-metrics',
           data: [path],
@@ -1074,11 +1145,24 @@ test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () =
         },
         onAfterUpdate: ({layer}) => {
           const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          lowZoomLength = getDashPhase(metrics, 1);
+          vertexStarts = layer.state.pathTesselator.vertexStarts;
+        }
+      },
+      {
+        viewport: baseViewport,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
           baseLength = getDashPhase(metrics, 1);
           expect(baseLength, 'base phase matches shader auto-offset projection').toBeCloseTo(
             getExpectedSegmentLength(baseViewport),
             3
           );
+          expect(baseLength, 'projection-mode change refreshes dash phase').not.toBe(lowZoomLength);
+          expect(
+            layer.state.pathTesselator.vertexStarts,
+            'projection-mode change preserves normalized path geometry'
+          ).toBe(vertexStarts);
         }
       },
       {
