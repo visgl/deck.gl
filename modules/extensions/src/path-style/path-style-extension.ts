@@ -346,7 +346,8 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       modelMatrix: this.props.modelMatrix,
       coordinateSystem: this.props.coordinateSystem,
       coordinateOrigin: this.props.coordinateOrigin,
-      autoWrapLongitude: this.props.wrapLongitude
+      // PathLayer normalizes/cuts wrapped paths on the CPU; its shader never wraps again.
+      autoWrapLongitude: this.wrapLongitude
     }) as ProjectUniforms;
     const readPosition = (vertexIndex: number): number[] => {
       if (usePackedPositions) {

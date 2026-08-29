@@ -338,8 +338,16 @@ test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
 });
 
 test('PathStyleExtension#dash phase follows normalized path geometry', () => {
+  const antimeridianViewport = new WebMercatorViewport({
+    width: 800,
+    height: 600,
+    longitude: 180,
+    latitude: 0,
+    zoom: 14
+  });
   testLayer({
     Layer: PathLayer,
+    viewport: antimeridianViewport,
     testCases: [
       {
         props: {
@@ -362,7 +370,10 @@ test('PathStyleExtension#dash phase follows normalized path geometry', () => {
           );
           expect(offsets[0], 'first rendered subpath starts at phase zero').toBe(0);
           expect(offsets[1], 'invalid antimeridian separator remains zero').toBe(0);
-          expect(offsets[2], 'second subpath carries phase across the cut').toBeGreaterThan(0);
+          expect(offsets[2], 'second subpath carries the short crossing phase').toBeCloseTo(
+            5120 / 360,
+            5
+          );
           expect(offsets[3], 'trailing invalid instance remains zero').toBe(0);
         }
       }
@@ -648,7 +659,7 @@ test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () =
 
   let baseLength = 0;
   let stableMetrics: Float32Array | null = null;
-  let stableProjectionScale: [number, number, number] | null = null;
+  let stableProjectionScale: number[] | null = null;
 
   testLayer({
     Layer: PathLayer,

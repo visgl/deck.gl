@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, WebMercatorViewport, project32, color, picking, UNIT} from '@deck.gl/core';
+import {Layer, WebMercatorViewport, project, project32, color, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
@@ -24,6 +24,7 @@ import type {
   GetPickingInfoParams,
   PickingInfo,
   DefaultProps,
+  ProjectUniforms,
   Viewport
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
@@ -134,13 +135,10 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
-type PathProjectionScale = [number, number, number] | null;
+type PathProjectionScale = number[] | null;
 
-function getPathProjectionScale(
-  viewport: Viewport,
-  trackViewportScale = false
-): PathProjectionScale {
-  if (viewport.isGeospatial && !trackViewportScale) {
+function getPathProjectionScale(viewport: Viewport): PathProjectionScale {
+  if (viewport.isGeospatial) {
     return null;
   }
   const {unitsPerMeter} = viewport.distanceScales;
@@ -153,7 +151,12 @@ function pathProjectionScalesEqual(
 ): boolean {
   return (
     left === right ||
-    Boolean(left && right && left[0] === right[0] && left[1] === right[1] && left[2] === right[2])
+    Boolean(
+      left &&
+        right &&
+        left.length === right.length &&
+        left.every((value, index) => value === right[index])
+    )
   );
 }
 
@@ -213,7 +216,23 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         coordinateSystem === 'lnglat' ||
         coordinateSystem === 'cartesian');
 
-    return getPathProjectionScale(viewport, trackViewportScale);
+    if (trackViewportScale) {
+      const projectUniforms = project.getUniforms({
+        viewport,
+        coordinateSystem,
+        coordinateOrigin: this.props.coordinateOrigin,
+        autoWrapLongitude: this.wrapLongitude
+      }) as ProjectUniforms;
+      return [
+        projectUniforms.coordinateOrigin[1],
+        projectUniforms.commonOrigin[1],
+        ...projectUniforms.commonUnitsPerWorldUnit,
+        ...projectUniforms.commonUnitsPerWorldUnit2,
+        projectUniforms.commonUnitsPerMeter[2]
+      ];
+    }
+
+    return getPathProjectionScale(viewport);
   }
 
   shouldUpdateState(params: UpdateParameters<this>): boolean {
