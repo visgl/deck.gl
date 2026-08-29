@@ -37,7 +37,9 @@ void main(void) {
   // Both evaluated so each derivative stays on one field across the corner/body boundary
   float bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
   float cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
-  float edgePixels = isRound && isCorner ? cornerPixels : bodyPixels;
+  // Rounded corners still intersect the stroke-width envelope. Extensions may remap
+  // vPathPosition.x independently of vCornerOffset, as PathStyleExtension does for offsets.
+  float edgePixels = isRound && isCorner ? min(cornerPixels, bodyPixels) : bodyPixels;
 
   // Fragments outside the coverage ramp must not write depth or picking colors.
   if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
