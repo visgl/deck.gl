@@ -77,9 +77,6 @@ const testCases = [
   createMVTLayer('mvt-with-holes-binary', {binary: true, holes: true})
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

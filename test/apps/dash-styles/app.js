@@ -251,7 +251,7 @@ function buildElevationLayers() {
       const comparisonOffsetPixels = variants.length > 1 ? (variantIndex - 0.5) * 12 : 0;
       layers.push(
         new PathLayer({
-          id: `elevation-${heightMeters}-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          id: `elevation-${heightMeters}-${billboard ? 'billboard' : 'flat'}`,
           data: [createElevationPath(baselineOffsetPixels + comparisonOffsetPixels, heightMeters)],
           getPath: path => path,
           billboard,
@@ -307,7 +307,7 @@ function buildSegmentMatrixLayers() {
 
       layers.push(
         new PathLayer({
-          id: `row-${rowIndex}-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          id: `row-${rowIndex}-${billboard ? 'billboard' : 'flat'}`,
           data: [buildPath(latitude)],
           getPath: path => path,
           billboard,
@@ -347,7 +347,7 @@ function buildSegmentMatrixLayers() {
     billboardVariants().forEach((billboard, variantIndex) => {
       layers.push(
         new PathLayer({
-          id: `circle-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          id: `circle-${billboard ? 'billboard' : 'flat'}`,
           data: [
             createCirclePath(
               120,
