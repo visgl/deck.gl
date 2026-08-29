@@ -7,8 +7,10 @@
  *
  * PathLayer dash math crosses three coordinate spaces:
  *
- * 1. **Common space** — `getDashOffsets` accumulates distance along a path on the CPU,
- *    and `instanceDashOffsets` carries it to the shader.
+ * 1. **Common space** — the private metric updater accumulates distance over normalized
+ *    PathTessellator geometry, and `instanceDashOffsets` carries it to the shader. The public
+ *    scalar `getDashOffsets` helper remains available for compatibility but does not back the
+ *    managed attribute.
  * 2. **Screen pixels** — the common basis for reconciling flat and billboard extrusion.
  *    At the dash injection point, `width` is in common units for a flat path but pixels for
  *    a billboarded path, whose conversion also includes `project.focalDistance`.

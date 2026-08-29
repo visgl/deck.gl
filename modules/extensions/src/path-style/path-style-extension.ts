@@ -31,8 +31,9 @@ const defaultProps = {
  * What `getDashArray` is measured in.
  *
  * `'widths'` is relative to half the stroke width and is the historical behavior, so a dash
- * scales with the line. The others are absolute: `'pixels'` keeps a dash the same size on
- * screen at every zoom, while `'meters'` and `'common'` keep it the same size on the ground.
+ * scales with the line. `'pixels'` uses nominal zoom-stable projected pixels: exact for flat or
+ * orthographic paths and approximate under pitch, perspective, or elevation. `'meters'` uses the
+ * local projection scale, while `'common'` uses deck.gl common-coordinate-space units.
  */
 export type DashUnits = 'widths' | 'pixels' | 'meters' | 'common';
 
@@ -80,8 +81,9 @@ export type PathStyleExtensionProps<DataT = any> = {
   dashGapPickable?: boolean;
   /**
    * What `getDashArray` is measured in. `'widths'` is relative to half the stroke width, so a
-   * dash scales with the line. `'pixels'` keeps a dash the same size on screen at every zoom,
-   * which is useful when `widthUnits` is `'meters'` and the stroke itself does not.
+   * dash scales with the line. `'pixels'` uses nominal zoom-stable projected pixels, which are
+   * exact for flat or orthographic paths and approximate under pitch, perspective, or elevation.
+   * `'meters'` uses the local projection scale and `'common'` uses deck.gl common space.
    * Only applies to `PathLayer` and composite layers that render paths; scatterplot outlines
    * and text backgrounds continue to interpret dash arrays relative to their stroke width.
    * @default 'widths'
