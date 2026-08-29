@@ -10,6 +10,8 @@ Data is loaded from URL templates in the `data` property.
 
 This layer also handles feature clipping so that there are no features divided by tile divisions.
 
+The default `GeoJsonLayer` rendering path supports both WebGL and WebGPU. Custom layers returned from `renderSubLayers` must separately support the selected device backend.
+
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';

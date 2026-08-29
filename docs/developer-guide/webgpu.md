@@ -63,9 +63,9 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/geo-layers` | `TripsLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3ClusterLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `H3HexagonLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `Tile3DLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TerrainLayer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `MVTLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `GeohashLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/carto` | `ClusterTileLayer` | ✅ | ❌ |
 | `@deck.gl/carto` | `H3TileLayer` | ✅ | ❌ |
@@ -81,10 +81,11 @@ The table below covers the public layer exports from the layer packages. It is d
 - `H3HexagonLayer` supports both its high-precision `PolygonLayer` path and its instanced `ColumnLayer` path on WebGPU. 
 - `H3ClusterLayer` renders through the polygon path.
 - `A5Layer` inherits its WebGPU rendering from `PolygonLayer` and supports both bigint and hexadecimal A5 cell identifiers.
+- `Tile3DLayer` supports point-cloud, glTF scenegraph, and I3S mesh tile content on WebGPU.
 
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. They all remain WebGL-only today because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU.
+The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `ClipExtension` has initial WebGPU support on the primitive layers used by the default `MVTLayer` rendering path.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
@@ -93,7 +94,7 @@ The table below covers the public extensions in `@deck.gl/extensions`. They all 
 | `@deck.gl/extensions` | `Fp64Extension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `ClipExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `ClipExtension` | ✅ | 🚧 |
 | `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
 
@@ -112,7 +113,7 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
 | Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
-| Shader hooks / layer extensions | ❌ | deck.gl's WGSL shader hook list is currently empty, so injection-based extensions are not yet portable. |
+| Shader hooks / layer extensions | 🚧 | `ClipExtension` has targeted support on `ScatterplotLayer`, `PathLayer`, and `SolidPolygonLayer`; general WGSL shader injection is not yet supported. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
 | Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |
