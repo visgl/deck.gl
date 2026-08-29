@@ -39,6 +39,24 @@ function getDashPhases(metrics: ArrayLike<number>, instanceCount: number): numbe
   return Array.from({length: instanceCount}, (_, index) => getDashPhase(metrics, index));
 }
 
+function modelHasAttribute(layer: PathLayer, attributeName: string): boolean {
+  return layer
+    .getModels()
+    .every(
+      model =>
+        model.bufferLayout.some(
+          layout =>
+            layout.name === attributeName ||
+            layout.attributes?.some(attribute => attribute.attribute === attributeName)
+        ) &&
+        model.pipeline.bufferLayout.some(
+          layout =>
+            layout.name === attributeName ||
+            layout.attributes?.some(attribute => attribute.attribute === attributeName)
+        )
+    );
+}
+
 webglTest('PathStyleExtension#rounded dash picking', async () => {
   const canvas = document.createElement('canvas');
   canvas.width = 200;
@@ -500,6 +518,106 @@ test('PathStyleExtension#dashMode', () => {
     }
   ];
   testLayer({Layer: PathLayer, testCases, onError: error => expect(error).toBeFalsy()});
+});
+
+test('PathStyleExtension#synchronizes live dash mode changes', () => {
+  const path = [
+    [0, 0],
+    [3, 0],
+    [6, 0]
+  ];
+  let dashArraysAttribute;
+  let offsetsAttribute;
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'live-dash-mode',
+          data: [path],
+          getPath: value => value,
+          getDashArray: [2, 1],
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          positionFormat: 'XY',
+          getOffset: 0,
+          extensions: [new PathStyleExtension({dashMode: 'segment', offset: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const attributes = layer.getAttributeManager().getAttributes();
+          expect(attributes.instanceDashArrays, 'segment mode has dash arrays').toBeTruthy();
+          expect(attributes.instanceOffsets, 'segment mode has offsets').toBeTruthy();
+          dashArraysAttribute = attributes.instanceDashArrays;
+          offsetsAttribute = attributes.instanceOffsets;
+          expect(attributes.instanceDashOffsets, 'segment mode omits path metrics').toBeUndefined();
+          expect(modelHasAttribute(layer, 'instanceDashOffsets'), 'model omits path metrics').toBe(
+            false
+          );
+        }
+      },
+      {
+        updateProps: {
+          extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const attributes = layer.getAttributeManager().getAttributes();
+          expect(attributes.instanceDashArrays, 'dash array attribute is preserved').toBe(
+            dashArraysAttribute
+          );
+          expect(attributes.instanceOffsets, 'offset attribute is preserved').toBe(
+            offsetsAttribute
+          );
+          const metrics = attributes.instanceDashOffsets;
+          expect(metrics, 'path mode adds path metrics').toBeTruthy();
+          expect(metrics.size, 'path metrics contain offset and total').toBe(2);
+          expect(Array.from(metrics.value.slice(0, 6)), 'path metrics are populated').toEqual([
+            0, 6, 3, 6, 0, 6
+          ]);
+          expect(modelHasAttribute(layer, 'instanceDashOffsets'), 'model binds path metrics').toBe(
+            true
+          );
+        }
+      },
+      {
+        updateProps: {
+          extensions: [new PathStyleExtension({dashMode: 'segment', offset: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const attributes = layer.getAttributeManager().getAttributes();
+          expect(attributes.instanceDashArrays, 'segment mode keeps the dash array attribute').toBe(
+            dashArraysAttribute
+          );
+          expect(attributes.instanceOffsets, 'segment mode keeps the offset attribute').toBe(
+            offsetsAttribute
+          );
+          expect(
+            attributes.instanceDashOffsets,
+            'segment mode removes path metrics'
+          ).toBeUndefined();
+          expect(modelHasAttribute(layer, 'instanceDashOffsets'), 'model drops path metrics').toBe(
+            false
+          );
+        }
+      },
+      {
+        updateProps: {
+          extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const attributes = layer.getAttributeManager().getAttributes();
+          expect(attributes.instanceDashArrays, 'dash array remains idempotent').toBe(
+            dashArraysAttribute
+          );
+          expect(attributes.instanceOffsets, 'offset remains idempotent').toBe(offsetsAttribute);
+          expect(attributes.instanceDashOffsets, 'path metrics can be re-added').toBeTruthy();
+          expect(
+            modelHasAttribute(layer, 'instanceDashOffsets'),
+            'model rebinds path metrics'
+          ).toBe(true);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
 });
 
 test('PathStyleExtension#dash phase follows normalized path geometry', () => {

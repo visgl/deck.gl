@@ -94,6 +94,8 @@ type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
+const PATH_STYLE_ATTRIBUTES = ['instanceDashArrays', 'instanceDashOffsets', 'instanceOffsets'];
+
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
 export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
   static defaultProps = defaultProps;
@@ -126,6 +128,64 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       return 'textBackground';
     }
     return null;
+  }
+
+  private synchronizeAttributes(layer: Layer<PathStyleExtensionProps>): boolean {
+    const attributeManager = layer.getAttributeManager();
+    const layerType = this.getLayerType(layer);
+    if (!attributeManager || !layerType) {
+      return false;
+    }
+
+    const attributes = attributeManager.getAttributes();
+    const desiredAttributes = new Set<string>();
+    if (this.opts.dash) {
+      desiredAttributes.add('instanceDashArrays');
+    }
+    if (layerType === 'path' && this.opts.dash && this.opts.dashMode === 'path') {
+      desiredAttributes.add('instanceDashOffsets');
+    }
+    if (layerType === 'path' && this.opts.offset) {
+      desiredAttributes.add('instanceOffsets');
+    }
+
+    let topologyChanged = false;
+    for (const attributeName of PATH_STYLE_ATTRIBUTES) {
+      if (attributes[attributeName] && !desiredAttributes.has(attributeName)) {
+        attributeManager.remove([attributeName]);
+        topologyChanged = true;
+      }
+    }
+
+    if (desiredAttributes.has('instanceDashArrays') && !attributes.instanceDashArrays) {
+      attributeManager.addInstanced({
+        instanceDashArrays: {size: 2, accessor: 'getDashArray'}
+      });
+      topologyChanged = true;
+    }
+    if (desiredAttributes.has('instanceDashOffsets') && !attributes.instanceDashOffsets) {
+      attributeManager.addInstanced({
+        instanceDashOffsets: {
+          // [distance from the start of the path, total length of the path]
+          size: 2,
+          // Keep getPath as an update trigger without allowing a binary getPath buffer to
+          // bypass this updater. Dash phase must follow the normalized geometry that the
+          // PathLayer actually renders.
+          accessor: ['getPath'],
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateDashMetrics
+        }
+      });
+      topologyChanged = true;
+    }
+    if (desiredAttributes.has('instanceOffsets') && !attributes.instanceOffsets) {
+      attributeManager.addInstanced({
+        instanceOffsets: {size: 1, accessor: 'getOffset'}
+      });
+      topologyChanged = true;
+    }
+
+    return topologyChanged;
   }
 
   isEnabled(layer: Layer<PathStyleExtensionProps>): boolean {
@@ -188,36 +248,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
-    const attributeManager = this.getAttributeManager();
-    const layerType = extension.getLayerType(this);
-    if (!attributeManager || !layerType) {
-      return;
-    }
-
-    if (extension.opts.dash) {
-      attributeManager.addInstanced({
-        instanceDashArrays: {size: 2, accessor: 'getDashArray'},
-        ...(layerType === 'path' && extension.opts.dashMode === 'path'
-          ? {
-              instanceDashOffsets: {
-                // [distance from the start of the path, total length of the path]
-                size: 2,
-                // Keep getPath as an update trigger without allowing a binary getPath buffer to
-                // bypass this updater. Dash phase must follow the normalized geometry that the
-                // PathLayer actually renders.
-                accessor: ['getPath'],
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                update: extension.calculateDashMetrics
-              }
-            }
-          : {})
-      });
-    }
-    if (layerType === 'path' && extension.opts.offset) {
-      attributeManager.addInstanced({
-        instanceOffsets: {size: 1, accessor: 'getOffset'}
-      });
-    }
+    extension.synchronizeAttributes(this);
   }
 
   updateState(
@@ -227,6 +258,20 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
   ) {
     if (!extension.isEnabled(this)) {
       return;
+    }
+
+    if (params.changeFlags.extensionsChanged) {
+      const topologyChanged = extension.synchronizeAttributes(this);
+      const attributeManager = this.getAttributeManager();
+      if (attributeManager && topologyChanged) {
+        // PathLayer recreates its model before extension updateState runs. Refresh the new
+        // model's layout after adding or removing extension-owned attributes, then ensure all
+        // managed buffers are rebound to the recreated vertex array.
+        attributeManager.invalidateAll();
+        for (const model of this.getModels()) {
+          model.setBufferLayout(attributeManager.getBufferLayouts(model));
+        }
+      }
     }
 
     if (extension.opts.dash) {
