@@ -3,7 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {COORDINATE_SYSTEM, Deck, OrthographicView} from '@deck.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  Deck,
+  OrthographicView,
+  OrthographicViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {
   PathLayer,
@@ -82,6 +88,13 @@ test('PathStyleExtension#PathLayer', () => {
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(0);
+        const pathStyleModule = layer
+          .getShaders()
+          .modules.find(module => module.name === 'pathStyle')!;
+        expect(pathStyleModule.uniformTypes, 'dash module retains its uniform block').toEqual({
+          dashAlignMode: 'f32',
+          dashGapPickable: 'i32'
+        });
         const attributes = layer.getAttributeManager().getAttributes();
         expect(
           attributes.instanceDashArrays.value,
@@ -130,6 +143,33 @@ test('PathStyleExtension#PathLayer', () => {
   ];
 
   testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#offset-only shader module', () => {
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'path-offset-only-test',
+          data: FIXTURES.zigzag,
+          getPath: d => d.path,
+          getOffset: 1,
+          extensions: [new PathStyleExtension({offset: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const pathStyleModule = layer
+            .getShaders()
+            .modules.find(module => module.name === 'pathStyle')!;
+          expect(
+            Object.hasOwn(pathStyleModule, 'uniformTypes'),
+            'offset-only module does not declare an unused uniform block'
+          ).toBe(false);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
 });
 
 test('PathStyleExtension#PolygonLayer', () => {
@@ -323,7 +363,10 @@ test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
   // so these CPU offsets and the GPU coordinate agree on paths that move in Z.
   const layer = {
     props: {positionFormat: 'XYZ'},
-    projectPosition: p => p
+    projectPosition: (p, params) => {
+      expect(params.autoOffset, 'projection does not depend on viewport offset mode').toBe(false);
+      return p;
+    }
   };
 
   const flat = extension.getDashOffsets.call(layer, [
@@ -343,4 +386,457 @@ test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
 
   // The trailing vertex is the tesselator's INVALID padding vertex and must stay zeroed.
   expect(climbing[climbing.length - 1], 'last offset is zeroed').toBe(0);
+});
+
+test('PathStyleExtension#dash phase follows normalized path geometry', () => {
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'path-wrap-dash-metrics',
+          data: [
+            [
+              [170, 0],
+              [-170, 0]
+            ]
+          ],
+          getPath: path => path,
+          wrapLongitude: true,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const {pathTesselator} = layer.state;
+          const offsets = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(pathTesselator.instanceCount, 'antimeridian path is cut into two segments').toBe(
+            4
+          );
+          expect(offsets[0], 'first rendered subpath starts at phase zero').toBe(0);
+          expect(offsets[1], 'invalid antimeridian separator remains zero').toBe(0);
+          expect(offsets[2], 'second subpath carries phase across the cut').toBeGreaterThan(0);
+          expect(offsets[3], 'trailing invalid instance remains zero').toBe(0);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'closed-path-dash-metrics',
+          data: [
+            [
+              [0, 0],
+              [3, 0],
+              [3, 4],
+              [0, 0]
+            ]
+          ],
+          getPath: path => path,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          positionFormat: 'XY',
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const offsets = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(offsets.slice(0, 6), 'closed phase is anchored at the first source point').toEqual(
+            [0, 3, 7, 0, 0, 0]
+          );
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase covers globe subdivisions', () => {
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    resolution: 30
+  });
+
+  testLayer({
+    Layer: PathLayer,
+    viewport,
+    testCases: [
+      {
+        props: {
+          id: 'globe-path-dash-metrics',
+          data: [
+            [
+              [-120, 0],
+              [120, 0]
+            ]
+          ],
+          getPath: path => path,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const {pathTesselator} = layer.state;
+          const offsets = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          const segmentTypes = pathTesselator.get('segmentTypes');
+          const validOffsets: number[] = [];
+          for (let index = 0; index < pathTesselator.instanceCount; index++) {
+            if ((segmentTypes[index] & 4) === 0) {
+              validOffsets.push(offsets[index]);
+            }
+          }
+          expect(pathTesselator.instanceCount, 'globe path is subdivided').toBeGreaterThan(2);
+          expect(validOffsets[0], 'first globe segment starts at zero').toBe(0);
+          expect(
+            validOffsets.at(-1),
+            'every generated globe segment receives accumulated phase'
+          ).toBeGreaterThan(0);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase tracks tessellation viewport inputs', () => {
+  const globeResolution30 = new GlobeViewport({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    resolution: 30
+  });
+  const globeResolution10 = new GlobeViewport({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    resolution: 10
+  });
+  const globePanned = new GlobeViewport({
+    width: 800,
+    height: 600,
+    longitude: 20,
+    latitude: 10,
+    zoom: 2,
+    resolution: 10
+  });
+  let resolution30InstanceCount = 0;
+  let stableMetrics: Float32Array | null = null;
+
+  testLayer({
+    Layer: PathLayer,
+    viewport: globeResolution30,
+    testCases: [
+      {
+        viewport: globeResolution30,
+        props: {
+          id: 'globe-viewport-dash-metrics',
+          data: [
+            [
+              [-120, 0],
+              [120, 0]
+            ]
+          ],
+          getPath: path => path,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          resolution30InstanceCount = layer.state.pathTesselator.instanceCount;
+        }
+      },
+      {
+        viewport: globeResolution10,
+        onAfterUpdate: ({layer}) => {
+          expect(
+            layer.state.pathTesselator.instanceCount,
+            'resolution changes rebuild normalized geometry'
+          ).not.toBe(resolution30InstanceCount);
+          expect(layer.state.tessellationResolution, 'new resolution is recorded').toBe(10);
+          stableMetrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+        }
+      },
+      {
+        viewport: globePanned,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics, 'ordinary pan and zoom preserve viewport-independent dash metrics').toBe(
+            stableMetrics
+          );
+          expect(layer.state.tessellationResolution, 'tessellation remains current').toBe(10);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase tracks identity projection scale', () => {
+  const baseViewport = new OrthographicViewport({
+    width: 800,
+    height: 600,
+    target: [0, 0, 0],
+    zoomX: 0,
+    zoomY: 0
+  });
+  const stretchedViewport = new OrthographicViewport({
+    width: 800,
+    height: 600,
+    target: [0, 0, 0],
+    zoomX: 1,
+    zoomY: 0
+  });
+  const pannedViewport = new OrthographicViewport({
+    width: 800,
+    height: 600,
+    target: [100, 100, 0],
+    zoomX: 1,
+    zoomY: 0
+  });
+  let stableMetrics: Float32Array | null = null;
+
+  testLayer({
+    Layer: PathLayer,
+    viewport: baseViewport,
+    testCases: [
+      {
+        viewport: baseViewport,
+        props: {
+          id: 'orthographic-projection-dash-metrics',
+          data: [
+            [
+              [0, 0],
+              [3, 4],
+              [6, 4]
+            ]
+          ],
+          getPath: path => path,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          positionFormat: 'XY',
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics[1], 'isotropic common-space distance').toBe(5);
+        }
+      },
+      {
+        viewport: stretchedViewport,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics[1], 'anisotropic common-space distance').toBeCloseTo(Math.sqrt(52));
+          stableMetrics = metrics;
+        }
+      },
+      {
+        viewport: pannedViewport,
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics, 'translation does not rebuild common-space metrics').toBe(stableMetrics);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase updates with projection inputs', () => {
+  const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const scaleX2 = [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'projected-path-dash-metrics',
+          data: [
+            [
+              [0, 0],
+              [10, 0],
+              [20, 0]
+            ]
+          ],
+          getPath: path => path,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          positionFormat: 'XY',
+          modelMatrix: identity,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const offsets = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(offsets[1], 'identity projection distance').toBe(10);
+        }
+      },
+      {
+        updateProps: {modelMatrix: scaleX2},
+        onAfterUpdate: ({layer}) => {
+          const offsets = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(offsets[1], 'model matrix change invalidates dash phase').toBe(20);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase reads strided binary paths', () => {
+  const data = {
+    length: 1,
+    startIndices: [0, 3],
+    attributes: {
+      getPath: {
+        value: new Float64Array([0, 0, 99, 3, 0, 99, 6, 0, 99]),
+        size: 2,
+        stride: 24
+      }
+    }
+  };
+
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'binary-path-dash-metrics',
+          data,
+          _pathType: 'open',
+          positionFormat: 'XY',
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const offsets = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(offsets.slice(0, 3), 'binary positions use size and byte stride').toEqual([
+            0, 3, 0
+          ]);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase supports partial path updates', () => {
+  const initialData = [
+    [
+      [0, 0],
+      [1, 0],
+      [2, 0]
+    ],
+    [
+      [0, 0],
+      [0, 2],
+      [0, 4]
+    ]
+  ];
+  const updatedData = [
+    initialData[0],
+    [
+      [0, 0],
+      [0, 3],
+      [4, 3],
+      [4, 8]
+    ]
+  ];
+
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'partial-path-dash-metrics',
+          data: initialData,
+          getPath: path => path,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          positionFormat: 'XY',
+          extensions: [new PathStyleExtension({highPrecisionDash: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics.slice(0, 6), 'initial rows receive independent phase').toEqual([
+            0, 1, 0, 0, 2, 0
+          ]);
+        }
+      },
+      {
+        updateProps: {
+          data: updatedData,
+          _dataDiff: () => [{startRow: 1, endRow: 2}]
+        },
+        onAfterUpdate: ({layer}) => {
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          expect(metrics.slice(0, 3), 'unchanged row retains its metrics').toEqual([0, 1, 0]);
+          expect(metrics.slice(3, 7), 'resized partial row receives updated phase').toEqual([
+            0, 3, 7, 0
+          ]);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#dash phase validates GPU-only paths', () => {
+  const pathBuffer = device.createBuffer({
+    data: new Float32Array([0, 0, 3, 0, 6, 0])
+  });
+  const createData = (instanceDashOffsets?: Float32Array) => ({
+    length: 1,
+    startIndices: [0, 3],
+    attributes: {
+      getPath: {buffer: pathBuffer, size: 2},
+      ...(instanceDashOffsets ? {instanceDashOffsets} : {})
+    }
+  });
+
+  try {
+    const errors: Error[] = [];
+    testLayer({
+      Layer: PathLayer,
+      testCases: [
+        {
+          props: {
+            id: 'gpu-only-path-dash-metrics',
+            data: createData(),
+            _pathType: 'open',
+            positionFormat: 'XY',
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            extensions: [new PathStyleExtension({highPrecisionDash: true})]
+          }
+        }
+      ],
+      onError: error => errors.push(error)
+    });
+    expect(
+      errors.some(error => error.message.includes('supply data.attributes.instanceDashOffsets')),
+      'GPU-only paths produce an actionable validation error'
+    ).toBe(true);
+
+    const explicitMetricsErrors: Error[] = [];
+    testLayer({
+      Layer: PathLayer,
+      testCases: [
+        {
+          props: {
+            id: 'gpu-only-path-explicit-dash-metrics',
+            data: createData(new Float32Array([0, 3, 0])),
+            _pathType: 'open',
+            positionFormat: 'XY',
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            extensions: [new PathStyleExtension({highPrecisionDash: true})]
+          }
+        }
+      ],
+      onError: error => explicitMetricsErrors.push(error)
+    });
+    expect(explicitMetricsErrors, 'explicit metrics are the zero-copy escape hatch').toEqual([]);
+  } finally {
+    pathBuffer.destroy();
+  }
 });

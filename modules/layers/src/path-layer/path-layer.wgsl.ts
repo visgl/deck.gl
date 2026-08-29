@@ -39,6 +39,8 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
+  // Location 6 is reserved for TripsLayer's injected vTime varying.
+  @location(7) clipCoordinates: vec2<f32>,
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -58,7 +60,9 @@ fn getLineJoinOffset(
   currPoint: vec3<f32>,
   nextPoint: vec3<f32>,
   width: vec2<f32>,
+#ifdef DASH_ENABLED
   sourcePathLength: f32,
+#endif
 #ifdef ANTIALIASING
   coverageScale: f32,
 #endif
@@ -95,6 +99,7 @@ fn getLineJoinOffset(
   let miterVec = vec2<f32>(-tangent.y, tangent.x);
   let dir = select(dirB, dirA, isEnd);
   let perp = select(perpB, perpA, isEnd);
+#ifdef DASH_ENABLED
   let segmentLength2D = select(lenB, lenA, isEnd);
 
   // Extrusion happens in the XY plane, so segmentLength2D is a 2D length and pathPosition.y
@@ -117,6 +122,9 @@ fn getLineJoinOffset(
     arcLengthRatio = length(currDelta3) / safeLength2D;
   }
   let pathLength = segmentLength2D * arcLengthRatio;
+#else
+  let pathLength = select(lenB, lenA, isEnd);
+#endif
 
   let sinHalfA = abs(dot(miterVec, perp));
   let cosHalfA = abs(dot(dirA, miterVec));
@@ -163,7 +171,11 @@ fn getLineJoinOffset(
 #endif
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
+#ifdef DASH_ENABLED
     dot(offsetFromStartOfPath, dir) * arcLengthRatio
+#else
+    dot(offsetFromStartOfPath, dir)
+#endif
   );
   let isValid = step(f32(instanceTypes), 3.5);
 #ifdef ANTIALIASING
@@ -222,21 +234,33 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     ) / 2.0;
 
   if (path.billboard != 0.0) {
+#ifdef DASH_ENABLED
     let prevProjection = project_position_to_clipspace_and_commonspace(
       prevPosition, prevPosition64Low, ZERO_OFFSET
-    );
-    let currProjection = project_position_to_clipspace_and_commonspace(
-      currPosition, currPosition64Low, ZERO_OFFSET
     );
     let nextProjection = project_position_to_clipspace_and_commonspace(
       nextPosition, nextPosition64Low, ZERO_OFFSET
     );
     let prevPositionCommon = prevProjection.commonPosition.xyz;
-    let currPositionCommon = currProjection.commonPosition.xyz;
     let nextPositionCommon = nextProjection.commonPosition.xyz;
     var prevPositionScreen = prevProjection.clipPosition;
-    var currPositionScreen = currProjection.clipPosition;
     var nextPositionScreen = nextProjection.clipPosition;
+#else
+    var prevPositionScreen = project_position_to_clipspace(
+      prevPosition, prevPosition64Low, ZERO_OFFSET
+    );
+    var nextPositionScreen = project_position_to_clipspace(
+      nextPosition, nextPosition64Low, ZERO_OFFSET
+    );
+#endif
+    let currProjection = project_position_to_clipspace_and_commonspace(
+      currPosition, currPosition64Low, ZERO_OFFSET
+    );
+    geometry.position = currProjection.commonPosition;
+    var currPositionScreen = currProjection.clipPosition;
+#ifdef DASH_ENABLED
+    let currPositionCommon = currProjection.commonPosition.xyz;
+#endif
 
     prevPositionScreen = clipLine(prevPositionScreen, currPositionScreen);
     nextPositionScreen = clipLine(nextPositionScreen, currPositionScreen);
@@ -249,6 +273,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       widthPixels > 0.0
     );
 #endif
+#ifdef DASH_ENABLED
     let currentDeltaCommon = select(
       nextPositionCommon - currPositionCommon,
       currPositionCommon - prevPositionCommon,
@@ -259,12 +284,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       length(currentDeltaCommon) * project.scale / (widthPixels * project.focalDistance),
       widthPixels > 0.0
     );
+#endif
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
+#ifdef DASH_ENABLED
       billboardPathLength,
+#endif
 #ifdef ANTIALIASING
       coverageScale,
 #endif
@@ -303,7 +331,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       currPositionCommon,
       nextPositionCommon,
       width,
+#ifdef DASH_ENABLED
       1.0,
+#endif
 #ifdef ANTIALIASING
       coverageScale,
 #endif
@@ -320,6 +350,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vPathLength = join.pathLength;
     varyings.vJointType = join.jointType;
   }
+
+  varyings.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
@@ -386,6 +419,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
   // DECKGL_FILTER_COLOR
+  clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
   return deckgl_premultiplied_alpha(color);
 #else

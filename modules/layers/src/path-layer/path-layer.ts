@@ -11,6 +11,7 @@ import {pathUniforms, PathProps} from './path-layer-uniforms';
 import {shaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
+import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -22,7 +23,8 @@ import type {
   UpdateParameters,
   GetPickingInfoParams,
   PickingInfo,
-  DefaultProps
+  DefaultProps,
+  Viewport
 } from '@deck.gl/core';
 import type {PathGeometry} from './path';
 
@@ -132,6 +134,26 @@ const ATTRIBUTE_TRANSITION = {
   }
 };
 
+type PathProjectionScale = [number, number, number] | null;
+
+function getPathProjectionScale(viewport: Viewport): PathProjectionScale {
+  if (viewport.isGeospatial) {
+    return null;
+  }
+  const {unitsPerMeter} = viewport.distanceScales;
+  return [unitsPerMeter[0], unitsPerMeter[1], unitsPerMeter[2]];
+}
+
+function pathProjectionScalesEqual(
+  left: PathProjectionScale | undefined,
+  right: PathProjectionScale
+): boolean {
+  return (
+    left === right ||
+    Boolean(left && right && left[0] === right[0] && left[1] === right[1] && left[2] === right[2])
+  );
+}
+
 /** Render lists of coordinate points as extruded polylines with mitering. */
 export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends Layer<
   ExtraPropsT & Required<_PathLayerProps<DataT>>
@@ -142,6 +164,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   state!: {
     model?: Model;
     pathTesselator: PathTesselator;
+    tessellationProjectionMode: number;
+    tessellationResolution?: number;
+    pathProjectionScale: PathProjectionScale;
   };
 
   getShaders() {
@@ -151,7 +176,13 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       fs,
       source: shaderWGSL,
       defines: antialiasing ? {ANTIALIASING: 1} : {},
-      modules: [project32, color, picking, pathUniforms]
+      modules: [
+        project32,
+        color,
+        picking,
+        pathUniforms,
+        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
+      ]
     }); // 'project' module added by default.
   }
 
@@ -166,6 +197,16 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 
+  shouldUpdateState(params: UpdateParameters<this>): boolean {
+    const {viewport} = this.context;
+    return (
+      super.shouldUpdateState(params) ||
+      this.state?.tessellationProjectionMode !== viewport.projectionMode ||
+      this.state?.tessellationResolution !== viewport.resolution ||
+      !pathProjectionScalesEqual(this.state?.pathProjectionScale, getPathProjectionScale(viewport))
+    );
+  }
+
   initializeState() {
     const noAlloc = true;
     const isWebGPU = this.context.device.type === 'webgpu';
@@ -176,7 +217,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         ? {
             // WebGPU cannot express WebGL's vertexOffset window in one vertex buffer layout.
             // Pack each segment's [left, start, end, right] high and low position parts instead.
-            instancePositions: {
+            pathPositions: {
               size: 24,
               type: 'float32',
               transition: false,
@@ -261,7 +302,10 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       pathTesselator: new PathTesselator({
         fp64: this.use64bitPositions(),
         isWebGPU
-      })
+      }),
+      tessellationProjectionMode: this.context.viewport.projectionMode,
+      tessellationResolution: this.context.viewport.resolution,
+      pathProjectionScale: getPathProjectionScale(this.context.viewport)
     });
   }
 
@@ -270,11 +314,26 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
+    const {viewport} = this.context;
+    const tessellationViewportChanged =
+      this.state.tessellationProjectionMode !== viewport.projectionMode ||
+      this.state.tessellationResolution !== viewport.resolution;
+    const pathProjectionScale = getPathProjectionScale(viewport);
+    const pathProjectionScaleChanged = !pathProjectionScalesEqual(
+      this.state.pathProjectionScale,
+      pathProjectionScale
+    );
 
-    const geometryChanged =
-      changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
+    const getPathChanged =
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath);
+    const geometryConfigurationChanged =
+      getPathChanged ||
+      props._pathType !== oldProps._pathType ||
+      props.positionFormat !== oldProps.positionFormat ||
+      props.wrapLongitude !== oldProps.wrapLongitude ||
+      tessellationViewportChanged;
+    const geometryChanged = changeFlags.dataChanged || geometryConfigurationChanged;
 
     if (geometryChanged) {
       const {pathTesselator} = this.state;
@@ -290,18 +349,28 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         positionFormat: props.positionFormat,
         wrapLongitude: props.wrapLongitude,
         // TODO - move the flag out of the viewport
-        resolution: this.context.viewport.resolution,
-        dataChanged: changeFlags.dataChanged
+        resolution: viewport.resolution,
+        // A partial data diff is only valid while normalization inputs remain unchanged.
+        dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });
       this.setState({
         numInstances: pathTesselator.instanceCount,
-        startIndices: pathTesselator.vertexStarts
+        startIndices: pathTesselator.vertexStarts,
+        tessellationProjectionMode: viewport.projectionMode,
+        tessellationResolution: viewport.resolution,
+        pathProjectionScale
       });
-      if (!changeFlags.dataChanged) {
+      if (!changeFlags.dataChanged || geometryConfigurationChanged) {
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
         attributeManager!.invalidateAll();
+      } else if (pathProjectionScaleChanged) {
+        // A data diff invalidates only its row range, while projection scale affects every path.
+        attributeManager!.invalidate('instanceDashOffsets');
       }
+    } else if (pathProjectionScaleChanged) {
+      this.setState({pathProjectionScale});
+      attributeManager!.invalidate('instanceDashOffsets');
     }
 
     if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
