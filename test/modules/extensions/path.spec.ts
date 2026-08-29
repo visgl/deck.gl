@@ -18,6 +18,8 @@ import {
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
+import {preprocess} from '@luma.gl/shadertools';
+import {dashShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -413,6 +415,35 @@ test('PathStyleExtension#shader defines', () => {
   ];
 
   testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
+  const injection = dashShaders.inject['fs:#main-start'];
+  const segmentShader = preprocess(injection);
+  const pathShader = preprocess(injection, {defines: {HIGH_PRECISION_DASH: 1}});
+
+  for (const [mode, shader, unitLengthAssignment] of [
+    ['segment', segmentShader, 'unitLength = vPathLength /'],
+    ['path', pathShader, 'unitLength = vDashPathLength /']
+  ] as const) {
+    const assignmentIndex = shader.indexOf(unitLengthAssignment);
+    const clampIndex = shader.indexOf('solidLength = min(solidLength, unitLength);');
+    const offsetIndex = shader.indexOf('offset = solidLength / 2.0;');
+    expect(assignmentIndex, `${mode} mode adjusts the dash period`).toBeGreaterThanOrEqual(0);
+    expect(clampIndex, `${mode} mode bounds the requested solid interval`).toBeGreaterThan(
+      assignmentIndex
+    );
+    expect(offsetIndex, `${mode} mode calculates offset after bounding`).toBeGreaterThan(
+      clampIndex
+    );
+  }
+
+  expect(segmentShader, 'segment mode uses its local phase').not.toContain(
+    'offset += vDashOffset;'
+  );
+  expect(pathShader, 'path mode adds the accumulated path phase').toContain(
+    'offset += vDashOffset;'
+  );
 });
 
 test('PathStyleExtension#getDashOffsets measures 3D distance', () => {

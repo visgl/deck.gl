@@ -156,14 +156,15 @@ float dashPatternCoverage(
       // already carries the distance to the start of this segment, reduced modulo this same
       // period in the vertex shader.
       unitLength = vDashPathLength / max(round(vDashPathLength / unitLength), 1.0);
-      offset = vDashOffset + solidLength / 2.0;
 #else
       unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
-      // A very short segment can make the justified period shorter than the requested dash.
-      // Treat that period as fully solid, matching the hard interval test and keeping the
-      // coverage integral and duty cycle bounded by one.
+#endif
+      // A short segment or path can make the fitted period shorter than the requested dash.
+      // Bound the solid interval to that period so coverage and duty cycle remain valid.
       solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
+#ifdef HIGH_PRECISION_DASH
+      offset += vDashOffset;
 #endif
     }
 
