@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, color, picking, UNIT} from '@deck.gl/core';
+import {Layer, WebMercatorViewport, project32, color, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
@@ -136,8 +136,11 @@ const ATTRIBUTE_TRANSITION = {
 
 type PathProjectionScale = [number, number, number] | null;
 
-function getPathProjectionScale(viewport: Viewport): PathProjectionScale {
-  if (viewport.isGeospatial) {
+function getPathProjectionScale(
+  viewport: Viewport,
+  trackViewportScale = false
+): PathProjectionScale {
+  if (viewport.isGeospatial && !trackViewportScale) {
     return null;
   }
   const {unitsPerMeter} = viewport.distanceScales;
@@ -197,13 +200,32 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return this.getAttributeManager()?.getBounds(['vertexPositions']);
   }
 
+  private getPathProjectionScale(viewport: Viewport): PathProjectionScale {
+    const coordinateSystem = this.props.coordinateSystem;
+    const hasDashMetrics = Boolean(this.getAttributeManager()?.getAttributes().instanceDashOffsets);
+    const trackViewportScale =
+      hasDashMetrics &&
+      viewport instanceof WebMercatorViewport &&
+      viewport.zoom >= 12 &&
+      // Offset coordinate systems use their fixed coordinateOrigin as the projection origin.
+      // Default/lnglat and preprojected Cartesian paths follow the viewport center instead.
+      (coordinateSystem === 'default' ||
+        coordinateSystem === 'lnglat' ||
+        coordinateSystem === 'cartesian');
+
+    return getPathProjectionScale(viewport, trackViewportScale);
+  }
+
   shouldUpdateState(params: UpdateParameters<this>): boolean {
     const {viewport} = this.context;
     return (
       super.shouldUpdateState(params) ||
       this.state?.tessellationProjectionMode !== viewport.projectionMode ||
       this.state?.tessellationResolution !== viewport.resolution ||
-      !pathProjectionScalesEqual(this.state?.pathProjectionScale, getPathProjectionScale(viewport))
+      !pathProjectionScalesEqual(
+        this.state?.pathProjectionScale,
+        this.getPathProjectionScale(viewport)
+      )
     );
   }
 
@@ -305,7 +327,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }),
       tessellationProjectionMode: this.context.viewport.projectionMode,
       tessellationResolution: this.context.viewport.resolution,
-      pathProjectionScale: getPathProjectionScale(this.context.viewport)
+      pathProjectionScale: this.getPathProjectionScale(this.context.viewport)
     });
   }
 
@@ -318,7 +340,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const tessellationViewportChanged =
       this.state.tessellationProjectionMode !== viewport.projectionMode ||
       this.state.tessellationResolution !== viewport.resolution;
-    const pathProjectionScale = getPathProjectionScale(viewport);
+    const pathProjectionScale = this.getPathProjectionScale(viewport);
     const pathProjectionScaleChanged = !pathProjectionScalesEqual(
       this.state.pathProjectionScale,
       pathProjectionScale
