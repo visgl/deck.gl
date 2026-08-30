@@ -4,11 +4,9 @@
     "start-local": "vite --config ../vite.config.local.mjs"
   },
   "dependencies": {
-    "deck.gl": "^9.0.0",
-    "maplibre-gl": "^5.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-map-gl": "^8.0.0"
+    "@deck.gl/core": "^9.0.0",
+    "@deck.gl/layers": "^9.0.0",
+    "@deck.gl/extensions": "^9.0.0"
   },
   "devDependencies": {
     "vite": "^7.3.1"

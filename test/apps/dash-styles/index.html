@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PathStyleExtension Dash Test</title>
+  <style>
+    body {margin: 0; width: 100vw; height: 100vh; overflow: hidden; font: 12px/1.5 Monaco, monospace;}
+    #controls {
+      position: absolute; top: 10px; left: 10px; z-index: 1;
+      background: rgba(255, 255, 255, 0.94); padding: 12px 14px; border-radius: 6px;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25); width: 260px;
+    }
+    #controls h1 {font-size: 13px; margin: 0 0 10px;}
+    #controls label {display: block; margin-bottom: 8px;}
+    #controls label > span {display: inline-block; width: 108px; vertical-align: middle;}
+    #controls select, #controls input[type=text] {width: 132px;}
+    #controls input[type=range] {width: 100px; vertical-align: middle;}
+    #controls .value {color: #666; margin-left: 4px;}
+    #readout {
+      position: absolute; bottom: 10px; left: 10px; z-index: 1;
+      background: rgba(255, 255, 255, 0.94); padding: 8px 12px; border-radius: 6px;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+    }
+    #legend span {display: inline-block; margin-right: 12px;}
+    #legend i {display: inline-block; width: 10px; height: 10px; margin-right: 4px;}
+  </style>
+</head>
+<body>
+  <div id="controls"></div>
+  <div id="readout"></div>
+</body>
+<script type="module" src="app.js"></script>
+</html>
