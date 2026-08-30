@@ -125,10 +125,22 @@ test('Viewport#equals', () => {
     ...webMercatorOptions,
     legacyMeterSizes: true
   });
+  const matchingLegacyMeterSizes = new WebMercatorViewport({
+    ...webMercatorOptions,
+    legacyMeterSizes: true
+  });
   expect(
     currentMeterSizes.equals(legacyMeterSizes),
     'different meter projection modes are not equal'
   ).toBeFalsy();
+  expect(
+    legacyMeterSizes.equals(currentMeterSizes),
+    'meter projection equality is symmetric'
+  ).toBeFalsy();
+  expect(
+    legacyMeterSizes.equals(matchingLegacyMeterSizes),
+    'matching legacy meter projection modes are equal'
+  ).toBeTruthy();
 });
 
 test('Viewport.getScales', () => {
