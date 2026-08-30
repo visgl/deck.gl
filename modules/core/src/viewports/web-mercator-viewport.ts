@@ -89,7 +89,7 @@ export default class WebMercatorViewport extends Viewport {
   /** Each sub viewport renders one copy of the world if repeat:true. The list is generated and cached on first request. */
   private _subViewports: WebMercatorViewport[] | null;
   /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
-  private _pseudoMeters: boolean;
+  protected readonly _pseudoMeters: boolean;
 
   /* eslint-disable complexity, max-statements */
   constructor(opts: WebMercatorViewportOptions = {}) {
