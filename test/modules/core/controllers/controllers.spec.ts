@@ -13,7 +13,6 @@ import {
   _GlobeView as GlobeView
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import testController, {createTestController} from './test-controller';
 
@@ -547,6 +546,43 @@ test('GlobeController falls back to center zoom when the pointer is off the glob
   expect(controller.props.longitude, 'off-globe zoom preserves longitude').toBeCloseTo(0);
   expect(controller.props.latitude, 'off-globe zoom preserves latitude').toBeCloseTo(0);
   expect(controller.props.zoom, 'off-globe zoom still changes scale').not.toBeCloseTo(1);
+});
+
+test('GlobeController drags through a pole from bearing zero', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: true}),
+    initialViewState: {
+      width: 800,
+      height: 600,
+      longitude: 0,
+      latitude: 80,
+      bearing: 0,
+      zoom: 0
+    }
+  });
+  const startPosition = {x: 400, y: 300};
+  controller.handleEvent(makeGestureEvent('panstart', startPosition) as any);
+
+  let previousViewState = controller.props;
+  let maximumLatitude = Math.abs(controller.props.latitude);
+  for (let index = 1; index <= 10; index++) {
+    controller.handleEvent(makeGestureEvent('panmove', {x: 400, y: 300 + index * 10}) as any);
+    maximumLatitude = Math.max(maximumLatitude, Math.abs(controller.props.latitude));
+
+    expect(
+      getGlobeAngularDistance(previousViewState, controller.props),
+      'camera position remains continuous through the pole'
+    ).toBeLessThan(2);
+    expect(
+      getGlobeUpAngularDistance(previousViewState, controller.props),
+      'camera orientation remains continuous through the pole'
+    ).toBeLessThan(2);
+    previousViewState = controller.props;
+  }
+
+  expect(maximumLatitude, 'drag reaches the pole').toBeGreaterThan(89);
+  expect(Math.abs(controller.props.longitude), 'drag crosses to the other hemisphere').toBe(180);
+  expect(Math.abs(controller.props.bearing), 'bearing follows the camera frame').toBe(180);
 });
 
 test('GlobeController keeps pointer zoom stable when the anchor crosses a pole', () => {

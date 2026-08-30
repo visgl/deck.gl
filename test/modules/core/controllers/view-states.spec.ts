@@ -12,7 +12,7 @@ import {
   OrthographicController,
   Viewport
 } from '@deck.gl/core';
-import {MAX_LATITUDE, normalizeViewportProps} from '@math.gl/web-mercator';
+import {normalizeViewportProps} from '@math.gl/web-mercator';
 
 const dummyMakeViewport = (props: any) => new Viewport(props);
 
@@ -121,21 +121,7 @@ test('GlobeViewState', () => {
     makeViewport: dummyMakeViewport
   });
   viewportProps = viewState.getViewportProps();
-  expect(viewportProps.latitude, 'latitude is constrained before the pole').toBeCloseTo(
-    MAX_LATITUDE
-  );
-
-  viewState = new GlobeViewState({
-    width: 800,
-    height: 600,
-    longitude: 0,
-    latitude: 90,
-    zoom: 5,
-    bearing: 45,
-    makeViewport: dummyMakeViewport
-  });
-  viewportProps = viewState.getViewportProps();
-  expect(viewportProps.latitude, 'free rotation can reach the pole').toBe(90);
+  expect(viewportProps.latitude, 'the default camera can reach the pole').toBe(90);
 
   viewState = new GlobeViewState({
     width: 800,
@@ -148,9 +134,22 @@ test('GlobeViewState', () => {
   });
   viewportProps = viewState.getViewportProps();
   expect(viewportProps.bearing, 'equivalent north-up bearing is normalized').toBe(0);
-  expect(viewportProps.latitude, 'equivalent north-up bearing uses the latitude limit').toBeCloseTo(
-    MAX_LATITUDE
-  );
+  expect(viewportProps.latitude, 'bearing does not imply a latitude limit').toBe(90);
+
+  viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 90,
+    zoom: 5,
+    maxBounds: [
+      [-180, -85],
+      [180, 85]
+    ],
+    makeViewport: dummyMakeViewport
+  });
+  viewportProps = viewState.getViewportProps();
+  expect(viewportProps.latitude, 'maxBounds explicitly limits latitude').toBeLessThanOrEqual(85);
 
   viewState = new GlobeViewState({
     width: 800,
@@ -165,10 +164,10 @@ test('GlobeViewState', () => {
     makeViewport: dummyMakeViewport
   });
   viewportProps = viewState.getViewportProps();
-  expect(
-    viewportProps.latitude,
-    'north-up limit takes precedence over polar maxBounds'
-  ).toBeCloseTo(MAX_LATITUDE);
+  expect(viewportProps.latitude, 'polar maxBounds can approach the pole').toBeGreaterThanOrEqual(
+    86
+  );
+  expect(viewportProps.latitude, 'polar maxBounds remains enforced').toBeLessThanOrEqual(89);
 
   viewState = new GlobeViewState({
     width: 800,
