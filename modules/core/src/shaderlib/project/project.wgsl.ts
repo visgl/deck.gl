@@ -187,7 +187,7 @@ fn project_mercator_(lnglat: vec2<f32>) -> vec2<f32> {
   let y = clamp(lnglat.y, -89.9, 89.9);
   return vec2<f32>(
     radians(x) + PI,
-    PI + log(tan(PI * 0.25 + radians(y) * 0.5))
+    PI + log(tan_fp32(PI * 0.25 + radians(y) * 0.5))
   ) * WORLD_SCALE;
 }
 

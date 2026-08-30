@@ -54,16 +54,13 @@ export interface DeviceLossState {
 export function createTestDevice(
   type: TestDeviceType,
   container: HTMLDivElement,
-  /**
-   * WebGL context attributes. Defaults to the browser's, which enables MSAA - pass
-   * `{antialias: false}` to test what applications get when a base map owns the context.
-   */
+  /** Additional WebGL context attributes. MSAA is disabled by default. */
   webgl?: {antialias?: boolean}
 ): Promise<Device> {
   return luma.createDevice({
     type,
     adapters: type === 'webgl' ? [webgl2Adapter] : [webgpuAdapter],
-    webgl,
+    webgl: type === 'webgl' ? {antialias: false, ...webgl} : undefined,
     createCanvasContext: {
       container,
       width: WIDTH,
