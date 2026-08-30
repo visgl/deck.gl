@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {vecNormalized} from '../../../utils/utils';
-import {OrthographicViewport, Viewport, _GlobeViewport as GlobeViewport} from 'deck.gl';
+import {
+  OrthographicViewport,
+  Viewport,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from 'deck.gl';
 import {Matrix4, Vector3} from '@math.gl/core';
 
 /* eslint-disable */
@@ -112,6 +117,17 @@ test('Viewport#equals', () => {
   expect(
     orthographicZoom1a.equals(orthographicZoom2),
     'different anisotropic common-space scales are not equal'
+  ).toBeFalsy();
+
+  const webMercatorOptions = {width: 800, height: 600, longitude: 0, latitude: 20, zoom: 10};
+  const currentMeterSizes = new WebMercatorViewport(webMercatorOptions);
+  const legacyMeterSizes = new WebMercatorViewport({
+    ...webMercatorOptions,
+    legacyMeterSizes: true
+  });
+  expect(
+    currentMeterSizes.equals(legacyMeterSizes),
+    'different meter projection modes are not equal'
   ).toBeFalsy();
 });
 
