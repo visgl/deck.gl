@@ -109,6 +109,102 @@ webglTest('PathStyleExtension#rounded dash picking', async () => {
   }
 });
 
+webglTest('PathStyleExtension#rounded dash shoulders use one coverage ramp', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 200;
+  canvas.height = 100;
+  const webglContext = canvas.getContext('webgl2', {
+    antialias: false,
+    preserveDrawingBuffer: true
+  });
+  expect(webglContext, 'WebGL2 context is created').toBeTruthy();
+
+  const deck = new Deck({
+    gl: webglContext!,
+    width: 200,
+    height: 100,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    initialViewState: {target: [0, 0, 0], zoom: 0},
+    controller: false,
+    layers: [
+      // Half-pixel coordinates align the end of the first 40 px dash interval with the
+      // reference endpoint below, so both rounded shoulders cover the same pixel centers.
+      new PathLayer({
+        id: 'rounded-dash-shoulder',
+        data: [
+          [
+            [-79.5, -19.5],
+            [80.5, -19.5]
+          ]
+        ],
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: path => path,
+        getColor: [255, 255, 255, 255],
+        getWidth: 20,
+        widthUnits: 'pixels',
+        antialiasing: true,
+        capRounded: true,
+        getDashArray: [4, 4],
+        extensions: [new PathStyleExtension({dash: true})]
+      }),
+      new PathLayer({
+        id: 'rounded-cap-reference',
+        data: [
+          [
+            [-79.5, 20.5],
+            [-39.5, 20.5]
+          ]
+        ],
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: path => path,
+        getColor: [255, 255, 255, 255],
+        getWidth: 20,
+        widthUnits: 'pixels',
+        antialiasing: true,
+        capRounded: true
+      })
+    ]
+  });
+
+  try {
+    await waitForRender(deck);
+    const pixels = new Uint8Array(200 * 100 * 4);
+    webglContext!.readPixels(
+      0,
+      0,
+      200,
+      100,
+      webglContext!.RGBA,
+      webglContext!.UNSIGNED_BYTE,
+      pixels
+    );
+    const getAlpha = (pixelX: number, pixelY: number) => pixels[(pixelY * 200 + pixelX) * 4 + 3];
+    // readPixels uses a bottom-left origin: world y=20.5 maps to row 19, while
+    // world y=-19.5 maps to row 59.
+    const referenceBody = getAlpha(60, 19);
+    const dashBody = getAlpha(60, 59);
+    const referenceShoulder = getAlpha(61, 19);
+    const dashShoulder = getAlpha(61, 59);
+
+    expect(
+      Math.abs(dashBody - referenceBody),
+      `body-edge coverage is aligned (dash=${dashBody}, reference=${referenceBody})`
+    ).toBeLessThanOrEqual(8);
+    expect(referenceShoulder, 'reference rounded shoulder has partial coverage').toBeGreaterThan(
+      96
+    );
+    expect(
+      dashShoulder / referenceShoulder,
+      `dash shoulder is not filtered twice (dash=${dashShoulder}, ` +
+        `reference=${referenceShoulder})`
+    ).toBeGreaterThan(0.8);
+  } finally {
+    deck.finalize();
+    webglContext!.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+});
+
 test('PathStyleExtension#PathLayer', () => {
   const testCases = [
     {
@@ -437,6 +533,7 @@ test('PathStyleExtension#shader defines', () => {
           .getShaders()
           .modules.find(module => module.name === 'pathStyle')!;
         const fragmentStart = pathStyleModule.inject?.['fs:#main-start'];
+        const fragmentEnd = pathStyleModule.inject?.['fs:#main-end'];
         expect(fragmentStart, 'rounded caps use a signed pixel-distance ramp').toContain(
           'smoothedge(0.0, capEdgePixels)'
         );
@@ -445,6 +542,12 @@ test('PathStyleExtension#shader defines', () => {
         );
         expect(fragmentStart, 'sub-pixel rounded dashes preserve capsule area').toContain(
           'boundedSolidLength + min(effectiveGap, capSpan)'
+        );
+        expect(fragmentEnd, 'rounded caps intersect the PathLayer coverage ramp once').toContain(
+          'min(pathCoverage, roundedDashResolvedCoverage)'
+        );
+        expect(fragmentEnd, 'sub-pixel capsule duty remains separable').toContain(
+          'roundedDashDutyCycle'
         );
       }
     },
