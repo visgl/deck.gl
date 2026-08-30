@@ -125,9 +125,6 @@ function createProjectionMatrix({
  * A new viewport instance should be created if any parameters have changed.
  */
 export default class Viewport {
-  /** Internal projection flag used by WebMercatorViewport. */
-  protected declare readonly _pseudoMeters?: boolean;
-
   static displayName = 'Viewport';
 
   /** Init parameters */
@@ -214,6 +211,11 @@ export default class Viewport {
     return PROJECTION_MODE.IDENTITY;
   }
 
+  /** Whether meter projection uses the legacy viewport-centered approximation. */
+  protected get usesPseudoMeters(): boolean {
+    return false;
+  }
+
   // Two viewports are equal if their dimensions, common-space scale, and
   // view and projection matrices are (approximately) equal.
   equals(viewport: Viewport): boolean {
@@ -230,12 +232,11 @@ export default class Viewport {
       viewport.scale === this.scale &&
       viewport.projectionMode === this.projectionMode &&
       viewport.resolution === this.resolution &&
-      viewport._pseudoMeters === this._pseudoMeters &&
+      viewport.usesPseudoMeters === this.usesPseudoMeters &&
       equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
     );
-    // TODO - check distance scales?
   }
 
   /**
