@@ -118,6 +118,9 @@ const config = {
             '@luma.gl/webgl/constants': resolve(
               '../node_modules/@luma.gl/webgl/dist/constants'
             ),
+            '@luma.gl/gpgpu/webgl': resolve(
+              '../node_modules/@luma.gl/gpgpu/dist/operations/webgl'
+            ),
             '@luma.gl/gpgpu/webgpu': resolve(
               '../node_modules/@luma.gl/gpgpu/dist/operations/webgpu'
             ),

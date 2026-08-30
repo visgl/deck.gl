@@ -126,6 +126,10 @@ const optimizeDepsConfig = {
     // luma.gl WebGL dependencies
     '@luma.gl/core',
     '@luma.gl/engine',
+    '@luma.gl/gpgpu',
+    '@luma.gl/gpgpu/cpu',
+    '@luma.gl/gpgpu/webgl',
+    '@luma.gl/gpgpu/webgpu',
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',

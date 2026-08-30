@@ -12,7 +12,7 @@ import DataColumn, {
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
-import {toDoublePrecisionArray} from '../../utils/math-utils';
+import {toDoublePrecisionArrayCPU} from '../../utils/math-utils';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
@@ -232,7 +232,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       } else if (
         this.constant ||
         !this.buffer ||
-        this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
+        this.buffer.byteLength <
+          this._getBufferByteLength(this.value as TypedArray) + this.byteOffset
       ) {
         if (this.constant) {
           // Route legacy constant updater output through the same path used by constant accessors.
@@ -291,13 +292,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     ) as TypedArray;
     const hasChanged = this.setData({constant: true, value: transformedValue});
     if (this.device.type === 'webgpu') {
-      let bufferValue = this.state.constantValue;
-      if (
-        this.doublePrecision &&
-        (bufferValue instanceof Float32Array || bufferValue instanceof Float64Array)
-      ) {
+      let bufferValue = this.state.constantValue!;
+      if (this.doublePrecision) {
         // A zero low tuple must be present in the buffer on WebGPU even when the source is fp32.
-        bufferValue = toDoublePrecisionArray(bufferValue, {size: this.size});
+        bufferValue = toDoublePrecisionArrayCPU(bufferValue as Float32Array | Float64Array, {
+          size: this.size
+        });
         this.setAccessor({
           ...this.getAccessor(),
           stride: this.size * 2 * Float32Array.BYTES_PER_ELEMENT

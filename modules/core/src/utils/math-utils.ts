@@ -109,26 +109,18 @@ export function fp64LowPart(x: number): number {
   return x - Math.fround(x);
 }
 
-let scratchArray;
+let scratchArray: Float32Array | null = null;
 
 /**
- * Split a Float32Array or Float64Array into a double-length Float32Array
- * @param typedArray
- * @param options
- * @param options.size  - per attribute size
- * @param options.startIndex - start index in the source array
- * @param options.endIndex  - end index in the source array
- * @returns {} - high part, low part for each attribute:
-    [1xHi, 1yHi, 1zHi, 1xLow, 1yLow, 1zLow, 2xHi, ...]
+ * Split a Float32Array or Float64Array into a double-length Float32Array on the CPU.
+ * @returns High and low parts grouped per attribute row.
  */
-export function toDoublePrecisionArray(
+export function toDoublePrecisionArrayCPU(
   typedArray: Float32Array | Float64Array,
   options: {size?: number; startIndex?: number; endIndex?: number}
 ): Float32Array {
   const {size = 1, startIndex = 0} = options;
-
   const endIndex = options.endIndex !== undefined ? options.endIndex : typedArray.length;
-
   const count = (endIndex - startIndex) / size;
   scratchArray = typedArrayManager.allocate(scratchArray, count, {
     type: Float32Array,
@@ -138,10 +130,10 @@ export function toDoublePrecisionArray(
   let sourceIndex = startIndex;
   let targetIndex = 0;
   while (sourceIndex < endIndex) {
-    for (let j = 0; j < size; j++) {
+    for (let componentIndex = 0; componentIndex < size; componentIndex++) {
       const value = typedArray[sourceIndex++];
-      scratchArray[targetIndex + j] = value;
-      scratchArray[targetIndex + j + size] = fp64LowPart(value);
+      scratchArray[targetIndex + componentIndex] = value;
+      scratchArray[targetIndex + componentIndex + size] = fp64LowPart(value);
     }
     targetIndex += size * 2;
   }

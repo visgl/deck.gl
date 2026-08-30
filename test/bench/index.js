@@ -19,6 +19,7 @@ import attributeUpdateBench from './attribute-update.bench';
 import comparePropsBench from './compare-props.bench';
 import createPropsBench from './create-props.bench';
 import textAutoWrappingBench from './text-auto-wrapping.bench';
+import doublePrecisionBench from './double-precision.bench';
 
 const suite = new Bench({minIterations: 10});
 
@@ -37,6 +38,7 @@ attributeUpdateBench(suite);
 comparePropsBench(suite);
 createPropsBench(suite);
 textAutoWrappingBench(suite);
+doublePrecisionBench(suite);
 
 // Run the suite
 suite.calibrate().run();
