@@ -16,9 +16,9 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 ### WebGPU
 
-deck.gl v9.4 substantially expands its experimental WebGPU support. Newly supported layers include [`ArcLayer`](./api-reference/layers/arc-layer.md), [`ColumnLayer`](./api-reference/layers/column-layer.md), [`GridCellLayer`](./api-reference/layers/grid-cell-layer.md), [`PathLayer`](./api-reference/layers/path-layer.md), [`PolygonLayer`](./api-reference/layers/polygon-layer.md), [`SolidPolygonLayer`](./api-reference/layers/solid-polygon-layer.md), and [`TileLayer`](./api-reference/geo-layers/tile-layer.md), together with [`ScreenGridLayer`](./api-reference/aggregation-layers/screen-grid-layer.md), [`HexagonLayer`](./api-reference/aggregation-layers/hexagon-layer.md), [`ContourLayer`](./api-reference/aggregation-layers/contour-layer.md), and [`HeatmapLayer`](./api-reference/aggregation-layers/heatmap-layer.md). [`BitmapLayer`](./api-reference/layers/bitmap-layer.md) and [`GeoJsonLayer`](./api-reference/layers/geojson-layer.md) also gain partial WebGPU support.
+deck.gl v9.4 substantially expands its experimental WebGPU support. Newly supported layers include [`ArcLayer`](./api-reference/layers/arc-layer.md), [`ColumnLayer`](./api-reference/layers/column-layer.md), [`GridCellLayer`](./api-reference/layers/grid-cell-layer.md), [`PathLayer`](./api-reference/layers/path-layer.md), [`PolygonLayer`](./api-reference/layers/polygon-layer.md), [`SolidPolygonLayer`](./api-reference/layers/solid-polygon-layer.md), [`TileLayer`](./api-reference/geo-layers/tile-layer.md), and [`Tile3DLayer`](./api-reference/geo-layers/tile-3d-layer.md), together with [`ScreenGridLayer`](./api-reference/aggregation-layers/screen-grid-layer.md), [`HexagonLayer`](./api-reference/aggregation-layers/hexagon-layer.md), [`ContourLayer`](./api-reference/aggregation-layers/contour-layer.md), and [`HeatmapLayer`](./api-reference/aggregation-layers/heatmap-layer.md). [`BitmapLayer`](./api-reference/layers/bitmap-layer.md) and [`GeoJsonLayer`](./api-reference/layers/geojson-layer.md) also gain partial WebGPU support.
 
-This release improves WebGPU attribute-buffer handling, adds WebGPU render-test coverage, and makes switching between WebGL2 and WebGPU more reliable in React and across website examples.
+This release improves WebGPU attribute-buffer handling, adds WebGPU render-test coverage, and makes switching between WebGL2 and WebGPU more reliable in React and across website examples. [`MVTLayer`](./api-reference/geo-layers/mvt-layer.md) now renders on WebGPU with tile clipping for its circle, path, and polygon sublayers.
 
 The WebGPU-capable code is included by default so that adopting WebGPU does not require changing application imports. Applications that only target WebGL2 can instead configure their bundler to resolve the custom export condition `visgl:webgl-only`; supported deck.gl packages will then use alternate builds with WebGPU branches and WGSL shader sources removed, reducing their contribution to bundle size without changing the imported APIs. See [Building Apps](./developer-guide/building-apps.md#bundle-size) for details.
 
@@ -56,6 +56,12 @@ new GlobeView({
 #### View Layout
 
 - A new [`ViewLayout`](./api-reference/widgets/view-layout.md) system makes responsive and dynamic multi-view applications easier to build. Applications define nested, relative view layouts in a simple declarative syntax. The `buildViewsFromViewLayout()` helper then automatically regenerates `View` instances from the specified view layout tree based on browser window size, splitter widget positions, etc.
+
+#### Multi-canvas rendering
+
+- [`Deck._canvases`](./api-reference/core/deck.md#_canvases) presents one shared layer stack into multiple HTML canvases.
+- [`View.canvasId`](./api-reference/core/view.md#canvasid) selects the canvas used for view layout, controllers, and picking.
+- Canvases are explicitly cleared when their views move or are removed.
 
 ### @deck.gl/geo-layers
 
