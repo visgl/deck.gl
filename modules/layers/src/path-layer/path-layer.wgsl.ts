@@ -55,6 +55,25 @@ fn clipLine(position: vec4<f32>, refPosition: vec4<f32>) -> vec4<f32> {
   return position;
 }
 
+#ifdef DASH_ENABLED
+// Return the visible interval of the original segment before clipLine moves either endpoint.
+fn getClippedPathRange(startW: f32, endW: f32) -> vec2<f32> {
+  let startClipped = startW < EPSILON;
+  let endClipped = endW < EPSILON;
+  if (startClipped && endClipped) {
+    return vec2<f32>(0.0, 0.0);
+  }
+  if (startClipped || endClipped) {
+    let intersection = clamp((EPSILON - startW) / (endW - startW), 0.0, 1.0);
+    if (startClipped) {
+      return vec2<f32>(intersection, 1.0);
+    }
+    return vec2<f32>(0.0, intersection);
+  }
+  return vec2<f32>(0.0, 1.0);
+}
+#endif
+
 fn getLineJoinOffset(
   prevPoint: vec3<f32>,
   currPoint: vec3<f32>,
@@ -62,6 +81,7 @@ fn getLineJoinOffset(
   width: vec2<f32>,
 #ifdef DASH_ENABLED
   sourcePathLength: f32,
+  sourcePathRange: vec2<f32>,
 #endif
 #ifdef ANTIALIASING
   coverageScale: f32,
@@ -116,12 +136,23 @@ fn getLineJoinOffset(
   // smaller than that in common space, and changing their scale corrupts even flat paths.
   let safeLength2D = select(1.0, currLength2D, currLength2D > 0.0);
   var arcLengthRatio = 1.0;
-  if (path.billboard != 0.0 && segmentLength2D > 0.0) {
-    arcLengthRatio = sourcePathLength / segmentLength2D;
+  var pathPositionOffset = 0.0;
+  var pathLength = segmentLength2D;
+  if (path.billboard != 0.0) {
+    // clipLine may shorten the visible screen-space segment. Preserve the corresponding interval
+    // of the complete common-space arclength instead of compressing the full dash period into the
+    // visible span. Keep pathLength complete so justification is stable as the camera clips it.
+    let visiblePathLength = sourcePathLength * (sourcePathRange.y - sourcePathRange.x);
+    arcLengthRatio = 0.0;
+    if (segmentLength2D > 0.0) {
+      arcLengthRatio = visiblePathLength / segmentLength2D;
+    }
+    pathPositionOffset = sourcePathLength * sourcePathRange.x;
+    pathLength = sourcePathLength;
   } else if (currLength2D > 0.0) {
     arcLengthRatio = length(currDelta3) / safeLength2D;
+    pathLength = segmentLength2D * arcLengthRatio;
   }
-  let pathLength = segmentLength2D * arcLengthRatio;
 #else
   let pathLength = select(lenB, lenA, isEnd);
 #endif
@@ -172,7 +203,7 @@ fn getLineJoinOffset(
   let pathPosition = vec2<f32>(
     dot(offsetFromStartOfPath, perp),
 #ifdef DASH_ENABLED
-    dot(offsetFromStartOfPath, dir) * arcLengthRatio
+    pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio
 #else
     dot(offsetFromStartOfPath, dir)
 #endif
@@ -260,6 +291,11 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     var currPositionScreen = currProjection.clipPosition;
 #ifdef DASH_ENABLED
     let currPositionCommon = currProjection.commonPosition.xyz;
+    let sourcePathStartScreen = mix(currPositionScreen, prevPositionScreen, isEnd);
+    let sourcePathEndScreen = mix(nextPositionScreen, currPositionScreen, isEnd);
+    let billboardPathRange = getClippedPathRange(
+      sourcePathStartScreen.w, sourcePathEndScreen.w
+    );
 #endif
 
     prevPositionScreen = clipLine(prevPositionScreen, currPositionScreen);
@@ -292,6 +328,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
 #ifdef DASH_ENABLED
       billboardPathLength,
+      billboardPathRange,
 #endif
 #ifdef ANTIALIASING
       coverageScale,
@@ -333,6 +370,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       width,
 #ifdef DASH_ENABLED
       1.0,
+      vec2<f32>(0.0, 1.0),
 #endif
 #ifdef ANTIALIASING
       coverageScale,
