@@ -125,6 +125,9 @@ function createProjectionMatrix({
  * A new viewport instance should be created if any parameters have changed.
  */
 export default class Viewport {
+  /** Internal projection flag used by WebMercatorViewport. */
+  protected declare readonly _pseudoMeters?: boolean;
+
   static displayName = 'Viewport';
 
   /** Init parameters */
@@ -227,6 +230,7 @@ export default class Viewport {
       viewport.scale === this.scale &&
       viewport.projectionMode === this.projectionMode &&
       viewport.resolution === this.resolution &&
+      viewport._pseudoMeters === this._pseudoMeters &&
       equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
