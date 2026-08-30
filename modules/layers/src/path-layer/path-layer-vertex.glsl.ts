@@ -42,7 +42,7 @@ vec3 getLineJoinOffset(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   vec2 width
 #ifdef DASH_ENABLED
-  , float sourcePathLength
+  , float sourcePathLength, vec2 sourcePathRange
 #endif
 #ifdef ANTIALIASING
   , float coverageScale
@@ -99,15 +99,21 @@ vec3 getLineJoinOffset(
   vec3 currDelta3 = isEnd ? deltaA3 : deltaB3;
   float currLength2D = length(currDelta3.xy);
   float arcLengthRatio = 1.0;
-  if (path.billboard && L > 0.0) {
-    // The billboard segment was measured after projection, while the CPU dash offset is true
-    // 3D common-space arclength. Derive the ratio from the complete target length so the local
-    // coordinate ends at exactly the next segment's CPU phase, including in a pitched view.
-    arcLengthRatio = sourcePathLength / L;
+  float pathPositionOffset = 0.0;
+  float pathLength = L;
+  if (path.billboard) {
+    // clipLine may shorten the visible screen-space segment. Preserve the corresponding interval
+    // of the complete common-space arclength instead of compressing the full dash period into the
+    // visible span. Keep pathLength complete so justification is stable as the camera clips it.
+    float visiblePathLength = sourcePathLength * (sourcePathRange.y - sourcePathRange.x);
+    arcLengthRatio = L > 0.0 ? visiblePathLength / L : 0.0;
+    pathPositionOffset = sourcePathLength * sourcePathRange.x;
+    pathLength = sourcePathLength;
   } else if (currLength2D > 0.0) {
     // Do not clamp a valid denominator to EPSILON: high-zoom Web Mercator deltas are often
     // smaller than that in common space, and changing their scale corrupts even flat paths.
     arcLengthRatio = length(currDelta3) / currLength2D;
+    pathLength = L * arcLengthRatio;
   }
 #endif
 
@@ -153,7 +159,7 @@ vec3 getLineJoinOffset(
   // its rasterized envelope to include the outer half of the centered coverage ramp.
   vec2 coverageOffsetVec = offsetVec * coverageScale;
 #ifdef DASH_ENABLED
-  vPathLength = L * arcLengthRatio;
+  vPathLength = pathLength;
 #else
   vPathLength = L;
 #endif
@@ -165,7 +171,7 @@ vec3 getLineJoinOffset(
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
 #ifdef DASH_ENABLED
-    dot(offsetFromStartOfPath, dir) * arcLengthRatio
+    pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio
 #else
     dot(offsetFromStartOfPath, dir)
 #endif
@@ -177,7 +183,7 @@ vec3 getLineJoinOffset(
 #else
   // Generate variables for fragment shader
 #ifdef DASH_ENABLED
-  vPathLength = L * arcLengthRatio;
+  vPathLength = pathLength;
 #else
   vPathLength = L;
 #endif
@@ -189,7 +195,7 @@ vec3 getLineJoinOffset(
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
 #ifdef DASH_ENABLED
-    dot(offsetFromStartOfPath, dir) * arcLengthRatio
+    pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio
 #else
     dot(offsetFromStartOfPath, dir)
 #endif
@@ -213,6 +219,22 @@ void clipLine(inout vec4 position, vec4 refPosition) {
     position = refPosition + (position - refPosition) * r;
   }
 }
+
+#ifdef DASH_ENABLED
+// Return the visible interval of the original segment before clipLine moves either endpoint.
+vec2 getClippedPathRange(float startW, float endW) {
+  bool startClipped = startW < EPSILON;
+  bool endClipped = endW < EPSILON;
+  if (startClipped && endClipped) {
+    return vec2(0.0);
+  }
+  if (startClipped || endClipped) {
+    float intersection = clamp((EPSILON - startW) / (endW - startW), 0.0, 1.0);
+    return startClipped ? vec2(intersection, 1.0) : vec2(0.0, intersection);
+  }
+  return vec2(0.0, 1.0);
+}
+#endif
 
 void main() {
   geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
@@ -260,6 +282,14 @@ void main() {
     );
 #endif
 
+#ifdef DASH_ENABLED
+    vec4 sourcePathStartScreen = mix(currPositionScreen, prevPositionScreen, isEnd);
+    vec4 sourcePathEndScreen = mix(nextPositionScreen, currPositionScreen, isEnd);
+    vec2 billboardPathRange = getClippedPathRange(
+      sourcePathStartScreen.w, sourcePathEndScreen.w
+    );
+#endif
+
     clipLine(prevPositionScreen, currPositionScreen);
     clipLine(nextPositionScreen, currPositionScreen);
     clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
@@ -289,7 +319,7 @@ void main() {
       project_pixel_size_to_clipspace(width.xy)
 #ifdef DASH_ENABLED
       ,
-      billboardPathLength
+      billboardPathLength, billboardPathRange
 #endif
 #ifdef ANTIALIASING
       ,
@@ -317,7 +347,7 @@ void main() {
     vec3 offset = getLineJoinOffset(
       prevPosition, currPosition, nextPosition, width.xy
 #ifdef DASH_ENABLED
-      , 1.0
+      , 1.0, vec2(0.0, 1.0)
 #endif
 #ifdef ANTIALIASING
       , coverageScale

@@ -3,8 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {testLayer} from '@deck.gl/test-utils/vitest';
+import {device, testLayer} from '@deck.gl/test-utils/vitest';
 import {PathLayer} from '@deck.gl/layers';
+import {BufferTransform} from '@luma.gl/engine';
 import {preprocess} from '@luma.gl/shadertools';
 import pathVertexShader from '@deck.gl/layers/path-layer/path-layer-vertex.glsl';
 import pathFragmentShader from '@deck.gl/layers/path-layer/path-layer-fragment.glsl';
@@ -89,6 +90,9 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
     expect(shader).not.toContain('arcLengthRatio');
     expect(shader).not.toContain('currentDeltaCommon');
     expect(shader).not.toContain('billboardPathLength');
+    expect(shader).not.toContain('getClippedPathRange');
+    expect(shader).not.toContain('sourcePathRange');
+    expect(shader).not.toContain('pathPositionOffset');
   }
 
   for (const shader of [dashVertexShader, dashShaderWGSL]) {
@@ -97,6 +101,17 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
     expect(shader).toContain('arcLengthRatio');
     expect(shader).toContain('currentDeltaCommon');
     expect(shader).toContain('billboardPathLength');
+    expect(shader).toContain('getClippedPathRange');
+    expect(shader).toContain('sourcePathRange');
+    expect(shader).toContain('pathPositionOffset');
+    expect(shader).toContain(
+      'visiblePathLength = sourcePathLength * (sourcePathRange.y - sourcePathRange.x)'
+    );
+    expect(shader).toContain('pathPositionOffset = sourcePathLength * sourcePathRange.x');
+    expect(shader).toContain('pathLength = sourcePathLength');
+    expect(shader).toContain(
+      'pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio'
+    );
   }
 
   expect(antialiasingVertexShader).toContain('coverageScale');
@@ -105,4 +120,54 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   expect(antialiasingShaderWGSL).toContain('coverageScale');
   expect(antialiasingShaderWGSL).toContain('fwidth');
   expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
+});
+
+const webglTest = BufferTransform.isSupported(device) ? test : test.skip;
+
+webglTest('PathLayer#dash clipping preserves the visible source interval', () => {
+  const helperMatch = preprocess(pathVertexShader, {defines: {DASH_ENABLED: 1}}).match(
+    /vec2 getClippedPathRange[\s\S]*?\n}\n/
+  );
+  expect(helperMatch, 'compiled dash shader contains the clipping helper').toBeTruthy();
+  const clippingHelper = helperMatch?.[0] || '';
+  const clipStartW = device.createBuffer({data: new Float32Array([-1, 1, 1, -2])});
+  const clipEndW = device.createBuffer({data: new Float32Array([1, -1, 2, -1])});
+  const clippedPathRange = device.createBuffer({byteLength: 4 * 2 * 4});
+  const transform = new BufferTransform(device, {
+    vs: `#version 300 es
+const float EPSILON = 0.001;
+${clippingHelper}
+in float clipStartW;
+in float clipEndW;
+out vec2 clippedPathRange;
+void main() {
+  clippedPathRange = getClippedPathRange(clipStartW, clipEndW);
+  gl_Position = vec4(0.0);
+}
+`,
+    varyings: ['clippedPathRange'],
+    bufferLayout: [
+      {name: 'clipStartW', format: 'float32'},
+      {name: 'clipEndW', format: 'float32'}
+    ]
+  });
+
+  try {
+    transform.model.setVertexCount(4);
+    transform.run({
+      inputBuffers: {clipStartW, clipEndW},
+      outputBuffers: {clippedPathRange}
+    });
+
+    const actual = new Float32Array(clippedPathRange.readSyncWebGL().buffer);
+    const expected = new Float32Array([0.5005, 1, 0, 0.4995, 0, 1, 0, 0]);
+    for (let index = 0; index < expected.length; index++) {
+      expect(actual[index], `range value ${index}`).toBeCloseTo(expected[index], 6);
+    }
+  } finally {
+    transform.destroy();
+    clipStartW.destroy();
+    clipEndW.destroy();
+    clippedPathRange.destroy();
+  }
 });
