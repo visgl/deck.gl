@@ -236,6 +236,15 @@ export default class WebMercatorViewport extends Viewport {
     return this._subViewports;
   }
 
+  /** Returns whether two Web Mercator viewports use the same projection settings. */
+  equals(viewport: Viewport): boolean {
+    return (
+      viewport instanceof WebMercatorViewport &&
+      viewport._pseudoMeters === this._pseudoMeters &&
+      super.equals(viewport)
+    );
+  }
+
   projectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
