@@ -50,7 +50,7 @@ export default class PathTesselator extends Tesselator<
 
   /* Implement base Tesselator interface */
   protected getGeometryFromBuffer(buffer) {
-    if (this.normalize) {
+    if (this.normalize || this.opts.isWebGPU) {
       return super.getGeometryFromBuffer(buffer);
     }
     // we don't need to read the positions if no normalization

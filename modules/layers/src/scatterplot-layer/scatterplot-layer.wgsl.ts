@@ -44,6 +44,7 @@ struct Varyings {
   @location(3) innerUnitRadius: f32,
   @location(4) outerRadiusPixels: f32,
   @location(5) pickingColor: vec3<f32>,
+  @location(6) clipCoordinates: vec2<f32>,
 };
 
 @vertex
@@ -88,20 +89,39 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
 
   if (scatterplot.billboard != 0) {
-    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, vec3<f32>(0.0)); // TODO , geometry.position);
+    let projectedPosition = project_position_to_clipspace_and_commonspace(
+      attributes.instancePositions,
+      attributes.instancePositions64Low,
+      vec3<f32>(0.0)
+    );
+    geometry.position = projectedPosition.commonPosition;
+    varyings.position = projectedPosition.clipPosition;
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
     var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
     varyings.position = vec4<f32>(varyings.position.x + clipPixels.x, varyings.position.y + clipPixels.y, varyings.position.z, varyings.position.w);
+    geometry.position = vec4<f32>(
+      geometry.position.xy + project_pixel_size_vec2(offset.xy),
+      geometry.position.zw
+    );
   } else {
     var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
-    varyings.position = project_position_to_clipspace(attributes.instancePositions, attributes.instancePositions64Low, offset); // TODO , geometry.position);
+    let projectedPosition = project_position_to_clipspace_and_commonspace(
+      attributes.instancePositions,
+      attributes.instancePositions64Low,
+      offset
+    );
+    geometry.position = projectedPosition.commonPosition;
+    varyings.position = projectedPosition.clipPosition;
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
   }
+
+  varyings.clipCoordinates = geometry.position.xy;
+  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   // Apply opacity to instance color, or return instance picking color
   varyings.vFillColor = vec4<f32>(attributes.instanceFillColors.rgb, attributes.instanceFillColors.a * layer.opacity);
@@ -153,6 +173,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   fragColor.a *= inCircle;
+
+  clip_filterColor(varyings.clipCoordinates);
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
