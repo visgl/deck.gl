@@ -5,6 +5,7 @@
 import {Layer, project32, color, picking, UNIT} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
+import type {TypedArray} from '@math.gl/core';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
@@ -451,9 +452,22 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   protected calculateWebGPUPositions(attribute) {
     const {pathTesselator} = this.state;
-    const value = pathTesselator.get('positions');
+    const binaryPositions = (this.props.data as any)?.attributes?.getPath;
+    let value = binaryPositions ? binaryPositions.value || binaryPositions : null;
+    let sourceSize = 3;
+    let sourceStride = 3;
+    let sourceOffset = 0;
 
-    if (!value) {
+    if (binaryPositions && ArrayBuffer.isView(value)) {
+      sourceSize = binaryPositions.size || (this.props.positionFormat === 'XY' ? 2 : 3);
+      const bytesPerElement = (value as TypedArray).BYTES_PER_ELEMENT;
+      sourceStride = binaryPositions.stride ? binaryPositions.stride / bytesPerElement : sourceSize;
+      sourceOffset = binaryPositions.offset ? binaryPositions.offset / bytesPerElement : 0;
+    } else {
+      value = pathTesselator.get('positions');
+    }
+
+    if (!value || !ArrayBuffer.isView(value)) {
       attribute.value = null;
       return;
     }
@@ -471,7 +485,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         const targetOffset = targetIndex + vertexOffset * 3;
         for (let j = 0; j < 3; j++) {
           const position =
-            sourceVertex >= 0 && sourceVertex < numInstances ? value[sourceVertex * 3 + j] : 0;
+            sourceVertex >= 0 && sourceVertex < numInstances && j < sourceSize
+              ? value[sourceVertex * sourceStride + sourceOffset + j]
+              : 0;
           const highPart = Math.fround(position);
           result[targetOffset + j] = highPart;
           result[targetOffset + j + 12] = position - highPart;
