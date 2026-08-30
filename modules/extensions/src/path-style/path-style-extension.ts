@@ -146,12 +146,14 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     const {inject} = result;
     const pathStyle: ShaderModule<PathStyleProps> = {
       name: 'pathStyle',
-      inject,
-      uniformTypes: {
+      inject
+    };
+    if (extension.opts.dash) {
+      pathStyle.uniformTypes = {
         dashAlignMode: 'f32',
         dashGapPickable: 'i32'
-      }
-    };
+      };
+    }
     return {
       modules: [pathStyle],
       defines
