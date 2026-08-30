@@ -211,11 +211,6 @@ export default class Viewport {
     return PROJECTION_MODE.IDENTITY;
   }
 
-  /** Whether meter projection uses the legacy viewport-centered approximation. */
-  protected get usesPseudoMeters(): boolean {
-    return false;
-  }
-
   // Two viewports are equal if their dimensions, common-space scale, and
   // view and projection matrices are (approximately) equal.
   equals(viewport: Viewport): boolean {
@@ -232,7 +227,6 @@ export default class Viewport {
       viewport.scale === this.scale &&
       viewport.projectionMode === this.projectionMode &&
       viewport.resolution === this.resolution &&
-      viewport.usesPseudoMeters === this.usesPseudoMeters &&
       equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
