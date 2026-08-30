@@ -8,6 +8,7 @@ import type {TestCase} from '../deck-test-utils';
 
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
+import {PointLabelLayer} from '@deck.gl/carto';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
@@ -459,6 +460,38 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-background.png'
+  },
+  {
+    name: 'point-label-layer-background',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new PointLabelLayer({
+        id: 'point-label',
+        data: [0],
+        getPosition: () => [0, 0],
+        getText: () => 'PointLabelLayer',
+        getRadius: 0,
+        sizeScale: 32,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        getColor: [180, 0, 0],
+        background: true,
+        getBackgroundColor: [240, 250, 255],
+        getBorderWidth: 3,
+        getBorderColor: [0, 100, 180],
+        backgroundPadding: [12, 8],
+        backgroundBorderRadius: 8,
+        updateTriggers: {getText: 'point-label'},
+        _subLayerProps: {
+          'point-label-primary': {_getFontRenderer: () => fontRenderer}
+        }
+      })
+    ],
+    goldenImage: './test/render/golden-images/point-label-layer-background.png'
   },
   {
     name: 'text-layer-auto-wrapping',
