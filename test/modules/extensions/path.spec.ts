@@ -213,6 +213,7 @@ test('PathStyleExtension#constructor options', () => {
   expect(resolvedOptions, 'omitted public options resolve to runtime defaults').toEqual({
     dash: false,
     offset: false,
+    dashMode: 'segment',
     highPrecisionDash: false
   });
 
@@ -222,6 +223,7 @@ test('PathStyleExtension#constructor options', () => {
   ).toEqual({
     dash: true,
     offset: false,
+    dashMode: 'path',
     highPrecisionDash: true
   });
 });
@@ -615,11 +617,6 @@ test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
 });
 
 test('PathStyleExtension#dashMode', () => {
-  const optionalOptions: PathStyleExtensionOptions = {};
-  expect(new PathStyleExtension(optionalOptions).opts.dash, 'exported options are optional').toBe(
-    false
-  );
-
   // 'path' allocates the offsets attribute; 'segment' must not pay for it.
   const segmentLayer = new PathStyleExtension({dash: true});
   expect(segmentLayer.opts.dashMode, 'defaults to segment').toBe('segment');
