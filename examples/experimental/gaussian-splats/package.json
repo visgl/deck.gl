@@ -1,0 +1,28 @@
+{
+  "name": "deckgl-examples-gaussian-splats",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "vite --config vite.config.mjs --open",
+    "start-local": "vite --config vite.config.mjs",
+    "build": "tsc --noEmit && vite build --config vite.config.mjs",
+    "test": "../../../node_modules/.bin/vitest run --root ../../.. --config vitest.config.ts --project headless test/modules/gaussian-splats/coit-frontier-retention.spec.ts"
+  },
+  "dependencies": {
+    "@loaders.gl/splats": "5.0.0-alpha.3",
+    "@luma.gl/core": "9.4.0-beta.3",
+    "@luma.gl/splats": "9.4.0-beta.3",
+    "@luma.gl/webgpu": "9.4.0-beta.3",
+    "@math.gl/core": "^4.1.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.3.3"
+  }
+}
