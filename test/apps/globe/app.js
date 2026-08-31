@@ -20,7 +20,10 @@ const INITIAL_VIEW_STATE = {
   latitude: 51.47,
   longitude: 0.45,
   minZoom: 1,
-  zoom: 1
+  zoom: 1,
+  bearing: 0,
+  pitch: 0,
+  transitionDuration: 0
 };
 
 let currentViewState = {...INITIAL_VIEW_STATE};
