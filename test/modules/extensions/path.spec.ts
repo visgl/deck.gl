@@ -14,6 +14,7 @@ import {
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
+import type {PathStyleExtensionOptions} from '@deck.gl/extensions';
 import {
   PathLayer,
   PolygonLayer,
@@ -172,6 +173,27 @@ webglTest('PathStyleExtension#rounded dash shoulders use one coverage ramp', asy
     deck.finalize();
     webglContext!.getExtension('WEBGL_lose_context')?.loseContext();
   }
+});
+
+test('PathStyleExtension#constructor options', () => {
+  const optionalOptions: PathStyleExtensionOptions = {};
+  const extension = new PathStyleExtension(optionalOptions);
+  const resolvedOptions: Required<PathStyleExtensionOptions> = extension.opts;
+
+  expect(resolvedOptions, 'omitted public options resolve to runtime defaults').toEqual({
+    dash: false,
+    offset: false,
+    highPrecisionDash: false
+  });
+
+  expect(
+    new PathStyleExtension({highPrecisionDash: true}).opts,
+    'high precision dashing continues to imply dashing'
+  ).toEqual({
+    dash: true,
+    offset: false,
+    highPrecisionDash: true
+  });
 });
 
 test('PathStyleExtension#PathLayer', () => {

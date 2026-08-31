@@ -70,23 +70,26 @@ export type PathStyleExtensionProps<DataT = any> = {
   dashGapPickable?: boolean;
 };
 
+/** Options for configuring a {@link PathStyleExtension}. */
 export type PathStyleExtensionOptions = {
   /**
    * Add capability to render dashed lines.
    * @default false
    */
-  dash: boolean;
+  dash?: boolean;
   /**
    * Add capability to offset lines.
    * @default false
    */
-  offset: boolean;
+  offset?: boolean;
   /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
    * @default false
    */
-  highPrecisionDash: boolean;
+  highPrecisionDash?: boolean;
 };
+
+type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
@@ -140,7 +143,7 @@ function projectRenderedPathPosition(
 }
 
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
-export default class PathStyleExtension extends LayerExtension<PathStyleExtensionOptions> {
+export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'PathStyleExtension';
 
@@ -148,7 +151,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     dash = false,
     offset = false,
     highPrecisionDash = false
-  }: Partial<PathStyleExtensionOptions> = {}) {
+  }: PathStyleExtensionOptions = {}) {
     super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
   }
 
