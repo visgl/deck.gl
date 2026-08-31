@@ -22,6 +22,7 @@ import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
+import {offsetShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
 
 import type {PathStyleExtensionOptions} from '@deck.gl/extensions';
 
@@ -327,6 +328,14 @@ test('PathStyleExtension#shader defines', () => {
   ];
 
   testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#offset keeps dash coordinates in the same units', () => {
+  const offsetVertexShader = offsetShaders.inject['vs:#main-end'];
+  expect(offsetVertexShader).toContain('vPathPosition.y *= offsetWidth');
+  expect(offsetVertexShader).toContain('vPathLength *= offsetWidth');
+  expect(offsetVertexShader).toContain('vPathBounds *= offsetWidth');
+  expect(offsetVertexShader).toContain('vDashOffset *= offsetWidth');
 });
 
 test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
