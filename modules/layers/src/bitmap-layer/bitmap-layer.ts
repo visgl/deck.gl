@@ -168,16 +168,13 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
-    return (
-      changeFlags.propsOrDataChanged ||
-      (changeFlags.viewportChanged && this._getMeshResolution() !== this.state.meshResolution)
-    );
+    return changeFlags.propsOrDataChanged || changeFlags.viewportChanged;
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     // setup model first
     const attributeManager = this.getAttributeManager()!;
-    const meshResolution = this._getMeshResolution();
+    const meshResolution = this.context.viewport.resolution;
 
     if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
@@ -240,10 +237,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ...info,
       color: this.encodePickingColor(0)
     });
-  }
-
-  private _getMeshResolution(): number | undefined {
-    return this.internalState?.viewport?.resolution ?? this.context.viewport.resolution;
   }
 
   protected _createMesh(resolution?: number) {

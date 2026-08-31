@@ -200,6 +200,7 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
           expect(layer.state.coordinateConversion, 'MapView needs no coordinate conversion').toBe(
             0
           );
+          expect(layer.state.meshResolution, 'MapView stores its flat projection').toBeUndefined();
           expect(layer.state.mesh.vertexCount, 'MapView uses one quad').toBe(6);
         }
       },
@@ -212,6 +213,9 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
             layer.state.coordinateConversion,
             'GlobeView converts Web Mercator image coordinates'
           ).toBe(1);
+          expect(layer.state.meshResolution, 'GlobeView stores its curved resolution').toBe(
+            globeViewport.resolution
+          );
           expect(layer.state.mesh.vertexCount, 'GlobeView tessellates the bitmap').toBeGreaterThan(
             6
           );
@@ -223,6 +227,10 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
         updateProps: {},
         onAfterUpdate({layer}) {
           expect(layer.state.coordinateConversion, 'MapView removes coordinate conversion').toBe(0);
+          expect(
+            layer.state.meshResolution,
+            'MapView restores its flat projection'
+          ).toBeUndefined();
           expect(layer.state.mesh.vertexCount, 'MapView restores one quad').toBe(6);
         }
       }
