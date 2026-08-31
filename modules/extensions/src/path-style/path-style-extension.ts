@@ -286,6 +286,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     }
     if (extension.opts.offset) {
       result = mergeShaders(result, offsetShaders);
+      defines.PATH_STYLE_OFFSET = true;
     }
 
     const {inject} = result;

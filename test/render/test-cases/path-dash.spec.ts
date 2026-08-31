@@ -31,13 +31,6 @@ import {PathStyleExtension} from '@deck.gl/extensions';
  *   per segment, so it does not rescue dense polylines.
  * - `path-dash-density-high-precision`: all six strips identical and correct. The
  *   continuous-arclength mechanism works; it is simply opt-in.
- * - `path-dash-billboard-map-z14`: flat dashes at a 34.8px period (correct for an 8px
- *   stroke); the billboard copy of the same geometry renders **solid** when dense and at a
- *   52.0px period - 1.5x too long - when sparse. `billboard: true` combined with
- *   `highPrecisionDash` is broken.
- * - `path-dash-3d-*`: every row has identical screen geometry under an orthographic
- *   `MapView`, but dash phase jumps at segment joints as elevation increases because the CPU
- *   accumulates 3D distance while the shader coordinate measures 2D.
  */
 
 const STRIP_LENGTH = 720;

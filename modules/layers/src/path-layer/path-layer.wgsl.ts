@@ -419,9 +419,13 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Both evaluated so each derivative stays on one field across the corner/body boundary
   let bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
   let cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+#ifdef PATH_STYLE_OFFSET
   // Rounded corners still intersect the stroke-width envelope. Extensions may remap
   // vPathPosition.x independently of vCornerOffset, as PathStyleExtension does for offsets.
   let edgePixels = select(bodyPixels, min(cornerPixels, bodyPixels), isRound && isCorner);
+#else
+  let edgePixels = select(bodyPixels, cornerPixels, isRound && isCorner);
+#endif
 
   // Fragments outside the coverage ramp must not write depth or picking colors.
   if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
