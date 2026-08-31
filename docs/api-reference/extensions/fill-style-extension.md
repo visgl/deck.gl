@@ -30,6 +30,7 @@ const layer = new GeoJsonLayer({
   getFillPattern: f => 'hatch',
   getFillPatternScale: 1,
   getFillPatternOffset: [0, 0],
+  getFillPatternBackgroundColor: [200, 200, 200],
 
   // Define extensions
   extensions: [new FillStyleExtension({pattern: true})]
@@ -112,6 +113,10 @@ Whether to treat the patterns as transparency masks.
 + If `true`, user defined color (e.g. from `getFillColor`) is applied.
 + If `false`, pixel color from the image is applied.
 
+In both cases the pattern is composited over
+[`getFillPatternBackgroundColor`](#getfillpatternbackgroundcolor), so the layer's fill color styles
+the pattern and the background color styles the area behind it.
+
 
 #### `getFillPattern` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
 
@@ -137,6 +142,29 @@ The offset of the pattern, relative to the original size. Offset `[0.5, 0.5]` sh
 - If an array is provided, it is used as the pattern offset for all objects.
 - If a function is provided, it is called on each object to retrieve its pattern offset.
 
+
+#### `getFillPatternBackgroundColor` ([Accessor&lt;Color&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpatternbackgroundcolor}
+
+- Default: `[0, 0, 0, 0]`
+
+The color filled behind the pattern. The pattern is composited on top of it, so the background shows
+through wherever the pattern is transparent. Defaults to fully transparent, which leaves the area
+behind the pattern unfilled.
+
+This makes it possible to style a polygon's background independently from the pattern drawn over it
+within a single layer. The layer's own `getFillColor` (or, with
+[`fillPatternMask: false`](#fillpatternmask), the atlas image) colors the pattern, while
+`getFillPatternBackgroundColor` colors the fill underneath:
+
+```js
+new GeoJsonLayer({
+  // ...
+  // A white pattern over a data-driven background
+  getFillColor: [255, 255, 255],
+  getFillPatternBackgroundColor: f => COLOR_SCALE(f.properties.value),
+  extensions: [new FillStyleExtension({pattern: true})]
+});
+```
 
 ## Source
 
