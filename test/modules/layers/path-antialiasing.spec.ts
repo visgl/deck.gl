@@ -67,9 +67,15 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   const antialiasingFragmentShader = preprocess(pathFragmentShader, {
     defines: {ANTIALIASING: 1}
   });
+  const offsetAntialiasingFragmentShader = preprocess(pathFragmentShader, {
+    defines: {ANTIALIASING: 1, PATH_STYLE_OFFSET: 1}
+  });
   const dashVertexShader = preprocess(pathVertexShader, {defines: {DASH_ENABLED: 1}});
   const defaultShaderWGSL = preprocess(shaderWGSL);
   const antialiasingShaderWGSL = preprocess(shaderWGSL, {defines: {ANTIALIASING: 1}});
+  const offsetAntialiasingShaderWGSL = preprocess(shaderWGSL, {
+    defines: {ANTIALIASING: 1, PATH_STYLE_OFFSET: 1}
+  });
   const dashShaderWGSL = preprocess(shaderWGSL, {defines: {DASH_ENABLED: 1}});
 
   expect(defaultVertexShader).not.toContain('coverageScale');
@@ -116,11 +122,15 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
-  expect(antialiasingFragmentShader).toContain('min(cornerPixels, bodyPixels)');
+  expect(antialiasingFragmentShader).toContain('? cornerPixels : bodyPixels');
+  expect(antialiasingFragmentShader).not.toContain('min(cornerPixels, bodyPixels)');
+  expect(offsetAntialiasingFragmentShader).toContain('min(cornerPixels, bodyPixels)');
   expect(antialiasingFragmentShader).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
   expect(antialiasingShaderWGSL).toContain('coverageScale');
   expect(antialiasingShaderWGSL).toContain('fwidth');
-  expect(antialiasingShaderWGSL).toContain('min(cornerPixels, bodyPixels)');
+  expect(antialiasingShaderWGSL).toContain('select(bodyPixels, cornerPixels');
+  expect(antialiasingShaderWGSL).not.toContain('min(cornerPixels, bodyPixels)');
+  expect(offsetAntialiasingShaderWGSL).toContain('min(cornerPixels, bodyPixels)');
   expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });
 

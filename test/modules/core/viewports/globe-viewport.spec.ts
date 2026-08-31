@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import GlobeViewport from '@deck.gl/core/viewports/globe-viewport';
 import {equals, config} from '@math.gl/core';
 
 const TEST_VIEWPORTS = [
@@ -166,6 +166,105 @@ test('GlobeViewport#project, unproject', () => {
   }
 
   config.EPSILON = oldEpsilon;
+});
+
+test('GlobeViewport#panByPosition anchors near the globe limb', () => {
+  const viewport = new GlobeViewport({
+    width: 1280,
+    height: 720,
+    latitude: 20,
+    longitude: 30,
+    zoom: 0
+  });
+  const pixelNearLimb = [725, 360];
+
+  const anchor = viewport.unproject(pixelNearLimb);
+  const zoomedViewport = new GlobeViewport({
+    width: 1280,
+    height: 720,
+    latitude: 20,
+    longitude: 30,
+    zoom: 1
+  });
+  const anchoredProps = zoomedViewport.panByPosition(anchor, pixelNearLimb);
+  expect(anchoredProps.longitude, 'near-limb anchor adjusts longitude').not.toBeCloseTo(
+    zoomedViewport.longitude
+  );
+});
+
+test('GlobeViewport#panByPosition keeps an on-globe anchor stable', () => {
+  const pixel = [500, 250];
+  const startViewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 20,
+    longitude: 30,
+    zoom: 1
+  });
+  const anchor = startViewport.unproject(pixel);
+  const zoomedViewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 20,
+    longitude: 30,
+    zoom: 2
+  });
+  const anchoredProps = zoomedViewport.panByPosition(anchor, pixel);
+  const anchoredViewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: anchoredProps.latitude,
+    longitude: anchoredProps.longitude,
+    zoom: 2
+  });
+  const projectedAnchor = anchoredViewport.project(anchor);
+
+  expect(Math.abs(projectedAnchor[0] - pixel[0]), 'anchor x remains stable').toBeLessThan(4);
+  expect(Math.abs(projectedAnchor[1] - pixel[1]), 'anchor y remains stable').toBeLessThan(4);
+});
+
+test('GlobeViewport#panByPosition ignores anchors far outside the globe', () => {
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 0,
+    longitude: 0,
+    zoom: 1
+  });
+  const anchoredProps = viewport.panByPosition(viewport.unproject([0, 0]), [0, 0]);
+
+  expect(anchoredProps.longitude, 'off-globe anchor preserves longitude').toBe(viewport.longitude);
+  expect(anchoredProps.latitude, 'off-globe anchor preserves latitude').toBe(viewport.latitude);
+});
+
+test('GlobeViewport#panByPosition uses the shortest wrapped longitude delta', () => {
+  const pixel = [500, 300];
+  const startViewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 10,
+    longitude: 170,
+    zoom: 1
+  });
+  const anchor = startViewport.unproject(pixel);
+  const zoomedViewport = new GlobeViewport({
+    width: 800,
+    height: 600,
+    latitude: 10,
+    longitude: 170,
+    zoom: 2
+  });
+
+  const anchoredProps = zoomedViewport.panByPosition(anchor, pixel);
+  const wrappedAnchorProps = zoomedViewport.panByPosition([anchor[0] + 360, anchor[1]], pixel);
+
+  expect(wrappedAnchorProps.longitude, 'equivalent longitudes produce the same camera').toBeCloseTo(
+    anchoredProps.longitude
+  );
+  expect(
+    Math.abs((anchoredProps.longitude as number) - zoomedViewport.longitude),
+    'camera follows the short path across the antimeridian'
+  ).toBeLessThan(180);
 });
 
 test('GlobeViewport#getBounds', () => {

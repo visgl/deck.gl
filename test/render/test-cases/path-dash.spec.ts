@@ -19,9 +19,18 @@ import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
  * indistinguishable. Cases are laid out as horizontal strips stacked vertically, following
  * the `OrthographicView` convention already used by `path-layer.spec.ts`.
  *
- * This matrix was introduced at the bottom of the dash stack as an intentional record of
- * the old defects. Each behavior layer updates or adds the goldens it owns, so at any stack
- * position the committed images describe the behavior implemented at that position.
+ * IMPORTANT: the golden images committed alongside this file record how dashing behaves
+ * *today*, defects included. They are a baseline to diff future work against, not a
+ * statement of desired output. Measured from these goldens, with `getDashArray: [4, 5]`:
+ *
+ * - `path-dash-density-default`: the 1, 2 and 4 segment strips dash correctly at a 43.4px
+ *   period; the 12 segment strip drifts to 55.4px; the 40 and 120 segment strips render
+ *   **fully solid**. All six draw the identical straight line. Dash phase restarts at every
+ *   vertex, so once a segment is shorter than one dash period nothing is ever discarded.
+ * - `path-dash-density-justified`: same collapse to solid - justification is also computed
+ *   per segment, so it does not rescue dense polylines.
+ * - `path-dash-density-high-precision`: all six strips identical and correct. The
+ *   continuous-arclength mechanism works; it is simply opt-in.
  */
 
 const STRIP_LENGTH = 720;
