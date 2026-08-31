@@ -496,6 +496,7 @@ in float instanceOffsets;
 #ifdef DASH_ENABLED
   // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so these rescalings restore
   // units of the original half-width. The dash block merges ahead of this one.
+  vPathBounds *= offsetWidth;
 #ifdef HIGH_PRECISION_DASH
   vDashPathLength *= offsetWidth;
   // The dash block reduced the CPU path offset modulo a period expressed in widened-width
