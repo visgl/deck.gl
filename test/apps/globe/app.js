@@ -32,10 +32,23 @@ let viewType = 'globe';
 
 const GRATICULES = getGraticules(30);
 
+function getControllerOptions() {
+  return {
+    inertia: 500,
+    zoomAround,
+    multiTouchDrag: 'rotate',
+    doubleClickZoom: true,
+    doubleClickDragZoom: true
+  };
+}
+
 export const deck = new Deck({
   views: getView(viewType),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {inertia: 500, zoomAround},
+  controller: getControllerOptions(),
+  eventRecognizerOptions: {
+    dblclick: {time: 500}
+  },
   parameters: {
     cull: true
   },
@@ -133,7 +146,7 @@ function getView(nextViewType) {
 const settingsControl = createSettingsControl({
   onZoomAroundChange: nextZoomAround => {
     zoomAround = nextZoomAround;
-    deck.setProps({controller: {inertia: 500, zoomAround}});
+    deck.setProps({controller: getControllerOptions()});
     updateSettingsControl();
   },
   onViewChange: nextViewType => {

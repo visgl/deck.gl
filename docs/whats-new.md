@@ -52,6 +52,8 @@ new GlobeView({
 #### Controllers
 
 - All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
+- Touch pinch zoom now ends at the last live gesture position instead of applying inertia from the noisy finger-lift frame, allowing an immediate handoff to pan or another pinch.
+- Mobile gesture recognition now distinguishes two-finger translation from pinch zoom and accepts a more deliberate first tap for double-tap-drag zoom.
 
 #### View Layout
 
