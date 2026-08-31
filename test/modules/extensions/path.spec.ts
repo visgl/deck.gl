@@ -210,6 +210,10 @@ test('PathStyleExtension#PathLayer', () => {
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(0);
+        expect(
+          layer.getShaders().defines.PATH_STYLE_OFFSET,
+          'offset capability selects the remapped corner envelope'
+        ).toBe(true);
         const pathStyleModule = layer
           .getShaders()
           .modules.find(module => module.name === 'pathStyle')!;
@@ -280,6 +284,10 @@ test('PathStyleExtension#offset-only shader module', () => {
           extensions: [new PathStyleExtension({offset: true})]
         },
         onAfterUpdate: ({layer}) => {
+          expect(
+            layer.getShaders().defines.PATH_STYLE_OFFSET,
+            'offset-only capability selects the remapped corner envelope'
+          ).toBe(true);
           const pathStyleModule = layer
             .getShaders()
             .modules.find(module => module.name === 'pathStyle')!;
