@@ -93,7 +93,7 @@ export type PathStyleExtensionOptions = {
   dashMode?: DashMode;
   /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
-   * @deprecated Use `dashMode: 'path'` instead, which this is now an alias for.
+   * @deprecated Use `dashMode: 'path'` instead.
    * @default false
    */
   highPrecisionDash?: boolean;
