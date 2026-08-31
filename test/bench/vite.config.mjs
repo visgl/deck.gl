@@ -17,7 +17,11 @@ export default defineConfig(async () => {
     root: rootDirectory,
     build: {
       rollupOptions: {
-        input: resolve(rootDirectory, 'antialiasing.html')
+        input: {
+          antialiasing: resolve(rootDirectory, 'antialiasing.html'),
+          pathStyleExtension: resolve(rootDirectory, 'path-style-extension.html'),
+          pathStyleExtensionCpu: resolve(rootDirectory, 'path-style-extension-cpu.html')
+        }
       }
     },
     resolve: {

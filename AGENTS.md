@@ -54,8 +54,14 @@ When asked to "get ready for merge", do a full merge-readiness pass:
 
 - Prefer TypeScript and ES module syntax.
 - Match the surrounding file style. In source files, use single quotes and semicolons.
-- Never abbreviate variable names. Use camelCase for variables, functions, and fields; PascalCase
-  for types and classes; and CAPITAL_CASE for constants.
+- Prefer descriptive names and avoid ad hoc abbreviations. Conventional mathematical, graphical,
+  geospatial, web-platform, and deck.gl callback abbreviations are allowed when unambiguous in
+  context. Examples include `x`, `y`, `z`, and `w` for vector components; `i`, `j`, and `k` for
+  indices; `r`, `g`, `b`, and `a` for color channels; `u` and `v` for texture coordinates; `d`
+  for a datum in accessor callbacks; and established terms such as `gl`, `id`, `lat`, `lng`,
+  `url`, `WebGL`, `GPU`, and `SDF`.
+- Use camelCase for variables, functions, and fields; PascalCase for types and classes; and
+  CAPITAL_CASE for constants.
 - Prefer verb-noun names for functions and methods.
 - File names should be kebab-case unless an existing local convention differs.
 
