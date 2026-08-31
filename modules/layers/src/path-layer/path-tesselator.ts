@@ -48,6 +48,30 @@ export default class PathTesselator extends Tesselator<
     return this.attributes[attributeName];
   }
 
+  /** Get rendered segment indexes in source traversal order. */
+  getPathSegmentIndices(dataIndex: number): number[] {
+    const segmentTypes = this.attributes.segmentTypes as TypedArray;
+    const rowStart = this.vertexStarts[dataIndex];
+    const rowEnd = Math.min(
+      this.vertexStarts[dataIndex + 1] ?? this.instanceCount,
+      this.instanceCount
+    );
+    const result: number[] = [];
+
+    for (let segmentIndex = rowStart; segmentIndex < rowEnd - 1; segmentIndex++) {
+      if ((segmentTypes[segmentIndex] & INVALID) === 0) {
+        result.push(segmentIndex);
+      }
+    }
+
+    // Closed paths are padded as [INVALID, B→C, C→A, A→B, INVALID, INVALID].
+    // Visit A→B first so consumers can anchor values at the first source position.
+    if (result.length && (segmentTypes[rowStart] & INVALID) !== 0) {
+      result.unshift(result.pop()!);
+    }
+    return result;
+  }
+
   /* Implement base Tesselator interface */
   protected getGeometryFromBuffer(buffer) {
     if (this.normalize || this.opts.isWebGPU) {

@@ -2,8 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
+import {
+  LayerExtension,
+  WebMercatorViewport,
+  project,
+  _deepEqual as deepEqual,
+  _mergeShaders as mergeShaders
+} from '@deck.gl/core';
+import {vec3, vec4} from '@math.gl/core';
 import {
   dashShaders,
   Defines,
@@ -12,7 +18,14 @@ import {
   textBackgroundDashShaders
 } from './shaders.glsl';
 
-import type {Accessor, Layer, LayerContext, UpdateParameters} from '@deck.gl/core';
+import type {
+  Accessor,
+  Attribute,
+  Layer,
+  LayerContext,
+  ProjectUniforms,
+  UpdateParameters
+} from '@deck.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
@@ -33,7 +46,9 @@ type SDFDashStyleProps = {
 
 export type PathStyleExtensionProps<DataT = any> = {
   /**
-   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
+   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to *half*
+   * the width of the path, so `[4, 5]` on a path 10 pixels wide draws 20 pixel dashes separated
+   * by 25 pixel gaps.
    * Requires the `dash` option to be on.
    */
   getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
@@ -77,6 +92,69 @@ export type PathStyleExtensionOptions = {
 type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
+
+function dashMetricsProjectionPropsChanged({
+  props,
+  oldProps
+}: UpdateParameters<Layer<PathStyleExtensionProps>>): boolean {
+  // Data, accessors, and tessellation configuration invalidate through AttributeManager and
+  // PathLayer. PathLayer separately tracks viewport projection scale. These are the remaining
+  // layer props consumed by the project uniforms used to calculate dash metrics.
+  return (
+    !deepEqual(props.modelMatrix, oldProps.modelMatrix, 2) ||
+    props.coordinateSystem !== oldProps.coordinateSystem ||
+    !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)
+  );
+}
+
+function projectRenderedPathPosition(
+  layer: Layer<PathStyleExtensionProps>,
+  position: number[],
+  projectUniforms: ProjectUniforms
+): [number, number, number] {
+  const viewport = layer.context.viewport;
+  if (!(viewport instanceof WebMercatorViewport) || viewport.zoom < 12) {
+    return layer.projectPosition(position, {autoOffset: false});
+  }
+
+  // High-zoom Web Mercator shaders use a center-relative Taylor projection for precision.
+  // Layer#projectPosition deliberately returns the exact, viewport-independent projection,
+  // so reproduce project_position here to keep CPU phase continuous with each GPU segment.
+  const positionWorld = vec4.transformMat4(
+    [],
+    [position[0], position[1], position[2] || 0, 1],
+    projectUniforms.modelMatrix
+  );
+  const coordinateSystem =
+    layer.props.coordinateSystem === 'default' ? 'lnglat' : layer.props.coordinateSystem;
+
+  if (coordinateSystem === 'lnglat') {
+    if (Math.abs(positionWorld[1] - projectUniforms.coordinateOrigin[1]) > 0.25) {
+      let longitude = positionWorld[0];
+      if (projectUniforms.wrapLongitude) {
+        longitude = ((((longitude + 180) % 360) + 360) % 360) - 180;
+      }
+      const commonPosition = viewport.projectPosition([longitude, positionWorld[1], 0]);
+      return [
+        commonPosition[0] - projectUniforms.commonOrigin[0],
+        commonPosition[1] - projectUniforms.commonOrigin[1],
+        positionWorld[2] * projectUniforms.commonUnitsPerMeter[2]
+      ];
+    }
+    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+  } else if (coordinateSystem === 'cartesian') {
+    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+  }
+
+  const deltaLatitude = positionWorld[1];
+  const scale = vec3.scaleAndAdd(
+    [],
+    projectUniforms.commonUnitsPerWorldUnit,
+    projectUniforms.commonUnitsPerWorldUnit2,
+    deltaLatitude
+  );
+  return vec3.multiply([], positionWorld, scale) as [number, number, number];
+}
 
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
 export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
@@ -138,6 +216,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     const defines: Defines = {};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
+      defines.DASH_ENABLED = true;
       if (extension.opts.highPrecisionDash) {
         defines.HIGH_PRECISION_DASH = true;
       }
@@ -177,8 +256,12 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
           ? {
               instanceDashOffsets: {
                 size: 1,
-                accessor: 'getPath',
-                transform: extension.getDashOffsets.bind(this)
+                // Recalculate from rendered geometry when getPath changes. A binary getPath
+                // buffer contains positions, not dash metrics, so keep it as an update trigger
+                // rather than binding it directly to this attribute.
+                accessor: ['getPath'],
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                update: extension.calculateDashMetrics
               }
             }
           : {})
@@ -202,6 +285,13 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
 
     if (extension.opts.dash) {
       const layerType = extension.getLayerType(this);
+      if (
+        layerType === 'path' &&
+        extension.opts.highPrecisionDash &&
+        dashMetricsProjectionPropsChanged(params)
+      ) {
+        this.getAttributeManager()?.invalidate('instanceDashOffsets');
+      }
       if (layerType === 'scatterplot' || layerType === 'textBackground') {
         const pathStyleProps: SDFDashStyleProps = {
           dashGapPickable: Boolean(this.props.dashGapPickable)
@@ -217,6 +307,114 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     }
   }
 
+  private calculateDashMetrics(
+    this: Layer<PathStyleExtensionProps>,
+    attribute: Attribute,
+    {startRow, endRow}: {startRow: number; endRow: number}
+  ): void {
+    const pathTesselator = (this.state as any).pathTesselator;
+    const vertexStarts = pathTesselator?.vertexStarts as number[] | undefined;
+    const instanceCount = pathTesselator?.instanceCount as number | undefined;
+    const packedPositions = pathTesselator?.get('positions');
+
+    if (
+      !vertexStarts ||
+      instanceCount === undefined ||
+      typeof pathTesselator?.getPathSegmentIndices !== 'function'
+    ) {
+      throw new Error('PathStyleExtension requires PathLayer tessellation data for path dashes.');
+    }
+
+    const binaryPath = (this.props.data as any)?.attributes?.getPath;
+    const binaryValue = ArrayBuffer.isView(binaryPath) ? binaryPath : binaryPath?.value;
+    const hasReadableBinaryPath = ArrayBuffer.isView(binaryValue);
+    // With `_pathType`, WebGL binds binary positions directly and the tesselator's allocated
+    // positions array is only a zero-filled placeholder. WebGPU materializes packed neighboring
+    // positions when the binary source is CPU-readable; GPU-only sources are rejected below.
+    const usePackedPositions =
+      packedPositions && (!binaryPath || pathTesselator.normalize || pathTesselator.opts?.isWebGPU);
+    if ((binaryPath && !hasReadableBinaryPath) || (!usePackedPositions && !hasReadableBinaryPath)) {
+      throw new Error(
+        'PathStyleExtension cannot calculate whole-path dash metrics from GPU-only getPath data; ' +
+          'supply data.attributes.instanceDashOffsets.'
+      );
+    }
+
+    const output = attribute.value as Float32Array;
+    const metricSize = attribute.size;
+    const firstRow = Math.max(0, startRow);
+    const lastRow = Math.min(endRow, vertexStarts.length - 1);
+
+    let binarySize = 3;
+    let binaryStride = 3;
+    let binaryOffset = 0;
+    if (!usePackedPositions) {
+      const bytesPerElement = (binaryValue as any).BYTES_PER_ELEMENT;
+      binarySize = binaryPath?.size || (this.props.positionFormat === 'XY' ? 2 : 3);
+      binaryStride = binaryPath?.stride ? binaryPath.stride / bytesPerElement : binarySize;
+      binaryOffset = binaryPath?.offset ? binaryPath.offset / bytesPerElement : 0;
+    }
+
+    const sourcePosition = new Array(3);
+    const projectUniforms = project.getUniforms({
+      viewport: this.context.viewport,
+      modelMatrix: this.props.modelMatrix,
+      coordinateSystem: this.props.coordinateSystem,
+      coordinateOrigin: this.props.coordinateOrigin,
+      // PathLayer normalizes/cuts wrapped paths on the CPU; its shader never wraps again.
+      autoWrapLongitude: this.wrapLongitude
+    }) as ProjectUniforms;
+    const readPosition = (vertexIndex: number): number[] => {
+      if (usePackedPositions) {
+        sourcePosition[0] = packedPositions[vertexIndex * 3];
+        sourcePosition[1] = packedPositions[vertexIndex * 3 + 1];
+        sourcePosition[2] = packedPositions[vertexIndex * 3 + 2];
+      } else {
+        const sourceIndex = binaryOffset + vertexIndex * binaryStride;
+        sourcePosition[0] = binaryValue[sourceIndex];
+        sourcePosition[1] = binaryValue[sourceIndex + 1];
+        sourcePosition[2] = binarySize === 3 ? binaryValue[sourceIndex + 2] : 0;
+      }
+      return sourcePosition;
+    };
+
+    attribute.startIndices = vertexStarts;
+    for (let row = firstRow; row < lastRow; row++) {
+      const rowStart = vertexStarts[row];
+      const rowEnd = Math.min(vertexStarts[row + 1] ?? instanceCount, instanceCount);
+      output.fill(0, rowStart * metricSize, rowEnd * metricSize);
+
+      const validSegments = pathTesselator.getPathSegmentIndices(row);
+
+      let phase = 0;
+      let previousSegment = -2;
+      let previousEnd: [number, number, number] | null = null;
+      for (const segmentIndex of validSegments) {
+        const outputIndex = segmentIndex * metricSize;
+        output[outputIndex] = phase;
+
+        const start =
+          segmentIndex === previousSegment + 1 && previousEnd
+            ? previousEnd
+            : projectRenderedPathPosition(this, readPosition(segmentIndex), projectUniforms);
+        const end = projectRenderedPathPosition(
+          this,
+          readPosition(segmentIndex + 1),
+          projectUniforms
+        );
+        phase += vec3.dist(start, end);
+        previousSegment = segmentIndex;
+        previousEnd = end;
+      }
+
+      if (metricSize > 1) {
+        for (let vertexIndex = rowStart; vertexIndex < rowEnd; vertexIndex++) {
+          output[vertexIndex * metricSize + 1] = phase;
+        }
+      }
+    }
+  }
+
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
     const result = [0];
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
@@ -227,7 +425,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     let prevP;
     for (let i = 0; i < geometrySize - 1; i++) {
       p = isNested ? path[i] : path.slice(i * positionSize, i * positionSize + positionSize);
-      p = this.projectPosition(p);
+      p = this.projectPosition(p, {autoOffset: false});
 
       if (i > 0) {
         result[i] = result[i - 1] + vec3.dist(prevP, p);
