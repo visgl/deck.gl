@@ -32,6 +32,10 @@ export type Defines = {
    * varyings only when they actually exist.
    */
   DASH_ENABLED?: boolean;
+  /**
+   * Set when PathStyleExtension offset shaders remap the path-width coordinate.
+   */
+  PATH_STYLE_OFFSET?: boolean;
 };
 
 export const dashShaders = {
