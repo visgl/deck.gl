@@ -55,28 +55,31 @@ export type PathStyleExtensionProps<DataT = any> = {
   dashGapPickable?: boolean;
 };
 
+/** Options for configuring a {@link PathStyleExtension}. */
 export type PathStyleExtensionOptions = {
   /**
    * Add capability to render dashed lines.
    * @default false
    */
-  dash: boolean;
+  dash?: boolean;
   /**
    * Add capability to offset lines.
    * @default false
    */
-  offset: boolean;
+  offset?: boolean;
   /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
    * @default false
    */
-  highPrecisionDash: boolean;
+  highPrecisionDash?: boolean;
 };
+
+type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
-export default class PathStyleExtension extends LayerExtension<PathStyleExtensionOptions> {
+export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'PathStyleExtension';
 
@@ -84,7 +87,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     dash = false,
     offset = false,
     highPrecisionDash = false
-  }: Partial<PathStyleExtensionOptions> = {}) {
+  }: PathStyleExtensionOptions = {}) {
     super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
   }
 
@@ -146,12 +149,14 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     const {inject} = result;
     const pathStyle: ShaderModule<PathStyleProps> = {
       name: 'pathStyle',
-      inject,
-      uniformTypes: {
+      inject
+    };
+    if (extension.opts.dash) {
+      pathStyle.uniformTypes = {
         dashAlignMode: 'f32',
         dashGapPickable: 'i32'
-      }
-    };
+      };
+    }
     return {
       modules: [pathStyle],
       defines

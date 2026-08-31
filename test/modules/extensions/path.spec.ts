@@ -14,6 +14,29 @@ import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
+import type {PathStyleExtensionOptions} from '@deck.gl/extensions';
+
+test('PathStyleExtension#constructor options', () => {
+  const optionalOptions: PathStyleExtensionOptions = {};
+  const extension = new PathStyleExtension(optionalOptions);
+  const resolvedOptions: Required<PathStyleExtensionOptions> = extension.opts;
+
+  expect(resolvedOptions, 'omitted public options resolve to runtime defaults').toEqual({
+    dash: false,
+    offset: false,
+    highPrecisionDash: false
+  });
+
+  expect(
+    new PathStyleExtension({highPrecisionDash: true}).opts,
+    'high precision dashing continues to imply dashing'
+  ).toEqual({
+    dash: true,
+    offset: false,
+    highPrecisionDash: true
+  });
+});
+
 test('PathStyleExtension#PathLayer', () => {
   const testCases = [
     {
@@ -28,6 +51,13 @@ test('PathStyleExtension#PathLayer', () => {
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
         expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(0);
+        const pathStyleModule = layer
+          .getShaders()
+          .modules.find(module => module.name === 'pathStyle')!;
+        expect(pathStyleModule.uniformTypes, 'dash module retains its uniform block').toEqual({
+          dashAlignMode: 'f32',
+          dashGapPickable: 'i32'
+        });
         const attributes = layer.getAttributeManager().getAttributes();
         expect(
           attributes.instanceDashArrays.value,
@@ -76,6 +106,33 @@ test('PathStyleExtension#PathLayer', () => {
   ];
 
   testLayer({Layer: PathLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#offset-only shader module', () => {
+  testLayer({
+    Layer: PathLayer,
+    testCases: [
+      {
+        props: {
+          id: 'path-offset-only-test',
+          data: FIXTURES.zigzag,
+          getPath: dataPoint => dataPoint.path,
+          getOffset: 1,
+          extensions: [new PathStyleExtension({offset: true})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const pathStyleModule = layer
+            .getShaders()
+            .modules.find(module => module.name === 'pathStyle')!;
+          expect(
+            Object.hasOwn(pathStyleModule, 'uniformTypes'),
+            'offset-only module does not declare an unused uniform block'
+          ).toBe(false);
+        }
+      }
+    ],
+    onError: error => expect(error).toBeFalsy()
+  });
 });
 
 test('PathStyleExtension#PolygonLayer', () => {
