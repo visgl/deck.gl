@@ -41,6 +41,9 @@ struct Varyings {
   @location(5) vJointType: f32,
   // Location 6 is reserved for TripsLayer's injected vTime varying.
   @location(7) clipCoordinates: vec2<f32>,
+#ifdef DASH_ENABLED
+  @location(8) vPathBounds: vec2<f32>,
+#endif
 };
 
 fn flipIfTrue(flag: bool) -> f32 {
@@ -336,6 +339,11 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.positions,
       attributes.instanceTypes
     );
+#ifdef DASH_ENABLED
+    // Phase and justification use the complete source segment, while cap and joint coverage
+    // must still recognize the endpoints moved by clipLine.
+    varyings.vPathBounds = billboardPathLength * billboardPathRange;
+#endif
 
     geometry.uv = join.pathPosition;
     varyings.position = vec4<f32>(
@@ -378,6 +386,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.positions,
       attributes.instanceTypes
     );
+#ifdef DASH_ENABLED
+    varyings.vPathBounds = vec2<f32>(0.0, join.pathLength);
+#endif
 
     geometry.position = vec4<f32>(currPositionCommon + join.offset, 1.0);
     geometry.uv = join.pathPosition;
@@ -408,7 +419,13 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
   // screen-space derivative converts the distance to the boundary into device pixels, which stays
   // correct under perspective foreshortening and under extensions that rescale the stroke.
+#ifdef DASH_ENABLED
+  let isCorner =
+    varyings.vPathPosition.y < varyings.vPathBounds.x ||
+    varyings.vPathPosition.y > varyings.vPathBounds.y;
+#else
   let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
+#endif
   let isRound = varyings.vJointType > 0.5;
 
   // Distance to the silhouette in device pixels, from the derivative of the coordinate that
@@ -444,10 +461,17 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
   color.a *= smoothedge(0.0, edgePixels);
 #else
+#ifdef DASH_ENABLED
+  if (
+    varyings.vPathPosition.y < varyings.vPathBounds.x ||
+    varyings.vPathPosition.y > varyings.vPathBounds.y
+  ) {
+#else
   if (
     varyings.vPathPosition.y < 0.0 ||
     varyings.vPathPosition.y > varyings.vPathLength
   ) {
+#endif
     if (varyings.vJointType > 0.5 && length(varyings.vCornerOffset) > 1.0) {
       discard;
     }

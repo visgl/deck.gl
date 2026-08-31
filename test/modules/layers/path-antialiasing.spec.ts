@@ -71,6 +71,7 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
     defines: {ANTIALIASING: 1, PATH_STYLE_OFFSET: 1}
   });
   const dashVertexShader = preprocess(pathVertexShader, {defines: {DASH_ENABLED: 1}});
+  const dashFragmentShader = preprocess(pathFragmentShader, {defines: {DASH_ENABLED: 1}});
   const defaultShaderWGSL = preprocess(shaderWGSL);
   const antialiasingShaderWGSL = preprocess(shaderWGSL, {defines: {ANTIALIASING: 1}});
   const offsetAntialiasingShaderWGSL = preprocess(shaderWGSL, {
@@ -87,7 +88,9 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
 
   for (const shader of [
     defaultVertexShader,
+    defaultFragmentShader,
     antialiasingVertexShader,
+    antialiasingFragmentShader,
     defaultShaderWGSL,
     antialiasingShaderWGSL
   ]) {
@@ -99,6 +102,7 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
     expect(shader).not.toContain('getClippedPathRange');
     expect(shader).not.toContain('sourcePathRange');
     expect(shader).not.toContain('pathPositionOffset');
+    expect(shader).not.toContain('vPathBounds');
   }
 
   for (const shader of [dashVertexShader, dashShaderWGSL]) {
@@ -118,7 +122,12 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
     expect(shader).toContain(
       'pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio'
     );
+    expect(shader).toContain('vPathBounds');
+    expect(shader).toContain('vPathBounds = billboardPathLength * billboardPathRange');
   }
+
+  expect(dashFragmentShader).toContain('vPathPosition.y < vPathBounds.x');
+  expect(dashFragmentShader).toContain('vPathPosition.y > vPathBounds.y');
 
   expect(antialiasingVertexShader).toContain('coverageScale');
   expect(antialiasingFragmentShader).toContain('fwidth');
@@ -175,6 +184,11 @@ void main() {
     const expected = new Float32Array([0.5005, 1, 0, 0.4995, 0, 1, 0, 0]);
     for (let index = 0; index < expected.length; index++) {
       expect(actual[index], `range value ${index}`).toBeCloseTo(expected[index], 6);
+    }
+
+    const expectedBounds = new Float32Array([50.05, 100, 0, 49.95, 0, 100, 0, 0]);
+    for (let index = 0; index < expectedBounds.length; index++) {
+      expect(actual[index] * 100, `visible bound ${index}`).toBeCloseTo(expectedBounds[index], 4);
     }
   } finally {
     transform.destroy();
