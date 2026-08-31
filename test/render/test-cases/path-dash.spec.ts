@@ -13,24 +13,22 @@ import {PathStyleExtension} from '@deck.gl/extensions';
 /**
  * Dash rendering matrix for PathStyleExtension.
  *
- * The organizing idea is that a dash is a property of the stroke, not of the tessellation:
- * every strip inside a `segment density` case draws the *same* straight line and differs
- * only in how many vertices it is built from, so all strips in one image should be
- * indistinguishable. Cases are laid out as horizontal strips stacked vertically, following
- * the `OrthographicView` convention already used by `path-layer.spec.ts`.
+ * Many images stack several horizontal strips. In the segment-density cases, every strip
+ * draws the same straight line, but builds it from a different number of pieces. Imagine
+ * drawing one line with one long ruler, then drawing it again with many short rulers:
  *
- * IMPORTANT: the golden images committed alongside this file record how dashing behaves
- * *today*, defects included. They are a baseline to diff future work against, not a
- * statement of desired output. Measured from these goldens, with `getDashArray: [4, 5]`:
+ * - `path-dash-density-default`: each piece starts the dash pattern over. Rows made from
+ *   different numbers of pieces are therefore expected to look different.
+ * - `path-dash-density-justified`: each piece still starts over, but its dashes and gaps are
+ *   adjusted to fit that piece evenly. Rows with different piece lengths may look different.
+ * - `path-dash-density-high-precision`: one measurement runs along the entire line instead
+ *   of starting over at each piece. All rows should show the same dash pattern.
+ * - `path-dash-density-rounded`: uses the same per-piece pattern as the default case, with
+ *   rounded dash ends and path joints. It shows that rounding remains well formed as the
+ *   number of pieces changes.
  *
- * - `path-dash-density-default`: the 1, 2 and 4 segment strips dash correctly at a 43.4px
- *   period; the 12 segment strip drifts to 55.4px; the 40 and 120 segment strips render
- *   **fully solid**. All six draw the identical straight line. Dash phase restarts at every
- *   vertex, so once a segment is shorter than one dash period nothing is ever discarded.
- * - `path-dash-density-justified`: same collapse to solid - justification is also computed
- *   per segment, so it does not rescue dense polylines.
- * - `path-dash-density-high-precision`: all six strips identical and correct. The
- *   continuous-arclength mechanism works; it is simply opt-in.
+ * The golden images are the expected output. Comments beside the remaining cases explain
+ * what each image is meant to show and which differences between rows are intentional.
  */
 
 const STRIP_LENGTH = 720;
@@ -172,13 +170,17 @@ function createGeographicPath(
 }
 
 /**
- * Perspective paths with a segment that crosses the camera plane in a fixed 800x450 MapView.
- * The front points project to x=80 and x=180. `clipLine` moves each behind-camera point to
- * x=515, so the artificial endpoint, rounded envelope and dash phase all remain visible.
+ * Four billboarded paths in a perspective view:
  *
- * Keep this fixture byte-for-byte stable through the PathStyle stack. Its golden deliberately
- * records the current behavior, defects included, so later shader changes produce reviewable
- * image diffs without also changing the input geometry.
+ * - `control` stays completely in front of the camera and provides the ordinary reference.
+ * - `clippedEnd` starts in front of the camera and ends behind it.
+ * - `clippedStart` starts behind the camera and ends in front of it.
+ * - `subpixel` also crosses behind the camera, but uses dashes smaller than one pixel.
+ *
+ * The clipped paths should keep the same dash measurement as their hidden portions pass behind
+ * the camera. Their visible ends should remain rounded, offsets should only move them sideways,
+ * and the subpixel pattern should blend evenly. The fixed coordinates keep every visible end
+ * inside the 800x450 image so these behaviors can be reviewed together.
  */
 const CLIPPED_COMPOSITION_PATHS = {
   control: [
@@ -271,8 +273,8 @@ function createSegmentDensityCase(name: string, dashProperties: Record<string, a
 }
 
 /**
- * Four paths that deliberately vary length, width, dash array and shape. Later stack layers
- * reuse this exact fixture to isolate the effects of path mode and whole-path justification.
+ * Four paths that vary length, width, dash array and shape. Together they show that the dash
+ * controls behave consistently across common path shapes and styling combinations.
  */
 function createPathVariantsCase(name: string, layerProperties: Record<string, any>): TestCase {
   return {
@@ -362,8 +364,7 @@ const testCases: TestCase[] = [
     extensions: [new PathStyleExtension({dash: true})]
   }),
 
-  // Matched control for the path-mode variants added later in the stack. This captures the
-  // existing per-segment behavior on the same four paths without justification.
+  // Per-segment reference for the four path variants, without justification.
   createPathVariantsCase('path-dash-variants-default', {
     extensions: [new PathStyleExtension({dash: true})]
   }),
@@ -429,7 +430,8 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
-  // Dense closed polyline - the reported failure, at three orthographic zoom levels
+  // Closed polylines at three zoom levels. The left circle restarts its pattern at each piece;
+  // the right circle measures continuously around the entire path.
   // ---------------------------------------------------------------------------------------
   ...[-2, 0, 2].map(zoom => ({
     name: `path-dash-circle-zoom${zoom}`,
@@ -513,10 +515,10 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-billboard-ortho-continuous.png'
   },
 
-  // Unpitched MapView across zoom levels - flat and billboard must stay locked together.
-  // Each zoom draws a dense pair in the upper half and a sparse pair in the lower half; a
-  // dense stripe that differs from the sparse one directly above it is the segment-density
-  // bug, and a blue stripe that differs from the red one beside it is a billboard bug.
+  // Unpitched MapView across zoom levels. Each image compares dense paths in the upper half
+  // with sparse paths in the lower half, and flat red paths with billboarded blue paths.
+  // Because every path follows the same straight line, their dashes should line up regardless
+  // of segment count or billboard mode.
   ...[10, 14, 18].map(zoom => ({
     name: `path-dash-billboard-map-z${zoom}`,
     viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
@@ -543,7 +545,8 @@ const testCases: TestCase[] = [
     goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`
   })),
 
-  // Pitched MapView - flat and billboard are EXPECTED to diverge toward the horizon
+  // Pitched MapView. Perspective makes the flat path shrink toward the horizon, while the
+  // billboarded path keeps its width facing the screen, so their screen patterns may diverge.
   {
     name: 'path-dash-billboard-pitched',
     views: new MapView({}),
@@ -579,9 +582,8 @@ const testCases: TestCase[] = [
     goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`
   })),
   {
-    // Rounded caps make phase discontinuities at data vertices visible as wedges cut out of
-    // the circles. This pitched 3D billboard case keeps those segment-boundary artifacts easy
-    // to inspect as behavior changes through the stack.
+    // Rounded dash ends make any phase jump at a data vertex visible as a missing wedge. The
+    // expected pattern continues smoothly across every joint at every tested elevation.
     name: 'path-dash-3d-billboard-pitched-rounded',
     views: DASH_ELEVATION_VIEW,
     viewState: DASH_ELEVATION_PITCHED_VIEW_STATE,
@@ -621,9 +623,8 @@ const testCases: TestCase[] = [
     viewState: ORTHO_VIEW_STATE,
     layers: createStripLayers(
       'path-dash-offset',
-      // Two segments, not forty: at high vertex counts every strip collapses to solid via
-      // the segment-density defect and the image says nothing about offsetting. All four
-      // strips should share one dash phase - the offset must not rescale the pattern.
+      // The same two-piece line is drawn at four offsets. Only its sideways position should
+      // change; dash length, gap length and phase should remain the same in every row.
       [0, 1, 2, -2].map((offset, index) => ({
         data: [createStraightPath(2, getStripY(index, 4))],
         getDashArray: [4, 5],
@@ -634,16 +635,15 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-offset.png'
   },
   {
-    // The case above uses segment-local phase, where vDashOffset is zero. Only a
-    // continuous phase can expose drift introduced when offset geometry widens the stroke.
+    // A continuous pattern crosses all four pieces of the line. Increasing the offset should
+    // move the line sideways without changing the pattern or introducing a jump at a joint.
     name: 'path-dash-offset-mode-path',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
     layers: createStripLayers(
       'path-dash-offset-mode-path',
-      // Four segments provide three joints where a phase discontinuity can appear.
-      // highPrecisionDash is intentionally used because it is the continuous-path spelling
-      // available before this stack adds dashMode. Increasing offsets make the defect visible.
+      // Four pieces provide three joints where continuity can be checked. `highPrecisionDash`
+      // selects the continuous-path behavior exercised by this case.
       [0, 2, 4, 8].map((offset, index) => ({
         data: [createStraightPath(4, getStripY(index, 4))],
         getDashArray: [4, 5],
@@ -713,9 +713,8 @@ const testCases: TestCase[] = [
 // list to delete once the extension gains WGSL sources.
 const DASH_SKIP_DEVICES = ['webgpu'];
 
-// Dash ends are the subject of these images, and pixelmatch discards antialiased pixels
-// from the mismatch count unless told otherwise. Establish that sensitivity in the baseline
-// so later behavior changes are measured against a consistent comparison policy.
+// Dash ends are the subject of these images. Include antialiased pixels in the comparison so
+// changes to partially covered edge pixels are not ignored.
 const DASH_IMAGE_DIFF_OPTIONS = {includeAA: true};
 
 const CLIPPED_COMPOSITION_VIEW_STATE = {
