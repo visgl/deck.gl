@@ -23,7 +23,7 @@ import {
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {preprocess} from '@luma.gl/shadertools';
-import {dashShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
+import {dashShaders, offsetShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
 import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
@@ -624,6 +624,14 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   expect(pathShader, 'path mode adds the accumulated path phase').toContain(
     'offset += vDashOffset;'
   );
+});
+
+test('PathStyleExtension#offset keeps dash coordinates in the same units', () => {
+  const offsetVertexShader = offsetShaders.inject['vs:#main-end'];
+  expect(offsetVertexShader).toContain('vPathPosition.y *= offsetWidth');
+  expect(offsetVertexShader).toContain('vPathLength *= offsetWidth');
+  expect(offsetVertexShader).toContain('vPathBounds *= offsetWidth');
+  expect(offsetVertexShader).toContain('vDashOffset *= offsetWidth');
 });
 
 test('PathStyleExtension#getDashOffsets measures 3D distance', () => {

@@ -536,6 +536,7 @@ in float instanceOffsets;
     // geometry. Relative 'widths' units intentionally remain tied to the original stroke.
     vDashArray *= offsetWidth;
   }
+  vPathBounds *= offsetWidth;
 #ifdef HIGH_PRECISION_DASH
   vDashPathLength *= offsetWidth;
   // The dash block reduced the CPU path offset modulo a period expressed in widened-width
