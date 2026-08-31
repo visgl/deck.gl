@@ -171,6 +171,38 @@ function createGeographicPath(
   return path;
 }
 
+/**
+ * Perspective paths with a segment that crosses the camera plane in a fixed 800x450 MapView.
+ * The front points project to x=80 and x=180. `clipLine` moves each behind-camera point to
+ * x=515, so the artificial endpoint, rounded envelope and dash phase all remain visible.
+ *
+ * Keep this fixture byte-for-byte stable through the PathStyle stack. Its golden deliberately
+ * records the current behavior, defects included, so later shader changes produce reviewable
+ * image diffs without also changing the input geometry.
+ */
+const CLIPPED_COMPOSITION_PATHS = {
+  control: [
+    [-122.4058975956, 37.7797300396, 307.2247788],
+    [-122.4040545969, 37.7797300396, 307.2247788],
+    [-122.3978815942, 37.7797300396, 307.2247788]
+  ],
+  clippedEnd: [
+    [-122.4058975956, 37.779001709, 166.953558],
+    [-122.4040545969, 37.779001709, 166.953558],
+    [-122.3985675923, 37.7669494206, 801.5731104]
+  ],
+  clippedStart: [
+    [-122.3985675923, 37.7672312217, 855.8369622],
+    [-122.4040545969, 37.778200537, 12.6552152],
+    [-122.4058975956, 37.778200537, 12.6552152]
+  ],
+  subpixel: [
+    [-122.4058975956, 37.7774721913, -127.6160055],
+    [-122.4040545969, 37.7774721913, -127.6160055],
+    [-122.3985675923, 37.7674874036, 905.1677366]
+  ]
+};
+
 function createElevationLayers(
   layerIdentifier: string,
   {billboard = false, antialiasing = false}: {billboard?: boolean; antialiasing?: boolean} = {}
@@ -857,6 +889,49 @@ const DASH_SKIP_DEVICES = ['webgpu'];
 // so later behavior changes are measured against a consistent comparison policy.
 const DASH_IMAGE_DIFF_OPTIONS = {includeAA: true};
 
+const CLIPPED_COMPOSITION_VIEW_STATE = {
+  longitude: -122.4,
+  latitude: 37.78,
+  zoom: 15,
+  pitch: 60,
+  bearing: 0
+};
+
+const clippedCompositionTestCases: TestCase[] = [
+  {
+    name: 'path-dash-clipped-composition',
+    views: new MapView(),
+    viewState: CLIPPED_COMPOSITION_VIEW_STATE,
+    layers: (
+      [
+        ['control', 0, [1.5, 3.5], [80, 80, 80]],
+        ['clippedEnd', 1, [1.5, 3.5], [200, 0, 0]],
+        ['clippedStart', -1, [1.5, 3.5], [0, 90, 200]],
+        ['subpixel', 1, [0.06, 0.06], [120, 0, 160]]
+      ] as const
+    ).map(
+      ([pathName, offset, dashArray, color]) =>
+        new PathLayer({
+          id: `path-dash-clipped-composition-${pathName}`,
+          data: [CLIPPED_COMPOSITION_PATHS[pathName]],
+          getPath: (path: number[][]) => path,
+          billboard: true,
+          antialiasing: true,
+          jointRounded: true,
+          capRounded: true,
+          widthUnits: 'pixels',
+          getWidth: 14,
+          getColor: color,
+          getDashArray: dashArray,
+          getOffset: offset,
+          extensions: [new PathStyleExtension({highPrecisionDash: true, offset: true})]
+        })
+    ),
+    goldenImage: './test/render/golden-images/path-dash-clipped-composition.png',
+    imageDiffOptions: {threshold: 0.998, includeAA: true}
+  }
+];
+
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(
     testCases.map(testCase => ({
@@ -866,4 +941,11 @@ describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
     })) as TestCase[],
     deviceType
   );
+});
+
+describe('webgl-no-msaa', () => {
+  runRenderTestSuite(clippedCompositionTestCases, 'webgl', {
+    deviceMode: 'isolated',
+    webgl: {antialias: false}
+  });
 });
