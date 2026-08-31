@@ -14,7 +14,6 @@ import {
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
-import type {PathStyleExtensionOptions} from '@deck.gl/extensions';
 import {
   GeoJsonLayer,
   PathLayer,
