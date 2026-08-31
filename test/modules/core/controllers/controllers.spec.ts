@@ -369,6 +369,12 @@ const ZOOM_AROUND_CASES = [
     getPosition: props => [props.longitude, props.latitude]
   },
   {
+    title: 'GlobeController',
+    ViewClass: GlobeView,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    getPosition: props => [props.longitude, props.latitude]
+  },
+  {
     title: 'OrbitController',
     ViewClass: OrbitView,
     initialViewState: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 0, zoom: 1},
@@ -473,6 +479,21 @@ test('Controller applies updated zoomAround option without recreating the view',
   controller.setProps({...controller.props, zoomAround: 'pointer'});
   controller.handleEvent(makeWheelEvent() as any);
   expect(controller.props.longitude, 'pointer zoom adjusts longitude').not.toBeCloseTo(0);
+});
+
+test('GlobeController falls back to center zoom when the pointer is off the globe', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 1}
+  });
+  const wheelEvent = makeWheelEvent();
+  wheelEvent.offsetCenter = {x: 0, y: 0};
+
+  controller.handleEvent(wheelEvent as any);
+
+  expect(controller.props.longitude, 'off-globe zoom preserves longitude').toBeCloseTo(0);
+  expect(controller.props.latitude, 'off-globe zoom preserves latitude').toBeCloseTo(0);
+  expect(controller.props.zoom, 'off-globe zoom still changes scale').not.toBeCloseTo(1);
 });
 
 test('GlobeController initializes multipan like pointer pan', () => {

@@ -8,9 +8,10 @@ import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
+import {CONSTRAINT_AROUND, type ConstraintAround} from './view-state';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
+import GlobeViewport, {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
 import {
   Globe,
   type CameraFrame,
@@ -143,12 +144,6 @@ class GlobeState extends MapState {
     }) as GlobeState;
   }
 
-  zoom({scale}: {scale: number}): MapState {
-    const startZoom = this.getState().startZoom || this.getViewportProps().zoom;
-    const zoom = startZoom + Math.log2(scale);
-    return this._getUpdatedState({zoom});
-  }
-
   _panFromCenter(offset: [number, number]): GlobeState {
     const {width, height} = this.getViewportProps();
     const center: [number, number] = [width / 2, height / 2];
@@ -158,14 +153,25 @@ class GlobeState extends MapState {
   }
 
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
-    const {longitude, latitude, maxBounds} = props;
+    const internalProps = props as typeof props & ConstraintAround;
+    const constraintAround = internalProps[CONSTRAINT_AROUND];
+    delete internalProps[CONSTRAINT_AROUND];
+    const {latitude, maxBounds} = props;
 
     props.zoom = this._constrainZoom(props.zoom, props);
 
-    if (longitude < -180 || longitude > 180) {
-      props.longitude = mod(longitude + 180, 360) - 180;
+    if (constraintAround) {
+      const viewport = this.makeViewport(props);
+      Object.assign(
+        props,
+        viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
+      );
     }
-    props.latitude = clamp(latitude, -90, 90);
+
+    if (props.longitude < -180 || props.longitude > 180) {
+      props.longitude = mod(props.longitude + 180, 360) - 180;
+    }
+    props.latitude = clamp(props.latitude, -90, 90);
 
     if (props.bearing < -180 || props.bearing > 180) {
       props.bearing = mod(props.bearing + 180, 360) - 180;
@@ -293,6 +299,17 @@ export default class GlobeController extends Controller<MapState> {
   };
 
   dragMode: 'pan' | 'rotate' = 'pan';
+
+  protected getZoomPosition(position: [number, number]): [number, number] {
+    const zoomPosition = super.getZoomPosition(position);
+    const viewport = this.makeViewport(this.controllerState.getViewportProps()) as GlobeViewport;
+
+    if (viewport.getZoomAnchorStrength(zoomPosition) > 0) {
+      return zoomPosition;
+    }
+
+    return viewport.project([viewport.longitude, viewport.latitude]) as [number, number];
+  }
 
   // Ring buffer tracking globe position during pan for inertia velocity
   private _panHistory: Array<{longitude: number; latitude: number; timestamp: number}> = [];
