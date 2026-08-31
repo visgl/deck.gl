@@ -460,9 +460,10 @@ in float instanceOffsets;
   vPathLength *= offsetWidth;
 #ifdef DASH_ENABLED
   // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so the three rescalings
-  // here restore units of the original half-width. vDashOffset was computed against the
-  // widened stroke in the dash block, which merges ahead of this one, so it needs the same
-  // correction or a dashed offset line drifts out of phase with an unoffset one.
+  // above and the two below restore units of the original half-width. vDashOffset was computed
+  // against the widened stroke in the dash block, which merges ahead of this one, so it needs
+  // the same correction or a dashed offset line drifts out of phase with an unoffset one.
+  vPathBounds *= offsetWidth;
   vDashOffset *= offsetWidth;
 #endif
 `,
