@@ -29,6 +29,9 @@ out float vMiterLength;
 out vec2 vPathPosition;
 out float vPathLength;
 out float vJointType;
+#ifdef DASH_ENABLED
+out vec2 vPathBounds;
+#endif
 
 const float EPSILON = 0.001;
 const vec3 ZERO_OFFSET = vec3(0.0);
@@ -326,6 +329,11 @@ void main() {
       coverageScale
 #endif
     );
+#ifdef DASH_ENABLED
+    // Phase and justification use the complete source segment, while cap and joint coverage
+    // must still recognize the endpoints moved by clipLine.
+    vPathBounds = billboardPathLength * billboardPathRange;
+#endif
 
     DECKGL_FILTER_GL_POSITION(currPositionScreen, geometry);
     gl_Position = vec4(currPositionScreen.xyz + offset * currPositionScreen.w, currPositionScreen.w);
@@ -353,6 +361,9 @@ void main() {
       , coverageScale
 #endif
     );
+#ifdef DASH_ENABLED
+    vPathBounds = vec2(0.0, vPathLength);
+#endif
     geometry.position = vec4(currPosition + offset, 1.0);
     gl_Position = project_common_position_to_clipspace(geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);

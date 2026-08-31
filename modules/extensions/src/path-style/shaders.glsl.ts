@@ -97,10 +97,8 @@ if (pathStyle.dashUnits == 1) {
 vDashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
 
 #ifdef HIGH_PRECISION_DASH
-// instanceDashOffsets accumulates common-space distance on the CPU. Converting it to pixels
-// and dividing by the pixel half-width above works in either branch; the previous
-// \`instanceDashOffsets / width.x\` was only dimensionally correct for flat paths, and dropped
-// a whole factor of project.scale when billboarded.
+// instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
+// divide by the pixel half-width so both extrusion branches use the same dash coordinate.
 vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
 vDashPathLength = dashOffsetAndLength.y;
 

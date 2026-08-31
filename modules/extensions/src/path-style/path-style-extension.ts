@@ -135,6 +135,20 @@ type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
 const PATH_STYLE_ATTRIBUTES = ['instanceDashArrays', 'instanceDashOffsets', 'instanceOffsets'];
 
+function dashMetricsProjectionPropsChanged({
+  props,
+  oldProps
+}: UpdateParameters<Layer<PathStyleExtensionProps>>): boolean {
+  // Data, accessors, and tessellation configuration invalidate through AttributeManager and
+  // PathLayer. PathLayer separately tracks viewport projection scale. These are the remaining
+  // layer props consumed by the project uniforms used to calculate dash metrics.
+  return (
+    !deepEqual(props.modelMatrix, oldProps.modelMatrix, 2) ||
+    props.coordinateSystem !== oldProps.coordinateSystem ||
+    !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)
+  );
+}
+
 function projectRenderedPathPosition(
   layer: Layer<PathStyleExtensionProps>,
   position: number[],
@@ -256,9 +270,9 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
         instanceDashOffsets: {
           // [distance from the start of the path, total length of the path]
           size: 2,
-          // Keep getPath as an update trigger without allowing a binary getPath buffer to
-          // bypass this updater. Dash phase must follow the normalized geometry that the
-          // PathLayer actually renders.
+          // Recalculate from rendered geometry when getPath changes. A binary getPath buffer
+          // contains positions, not dash metrics, so keep it as an update trigger rather than
+          // binding it directly to this attribute.
           accessor: ['getPath'],
           // eslint-disable-next-line @typescript-eslint/unbound-method
           update: this.calculateDashMetrics
@@ -369,9 +383,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       if (
         layerType === 'path' &&
         extension.opts.dashMode === 'path' &&
-        (!deepEqual(params.props.modelMatrix, params.oldProps.modelMatrix, 2) ||
-          params.props.coordinateSystem !== params.oldProps.coordinateSystem ||
-          !deepEqual(params.props.coordinateOrigin, params.oldProps.coordinateOrigin, 1))
+        dashMetricsProjectionPropsChanged(params)
       ) {
         this.getAttributeManager()?.invalidate('instanceDashOffsets');
       }
