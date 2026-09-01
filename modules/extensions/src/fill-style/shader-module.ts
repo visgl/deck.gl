@@ -83,7 +83,7 @@ const inject = {
       vec2 patternUV = mod(mod(fill.uvCoordinateOrigin, scale) + fill.uvCoordinateOrigin64Low + fill_uv, scale) / scale;
       patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
 
-      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
+      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * vec2(patternUV.x, 1.0 - patternUV.y);
 
       vec4 patternColor = texture(fill_patternTexture, texCoords);
       color.a *= patternColor.a;
