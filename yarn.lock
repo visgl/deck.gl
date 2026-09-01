@@ -1516,7 +1516,7 @@
   dependencies:
     "@loaders.gl/loader-utils" "4.4.5"
 
-"@loaders.gl/loader-utils@4.4.3", "@loaders.gl/loader-utils@^4.4.3":
+"@loaders.gl/loader-utils@4.4.3":
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-4.4.3.tgz#16c973aa23ad6c3274143a239d2f61dff88cb506"
   integrity sha512-5yt1OqZPYR3d+xFAqtzSKO24Hd7019KqN+iOWp7XBKPQBS+sAEhAnmSTnO1axo45IEi14J3FhMDk+ndqBoSKEQ==
@@ -1526,7 +1526,7 @@
     "@probe.gl/log" "^4.1.1"
     "@probe.gl/stats" "^4.1.1"
 
-"@loaders.gl/loader-utils@4.4.5":
+"@loaders.gl/loader-utils@4.4.5", "@loaders.gl/loader-utils@^4.4.3":
   version "4.4.5"
   resolved "https://registry.npmjs.org/@loaders.gl/loader-utils/-/loader-utils-4.4.5.tgz#8c4b0f21f07c2e05d30318dd1283821d26bd5bfa"
   integrity sha512-c4h2RUMEru+hbfvgZEIy5cLQKyQka2TPQZW/2Wy+yIPr3FU7RKwfp+vLwIfir6Xkdn2zniWyWretZwE02aY/Ug==
@@ -1590,7 +1590,7 @@
     "@types/geojson" "^7946.0.7"
     apache-arrow ">= 17.0.0"
 
-"@loaders.gl/schema@4.4.3", "@loaders.gl/schema@^4.4.3":
+"@loaders.gl/schema@4.4.3":
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.4.3.tgz#988bab4bbbde16517f150310a07a14542b74ccd3"
   integrity sha512-tDb/rOn44nHWvMFSOaAk1/pQcQcusxirGCM1O5BMJR0PQ71UrCHey56rsbcf7/wGhvyRwPtX+oiMzlJ9TmN8vQ==
@@ -1598,18 +1598,10 @@
     "@types/geojson" "^7946.0.7"
     apache-arrow ">= 17.0.0"
 
-"@loaders.gl/schema@4.4.5":
+"@loaders.gl/schema@4.4.5", "@loaders.gl/schema@^4.3.3", "@loaders.gl/schema@^4.4.3":
   version "4.4.5"
   resolved "https://registry.npmjs.org/@loaders.gl/schema/-/schema-4.4.5.tgz#9925fcd0c5b5386bdddc4c55a6d7c667f8f39a18"
   integrity sha512-q2XNquegw+hX+ZEshacKYL/+FKBUIS5FHA+2Ft3JWmcNiR6umGnYCdXQhDcFCqAm8Ks87fMCV+z/zTloxaIZgQ==
-  dependencies:
-    "@types/geojson" "^7946.0.7"
-    apache-arrow ">= 17.0.0"
-
-"@loaders.gl/schema@^4.3.3":
-  version "4.4.1"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/schema/-/schema-4.4.1.tgz#185aa36758f1d69d05d7438d96a45b15e7222fd2"
-  integrity sha512-s7NjEnyK6jZvJJSWj/mHq+S9mHRHVzIYtFP+C7sMf1gVCQbdkt6OSAMUWRzwPr9+whQNVWjZ9pbLsI/IPW3zvw==
   dependencies:
     "@types/geojson" "^7946.0.7"
     apache-arrow ">= 17.0.0"
