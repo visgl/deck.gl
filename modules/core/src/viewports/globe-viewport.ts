@@ -2,18 +2,27 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, vec3, vec4} from '@math.gl/core';
+import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
-import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
-
-import {vec3, vec4} from '@math.gl/core';
+import {mod} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
+const NORTH_UP_BEARING_THRESHOLD = 1;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
+// Pointer correction depends on distance from the screen-space limb, not latitude.
+// Smoothly release edge and off-globe anchors so they converge to center without a snap.
+const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
+const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
+
+/** Returns whether a globe bearing uses the default north-up constraints. @internal */
+export function isGlobeNorthUp(bearing: number): boolean {
+  const normalizedBearing = mod(bearing + 180, 360) - 180;
+  return Math.abs(normalizedBearing) < NORTH_UP_BEARING_THRESHOLD;
+}
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -191,6 +200,92 @@ export default class GlobeViewport extends Viewport {
     ];
   }
 
+  /**
+   * Builds the screen-pixel → globe-center ray and the intermediate ray/sphere
+   * math reused by `unproject` and anchored zoom. One function so the same
+   * pixelUnprojectionMatrix work isn't duplicated.
+   */
+  private _getRayToGlobe(
+    screenPosition: number[],
+    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+  ): {
+    rayStartPosition: number[];
+    rayEndPosition: number[];
+    radius: number;
+    rayLengthSquared: number;
+    rayStartDistanceSquared: number;
+    distanceToCenterSquared: number;
+  } {
+    const [screenX, screenY] = screenPosition;
+    const adjustedScreenY = topLeft ? screenY : this.height - screenY;
+    const {pixelUnprojectionMatrix} = this;
+
+    const rayStartPosition = transformVector(pixelUnprojectionMatrix, [
+      screenX,
+      adjustedScreenY,
+      -1,
+      1
+    ]);
+    const rayEndPosition = transformVector(pixelUnprojectionMatrix, [
+      screenX,
+      adjustedScreenY,
+      1,
+      1
+    ]);
+
+    const radius = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
+    const rayLengthSquared = vec3.sqrLen(vec3.sub([], rayStartPosition, rayEndPosition));
+    const rayStartDistanceSquared = vec3.sqrLen(rayStartPosition);
+    const rayEndDistanceSquared = vec3.sqrLen(rayEndPosition);
+    const triangleAreaSquared =
+      (4 * rayStartDistanceSquared * rayEndDistanceSquared -
+        (rayLengthSquared - rayStartDistanceSquared - rayEndDistanceSquared) ** 2) /
+      16;
+    const distanceToCenterSquared = (4 * triangleAreaSquared) / rayLengthSquared;
+
+    return {
+      rayStartPosition,
+      rayEndPosition,
+      radius,
+      rayLengthSquared,
+      rayStartDistanceSquared,
+      distanceToCenterSquared
+    };
+  }
+
+  private _getRayDistanceToGlobeCenterRatio(
+    screenPosition: number[],
+    options?: {topLeft?: boolean; targetZ?: number}
+  ): number {
+    const {distanceToCenterSquared, radius} = this._getRayToGlobe(screenPosition, options);
+
+    return Math.sqrt(Math.max(0, distanceToCenterSquared)) / radius;
+  }
+
+  /**
+   * Returns how strongly a screen position should anchor zoom on the visible globe.
+   * A value of `0` means that the controller should fall back to center zoom.
+   * @param screenPosition - Screen position to evaluate.
+   * @returns Anchor strength from `0` to `1`.
+   */
+  getZoomAnchorStrength(screenPosition: number[]): number {
+    const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
+    if (distanceRatio >= GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+      return 0;
+    }
+
+    const edgeProgress = Math.max(
+      0,
+      Math.min(
+        1,
+        (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
+          (GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+      )
+    );
+    const smoothProgress = edgeProgress * edgeProgress * (3 - 2 * edgeProgress);
+    return 1 - smoothProgress;
+  }
+
   unproject(
     xyz: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
@@ -207,20 +302,24 @@ export default class GlobeViewport extends Viewport {
     } else {
       // since we don't know the correct projected z value for the point,
       // unproject two points to get a line and then find the point on that line that intersects with the sphere
-      const coord0 = transformVector(pixelUnprojectionMatrix, [x, y2, -1, 1]);
-      const coord1 = transformVector(pixelUnprojectionMatrix, [x, y2, 1, 1]);
+      const {
+        rayStartPosition,
+        rayEndPosition,
+        radius,
+        rayLengthSquared,
+        rayStartDistanceSquared,
+        distanceToCenterSquared
+      } = this._getRayToGlobe(xyz, {topLeft, targetZ});
+      const rayStartToClosestApproach = Math.sqrt(
+        rayStartDistanceSquared - distanceToCenterSquared
+      );
+      const closestApproachToIntersection = Math.sqrt(
+        Math.max(0, radius * radius - distanceToCenterSquared)
+      );
+      const intersectionRatio =
+        (rayStartToClosestApproach - closestApproachToIntersection) / Math.sqrt(rayLengthSquared);
 
-      const lt = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
-      const lSqr = vec3.sqrLen(vec3.sub([], coord0, coord1));
-      const l0Sqr = vec3.sqrLen(coord0);
-      const l1Sqr = vec3.sqrLen(coord1);
-      const sSqr = (4 * l0Sqr * l1Sqr - (lSqr - l0Sqr - l1Sqr) ** 2) / 16;
-      const dSqr = (4 * sSqr) / lSqr;
-      const r0 = Math.sqrt(l0Sqr - dSqr);
-      const dr = Math.sqrt(Math.max(0, lt * lt - dSqr));
-      const t = (r0 - dr) / Math.sqrt(lSqr);
-
-      coord = vec3.lerp([], coord0, coord1, t);
+      coord = vec3.lerp([], rayStartPosition, rayEndPosition, intersectionRatio);
     }
     const [X, Y, Z] = this.unprojectPosition(coord);
 
@@ -261,27 +360,60 @@ export default class GlobeViewport extends Viewport {
   }
 
   /**
-   * Pan the globe using delta-based movement
-   * @param coords - the geographic coordinates where the pan started
-   * @param pixel - the current screen position
-   * @param startPixel - the screen position where the pan started
-   * @returns updated viewport options with new longitude/latitude
+   * Pan the globe to place geographic coordinates at a screen pixel.
+   * When `dragStartPosition` is supplied, applies the delta-based movement used by globe dragging.
+   * @param coordinates - Geographic anchor, or the starting longitude, latitude and zoom.
+   * @param screenPosition - Current screen position.
+   * @param dragStartPosition - Screen position where a drag started.
+   * @returns Updated viewport options.
    */
   panByPosition(
-    [startLng, startLat, startZoom]: number[],
-    pixel: number[],
-    startPixel: number[]
+    coordinates: number[],
+    screenPosition: number[],
+    dragStartPosition?: number[]
   ): GlobeViewportOptions {
+    if (!dragStartPosition) {
+      let anchorStrength = this.getZoomAnchorStrength(screenPosition);
+      if (anchorStrength === 0) {
+        return {longitude: this.longitude, latitude: this.latitude};
+      }
+
+      const currentCoordinates = this.unproject(screenPosition);
+      const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
+      const latitudeDelta = coordinates[1] - currentCoordinates[1];
+      const crossesPole =
+        Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90;
+      if (isGlobeNorthUp(this.bearing) && crossesPole) {
+        // A zoom gesture keeps its original geographic anchor. Once the
+        // pointer crosses a pole it can reappear in the opposite hemisphere,
+        // reversing longitude. Continue zooming around center in either case.
+        return {longitude: this.longitude, latitude: this.latitude};
+      }
+      if (isGlobeNorthUp(this.bearing) && latitudeDelta !== 0) {
+        // Longitude and latitude are one coupled correction. If north-up runs
+        // out of latitude headroom, scale both axes together instead of
+        // clipping latitude while applying the full sideways rotation.
+        const latitudeLimit = latitudeDelta > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
+        const latitudeConstraintStrength = (latitudeLimit - this.latitude) / latitudeDelta;
+        anchorStrength = Math.min(anchorStrength, Math.max(0, latitudeConstraintStrength));
+      }
+      const longitude = this.longitude + longitudeDelta * anchorStrength;
+      const latitude = Math.max(Math.min(this.latitude + latitudeDelta * anchorStrength, 90), -90);
+
+      return {longitude, latitude};
+    }
+
+    const [startLongitude, startLatitude, startZoom] = coordinates;
     // Scale rotation speed inversely with zoom, to approximate constant panning speed
     const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
     const rotationSpeed = 0.25 / scale;
 
-    const longitude = startLng + rotationSpeed * (startPixel[0] - pixel[0]);
-    let latitude = startLat - rotationSpeed * (startPixel[1] - pixel[1]);
+    const longitude = startLongitude + rotationSpeed * (dragStartPosition[0] - screenPosition[0]);
+    let latitude = startLatitude - rotationSpeed * (dragStartPosition[1] - screenPosition[1]);
     latitude = Math.max(Math.min(latitude, 90), -90);
-    const out = {longitude, latitude, zoom: startZoom - zoomAdjust(startLat)};
-    out.zoom += zoomAdjust(out.latitude);
-    return out;
+    const nextViewState = {longitude, latitude, zoom: startZoom - zoomAdjust(startLatitude)};
+    nextViewState.zoom += zoomAdjust(nextViewState.latitude);
+    return nextViewState;
   }
 }
 

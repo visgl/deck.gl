@@ -77,7 +77,9 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
 
-When `bearing` is `0` (the default), north is always kept pointing up and the globe behaves like a traditional desk globe — horizontal drag changes longitude, vertical drag changes latitude, and the polar axis stays fixed. When the user changes the bearing (via shift+drag or right-click drag), the globe enters free rotation mode where bearing evolves naturally to avoid orientation discontinuities near the poles.
+The globe behaves like a physical ball. Dragging and pointer-anchored zoom rotate the full camera frame, so an initial `bearing` of `0` does not lock north up: `bearing` evolves naturally as the camera crosses a pole. This avoids orientation discontinuities and keeps interaction consistent across latitudes. Use `zoomAround: 'center'` to zoom without steering the camera frame.
+
+To limit how far the camera can travel, set the shared controller [`maxBounds`](./controller.md#options) option. For example, `maxBounds: [[-180, -85], [180, 85]]` keeps the viewport center between `±85°` latitude.
 
 
 ## Controller

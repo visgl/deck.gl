@@ -72,12 +72,17 @@ test.each([
 
 test('Attribute#delete', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
-  attribute.setData(new Float32Array(4));
+  attribute.allocate(4);
 
   expect(attribute._buffer, 'Attribute created Buffer object').toBeTruthy();
+  expect(attribute.state.allocatedValue, 'Attribute owns an allocated typed array').toBeTruthy();
 
   attribute.delete();
   expect(attribute._buffer, 'Attribute deleted Buffer object').toBeFalsy();
+  expect(attribute.state.allocatedValue, 'Attribute released its allocated typed array').toBeNull();
+
+  attribute.delete();
+  expect(attribute.state.allocatedValue, 'Repeated delete remains a no-op').toBeNull();
 });
 
 test('Attribute#getUpdateTriggers', () => {
@@ -503,9 +508,8 @@ test('Attribute#updateBuffer', () => {
         attribute.value.slice(0, result.length),
         `${testCase.title} updates attribute buffer`
       ).toEqual(result);
-
-      attribute.delete();
     }
+    testCase.attribute.delete();
   }
 });
 

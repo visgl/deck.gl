@@ -7,6 +7,7 @@ The `View` class and its subclasses are used to specify where and how your deck.
 Views allow you to specify:
 
 * A unique `id`.
+* An optional `canvasId` that selects which presentation canvas renders the view in multi-canvas mode.
 * The position and extent of the view on the canvas: `x`, `y`, `width`, and `height`.
 * Certain camera parameters specifying how your data should be projected into this view, e.g. field of view, near/far planes, perspective vs. orthographic, etc.
 * The [controller](./controller.md) to be used for this view. A controller listens to pointer events and touch gestures, and translates user input into changes in the view state. If enabled, the camera becomes interactive.
@@ -25,6 +26,10 @@ Parameters:
 #### `id` (string, optional) {#id}
 
 A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view.
+
+#### `canvasId` (string, optional) {#canvasid}
+
+When [`Deck._canvases`](./deck.md#_canvases) is supplied, selects which presentation canvas renders this view. If omitted, the view renders into the first configured canvas.
 
 #### `x` (string | number, optional) {#x}
 

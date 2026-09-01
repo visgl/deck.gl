@@ -48,10 +48,46 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
           fillLayer.getAttributeManager().getAttributes().fillPatternFrames.value.slice(0, 4),
           'fillPatternFrames attribute is populated'
         ).toEqual([0, 0, 1, 1]);
+        expect(
+          fillLayer.getAttributeManager().getAttributes().fillPatternBackgroundColors.value,
+          'fillPatternBackgroundColors defaults to transparent'
+        ).toEqual(new Float32Array([0, 0, 0, 0]));
 
         uniforms = getLayerUniforms(strokeLayer);
         expect(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer').toBeFalsy();
         expect('patternMask' in uniforms, 'should not be enabled in PathLayer').toBeFalsy();
+      }
+    },
+    {
+      title: 'getFillPatternBackgroundColor',
+      updateProps: {
+        getFillPatternBackgroundColor: [255, 128, 0]
+      },
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        expect(
+          fillLayer.getAttributeManager().getAttributes().fillPatternBackgroundColors.value,
+          'a 3-element background color is opaque'
+        ).toEqual(new Float32Array([255 / 255, 128 / 255, 0, 1]));
+      }
+    },
+    {
+      title: 'getFillPatternBackgroundColor as a function',
+      updateProps: {
+        getFillPatternBackgroundColor: (f, {index}) => [index + 1, 2, 3, 51],
+        updateTriggers: {getFillPatternBackgroundColor: 1}
+      },
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        expect(
+          Array.from(
+            fillLayer
+              .getAttributeManager()
+              .getAttributes()
+              .fillPatternBackgroundColors.value.slice(0, 4)
+          ),
+          'fillPatternBackgroundColors attribute is populated per object'
+        ).toEqual([1, 2, 3, 51]);
       }
     },
     {
