@@ -50,10 +50,11 @@ const float FILL_UV_SCALE = 512.0 / 40000000.0;
 
 // Draw the pattern over the background fill (Porter-Duff source-over)
 vec4 fill_blendOverBackground(vec4 pattern, vec4 background) {
-  if (background.a == 0.0) return pattern;
-  float blendedAlpha = pattern.a + background.a * (1.0 - pattern.a);
-  vec3 blendedRGB = mix(background.rgb, pattern.rgb, pattern.a / blendedAlpha);
-  return vec4(blendedRGB, blendedAlpha);
+  if (background.a == 0.0 || layer.opacity == 0.0) return pattern;
+  float patternAlpha = pattern.a / layer.opacity;
+  float blendedAlpha = patternAlpha + background.a * (1.0 - patternAlpha);
+  vec3 blendedRGB = mix(background.rgb, pattern.rgb, patternAlpha / blendedAlpha);
+  return vec4(blendedRGB, blendedAlpha * layer.opacity);
 }
 `;
 
@@ -72,7 +73,7 @@ const inject = {
       fill_patternBounds = fillPatternFrames / vec4(fill.patternTextureSize, fill.patternTextureSize);
       fill_patternPlacement.xy = fillPatternOffsets;
       fill_patternPlacement.zw = fillPatternScales * fillPatternFrames.zw;
-      fill_backgroundColor = vec4(fillPatternBackgroundColors.rgb, fillPatternBackgroundColors.a * layer.opacity);
+      fill_backgroundColor = fillPatternBackgroundColors;
     }
   `,
 
