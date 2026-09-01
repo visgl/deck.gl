@@ -68,6 +68,10 @@ new GlobeView({
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
 
+### @deck.gl/extensions
+
+- [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) adds a `getFillPatternBackgroundColor` accessor.
+
 ### @deck.gl/arcgis
 
 - [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.

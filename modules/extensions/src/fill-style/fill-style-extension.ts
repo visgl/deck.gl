@@ -9,6 +9,7 @@ import {FillStyleModuleProps, patternShaders} from './shader-module';
 import type {
   Layer,
   LayerContext,
+  Color,
   DefaultProps,
   Accessor,
   AccessorFunction,
@@ -28,7 +29,8 @@ const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternMask: true,
   getFillPattern: {type: 'accessor', value: d => d.pattern},
   getFillPatternScale: {type: 'accessor', value: 1},
-  getFillPatternOffset: {type: 'accessor', value: [0, 0]}
+  getFillPatternOffset: {type: 'accessor', value: [0, 0]},
+  getFillPatternBackgroundColor: {type: 'accessor', value: [0, 0, 0, 0]}
 };
 
 export type FillStyleExtensionProps<DataT = any> = {
@@ -70,6 +72,13 @@ export type FillStyleExtensionProps<DataT = any> = {
    * @default [0, 0]
    */
   getFillPatternOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  /**
+   * Accessor for the color filled behind the pattern. The pattern is composited on top of it, so
+   * the background is visible wherever the pattern is transparent. Fully transparent by default,
+   * which leaves the area behind the pattern unfilled.
+   * @default [0, 0, 0, 0]
+   */
+  getFillPatternBackgroundColor?: Accessor<DataT, Color>;
 };
 
 export type FillStyleExtensionOptions = {
@@ -127,6 +136,13 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
           size: 2,
           stepMode: 'dynamic',
           accessor: 'getFillPatternOffset'
+        },
+        fillPatternBackgroundColors: {
+          size: 4,
+          type: 'unorm8',
+          stepMode: 'dynamic',
+          accessor: 'getFillPatternBackgroundColor',
+          defaultValue: [0, 0, 0, 255]
         }
       });
     }

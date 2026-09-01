@@ -3514,12 +3514,10 @@
   dependencies:
     argparse "^2.0.1"
 
-a5-js@^0.7.2:
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.7.2.tgz#78b698404308fce69050e400681db963e0a88cdd"
-  integrity sha512-dMzoDsOiTdDBe8eC8u0hfRbqLuH+Sx58K+qbpdZmp3fUSJgp5AUzJGUcW0I4KIqQUAu0HENZMjujVL5wmNuzKg==
-  dependencies:
-    gl-matrix "^3.4.3"
+a5-js@^0.10.0:
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.10.0.tgz#d164d9f567e6f980aa1ba8d2afbdbde51ebd27d0"
+  integrity sha512-DB0OG4SHbaDK6ML4LTsNaxpxdXxtIynpRDKdSAm5q6s7r+AI81+PwjEaA+q0jKZ0bOpCOAiVe/81vodvBoEVZA==
 
 abab@^2.0.6:
   version "2.0.6"

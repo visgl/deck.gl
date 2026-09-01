@@ -152,6 +152,39 @@ const testCases = [
     goldenImage: './test/render/golden-images/polygon-pattern.png'
   },
   {
+    name: 'polygon-pattern-background',
+    skip: ['webgpu'],
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.43,
+      zoom: 11.5
+    },
+    layers: [
+      new PolygonLayer({
+        id: 'polygon-pattern-background',
+        data: polygons,
+        getPolygon: f => f,
+        filled: true,
+        stroked: true,
+        // The pattern is white, the fill behind it is styled independently
+        getFillColor: [255, 255, 255],
+
+        fillPatternMask: true,
+        fillPatternAtlas: '/test/data/pattern.png',
+        fillPatternMapping: '/test/data/pattern.json',
+        getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
+        getFillPatternScale: 5,
+        getFillPatternOffset: [0, 0],
+        // Opaque background on even features, semi-transparent on odd ones
+        getFillPatternBackgroundColor: (f, {index}) =>
+          index % 2 === 0 ? [60, 180, 240] : [240, 140, 60, 128],
+
+        extensions: [new FillStyleExtension({pattern: true})]
+      })
+    ],
+    goldenImage: './test/render/golden-images/polygon-pattern-background.png'
+  },
+  {
     name: 'polygon-globe',
     views: [new GlobeView()],
     viewState: {
