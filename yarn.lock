@@ -4882,20 +4882,15 @@ dunder-proto@1.0.1, dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     es-errors "^1.3.0"
     gopd "^1.2.0"
 
-earcut@^2.2.2, earcut@^2.2.4:
+earcut@^2.2.2:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/earcut/-/earcut-2.2.4.tgz#6d02fd4d68160c114825d06890a92ecaae60343a"
   integrity sha512-/pjZsA1b4RPHbeWZQn66SWS8nZZWLQQ23oE3Eam7aroEFGEvwKAsJfZ9ytiEMycfzXWpca4FA9QIOehf7PocBQ==
 
-earcut@^3.0.0, earcut@^3.0.1, earcut@^3.2.3:
+earcut@^3.0.0, earcut@^3.0.1, earcut@^3.0.2, earcut@^3.2.3:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/earcut/-/earcut-3.2.3.tgz#74aec19555a7e28773429826729d2e4bfeb19022"
   integrity sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==
-
-earcut@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/earcut/-/earcut-3.0.2.tgz#d478a29aaf99acf418151493048aa197d0512248"
-  integrity sha512-X7hshQbLyMJ/3RPhyObLARM2sNxxmRALLKx1+NVFFnQ9gKzmCrxm9+uLIAdBcvc8FNLpctqlQ2V6AE92Ol9UDQ==
 
 ecc-jsbn@~0.1.1:
   version "0.1.2"
