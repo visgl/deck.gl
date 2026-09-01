@@ -5,6 +5,11 @@
 import {LayerExtension} from '@deck.gl/core';
 
 import {FillStyleModuleProps, patternShaders} from './shader-module';
+import {
+  packProceduralPatterns,
+  PROCEDURAL_PATTERN_TEXTURE_FORMAT,
+  type ProceduralPatternMapping
+} from './procedural-pattern';
 
 import type {
   Layer,
@@ -48,11 +53,12 @@ export type FillStyleExtensionProps<DataT = any> = {
    * @default true
    */
   fillPatternEnabled?: boolean;
-  /** Sprite image url or texture that packs all your patterns into one layout. */
+  /** Sprite image url or texture that packs all your patterns into one layout. Ignored for procedural patterns. */
   fillPatternAtlas?: string | TextureSource;
-  /** Pattern names mapped to pattern definitions, or a url that points to a JSON file. */
+  /** Pattern names mapped to atlas frames or procedural definitions, or a URL to a JSON file. */
   fillPatternMapping?:
     | string
+    | ProceduralPatternMapping
     | Record<
         string,
         {
@@ -83,7 +89,7 @@ export type FillStyleExtensionProps<DataT = any> = {
   fillPatternSizeUnits?: Unit;
   /** Accessor for the name of the pattern. */
   getFillPattern?: AccessorFunction<DataT, string>;
-  /** Accessor for the scale of the pattern, relative to the original size. If the pattern is 24 x 24 pixels, scale `1` roughly yields 24 meters.
+  /** Accessor for the scale of the pattern, relative to its dimensions in `fillPatternSizeUnits`.
    * @default 1
    */
   getFillPatternScale?: Accessor<DataT, number>;
@@ -106,6 +112,10 @@ export type FillStyleExtensionOptions = {
    * @default false
    */
   pattern: boolean;
+  /** If `true`, generates patterns in the fragment shader instead of sampling an image atlas.
+   * @default false
+   */
+  proceduralPattern: boolean;
 };
 
 /** Adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`. */
@@ -113,8 +123,11 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
   static defaultProps = defaultProps;
   static extensionName = 'FillStyleExtension';
 
-  constructor({pattern = false}: Partial<FillStyleExtensionOptions> = {}) {
-    super({pattern});
+  constructor({
+    pattern = false,
+    proceduralPattern = false
+  }: Partial<FillStyleExtensionOptions> = {}) {
+    super({pattern: pattern || proceduralPattern, proceduralPattern});
   }
 
   isEnabled(layer: Layer<FillStyleExtensionProps>): boolean {
@@ -144,7 +157,9 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
           size: 4,
           stepMode: 'dynamic',
           accessor: 'getFillPattern',
-          transform: extension.getPatternFrame.bind(this)
+          transform: extension.opts.proceduralPattern
+            ? extension.getProceduralPatternIndex.bind(this)
+            : extension.getPatternFrame.bind(this)
         },
         fillPatternScales: {
           size: 1,
@@ -171,7 +186,9 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
         data: new Uint8Array(4),
         width: 1,
         height: 1
-      })
+      }),
+      ...(extension.opts.proceduralPattern &&
+        extension.createProceduralPatternTexture.call(this, {}))
     });
   }
 
@@ -185,6 +202,16 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     }
 
     if (props.fillPatternMapping && props.fillPatternMapping !== oldProps.fillPatternMapping) {
+      if (extension.opts.proceduralPattern && typeof props.fillPatternMapping !== 'string') {
+        const oldTexture = this.state.proceduralPatternTexture as Texture | undefined;
+        this.setState(
+          extension.createProceduralPatternTexture.call(
+            this,
+            props.fillPatternMapping as ProceduralPatternMapping
+          )
+        );
+        oldTexture?.delete();
+      }
       this.getAttributeManager()!.invalidate('getFillPattern');
     }
 
@@ -208,7 +235,10 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       fillPatternEnabled,
       fillPatternMask,
       fillPatternSizeUnits,
-      fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture,
+      procedural: extension.opts.proceduralPattern,
+      fillPatternTexture: (extension.opts.proceduralPattern
+        ? this.state.proceduralPatternTexture || this.state.emptyTexture
+        : fillPatternAtlas || this.state.emptyTexture) as Texture,
       fillPatternCommonFrame: this.state.commonFrame as [number, number] | null
     };
     this.setShaderModuleProps({fill: fillProps});
@@ -217,12 +247,14 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
   finalizeState(this: Layer<FillStyleExtensionProps>) {
     const emptyTexture = this.state.emptyTexture as Texture;
     emptyTexture?.delete();
+    const proceduralPatternTexture = this.state.proceduralPatternTexture as Texture;
+    proceduralPatternTexture?.delete();
   }
 
   getPatternFrame(this: Layer<FillStyleExtensionProps>, name: string) {
     const {fillPatternMapping} = this.getCurrentLayer()!.props;
     const def = fillPatternMapping && fillPatternMapping[name];
-    return def ? [def.x, def.y, def.width, def.height] : [0, 0, 0, 0];
+    return def && 'x' in def ? [def.x, def.y, def.width, def.height] : [0, 0, 0, 0];
   }
 
   /**
@@ -237,10 +269,36 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     let height = 0;
     for (const name in fillPatternMapping) {
       const frame = fillPatternMapping[name];
+      // Procedural definitions do not have atlas dimensions and do not need origin reduction here.
+      if (!('width' in frame)) return null;
       width = leastCommonMultiple(width, frame.width);
       height = leastCommonMultiple(height, frame.height);
       if (!width || !height) return null;
     }
     return width ? [scale * width, scale * height] : null;
+  }
+
+  getProceduralPatternIndex(this: Layer<FillStyleExtensionProps>, name: string) {
+    const patternIndices = this.state.proceduralPatternIndices as
+      | ReadonlyMap<string, number>
+      | undefined;
+    return [patternIndices?.get(name) ?? 0, 0, 0, 0];
+  }
+
+  createProceduralPatternTexture(
+    this: Layer<FillStyleExtensionProps>,
+    mapping: ProceduralPatternMapping
+  ) {
+    const packedPatterns = packProceduralPatterns(mapping);
+    return {
+      proceduralPatternIndices: packedPatterns.patternIndices,
+      proceduralPatternTexture: this.context.device.createTexture({
+        data: packedPatterns.data,
+        width: packedPatterns.width,
+        height: packedPatterns.height,
+        format: PROCEDURAL_PATTERN_TEXTURE_FORMAT,
+        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+      })
+    };
   }
 }
