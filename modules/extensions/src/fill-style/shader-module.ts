@@ -4,7 +4,7 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, fp64LowPart} from '@deck.gl/core';
-import type {ProjectProps, ProjectUniforms} from '@deck.gl/core';
+import type {OrthographicViewport, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 
@@ -13,6 +13,7 @@ layout(std140) uniform fillUniforms {
   vec2 patternTextureSize;
   bool patternEnabled;
   bool patternMask;
+  bool flipY;
   vec2 uvCoordinateOrigin;
   vec2 uvCoordinateOrigin64Low;
 } fill;
@@ -70,7 +71,10 @@ const inject = {
       // Reduce the coordinate origin to within one tile before adding the vertex position. The
       // origin is large in common space, and fp32 cannot carry the sum at full precision.
       vec2 origin = mod(fill.uvCoordinateOrigin, patternFrameCommon) + fill.uvCoordinateOrigin64Low;
-      fill_uv = (origin + geometry.position.xy) / patternFrameCommon + fillPatternOffsets;
+      fill_uv = (origin + geometry.position.xy) / patternFrameCommon;
+      // Pattern atlases use top-left coordinates, so reverse common-space Y in bottom-left views.
+      fill_uv.y *= fill.flipY ? 1.0 : -1.0;
+      fill_uv += fillPatternOffsets;
 
       fill_backgroundColor = fillPatternBackgroundColors;
     }
@@ -79,7 +83,7 @@ const inject = {
   'fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       vec2 patternUV = fract(fill_uv);
-      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * vec2(patternUV.x, 1.0 - patternUV.y);
+      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
 
       // Tiling is emulated by wrapping the coordinate, so texCoords jumps from the end of the
       // frame back to its start once per tile, leading to the wrong mip level being selected,
@@ -108,6 +112,7 @@ type FillStyleModuleUniforms = {
   patternTextureSize?: [number, number];
   patternEnabled?: boolean;
   patternMask?: boolean;
+  flipY?: boolean;
   uvCoordinateOrigin?: [number, number];
   uvCoordinateOrigin64Low?: [number, number];
 };
@@ -143,6 +148,7 @@ function getPatternUniforms(
     uniforms.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
     uniforms.patternMask = fillPatternMask;
     uniforms.patternEnabled = fillPatternEnabled;
+    uniforms.flipY = (opts.project.viewport as OrthographicViewport)?.flipY ?? false;
   }
   return uniforms;
 }
@@ -158,6 +164,7 @@ export const patternShaders = {
     patternTextureSize: 'vec2<f32>',
     patternEnabled: 'i32',
     patternMask: 'i32',
+    flipY: 'i32',
     uvCoordinateOrigin: 'vec2<f32>',
     uvCoordinateOrigin64Low: 'vec2<f32>'
   }

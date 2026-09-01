@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import {OrthographicViewport} from '@deck.gl/core';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
@@ -40,6 +41,7 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
         expect(fillLayer.state.emptyTexture, 'should be enabled in composite layer').toBeTruthy();
         let uniforms = getLayerUniforms(fillLayer);
         expect(uniforms.patternMask, 'has patternMask uniform').toBeTruthy();
+        expect(uniforms.flipY, 'defaults to bottom-left common coordinates').toBeFalsy();
         expect(
           fillLayer.getAttributeManager().getAttributes().fillPatternScales.value,
           'fillPatternScales attribute is populated'
@@ -65,6 +67,15 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
         uniforms = getLayerUniforms(strokeLayer);
         expect(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer').toBeFalsy();
         expect('patternMask' in uniforms, 'should not be enabled in PathLayer').toBeFalsy();
+      }
+    },
+    {
+      title: 'top-left common coordinates',
+      viewport: new OrthographicViewport({width: 100, height: 100, flipY: true}),
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        const uniforms = getLayerUniforms(fillLayer);
+        expect(uniforms.flipY, 'uses the viewport Y orientation').toBeTruthy();
       }
     },
     {
