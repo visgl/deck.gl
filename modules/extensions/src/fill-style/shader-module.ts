@@ -79,7 +79,7 @@ const inject = {
   'fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       vec2 patternUV = fract(fill_uv);
-      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * patternUV;
+      vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * vec2(patternUV.x, 1.0 - patternUV.y);
 
       // Tiling is emulated by wrapping the coordinate, so texCoords jumps from the end of the
       // frame back to its start once per tile, leading to the wrong mip level being selected,
