@@ -25,10 +25,12 @@ const patternVs = /* glsl */ `
 in vec4 fillPatternFrames;
 in float fillPatternScales;
 in vec2 fillPatternOffsets;
+in vec4 fillPatternBackgroundColors;
 
 out vec2 fill_uv;
 out vec4 fill_patternBounds;
 out vec4 fill_patternPlacement;
+out vec4 fill_backgroundColor;
 `;
 
 const vs = `
@@ -41,9 +43,19 @@ uniform sampler2D fill_patternTexture;
 
 in vec4 fill_patternBounds;
 in vec4 fill_patternPlacement;
+in vec4 fill_backgroundColor;
 in vec2 fill_uv;
 
 const float FILL_UV_SCALE = 512.0 / 40000000.0;
+
+// Draw the pattern over the background fill (Porter-Duff source-over)
+vec4 fill_blendOverBackground(vec4 pattern, vec4 background) {
+  if (background.a == 0.0 || layer.opacity == 0.0) return pattern;
+  float patternAlpha = pattern.a / layer.opacity;
+  float blendedAlpha = patternAlpha + background.a * (1.0 - patternAlpha);
+  vec3 blendedRGB = mix(background.rgb, pattern.rgb, patternAlpha / blendedAlpha);
+  return vec4(blendedRGB, blendedAlpha * layer.opacity);
+}
 `;
 
 const fs = `
@@ -61,6 +73,7 @@ const inject = {
       fill_patternBounds = fillPatternFrames / vec4(fill.patternTextureSize, fill.patternTextureSize);
       fill_patternPlacement.xy = fillPatternOffsets;
       fill_patternPlacement.zw = fillPatternScales * fillPatternFrames.zw;
+      fill_backgroundColor = fillPatternBackgroundColors;
     }
   `,
 
@@ -77,6 +90,7 @@ const inject = {
       if (!fill.patternMask) {
         color.rgb = patternColor.rgb;
       }
+      color = fill_blendOverBackground(color, fill_backgroundColor);
     }
   `
 };
