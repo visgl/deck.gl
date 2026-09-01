@@ -49,6 +49,15 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
           'fillPatternFrames attribute is populated'
         ).toEqual([0, 0, 1, 1]);
 
+        // The atlas used to be pinned to mip 0, because emulating tiling with mod() breaks the
+        // implicit derivatives that mip selection is based on. `textureGrad` supplies the
+        // gradients instead, so the mip chain has to stay available - see #7326
+        const {sampler} = layer.props.fillPatternAtlas;
+        expect(sampler.props.lodMaxClamp, 'pattern atlas is not pinned to mip 0').toBeGreaterThan(
+          0
+        );
+        expect(sampler.props.mipmapFilter, 'pattern atlas filters between mips').toBe('linear');
+
         uniforms = getLayerUniforms(strokeLayer);
         expect(strokeLayer.state.emptyTexture, 'should not be enabled in PathLayer').toBeFalsy();
         expect('patternMask' in uniforms, 'should not be enabled in PathLayer').toBeFalsy();
