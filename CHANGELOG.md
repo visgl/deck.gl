@@ -21,6 +21,25 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
+#### deck.gl [v9.4.0-beta.2] - Sep 2 2026
+
+- fix(fill-style): textureGrad for better mip selection (#10628)
+- feat(extensions): add dashUnits (#10583)
+- feat(extensions): add dashMode and whole-path justification (#10582)
+- fix(fill-style): correct pattern orientation by flipping texture y-axis (#10550)
+- feat: FillStyleExtension.getFillPatternBackgroundColor (#10618)
+- chore(deps): bump a5-js from 0.7.2 to 0.10.0 (#10620)
+- feat(extensions): prefilter dash coverage (#10581)
+- fix(extensions): align billboard, 3D, justified, and offset dashes (#10580)
+- fix(extensions): make PathStyle options optional (#10616)
+- CARTO: Remove dead code (moved to api-client) (#10617)
+- fix(core): rotate GlobeView like a ball through poles (#10598)
+- feat(core): support pointer-anchored zoom in GlobeView (#10385)
+- fix(core): compare viewport projection state in equals (#10611)
+- fix(extensions): omit dash uniforms for offset-only path styles (#10607)
+- fix(core): make attribute buffer cleanup idempotent (#10609)
+- feat(core): configure zoom anchors across controllers (#10595)
+
 #### deck.gl [v9.4.0-beta.1] - Aug 28 2026
 
 - feat(widgets): custom tooltip system for widget buttons (#10435)
