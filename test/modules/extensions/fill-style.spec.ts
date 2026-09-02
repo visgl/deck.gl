@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {OrthographicViewport} from '@deck.gl/core';
+import {MapView, OrthographicViewport} from '@deck.gl/core';
+import type {Viewport} from '@deck.gl/core';
 import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
@@ -120,6 +121,68 @@ webglTest('FillStyleExtension#PolygonLayer', () => {
           layer.props.fillPatternAtlas.handle,
           'fillPatternAtlas texture is not deleted'
         ).toBeTruthy();
+      }
+    }
+  ];
+
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+webglTest('FillStyleExtension#fillPatternSizeUnits', () => {
+  const viewport = new MapView({}).makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 12.3, latitude: 45.6, zoom: 14.4}
+  }) as Viewport;
+
+  const METERS_PER_COMMON_UNIT = 512 / 40000000;
+
+  const testCases = [
+    {
+      props: {
+        id: 'fill-style-size-units-test',
+        data: FIXTURES.polygons,
+        getPolygon: d => d,
+
+        fillPatternAtlas: FILL_PATTERN_ATLAS,
+        fillPatternMapping: FILL_PATTERN_MAPPING,
+        getFillPattern: () => 'pattern',
+        getFillPatternScale: 2,
+
+        extensions: [new FillStyleExtension({pattern: true})]
+      },
+      viewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        expect(
+          getLayerUniforms(fillLayer).patternUnitScale,
+          'defaults to sizing the pattern in meters'
+        ).toBeCloseTo(METERS_PER_COMMON_UNIT, 12);
+      }
+    },
+    {
+      title: 'fillPatternSizeUnits: pixels',
+      updateProps: {
+        fillPatternSizeUnits: 'pixels'
+      },
+      viewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        const uniforms = getLayerUniforms(fillLayer);
+        expect(
+          uniforms.patternUnitScale,
+          'one texel spans one screen pixel at the rounded zoom level'
+        ).toBeCloseTo(2 ** -14, 12);
+      }
+    },
+    {
+      title: 'fillPatternSizeUnits: common',
+      updateProps: {
+        fillPatternSizeUnits: 'common'
+      },
+      viewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        expect(getLayerUniforms(fillLayer).patternUnitScale, 'one texel spans one unit').toBe(1);
       }
     }
   ];
