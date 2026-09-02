@@ -24,10 +24,19 @@ export const dashShaders = {
     'vs:#decl': `
 in vec2 instanceDashArrays;
 #ifdef HIGH_PRECISION_DASH
-in float instanceDashOffsets;
+// [distance from the start of the path, total length of the path], in common space.
+in vec2 instanceDashOffsets;
 #endif
 out vec2 vDashArray;
 out float vDashOffset;
+out float vDashPathLength;
+
+// Also declared in the fragment stage. The vertex stage needs dashAlignMode so that it can
+// reduce the dash phase modulo the same period the fragment stage will test against.
+layout(std140) uniform pathStyleUniforms {
+  float dashAlignMode;
+  bool dashGapPickable;
+} pathStyle;
 `,
 
     'vs:#main-end': `
@@ -56,9 +65,22 @@ vDashArray = path.billboard
 #ifdef HIGH_PRECISION_DASH
 // instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
 // divide by the pixel half-width so both extrusion branches use the same dash coordinate.
-vDashOffset = (instanceDashOffsets * project.scale) / dashWidthPixels;
+vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
+vDashPathLength = dashOffsetAndLength.y;
+
+// Reduce the phase into the first period here rather than in the fragment shader. On a long
+// path at high zoom the raw offset reaches into the millions, and adding the much smaller
+// vPathPosition.y to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
+// The dash function is periodic, so this discards nothing - but it has to be reduced modulo
+// whichever period the fragment stage will actually test against, hence dashAlignMode here.
+float dashUnitLength = vDashArray.x + vDashArray.y;
+float dashPeriod = pathStyle.dashAlignMode == 0.0
+  ? dashUnitLength
+  : vDashPathLength / max(round(vDashPathLength / max(dashUnitLength, 0.0001)), 1.0);
+vDashOffset = dashPeriod > 0.0 ? mod(dashOffsetAndLength.x, dashPeriod) : 0.0;
 #else
 vDashOffset = 0.0;
+vDashPathLength = 0.0;
 #endif
 `,
 
@@ -70,6 +92,7 @@ layout(std140) uniform pathStyleUniforms {
 
 in vec2 vDashArray;
 in float vDashOffset;
+in float vDashPathLength;
 
 // Integral of the dash square wave from 0 to position, i.e. how much solid stroke lies before it.
 float dashPatternIntegral(float position, float solidLength, float unitLength) {
@@ -129,14 +152,26 @@ float dashPatternCoverage(
     if (pathStyle.dashAlignMode == 0.0) {
       offset = vDashOffset;
     } else {
-      // At least one whole period per segment: a segment shorter than half a period rounds
-      // to zero periods, which made unitLength infinite and rendered the segment solid.
+      // Justified: stretch the period so a whole number of them spans the run, and start
+      // half a dash in so both ends finish on a joint. Rounding up to at least one period
+      // matters - a run shorter than half a period used to round to zero, which made
+      // unitLength infinite and rendered it solid.
+#ifdef HIGH_PRECISION_DASH
+      // Justify across the entire path rather than each segment separately, so the gaps stay
+      // even instead of being stretched by a different amount on every segment. vDashOffset
+      // already carries the distance to the start of this segment, reduced modulo this same
+      // period in the vertex shader.
+      unitLength = vDashPathLength / max(round(vDashPathLength / unitLength), 1.0);
+#else
       unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
-      // A very short segment can make the justified period shorter than the requested dash.
-      // Treat that period as fully solid, matching the hard interval test and keeping the
-      // coverage integral and duty cycle bounded by one.
+#endif
+      // A short segment or path can make the fitted period shorter than the requested dash.
+      // Bound the solid interval to that period so coverage and duty cycle remain valid.
       solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
+#ifdef HIGH_PRECISION_DASH
+      offset += vDashOffset;
+#endif
     }
 
     float alongPath = vPathPosition.y + offset;
@@ -459,12 +494,25 @@ in float instanceOffsets;
   vPathPosition.y *= offsetWidth;
   vPathLength *= offsetWidth;
 #ifdef DASH_ENABLED
-  // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so the three rescalings
-  // above and the two below restore units of the original half-width. vDashOffset was computed
-  // against the widened stroke in the dash block, which merges ahead of this one, so it needs
-  // the same correction or a dashed offset line drifts out of phase with an unoffset one.
+  // DECKGL_FILTER_SIZE above widened the stroke by offsetWidth, so these rescalings restore
+  // units of the original half-width. The dash block merges ahead of this one.
   vPathBounds *= offsetWidth;
+#ifdef HIGH_PRECISION_DASH
+  vDashPathLength *= offsetWidth;
+  // The dash block reduced the CPU path offset modulo a period expressed in widened-width
+  // units. Multiplying that remainder cannot recover the original phase after wrapping, so
+  // redo the reduction with both the restored path offset and restored justified period.
+  float restoredDashUnitLength = vDashArray.x + vDashArray.y;
+  float restoredDashPeriod = pathStyle.dashAlignMode == 0.0
+    ? restoredDashUnitLength
+    : vDashPathLength /
+      max(round(vDashPathLength / max(restoredDashUnitLength, 0.0001)), 1.0);
+  vDashOffset = restoredDashPeriod > 0.0
+    ? mod(dashOffsetAndLength.x * offsetWidth, restoredDashPeriod)
+    : 0.0;
+#else
   vDashOffset *= offsetWidth;
+#endif
 #endif
 `,
     'fs:#main-end': `
