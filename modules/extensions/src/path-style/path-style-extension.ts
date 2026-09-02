@@ -32,12 +32,32 @@ const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   getOffset: {type: 'accessor', value: 0},
   dashJustified: false,
-  dashGapPickable: false
+  dashGapPickable: false,
+  dashUnits: 'widths'
+};
+
+/**
+ * What `getDashArray` is measured in.
+ *
+ * `'widths'` is relative to half the stroke width and is the historical behavior, so a dash
+ * scales with the line. `'pixels'` uses nominal zoom-stable projected pixels: exact for flat or
+ * orthographic paths and approximate under pitch, perspective, or elevation. `'meters'` uses the
+ * local projection scale, while `'common'` uses deck.gl common-coordinate-space units.
+ */
+export type DashUnits = 'widths' | 'pixels' | 'meters' | 'common';
+
+/** Keep in sync with the branch in the dash vertex shader. */
+const DASH_UNITS: Record<DashUnits, number> = {
+  widths: 0,
+  pixels: 1,
+  meters: 2,
+  common: 3
 };
 
 type PathStyleProps = {
   dashAlignMode: number;
   dashGapPickable: boolean;
+  dashUnits: number;
 };
 
 type SDFDashStyleProps = {
@@ -46,9 +66,9 @@ type SDFDashStyleProps = {
 
 export type PathStyleExtensionProps<DataT = any> = {
   /**
-   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to *half*
-   * the width of the path, so `[4, 5]` on a path 10 pixels wide draws 20 pixel dashes separated
-   * by 25 pixel gaps.
+   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` in the units
+   * selected by `dashUnits`. By default those units are relative to *half* the path width,
+   * so `[4, 5]` on a path 10 pixels wide draws 20 pixel dashes separated by 25 pixel gaps.
    * Requires the `dash` option to be on.
    */
   getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
@@ -68,6 +88,16 @@ export type PathStyleExtensionProps<DataT = any> = {
    * @default false
    */
   dashGapPickable?: boolean;
+  /**
+   * What `getDashArray` is measured in. `'widths'` is relative to half the stroke width, so a
+   * dash scales with the line. `'pixels'` uses nominal zoom-stable projected pixels, which are
+   * exact for flat or orthographic paths and approximate under pitch, perspective, or elevation.
+   * `'meters'` uses the local projection scale and `'common'` uses deck.gl common space.
+   * Only applies to `PathLayer` and composite layers that render paths; scatterplot outlines
+   * and text backgrounds continue to interpret dash arrays relative to their stroke width.
+   * @default 'widths'
+   */
+  dashUnits?: DashUnits;
 };
 
 /** How the dash pattern is positioned along a path. */
@@ -311,7 +341,8 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     if (extension.opts.dash) {
       pathStyle.uniformTypes = {
         dashAlignMode: 'f32',
-        dashGapPickable: 'i32'
+        dashGapPickable: 'i32',
+        dashUnits: 'i32'
       };
     }
     return {
@@ -364,7 +395,8 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       } else {
         const pathStyleProps: PathStyleProps = {
           dashAlignMode: this.props.dashJustified ? 1 : 0,
-          dashGapPickable: Boolean(this.props.dashGapPickable)
+          dashGapPickable: Boolean(this.props.dashGapPickable),
+          dashUnits: DASH_UNITS[this.props.dashUnits ?? 'widths']
         };
         this.setShaderModuleProps({pathStyle: pathStyleProps});
       }

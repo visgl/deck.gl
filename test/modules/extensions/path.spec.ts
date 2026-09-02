@@ -14,8 +14,8 @@ import {
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {PathStyleExtension} from '@deck.gl/extensions';
-import type {PathStyleExtensionOptions} from '@deck.gl/extensions';
 import {
+  GeoJsonLayer,
   PathLayer,
   PolygonLayer,
   ScatterplotLayer,
@@ -27,6 +27,8 @@ import {dashShaders, offsetShaders} from '../../../modules/extensions/src/path-s
 import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
+
+import type {DashUnits, PathStyleExtensionOptions} from '@deck.gl/extensions';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -249,7 +251,8 @@ test('PathStyleExtension#PathLayer', () => {
           .modules.find(module => module.name === 'pathStyle')!;
         expect(pathStyleModule.uniformTypes, 'dash module retains its uniform block').toEqual({
           dashAlignMode: 'f32',
-          dashGapPickable: 'i32'
+          dashGapPickable: 'i32',
+          dashUnits: 'i32'
         });
         const attributes = layer.getAttributeManager().getAttributes();
         expect(
@@ -348,12 +351,14 @@ test('PathStyleExtension#PolygonLayer', () => {
         getPolygon: d => d,
         stroke: true,
         getDashArray: [0, 0],
+        dashUnits: 'pixels',
         extensions: [new PathStyleExtension({dash: true})]
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
         const uniforms = getLayerUniforms(pathLayer);
         expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(0);
+        expect(uniforms.dashUnits, 'PolygonLayer forwards dashUnits').toBe(1);
         expect(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
           'instanceDashArrays attribute is populated'
@@ -363,12 +368,14 @@ test('PathStyleExtension#PolygonLayer', () => {
     {
       updateProps: {
         dashJustified: true,
+        dashUnits: 'common',
         getDashArray: d => [3, 1]
       },
       onAfterUpdate: ({subLayers}) => {
         const pathLayer = subLayers.find(l => l.id.endsWith('stroke'));
         const uniforms = getLayerUniforms(pathLayer);
         expect(uniforms.dashAlignMode, 'has dashAlignMode uniform').toBe(1);
+        expect(uniforms.dashUnits, 'PolygonLayer updates forwarded dashUnits').toBe(3);
         expect(
           pathLayer.getAttributeManager().getAttributes().instanceDashArrays.value,
           'instanceDashArrays attribute is populated'
@@ -378,6 +385,42 @@ test('PathStyleExtension#PolygonLayer', () => {
   ];
 
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('PathStyleExtension#GeoJsonLayer forwards dashUnits', () => {
+  testLayer({
+    Layer: GeoJsonLayer,
+    testCases: [
+      {
+        props: {
+          id: 'geojson-dash-units',
+          data: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: [
+                  [0, 0],
+                  [1, 1]
+                ]
+              }
+            }
+          ],
+          stroked: true,
+          getDashArray: [4, 5],
+          dashUnits: 'meters',
+          extensions: [new PathStyleExtension({dash: true})]
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const pathLayer = subLayers.find(layer => layer.id.endsWith('linestrings'));
+          expect(pathLayer, 'GeoJsonLayer creates its path sublayer').toBeTruthy();
+          expect(getLayerUniforms(pathLayer).dashUnits, 'GeoJsonLayer forwards dashUnits').toBe(2);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
 });
 
 test('PathStyleExtension#ScatterplotLayer', () => {
@@ -689,6 +732,40 @@ test('PathStyleExtension#dashMode', () => {
     }
   ];
   testLayer({Layer: PathLayer, testCases, onError: error => expect(error).toBeFalsy()});
+});
+
+test('PathStyleExtension#dashUnits', () => {
+  const unitValues: Array<[DashUnits | undefined, number]> = [
+    [undefined, 0],
+    ['widths', 0],
+    ['pixels', 1],
+    ['meters', 2],
+    ['common', 3]
+  ];
+
+  testLayer({
+    Layer: PathLayer,
+    testCases: unitValues.map(([dashUnits, expectedValue], index) => ({
+      ...(index === 0
+        ? {
+            props: {
+              id: 'dash-units-test',
+              data: FIXTURES.zigzag,
+              getPath: datum => datum.path,
+              getDashArray: [4, 5],
+              extensions: [new PathStyleExtension({dash: true})]
+            }
+          }
+        : {updateProps: {dashUnits}}),
+      onAfterUpdate: ({layer}) => {
+        expect(
+          getLayerUniforms(layer).dashUnits,
+          dashUnits ? `${dashUnits} maps to its shader value` : 'dashUnits defaults to widths'
+        ).toBe(expectedValue);
+      }
+    })),
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
 });
 
 test('PathStyleExtension#synchronizes live dash mode changes', () => {
