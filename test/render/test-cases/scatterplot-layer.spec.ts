@@ -138,10 +138,11 @@ const testCases = [
         getRadius: d => 1000,
         radiusUnits: 'pixels'
       }),
-      ...[true, false].map(
-        antialiasing =>
+      // Composite the antialiased pass twice to make partial edge coverage easier to inspect.
+      ...[true, true, false].map(
+        (antialiasing, drawIndex) =>
           new ScatterplotLayer({
-            id: `circles-${antialiasing}`,
+            id: `circles-${drawIndex}`,
             data: Array(399)
               .fill()
               .map((x, i) => i),
