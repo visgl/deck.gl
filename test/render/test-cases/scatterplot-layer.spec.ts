@@ -7,7 +7,6 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 /* eslint-disable callback-return */
-import {GL} from '@luma.gl/webgl/constants';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -143,17 +142,16 @@ const testCases = [
         antialiasing =>
           new ScatterplotLayer({
             id: `circles-${antialiasing}`,
-            data: Array(399)
+            data: Array(190)
               .fill()
               .map((x, i) => i),
-            getFillColor: antialiasing ? [255, 250, 50] : [0, 0, 0],
-            getPosition: d => [-124 + 0.4 * Math.floor(d / 19), 48.25 - 0.14 * (d % 19)],
+            getFillColor: [255, 250, 50],
+            getPosition: d => [
+              (antialiasing ? -124 : -119.6) + 0.4 * Math.floor(d / 19),
+              48.25 - 0.14 * (d % 19)
+            ],
             getRadius: d => 4 + 8 * (d % 2),
             antialiasing,
-            parameters: {
-              blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
-              blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
-            },
             radiusUnits: 'pixels'
           })
       )
