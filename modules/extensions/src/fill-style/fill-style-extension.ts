@@ -187,6 +187,15 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
   finalizeState(this: Layer<FillStyleExtensionProps>) {
     const emptyTexture = this.state.emptyTexture as Texture;
     emptyTexture?.delete();
+
+    // The layer outlives the extension when it is switched off, and these attributes are bound
+    // to accessors that only exist while it is attached
+    this.getAttributeManager()?.remove([
+      'fillPatternFrames',
+      'fillPatternScales',
+      'fillPatternOffsets',
+      'fillPatternBackgroundColors'
+    ]);
   }
 
   getPatternFrame(this: Layer<FillStyleExtensionProps>, name: string) {

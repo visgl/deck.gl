@@ -27,6 +27,7 @@ import {worldToPixels} from '@math.gl/web-mercator';
 import {load} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/loader-utils';
+import type LayerExtension from './layer-extension';
 import type {CoordinateSystem} from './constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
@@ -1040,7 +1041,36 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
 
+    // A matched layer keeps the state of the one it replaced, so extensions that were added
+    // along with the new props have not had initializeState called - whatever they set up in it,
+    // attributes included, would be missing for the rest of the layer's life. Extensions that
+    // were dropped have not had finalizeState called, so anything they hold on to would leak.
+    this._updateExtensions(oldLayer.props.extensions);
+
     this._diffProps(this.props, this.internalState.getOldProps() as Layer<PropsT>['props']);
+  }
+
+  /** Initialize extensions that this layer gained, finalize the ones it lost.
+   * Extensions are compared by class rather than with `equals`: reconfiguring one leaves the
+   * state it set up in place, which is what layers have always done - re-running initializeState
+   * over live attributes would orphan the buffers behind them. */
+  private _updateExtensions(oldExtensions: LayerExtension[]): void {
+    const {extensions} = this.props;
+    if (extensions === oldExtensions) {
+      return;
+    }
+    const sameClass = (a: LayerExtension, b: LayerExtension) => a.constructor === b.constructor;
+
+    for (const extension of oldExtensions) {
+      if (!extensions.some(ext => sameClass(ext, extension))) {
+        extension.finalizeState.call(this, this.context, extension);
+      }
+    }
+    for (const extension of extensions) {
+      if (!oldExtensions.some(ext => sameClass(ext, extension))) {
+        extension.initializeState.call(this, this.context, extension);
+      }
+    }
   }
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
