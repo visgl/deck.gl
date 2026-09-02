@@ -131,6 +131,7 @@ export type FillStyleModuleProps = {
   fillPatternMask?: boolean;
   fillPatternTexture: Texture;
   fillPatternSizeUnits?: Unit;
+  fillPatternCommonFrame?: [number, number] | null;
 };
 
 type FillStyleModuleUniforms = {
@@ -164,19 +165,23 @@ function getPatternUniforms(
     const {
       fillPatternMask = true,
       fillPatternEnabled = true,
-      fillPatternSizeUnits = 'meters'
+      fillPatternSizeUnits = 'meters',
+      fillPatternCommonFrame = null
     } = opts;
     const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
     const {commonOrigin: coordinateOriginCommon} = projectUniforms;
     const unitScale = getPatternUnitScale(fillPatternSizeUnits, opts.project.viewport);
 
-    const coordinateOriginCommon64Low: [number, number] = [
-      fp64LowPart(coordinateOriginCommon[0]),
-      fp64LowPart(coordinateOriginCommon[1])
-    ];
+    // Improve the precision of the uv mapping by removing an integer multiple of the
+    // pattern frames. This results in the same result, without wobbling at high zooms
+    const origin: [number, number] = [coordinateOriginCommon[0], coordinateOriginCommon[1]];
+    if (fillPatternCommonFrame) {
+      origin[0] %= unitScale * fillPatternCommonFrame[0];
+      origin[1] %= unitScale * fillPatternCommonFrame[1];
+    }
 
-    uniforms.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2) as [number, number];
-    uniforms.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
+    uniforms.uvCoordinateOrigin = origin;
+    uniforms.uvCoordinateOrigin64Low = [fp64LowPart(origin[0]), fp64LowPart(origin[1])];
     uniforms.patternUnitScale = unitScale;
     uniforms.patternMask = fillPatternMask;
     uniforms.patternEnabled = fillPatternEnabled;

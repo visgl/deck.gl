@@ -19,6 +19,14 @@ import type {
 } from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
 
+function leastCommonMultiple(a: number, b: number): number {
+  if (!Number.isInteger(b) || b <= 0) return 0;
+  if (a === 0) return b;
+  let [x, y] = [a, b];
+  while (y > 0) [x, y] = [y, x % y];
+  return (a / x) * b;
+}
+
 const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternEnabled: true,
   fillPatternAtlas: {
@@ -179,6 +187,13 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     if (props.fillPatternMapping && props.fillPatternMapping !== oldProps.fillPatternMapping) {
       this.getAttributeManager()!.invalidate('getFillPattern');
     }
+
+    if (
+      props.fillPatternMapping !== oldProps.fillPatternMapping ||
+      props.getFillPatternScale !== oldProps.getFillPatternScale
+    ) {
+      this.setState({commonFrame: extension.getCommonFrame(props)});
+    }
   }
 
   draw(this: Layer<FillStyleExtensionProps>, params: any, extension: this) {
@@ -193,7 +208,8 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       fillPatternEnabled,
       fillPatternMask,
       fillPatternSizeUnits,
-      fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture
+      fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture,
+      fillPatternCommonFrame: this.state.commonFrame as [number, number] | null
     };
     this.setShaderModuleProps({fill: fillProps});
   }
@@ -207,5 +223,24 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const {fillPatternMapping} = this.getCurrentLayer()!.props;
     const def = fillPatternMapping && fillPatternMapping[name];
     return def ? [def.x, def.y, def.width, def.height] : [0, 0, 0, 0];
+  }
+
+  /**
+   * Returns common frame into which all patterns fit as integer multiples
+   */
+  getCommonFrame(props: FillStyleExtensionProps): [number, number] | null {
+    const {fillPatternMapping, getFillPatternScale: scale} = props;
+    if (typeof scale !== 'number' || !(scale > 0) || typeof fillPatternMapping !== 'object') {
+      return null;
+    }
+    let width = 0;
+    let height = 0;
+    for (const name in fillPatternMapping) {
+      const frame = fillPatternMapping[name];
+      width = leastCommonMultiple(width, frame.width);
+      height = leastCommonMultiple(height, frame.height);
+      if (!width || !height) return null;
+    }
+    return width ? [scale * width, scale * height] : null;
   }
 }
