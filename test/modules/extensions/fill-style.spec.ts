@@ -9,8 +9,6 @@ import {FillStyleExtension} from '@deck.gl/extensions';
 import {PolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
 
-import type {Viewport} from '@deck.gl/core';
-
 import * as FIXTURES from 'deck.gl-test/data';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -260,4 +258,36 @@ webglTest('FillStyleExtension#fillPatternSizeUnits', () => {
   ];
 
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+webglTest('FillStyleExtension#proceduralPattern', () => {
+  testLayer({
+    Layer: PolygonLayer,
+    testCases: [
+      {
+        props: {
+          id: 'fill-style-extension-procedural-test',
+          data: FIXTURES.polygons,
+          getPolygon: d => d,
+          fillPatternMapping: {
+            diagonal: {type: 'hatch', angle: 45, strokeWidth: 2, gap: [4, 8]}
+          },
+          getFillPattern: () => 'diagonal',
+          fillPatternSizeUnits: 'pixels',
+          extensions: [new FillStyleExtension({proceduralPattern: true})]
+        },
+        onAfterUpdate: ({subLayers}) => {
+          const fillLayer = subLayers.find(l => l.id.includes('fill'));
+          const uniforms = getLayerUniforms(fillLayer);
+          expect(uniforms.procedural, 'enables procedural shader interpretation').toBeTruthy();
+          expect(
+            fillLayer.getAttributeManager().getAttributes().fillPatternFrames.value.slice(0, 4),
+            'fillPatternFrames stores the packed pattern record index'
+          ).toEqual([1, 0, 0, 0]);
+          expect(fillLayer.state.proceduralPatternTexture.format).toBe('rg32float');
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
 });
