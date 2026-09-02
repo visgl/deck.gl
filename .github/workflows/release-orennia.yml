@@ -5,10 +5,19 @@ on:
       - v*
   workflow_dispatch:
     inputs:
+      tag:
+        description: "Git tag to pack (e.g. v9.3.5-or). Empty = current ref; release name then comes from package.json."
+        required: false
+        type: string
       publish:
-        description: "Publish packages (false = dry run)"
+        description: "Publish packages to CodeArtifact (false = skip)"
         required: false
         default: false
+        type: boolean
+      upload_tarballs:
+        description: "Upload packed tarballs to the GitHub Release"
+        required: false
+        default: true
         type: boolean
 
 jobs:
@@ -19,6 +28,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Fetch remote branches
         run: |
@@ -51,6 +62,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
@@ -70,7 +83,43 @@ jobs:
       - name: Run tests from transpiled code
         run: yarn test-fast
 
+      - name: Pack npm tarballs
+        run: |
+          set -euo pipefail
+          root="$PWD"
+          mkdir -p "$root/tarballs"
+          for dir in modules/*/; do
+            [ -f "${dir}package.json" ] || continue
+            if node -e "process.exit(require('./${dir}package.json').private ? 0 : 1)"; then
+              continue
+            fi
+            (cd "$dir" && npm pack --pack-destination "$root/tarballs")
+          done
+          ls -lh "$root/tarballs"
+
+      - name: Upload tarballs to GitHub Release
+        if: github.event_name == 'push' || github.event.inputs.upload_tarballs == 'true'
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            tag="${GITHUB_REF_NAME}"
+          elif [ -n "${{ github.event.inputs.tag }}" ]; then
+            tag="${{ github.event.inputs.tag }}"
+          else
+            tag="v$(node -p "require('./modules/core/package.json').version")"
+          fi
+          echo "Uploading tarballs to ${tag}"
+          if ! gh release view "${tag}" >/dev/null 2>&1; then
+            gh release create "${tag}" \
+              --title "${tag}" \
+              --notes "Orennia deck.gl ${tag}" \
+              --target "${GITHUB_SHA}"
+          fi
+          # ponytail: no --clobber. A bad pack is a new tag, not a replaced asset.
+          gh release upload "${tag}" tarballs/*.tgz
+
       - name: Configure DEV AWS credentials
+        if: github.event_name == 'push' || github.event.inputs.publish == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ vars.DEV_AWS_ACCOUNT_ID }}:role/dev-github-oidc-role
@@ -78,6 +127,7 @@ jobs:
           aws-region: ${{ vars.DEV_AWS_REGION }}
 
       - name: Login to CodeArtifact npm
+        if: github.event_name == 'push' || github.event.inputs.publish == 'true'
         run: |
           aws codeartifact login \
             --tool npm \
@@ -87,6 +137,7 @@ jobs:
             --region "${{ vars.DEV_AWS_REGION }}"
 
       - name: Verify npm registry points to CodeArtifact
+        if: github.event_name == 'push' || github.event.inputs.publish == 'true'
         run: |
           REGISTRY="$(npm config get registry)"
           echo "npm registry: ${REGISTRY}"
