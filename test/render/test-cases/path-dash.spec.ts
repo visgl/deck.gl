@@ -8,7 +8,7 @@ import type {TestCase} from '../deck-test-utils';
 
 import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
 /**
  * Dash rendering matrix for PathStyleExtension.
@@ -167,6 +167,51 @@ function createGeographicPath(
     path.push([MAP_CENTER[0] - span / 2 + (span * pointIndex) / segments, latitude]);
   }
   return path;
+}
+
+const DASH_UNIT_WIDTH_ZOOM = 14;
+const DASH_UNIT_WIDTH_VIEW = new MapView({orthographic: true});
+const DASH_UNIT_WIDTH_VIEW_STATE = {
+  longitude: MAP_CENTER[0],
+  latitude: MAP_CENTER[1],
+  zoom: DASH_UNIT_WIDTH_ZOOM,
+  pitch: 0,
+  bearing: 0
+};
+
+/**
+ * Compares the same dash array on 2px and 6px strokes at one fixed view. The upper pair is
+ * thin and the lower pair is thick; red is flat and blue is billboard. Absolute dash units
+ * must have the same period in all four rows, while `widths` deliberately scales with the
+ * stroke and serves as the control.
+ */
+function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, number]): TestCase {
+  return {
+    name: `path-dash-units-width-${dashUnits}`,
+    views: DASH_UNIT_WIDTH_VIEW,
+    viewState: DASH_UNIT_WIDTH_VIEW_STATE,
+    layers: [
+      {width: 2, billboard: false},
+      {width: 2, billboard: true},
+      {width: 6, billboard: false},
+      {width: 6, billboard: true}
+    ].map(
+      ({width, billboard}, index) =>
+        new PathLayer({
+          id: `units-width-${dashUnits}-${width}-${billboard ? 'billboard' : 'flat'}`,
+          data: [createGeographicPath(120, DASH_UNIT_WIDTH_ZOOM, -getStripY(index, 4))],
+          getPath: (path: number[][]) => path,
+          billboard,
+          widthUnits: 'pixels' as const,
+          getWidth: width,
+          getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+          getDashArray: dashArray,
+          dashUnits,
+          extensions: [new PathStyleExtension({dashMode: 'path'})]
+        })
+    ),
+    goldenImage: `./test/render/golden-images/path-dash-units-width-${dashUnits}.png`
+  };
 }
 
 /**
@@ -701,6 +746,76 @@ const testCases: TestCase[] = [
     goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`
   })),
 
+  // ---------------------------------------------------------------------------------------
+  // dashUnits. widthUnits is 'meters' here, so the stroke itself thickens with zoom. The
+  // 'widths' rows are relative to the stroke and so grow with it, while the 'pixels' rows
+  // must hold exactly the same dash period at z12, z13 and z14. Comparing the three golden
+  // images against each other is the assertion.
+  // ---------------------------------------------------------------------------------------
+  ...[12, 13, 14].map(zoom => ({
+    name: `path-dash-units-z${zoom}`,
+    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
+    layers: [
+      // [dashUnits, dash array, vertical offset in pixels]
+      ['widths', [4, 5], 150],
+      ['widths', [4, 5], 90],
+      ['pixels', [20, 25], -90],
+      ['pixels', [20, 25], -150]
+    ].map(([dashUnits, dashArray, offsetPixels], index) => {
+      const billboard = index % 2 === 1;
+      return new PathLayer({
+        id: `units-${dashUnits}-${billboard ? 'billboard' : 'flat'}`,
+        data: [createGeographicPath(120, zoom, offsetPixels as number)],
+        getPath: (path: number[][]) => path,
+        billboard,
+        widthUnits: 'meters' as const,
+        getWidth: 60,
+        widthMinPixels: 2,
+        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+        getDashArray: dashArray,
+        dashUnits,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      });
+    }),
+    goldenImage: `./test/render/golden-images/path-dash-units-z${zoom}.png`
+  })),
+
+  // At a fixed view, changing only the stroke width must not affect absolute dash units.
+  // `widths` is the control and should visibly change between its thin and thick pairs.
+  createDashUnitWidthCase('widths', [4, 5]),
+  createDashUnitWidthCase('pixels', [4, 5]),
+  createDashUnitWidthCase('meters', [30, 38]),
+  createDashUnitWidthCase('common', [4 / 2 ** DASH_UNIT_WIDTH_ZOOM, 5 / 2 ** DASH_UNIT_WIDTH_ZOOM]),
+
+  {
+    // A round cap extends half the stroke width beyond each dash endpoint. On a 29px stroke,
+    // neighboring caps therefore close a nominal gap at or below 29px; a larger gap retains
+    // only the excess as visible whitespace. Square rows preserve the literal interval and
+    // make that geometric boundary explicit.
+    name: 'path-dash-units-rounded-cap-overlap',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-units-rounded-cap-overlap',
+      [
+        {gapSize: 5, capRounded: false},
+        {gapSize: 5, capRounded: true},
+        {gapSize: 29, capRounded: false},
+        {gapSize: 29, capRounded: true},
+        {gapSize: 45, capRounded: false},
+        {gapSize: 45, capRounded: true}
+      ].map(({gapSize, capRounded}, index) => ({
+        data: [createStraightPath(1, getStripY(index, 6))],
+        getWidth: 29,
+        getDashArray: [4, gapSize],
+        dashUnits: 'pixels',
+        capRounded,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-units-rounded-cap-overlap.png'
+  },
+
   // Pitched MapView. Perspective makes the flat path shrink toward the horizon, while the
   // billboarded path keeps its width facing the screen, so their screen patterns may diverge.
   {
@@ -824,6 +939,22 @@ const testCases: TestCase[] = [
       }))
     ),
     goldenImage: './test/render/golden-images/path-dash-offset-mode-path-justified.png'
+  },
+  {
+    name: 'path-dash-offset-units',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-units',
+      [0, 1, 2, -2].map((offset, index) => ({
+        data: [createStraightPath(40, getStripY(index, 4))],
+        getDashArray: [20, 25],
+        dashUnits: 'pixels',
+        getOffset: offset,
+        extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-units.png'
   },
 
   // ---------------------------------------------------------------------------------------

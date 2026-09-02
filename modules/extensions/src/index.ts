@@ -24,7 +24,8 @@ export type {
 export type {
   PathStyleExtensionProps,
   PathStyleExtensionOptions,
-  DashMode
+  DashMode,
+  DashUnits
 } from './path-style/path-style-extension';
 export type {
   FillStyleExtensionProps,
