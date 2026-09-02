@@ -2,6 +2,21 @@
 
 ## Upgrading to v9.4
 
+### PathStyleExtension dashes
+
+`highPrecisionDash` is deprecated in favour of `dashMode`. It still works and is now an alias for `dashMode: 'path'`, so no change is required:
+
+```ts
+// Before
+new PathStyleExtension({highPrecisionDash: true})
+// After
+new PathStyleExtension({dashMode: 'path'})
+```
+
+If both options are supplied, the explicit `dashMode` takes precedence over `highPrecisionDash`.
+
+See [PathStyleExtension migration and troubleshooting](./api-reference/extensions/path-style-extension.md#migration-and-troubleshooting) for symptom-specific guidance.
+
 ### pydeck lighting
 
 The obsolete `pydeck.LightSettings` binding has been removed. It serialized the

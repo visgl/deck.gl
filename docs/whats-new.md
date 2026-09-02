@@ -13,6 +13,7 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 ### Core Performance
 
 - Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
+- `PathLayer` now compiles additional 3D dash-distance calculations only when dashing is enabled, keeping ordinary and offset-only paths on the simpler vertex-shader path.
 
 ### WebGPU
 
@@ -71,6 +72,9 @@ new GlobeView({
 ### @deck.gl/extensions
 
 - [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) adds a `getFillPatternBackgroundColor` accessor.
+- [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) now keeps existing dash patterns aligned across flat, billboarded, elevated, and offset paths, and prefilters fine patterns so they remain stable instead of shimmering or becoming falsely solid.
+- [`dashMode`](./api-reference/extensions/path-style-extension.md#segment-and-path-phase) controls whether a pattern restarts at each rendered segment or continues across a complete normalized path. Use path mode for routes, GPS traces, and other strokes whose vertices should not reset the pattern.
+- [`dashUnits`](./api-reference/extensions/path-style-extension.md#dashunits) expresses dash lengths relative to stroke width, in projected pixels, in projection-local meters, or in deck.gl common-space units. Use it when a pattern must retain a screen-space or measured length independently of stroke width.
 
 ### @deck.gl/arcgis
 
