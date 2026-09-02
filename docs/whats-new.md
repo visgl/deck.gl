@@ -10,19 +10,10 @@ deck.gl v9.4 is expected to be the final release in the v9 series. It brings tog
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
-### Path styling in 2D and 3D
-
-[`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) is now a dependable stroke-style system for flat, elevated, billboarded, and offset paths. Existing dash patterns now agree between flat and billboard extrusion, advance through true 3D distance without phase seams, preserve phase on long and offset paths, and prefilter fine patterns instead of shimmering or becoming falsely solid. These rendering fixes apply automatically.
-
-Two opt-in controls define the intended pattern. `dashMode: 'path'` runs phase continuously along the complete normalized path, including generated subdivisions and antimeridian cuts, so rendered-segment density no longer resets the pattern. `dashUnits` makes pattern lengths proportional to the stroke, nominally zoom-stable in projected pixels, measured in projection-local meters, or expressed in deck.gl common-space units. Pixel units are exact for flat or orthographic paths and approximate under pitch, perspective, or elevation. Existing `dashJustified`, `dashGapPickable`, and `getOffset` compose with those controls for endpoint fitting, whole-object interaction, and parallel strokes from a shared centerline.
-
-`highPrecisionDash` remains available as a deprecated alias for `dashMode: 'path'`.
-
-`PathStyleExtension` remains WebGL-only in v9.4 because its dash and offset hooks inject GLSL and do not yet have a WGSL implementation.
-
 ### Core Performance
 
 - Picking has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
+- `PathLayer` now compiles additional 3D dash-distance calculations only when dashing is enabled, keeping ordinary and offset-only paths on the simpler vertex-shader path.
 
 ### WebGPU
 
@@ -81,6 +72,9 @@ new GlobeView({
 ### @deck.gl/extensions
 
 - [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) adds a `getFillPatternBackgroundColor` accessor.
+- [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) now keeps existing dash patterns aligned across flat, billboarded, elevated, and offset paths, and prefilters fine patterns so they remain stable instead of shimmering or becoming falsely solid.
+- [`dashMode`](./api-reference/extensions/path-style-extension.md#segment-and-path-phase) controls whether a pattern restarts at each rendered segment or continues across a complete normalized path. Use path mode for routes, GPS traces, and other strokes whose vertices should not reset the pattern.
+- [`dashUnits`](./api-reference/extensions/path-style-extension.md#dashunits) expresses dash lengths relative to stroke width, in projected pixels, in projection-local meters, or in deck.gl common-space units. Use it when a pattern must retain a screen-space or measured length independently of stroke width.
 
 ### @deck.gl/arcgis
 

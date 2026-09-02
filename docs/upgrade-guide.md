@@ -15,12 +15,6 @@ new PathStyleExtension({dashMode: 'path'})
 
 If both options are supplied, the explicit `dashMode` takes precedence over `highPrecisionDash`.
 
-Several rendering defects are fixed automatically; no code change is required. Billboard scaling, 3D arclength, long-path phase, dash phase on offset strokes, short justified runs, and fine-pattern coverage can change pixels while preserving the intended style. Applications that compare stored images should regenerate affected screenshots after upgrading.
-
-`getDashArray` is unchanged. Its documentation now correctly states that values are relative to *half* the stroke width: `[4, 5]` on a 10-pixel stroke draws a 20-pixel dash and a 25-pixel gap.
-
-Applications that explicitly provide the internal `data.attributes.instanceDashOffsets` binary attribute must update it from one scalar to two components per rendered instance: `[offsetFromPathStart, totalPathLength]`. In path mode, GPU-only `getPath` geometry that cannot be read on the CPU must provide this attribute. The public scalar `getDashOffsets(path)` helper is unchanged; path-mode rendering now calculates its private two-component metrics from normalized `PathTessellator` geometry.
-
 See [PathStyleExtension migration and troubleshooting](./api-reference/extensions/path-style-extension.md#migration-and-troubleshooting) for symptom-specific guidance.
 
 ### pydeck lighting
