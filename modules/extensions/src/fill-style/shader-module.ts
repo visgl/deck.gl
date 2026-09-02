@@ -29,8 +29,9 @@ in vec4 fillPatternBackgroundColors;
 
 out vec2 fill_uv;
 out vec4 fill_patternBounds;
-out vec4 fill_patternPlacement;
 out vec4 fill_backgroundColor;
+
+const float FILL_UV_SCALE = 512.0 / 40000000.0;
 `;
 
 const vs = `
@@ -42,11 +43,8 @@ const patternFs = /* glsl */ `
 uniform sampler2D fill_patternTexture;
 
 in vec4 fill_patternBounds;
-in vec4 fill_patternPlacement;
 in vec4 fill_backgroundColor;
 in vec2 fill_uv;
-
-const float FILL_UV_SCALE = 512.0 / 40000000.0;
 
 // Draw the pattern over the background fill (Porter-Duff source-over)
 vec4 fill_blendOverBackground(vec4 pattern, vec4 background) {
@@ -65,27 +63,31 @@ ${patternFs}
 
 const inject = {
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-    fill_uv = geometry.position.xy;
-  `,
-
-  'vs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       fill_patternBounds = fillPatternFrames / vec4(fill.patternTextureSize, fill.patternTextureSize);
-      fill_patternPlacement.xy = fillPatternOffsets;
-      fill_patternPlacement.zw = fillPatternScales * fillPatternFrames.zw;
+
+      vec2 patternFrameCommon = FILL_UV_SCALE * fillPatternScales * fillPatternFrames.zw;
+      // Reduce the coordinate origin to within one tile before adding the vertex position. The
+      // origin is large in common space, and fp32 cannot carry the sum at full precision.
+      vec2 origin = mod(fill.uvCoordinateOrigin, patternFrameCommon) + fill.uvCoordinateOrigin64Low;
+      fill_uv = (origin + geometry.position.xy) / patternFrameCommon + fillPatternOffsets;
+
       fill_backgroundColor = fillPatternBackgroundColors;
     }
   `,
 
   'fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
-      vec2 scale = FILL_UV_SCALE * fill_patternPlacement.zw;
-      vec2 patternUV = mod(mod(fill.uvCoordinateOrigin, scale) + fill.uvCoordinateOrigin64Low + fill_uv, scale) / scale;
-      patternUV = mod(fill_patternPlacement.xy + patternUV, 1.0);
-
+      vec2 patternUV = fract(fill_uv);
       vec2 texCoords = fill_patternBounds.xy + fill_patternBounds.zw * vec2(patternUV.x, 1.0 - patternUV.y);
 
-      vec4 patternColor = texture(fill_patternTexture, texCoords);
+      // Tiling is emulated by wrapping the coordinate, so texCoords jumps from the end of the
+      // frame back to its start once per tile, leading to the wrong mip level being selected,
+      // which leads to artifacts at pattern edges. fill_uv is continuous across the primitive,
+      // meaning that the correct mip level is always selected
+      vec4 grad = fill_patternBounds.zwzw * vec4(dFdx(fill_uv), dFdy(fill_uv));
+      vec4 patternColor = textureGrad(fill_patternTexture, texCoords, grad.xy, grad.zw);
+
       color.a *= patternColor.a;
       if (!fill.patternMask) {
         color.rgb = patternColor.rgb;

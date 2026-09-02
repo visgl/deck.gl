@@ -23,8 +23,7 @@ const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   fillPatternAtlas: {
     type: 'image',
     value: null,
-    async: true,
-    parameters: {lodMaxClamp: 0}
+    async: true
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,
