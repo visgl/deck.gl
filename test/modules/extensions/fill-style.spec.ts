@@ -183,3 +183,70 @@ webglTest('FillStyleExtension#originPrecision', () => {
 
   testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+webglTest('FillStyleExtension#fillPatternSizeUnits', () => {
+  const viewport = new MapView({}).makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 12.3, latitude: 45.6, zoom: 14.4}
+  }) as Viewport;
+
+  const METERS_PER_COMMON_UNIT = 512 / 40000000;
+
+  const testCases = [
+    {
+      props: {
+        id: 'fill-style-size-units-test',
+        data: FIXTURES.polygons,
+        getPolygon: d => d,
+
+        fillPatternAtlas: FILL_PATTERN_ATLAS,
+        fillPatternMapping: FILL_PATTERN_MAPPING,
+        getFillPattern: () => 'pattern',
+        getFillPatternScale: 2,
+
+        extensions: [new FillStyleExtension({pattern: true})]
+      },
+      viewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        expect(
+          getLayerUniforms(fillLayer).patternUnitScale,
+          'defaults to sizing the pattern in meters'
+        ).toBeCloseTo(METERS_PER_COMMON_UNIT, 12);
+      }
+    },
+    {
+      title: 'fillPatternSizeUnits: pixels',
+      updateProps: {
+        fillPatternSizeUnits: 'pixels'
+      },
+      viewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        const uniforms = getLayerUniforms(fillLayer);
+        expect(
+          uniforms.patternUnitScale,
+          'one texel spans one screen pixel at the rounded zoom level'
+        ).toBeCloseTo(2 ** -14, 12);
+        expect(
+          Math.abs(uniforms.uvCoordinateOrigin[0]),
+          'the origin is reduced by a period that follows the zoom'
+        ).toBeLessThan(2 * 1 * 2 ** -14);
+      }
+    },
+    {
+      title: 'fillPatternSizeUnits: common',
+      updateProps: {
+        fillPatternSizeUnits: 'common'
+      },
+      viewport,
+      onAfterUpdate: ({subLayers}) => {
+        const fillLayer = subLayers.find(l => l.id.includes('fill'));
+        expect(getLayerUniforms(fillLayer).patternUnitScale, 'one texel spans one unit').toBe(1);
+      }
+    }
+  ];
+
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});

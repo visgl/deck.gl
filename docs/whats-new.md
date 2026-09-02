@@ -71,6 +71,7 @@ new GlobeView({
 ### @deck.gl/extensions
 
 - [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) adds a `getFillPatternBackgroundColor` accessor.
+- [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) adds a `fillPatternSizeUnits` prop, which can hold the pattern at a constant size on screen instead of scaling it with the map.
 
 ### @deck.gl/arcgis
 

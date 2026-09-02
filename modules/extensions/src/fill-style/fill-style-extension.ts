@@ -14,6 +14,7 @@ import type {
   Accessor,
   AccessorFunction,
   TextureSource,
+  Unit,
   UpdateParameters
 } from '@deck.gl/core';
 import type {Texture} from '@luma.gl/core';
@@ -35,6 +36,7 @@ const defaultProps: DefaultProps<FillStyleExtensionProps> = {
   },
   fillPatternMapping: {type: 'object', value: {}, async: true},
   fillPatternMask: true,
+  fillPatternSizeUnits: 'meters',
   getFillPattern: {type: 'accessor', value: d => d.pattern},
   getFillPatternScale: {type: 'accessor', value: 1},
   getFillPatternOffset: {type: 'accessor', value: [0, 0]},
@@ -69,6 +71,16 @@ export type FillStyleExtensionProps<DataT = any> = {
    * @default true
    */
   fillPatternMask?: boolean;
+  /**
+   * The units of the pattern size, one of `'meters'`, `'common'` and `'pixels'`. A 24 x 24 pixel
+   * pattern at scale `1` covers 24 units of the chosen unit.
+   *
+   * With `'meters'` (the default) the pattern is anchored to the ground and zooms with the map.
+   * With `'pixels'` it keeps a constant size on screen instead, re-anchored at each integer zoom
+   * level so that the tiling is stable while zooming within a level.
+   * @default 'meters'
+   */
+  fillPatternSizeUnits?: Unit;
   /** Accessor for the name of the pattern. */
   getFillPattern?: AccessorFunction<DataT, string>;
   /** Accessor for the scale of the pattern, relative to the original size. If the pattern is 24 x 24 pixels, scale `1` roughly yields 24 meters.
@@ -189,11 +201,13 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
       return;
     }
 
-    const {fillPatternAtlas, fillPatternEnabled, fillPatternMask} = this.props;
+    const {fillPatternAtlas, fillPatternEnabled, fillPatternMask, fillPatternSizeUnits} =
+      this.props;
     const fillProps: FillStyleModuleProps = {
       project: params.shaderModuleProps.project,
       fillPatternEnabled,
       fillPatternMask,
+      fillPatternSizeUnits,
       fillPatternTexture: (fillPatternAtlas || this.state.emptyTexture) as Texture,
       fillPatternCommonFrame: this.state.commonFrame as [number, number] | null
     };

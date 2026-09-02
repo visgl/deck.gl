@@ -118,6 +118,26 @@ In both cases the pattern is composited over
 the pattern and the background color styles the area behind it.
 
 
+#### `fillPatternSizeUnits` (string, optional) {#fillpatternsizeunits}
+
+- Default: `'meters'`
+
+The units of the pattern size, one of `'meters'`, `'common'` and `'pixels'`. See [unit system](../../developer-guide/coordinate-systems.md#supported-units). A 24 x 24 pixel pattern at [`getFillPatternScale: 1`](#getfillpatternscale) covers 24 units of the chosen unit.
+
++ `'meters'` anchors the pattern to the ground, so it zooms along with the rest of the map.
++ `'common'` sizes the pattern in [common space](../../developer-guide/coordinate-systems.md) units, which is what a non-geospatial view (`COORDINATE_SYSTEM.CARTESIAN`) wants - meters are converted with a fixed Web Mercator ratio and are not meaningful there.
++ `'pixels'` keeps the pattern at a constant size on screen instead. The size is re-anchored at each integer zoom level rather than followed continuously, so that the tiling stays put while zooming within a level; the pattern therefore stays within a factor of `sqrt(2)` of its nominal pixel size.
+
+```js
+new GeoJsonLayer({
+  // ...
+  // A 24 x 24 pattern drawn at 24 x 24 screen pixels, at any zoom
+  fillPatternSizeUnits: 'pixels',
+  getFillPatternScale: 1,
+  extensions: [new FillStyleExtension({pattern: true})]
+});
+```
+
 #### `getFillPattern` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors)) {#getfillpattern}
 
 Called to retrieve the name of the pattern. Returns a string key from the `fillPatternMapping` object.
@@ -127,7 +147,7 @@ Called to retrieve the name of the pattern. Returns a string key from the `fillP
 
 - Default: `1`
 
-The scale of the pattern, relative to the original size. If the pattern is 24 x 24 pixels, scale `1` roughly yields 24 meters.
+The scale of the pattern, relative to the original size. If the pattern is 24 x 24 pixels, scale `1` roughly yields 24 meters, or 24 of whichever unit [`fillPatternSizeUnits`](#fillpatternsizeunits) selects.
 
 - If a number is provided, it is used as the pattern scale for all objects.
 - If a function is provided, it is called on each object to retrieve its pattern scale.
