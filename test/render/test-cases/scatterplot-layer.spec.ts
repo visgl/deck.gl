@@ -142,16 +142,17 @@ const testCases = [
         antialiasing =>
           new ScatterplotLayer({
             id: `circles-${antialiasing}`,
-            data: Array(190)
+            data: Array(399)
               .fill()
               .map((x, i) => i),
-            getFillColor: [255, 250, 50],
-            getPosition: d => [
-              (antialiasing ? -124 : -119.6) + 0.4 * Math.floor(d / 19),
-              48.25 - 0.14 * (d % 19)
-            ],
+            getFillColor: antialiasing ? [255, 250, 50] : [0, 0, 0],
+            getPosition: d => [-124 + 0.4 * Math.floor(d / 19), 48.25 - 0.14 * (d % 19)],
             getRadius: d => 4 + 8 * (d % 2),
             antialiasing,
+            parameters: {
+              depthCompare: 'always',
+              depthWriteEnabled: false
+            },
             radiusUnits: 'pixels'
           })
       )
