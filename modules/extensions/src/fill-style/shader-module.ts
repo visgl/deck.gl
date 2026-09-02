@@ -8,6 +8,9 @@ import type {ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
 
+// Common-space size of one atlas texel: the equator measures 40,000km and spans 512 common units
+const FILL_UV_SCALE = 512 / 40000000;
+
 const uniformBlock = /* glsl */ `\
 layout(std140) uniform fillUniforms {
   vec2 patternTextureSize;
@@ -31,7 +34,7 @@ out vec2 fill_uv;
 out vec4 fill_patternBounds;
 out vec4 fill_backgroundColor;
 
-const float FILL_UV_SCALE = 512.0 / 40000000.0;
+const float FILL_UV_SCALE = ${FILL_UV_SCALE};
 `;
 
 const vs = `
@@ -102,6 +105,7 @@ export type FillStyleModuleProps = {
   fillPatternEnabled?: boolean;
   fillPatternMask?: boolean;
   fillPatternTexture: Texture;
+  fillPatternCommonFrame?: [number, number] | null;
 };
 
 type FillStyleModuleUniforms = {
@@ -130,17 +134,20 @@ function getPatternUniforms(
     uniforms.patternTextureSize = [fillPatternTexture.width, fillPatternTexture.height];
   }
   if ('project' in opts) {
-    const {fillPatternMask = true, fillPatternEnabled = true} = opts;
+    const {fillPatternMask = true, fillPatternEnabled = true, fillPatternCommonFrame = null} = opts;
     const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
     const {commonOrigin: coordinateOriginCommon} = projectUniforms;
 
-    const coordinateOriginCommon64Low: [number, number] = [
-      fp64LowPart(coordinateOriginCommon[0]),
-      fp64LowPart(coordinateOriginCommon[1])
-    ];
+    // Improve the precision of the uv mapping by removing an integer multiple of the
+    // pattern frames. This results in the same result, without wobbling at high zooms
+    const origin: [number, number] = [coordinateOriginCommon[0], coordinateOriginCommon[1]];
+    if (fillPatternCommonFrame) {
+      origin[0] %= FILL_UV_SCALE * fillPatternCommonFrame[0];
+      origin[1] %= FILL_UV_SCALE * fillPatternCommonFrame[1];
+    }
 
-    uniforms.uvCoordinateOrigin = coordinateOriginCommon.slice(0, 2) as [number, number];
-    uniforms.uvCoordinateOrigin64Low = coordinateOriginCommon64Low;
+    uniforms.uvCoordinateOrigin = origin;
+    uniforms.uvCoordinateOrigin64Low = [fp64LowPart(origin[0]), fp64LowPart(origin[1])];
     uniforms.patternMask = fillPatternMask;
     uniforms.patternEnabled = fillPatternEnabled;
   }
