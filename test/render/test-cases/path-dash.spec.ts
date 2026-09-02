@@ -8,7 +8,7 @@ import type {TestCase} from '../deck-test-utils';
 
 import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
 /**
  * Dash rendering matrix for PathStyleExtension.
@@ -169,6 +169,51 @@ function createGeographicPath(
   return path;
 }
 
+const DASH_UNIT_WIDTH_ZOOM = 14;
+const DASH_UNIT_WIDTH_VIEW = new MapView({orthographic: true});
+const DASH_UNIT_WIDTH_VIEW_STATE = {
+  longitude: MAP_CENTER[0],
+  latitude: MAP_CENTER[1],
+  zoom: DASH_UNIT_WIDTH_ZOOM,
+  pitch: 0,
+  bearing: 0
+};
+
+/**
+ * Compares the same dash array on 2px and 6px strokes at one fixed view. The upper pair is
+ * thin and the lower pair is thick; red is flat and blue is billboard. Absolute dash units
+ * must have the same period in all four rows, while `widths` deliberately scales with the
+ * stroke and serves as the control.
+ */
+function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, number]): TestCase {
+  return {
+    name: `path-dash-units-width-${dashUnits}`,
+    views: DASH_UNIT_WIDTH_VIEW,
+    viewState: DASH_UNIT_WIDTH_VIEW_STATE,
+    layers: [
+      {width: 2, billboard: false},
+      {width: 2, billboard: true},
+      {width: 6, billboard: false},
+      {width: 6, billboard: true}
+    ].map(
+      ({width, billboard}, index) =>
+        new PathLayer({
+          id: `units-width-${dashUnits}-${width}-${billboard ? 'billboard' : 'flat'}`,
+          data: [createGeographicPath(120, DASH_UNIT_WIDTH_ZOOM, -getStripY(index, 4))],
+          getPath: (path: number[][]) => path,
+          billboard,
+          widthUnits: 'pixels' as const,
+          getWidth: width,
+          getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+          getDashArray: dashArray,
+          dashUnits,
+          extensions: [new PathStyleExtension({dashMode: 'path'})]
+        })
+    ),
+    goldenImage: `./test/render/golden-images/path-dash-units-width-${dashUnits}.png`
+  };
+}
+
 /**
  * Four billboarded paths in a perspective view:
  *
@@ -311,6 +356,40 @@ function createPathVariantsCase(name: string, layerProperties: Record<string, an
   };
 }
 
+/** Vertical spacing for comparing mode combinations on one unevenly divided path. */
+const MODE_COMBINATION_ROW_SPACING = 96;
+
+/** Unequal segment lengths that include runs shorter than the configured dash period. */
+const MODE_COMBINATION_SEGMENT_LENGTHS = [260, 90, 210, 160];
+
+const DASH_MODE_COMBINATIONS: {
+  dashMode: 'segment' | 'path';
+  dashJustified: boolean;
+}[] = [
+  {dashMode: 'segment', dashJustified: false},
+  {dashMode: 'segment', dashJustified: true},
+  {dashMode: 'path', dashJustified: false},
+  {dashMode: 'path', dashJustified: true}
+];
+
+function createUnevenPath(verticalPosition: number): number[][] {
+  const path: number[][] = [];
+  let horizontalPosition = -STRIP_LENGTH / 2;
+  path.push([horizontalPosition, verticalPosition]);
+  for (const segmentLength of MODE_COMBINATION_SEGMENT_LENGTHS) {
+    horizontalPosition += segmentLength;
+    path.push([horizontalPosition, verticalPosition]);
+  }
+  return path;
+}
+
+function getModeCombinationVerticalPosition(index: number): number {
+  return (
+    -((DASH_MODE_COMBINATIONS.length - 1) * MODE_COMBINATION_ROW_SPACING) / 2 +
+    index * MODE_COMBINATION_ROW_SPACING
+  );
+}
+
 /** Vertical gap between the flat and billboard copies of a parity pair, in world units. */
 const PARITY_OFFSET = 16;
 
@@ -363,11 +442,70 @@ const testCases: TestCase[] = [
     jointRounded: true,
     extensions: [new PathStyleExtension({dash: true})]
   }),
-
-  // Per-segment reference for the four path variants, without justification.
+  // dashMode 'path' is the whole point of the exercise: all six strips draw the same line and
+  // must come out identical no matter how many vertices it was built from.
+  createSegmentDensityCase('path-dash-density-mode-path', {
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Justified now composes with continuous phase instead of overriding it. The period is
+  // stretched once across the whole path, so every strip still matches.
+  createSegmentDensityCase('path-dash-density-mode-path-justified', {
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Matched variants isolate segment mode, continuous path mode, and whole-path
+  // justification on exactly the same geometry and style inputs.
   createPathVariantsCase('path-dash-variants-default', {
     extensions: [new PathStyleExtension({dash: true})]
   }),
+  createPathVariantsCase('path-dash-variants-mode-path', {
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  // Whole-path justification must derive its period from each path's own arclength and
+  // stroke width. Every path should begin and end with half a dash and contain only complete
+  // periods between.
+  createPathVariantsCase('path-dash-mode-path-justified-variants', {
+    dashJustified: true,
+    extensions: [new PathStyleExtension({dashMode: 'path'})]
+  }),
+  {
+    // Compare the complete dashMode x dashJustified state space on identical geometry.
+    // Unequal segments and joint markers make each phase domain visibly distinct.
+    name: 'path-dash-mode-combinations',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: [
+      ...DASH_MODE_COMBINATIONS.map(
+        ({dashMode, dashJustified}, index) =>
+          new PathLayer({
+            id: `mode-combinations-${dashMode}-${dashJustified}`,
+            data: [createUnevenPath(getModeCombinationVerticalPosition(index))],
+            ...CARTESIAN,
+            // One dash unit is half the 14px stroke width, yielding a 63px period.
+            getWidth: 14,
+            getDashArray: [5, 4],
+            dashJustified,
+            extensions: [new PathStyleExtension({dashMode})]
+          })
+      ),
+      new PathLayer({
+        id: 'mode-combinations-joints',
+        data: DASH_MODE_COMBINATIONS.flatMap((_, index) => {
+          const verticalPosition = getModeCombinationVerticalPosition(index);
+          return createUnevenPath(verticalPosition).map(([horizontalPosition]) => [
+            [horizontalPosition, verticalPosition - 22],
+            [horizontalPosition, verticalPosition + 22]
+          ]);
+        }),
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: (path: number[][]) => path,
+        widthUnits: 'pixels' as const,
+        getWidth: 1.5,
+        getColor: [90, 90, 90]
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-dash-mode-combinations.png'
+  },
 
   // ---------------------------------------------------------------------------------------
   // Dash arrays, from long dashes down to sub-pixel periods
@@ -608,6 +746,76 @@ const testCases: TestCase[] = [
     goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`
   })),
 
+  // ---------------------------------------------------------------------------------------
+  // dashUnits. widthUnits is 'meters' here, so the stroke itself thickens with zoom. The
+  // 'widths' rows are relative to the stroke and so grow with it, while the 'pixels' rows
+  // must hold exactly the same dash period at z12, z13 and z14. Comparing the three golden
+  // images against each other is the assertion.
+  // ---------------------------------------------------------------------------------------
+  ...[12, 13, 14].map(zoom => ({
+    name: `path-dash-units-z${zoom}`,
+    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
+    layers: [
+      // [dashUnits, dash array, vertical offset in pixels]
+      ['widths', [4, 5], 150],
+      ['widths', [4, 5], 90],
+      ['pixels', [20, 25], -90],
+      ['pixels', [20, 25], -150]
+    ].map(([dashUnits, dashArray, offsetPixels], index) => {
+      const billboard = index % 2 === 1;
+      return new PathLayer({
+        id: `units-${dashUnits}-${billboard ? 'billboard' : 'flat'}`,
+        data: [createGeographicPath(120, zoom, offsetPixels as number)],
+        getPath: (path: number[][]) => path,
+        billboard,
+        widthUnits: 'meters' as const,
+        getWidth: 60,
+        widthMinPixels: 2,
+        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+        getDashArray: dashArray,
+        dashUnits,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      });
+    }),
+    goldenImage: `./test/render/golden-images/path-dash-units-z${zoom}.png`
+  })),
+
+  // At a fixed view, changing only the stroke width must not affect absolute dash units.
+  // `widths` is the control and should visibly change between its thin and thick pairs.
+  createDashUnitWidthCase('widths', [4, 5]),
+  createDashUnitWidthCase('pixels', [4, 5]),
+  createDashUnitWidthCase('meters', [30, 38]),
+  createDashUnitWidthCase('common', [4 / 2 ** DASH_UNIT_WIDTH_ZOOM, 5 / 2 ** DASH_UNIT_WIDTH_ZOOM]),
+
+  {
+    // A round cap extends half the stroke width beyond each dash endpoint. On a 29px stroke,
+    // neighboring caps therefore close a nominal gap at or below 29px; a larger gap retains
+    // only the excess as visible whitespace. Square rows preserve the literal interval and
+    // make that geometric boundary explicit.
+    name: 'path-dash-units-rounded-cap-overlap',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-units-rounded-cap-overlap',
+      [
+        {gapSize: 5, capRounded: false},
+        {gapSize: 5, capRounded: true},
+        {gapSize: 29, capRounded: false},
+        {gapSize: 29, capRounded: true},
+        {gapSize: 45, capRounded: false},
+        {gapSize: 45, capRounded: true}
+      ].map(({gapSize, capRounded}, index) => ({
+        data: [createStraightPath(1, getStripY(index, 6))],
+        getWidth: 29,
+        getDashArray: [4, gapSize],
+        dashUnits: 'pixels',
+        capRounded,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-units-rounded-cap-overlap.png'
+  },
+
   // Pitched MapView. Perspective makes the flat path shrink toward the horizon, while the
   // billboarded path keeps its width facing the screen, so their screen patterns may diverge.
   {
@@ -715,6 +923,38 @@ const testCases: TestCase[] = [
       }))
     ),
     goldenImage: './test/render/golden-images/path-dash-offset-mode-path.png'
+  },
+  {
+    name: 'path-dash-offset-mode-path-justified',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-mode-path-justified',
+      [0, 1, 2, -2].map((offset, index) => ({
+        data: [createStraightPath(40, getStripY(index, 4))],
+        getDashArray: [4, 5],
+        dashJustified: true,
+        getOffset: offset,
+        extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-mode-path-justified.png'
+  },
+  {
+    name: 'path-dash-offset-units',
+    views: new OrthographicView(),
+    viewState: ORTHO_VIEW_STATE,
+    layers: createStripLayers(
+      'path-dash-offset-units',
+      [0, 1, 2, -2].map((offset, index) => ({
+        data: [createStraightPath(40, getStripY(index, 4))],
+        getDashArray: [20, 25],
+        dashUnits: 'pixels',
+        getOffset: offset,
+        extensions: [new PathStyleExtension({dashMode: 'path', offset: true})]
+      }))
+    ),
+    goldenImage: './test/render/golden-images/path-dash-offset-units.png'
   },
 
   // ---------------------------------------------------------------------------------------
