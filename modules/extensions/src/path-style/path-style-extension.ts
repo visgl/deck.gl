@@ -70,6 +70,9 @@ export type PathStyleExtensionProps<DataT = any> = {
   dashGapPickable?: boolean;
 };
 
+/** How the dash pattern is positioned along a path. */
+export type DashMode = 'segment' | 'path';
+
 /** Options for configuring a {@link PathStyleExtension}. */
 export type PathStyleExtensionOptions = {
   /**
@@ -83,7 +86,14 @@ export type PathStyleExtensionOptions = {
    */
   offset?: boolean;
   /**
+   * How the dash pattern is positioned along a path. `'path'` keeps dashes continuous across
+   * rendered segments, at the cost of a vertex attribute and a CPU pass over the geometry.
+   * @default 'segment'
+   */
+  dashMode?: DashMode;
+  /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
+   * @deprecated Use `dashMode: 'path'` instead.
    * @default false
    */
   highPrecisionDash?: boolean;
@@ -92,6 +102,8 @@ export type PathStyleExtensionOptions = {
 type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
+
+const PATH_STYLE_ATTRIBUTES = ['instanceDashArrays', 'instanceDashOffsets', 'instanceOffsets'];
 
 function dashMetricsProjectionPropsChanged({
   props,
@@ -164,9 +176,16 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
   constructor({
     dash = false,
     offset = false,
+    dashMode,
     highPrecisionDash = false
   }: PathStyleExtensionOptions = {}) {
-    super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
+    const resolvedDashMode: DashMode = dashMode ?? (highPrecisionDash ? 'path' : 'segment');
+    super({
+      dash: dash || highPrecisionDash || dashMode !== undefined,
+      offset,
+      dashMode: resolvedDashMode,
+      highPrecisionDash: resolvedDashMode === 'path'
+    });
   }
 
   private getLayerType(layer: Layer): LayerType | null {
@@ -181,6 +200,64 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       return 'textBackground';
     }
     return null;
+  }
+
+  private synchronizeAttributes(layer: Layer<PathStyleExtensionProps>): boolean {
+    const attributeManager = layer.getAttributeManager();
+    const layerType = this.getLayerType(layer);
+    if (!attributeManager || !layerType) {
+      return false;
+    }
+
+    const attributes = attributeManager.getAttributes();
+    const desiredAttributes = new Set<string>();
+    if (this.opts.dash) {
+      desiredAttributes.add('instanceDashArrays');
+    }
+    if (layerType === 'path' && this.opts.dash && this.opts.dashMode === 'path') {
+      desiredAttributes.add('instanceDashOffsets');
+    }
+    if (layerType === 'path' && this.opts.offset) {
+      desiredAttributes.add('instanceOffsets');
+    }
+
+    let topologyChanged = false;
+    for (const attributeName of PATH_STYLE_ATTRIBUTES) {
+      if (attributes[attributeName] && !desiredAttributes.has(attributeName)) {
+        attributeManager.remove([attributeName]);
+        topologyChanged = true;
+      }
+    }
+
+    if (desiredAttributes.has('instanceDashArrays') && !attributes.instanceDashArrays) {
+      attributeManager.addInstanced({
+        instanceDashArrays: {size: 2, accessor: 'getDashArray'}
+      });
+      topologyChanged = true;
+    }
+    if (desiredAttributes.has('instanceDashOffsets') && !attributes.instanceDashOffsets) {
+      attributeManager.addInstanced({
+        instanceDashOffsets: {
+          // [distance from the start of the path, total length of the path]
+          size: 2,
+          // Recalculate from rendered geometry when getPath changes. A binary getPath buffer
+          // contains positions, not dash metrics, so keep it as an update trigger rather than
+          // binding it directly to this attribute.
+          accessor: ['getPath'],
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateDashMetrics
+        }
+      });
+      topologyChanged = true;
+    }
+    if (desiredAttributes.has('instanceOffsets') && !attributes.instanceOffsets) {
+      attributeManager.addInstanced({
+        instanceOffsets: {size: 1, accessor: 'getOffset'}
+      });
+      topologyChanged = true;
+    }
+
+    return topologyChanged;
   }
 
   isEnabled(layer: Layer<PathStyleExtensionProps>): boolean {
@@ -217,7 +294,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
       defines.DASH_ENABLED = true;
-      if (extension.opts.highPrecisionDash) {
+      if (extension.opts.dashMode === 'path') {
         defines.HIGH_PRECISION_DASH = true;
       }
     }
@@ -244,35 +321,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
-    const attributeManager = this.getAttributeManager();
-    const layerType = extension.getLayerType(this);
-    if (!attributeManager || !layerType) {
-      return;
-    }
-
-    if (extension.opts.dash) {
-      attributeManager.addInstanced({
-        instanceDashArrays: {size: 2, accessor: 'getDashArray'},
-        ...(layerType === 'path' && extension.opts.highPrecisionDash
-          ? {
-              instanceDashOffsets: {
-                size: 1,
-                // Recalculate from rendered geometry when getPath changes. A binary getPath
-                // buffer contains positions, not dash metrics, so keep it as an update trigger
-                // rather than binding it directly to this attribute.
-                accessor: ['getPath'],
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                update: extension.calculateDashMetrics
-              }
-            }
-          : {})
-      });
-    }
-    if (layerType === 'path' && extension.opts.offset) {
-      attributeManager.addInstanced({
-        instanceOffsets: {size: 1, accessor: 'getOffset'}
-      });
-    }
+    extension.synchronizeAttributes(this);
   }
 
   updateState(
@@ -284,11 +333,25 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       return;
     }
 
+    if (params.changeFlags.extensionsChanged) {
+      const topologyChanged = extension.synchronizeAttributes(this);
+      const attributeManager = this.getAttributeManager();
+      if (attributeManager && topologyChanged) {
+        // PathLayer recreates its model before extension updateState runs. Refresh the new
+        // model's layout after adding or removing extension-owned attributes, then ensure all
+        // managed buffers are rebound to the recreated vertex array.
+        attributeManager.invalidateAll();
+        for (const model of this.getModels()) {
+          model.setBufferLayout(attributeManager.getBufferLayouts(model));
+        }
+      }
+    }
+
     if (extension.opts.dash) {
       const layerType = extension.getLayerType(this);
       if (
         layerType === 'path' &&
-        extension.opts.highPrecisionDash &&
+        extension.opts.dashMode === 'path' &&
         dashMetricsProjectionPropsChanged(params)
       ) {
         this.getAttributeManager()?.invalidate('instanceDashOffsets');
@@ -416,6 +479,13 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     }
   }
 
+  /**
+   * Calculates the distance from the start of a path to each rendered segment.
+   *
+   * The final entry is zero because PathLayer reserves the final vertex as invalid padding.
+   * This scalar return shape is retained for compatibility; path-mode rendering uses an
+   * internal attribute containing both each segment offset and the total path length.
+   */
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
     const result = [0];
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
