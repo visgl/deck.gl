@@ -10,16 +10,6 @@ deck.gl v9.4 is expected to be the final release in the v9 series. It brings tog
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
 
-### Path styling in 2D and 3D
-
-[`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) is now a dependable stroke-style system for flat, elevated, billboarded, and offset paths. Existing dash patterns now agree between flat and billboard extrusion, advance through true 3D distance without phase seams, preserve phase on long and offset paths, and prefilter fine patterns instead of shimmering or becoming falsely solid. These rendering fixes apply automatically.
-
-Two opt-in controls define the intended pattern. `dashMode: 'path'` runs phase continuously along the complete normalized path, including generated subdivisions and antimeridian cuts, so rendered-segment density no longer resets the pattern. `dashUnits` makes pattern lengths proportional to the stroke, nominally zoom-stable in projected pixels, measured in projection-local meters, or expressed in deck.gl common-space units. Pixel units are exact for flat or orthographic paths and approximate under pitch, perspective, or elevation. Existing `dashJustified`, `dashGapPickable`, and `getOffset` compose with those controls for endpoint fitting, whole-object interaction, and parallel strokes from a shared centerline.
-
-`highPrecisionDash` remains available as a deprecated alias for `dashMode: 'path'`.
-
-`PathStyleExtension` remains WebGL-only in v9.4 because its dash and offset hooks inject GLSL and do not yet have a WGSL implementation.
-
 ### WebGPU
 
 deck.gl v9.4 substantially expands its experimental WebGPU support. All layers in the official layer catalog now support WebGPU, including [`MVTLayer`](./api-reference/geo-layers/mvt-layer.md), with tile clipping for its circle, path, and polygon sublayers, and [`Tile3DLayer`](./api-reference/geo-layers/tile-3d-layer.md), with support for point-cloud, glTF scenegraph, and I3S mesh tile content. Big improvements are made to core WebGPU attribute-buffer assembly, render pass management, and device switching. Render tests are used to ensure WebGL-WebGPU parity covering most common use cases.
