@@ -548,6 +548,12 @@ describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () 
   }, 60000);
 
   test('feather survives an extension that rescales the stroke', async () => {
+    const off = await measureAntialiasingCoverage({antialiasing: false});
+    const offOffset = await measureAntialiasingCoverage({
+      antialiasing: false,
+      getOffset: 1,
+      extensions: [new PathStyleExtension({offset: true})]
+    });
     const on = await measureAntialiasingCoverage({antialiasing: true});
     const onOffset = await measureAntialiasingCoverage({
       antialiasing: true,
@@ -555,6 +561,14 @@ describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () 
       extensions: [new PathStyleExtension({offset: true})]
     });
 
+    expect(offOffset.partial, 'non-AA offset strokes retain a hard edge').toBe(0);
+    const solidRatio = offOffset.solid / off.solid;
+    expect(
+      solidRatio,
+      `non-AA offset coverage should match un-offset coverage (off=${off.solid}, ` +
+        `offset=${offOffset.solid}, ratio=${solidRatio.toFixed(3)})`
+    ).toBeGreaterThan(0.75);
+    expect(solidRatio, 'offsetting should not widen the visible stroke').toBeLessThan(1.25);
     expect(onOffset.solid, 'offset strokes were drawn').toBeGreaterThan(200);
     expect(
       onOffset.partial,
@@ -564,13 +578,59 @@ describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () 
       onOffset.levels,
       `offset coverage should be continuous (got ${onOffset.levels} distinct alpha levels)`
     ).toBeGreaterThan(40);
+    expect(
+      onOffset.minimumPartial,
+      `offset coverage should retain the outside half of the centered ramp ` +
+        `(minimum alpha ${onOffset.minimumPartial})`
+    ).toBeLessThan(96);
 
     const ratio = onOffset.partial / on.partial;
     expect(
       ratio,
       `offset feather should be comparable to un-offset (on=${on.partial}, ` +
         `offset=${onOffset.partial}, ratio=${ratio.toFixed(3)})`
-    ).toBeGreaterThan(0.35);
+    ).toBeGreaterThan(0.75);
+  }, 60000);
+
+  test('rounded offset coverage stays inside the remapped stroke width', async () => {
+    const roundedProps = {
+      data: [
+        {
+          path: [
+            [-30, -10],
+            [0, 10],
+            [30, -10]
+          ]
+        }
+      ],
+      getWidth: 12,
+      jointRounded: true,
+      capRounded: true
+    };
+    const rounded = await measureAntialiasingCoverage({
+      ...roundedProps,
+      antialiasing: true
+    });
+    const roundedOffset = await measureAntialiasingCoverage({
+      ...roundedProps,
+      antialiasing: true,
+      getOffset: 1,
+      extensions: [new PathStyleExtension({offset: true})]
+    });
+
+    const solidRatio = roundedOffset.solid / rounded.solid;
+    const partialRatio = roundedOffset.partial / rounded.partial;
+    expect(roundedOffset.solid, 'rounded offset stroke was drawn').toBeGreaterThan(200);
+    expect(
+      solidRatio,
+      `rounded offset envelope does not expose widened corner geometry ` +
+        `(ratio=${solidRatio.toFixed(3)})`
+    ).toBeLessThan(1.75);
+    expect(
+      partialRatio,
+      `rounded offset feather stays bounded by the remapped stroke width ` +
+        `(ratio=${partialRatio.toFixed(3)})`
+    ).toBeLessThan(1.75);
   }, 60000);
 });
 

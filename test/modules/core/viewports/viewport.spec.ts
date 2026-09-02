@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {vecNormalized} from '../../../utils/utils';
-import {Viewport} from 'deck.gl';
+import {
+  OrthographicViewport,
+  Viewport,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from 'deck.gl';
 import {Matrix4, Vector3} from '@math.gl/core';
 
 /* eslint-disable */
@@ -87,6 +92,55 @@ test('Viewport#equals', () => {
   expect(viewport1a.equals(viewport1b), 'Viewport equality correct').toBeTruthy();
   expect(viewport2a.equals(viewport2b), 'Viewport equality correct').toBeTruthy();
   expect(viewport1a.equals(viewport2a), 'Viewport equality correct').toBeFalsy();
+
+  const globeOptions = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 1};
+  const globeResolution10a = new GlobeViewport({...globeOptions, resolution: 10});
+  const globeResolution10b = new GlobeViewport({...globeOptions, resolution: 10});
+  const globeResolution5 = new GlobeViewport({...globeOptions, resolution: 5});
+  expect(
+    globeResolution10a.equals(globeResolution10b),
+    'matching globe tessellation resolutions are equal'
+  ).toBeTruthy();
+  expect(
+    globeResolution10a.equals(globeResolution5),
+    'different globe tessellation resolutions are not equal'
+  ).toBeFalsy();
+
+  const orthographicOptions = {width: 800, height: 600, zoomY: 0};
+  const orthographicZoom1a = new OrthographicViewport({...orthographicOptions, zoomX: 1});
+  const orthographicZoom1b = new OrthographicViewport({...orthographicOptions, zoomX: 1});
+  const orthographicZoom2 = new OrthographicViewport({...orthographicOptions, zoomX: 2});
+  expect(
+    orthographicZoom1a.equals(orthographicZoom1b),
+    'matching anisotropic common-space scales are equal'
+  ).toBeTruthy();
+  expect(
+    orthographicZoom1a.equals(orthographicZoom2),
+    'different anisotropic common-space scales are not equal'
+  ).toBeFalsy();
+
+  const webMercatorOptions = {width: 800, height: 600, longitude: 0, latitude: 20, zoom: 10};
+  const currentMeterSizes = new WebMercatorViewport(webMercatorOptions);
+  const legacyMeterSizes = new WebMercatorViewport({
+    ...webMercatorOptions,
+    legacyMeterSizes: true
+  });
+  const matchingLegacyMeterSizes = new WebMercatorViewport({
+    ...webMercatorOptions,
+    legacyMeterSizes: true
+  });
+  expect(
+    currentMeterSizes.equals(legacyMeterSizes),
+    'different meter projection modes are not equal'
+  ).toBeFalsy();
+  expect(
+    legacyMeterSizes.equals(currentMeterSizes),
+    'meter projection equality is symmetric'
+  ).toBeFalsy();
+  expect(
+    legacyMeterSizes.equals(matchingLegacyMeterSizes),
+    'matching legacy meter projection modes are equal'
+  ).toBeTruthy();
 });
 
 test('Viewport.getScales', () => {
