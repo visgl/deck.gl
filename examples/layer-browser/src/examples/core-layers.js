@@ -211,6 +211,7 @@ const PolygonLayerBinaryExample = {
       ['hatch-1x', 'hatch-2x', 'hatch-cross', 'dots'][Math.floor(Math.random() * 4)],
     getFillPatternOffset: [0, 0],
     getFillPatternScale: 5,
+    getFillPatternBackgroundColor: [220, 220, 220, 200],
     extensions: [new FillStyleExtension({pattern: true})]
   }
 };
