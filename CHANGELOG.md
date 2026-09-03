@@ -21,6 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
+#### deck.gl [v9.4.0-beta.4] - Sep 3 2026
+
+- chore: fix cjs build (#10651)
+- fix(layers): ScatterplotLayer antialiasing on webgpu (#10642)
+- fix(layers): sdf text outline in webgpu (#10640)
+- fix: export MapLibre integration and update peer ranges (#10645)
+
 #### deck.gl [v9.4.0-beta.3] - Sep 2 2026
 
 - feat(extensions): procedural fill patterns (#10632)
