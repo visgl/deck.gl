@@ -502,6 +502,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.canvas = null;
       this._ownedCanvas = null;
     }
+
+    if (!this.props.device && !this.props.gl) {
+      this._canvasContext?.destroy();
+    }
     this._canvasContext = null;
   }
 
