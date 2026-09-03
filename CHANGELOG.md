@@ -21,8 +21,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
-#### deck.gl [v9.4.0-beta.2] - Sep 2 2026
+#### deck.gl [v9.4.0-beta.3] - Sep 2 2026
 
+- feat(extensions): procedural fill patterns (#10632)
+- fix(extensions): reduce pattern origin in fp64 to stop drift at high zoom (#10633)
+- feat(extensions): fillPatternSizeUnits (#10634)
+- fix(extensions): follow up FillStyleExtension flipY fix (#10629)
 - fix(fill-style): textureGrad for better mip selection (#10628)
 - feat(extensions): add dashUnits (#10583)
 - feat(extensions): add dashMode and whole-path justification (#10582)
@@ -39,6 +43,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - fix(extensions): omit dash uniforms for offset-only path styles (#10607)
 - fix(core): make attribute buffer cleanup idempotent (#10609)
 - feat(core): configure zoom anchors across controllers (#10595)
+
+#### deck.gl [v9.4.0-beta.2] - Sep 2 2026
+
+- Intentionally skipped; no npm distribution was published.
 
 #### deck.gl [v9.4.0-beta.1] - Aug 28 2026
 
