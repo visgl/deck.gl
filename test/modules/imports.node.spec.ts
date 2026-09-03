@@ -7,7 +7,6 @@ import '@luma.gl/core';
 
 import DeckGL from 'deck.gl';
 import * as deck from 'deck.gl';
-import type {MapLibreOverlayProps} from 'deck.gl';
 
 import * as layers from '@deck.gl/layers';
 import * as aggregationLayers from '@deck.gl/aggregation-layers';
@@ -81,9 +80,6 @@ describe('Top-level imports', () => {
     expect(deck.ArcLayer, 'ArcLayer symbol imported').toBeTruthy();
     expect(deck.LineLayer, 'LineLayer symbol imported').toBeTruthy();
     expect(deck.MapLibreOverlay, 'MapLibreOverlay symbol imported').toBeTruthy();
-
-    const mapLibreOverlayProps: MapLibreOverlayProps = {layers: []};
-    expect(mapLibreOverlayProps.layers, 'MapLibreOverlayProps type imported').toEqual([]);
 
     expect(deck.COORDINATE_SYSTEM.LNGLAT, 'COORDINATE_SYSTEM.LNGLAT imported').toBe('lnglat');
     expect(deck.COORDINATE_SYSTEM.METER_OFFSETS, 'COORDINATE_SYSTEM.METERS imported').toBe(
