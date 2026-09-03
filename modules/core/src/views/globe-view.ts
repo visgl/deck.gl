@@ -60,4 +60,10 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
   get ControllerType() {
     return GlobeController;
   }
+
+  /** Resolve navigation explicitly so saved view state cannot override the default. */
+  get controller() {
+    const controller = super.controller;
+    return controller && {...controller, navigation: controller.navigation ?? 'map'};
+  }
 }

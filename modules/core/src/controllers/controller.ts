@@ -89,6 +89,12 @@ export type ControllerOptions = {
       };
   /** Drag behavior without pressing function keys, one of `pan` and `rotate`. */
   dragMode?: 'pan' | 'rotate';
+  /**
+   * Globe navigation behavior. `'map'` preserves bearing while panning and zooming;
+   * `'ball'` rotates the camera frame freely through the poles. Default `'map'`.
+   * Only used by GlobeController. Explicit rotation gestures are unchanged.
+   */
+  navigation?: 'map' | 'ball';
   /** Screen position that remains fixed while zooming. Default `'pointer'`. */
   zoomAround?: 'center' | 'pointer';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
@@ -458,6 +464,26 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   updateTransition() {
     this.transitionManager.updateTransition();
+  }
+
+  /** Cancel active gestures and inertia before changing navigation behavior. */
+  protected _cancelInteraction(): void {
+    this.state = {};
+    this._controllerState = undefined;
+    this._panMove = false;
+    this._multiPanMode = null;
+    this._doubleClickDragAnchor = null;
+    if (this._eventStartBlocked) {
+      clearTimeout(this._eventStartBlocked);
+      this._eventStartBlocked = null;
+    }
+    this.transitionManager.finalize();
+    this._setInteractionState({
+      isDragging: false,
+      isPanning: false,
+      isRotating: false,
+      isZooming: false
+    });
   }
 
   toggleEvents(eventNames, enabled) {

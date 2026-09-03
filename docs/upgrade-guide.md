@@ -2,6 +2,13 @@
 
 ## Upgrading to v9.4
 
+### Globe navigation
+
+`GlobeController` defaults to `navigation: 'map'`, preserving the current bearing during panning and
+zooming and limiting latitude to approximately `±85.051°`. If you relied on the free-rotation behavior
+introduced during the v9.4 prereleases, set `controller: {navigation: 'ball'}` to retain pole crossing
+and evolving bearing. Explicit rotation gestures remain available in both modes.
+
 ### pydeck lighting
 
 The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
