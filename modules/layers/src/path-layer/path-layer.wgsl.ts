@@ -12,6 +12,9 @@ struct JoinResult {
   miterLength: f32,
   pathPosition: vec2<f32>,
   pathLength: f32,
+#ifdef DASH_ENABLED
+  dashSegment: vec2<f32>,
+#endif
   jointType: f32,
 };
 
@@ -42,7 +45,8 @@ struct Varyings {
   // Location 6 is reserved for TripsLayer's injected vTime varying.
   @location(7) clipCoordinates: vec2<f32>,
 #ifdef DASH_ENABLED
-  @location(8) vPathBounds: vec2<f32>,
+  // [position along the source segment, complete source-segment length]
+  @location(8) vDashSegment: vec2<f32>,
 #endif
 };
 
@@ -122,42 +126,38 @@ fn getLineJoinOffset(
   let miterVec = vec2<f32>(-tangent.y, tangent.x);
   let dir = select(dirB, dirA, isEnd);
   let perp = select(perpB, perpA, isEnd);
+  let pathLength = select(lenB, lenA, isEnd);
 #ifdef DASH_ENABLED
-  let segmentLength2D = select(lenB, lenA, isEnd);
-
-  // Extrusion happens in the XY plane, so segmentLength2D is a 2D length and pathPosition.y
-  // below measures 2D distance along the segment. For a path that also moves in Z the true
-  // arc length is longer by this ratio. Scaling pathLength and pathPosition.y by it makes
-  // the coordinate measure real 3D distance while leaving the joint tests unchanged, since
-  // they compare the two against each other and both are scaled alike. Billboard mode
-  // extrudes in clip space, where the perspective divide has already reduced the segment to
-  // its screen projection, so its complete common-space length is supplied by the caller.
+  // Extrusion happens in the XY plane, so pathLength is a 2D length. For a path that also
+  // moves in Z, the source-segment arclength is longer by this ratio. Keep that dash coordinate
+  // separate from pathPosition so PathLayer's geometric cap and joint tests stay unchanged.
+  // Billboard mode extrudes in clip space, where the perspective divide has already reduced
+  // the segment to its screen projection, so its complete common-space length is supplied by
+  // the caller.
   // Mirrors path-layer-vertex.glsl.ts.
   let currDelta3 = select(deltaB3, deltaA3, isEnd);
   let currLength2D = length(currDelta3.xy);
   // Do not clamp a valid denominator to EPSILON: high-zoom Web Mercator deltas are often
   // smaller than that in common space, and changing their scale corrupts even flat paths.
   let safeLength2D = select(1.0, currLength2D, currLength2D > 0.0);
-  var arcLengthRatio = 1.0;
-  var pathPositionOffset = 0.0;
-  var pathLength = segmentLength2D;
+  var dashArcLengthRatio = 1.0;
+  var dashPositionOffset = 0.0;
+  var dashSegmentLength = pathLength;
   if (path.billboard != 0.0) {
     // clipLine may shorten the visible screen-space segment. Preserve the corresponding interval
     // of the complete common-space arclength instead of compressing the full dash period into the
-    // visible span. Keep pathLength complete so justification is stable as the camera clips it.
+    // visible span. Keep dashSegmentLength complete so justification is stable as the camera clips it.
     let visiblePathLength = sourcePathLength * (sourcePathRange.y - sourcePathRange.x);
-    arcLengthRatio = 0.0;
-    if (segmentLength2D > 0.0) {
-      arcLengthRatio = visiblePathLength / segmentLength2D;
+    dashArcLengthRatio = 0.0;
+    if (pathLength > 0.0) {
+      dashArcLengthRatio = visiblePathLength / pathLength;
     }
-    pathPositionOffset = sourcePathLength * sourcePathRange.x;
-    pathLength = sourcePathLength;
+    dashPositionOffset = sourcePathLength * sourcePathRange.x;
+    dashSegmentLength = sourcePathLength;
   } else if (currLength2D > 0.0) {
-    arcLengthRatio = length(currDelta3) / safeLength2D;
-    pathLength = segmentLength2D * arcLengthRatio;
+    dashArcLengthRatio = length(currDelta3) / safeLength2D;
+    dashSegmentLength = pathLength * dashArcLengthRatio;
   }
-#else
-  let pathLength = select(lenB, lenA, isEnd);
 #endif
 
   let sinHalfA = abs(dot(miterVec, perp));
@@ -203,14 +203,14 @@ fn getLineJoinOffset(
 #else
   let offsetFromStartOfPath = offsetVec + deltaA * select(0.0, 1.0, isEnd);
 #endif
-  let pathPosition = vec2<f32>(
-    dot(offsetFromStartOfPath, perp),
+  let positionAlongPath = dot(offsetFromStartOfPath, dir);
+  let pathPosition = vec2<f32>(dot(offsetFromStartOfPath, perp), positionAlongPath);
 #ifdef DASH_ENABLED
-    pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio
-#else
-    dot(offsetFromStartOfPath, dir)
-#endif
+  let dashSegment = vec2<f32>(
+    dashPositionOffset + positionAlongPath * dashArcLengthRatio,
+    dashSegmentLength
   );
+#endif
   let isValid = step(f32(instanceTypes), 3.5);
 #ifdef ANTIALIASING
   var offset = vec3<f32>(coverageOffsetVec * width * isValid, 0.0);
@@ -224,10 +224,20 @@ fn getLineJoinOffset(
 
 #ifdef ANTIALIASING
   return JoinResult(
-    offset, coverageOffsetVec, miterLength, pathPosition, pathLength, jointType
+    offset, coverageOffsetVec, miterLength, pathPosition, pathLength,
+#ifdef DASH_ENABLED
+    dashSegment,
+#endif
+    jointType
   );
 #else
-  return JoinResult(offset, offsetVec, miterLength, pathPosition, pathLength, jointType);
+  return JoinResult(
+    offset, offsetVec, miterLength, pathPosition, pathLength,
+#ifdef DASH_ENABLED
+    dashSegment,
+#endif
+    jointType
+  );
 #endif
 }
 
@@ -339,12 +349,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.positions,
       attributes.instanceTypes
     );
-#ifdef DASH_ENABLED
-    // Phase and justification use the complete source segment, while cap and joint coverage
-    // must still recognize the endpoints moved by clipLine.
-    varyings.vPathBounds = billboardPathLength * billboardPathRange;
-#endif
-
     geometry.uv = join.pathPosition;
     varyings.position = vec4<f32>(
       currPositionScreen.xyz + join.offset * currPositionScreen.w,
@@ -354,6 +358,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vMiterLength = join.miterLength;
     varyings.vPathPosition = join.pathPosition;
     varyings.vPathLength = join.pathLength;
+#ifdef DASH_ENABLED
+    varyings.vDashSegment = join.dashSegment;
+#endif
     varyings.vJointType = join.jointType;
   } else {
     let prevPositionCommon = project_position_vec3_f64(prevPosition, prevPosition64Low);
@@ -386,10 +393,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.positions,
       attributes.instanceTypes
     );
-#ifdef DASH_ENABLED
-    varyings.vPathBounds = vec2<f32>(0.0, join.pathLength);
-#endif
-
     geometry.position = vec4<f32>(currPositionCommon + join.offset, 1.0);
     geometry.uv = join.pathPosition;
     varyings.position = project_common_position_to_clipspace(geometry.position);
@@ -397,6 +400,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vMiterLength = join.miterLength;
     varyings.vPathPosition = join.pathPosition;
     varyings.vPathLength = join.pathLength;
+#ifdef DASH_ENABLED
+    varyings.vDashSegment = join.dashSegment;
+#endif
     varyings.vJointType = join.jointType;
   }
 
@@ -419,13 +425,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // bounded by the corner offset, everywhere else by the edge of the stroke. Dividing by the
   // screen-space derivative converts the distance to the boundary into device pixels, which stays
   // correct under perspective foreshortening and under extensions that rescale the stroke.
-#ifdef DASH_ENABLED
-  let isCorner =
-    varyings.vPathPosition.y < varyings.vPathBounds.x ||
-    varyings.vPathPosition.y > varyings.vPathBounds.y;
-#else
   let isCorner = varyings.vPathPosition.y < 0.0 || varyings.vPathPosition.y > varyings.vPathLength;
-#endif
   let isRound = varyings.vJointType > 0.5;
 
   // Distance to the silhouette in device pixels, from the derivative of the coordinate that
@@ -461,17 +461,10 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
   color.a *= smoothedge(0.0, edgePixels);
 #else
-#ifdef DASH_ENABLED
-  if (
-    varyings.vPathPosition.y < varyings.vPathBounds.x ||
-    varyings.vPathPosition.y > varyings.vPathBounds.y
-  ) {
-#else
   if (
     varyings.vPathPosition.y < 0.0 ||
     varyings.vPathPosition.y > varyings.vPathLength
   ) {
-#endif
     if (varyings.vJointType > 0.5 && length(varyings.vCornerOffset) > 1.0) {
       discard;
     }
