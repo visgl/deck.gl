@@ -66,10 +66,10 @@
     "long": "^3.2.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.0-beta.2",
-    "@deck.gl/extensions": "~9.3.0-beta.2",
-    "@deck.gl/layers": "~9.3.0-beta.2",
-    "@deck.gl/mesh-layers": "~9.3.0-beta.2",
+    "@deck.gl/core": "~9.4.0-beta.3",
+    "@deck.gl/extensions": "~9.4.0-beta.3",
+    "@deck.gl/layers": "~9.4.0-beta.3",
+    "@deck.gl/mesh-layers": "~9.4.0-beta.3",
     "@loaders.gl/core": "^4.4.3",
     "@luma.gl/core": "~9.4.0-beta.4",
     "@luma.gl/engine": "~9.4.0-beta.4"
