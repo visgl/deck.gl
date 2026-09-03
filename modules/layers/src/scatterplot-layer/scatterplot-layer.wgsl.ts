@@ -75,9 +75,10 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // outer radius needs to offset by half stroke width
   varyings.outerRadiusPixels += scatterplot.stroked * lineWidthPixels / 2.0;
   // Expand geometry to accommodate edge smoothing
+  // WGSL selects the second value when the condition is true, so keep the antialiased path second.
   let edgePadding = select(
-    (varyings.outerRadiusPixels + SMOOTH_EDGE_RADIUS) / varyings.outerRadiusPixels,
     1.0,
+    (varyings.outerRadiusPixels + SMOOTH_EDGE_RADIUS) / varyings.outerRadiusPixels,
     scatterplot.antialiasing != 0
   );
 
@@ -140,8 +141,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
   let inCircle = select(
-    smoothedge(distToCenter, varyings.outerRadiusPixels),
     step(distToCenter, varyings.outerRadiusPixels),
+    smoothedge(distToCenter, varyings.outerRadiusPixels),
     scatterplot.antialiasing != 0
   );
 
@@ -153,8 +154,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   if (scatterplot.stroked != 0) {
     let isLine = select(
-      smoothedge(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
       step(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
+      smoothedge(varyings.innerUnitRadius * varyings.outerRadiusPixels, distToCenter),
       scatterplot.antialiasing != 0
     );
 
