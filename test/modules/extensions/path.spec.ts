@@ -559,10 +559,7 @@ test('PathStyleExtension#shader defines', () => {
         const {defines} = layer.getShaders();
         // The shared coordinate stage guards dash-only varyings and calculations on this define.
         expect(defines.DASH_ENABLED, 'DASH_ENABLED is set when dash is enabled').toBe(true);
-        expect(
-          defines.HIGH_PRECISION_DASH,
-          'HIGH_PRECISION_DASH is off by default'
-        ).toBeUndefined();
+        expect(defines.DASH_MODE_PATH, 'DASH_MODE_PATH is off by default').toBeUndefined();
         const pathStyleModule = layer
           .getShaders()
           .modules.find(module => module.name === 'pathStyle')!;
@@ -587,12 +584,22 @@ test('PathStyleExtension#shader defines', () => {
     },
     {
       updateProps: {
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      },
+      onAfterUpdate: ({layer}) => {
+        const {defines} = layer.getShaders();
+        expect(defines.DASH_ENABLED, 'path mode implies dash').toBe(true);
+        expect(defines.DASH_MODE_PATH, 'path mode sets DASH_MODE_PATH').toBe(true);
+      }
+    },
+    {
+      updateProps: {
         extensions: [new PathStyleExtension({highPrecisionDash: true})]
       },
       onAfterUpdate: ({layer}) => {
         const {defines} = layer.getShaders();
         expect(defines.DASH_ENABLED, 'highPrecisionDash implies dash').toBe(true);
-        expect(defines.HIGH_PRECISION_DASH, 'HIGH_PRECISION_DASH is set').toBe(true);
+        expect(defines.DASH_MODE_PATH, 'legacy alias selects DASH_MODE_PATH').toBe(true);
       }
     }
   ];
@@ -603,7 +610,7 @@ test('PathStyleExtension#shader defines', () => {
 test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   const injection = dashShaders.inject['fs:#main-start'];
   const segmentShader = preprocess(injection);
-  const pathShader = preprocess(injection, {defines: {HIGH_PRECISION_DASH: 1}});
+  const pathShader = preprocess(injection, {defines: {DASH_MODE_PATH: 1}});
 
   for (const [mode, shader, unitLengthAssignment] of [
     ['segment', segmentShader, 'unitLength = vDashSegment.y /'],
@@ -635,10 +642,10 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
     defines: {PATH_STYLE_OFFSET: 1}
   });
   const dashVertexShader = preprocess(vertexInjection, {
-    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1}
+    defines: {DASH_ENABLED: 1, DASH_MODE_PATH: 1}
   });
   const combinedVertexShader = preprocess(vertexInjection, {
-    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1, PATH_STYLE_OFFSET: 1}
+    defines: {DASH_ENABLED: 1, DASH_MODE_PATH: 1, PATH_STYLE_OFFSET: 1}
   });
   const remapIndex = combinedVertexShader.indexOf('vPathPosition.y *= offsetWidth');
   const widthRestoreIndex = combinedVertexShader.indexOf('strokeHalfWidth /= offsetWidth');
