@@ -130,6 +130,13 @@ export {
 export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 //
+// MAPLIBRE INTEGRATION PACKAGE
+//
+
+export {MapLibreOverlay} from '@deck.gl/maplibre';
+export type {MapLibreOverlayProps} from '@deck.gl/maplibre';
+
+//
 // REACT BINDINGS PACKAGE
 //
 
