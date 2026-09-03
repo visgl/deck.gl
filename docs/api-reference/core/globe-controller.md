@@ -41,10 +41,32 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `dragRotate`: shift+drag or right-click drag to change bearing and pitch
 - `multiTouchDrag`: two-pointer translation can pan or change bearing and pitch
 - `keyboard`: arrow keys to pan, +/- to zoom
-- `zoomAround`: default `'pointer'`. Pointer zoom rotates the full camera frame around the sphere, so bearing may change as zoom steers around a pole. Use `'center'` to change scale without steering.
+- `navigation`: default `'map'`. Preserve bearing while navigating, or use `'ball'` for free rotation through the poles.
+- `zoomAround`: default `'pointer'`. Keep the zoom anchored near the pointer, subject to the navigation mode and bounds. Use `'center'` to change scale without steering.
 - `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
 - `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 - `maxBoundsPadding` - padding inside the viewport when fitting `maxBounds`, using the same `{left, right, top, bottom}` format as view padding. Numeric values are pixels; strings may be percentages or layout expressions such as `calc(10% - 4px)`. Each side is measured from the projected globe center. Default `0`.
+
+### `navigation` (string) {#navigation}
+
+Select how the globe moves independently of the input gesture bindings:
+
+- `'map'` (default): dragging, keyboard panning, pointer-anchored zoom, and pan inertia preserve the current bearing. North stays up when `bearing` is `0`. Latitude is constrained to approximately `±85.051°` to prevent crossing the poles. Explicit rotation gestures, such as shift+drag or right-click drag, can still change bearing and pitch.
+- `'ball'`: dragging and pointer-anchored zoom rotate the full camera frame. Bearing evolves naturally through the poles, even when it starts at `0`. Pan inertia continues rotating around a fixed sphere axis.
+
+```js
+new GlobeView({
+  controller: {
+    navigation: 'ball', // 'map' | 'ball'
+    zoomAround: 'pointer',
+    inertia: true
+  }
+});
+```
+
+`navigation` does not switch automatically based on bearing or zoom. Changing it cancels the previous
+gesture's anchors and inertia. `dragMode` still selects the primary drag gesture; `zoomAround: 'center'`
+zooms without steering in either navigation mode. `maxBounds` can impose additional geographic limits.
 
 ## Custom GlobeController
 

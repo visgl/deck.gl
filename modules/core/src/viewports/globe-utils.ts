@@ -127,7 +127,8 @@ export class Globe {
   /**
    * Rotate a camera frame by horizontal/vertical angles (radians).
    * Returns a new frame with updated position, up, longitude, latitude,
-   * and bearing. If lockBearing is true, bearing is forced to 0.
+   * and bearing. If lockBearing is true, preserve the input bearing and rebuild
+   * the up vector at the new position to match it.
    */
   static rotateFrame(
     frame: CameraFrame,
@@ -137,11 +138,17 @@ export class Globe {
   ): CameraFrame {
     let position = Globe.rotate(frame.position, frame.axisHorizontal, horizontalAngle);
     position = Globe.rotate(position, frame.axisVertical, verticalAngle);
-    let up = Globe.rotate(frame.up, frame.axisHorizontal, horizontalAngle);
-    up = Globe.rotate(up, frame.axisVertical, verticalAngle);
-
     const [longitude, latitude] = Globe.toLngLat(position);
-    const b = lockBearing ? 0 : Globe.bearing(up, longitude, latitude);
+    let up: Vec3;
+    let bearing: number;
+    if (lockBearing) {
+      bearing = frame.bearing;
+      up = Globe.upVector(longitude, latitude, bearing);
+    } else {
+      up = Globe.rotate(frame.up, frame.axisHorizontal, horizontalAngle);
+      up = Globe.rotate(up, frame.axisVertical, verticalAngle);
+      bearing = Globe.bearing(up, longitude, latitude);
+    }
 
     return {
       ...frame, // preserve axes
@@ -149,7 +156,7 @@ export class Globe {
       up,
       longitude,
       latitude,
-      bearing: b
+      bearing
     };
   }
 

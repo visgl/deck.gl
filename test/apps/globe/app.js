@@ -29,13 +29,21 @@ const INITIAL_VIEW_STATE = {
 let currentViewState = {...INITIAL_VIEW_STATE};
 let zoomAround = 'pointer';
 let viewType = 'globe';
+let navigation = 'map';
+
+const PRESETS = {
+  north: {latitude: 80, longitude: 0, zoom: 2},
+  south: {latitude: -80, longitude: 0, zoom: 2},
+  rotated: {latitude: 75, longitude: 0, zoom: 2, bearing: 45},
+  street: {latitude: 51.47, longitude: 0.45, zoom: 14}
+};
 
 const GRATICULES = getGraticules(30);
 
 export const deck = new Deck({
   views: getView(viewType),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {inertia: 500, zoomAround},
+  controller: {inertia: 500, zoomAround, navigation},
   parameters: {
     cull: true
   },
@@ -133,7 +141,12 @@ function getView(nextViewType) {
 const settingsControl = createSettingsControl({
   onZoomAroundChange: nextZoomAround => {
     zoomAround = nextZoomAround;
-    deck.setProps({controller: {inertia: 500, zoomAround}});
+    deck.setProps({controller: {inertia: 500, zoomAround, navigation}});
+    updateSettingsControl();
+  },
+  onNavigationChange: nextNavigation => {
+    navigation = nextNavigation;
+    deck.setProps({controller: {inertia: 500, zoomAround, navigation}});
     updateSettingsControl();
   },
   onViewChange: nextViewType => {
@@ -141,7 +154,8 @@ const settingsControl = createSettingsControl({
     deck.setProps({views: getView(viewType)});
     updateSettingsControl();
   },
-  onReset: () => setViewState(INITIAL_VIEW_STATE)
+  onReset: () => setViewState(INITIAL_VIEW_STATE),
+  onPresetChange: preset => setViewState({...INITIAL_VIEW_STATE, ...PRESETS[preset]})
 });
 
 function setViewState(nextViewState) {
@@ -151,7 +165,7 @@ function setViewState(nextViewState) {
 }
 
 function updateSettingsControl() {
-  settingsControl.update({viewState: currentViewState, zoomAround, viewType});
+  settingsControl.update({viewState: currentViewState, zoomAround, viewType, navigation});
 }
 
 updateSettingsControl();
