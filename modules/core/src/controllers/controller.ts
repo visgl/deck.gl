@@ -505,12 +505,15 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
 
   // Private Methods
 
-  /* Callback util */
-  // formats map state and invokes callback function
+  /**
+   * Format viewport state and invoke the change callback.
+   * @param oldViewState - Optional snapshot from before a controller configuration change.
+   */
   protected updateViewport(
     newControllerState: ControllerState,
     extraProps: Record<string, any> | null = null,
-    interactionState: InteractionState = {}
+    interactionState: InteractionState = {},
+    oldViewState?: Record<string, any>
   ) {
     const viewState = {...newControllerState.getViewportProps(), ...extraProps};
 
@@ -523,12 +526,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this._setInteractionState(interactionState);
 
     if (changed) {
-      const oldViewState = this.controllerState && this.controllerState.getViewportProps();
       if (this.onViewStateChange) {
         this.onViewStateChange({
           viewState,
           interactionState: this._interactionState,
-          oldViewState,
+          oldViewState: oldViewState ?? this.controllerState.getViewportProps(),
           viewId: this.props.id
         });
       }

@@ -9,6 +9,7 @@ import {
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
+import {Globe} from '@deck.gl/core/viewports/globe-utils';
 import {Timeline} from '@luma.gl/engine';
 import {createTestController} from './test-controller';
 
@@ -43,6 +44,110 @@ const makeWheelEvent = () => ({
 
 const makeViewport = props => new GlobeViewport(props);
 const GlobeState = new GlobeController({} as any).ControllerState;
+
+// Characterization values from #10298's locked pan, before #10598 removed that path.
+test.each([
+  {
+    latitude: -75,
+    longitude: 0,
+    offset: [80, 40],
+    expected: [-7.368659198256055, -73.99256541637756, 3.0914803297151443]
+  },
+  {
+    latitude: 0,
+    longitude: 0,
+    offset: [80, 40],
+    expected: [-7.872233702373929, 3.890096841116076, 2.9966722242700756]
+  },
+  {
+    latitude: 75,
+    longitude: 0,
+    offset: [80, 40],
+    expected: [-8.41004469276098, 76.00617245907846, 2.901974064385081]
+  },
+  {latitude: 45, longitude: 179, offset: [-120, 0], expected: [-169.21902754903826, 45, 3]}
+])(
+  'GlobeState map pan reuses the original locked trajectory at $latitude',
+  ({latitude, longitude, offset, expected}) => {
+    const state = new GlobeState({
+      ...INITIAL_VIEW_STATE,
+      latitude,
+      longitude,
+      zoom: 3,
+      navigation: 'map',
+      makeViewport
+    })
+      .panStart({pos: [400, 300]})
+      .pan({pos: [400 + offset[0], 300 + offset[1]]});
+    const props = state.getViewportProps();
+    expect(props.longitude).toBeCloseTo(expected[0], 10);
+    expect(props.latitude).toBeCloseTo(expected[1], 10);
+    expect(props.zoom).toBeCloseTo(expected[2], 10);
+    expect(props.bearing).toBe(0);
+  }
+);
+
+test.each([0, 45, -120])(
+  'Globe.rotateFrame keeps locked bearing %s and its up vector consistent',
+  bearing => {
+    const frame = Globe.cameraFrame(10, 75, bearing);
+    const locked = Globe.rotateFrame(frame, 0.1, 0.2, true);
+    expect(locked.bearing).toBe(bearing);
+    expect(Globe.bearing(locked.up, locked.longitude, locked.latitude)).toBeCloseTo(bearing, 10);
+    const free = Globe.rotateFrame(frame, 0.1, 0.2, false);
+    expect(free.position).toEqual(locked.position);
+    expect(Globe.bearing(free.up, free.longitude, free.latitude)).toBeCloseTo(free.bearing, 10);
+    expect(free.bearing).not.toBeCloseTo(bearing);
+  }
+);
+
+test('GlobeController navigation change emits the actual previous view state', () => {
+  const updates: any[] = [];
+  const controller = createTestController({
+    view: new GlobeView({controller: {navigation: 'ball'}}),
+    initialViewState: {...INITIAL_VIEW_STATE, latitude: 89, zoom: 3, bearing: 45},
+    onViewStateChange: update => {
+      updates.push(update);
+    }
+  });
+  controller.setProps({...controller.props, navigation: 'map'});
+  expect(updates).toHaveLength(1);
+  expect(updates[0].oldViewState.latitude).toBe(89);
+  expect(updates[0].oldViewState.navigation).toBe('ball');
+  expect(updates[0].viewState.latitude).toBeCloseTo(85.051129);
+  expect(updates[0].viewState.navigation).toBe('map');
+});
+
+test.each(['map', 'ball'] as const)(
+  'GlobeController navigation change after a %s drag emits the latest view state',
+  navigation => {
+    const updates: any[] = [];
+    const controller = createTestController({
+      view: new GlobeView({controller: {navigation}}),
+      initialViewState: {...INITIAL_VIEW_STATE, zoom: 3, bearing: 45},
+      onViewStateChange: update => {
+        updates.push(update);
+      }
+    });
+    controller.handleEvent(makePanEvent('panstart'));
+    controller.handleEvent(makePanEvent('panmove', 480, 340));
+    const previousViewState = {...controller.props};
+    expect(previousViewState.latitude).not.toBeCloseTo(INITIAL_VIEW_STATE.latitude);
+    updates.length = 0;
+    const nextNavigation = navigation === 'map' ? 'ball' : 'map';
+    controller.setProps({...controller.props, navigation: nextNavigation});
+    expect(updates).toHaveLength(1);
+    for (const property of ['longitude', 'latitude', 'zoom', 'bearing']) {
+      expect(updates[0].oldViewState[property], `previous ${property}`).toBeCloseTo(
+        previousViewState[property],
+        10
+      );
+    }
+    expect(updates[0].oldViewState.navigation).toBe(navigation);
+    expect(updates[0].viewState.navigation).toBe(nextNavigation);
+    controller.finalize();
+  }
+);
 
 test.each([0, 45, 360, 405])(
   'GlobeController defaults to map navigation at bearing %s',

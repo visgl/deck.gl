@@ -63,6 +63,11 @@ class GlobeState extends MapState {
   panStart({pos}: {pos: [number, number]}): GlobeState {
     const {latitude, longitude, zoom, bearing = 0} = this.getViewportProps();
     const cameraFrame = Globe.cameraFrame(longitude, latitude, bearing);
+    if (this.getViewportProps().navigation === 'map') {
+      // Use geographic axes for locked navigation, including deliberately rotated maps.
+      cameraFrame.axisHorizontal = [0, 0, 1];
+      cameraFrame.axisVertical = Globe.cameraFrame(longitude, latitude, 0).axisVertical;
+    }
 
     // Radians of arc per pixel, derived from zoom scale
     const scale = Math.pow(2, zoom - zoomAdjust(latitude, true));
@@ -90,30 +95,22 @@ class GlobeState extends MapState {
 
     const deltaX = startPanPos[0] - pos[0];
     const deltaY = startPanPos[1] - pos[1];
-
-    if (this.getViewportProps().navigation === 'map') {
+    const lockBearing = this.getViewportProps().navigation === 'map';
+    let horizontalAngle = deltaX * rate;
+    let verticalAngle = -deltaY * rate;
+    if (lockBearing) {
       const bearing = frame.bearing * DEGREES_TO_RADIANS;
-      // Resolve screen movement into east/north without rotating the camera up vector.
-      const longitudeDelta =
+      // Resolve screen movement into geographic angles; compensate for smaller latitude circles.
+      horizontalAngle =
         ((deltaX * Math.cos(bearing) - deltaY * Math.sin(bearing)) * rate) /
         Math.max(Math.cos(frame.latitude * DEGREES_TO_RADIANS), 0.25);
-      const latitudeDelta = -(deltaX * Math.sin(bearing) + deltaY * Math.cos(bearing)) * rate;
-      const latitude = clamp(
-        frame.latitude + latitudeDelta * RADIANS_TO_DEGREES,
-        -MAX_LATITUDE,
-        MAX_LATITUDE
+      verticalAngle = clamp(
+        -(deltaX * Math.sin(bearing) + deltaY * Math.cos(bearing)) * rate,
+        -(MAX_LATITUDE + frame.latitude) * DEGREES_TO_RADIANS,
+        (MAX_LATITUDE - frame.latitude) * DEGREES_TO_RADIANS
       );
-      return this._getUpdatedState({
-        longitude: frame.longitude + longitudeDelta * RADIANS_TO_DEGREES,
-        latitude,
-        bearing: frame.bearing,
-        zoom: startZoom + zoomAdjust(latitude, true) - zoomAdjust(frame.latitude, true)
-      }) as GlobeState;
     }
-
-    const hAngle = deltaX * rate;
-    const vAngle = -deltaY * rate;
-    const rotated = Globe.rotateFrame(frame, hAngle, vAngle);
+    const rotated = Globe.rotateFrame(frame, horizontalAngle, verticalAngle, lockBearing);
     const zoom = startZoom + zoomAdjust(rotated.latitude, true) - zoomAdjust(frame.latitude, true);
 
     return this._getUpdatedState({
@@ -151,35 +148,18 @@ class GlobeState extends MapState {
 
     if (constraintAround) {
       const viewport = this.makeViewport(props);
-      const currentCoordinates = viewport.unproject(constraintAround.screenPosition);
-      const longitudeDelta =
-        mod(constraintAround.position[0] - currentCoordinates[0] + 180, 360) - 180;
-      // Map anchors can pass behind a pole as the globe shrinks, at any bearing.
-      const crossesMapPole =
-        props.navigation === 'map' &&
-        viewport instanceof GlobeViewport &&
-        (Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90);
-      if (!crossesMapPole && (props.navigation === 'map' || !(viewport instanceof GlobeViewport))) {
-        const nextProps = viewport.panByPosition(
-          constraintAround.position,
-          constraintAround.screenPosition
+      const {position, screenPosition} = constraintAround;
+      if (!(viewport instanceof GlobeViewport) || props.navigation === 'map') {
+        Object.assign(
+          props,
+          viewport instanceof GlobeViewport
+            ? viewport.panByPosition(position, screenPosition, undefined, true)
+            : viewport.panByPosition(position, screenPosition)
         );
-        if (props.navigation === 'map' && nextProps.latitude !== undefined) {
-          const latitudeDelta = nextProps.latitude - props.latitude;
-          const latitude = clamp(nextProps.latitude, -MAX_LATITUDE, MAX_LATITUDE);
-          // Release both axes together when a fixed-bearing anchor reaches a pole.
-          if (latitudeDelta && nextProps.longitude !== undefined) {
-            nextProps.longitude =
-              props.longitude +
-              ((nextProps.longitude - props.longitude) * (latitude - props.latitude)) /
-                latitudeDelta;
-          }
-          nextProps.latitude = latitude;
-        }
-        Object.assign(props, nextProps);
-      } else if (props.navigation === 'ball' && viewport instanceof GlobeViewport) {
-        const anchorStrength = viewport.getZoomAnchorStrength(constraintAround.screenPosition);
+      } else {
+        const anchorStrength = viewport.getZoomAnchorStrength(screenPosition);
         if (anchorStrength > 0) {
+          const currentCoordinates = viewport.unproject(screenPosition);
           const cameraFrame = Globe.cameraFrame(
             props.longitude,
             props.latitude,
@@ -188,7 +168,7 @@ class GlobeState extends MapState {
           const rotatedFrame = Globe.rotateFrameToMatch(
             cameraFrame,
             [currentCoordinates[0], currentCoordinates[1]],
-            [constraintAround.position[0], constraintAround.position[1]],
+            [position[0], position[1]],
             anchorStrength
           );
           props.longitude = rotatedFrame.longitude;
@@ -339,6 +319,13 @@ export default class GlobeController extends Controller<MapState> {
   setProps(props: ControllerProps & MapStateProps): void {
     const navigation = props.navigation || 'map';
     const navigationChanged = this.props && navigation !== (this.props.navigation || 'map');
+    // The event's cached controller state may precede the latest controlled view state.
+    const oldViewState = navigationChanged
+      ? new this.ControllerState({
+          ...(this.props as ControllerProps & MapStateProps),
+          makeViewport: this.makeViewport
+        }).getViewportProps()
+      : undefined;
     if (navigationChanged) {
       this._panHistory = [];
       this._cancelInteraction();
@@ -348,7 +335,9 @@ export default class GlobeController extends Controller<MapState> {
     if (navigationChanged) {
       this.updateViewport(
         new this.ControllerState({...props, makeViewport: this.makeViewport}),
-        null
+        null,
+        {},
+        oldViewState
       );
     }
   }
