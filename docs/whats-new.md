@@ -52,6 +52,7 @@ new GlobeView({
 #### Controllers
 
 - All [controllers](./api-reference/core/controller.md) now support a `doubleClickDragZoom` gesture that enables continuous zooming by double-clicking and dragging vertically.
+- [OrthographicController](./api-reference/core/orthographic-controller.md) adds `maxBoundsAlignment` to align bounded content that remains smaller than the viewport to the start, center, or end of either world axis without changing zoom behavior.
 
 #### View Layout
 

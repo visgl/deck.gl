@@ -31,6 +31,8 @@ export type OrthographicStateProps = {
   minZoomY?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  /** Alignment used when an axis of `maxBounds` is smaller than the viewport. */
+  maxBoundsAlignment?: ControllerProps['maxBoundsAlignment'];
   /** Padding inside the viewport used when fitting `maxBounds`. Defaults to `0`. */
   maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
   /** Enables elastic bounds and zoom constraints during interaction. Defaults to `false`. */
@@ -67,21 +69,24 @@ function getAxisBounds(
   index: number,
   negativeExtent: number,
   positiveExtent: number,
-  target: number
+  target: number,
+  alignment: NonNullable<ControllerProps['maxBoundsAlignment']>['x'] | undefined
 ) {
   const minimum = maxBounds[0][index] + negativeExtent;
   const maximum = maxBounds[1][index] - positiveExtent;
   // An inverted interval has one stable resting target, including when asymmetric
   // viewport padding means that target is not the geometric center of maxBounds.
   const midpoint = (minimum + maximum) / 2;
+  const hasFiniteExtents = Number.isFinite(negativeExtent) && Number.isFinite(positiveExtent);
+  const isUndersized = hasFiniteExtents && minimum > maximum;
+  const alignedTarget = alignment === 'start' ? minimum : alignment === 'end' ? maximum : midpoint;
   return {
     minimum,
     maximum,
     midpoint,
+    isUndersized,
     settledTarget:
-      Number.isFinite(negativeExtent) && Number.isFinite(positiveExtent) && minimum <= maximum
-        ? clamp(target, minimum, maximum)
-        : midpoint
+      hasFiniteExtents && minimum <= maximum ? clamp(target, minimum, maximum) : alignedTarget
   };
 }
 
@@ -116,6 +121,7 @@ export class OrthographicState extends ViewState<
       maxZoomY = maxZoom,
 
       maxBounds = null,
+      maxBoundsAlignment = null,
       maxBoundsPadding = null,
       rubberBand = false,
 
@@ -143,6 +149,7 @@ export class OrthographicState extends ViewState<
         minZoomY,
         maxZoomY,
         maxBounds,
+        maxBoundsAlignment,
         maxBoundsPadding,
         rubberBand,
         ...{[CONSTRAINT_AROUND]: constraintAround}
@@ -458,7 +465,7 @@ export class OrthographicState extends ViewState<
         ? [props.zoomX, props.zoomY]
         : props.zoomX;
 
-    const {maxBounds, rubberBand, target} = props;
+    const {maxBounds, maxBoundsAlignment, rubberBand, target} = props;
     if (maxBounds) {
       const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const viewport = this.makeViewport(props);
@@ -487,12 +494,14 @@ export class OrthographicState extends ViewState<
         if (targetDimensions[index] < 0) {
           continue;
         }
-        const {minimum, maximum, midpoint, settledTarget} = getAxisBounds(
+        const alignment = index === 0 ? maxBoundsAlignment?.x : maxBoundsAlignment?.y;
+        const {minimum, maximum, midpoint, isUndersized, settledTarget} = getAxisBounds(
           maxBounds,
           index,
           negativeExtent,
           positiveExtent,
-          target[index]
+          target[index],
+          alignment
         );
 
         if (
@@ -504,7 +513,12 @@ export class OrthographicState extends ViewState<
           continue;
         }
 
-        const constrained = rubberBand ? settledTarget : clamp(target[index], minimum, maximum);
+        const constrained =
+          isUndersized && alignment
+            ? settledTarget
+            : rubberBand
+              ? settledTarget
+              : clamp(target[index], minimum, maximum);
         constrainedTarget[index] =
           constraintContext?.mode === 'preserve'
             ? target[index]

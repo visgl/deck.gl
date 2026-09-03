@@ -10,11 +10,13 @@ import {
   _GlobeController as GlobeController,
   OrbitViewport,
   OrthographicController,
+  OrthographicViewport,
   Viewport
 } from '@deck.gl/core';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 
 const dummyMakeViewport = (props: any) => new Viewport(props);
+const makeOrthographicViewport = (props: any) => new OrthographicViewport(props);
 
 test('MapViewState', () => {
   const MapViewState = new MapController({} as any).ControllerState;
@@ -346,6 +348,173 @@ test('OrthographicViewState', () => {
   expect(viewportProps.target, 'adjusted target to maxBounds').toEqual([150, 300, 0]);
   expect(viewportProps.zoomX, 'adjusted zoom to maxBounds').toBe(3);
   expect(viewportProps.zoomY, 'adjusted zoom to maxBounds').toBe(0);
+});
+
+test.each([
+  {axis: 'x', alignment: 'start', expected: 50},
+  {axis: 'x', alignment: 'center', expected: 12.5},
+  {axis: 'x', alignment: 'end', expected: -25},
+  {axis: 'y', alignment: 'start', expected: 50},
+  {axis: 'y', alignment: 'center', expected: 12.5},
+  {axis: 'y', alignment: 'end', expected: -25}
+] as const)(
+  'OrthographicViewState aligns undersized $axis bounds to $alignment',
+  ({axis, alignment, expected}) => {
+    const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+    const isXAxis = axis === 'x';
+    const viewState = new OrthographicViewState({
+      width: 100,
+      height: 100,
+      target: isXAxis ? [0, 100, 0] : [100, 0, 0],
+      zoomX: 0,
+      zoomY: 0,
+      zoomAxis: isXAxis ? 'Y' : 'X',
+      maxBounds: isXAxis
+        ? [
+            [0, 0],
+            [25, 200]
+          ]
+        : [
+            [0, 0],
+            [200, 25]
+          ],
+      maxBoundsAlignment: {[axis]: alignment},
+      makeViewport: makeOrthographicViewport
+    });
+    const viewportProps = viewState.getViewportProps();
+
+    expect(viewportProps.target[isXAxis ? 0 : 1], 'aligned the undersized axis').toBe(expected);
+    expect(viewportProps.target[isXAxis ? 1 : 0], 'left the fitting axis centered').toBe(100);
+    expect(viewportProps.zoomX, 'did not change X zoom behavior').toBe(0);
+    expect(viewportProps.zoomY, 'did not change Y zoom behavior').toBe(0);
+  }
+);
+
+test.each([
+  {description: 'exact-fit', boundsSize: 100, target: 1_000, expected: 50},
+  {description: 'larger', boundsSize: 200, target: 1_000, expected: 150}
+])(
+  'OrthographicViewState uses ordinary clamping for $description aligned bounds',
+  ({boundsSize, target, expected}) => {
+    const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+    const viewState = new OrthographicViewState({
+      width: 100,
+      height: 100,
+      target: [target, target, 0],
+      zoom: 0,
+      zoomAxis: 'X',
+      maxBounds: [
+        [0, 0],
+        [boundsSize, boundsSize]
+      ],
+      maxBoundsAlignment: {x: 'start', y: 'end'},
+      makeViewport: makeOrthographicViewport
+    });
+
+    expect(viewState.getViewportProps().target, 'alignment is inactive when bounds fill').toEqual([
+      expected,
+      expected,
+      0
+    ]);
+  }
+);
+
+test.each([true, false])(
+  'OrthographicViewState treats alignment as world-relative with flipY=$flipY',
+  flipY => {
+    const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+    const makeViewport = (props: any) => new OrthographicViewport({...props, flipY});
+    const viewState = new OrthographicViewState({
+      width: 100,
+      height: 100,
+      target: [100, 0, 0],
+      zoom: 0,
+      zoomAxis: 'X',
+      maxBounds: [
+        [0, 0],
+        [200, 25]
+      ],
+      maxBoundsAlignment: {y: 'start'},
+      makeViewport
+    });
+
+    expect(viewState.getViewportProps().target[1], 'start follows the minimum Y bound').toBe(50);
+  }
+);
+
+test('OrthographicViewState aligns within asymmetric maxBoundsPadding', () => {
+  const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+  const baseProps = {
+    width: 100,
+    height: 100,
+    target: [100, 0, 0],
+    zoom: 0,
+    zoomAxis: 'X' as const,
+    maxBounds: [
+      [0, 0],
+      [200, 25]
+    ],
+    maxBoundsPadding: {top: 10, bottom: 30},
+    makeViewport: makeOrthographicViewport
+  };
+
+  for (const [alignment, expected] of [
+    ['start', 40],
+    ['center', 22.5],
+    ['end', 5]
+  ] as const) {
+    const viewState = new OrthographicViewState({
+      ...baseProps,
+      maxBoundsAlignment: {y: alignment}
+    });
+    expect(viewState.getViewportProps().target[1], `${alignment} uses padded extents`).toBe(
+      expected
+    );
+  }
+});
+
+test.each([
+  {height: 100, expected: -25},
+  {height: 200, expected: -75}
+])('OrthographicViewState reapplies alignment at height $height', ({height, expected}) => {
+  const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+  const viewState = new OrthographicViewState({
+    width: 100,
+    height,
+    target: [100, 0, 0],
+    zoom: 0,
+    zoomAxis: 'X',
+    maxBounds: [
+      [0, 0],
+      [200, 25]
+    ],
+    maxBoundsAlignment: {y: 'end'},
+    makeViewport: makeOrthographicViewport
+  });
+
+  expect(viewState.getViewportProps().target[1], 'alignment uses the current dimensions').toBe(
+    expected
+  );
+});
+
+test('OrthographicViewState preserves default undersized maxBounds behavior', () => {
+  const OrthographicViewState = new OrthographicController({} as any).ControllerState;
+  const viewState = new OrthographicViewState({
+    width: 100,
+    height: 100,
+    target: [100, 0, 0],
+    zoom: 0,
+    zoomAxis: 'X',
+    maxBounds: [
+      [0, 0],
+      [200, 25]
+    ],
+    makeViewport: makeOrthographicViewport
+  });
+  const viewportProps = viewState.getViewportProps();
+
+  expect(viewportProps.target, 'legacy hard constraints remain unchanged').toEqual([100, 50, 0]);
+  expect(viewportProps.zoomY, 'legacy zoom fitting remains unchanged').toBe(0);
 });
 
 test('FirstPersonViewState', () => {

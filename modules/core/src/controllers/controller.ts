@@ -99,6 +99,17 @@ export type ControllerOptions = {
     | [min: [number, number, number], max: [number, number, number]]
     | null;
   /**
+   * Alignment of orthographic `maxBounds` on axes where the viewport is larger than the bounds.
+   * `start` aligns the minimum world coordinate, and `end` aligns the maximum world coordinate.
+   * Unspecified axes retain their default constraint behavior. Default `null`.
+   */
+  maxBoundsAlignment?: {
+    /** Alignment along the world X axis. */
+    x?: 'start' | 'center' | 'end';
+    /** Alignment along the world Y axis. */
+    y?: 'start' | 'center' | 'end';
+  } | null;
+  /**
    * Padding inside the viewport when fitting `maxBounds`, in the shape of
    * `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`)
    * or absolute pixels. These values support the same CSS-style expressions
@@ -373,6 +384,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (props.maxBoundsPadding === undefined) {
       props.maxBoundsPadding = null;
     }
+    if (props.maxBoundsAlignment === undefined) {
+      props.maxBoundsAlignment = null;
+    }
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
@@ -441,7 +455,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       oldProps.height !== props.height ||
       oldProps.width !== props.width ||
       oldProps.maxBounds !== props.maxBounds ||
-      oldProps.maxBoundsPadding !== props.maxBoundsPadding;
+      oldProps.maxBoundsPadding !== props.maxBoundsPadding ||
+      oldProps.maxBoundsAlignment?.x !== props.maxBoundsAlignment?.x ||
+      oldProps.maxBoundsAlignment?.y !== props.maxBoundsAlignment?.y;
     if (constraintChanged && props.maxBounds) {
       // Constraint inputs changed, try re-normalize the props
       const controllerState = new this.ControllerState({...props, makeViewport: this.makeViewport});
