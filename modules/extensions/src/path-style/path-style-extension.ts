@@ -329,7 +329,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       result = mergeShaders(result, dashShaders);
       defines.DASH_ENABLED = true;
       if (extension.opts.dashMode === 'path') {
-        defines.HIGH_PRECISION_DASH = true;
+        defines.DASH_MODE_PATH = true;
       }
     }
     if (extension.opts.offset) {
