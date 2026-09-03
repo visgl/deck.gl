@@ -157,6 +157,46 @@ test('PathLayer#default shader preserves the pre-antialiasing fast path', () => 
   expect(antialiasingShaderWGSL).toContain('edgePixels <= -SMOOTH_EDGE_RADIUS');
 });
 
+test('PathLayer#GLSL assembles join outputs once after selecting the raster envelope', () => {
+  const defaultVertexShader = preprocess(pathVertexShader);
+  const antialiasingVertexShader = preprocess(pathVertexShader, {defines: {ANTIALIASING: 1}});
+  const dashVertexShader = preprocess(pathVertexShader, {defines: {DASH_ENABLED: 1}});
+  const antialiasingDashVertexShader = preprocess(pathVertexShader, {
+    defines: {ANTIALIASING: 1, DASH_ENABLED: 1}
+  });
+
+  for (const shader of [defaultVertexShader, dashVertexShader]) {
+    expect(shader).toContain('renderOffsetVec = offsetVec;');
+    expect(shader).not.toContain('renderOffsetVec = offsetVec * coverageScale;');
+  }
+  for (const shader of [antialiasingVertexShader, antialiasingDashVertexShader]) {
+    expect(shader).toContain('renderOffsetVec = offsetVec * coverageScale;');
+    expect(shader).not.toContain('renderOffsetVec = offsetVec;');
+  }
+
+  for (const shader of [
+    defaultVertexShader,
+    antialiasingVertexShader,
+    dashVertexShader,
+    antialiasingDashVertexShader
+  ]) {
+    expect(shader.match(/vPathLength = L;/g)).toHaveLength(1);
+    expect(shader.match(/vPathPosition = vec2\(/g)).toHaveLength(1);
+    expect(shader.match(/geometry\.uv = vPathPosition;/g)).toHaveLength(1);
+    expect(
+      shader.match(/vec3 offset = vec3\(renderOffsetVec \* width \* isValid, 0\.0\);/g)
+    ).toHaveLength(1);
+  }
+
+  for (const shader of [defaultVertexShader, antialiasingVertexShader]) {
+    expect(shader).not.toContain('vDashSegment = vec2(');
+  }
+
+  for (const shader of [dashVertexShader, antialiasingDashVertexShader]) {
+    expect(shader.match(/vDashSegment = vec2\(/g)).toHaveLength(1);
+  }
+});
+
 const webglTest = BufferTransform.isSupported(device) ? test : test.skip;
 
 webglTest('PathLayer#dash clipping preserves the visible source interval', () => {
