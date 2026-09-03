@@ -606,7 +606,7 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   const pathShader = preprocess(injection, {defines: {HIGH_PRECISION_DASH: 1}});
 
   for (const [mode, shader, unitLengthAssignment] of [
-    ['segment', segmentShader, 'unitLength = vPathLength /'],
+    ['segment', segmentShader, 'unitLength = vDashSegment.y /'],
     ['path', pathShader, 'unitLength = vDashPathLength /']
   ] as const) {
     const assignmentIndex = shader.indexOf(unitLengthAssignment);
@@ -649,8 +649,8 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
   expect(combinedVertexShader, 'restores segment length in the same stage').toContain(
     'vPathLength *= offsetWidth'
   );
-  expect(combinedVertexShader, 'restores clipped path bounds in the same stage').toContain(
-    'vPathBounds *= offsetWidth'
+  expect(combinedVertexShader, 'restores dash arclength in the same stage').toContain(
+    'vDashSegment *= offsetWidth'
   );
   expect(widthRestoreIndex, 'recovers the pre-offset stroke width after remapping').toBeGreaterThan(
     remapIndex
@@ -675,8 +675,8 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
   expect(offsetVertexShader, 'offset-only does not compile dash calculations').not.toContain(
     'vDashArray'
   );
-  expect(offsetVertexShader, 'offset-only does not access dash path bounds').not.toContain(
-    'vPathBounds'
+  expect(offsetVertexShader, 'offset-only does not access dash arclength').not.toContain(
+    'vDashSegment'
   );
 
   expect(dashVertexShader, 'dash-only keeps dash conversion').toContain(
