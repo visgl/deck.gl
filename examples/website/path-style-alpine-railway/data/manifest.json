@@ -1,0 +1,528 @@
+{
+  "schemaVersion": 1,
+  "example": "path-style-alpine-railway",
+  "deterministic": true,
+  "generatedAt": "2026-08-27T03:37:55.000Z",
+  "generatedBy": "scripts/path-style-extension/alpine-railway/create-manifest.mjs",
+  "timestampPolicy": "The recorded generation and retrieval timestamp is a fixed provenance input, not the manifest generator wall clock.",
+  "attribution": "Source: Federal Office of Topography swisstopo",
+  "derivedDataNotice": "Derived from Federal Office of Topography swisstopo data.",
+  "licenseUrl": "https://www.swisstopo.admin.ch/en/terms-of-use-free-geodata-and-geoservices",
+  "sources": {
+    "railway": {
+      "provider": "Federal Office of Topography swisstopo",
+      "dataset": "swissTLM3D Railway",
+      "productVersion": "swissTLM3D 2.4",
+      "release": "2026-02",
+      "sourcePublished": "2026-02-24",
+      "retrievedAt": "2026-08-27T03:37:55.000Z",
+      "productUrl": "https://www.swisstopo.admin.ch/en/landscape-model-swisstlm3d",
+      "stacItemUrl": "https://data.geo.admin.ch/api/stac/v1/collections/ch.swisstopo.swisstlm3d/items/swisstlm3d_2026-02",
+      "featureClass": "swissTLM3D_TLM_EISENBAHN",
+      "sourceFeatureCount": 56026,
+      "geometryType": "3D LineString",
+      "sourceCrs": {
+        "compound": "EPSG:2056 + EPSG:5728",
+        "horizontal": "CH1903+ / LV95 (EPSG:2056)",
+        "vertical": "LN02 height in metres (EPSG:5728)"
+      },
+      "sourceAsset": {
+        "url": "https://data.geo.admin.ch/ch.swisstopo.swisstlm3d/swisstlm3d_2026-02/swisstlm3d_2026-02_2056_5728.shp.zip",
+        "sizeBytes": 3591345815,
+        "sha256": "75086b5aa7e721f5ad2ea080e14e9e3f42d5e0afdee31c2e3c162f412fab4114",
+        "stacChecksumMultihash": "122075086B5AA7E721F5AD2EA080E14E9E3F42D5E0AFDEE31C2E3C162F412FAB4114"
+      }
+    },
+    "terrain": {
+      "provider": "Federal Office of Topography swisstopo",
+      "dataset": "swissALTI3D",
+      "retrievedAt": "2026-08-27T03:37:55.000Z",
+      "releaseYearsEncodedBySourceTiles": [
+        2023
+      ],
+      "productUrl": "https://www.swisstopo.admin.ch/en/height-model-swissalti3d",
+      "stacCollectionUrl": "https://data.geo.admin.ch/api/stac/v1/collections/ch.swisstopo.swissalti3d",
+      "sourceResolutionMeters": 2,
+      "sourceFormat": "Cloud Optimized GeoTIFF, Float32",
+      "sourceCrs": {
+        "compound": "EPSG:2056 + EPSG:5728",
+        "horizontal": "CH1903+ / LV95 (EPSG:2056)",
+        "vertical": "LN02 height in metres (EPSG:5728)"
+      }
+    }
+  },
+  "pipelineFiles": {
+    "railwayExtraction": {
+      "path": "scripts/path-style-extension/alpine-railway/extract-scenes.mjs",
+      "mediaType": "text/javascript",
+      "sizeBytes": 7409,
+      "sha256": "2b41f648962b5f3f9a12efdbb2aea79865fb9b3ed489bdf61d345f0aef9e9b61"
+    },
+    "terrainSourceRegistry": {
+      "path": "scripts/path-style-extension/alpine-railway/terrain-sources.mjs",
+      "mediaType": "text/javascript",
+      "sizeBytes": 5057,
+      "sha256": "81076e08f777d0f52b04b82f58f7faabe2777659100b1e1d4576a92d6ab5ee0f"
+    },
+    "terrainBuild": {
+      "path": "scripts/path-style-extension/alpine-railway/build-terrain.mjs",
+      "mediaType": "text/javascript",
+      "sizeBytes": 5933,
+      "sha256": "6bbe468c799368cdec0d80a54c97b533ba3bea62f2899e6f256a70b7987c06d2"
+    }
+  },
+  "transformations": {
+    "railway": [
+      "Selected complete swissTLM3D_TLM_EISENBAHN features by the UUIDs recorded for each scene, preserving declared selection order; no path was hand traced.",
+      "Selected source attributes UUID, DATUM_AEND, OBJEKTART, KUNSTBAUTE, ANZAHL_SPU, ACHSE_DKM, and NAME.",
+      "Reprojected horizontal X/Y from EPSG:2056 to WGS84 longitude/latitude with ogr2ogr; retained source LN02 Z values in metres without a vertical transformation.",
+      "Removed exact consecutive duplicate source positions before output quantization.",
+      "Rounded longitude and latitude to 7 decimal places and elevation to 2 decimal places; performed no simplification, densification, or geometry clipping.",
+      "Mapped KUNSTBAUTE values Keine, Bruecke, Tunnel, Galerie, and Gedeckte_Bruecke to runtime structure classes open, bridge, tunnel, covered, and covered.",
+      "Assigned deterministic scene-local track IDs and retained source UUID, class, revision date, track count, and representative-axis metadata."
+    ],
+    "terrain": [
+      "Downloaded every 2 m swissALTI3D Cloud Optimized GeoTIFF named per scene and verified its SHA-256 before use.",
+      "Built a GDAL VRT mosaic, warped it with cubic resampling to each runtime WGS84 terrain bounds, wrote Float32 with -9999 nodata, and filled nodata with gdal_fillnodata.py using a 100-pixel maximum search distance and one smoothing iteration.",
+      "Generated the 257 x 257 elevation raster by rounding (elevation metres + 10000) * 10, clipping to 24-bit range, and packing the value into 8-bit RGB channels.",
+      "Generated the 512 x 512 grayscale texture with gdaldem hillshade using azimuth 315, altitude 42, scale 90000, and compute_edges, then linearly scaled source byte values 0..255 to 30..210.",
+      "Encoded both derived rasters as PNG with ZLEVEL=9. Exact checked-in PNG hashes are recorded per scene; GDAL-version differences may change derived bytes."
+    ],
+    "runtime": [
+      "The browser reads checked-in scene JSON and PNG files and performs no source download, reprojection, clipping, or terrain generation.",
+      "Sleepers and paired rail strokes are runtime cartographic constructions from each source centerline; they are not surveyed source features.",
+      "The source class Schmalspur does not supply an exact numeric gauge, so gaugeMeters remains null in data."
+    ],
+    "terrainRgbDecoder": {
+      "rScaler": 6553.6,
+      "gScaler": 25.6,
+      "bScaler": 0.1,
+      "offset": -10000
+    }
+  },
+  "scenes": [
+    {
+      "sceneId": "albula-landwasser",
+      "generatedAt": "2026-08-27T03:37:55.000Z",
+      "label": "Albula / Landwasser",
+      "bounds": [
+        9.65669,
+        46.6736053,
+        9.6792523,
+        46.6825821
+      ],
+      "sourceSelection": {
+        "railwayObjectIds": [
+          "{61192120-C6F4-4BE4-B264-BFEE83C93600}",
+          "{5716ADA1-5D06-41A1-9048-08010D4DB448}",
+          "{9681FA77-1ADA-4368-A916-FC5F141D9C30}",
+          "{25F6BB09-E81F-4AD9-914B-6D609B7BB2E2}",
+          "{A662ED86-105D-4D6E-91BC-EDFCB8E0B001}",
+          "{3D3381EF-547C-4CC8-AA91-41C9920D2406}",
+          "{5F17FB42-8F8B-4D38-877E-D6C4F77C3F3F}",
+          "{704C0C19-C2EE-4087-A923-48C89F48210F}",
+          "{DBDFB80A-837C-41B4-8E27-871C4C2CCC64}",
+          "{A36C1760-2515-43D6-825A-B2E27E499C7D}",
+          "{4F607941-D04B-459D-9E42-F4DDE6680849}"
+        ],
+        "terrainBoundsLV95": [
+          2769700,
+          1171600,
+          2771400,
+          1172550
+        ],
+        "terrainTiles": [
+          {
+            "id": "swissalti3d_2023_2769-1171_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2769-1171/swissalti3d_2023_2769-1171_2_2056_5728.tif",
+            "sourceSha256": "52e4fe2d2c563de149e2217ffe9ae74448852907b76ff887b20d67f446ea2266"
+          },
+          {
+            "id": "swissalti3d_2023_2769-1172_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2769-1172/swissalti3d_2023_2769-1172_2_2056_5728.tif",
+            "sourceSha256": "81cfa176336cc2a3b21429c1cae82df49f982dded19ba92b2281e9eeb8a371c8"
+          },
+          {
+            "id": "swissalti3d_2023_2770-1171_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2770-1171/swissalti3d_2023_2770-1171_2_2056_5728.tif",
+            "sourceSha256": "c2c66e8452270e133fd29b212e9e92b7ca00f1920bafa354450d3713be15778c"
+          },
+          {
+            "id": "swissalti3d_2023_2770-1172_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2770-1172/swissalti3d_2023_2770-1172_2_2056_5728.tif",
+            "sourceSha256": "d624e55091945d873f2a4b5db4b523af96b68db173efc7e924558b8068920b49"
+          },
+          {
+            "id": "swissalti3d_2023_2771-1171_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2771-1171/swissalti3d_2023_2771-1171_2_2056_5728.tif",
+            "sourceSha256": "a84d9fbdff998e83f8eb6645c89c1b49005b4b1d5574c42444d0da9014d3c037"
+          },
+          {
+            "id": "swissalti3d_2023_2771-1172_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2771-1172/swissalti3d_2023_2771-1172_2_2056_5728.tif",
+            "sourceSha256": "18c356faa6b742845739bd403282fd541b1124ce94ec925f94b302c81e326512"
+          }
+        ]
+      },
+      "derivedAssets": {
+        "scene": {
+          "path": "examples/website/path-style-alpine-railway/data/albula-landwasser.json",
+          "mediaType": "application/json",
+          "sizeBytes": 8316,
+          "sha256": "f6ad3da18f1bb441e53dd2e3d1d60d69f42256355325a69b63a4a86aea87cd69"
+        },
+        "terrainElevation": {
+          "path": "examples/website/path-style-alpine-railway/data/terrain/albula-landwasser-elevation.png",
+          "mediaType": "image/png",
+          "sizeBytes": 59669,
+          "sha256": "6f574b9256c55506b142906fe3f683b848419d1dd75e2db3f36f25fe60780a47",
+          "width": 257,
+          "height": 257,
+          "bitDepth": 8,
+          "colorType": "rgb",
+          "interlaced": false
+        },
+        "terrainTexture": {
+          "path": "examples/website/path-style-alpine-railway/data/terrain/albula-landwasser-texture.png",
+          "mediaType": "image/png",
+          "sizeBytes": 147755,
+          "sha256": "d4b080324f029de41076540bf8a82029bda6f8bcb7c809bd33787e74a508e6c6",
+          "width": 512,
+          "height": 512,
+          "bitDepth": 8,
+          "colorType": "grayscale",
+          "interlaced": false
+        }
+      },
+      "statistics": {
+        "trackCount": 11,
+        "coordinateCount": 157,
+        "uniqueSourceObjectCount": 11,
+        "coordinateBounds": [
+          9.6599718,
+          46.6752803,
+          9.6768152,
+          46.681012
+        ],
+        "elevationRangeMeters": [
+          1016.56,
+          1062.63
+        ],
+        "lengthMetersApproximate": 1875.87,
+        "lengthMethod": "sum of 3D segments using the WGS84-coordinate haversine distance at mean Earth radius 6371008.8 m and source LN02 elevation deltas",
+        "structureCounts": {
+          "bridge": 4,
+          "open": 5,
+          "tunnel": 2
+        },
+        "sourceClassCounts": {
+          "Schmalspur": 11
+        },
+        "sourceTrackCountCounts": {
+          "1": 11
+        },
+        "representativeAxisCount": 11,
+        "sourceUpdatedRange": [
+          "2022-11-23",
+          "2025-11-28"
+        ],
+        "tracksWithSourcedGauge": 0
+      }
+    },
+    {
+      "sceneId": "bernina-pass",
+      "generatedAt": "2026-08-27T03:37:55.000Z",
+      "label": "Bernina Pass / Lago Bianco",
+      "bounds": [
+        10.0000926,
+        46.3879247,
+        10.0366802,
+        46.4201911
+      ],
+      "sourceSelection": {
+        "railwayObjectIds": [
+          "{1B57E58E-8677-4B53-A5E7-9A3096952CE0}",
+          "{702F3C38-39D9-4C3B-93E7-500B8BB80027}",
+          "{4E9D2854-9FAB-4EF2-AC8D-123EE9320351}",
+          "{9D2A98CA-D319-47C1-9441-8BEA3041FD50}",
+          "{0D13633A-91C4-4322-A3FE-6E37A7A5420D}",
+          "{819ECFBB-38AC-45C4-8573-3561D27AC1D9}",
+          "{A45EADCA-4AF3-4732-ADF4-C93D5C0B614F}",
+          "{99DE6FEF-E398-4F9E-BD53-27840057BFE3}",
+          "{8793DD2C-64AE-4324-AA15-1E0D745D9806}"
+        ],
+        "terrainBoundsLV95": [
+          2797000,
+          1140700,
+          2799700,
+          1144200
+        ],
+        "terrainTiles": [
+          {
+            "id": "swissalti3d_2023_2797-1140_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2797-1140/swissalti3d_2023_2797-1140_2_2056_5728.tif",
+            "sourceSha256": "f3029f7d83bf3beb60078c3f9379839b2b11e5673ba7abb055fa92d185b90859"
+          },
+          {
+            "id": "swissalti3d_2023_2797-1141_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2797-1141/swissalti3d_2023_2797-1141_2_2056_5728.tif",
+            "sourceSha256": "bd545875ac8b5850cb4d1e08f22f7cb3ecb93d3d8ad3f2113c469aecb5f184b9"
+          },
+          {
+            "id": "swissalti3d_2023_2797-1142_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2797-1142/swissalti3d_2023_2797-1142_2_2056_5728.tif",
+            "sourceSha256": "92c33587f03e4b46185adc191a118db16e073921c5d88aa17074ee2f2fc3ad69"
+          },
+          {
+            "id": "swissalti3d_2023_2797-1143_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2797-1143/swissalti3d_2023_2797-1143_2_2056_5728.tif",
+            "sourceSha256": "e1308c32f740bd02e99863041548f73d1beaefecacaa570bcc33b6344e51365e"
+          },
+          {
+            "id": "swissalti3d_2023_2797-1144_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2797-1144/swissalti3d_2023_2797-1144_2_2056_5728.tif",
+            "sourceSha256": "249eb2c230bddd0f4296f994a2529ae0f5a7db5ca4731e9d95f07ccb8370dcbc"
+          },
+          {
+            "id": "swissalti3d_2023_2798-1140_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2798-1140/swissalti3d_2023_2798-1140_2_2056_5728.tif",
+            "sourceSha256": "d2dccb835dfa452fe1840abbb67c233ecb912e36f2f8acb68866e21d9f7f8619"
+          },
+          {
+            "id": "swissalti3d_2023_2798-1141_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2798-1141/swissalti3d_2023_2798-1141_2_2056_5728.tif",
+            "sourceSha256": "c1476a5a6d24f1609cd42e3528cbfe0bb8b19c8e0389011a0146a33649480a02"
+          },
+          {
+            "id": "swissalti3d_2023_2798-1142_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2798-1142/swissalti3d_2023_2798-1142_2_2056_5728.tif",
+            "sourceSha256": "3675d997db618633789f8fb7e4a26f3bdd0f68ab9c421785916f2e19ac699968"
+          },
+          {
+            "id": "swissalti3d_2023_2798-1143_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2798-1143/swissalti3d_2023_2798-1143_2_2056_5728.tif",
+            "sourceSha256": "e58a3423d65e24d337324907ce501b95ab625b43081ccaac053db891c33bd76e"
+          },
+          {
+            "id": "swissalti3d_2023_2798-1144_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2798-1144/swissalti3d_2023_2798-1144_2_2056_5728.tif",
+            "sourceSha256": "ba029941590d6ac087e57d9ebfa97253f4c9fbc6be82f78099a85b392a871f5a"
+          },
+          {
+            "id": "swissalti3d_2023_2799-1140_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2799-1140/swissalti3d_2023_2799-1140_2_2056_5728.tif",
+            "sourceSha256": "f2b2fcf29e7accf02a8f1a91771dbad42663354ecd8dd194a14650a840a795b3"
+          },
+          {
+            "id": "swissalti3d_2023_2799-1141_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2799-1141/swissalti3d_2023_2799-1141_2_2056_5728.tif",
+            "sourceSha256": "5ca5583e172017ad6404c6d3c7a85c52559218e2133f5fad65ae211441fc56a8"
+          },
+          {
+            "id": "swissalti3d_2023_2799-1142_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2799-1142/swissalti3d_2023_2799-1142_2_2056_5728.tif",
+            "sourceSha256": "e0f37a6723376dbcf7bc353405ec7d5073671095f1ce7958595f0a722395855c"
+          },
+          {
+            "id": "swissalti3d_2023_2799-1143_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2799-1143/swissalti3d_2023_2799-1143_2_2056_5728.tif",
+            "sourceSha256": "349e25db932fbd354398200e1661bd4b3e89fede74ccd421a3b8c089aa58531c"
+          },
+          {
+            "id": "swissalti3d_2023_2799-1144_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2799-1144/swissalti3d_2023_2799-1144_2_2056_5728.tif",
+            "sourceSha256": "0a085a3a5b6a6a056d7cb33559e225c3c0cd4ecfbde2660226a98471dc1b53e5"
+          }
+        ]
+      },
+      "derivedAssets": {
+        "scene": {
+          "path": "examples/website/path-style-alpine-railway/data/bernina-pass.json",
+          "mediaType": "application/json",
+          "sizeBytes": 18878,
+          "sha256": "00984e9b04379ce436d12a87c2ef0f5f29c1ad4422247000ae41665f25cc9677"
+        },
+        "terrainElevation": {
+          "path": "examples/website/path-style-alpine-railway/data/terrain/bernina-pass-elevation.png",
+          "mediaType": "image/png",
+          "sizeBytes": 72941,
+          "sha256": "c563640f1b518d86684e3018f7de5b4e345cdbec00f0481586839f436e14bed8",
+          "width": 257,
+          "height": 257,
+          "bitDepth": 8,
+          "colorType": "rgb",
+          "interlaced": false
+        },
+        "terrainTexture": {
+          "path": "examples/website/path-style-alpine-railway/data/terrain/bernina-pass-texture.png",
+          "mediaType": "image/png",
+          "sizeBytes": 136216,
+          "sha256": "8953b27037110612641867fe44ae1216c283d03a36841ce36dc9762e078da9c3",
+          "width": 512,
+          "height": 512,
+          "bitDepth": 8,
+          "colorType": "grayscale",
+          "interlaced": false
+        }
+      },
+      "statistics": {
+        "trackCount": 9,
+        "coordinateCount": 504,
+        "uniqueSourceObjectCount": 9,
+        "coordinateBounds": [
+          10.0032567,
+          46.389046,
+          10.0340611,
+          46.4195785
+        ],
+        "elevationRangeMeters": [
+          2211.58,
+          2253.29
+        ],
+        "lengthMetersApproximate": 4938.1,
+        "lengthMethod": "sum of 3D segments using the WGS84-coordinate haversine distance at mean Earth radius 6371008.8 m and source LN02 elevation deltas",
+        "structureCounts": {
+          "bridge": 1,
+          "covered": 1,
+          "open": 7
+        },
+        "sourceClassCounts": {
+          "Schmalspur": 9
+        },
+        "sourceTrackCountCounts": {
+          "1": 6,
+          "2": 3
+        },
+        "representativeAxisCount": 9,
+        "sourceUpdatedRange": [
+          "2023-01-31",
+          "2026-01-08"
+        ],
+        "tracksWithSourcedGauge": 0
+      }
+    },
+    {
+      "sceneId": "brusio-spiral",
+      "generatedAt": "2026-08-27T03:37:55.000Z",
+      "label": "Brusio Spiral",
+      "bounds": [
+        10.1203531,
+        46.2425176,
+        10.1342907,
+        46.2626048
+      ],
+      "sourceSelection": {
+        "railwayObjectIds": [
+          "{99058F3D-C885-4085-A8AF-842D1A3BEC72}",
+          "{96BD39A0-5CE4-4A15-A87E-B6E9DD998879}",
+          "{9F2D61B0-B2A1-4C07-AEC1-D276822672E1}",
+          "{3CACC011-EABF-4B70-AE56-2016C02421C5}",
+          "{FB5248A1-ECA1-4A70-9768-25F338B70950}",
+          "{9E941768-A16E-416B-8ED0-16ED6D408822}"
+        ],
+        "terrainBoundsLV95": [
+          2806800,
+          1124800,
+          2807800,
+          1127000
+        ],
+        "terrainTiles": [
+          {
+            "id": "swissalti3d_2023_2806-1124_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2806-1124/swissalti3d_2023_2806-1124_2_2056_5728.tif",
+            "sourceSha256": "541c0481c6e0a3f6174157d3a37fc644d12849b0e7b1f0b3be47eff90e67f7ba"
+          },
+          {
+            "id": "swissalti3d_2023_2806-1125_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2806-1125/swissalti3d_2023_2806-1125_2_2056_5728.tif",
+            "sourceSha256": "00db7500a7ed62b3ac3c0e7dd57c7c7c75060f5d4537e94a6621591c04d30481"
+          },
+          {
+            "id": "swissalti3d_2023_2806-1126_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2806-1126/swissalti3d_2023_2806-1126_2_2056_5728.tif",
+            "sourceSha256": "e92f23b2adace568d622a61f78d91fb4706023d4525bdaedb7c752c91cb6881f"
+          },
+          {
+            "id": "swissalti3d_2023_2807-1124_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2807-1124/swissalti3d_2023_2807-1124_2_2056_5728.tif",
+            "sourceSha256": "812abe57bb70be0f5b9394510847032441a206ad8b884142fe16f1877d6eff76"
+          },
+          {
+            "id": "swissalti3d_2023_2807-1125_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2807-1125/swissalti3d_2023_2807-1125_2_2056_5728.tif",
+            "sourceSha256": "1ea8f63949fecd1f08232cf6a4f18db6127df006f57271f8792ff668599f1fb3"
+          },
+          {
+            "id": "swissalti3d_2023_2807-1126_2_2056_5728.tif",
+            "url": "https://data.geo.admin.ch/ch.swisstopo.swissalti3d/swissalti3d_2023_2807-1126/swissalti3d_2023_2807-1126_2_2056_5728.tif",
+            "sourceSha256": "496fd2029a064524792095bf34ec7a42bf209c5c3468b9855d6c910016b60aa8"
+          }
+        ]
+      },
+      "derivedAssets": {
+        "scene": {
+          "path": "examples/website/path-style-alpine-railway/data/brusio-spiral.json",
+          "mediaType": "application/json",
+          "sizeBytes": 13509,
+          "sha256": "20b9b06a653cb4a086dfc9a617dcd2fd83b6c7f36a10e272833d677c3b0fcd08"
+        },
+        "terrainElevation": {
+          "path": "examples/website/path-style-alpine-railway/data/terrain/brusio-spiral-elevation.png",
+          "mediaType": "image/png",
+          "sizeBytes": 73028,
+          "sha256": "c0475a36bbbc03211463720eeb2fb414343d7b4eef2fbfa8f293b5fd59ac37a8",
+          "width": 257,
+          "height": 257,
+          "bitDepth": 8,
+          "colorType": "rgb",
+          "interlaced": false
+        },
+        "terrainTexture": {
+          "path": "examples/website/path-style-alpine-railway/data/terrain/brusio-spiral-texture.png",
+          "mediaType": "image/png",
+          "sizeBytes": 155259,
+          "sha256": "c74b672011cebf8d532513ca6fb8bde3eb36d26ec6b9bdbd04bd8fe80822d208",
+          "width": 512,
+          "height": 512,
+          "bitDepth": 8,
+          "colorType": "grayscale",
+          "interlaced": false
+        }
+      },
+      "statistics": {
+        "trackCount": 6,
+        "coordinateCount": 372,
+        "uniqueSourceObjectCount": 6,
+        "coordinateBounds": [
+          10.1223934,
+          46.2428988,
+          10.1322078,
+          46.2616088
+        ],
+        "elevationRangeMeters": [
+          624.21,
+          828.02
+        ],
+        "lengthMetersApproximate": 3245.87,
+        "lengthMethod": "sum of 3D segments using the WGS84-coordinate haversine distance at mean Earth radius 6371008.8 m and source LN02 elevation deltas",
+        "structureCounts": {
+          "bridge": 2,
+          "open": 4
+        },
+        "sourceClassCounts": {
+          "Schmalspur": 6
+        },
+        "sourceTrackCountCounts": {
+          "1": 5,
+          "null": 1
+        },
+        "representativeAxisCount": 5,
+        "sourceUpdatedRange": [
+          "2023-07-04",
+          "2026-01-09"
+        ],
+        "tracksWithSourcedGauge": 0
+      }
+    }
+  ]
+}
