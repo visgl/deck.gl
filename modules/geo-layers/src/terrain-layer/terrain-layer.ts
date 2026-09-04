@@ -8,7 +8,6 @@ import {
   CompositeLayerProps,
   COORDINATE_SYSTEM,
   DefaultProps,
-  _GlobeViewport as GlobeViewport,
   Layer,
   LayersList,
   log,
@@ -19,6 +18,11 @@ import {
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
+import {
+  MAX_LATITUDE as MAX_WEB_MERCATOR_LATITUDE,
+  lngLatToWorld,
+  worldToLngLat
+} from '@math.gl/web-mercator';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
   Bounds,
@@ -112,13 +116,15 @@ type TerrainLoadProps = {
   signal?: AbortSignal;
 };
 
-type MeshAndTexture = [MeshAttributes | null, TextureSource | null];
 type MeshBoundingBox = [min: number[], max: number[]];
-type MeshWithBoundingBox = MeshAttributes & {
+type TerrainMesh = {
+  attributes: MeshAttributes;
   header?: {
     boundingBox?: MeshBoundingBox;
   };
+  [key: string]: unknown;
 };
+type MeshAndTexture = [TerrainMesh | null, TextureSource | null];
 
 /** All properties supported by TerrainLayer */
 export type TerrainLayerProps = _TerrainLayerProps &
@@ -166,7 +172,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
   state!: {
     isTiled?: boolean;
-    terrain?: MeshAttributes;
+    terrain?: TerrainMesh;
     zRange?: ZRange | null;
   };
 
@@ -205,7 +211,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     elevationDecoder,
     meshMaxError,
     signal
-  }: TerrainLoadProps): Promise<MeshAttributes> | null {
+  }: TerrainLoadProps): Promise<TerrainMesh> | null {
     if (!elevationData) {
       return null;
     }
@@ -222,7 +228,12 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       }
     };
     const {fetch} = this.props;
-    return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
+    return fetch(elevationData, {
+      propName: 'elevationData',
+      layer: this,
+      loadOptions,
+      signal
+    });
   }
 
   getTiledTerrainData(tile: TileLoadProps): Promise<MeshAndTexture> {
@@ -244,19 +255,24 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       topRight = [bbox.right, bbox.top];
     }
     const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-    const overlappedBounds = getOverlappedBounds(
-      bounds,
-      this.props.tileSize,
-      viewport instanceof GlobeViewport
-    );
+    const isGlobe = Boolean(viewport.resolution);
+    const overlappedBounds = getOverlappedBounds(bounds, this.props.tileSize, isGlobe);
 
-    const terrain = this.loadTerrain({
-      elevationData: dataUrl,
-      bounds: overlappedBounds,
-      elevationDecoder,
-      meshMaxError,
-      signal
-    });
+    const terrainPromise =
+      this.loadTerrain({
+        elevationData: dataUrl,
+        bounds: overlappedBounds,
+        elevationDecoder,
+        meshMaxError,
+        signal
+      }) ?? Promise.resolve(null);
+    // The terrain surface keeps its original texture and UVs; only mesh row positions are
+    // remapped from WebMercator tile spacing to lng/lat for GlobeView.
+    const terrain = isGlobe
+      ? terrainPromise.then(mesh =>
+          mesh ? remapTerrainMeshToWebMercatorTile(mesh, overlappedBounds) : mesh
+        )
+      : terrainPromise;
     const surface = textureUrl
       ? // If surface image fails to load, the tile should still be displayed
         fetch(textureUrl, {propName: 'texture', layer: this, loaders: [], signal}).catch(_ => null)
@@ -287,8 +303,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
-    const isGlobe = viewport instanceof GlobeViewport;
-    const boundingBox = (mesh as MeshWithBoundingBox | null)?.header?.boundingBox;
+    const isGlobe = Boolean(viewport.resolution);
+    const boundingBox = mesh?.header?.boundingBox;
     const hasLngLatBounds =
       boundingBox &&
       boundingBox.every(
@@ -321,10 +337,9 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const ranges = tiles
       .map(tile => tile.content)
       .filter(Boolean)
-      .map(arr => {
-        // @ts-ignore
-        const bounds = arr[0].header.boundingBox;
-        return bounds.map(bound => bound[2]);
+      .flatMap(arr => {
+        const bounds = arr?.[0]?.header?.boundingBox;
+        return bounds ? [bounds.map(bound => bound[2])] : [];
       });
     if (ranges.length === 0) {
       return;
@@ -421,3 +436,44 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
 
 const isTileSetURL = (url: string): boolean =>
   url.includes('{x}') && (url.includes('{y}') || url.includes('{-y}'));
+
+function remapTerrainMeshToWebMercatorTile(mesh: TerrainMesh, bounds: Bounds): TerrainMesh {
+  const {attributes} = mesh;
+  const positionAttribute = attributes.POSITION;
+  const textureCoordinateAttribute = attributes.TEXCOORD_0;
+  const positions = positionAttribute?.value;
+  const textureCoordinates = textureCoordinateAttribute?.value;
+  if (!positions || !textureCoordinates) {
+    return mesh;
+  }
+
+  const [, south, , north] = bounds;
+  const northY = lngLatToMercatorWorldY(north);
+  const southY = lngLatToMercatorWorldY(south);
+  const remappedPositions = new Float32Array(positions);
+
+  for (let vertexIndex = 0; vertexIndex < textureCoordinates.length / 2; vertexIndex++) {
+    const textureV = textureCoordinates[vertexIndex * 2 + 1];
+    const mercatorY = northY + (southY - northY) * textureV;
+    remappedPositions[vertexIndex * 3 + 1] = worldToLngLat([0, mercatorY])[1];
+  }
+
+  return {
+    ...mesh,
+    attributes: {
+      ...attributes,
+      POSITION: {
+        ...positionAttribute,
+        value: remappedPositions
+      }
+    }
+  };
+}
+
+function lngLatToMercatorWorldY(latitude: number): number {
+  const clampedLatitude = Math.max(
+    -MAX_WEB_MERCATOR_LATITUDE,
+    Math.min(MAX_WEB_MERCATOR_LATITUDE, latitude)
+  );
+  return lngLatToWorld([0, clampedLatitude])[1];
+}
