@@ -2,8 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LayerExtension, _mergeShaders as mergeShaders} from '@deck.gl/core';
-import {vec3} from '@math.gl/core';
+import {
+  LayerExtension,
+  WebMercatorViewport,
+  project,
+  _deepEqual as deepEqual,
+  _mergeShaders as mergeShaders
+} from '@deck.gl/core';
+import {vec3, vec4} from '@math.gl/core';
 import {
   dashShaders,
   Defines,
@@ -12,19 +18,46 @@ import {
   textBackgroundDashShaders
 } from './shaders.glsl';
 
-import type {Accessor, Layer, LayerContext, UpdateParameters} from '@deck.gl/core';
+import type {
+  Accessor,
+  Attribute,
+  Layer,
+  LayerContext,
+  ProjectUniforms,
+  UpdateParameters
+} from '@deck.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
   getOffset: {type: 'accessor', value: 0},
   dashJustified: false,
-  dashGapPickable: false
+  dashGapPickable: false,
+  dashUnits: 'widths'
+};
+
+/**
+ * What `getDashArray` is measured in.
+ *
+ * `'widths'` is relative to half the stroke width and is the historical behavior, so a dash
+ * scales with the line. `'pixels'` uses nominal zoom-stable projected pixels: exact for flat or
+ * orthographic paths and approximate under pitch, perspective, or elevation. `'meters'` uses the
+ * local projection scale, while `'common'` uses deck.gl common-coordinate-space units.
+ */
+export type DashUnits = 'widths' | 'pixels' | 'meters' | 'common';
+
+/** Keep in sync with the branch in the dash vertex shader. */
+const DASH_UNITS: Record<DashUnits, number> = {
+  widths: 0,
+  pixels: 1,
+  meters: 2,
+  common: 3
 };
 
 type PathStyleProps = {
   dashAlignMode: number;
   dashGapPickable: boolean;
+  dashUnits: number;
 };
 
 type SDFDashStyleProps = {
@@ -33,7 +66,9 @@ type SDFDashStyleProps = {
 
 export type PathStyleExtensionProps<DataT = any> = {
   /**
-   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
+   * Accessor for the dash array to draw each path with: `[dashSize, gapSize]` in the units
+   * selected by `dashUnits`. By default those units are relative to *half* the path width,
+   * so `[4, 5]` on a path 10 pixels wide draws 20 pixel dashes separated by 25 pixel gaps.
    * Requires the `dash` option to be on.
    */
   getDashArray?: Accessor<DataT, Readonly<[number, number]>>;
@@ -53,39 +88,134 @@ export type PathStyleExtensionProps<DataT = any> = {
    * @default false
    */
   dashGapPickable?: boolean;
+  /**
+   * What `getDashArray` is measured in. `'widths'` is relative to half the stroke width, so a
+   * dash scales with the line. `'pixels'` uses nominal zoom-stable projected pixels, which are
+   * exact for flat or orthographic paths and approximate under pitch, perspective, or elevation.
+   * `'meters'` uses the local projection scale and `'common'` uses deck.gl common space.
+   * Only applies to `PathLayer` and composite layers that render paths; scatterplot outlines
+   * and text backgrounds continue to interpret dash arrays relative to their stroke width.
+   * @default 'widths'
+   */
+  dashUnits?: DashUnits;
 };
 
+/** How the dash pattern is positioned along a path. */
+export type DashMode = 'segment' | 'path';
+
+/** Options for configuring a {@link PathStyleExtension}. */
 export type PathStyleExtensionOptions = {
   /**
    * Add capability to render dashed lines.
    * @default false
    */
-  dash: boolean;
+  dash?: boolean;
   /**
    * Add capability to offset lines.
    * @default false
    */
-  offset: boolean;
+  offset?: boolean;
+  /**
+   * How the dash pattern is positioned along a path. `'path'` keeps dashes continuous across
+   * rendered segments, at the cost of a vertex attribute and a CPU pass over the geometry.
+   * @default 'segment'
+   */
+  dashMode?: DashMode;
   /**
    * Improve dash rendering quality in certain circumstances. Note that this option introduces additional performance overhead.
+   * @deprecated Use `dashMode: 'path'` instead.
    * @default false
    */
-  highPrecisionDash: boolean;
+  highPrecisionDash?: boolean;
 };
+
+type ResolvedPathStyleExtensionOptions = Required<PathStyleExtensionOptions>;
 
 type LayerType = 'path' | 'scatterplot' | 'textBackground';
 
+const PATH_STYLE_ATTRIBUTES = ['instanceDashArrays', 'instanceDashOffsets', 'instanceOffsets'];
+
+function dashMetricsProjectionPropsChanged({
+  props,
+  oldProps
+}: UpdateParameters<Layer<PathStyleExtensionProps>>): boolean {
+  // Data, accessors, and tessellation configuration invalidate through AttributeManager and
+  // PathLayer. PathLayer separately tracks viewport projection scale. These are the remaining
+  // layer props consumed by the project uniforms used to calculate dash metrics.
+  return (
+    !deepEqual(props.modelMatrix, oldProps.modelMatrix, 2) ||
+    props.coordinateSystem !== oldProps.coordinateSystem ||
+    !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)
+  );
+}
+
+function projectRenderedPathPosition(
+  layer: Layer<PathStyleExtensionProps>,
+  position: number[],
+  projectUniforms: ProjectUniforms
+): [number, number, number] {
+  const viewport = layer.context.viewport;
+  if (!(viewport instanceof WebMercatorViewport) || viewport.zoom < 12) {
+    return layer.projectPosition(position, {autoOffset: false});
+  }
+
+  // High-zoom Web Mercator shaders use a center-relative Taylor projection for precision.
+  // Layer#projectPosition deliberately returns the exact, viewport-independent projection,
+  // so reproduce project_position here to keep CPU phase continuous with each GPU segment.
+  const positionWorld = vec4.transformMat4(
+    [],
+    [position[0], position[1], position[2] || 0, 1],
+    projectUniforms.modelMatrix
+  );
+  const coordinateSystem =
+    layer.props.coordinateSystem === 'default' ? 'lnglat' : layer.props.coordinateSystem;
+
+  if (coordinateSystem === 'lnglat') {
+    if (Math.abs(positionWorld[1] - projectUniforms.coordinateOrigin[1]) > 0.25) {
+      let longitude = positionWorld[0];
+      if (projectUniforms.wrapLongitude) {
+        longitude = ((((longitude + 180) % 360) + 360) % 360) - 180;
+      }
+      const commonPosition = viewport.projectPosition([longitude, positionWorld[1], 0]);
+      return [
+        commonPosition[0] - projectUniforms.commonOrigin[0],
+        commonPosition[1] - projectUniforms.commonOrigin[1],
+        positionWorld[2] * projectUniforms.commonUnitsPerMeter[2]
+      ];
+    }
+    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+  } else if (coordinateSystem === 'cartesian') {
+    vec3.sub(positionWorld, positionWorld, projectUniforms.coordinateOrigin);
+  }
+
+  const deltaLatitude = positionWorld[1];
+  const scale = vec3.scaleAndAdd(
+    [],
+    projectUniforms.commonUnitsPerWorldUnit,
+    projectUniforms.commonUnitsPerWorldUnit2,
+    deltaLatitude
+  );
+  return vec3.multiply([], positionWorld, scale) as [number, number, number];
+}
+
 /** Adds selected features to the `PathLayer`, `ScatterplotLayer`, `TextBackgroundLayer`, and composite layers that render them. */
-export default class PathStyleExtension extends LayerExtension<PathStyleExtensionOptions> {
+export default class PathStyleExtension extends LayerExtension<ResolvedPathStyleExtensionOptions> {
   static defaultProps = defaultProps;
   static extensionName = 'PathStyleExtension';
 
   constructor({
     dash = false,
     offset = false,
+    dashMode,
     highPrecisionDash = false
-  }: Partial<PathStyleExtensionOptions> = {}) {
-    super({dash: dash || highPrecisionDash, offset, highPrecisionDash});
+  }: PathStyleExtensionOptions = {}) {
+    const resolvedDashMode: DashMode = dashMode ?? (highPrecisionDash ? 'path' : 'segment');
+    super({
+      dash: dash || highPrecisionDash || dashMode !== undefined,
+      offset,
+      dashMode: resolvedDashMode,
+      highPrecisionDash: resolvedDashMode === 'path'
+    });
   }
 
   private getLayerType(layer: Layer): LayerType | null {
@@ -100,6 +230,64 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       return 'textBackground';
     }
     return null;
+  }
+
+  private synchronizeAttributes(layer: Layer<PathStyleExtensionProps>): boolean {
+    const attributeManager = layer.getAttributeManager();
+    const layerType = this.getLayerType(layer);
+    if (!attributeManager || !layerType) {
+      return false;
+    }
+
+    const attributes = attributeManager.getAttributes();
+    const desiredAttributes = new Set<string>();
+    if (this.opts.dash) {
+      desiredAttributes.add('instanceDashArrays');
+    }
+    if (layerType === 'path' && this.opts.dash && this.opts.dashMode === 'path') {
+      desiredAttributes.add('instanceDashOffsets');
+    }
+    if (layerType === 'path' && this.opts.offset) {
+      desiredAttributes.add('instanceOffsets');
+    }
+
+    let topologyChanged = false;
+    for (const attributeName of PATH_STYLE_ATTRIBUTES) {
+      if (attributes[attributeName] && !desiredAttributes.has(attributeName)) {
+        attributeManager.remove([attributeName]);
+        topologyChanged = true;
+      }
+    }
+
+    if (desiredAttributes.has('instanceDashArrays') && !attributes.instanceDashArrays) {
+      attributeManager.addInstanced({
+        instanceDashArrays: {size: 2, accessor: 'getDashArray'}
+      });
+      topologyChanged = true;
+    }
+    if (desiredAttributes.has('instanceDashOffsets') && !attributes.instanceDashOffsets) {
+      attributeManager.addInstanced({
+        instanceDashOffsets: {
+          // [distance from the start of the path, total length of the path]
+          size: 2,
+          // Recalculate from rendered geometry when getPath changes. A binary getPath buffer
+          // contains positions, not dash metrics, so keep it as an update trigger rather than
+          // binding it directly to this attribute.
+          accessor: ['getPath'],
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          update: this.calculateDashMetrics
+        }
+      });
+      topologyChanged = true;
+    }
+    if (desiredAttributes.has('instanceOffsets') && !attributes.instanceOffsets) {
+      attributeManager.addInstanced({
+        instanceOffsets: {size: 1, accessor: 'getOffset'}
+      });
+      topologyChanged = true;
+    }
+
+    return topologyChanged;
   }
 
   isEnabled(layer: Layer<PathStyleExtensionProps>): boolean {
@@ -135,12 +323,14 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     const defines: Defines = {};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
-      if (extension.opts.highPrecisionDash) {
+      defines.DASH_ENABLED = true;
+      if (extension.opts.dashMode === 'path') {
         defines.HIGH_PRECISION_DASH = true;
       }
     }
     if (extension.opts.offset) {
       result = mergeShaders(result, offsetShaders);
+      defines.PATH_STYLE_OFFSET = true;
     }
 
     const {inject} = result;
@@ -151,7 +341,8 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     if (extension.opts.dash) {
       pathStyle.uniformTypes = {
         dashAlignMode: 'f32',
-        dashGapPickable: 'i32'
+        dashGapPickable: 'i32',
+        dashUnits: 'i32'
       };
     }
     return {
@@ -161,31 +352,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
   }
 
   initializeState(this: Layer<PathStyleExtensionProps>, context: LayerContext, extension: this) {
-    const attributeManager = this.getAttributeManager();
-    const layerType = extension.getLayerType(this);
-    if (!attributeManager || !layerType) {
-      return;
-    }
-
-    if (extension.opts.dash) {
-      attributeManager.addInstanced({
-        instanceDashArrays: {size: 2, accessor: 'getDashArray'},
-        ...(layerType === 'path' && extension.opts.highPrecisionDash
-          ? {
-              instanceDashOffsets: {
-                size: 1,
-                accessor: 'getPath',
-                transform: extension.getDashOffsets.bind(this)
-              }
-            }
-          : {})
-      });
-    }
-    if (layerType === 'path' && extension.opts.offset) {
-      attributeManager.addInstanced({
-        instanceOffsets: {size: 1, accessor: 'getOffset'}
-      });
-    }
+    extension.synchronizeAttributes(this);
   }
 
   updateState(
@@ -197,8 +364,29 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       return;
     }
 
+    if (params.changeFlags.extensionsChanged) {
+      const topologyChanged = extension.synchronizeAttributes(this);
+      const attributeManager = this.getAttributeManager();
+      if (attributeManager && topologyChanged) {
+        // PathLayer recreates its model before extension updateState runs. Refresh the new
+        // model's layout after adding or removing extension-owned attributes, then ensure all
+        // managed buffers are rebound to the recreated vertex array.
+        attributeManager.invalidateAll();
+        for (const model of this.getModels()) {
+          model.setBufferLayout(attributeManager.getBufferLayouts(model));
+        }
+      }
+    }
+
     if (extension.opts.dash) {
       const layerType = extension.getLayerType(this);
+      if (
+        layerType === 'path' &&
+        extension.opts.dashMode === 'path' &&
+        dashMetricsProjectionPropsChanged(params)
+      ) {
+        this.getAttributeManager()?.invalidate('instanceDashOffsets');
+      }
       if (layerType === 'scatterplot' || layerType === 'textBackground') {
         const pathStyleProps: SDFDashStyleProps = {
           dashGapPickable: Boolean(this.props.dashGapPickable)
@@ -207,13 +395,129 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
       } else {
         const pathStyleProps: PathStyleProps = {
           dashAlignMode: this.props.dashJustified ? 1 : 0,
-          dashGapPickable: Boolean(this.props.dashGapPickable)
+          dashGapPickable: Boolean(this.props.dashGapPickable),
+          dashUnits: DASH_UNITS[this.props.dashUnits ?? 'widths']
         };
         this.setShaderModuleProps({pathStyle: pathStyleProps});
       }
     }
   }
 
+  private calculateDashMetrics(
+    this: Layer<PathStyleExtensionProps>,
+    attribute: Attribute,
+    {startRow, endRow}: {startRow: number; endRow: number}
+  ): void {
+    const pathTesselator = (this.state as any).pathTesselator;
+    const vertexStarts = pathTesselator?.vertexStarts as number[] | undefined;
+    const instanceCount = pathTesselator?.instanceCount as number | undefined;
+    const packedPositions = pathTesselator?.get('positions');
+
+    if (
+      !vertexStarts ||
+      instanceCount === undefined ||
+      typeof pathTesselator?.getPathSegmentIndices !== 'function'
+    ) {
+      throw new Error('PathStyleExtension requires PathLayer tessellation data for path dashes.');
+    }
+
+    const binaryPath = (this.props.data as any)?.attributes?.getPath;
+    const binaryValue = ArrayBuffer.isView(binaryPath) ? binaryPath : binaryPath?.value;
+    const hasReadableBinaryPath = ArrayBuffer.isView(binaryValue);
+    // With `_pathType`, WebGL binds binary positions directly and the tesselator's allocated
+    // positions array is only a zero-filled placeholder. WebGPU materializes packed neighboring
+    // positions when the binary source is CPU-readable; GPU-only sources are rejected below.
+    const usePackedPositions =
+      packedPositions && (!binaryPath || pathTesselator.normalize || pathTesselator.opts?.isWebGPU);
+    if ((binaryPath && !hasReadableBinaryPath) || (!usePackedPositions && !hasReadableBinaryPath)) {
+      throw new Error(
+        'PathStyleExtension cannot calculate whole-path dash metrics from GPU-only getPath data; ' +
+          'supply data.attributes.instanceDashOffsets.'
+      );
+    }
+
+    const output = attribute.value as Float32Array;
+    const metricSize = attribute.size;
+    const firstRow = Math.max(0, startRow);
+    const lastRow = Math.min(endRow, vertexStarts.length - 1);
+
+    let binarySize = 3;
+    let binaryStride = 3;
+    let binaryOffset = 0;
+    if (!usePackedPositions) {
+      const bytesPerElement = (binaryValue as any).BYTES_PER_ELEMENT;
+      binarySize = binaryPath?.size || (this.props.positionFormat === 'XY' ? 2 : 3);
+      binaryStride = binaryPath?.stride ? binaryPath.stride / bytesPerElement : binarySize;
+      binaryOffset = binaryPath?.offset ? binaryPath.offset / bytesPerElement : 0;
+    }
+
+    const sourcePosition = new Array(3);
+    const projectUniforms = project.getUniforms({
+      viewport: this.context.viewport,
+      modelMatrix: this.props.modelMatrix,
+      coordinateSystem: this.props.coordinateSystem,
+      coordinateOrigin: this.props.coordinateOrigin,
+      // PathLayer normalizes/cuts wrapped paths on the CPU; its shader never wraps again.
+      autoWrapLongitude: this.wrapLongitude
+    }) as ProjectUniforms;
+    const readPosition = (vertexIndex: number): number[] => {
+      if (usePackedPositions) {
+        sourcePosition[0] = packedPositions[vertexIndex * 3];
+        sourcePosition[1] = packedPositions[vertexIndex * 3 + 1];
+        sourcePosition[2] = packedPositions[vertexIndex * 3 + 2];
+      } else {
+        const sourceIndex = binaryOffset + vertexIndex * binaryStride;
+        sourcePosition[0] = binaryValue[sourceIndex];
+        sourcePosition[1] = binaryValue[sourceIndex + 1];
+        sourcePosition[2] = binarySize === 3 ? binaryValue[sourceIndex + 2] : 0;
+      }
+      return sourcePosition;
+    };
+
+    attribute.startIndices = vertexStarts;
+    for (let row = firstRow; row < lastRow; row++) {
+      const rowStart = vertexStarts[row];
+      const rowEnd = Math.min(vertexStarts[row + 1] ?? instanceCount, instanceCount);
+      output.fill(0, rowStart * metricSize, rowEnd * metricSize);
+
+      const validSegments = pathTesselator.getPathSegmentIndices(row);
+
+      let phase = 0;
+      let previousSegment = -2;
+      let previousEnd: [number, number, number] | null = null;
+      for (const segmentIndex of validSegments) {
+        const outputIndex = segmentIndex * metricSize;
+        output[outputIndex] = phase;
+
+        const start =
+          segmentIndex === previousSegment + 1 && previousEnd
+            ? previousEnd
+            : projectRenderedPathPosition(this, readPosition(segmentIndex), projectUniforms);
+        const end = projectRenderedPathPosition(
+          this,
+          readPosition(segmentIndex + 1),
+          projectUniforms
+        );
+        phase += vec3.dist(start, end);
+        previousSegment = segmentIndex;
+        previousEnd = end;
+      }
+
+      if (metricSize > 1) {
+        for (let vertexIndex = rowStart; vertexIndex < rowEnd; vertexIndex++) {
+          output[vertexIndex * metricSize + 1] = phase;
+        }
+      }
+    }
+  }
+
+  /**
+   * Calculates the distance from the start of a path to each rendered segment.
+   *
+   * The final entry is zero because PathLayer reserves the final vertex as invalid padding.
+   * This scalar return shape is retained for compatibility; path-mode rendering uses an
+   * internal attribute containing both each segment offset and the total path length.
+   */
   getDashOffsets(this: Layer<PathStyleExtensionProps>, path: number[] | number[][]): number[] {
     const result = [0];
     const positionSize = this.props.positionFormat === 'XY' ? 2 : 3;
@@ -224,7 +528,7 @@ export default class PathStyleExtension extends LayerExtension<PathStyleExtensio
     let prevP;
     for (let i = 0; i < geometrySize - 1; i++) {
       p = isNested ? path[i] : path.slice(i * positionSize, i * positionSize + positionSize);
-      p = this.projectPosition(p);
+      p = this.projectPosition(p, {autoOffset: false});
 
       if (i > 0) {
         result[i] = result[i - 1] + vec3.dist(prevP, p);

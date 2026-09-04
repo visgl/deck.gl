@@ -200,6 +200,11 @@ const PolygonLayerBinaryExample = {
       // Convert each polygon from an array of points to an array of numbers
       return flattenVertices(polygon, {dimensions: 2});
     }),
+  propTypes: {
+    ...PolygonLayerExample.propTypes,
+    fillPatternSizeUnits: {type: 'category', value: ['meters', 'pixels']},
+    getFillPatternScale: {type: 'number', max: 3}
+  },
   props: {
     ...PolygonLayerExample.props,
     getPolygon: d => d,
@@ -210,7 +215,9 @@ const PolygonLayerBinaryExample = {
     getFillPattern: f =>
       ['hatch-1x', 'hatch-2x', 'hatch-cross', 'dots'][Math.floor(Math.random() * 4)],
     getFillPatternOffset: [0, 0],
-    getFillPatternScale: 5,
+    getFillPatternScale: 3,
+    fillPatternSizeUnits: 'meters',
+    getFillPatternBackgroundColor: [220, 220, 220, 200],
     extensions: [new FillStyleExtension({pattern: true})]
   }
 };

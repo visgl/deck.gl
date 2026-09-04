@@ -19,6 +19,9 @@ in float vMiterLength;
 in vec2 vPathPosition;
 in float vPathLength;
 in float vJointType;
+#ifdef DASH_ENABLED
+in vec2 vPathBounds;
+#endif
 
 out vec4 fragColor;
 
@@ -26,7 +29,11 @@ void main(void) {
   geometry.uv = vPathPosition;
 
 #ifdef ANTIALIASING
+#ifdef DASH_ENABLED
+  bool isCorner = vPathPosition.y < vPathBounds.x || vPathPosition.y > vPathBounds.y;
+#else
   bool isCorner = vPathPosition.y < 0.0 || vPathPosition.y > vPathLength;
+#endif
   bool isRound = vJointType > 0.5;
 
   // Distance to the silhouette in device pixels, from the derivative of the coordinate that
@@ -37,7 +44,13 @@ void main(void) {
   // Both evaluated so each derivative stays on one field across the corner/body boundary
   float bodyPixels = (1.0 - bodyCoord) / max(fwidth(bodyCoord), 1e-6);
   float cornerPixels = (1.0 - cornerCoord) / max(fwidth(cornerCoord), 1e-6);
+#ifdef PATH_STYLE_OFFSET
+  // Rounded corners still intersect the stroke-width envelope. Extensions may remap
+  // vPathPosition.x independently of vCornerOffset, as PathStyleExtension does for offsets.
+  float edgePixels = isRound && isCorner ? min(cornerPixels, bodyPixels) : bodyPixels;
+#else
   float edgePixels = isRound && isCorner ? cornerPixels : bodyPixels;
+#endif
 
   // Fragments outside the coverage ramp must not write depth or picking colors.
   if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
@@ -57,7 +70,11 @@ void main(void) {
   // ramps across exactly one pixel centered on the edge.
   fragColor.a *= smoothedge(0.0, edgePixels);
 #else
+#ifdef DASH_ENABLED
+  if (vPathPosition.y < vPathBounds.x || vPathPosition.y > vPathBounds.y) {
+#else
   if (vPathPosition.y < 0.0 || vPathPosition.y > vPathLength) {
+#endif
     // if joint is rounded, test distance from the corner
     if (vJointType > 0.5 && length(vCornerOffset) > 1.0) {
       discard;

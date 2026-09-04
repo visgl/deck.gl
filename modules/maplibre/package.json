@@ -3,7 +3,7 @@
   "description": "Use deck.gl layers with MapLibre GL JS",
   "license": "MIT",
   "type": "module",
-  "version": "9.4.0-beta.1",
+  "version": "9.4.0-beta.4",
   "publishConfig": {
     "access": "public"
   },
@@ -35,8 +35,8 @@
   ],
   "sideEffects": false,
   "peerDependencies": {
-    "@deck.gl/core": "~9.4.0-alpha.2",
-    "@luma.gl/core": "~9.4.0-beta.3",
+    "@deck.gl/core": "~9.4.0-beta.3",
+    "@luma.gl/core": "~9.4.0-beta.7",
     "maplibre-gl": "^4.5.1 || ^5.0.0 || ^6.0.0"
   },
   "devDependencies": {

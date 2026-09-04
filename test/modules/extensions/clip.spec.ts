@@ -12,6 +12,18 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {geojson} from 'deck.gl-test/data';
 
+class DashArclengthPathLayer extends PathLayer {
+  static layerName = 'DashArclengthPathLayer';
+
+  getShaders() {
+    const shaders = super.getShaders();
+    return {
+      ...shaders,
+      defines: {...shaders.defines, DASH_ENABLED: 1}
+    };
+  }
+}
+
 test('ClipExtension#clipByInstance', () => {
   const checkLayer = (layer, expectedClipByInstance) => {
     expect(
@@ -156,4 +168,47 @@ test('ClipExtension#WebGPU GeoJson sublayers', async ({skip}) => {
 
     layerManager.finalize();
   }
+});
+
+test('ClipExtension#WebGPU PathLayer dash arclength with billboard', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1, pitch: 45}
+  });
+  const errors: Error[] = [];
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  layerManager.setProps({onError: error => errors.push(error)});
+  const layer = new DashArclengthPathLayer({
+    id: 'webgpu-clip-dash-arclength-billboard',
+    data: [
+      {
+        path: [
+          [-1, 0, 0],
+          [1, 0, 100]
+        ]
+      }
+    ],
+    getPath: path => path.path,
+    billboard: true,
+    clipBounds: [-0.5, -0.5, 0.5, 0.5],
+    extensions: [new ClipExtension()]
+  });
+
+  webgpuDevice.handle.pushErrorScope('validation');
+  layerManager.setLayers([layer]);
+
+  expect(errors).toEqual([]);
+  expect(layer.state.clipByInstance, 'PathLayer clips interpolated geometry').toBe(false);
+  expect(layer.getShaders().defines.DASH_ENABLED, 'dash arclength branch is compiled').toBe(1);
+  await webgpuDevice.handle.queue.onSubmittedWorkDone();
+  expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+
+  layerManager.finalize();
 });

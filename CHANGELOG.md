@@ -21,6 +21,40 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
+#### deck.gl [v9.4.0-beta.4] - Sep 3 2026
+
+- chore: fix cjs build (#10651)
+- fix(layers): ScatterplotLayer antialiasing on webgpu (#10642)
+- fix(layers): sdf text outline in webgpu (#10640)
+- fix: export MapLibre integration and update peer ranges (#10645)
+
+#### deck.gl [v9.4.0-beta.3] - Sep 2 2026
+
+- feat(extensions): procedural fill patterns (#10632)
+- fix(extensions): reduce pattern origin in fp64 to stop drift at high zoom (#10633)
+- feat(extensions): fillPatternSizeUnits (#10634)
+- fix(extensions): follow up FillStyleExtension flipY fix (#10629)
+- fix(fill-style): textureGrad for better mip selection (#10628)
+- feat(extensions): add dashUnits (#10583)
+- feat(extensions): add dashMode and whole-path justification (#10582)
+- fix(fill-style): correct pattern orientation by flipping texture y-axis (#10550)
+- feat: FillStyleExtension.getFillPatternBackgroundColor (#10618)
+- chore(deps): bump a5-js from 0.7.2 to 0.10.0 (#10620)
+- feat(extensions): prefilter dash coverage (#10581)
+- fix(extensions): align billboard, 3D, justified, and offset dashes (#10580)
+- fix(extensions): make PathStyle options optional (#10616)
+- CARTO: Remove dead code (moved to api-client) (#10617)
+- fix(core): rotate GlobeView like a ball through poles (#10598)
+- feat(core): support pointer-anchored zoom in GlobeView (#10385)
+- fix(core): compare viewport projection state in equals (#10611)
+- fix(extensions): omit dash uniforms for offset-only path styles (#10607)
+- fix(core): make attribute buffer cleanup idempotent (#10609)
+- feat(core): configure zoom anchors across controllers (#10595)
+
+#### deck.gl [v9.4.0-beta.2] - Sep 2 2026
+
+- Intentionally skipped; no npm distribution was published.
+
 #### deck.gl [v9.4.0-beta.1] - Aug 28 2026
 
 - feat(widgets): custom tooltip system for widget buttons (#10435)

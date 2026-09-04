@@ -50,6 +50,10 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 - In such cases, use the new picking shader helper functions to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL.
 - However, if the logical picking id is different from the rendered instance id, layers can register and populate an explicit `rowIndexes` attribute.
 
+### FillStyleExtension
+
+Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
+
 ## Upgrading to v9.3
 
 Upgraded dependencies to [luma.gl v9.3](https://luma.gl/docs/upgrade-guide) and [loaders.gl v4.4](https://loaders.gl/docs/upgrade-guide). Your app may be affected if it contains custom layers.
