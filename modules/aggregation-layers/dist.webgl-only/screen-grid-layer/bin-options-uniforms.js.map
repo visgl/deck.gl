@@ -1,1 +1,0 @@
-{"version":3,"file":"bin-options-uniforms.js","sourceRoot":"","sources":["../../src/screen-grid-layer/bin-options-uniforms.ts"],"names":[],"mappings":"AAAA,UAAU;AACV,+BAA+B;AAC/B,oCAAoC;AAIpC,MAAM,YAAY,GAAG,UAAU,CAAC;;;;CAI/B,CAAC;AAMF,MAAM,CAAC,MAAM,kBAAkB,GAAG;IAChC,IAAI,EAAE,YAAY;IAClB,EAAE,EAAE,YAAY;IAChB,YAAY,EAAE;QACZ,cAAc,EAAE,KAAK;KACtB;CAC0C,CAAC"}
