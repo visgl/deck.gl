@@ -72,6 +72,26 @@ function finalizeOwnedDeck(deck: Deck): void {
   ownedDevice?.destroy();
 }
 
+function dispatchPointerEvent(
+  target: EventTarget,
+  type: 'pointerdown' | 'pointermove' | 'pointerup',
+  {pointerId, x, y}: {pointerId: number; x: number; y: number}
+): void {
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      clientX: x,
+      clientY: y,
+      bubbles: true,
+      cancelable: true,
+      pointerId,
+      pointerType: 'touch',
+      isPrimary: pointerId === 1,
+      button: 0,
+      buttons: type === 'pointerup' ? 0 : 1
+    })
+  );
+}
+
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 test('Deck#constructor', async () => {
@@ -1104,6 +1124,165 @@ test('Deck#async pointerdown delays click callback until picking resolves', asyn
   expect(clicked, 'click callback uses resolved pointerdown picking info').toEqual([7]);
 
   deck.finalize();
+});
+
+test('Deck disambiguates mobile touch gestures', async () => {
+  const testDeck = new Deck({
+    id: 'mobile-gesture-arbitration-test',
+    device,
+    width: 800,
+    height: 400,
+    viewState: {longitude: -122, latitude: 38, zoom: 10},
+    controller: {
+      doubleClickZoom: false,
+      doubleClickDragZoom: true,
+      multiTouchDrag: 'rotate',
+      touchZoom: true
+    },
+    layers: []
+  });
+  await waitForRender(testDeck);
+
+  const eventManager = testDeck.getEventManager()!;
+  const root = eventManager.getElement()!;
+  const gestureEvents: string[] = [];
+  for (const type of ['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend', 'panstart']) {
+    eventManager.on(type, () => gestureEvents.push(type));
+  }
+
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 1, x: 400, y: 200});
+  await sleep(600);
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 1, x: 400, y: 200});
+  await sleep(400);
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 2, x: 400, y: 200});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 2, x: 400, y: 180});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 2, x: 400, y: 160});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 2, x: 400, y: 160});
+
+  expect(gestureEvents, 'double-tap drag owns the second press').toEqual([
+    'dblclickdragstart',
+    'dblclickdragmove',
+    'dblclickdragend'
+  ]);
+  gestureEvents.length = 0;
+  for (const type of ['multipanstart', 'multipanmove', 'pinchstart']) {
+    eventManager.on(type, () => gestureEvents.push(type));
+  }
+
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 1, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 2, x: 450, y: 250});
+  for (const offset of [10, 20, 30, 40]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 1, x: 350, y: 250 - offset});
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 2, x: 450, y: 250 - offset});
+    // Hammer updates input direction on a 25ms sampling interval.
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 1, x: 350, y: 210});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 2, x: 450, y: 210});
+
+  expect(gestureEvents, 'two-finger translation claims multipan').toContain('multipanstart');
+  expect(gestureEvents, 'translation does not begin pinch zoom').not.toContain('pinchstart');
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 3, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 4, x: 450, y: 250});
+  for (const offset of [10, 20, 30, 40]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 3, x: 350 + offset, y: 250});
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 4, x: 450 + offset, y: 250});
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 3, x: 390, y: 250});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 4, x: 490, y: 250});
+
+  expect(gestureEvents, 'horizontal two-finger translation claims multipan').toContain(
+    'multipanstart'
+  );
+  expect(gestureEvents, 'horizontal translation does not begin pinch zoom').not.toContain(
+    'pinchstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 5, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 6, x: 450, y: 250});
+  for (const offset of [10, 20, 30]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 5, x: 350 - offset, y: 250});
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 6, x: 450 + offset, y: 250});
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 5, x: 320, y: 250});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 6, x: 480, y: 250});
+
+  expect(gestureEvents, 'two-finger separation still claims pinch zoom').toContain('pinchstart');
+  expect(gestureEvents, 'pinch zoom does not begin multipan').not.toContain('multipanstart');
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 7, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 8, x: 450, y: 250});
+  for (const step of [1, 2, 3, 4]) {
+    dispatchPointerEvent(window, 'pointermove', {
+      pointerId: 7,
+      x: 350 - step,
+      y: 250 - step * 4
+    });
+    dispatchPointerEvent(window, 'pointermove', {
+      pointerId: 8,
+      x: 450 + step,
+      y: 250 - step * 4
+    });
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 7, x: 346, y: 234});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 8, x: 454, y: 234});
+
+  expect(gestureEvents, 'a small moving pinch claims pinch zoom').toContain('pinchstart');
+  expect(gestureEvents, 'a small moving pinch does not begin multipan').not.toContain(
+    'multipanstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 9, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 10, x: 450, y: 250});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 9, x: 351, y: 243});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 10, x: 449, y: 257});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 9, x: 351, y: 243});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 10, x: 449, y: 257});
+
+  expect(gestureEvents, 'a two-finger twist claims pinch rotation').toContain('pinchstart');
+  expect(gestureEvents, 'a two-finger twist does not begin multipan').not.toContain(
+    'multipanstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 11, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 12, x: 450, y: 250});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 11, x: 350, y: 220});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 12, x: 450, y: 220});
+  await sleep(30);
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 11, x: 350, y: 210});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 12, x: 450, y: 210});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 11, x: 350, y: 210});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 12, x: 450, y: 210});
+
+  expect(gestureEvents, 'a large staggered translation claims multipan').toContain('multipanstart');
+  expect(gestureEvents, 'a large staggered translation does not begin pinch').not.toContain(
+    'pinchstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 13, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 14, x: 450, y: 250});
+  for (const offset of [8, 16, 24]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 13, x: 350 - offset, y: 250});
+    await sleep(25);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 13, x: 326, y: 250});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 14, x: 450, y: 250});
+
+  expect(gestureEvents, 'an anchored pinch claims pinch after the arbitration delay').toContain(
+    'pinchstart'
+  );
+  expect(gestureEvents, 'an anchored pinch does not begin multipan').not.toContain('multipanstart');
+  testDeck.finalize();
 });
 
 test('Deck#controller pickPosition returns null in async mode', async () => {

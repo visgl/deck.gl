@@ -231,6 +231,34 @@ test('MapController only handles trackpad pinch when trackpad gestures are enabl
   expect(enabledController.props.zoom, 'trackpad pinch follows touchZoom').toBeGreaterThan(10);
 });
 
+test('MapController preserves pinch inertia for trackpad input', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {inertia: 500, trackpadGesture: true}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45
+    }
+  });
+  const makePinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    ...makeGestureEvent(type, {pointerType: 'trackpad'}),
+    scale,
+    rotation: 0,
+    deltaTime
+  });
+
+  controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 1.1, 16) as any);
+  controller.handleEvent(makePinchEvent('pinchend', 1.2, 32) as any);
+
+  expect(
+    controller.transitionManager.transition.inProgress,
+    'trackpad pinch retains its inertia transition'
+  ).toBe(true);
+});
+
 test('MapController restricts wheel zoom to mouse input when trackpad gestures are enabled', () => {
   const controller = createTestController({
     view: new MapView({controller: {trackpadGesture: true}}),
@@ -827,6 +855,56 @@ test('GlobeController keeps continuous pinch zoom stable across a pole', () => {
     }
     controller.handleEvent(makePinchEvent('pinchend', Math.pow(0.85, 24)) as any);
   }
+});
+
+test('GlobeController hands off touch pinch to pan and another pinch', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {inertia: 500, zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 1280,
+      height: 720,
+      longitude: 0,
+      latitude: 45,
+      zoom: 5,
+      minZoom: 0
+    }
+  });
+  const makeTouchPinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    ...makeGestureEvent(type, {x: 640, y: 360}),
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {pointerType: 'touch'}
+  });
+
+  controller.handleEvent(makeTouchPinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makeTouchPinchEvent('pinchmove', 1.2, 16) as any);
+  const zoomAfterPinchMove = controller.props.zoom;
+  controller.handleEvent(makeTouchPinchEvent('pinchend', 10, 17) as any);
+
+  expect(controller.props.zoom, 'touch lift does not project a noisy pinch velocity').toBeCloseTo(
+    zoomAfterPinchMove
+  );
+  expect(
+    controller.handleEvent(makeGestureEvent('panstart', {x: 640, y: 360}) as any),
+    'one-finger pan starts immediately after pinch'
+  ).toBe(true);
+  const beforePan = controller.props;
+  controller.handleEvent(makeGestureEvent('panmove', {x: 680, y: 380}) as any);
+  expect(
+    getGlobeAngularDistance(beforePan, controller.props),
+    'pan moves the globe after pinch'
+  ).toBeGreaterThan(0);
+  controller.handleEvent(makeGestureEvent('panend', {x: 680, y: 380}) as any);
+
+  expect(
+    controller.handleEvent(makeTouchPinchEvent('pinchstart', 1, 0) as any),
+    'second pinch starts immediately after pan'
+  ).toBe(true);
+  const zoomBeforeSecondPinch = controller.props.zoom;
+  controller.handleEvent(makeTouchPinchEvent('pinchmove', 0.8, 16) as any);
+  expect(controller.props.zoom, 'second pinch changes zoom').not.toBeCloseTo(zoomBeforeSecondPinch);
+  controller.handleEvent(makeTouchPinchEvent('pinchend', 0.8, 32) as any);
 });
 
 test('GlobeController preserves pointer zoom in free rotation mode', () => {
