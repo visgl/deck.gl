@@ -296,4 +296,4 @@ new GeoJsonLayer({
 
 ## Source
 
-[modules/extensions/src/fill-style](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/fill-style)
+[modules/extensions/src/fill-style](https://github.com/visgl/deck.gl/tree/9.4-release/modules/extensions/src/fill-style)

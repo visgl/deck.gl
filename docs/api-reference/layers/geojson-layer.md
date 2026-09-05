@@ -672,4 +672,4 @@ In order to pass [pass attributes directly](../../developer-guide/performance.md
 
 ## Source
 
-[modules/layers/src/geojson-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/geojson-layer)
+[modules/layers/src/geojson-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/layers/src/geojson-layer)

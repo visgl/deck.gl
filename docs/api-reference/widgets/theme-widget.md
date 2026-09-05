@@ -170,4 +170,4 @@ Custom tooltip content when in dark mode. Overrides the default label text in th
 
 ## Source
 
-[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/theme-widget.tsx)
+[modules/widgets/src/theme-widget.tsx](https://github.com/visgl/deck.gl/tree/9.4-release/modules/widgets/src/theme-widget.tsx)

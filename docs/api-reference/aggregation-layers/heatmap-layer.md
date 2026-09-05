@@ -238,4 +238,4 @@ The `HeatmapLayer` performs aggregation on the GPU. On WebGPU, it uses instanced
 
 ## Source
 
-[modules/aggregation-layers/src/heatmap-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/heatmap-layer)
+[modules/aggregation-layers/src/heatmap-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/aggregation-layers/src/heatmap-layer)

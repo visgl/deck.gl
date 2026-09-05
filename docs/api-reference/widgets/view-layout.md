@@ -130,4 +130,4 @@ Returns:
 
 ## Source
 
-[modules/widgets/src/view-layout/build-views-from-view-layout.ts](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/view-layout/build-views-from-view-layout.ts)
+[modules/widgets/src/view-layout/build-views-from-view-layout.ts](https://github.com/visgl/deck.gl/tree/9.4-release/modules/widgets/src/view-layout/build-views-from-view-layout.ts)

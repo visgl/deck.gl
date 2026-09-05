@@ -53,4 +53,4 @@ Set `antialiasing: true` on those layers to have them compute edge coverage in t
 
 ## Source
 
-[/modules/core/src/effects/post-process-effect.ts](https://github.com/visgl/deck.gl/tree/master/modules/core/src/effects/post-process-effect.ts)
+[/modules/core/src/effects/post-process-effect.ts](https://github.com/visgl/deck.gl/tree/9.4-release/modules/core/src/effects/post-process-effect.ts)

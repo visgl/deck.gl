@@ -509,4 +509,4 @@ If `data.attributes.getIcon` is supplied, since its value can only be a typed ar
 
 ## Source
 
-[modules/layers/src/icon-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/icon-layer)
+[modules/layers/src/icon-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/layers/src/icon-layer)

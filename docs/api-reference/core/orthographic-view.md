@@ -74,4 +74,4 @@ When the X and Y axes zoom independently, it becomes ambiguous whether size shou
 
 ## Source
 
-[modules/core/src/views/orthographic-view.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/views/orthographic-view.ts)
+[modules/core/src/views/orthographic-view.ts](https://github.com/visgl/deck.gl/tree/9.4-release/modules/core/src/views/orthographic-view.ts)

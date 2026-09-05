@@ -252,4 +252,4 @@ new LineLayer({
 
 ## Source
 
-[modules/layers/src/line-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/line-layer)
+[modules/layers/src/line-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/layers/src/line-layer)

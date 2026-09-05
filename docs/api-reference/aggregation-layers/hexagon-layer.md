@@ -529,4 +529,4 @@ The HexagonLayer renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/hexagon-layer](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/hexagon-layer)
+[modules/aggregation-layers/src/hexagon-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/aggregation-layers/src/hexagon-layer)

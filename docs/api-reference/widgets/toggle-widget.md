@@ -157,4 +157,4 @@ The `ToggleWidget` uses the shared button theme variables described in the [styl
 
 ## Source
 
-[modules/widgets/src/toggle-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/toggle-widget.tsx)
+[modules/widgets/src/toggle-widget.tsx](https://github.com/visgl/deck.gl/tree/9.4-release/modules/widgets/src/toggle-widget.tsx)

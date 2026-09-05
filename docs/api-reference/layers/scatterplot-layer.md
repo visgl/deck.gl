@@ -308,4 +308,4 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 ## Source
 
-[modules/layers/src/scatterplot-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/scatterplot-layer)
+[modules/layers/src/scatterplot-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/layers/src/scatterplot-layer)

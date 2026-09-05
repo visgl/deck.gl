@@ -151,4 +151,4 @@ class MyController extends Controller{
 
 ## Source
 
-[modules/core/src/controllers/controller.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/controllers/controller.ts)
+[modules/core/src/controllers/controller.ts](https://github.com/visgl/deck.gl/tree/9.4-release/modules/core/src/controllers/controller.ts)

@@ -154,4 +154,4 @@ Learn more about how to replace icons in the [styling guide](./styling#replacing
 
 ## Source
 
-[modules/widgets/src/reset-view-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/reset-view-widget.tsx)
+[modules/widgets/src/reset-view-widget.tsx](https://github.com/visgl/deck.gl/tree/9.4-release/modules/widgets/src/reset-view-widget.tsx)
