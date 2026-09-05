@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
-Release date: August 2026
+Release date: September 5, 2026
 
 
 <table style={{border: 0}} align="center">
@@ -29,7 +29,7 @@ Looking ahead, deck.gl v10 is expected to introduce larger architectural changes
 
 ### WebGPU
 
-deck.gl v9.4 substantially expands its experimental WebGPU support. All of the official layer catalog except `MVTLayer` and `Tile3DLayer` now support WebGPU. Big improvements are made to core over WebGPU attribute-buffer assembly, render pass management and device switching. Render tests are used to ensure WebGL-WebGPU parity covering most common use cases.
+deck.gl v9.4 substantially expands its experimental WebGPU support. All layers in the official layer catalog now support WebGPU, including [`MVTLayer`](./api-reference/geo-layers/mvt-layer.md), with tile clipping for its circle, path, and polygon sublayers, and [`Tile3DLayer`](./api-reference/geo-layers/tile-3d-layer.md), with support for point-cloud, glTF scenegraph, and I3S mesh tile content. Big improvements are made to core WebGPU attribute-buffer assembly, render pass management, and device switching. Render tests are used to ensure WebGL-WebGPU parity covering most common use cases.
 
 The WebGPU-capable code is included by default so that adopting WebGPU does not require changing application imports. Applications that only target WebGL2 can instead configure their bundler to resolve the custom export condition `visgl:webgl-only`; supported deck.gl packages will then use alternate builds with WebGPU branches and WGSL shader sources removed, reducing their contribution to bundle size without changing the imported APIs. See [Building Apps](./developer-guide/building-apps.md#bundle-size) for details.
 
@@ -71,6 +71,7 @@ New experimental multi-canvas foundations allow integrations to associate each `
 
 - All [controllers](./api-reference/core/controller.md) now support `doubleClickDragZoom` for continuous zooming by double-clicking or double-tapping and dragging vertically.
 - The new `trackpadGesture` option enables native trackpad gestures, including two-finger pan, pinch-to-zoom, and rotate where supported.
+- The new `zoomAround` option chooses whether pointer-based zoom interactions keep the pointer location or the viewport center fixed.
 - The new `maxBoundsPadding` option fits `maxBounds` within a padded or asymmetrically positioned viewport region, with support for pixels, percentages, and CSS-style layout expressions.
 - `OrthographicController` and `MapController` now support `rubberBand`, allowing pan and zoom interactions to temporarily overshoot their constraints before easing back on release.
 
@@ -78,14 +79,18 @@ New experimental multi-canvas foundations allow integrations to associate each `
 
 New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked from the former `@deck.gl/mapbox` module. It provides support for overlaid and interleaved rendering with MapLibre GL JS v4, v5, and the recently released v6.
 
-### Other Improvements
-
-Better performance, and new layer and widget features.
+### Layers and Extensions
 
 - Picking performance has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now correctly passes `zoomOffset` through to its child `TileLayer`.
 - [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md#getpixeloffset) adds a transition-enabled `getPixelOffset` accessor for positioning circles in screen space.
+- [`PathLayer`](./api-reference/layers/path-layer.md), [`LineLayer`](./api-reference/layers/line-layer.md), [`ArcLayer`](./api-reference/layers/arc-layer.md), and [`PointCloudLayer`](./api-reference/layers/point-cloud-layer.md) now use analytic antialiasing for smooth edges without requiring MSAA. Composite layers that render paths, including `GeoJsonLayer`, `PolygonLayer`, and the geospatial cell layers, forward the new `antialiasing` prop to their path sublayers.
+- [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) adds `dashMode` to choose whether a dash pattern restarts at each segment or runs continuously across a complete path, and `dashUnits` to express dash lengths in stroke widths, pixels, meters, or common units. Dash rendering is also more robust for dense and 3D paths, billboarded or offset strokes, long paths, and subpixel patterns.
+- [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) can generate hatch, cross-hatch, and dot patterns directly in the fragment shader without a texture atlas. It also adds `fillPatternSizeUnits` for ground- or screen-relative pattern sizing and `getFillPatternBackgroundColor` for compositing patterns over a per-object background color.
+
+### Other Improvements
+
 - [OrthographicView](./api-reference/core/orthographic-view.md#common-size-resolution) allows `zoom` to control the size of geometry in common units independently from positional `zoomX` and `zoomY`.
 - [ZoomWidget](./api-reference/widgets/zoom-widget.md) now supports a `zoomStep` prop to configure the zoom level delta applied by each button click.
 - Built-in widget buttons now use [styled, customizable tooltips](./api-reference/widgets/tooltips.md) that support text, HTML content, theming, and per-button disabling.
