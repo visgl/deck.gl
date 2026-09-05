@@ -6,23 +6,6 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: September 5, 2026
 
-
-<table style={{border: 0}} align="center">
-  <tbody>
-    <tr>
-      <td>
-        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/antialiasing.png?raw=true" />
-        <p><i>Analytic antialiasing</i></p>
-      </td>
-      <td>
-        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/rubberband.gif?raw=true" />
-        <p><i>Controller maxBounds + rubberBand</i></p>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-
 deck.gl v9.4 is expected to be the final release in the v9 series. It brings together a collection of completed improvements focused on performance, stability, and usability, and is intended to be a highly compatible, highly recommended upgrade for all v9 applications.
 
 Looking ahead, deck.gl v10 is expected to introduce larger architectural changes, including luma.gl v10, loaders.gl v5, and support for more advanced binary data pipelines and GPU rendering techniques. As a result, v10 will likely be a more substantial and intentional upgrade for applications than this release.
@@ -36,6 +19,22 @@ The WebGPU-capable code is included by default so that adopting WebGPU does not 
 WebGPU support remains experimental and is not yet recommended for production. Some layers and features remain unavailable or only partially supported. See the [WebGPU guide](./developer-guide/webgpu.md) for setup instructions, current limitations, and the complete compatibility matrix.
 
 ### Views and Controllers
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/globe-tilt.gif?raw=true" />
+        <p><i>GlobeView pitch and bearing</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/rubberband.gif?raw=true" />
+        <p><i>Controller maxBounds + rubberBand</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 
 deck.gl v9.4 brings numerous view and controller improvements on top of the substantial changes in v9.3.
 
@@ -80,6 +79,26 @@ New experimental multi-canvas foundations allow integrations to associate each `
 New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked from the former `@deck.gl/mapbox` module. It provides support for overlaid and interleaved rendering with MapLibre GL JS v4, v5, and the recently released v6.
 
 ### Layers and Extensions
+
+
+<table style={{border: 0}} align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/antialiasing.png?raw=true" />
+        <p><i>Analytic antialiasing</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/path-style.png?raw=true" />
+        <p><i>PathStyleExtension dash config</i></p>
+      </td>
+      <td>
+        <img style={{maxHeight:240}} src="https://github.com/visgl/deck.gl-data/blob/master/images/whats-new/fill-pattern.png?raw=true" />
+        <p><i>FillStyleExtension procedural patterns</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 - Picking performance has been optimized. Most layers now use shader builtins (`instance_index`) instead of picking color buffers, reducing GPU memory usage and layer initialization costs.
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) now prioritizes tile requests closest to the viewport center, improving perceived load times during panning and zooming.
