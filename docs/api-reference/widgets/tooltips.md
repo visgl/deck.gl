@@ -1,6 +1,6 @@
 # Widget Tooltips
 
-<img src="https://img.shields.io/badge/from-v9.5-green.svg?style=flat-square" alt="from v9.5" />
+<img src="https://img.shields.io/badge/from-v9.4-green.svg?style=flat-square" alt="from v9.4" />
 
 Built-in button widgets ship with styled tooltips that appear on hover and keyboard focus. These replace the slow native browser title tooltips with themed, customizable alternatives.
 
