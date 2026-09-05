@@ -19,6 +19,17 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.4
 
+#### deck.gl [v9.4.0] - Sep 5 2026
+
+deck.gl v9.4 brings together a collection of completed improvements focused on performance, stability, and usability. Highlights include:
+
+- **All layers go WebGPU**: entire official layers catalog has been ported to WebGPU and achieves render parity with the WebGL version.
+- **Natural controllers interaction**: globe now supports pitch and bearing; trackpad gestures; and elastic navigation bounds makes complex 2D and 3D scenes easier to explore.
+- **Responsive multi-view and multi-canvas layouts**: make responsive dashboards and multi-view visualizations with ease.
+- **Layers, extensions and widgets improvements**: Sophisticated antialiasing, pattern fills, dashed-line styling, and tile loading features add stunning visuals.
+
+Visit [what's new](https://deck.gl/docs/whats-new) for a detailed lists of new features.
+
 ### deck.gl v9.4 Prereleases
 
 #### deck.gl [v9.4.0-beta.4] - Sep 3 2026
