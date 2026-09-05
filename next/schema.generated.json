@@ -416,6 +416,14 @@
                         ],
                         "description": "Drag behavior without pressing function keys, one of `pan` and `rotate`."
                       },
+                      "zoomAround": {
+                        "type": "string",
+                        "enum": [
+                          "center",
+                          "pointer"
+                        ],
+                        "description": "Screen position that remains fixed while zooming. Default `'pointer'`."
+                      },
                       "inertia": {
                         "type": [
                           "boolean",
@@ -887,6 +895,14 @@
                         ],
                         "description": "Drag behavior without pressing function keys, one of `pan` and `rotate`."
                       },
+                      "zoomAround": {
+                        "type": "string",
+                        "enum": [
+                          "center",
+                          "pointer"
+                        ],
+                        "description": "Screen position that remains fixed while zooming. Default `'pointer'`."
+                      },
                       "inertia": {
                         "type": [
                           "boolean",
@@ -1342,6 +1358,14 @@
                           "rotate"
                         ],
                         "description": "Drag behavior without pressing function keys, one of `pan` and `rotate`."
+                      },
+                      "zoomAround": {
+                        "type": "string",
+                        "enum": [
+                          "center",
+                          "pointer"
+                        ],
+                        "description": "Screen position that remains fixed while zooming. Default `'pointer'`."
                       },
                       "inertia": {
                         "type": [
@@ -1857,6 +1881,14 @@
                           "rotate"
                         ],
                         "description": "Drag behavior without pressing function keys, one of `pan` and `rotate`."
+                      },
+                      "zoomAround": {
+                        "type": "string",
+                        "enum": [
+                          "center",
+                          "pointer"
+                        ],
+                        "description": "Screen position that remains fixed while zooming. Default `'pointer'`."
                       },
                       "inertia": {
                         "type": [
@@ -14347,6 +14379,13 @@
               "type": "boolean",
               "description": "Recognize trackpad pinch gestures from wheel events. Only applies when pointers is 2.",
               "default": false
+            },
+            "coherent": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InputCoherenceCondition"
+              },
+              "description": "Alternative minimum input deltas used to delay recognition until pointer movement is coherent. Conditions in one object are combined with AND. Multiple objects are combined with OR."
             }
           }
         },
@@ -14372,6 +14411,13 @@
               "type": "boolean",
               "description": "Recognize two-finger trackpad pan gestures from wheel events. Only applies when pointers is 2.",
               "default": false
+            },
+            "coherent": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InputCoherenceCondition"
+              },
+              "description": "Alternative minimum input deltas used to delay recognition until pointer movement is coherent. Conditions in one object are combined with AND. Multiple objects are combined with OR."
             }
           }
         },
@@ -14397,6 +14443,13 @@
               "type": "boolean",
               "description": "Recognize two-finger trackpad pan gestures from wheel events. Only applies when pointers is 2.",
               "default": false
+            },
+            "coherent": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InputCoherenceCondition"
+              },
+              "description": "Alternative minimum input deltas used to delay recognition until pointer movement is coherent. Conditions in one object are combined with AND. Multiple objects are combined with OR."
             }
           }
         },
@@ -14471,6 +14524,32 @@
           }
         }
       }
+    },
+    "InputCoherenceCondition": {
+      "type": "object",
+      "properties": {
+        "distance": {
+          "type": "number",
+          "description": "Minimum movement of the gesture center, in pixels."
+        },
+        "distancePerPointer": {
+          "type": "number",
+          "description": "Minimum displacement of every pointer from where the current pointer set began, in pixels."
+        },
+        "movementDeltaTime": {
+          "type": "number",
+          "description": "Minimum time since the first movement within the current pointer set, in milliseconds."
+        },
+        "rotation": {
+          "type": "number",
+          "description": "Minimum absolute rotation from the initial pointer orientation, in degrees."
+        },
+        "scale": {
+          "type": "number",
+          "description": "Minimum absolute scale change from 1."
+        }
+      },
+      "description": "Minimum input deltas that must be reached before a recognizer can begin. Conditions in one object are combined with AND. Multiple objects are combined with OR."
     },
     "InputDirection": {
       "type": "number",
