@@ -7,6 +7,7 @@ import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
+import {expandViewMatrix} from '../view-presets';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
 import {COORDINATE_SYSTEM, Deck, MapView, OrthographicView} from '@deck.gl/core';
@@ -15,29 +16,40 @@ import {ArcLayer} from '@deck.gl/layers';
 import * as dataSamples from 'deck.gl-test/data';
 
 const testCases = [
-  {
-    name: 'arc-lnglat',
-    viewState: {
-      latitude: 37.76,
-      longitude: -122.45,
-      zoom: 11.5,
-      pitch: 20,
-      bearing: 0
+  // The globe variant guards the strip winding: GlobeView draws with cullMode: 'back', and a
+  // clockwise (back-facing) quad would be culled entirely
+  ...expandViewMatrix(
+    {
+      name: 'arc-lnglat',
+      viewState: {
+        latitude: 37.76,
+        longitude: -122.45,
+        zoom: 11.5,
+        pitch: 20,
+        bearing: 0
+      },
+      layers: [
+        new ArcLayer({
+          id: 'arc-lnglat',
+          data: dataSamples.routes,
+          opacity: 0.8,
+          getWidth: 2,
+          getSourcePosition: d => d.START,
+          getTargetPosition: d => d.END,
+          getSourceColor: [64, 255, 0],
+          getTargetColor: [0, 128, 200]
+        })
+      ],
+      goldenImage: './test/render/golden-images/arc-lnglat.png',
+      overrides: {
+        globe: {
+          skip: ['webgpu'],
+          imageDiffOptions: {threshold: 0.985}
+        }
+      }
     },
-    layers: [
-      new ArcLayer({
-        id: 'arc-lnglat',
-        data: dataSamples.routes,
-        opacity: 0.8,
-        getWidth: 2,
-        getSourcePosition: d => d.START,
-        getTargetPosition: d => d.END,
-        getSourceColor: [64, 255, 0],
-        getTargetColor: [0, 128, 200]
-      })
-    ],
-    goldenImage: './test/render/golden-images/arc-lnglat.png'
-  },
+    ['map', 'globe']
+  ),
   {
     name: 'arc-lnglat-wrap-longitude',
     viewState: {

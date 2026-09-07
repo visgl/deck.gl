@@ -22,8 +22,10 @@ out vec2 uv;
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
   vec2 dir_screenspace = normalize(line_clipspace * project.viewportSize);
-  // rotate by 90 degrees
-  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+  // rotate by 90 degrees clockwise. The strip emits the -1 side before the +1 side, so this
+  // winds the quad counter-clockwise in clip space (front-facing): it must survive
+  // cullMode: 'back', which GlobeView applies to every layer by default.
+  dir_screenspace = vec2(dir_screenspace.y, -dir_screenspace.x);
 
   return dir_screenspace * offset_direction * width / 2.0;
 }
