@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Text collision development</title>
+    <style>
+      body {margin: 0; font: 13px system-ui; background: #f4f6f8;}
+      aside {position: absolute; top: 12px; left: 12px; width: 250px; padding: 16px; background: white; border-radius: 8px; max-height: calc(100vh - 56px); overflow: auto;}
+      label {display: flex; justify-content: space-between; align-items: center; margin: 9px 0; gap: 8px;}
+      input[type=range] {width: 125px;}
+      select {max-width: 150px;}
+      h1 {font-size: 17px; margin: 0 0 10px;}
+      p, output {line-height: 1.5;}
+      button {margin-right: 8px;}
+    </style>
+  </head>
+  <body>
+    <canvas id="deck"></canvas>
+    <aside>
+      <h1>Text collision development</h1>
+      <p>Green labels have higher priority; red labels should disappear when they overlap. Dots mark geographic anchors.</p>
+      <div id="controls"></div>
+      <button id="reset">Reset view</button><button id="benchmark">Benchmark</button>
+      <p><output id="metrics">Ready</output></p>
+      <a href="/">Geographic / mask examples</a>
+    </aside>
+    <script type="module" src="text.js"></script>
+  </body>
+</html>
