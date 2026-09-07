@@ -1516,7 +1516,7 @@
   dependencies:
     "@loaders.gl/loader-utils" "4.4.5"
 
-"@loaders.gl/loader-utils@4.4.3", "@loaders.gl/loader-utils@^4.4.3":
+"@loaders.gl/loader-utils@4.4.3":
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-4.4.3.tgz#16c973aa23ad6c3274143a239d2f61dff88cb506"
   integrity sha512-5yt1OqZPYR3d+xFAqtzSKO24Hd7019KqN+iOWp7XBKPQBS+sAEhAnmSTnO1axo45IEi14J3FhMDk+ndqBoSKEQ==
@@ -1526,7 +1526,7 @@
     "@probe.gl/log" "^4.1.1"
     "@probe.gl/stats" "^4.1.1"
 
-"@loaders.gl/loader-utils@4.4.5":
+"@loaders.gl/loader-utils@4.4.5", "@loaders.gl/loader-utils@^4.4.3":
   version "4.4.5"
   resolved "https://registry.npmjs.org/@loaders.gl/loader-utils/-/loader-utils-4.4.5.tgz#8c4b0f21f07c2e05d30318dd1283821d26bd5bfa"
   integrity sha512-c4h2RUMEru+hbfvgZEIy5cLQKyQka2TPQZW/2Wy+yIPr3FU7RKwfp+vLwIfir6Xkdn2zniWyWretZwE02aY/Ug==
@@ -1540,6 +1540,13 @@
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/math/-/math-4.4.3.tgz#7202ba29af969940236eb31c6eb7ab81c681f6b6"
   integrity sha512-EdEsZGqo1AX3sqgXt8bSBmdo+8ncURXjWucyQ8eeIJ2h0VIqM3bLkOGKk/D1ngeqK4hJXcjiturYHBW1B286lw==
+  dependencies:
+    "@math.gl/core" "^4.1.0"
+
+"@loaders.gl/math@4.4.5":
+  version "4.4.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/math/-/math-4.4.5.tgz#dbb54742d037d56ec0da73624f23af8fd0535eaf"
+  integrity sha512-Az7rMw7oMNMzi1bXgPaabdkpPtk0safkWBr+I+dHjZHzny1RK5mFF4VjRkalw++DZBKbL0TskMw/OcdiRaL/Bw==
   dependencies:
     "@math.gl/core" "^4.1.0"
 
@@ -1650,13 +1657,26 @@
     ktx-parse "^0.7.0"
     texture-compressor "^1.0.2"
 
-"@loaders.gl/tiles@4.4.3", "@loaders.gl/tiles@^4.4.3":
+"@loaders.gl/tiles@4.4.3":
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/tiles/-/tiles-4.4.3.tgz#eacb018ebec876bc3cec3360f4fa3db869c9e16e"
   integrity sha512-8ZkPMe+daMV5mHKTEU591mJSp6pswdWliI+PcNhSOkpeuvyjecaYKSzuzMFMmaywfgOLpYl+lpfzKUEmCcE5vQ==
   dependencies:
     "@loaders.gl/loader-utils" "4.4.3"
     "@loaders.gl/math" "4.4.3"
+    "@math.gl/core" "^4.1.0"
+    "@math.gl/culling" "^4.1.0"
+    "@math.gl/geospatial" "^4.1.0"
+    "@math.gl/web-mercator" "^4.1.0"
+    "@probe.gl/stats" "^4.1.1"
+
+"@loaders.gl/tiles@^4.4.3":
+  version "4.4.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/tiles/-/tiles-4.4.5.tgz#bbb84304a297da9754b44d865d7b0006225ba0e6"
+  integrity sha512-XO9NeUsukjj+90YN1GEJWOgt7rI5GIv20dCpPIYdgj299aa8iYB5DWcm1YGcOuNjGqdQNZXIgPSv6ocdN/X7Mw==
+  dependencies:
+    "@loaders.gl/loader-utils" "4.4.5"
+    "@loaders.gl/math" "4.4.5"
     "@math.gl/core" "^4.1.0"
     "@math.gl/culling" "^4.1.0"
     "@math.gl/geospatial" "^4.1.0"
