@@ -78,7 +78,7 @@ When added to a layer via the `extensions` prop, the `BrushingExtension` adds th
 
 The brushing radius centered at the pointer, in meters. If a data object is within this circle, it is rendered; otherwise it is hidden.
 
-The radius is measured in true meters at the pointer's latitude in every view and at every zoom level.
+The radius is measured in meters in every view and at every zoom level. In `GlobeView` it is the exact 3D distance; in `MapView` it is the Web Mercator distance scaled by the mean latitude of the pointer and the object, which is exact to first order and deviates by at most a few percent for radii of several hundred kilometers.
 
 
 #### `brushingEnabled` (boolean, optional) {#brushingenabled}
