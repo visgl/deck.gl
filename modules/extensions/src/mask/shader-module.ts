@@ -17,8 +17,8 @@ layout(std140) uniform maskUniforms {
 `;
 
 const vertex = /* glsl */ `
-vec2 mask_getCoords(vec4 position) {
-  return (position.xy - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
+vec2 mask_getCoords(vec2 flatPosition) {
+  return (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
 }
 `;
 
@@ -64,13 +64,12 @@ const inject = {
 out vec2 mask_texCoords;
 `,
   'vs:#main-end': /* glsl */ `
-   vec4 mask_common_position;
-   if (mask.maskByInstance) {
-     mask_common_position = project_position(vec4(geometry.worldPosition, 1.0));
-   } else {
-     mask_common_position = geometry.position;
-   }
-   mask_texCoords = mask_getCoords(mask_common_position);
+   // Anchor (instance) or vertex position in common space, then flattened to the space the
+   // mask texture was rendered in (Mercator for geospatial views, identity otherwise)
+   vec4 mask_common_position = mask.maskByInstance
+     ? project_position(vec4(geometry.worldPosition, 1.0))
+     : geometry.position;
+   mask_texCoords = mask_getCoords(project_common_position_to_flat(mask_common_position));
 `,
   'fs:#decl': /* glsl */ `
 in vec2 mask_texCoords;
