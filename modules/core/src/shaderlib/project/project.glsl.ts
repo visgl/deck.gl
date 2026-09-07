@@ -182,6 +182,37 @@ vec3 project_globe_(vec3 lnglatz) {
   ) * D;
 }
 
+// Inverse of project_globe_ followed by a Mercator projection: converts a position in
+// globe common space (sphere XYZ) into absolute Mercator common space.
+vec2 project_globe_to_mercator_(vec3 spherePos) {
+  float D = length(spherePos);
+  float lat = degrees(asin(clamp(spherePos.z / D, -1.0, 1.0)));
+  float lng = degrees(atan(spherePos.x, -spherePos.y));
+  return project_mercator_(vec2(lng, lat));
+}
+
+//
+// Projects a common space position (geometry.position, or the output of project_position)
+// into FLAT common space: Web Mercator for geospatial projections, cartesian for identity.
+// Identity for flat projection modes, so the result stays in the same frame as
+// geometry.position (offset-relative under WEB_MERCATOR_AUTO_OFFSET). Under GLOBE the result
+// is absolute Mercator: do NOT add project.commonOrigin to it (for meter-offsets on the globe
+// commonOrigin is a sphere position, not a Mercator one).
+// Use when sampling a texture or testing bounds produced by a flat viewport (mask FBO, clip
+// bounds, fill pattern UVs, terrain height map).
+// Adding a non-flat projection mode: invert it HERE. This is the single GPU switch point.
+//
+vec2 project_common_position_to_flat(vec3 commonPosition) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    return project_globe_to_mercator_(commonPosition);
+  }
+  return commonPosition.xy;
+}
+
+vec2 project_common_position_to_flat(vec4 commonPosition) {
+  return project_common_position_to_flat(commonPosition.xyz);
+}
+
 //
 // Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //
