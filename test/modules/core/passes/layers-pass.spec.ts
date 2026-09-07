@@ -279,6 +279,55 @@ test('LayersPass#shouldDrawLayer', () => {
   expect(renderStats.visibleCount, '# of rendered layers').toBe(1); // test-primitive-visible
 });
 
+test('LayersPass#activateViewport option', () => {
+  const layer = new TestLayer({id: 'activate-viewport-layer'});
+  const layerManager = new LayerManager(device, {});
+  const layersPass = new DrawLayersPass(device);
+  layerManager.setLayers([layer]);
+
+  const activateViewport = vi.spyOn(layer, 'activateViewport');
+  const viewportA = new Viewport({id: 'A'});
+  const viewportB = new Viewport({id: 'B', longitude: 10, latitude: 10, zoom: 3});
+
+  // Default: the drawn layer is bound to the pass viewport
+  layersPass.render({
+    viewports: [viewportA],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+  expect(activateViewport, 'activateViewport is called by default').toHaveBeenCalledTimes(1);
+  expect(activateViewport).toHaveBeenLastCalledWith(viewportA);
+  expect(layer.internalState!.viewport, 'layer viewport is the pass viewport').toBe(viewportA);
+
+  // Opt-out: an off-screen pass renders with another viewport without rebinding the layer
+  activateViewport.mockClear();
+  const renderStats = layersPass.render({
+    viewports: [viewportB],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    activateViewport: false
+  })[0];
+  expect(renderStats.visibleCount, 'layer is still drawn').toBe(1);
+  expect(activateViewport, 'activateViewport is skipped').not.toHaveBeenCalled();
+  expect(layer.internalState!.viewport, 'layer keeps its previous viewport').toBe(viewportA);
+
+  // Explicit true behaves like the default
+  activateViewport.mockClear();
+  layersPass.render({
+    viewports: [viewportB],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    activateViewport: true
+  });
+  expect(activateViewport, 'activateViewport: true calls the layer method').toHaveBeenCalledTimes(
+    1
+  );
+  expect(layer.internalState!.viewport).toBe(viewportB);
+
+  activateViewport.mockRestore();
+  layerManager.finalize();
+});
+
 test('LayersPass#viewParameters', () => {
   const drawCalls = [];
   const layers = [
