@@ -15,6 +15,15 @@
 .. image:: gallery/images/bitmap_layer.png
    :width: 0
 
+.. image:: gallery/images/bar_chart.png
+   :width: 0
+
+.. image:: gallery/images/scatter_plot.png
+   :width: 0
+
+.. image:: gallery/images/surface_plot.png
+   :width: 0
+
 .. image:: gallery/images/column_layer.png
    :width: 0
 
@@ -202,6 +211,12 @@
    gallery/binary_transport
 
    gallery/bitmap_layer
+
+   gallery/bar_chart
+
+   gallery/scatter_plot
+
+   gallery/surface_plot
 
    gallery/column_layer
 

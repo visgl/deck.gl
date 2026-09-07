@@ -1,4 +1,5 @@
 import html
+import json
 import os
 from os.path import realpath, join, dirname
 import sys
@@ -85,7 +86,8 @@ def render_json_to_html(
         deckgl_widget_css=widget_css_picker(),
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
-        custom_libraries=custom_libraries,
+        # Serialize as JSON so booleans and quotes are valid JavaScript (Python repr is not)
+        custom_libraries=json.dumps(custom_libraries) if custom_libraries else None,
         configuration=configuration,
         show_error=show_error,
     )

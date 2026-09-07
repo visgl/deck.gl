@@ -13,7 +13,7 @@ import {GL as GLConstants} from '@luma.gl/webgl/constants';
 import makeTooltip from './widget-tooltip';
 
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
-import {loadScript} from './utils/script-utils';
+import {loadModule, loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
@@ -100,7 +100,7 @@ export function addCustomLibraries(customLibraries, onComplete) {
     onEachFinish();
   }
 
-  customLibraries.forEach(({libraryName, resourceUri}) => {
+  customLibraries.forEach(({libraryName, resourceUri, module}) => {
     // set loaded to be false, even if addCustomLibraries is called multiple times
     // with the same parameters
     loaded[libraryName] = false;
@@ -111,17 +111,18 @@ export function addCustomLibraries(customLibraries, onComplete) {
       return;
     }
 
-    // because loadscript is async and scipt execution is untraceble
-    // the only way we can listen on its execution complete is to observe on the
-    // window.libraryName property
+    // Script execution is asynchronous and untraceable, so completion is observed through the
+    // window[libraryName] property: classic scripts assign it themselves, and for ES modules
+    // loadModule() assigns the module namespace after import.
     Object.defineProperty(window, libraryName, {
-      set: module => onModuleLoaded(libraryName, module),
+      set: loadedModule => onModuleLoaded(libraryName, loadedModule),
       get: () => {
         return loaded[libraryName];
       }
     });
 
-    loadScript(resourceUri);
+    const loading = module ? loadModule(resourceUri, libraryName) : loadScript(resourceUri);
+    loading.catch(error => console.error(`Could not load custom library ${libraryName}`, error));
   });
 }
 

@@ -22,6 +22,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {NullDevice} from '@luma.gl/test-utils';
 import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
+import {loadModule} from '@deck.gl/jupyter-widget/playground/utils/script-utils';
 
 class DemoCompositeLayer extends CompositeLayer {
   renderLayers() {
@@ -60,6 +61,42 @@ describe('jupyter-widget: dynamic-registration', () => {
       ],
       onComplete
     );
+  });
+
+  test('addCustomLibraries loads ES modules', async () => {
+    const LIBRARY_NAME = 'DemoEsmLibrary';
+    // Stands in for the `deck` global that an externalized custom build reads its base classes from.
+    (window as any).__DemoBaseLayer = CompositeLayer;
+    const url = URL.createObjectURL(
+      new Blob(
+        [
+          'export class DemoEsmLayer extends globalThis.__DemoBaseLayer { renderLayers() { return null; } }'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      const props = jsonConverter.convert({layers: [{'@@type': 'DemoEsmLayer', data: []}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].DemoEsmLayer);
+      expect(props.layers[0]).toBeInstanceOf(CompositeLayer);
+    } finally {
+      URL.revokeObjectURL(url);
+      delete (window as any).__DemoBaseLayer;
+    }
+  });
+
+  test('loadModule quotes the URL and global name', async () => {
+    const url = 'data:text/javascript,export%20const%20Ok%3D1';
+    await loadModule(url, 'Quoted"Name</script>');
+    const scripts = Array.from(document.querySelectorAll('script[type="module"]'));
+    const script = scripts[scripts.length - 1];
+    expect(script.textContent).toContain(
+      `import * as m from ${JSON.stringify(url)}; window["Quoted\\"Name\\u003c/script>"] = m;`
+    );
+    expect(script.textContent).not.toContain('</script>');
   });
 });
 
