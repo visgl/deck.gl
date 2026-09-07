@@ -150,6 +150,32 @@ describe('jupyter-widget: anywidget entry', () => {
     }
   });
 
+  test('a data_buffer present at render time is attached on the first update', async () => {
+    const buffer = new ArrayBuffer(16);
+    new Float32Array(buffer).set([5, 6, 7, 8]);
+    const model = new MockModel({
+      json_input: JSON.stringify(
+        withDevice({layers: [{'@@type': 'ScatterplotLayer', id: 'layer-id'}]})
+      ),
+      data_buffer: {
+        'layer-id': {
+          length: 2,
+          attributes: {getPosition: {dtype: 'float32', size: 2, value: new DataView(buffer)}}
+        }
+      }
+    });
+    const {el, deck, controller} = render(model);
+    try {
+      await flush();
+      const {value} = deck.props.layers[0].props.data.attributes.getPosition;
+      expect(value).toBeInstanceOf(Float32Array);
+      expect(Array.from(value)).toEqual([5, 6, 7, 8]);
+    } finally {
+      controller.abort();
+      el.remove();
+    }
+  });
+
   test('events are sent to Python as JSON strings', () => {
     const model = new MockModel({json_input: JSON.stringify(LAYER_JSON)});
     const {el, deck, controller} = render(model);

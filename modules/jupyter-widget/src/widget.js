@@ -84,6 +84,12 @@ export function renderWidget({model, el, signal}) {
   model.on('change:json_input', scheduleApply);
   model.on('change:data_buffer', scheduleApply);
 
+  // Deck.show() syncs json_input and data_buffer before the first render, so binary-transport
+  // layers already have their buffers waiting; createDeck only consumed the JSON.
+  if (model.get('data_buffer')) {
+    scheduleApply();
+  }
+
   signal.addEventListener('abort', () => {
     model.off('change:json_input', scheduleApply);
     model.off('change:data_buffer', scheduleApply);
