@@ -186,6 +186,12 @@
 .. image:: gallery/images/trips_layer.png
    :width: 0
 
+.. image:: gallery/images/multi_view.png
+   :width: 0
+
+.. image:: gallery/images/split_view.png
+   :width: 0
+
 .. image:: gallery/images/widgets.png
    :width: 0
 
@@ -316,5 +322,9 @@
    gallery/text_layer
 
    gallery/trips_layer
+
+   gallery/multi_view
+
+   gallery/split_view
 
    gallery/widgets

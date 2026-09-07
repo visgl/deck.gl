@@ -8,8 +8,13 @@ Releases and associated GitHub PRs for pydeck are documented here.
 
 0.9.4 - TBD
 ^^^^^^^^^^^
-- Add typed lighting and post-processing effects through ``pydeck.Effect``
-- Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop
+- Update to deck.gl v9.4
+- Add typed layer extensions through ``pydeck.Extension`` (#10447)
+- Register the canonical ``GlobeView`` type name in the Jupyter widget (#10451)
+- Add typed lighting and post-processing effects through ``pydeck.Effect`` (#10455)
+- Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop (#10455)
+- Add MapLibre basemap provider with globe projection via ``map_provider="maplibre"`` (#10566)
+- Add multi-view layout and ``SplitterWidget`` documentation and gallery examples
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^
