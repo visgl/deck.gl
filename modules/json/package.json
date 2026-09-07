@@ -42,7 +42,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "jsep": "^0.3.0"
+    "jsep": "^1.4.0"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0"
