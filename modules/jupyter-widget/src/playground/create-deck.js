@@ -87,9 +87,11 @@ export function addCustomLibraries(customLibraries, onComplete) {
 
   const loaded = {};
 
+  const failed = {};
+
   function onEachFinish() {
-    if (Object.values(loaded).every(f => f)) {
-      // when all libraries loaded
+    if (Object.keys(loaded).every(name => loaded[name] || failed[name])) {
+      // when all libraries loaded (or failed to load)
       if (typeof onComplete === 'function') onComplete();
     }
   }
@@ -97,6 +99,14 @@ export function addCustomLibraries(customLibraries, onComplete) {
   function onModuleLoaded(libraryName, module) {
     addModuleToConverter(module, jsonConverter);
     loaded[libraryName] = module;
+    onEachFinish();
+  }
+
+  function onModuleFailed(libraryName, error) {
+    // eslint-disable-next-line
+    console.error(`Could not load custom library ${libraryName}`, error);
+    // Settle the registration so initialization completes; the library's classes stay unregistered
+    failed[libraryName] = true;
     onEachFinish();
   }
 
@@ -122,7 +132,7 @@ export function addCustomLibraries(customLibraries, onComplete) {
     });
 
     const loading = module ? loadModule(resourceUri, libraryName) : loadScript(resourceUri);
-    loading.catch(error => console.error(`Could not load custom library ${libraryName}`, error));
+    loading.catch(error => onModuleFailed(libraryName, error));
   });
 }
 

@@ -54,3 +54,11 @@ def test_no_custom_libraries_renders_null():
     pydeck.settings.custom_libraries = []
     html_str = pydeck.Deck(pydeck.Layer("ScatterplotLayer", [])).to_html(as_string=True)
     assert "const customLibraries = null;" in html_str
+
+
+def test_custom_libraries_cannot_close_the_script_element():
+    pydeck.settings.custom_libraries = []
+    pydeck.settings.register_library("Evil</script><script>alert(1)</script>", "https://deck.gl/x.js")
+    html_str = pydeck.Deck(pydeck.Layer("DemoLayer", [])).to_html(as_string=True)
+    assert "</script><script>alert(1)" not in html_str
+    assert _custom_libraries_from_html(html_str)[0]["libraryName"] == ("Evil</script><script>alert(1)</script>")

@@ -15,8 +15,9 @@ export function loadScript(url) {
     const head = document.querySelector('head');
     head.appendChild(script);
 
-    scriptLoadPromises[url] = new Promise(resolve => {
+    scriptLoadPromises[url] = new Promise((resolve, reject) => {
       script.onload = resolve;
+      script.onerror = () => reject(new Error(`Failed to load script ${url}`));
     });
   }
   return scriptLoadPromises[url];

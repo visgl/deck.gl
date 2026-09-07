@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line
 /* global document, window, global */
-import {test, expect, describe} from 'vitest';
+import {test, expect, describe, vi} from 'vitest';
 
 import {
   AmbientLight,
@@ -85,6 +85,26 @@ describe('jupyter-widget: dynamic-registration', () => {
     } finally {
       URL.revokeObjectURL(url);
       delete (window as any).__DemoBaseLayer;
+    }
+  });
+
+  test('addCustomLibraries completes when a library fails to load', async () => {
+    const missingModule = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000000`;
+    const missingScript = `${window.location.origin}/no-such-custom-library-${Date.now()}.js`;
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [
+            {libraryName: 'MissingEsmLibrary', resourceUri: missingModule, module: true},
+            {libraryName: 'MissingClassicLibrary', resourceUri: missingScript}
+          ],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(2);
+    } finally {
+      errors.mockRestore();
     }
   });
 
