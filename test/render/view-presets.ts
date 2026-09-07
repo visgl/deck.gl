@@ -34,8 +34,11 @@ export type ViewPreset = {
   /** map/globe share lng/lat data; orthographic needs cartesian data (use toPosition/toBounds) */
   isGeospatial: boolean;
   coordinateSystem: 'lnglat' | 'cartesian';
-  /** Map a lng/lat from the shared San Francisco test data into this preset's world space */
-  toPosition: (lngLat: number[]) => number[];
+  /**
+   * Map a lng/lat from the shared San Francisco test data into this preset's world space.
+   * Returns a 2-tuple so it can be used directly in `getPosition` accessors.
+   */
+  toPosition: (lngLat: number[]) => [number, number];
   /** Same for `[minX, minY, maxX, maxY]` bounds (e.g. `clipBounds`) */
   toBounds: (bounds: [number, number, number, number]) => [number, number, number, number];
 };
@@ -50,6 +53,7 @@ export const SF_VIEW_STATE = {
 };
 
 const identity = <T>(value: T): T => value;
+const toLngLat = (lngLat: number[]): [number, number] => [lngLat[0], lngLat[1]];
 
 /** Pixel projection of the map preset; expresses the same picture in cartesian coordinates */
 const sfPixelViewport = new WebMercatorViewport({...SF_VIEW_STATE, width: WIDTH, height: HEIGHT});
@@ -61,7 +65,7 @@ export const VIEW_PRESETS: Record<ViewPresetName, ViewPreset> = {
     viewState: SF_VIEW_STATE,
     isGeospatial: true,
     coordinateSystem: 'lnglat',
-    toPosition: identity,
+    toPosition: toLngLat,
     toBounds: identity
   },
   // Same lng/lat/zoom as the map preset. GlobeViewport scales by 2^(zoom - log2(PI * cos(lat))),
@@ -73,7 +77,7 @@ export const VIEW_PRESETS: Record<ViewPresetName, ViewPreset> = {
     viewState: SF_VIEW_STATE,
     isGeospatial: true,
     coordinateSystem: 'lnglat',
-    toPosition: identity,
+    toPosition: toLngLat,
     toBounds: identity
   },
   // Pixel space of the map preset. OrthographicView defaults to flipY: true (+y = screen down),
@@ -84,7 +88,10 @@ export const VIEW_PRESETS: Record<ViewPresetName, ViewPreset> = {
     viewState: {target: [WIDTH / 2, HEIGHT / 2, 0], zoom: 0},
     isGeospatial: false,
     coordinateSystem: 'cartesian',
-    toPosition: lngLat => sfPixelViewport.project(lngLat).slice(0, 2),
+    toPosition: lngLat => {
+      const [x, y] = sfPixelViewport.project(lngLat);
+      return [x, y];
+    },
     toBounds: ([x0, y0, x1, y1]) => {
       const a = sfPixelViewport.project([x0, y0]);
       const b = sfPixelViewport.project([x1, y1]);
