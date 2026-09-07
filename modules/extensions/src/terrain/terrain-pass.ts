@@ -74,7 +74,17 @@ export class TerrainPass extends LayersPass {
       pass: `terrain-cover-${terrainCover.id}`,
       layers,
       viewports: [viewport],
-      clearColor: [0, 0, 0, 0]
+      clearColor: [0, 0, 0, 0],
+      // The cover is drawn with a flat Web Mercator viewport while the same layers are also drawn
+      // to screen (their vertices are discarded by the terrain shader module) with the screen
+      // viewport. Activating both viewports on the layers each frame makes viewport-dependent
+      // state such as PathLayer tessellation (`viewport.resolution` / projectionMode differ on
+      // GlobeView) flip-flop, redraw and re-dirty this cover forever. Skip activation here:
+      // the `project` uniforms still come from the cover viewport, so geometry tessellated for
+      // the screen viewport is drawn into the Mercator cover. On GlobeView that means the
+      // globe subdivision of long segments only adds collinear vertices in Mercator, and
+      // Mercator-only state such as dash offsets is computed for the screen viewport.
+      activateViewport: false
     });
   }
 

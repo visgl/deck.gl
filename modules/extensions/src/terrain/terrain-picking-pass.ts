@@ -75,7 +75,10 @@ export class TerrainPickingPass extends PickLayersPass {
       cullRect: undefined,
       deviceRect: viewport,
       pickZ: false,
-      clearColor: [0, 0, 0, terrainAlpha]
+      clearColor: [0, 0, 0, terrainAlpha],
+      // Same reason as TerrainPass.renderTerrainCover: keep the layers' viewport-dependent state
+      // bound to the screen viewport instead of re-updating them for the Mercator cover viewport.
+      activateViewport: false
     });
   }
 
