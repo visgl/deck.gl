@@ -19,10 +19,11 @@ WIDGET_DIR=../../modules/jupyter-widget
 copy-bundle:
 	node scripts/build_widget.mjs --copy-only
 
+# Build deck.gl from the repository root (this directory has its own package.json for the
+# widget bundle step, so yarn must not be run here), then copy the bundles into pydeck/static
 init:
 	. $(BIN)/activate; \
-	yarn bootstrap; \
-	yarn build
+	cd ../.. && yarn bootstrap && yarn build
 	$(MAKE) copy-bundle
 	uv pip install -r requirements/requirements.txt && \
 	uv pip install -r requirements/requirements-dev.txt && \
