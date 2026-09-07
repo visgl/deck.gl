@@ -3,9 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, project} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
+import {projectBoundsToFlatCommon} from '../utils/projection-utils';
 
 const defaultProps = {
   clipBounds: [0, 0, 1, 1],
@@ -76,6 +77,8 @@ in float clip_isVisible;
  */
 const shaderModuleFs: ShaderModule<ClipModuleProps> = {
   name: 'clip',
+  // The vertex injection below calls project_common_position_to_flat()
+  dependencies: [project],
   fs: shaderFunction,
   uniformTypes: {
     bounds: 'vec4<f32>'
@@ -86,8 +89,10 @@ const injectionFs = {
   'vs:#decl': /* glsl */ `
 out vec2 clip_commonPosition;
 `,
+  // Flat (Mercator / cartesian) common space, so that the position can be compared with the
+  // bounds produced by projectBoundsToFlatCommon() in every projection mode, including globe
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-  clip_commonPosition = geometry.position.xy;
+  clip_commonPosition = project_common_position_to_flat(geometry.position);
 `,
   'fs:#decl': /* glsl */ `
 in vec2 clip_commonPosition;
@@ -136,15 +141,8 @@ export default class ClipExtension extends LayerExtension {
     if (this.state.clipByInstance) {
       clipProps.bounds = clipBounds;
     } else {
-      const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
-      const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
-
-      clipProps.bounds = [
-        Math.min(corner0[0], corner1[0]),
-        Math.min(corner0[1], corner1[1]),
-        Math.max(corner0[0], corner1[0]),
-        Math.max(corner0[1], corner1[1])
-      ];
+      // Pairs with project_common_position_to_flat() in the vertex shader
+      clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds);
     }
 
     if (this.context.device.type === 'webgpu') {
