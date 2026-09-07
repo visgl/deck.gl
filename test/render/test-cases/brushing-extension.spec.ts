@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import {describe} from 'vitest';
@@ -40,10 +40,38 @@ const getPointLayer = (id: string, props = {}) =>
     ...props
   });
 
+// Every 10th point joined to the next kept one (252 segments); brushingTarget 'source_target'
+// keeps a line if either end is within the radius, so the visible set is a fan of segments
+// around the pointer
+const sparsePoints = points.filter((_, i) => i % 10 === 0);
+const lines = sparsePoints.map((d, i) => ({
+  source: d.COORDINATES,
+  target: sparsePoints[(i + 1) % sparsePoints.length].COORDINATES
+}));
+
+const getLineLayer = (id: string) =>
+  new LineLayer({
+    id,
+    data: lines,
+    getSourcePosition: d => d.source,
+    getTargetPosition: d => d.target,
+    getColor: [0, 0, 0],
+    getWidth: 3,
+    widthUnits: 'pixels',
+    brushingEnabled: true,
+    brushingRadius: BRUSHING_RADIUS,
+    brushingTarget: 'source_target',
+    extensions: [new BrushingExtension()]
+  });
+
 const testCases: TestCase[] = [
   {
     name: 'brushing-source',
     layers: [getPointLayer('brushing-source')]
+  },
+  {
+    name: 'brushing-target',
+    layers: [getLineLayer('brushing-target')]
   },
   {
     name: 'brushing-disabled',
