@@ -13,6 +13,7 @@ import type {
 } from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
+import {getFlatCommonOrigin} from '../utils/projection-utils';
 
 // Common-space size of one atlas texel: the equator measures 40,000km and spans 512 common units
 const FILL_UV_SCALE = 512 / 40000000;
@@ -216,10 +217,13 @@ ${patternFs}
 const inject = {
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     if (fill.patternEnabled) {
+      // Patterns tile a flat plane. geometry.position is sphere XYZ under GlobeView, so flatten
+      // it to Mercator; a no-op for flat projections. Pairs with getFlatCommonOrigin() on the CPU.
+      vec2 fill_flatPosition = project_common_position_to_flat(geometry.position);
       fill_patternPlacement.xy = fillPatternOffsets;
       fill_backgroundColor = fillPatternBackgroundColors;
       if (fill.procedural) {
-        fill_uv = geometry.position.xy;
+        fill_uv = fill_flatPosition;
         fill_patternCoordinateScale = fill.patternUnitScale * fillPatternScales;
         int texelIndex = int(fillPatternFrames.x) * 4;
         fill_patternParams0 = vec4(
@@ -236,7 +240,7 @@ const inject = {
         // Reduce the coordinate origin to within one tile before adding the vertex position. The
         // origin is large in common space, and fp32 cannot carry the sum at full precision.
         vec2 origin = mod(fill.uvCoordinateOrigin, patternFrameCommon) + fill.uvCoordinateOrigin64Low;
-        fill_uv = (origin + geometry.position.xy) / patternFrameCommon;
+        fill_uv = (origin + fill_flatPosition) / patternFrameCommon;
         // Pattern atlases use top-left coordinates, so reverse common-space Y in bottom-left views.
         fill_uv.y *= fill.flipY ? 1.0 : -1.0;
         fill_uv += fillPatternOffsets;
@@ -316,12 +320,13 @@ function getPatternUniforms(
       procedural = false
     } = opts;
     const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
-    const {commonOrigin: coordinateOriginCommon} = projectUniforms;
     const unitScale = getPatternUnitScale(fillPatternSizeUnits, opts.project.viewport);
 
+    // The origin that the shader's flat position is relative to: project.commonOrigin on flat
+    // viewports, [0, 0] on GlobeView where project_common_position_to_flat() is absolute Mercator
+    const origin = getFlatCommonOrigin(projectUniforms, opts.project.viewport);
     // Improve the precision of the uv mapping by removing an integer multiple of the
     // pattern frames. This results in the same result, without wobbling at high zooms
-    const origin: [number, number] = [coordinateOriginCommon[0], coordinateOriginCommon[1]];
     if (fillPatternCommonFrame) {
       origin[0] %= unitScale * fillPatternCommonFrame[0];
       origin[1] %= unitScale * fillPatternCommonFrame[1];
