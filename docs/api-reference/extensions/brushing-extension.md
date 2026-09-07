@@ -78,6 +78,8 @@ When added to a layer via the `extensions` prop, the `BrushingExtension` adds th
 
 The brushing radius centered at the pointer, in meters. If a data object is within this circle, it is rendered; otherwise it is hidden.
 
+The radius is measured in true meters at the pointer's latitude in every view and at every zoom level.
+
 
 #### `brushingEnabled` (boolean, optional) {#brushingenabled}
 
