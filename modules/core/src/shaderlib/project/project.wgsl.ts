@@ -204,6 +204,26 @@ fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   ) * D;
 }
 
+// Inverse of project_globe_ followed by a Mercator projection: converts a position in
+// globe common space (sphere XYZ) into absolute Mercator common space.
+fn project_globe_to_mercator_(spherePos: vec3<f32>) -> vec2<f32> {
+  let D = length(spherePos);
+  let lat = degrees(asin(clamp(spherePos.z / D, -1.0, 1.0)));
+  let lng = degrees(atan2(spherePos.x, -spherePos.y));
+  return project_mercator_(vec2<f32>(lng, lat));
+}
+
+// Projects a common space position into FLAT common space: Web Mercator for geospatial
+// projections, cartesian for identity. Identity for flat projection modes; absolute Mercator
+// under GLOBE (do not add project.commonOrigin to it). See project.glsl.ts for details.
+// WGSL has no function overloading: pass position.xyz for a vec4.
+fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    return project_globe_to_mercator_(commonPosition);
+  }
+  return commonPosition.xy;
+}
+
 // Projects positions (with an optional 64-bit low part) from the input
 // coordinate system to the common space.
 fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {
