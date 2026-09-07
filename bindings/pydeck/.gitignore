@@ -151,9 +151,10 @@ $RECYCLE.BIN/
 # -------------
 **/coverage/
 
-# Cut JS files created in build process
-**/pydeck/nbextension/static/index.js
-**/pydeck/nbextension/static/index.js.map
+# Widget bundles copied from @deck.gl/jupyter-widget in the build process
+**/pydeck/static/*.js
+**/pydeck/static/*.js.map
+**/pydeck/static/*.css
 **/_build
 # Docs and examples html pages
 **/examples/*.png

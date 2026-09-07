@@ -16,8 +16,7 @@ Check that the version matches `DECKGL_SEMVER` in `pydeck/frontend_semver.py`.
 
 Run `make bump-version` and select a release type at the prompt. This bumps all version files:
 
-- `pydeck/_version.py` — the canonical Python version
-- `pyproject.toml` — the package metadata version (used by `python -m build`)
+- `pydeck/_version.py` — the canonical Python version (`pyproject.toml` reads it through hatchling)
 - `docs/conf.py` — the Sphinx documentation version and release
 - `pydeck/frontend_semver.py` — synced to the deck.gl version in `lerna.json`
 
@@ -30,13 +29,16 @@ Update `docs/CHANGELOG.rst` with release notes for the new version.
 
 ### Local build testing
 
-Build the wheel from the pydeck dev environment:
+Build the wheel from the pydeck dev environment. The hatch-jupyter-builder hook builds
+`@deck.gl/jupyter-widget` and copies its bundles into `pydeck/static`, so deck.gl must be built first
+(`yarn build` at the repository root, as `make init` does):
 
 ```bash
 cd bindings/pydeck
 source .venv/bin/activate
 uv pip install build
 python -m build
+unzip -l dist/pydeck-*.whl | grep static   # expect widget.js, widget.css and standalone.js
 ```
 
 Then install it in a fresh venv with Jupyter dependencies:
@@ -44,7 +46,7 @@ Then install it in a fresh venv with Jupyter dependencies:
 ```bash
 uv venv /tmp/pydeck-test
 source /tmp/pydeck-test/bin/activate
-uv pip install dist/pydeck-*.whl notebook jupyterlab pandas numpy requests ipywidgets networkx
+uv pip install "$(ls dist/pydeck-*.whl)[jupyter]" notebook jupyterlab pandas numpy requests networkx
 ```
 
 Run through the verification checklist:
@@ -66,14 +68,12 @@ jupyter notebook examples/
 jupyter lab examples/
 ```
 
-**Note on `.show()` vs `.to_html()`:** In pydeck v0.9+, `.show()` is a wrapper around
-`.to_html()` — both render via an HTML iframe using the deck.gl JS bundle from jsDelivr.
-The earlier ipywidgets-based `.show()` (which supported binary transport, data selection,
-and live `.update()` calls) is not currently functional. Neither nbextension nor labextension
-setup is required for the current `.show()` / `.to_html()` behavior.
-
-Restoring full Jupyter widget support (ipywidgets protocol, prebuilt labextension) is
-tracked as a future improvement.
+**Note on `.show()` vs `.to_html()`:** With the `jupyter` extra installed, `.show()` returns the
+anywidget-based `DeckGLWidget` (live `.update()`, event handlers, data selection, binary transport)
+loaded from the bundles inside the wheel. Without the extra it renders the same HTML iframe as
+`.to_html()`, which loads the deck.gl JS bundle from jsDelivr. No nbextension or labextension setup
+is required in either case. Verify `.show()` in JupyterLab, Jupyter Notebook, VS Code and Google Colab
+before a release.
 
 ### Producing a production release
 

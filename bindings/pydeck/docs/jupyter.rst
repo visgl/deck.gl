@@ -1,15 +1,22 @@
 Jupyter-specific features
 =========================
 
-.. NOTE::
-   The features described on this page are not currently functional in pydeck v0.9+.
-   Both ``.show()`` and ``.to_html()`` render via an HTML iframe using the deck.gl JS bundle
-   from jsDelivr. The widget code path in ``.show()`` is disabled in the Python source
-   (``pydeck/bindings/deck.py``). Restoring full Jupyter widget support — including the
-   features below — is tracked as a future improvement.
-
 Jupyter environments offer unique opportunities for two-way data interaction,
 sharing data between the Python backend and visualization in deck.gl.
+
+Installation
+^^^^^^^^^^^^
+
+Install pydeck with the Jupyter extra:
+
+.. code-block:: bash
+
+        pip install "pydeck[jupyter]"
+
+The widget is built on `anywidget <https://anywidget.dev>`__ and works in JupyterLab 4, Jupyter Notebook 7,
+VS Code, Google Colab and other ipywidgets-compatible frontends. No ``nbextension`` or ``labextension``
+installation step is needed. Without the extra, :meth:`pydeck.bindings.deck.Deck.show` renders a static
+HTML iframe, the same output as :meth:`pydeck.bindings.deck.Deck.to_html`.
 
 To use a visualization with these features, call :meth:`pydeck.bindings.deck.Deck.show` on the :class:`pydeck.bindings.deck.Deck` object
 rather than :meth:`pydeck.bindings.deck.Deck.to_html`.
