@@ -107,6 +107,11 @@ The position used to filter each object by. One of the following:
 Called to retrieve an arbitrary position for each object that it will be filtered by. Returns an array `[x, y]`. Only effective if `brushingTarget` is set to `custom`.
 
 
+## Remarks
+
+- Supported in `GlobeView`. `brushingRadius` is compared against the straight-line distance between the pointer and each object in 3D, which equals the great-circle distance to within 0.03% for radii under 500 km.
+
+
 ## Source
 
 [modules/extensions/src/brushing](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/brushing)
