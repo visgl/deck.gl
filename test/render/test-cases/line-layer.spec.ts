@@ -7,6 +7,7 @@ import {luma} from '@luma.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
+import {expandViewMatrix} from '../view-presets';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
 /* eslint-disable callback-return */
@@ -49,30 +50,41 @@ const antialiasingTestCase: TestCase = {
 };
 
 const testCases: TestCase[] = [
-  {
-    name: 'line-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
+  // The globe variant guards the strip winding: GlobeView draws with cullMode: 'back', and a
+  // clockwise (back-facing) quad would be culled entirely
+  ...expandViewMatrix(
+    {
+      name: 'line-lnglat',
+      viewState: {
+        latitude: 37.751537058389985,
+        longitude: -122.42694203247012,
+        zoom: 11.5,
+        pitch: 0,
+        bearing: 0
+      },
+      layers: [
+        new LineLayer({
+          id: 'line-lnglat',
+          data: routes,
+          opacity: 0.8,
+          getWidth: 0,
+          widthMinPixels: 2,
+          getSourcePosition: d => d.START,
+          getTargetPosition: d => d.END,
+          getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
+          pickable: true
+        })
+      ],
+      goldenImage: './test/render/golden-images/line-lnglat.png',
+      overrides: {
+        globe: {
+          skip: ['webgpu'],
+          imageDiffOptions: {threshold: 0.985}
+        }
+      }
     },
-    layers: [
-      new LineLayer({
-        id: 'line-lnglat',
-        data: routes,
-        opacity: 0.8,
-        getWidth: 0,
-        widthMinPixels: 2,
-        getSourcePosition: d => d.START,
-        getTargetPosition: d => d.END,
-        getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/line-lnglat.png'
-  },
+    ['map', 'globe']
+  ),
   antialiasingTestCase
 ];
 

@@ -23,8 +23,10 @@ fn deckgl_filter_gl_position(p: vec4<f32>, geometry: Geometry) -> vec4<f32> {
 fn getExtrusionOffset(line_clipspace: vec2<f32>, offset_direction: f32, width: f32) -> vec2<f32> {
   // project.viewportSize should be provided as a uniform (not shown here)
   let dir_screenspace = normalize(line_clipspace * project.viewportSize);
-  // Rotate by 90°: (x,y) becomes (-y,x)
-  let rotated = vec2<f32>(-dir_screenspace.y, dir_screenspace.x);
+  // Rotate by 90° clockwise: (x,y) becomes (y,-x). The strip emits the -1 side before the +1
+  // side, so this winds the quad counter-clockwise in clip space (front-facing): it must survive
+  // cullMode: 'back', which GlobeView applies to every layer by default.
+  let rotated = vec2<f32>(dir_screenspace.y, -dir_screenspace.x);
   return rotated * offset_direction * width / 2.0;
 }
 
