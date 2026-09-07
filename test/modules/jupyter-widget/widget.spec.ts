@@ -5,6 +5,7 @@
 /* global document */
 import {test, expect, describe, vi} from 'vitest';
 import {Deck} from '@deck.gl/core';
+import {device} from '@deck.gl/test-utils/vitest';
 import {renderWidget} from '@deck.gl/jupyter-widget/widget';
 
 /** Minimal stand-in for anywidget's AnyModel */
@@ -23,7 +24,9 @@ class MockModel {
       mapbox_key: '',
       google_maps_key: '',
       custom_libraries: null,
-      configuration: null,
+      // The headless suite shares one browser page across all spec files, so every widget must
+      // render through the shared test device instead of opening its own WebGL context.
+      configuration: {constants: {TEST_DEVICE: device}},
       show_error: false,
       ...state
     };
@@ -58,7 +61,9 @@ class MockModel {
   }
 }
 
-const LAYER_JSON = {
+const withDevice = json => ({device: '@@#TEST_DEVICE', ...json});
+
+const LAYER_JSON = withDevice({
   layers: [
     {
       '@@type': 'ScatterplotLayer',
@@ -68,7 +73,7 @@ const LAYER_JSON = {
     }
   ],
   initialViewState: {longitude: 0, latitude: 0, zoom: 1}
-};
+});
 
 const flush = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -98,7 +103,7 @@ describe('jupyter-widget: anywidget entry', () => {
   });
 
   test('json_input changes are applied after a microtask', async () => {
-    const model = new MockModel({json_input: JSON.stringify({layers: []})});
+    const model = new MockModel({json_input: JSON.stringify(withDevice({layers: []}))});
     const {el, deck, controller} = render(model);
     try {
       expect(deck.props.layers).toHaveLength(0);
@@ -114,7 +119,7 @@ describe('jupyter-widget: anywidget entry', () => {
   });
 
   test('json_input and data_buffer changes coalesce into one setProps with binary data', async () => {
-    const model = new MockModel({json_input: JSON.stringify({layers: []})});
+    const model = new MockModel({json_input: JSON.stringify(withDevice({layers: []}))});
     const {el, deck, controller} = render(model);
     try {
       const setProps = vi.spyOn(deck, 'setProps');
@@ -133,7 +138,9 @@ describe('jupyter-widget: anywidget entry', () => {
       model.trigger('change:json_input');
       model.trigger('change:data_buffer');
       await flush();
-      expect(setProps).toHaveBeenCalledTimes(1);
+      // Deck itself calls setProps({}) once its device is ready; only count the widget's update
+      const widgetCalls = setProps.mock.calls.filter(([props]) => 'layers' in props);
+      expect(widgetCalls).toHaveLength(1);
       const {value} = deck.props.layers[0].props.data.attributes.getPosition;
       expect(value).toBeInstanceOf(Float32Array);
       expect(Array.from(value)).toEqual([1, 2, 3, 4]);
