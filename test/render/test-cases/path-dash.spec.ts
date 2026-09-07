@@ -4,10 +4,9 @@
 
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
-import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
@@ -215,22 +214,27 @@ function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, numbe
   };
 }
 
-/** GlobeView instantiates a WebMercatorViewport above this zoom (GlobeView.getViewportType). */
-const GLOBE_MAX_ZOOM = 12;
-
 /**
- * Renders a geospatial MapView case under GlobeView as well, as `<name>-globe`, when its zoom
- * still instantiates a GlobeViewport. Cases above the handoff zoom stay map-only. The globe
- * surface is tessellated, so the globe golden uses the threshold other globe cases use.
+ * Renders a MapView case as two identical views side by side: MapView on the left, GlobeView on
+ * the right, same viewState and layers. Any difference in dash size, gap or phase between the
+ * two projections shows up as a seam at the centre of a single image. Only meaningful at
+ * zoom <= 12: above that GlobeView instantiates a WebMercatorViewport and both halves are
+ * Mercator (GlobeView.getViewportType).
  */
-function withGlobeVariant(testCase: TestCase, zoom: number): TestCase[] {
-  if (zoom > GLOBE_MAX_ZOOM) {
-    return [testCase];
-  }
-  return expandViewMatrix(
-    {...testCase, overrides: {globe: {imageDiffOptions: {threshold: 0.985}}}},
-    ['map', 'globe']
-  );
+function withGlobeSideBySide(testCase: TestCase): TestCase {
+  const {viewState} = testCase;
+  return {
+    ...testCase,
+    name: `${testCase.name}-map-vs-globe`,
+    views: [
+      new MapView({id: 'map', width: '50%'}),
+      new GlobeView({id: 'globe', x: '50%', width: '50%'})
+    ],
+    viewState: {map: viewState, globe: viewState},
+    // The globe surface is tessellated, so use the threshold other globe cases use
+    imageDiffOptions: {threshold: 0.985},
+    goldenImage: testCase.goldenImage.replace(/\.png$/, '-map-vs-globe.png')
+  };
 }
 
 /**
@@ -805,20 +809,23 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-billboard-ortho-continuous.png'
   },
 
-  // Unpitched MapView across zoom levels. The zoom 10 case is also rendered under GlobeView
-  // (`-globe` golden): the CPU dash offsets and the shader's segment lengths are both measured
-  // in the active projection's common space (sphere units on the globe) and project.scale
-  // converts both to pixels, so the dashes must line up exactly as on the map. z14 and z18 are
-  // above GlobeView's Mercator handoff and stay map-only.
-  ...[10, 14, 18].flatMap(zoom => withGlobeVariant(createBillboardMapCase(zoom), zoom)),
+  // Unpitched MapView across zoom levels. The zoom 10 case is also rendered as MapView and
+  // GlobeView side by side (`-map-vs-globe` golden): the CPU dash offsets and the shader's
+  // segment lengths are both measured in the active projection's common space (sphere units on
+  // the globe) and project.scale converts both to pixels, so the dashes must continue across the
+  // centre seam without any change in size, gap or phase. z14 and z18 are above GlobeView's
+  // Mercator handoff, where both halves would be Mercator, and stay map-only.
+  ...[10, 14, 18].map(createBillboardMapCase),
+  withGlobeSideBySide(createBillboardMapCase(10)),
 
   // ---------------------------------------------------------------------------------------
   // dashUnits at z12, z13 and z14 (see createDashUnitsCase). The z12 case is also rendered
-  // under GlobeView, where zoom 12 still instantiates a GlobeViewport: 'widths' and 'pixels'
-  // both resolve through project.scale, which GlobeViewport calibrates to converge with
-  // Mercator, so the globe image must show the same dash periods as the map image.
+  // side by side with GlobeView, where zoom 12 still instantiates a GlobeViewport: 'widths' and
+  // 'pixels' both resolve through project.scale, which GlobeViewport calibrates to converge with
+  // Mercator, so both halves must show the same dash periods.
   // ---------------------------------------------------------------------------------------
-  ...[12, 13, 14].flatMap(zoom => withGlobeVariant(createDashUnitsCase(zoom), zoom)),
+  ...[12, 13, 14].map(createDashUnitsCase),
+  withGlobeSideBySide(createDashUnitsCase(12)),
 
   // At a fixed view, changing only the stroke width must not affect absolute dash units.
   // `widths` is the control and should visibly change between its thin and thick pairs.
