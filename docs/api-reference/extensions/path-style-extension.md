@@ -116,6 +116,8 @@ Only effective if `getDashArray` is specified. If `true`, gaps between solid str
 
 WebGL2 has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
 
+`dashMode: 'path'` (and the legacy `highPrecisionDash`) measures path length in the common space of the active view and is supported in [GlobeView](../core/globe-view.md): the CPU-computed dash offsets and the GPU segment lengths are both expressed in the same space, so the dash pattern on the globe matches the map rendering segment for segment. The dash phase is continuous across GlobeView's zoom-12 handoff to Web Mercator, at which point the offsets are recomputed for the new projection.
+
 ### Tips on Rendering Dash Lines
 
 There are three modes to render dash lines with this extension:

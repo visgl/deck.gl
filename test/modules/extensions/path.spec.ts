@@ -945,6 +945,90 @@ test('PathStyleExtension#dash phase follows normalized path geometry', () => {
   });
 });
 
+test('PathStyleExtension#getDashOffsets measures globe common space', () => {
+  // City-scale path along a parallel near San Francisco, the same layout the path-dash render
+  // matrix uses. Below GlobeView's zoom-12 handoff the layer projects into a GlobeViewport, whose
+  // common space is sphere XYZ (GLOBE_RADIUS = 256) rather than Web Mercator.
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 450,
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  });
+  const mercatorViewport = new WebMercatorViewport({
+    width: 800,
+    height: 450,
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  });
+  const path = [
+    [-122.7, 37.78],
+    [-122.5, 37.78],
+    [-122.3, 37.78],
+    [-122.1, 37.78]
+  ];
+  const cumulativeDistance = (project: (position: number[]) => number[]): number[] => {
+    const result = [0];
+    for (let i = 1; i < path.length - 1; i++) {
+      result[i] = result[i - 1] + vec3.dist(project(path[i - 1]), project(path[i]));
+    }
+    result[path.length - 1] = 0;
+    return result;
+  };
+  const expected = cumulativeDistance(p => viewport.projectPosition(p));
+  const mercatorExpected = cumulativeDistance(p => mercatorViewport.projectPosition(p));
+
+  testLayer({
+    Layer: PathLayer,
+    viewport,
+    testCases: [
+      {
+        props: {
+          id: 'globe-dash-offsets',
+          data: [path],
+          getPath: pathData => pathData,
+          extensions: [new PathStyleExtension({dashMode: 'path'})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const extension = layer.props.extensions[0] as PathStyleExtension;
+          const offsets = extension.getDashOffsets.call(layer, path);
+
+          expect(offsets.length, 'one offset per vertex').toBe(path.length);
+          expect(offsets[1], 'offsets are non-zero on the globe').toBeGreaterThan(0);
+          expect(offsets[2], 'offsets accumulate along the path').toBeGreaterThan(offsets[1]);
+          offsets.forEach((offset, index) => {
+            expect(
+              offset,
+              `offset ${index} is the cumulative chord distance in sphere common space`
+            ).toBeCloseTo(expected[index], 6);
+          });
+          expect(
+            Math.abs(offsets[1] - mercatorExpected[1]) / mercatorExpected[1],
+            'globe offsets are not Web Mercator distances'
+          ).toBeGreaterThan(0.1);
+
+          // The managed attribute that actually drives the shader agrees with the public helper
+          // for the rendered path: its total length is the same chord sum.
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          const total =
+            expected[path.length - 2] +
+            vec3.dist(
+              viewport.projectPosition(path[path.length - 2]),
+              viewport.projectPosition(path[path.length - 1])
+            );
+          expect(
+            metrics[1],
+            'instanceDashOffsets total length is in sphere common space'
+          ).toBeCloseTo(total, 4);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
 test('PathStyleExtension#dash phase covers globe subdivisions', () => {
   const viewport = new GlobeViewport({
     width: 800,

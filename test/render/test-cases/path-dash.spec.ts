@@ -4,6 +4,7 @@
 
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
+import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
 import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
@@ -211,6 +212,94 @@ function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, numbe
         })
     ),
     goldenImage: `./test/render/golden-images/path-dash-units-width-${dashUnits}.png`
+  };
+}
+
+/** GlobeView instantiates a WebMercatorViewport above this zoom (GlobeView.getViewportType). */
+const GLOBE_MAX_ZOOM = 12;
+
+/**
+ * Renders a geospatial MapView case under GlobeView as well, as `<name>-globe`, when its zoom
+ * still instantiates a GlobeViewport. Cases above the handoff zoom stay map-only. The globe
+ * surface is tessellated, so the globe golden uses the threshold other globe cases use.
+ */
+function withGlobeVariant(testCase: TestCase, zoom: number): TestCase[] {
+  if (zoom > GLOBE_MAX_ZOOM) {
+    return [testCase];
+  }
+  return expandViewMatrix(
+    {...testCase, overrides: {globe: {imageDiffOptions: {threshold: 0.985}}}},
+    ['map', 'globe']
+  );
+}
+
+/**
+ * Unpitched MapView at `zoom`. Compares dense paths in the upper half with sparse paths in
+ * the lower half, and flat red paths with billboarded blue paths. Because every path follows
+ * the same straight line, their dashes should line up regardless of segment count or
+ * billboard mode.
+ */
+function createBillboardMapCase(zoom: number): TestCase {
+  return {
+    name: `path-dash-billboard-map-z${zoom}`,
+    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
+    layers: [
+      // [segments, vertical offset in pixels]
+      [120, 110],
+      [120, 80],
+      [1, -80],
+      [1, -110]
+    ].flatMap(([segments, offsetPixels], index) => {
+      const billboard = index % 2 === 1;
+      return new PathLayer({
+        id: `map-${segments}-${billboard ? 'billboard' : 'flat'}`,
+        data: [createGeographicPath(segments, zoom, offsetPixels)],
+        getPath: (path: number[][]) => path,
+        billboard,
+        widthUnits: 'pixels' as const,
+        getWidth: 8,
+        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+        getDashArray: [4, 5],
+        extensions: [new PathStyleExtension({highPrecisionDash: true})]
+      });
+    }),
+    goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`
+  };
+}
+
+/**
+ * dashUnits at `zoom`. widthUnits is 'meters' here, so the stroke itself thickens with zoom.
+ * The 'widths' rows are relative to the stroke and so grow with it, while the 'pixels' rows
+ * must hold exactly the same dash period at every zoom. Comparing the golden images of
+ * different zooms against each other is the assertion.
+ */
+function createDashUnitsCase(zoom: number): TestCase {
+  return {
+    name: `path-dash-units-z${zoom}`,
+    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
+    layers: [
+      // [dashUnits, dash array, vertical offset in pixels]
+      ['widths', [4, 5], 150],
+      ['widths', [4, 5], 90],
+      ['pixels', [20, 25], -90],
+      ['pixels', [20, 25], -150]
+    ].map(([dashUnits, dashArray, offsetPixels], index) => {
+      const billboard = index % 2 === 1;
+      return new PathLayer({
+        id: `units-${dashUnits}-${billboard ? 'billboard' : 'flat'}`,
+        data: [createGeographicPath(120, zoom, offsetPixels as number)],
+        getPath: (path: number[][]) => path,
+        billboard,
+        widthUnits: 'meters' as const,
+        getWidth: 60,
+        widthMinPixels: 2,
+        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
+        getDashArray: dashArray,
+        dashUnits,
+        extensions: [new PathStyleExtension({dashMode: 'path'})]
+      });
+    }),
+    goldenImage: `./test/render/golden-images/path-dash-units-z${zoom}.png`
   };
 }
 
@@ -716,69 +805,20 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-billboard-ortho-continuous.png'
   },
 
-  // Unpitched MapView across zoom levels. Each image compares dense paths in the upper half
-  // with sparse paths in the lower half, and flat red paths with billboarded blue paths.
-  // Because every path follows the same straight line, their dashes should line up regardless
-  // of segment count or billboard mode.
-  ...[10, 14, 18].map(zoom => ({
-    name: `path-dash-billboard-map-z${zoom}`,
-    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
-    layers: [
-      // [segments, vertical offset in pixels]
-      [120, 110],
-      [120, 80],
-      [1, -80],
-      [1, -110]
-    ].flatMap(([segments, offsetPixels], index) => {
-      const billboard = index % 2 === 1;
-      return new PathLayer({
-        id: `map-${segments}-${billboard ? 'billboard' : 'flat'}`,
-        data: [createGeographicPath(segments, zoom, offsetPixels)],
-        getPath: (path: number[][]) => path,
-        billboard,
-        widthUnits: 'pixels' as const,
-        getWidth: 8,
-        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-        getDashArray: [4, 5],
-        extensions: [new PathStyleExtension({highPrecisionDash: true})]
-      });
-    }),
-    goldenImage: `./test/render/golden-images/path-dash-billboard-map-z${zoom}.png`
-  })),
+  // Unpitched MapView across zoom levels. The zoom 10 case is also rendered under GlobeView
+  // (`-globe` golden): the CPU dash offsets and the shader's segment lengths are both measured
+  // in the active projection's common space (sphere units on the globe) and project.scale
+  // converts both to pixels, so the dashes must line up exactly as on the map. z14 and z18 are
+  // above GlobeView's Mercator handoff and stay map-only.
+  ...[10, 14, 18].flatMap(zoom => withGlobeVariant(createBillboardMapCase(zoom), zoom)),
 
   // ---------------------------------------------------------------------------------------
-  // dashUnits. widthUnits is 'meters' here, so the stroke itself thickens with zoom. The
-  // 'widths' rows are relative to the stroke and so grow with it, while the 'pixels' rows
-  // must hold exactly the same dash period at z12, z13 and z14. Comparing the three golden
-  // images against each other is the assertion.
+  // dashUnits at z12, z13 and z14 (see createDashUnitsCase). The z12 case is also rendered
+  // under GlobeView, where zoom 12 still instantiates a GlobeViewport: 'widths' and 'pixels'
+  // both resolve through project.scale, which GlobeViewport calibrates to converge with
+  // Mercator, so the globe image must show the same dash periods as the map image.
   // ---------------------------------------------------------------------------------------
-  ...[12, 13, 14].map(zoom => ({
-    name: `path-dash-units-z${zoom}`,
-    viewState: {longitude: MAP_CENTER[0], latitude: MAP_CENTER[1], zoom, pitch: 0, bearing: 0},
-    layers: [
-      // [dashUnits, dash array, vertical offset in pixels]
-      ['widths', [4, 5], 150],
-      ['widths', [4, 5], 90],
-      ['pixels', [20, 25], -90],
-      ['pixels', [20, 25], -150]
-    ].map(([dashUnits, dashArray, offsetPixels], index) => {
-      const billboard = index % 2 === 1;
-      return new PathLayer({
-        id: `units-${dashUnits}-${billboard ? 'billboard' : 'flat'}`,
-        data: [createGeographicPath(120, zoom, offsetPixels as number)],
-        getPath: (path: number[][]) => path,
-        billboard,
-        widthUnits: 'meters' as const,
-        getWidth: 60,
-        widthMinPixels: 2,
-        getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-        getDashArray: dashArray,
-        dashUnits,
-        extensions: [new PathStyleExtension({dashMode: 'path'})]
-      });
-    }),
-    goldenImage: `./test/render/golden-images/path-dash-units-z${zoom}.png`
-  })),
+  ...[12, 13, 14].flatMap(zoom => withGlobeVariant(createDashUnitsCase(zoom), zoom)),
 
   // At a fixed view, changing only the stroke width must not affect absolute dash units.
   // `widths` is the control and should visibly change between its thin and thick pairs.
