@@ -80,6 +80,8 @@ New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked
 
 ### Layers and Extensions
 
+- [CollisionFilterExtension](./api-reference/extensions/collision-filter-extension.md) now supports TextLayer pixel offsets, anchors, baselines, and rotation, including GeoJSON text. Labels use shared glyph bounds for collision detection, and priorities are respected across source layers in the same collision group.
+
 
 <table style={{border: 0}} align="center">
   <tbody>

@@ -48,9 +48,15 @@ export default class CollisionFilterExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<CollisionFilterExtensionProps>, {shaderModuleProps}: any) {
     if (shaderModuleProps.collision?.drawToCollisionMap) {
-      // Override any props with those defined in collisionTestProps
-      // @ts-ignore
-      this.props = this.clone(this.props.collisionTestProps).props;
+      // Avoid constructing a layer when the overrides are empty or unchanged.
+      const {collisionTestProps} = this.props;
+      for (const key in collisionTestProps) {
+        if (collisionTestProps[key] !== this.props[key]) {
+          // @ts-ignore
+          this.props = this.clone(collisionTestProps).props;
+          break;
+        }
+      }
     }
   }
 
@@ -64,6 +70,16 @@ export default class CollisionFilterExtension extends LayerExtension {
     }
     this.context.deck?._addDefaultEffect(new CollisionFilterEffect());
     const attributeManager = this.getAttributeManager();
+    // Text glyphs share one sample point per label. Allocate it only when the extension is used.
+    if ('getCollisionRect' in this.props) {
+      attributeManager!.add({
+        instanceCollisionRects: {
+          size: 4,
+          stepMode: 'dynamic',
+          accessor: 'getCollisionRect'
+        }
+      });
+    }
     attributeManager!.add({
       collisionPriorities: {
         size: 1,

@@ -19,6 +19,9 @@ in float instanceColorModes;
 in vec2 instanceOffsets;
 in vec2 instancePixelOffset;
 in vec4 instanceClipRect;
+#ifdef MODULE_COLLISION
+in vec4 instanceCollisionRects;
+#endif
 
 out float vColorMode;
 out vec4 vColor;
@@ -68,45 +71,67 @@ void main(void) {
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
+#ifdef MODULE_COLLISION
+  // Binary input can supply per-character GPU attributes without per-label
+  // background attributes. In that case this layer writes the label rectangle.
+  if (collision.sort) {
+    pixelOffset = instanceCollisionRects.xy + (positions / 2.0 + 0.5) * instanceCollisionRects.zw;
+  }
+#endif
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
   pixelOffset += instancePixelOffset;
   pixelOffset.y *= -1.0;
 
-  vec2 anchorPosScreen;
-  if (icon.billboard)  {
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
-    anchorPosScreen = gl_Position.xy / gl_Position.w;
-    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-    vec3 offset = vec3(pixelOffset, 0.0);
-    DECKGL_FILTER_SIZE(offset, geometry);
-    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
-  } else {
-    vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
-    if (text.flipY) {
-      offset_common.y *= -1.;
-    }
-    DECKGL_FILTER_SIZE(offset_common, geometry);
-    vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
-    anchorPosScreen = anchorPos.xy / anchorPos.w;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position); 
-    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-  }
-
+  vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+  vec2 anchorPosScreen = anchorPos.xy / anchorPos.w;
   anchorPosScreen = vec2(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0 * project.viewportSize / project.devicePixelRatio;
   vec2 xy = project_size_to_pixel(instanceClipRect.xy);
   vec2 wh = project_size_to_pixel(instanceClipRect.zw);
   if (text.flipY) {
     xy.y = -xy.y - wh.y;
   }
+  vec2 scrollPixels = vec2(0.0);
   if (text.align.x > 0 || text.align.y > 0) {
     vec2 viewportPixels = project.viewportSize / project.devicePixelRatio;
-    vec2 scrollPixels = vec2(
+    scrollPixels = vec2(
       getPixelOffsetFromAlignment(anchorPosScreen.x, viewportPixels.x, xy.x, xy.x + wh.x, text.align.x),
       -getPixelOffsetFromAlignment(anchorPosScreen.y, viewportPixels.y, -xy.y - wh.y, -xy.y, text.align.y)
     );
-    pixelOffset += scrollPixels;
-    gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
   }
+
+#ifdef MODULE_COLLISION
+  vec2 collisionOffset = rotate_by_angle(instanceCollisionRects.xy + instanceCollisionRects.zw / 2.0, instanceAngles) * collision_getSize(instanceSizes) / text.fontSize;
+  collisionOffset += instancePixelOffset;
+  collisionOffset.y *= -1.0;
+  // A clipped background occupies the content box, independently of text alignment.
+  if (instanceClipRect.z >= 0.0) collisionOffset.x = xy.x + wh.x / 2.0;
+  if (instanceClipRect.w >= 0.0) collisionOffset.y = xy.y + wh.y / 2.0;
+  collision_usePosition = true;
+  if (icon.billboard) {
+    collision_position = anchorPos;
+    collision_position.xy += project_pixel_size_to_clipspace(collisionOffset);
+  } else {
+    vec3 collisionOffsetCommon = vec3(project_pixel_size(collisionOffset), 0.0);
+    if (text.flipY) collisionOffsetCommon.y *= -1.0;
+    collision_position = project_position_to_clipspace(instancePositions, instancePositions64Low, collisionOffsetCommon);
+  }
+#endif
+
+  if (icon.billboard) {
+    gl_Position = anchorPos;
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+    vec3 offset = vec3(pixelOffset, 0.0);
+    DECKGL_FILTER_SIZE(offset, geometry);
+    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+  } else {
+    vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
+    if (text.flipY) offset_common.y *= -1.0;
+    DECKGL_FILTER_SIZE(offset_common, geometry);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  }
+  pixelOffset += scrollPixels;
+  gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
 
   if (instanceClipRect.z >= 0.) {
     if (pixelOffset.x < xy.x || pixelOffset.x > xy.x + wh.x) {

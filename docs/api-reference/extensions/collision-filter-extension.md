@@ -112,6 +112,16 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 * If a number is provided, it is used for all objects in the layer.
 * If a function is provided, it is called on each object to retrieve its priority.
 
+## Using with TextLayer
+
+Text labels are tested at the center of their glyph bounds, after applying `getPixelOffset`, `getTextAnchor`, `getAlignmentBaseline`, `getAngle`, and the layer's size settings. Every character in a label shares the same visibility. This also applies to `GeoJsonLayer` with `pointType: 'text'` and its corresponding text accessors.
+
+TextLayer writes a rectangle covering each label into the collision map. Whitespace and empty lines do not enlarge the glyph bounds. When `background: true`, the background rectangle, including `backgroundPadding`, is used instead. No visible background or `alphaCutoff` override is required for text collision filtering.
+
+Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The sample point follows the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
+
+As with other layers, this is a point-in-rectangle test: overlapping edges alone do not necessarily hide a label. Higher-priority labels win when their collision area covers another label's sample point.
+
 ## Using with transparent layers
 
 The `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.

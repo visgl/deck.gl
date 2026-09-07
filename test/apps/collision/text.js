@@ -169,7 +169,10 @@ function addControl(key, title, options) {
           ? Number(input.value)
           : input.value;
     if (typeof settings[key] === 'number') caption.textContent = `${title}: ${settings[key]}`;
-    if (key === 'scene') updateData();
+    if (key === 'scene') {
+      updateData();
+      resetView();
+    }
     if (key === 'zoom')
       deck.setProps({initialViewState: {...initialViewState, zoom: settings.zoom}});
     update();
@@ -188,15 +191,28 @@ addControl('offsetY', 'Offset Y', {min: -200, max: 200, step: 1});
 addControl('angle', 'Angle', {min: -180, max: 180, step: 15});
 addControl('size', 'Size', {min: 8, max: 64, step: 1});
 addControl('collisionScale', 'Collision scale', {min: 1, max: 3, step: 0.25});
-addControl('zoom', 'Zoom', {min: -2, max: 3, step: 0.1});
+addControl('zoom', 'Zoom', {min: -5, max: 3, step: 0.1});
 addControl('devicePixels', 'Device pixel ratio', {min: 1, max: 2, step: 1});
 addControl('background', 'Background');
 addControl('billboard', 'Billboard');
 addControl('sdf', 'SDF');
-document.getElementById('reset').onclick = () => deck.setProps({initialViewState});
+function getSceneViewState() {
+  return settings.scene === 'stress' ? {target: [11040, 2025, 0], zoom: -5} : initialViewState;
+}
+
+function resetView() {
+  const viewState = getSceneViewState();
+  settings.zoom = viewState.zoom;
+  const zoomInput = document.getElementById('zoom');
+  zoomInput.value = settings.zoom;
+  zoomInput.parentElement.firstChild.textContent = `Zoom: ${settings.zoom}`;
+  deck.setProps({initialViewState: viewState});
+}
+document.getElementById('reset').onclick = resetView;
 
 async function benchmark() {
   const samples = [];
+  const {target} = getSceneViewState();
   const start = performance.now();
   let previous = start;
   for (let frame = 0; frame < 180; frame++) {
@@ -205,10 +221,13 @@ async function benchmark() {
     if (frame >= 30) samples.push(now - previous);
     previous = now;
     deck.setProps({
-      viewState: {target: [frame * 0.5, 0, 0], zoom: settings.zoom + Math.sin(frame / 30) * 0.2}
+      viewState: {
+        target: [target[0] + frame * 0.5, target[1], 0],
+        zoom: settings.zoom + Math.sin(frame / 30) * 0.2
+      }
     });
   }
-  deck.setProps({viewState: null, initialViewState});
+  deck.setProps({viewState: null, initialViewState: getSceneViewState()});
   samples.sort((a, b) => a - b);
   const result = {
     labels: data.length,

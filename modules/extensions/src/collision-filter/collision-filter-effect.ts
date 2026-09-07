@@ -21,7 +21,13 @@ type RenderInfo = {
   layers: Layer<CollisionFilterExtensionProps>[];
   layerBounds: ([number[], number[]] | null)[];
   allLayersLoaded: boolean;
+  pickingColorOffsets: Record<string, number>;
 };
+
+// Sublayers of a composite share source object indices (e.g. text and its background).
+function getCollisionSourceId(layer: Layer): string {
+  return layer.parent?.id || layer.id;
+}
 
 export default class CollisionFilterEffect implements Effect {
   id = 'collision-filter-effect';
@@ -63,7 +69,8 @@ export default class CollisionFilterEffect implements Effect {
 
     const collisionLayers = layers.filter(
       // @ts-ignore
-      ({props: {visible, collisionEnabled}}) => visible && collisionEnabled
+      ({isComposite, props: {visible, collisionEnabled}}) =>
+        !isComposite && visible && collisionEnabled
     ) as Layer<CollisionFilterExtensionProps>[];
     if (collisionLayers.length === 0) {
       this.channels = {};
@@ -152,7 +159,7 @@ export default class CollisionFilterEffect implements Effect {
         pass: 'collision-filter',
         isPicking: true,
         layers: renderInfo.layers,
-        effects,
+        effects: [...(effects || []), this],
         layerFilter,
         viewports: viewport ? [viewport] : [],
         onViewportActive,
@@ -185,9 +192,20 @@ export default class CollisionFilterEffect implements Effect {
       const collisionGroup = layer.props.collisionGroup!;
       let channelInfo = channelMap[collisionGroup];
       if (!channelInfo) {
-        channelInfo = {collisionGroup, layers: [], layerBounds: [], allLayersLoaded: true};
+        channelInfo = {
+          collisionGroup,
+          layers: [],
+          layerBounds: [],
+          allLayersLoaded: true,
+          pickingColorOffsets: {}
+        };
         channelMap[collisionGroup] = channelInfo;
       }
+      const sourceId = getCollisionSourceId(layer);
+      channelInfo.pickingColorOffsets[sourceId] = Math.max(
+        channelInfo.pickingColorOffsets[sourceId] || 0,
+        layer.getNumInstances()
+      );
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
       if (!layer.isLoaded) {
@@ -197,6 +215,15 @@ export default class CollisionFilterEffect implements Effect {
 
     // Create any new passes and remove any old ones
     for (const collisionGroup of Object.keys(channelMap)) {
+      // Reserve disjoint picking colors for each source layer. Object 0 from one
+      // layer must not match object 0 from another layer in the same group.
+      const offsets = channelMap[collisionGroup].pickingColorOffsets;
+      let offset = 0;
+      for (const sourceId in offsets) {
+        const count = offsets[sourceId];
+        offsets[sourceId] = offset;
+        offset += count;
+      }
       if (!this.collisionFBOs[collisionGroup]) {
         this.createFBO(device, collisionGroup);
       }
@@ -216,16 +243,25 @@ export default class CollisionFilterEffect implements Effect {
   getShaderModuleProps(layer: Layer): {
     collision: CollisionModuleProps;
   } {
-    const {collisionGroup, collisionEnabled} = (layer as Layer<CollisionFilterExtensionProps>)
+    const props = (layer as Layer<CollisionFilterExtensionProps & Partial<CollisionModuleProps>>)
       .props;
+    const {collisionGroup, collisionEnabled} = props;
+    const testProps = props.collisionTestProps as Partial<CollisionModuleProps>;
     const {collisionFBOs, dummyCollisionMap} = this;
     const collisionFBO = collisionFBOs[collisionGroup!];
     const enabled = collisionEnabled && Boolean(collisionFBO);
     return {
       collision: {
         enabled,
+        pickingColorOffset:
+          this.channels[collisionGroup!]?.pickingColorOffsets[getCollisionSourceId(layer)] || 0,
         collisionFBO,
-        dummyCollisionMap: dummyCollisionMap!
+        dummyCollisionMap: dummyCollisionMap!,
+        // Match collisionTestProps sizing when projecting a text label's sample point.
+        sizeScale: testProps?.sizeScale ?? props.sizeScale,
+        sizeMinPixels: testProps?.sizeMinPixels ?? props.sizeMinPixels,
+        sizeMaxPixels: testProps?.sizeMaxPixels ?? props.sizeMaxPixels,
+        sizeUnits: testProps?.sizeUnits ?? props.sizeUnits
       }
     };
   }

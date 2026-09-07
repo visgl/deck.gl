@@ -71,6 +71,23 @@ void main(void) {
     pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
   }
 
+#ifdef MODULE_COLLISION
+  vec2 collisionOffset = (instanceRects.xy + instanceRects.zw / 2.0) * collision_getSize(instanceSizes) / text.fontSize;
+  collisionOffset = rotate_by_angle(collisionOffset, instanceAngles) + instancePixelOffsets;
+  collisionOffset.y *= -1.0;
+  if (instanceClipRect.z >= 0.0) collisionOffset.x = xy.x + wh.x / 2.0;
+  if (instanceClipRect.w >= 0.0) collisionOffset.y = xy.y + wh.y / 2.0;
+  collision_usePosition = true;
+  if (textBackground.billboard) {
+    collision_position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
+    collision_position.xy += project_pixel_size_to_clipspace(collisionOffset);
+  } else {
+    vec3 collisionOffsetCommon = vec3(project_pixel_size(collisionOffset), 0.0);
+    if (text.flipY) collisionOffsetCommon.y *= -1.0;
+    collision_position = project_position_to_clipspace(instancePositions, instancePositions64Low, collisionOffsetCommon);
+  }
+#endif
+
   if (textBackground.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
