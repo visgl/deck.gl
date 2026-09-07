@@ -9,7 +9,7 @@ To use this extension, first define a terrain source with the prop `operation: '
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
-The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them. A `TerrainLayer` source needs no extra configuration on `GlobeView`: it detects the globe viewport and positions its tile meshes in `lnglat` coordinates instead of Web Mercator common space, so the same source works on both projections.
+The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them.
 
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
