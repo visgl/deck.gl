@@ -6,9 +6,15 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
+import {expandViewMatrix} from '../view-presets';
+import type {ViewPresetName} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
 const VIEWSTATE = {latitude: 37, longitude: -122, zoom: 10.2, pitch: 0, bearing: 0};
+
+// Attribute filtering is projection independent, so one range and one category variant are
+// rendered under GlobeView as well; the remaining variants stay map-only to limit golden images.
+const MAP_AND_GLOBE: ViewPresetName[] = ['map', 'globe'];
 const DATA = [];
 let i = 0;
 for (let y = 0; y < 20; y++) {
@@ -22,9 +28,10 @@ for (let y = 0; y < 20; y++) {
   }
 }
 
-const testCases = [
+const testCases: TestCase[] = [
   {
     name: 'filter-1d',
+    presets: MAP_AND_GLOBE,
     props: {
       extensions: [new DataFilterExtension({filterSize: 1})],
       getFilterValue: d => d.column,
@@ -44,6 +51,7 @@ const testCases = [
   },
   {
     name: 'single-category',
+    presets: MAP_AND_GLOBE,
     props: {
       extensions: [new DataFilterExtension({categorySize: 1})],
       getFilterCategory: d => d.index % 128,
@@ -90,30 +98,37 @@ const testCases = [
       ]
     }
   }
-].map(({name, props}) => ({
-  name: `data-filter-effect-${name}`,
-  viewState: VIEWSTATE,
-  layers: [
-    new ScatterplotLayer({
-      id: name,
-      data: DATA,
-      getRadius: 8,
-      radiusUnits: 'pixels',
-      ...props
-    }),
-    new ScatterplotLayer({
-      id: `${name}-background`,
-      data: DATA,
-      getRadius: 2,
-      radiusUnits: 'pixels'
-    })
-  ],
-  goldenImage: `./test/render/golden-images/data-filter-effect-${name}.png`
-}));
+].flatMap(({name, presets, props}: {name: string; presets?: ViewPresetName[]; props: any}) =>
+  expandViewMatrix(
+    {
+      name: `data-filter-effect-${name}`,
+      // The spec's own view; passed explicitly so the existing map goldens are reused unchanged
+      viewState: VIEWSTATE,
+      layers: [
+        new ScatterplotLayer({
+          id: name,
+          data: DATA,
+          getRadius: 8,
+          radiusUnits: 'pixels',
+          ...props
+        }),
+        new ScatterplotLayer({
+          id: `${name}-background`,
+          data: DATA,
+          getRadius: 2,
+          radiusUnits: 'pixels'
+        })
+      ],
+      // Globe surfaces are tessellated, so globe goldens never match Mercator pixel-for-pixel
+      overrides: {globe: {imageDiffOptions: {threshold: 0.985}}}
+    },
+    presets ?? ['map']
+  )
+);
 
 describe.each([
   'webgl'
   // 'webgpu'
 ] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+  runRenderTestSuite(testCases, deviceType);
 });
