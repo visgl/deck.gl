@@ -294,6 +294,21 @@ new GeoJsonLayer({
 });
 ```
 
+## Remarks
+
+### Globe view
+
+The extension is supported in [GlobeView](../core/globe-view.md). Patterns are laid out in Web
+Mercator space in every geospatial view, so on the globe they stretch toward the poles the same
+way a Web Mercator basemap does. Tiles keep their `'meters'` and `'pixels'` sizes at the zoom
+levels that `GlobeView` renders.
+
+The high-zoom anchor precision trick (reducing the pattern origin to within one tile) is only
+available in flat views: on the globe the pattern is anchored to absolute Mercator coordinates.
+This has no visible effect at the zoom levels where `GlobeView` uses a globe projection (it hands
+off to Web Mercator above zoom 12) and only matters for custom views that construct a
+`GlobeViewport` at higher zoom.
+
 ## Source
 
 [modules/extensions/src/fill-style](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/fill-style)
