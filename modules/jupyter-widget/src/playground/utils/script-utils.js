@@ -33,8 +33,9 @@ export function loadScript(url) {
 // carrying the (possibly empty) message.
 export const MODULE_LOADED_EVENT = 'deckgl-custom-library-loaded';
 
-// Loads an ES module, resolving with its namespace, and also exposes the namespace as
-// window[globalName] for scripts that expect a global.
+// Loads an ES module, resolving with its namespace. The namespace is also exposed as
+// window[globalName] for scripts that expect a global, unless that name is already taken (for
+// example by a classic library whose load is being observed through a window accessor).
 export function loadModule(url, globalName) {
   const key = `module:${globalName}:${url}`;
   if (!scriptLoadPromises[key]) {
@@ -48,7 +49,8 @@ export function loadModule(url, globalName) {
     script.type = 'module';
     // A dynamic import inside try/catch reports fetch, parse and top-level evaluation failures alike
     script.textContent =
-      `try { const m = await import(${quote(url)}); window[${quote(globalName)}] = m; ${dispatch(true, 'm', 'null')}; } ` +
+      `try { const m = await import(${quote(url)}); ` +
+      `if (!(${quote(globalName)} in window)) { window[${quote(globalName)}] = m; } ${dispatch(true, 'm', 'null')}; } ` +
       `catch (error) { ${dispatch(false, 'null', 'String((error && error.message) || error)')}; }`;
     scriptLoadPromises[key] = new Promise((resolve, reject) => {
       const fail = message => {

@@ -31,7 +31,8 @@ ES module bundles
 ^^^^^^^^^^^^^^^^^
 
 Libraries published as ES modules (files with ``export`` statements) are loaded with ``module=True``. pydeck
-imports the module with ``<script type="module">`` and exposes its namespace as ``window[libraryName]``:
+imports the module with ``<script type="module">`` and, unless that global already exists, exposes its
+namespace as ``window[libraryName]``:
 
 .. code-block:: python
 

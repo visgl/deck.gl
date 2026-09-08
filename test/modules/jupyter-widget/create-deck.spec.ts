@@ -248,6 +248,52 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('an ES module does not hijack a pending classic registration of the same name', async () => {
+    const LIBRARY_NAME = 'MixedLibrary';
+    const classicUrl = URL.createObjectURL(
+      new Blob(
+        [
+          'setTimeout(() => { window.MixedLibrary = {MixedClassicLayer: class MixedClassicLayer {',
+          ' constructor(props) { this.props = props; } }}; }, 100);'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    const moduleUrl = URL.createObjectURL(
+      new Blob(['export class MixedModuleLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    try {
+      await Promise.all([
+        new Promise<void>(resolve =>
+          addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: classicUrl}], resolve)
+        ),
+        new Promise<void>(resolve =>
+          addCustomLibraries(
+            [{libraryName: LIBRARY_NAME, resourceUri: moduleUrl, module: true}],
+            resolve
+          )
+        )
+      ]);
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'MixedClassicLayer', id: 'c'},
+          {'@@type': 'MixedModuleLayer', id: 'm'}
+        ]
+      });
+      expect(props.layers[0].constructor.name).toBe('MixedClassicLayer');
+      expect(props.layers[1].constructor.name).toBe('MixedModuleLayer');
+      expect(
+        (window as any)[LIBRARY_NAME].MixedClassicLayer,
+        'classic global is kept'
+      ).toBeTruthy();
+    } finally {
+      URL.revokeObjectURL(classicUrl);
+      URL.revokeObjectURL(moduleUrl);
+    }
+  });
+
   test('a failed custom library can be retried', async () => {
     const LIBRARY_NAME = 'RetryEsmLibrary';
     const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;
