@@ -80,6 +80,49 @@ function addModuleToConverter(module, converter) {
   converter.mergeConfiguration(newConfiguration);
 }
 
+// Custom libraries whose load is in flight, keyed by library name. Script execution is asynchronous
+// and untraceable, so completion is observed through a window[libraryName] accessor: classic scripts
+// assign it themselves, and for ES modules loadModule() assigns the module namespace after import.
+// One accessor is shared by every addCustomLibraries call waiting on the same library.
+const pendingLibraries = {};
+
+function watchLibrary(libraryName, onLoaded) {
+  let pending = pendingLibraries[libraryName];
+  if (!pending) {
+    pending = {waiters: []};
+    pendingLibraries[libraryName] = pending;
+    Object.defineProperty(window, libraryName, {
+      configurable: true,
+      enumerable: true,
+      get: () => undefined,
+      set: loadedModule => {
+        delete pendingLibraries[libraryName];
+        // Replace the accessor with the namespace, as a plain script assignment would have
+        Object.defineProperty(window, libraryName, {
+          value: loadedModule,
+          writable: true,
+          configurable: true,
+          enumerable: true
+        });
+        for (const waiter of pending.waiters) {
+          waiter(loadedModule);
+        }
+      }
+    });
+  }
+  pending.waiters.push(onLoaded);
+
+  // Stop waiting (the caller's load failed); the accessor goes away with the last waiter so that a
+  // later addCustomLibraries call retries the load
+  return () => {
+    pending.waiters = pending.waiters.filter(waiter => waiter !== onLoaded);
+    if (!pending.waiters.length && pendingLibraries[libraryName] === pending) {
+      delete pendingLibraries[libraryName];
+      delete window[libraryName];
+    }
+  };
+}
+
 export function addCustomLibraries(customLibraries, onComplete) {
   if (!customLibraries) {
     return;
@@ -87,8 +130,6 @@ export function addCustomLibraries(customLibraries, onComplete) {
 
   const loaded = {};
   const failed = {};
-  // Getters of the window[libraryName] accessors installed by this call
-  const getters = {};
 
   function onEachFinish() {
     if (Object.keys(loaded).every(name => loaded[name] || failed[name])) {
@@ -108,12 +149,6 @@ export function addCustomLibraries(customLibraries, onComplete) {
     console.error(`Could not load custom library ${libraryName}`, error);
     // Settle the registration so initialization completes; the library's classes stay unregistered
     failed[libraryName] = true;
-    // Remove this call's placeholder accessor so a later addCustomLibraries call retries the load.
-    // An accessor installed by a newer registration (which chains this one) is left alone.
-    const descriptor = Object.getOwnPropertyDescriptor(window, libraryName);
-    if (descriptor && descriptor.get === getters[libraryName]) {
-      delete window[libraryName];
-    }
     onEachFinish();
   }
 
@@ -129,25 +164,14 @@ export function addCustomLibraries(customLibraries, onComplete) {
       return;
     }
 
-    // Script execution is asynchronous and untraceable, so completion is observed through the
-    // window[libraryName] property: classic scripts assign it themselves, and for ES modules
-    // loadModule() assigns the module namespace after import. An accessor left by an earlier call
-    // whose load is still in flight is chained so that call settles too.
-    const previous = Object.getOwnPropertyDescriptor(window, libraryName);
-    getters[libraryName] = () => loaded[libraryName];
-    Object.defineProperty(window, libraryName, {
-      configurable: true,
-      set: loadedModule => {
-        if (previous && previous.set) {
-          previous.set(loadedModule);
-        }
-        onModuleLoaded(libraryName, loadedModule);
-      },
-      get: getters[libraryName]
-    });
-
+    const unwatch = watchLibrary(libraryName, loadedModule =>
+      onModuleLoaded(libraryName, loadedModule)
+    );
     const loading = module ? loadModule(resourceUri, libraryName) : loadScript(resourceUri);
-    loading.catch(error => onModuleFailed(libraryName, error));
+    loading.catch(error => {
+      unwatch();
+      onModuleFailed(libraryName, error);
+    });
   });
 }
 

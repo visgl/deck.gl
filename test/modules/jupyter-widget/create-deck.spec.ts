@@ -175,6 +175,40 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('a newer failure does not detach an older in-flight registration', async () => {
+    const LIBRARY_NAME = 'SlowEsmLibrary';
+    const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000003`;
+    const url = URL.createObjectURL(
+      new Blob(
+        [
+          'await new Promise(resolve => setTimeout(resolve, 100));',
+          'export class SlowEsmLayer { constructor(props) { this.props = props; } }'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const older = new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      const newer = new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: LIBRARY_NAME, resourceUri: missing, module: true}],
+          resolve
+        )
+      );
+      await newer;
+      expect(errors).toHaveBeenCalledTimes(1);
+      await older;
+      const props = jsonConverter.convert({layers: [{'@@type': 'SlowEsmLayer', id: 's'}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].SlowEsmLayer);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
   test('a failed custom library can be retried', async () => {
     const LIBRARY_NAME = 'RetryEsmLibrary';
     const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;
