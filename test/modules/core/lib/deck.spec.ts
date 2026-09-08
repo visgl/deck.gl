@@ -7,8 +7,8 @@ import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import type {CanvasContext, CanvasContextProps, Device} from '@luma.gl/core';
+import {webgl2Adapter, WebGLDevice} from '@luma.gl/webgl';
+import type {CanvasContext, CanvasContextProps, Device, DeviceProps} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -380,6 +380,47 @@ webglTest('Deck#attached gl reuses a device already attached to the context', as
     deck2.finalize();
     attach.mockRestore();
   }
+});
+
+webglTest('Deck#attached gl props let luma reuse a device already on the context', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const gl = canvas.getContext('webgl2');
+  expect(gl, 'WebGL2 context is created').toBeTruthy();
+
+  const attach = vi.spyOn(webgl2Adapter, 'attach');
+  const initialized = createDeferred<Device>();
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [],
+    onDeviceInitialized: initialized.resolve,
+    onError: initialized.reject
+  });
+
+  let first: Device;
+  let attachProps: DeviceProps;
+  try {
+    first = await initialized.promise;
+    attachProps = attach.mock.calls[0][1]!;
+  } finally {
+    attach.mockRestore();
+    deck.finalize();
+  }
+
+  // The attach race cannot be reproduced here: the test runner loads luma's device module
+  // per request, which serializes concurrent attaches. Replay what attach() does once its
+  // "already attached" check has passed instead, with the props Deck supplied: construct
+  // a device on a context that already has one.
+  const second = new WebGLDevice({
+    ...attachProps,
+    _handle: gl,
+    createCanvasContext: {canvas: gl!.canvas, autoResize: false}
+  });
+  expect(second, 'existing device is reused').toBe(first);
 });
 
 test('Deck#useDevicePixels forwards to canvas context', async () => {
