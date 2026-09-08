@@ -17,14 +17,19 @@ export function loadScript(url) {
 
     scriptLoadPromises[url] = new Promise((resolve, reject) => {
       script.onload = resolve;
-      script.onerror = () => reject(new Error(`Failed to load script ${url}`));
+      script.onerror = () => {
+        // Forget the failed load so a later call can retry
+        delete scriptLoadPromises[url];
+        reject(new Error(`Failed to load script ${url}`));
+      };
     });
   }
   return scriptLoadPromises[url];
 }
 
 // Fired on `document` by the inline module that loadModule injects, since inline module scripts
-// do not emit "load" events.
+// do not emit "load" events. `detail` is `{key, error}`; `error` is set when the import or the
+// module's top-level evaluation threw.
 export const MODULE_LOADED_EVENT = 'deckgl-custom-library-loaded';
 
 // Loads an ES module and exposes its namespace as window[globalName]. Assigning the namespace
@@ -35,23 +40,34 @@ export function loadModule(url, globalName) {
     // JSON.stringify yields a valid JS string literal for any input; escaping "<" keeps a literal
     // "</script>" from ever appearing inside the inline module source.
     const quote = value => JSON.stringify(String(value)).replace(/</g, '\\u003c');
+    const dispatch = error =>
+      `document.dispatchEvent(new CustomEvent(${quote(MODULE_LOADED_EVENT)}, ` +
+      `{detail: {key: ${quote(key)}, error: ${error}}}))`;
     const script = document.createElement('script');
     script.type = 'module';
+    // A dynamic import inside try/catch reports fetch, parse and top-level evaluation failures alike
     script.textContent =
-      `import * as m from ${quote(url)}; window[${quote(globalName)}] = m; ` +
-      `document.dispatchEvent(new CustomEvent(${quote(MODULE_LOADED_EVENT)}, {detail: ${quote(key)}}));`;
+      `try { const m = await import(${quote(url)}); window[${quote(globalName)}] = m; ${dispatch('null')}; } ` +
+      `catch (error) { ${dispatch('String((error && error.message) || error)')}; }`;
     scriptLoadPromises[key] = new Promise((resolve, reject) => {
+      const fail = message => {
+        document.removeEventListener(MODULE_LOADED_EVENT, onLoaded);
+        // Forget the failed load so a later call can retry
+        delete scriptLoadPromises[key];
+        reject(new Error(`Failed to load module ${url}: ${message}`));
+      };
       const onLoaded = event => {
-        if (event.detail === key) {
+        if (event.detail && event.detail.key === key) {
           document.removeEventListener(MODULE_LOADED_EVENT, onLoaded);
-          resolve();
+          if (event.detail.error) {
+            fail(event.detail.error);
+          } else {
+            resolve();
+          }
         }
       };
       document.addEventListener(MODULE_LOADED_EVENT, onLoaded);
-      script.onerror = () => {
-        document.removeEventListener(MODULE_LOADED_EVENT, onLoaded);
-        reject(new Error(`Failed to load module ${url}`));
-      };
+      script.onerror = () => fail('script error');
       document.querySelector('head').appendChild(script);
     });
   }

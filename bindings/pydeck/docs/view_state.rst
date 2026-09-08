@@ -9,7 +9,7 @@ Non-geospatial views
 ^^^^^^^^^^^^^^^^^^^^
 
 ``ViewState`` forwards any keyword argument to deck.gl (snake_case is converted to camelCase), so it also
-describes the camera of non-geospatial views. Leave ``latitude`` and ``longitude`` unset and use the view's
+describes the camera of non-geospatial views. Use the view's
 own parameters instead:
 
 .. list-table::

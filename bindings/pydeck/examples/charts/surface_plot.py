@@ -5,7 +5,7 @@ Surface Plot
 A 3D surface plot on an OrbitView.
 
 The surface is a heightfield of quads drawn with a SolidPolygonLayer, colored on a diverging ramp
-by height. deck.gl's default lighting shades the surface; drag to orbit, scroll to zoom.
+by height. Drag to orbit, scroll to zoom.
 """
 
 import numpy as np

@@ -108,14 +108,66 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('addCustomLibraries completes when a module throws during evaluation', async () => {
+    const url = URL.createObjectURL(
+      new Blob(['throw new Error("boom");'], {type: 'text/javascript'})
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: 'ThrowingEsmLibrary', resourceUri: url, module: true}],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(String(errors.mock.calls[0][1])).toContain('boom');
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('a failed custom library can be retried', async () => {
+    const LIBRARY_NAME = 'RetryEsmLibrary';
+    const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;
+    const url = URL.createObjectURL(
+      new Blob(['export class RetryEsmLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: LIBRARY_NAME, resourceUri: missing, module: true}],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(
+        (window as any)[LIBRARY_NAME],
+        'placeholder is removed after a failure'
+      ).toBeUndefined();
+
+      await new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      const props = jsonConverter.convert({layers: [{'@@type': 'RetryEsmLayer', id: 'retry'}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].RetryEsmLayer);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
   test('loadModule quotes the URL and global name', async () => {
     const url = 'data:text/javascript,export%20const%20Ok%3D1';
     await loadModule(url, 'Quoted"Name</script>');
     const scripts = Array.from(document.querySelectorAll('script[type="module"]'));
     const script = scripts[scripts.length - 1];
-    expect(script.textContent).toContain(
-      `import * as m from ${JSON.stringify(url)}; window["Quoted\\"Name\\u003c/script>"] = m;`
-    );
+    expect(script.textContent).toContain(`await import(${JSON.stringify(url)})`);
+    expect(script.textContent).toContain(`window["Quoted\\"Name\\u003c/script>"] = m;`);
     expect(script.textContent).not.toContain('</script>');
   });
 });

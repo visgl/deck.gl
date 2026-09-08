@@ -107,6 +107,10 @@ export function addCustomLibraries(customLibraries, onComplete) {
     console.error(`Could not load custom library ${libraryName}`, error);
     // Settle the registration so initialization completes; the library's classes stay unregistered
     failed[libraryName] = true;
+    if (!window[libraryName]) {
+      // Remove the placeholder accessor so a later addCustomLibraries call retries the load
+      delete window[libraryName];
+    }
     onEachFinish();
   }
 
@@ -115,17 +119,26 @@ export function addCustomLibraries(customLibraries, onComplete) {
     // with the same parameters
     loaded[libraryName] = false;
 
-    if (libraryName in window) {
-      // do not redefine
-      onModuleLoaded(libraryName, window[libraryName]);
+    const existing = window[libraryName];
+    if (existing) {
+      // already loaded, by a classic script global or an earlier call
+      onModuleLoaded(libraryName, existing);
       return;
     }
 
     // Script execution is asynchronous and untraceable, so completion is observed through the
     // window[libraryName] property: classic scripts assign it themselves, and for ES modules
-    // loadModule() assigns the module namespace after import.
+    // loadModule() assigns the module namespace after import. An accessor left by an earlier call
+    // whose load is still in flight is chained so that call settles too.
+    const previous = Object.getOwnPropertyDescriptor(window, libraryName);
     Object.defineProperty(window, libraryName, {
-      set: loadedModule => onModuleLoaded(libraryName, loadedModule),
+      configurable: true,
+      set: loadedModule => {
+        if (previous && previous.set) {
+          previous.set(loadedModule);
+        }
+        onModuleLoaded(libraryName, loadedModule);
+      },
       get: () => {
         return loaded[libraryName];
       }
