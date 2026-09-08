@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import collision from '../text-layer-collision.glsl';
+
 export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME multi-icon-layer-vertex-shader
@@ -21,6 +23,7 @@ in vec2 instancePixelOffset;
 in vec4 instanceClipRect;
 #ifdef MODULE_COLLISION
 in vec4 instanceCollisionRects;
+in float collisionStartIndices;
 #endif
 
 out float vColorMode;
@@ -52,7 +55,16 @@ float getPixelOffsetFromAlignment(float anchor, float extent, float clipStart, f
   return 0.0;
 }
 
+${collision}
+
 void main(void) {
+#ifdef MODULE_COLLISION
+  // Binary input renders through the character layer. Evaluate only its first glyph.
+  if (collision.visibilityPass && gl_InstanceID != int(collisionStartIndices)) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+    return;
+  }
+#endif
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
   geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
@@ -100,21 +112,9 @@ void main(void) {
   }
 
 #ifdef MODULE_COLLISION
-  vec2 collisionOffset = rotate_by_angle(instanceCollisionRects.xy + instanceCollisionRects.zw / 2.0, instanceAngles) * collision_getSize(instanceSizes) / text.fontSize;
-  collisionOffset += instancePixelOffset;
-  collisionOffset.y *= -1.0;
-  // A clipped background occupies the content box, independently of text alignment.
-  if (instanceClipRect.z >= 0.0) collisionOffset.x = xy.x + wh.x / 2.0;
-  if (instanceClipRect.w >= 0.0) collisionOffset.y = xy.y + wh.y / 2.0;
-  collision_usePosition = true;
-  if (icon.billboard) {
-    collision_position = anchorPos;
-    collision_position.xy += project_pixel_size_to_clipspace(collisionOffset);
-  } else {
-    vec3 collisionOffsetCommon = vec3(project_pixel_size(collisionOffset), 0.0);
-    if (text.flipY) collisionOffsetCommon.y *= -1.0;
-    collision_position = project_position_to_clipspace(instancePositions, instancePositions64Low, collisionOffsetCommon);
-  }
+  text_setCollisionBounds(instancePositions, instancePositions64Low,
+    instanceCollisionRects * collision_getSize(instanceSizes) / text.fontSize,
+    instancePixelOffset, instanceAngles, vec4(xy, wh), icon.billboard, text.flipY);
 #endif
 
   if (icon.billboard) {
@@ -170,5 +170,10 @@ void main(void) {
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   vColorMode = instanceColorModes;
+#ifdef MODULE_COLLISION
+  if (collision.visibilityPass) {
+    gl_Position = collision_getVisibilityPosition(positions / 2.0 + 0.5);
+  }
+#endif
 }
 `;

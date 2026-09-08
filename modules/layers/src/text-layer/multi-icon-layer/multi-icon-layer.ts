@@ -185,7 +185,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
-    if (sdf && outlineWidth && !params.shaderModuleProps?.collision?.drawToCollisionMap) {
+    if (
+      sdf &&
+      outlineWidth &&
+      !params.shaderModuleProps?.collision?.drawToCollisionMap &&
+      !params.shaderModuleProps?.collision?.drawToCollisionVisibility
+    ) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
 

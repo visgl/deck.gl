@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import collision from '../text-layer-collision.glsl';
+
 export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME text-background-layer-vertex-shader
@@ -32,6 +34,8 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
   mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
   return rotationMatrix * vertex;
 }
+
+${collision}
 
 void main(void) {
   geometry.worldPosition = instancePositions;
@@ -72,20 +76,20 @@ void main(void) {
   }
 
 #ifdef MODULE_COLLISION
-  vec2 collisionOffset = (instanceRects.xy + instanceRects.zw / 2.0) * collision_getSize(instanceSizes) / text.fontSize;
-  collisionOffset = rotate_by_angle(collisionOffset, instanceAngles) + instancePixelOffsets;
-  collisionOffset.y *= -1.0;
-  if (instanceClipRect.z >= 0.0) collisionOffset.x = xy.x + wh.x / 2.0;
-  if (instanceClipRect.w >= 0.0) collisionOffset.y = xy.y + wh.y / 2.0;
-  collision_usePosition = true;
-  if (textBackground.billboard) {
-    collision_position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
-    collision_position.xy += project_pixel_size_to_clipspace(collisionOffset);
-  } else {
-    vec3 collisionOffsetCommon = vec3(project_pixel_size(collisionOffset), 0.0);
-    if (text.flipY) collisionOffsetCommon.y *= -1.0;
-    collision_position = project_position_to_clipspace(instancePositions, instancePositions64Low, collisionOffsetCommon);
+  vec4 collisionRect = instanceRects * collision_getSize(instanceSizes) / text.fontSize;
+  collisionRect.xy -= textBackground.padding.xy;
+  collisionRect.zw += textBackground.padding.xy + textBackground.padding.zw;
+  vec4 collisionClipRect = vec4(xy, wh);
+  if (instanceClipRect.z >= 0.0) {
+    collisionClipRect.x -= textBackground.padding.x;
+    collisionClipRect.z += textBackground.padding.x + textBackground.padding.z;
   }
+  if (instanceClipRect.w >= 0.0) {
+    collisionClipRect.y -= textBackground.padding.y;
+    collisionClipRect.w += textBackground.padding.y + textBackground.padding.w;
+  }
+  text_setCollisionBounds(instancePositions, instancePositions64Low,
+    collisionRect, instancePixelOffsets, instanceAngles, collisionClipRect, textBackground.billboard, text.flipY);
 #endif
 
   if (textBackground.billboard)  {
@@ -109,5 +113,10 @@ void main(void) {
   DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
+#ifdef MODULE_COLLISION
+  if (collision.visibilityPass) {
+    gl_Position = collision_getVisibilityPosition(positions);
+  }
+#endif
 }
 `;

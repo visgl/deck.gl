@@ -10,6 +10,8 @@ const uniformBlock = /* glsl */ `
 layout(std140) uniform collisionUniforms {
   bool sort;
   bool enabled;
+  bool visibilityPass;
+  vec2 visibilitySize;
   highp float sizeScale;
   highp float sizeMinPixels;
   highp float sizeMaxPixels;
@@ -21,14 +23,17 @@ layout(std140) uniform collisionUniforms {
 const vs = /* glsl */ `
 in float collisionPriorities;
 flat out highp vec3 collision_pickingColor;
+flat out float collision_priority;
 
 uniform sampler2D collision_texture;
+uniform sampler2D collision_visibilityTexture;
 
 ${uniformBlock}
 
-// Layers with screen-space offsets can supply the projected label center.
-vec4 collision_position = vec4(0.0);
-bool collision_usePosition = false;
+// Text layers supply their projected footprint for the visibility pass.
+flat out vec4 collision_position;
+bool collision_useBounds = false;
+flat out vec2 collision_corners[4];
 
 float collision_getSize(float size) {
   return clamp(project_size_to_pixel(size * collision.sizeScale, collision.sizeUnits),
@@ -55,26 +60,30 @@ float collision_match(vec2 tex, vec3 pickingColor) {
   return step(delta, e);
 }
 
+ivec2 collision_getVisibilityPixel(vec3 pickingColor) {
+  float index = dot(round(pickingColor * 255.0), vec3(1.0, 256.0, 65536.0));
+  float columns = collision.visibilitySize.x / 4.0;
+  return ivec2(mod(index, columns), floor(index / columns)) * 4;
+}
+
+vec4 collision_getVisibilityPosition(vec2 corner) {
+  vec2 pixel = vec2(collision_getVisibilityPixel(collision_pickingColor)) + corner * 4.0;
+  return vec4(pixel / collision.visibilitySize * 2.0 - 1.0, 0.0, 1.0);
+}
+
 float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
   if (!collision.enabled) {
     return 1.0;
   }
 
-  // Rectangle-backed text has a shared interior sample point. Interpolate the
-  // four neighboring texels for a stable edge fade, without the 25-tap kernel
-  // needed by point/line geometry. Half coverage is sufficient for full opacity.
-  if (collision_usePosition) {
-    vec2 texSize = vec2(textureSize(collision_texture, 0));
-    vec2 texel = texCoords * texSize - 0.5;
-    vec2 fraction = fract(texel);
-    vec2 origin = (floor(texel) + 0.5) / texSize;
-    vec2 step = 1.0 / texSize;
-    float coverage = mix(
-      mix(collision_match(origin, pickingColor), collision_match(origin + vec2(step.x, 0.0), pickingColor), fraction.x),
-      mix(collision_match(origin + vec2(0.0, step.y), pickingColor), collision_match(origin + step, pickingColor), fraction.x),
-      fraction.y
-    );
-    return smoothstep(0.0, 0.5, coverage);
+  if (collision_useBounds) {
+    ivec2 first = collision_getVisibilityPixel(pickingColor);
+    for (int y = 0; y < 4; y++) {
+      for (int x = 0; x < 4; x++) {
+        if (texelFetch(collision_visibilityTexture, first + ivec2(x, y), 0).r < 0.5) return 0.0;
+      }
+    }
+    return 1.0;
   }
 
   // Visibility test, sample area of 5x5 pixels in order to fade in/out.
@@ -103,6 +112,64 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 const fs = /* glsl */ `
 ${uniformBlock}
 flat in highp vec3 collision_pickingColor;
+flat in float collision_priority;
+flat in vec4 collision_position;
+flat in vec2 collision_corners[4];
+uniform sampler2D collision_texture;
+uniform highp sampler2D collision_depthTexture;
+bool collision_isOccluded(ivec2 pixel, vec3 pickingColor) {
+  vec4 color = texelFetch(collision_texture, pixel, 0);
+  if (color.a == 0.0 || all(lessThan(abs(color.rgb - pickingColor), vec3(0.5 / 255.0)))) {
+    return false;
+  }
+  // Ignore lower-priority geometry visible through rounded corners or clipping.
+  // The depth buffer is 16-bit; equal depths use the collision pass's draw order.
+  float depth = texelFetch(collision_depthTexture, pixel, 0).r;
+  float ownDepth = 0.5 - 0.0005 * collision_priority;
+  return depth <= ownDepth + 0.5 / 65535.0;
+}
+
+float collision_testBounds(vec3 pickingColor) {
+  ivec2 size = textureSize(collision_texture, 0);
+  vec2 minCorner = min(min(collision_corners[0], collision_corners[1]), min(collision_corners[2], collision_corners[3]));
+  vec2 maxCorner = max(max(collision_corners[0], collision_corners[1]), max(collision_corners[2], collision_corners[3]));
+  ivec2 first = max(ivec2(floor(minCorner * vec2(size))), ivec2(0));
+  ivec2 last = min(ivec2(ceil(maxCorner * vec2(size))), size - 1);
+
+  // Check the center first: densely packed labels usually reject in one lookup.
+  vec2 center = (collision_position.xy / collision_position.w + 1.0) / 2.0;
+  ivec2 centerPixel = ivec2(center * vec2(size));
+  if (all(greaterThanEqual(centerPixel, first)) && all(lessThanEqual(centerPixel, last)) &&
+      collision_isOccluded(centerPixel, pickingColor)) return 0.0;
+
+  // Distribute a label's footprint across a 4x4 block of fragments. This bounds
+  // the serial work per shader invocation even for long, multiline labels.
+  ivec2 extent = (last - first + 4) / 4;
+  ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
+  first += tile * extent;
+  last = min(last, first + extent - 1);
+
+  // Test every covered map pixel, rather than a fixed sample grid that can miss
+  // edge intersections or a small, higher-priority label inside a larger label.
+  vec3 edges[4];
+  for (int i = 0; i < 4; i++) {
+    vec2 a = collision_corners[i] * vec2(size);
+    vec2 b = collision_corners[(i + 1) % 4] * vec2(size);
+    vec2 normal = vec2(a.y - b.y, b.x - a.x);
+    edges[i] = vec3(normal, -dot(normal, a));
+  }
+  for (int y = first.y; y <= last.y; y++) {
+    for (int x = first.x; x <= last.x; x++) {
+      vec3 point = vec3(vec2(x, y) + 0.5, 1.0);
+      vec4 distances = vec4(dot(edges[0], point), dot(edges[1], point), dot(edges[2], point), dot(edges[3], point));
+      bool inside = all(greaterThanEqual(distances, vec4(0.0))) || all(lessThanEqual(distances, vec4(0.0)));
+      if (inside && collision_isOccluded(ivec2(x, y), pickingColor)) return 0.0;
+    }
+  }
+  return 1.0;
+}
+
+
 `;
 
 const inject = {
@@ -111,6 +178,7 @@ const inject = {
 `,
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   if (collision.sort || collision.enabled) {
+    collision_priority = collisionPriorities;
     collision_pickingColor = collision_getPickingColor(geometry.pickingColor);
   }
   if (collision.sort) {
@@ -118,11 +186,9 @@ const inject = {
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
   }
 
-  if (collision.enabled) {
+  if (collision.enabled && !collision.visibilityPass) {
     vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
-    vec2 collision_texCoords = collision_usePosition
-      ? (1.0 + collision_position.xy / collision_position.w) / 2.0
-      : collision_getCoords(collision_common_position);
+    vec2 collision_texCoords = collision_getCoords(collision_common_position);
     collision_fade = collision_isVisible(collision_texCoords, collision_pickingColor);
     if (collision_fade < 0.0001) {
       // Position outside clip space bounds to discard
@@ -143,8 +209,11 @@ const inject = {
 
 export type CollisionModuleProps = {
   enabled: boolean;
+  isTextLayer?: boolean;
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
+  drawToCollisionVisibility?: boolean;
+  visibilityFBO?: Framebuffer;
   dummyCollisionMap?: Texture;
   pickingColorOffset?: number;
   sizeScale?: number;
@@ -157,6 +226,8 @@ export type CollisionModuleProps = {
 type CollisionUniforms = {
   enabled?: boolean;
   sort?: boolean;
+  visibilityPass?: boolean;
+  visibilitySize?: [number, number];
   pickingColorOffset?: number;
   sizeScale?: number;
   sizeMinPixels?: number;
@@ -166,6 +237,8 @@ type CollisionUniforms = {
 
 type CollisionBindings = {
   collision_texture?: TextureView | Texture;
+  collision_depthTexture?: TextureView | Texture;
+  collision_visibilityTexture?: TextureView | Texture;
 };
 
 const getCollisionUniforms = (
@@ -174,15 +247,34 @@ const getCollisionUniforms = (
   if (!opts || !('dummyCollisionMap' in opts)) {
     return {};
   }
-  const {enabled, collisionFBO, drawToCollisionMap, dummyCollisionMap} = opts;
+  const {
+    enabled,
+    collisionFBO,
+    drawToCollisionMap,
+    drawToCollisionVisibility,
+    visibilityFBO,
+    dummyCollisionMap
+  } = opts;
   return {
     enabled: enabled && !drawToCollisionMap,
     sort: Boolean(drawToCollisionMap),
+    visibilityPass: Boolean(drawToCollisionVisibility),
+    visibilitySize: visibilityFBO ? [visibilityFBO.width, visibilityFBO.height] : [1, 1],
     pickingColorOffset: opts.pickingColorOffset ?? 0,
     sizeScale: opts.sizeScale ?? 1,
     sizeMinPixels: opts.sizeMinPixels ?? 0,
     sizeMaxPixels: opts.sizeMaxPixels ?? Number.MAX_SAFE_INTEGER,
     sizeUnits: UNIT[opts.sizeUnits || 'pixels'],
+    collision_visibilityTexture:
+      !drawToCollisionVisibility && visibilityFBO
+        ? visibilityFBO.colorAttachments[0]
+        : dummyCollisionMap,
+    ...(opts.isTextLayer && {
+      collision_depthTexture:
+        !drawToCollisionMap && collisionFBO
+          ? collisionFBO.depthStencilAttachment!
+          : dummyCollisionMap
+    }),
     collision_texture:
       !drawToCollisionMap && collisionFBO ? collisionFBO.colorAttachments[0] : dummyCollisionMap
   };
@@ -199,6 +291,8 @@ export default {
   uniformTypes: {
     sort: 'i32',
     enabled: 'i32',
+    visibilityPass: 'i32',
+    visibilitySize: 'vec2<f32>',
     sizeScale: 'f32',
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',

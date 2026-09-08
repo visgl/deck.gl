@@ -16,7 +16,7 @@ Run the browser matrix with the server running:
 node test/apps/collision/test-text.mjs
 ```
 
-It checks 648 combinations of TextLayer/GeoJSON, billboard mode, anchor, baseline, offsets, zoom and reversed priority. At low zoom only the higher-priority member of each pair is pickable; at high zoom both separated labels are pickable. The render suite additionally checks sizing overrides, rotation, wrapping, clipping, outlines, backgrounds, narrow glyphs, and priority across separate layers:
+It checks 1,296 combinations of single-line/multiline scenes and TextLayer/GeoJSON, billboard mode, anchor, baseline, offsets, zoom and reversed priority. At low zoom only the higher-priority member of each pair is pickable; at high zoom both separated labels are pickable. For a hardware browser run on macOS, use `COLLISION_TEST_GPU=metal node test/apps/collision/test-text.mjs`. The render suite additionally checks sizing overrides, rotation, wrapping, clipping, outlines, backgrounds, narrow glyphs, and priority across separate layers:
 
 ```sh
 RENDER_TEST_DEVICE=webgl yarn test-render --reporter=dot test/render/text-collision.spec.ts

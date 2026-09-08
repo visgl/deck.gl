@@ -55,7 +55,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl')).each(cases)(
   'text collision: $anchor / $baseline / GeoJSON=$useGeoJson',
   async ({anchor, baseline, useGeoJson}) => {
     for (const reverse of [false, true]) {
-      for (const zoom of [-1, 0, 4]) {
+      for (const zoom of [-1, 0, 5]) {
         const props = {
           id: 'collision-text',
           data,
@@ -87,7 +87,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl')).each(cases)(
         await new Promise<void>((resolve, reject) => {
           deck.setProps({
             layers: [layer],
-            viewState: {target: [0, 0, 0], zoom},
+            viewState: {target: [6, 0, 0], zoom},
             onError: reject,
             onAfterRender: () => {
               if (layer.isLoaded) resolve();
@@ -99,7 +99,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl')).each(cases)(
           .map(({object}) => (object.properties || object).priority)
           .sort((a, b) => a - b);
         expect(priorities, `zoom=${zoom}, reverse=${reverse}`).toEqual(
-          zoom === 4 ? [-100, 100] : [reverse ? -100 : 100]
+          zoom === 5 ? [-100, 100] : [reverse ? -100 : 100]
         );
       }
     }
@@ -266,5 +266,152 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     } finally {
       deck.setProps({views: new OrthographicView(), useDevicePixels: false});
     }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'multiline collision rejects overlap away from label centers',
+  async () => {
+    const layer = new TextLayer({
+      id: 'multiline-edge-overlap',
+      data: [
+        {position: [-40, 0], text: 'Label\nsecond line', priority: 100},
+        {position: [40, 0], text: 'Label\nsecond line', priority: -100}
+      ],
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer])).toEqual([100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text collision checks edges and contained labels',
+  async () => {
+    const commonProps = {
+      extensions,
+      pickable: true,
+      getSize: 24,
+      fontFamily: 'Arial',
+      getCollisionPriority: d => d.priority
+    };
+    for (const [name, first, second] of [
+      [
+        'long second line',
+        {text: 'Label\nsecond line', position: [-40, 0]},
+        {text: 'Label\nsecond line', position: [40, 0]}
+      ],
+      [
+        'long first line',
+        {text: 'second line\nLabel', position: [-40, 0]},
+        {text: 'second line\nLabel', position: [40, 0]}
+      ],
+      [
+        'vertical edge',
+        {text: 'Label\nsecond line', position: [0, -15]},
+        {text: 'Label\nsecond line', position: [0, 15]}
+      ],
+      [
+        'contained small label',
+        {text: 'i', position: [50, 0]},
+        {text: 'XXXXXXXXXXXX', position: [0, 0]}
+      ],
+      [
+        'different line widths',
+        {text: 'Second line', position: [-50, 0]},
+        {text: 'Much longer second line', position: [50, 0]}
+      ]
+    ]) {
+      const layer = new TextLayer({
+        ...commonProps,
+        id: 'overlap-cases',
+        data: [
+          {...first, priority: 100},
+          {...second, priority: -100}
+        ]
+      });
+      expect(await drawLayers([layer]), name).toEqual([100]);
+      expect(
+        await drawLayers([
+          layer.clone({
+            getCollisionPriority: d => -d.priority,
+            updateTriggers: {getCollisionPriority: 'reversed'}
+          })
+        ]),
+        `${name}: reversed`
+      ).toEqual([-100]);
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'multiline collision switches visibility at the longest line edge',
+  async () => {
+    for (const devicePixels of [1, 2]) {
+      deck.setProps({useDevicePixels: devicePixels});
+      try {
+        for (const distance of [120, 124]) {
+          const layer = new TextLayer({
+            id: 'multiline-touching',
+            data: [
+              {position: [-distance / 2, 0], text: 'Label\nsecond line', priority: 100},
+              {position: [distance / 2, 0], text: 'Label\nsecond line', priority: -100}
+            ],
+            getSize: 24,
+            fontFamily: 'Arial',
+            extensions,
+            pickable: true,
+            getCollisionPriority: d => d.priority
+          });
+          expect(await drawLayers([layer]), `distance=${distance}, DPR=${devicePixels}`).toEqual(
+            distance === 120 ? [100] : [-100, 100]
+          );
+        }
+      } finally {
+        deck.setProps({useDevicePixels: false});
+      }
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'long wrapped labels share visibility across every glyph',
+  async () => {
+    const layer = new TextLayer({
+      id: 'long-paragraph',
+      data: [{position: [0, 0], text: 'Label text '.repeat(45), priority: 100}],
+      getSize: 24,
+      maxWidth: 20,
+      wordBreak: 'break-word',
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer])).toEqual([100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text and padded backgrounds share the same collision result',
+  async () => {
+    const layer = new TextLayer({
+      id: 'padded-labels',
+      data: [
+        {position: [-40, 0], text: 'Label', priority: 100},
+        {position: [40, 0], text: 'Label', priority: -100}
+      ],
+      getSize: 24,
+      background: true,
+      backgroundPadding: [20, 10],
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer])).toEqual([100]);
   }
 );

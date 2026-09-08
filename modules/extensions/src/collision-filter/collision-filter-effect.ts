@@ -22,6 +22,7 @@ type RenderInfo = {
   layerBounds: ([number[], number[]] | null)[];
   allLayersLoaded: boolean;
   pickingColorOffsets: Record<string, number>;
+  hasText: boolean;
 };
 
 // Sublayers of a composite share source object indices (e.g. text and its background).
@@ -39,6 +40,7 @@ export default class CollisionFilterEffect implements Effect {
   private channels: Record<string, RenderInfo> = {};
   private collisionFilterPass?: CollisionFilterPass;
   private collisionFBOs: Record<string, Framebuffer> = {};
+  private visibilityFBOs: Record<string, Framebuffer> = {};
   private dummyCollisionMap?: Texture;
   private lastViewport?: Viewport;
 
@@ -93,10 +95,12 @@ export default class CollisionFilterEffect implements Effect {
       const collisionFBO = this.collisionFBOs[collisionGroup];
       const renderInfo = channels[collisionGroup];
       // @ts-expect-error TODO - assuming WebGL context
-      const [width, height] = device.canvasContext.getPixelSize();
+      const [width, height] = device.canvasContext.getDrawingBufferSize();
+      const oldWidth = collisionFBO.width;
+      const oldHeight = collisionFBO.height;
       collisionFBO.resize({
-        width: width / DOWNSCALE,
-        height: height / DOWNSCALE
+        width: width / (renderInfo.hasText ? 1 : DOWNSCALE),
+        height: height / (renderInfo.hasText ? 1 : DOWNSCALE)
       });
       this._render(renderInfo, {
         effects,
@@ -104,7 +108,8 @@ export default class CollisionFilterEffect implements Effect {
         onViewportActive,
         views,
         viewport,
-        viewportChanged
+        viewportChanged:
+          viewportChanged || oldWidth !== collisionFBO.width || oldHeight !== collisionFBO.height
       });
     }
 
@@ -171,11 +176,35 @@ export default class CollisionFilterEffect implements Effect {
             dummyCollisionMap: this.dummyCollisionMap
           },
           project: {
-            // @ts-expect-error TODO - assuming WebGL context
-            devicePixelRatio: collisionFBO.device.canvasContext.getDevicePixelRatio() / DOWNSCALE
+            devicePixelRatio:
+              collisionFBO.device.canvasContext!.cssToDeviceRatio() /
+              (renderInfo.hasText ? 1 : DOWNSCALE)
           }
         }
       });
+      if (renderInfo.hasText) {
+        const visibilityFBO = this.visibilityFBOs[collisionGroup];
+        const pixelRatio = collisionFBO.device.canvasContext!.cssToDeviceRatio();
+        this.collisionFilterPass!.renderCollisionVisibility(visibilityFBO, {
+          pass: 'collision',
+          isPicking: true,
+          layers: renderInfo.layers.filter(
+            layer => 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props
+          ),
+          effects: [...(effects || []), this],
+          layerFilter,
+          viewports: [viewport],
+          onViewportActive,
+          views,
+          shaderModuleProps: {
+            collision: {
+              enabled: true,
+              dummyCollisionMap: this.dummyCollisionMap
+            },
+            project: {devicePixelRatio: pixelRatio}
+          }
+        });
+      }
     }
   }
 
@@ -197,10 +226,12 @@ export default class CollisionFilterEffect implements Effect {
           layers: [],
           layerBounds: [],
           allLayersLoaded: true,
-          pickingColorOffsets: {}
+          pickingColorOffsets: {},
+          hasText: false
         };
         channelMap[collisionGroup] = channelInfo;
       }
+      channelInfo.hasText ||= 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
       const sourceId = getCollisionSourceId(layer);
       channelInfo.pickingColorOffsets[sourceId] = Math.max(
         channelInfo.pickingColorOffsets[sourceId] || 0,
@@ -223,6 +254,30 @@ export default class CollisionFilterEffect implements Effect {
         const count = offsets[sourceId];
         offsets[sourceId] = offset;
         offset += count;
+      }
+      if (channelMap[collisionGroup].hasText) {
+        const width = Math.min(
+          device.limits.maxTextureDimension2D,
+          Math.ceil(Math.sqrt(offset + 1)) * 4
+        );
+        const height = Math.ceil((offset + 1) / (width / 4)) * 4;
+        if (!this.visibilityFBOs[collisionGroup]) {
+          this.visibilityFBOs[collisionGroup] = device.createFramebuffer({
+            id: `collision-visibility-${collisionGroup}`,
+            width,
+            height,
+            colorAttachments: [
+              device.createTexture({
+                width,
+                height,
+                format: 'rgba8unorm',
+                sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+              })
+            ]
+          });
+        } else {
+          this.visibilityFBOs[collisionGroup].resize({width, height});
+        }
       }
       if (!this.collisionFBOs[collisionGroup]) {
         this.createFBO(device, collisionGroup);
@@ -250,14 +305,17 @@ export default class CollisionFilterEffect implements Effect {
     const {collisionFBOs, dummyCollisionMap} = this;
     const collisionFBO = collisionFBOs[collisionGroup!];
     const enabled = collisionEnabled && Boolean(collisionFBO);
+    const isTextLayer = 'getCollisionRect' in props || 'getBoundingRect' in props;
     return {
       collision: {
         enabled,
+        isTextLayer,
         pickingColorOffset:
           this.channels[collisionGroup!]?.pickingColorOffsets[getCollisionSourceId(layer)] || 0,
         collisionFBO,
+        visibilityFBO: isTextLayer ? this.visibilityFBOs[collisionGroup!] : undefined,
         dummyCollisionMap: dummyCollisionMap!,
-        // Match collisionTestProps sizing when projecting a text label's sample point.
+        // Match collisionTestProps sizing when projecting text collision bounds.
         sizeScale: testProps?.sizeScale ?? props.sizeScale,
         sizeMinPixels: testProps?.sizeMinPixels ?? props.sizeMinPixels,
         sizeMaxPixels: testProps?.sizeMaxPixels ?? props.sizeMaxPixels,
@@ -296,7 +354,8 @@ export default class CollisionFilterEffect implements Effect {
     const depthStencilAttachment = device.createTexture({
       format: 'depth16unorm',
       width,
-      height
+      height,
+      sampler: {minFilter: 'nearest', magFilter: 'nearest'}
     });
     this.collisionFBOs[collisionGroup] = device.createFramebuffer({
       id: `collision-${collisionGroup}`,
@@ -313,5 +372,11 @@ export default class CollisionFilterEffect implements Effect {
     fbo.depthStencilAttachment?.destroy();
     fbo.destroy();
     delete this.collisionFBOs[collisionGroup];
+    const visibilityFBO = this.visibilityFBOs[collisionGroup];
+    if (visibilityFBO) {
+      visibilityFBO.colorAttachments[0].destroy();
+      visibilityFBO.destroy();
+      delete this.visibilityFBOs[collisionGroup];
+    }
   }
 }

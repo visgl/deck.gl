@@ -47,6 +47,12 @@ export default class CollisionFilterExtension extends LayerExtension {
 
   /* eslint-disable camelcase */
   draw(this: Layer<CollisionFilterExtensionProps>, {shaderModuleProps}: any) {
+    if (shaderModuleProps.collision?.drawToCollisionVisibility) {
+      const {visibilityFBO} = shaderModuleProps.collision;
+      this.context.renderPass.setParameters({
+        viewport: [0, 0, visibilityFBO.width, visibilityFBO.height]
+      });
+    }
     if (shaderModuleProps.collision?.drawToCollisionMap) {
       // Avoid constructing a layer when the overrides are empty or unchanged.
       const {collisionTestProps} = this.props;
@@ -70,9 +76,14 @@ export default class CollisionFilterExtension extends LayerExtension {
     }
     this.context.deck?._addDefaultEffect(new CollisionFilterEffect());
     const attributeManager = this.getAttributeManager();
-    // Text glyphs share one sample point per label. Allocate it only when the extension is used.
+    // Text glyphs share collision bounds and visibility per label. Allocate it only when the extension is used.
     if ('getCollisionRect' in this.props) {
       attributeManager!.add({
+        collisionStartIndices: {
+          size: 1,
+          stepMode: 'dynamic',
+          accessor: (_, {index}) => this.props.startIndices?.[index] ?? index
+        },
         instanceCollisionRects: {
           size: 4,
           stepMode: 'dynamic',

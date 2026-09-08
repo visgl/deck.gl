@@ -114,17 +114,17 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 
 ## Using with TextLayer
 
-Text labels are tested at the center of their glyph bounds, after applying `getPixelOffset`, `getTextAnchor`, `getAlignmentBaseline`, `getAngle`, and the layer's size settings. Every character in a label shares the same visibility. This also applies to `GeoJsonLayer` with `pointType: 'text'` and its corresponding text accessors.
+Text labels are tested over their entire projected glyph bounds, after applying `getPixelOffset`, `getTextAnchor`, `getAlignmentBaseline`, `getAngle`, and the layer's size settings. Every character in a label shares the same visibility. This also applies to `GeoJsonLayer` with `pointType: 'text'` and its corresponding text accessors.
 
 TextLayer writes a rectangle covering each label into the collision map. Whitespace and empty lines do not enlarge the glyph bounds. When `background: true`, the background rectangle, including `backgroundPadding`, is used instead. No visible background or `alphaCutoff` override is required for text collision filtering.
 
-Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The sample point follows the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
+Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The tested bounds follow the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
 
-As with other layers, this is a point-in-rectangle test: overlapping edges alone do not necessarily hide a label. Higher-priority labels win when their collision area covers another label's sample point.
+A text label is hidden when any part of its collision rectangle overlaps higher-priority geometry, at the collision map's pixel resolution. This includes overlaps at the edges of multiline labels and smaller labels contained inside larger ones. The rectangles include the spaces between lines, so this is conservative: labels may hide before their visible glyphs touch.
 
 ## Using with transparent layers
 
-The `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
+For layers other than TextLayer, the `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
 
 A common issue is with the `IconLayer`, which [discards transparent pixels](https://deck.gl/docs/api-reference/layers/icon-layer#alphacutoff). To avoid this, use `alphaCutoff: -1`. A similar issue occurs when the anchor point of the `IconLayer` is too close to the edge of the image, to be safe include a few pixels of padding, e.g.
 
@@ -138,7 +138,7 @@ iconMapping: {
 
 - Accessors are not supported in `collisionTestProps`
 - Given that collisions is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- The collision is point-in-polygon, specifically is computed by comparing the anchor point of a feature with the rasterized screen-space areas of other features. While good for realtime applications, generally this will not give the same results as a full collision test would.
+- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer tests the full projected label rectangle. Both methods operate at pixel resolution, rather than performing exact vector geometry intersections.
 
 ## Source
 

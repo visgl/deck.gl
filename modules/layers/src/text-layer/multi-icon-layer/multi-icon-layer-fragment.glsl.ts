@@ -17,6 +17,12 @@ in vec2 uv;
 out vec4 fragColor;
 
 void main(void) {
+#ifdef MODULE_COLLISION
+  if (collision.visibilityPass) {
+    fragColor = vec4(collision_testBounds(collision_pickingColor), 0.0, 0.0, 1.0);
+    return;
+  }
+#endif
   geometry.uv = uv;
 
   if (!bool(picking.isActive)) {
