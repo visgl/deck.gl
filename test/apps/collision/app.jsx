@@ -40,6 +40,7 @@ export default function App() {
   const [offsetY, setOffsetY] = useState(0);
   const [textAnchor, setTextAnchor] = useState('middle');
   const [alignmentBaseline, setAlignmentBaseline] = useState('center');
+  const [textCollisionScale, setTextCollisionScale] = useState(1);
   const [selectedCounty, selectCounty] = useState(null);
 
   const props = {
@@ -165,7 +166,7 @@ export default function App() {
         collisionEnabled,
         collisionGroup: 'labels',
         collisionTestProps: {
-          sizeScale: 2 // Enlarge text to increase hit area
+          sizeScale: textCollisionScale
         },
         ...maskProps
       })
@@ -207,6 +208,22 @@ export default function App() {
         </label>
         {showLabels && (
           <>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <label htmlFor="text-collision-scale" style={{whiteSpace: 'nowrap'}}>
+                Collision scale
+              </label>
+              <input
+                id="text-collision-scale"
+                style={{width: 180}}
+                type="range"
+                min="1"
+                max="3"
+                step="0.1"
+                value={textCollisionScale}
+                onChange={event => setTextCollisionScale(Number(event.target.value))}
+              />
+              <span style={{width: 40, textAlign: 'right'}}>{textCollisionScale.toFixed(1)}×</span>
+            </div>
             <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
               <span style={{width: 72, whiteSpace: 'nowrap'}}>Anchor</span>
               <select value={textAnchor} onChange={event => setTextAnchor(event.target.value)}>
