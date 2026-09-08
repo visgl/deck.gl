@@ -1,3 +1,7 @@
+---
+description: "Render deck.gl layers over Google Maps with GoogleMapsOverlay from @deck.gl/google-maps, overlaid or interleaved."
+---
+
 # Using with Google Maps Platform
 
 | Pure JS | React | Overlaid | Interleaved |

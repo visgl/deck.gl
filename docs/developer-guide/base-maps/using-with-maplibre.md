@@ -1,3 +1,7 @@
+---
+description: "Render deck.gl layers over MapLibre GL JS with MapLibreOverlay from @deck.gl/maplibre, overlaid or interleaved."
+---
+
 # Using with MapLibre
 
 | Pure JS | React | Overlaid | Interleaved |

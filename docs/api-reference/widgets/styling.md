@@ -1,3 +1,7 @@
+---
+description: "Styling deck.gl widgets with CSS variables, themes and custom class names."
+---
+
 import {WidgetThemes} from '@site/src/doc-demos/widgets';
 
 # Styling Widgets

@@ -36,6 +36,10 @@ case $MODE in
     ;;
 esac
 
+# repair llms.txt / raw Markdown links for base-path deploys (WEBSITE_BASE_URL) and validate them
+node ./scripts/normalize-llm-output.mjs
+node ./scripts/check-llm-output.mjs
+
 # transpile workers
 BABEL_ENV=es5 npx babel ./static/workers --out-dir ./$OUTPUT_DIR/workers
 BABEL_ENV=esm npx babel ../examples/pydeck/src/pyodide-worker.ts --out-file ./$OUTPUT_DIR/workers/pyodide-worker.mjs

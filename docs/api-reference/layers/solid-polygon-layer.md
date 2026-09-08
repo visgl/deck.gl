@@ -1,3 +1,7 @@
+---
+description: "SolidPolygonLayer renders filled and optionally extruded polygons without strokes."
+---
+
 # SolidPolygonLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
