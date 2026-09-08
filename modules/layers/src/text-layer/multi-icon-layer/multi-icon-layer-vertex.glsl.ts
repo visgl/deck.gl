@@ -172,6 +172,8 @@ void main(void) {
   vColorMode = instanceColorModes;
 #ifdef MODULE_COLLISION
   if (collision.visibilityPass) {
+    // Preserve culling by the projection and other vertex extensions.
+    if (gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w) return;
     gl_Position = collision_getVisibilityPosition(positions / 2.0 + 0.5);
   }
 #endif

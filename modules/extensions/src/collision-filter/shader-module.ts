@@ -11,6 +11,7 @@ layout(std140) uniform collisionUniforms {
   bool sort;
   bool enabled;
   bool visibilityPass;
+  bool hasColliders;
   vec2 visibilitySize;
   highp float sizeScale;
   highp float sizeMinPixels;
@@ -78,12 +79,7 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 
   if (collision_useBounds) {
     ivec2 first = collision_getVisibilityPixel(pickingColor);
-    for (int y = 0; y < 4; y++) {
-      for (int x = 0; x < 4; x++) {
-        if (texelFetch(collision_visibilityTexture, first + ivec2(x, y), 0).r < 0.5) return 0.0;
-      }
-    }
-    return 1.0;
+    return texelFetch(collision_visibilityTexture, first + ivec2(3, 3), 0).r;
   }
 
   // Visibility test, sample area of 5x5 pixels in order to fade in/out.
@@ -129,7 +125,8 @@ bool collision_isOccluded(ivec2 pixel, vec3 pickingColor) {
   return depth <= ownDepth + 0.5 / 65535.0;
 }
 
-float collision_testBounds(vec3 pickingColor) {
+float collision_testBounds(vec3 pickingColor, int tileIndex) {
+  if (!collision.hasColliders) return 1.0;
   ivec2 size = textureSize(collision_texture, 0);
   vec2 minCorner = min(min(collision_corners[0], collision_corners[1]), min(collision_corners[2], collision_corners[3]));
   vec2 maxCorner = max(max(collision_corners[0], collision_corners[1]), max(collision_corners[2], collision_corners[3]));
@@ -142,10 +139,9 @@ float collision_testBounds(vec3 pickingColor) {
   if (all(greaterThanEqual(centerPixel, first)) && all(lessThanEqual(centerPixel, last)) &&
       collision_isOccluded(centerPixel, pickingColor)) return 0.0;
 
-  // Distribute a label's footprint across a 4x4 block of fragments. This bounds
-  // the serial work per shader invocation even for long, multiline labels.
-  ivec2 extent = (last - first + 4) / 4;
-  ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
+  // Six fragments test disjoint portions of the footprint against non-text geometry.
+  ivec2 extent = (last - first + ivec2(2, 3)) / ivec2(2, 3);
+  ivec2 tile = ivec2(tileIndex % 2, tileIndex / 2);
   first += tile * extent;
   last = min(last, first + extent - 1);
 
@@ -168,8 +164,18 @@ float collision_testBounds(vec3 pickingColor) {
   }
   return 1.0;
 }
-
-
+// Store projected bounds in RGBA8, avoiding a floating-point render-target requirement.
+vec4 collision_getBoundsData() {
+  ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
+  int component = tile.y * 4 + tile.x;
+  if (component >= 10) return vec4(collision_testBounds(collision_pickingColor, component - 10), 0.0, 0.0, 1.0);
+  float value = 0.0;
+  if (component < 8) value = collision_corners[component / 2][component % 2];
+  if (component == 8) value = collision_priority;
+  if (component == 9) value = 1.0;
+  uint bits = floatBitsToUint(value);
+  return vec4(uvec4(bits, bits >> 8, bits >> 16, bits >> 24) & 255u) / 255.0;
+}
 `;
 
 const inject = {
@@ -186,7 +192,7 @@ const inject = {
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
   }
 
-  if (collision.enabled && !collision.visibilityPass) {
+  if (collision.enabled && !collision.visibilityPass && (!collision.sort || collision_useBounds)) {
     vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
     vec2 collision_texCoords = collision_getCoords(collision_common_position);
     collision_fade = collision_isVisible(collision_texCoords, collision_pickingColor);
@@ -213,6 +219,8 @@ export type CollisionModuleProps = {
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
   drawToCollisionVisibility?: boolean;
+  filterByVisibility?: boolean;
+  hasColliders?: boolean;
   visibilityFBO?: Framebuffer;
   dummyCollisionMap?: Texture;
   pickingColorOffset?: number;
@@ -227,6 +235,7 @@ type CollisionUniforms = {
   enabled?: boolean;
   sort?: boolean;
   visibilityPass?: boolean;
+  hasColliders?: boolean;
   visibilitySize?: [number, number];
   pickingColorOffset?: number;
   sizeScale?: number;
@@ -256,9 +265,10 @@ const getCollisionUniforms = (
     dummyCollisionMap
   } = opts;
   return {
-    enabled: enabled && !drawToCollisionMap,
+    enabled: enabled && (!drawToCollisionMap || Boolean(opts.filterByVisibility)),
     sort: Boolean(drawToCollisionMap),
     visibilityPass: Boolean(drawToCollisionVisibility),
+    hasColliders: Boolean(opts.hasColliders),
     visibilitySize: visibilityFBO ? [visibilityFBO.width, visibilityFBO.height] : [1, 1],
     pickingColorOffset: opts.pickingColorOffset ?? 0,
     sizeScale: opts.sizeScale ?? 1,
@@ -292,6 +302,7 @@ export default {
     sort: 'i32',
     enabled: 'i32',
     visibilityPass: 'i32',
+    hasColliders: 'i32',
     visibilitySize: 'vec2<f32>',
     sizeScale: 'f32',
     sizeMinPixels: 'f32',

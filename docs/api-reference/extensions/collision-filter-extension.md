@@ -1,7 +1,7 @@
 
 # CollisionFilterExtension
 
-The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame.
+The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. Collisions update as the viewport and layer data change. Most layers use a GPU collision map; text combines GPU projection with priority-ordered placement.
 
 To use this extension on a layer, add the `CollisionFilterExtension` to the layer's `extensions` prop.
 
@@ -116,11 +116,15 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 
 Text labels are tested over their entire projected glyph bounds, after applying `getPixelOffset`, `getTextAnchor`, `getAlignmentBaseline`, `getAngle`, and the layer's size settings. Every character in a label shares the same visibility. This also applies to `GeoJsonLayer` with `pointType: 'text'` and its corresponding text accessors.
 
-TextLayer writes a rectangle covering each label into the collision map. Whitespace and empty lines do not enlarge the glyph bounds. When `background: true`, the background rectangle, including `backgroundPadding`, is used instead. No visible background or `alphaCutoff` override is required for text collision filtering.
+TextLayer projects a rectangle covering each label. Whitespace and empty lines do not enlarge the glyph bounds. When `background: true`, the background rectangle, including `backgroundPadding`, is used instead. No visible background or `alphaCutoff` override is required for text collision filtering.
 
 Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The tested bounds follow the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
 
-A text label is hidden when any part of its collision rectangle overlaps higher-priority geometry, at the collision map's pixel resolution. This includes overlaps at the edges of multiline labels and smaller labels contained inside larger ones. The rectangles include the spaces between lines, so this is conservative: labels may hide before their visible glyphs touch.
+Text labels are placed in descending priority, with later source draw order breaking ties. A label is accepted if its projected rectangle does not overlap an already accepted label. Rejected labels do not reserve space, so a chain of overlapping candidates can display several separated labels. This is greedy placement: it fills available space while honoring priority, rather than guaranteeing the mathematically largest number of labels.
+
+The GPU supplies projected bounds to a CPU spatial grid, which checks nearby accepted labels and uploads their visibility. This requires a compact GPU readback when collisions update. Labels in the same group as non-text geometry also test that geometry at the collision map's pixel resolution. Non-text features retain their anchor-based filtering and can still conservatively block labels even if another feature hides them.
+
+The rectangles include the spaces between lines, so labels may hide before their visible glyphs touch. Multiline edge overlaps and smaller labels contained inside larger ones are both detected.
 
 ## Using with transparent layers
 
@@ -137,8 +141,8 @@ iconMapping: {
 ## Limitations
 
 - Accessors are not supported in `collisionTestProps`
-- Given that collisions is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer tests the full projected label rectangle. Both methods operate at pixel resolution, rather than performing exact vector geometry intersections.
+- The layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
+- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer compares full projected rectangles with other text, and tests non-text geometry at the collision map’s pixel resolution.
 
 ## Source
 

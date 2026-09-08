@@ -12,6 +12,7 @@ const settings = {
   scene: 'pairs',
   geojson: false,
   collisionEnabled: true,
+  showAnchors: true,
   reversePriority: false,
   anchor: 'middle',
   baseline: 'center',
@@ -92,6 +93,7 @@ function getLayers() {
   return [
     new ScatterplotLayer({
       id: 'anchors',
+      visible: settings.showAnchors,
       data,
       getPosition: d => d.position,
       getRadius: 3,
@@ -180,6 +182,7 @@ function addControl(key, title, options) {
   label.append(input);
   controls.append(label);
 }
+addControl('showAnchors', 'Anchor points');
 addControl('scene', 'Scene', ['pairs', 'multiline', 'whitespace', 'stress']);
 addControl('geojson', 'GeoJSON text');
 addControl('collisionEnabled', 'Collisions');
@@ -227,15 +230,19 @@ async function benchmark() {
       }
     });
   }
+  const visibleLabels = (
+    await deck.pickObjectsAsync({x: 0, y: 0, width: deck.width, height: deck.height})
+  ).length;
   deck.setProps({viewState: null, initialViewState: getSceneViewState()});
   samples.sort((a, b) => a - b);
   const result = {
     labels: data.length,
+    visibleLabels,
     medianMs: samples[Math.floor(samples.length / 2)],
     p95Ms: samples[Math.floor(samples.length * 0.95)]
   };
   document.getElementById('metrics').textContent =
-    `${result.labels} labels: median ${result.medianMs.toFixed(1)} ms, p95 ${result.p95Ms.toFixed(1)} ms`;
+    `${result.visibleLabels} / ${result.labels} labels visible: median ${result.medianMs.toFixed(1)} ms, p95 ${result.p95Ms.toFixed(1)} ms`;
   return result;
 }
 document.getElementById('benchmark').onclick = benchmark;

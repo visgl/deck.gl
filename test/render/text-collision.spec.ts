@@ -4,8 +4,8 @@
 
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {Deck, OrthographicView, MapView} from '@deck.gl/core';
-import {TextLayer, GeoJsonLayer} from '@deck.gl/layers';
-import {CollisionFilterExtension} from '@deck.gl/extensions';
+import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension, DataFilterExtension} from '@deck.gl/extensions';
 import {createContainer, createTestDevice, removeContainer} from './deck-test-utils';
 import {isRenderTestDeviceEnabled} from './render-test-suite';
 
@@ -192,7 +192,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
         startIndices,
         attributes: {
           getText: new Uint8Array(Array.from(texts.join('')).map(char => char.charCodeAt(0))),
-          getPosition: {buffer, size: 3}
+          getPosition: {buffer, type: 'float32', size: 3, stride: 12}
         }
       },
       extensions,
@@ -413,5 +413,90 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       getCollisionPriority: d => d.priority
     });
     expect(await drawLayers([layer])).toEqual([100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'rejected labels do not block non-overlapping neighbors',
+  async () => {
+    const layer = new TextLayer({
+      id: 'collision-chain',
+      data: [
+        {position: [-60, 0], text: 'XXXXX', priority: 10},
+        {position: [0, 0], text: 'XXXXX', priority: 20},
+        {position: [60, 0], text: 'XXXXX', priority: 30}
+      ],
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer])).toEqual([10, 30]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text placement fills a long chain at different zoom levels',
+  async () => {
+    const layer = new TextLayer({
+      id: 'long-collision-chain',
+      data: Array.from({length: 10}, (_, index) => ({
+        position: [index * 60 - 270, 0],
+        text: 'XXXXX',
+        priority: index
+      })),
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer], 0)).toEqual([1, 3, 5, 7, 9]);
+    expect(await drawLayers([layer.clone()], -1)).toEqual([0, 3, 6, 9]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text placement respects non-text collision priorities',
+  async () => {
+    const text = new TextLayer({
+      id: 'mixed-text',
+      data: [data[0]],
+      getSize: 24,
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    const point = new ScatterplotLayer({
+      id: 'mixed-point',
+      data: [{position: [0, 0], priority: 200}],
+      getRadius: 8,
+      radiusUnits: 'pixels',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([text, point])).toEqual([200]);
+    expect(
+      await drawLayers([text.clone(), point.clone({data: [{position: [0, 0], priority: -200}]})])
+    ).toEqual([100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'filtered text does not reserve placement space',
+  async () => {
+    const layer = new TextLayer({
+      id: 'filtered-collision-text',
+      data,
+      getSize: 24,
+      extensions: [...extensions, new DataFilterExtension({filterSize: 1})],
+      filterRange: [-100, 0],
+      getFilterValue: d => d.priority,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer])).toEqual([-100]);
   }
 );

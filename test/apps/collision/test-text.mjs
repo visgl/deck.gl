@@ -120,6 +120,30 @@ try {
       assert.equal(green > 0, zoom === 2.8 || !reversePriority, `Green pixels: zoom=${zoom}`);
     }
   }
+  // Dense chains must leave room for many separated labels, at either priority order.
+  await page.selectOption('#scene', 'stress');
+  for (const reversePriority of [false, true]) {
+    for (const zoom of [-5, -4, -3]) {
+      const visible = await page.evaluate(
+        async ({reversePriority, zoom}) => {
+          const {deck, settings, update} = window.collisionTest;
+          Object.assign(settings, {reversePriority, angle: 0, collisionScale: 1});
+          update();
+          deck.setProps({viewState: {target: [11040, 2025, 0], zoom}});
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          return (await deck.pickObjectsAsync({x: 0, y: 0, width: 1200, height: 800})).map(
+            ({object}) => ({high: object.high, index: object.index})
+          );
+        },
+        {reversePriority, zoom}
+      );
+      assert.ok(visible.length >= 30, `Dense packing: zoom=${zoom}, count=${visible.length}`);
+      assert.ok(
+        visible.every(label => label.high !== reversePriority),
+        'Dense packing priorities'
+      );
+    }
+  }
   assert.deepEqual(errors, [], 'Browser errors');
   console.log(`Passed ${count} text collision combinations.`);
 } finally {

@@ -46,7 +46,7 @@ vec4 get_stroked_fragColor(float dist) {
 void main(void) {
 #ifdef MODULE_COLLISION
   if (collision.visibilityPass) {
-    fragColor = vec4(collision_testBounds(collision_pickingColor), 0.0, 0.0, 1.0);
+    fragColor = collision_getBoundsData();
     return;
   }
 #endif

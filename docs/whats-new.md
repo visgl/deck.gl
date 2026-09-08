@@ -80,7 +80,7 @@ New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked
 
 ### Layers and Extensions
 
-- [CollisionFilterExtension](./api-reference/extensions/collision-filter-extension.md) now supports TextLayer pixel offsets, anchors, baselines, and rotation, including GeoJSON text. Labels test their full projected glyph bounds for collision detection, including multiline edge overlaps, and priorities are respected across source layers in the same collision group.
+- [CollisionFilterExtension](./api-reference/extensions/collision-filter-extension.md) now supports TextLayer pixel offsets, anchors, baselines, and rotation, including GeoJSON text. Labels test their full projected glyph bounds for collision detection, including multiline edge overlaps, and priorities are respected across source layers in the same collision group. Priority-ordered text placement reuses space from rejected labels, preventing dense overlap chains from hiding all but one label.
 
 
 <table style={{border: 0}} align="center">
