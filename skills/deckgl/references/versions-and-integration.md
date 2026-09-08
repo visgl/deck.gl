@@ -5,12 +5,16 @@
 - deck.gl **9.x** is the current major (9.4 released September 2026). Training data is dominated by
   8.x examples; do not pin `deck.gl@8` unless the project already depends on it. Check
   `npm view deck.gl version` or the installed lockfile instead of assuming.
-- deck.gl 9 runs on luma.gl 9 with WebGL 2 and WebGPU. All official layers support WebGPU in 9.4.
+- deck.gl 9 runs on luma.gl 9 with WebGL 2 and experimental WebGPU. In 9.4 every layer in the
+  official layer catalog has a WebGPU path, but `@deck.gl/carto` layers and most extensions do not,
+  WebGPU is opt-in via `deviceProps` and is not production ready. See the WebGPU developer guide.
 - The umbrella `deck.gl` package re-exports the modules; scoped packages (`@deck.gl/core`,
   `@deck.gl/layers`, `@deck.gl/geo-layers`, `@deck.gl/aggregation-layers`, `@deck.gl/react`,
   `@deck.gl/maplibre`, `@deck.gl/mapbox`, `@deck.gl/google-maps`, `@deck.gl/json`, `@deck.gl/carto`)
-  must all be on the same version. Do not add `@luma.gl/*` packages by hand; they come as
-  dependencies.
+  must all be on the same version. `@luma.gl/core` is a peer dependency that must match the deck.gl
+  release; do not install other `@luma.gl/*` packages unless a feature needs them, for example
+  `@luma.gl/webgpu` when opting into WebGPU with
+  `deviceProps: {type: 'webgpu', adapters: [webgpuAdapter]}`.
 
 ## v8 to v9 patterns to leave behind
 
@@ -26,11 +30,14 @@
 | Base map | Package (9.4+) | Class | Attach |
 | --- | --- | --- | --- |
 | MapLibre GL JS v4.5.1, v5, v6 | `@deck.gl/maplibre` | `MapLibreOverlay` | `map.addControl(overlay)` |
-| MapLibre on deck.gl ≤ 9.3 | `@deck.gl/mapbox` | `MapboxOverlay` | `map.addControl(overlay)` (works; module is named for Mapbox) |
+| MapLibre, any 9.x | `@deck.gl/mapbox` | `MapboxOverlay` | `map.addControl(overlay)`; still supported with MapLibre in 9.4, but `@deck.gl/maplibre` is now the recommended integration |
 | Mapbox GL JS | `@deck.gl/mapbox` | `MapboxOverlay` | `map.addControl(overlay)`; needs a Mapbox access token |
 | Google Maps | `@deck.gl/google-maps` | `GoogleMapsOverlay` | `overlay.setMap(map)` |
 | React | `@deck.gl/react` `DeckGL` + `react-map-gl/maplibre` (or `/mapbox`) | | `<DeckGL><Map/></DeckGL>` |
 
+- `@deck.gl/maplibre` is distributed as ES modules only. Bundled applications must configure the
+  MapLibre worker (`setWorkerUrl` from `maplibre-gl` with the bundler's worker URL); direct browser
+  ES module imports and the CDN bundle configure it automatically.
 - `interleaved: false` (default) draws deck.gl in its own canvas above the base map: simplest,
   most robust. `interleaved: true` renders into the base map's context so 3D layers can sit under
   labels and buildings; then use `beforeId` on layers to slot them below a base map layer.

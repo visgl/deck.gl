@@ -15,8 +15,9 @@
 
 ## Sizes and units
 
-- `radiusUnits`, `lineWidthUnits`, `sizeUnits`: `'meters'` (default for most), `'pixels'`,
-  `'common'`. Meter radii disappear at world zoom; pair meter sizes with `radiusMinPixels` /
+- `radiusUnits` and `lineWidthUnits` default to `'meters'`; `sizeUnits` defaults to `'pixels'` in
+  `IconLayer`, `TextLayer` and `PointCloudLayer`. All accept `'meters'`, `'pixels'` or `'common'`.
+  Meter radii disappear at world zoom; pair meter sizes with `radiusMinPixels` /
   `lineWidthMinPixels`, or use pixel units for symbol-like marks.
 - `pickable: true` is required for hover and click. Provide `getTooltip` on `Deck`/`DeckGL`
   or the overlay, returning `null` or a string/`{html, style}` object.
@@ -25,7 +26,8 @@
 
 - Do not build millions of JavaScript objects. Pass binary attributes:
   `data: {length: n, attributes: {getPosition: {value: Float32Array, size: 2},
-  getFillColor: {value: Uint8Array, size: 3, normalized: false}}}`. Or use Arrow / GeoArrow
+  getFillColor: {value: Uint8Array, size: 3}}}`. Color attributes are normalized by default, so
+  0-255 `Uint8Array` values are correct as they are; do not pass `normalized: false`. Or use Arrow / GeoArrow
   layers, or tiled data (`MVTLayer`, `TileLayer`, `GeoJsonLayer` over tiles) so only the
   viewport is loaded.
 - Fetch and parse with loaders.gl when a format is involved; deck.gl `data` accepts a URL, a
@@ -34,9 +36,11 @@
 ## Aggregation layers (`@deck.gl/aggregation-layers`)
 
 - `HexagonLayer` and `GridLayer`: `radius` / `cellSize` in meters, `extruded`, `elevationScale`,
-  `getColorValue` / `getElevationValue` (or `getColorWeight` + `colorAggregation`), `colorRange`
-  (array of RGBA arrays), `colorScaleType` (`'quantize'`, `'quantile'`, `'ordinal'`),
-  `upperPercentile` / `lowerPercentile` to clip long tails.
+  `colorRange` (array of RGB or RGBA arrays), `upperPercentile` / `lowerPercentile` to clip long
+  tails. Prefer `getColorWeight` + `colorAggregation` (`'SUM' | 'MEAN' | 'MIN' | 'MAX' | 'COUNT'`)
+  and the elevation equivalents: they keep GPU aggregation. `getColorValue` / `getElevationValue`
+  override them and fall back to CPU aggregation. `colorScaleType`: `'quantize'` (default),
+  `'linear'`, `'quantile'`, `'ordinal'`; the last two read results back from the GPU once.
 - Count-like data is heavily right-skewed: with defaults nearly every cell lands in the lowest
   color bin. Use `colorScaleType: 'quantile'` or lower `upperPercentile`, and say so in a legend.
 - `HeatmapLayer`: `getWeight`, `radiusPixels`, `intensity`, `colorRange`, `colorDomain`; it

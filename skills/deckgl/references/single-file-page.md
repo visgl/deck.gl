@@ -2,10 +2,9 @@
 
 Use this when the deliverable is one HTML file: an artifact, a demo, a gist, a slide.
 
-## Choose the tool honestly
+## Choose the tool
 
-- A few markers with popups on a slippy map: a plain base map library is smaller and simpler;
-  deck.gl adds nothing there.
+- A few static markers with popups: the base map library's own markers may suffice.
 - Thousands of features, data-driven color or size, aggregation, 3D, animation, or anything
   that must stay smooth while panning: MapLibre for the basemap, deck.gl for the data.
 

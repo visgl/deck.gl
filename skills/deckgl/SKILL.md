@@ -40,9 +40,9 @@ Read every reference that applies; integration and layer rules usually both matt
 ## Implement
 
 1. Pick the smallest correct surface: a base map library for the basemap, deck.gl for the data
-   layers, connected through the overlay class for that library. deck.gl is not a marker-and-popup
-   library; for a handful of markers on a slippy map, a plain base map library may be the better
-   answer, and saying so is part of the job.
+   layers, connected through the overlay class for that library. For a handful of static markers
+   with popups, the base map library's own markers may suffice; deck.gl earns its place as soon as
+   the data is large, data-driven, aggregated, 3D or animated.
 2. Treat layers as immutable. Never mutate `layer.props` or call internal state methods; create
    new layer instances with new props and pass them to `setProps` or `layers`. deck.gl diffs by
    layer `id`.

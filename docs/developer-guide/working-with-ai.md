@@ -1,10 +1,9 @@
 # Working with AI Coding Agents
 
-AI coding agents write deck.gl fluently, and mostly a version behind. Asked in September 2026
-which deck.gl was current, every frontier model answered 9.0 or 9.1; asked to build maps, most
-loaded a deck.gl 8 bundle and used 8-era integration patterns. The maps rendered. The code was
-old. This page describes a workflow that keeps agents on the version you actually use, first for
-application developers, then for contributors to the deck.gl repository.
+AI coding agents often generate code for an older deck.gl release than the one installed: 8.x
+bundles, 8-era base map integration and deprecated props are common in generated code even when
+the map renders. This page describes a workflow that keeps agents on the version you actually
+use, first for application developers, then for contributors to the deck.gl repository.
 
 ## Start from local truth
 
@@ -43,8 +42,8 @@ version, the base map and the observable success condition:
 > Confirm the installed deck.gl version, keep the layer update immutable, open the page in a
 > browser, and report console errors and a screenshot with the data visible.
 
-The skill carries procedural judgment and the mistakes we have seen agents make. It does not copy
-the API reference into every conversation.
+The skill carries procedural judgment and the common mistakes in generated deck.gl code. It does
+not copy the API reference into every conversation.
 
 ## Give agents exact documentation
 

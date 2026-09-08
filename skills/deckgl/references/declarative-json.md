@@ -11,9 +11,10 @@ code, and it is what pydeck, kepler.gl-style configs and several agent products 
 - `"@@function": "name"` calls a registered function with the sibling keys as its argument
   object. `"@@#Enum.VALUE"` resolves a registered constant or enumeration.
 - `"@@=expression"` turns a string into an accessor. The expression runs in a small safe
-  evaluator: property access, indexing, arithmetic, comparisons, logical and ternary operators.
-  **No function calls** (`Math.log`, `.toFixed`, `.includes`), no optional chaining, no template
-  literals, no object literals. Precompute transformations in the data instead.
+  evaluator: property access, indexing, arithmetic, comparisons, logical and ternary operators,
+  and array literals; `"getPosition": "@@=[lng, lat]"` is the standard form. Function calls
+  (`Math.log`, `.toFixed`, `.includes`) throw at parse time; there is no optional chaining, no
+  template literal and no object literal. Precompute transformations in the data instead.
 - Top-level keys mirror `Deck` props: `initialViewState`, `views`, `layers`, `effects`,
   `getTooltip`, plus `mapStyle` in the scripting integration.
 
@@ -43,8 +44,8 @@ not deck.gl accessors.
 
 ## Failure is silent today
 
-- An unknown `@@type` or `@@function` is logged as a warning (if a `log` is configured) and
-  replaced with `null`. The map renders without that layer and **no error is thrown**.
+- An unknown `@@type` or `@@function` is logged as a warning (the configuration's `log` defaults
+  to `console`) and replaced with `null`. The map renders without that layer and **no error is thrown**.
 - A wrong accessor expression can evaluate to `undefined` and become a transparent color or a
   zero radius. The map renders empty.
 - Because of this, a converter used by an agent should: count layers in the spec versus layers
