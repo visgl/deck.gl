@@ -86,8 +86,9 @@ export function addCustomLibraries(customLibraries, onComplete) {
   }
 
   const loaded = {};
-
   const failed = {};
+  // Getters of the window[libraryName] accessors installed by this call
+  const getters = {};
 
   function onEachFinish() {
     if (Object.keys(loaded).every(name => loaded[name] || failed[name])) {
@@ -107,8 +108,10 @@ export function addCustomLibraries(customLibraries, onComplete) {
     console.error(`Could not load custom library ${libraryName}`, error);
     // Settle the registration so initialization completes; the library's classes stay unregistered
     failed[libraryName] = true;
-    if (!window[libraryName]) {
-      // Remove the placeholder accessor so a later addCustomLibraries call retries the load
+    // Remove this call's placeholder accessor so a later addCustomLibraries call retries the load.
+    // An accessor installed by a newer registration (which chains this one) is left alone.
+    const descriptor = Object.getOwnPropertyDescriptor(window, libraryName);
+    if (descriptor && descriptor.get === getters[libraryName]) {
       delete window[libraryName];
     }
     onEachFinish();
@@ -131,6 +134,7 @@ export function addCustomLibraries(customLibraries, onComplete) {
     // loadModule() assigns the module namespace after import. An accessor left by an earlier call
     // whose load is still in flight is chained so that call settles too.
     const previous = Object.getOwnPropertyDescriptor(window, libraryName);
+    getters[libraryName] = () => loaded[libraryName];
     Object.defineProperty(window, libraryName, {
       configurable: true,
       set: loadedModule => {
@@ -139,9 +143,7 @@ export function addCustomLibraries(customLibraries, onComplete) {
         }
         onModuleLoaded(libraryName, loadedModule);
       },
-      get: () => {
-        return loaded[libraryName];
-      }
+      get: getters[libraryName]
     });
 
     const loading = module ? loadModule(resourceUri, libraryName) : loadScript(resourceUri);

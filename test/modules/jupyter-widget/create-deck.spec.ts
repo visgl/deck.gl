@@ -128,6 +128,53 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('addCustomLibraries completes when a module throws an empty error', async () => {
+    const url = URL.createObjectURL(new Blob(['throw "";'], {type: 'text/javascript'}));
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: 'EmptyErrorEsmLibrary', resourceUri: url, module: true}],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('a failure does not detach a newer registration of the same library', async () => {
+    const LIBRARY_NAME = 'ConcurrentEsmLibrary';
+    const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000002`;
+    const url = URL.createObjectURL(
+      new Blob(['export class ConcurrentEsmLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      // Two widgets register the same library name at once; the older one fails, the newer one loads
+      const first = new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: LIBRARY_NAME, resourceUri: missing, module: true}],
+          resolve
+        )
+      );
+      const second = new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      await Promise.all([first, second]);
+      expect(errors).toHaveBeenCalledTimes(1);
+      const props = jsonConverter.convert({layers: [{'@@type': 'ConcurrentEsmLayer', id: 'c'}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].ConcurrentEsmLayer);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
   test('a failed custom library can be retried', async () => {
     const LIBRARY_NAME = 'RetryEsmLibrary';
     const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;
