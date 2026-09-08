@@ -7,7 +7,8 @@ import {Deck, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
-import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import type {CanvasContext, CanvasContextProps, Device} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -329,6 +330,55 @@ webglTest('Deck#attached gl resize syncs canvas context drawing buffer', async (
   } finally {
     canvasContext.setDrawingBufferSize = originalSetDrawingBufferSize;
     deck.finalize();
+  }
+});
+
+webglTest('Deck#attached gl reuses a device already attached to the context', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const gl = canvas.getContext('webgl2');
+  expect(gl, 'WebGL2 context is created').toBeTruthy();
+
+  const props = {
+    gl,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: []
+  };
+
+  // A Deck recreated on the same context (e.g. React StrictMode) attaches again before
+  // the first attach settles; luma throws unless told to reuse the device.
+  const attach = vi.spyOn(webgl2Adapter, 'attach');
+  const initialized = createDeferred<Device>();
+  const deck = new Deck({
+    ...props,
+    onDeviceInitialized: initialized.resolve,
+    onError: initialized.reject
+  });
+
+  try {
+    expect(attach, 'attach is called once').toHaveBeenCalledTimes(1);
+    expect(attach.mock.calls[0][1], 'attach reuses existing device').toMatchObject({
+      _reuseDevices: true,
+      _cacheShaders: true,
+      _cachePipelines: true
+    });
+    expect(await initialized.promise, 'device is attached').toBe(deck.device);
+  } finally {
+    deck.finalize();
+  }
+
+  attach.mockClear();
+  const deck2 = new Deck({...props, deviceProps: {_reuseDevices: false}});
+  try {
+    expect(attach.mock.calls[0][1], 'deviceProps override defaults').toMatchObject({
+      _reuseDevices: false
+    });
+  } finally {
+    deck2.finalize();
+    attach.mockRestore();
   }
 });
 
