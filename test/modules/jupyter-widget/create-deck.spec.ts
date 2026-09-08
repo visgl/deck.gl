@@ -209,6 +209,45 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('concurrent registrations of one name with different modules register both', async () => {
+    const LIBRARY_NAME = 'SharedNameEsmLibrary';
+    const makeUrl = (name: string) =>
+      URL.createObjectURL(
+        new Blob([`export class ${name} { constructor(props) { this.props = props; } }`], {
+          type: 'text/javascript'
+        })
+      );
+    const urlA = makeUrl('SharedNameLayerA');
+    const urlB = makeUrl('SharedNameLayerB');
+    try {
+      await Promise.all([
+        new Promise<void>(resolve =>
+          addCustomLibraries(
+            [{libraryName: LIBRARY_NAME, resourceUri: urlA, module: true}],
+            resolve
+          )
+        ),
+        new Promise<void>(resolve =>
+          addCustomLibraries(
+            [{libraryName: LIBRARY_NAME, resourceUri: urlB, module: true}],
+            resolve
+          )
+        )
+      ]);
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'SharedNameLayerA', id: 'a'},
+          {'@@type': 'SharedNameLayerB', id: 'b'}
+        ]
+      });
+      expect(props.layers[0].constructor.name).toBe('SharedNameLayerA');
+      expect(props.layers[1].constructor.name).toBe('SharedNameLayerB');
+    } finally {
+      URL.revokeObjectURL(urlA);
+      URL.revokeObjectURL(urlB);
+    }
+  });
+
   test('a failed custom library can be retried', async () => {
     const LIBRARY_NAME = 'RetryEsmLibrary';
     const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;

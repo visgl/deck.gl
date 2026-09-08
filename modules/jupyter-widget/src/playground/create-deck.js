@@ -80,10 +80,10 @@ function addModuleToConverter(module, converter) {
   converter.mergeConfiguration(newConfiguration);
 }
 
-// Custom libraries whose load is in flight, keyed by library name. Script execution is asynchronous
-// and untraceable, so completion is observed through a window[libraryName] accessor: classic scripts
-// assign it themselves, and for ES modules loadModule() assigns the module namespace after import.
-// One accessor is shared by every addCustomLibraries call waiting on the same library.
+// Classic custom libraries whose load is in flight, keyed by library name. Script execution is
+// asynchronous and untraceable, so completion is observed through a window[libraryName] accessor
+// that the script assigns itself. One accessor is shared by every addCustomLibraries call waiting
+// on the same library. (ES modules resolve with their namespace and do not need this.)
 const pendingLibraries = {};
 
 function watchLibrary(libraryName, onLoaded) {
@@ -157,9 +157,19 @@ export function addCustomLibraries(customLibraries, onComplete) {
     // with the same parameters
     loaded[libraryName] = false;
 
+    if (module) {
+      // Each registration receives the namespace of the module it asked for (loads are cached per
+      // name and URL), so two registrations sharing a name but not a URL both get registered.
+      loadModule(resourceUri, libraryName).then(
+        namespace => onModuleLoaded(libraryName, namespace),
+        error => onModuleFailed(libraryName, error)
+      );
+      return;
+    }
+
     const existing = window[libraryName];
     if (existing) {
-      // already loaded, by a classic script global or an earlier call
+      // already loaded, by a script global or an earlier call
       onModuleLoaded(libraryName, existing);
       return;
     }
@@ -167,8 +177,7 @@ export function addCustomLibraries(customLibraries, onComplete) {
     const unwatch = watchLibrary(libraryName, loadedModule =>
       onModuleLoaded(libraryName, loadedModule)
     );
-    const loading = module ? loadModule(resourceUri, libraryName) : loadScript(resourceUri);
-    loading.catch(error => {
+    loadScript(resourceUri).catch(error => {
       unwatch();
       onModuleFailed(libraryName, error);
     });
