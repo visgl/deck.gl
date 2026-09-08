@@ -1,7 +1,7 @@
 
 # CollisionFilterExtension
 
-The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. Collisions update as the viewport and layer data change. Most layers use a GPU collision map; text combines GPU projection with priority-ordered placement.
+The `CollisionFilterExtension` allows layers to hide features which overlap with other features. An example is a dense `ScatterplotLayer` with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. Collisions update as the viewport and layer data change. Layers use a GPU collision map by default; text can opt into priority-ordered placement with `collisionGreedy`.
 
 To use this extension on a layer, add the `CollisionFilterExtension` to the layer's `extensions` prop.
 
@@ -70,6 +70,23 @@ When added to a layer via the `extensions` prop, the `CollisionFilterExtension` 
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
+#### `collisionGreedy` (boolean, optional) {#collisiongreedy}
+
+Enable priority-ordered text placement. Defaults to `false`.
+
+* `false`: use GPU-only collision filtering for the lowest overhead. All candidates participate in the collision map, so rejected labels can still hide other labels in an overlap chain.
+* `true`: place text labels in descending priority and reserve space only for accepted labels. This can display more labels in dense scenes, at the cost of GPU readback and CPU placement when collisions update.
+
+Enabling this on any TextLayer (including GeoJSON text) applies to all text layers in its `collisionGroup`. Groups without text are unaffected. Use separate groups when independent placement modes are needed.
+
+```js
+new TextLayer({
+  ...,
+  extensions: [new CollisionFilterExtension()],
+  collisionGreedy: true
+})
+```
+
 #### `collisionGroup` (string, optional) {#collisiongroup}
 
 Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collisionGroup` will be considered together when calculating collisions.
@@ -120,9 +137,9 @@ TextLayer projects a rectangle covering each label. Whitespace and empty lines d
 
 Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The tested bounds follow the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
 
-Text labels are placed in descending priority, with later source draw order breaking ties. A label is accepted if its projected rectangle does not overlap an already accepted label. Rejected labels do not reserve space, so a chain of overlapping candidates can display several separated labels. This is greedy placement: it fills available space while honoring priority, rather than guaranteeing the mathematically largest number of labels.
+With `collisionGreedy: true`, text labels are placed in descending priority, with later source draw order breaking ties. A label is accepted if its projected rectangle does not overlap an already accepted label. Rejected labels do not reserve space, so a chain of overlapping candidates can display several separated labels. This is greedy placement: it fills available space while honoring priority, rather than guaranteeing the mathematically largest number of labels.
 
-The GPU supplies projected bounds to a CPU spatial grid, which checks nearby accepted labels and uploads their visibility. This requires a compact GPU readback when collisions update. Labels in the same group as non-text geometry also test that geometry at the collision map's pixel resolution. Non-text features retain their anchor-based filtering and can still conservatively block labels even if another feature hides them.
+In greedy mode, the GPU supplies projected bounds to a CPU spatial grid, which checks nearby accepted labels and uploads their visibility. This requires a compact GPU readback when collisions update. Labels in the same group as non-text geometry also test that geometry at the collision map's pixel resolution. Non-text features retain their anchor-based filtering and can still conservatively block labels even if another feature hides them.
 
 The rectangles include the spaces between lines, so labels may hide before their visible glyphs touch. Multiline edge overlaps and smaller labels contained inside larger ones are both detected.
 
@@ -142,7 +159,7 @@ iconMapping: {
 
 - Accessors are not supported in `collisionTestProps`
 - The layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer compares full projected rectangles with other text, and tests non-text geometry at the collision map’s pixel resolution.
+- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer tests full projected rectangles at the collision map’s pixel resolution by default. In greedy mode, it compares projected rectangles with other text and tests non-text geometry at the collision map’s pixel resolution.
 
 ## Source
 

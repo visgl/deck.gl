@@ -12,6 +12,7 @@ const settings = {
   scene: 'pairs',
   geojson: false,
   collisionEnabled: true,
+  collisionGreedy: false,
   showAnchors: true,
   reversePriority: false,
   anchor: 'middle',
@@ -85,6 +86,7 @@ function getLayers() {
     extensions,
     getCollisionPriority: getPriority,
     collisionEnabled: settings.collisionEnabled,
+    collisionGreedy: settings.collisionGreedy,
     collisionTestProps: {sizeScale: settings.collisionScale},
     updateTriggers: {getCollisionPriority: settings.reversePriority},
     pickable: true,
@@ -186,6 +188,7 @@ addControl('showAnchors', 'Anchor points');
 addControl('scene', 'Scene', ['pairs', 'multiline', 'whitespace', 'stress']);
 addControl('geojson', 'GeoJSON text');
 addControl('collisionEnabled', 'Collisions');
+addControl('collisionGreedy', 'Greedy placement');
 addControl('reversePriority', 'Reverse priority');
 addControl('anchor', 'Anchor', ['start', 'middle', 'end']);
 addControl('baseline', 'Baseline', ['top', 'center', 'bottom']);
@@ -237,6 +240,7 @@ async function benchmark() {
   samples.sort((a, b) => a - b);
   const result = {
     labels: data.length,
+    collisionGreedy: settings.collisionGreedy,
     visibleLabels,
     medianMs: samples[Math.floor(samples.length / 2)],
     p95Ms: samples[Math.floor(samples.length * 0.95)]

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {afterAll, beforeAll, expect, test} from 'vitest';
+import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import {Deck, OrthographicView, MapView} from '@deck.gl/core';
 import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension, DataFilterExtension} from '@deck.gl/extensions';
@@ -47,17 +47,20 @@ afterAll(() => {
 
 const cases = ['start', 'middle', 'end'].flatMap(anchor =>
   ['top', 'center', 'bottom'].flatMap(baseline =>
-    [false, true].map(useGeoJson => ({anchor, baseline, useGeoJson}))
+    [false, true].flatMap(useGeoJson =>
+      [false, true].map(collisionGreedy => ({anchor, baseline, useGeoJson, collisionGreedy}))
+    )
   )
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl')).each(cases)(
-  'text collision: $anchor / $baseline / GeoJSON=$useGeoJson',
-  async ({anchor, baseline, useGeoJson}) => {
+  'text collision: $anchor / $baseline / GeoJSON=$useGeoJson / greedy=$collisionGreedy',
+  async ({anchor, baseline, useGeoJson, collisionGreedy}) => {
     for (const reverse of [false, true]) {
       for (const zoom of [-1, 0, 5]) {
         const props = {
           id: 'collision-text',
+          collisionGreedy,
           data,
           getSize: 20,
           getTextAnchor: anchor,
@@ -432,7 +435,23 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       pickable: true,
       getCollisionPriority: d => d.priority
     });
-    expect(await drawLayers([layer])).toEqual([10, 30]);
+    const readPixels = vi.spyOn(device, 'readPixelsToArrayWebGL');
+    const readCollisionBounds = () =>
+      readPixels.mock.calls.some(([target]) =>
+        (target as {id?: string}).id?.startsWith('collision-visibility-')
+      );
+    try {
+      expect(await drawLayers([layer])).toEqual([30]);
+      expect(readCollisionBounds()).toBe(false);
+      readPixels.mockClear();
+      expect(await drawLayers([layer.clone({collisionGreedy: true})])).toEqual([10, 30]);
+      expect(readCollisionBounds()).toBe(true);
+      readPixels.mockClear();
+      expect(await drawLayers([layer.clone({collisionGreedy: false})])).toEqual([30]);
+      expect(readCollisionBounds()).toBe(false);
+    } finally {
+      readPixels.mockRestore();
+    }
   }
 );
 
@@ -441,6 +460,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   async () => {
     const layer = new TextLayer({
       id: 'long-collision-chain',
+      collisionGreedy: true,
       data: Array.from({length: 10}, (_, index) => ({
         position: [index * 60 - 270, 0],
         text: 'XXXXX',
@@ -462,6 +482,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   async () => {
     const text = new TextLayer({
       id: 'mixed-text',
+      collisionGreedy: true,
       data: [data[0]],
       getSize: 24,
       extensions,
@@ -489,6 +510,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   async () => {
     const layer = new TextLayer({
       id: 'filtered-collision-text',
+      collisionGreedy: true,
       data,
       getSize: 24,
       extensions: [...extensions, new DataFilterExtension({filterSize: 1})],
@@ -498,5 +520,33 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       getCollisionPriority: d => d.priority
     });
     expect(await drawLayers([layer])).toEqual([-100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy placement applies to its collision group only',
+  async () => {
+    const low = new TextLayer({
+      id: 'group-low',
+      data: [{position: [-60, 0], text: 'XXXXX', priority: 10}],
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    const middle = low.clone({
+      id: 'group-middle',
+      data: [{position: [0, 0], text: 'XXXXX', priority: 20}]
+    });
+    const high = low.clone({
+      id: 'group-high',
+      data: [{position: [60, 0], text: 'XXXXX', priority: 30}],
+      collisionGreedy: true
+    });
+    expect(await drawLayers([low, middle, high])).toEqual([10, 30]);
+    expect(
+      await drawLayers([low.clone(), middle.clone(), high.clone({collisionGroup: 'other'})])
+    ).toEqual([20, 30]);
   }
 );

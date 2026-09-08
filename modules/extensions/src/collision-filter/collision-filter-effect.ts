@@ -24,6 +24,7 @@ type RenderInfo = {
   allLayersLoaded: boolean;
   pickingColorOffsets: Record<string, number>;
   hasText: boolean;
+  greedy: boolean;
   objectCount: number;
 };
 
@@ -187,10 +188,10 @@ export default class CollisionFilterEffect implements Effect {
           }
         }
       };
-      if (otherLayers.length) {
+      if (!renderInfo.greedy || otherLayers.length) {
         this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
           ...renderOptions,
-          layers: otherLayers
+          layers: renderInfo.greedy ? otherLayers : renderInfo.layers
         });
       }
       if (renderInfo.hasText) {
@@ -208,31 +209,33 @@ export default class CollisionFilterEffect implements Effect {
           shaderModuleProps: {
             collision: {
               enabled: true,
-              hasColliders: otherLayers.length > 0,
+              hasColliders: !renderInfo.greedy || otherLayers.length > 0,
               dummyCollisionMap: this.dummyCollisionMap
             },
             project: {devicePixelRatio: pixelRatio}
           }
         });
-        const pixels = collisionFBO.device.readPixelsToArrayWebGL(visibilityFBO) as Uint8Array;
-        placeTextLabels(
-          pixels,
-          visibilityFBO.width,
-          renderInfo.objectCount,
-          viewport.width * pixelRatio,
-          viewport.height * pixelRatio
-        );
-        visibilityFBO.colorAttachments[0].texture.writeData(pixels);
-        // Non-text layers retain their existing collision-map sampling. Only accepted
-        // labels may write into that map, so rejected labels cannot hide those features.
-        if (otherLayers.length) {
-          this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
-            ...renderOptions,
-            shaderModuleProps: {
-              ...renderOptions.shaderModuleProps,
-              collision: {...renderOptions.shaderModuleProps.collision, filterByVisibility: true}
-            }
-          });
+        if (renderInfo.greedy) {
+          const pixels = collisionFBO.device.readPixelsToArrayWebGL(visibilityFBO) as Uint8Array;
+          placeTextLabels(
+            pixels,
+            visibilityFBO.width,
+            renderInfo.objectCount,
+            viewport.width * pixelRatio,
+            viewport.height * pixelRatio
+          );
+          visibilityFBO.colorAttachments[0].texture.writeData(pixels);
+          // Non-text layers retain their existing collision-map sampling. Only accepted
+          // labels may write into that map, so rejected labels cannot hide those features.
+          if (otherLayers.length) {
+            this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
+              ...renderOptions,
+              shaderModuleProps: {
+                ...renderOptions.shaderModuleProps,
+                collision: {...renderOptions.shaderModuleProps.collision, filterByVisibility: true}
+              }
+            });
+          }
         }
       }
     }
@@ -258,11 +261,14 @@ export default class CollisionFilterEffect implements Effect {
           allLayersLoaded: true,
           pickingColorOffsets: {},
           hasText: false,
+          greedy: false,
           objectCount: 0
         };
         channelMap[collisionGroup] = channelInfo;
       }
-      channelInfo.hasText ||= 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
+      const isTextLayer = 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
+      channelInfo.hasText ||= isTextLayer;
+      channelInfo.greedy ||= isTextLayer && Boolean(layer.props.collisionGreedy);
       const sourceId = getCollisionSourceId(layer);
       channelInfo.pickingColorOffsets[sourceId] = Math.max(
         channelInfo.pickingColorOffsets[sourceId] || 0,
@@ -343,6 +349,7 @@ export default class CollisionFilterEffect implements Effect {
     return {
       collision: {
         enabled,
+        greedy: this.channels[collisionGroup!]?.greedy || false,
         isTextLayer,
         pickingColorOffset:
           this.channels[collisionGroup!]?.pickingColorOffsets[getCollisionSourceId(layer)] || 0,

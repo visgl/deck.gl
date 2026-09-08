@@ -127,7 +127,12 @@ try {
       const visible = await page.evaluate(
         async ({reversePriority, zoom}) => {
           const {deck, settings, update} = window.collisionTest;
-          Object.assign(settings, {reversePriority, angle: 0, collisionScale: 1});
+          Object.assign(settings, {
+            reversePriority,
+            angle: 0,
+            collisionScale: 1,
+            collisionGreedy: true
+          });
           update();
           deck.setProps({viewState: {target: [11040, 2025, 0], zoom}});
           await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -144,6 +149,16 @@ try {
       );
     }
   }
+  // Toggling back restores the GPU-only path without recreating the layer.
+  await page.check('#collisionGreedy');
+  await page.uncheck('#collisionGreedy');
+  const fastCount = await page.evaluate(async () => {
+    const {deck} = window.collisionTest;
+    deck.setProps({viewState: {target: [11040, 2025, 0], zoom: -5}});
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return (await deck.pickObjectsAsync({x: 0, y: 0, width: 1200, height: 800})).length;
+  });
+  assert.equal(fastCount, 1, 'GPU-only overlap-chain behavior');
   assert.deepEqual(errors, [], 'Browser errors');
   console.log(`Passed ${count} text collision combinations.`);
 } finally {

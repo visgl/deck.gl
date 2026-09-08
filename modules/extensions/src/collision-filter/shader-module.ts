@@ -12,6 +12,7 @@ layout(std140) uniform collisionUniforms {
   bool enabled;
   bool visibilityPass;
   bool hasColliders;
+  bool greedy;
   vec2 visibilitySize;
   highp float sizeScale;
   highp float sizeMinPixels;
@@ -79,7 +80,15 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 
   if (collision_useBounds) {
     ivec2 first = collision_getVisibilityPixel(pickingColor);
-    return texelFetch(collision_visibilityTexture, first + ivec2(3, 3), 0).r;
+    if (collision.greedy) {
+      return texelFetch(collision_visibilityTexture, first + ivec2(3, 3), 0).r;
+    }
+    for (int y = 0; y < 4; y++) {
+      for (int x = 0; x < 4; x++) {
+        if (texelFetch(collision_visibilityTexture, first + ivec2(x, y), 0).r < 0.5) return 0.0;
+      }
+    }
+    return 1.0;
   }
 
   // Visibility test, sample area of 5x5 pixels in order to fade in/out.
@@ -139,9 +148,10 @@ float collision_testBounds(vec3 pickingColor, int tileIndex) {
   if (all(greaterThanEqual(centerPixel, first)) && all(lessThanEqual(centerPixel, last)) &&
       collision_isOccluded(centerPixel, pickingColor)) return 0.0;
 
-  // Six fragments test disjoint portions of the footprint against non-text geometry.
-  ivec2 extent = (last - first + ivec2(2, 3)) / ivec2(2, 3);
-  ivec2 tile = ivec2(tileIndex % 2, tileIndex / 2);
+  // Greedy mode reserves ten texels for metadata; the GPU-only path uses all sixteen.
+  ivec2 tiles = collision.greedy ? ivec2(2, 3) : ivec2(4);
+  ivec2 extent = (last - first + tiles) / tiles;
+  ivec2 tile = ivec2(tileIndex % tiles.x, tileIndex / tiles.x);
   first += tile * extent;
   last = min(last, first + extent - 1);
 
@@ -168,6 +178,7 @@ float collision_testBounds(vec3 pickingColor, int tileIndex) {
 vec4 collision_getBoundsData() {
   ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
   int component = tile.y * 4 + tile.x;
+  if (!collision.greedy) return vec4(collision_testBounds(collision_pickingColor, component), 0.0, 0.0, 1.0);
   if (component >= 10) return vec4(collision_testBounds(collision_pickingColor, component - 10), 0.0, 0.0, 1.0);
   float value = 0.0;
   if (component < 8) value = collision_corners[component / 2][component % 2];
@@ -221,6 +232,7 @@ export type CollisionModuleProps = {
   drawToCollisionVisibility?: boolean;
   filterByVisibility?: boolean;
   hasColliders?: boolean;
+  greedy?: boolean;
   visibilityFBO?: Framebuffer;
   dummyCollisionMap?: Texture;
   pickingColorOffset?: number;
@@ -236,6 +248,7 @@ type CollisionUniforms = {
   sort?: boolean;
   visibilityPass?: boolean;
   hasColliders?: boolean;
+  greedy?: boolean;
   visibilitySize?: [number, number];
   pickingColorOffset?: number;
   sizeScale?: number;
@@ -269,6 +282,7 @@ const getCollisionUniforms = (
     sort: Boolean(drawToCollisionMap),
     visibilityPass: Boolean(drawToCollisionVisibility),
     hasColliders: Boolean(opts.hasColliders),
+    greedy: Boolean(opts.greedy),
     visibilitySize: visibilityFBO ? [visibilityFBO.width, visibilityFBO.height] : [1, 1],
     pickingColorOffset: opts.pickingColorOffset ?? 0,
     sizeScale: opts.sizeScale ?? 1,
@@ -303,6 +317,7 @@ export default {
     enabled: 'i32',
     visibilityPass: 'i32',
     hasColliders: 'i32',
+    greedy: 'i32',
     visibilitySize: 'vec2<f32>',
     sizeScale: 'f32',
     sizeMinPixels: 'f32',

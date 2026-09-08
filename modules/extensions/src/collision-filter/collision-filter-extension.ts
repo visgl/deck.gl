@@ -9,6 +9,7 @@ import CollisionFilterEffect from './collision-filter-effect';
 const defaultProps = {
   getCollisionPriority: {type: 'accessor', value: 0},
   collisionEnabled: true,
+  collisionGreedy: false,
   collisionGroup: {type: 'string', value: 'default'},
   collisionTestProps: {}
 };
@@ -29,6 +30,14 @@ export type CollisionFilterExtensionProps<DataT = any> = {
    * Collision group this layer belongs to. If it is not set, the 'default' collision group is used
    */
   collisionGroup?: string;
+
+  /**
+   * Place text in priority order, allowing labels to reuse space from rejected labels.
+   * Uses GPU readback and CPU placement. Enabling this on any text layer applies to
+   * all text layers in its collisionGroup. Has no effect on groups without text.
+   * @default false
+   */
+  collisionGreedy?: boolean;
 
   /**
    * Props to override when rendering collision map

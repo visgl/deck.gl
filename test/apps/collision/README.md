@@ -24,4 +24,4 @@ RENDER_TEST_DEVICE=webgl yarn test-render --reporter=dot test/render/text-collis
 
 The Benchmark button measures 150 animation frames after a 30-frame warmup while panning and zooming. It reports median and p95 frame intervals. For useful FPS measurements, use a foreground browser with hardware acceleration, keep the viewport and device pixel ratio fixed, and close other GPU workloads. Compare the same scene with collisions enabled and disabled. These timings include browser scheduling and may be capped by display refresh rate.
 
-The benchmark reports the number of visible labels alongside median and p95 frame times. Use the stress scene to check both packing and speed; rejected labels should leave room for separated neighbors. Toggle Anchor points to inspect text without the underlying grid of dots.
+The benchmark reports the number of visible labels alongside median and p95 frame times. Use the stress scene to check both packing and speed. Greedy placement (`collisionGreedy`, off by default) reuses space from rejected labels; disabling it restores GPU-only filtering for lower overhead. Toggle Anchor points to inspect text without the underlying grid of dots.
