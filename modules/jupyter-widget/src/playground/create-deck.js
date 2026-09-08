@@ -80,49 +80,6 @@ function addModuleToConverter(module, converter) {
   converter.mergeConfiguration(newConfiguration);
 }
 
-// Classic custom libraries whose load is in flight, keyed by library name. Script execution is
-// asynchronous and untraceable, so completion is observed through a window[libraryName] accessor
-// that the script assigns itself. One accessor is shared by every addCustomLibraries call waiting
-// on the same library. (ES modules resolve with their namespace and do not need this.)
-const pendingLibraries = {};
-
-function watchLibrary(libraryName, onLoaded) {
-  let pending = pendingLibraries[libraryName];
-  if (!pending) {
-    pending = {waiters: []};
-    pendingLibraries[libraryName] = pending;
-    Object.defineProperty(window, libraryName, {
-      configurable: true,
-      enumerable: true,
-      get: () => undefined,
-      set: loadedModule => {
-        delete pendingLibraries[libraryName];
-        // Replace the accessor with the namespace, as a plain script assignment would have
-        Object.defineProperty(window, libraryName, {
-          value: loadedModule,
-          writable: true,
-          configurable: true,
-          enumerable: true
-        });
-        for (const waiter of pending.waiters) {
-          waiter(loadedModule);
-        }
-      }
-    });
-  }
-  pending.waiters.push(onLoaded);
-
-  // Stop waiting (the caller's load failed); the accessor goes away with the last waiter so that a
-  // later addCustomLibraries call retries the load
-  return () => {
-    pending.waiters = pending.waiters.filter(waiter => waiter !== onLoaded);
-    if (!pending.waiters.length && pendingLibraries[libraryName] === pending) {
-      delete pendingLibraries[libraryName];
-      delete window[libraryName];
-    }
-  };
-}
-
 export function addCustomLibraries(customLibraries, onComplete) {
   if (!customLibraries) {
     return;
@@ -174,13 +131,23 @@ export function addCustomLibraries(customLibraries, onComplete) {
       return;
     }
 
-    const unwatch = watchLibrary(libraryName, loadedModule =>
-      onModuleLoaded(libraryName, loadedModule)
+    // A classic script's load event fires right after it has executed, so window[libraryName] holds
+    // what this script assigned (another script registered under the same name cannot have run in
+    // between). Loads are cached per URL.
+    loadScript(resourceUri).then(
+      () => {
+        const library = window[libraryName];
+        if (library) {
+          onModuleLoaded(libraryName, library);
+        } else {
+          onModuleFailed(
+            libraryName,
+            new Error(`${resourceUri} did not define window.${libraryName}`)
+          );
+        }
+      },
+      error => onModuleFailed(libraryName, error)
     );
-    loadScript(resourceUri).catch(error => {
-      unwatch();
-      onModuleFailed(libraryName, error);
-    });
   });
 }
 

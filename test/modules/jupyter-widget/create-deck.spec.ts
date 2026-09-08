@@ -253,8 +253,8 @@ describe('jupyter-widget: dynamic-registration', () => {
     const classicUrl = URL.createObjectURL(
       new Blob(
         [
-          'setTimeout(() => { window.MixedLibrary = {MixedClassicLayer: class MixedClassicLayer {',
-          ' constructor(props) { this.props = props; } }}; }, 100);'
+          'window.MixedLibrary = {MixedClassicLayer: class MixedClassicLayer {',
+          ' constructor(props) { this.props = props; } }};'
         ],
         {type: 'text/javascript'}
       )
@@ -291,6 +291,63 @@ describe('jupyter-widget: dynamic-registration', () => {
     } finally {
       URL.revokeObjectURL(classicUrl);
       URL.revokeObjectURL(moduleUrl);
+    }
+  });
+
+  test('concurrent classic registrations of one name register both scripts', async () => {
+    const LIBRARY_NAME = 'SharedClassicLibrary';
+    const makeUrl = (name: string) =>
+      URL.createObjectURL(
+        new Blob(
+          [
+            `window.${LIBRARY_NAME} = {${name}: class ${name} { constructor(props) { this.props = props; } }};`
+          ],
+          {type: 'text/javascript'}
+        )
+      );
+    const urlA = makeUrl('SharedClassicLayerA');
+    const urlB = makeUrl('SharedClassicLayerB');
+    try {
+      await Promise.all([
+        new Promise<void>(resolve =>
+          addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: urlA}], resolve)
+        ),
+        new Promise<void>(resolve =>
+          addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: urlB}], resolve)
+        )
+      ]);
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'SharedClassicLayerA', id: 'a'},
+          {'@@type': 'SharedClassicLayerB', id: 'b'}
+        ]
+      });
+      expect(props.layers[0].constructor.name).toBe('SharedClassicLayerA');
+      expect(props.layers[1].constructor.name).toBe('SharedClassicLayerB');
+    } finally {
+      URL.revokeObjectURL(urlA);
+      URL.revokeObjectURL(urlB);
+      delete (window as any)[LIBRARY_NAME];
+    }
+  });
+
+  test('a classic script that does not define its global fails the registration', async () => {
+    const url = URL.createObjectURL(
+      new Blob(['window.SomethingElse = {};'], {type: 'text/javascript'})
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: 'UndefinedClassicLibrary', resourceUri: url}], resolve)
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(String(errors.mock.calls[0][1])).toContain(
+        'did not define window.UndefinedClassicLibrary'
+      );
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+      delete (window as any).SomethingElse;
     }
   });
 
