@@ -16,6 +16,16 @@ subdirectories may add local guidance.
 - Use the exact script names from `package.json`; do not substitute spaced forms such as
   `yarn test headless`.
 
+## Contribution Policy
+
+- This repository follows the AI-assisted contributions section of `CONTRIBUTING.md`. Disclosure of
+  substantial AI assistance belongs in the pull request description; where commits are preserved,
+  add an `Assisted-by: LLM` or `Assisted-by: a coding agent` trailer (naming the specific tool is
+  optional in commit messages).
+- Never add `Signed-off-by` tags; only the human contributor certifies a DCO.
+- Do not work on issues labelled for newcomers (for example `good first issue`).
+- Do not open pull requests or issues autonomously; a person reviews, discloses and submits the work.
+
 ## Before Committing
 
 - Run the most relevant tests for the changed packages, integrations, examples, or docs.
@@ -46,7 +56,9 @@ When asked to "get ready for merge", do a full merge-readiness pass:
   and `yarn test-website`.
 - For website or docs changes, run the website check from the repo root with `yarn test-website`.
 - Prepare a copyable Markdown PR description based on the branch diff compared to `master`. Start
-  with the PR goals, then list the actual changes and validation.
+  with the PR goals, then list the actual changes and validation. The contributor edits, verifies
+  and discloses it before opening the PR; include an "AI assistance" note stating what you did and
+  what still needs human verification.
 - In the final handoff, call out which merge-readiness gates passed, which were not run, and any
   remaining risk or unrelated pre-existing failures.
 

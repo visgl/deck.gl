@@ -11,3 +11,6 @@ Closes #
 <!-- For all the PRs -->
 #### Change List
 -
+
+<!-- For all the PRs. See CONTRIBUTING.md → "AI-assisted contributions". Substantial = anything beyond single-line autocomplete. Disclosure is not penalized. -->
+- [ ] I have read the AI-assisted contributions section of CONTRIBUTING.md and disclosed any substantial AI assistance above (tool, what it did, what I verified).

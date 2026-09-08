@@ -5,6 +5,19 @@
 PRs and bug reports are welcome, and we are actively looking for new maintainers.
 
 
+## AI-assisted contributions
+
+You may use AI coding assistants and agents to help with contributions. deck.gl is an OpenJS Foundation project and the Foundation's [Policy on Use of AI Coding Assistants](https://ai-coding-assistants-policy.openjsf.org/) applies to every submission; the vis.gl [developer process](https://github.com/visgl/tsc/blob/master/developer-process/ai-assisted-contributions.md) describes how it applies here. In short:
+
+- **You are the author.** You are responsible for everything you submit, whatever tools you used. Only humans certify a DCO; agents must not add `Signed-off-by` tags.
+- **Disclose substantial assistance** (anything beyond single-line autocomplete) in the pull request description: the tool, what it did, and what you verified. Tick the box in the PR template. Add an `Assisted-by:` trailer where commits are preserved. Disclosure is not penalized.
+- **Understand and verify.** Be able to explain the change in your own words, answer review comments yourself, and run the relevant tests locally, including render tests for rendering changes. Do not remove or alter tests to make generated code pass without understanding why.
+- **Keep it reviewable.** A contribution should be worth more to the project than the time it takes to review. Split large generated changes. Pull requests whose author cannot explain them, has not tested them, or has misrepresented how they were made may be closed without further review.
+- **Newcomer issues are for people.** Do not use AI tools to fix issues labelled for newcomers.
+- **No unattended agents.** Pull requests and issues are opened by people; an agent-drafted PR description that you have edited, verified and disclosed is fine.
+
+Agents working in this repository should read the root `AGENTS.md`, which describes the commands, quality gates and merge-readiness checklist.
+
 ## Setting Up Dev Environment
 
 The **master** branch is the active development branch.
