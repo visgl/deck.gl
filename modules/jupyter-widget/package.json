@@ -53,7 +53,7 @@
     "@luma.gl/webgl": "^9.4.0",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2",
-    "maplibre-gl": "^5.14.0"
+    "maplibre-gl": "^6.4.1"
   },
   "jupyterlab": {
     "extension": "src/plugin",
