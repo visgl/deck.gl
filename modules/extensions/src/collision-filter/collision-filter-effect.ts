@@ -33,6 +33,11 @@ function getCollisionSourceId(layer: Layer): string {
   return layer.parent?.id || layer.id;
 }
 
+// Character and background sublayers expose the bounds used by text collision shaders.
+function isTextCollisionLayer(layer: Layer): boolean {
+  return 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
+}
+
 export default class CollisionFilterEffect implements Effect {
   id = 'collision-filter-effect';
   props = null;
@@ -162,9 +167,7 @@ export default class CollisionFilterEffect implements Effect {
       this.lastViewport = viewport;
       const collisionFBO = this.collisionFBOs[collisionGroup];
 
-      const textLayers = renderInfo.layers.filter(
-        layer => 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props
-      );
+      const textLayers = renderInfo.layers.filter(isTextCollisionLayer);
       const otherLayers = renderInfo.layers.filter(layer => !textLayers.includes(layer));
       const renderOptions = {
         pass: 'collision-filter',
@@ -266,7 +269,7 @@ export default class CollisionFilterEffect implements Effect {
         };
         channelMap[collisionGroup] = channelInfo;
       }
-      const isTextLayer = 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
+      const isTextLayer = isTextCollisionLayer(layer);
       channelInfo.hasText ||= isTextLayer;
       channelInfo.greedy ||= isTextLayer && Boolean(layer.props.collisionGreedy);
       const sourceId = getCollisionSourceId(layer);
@@ -345,7 +348,7 @@ export default class CollisionFilterEffect implements Effect {
     const {collisionFBOs, dummyCollisionMap} = this;
     const collisionFBO = collisionFBOs[collisionGroup!];
     const enabled = collisionEnabled && Boolean(collisionFBO);
-    const isTextLayer = 'getCollisionRect' in props || 'getBoundingRect' in props;
+    const isTextLayer = isTextCollisionLayer(layer);
     return {
       collision: {
         enabled,

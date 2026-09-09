@@ -26,7 +26,7 @@ const priorityDepth = /* glsl */ `
 float collision_getPriorityDepth(float priority) {
   // Keep the supported range [-1000, 1000] inside the clip planes. A power-of-two
   // divisor also avoids rounding the scale itself when comparing equal priorities.
-  return -priority / 1024.0;
+  return -clamp(priority, -1000.0, 1000.0) / 1024.0;
 }
 `;
 
@@ -205,11 +205,11 @@ const inject = {
 `,
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   if (collision.sort || collision.enabled) {
-    collision_priority = collisionPriorities;
+    collision_priority = clamp(collisionPriorities, -1000.0, 1000.0);
     collision_pickingColor = collision_getPickingColor(geometry.pickingColor);
   }
   if (collision.sort) {
-    position.z = collision_getPriorityDepth(collisionPriorities) * position.w;
+    position.z = collision_getPriorityDepth(collision_priority) * position.w;
   }
 
   if (collision.enabled && !collision.visibilityPass && (!collision.sort || collision_useBounds)) {

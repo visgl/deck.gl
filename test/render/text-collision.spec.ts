@@ -173,6 +173,39 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text collision clamps priorities consistently in GPU and greedy placement',
+  async () => {
+    for (const collisionGreedy of [false, true]) {
+      const layer = new TextLayer({
+        id: 'clamped-priorities',
+        data: [
+          {position: [0, 0], text: 'Label', priority: 2000},
+          {position: [0, 0], text: 'Label', priority: 1000}
+        ],
+        getSize: 24,
+        collisionGreedy,
+        extensions,
+        pickable: true,
+        getCollisionPriority: d => d.priority
+      });
+      // Both priorities clamp to 1000, so the later label wins the tie.
+      expect(await drawLayers([layer]), `greedy=${collisionGreedy}`).toEqual([1000]);
+      expect(
+        await drawLayers([
+          layer.clone({data: layer.props.data.map(d => ({...d, priority: d.priority + 1000}))})
+        ])
+      ).toEqual([2000]);
+      // A priority below the supported range must remain visible when isolated.
+      expect(
+        await drawLayers([
+          layer.clone({data: [{position: [0, 0], text: 'Label', priority: -2000}]})
+        ])
+      ).toEqual([-2000]);
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'text collision size, rotation, background and font settings',
   async () => {
     const layer = new TextLayer({

@@ -16,7 +16,7 @@ const defaultProps = {
 
 export type CollisionFilterExtensionProps<DataT = any> = {
   /**
-   * Accessor for collision priority. Must return a number in the range -1000 -> 1000. Features with higher values are shown preferentially.
+   * Accessor for collision priority, clamped to the range [-1000, 1000]. Features with higher values are shown preferentially.
    */
   getCollisionPriority?: Accessor<DataT, number>;
 
