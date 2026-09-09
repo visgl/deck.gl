@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, MapView, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 
@@ -11,6 +11,7 @@ const initialViewState = {target: [0, 0, 0], zoom: 0};
 const settings = {
   scene: 'pairs',
   geojson: false,
+  splitLayers: false,
   collisionEnabled: true,
   collisionGreedy: false,
   showAnchors: true,
@@ -21,6 +22,8 @@ const settings = {
   offsetY: 0,
   angle: 0,
   size: 24,
+  fontFamily: 'Arial',
+  fontWeight: 400,
   collisionScale: 1,
   background: false,
   billboard: true,
@@ -81,12 +84,14 @@ function getLayers() {
     billboard: settings.billboard,
     background: settings.background,
     getBackgroundColor: [210, 220, 230],
-    fontFamily: 'Arial',
+    fontFamily: settings.fontFamily,
+    fontWeight: settings.fontWeight,
     fontSettings: {sdf: settings.sdf},
     extensions,
     getCollisionPriority: getPriority,
     collisionEnabled: settings.collisionEnabled,
     collisionGreedy: settings.collisionGreedy,
+    collisionGroup: 'labels',
     collisionTestProps: {sizeScale: settings.collisionScale},
     updateTriggers: {getCollisionPriority: settings.reversePriority},
     pickable: true,
@@ -102,26 +107,42 @@ function getLayers() {
       radiusUnits: 'pixels',
       getFillColor: [80, 90, 100]
     }),
-    settings.geojson
-      ? new GeoJsonLayer({
-          ...textProps,
-          id: 'labels',
-          data: geojson,
-          pointType: 'text',
-          getText: f => f.properties.text,
-          getTextColor: f => getColor(f.properties),
-          getTextSize: settings.size,
-          getTextAnchor: settings.anchor,
-          getTextAlignmentBaseline: settings.baseline,
-          getTextPixelOffset: [settings.offsetX, settings.offsetY],
-          getTextAngle: settings.angle,
-          textBillboard: settings.billboard,
-          textBackground: settings.background,
-          textFontFamily: 'Arial',
-          textFontSettings: {sdf: settings.sdf},
-          getCollisionPriority: f => getPriority(f.properties)
-        })
-      : new TextLayer({...textProps, id: 'labels', data})
+    ...(settings.splitLayers ? [0, 1] : [null]).map(group => {
+      // Different layer classes must not inherit each other's state when toggling GeoJSON.
+      const prefix = settings.geojson ? 'geojson-labels' : 'labels';
+      const id = group === null ? prefix : `${prefix}-${group}`;
+      return settings.geojson
+        ? new GeoJsonLayer({
+            ...textProps,
+            id,
+            data:
+              group === null
+                ? geojson
+                : {
+                    ...geojson,
+                    features: geojson.features.filter((_, index) => index % 2 === group)
+                  },
+            pointType: 'text',
+            getText: f => f.properties.text,
+            getTextColor: f => getColor(f.properties),
+            getTextSize: settings.size,
+            getTextAnchor: settings.anchor,
+            getTextAlignmentBaseline: settings.baseline,
+            getTextPixelOffset: [settings.offsetX, settings.offsetY],
+            getTextAngle: settings.angle,
+            textBillboard: settings.billboard,
+            textBackground: settings.background,
+            textFontFamily: settings.fontFamily,
+            textFontWeight: settings.fontWeight,
+            textFontSettings: {sdf: settings.sdf},
+            getCollisionPriority: f => getPriority(f.properties)
+          })
+        : new TextLayer({
+            ...textProps,
+            id,
+            data: group === null ? data : data.filter((_, index) => index % 2 === group)
+          });
+    })
   ];
 }
 
@@ -187,6 +208,7 @@ function addControl(key, title, options) {
 addControl('showAnchors', 'Anchor points');
 addControl('scene', 'Scene', ['pairs', 'multiline', 'whitespace', 'stress']);
 addControl('geojson', 'GeoJSON text');
+addControl('splitLayers', 'Two layers, shared group');
 addControl('collisionEnabled', 'Collisions');
 addControl('collisionGreedy', 'Greedy placement');
 addControl('reversePriority', 'Reverse priority');
@@ -196,9 +218,11 @@ addControl('offsetX', 'Offset X', {min: -200, max: 200, step: 1});
 addControl('offsetY', 'Offset Y', {min: -200, max: 200, step: 1});
 addControl('angle', 'Angle', {min: -180, max: 180, step: 15});
 addControl('size', 'Size', {min: 8, max: 64, step: 1});
+addControl('fontFamily', 'Font family', ['Arial', 'Inter, sans-serif', 'sans-serif', 'monospace']);
+addControl('fontWeight', 'Font weight', [400, 700]);
 addControl('collisionScale', 'Collision scale', {min: 1, max: 3, step: 0.25});
 addControl('zoom', 'Zoom', {min: -5, max: 3, step: 0.1});
-addControl('devicePixels', 'Device pixel ratio', {min: 1, max: 2, step: 1});
+addControl('devicePixels', 'Device pixel ratio', {min: 1, max: 2, step: 0.25});
 addControl('background', 'Background');
 addControl('billboard', 'Billboard');
 addControl('sdf', 'SDF');
@@ -241,6 +265,7 @@ async function benchmark() {
   const result = {
     labels: data.length,
     collisionGreedy: settings.collisionGreedy,
+    splitLayers: settings.splitLayers,
     visibleLabels,
     medianMs: samples[Math.floor(samples.length / 2)],
     p95Ms: samples[Math.floor(samples.length * 0.95)]
@@ -251,4 +276,4 @@ async function benchmark() {
 }
 document.getElementById('benchmark').onclick = benchmark;
 // Development/automation API: stable data, explicit updates, and repeatable camera motion.
-window.collisionTest = {deck, settings, update, benchmark};
+window.collisionTest = {deck, settings, update, benchmark, MapView};

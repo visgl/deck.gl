@@ -22,7 +22,16 @@ layout(std140) uniform collisionUniforms {
 } collision;
 `;
 
+const priorityDepth = /* glsl */ `
+float collision_getPriorityDepth(float priority) {
+  // Keep the supported range [-1000, 1000] inside the clip planes. A power-of-two
+  // divisor also avoids rounding the scale itself when comparing equal priorities.
+  return -priority / 1024.0;
+}
+`;
+
 const vs = /* glsl */ `
+${priorityDepth}
 in float collisionPriorities;
 flat out highp vec3 collision_pickingColor;
 flat out float collision_priority;
@@ -116,6 +125,7 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 
 const fs = /* glsl */ `
 ${uniformBlock}
+${priorityDepth}
 flat in highp vec3 collision_pickingColor;
 flat in float collision_priority;
 flat in vec4 collision_position;
@@ -130,7 +140,7 @@ bool collision_isOccluded(ivec2 pixel, vec3 pickingColor) {
   // Ignore lower-priority geometry visible through rounded corners or clipping.
   // The depth buffer is 16-bit; equal depths use the collision pass's draw order.
   float depth = texelFetch(collision_depthTexture, pixel, 0).r;
-  float ownDepth = 0.5 - 0.0005 * collision_priority;
+  float ownDepth = (1.0 + collision_getPriorityDepth(collision_priority)) * 0.5;
   return depth <= ownDepth + 0.5 / 65535.0;
 }
 
@@ -199,8 +209,7 @@ const inject = {
     collision_pickingColor = collision_getPickingColor(geometry.pickingColor);
   }
   if (collision.sort) {
-    float collisionPriority = collisionPriorities;
-    position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
+    position.z = collision_getPriorityDepth(collisionPriorities) * position.w;
   }
 
   if (collision.enabled && !collision.visibilityPass && (!collision.sort || collision_useBounds)) {

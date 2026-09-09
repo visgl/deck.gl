@@ -31,6 +31,9 @@ export default class CollisionFilterPass extends LayersPass {
     return {
       ...layer.props.parameters,
       blend: false,
+      // Collision depth encodes priority, independent of the layer's display order.
+      depthBias: 0,
+      depthBiasSlopeScale: 0,
       depthWriteEnabled: !this.drawToCollisionVisibility,
       depthCompare: this.drawToCollisionVisibility ? 'always' : 'less-equal'
     };

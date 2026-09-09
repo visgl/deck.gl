@@ -143,6 +143,36 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text collision priorities are independent of layer depth offsets',
+  async () => {
+    for (const collisionGreedy of [false, true]) {
+      const high = new TextLayer({
+        id: 'priority-high',
+        data: [{position: [0, 0], text: 'Label\nsecond line', priority: 1}],
+        getSize: 24,
+        collisionGroup: 'shared-priority',
+        collisionGreedy,
+        getCollisionPriority: d => d.priority,
+        extensions,
+        pickable: true
+      });
+      const low = high.clone({
+        id: 'priority-low',
+        data: [{position: [12, 0], text: 'Label\nsecond line', priority: 0}]
+      });
+      expect(await drawLayers([high, low]), `greedy=${collisionGreedy}`).toEqual([1]);
+      expect(await drawLayers([low.clone(), high.clone()])).toEqual([1]);
+      expect(
+        await drawLayers([
+          high.clone({getPolygonOffset: () => [0, 1000]}),
+          low.clone({getPolygonOffset: () => [0, -1000]})
+        ])
+      ).toEqual([1]);
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'text collision size, rotation, background and font settings',
   async () => {
     const layer = new TextLayer({
@@ -376,6 +406,50 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       } finally {
         deck.setProps({useDevicePixels: false});
       }
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy multiline placement agrees within and across layers at fractional pixel ratios',
+  async () => {
+    try {
+      for (const devicePixels of [1, 1.5, 2]) {
+        deck.setProps({useDevicePixels: devicePixels});
+        for (const splitLayers of [false, true]) {
+          for (const reverse of [false, true]) {
+            const labels = [
+              {position: [-30, 0], text: 'Label\nsecond line', priority: reverse ? -100 : 100},
+              {position: [30, 0], text: 'Much longer line\nshort', priority: reverse ? 100 : -100}
+            ];
+            const text = new TextLayer({
+              id: 'multiline-greedy',
+              data: labels,
+              collisionGreedy: true,
+              collisionGroup: 'multiline',
+              getSize: 24,
+              fontFamily: 'Arial',
+              extensions,
+              pickable: true,
+              getPixelOffset: [40, -25],
+              getCollisionPriority: d => d.priority
+            });
+            const layers = splitLayers
+              ? labels.map((label, index) => text.clone({id: `multiline-${index}`, data: [label]}))
+              : [text];
+            // Leave room around the collision threshold: system font metrics can differ by OS.
+            expect(await drawLayers(layers, 0)).toEqual([100]);
+            expect(
+              await drawLayers(
+                layers.map(layer => layer.clone()),
+                2
+              )
+            ).toEqual([-100, 100]);
+          }
+        }
+      }
+    } finally {
+      deck.setProps({useDevicePixels: false});
     }
   }
 );
