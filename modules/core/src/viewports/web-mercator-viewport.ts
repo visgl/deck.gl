@@ -38,6 +38,8 @@ export type WebMercatorViewportOptions = {
   latitude?: number;
   /** Tilt of the camera in degrees */
   pitch?: number;
+  /** Camera roll in degrees, positive counter-clockwise on screen. Default `0`. */
+  roll?: number;
   /** Heading of the camera in degrees */
   bearing?: number;
   /** Camera altitude relative to the viewport height, legacy property used to control the FOV. Default `1.5` */
@@ -81,6 +83,8 @@ export default class WebMercatorViewport extends Viewport {
   longitude: number;
   latitude: number;
   pitch: number;
+  /** Camera roll in degrees. */
+  roll: number;
   bearing: number;
   altitude: number;
   fovy: number;
@@ -98,6 +102,7 @@ export default class WebMercatorViewport extends Viewport {
       longitude = 0,
       zoom = 0,
       pitch = 0,
+      roll = 0,
       bearing = 0,
       nearZMultiplier = 0.1,
       farZMultiplier = 1.01,
@@ -142,6 +147,21 @@ export default class WebMercatorViewport extends Viewport {
         offset = [0, clamp((top + height - bottom) / 2, 0, height) - height / 2];
       }
 
+      if (roll) {
+        // Roll can bring a side or bottom corner closer to the horizon. Use the
+        // upper extent of the rotated viewport when calculating the far plane.
+        // Padding shifts the projection center in screen space, after roll.
+        const angle = (roll * Math.PI) / 180;
+        const {left = 0, right = 0} = padding || {};
+        const offsetX = clamp((left + width - right) / 2, 0, width) - width / 2;
+        const offsetY = offset?.[1] || 0;
+        const upperExtent =
+          (Math.abs(Math.sin(angle)) * width + Math.abs(Math.cos(angle)) * height) / 2 +
+          Math.sin(angle) * offsetX +
+          Math.cos(angle) * offsetY;
+        offset = [0, upperExtent - height / 2];
+      }
+
       projectionParameters = getProjectionParameters({
         width,
         height,
@@ -174,6 +194,14 @@ export default class WebMercatorViewport extends Viewport {
       altitude
     });
 
+    // Roll around the camera forward axis after bearing and pitch. Premultiplying
+    // in view space keeps projection, unprojection, picking and shader math aligned.
+    if (roll) {
+      viewMatrixUncentered = new Matrix4()
+        .rotateZ((roll * Math.PI) / 180)
+        .multiplyRight(viewMatrixUncentered);
+    }
+
     if (worldOffset) {
       const viewOffset = new Matrix4().translate([512 * worldOffset, 0, 0]);
       viewMatrixUncentered = viewOffset.multiplyLeft(viewMatrixUncentered);
@@ -202,6 +230,7 @@ export default class WebMercatorViewport extends Viewport {
     this.longitude = longitude;
     this.zoom = zoom;
     this.pitch = pitch;
+    this.roll = roll;
     this.bearing = bearing;
     this.altitude = altitude;
     this.fovy = fovy;
@@ -305,14 +334,16 @@ export default class WebMercatorViewport extends Viewport {
   }
 
   getBounds(options: {z?: number} = {}): [number, number, number, number] {
-    // @ts-ignore
-    const corners = getBounds(this, options.z || 0);
+    const corners = this.roll
+      ? getRolledBounds(this, options.z || 0)
+      : // @ts-ignore math.gl only reads the shared viewport properties
+        getBounds(this, options.z || 0);
 
     return [
-      Math.min(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
-      Math.min(corners[0][1], corners[1][1], corners[2][1], corners[3][1]),
-      Math.max(corners[0][0], corners[1][0], corners[2][0], corners[3][0]),
-      Math.max(corners[0][1], corners[1][1], corners[2][1], corners[3][1])
+      Math.min(...corners.map(p => p[0])),
+      Math.min(...corners.map(p => p[1])),
+      Math.max(...corners.map(p => p[0])),
+      Math.max(...corners.map(p => p[1]))
     ];
   }
 
@@ -342,4 +373,36 @@ export default class WebMercatorViewport extends Viewport {
     const {longitude, latitude, zoom} = fitBounds({width, height, bounds, ...options});
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
   }
+}
+
+// A rolled horizon can cross any screen edge. Intersect all twelve frustum
+// edges with the requested elevation instead of assuming a horizontal horizon.
+function getRolledBounds(viewport: WebMercatorViewport, z: number): number[][] {
+  const inverseMatrix = new Matrix4(viewport.pixelUnprojectionMatrix);
+  const targetZ = z * viewport.distanceScales.unitsPerMeter[2];
+  const corners = Array.from({length: 8}, (_, i) =>
+    inverseMatrix.transformAsPoint([
+      i & 1 ? viewport.width : 0,
+      i & 2 ? viewport.height : 0,
+      i & 4 ? 1 : -1
+    ])
+  );
+  const intersections: number[][] = [];
+  for (let i = 0; i < 8; i++) {
+    for (const axis of [1, 2, 4]) {
+      if (i & axis) continue;
+      const start = corners[i];
+      const end = corners[i | axis];
+      const t = (targetZ - start[2]) / (end[2] - start[2]);
+      if (t >= 0 && t <= 1) {
+        intersections.push(
+          viewport.unprojectFlat([
+            start[0] + t * (end[0] - start[0]),
+            start[1] + t * (end[1] - start[1])
+          ])
+        );
+      }
+    }
+  }
+  return intersections.length ? intersections : [[viewport.longitude, viewport.latitude]];
 }

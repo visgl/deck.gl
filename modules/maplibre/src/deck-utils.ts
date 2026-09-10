@@ -94,6 +94,7 @@ export function getMapLibreViewState(map: MapLibreMap): MapViewState & {
     zoom: map.getZoom(),
     bearing: map.getBearing(),
     pitch: map.getPitch(),
+    roll: map.getRoll?.() ?? 0,
     padding: {
       top: padding.top ?? 0,
       bottom: padding.bottom ?? 0,
@@ -159,6 +160,8 @@ export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {
       onLoad?.();
       if (MAPLIBRE_DECK_STATES.get(map) === state) {
         startWatchingMove(map, state);
+        // The camera may have moved while Deck was initializing.
+        onMapLibreMove(deck, map);
       }
     };
   }

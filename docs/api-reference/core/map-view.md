@@ -62,11 +62,16 @@ To render, `MapView` needs to be used together with a `viewState` with the follo
 - `zoom` (number) - zoom level
 - `pitch` (number, optional) - pitch angle in degrees. Default `0` (top-down).
 - `bearing` (number, optional) - bearing angle in degrees. Default `0` (north).
+- `roll` (number, optional) - camera bank angle in degrees. Positive values rotate the image counter-clockwise on screen, matching MapLibre. Default `0`.
 - `maxZoom` (number, optional) - max zoom level. Default `20`.
 - `minZoom` (number, optional) - min zoom level. Default `0`.
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
 - `position` (number[3], optional) - Viewport center offsets from lng, lat in meters. Default: `[0,0,0]`.
+
+Roll is applied around the camera's forward axis after pitch and bearing. It can be
+set or transitioned programmatically; the controller preserves it during
+interaction but does not provide a roll gesture.
 
 ## Controller
 

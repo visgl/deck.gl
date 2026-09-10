@@ -56,6 +56,8 @@ export type MapStateProps = {
   bearing?: number;
   /** The pitch of the viewport in degrees */
   pitch?: number;
+  /** Camera roll in degrees. Preserved by interactions. Default `0`. */
+  roll?: number;
   /**
    * Specify the altitude of the viewport camera
    * Unit: map heights, default 1.5
@@ -132,6 +134,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       bearing = 0,
       /** The pitch of the viewport in degrees */
       pitch = 0,
+      roll = 0,
       /**
        * Specify the altitude of the viewport camera
        * Unit: map heights, default 1.5
@@ -185,6 +188,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         zoom,
         bearing,
         pitch,
+        roll,
         altitude,
         maxZoom,
         minZoom,
@@ -460,7 +464,11 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     // const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
     const fromProps = viewState.getViewportProps();
     const props = {...this.getViewportProps()};
-    const {bearing, longitude} = props;
+    const {bearing, longitude, roll} = props;
+
+    if (Math.abs(roll - fromProps.roll) > 180) {
+      props.roll = roll < 0 ? roll + 360 : roll - 360;
+    }
 
     if (Math.abs(bearing - fromProps.bearing) > 180) {
       props.bearing = bearing < 0 ? bearing + 360 : bearing - 360;
@@ -484,6 +492,9 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     const {maxPitch, minPitch, pitch, bearing, normalize, maxBounds, rubberBand} = props;
 
     if (normalize) {
+      if (props.roll < -180 || props.roll > 180) {
+        props.roll = mod(props.roll + 180, 360) - 180;
+      }
       if (bearing < -180 || bearing > 180) {
         props.bearing = mod(bearing + 180, 360) - 180;
       }
@@ -516,7 +527,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       // Resolve the semantic center through the viewport because view padding can
       // place it away from the canvas' geometric center.
-      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
+      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0, roll: 0});
       const screenExtents = getMaxBoundsExtents(
         viewport,
         [props.longitude, props.latitude],
@@ -702,7 +713,7 @@ export default class MapController extends Controller<MapState> {
     transitionDuration: 300,
     transitionInterpolator: new LinearInterpolator({
       transitionProps: {
-        compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'],
+        compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'roll', 'position'],
         required: ['longitude', 'latitude', 'zoom']
       }
     })

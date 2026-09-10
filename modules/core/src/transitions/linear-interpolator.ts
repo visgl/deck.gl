@@ -7,7 +7,7 @@ import {lerp} from '@math.gl/core';
 
 import type Viewport from '../viewports/viewport';
 
-const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
+const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'roll'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
 
 type PropsWithAnchor = {
@@ -62,6 +62,14 @@ export default class LinearInterpolator extends TransitionInterpolator {
 
     super(normalizedOpts.transitionProps);
     this.opts = normalizedOpts;
+  }
+
+  /** Treat omitted roll as zero when comparing legacy view states. */
+  arePropsEqual(startProps: Record<string, any>, endProps: Record<string, any>): boolean {
+    return super.arePropsEqual(
+      {...startProps, roll: startProps.roll ?? 0},
+      {...endProps, roll: endProps.roll ?? 0}
+    );
   }
 
   initializeProps(

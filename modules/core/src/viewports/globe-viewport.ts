@@ -57,6 +57,8 @@ export type GlobeViewportOptions = {
   bearing?: number;
   /** Pitch in degrees. Default `0` */
   pitch?: number;
+  /** Camera roll in degrees, positive counter-clockwise on screen. Default `0`. */
+  roll?: number;
   /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
   altitude?: number;
   /* Meter offsets of the viewport center from lng, lat, elevation */
@@ -86,6 +88,8 @@ export default class GlobeViewport extends Viewport {
   latitude: number;
   bearing: number;
   pitch: number;
+  /** Camera roll in degrees. */
+  roll: number;
   fovy: number;
   resolution: number;
 
@@ -94,6 +98,7 @@ export default class GlobeViewport extends Viewport {
       longitude = 0,
       bearing = 0,
       pitch = 0,
+      roll = 0,
       zoom = 0,
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
@@ -145,6 +150,12 @@ export default class GlobeViewport extends Viewport {
       .rotateZ(-longitude * DEGREES_TO_RADIANS)
       .scale(scale / height);
 
+    // Premultiply in view space: roll acts around the camera forward axis after
+    // pitch, bearing and globe orientation, matching WebMercatorViewport.
+    if (roll) {
+      viewMatrix.multiplyLeft(new Matrix4().rotateZ(roll * DEGREES_TO_RADIANS));
+    }
+
     super({
       ...opts,
       // x, y, width,
@@ -169,6 +180,7 @@ export default class GlobeViewport extends Viewport {
     this.longitude = longitude;
     this.bearing = bearing;
     this.pitch = pitch;
+    this.roll = roll;
     this.fovy = fovy;
     this.resolution = resolution;
   }

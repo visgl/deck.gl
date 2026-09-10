@@ -44,6 +44,7 @@ Parameters:
   + `zoom` (number, optional) - Map zoom (scale is calculated as `2^zoom`). Default to `11`.
   + `pitch` (number, optional) - The pitch (tilt) of the map from the screen, in degrees (0 is straight down). Default to `0`.
   + `bearing` (number, optional) - The bearing (rotation) of the map from north, in degrees counter-clockwise (0 means north is up). Default to `0`.
+  + `roll` (number, optional) - Camera rotation around the forward axis, applied after pitch and bearing. Positive values rotate the image counter-clockwise on screen. Default `0`.
   + `altitude` (number, optional) - Altitude of camera in screen units. Default to `1.5`.
 
   projection matrix arguments:

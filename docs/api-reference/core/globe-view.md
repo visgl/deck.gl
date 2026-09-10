@@ -72,6 +72,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `zoom` (number) - zoom level
 - `bearing` (number, optional) - bearing angle in degrees. Default `0` (north up).
 - `pitch` (number, optional) - pitch angle in degrees. `0` looks straight down at the earth. Default `0`.
+- `roll` (number, optional) - camera bank angle in degrees. Positive values rotate the image counter-clockwise on screen, matching MapLibre. Default `0`.
 - `maxZoom` (number, optional) - max zoom level. Default `20`.
 - `minZoom` (number, optional) - min zoom level. Default `0`.
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
@@ -81,6 +82,10 @@ The globe behaves like a physical ball. Dragging and pointer-anchored zoom rotat
 
 To limit how far the camera can travel, set the shared controller [`maxBounds`](./controller.md#options) option. For example, `maxBounds: [[-180, -85], [180, 85]]` keeps the viewport center between `±85°` latitude.
 
+
+Roll is applied around the camera's forward axis after pitch and bearing, including
+the Mercator projection used at high zoom. The controller preserves it during
+interaction but does not provide a roll gesture.
 
 ## Controller
 
