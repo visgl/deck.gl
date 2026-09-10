@@ -4,7 +4,7 @@
 
 import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
-import {_deepEqual as deepEqual} from '@deck.gl/core';
+import {_deepEqual as deepEqual, log} from '@deck.gl/core';
 import type {Effect, EffectContext, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollisionFilterPass from './collision-filter-pass';
 import {placeTextLabels} from './text-collision-placement';
@@ -16,6 +16,8 @@ import type {CollisionModuleProps} from './shader-module';
 
 // Factor by which to downscale Collision FBO relative to canvas
 const DOWNSCALE = 2;
+// RGB picking colors reserve zero for no object.
+const MAX_PICKING_COLOR = 0xffffff;
 
 type RenderInfo = {
   collisionGroup: string;
@@ -298,11 +300,21 @@ export default class CollisionFilterEffect implements Effect {
         offset += count;
       }
       channelMap[collisionGroup].objectCount = offset;
+      // Each object uses a 4x4 visibility cell, including the reserved zero ID.
+      const maxVisibilityColumns = Math.floor(device.limits.maxTextureDimension2D / 4);
+      const maxObjectCount = channelMap[collisionGroup].hasText
+        ? Math.min(MAX_PICKING_COLOR, maxVisibilityColumns ** 2 - 1)
+        : MAX_PICKING_COLOR;
+      if (offset > maxObjectCount) {
+        log.warn(
+          `CollisionFilterExtension: collision group "${collisionGroup}" exceeds the supported object count (${maxObjectCount}); collision filtering is disabled.`
+        )();
+        delete channelMap[collisionGroup];
+        delete this.channels[collisionGroup];
+        continue;
+      }
       if (channelMap[collisionGroup].hasText) {
-        const width = Math.min(
-          device.limits.maxTextureDimension2D,
-          Math.ceil(Math.sqrt(offset + 1)) * 4
-        );
+        const width = Math.min(maxVisibilityColumns * 4, Math.ceil(Math.sqrt(offset + 1)) * 4);
         const height = Math.ceil((offset + 1) / (width / 4)) * 4;
         if (!this.visibilityFBOs[collisionGroup]) {
           this.visibilityFBOs[collisionGroup] = device.createFramebuffer({

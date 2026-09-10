@@ -157,6 +157,7 @@ iconMapping: {
 
 ## Limitations
 
+- Each collision group supports at most 16,777,215 source objects. Groups containing text are also limited to `floor(maxTextureDimension2D / 4)² - 1` objects, where `maxTextureDimension2D` is the device's maximum 2D texture dimension. Counts include non-text objects in the group; text characters and backgrounds share their label's ID. If either limit is exceeded, a warning is logged and collision filtering is disabled for the entire group until its object count is within the limits again.
 - Accessors are not supported in `collisionTestProps`
 - The layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
 - Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer tests full projected rectangles at the collision map’s pixel resolution by default. In greedy mode, it compares projected rectangles with other text and tests non-text geometry at the collision map’s pixel resolution.
