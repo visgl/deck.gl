@@ -92,20 +92,6 @@ new ScatterplotLayer({
 - Non-default vertical field of view is not synchronized.
 - One interleaved overlay may be attached to a map.
 
-### Camera roll
-
-MapLibre remains the camera source of truth. Changing its roll updates both the
-base map and deck.gl layers, including picking:
-
-```typescript
-map.addControl(new MapLibreOverlay({interleaved: true, layers}));
-map.setRoll(28);
-```
-
-The same synchronization applies to Mercator and globe projections. Zero or
-omitted roll retains the existing projection. No additional deck.gl view or
-controller configuration is required.
-
 ### Antialiasing
 
 MapLibre creates its WebGL context with `antialias: false` by default. In interleaved mode, deck.gl shares that context, so layers whose edges depend on MSAA — including [PathLayer](../layers/path-layer.md), [LineLayer](../layers/line-layer.md), [ArcLayer](../layers/arc-layer.md), and [PointCloudLayer](../layers/point-cloud-layer.md) — render with hard, aliased edges.
