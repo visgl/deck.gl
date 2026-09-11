@@ -15,16 +15,14 @@ _DEFAULT_MAP_STYLE_SENTINEL = "__MAP_STYLE__"
 
 
 def has_jupyter_extra():
+    """True when the optional Jupyter extra (``pip install "pydeck[jupyter]"``) and the widget bundle are available"""
     try:
-        from ..widget import DeckGLWidget
+        import anywidget  # noqa: F401
 
-        DeckGLWidget()
-        return True
-    except (ImportError, NotImplementedError):
+        from ..widget import WIDGET_BUNDLE_PATH
+    except ImportError:
         return False
-
-
-in_google_colab = "google.colab" in sys.modules
+    return WIDGET_BUNDLE_PATH.exists() or bool(os.getenv("PYDECK_DEV_PORT"))
 
 
 class Deck(JSONMixin):
@@ -133,7 +131,7 @@ class Deck(JSONMixin):
             self.deck_widget.height = height
             self.deck_widget.width = width
             self.deck_widget.tooltip = tooltip
-            self.deck_widget.map_provider = map_provider
+            self.deck_widget.show_error = show_error
 
         self._set_api_keys(api_keys)
 
@@ -151,9 +149,11 @@ class Deck(JSONMixin):
 
     @property
     def selected_data(self):
-        if not self.deck_widget.selected_data:
+        """Data selected by clicking in the Jupyter widget, or ``None`` if nothing is selected"""
+        widget = getattr(self, "deck_widget", None)
+        if widget is None or not widget.selected_data:
             return None
-        return self.deck_widget.selected_data
+        return widget.selected_data
 
     # Mapping from provider to env var names, checked in order.
     # deck.gl JS convention first, then pydeck convention.
@@ -168,6 +168,7 @@ class Deck(JSONMixin):
         """Sets API key for base map provider for both HTML embedding and the Jupyter widget"""
         for k in api_keys:
             k and BaseMapProvider(k)
+        widget = getattr(self, "deck_widget", None)
         for provider in BaseMapProvider:
             attr_name = f"{provider.value}_key"
             attr_value = api_keys.get(provider.value)
@@ -177,18 +178,20 @@ class Deck(JSONMixin):
                     if attr_value:
                         break
             setattr(self, attr_name, attr_value)
-            if has_jupyter_extra():
-                setattr(self.deck_widget, attr_name, attr_value)
+            if widget is not None and widget.has_trait(attr_name):
+                setattr(widget, attr_name, attr_value)
 
     def show(self):
-        """Display current Deck object for a Jupyter notebook"""
-        # TODO: Jupyter-specific features not currently supported in pydeck v0.9.
-        # if in_google_colab:
-        #     self.to_html(notebook_display=True)
-        # else:
-        #     self.update()
-        #     return self.deck_widget
-        return self.to_html(notebook_display=True)
+        """Display current Deck object for a Jupyter notebook
+
+        With the Jupyter extra installed (``pip install "pydeck[jupyter]"``) this returns a live widget that
+        supports :meth:`update`, event handlers and binary data transfer. Otherwise the visualization is
+        rendered as a static HTML iframe, the same as :meth:`to_html`.
+        """
+        if not has_jupyter_extra():
+            return self.to_html(notebook_display=True)
+        self.update()
+        return self.deck_widget
 
     def update(self):
         """Update a deck.gl map to reflect the current configuration
@@ -196,23 +199,20 @@ class Deck(JSONMixin):
         For example, if you've modified data passed to Layer and rendered the map using `.show()`,
         you can call `update` to change the data on the map.
 
-        Intended for use in a Jupyter environment.
+        Intended for use in a Jupyter environment and requires the Jupyter extra.
         """
-        # TODO: Jupyter-specific features not currently supported in pydeck v0.9.
-        # if not has_jupyter_extra():
-        #     raise ImportError(
-        #         "Install the Jupyter extra for pydeck with your package manager, e.g. `pip install pydeck[jupyter]`"
-        #     )
-        # self.deck_widget.json_input = self.to_json()
-        # has_binary = False
-        # binary_data_sets = []
-        # for layer in self.layers:
-        #     if layer.use_binary_transport:
-        #         binary_data_sets.extend(layer.get_binary_data())
-        #         has_binary = True
-        # if has_binary:
-        #     self.deck_widget.data_buffer = binary_data_sets
-        raise NotImplementedError("Jupyter-specific features not currently supported in pydeck v0.9.")
+        if not has_jupyter_extra():
+            raise ImportError(
+                'Install the Jupyter extra for pydeck with your package manager, e.g. `pip install "pydeck[jupyter]"`'
+            )
+        binary_data_sets = []
+        for layer in self.layers:
+            if layer.use_binary_transport:
+                binary_data_sets.extend(layer.get_binary_data())
+        # Send both traits in a single message so the frontend never renders a layer against a stale buffer
+        with self.deck_widget.hold_sync():
+            self.deck_widget.json_input = self.to_json()
+            self.deck_widget.data_buffer = binary_data_sets or None
 
     def to_html(
         self,

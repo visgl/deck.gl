@@ -36,18 +36,39 @@ function dtypeToTypedArray(dtype) {
   }
 }
 
-export function deserializeMatrix(obj, manager) {
+function toTypedArray(ArrayType, value) {
+  if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
+    // Already converted
+    return value;
+  }
+  // The widget protocol delivers binary buffers as DataViews, which may be windows into a larger
+  // ArrayBuffer, so byteOffset and byteLength must be honored.
+  const view = value instanceof DataView ? value : new DataView(value);
+  return new ArrayType(view.buffer, view.byteOffset, view.byteLength / ArrayType.BYTES_PER_ELEMENT);
+}
+
+/**
+ * Converts pydeck's serialized binary attributes ({layerId: {length, attributes: {name: {dtype, size, value}}}})
+ * into deck.gl binary attribute data with typed arrays. Does not mutate its input: the widget model keeps the
+ * raw buffers, and every rendered view deserializes them independently.
+ */
+export function deserializeMatrix(obj) {
   if (!obj) {
     return null;
   }
+  const result = {};
   for (const layerId in obj) {
-    const attributes = obj[layerId].attributes;
+    const {attributes = {}, ...layerData} = obj[layerId];
+    const convertedAttributes = {};
     for (const accessorName in attributes) {
-      const {dtype, value} = attributes[accessorName];
-      const ArrayType = dtypeToTypedArray(dtype);
-      attributes[accessorName].value = new ArrayType(value.buffer);
+      const {dtype, value, ...attribute} = attributes[accessorName];
+      convertedAttributes[accessorName] = {
+        ...attribute,
+        dtype,
+        value: toTypedArray(dtypeToTypedArray(dtype), value)
+      };
     }
+    result[layerId] = {...layerData, attributes: convertedAttributes};
   }
-  // Becomes the data stored within the widget model at `model.get('data_buffer')`
-  return obj;
+  return result;
 }

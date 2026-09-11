@@ -1,12 +1,23 @@
-from ast import literal_eval
 import json
+import os
+import pathlib
 
-from ipywidgets import register, CallbackDispatcher, DOMWidget
+import anywidget
+from ipywidgets import CallbackDispatcher
 from traitlets import Any, Bool, Int, Unicode
 
 from ..data_utils.binary_transfer import data_buffer_serialization
-from ._frontend import module_name, module_version
 from .debounce import debounce
+
+# Built by `make copy-bundle` (or the hatch-jupyter-builder hook) from @deck.gl/jupyter-widget
+STATIC_DIR = pathlib.Path(__file__).resolve().parent.parent / "static"
+WIDGET_BUNDLE_PATH = STATIC_DIR / "widget.js"
+WIDGET_CSS_PATH = STATIC_DIR / "widget.css"
+
+# anywidget validates file-backed _esm/_css at class-definition time. Keep the module importable in a
+# source checkout without a build; DeckGLWidget() then raises a clear error (see __init__).
+_MISSING_BUNDLE_ESM = "export default { render() { throw new Error('pydeck widget bundle is missing'); } };"
+_MISSING_BUNDLE_CSS = "/* pydeck widget stylesheet is missing */"
 
 
 def store_selection(widget_instance, payload):
@@ -21,11 +32,12 @@ def store_selection(widget_instance, payload):
         widget_instance.handler_exception = e
 
 
-@register
-class DeckGLWidget(DOMWidget):
+class DeckGLWidget(anywidget.AnyWidget):
     """
-    Jupyter environment widget that takes JSON and
-    renders a deck.gl visualization based on provided properties.
+    Jupyter widget that takes JSON and renders a deck.gl visualization based on provided properties.
+
+    Built on `anywidget <https://anywidget.dev>`_, so it works in JupyterLab, Jupyter Notebook, VS Code,
+    Google Colab and other ipywidgets-compatible frontends without installing an extension.
 
     You may set a Mapbox API key as an environment variable to use Mapbox maps in your visualization
 
@@ -43,16 +55,14 @@ class DeckGLWidget(DOMWidget):
             See the ``Deck`` constructor.
         google_maps_key : str, default ''
             API key for Google Maps
+        show_error : bool, default False
+            Render errors from the frontend into the output cell
         selected_data : list of dict, default []
-            Data selected on click, if the pydeck Jupyter widget is enabled for server use
+            Data selected on click
     """
 
-    _model_name = Unicode("JupyterTransportModel").tag(sync=True)
-    _model_module = Unicode(module_name).tag(sync=True)
-    _model_module_version = Unicode(module_version).tag(sync=True)
-    _view_name = Unicode("JupyterTransportView").tag(sync=True)
-    _view_module = Unicode(module_name).tag(sync=True)
-    _view_module_version = Unicode(module_version).tag(sync=True)
+    _esm = WIDGET_BUNDLE_PATH if WIDGET_BUNDLE_PATH.exists() else _MISSING_BUNDLE_ESM
+    _css = WIDGET_CSS_PATH if WIDGET_CSS_PATH.exists() else _MISSING_BUNDLE_CSS
 
     carto_key = Unicode("", allow_none=True).tag(sync=True)
     mapbox_key = Unicode("", allow_none=True).tag(sync=True)
@@ -63,11 +73,24 @@ class DeckGLWidget(DOMWidget):
     custom_libraries = Any(allow_none=True).tag(sync=True)
     configuration = Any(allow_none=True).tag(sync=True)
     tooltip = Any(True).tag(sync=True)
+    show_error = Bool(False).tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Any("100%").tag(sync=True)
 
     def __init__(self, **kwargs):
-        super(DeckGLWidget, self).__init__(**kwargs)
+        dev_port = os.getenv("PYDECK_DEV_PORT")
+        if not WIDGET_BUNDLE_PATH.exists() and not dev_port:
+            # anywidget would otherwise fall back to treating the path itself as module source
+            raise RuntimeError(
+                "pydeck's widget bundle is missing ({}). Reinstall pydeck, or from a source checkout run "
+                "`make copy-bundle` in bindings/pydeck.".format(WIDGET_BUNDLE_PATH)
+            )
+        super().__init__(**kwargs)
+        if dev_port:
+            # Load the bundle from a local dev server (see docs/contributing.rst) instead of the package
+            self._esm = "http://localhost:{}/dist/widget.js".format(dev_port)
+            self._css = "http://localhost:{}/../widgets/dist/stylesheet.css".format(dev_port)
+
         self._hover_handlers = CallbackDispatcher()
         self._click_handlers = CallbackDispatcher()
         self._resize_handlers = CallbackDispatcher()
@@ -104,6 +127,7 @@ class DeckGLWidget(DOMWidget):
         self._drag_end_handlers.register_callback(callback, remove=remove)
 
     def _handle_custom_msgs(self, _, content, buffers=None):
+        # The frontend sends events as a JSON string of {"type": ..., "data": ...}
         content = json.loads(content)
         event_type = content.get("type", "")
         if event_type == "deck-hover-event":

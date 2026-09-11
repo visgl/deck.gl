@@ -1,7 +1,10 @@
 import pytest
 
 import json
+import sys
+
 import pydeck
+from pydeck.bindings.deck import has_jupyter_extra
 
 try:
     from unittest.mock import MagicMock
@@ -61,9 +64,14 @@ def test_json_output():
         assert json.loads(str(actual.to_json())) == json.loads(expected)
 
 
-@pytest.mark.skip("Skipping widget test, see #7783")
+requires_jupyter_extra = pytest.mark.skipif(
+    not has_jupyter_extra(), reason="Requires the Jupyter extra and a built widget bundle (make copy-bundle)"
+)
+
+
+@requires_jupyter_extra
 def test_update():
-    """Verify that calling `update` changes the Deck object"""
+    """Verify that calling `update` pushes the current configuration to the widget"""
     deck = pydeck_examples.create_minimal_test_object()
     deck.initial_view_state.latitude, deck.initial_view_state.longitude = 0, 0
     deck.update()
@@ -72,27 +80,57 @@ def test_update():
     expected_results["initialViewState"]["latitude"] = 0
     expected_results["initialViewState"]["longitude"] = 0
     assert json.loads(str(deck)) == expected_results
+    assert deck.deck_widget.json_input == deck.to_json()
+    assert deck.deck_widget.data_buffer is None
 
 
-@pytest.mark.skip("Skipping widget test, see #7783")
+@requires_jupyter_extra
+def test_update_with_binary_transport():
+    import pandas as pd
+
+    df = pd.DataFrame({"position": [[0.0, 0.0], [1.0, 1.0]]})
+    layer = pydeck.Layer("ScatterplotLayer", id="points", data=df, get_position="position", use_binary_transport=True)
+    deck = pydeck.Deck(layers=[layer])
+    deck.update()
+    assert "data" not in json.loads(deck.deck_widget.json_input)["layers"][0]
+    assert deck.deck_widget.data_buffer[0]["layer_id"] == "points"
+
+
+@requires_jupyter_extra
 def test_show_jupyter():
     pydeck.io.html.render_for_colab = MagicMock()
     deck = pydeck_examples.create_minimal_test_object()
     output = deck.show()
     pydeck.io.html.render_for_colab.assert_not_called()
     assert isinstance(output, pydeck.widget.DeckGLWidget)
+    assert output.json_input == deck.to_json()
 
 
 def test_show_google_colab():
     pydeck.io.html.render_for_colab = MagicMock()
     pydeck.io.html.in_google_colab = True
-    pydeck.bindings.deck.in_google_colab = True
     deck = pydeck_examples.create_minimal_test_object()
     output = deck.show()
-    pydeck.bindings.deck.in_google_colab = False
     pydeck.io.html.in_google_colab = False
-    pydeck.io.html.render_for_colab.assert_called_once()
-    assert output is None
+    if has_jupyter_extra():
+        # anywidget enables Colab's custom widget manager itself, so the widget renders directly
+        assert isinstance(output, pydeck.widget.DeckGLWidget)
+        pydeck.io.html.render_for_colab.assert_not_called()
+    else:
+        pydeck.io.html.render_for_colab.assert_called_once()
+        assert output is None
+
+
+def test_show_and_update_without_jupyter_extra(monkeypatch):
+    monkeypatch.setitem(sys.modules, "anywidget", None)
+    pydeck.io.html.iframe_with_srcdoc = MagicMock(return_value=HTML("Hello"))
+    pydeck.io.html.in_google_colab = False
+    deck = pydeck_examples.create_minimal_test_object()
+    assert not hasattr(deck, "deck_widget")
+    assert deck.selected_data is None
+    assert isinstance(deck.show(), HTML)
+    with pytest.raises(ImportError):
+        deck.update()
 
 
 def test_to_html_jupyter():

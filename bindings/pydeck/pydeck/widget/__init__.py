@@ -1,1 +1,1 @@
-from .widget import DeckGLWidget  # noqa
+from .widget import DeckGLWidget, WIDGET_BUNDLE_PATH  # noqa

@@ -3,6 +3,20 @@ CHANGELOG
 
 Releases and associated GitHub PRs for pydeck are documented here.
 
+0.10 Releases
+-------------
+
+0.10.0 - TBD
+^^^^^^^^^^^^
+- Rebuild the Jupyter widget on `anywidget <https://anywidget.dev>`__ (#10453): ``Deck.show()`` returns a
+  live widget again, and ``Deck.update()``, event handlers, data selection and binary transport work in
+  JupyterLab 4, Jupyter Notebook 7, VS Code and Google Colab
+- BREAKING: pydeck requires Python 3.10 or above
+- BREAKING: the ``pydeck[jupyter]`` extra now depends on ``anywidget`` (ipywidgets 8); the nbextension and
+  labextension are removed, so ``jupyter nbextension install/enable --py pydeck`` no longer applies
+- BREAKING: packaging moved from setuptools to hatchling; the widget bundles ship inside the wheel
+- ``Deck.to_html(offline=True)`` also inlines the widget stylesheet
+
 0.9 Releases
 ------------
 

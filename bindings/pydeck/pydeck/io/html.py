@@ -31,6 +31,10 @@ in_google_colab = "google.colab" in sys.modules
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./templates/")
+# Bundles copied from @deck.gl/jupyter-widget by `make copy-bundle` / the hatch build hook
+STATIC_PATH = realpath(join(dirname(__file__), "..", "static"))
+OFFLINE_BUNDLE_PATH = join(STATIC_PATH, "standalone.js")
+OFFLINE_CSS_PATH = join(STATIC_PATH, "widget.css")
 j2_loader = jinja2.FileSystemLoader(TEMPLATES_PATH)
 j2_env = jinja2.Environment(loader=j2_loader, trim_blocks=True)
 CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(DECKGL_SEMVER)
@@ -46,15 +50,22 @@ def cdn_picker(offline=False):
             dev_port=dev_port
         )
     if offline:
-        RELPATH_TO_BUNDLE = "../nbextension/static/index.js"
-        with open(join(dirname(__file__), RELPATH_TO_BUNDLE), "r", encoding="utf-8") as file:
+        if not os.path.exists(OFFLINE_BUNDLE_PATH):
+            raise FileNotFoundError(
+                "pydeck's offline bundle is missing ({}). Reinstall pydeck, or from a source checkout run "
+                "`make copy-bundle` in bindings/pydeck.".format(OFFLINE_BUNDLE_PATH)
+            )
+        with open(OFFLINE_BUNDLE_PATH, "r", encoding="utf-8") as file:
             js = file.read()
         return "<script type='text/javascript'>{}</script>".format(js)
 
     return "<script src='{}'></script>".format(CDN_URL)
 
 
-def widget_css_picker():
+def widget_css_picker(offline=False):
+    if offline and os.path.exists(OFFLINE_CSS_PATH):
+        with open(OFFLINE_CSS_PATH, "r", encoding="utf-8") as file:
+            return "<style>\n{}\n</style>".format(file.read())
     if os.getenv("PYDECK_DEV_PORT"):
         stylesheet_path = realpath(join(dirname(__file__), "../../../../modules/widgets/dist/stylesheet.css"))
         if os.path.exists(stylesheet_path):
@@ -82,7 +93,7 @@ def render_json_to_html(
         google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
-        deckgl_widget_css=widget_css_picker(),
+        deckgl_widget_css=widget_css_picker(offline=offline),
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
         custom_libraries=custom_libraries,

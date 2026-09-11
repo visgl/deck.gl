@@ -1,16 +1,14 @@
 Event handling
 ^^^^^^^^^^^^^^
 
-.. NOTE::
-   Event handling requires the Jupyter widget integration, which is not currently
-   functional in pydeck v0.9+. See :doc:`jupyter` for details.
-
 pydeck provides bidirectional interactions in Jupyter via event handlers,
-``on_hover``, ``on_resize``, ``on_view_state_change``, and ``on_click``. Each corresponds
-to the
+``on_hover``, ``on_click``, ``on_drag_start``, ``on_drag``, ``on_drag_end``, ``on_resize`` and
+``on_view_state_change``. Each corresponds to the
 `cursor <https://deck.gl/docs/developer-guide/interactivity#using-the-built-in-event-handling>`__
 and `view state <https://deck.gl/docs/api-reference/core/deck#onviewstatechange>`__ events in the deck.gl
-documentation.
+documentation. Handlers are registered on ``Deck.deck_widget`` and require the Jupyter extra
+(``pip install "pydeck[jupyter]"``; see :doc:`jupyter`). ``on_view_state_change`` debounces rapid camera
+changes; tune it with ``debounce_seconds`` (default ``0.2``).
 
 When an event triggers these callbacks (like a click on the visualization), data is sent from the frontend
 to the Jupyter kernel. The data structure varies slightly by handler.
@@ -50,7 +48,7 @@ a count of visible points.
                 text.value = 'Error: %s' % e
 
 
-        r.deck_widget.on_click(filter_by_viewport)
+        r.deck_widget.on_view_state_change(filter_by_viewport)
         display(text)
         r.show()
 

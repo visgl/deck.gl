@@ -12,6 +12,11 @@ optimized for a Jupyter environment. To get started, __[see the documentation](h
 
 __[To install pydeck, see the instructions here](https://pydeck.gl/en/latest/installation.html)__.
 
+`pip install pydeck` renders visualizations as static HTML. For a live Jupyter widget with `.update()`,
+event handlers, data selection and binary data transport, install the extra: `pip install "pydeck[jupyter]"`.
+The widget is built on [anywidget](https://anywidget.dev) and needs no `nbextension`/`labextension` setup
+(if you enabled the pydeck 0.8 extension, remove it with `jupyter nbextension uninstall --py pydeck`).
+
 For __interactive demos__, click the binder logo below:
 
 [![Binder](https://mybinder.org/static/logo.svg?v=f9f0d927b67cc9dc99d788c822ca21c0)](https://mybinder.org/v2/gh/uber/deck.gl/binder)
