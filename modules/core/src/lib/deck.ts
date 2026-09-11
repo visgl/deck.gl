@@ -432,6 +432,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         log.error('WebGL1 context not supported.')();
       }
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
+        // Attach is async: a Deck recreated on the same context (e.g. React StrictMode)
+        // can attach again before the first attach settles. See _createDevice.
+        _reuseDevices: true,
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
