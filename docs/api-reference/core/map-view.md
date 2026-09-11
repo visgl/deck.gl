@@ -69,10 +69,6 @@ To render, `MapView` needs to be used together with a `viewState` with the follo
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
 - `position` (number[3], optional) - Viewport center offsets from lng, lat in meters. Default: `[0,0,0]`.
 
-Roll is applied around the camera's forward axis after pitch and bearing. It can be
-set or transitioned programmatically; the controller preserves it during
-interaction but does not provide a roll gesture.
-
 ## Controller
 
 By default, `MapView` uses the `MapController` to handle interactivity. To enable the controller, use:
