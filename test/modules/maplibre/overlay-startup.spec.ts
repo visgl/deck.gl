@@ -34,17 +34,40 @@ for (const [version, MapClass] of [
 
       try {
         await new Promise<void>(resolve => map.once('load', () => resolve()));
-        let onLoad: () => void;
+        let resolveLoaded: () => void;
         const loaded = new Promise<void>(resolve => {
-          onLoad = resolve;
+          resolveLoaded = resolve;
         });
-        const overlay = new MapLibreOverlay({interleaved: true, layers: [], onLoad: onLoad!});
+        let viewStateAtLoad: unknown;
+        let projectedAtLoad: number[] = [];
+        let zoomAfterMoveAtLoad: number | undefined;
+        const overlay = new MapLibreOverlay({
+          interleaved: true,
+          layers: [],
+          onLoad: () => {
+            viewStateAtLoad = {...overlay._deck!.props.viewState};
+            projectedAtLoad = overlay._deck!.getViewports()[0].project([9, 48]);
+            map.jumpTo({zoom: 9});
+            zoomAfterMoveAtLoad = overlay._deck!.props.viewState.zoom;
+            resolveLoaded();
+          }
+        });
         map.addControl(overlay);
         expect(overlay._deck!.isInitialized).toBe(false);
 
         map.jumpTo({center: [9, 48], zoom: 8, bearing: 25, pitch: 30});
         await loaded;
 
+        expect(viewStateAtLoad).toMatchObject({
+          longitude: 9,
+          latitude: 48,
+          zoom: 8,
+          bearing: 25,
+          pitch: 30
+        });
+        expect(projectedAtLoad[0]).toBeCloseTo(container.clientWidth / 2);
+        expect(projectedAtLoad[1]).toBeCloseTo(container.clientHeight / 2);
+        expect(zoomAfterMoveAtLoad).toBe(9);
         expect(overlay._deck!.props.viewState).toMatchObject({
           longitude: map.getCenter().lng,
           latitude: map.getCenter().lat,
