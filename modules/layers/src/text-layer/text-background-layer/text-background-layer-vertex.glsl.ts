@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import collision from '../text-layer-collision.glsl';
+
 export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME text-background-layer-vertex-shader
@@ -32,6 +34,8 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
   mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
   return rotationMatrix * vertex;
 }
+
+${collision}
 
 void main(void) {
   geometry.worldPosition = instancePositions;
@@ -71,6 +75,23 @@ void main(void) {
     pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
   }
 
+#ifdef MODULE_COLLISION
+  vec4 collisionRect = instanceRects * collision_getSize(instanceSizes) / text.fontSize;
+  collisionRect.xy -= textBackground.padding.xy;
+  collisionRect.zw += textBackground.padding.xy + textBackground.padding.zw;
+  vec4 collisionClipRect = vec4(xy, wh);
+  if (instanceClipRect.z >= 0.0) {
+    collisionClipRect.x -= textBackground.padding.x;
+    collisionClipRect.z += textBackground.padding.x + textBackground.padding.z;
+  }
+  if (instanceClipRect.w >= 0.0) {
+    collisionClipRect.y -= textBackground.padding.y;
+    collisionClipRect.w += textBackground.padding.y + textBackground.padding.w;
+  }
+  text_setCollisionBounds(instancePositions, instancePositions64Low,
+    collisionRect, instancePixelOffsets, instanceAngles, collisionClipRect, textBackground.billboard, text.flipY);
+#endif
+
   if (textBackground.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
@@ -92,5 +113,12 @@ void main(void) {
   DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
+#ifdef MODULE_COLLISION
+  if (collision.visibilityPass) {
+    // Preserve culling by the projection and other vertex extensions.
+    if (gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w) return;
+    gl_Position = collision_getVisibilityPosition(positions);
+  }
+#endif
 }
 `;

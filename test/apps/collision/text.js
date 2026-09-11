@@ -1,0 +1,279 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {Deck, MapView, OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
+
+const extensions = [new CollisionFilterExtension()];
+const initialViewState = {target: [0, 0, 0], zoom: 0};
+const settings = {
+  scene: 'pairs',
+  geojson: false,
+  splitLayers: false,
+  collisionEnabled: true,
+  collisionGreedy: false,
+  showAnchors: true,
+  reversePriority: false,
+  anchor: 'middle',
+  baseline: 'center',
+  offsetX: 0,
+  offsetY: 0,
+  angle: 0,
+  size: 24,
+  fontFamily: 'Arial',
+  fontWeight: 400,
+  collisionScale: 1,
+  background: false,
+  billboard: true,
+  sdf: false,
+  zoom: 0,
+  devicePixels: 1
+};
+
+function createData(scene) {
+  const count = scene === 'stress' ? 10000 : 12;
+  return Array.from({length: count}, (_, index) => {
+    const pair = Math.floor(index / 2);
+    const high = index % 2 === 0;
+    const columns = scene === 'stress' ? 100 : 2;
+    return {
+      position: [
+        150 + (pair % columns) * 220 + (high ? 0 : 20),
+        Math.floor(pair / columns) * 90 - 180
+      ],
+      text:
+        scene === 'multiline'
+          ? 'Label\nsecond line'
+          : scene === 'whitespace'
+            ? '  Label  '
+            : `Label ${pair}`,
+      high,
+      index
+    };
+  });
+}
+let data = createData(settings.scene);
+let geojson;
+function updateData() {
+  data = createData(settings.scene);
+  geojson = {
+    type: 'FeatureCollection',
+    features: data.map(d => ({
+      type: 'Feature',
+      properties: d,
+      geometry: {type: 'Point', coordinates: d.position}
+    }))
+  };
+}
+updateData();
+const getPriority = d => (d.high !== settings.reversePriority ? 100 : -100);
+const getColor = d => (d.high ? [0, 145, 85] : [215, 55, 45]);
+
+function getLayers() {
+  const textProps = {
+    getText: d => d.text,
+    getPosition: d => d.position,
+    getColor,
+    getSize: settings.size,
+    getTextAnchor: settings.anchor,
+    getAlignmentBaseline: settings.baseline,
+    getPixelOffset: [settings.offsetX, settings.offsetY],
+    getAngle: settings.angle,
+    billboard: settings.billboard,
+    background: settings.background,
+    getBackgroundColor: [210, 220, 230],
+    fontFamily: settings.fontFamily,
+    fontWeight: settings.fontWeight,
+    fontSettings: {sdf: settings.sdf},
+    extensions,
+    getCollisionPriority: getPriority,
+    collisionEnabled: settings.collisionEnabled,
+    collisionGreedy: settings.collisionGreedy,
+    collisionGroup: 'labels',
+    collisionTestProps: {sizeScale: settings.collisionScale},
+    updateTriggers: {getCollisionPriority: settings.reversePriority},
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+  };
+  return [
+    new ScatterplotLayer({
+      id: 'anchors',
+      visible: settings.showAnchors,
+      data,
+      getPosition: d => d.position,
+      getRadius: 3,
+      radiusUnits: 'pixels',
+      getFillColor: [80, 90, 100]
+    }),
+    ...(settings.splitLayers ? [0, 1] : [null]).map(group => {
+      // Different layer classes must not inherit each other's state when toggling GeoJSON.
+      const prefix = settings.geojson ? 'geojson-labels' : 'labels';
+      const id = group === null ? prefix : `${prefix}-${group}`;
+      return settings.geojson
+        ? new GeoJsonLayer({
+            ...textProps,
+            id,
+            data:
+              group === null
+                ? geojson
+                : {
+                    ...geojson,
+                    features: geojson.features.filter((_, index) => index % 2 === group)
+                  },
+            pointType: 'text',
+            getText: f => f.properties.text,
+            getTextColor: f => getColor(f.properties),
+            getTextSize: settings.size,
+            getTextAnchor: settings.anchor,
+            getTextAlignmentBaseline: settings.baseline,
+            getTextPixelOffset: [settings.offsetX, settings.offsetY],
+            getTextAngle: settings.angle,
+            textBillboard: settings.billboard,
+            textBackground: settings.background,
+            textFontFamily: settings.fontFamily,
+            textFontWeight: settings.fontWeight,
+            textFontSettings: {sdf: settings.sdf},
+            getCollisionPriority: f => getPriority(f.properties)
+          })
+        : new TextLayer({
+            ...textProps,
+            id,
+            data: group === null ? data : data.filter((_, index) => index % 2 === group)
+          });
+    })
+  ];
+}
+
+const deck = new Deck({
+  canvas: 'deck',
+  views: new OrthographicView({id: 'main'}),
+  initialViewState,
+  controller: true,
+  useDevicePixels: settings.devicePixels,
+  layers: getLayers(),
+  getTooltip: ({object}) =>
+    object &&
+    `${(object.properties || object).text}: priority ${getPriority(object.properties || object)}`
+});
+
+function update() {
+  deck.setProps({layers: getLayers(), useDevicePixels: settings.devicePixels});
+}
+
+const controls = document.getElementById('controls');
+function addControl(key, title, options) {
+  const label = document.createElement('label');
+  const caption = document.createElement('span');
+  caption.textContent = typeof settings[key] === 'number' ? `${title}: ${settings[key]}` : title;
+  label.append(caption);
+  const input = document.createElement(Array.isArray(options) ? 'select' : 'input');
+  input.id = key;
+  input.setAttribute('aria-label', title);
+  if (Array.isArray(options)) {
+    for (const value of options) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      input.append(option);
+    }
+    input.value = settings[key];
+  } else if (typeof settings[key] === 'boolean') {
+    input.type = 'checkbox';
+    input.checked = settings[key];
+  } else {
+    input.type = 'range';
+    Object.assign(input, options, {value: settings[key]});
+  }
+  input.oninput = () => {
+    settings[key] =
+      input.type === 'checkbox'
+        ? input.checked
+        : typeof settings[key] === 'number'
+          ? Number(input.value)
+          : input.value;
+    if (typeof settings[key] === 'number') caption.textContent = `${title}: ${settings[key]}`;
+    if (key === 'scene') {
+      updateData();
+      resetView();
+    }
+    if (key === 'zoom')
+      deck.setProps({initialViewState: {...initialViewState, zoom: settings.zoom}});
+    update();
+  };
+  label.append(input);
+  controls.append(label);
+}
+addControl('showAnchors', 'Anchor points');
+addControl('scene', 'Scene', ['pairs', 'multiline', 'whitespace', 'stress']);
+addControl('geojson', 'GeoJSON text');
+addControl('splitLayers', 'Two layers, shared group');
+addControl('collisionEnabled', 'Collisions');
+addControl('collisionGreedy', 'Greedy placement');
+addControl('reversePriority', 'Reverse priority');
+addControl('anchor', 'Anchor', ['start', 'middle', 'end']);
+addControl('baseline', 'Baseline', ['top', 'center', 'bottom']);
+addControl('offsetX', 'Offset X', {min: -200, max: 200, step: 1});
+addControl('offsetY', 'Offset Y', {min: -200, max: 200, step: 1});
+addControl('angle', 'Angle', {min: -180, max: 180, step: 15});
+addControl('size', 'Size', {min: 8, max: 64, step: 1});
+addControl('fontFamily', 'Font family', ['Arial', 'Inter, sans-serif', 'sans-serif', 'monospace']);
+addControl('fontWeight', 'Font weight', [400, 700]);
+addControl('collisionScale', 'Collision scale', {min: 1, max: 3, step: 0.25});
+addControl('zoom', 'Zoom', {min: -5, max: 3, step: 0.1});
+addControl('devicePixels', 'Device pixel ratio', {min: 1, max: 2, step: 0.25});
+addControl('background', 'Background');
+addControl('billboard', 'Billboard');
+addControl('sdf', 'SDF');
+function getSceneViewState() {
+  return settings.scene === 'stress' ? {target: [11040, 2025, 0], zoom: -5} : initialViewState;
+}
+
+function resetView() {
+  const viewState = getSceneViewState();
+  settings.zoom = viewState.zoom;
+  const zoomInput = document.getElementById('zoom');
+  zoomInput.value = settings.zoom;
+  zoomInput.parentElement.firstChild.textContent = `Zoom: ${settings.zoom}`;
+  deck.setProps({initialViewState: viewState});
+}
+document.getElementById('reset').onclick = resetView;
+
+async function benchmark() {
+  const samples = [];
+  const {target} = getSceneViewState();
+  const start = performance.now();
+  let previous = start;
+  for (let frame = 0; frame < 180; frame++) {
+    await new Promise(requestAnimationFrame);
+    const now = performance.now();
+    if (frame >= 30) samples.push(now - previous);
+    previous = now;
+    deck.setProps({
+      viewState: {
+        target: [target[0] + frame * 0.5, target[1], 0],
+        zoom: settings.zoom + Math.sin(frame / 30) * 0.2
+      }
+    });
+  }
+  const visibleLabels = (
+    await deck.pickObjectsAsync({x: 0, y: 0, width: deck.width, height: deck.height})
+  ).length;
+  deck.setProps({viewState: null, initialViewState: getSceneViewState()});
+  samples.sort((a, b) => a - b);
+  const result = {
+    labels: data.length,
+    collisionGreedy: settings.collisionGreedy,
+    splitLayers: settings.splitLayers,
+    visibleLabels,
+    medianMs: samples[Math.floor(samples.length / 2)],
+    p95Ms: samples[Math.floor(samples.length * 0.95)]
+  };
+  document.getElementById('metrics').textContent =
+    `${result.visibleLabels} / ${result.labels} labels visible: median ${result.medianMs.toFixed(1)} ms, p95 ${result.p95Ms.toFixed(1)} ms`;
+  return result;
+}
+document.getElementById('benchmark').onclick = benchmark;
+// Development/automation API: stable data, explicit updates, and repeatable camera motion.
+window.collisionTest = {deck, settings, update, benchmark, MapView};
