@@ -83,10 +83,6 @@ The globe behaves like a physical ball. Dragging and pointer-anchored zoom rotat
 To limit how far the camera can travel, set the shared controller [`maxBounds`](./controller.md#options) option. For example, `maxBounds: [[-180, -85], [180, 85]]` keeps the viewport center between `±85°` latitude.
 
 
-Roll is applied around the camera's forward axis after pitch and bearing, including
-the Mercator projection used at high zoom. The controller preserves it during
-interaction but does not provide a roll gesture.
-
 ## Controller
 
 By default, `GlobeView` uses the `GlobeController` to handle interactivity. To enable the controller, use:
