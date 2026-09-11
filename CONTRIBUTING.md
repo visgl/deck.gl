@@ -4,6 +4,22 @@
 
 PRs and bug reports are welcome, and we are actively looking for new maintainers.
 
+## AI-assisted contributions
+
+All contributions are subject to the OpenJS Foundation's [policy](https://openjsf.cdn.prismic.io/openjsf/acqiJpGXnQHGZGtq_OpenJSAICodingAssistantsPolicy.pdf) on uses of AI coding assistants.
+
+We aim to be a welcoming community and recognize the fact that AI coding tools are a part of software development. It is no longer a question of *if* they are being used, more a matter of *how*.
+
+When contributing, please consider that there are still humans in the loop though, and:
+
+- **Think**. If a contribution will take more effort to review than it took you to create, something is wrong.
+- Avoid **copy-pasting** responses from AI into conversations with humans (a.k.a. "don't be a meat-proxy").
+- Avoid AI-generated **PR descriptions**, they will likely *not* be read. The maintainers of this repo are perfectly capable of generating their own AI summary of a PR.
+- The best PR description is a short set of **bulletpoints written by a human**. [Example](https://github.com/visgl/deck.gl/pull/10570)
+- If you must, **label any AI-generated context** in a PR message, under a heading: "Context for AI".
+- Break larger contributions into **manageable chunks**. AI is a great tool for refactoring into multiple PRs.
+
+AI gives developers unprecedented power. It is up to us to use it responsibly. While it is tempting to take shortcuts and ignore the suggestions above, with time this erodes trust and risks people viewing you as a mouthpiece for an AI bot. Ultimately we are still humans, who prefer talking and collaborating with each other, rather than with machines.
 
 ## Setting Up Dev Environment
 
