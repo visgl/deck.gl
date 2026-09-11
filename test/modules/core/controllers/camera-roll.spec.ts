@@ -83,9 +83,12 @@ for (const interpolator of [new LinearInterpolator(), new FlyToInterpolator()]) 
     };
     expect(interpolator.arePropsEqual(props, {...props})).toBe(true);
     expect(interpolator.arePropsEqual(props, {...props, roll: 0})).toBe(true);
-    expect(interpolator.arePropsEqual(props, {...props, roll: 28})).toBe(false);
+    expect(interpolator.arePropsEqual({...props, roll: 0}, {...props, roll: 0})).toBe(true);
+    expect(interpolator.arePropsEqual({...props, roll: 0}, {...props, roll: 28})).toBe(false);
     const transition = interpolator.initializeProps(props, {...props, roll: 28});
     expect(interpolator.interpolateProps(transition.start, transition.end, 0.5).roll).toBe(14);
+    const reverse = interpolator.initializeProps({...props, roll: 28}, props);
+    expect(interpolator.interpolateProps(reverse.start, reverse.end, 0.5).roll).toBe(14);
   });
 }
 

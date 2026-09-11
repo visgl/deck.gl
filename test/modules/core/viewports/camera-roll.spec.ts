@@ -28,7 +28,7 @@ for (const ViewportClass of [WebMercatorViewport, GlobeViewport]) {
     expect(new ViewportClass({...VIEW_STATE, roll: 30}).equals(legacy)).toBe(false);
   });
 
-  test.each([-45, 30, 90])(
+  test.each([-450, -45, 30, 90, 390, 750])(
     `${ViewportClass.displayName} rotates screen coordinates at %s degrees after bearing and pitch`,
     roll => {
       const level = new ViewportClass(VIEW_STATE);
@@ -91,7 +91,7 @@ test('repeated Mercator worlds retain roll', () => {
   }
 });
 
-test.each([30, -45, 90, 180])(
+test.each([30, -45, 90, 180, -450, 390, 750])(
   'rolled Mercator bounds contain the visible ground at %s degrees',
   roll => {
     const viewport = new WebMercatorViewport({...VIEW_STATE, pitch: 75, roll});
@@ -112,7 +112,7 @@ test.each([30, -45, 90, 180])(
   }
 );
 
-test.each([30, -45, 90, 180])(
+test.each([30, -45, 90, 180, -450, 390, 750])(
   'rolled Mercator far plane includes the ground corners at %s degrees',
   roll => {
     const viewport = new WebMercatorViewport({...VIEW_STATE, pitch: 45, roll});

@@ -160,8 +160,6 @@ export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {
       onLoad?.();
       if (MAPLIBRE_DECK_STATES.get(map) === state) {
         startWatchingMove(map, state);
-        // The camera may have moved while Deck was initializing.
-        onMapLibreMove(deck, map);
       }
     };
   }

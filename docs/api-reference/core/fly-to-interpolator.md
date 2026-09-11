@@ -2,6 +2,8 @@
 
 Performs "fly to" style interpolation between two geospatial view states. Implements [TransitionInterpolator](./transition-interpolator.md).
 
+The camera's `longitude`, `latitude`, and `zoom` follow a smooth flight path that combines panning and zooming. For distant destinations, the camera can zoom out to show more of the route, then zoom in to the target zoom level as it approaches the destination. The `curve` option controls how much zooming occurs along the path.
+
 The camera’s `bearing`, `pitch`, `roll`, and `position` are interpolated linearly during the flight.
 
 See [View State Transitions](../../developer-guide/animations-and-transitions.md#camera-transitions) for usage examples.

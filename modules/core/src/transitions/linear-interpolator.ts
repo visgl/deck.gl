@@ -64,7 +64,10 @@ export default class LinearInterpolator extends TransitionInterpolator {
     this.opts = normalizedOpts;
   }
 
-  /** Treat omitted roll as zero when comparing legacy view states. */
+  /**
+   * Preserve equality for existing view states that include pitch/bearing but omit roll.
+   * Otherwise the new comparison prop triggers transitions even when the camera is unchanged.
+   */
   arePropsEqual(startProps: Record<string, any>, endProps: Record<string, any>): boolean {
     return super.arePropsEqual(
       {...startProps, roll: startProps.roll ?? 0},

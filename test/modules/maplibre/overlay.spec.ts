@@ -249,7 +249,7 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
             });
             map.addControl(overlay);
             if (!interleaved) overlayCanvas = overlay.getCanvas();
-            // The first roll update also exercises camera changes before Deck loads.
+            await waitForRender(() => Boolean(overlay._deck?.isInitialized));
             for (const roll of [28, -32, 0]) {
               renderedPixel = [];
               // Interleaved resize currently leaves luma's default framebuffer
