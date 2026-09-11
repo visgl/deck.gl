@@ -88,7 +88,6 @@ export default class GlobeViewport extends Viewport {
   latitude: number;
   bearing: number;
   pitch: number;
-  /** Camera roll in degrees. */
   roll: number;
   fovy: number;
   resolution: number;
