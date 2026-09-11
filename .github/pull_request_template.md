@@ -1,5 +1,5 @@
 <!-- If using AI to draft PR description (discouraged), remove this line. Maintainers are under no obligation to read AI summaries. See CONTRIBUTING.md -->
-Text below is written by me without [AI assistance]
+Text below is written by me without [AI assistance](https://github.com/visgl/deck.gl?tab=contributing-ov-file)
 
 <!-- For feature, feature enhancement or bug fix, create an issue first and finish To Do List there -->
 <!-- Anything doesn't work as expected is a bug, including code, doc and test -->
