@@ -112,6 +112,8 @@ Only effective if `getDashArray` is specified. If `true`, gaps between solid str
 
 ## Remarks
 
+Dashes render the same in [GlobeView](../core/globe-view.md) as in `MapView` for every `dashMode` and `dashUnits` configuration, including when `GlobeView` hands off to Web Mercator above zoom 12.
+
 ### Limitations
 
 WebGL2 has guaranteed support for up to 16 attributes per shader. The current implementation of `PathLayer` uses 13 attributes. Each one of the options of this extension adds one more attribute. In other words, if all options are enabled, the layer will not be able to use other extensions.
