@@ -1,3 +1,7 @@
+---
+description: "ScreenGridLayer aggregates points into screen-space grid cells colored by count or weight."
+---
+
 # ScreenGridLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

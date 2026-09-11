@@ -1,3 +1,7 @@
+---
+description: "PathLayer renders polylines with configurable width, joints and caps."
+---
+
 # PathLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
