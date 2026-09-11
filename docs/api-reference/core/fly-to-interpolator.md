@@ -2,7 +2,7 @@
 
 Performs "fly to" style interpolation between two geospatial view states. Implements [TransitionInterpolator](./transition-interpolator.md).
 
-The camera’s `bearing`, `pitch`, `roll`, and `position` are interpolated linearly during the flight. Omitted `roll` is treated as `0`.
+The camera’s `bearing`, `pitch`, `roll`, and `position` are interpolated linearly during the flight.
 
 See [View State Transitions](../../developer-guide/animations-and-transitions.md#camera-transitions) for usage examples.
 
