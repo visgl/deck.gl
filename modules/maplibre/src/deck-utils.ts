@@ -159,6 +159,7 @@ export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {
       onLoad?.();
       if (MAPLIBRE_DECK_STATES.get(map) === state) {
         startWatchingMove(map, state);
+        onMapLibreMove(deck, map);
       }
     };
   }
