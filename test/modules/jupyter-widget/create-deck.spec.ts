@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line
 /* global document, window, global */
-import {test, expect, describe} from 'vitest';
+import {test, expect, describe, vi} from 'vitest';
 
 import {
   AmbientLight,
@@ -22,6 +22,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {NullDevice} from '@luma.gl/test-utils';
 import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
+import {loadModule} from '@deck.gl/jupyter-widget/playground/utils/script-utils';
 
 class DemoCompositeLayer extends CompositeLayer {
   renderLayers() {
@@ -60,6 +61,337 @@ describe('jupyter-widget: dynamic-registration', () => {
       ],
       onComplete
     );
+  });
+
+  test('addCustomLibraries loads ES modules', async () => {
+    const LIBRARY_NAME = 'DemoEsmLibrary';
+    // Stands in for the `deck` global that an externalized custom build reads its base classes from.
+    (window as any).__DemoBaseLayer = CompositeLayer;
+    const url = URL.createObjectURL(
+      new Blob(
+        [
+          'export class DemoEsmLayer extends globalThis.__DemoBaseLayer { renderLayers() { return null; } }'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      const props = jsonConverter.convert({layers: [{'@@type': 'DemoEsmLayer', data: []}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].DemoEsmLayer);
+      expect(props.layers[0]).toBeInstanceOf(CompositeLayer);
+    } finally {
+      URL.revokeObjectURL(url);
+      delete (window as any).__DemoBaseLayer;
+    }
+  });
+
+  test('addCustomLibraries completes when a library fails to load', async () => {
+    const missingModule = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000000`;
+    const missingScript = `${window.location.origin}/no-such-custom-library-${Date.now()}.js`;
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [
+            {libraryName: 'MissingEsmLibrary', resourceUri: missingModule, module: true},
+            {libraryName: 'MissingClassicLibrary', resourceUri: missingScript}
+          ],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(2);
+    } finally {
+      errors.mockRestore();
+    }
+  });
+
+  test('addCustomLibraries completes when a module throws during evaluation', async () => {
+    const url = URL.createObjectURL(
+      new Blob(['throw new Error("boom");'], {type: 'text/javascript'})
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: 'ThrowingEsmLibrary', resourceUri: url, module: true}],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(String(errors.mock.calls[0][1])).toContain('boom');
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('addCustomLibraries completes when a module throws an empty error', async () => {
+    const url = URL.createObjectURL(new Blob(['throw "";'], {type: 'text/javascript'}));
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: 'EmptyErrorEsmLibrary', resourceUri: url, module: true}],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('a failure does not detach a newer registration of the same library', async () => {
+    const LIBRARY_NAME = 'ConcurrentEsmLibrary';
+    const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000002`;
+    const url = URL.createObjectURL(
+      new Blob(['export class ConcurrentEsmLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      // Two widgets register the same library name at once; the older one fails, the newer one loads
+      const first = new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: LIBRARY_NAME, resourceUri: missing, module: true}],
+          resolve
+        )
+      );
+      const second = new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      await Promise.all([first, second]);
+      expect(errors).toHaveBeenCalledTimes(1);
+      const props = jsonConverter.convert({layers: [{'@@type': 'ConcurrentEsmLayer', id: 'c'}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].ConcurrentEsmLayer);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('a newer failure does not detach an older in-flight registration', async () => {
+    const LIBRARY_NAME = 'SlowEsmLibrary';
+    const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000003`;
+    const url = URL.createObjectURL(
+      new Blob(
+        [
+          'await new Promise(resolve => setTimeout(resolve, 100));',
+          'export class SlowEsmLayer { constructor(props) { this.props = props; } }'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const older = new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      const newer = new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: LIBRARY_NAME, resourceUri: missing, module: true}],
+          resolve
+        )
+      );
+      await newer;
+      expect(errors).toHaveBeenCalledTimes(1);
+      await older;
+      const props = jsonConverter.convert({layers: [{'@@type': 'SlowEsmLayer', id: 's'}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].SlowEsmLayer);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('concurrent registrations of one name with different modules register both', async () => {
+    const LIBRARY_NAME = 'SharedNameEsmLibrary';
+    const makeUrl = (name: string) =>
+      URL.createObjectURL(
+        new Blob([`export class ${name} { constructor(props) { this.props = props; } }`], {
+          type: 'text/javascript'
+        })
+      );
+    const urlA = makeUrl('SharedNameLayerA');
+    const urlB = makeUrl('SharedNameLayerB');
+    try {
+      await Promise.all([
+        new Promise<void>(resolve =>
+          addCustomLibraries(
+            [{libraryName: LIBRARY_NAME, resourceUri: urlA, module: true}],
+            resolve
+          )
+        ),
+        new Promise<void>(resolve =>
+          addCustomLibraries(
+            [{libraryName: LIBRARY_NAME, resourceUri: urlB, module: true}],
+            resolve
+          )
+        )
+      ]);
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'SharedNameLayerA', id: 'a'},
+          {'@@type': 'SharedNameLayerB', id: 'b'}
+        ]
+      });
+      expect(props.layers[0].constructor.name).toBe('SharedNameLayerA');
+      expect(props.layers[1].constructor.name).toBe('SharedNameLayerB');
+    } finally {
+      URL.revokeObjectURL(urlA);
+      URL.revokeObjectURL(urlB);
+    }
+  });
+
+  test('an ES module does not hijack a pending classic registration of the same name', async () => {
+    const LIBRARY_NAME = 'MixedLibrary';
+    const classicUrl = URL.createObjectURL(
+      new Blob(
+        [
+          'window.MixedLibrary = {MixedClassicLayer: class MixedClassicLayer {',
+          ' constructor(props) { this.props = props; } }};'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    const moduleUrl = URL.createObjectURL(
+      new Blob(['export class MixedModuleLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    try {
+      await Promise.all([
+        new Promise<void>(resolve =>
+          addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: classicUrl}], resolve)
+        ),
+        new Promise<void>(resolve =>
+          addCustomLibraries(
+            [{libraryName: LIBRARY_NAME, resourceUri: moduleUrl, module: true}],
+            resolve
+          )
+        )
+      ]);
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'MixedClassicLayer', id: 'c'},
+          {'@@type': 'MixedModuleLayer', id: 'm'}
+        ]
+      });
+      expect(props.layers[0].constructor.name).toBe('MixedClassicLayer');
+      expect(props.layers[1].constructor.name).toBe('MixedModuleLayer');
+      expect(
+        (window as any)[LIBRARY_NAME].MixedClassicLayer,
+        'classic global is kept'
+      ).toBeTruthy();
+    } finally {
+      URL.revokeObjectURL(classicUrl);
+      URL.revokeObjectURL(moduleUrl);
+    }
+  });
+
+  test('concurrent classic registrations of one name register both scripts', async () => {
+    const LIBRARY_NAME = 'SharedClassicLibrary';
+    const makeUrl = (name: string) =>
+      URL.createObjectURL(
+        new Blob(
+          [
+            `window.${LIBRARY_NAME} = {${name}: class ${name} { constructor(props) { this.props = props; } }};`
+          ],
+          {type: 'text/javascript'}
+        )
+      );
+    const urlA = makeUrl('SharedClassicLayerA');
+    const urlB = makeUrl('SharedClassicLayerB');
+    try {
+      await Promise.all([
+        new Promise<void>(resolve =>
+          addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: urlA}], resolve)
+        ),
+        new Promise<void>(resolve =>
+          addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: urlB}], resolve)
+        )
+      ]);
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'SharedClassicLayerA', id: 'a'},
+          {'@@type': 'SharedClassicLayerB', id: 'b'}
+        ]
+      });
+      expect(props.layers[0].constructor.name).toBe('SharedClassicLayerA');
+      expect(props.layers[1].constructor.name).toBe('SharedClassicLayerB');
+    } finally {
+      URL.revokeObjectURL(urlA);
+      URL.revokeObjectURL(urlB);
+      delete (window as any)[LIBRARY_NAME];
+    }
+  });
+
+  test('a classic script that does not define its global fails the registration', async () => {
+    const url = URL.createObjectURL(
+      new Blob(['window.SomethingElse = {};'], {type: 'text/javascript'})
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: 'UndefinedClassicLibrary', resourceUri: url}], resolve)
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(String(errors.mock.calls[0][1])).toContain(
+        'did not define window.UndefinedClassicLibrary'
+      );
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+      delete (window as any).SomethingElse;
+    }
+  });
+
+  test('a failed custom library can be retried', async () => {
+    const LIBRARY_NAME = 'RetryEsmLibrary';
+    const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;
+    const url = URL.createObjectURL(
+      new Blob(['export class RetryEsmLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [{libraryName: LIBRARY_NAME, resourceUri: missing, module: true}],
+          resolve
+        )
+      );
+      expect(errors).toHaveBeenCalledTimes(1);
+      expect(
+        (window as any)[LIBRARY_NAME],
+        'placeholder is removed after a failure'
+      ).toBeUndefined();
+
+      await new Promise<void>(resolve =>
+        addCustomLibraries([{libraryName: LIBRARY_NAME, resourceUri: url, module: true}], resolve)
+      );
+      const props = jsonConverter.convert({layers: [{'@@type': 'RetryEsmLayer', id: 'retry'}]});
+      expect(props.layers[0]).toBeInstanceOf((window as any)[LIBRARY_NAME].RetryEsmLayer);
+    } finally {
+      errors.mockRestore();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  test('loadModule quotes the URL and global name', async () => {
+    const url = 'data:text/javascript,export%20const%20Ok%3D1';
+    await loadModule(url, 'Quoted"Name</script>');
+    const scripts = Array.from(document.querySelectorAll('script[type="module"]'));
+    const script = scripts[scripts.length - 1];
+    expect(script.textContent).toContain(`await import(${JSON.stringify(url)})`);
+    expect(script.textContent).toContain(`window["Quoted\\"Name\\u003c/script>"] = m;`);
+    expect(script.textContent).not.toContain('</script>');
   });
 });
 

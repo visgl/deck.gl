@@ -10,6 +10,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 ^^^^^^^^^^^
 - Add typed lighting and post-processing effects through ``pydeck.Effect``
 - Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop
+- Add non-geospatial chart gallery examples (scatter plot, bar chart, surface plot) and document
+  ``OrthographicView`` and ``OrbitView`` view states (#10454)
+- Load ES module custom libraries with ``pydeck.settings.register_library(name, uri, module=True)``;
+  fix ``register_library`` emitting an unused ``uri`` key (#10454)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^
