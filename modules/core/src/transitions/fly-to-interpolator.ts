@@ -10,6 +10,7 @@ import {flyToViewport, getFlyToDuration} from '@math.gl/web-mercator';
 const LINEARLY_INTERPOLATED_PROPS = {
   bearing: 0,
   pitch: 0,
+  roll: 0,
   position: [0, 0, 0]
 };
 const DEFAULT_OPTS = {
@@ -45,17 +46,38 @@ export default class FlyToInterpolator extends TransitionInterpolator {
     } = {}
   ) {
     super({
-      compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'],
-      extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'position'],
+      compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'roll', 'position'],
+      extract: [
+        'width',
+        'height',
+        'longitude',
+        'latitude',
+        'zoom',
+        'bearing',
+        'pitch',
+        'roll',
+        'position'
+      ],
       required: ['width', 'height', 'latitude', 'longitude', 'zoom']
     });
     this.opts = {...DEFAULT_OPTS, ...opts};
   }
 
+  /**
+   * Preserve equality for existing view states that include pitch/bearing but omit roll.
+   * Otherwise the new comparison prop triggers transitions even when the camera is unchanged.
+   */
+  arePropsEqual(startProps: Record<string, any>, endProps: Record<string, any>): boolean {
+    return super.arePropsEqual(
+      {...startProps, roll: startProps.roll ?? 0},
+      {...endProps, roll: endProps.roll ?? 0}
+    );
+  }
+
   interpolateProps(startProps, endProps, t) {
     const viewport = flyToViewport(startProps, endProps, t, this.opts);
 
-    // Linearly interpolate 'bearing', 'pitch' and 'position'.
+    // Linearly interpolate 'bearing', 'pitch', 'roll' and 'position'.
     // If they are not supplied, they are interpreted as zeros in viewport calculation
     // (fallback defined in WebMercatorViewport)
     // Because there is no guarantee that the current controller's ViewState normalizes

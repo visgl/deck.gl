@@ -36,7 +36,7 @@ const TEST_CASES = [
       end: {longitude: -74, latitude: 40.7, zoom: 11, pitch: undefined, bearing: 10}
     },
     transition: {
-      0.5: {longitude: -98.225, latitude: 39.24, zoom: 11.5, pitch: 0, bearing: 5}
+      0.5: {longitude: -98.225, latitude: 39.24, zoom: 11.5, pitch: 0, bearing: 5, roll: 0}
     }
   },
   {

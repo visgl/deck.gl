@@ -19,6 +19,8 @@ export type MapViewState = {
   pitch?: number;
   /** Bearing (rotation) of the map, in degrees. `0` is north up */
   bearing?: number;
+  /** Camera roll in degrees, positive counter-clockwise on screen. Default `0`. */
+  roll?: number;
   /** Min zoom, default `0` */
   minZoom?: number;
   /** Max zoom, default `20` */

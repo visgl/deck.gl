@@ -88,7 +88,8 @@ new ScatterplotLayer({
 - Interleaved mode only works when WebGL2 is available.
 - Camera target elevation is synchronized. deck.gl layers are not draped over MapLibre terrain.
 - Mercator is supported. Globe integration uses deck.gl's experimental [`GlobeView`](../core/globe-view.md). With default back-face culling, `TextLayer` and non-billboard `IconLayer` do not render. Disabling culling makes them visible, but non-billboard icons render rotated 180°.
-- Non-default vertical field of view and camera roll are not synchronized.
+- Camera roll is synchronized in MapLibre v5+. Older versions will ignore roll.
+- Non-default vertical field of view is not synchronized.
 - One interleaved overlay may be attached to a map.
 
 ### Antialiasing

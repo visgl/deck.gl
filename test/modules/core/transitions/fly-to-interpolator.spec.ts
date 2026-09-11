@@ -65,6 +65,7 @@ const TEST_CASES = [
     transition: {
       0.25: {
         bearing: 0,
+        roll: 0,
         pitch: 5,
         longitude: -122.4017,
         latitude: 37.78297,
@@ -73,6 +74,7 @@ const TEST_CASES = [
       },
       0.5: {
         bearing: 0,
+        roll: 0,
         pitch: 10,
         longitude: -106.3,
         latitude: 38.76683,
@@ -81,6 +83,7 @@ const TEST_CASES = [
       },
       0.75: {
         bearing: 0,
+        roll: 0,
         pitch: 15,
         longitude: -74.19253,
         latitude: 40.68864,

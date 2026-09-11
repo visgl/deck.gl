@@ -16,7 +16,7 @@ new LinearInterpolator({transitionProps: ['target', 'zoom']});
 Parameters:
 
 - options (object)
-  * `transitionProps` (string[], optional) - Array of prop names that should be linearly interpolated. Default `['longitude', 'latitude', 'zoom', 'bearing', 'pitch']`.
+  * `transitionProps` (string[], optional) - Array of prop names that should be linearly interpolated. Default `['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'roll']`.
   * `around` (number[2], optional) - A point to zoom/rotate around, `[x, y]` in screen pixels. If provided, the location at this point will not move during the transition.
   * `makeViewport` (Function, optional) - Called to construct a [viewport](./viewport.md), e.g. `props => new WebMercatorViewport(props)`. Must be provided if `around` is used.
 
