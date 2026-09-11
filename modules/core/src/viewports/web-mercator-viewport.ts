@@ -83,7 +83,6 @@ export default class WebMercatorViewport extends Viewport {
   longitude: number;
   latitude: number;
   pitch: number;
-  /** Camera roll in degrees. */
   roll: number;
   bearing: number;
   altitude: number;
