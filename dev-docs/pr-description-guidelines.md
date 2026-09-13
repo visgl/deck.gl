@@ -403,4 +403,3 @@ When drafting a PR description for a contributor, follow the guidelines above. I
 * Do not make up an issue number. If the issue is not known, leave `Closes #` for the contributor
   to fill in.
 * When golden images change, say which ones and why in the Change List.
-* Hand the draft to the contributor to edit, verify and submit. Do not open the PR.

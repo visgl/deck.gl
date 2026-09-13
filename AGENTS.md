@@ -45,7 +45,6 @@ subdirectories may add local guidance.
 - Do not add footers, emoji, links to tool sessions, `Co-Authored-By` lines, tables of files, or
   the template's authorship declaration.
 - Do not make up an issue number. Leave `Closes #` for the contributor if the issue is not known.
-- Hand the draft to the contributor. Do not open the PR.
 
 ## Ready For Merge
 
@@ -69,7 +68,7 @@ When asked to "get ready for merge", do a full merge-readiness pass:
 - Prepare a copyable Markdown PR description based on the branch diff compared to `master`,
   following `dev-docs/pr-description-guidelines.md` and the headings in
   `.github/pull_request_template.md`. Do not include the authorship declaration line. The
-  contributor decides what to disclose, then edits, verifies and submits the description.
+  contributor decides what to disclose.
 - In the final handoff, call out which merge-readiness gates passed, which were not run, and any
   remaining risk or unrelated pre-existing failures.
 
