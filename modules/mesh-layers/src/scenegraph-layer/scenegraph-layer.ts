@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, log} from '@deck.gl/core';
-import type {Device} from '@luma.gl/core';
+import {Layer, project32, color, picking, log} from '@deck.gl/core';
+import type {Device, RenderPipelineParameters} from '@luma.gl/core';
 import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
@@ -15,6 +15,8 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import {scenegraphUniforms, ScenegraphProps} from './scenegraph-layer-uniforms';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
+import source from './scenegraph-layer.wgsl';
+import {scenegraphPbrMaterial} from './scenegraph-pbr-material';
 
 import {
   UpdateParameters,
@@ -29,7 +31,7 @@ import {
 
 type GLTFInstantiatorOptions = Parameters<typeof createScenegraphsFromGLTF>[2];
 
-const DEFAULT_COLOR: [number, number, number, number] = [255, 255, 255, 255];
+const DEFAULT_COLOR = [255, 255, 255, 255] as const;
 
 export type ScenegraphLayerProps<DataT = unknown> = _ScenegraphLayerProps<DataT> & LayerProps;
 
@@ -77,7 +79,12 @@ type _ScenegraphLayerProps<DataT> = {
    */
   _imageBasedLightingEnvironment?:
     | PBREnvironment
-    | ((context: {gl: WebGL2RenderingContext; layer: ScenegraphLayer<DataT>}) => PBREnvironment);
+    | ((context: {
+        device?: Device;
+        /** @deprecated Use `device.handle`. */
+        gl?: WebGL2RenderingContext;
+        layer: ScenegraphLayer<DataT>;
+      }) => PBREnvironment);
 
   /** Anchor position accessor. */
   getPosition?: Accessor<DataT, Position>;
@@ -90,21 +97,27 @@ type _ScenegraphLayerProps<DataT> = {
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, [number, number, number]>;
+  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, [number, number, number]>;
+  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, [number, number, number]>;
+  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */
   getTransformMatrix?: Accessor<DataT, number[]>;
+  /**
+   * Called after the layer has rendered for the first time.
+   * Used by Tile3DLayer to signal that a tile's sublayer is visible,
+   * allowing parent tiles to be safely deselected during transitions.
+   */
+  onFirstDraw?: () => void;
   /**
    * Multiplier to scale each geometry by.
    * @default 1
@@ -134,6 +147,7 @@ const defaultProps: DefaultProps<ScenegraphLayerProps> = {
   getAnimator: scenegraph => scenegraph && scenegraph.animator,
   _animations: null,
 
+  onFirstDraw: {type: 'function', value: () => {}},
   sizeScale: {type: 'number', value: 1, min: 0},
   sizeMinPixels: {type: 'number', min: 0, value: 0},
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
@@ -166,30 +180,44 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   static layerName = 'ScenegraphLayer';
 
   state!: {
-    scenegraph: GroupNode;
-    animator: GLTFAnimator;
+    scenegraph: GroupNode | null;
+    animator: GLTFAnimator | null;
+    materials?: {destroy(): void}[] | null;
     models: Model[];
+    firstDrawSignaled: boolean;
   };
 
   getShaders() {
     const defines: {LIGHTING_PBR?: 1} = {};
     let pbr;
+    const isWebGPU = this.context.device?.type === 'webgpu';
 
     if (this.props._lighting === 'pbr') {
-      pbr = pbrMaterial;
+      // The stock pbrMaterial module supplies the existing GLSL PBR path.
+      // WebGPU uses a Scenegraph-specific wrapper because its WGSL source must
+      // adapt the PBR position/normal inputs and camera binding to deck.gl's
+      // project module.
+      pbr = isWebGPU ? scenegraphPbrMaterial : pbrMaterial;
       defines.LIGHTING_PBR = 1;
+    } else if (isWebGPU) {
+      // The flat WGSL path can still sample a glTF base-color texture, so it
+      // needs the Scenegraph PBR module's sampler bindings even though
+      // LIGHTING_PBR is not enabled.
+      pbr = scenegraphPbrMaterial;
     } else {
-      // Dummy shader module needed to handle
-      // pbrMaterial.pbr_baseColorSampler binding
+      // The flat GLSL shader declares pbr_baseColorSampler itself. Register a
+      // name-only module so the glTF material binding is still routed to that
+      // sampler without injecting the full PBR lighting module.
       pbr = {name: 'pbrMaterial'};
     }
 
-    const modules = [project32, picking, scenegraphUniforms, pbr];
-    return super.getShaders({defines, vs, fs, modules});
+    const modules = [project32, color, picking, scenegraphUniforms, pbr];
+    return super.getShaders({defines, vs, fs, source, modules});
   }
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
+    const supportsTransitions = this.context.device.type !== 'webgpu';
     // attributeManager is always defined for primitive layers
     attributeManager!.addInstanced({
       instancePositions: {
@@ -197,14 +225,14 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         type: 'float64',
         fp64: this.use64bitPositions(),
         accessor: 'getPosition',
-        transition: true
+        transition: supportsTransitions
       },
       instanceColors: {
         type: 'unorm8',
         size: this.props.colorFormat.length,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR,
-        transition: true
+        transition: supportsTransitions
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
@@ -223,7 +251,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this.state.scenegraph?.destroy();
+    this._destroyScenegraphAssets();
   }
 
   get isLoaded(): boolean {
@@ -245,12 +273,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       const processedGLTF = gltf.json ? postProcessGLTF(gltf) : gltf;
 
       const gltfObjects = createScenegraphsFromGLTF(device, processedGLTF, this._getModelOptions());
-      scenegraphData = {gltf: processedGLTF, ...gltfObjects};
+      scenegraphData = gltfObjects;
 
       waitForGLTFAssets(gltfObjects)
-        .then(() => {
-          this.setNeedsRedraw();
-        })
+        .then(() => this.setNeedsRedraw())
         .catch(ex => {
           this.raiseError(ex, 'loading glTF');
         });
@@ -261,7 +287,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     const animator = props.getAnimator(scenegraphData, options);
 
     if (scenegraph instanceof GroupNode) {
-      this.state.scenegraph?.destroy();
+      this._destroyScenegraphAssets();
 
       this._applyAnimationsProp(animator, props._animations);
 
@@ -272,14 +298,29 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         }
       });
 
-      this.setState({scenegraph, animator, models});
+      this.setState({
+        scenegraph,
+        animator,
+        materials: scenegraphData?.materials || null,
+        models,
+        firstDrawSignaled: false
+      });
       this.getAttributeManager()!.invalidateAll();
     } else if (scenegraph !== null) {
       log.warn('invalid scenegraph:', scenegraph)();
     }
   }
 
-  private _applyAnimationsProp(animator: GLTFAnimator, animationsProp: any): void {
+  private _destroyScenegraphAssets(): void {
+    this.state.scenegraph?.destroy();
+    this.state.materials?.forEach(material => material.destroy());
+    this.state.scenegraph = null;
+    this.state.animator = null;
+    this.state.materials = null;
+    this.state.models = [];
+  }
+
+  private _applyAnimationsProp(animator: GLTFAnimator | null, animationsProp: any): void {
     if (!animator || !animationsProp) {
       return;
     }
@@ -308,7 +349,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
             log.warn(`animation ${key} not found`)();
           }
         } else {
-          const findResult = animations.find(({name}) => name === key);
+          const findResult = animations.find(({animation}) => animation.name === key);
           if (findResult) {
             Object.assign(findResult, value);
           } else {
@@ -324,11 +365,23 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     let env: PBREnvironment | undefined;
     if (_imageBasedLightingEnvironment) {
       if (typeof _imageBasedLightingEnvironment === 'function') {
-        env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
+        env = _imageBasedLightingEnvironment({
+          device: this.context.device,
+          gl: this.context.gl,
+          layer: this
+        });
       } else {
         env = _imageBasedLightingEnvironment;
       }
     }
+
+    const parameters =
+      this.context.device.type === 'webgpu'
+        ? ({
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal'
+          } satisfies RenderPipelineParameters)
+        : undefined;
 
     return {
       imageBasedLightingEnvironment: env,
@@ -336,6 +389,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         id: this.props.id,
         isInstanced: true,
         bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+        parameters,
         ...this.getShaders()
       },
       // tangents are not supported
@@ -347,12 +401,15 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     if (!this.state.scenegraph) return;
 
     if (this.props._animations && this.state.animator) {
-      this.state.animator.animate(context.timeline.getTime());
+      this.state.animator.setTime(context.timeline.getTime());
       this.setNeedsRedraw();
     }
 
     const {viewport, renderPass} = this.context;
     const {sizeScale, sizeMinPixels, sizeMaxPixels, coordinateSystem} = this.props;
+    const pbrProjectionProps = {
+      camera: viewport.cameraPosition as [number, number, number]
+    };
 
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
@@ -360,15 +417,11 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         const {model} = node;
         model.setInstanceCount(numInstances);
 
-        const pbrProjectionProps = {
-          // Needed for PBR (TODO: find better way to get it)
-          camera: model.uniforms.cameraPosition as [number, number, number]
-        };
         const scenegraphProps: ScenegraphProps = {
           sizeScale,
           sizeMinPixels,
           sizeMaxPixels,
-          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem),
+          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem) ? 1 : 0,
           sceneModelMatrix: worldMatrix
         };
 
@@ -379,5 +432,10 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         model.draw(renderPass);
       }
     });
+
+    if (!this.state.firstDrawSignaled) {
+      this.state.firstDrawSignaled = true;
+      this.props.onFirstDraw?.();
+    }
   }
 }

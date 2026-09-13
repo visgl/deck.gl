@@ -4,8 +4,29 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct ColumnUniforms {
+  radius: f32,
+  angle: f32,
+  offset: vec2<f32>,
+  extruded: f32,
+  stroked: f32,
+  isStroke: f32,
+  coverage: f32,
+  elevationScale: f32,
+  edgeDistance: f32,
+  widthScale: f32,
+  widthMinPixels: f32,
+  widthMaxPixels: f32,
+  radiusUnits: i32,
+  widthUnits: i32,
+};
+
+@group(0) @binding(auto) var<uniform> column: ColumnUniforms;
+`;
+
 const uniformBlock = `\
-uniform columnUniforms {
+layout(std140) uniform columnUniforms {
   float radius;
   float angle;
   vec2 offset;
@@ -26,7 +47,7 @@ uniform columnUniforms {
 export type ColumnProps = {
   radius: number;
   angle: number;
-  offset: [number, number];
+  offset: Readonly<[number, number]>;
   extruded: boolean;
   stroked: boolean;
   isStroke: boolean;
@@ -42,6 +63,7 @@ export type ColumnProps = {
 
 export const columnUniforms = {
   name: 'column',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   fs: uniformBlock,
   uniformTypes: {

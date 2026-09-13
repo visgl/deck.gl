@@ -1,59 +1,205 @@
 # ZoomWidget
 
-This widget controls the zoom level of a deck.gl view. Click '+' to zoom in by 1, click '-' to zoom out by 1. Supports controlling Map and Globe views.
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
-## Props
+import {ZoomWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-#### `id` (string, optional) {#id}
+<ZoomWidgetDemo />
 
-Default: `'zoom'`
+This widget controls the zoom level of a deck.gl view. Click '+' to zoom in or '-' to zoom out by the configured `zoomStep`. Supports controlling Map and Globe views.
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly. The `id` is used to match widgets between updates, ensuring deck.gl can distinguish between them. A default `id` is assigned based on widget type, so if you have multiple widgets of the same type (e.g., two `compass` widgets), you need to provide a custom `id` for at least one.
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-#### `viewId` (string, optional) {#viewid}
+```js
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `null`
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
+});
+```
 
-The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-#### `placement` (string, optional) {#placement}
+```ts
+import {ZoomWidget} from '@deck.gl/widgets';
+import {Deck} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
 
-Default: `'top-left'`
+new Deck({
+  initialViewState: {
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  },
+  controller: true,
+  widgets: [
+    new ZoomWidget({placement: 'top-left'})
+  ]
+});
+```
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: 0,
+        latitude: 52,
+        zoom: 4
+      }}
+      controller
+    >
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import {DeckGL, ZoomWidget} from '@deck.gl/react';
+import type {MapViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [viewState, setViewState] = useState<MapViewState>({
+    longitude: 0,
+    latitude: 52,
+    zoom: 4
+  });
+
+  const onViewStateChange = useCallback(({viewState: vs}) => {
+    setViewState(vs as MapViewState);
+  }, []);
+
+  return (
+    <DeckGL viewState={viewState} onViewStateChange={onViewStateChange} controller>
+      <ZoomWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {ZoomWidget, type ZoomWidgetProps} from '@deck.gl/widgets';
+new ZoomWidget({} satisfies ZoomWidgetProps);
+```
+
+## Types
+
+### `ZoomWidgetProps` {#zoomwidgetprops}
+
+The `ZoomWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `orientation` (string, optional) {#orientation}
 
-Default: `'vertical'`
+* Default: `'vertical'`
 
 Widget button orientation. Valid options are `vertical` or `horizontal`.
 
+#### `zoomAxis` (string, optional)
+
+* Default: `'all'`
+
+Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
+Only effective if the current view is an [OrthographicView](../core/orthographic-view.md).
+
+#### `zoomStep` (number, optional) {#zoomstep}
+
+<img src="https://img.shields.io/badge/from-v9.4-green.svg?style=flat-square" alt="from v9.4" />
+
+* Default: `1`
+
+Zoom level delta applied by each button click.
+
 #### `zoomInLabel` (string, optional) {#zoominlabel}
+
+* Default: `'Zoom In'`
 
 Tooltip message displayed while hovering a mouse over the zoom in button.
 
-Default: `'Zoom In'`
+#### `zoomInTooltip` (string | HTMLElement | false, optional) {#zoomintooltip}
+
+* Default: value of `zoomInLabel`
+
+Custom tooltip content for the zoom in button. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `zoomOutLabel` (string, optional) {#zoomoutlabel}
 
+* Default: `'Zoom Out'`
+
 Tooltip message displayed while hovering a mouse over the zoom out button.
 
-Default: `'Zoom Out'`
+#### `zoomOutTooltip` (string | HTMLElement | false, optional) {#zoomouttooltip}
+
+* Default: value of `zoomOutLabel`
+
+Custom tooltip content for the zoom out button. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Zoom transition duration in milliseconds.
 
-#### `style` (object, optional) {#style}
+#### `onZoom` (Function, optional) {#onzoom}
 
-Default: `{}`
+```ts
+(params: {viewId: string; delta: number; zoom: number}) => void
+```
 
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
+* Default: `() => {}`
 
-#### `className` (string, optional) {#classname}
+Callback when zoom buttons are clicked. Called for each viewport that will be zoomed.
 
-Default: `undefined`
+- `viewId`: The view being zoomed
+- `delta`: Zoom direction (+1 for zoom in, -1 for zoom out)
+- `zoom`: The new zoom level
+- `zoomX`: The new zoom level on X axis, if used with an `OrthographicView`.
+- `zoomY`: The new zoom level on Y axis, if used with an `OrthographicView`.
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-zoom-widget`.
+## Styles
+
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
+
+| Name              | Type                     | Default                                     |
+| ----------------- | ------------------------ | ------------------------------------------- |
+| `--icon-zoom-in`  | [SVG Data Url][data_url] | [Material Symbol Add][icon_zoom_in_url]     |
+| `--icon-zoom-out` | [SVG Data Url][data_url] | [Material Symbol Remove][icon_zoom_out_url] |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[icon_zoom_in_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40
+[icon_zoom_out_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40
+
+## Source
+
+[modules/widgets/src/zoom-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/zoom-widget.tsx)

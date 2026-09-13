@@ -85,7 +85,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
 import type {PickingInfo} from '@deck.gl/core';
 

@@ -38,9 +38,13 @@ new Deck({
 Supports all [Controller options](./controller.md#options) with the following default behavior:
 
 - `dragPan`: default `'pan'` (drag to pan)
-- `dragRotate`: not effective, this view does not currently support rotation
-- `touchRotate`: not effective, this view does not currently support rotation
+- `dragRotate`: shift+drag or right-click drag to change bearing and pitch
+- `multiTouchDrag`: two-pointer translation can pan or change bearing and pitch
 - `keyboard`: arrow keys to pan, +/- to zoom
+- `zoomAround`: default `'pointer'`. Pointer zoom rotates the full camera frame around the sphere, so bearing may change as zoom steers around a pole. Use `'center'` to change scale without steering.
+- `inertia`: when set to a number (milliseconds), the globe continues spinning after a fling gesture with exponential decay
+- `maxBounds` - constrains the viewport to the specified bounding box `[[minLng, minLat], [maxLng, maxLat]]`
+- `maxBoundsPadding` - padding inside the viewport when fitting `maxBounds`, using the same `{left, right, top, bottom}` format as view padding. Numeric values are pixels; strings may be percentages or layout expressions such as `calc(10% - 4px)`. Each side is measured from the projected globe center. Default `0`.
 
 ## Custom GlobeController
 

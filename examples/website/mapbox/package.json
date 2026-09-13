@@ -9,16 +9,16 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/csv": "^4.2.0",
+    "@loaders.gl/csv": "^4.4.3",
     "d3-scale": "^4.0.0",
     "deck.gl": "^9.0.0",
     "mapbox-gl": "^3.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-map-gl": "^7.1.0"
+    "react-map-gl": "^8.0.0"
   },
   "devDependencies": {
     "typescript": "^4.6.0",
-    "vite": "^4.0.0"
+    "vite": "^7.3.3"
   }
 }

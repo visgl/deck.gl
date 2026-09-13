@@ -89,7 +89,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GridLayer, GridLayerPickingInfo} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
@@ -170,7 +170,7 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 #### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
-* Default: `false`
+* Default: `true`
 
 When set to `true`, aggregation is performed on the GPU. 
 
@@ -179,6 +179,7 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 - The current browser does not support GPU aggregation
+- The layer is rendered with WebGPU, which does not support WebGL GPU aggregation
 - `gridAggregator` is defined
 - `getColorValue` is defined
 - `getElevationValue` is defined

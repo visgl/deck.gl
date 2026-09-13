@@ -8,6 +8,26 @@ import type {Layer, Viewport} from '@deck.gl/core';
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
 
+/** Fixed Mercator viewport for projection-independent coordinate conversion */
+const MERCATOR_REFERENCE_VIEWPORT = new WebMercatorViewport({
+  width: 1,
+  height: 1,
+  longitude: 0,
+  latitude: 0,
+  zoom: 0
+});
+
+/** Project lng/lat to absolute Mercator common space. */
+export function lngLatToMercatorCommon(lngLat: number[]): [number, number] {
+  const [x, y] = MERCATOR_REFERENCE_VIEWPORT.projectPosition(lngLat);
+  return [x, y];
+}
+
+/** Returns a Mercator viewport for bounds computation, bypassing GlobeView. */
+export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
+  return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
+}
+
 /*
  * Compute the union of bounds from multiple layers
  * Returns bounds in CARTESIAN coordinates
@@ -63,11 +83,14 @@ export function makeViewport(opts: {
     return null;
   }
 
-  const centerWorld = viewport.unprojectPosition([
-    (bounds[0] + bounds[2]) / 2,
-    (bounds[1] + bounds[3]) / 2,
-    0
-  ]);
+  // Unproject through Mercator reference (GlobeView would give sphere coords)
+  const centerWorld = isGeospatial
+    ? MERCATOR_REFERENCE_VIEWPORT.unprojectPosition([
+        (bounds[0] + bounds[2]) / 2,
+        (bounds[1] + bounds[3]) / 2,
+        0
+      ])
+    : viewport.unprojectPosition([(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2, 0]);
 
   let {width, height, zoom} = opts;
   if (zoom === undefined) {

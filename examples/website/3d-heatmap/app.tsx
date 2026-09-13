@@ -7,11 +7,12 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL =
@@ -78,13 +79,15 @@ export default function App({
   mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
-  coverage = 1
+  coverage = 1,
+  device
 }: {
   data?: DataPoint[] | null;
   mapStyle?: string;
   radius?: number;
   upperPercentile?: number;
   coverage?: number;
+  device?: Device;
 }) {
   const layers = [
     new HexagonLayer<DataPoint>({
@@ -115,6 +118,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       effects={[lightingEffect]}
       initialViewState={INITIAL_VIEW_STATE}

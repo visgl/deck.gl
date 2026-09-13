@@ -5,7 +5,8 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["google.maps"]
   },
   "references": [
     {"path": "../core"}

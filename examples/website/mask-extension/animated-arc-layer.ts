@@ -4,6 +4,26 @@
 
 import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
 import {Accessor, DefaultProps} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shadertools';
+
+const uniformBlock = `\
+uniform tripsUniforms {
+  vec2 timeRange;
+} trips;
+`;
+
+export type TripsProps = {
+  timeRange: [number, number];
+};
+
+export const tripsUniforms = {
+  name: 'trips',
+  vs: uniformBlock,
+  fs: uniformBlock,
+  uniformTypes: {
+    timeRange: 'vec2<f32>'
+  }
+} as const satisfies ShaderModule<TripsProps>;
 
 export type AnimatedArcLayerProps<DataT = any> = _AnimatedArcLayerProps<DataT> &
   ArcLayerProps<DataT>;
@@ -31,7 +51,6 @@ export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcL
     const shaders = super.getShaders();
     shaders.inject = {
       'vs:#decl': `\
-uniform vec2 timeRange;
 in float instanceSourceTimestamp;
 in float instanceTargetTimestamp;
 out float vTimestamp;
@@ -40,23 +59,23 @@ out float vTimestamp;
 vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
 `,
       'fs:#decl': `\
-uniform vec2 timeRange;
 in float vTimestamp;
 `,
       'fs:#main-start': `\
-if (vTimestamp < timeRange.x || vTimestamp > timeRange.y) {
+if (vTimestamp < trips.timeRange.x || vTimestamp > trips.timeRange.y) {
   discard;
 }
 `,
       // Shape trail into teardrop
       'fs:DECKGL_FILTER_COLOR': `\
-float f = (vTimestamp - timeRange.x) / (timeRange.y - timeRange.x);
+float f = (vTimestamp - trips.timeRange.x) / (trips.timeRange.y - trips.timeRange.x);
 color.a *= pow(f, 5.0);
 float cap = 10.0 * (f - 0.9);
 float w = pow(f, 4.0) - smoothstep(0.89, 0.91, f) * pow(cap, 4.0);
 color.a *= smoothstep(1.1 * w, w, abs(geometry.uv.y));
 `
     };
+    shaders.modules = [...shaders.modules, tripsUniforms];
     return shaders;
   }
 
@@ -75,10 +94,10 @@ color.a *= smoothstep(1.1 * w, w, abs(geometry.uv.y));
   }
 
   draw(params) {
-    params.uniforms = {
-      ...params.uniforms,
-      timeRange: this.props.timeRange
-    };
+    const {timeRange} = this.props;
+    const tripsProps: TripsProps = {timeRange};
+    const model = this.state.model!;
+    model.shaderInputs.setProps({trips: tripsProps});
     super.draw(params);
   }
 }

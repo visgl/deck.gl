@@ -6,7 +6,7 @@ import type {TextureView} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = `\
-uniform screenUniforms {
+layout(std140) uniform screenUniforms {
   vec2 texSize;
 } screen;
 `;

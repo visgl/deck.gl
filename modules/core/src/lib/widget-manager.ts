@@ -7,56 +7,10 @@ import type Viewport from '../viewports/viewport';
 import type {PickingInfo} from './picking/pick-info';
 import type {MjolnirPointerEvent, MjolnirGestureEvent} from 'mjolnir.js';
 import type Layer from './layer';
+import {Widget} from './widget';
 
 import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
-
-export interface Widget<PropsT = any> {
-  /** Unique identifier of the widget. */
-  id: string;
-  /** Widget prop types. */
-  props: PropsT;
-  /**
-   * The view id that this widget is being attached to. Default `null`.
-   * If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
-   */
-  viewId?: string | null;
-  /** Widget positioning within the view. Default 'top-left'. */
-  placement?: WidgetPlacement;
-
-  // Populated by core when mounted
-  _element?: HTMLDivElement | null;
-
-  // Lifecycle hooks
-  /** Called when the widget is added to a Deck instance.
-   * @returns an optional UI element that should be appended to the Deck container */
-  onAdd: (params: {
-    /** The Deck instance that the widget is attached to */
-    deck: Deck<any>;
-    /** The id of the view that the widget is attached to */
-    viewId: string | null;
-  }) => HTMLDivElement | null;
-  /** Called when the widget is removed */
-  onRemove?: () => void;
-  /** Called to update widget options */
-  setProps: (props: Partial<PropsT>) => void;
-
-  // Optional event hooks
-  /** Called when the containing view is changed */
-  onViewportChange?: (viewport: Viewport) => void;
-  /** Called when the containing view is redrawn */
-  onRedraw?: (params: {viewports: Viewport[]; layers: Layer[]}) => void;
-  /** Called when a hover event occurs */
-  onHover?: (info: PickingInfo, event: MjolnirPointerEvent) => void;
-  /** Called when a click event occurs */
-  onClick?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
-  /** Called when a drag event occurs */
-  onDrag?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
-  /** Called when a dragstart event occurs */
-  onDragStart?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
-  /** Called when a dragend event occurs */
-  onDragEnd?: (info: PickingInfo, event: MjolnirGestureEvent) => void;
-}
 
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
@@ -69,8 +23,24 @@ const DEFAULT_PLACEMENT = 'top-left';
 
 export type WidgetPlacement = keyof typeof PLACEMENTS;
 
-const ROOT_CONTAINER_ID = '__root';
+const ROOT_CONTAINER_ID = 'root';
 
+/** CSS-pixel bounds of a canvas relative to the shared widget root. */
+type WidgetCanvasBounds = {
+  /** Horizontal offset from the widget root. */
+  x: number;
+  /** Vertical offset from the widget root. */
+  y: number;
+  /** Canvas width in CSS pixels. */
+  width: number;
+  /** Canvas height in CSS pixels. */
+  height: number;
+};
+
+export type WidgetManagerProps = {
+  deck: Deck<any>;
+  parentElement?: HTMLElement | null;
+};
 export class WidgetManager {
   deck: Deck<any>;
   parentElement?: HTMLElement | null;
@@ -87,8 +57,9 @@ export class WidgetManager {
   /** Viewport provided to widget on redraw */
   private lastViewports: {[id: string]: Viewport} = {};
 
-  constructor({deck, parentElement}: {deck: Deck<any>; parentElement?: HTMLElement | null}) {
+  constructor({deck, parentElement}: WidgetManagerProps) {
     this.deck = deck;
+    parentElement?.classList.add('deck-widget-container');
     this.parentElement = parentElement;
   }
 
@@ -97,15 +68,17 @@ export class WidgetManager {
   }
 
   /** Declarative API to configure widgets */
-  setProps(props: {widgets?: Widget[]}) {
+  setProps(props: {widgets?: (Widget | null | undefined)[]}) {
     if (props.widgets && !deepEqual(props.widgets, this.widgets, 1)) {
-      this._setWidgets(props.widgets);
+      // Allow application to supply null widgets
+      const nextWidgets = props.widgets.filter(Boolean) as Widget[];
+      this._setWidgets(nextWidgets);
     }
   }
 
   finalize() {
     for (const widget of this.getWidgets()) {
-      this._remove(widget);
+      this._removeWidget(widget);
     }
     this.defaultWidgets.length = 0;
     this.resolvedWidgets.length = 0;
@@ -117,123 +90,10 @@ export class WidgetManager {
   /** Imperative API. Widgets added this way are not affected by the declarative prop. */
   addDefault(widget: Widget) {
     if (!this.defaultWidgets.find(w => w.id === widget.id)) {
-      this._add(widget);
+      this._addWidget(widget);
       this.defaultWidgets.push(widget);
       // Update widget list
       this._setWidgets(this.widgets);
-    }
-  }
-
-  /** Resolve widgets from the declarative prop */
-  private _setWidgets(nextWidgets: Widget[]) {
-    const oldWidgetMap: Record<string, Widget | null> = {};
-
-    for (const widget of this.resolvedWidgets) {
-      oldWidgetMap[widget.id] = widget;
-    }
-    // Clear and rebuild the list
-    this.resolvedWidgets.length = 0;
-
-    // Add all default widgets
-    for (const widget of this.defaultWidgets) {
-      oldWidgetMap[widget.id] = null;
-      this.resolvedWidgets.push(widget);
-    }
-
-    for (let widget of nextWidgets) {
-      const oldWidget = oldWidgetMap[widget.id];
-      if (!oldWidget) {
-        // Widget is new
-        this._add(widget);
-      } else if (
-        // Widget placement changed
-        oldWidget.viewId !== widget.viewId ||
-        oldWidget.placement !== widget.placement
-      ) {
-        this._remove(oldWidget);
-        this._add(widget);
-      } else if (widget !== oldWidget) {
-        // Widget props changed
-        oldWidget.setProps(widget.props);
-        widget = oldWidget;
-      }
-
-      // mark as matched
-      oldWidgetMap[widget.id] = null;
-      this.resolvedWidgets.push(widget);
-    }
-
-    for (const id in oldWidgetMap) {
-      const oldWidget = oldWidgetMap[id];
-      if (oldWidget) {
-        // No longer exists
-        this._remove(oldWidget);
-      }
-    }
-    this.widgets = nextWidgets;
-  }
-
-  private _add(widget: Widget) {
-    const {viewId = null, placement = DEFAULT_PLACEMENT} = widget;
-    const element = widget.onAdd({deck: this.deck, viewId});
-
-    if (element) {
-      this._getContainer(viewId, placement).append(element);
-    }
-    widget._element = element;
-  }
-
-  private _remove(widget: Widget) {
-    widget.onRemove?.();
-
-    if (widget._element) {
-      widget._element.remove();
-    }
-    widget._element = undefined;
-  }
-
-  /* global document */
-  private _getContainer(viewId: string | null, placement: WidgetPlacement): HTMLDivElement {
-    const containerId = viewId || ROOT_CONTAINER_ID;
-    let viewContainer = this.containers[containerId];
-    if (!viewContainer) {
-      viewContainer = document.createElement('div');
-      viewContainer.style.pointerEvents = 'none';
-      viewContainer.style.position = 'absolute';
-      viewContainer.style.overflow = 'hidden';
-      this.parentElement?.append(viewContainer);
-      this.containers[containerId] = viewContainer;
-    }
-    let container = viewContainer.querySelector<HTMLDivElement>(`.${placement}`);
-    if (!container) {
-      container = document.createElement('div');
-      container.className = placement;
-      container.style.position = 'absolute';
-      container.style.zIndex = '2';
-      Object.assign(container.style, PLACEMENTS[placement]);
-      viewContainer.append(container);
-    }
-    return container;
-  }
-
-  private _updateContainers() {
-    const canvasWidth = this.deck.width;
-    const canvasHeight = this.deck.height;
-    for (const id in this.containers) {
-      const viewport = this.lastViewports[id] || null;
-      const visible = id === ROOT_CONTAINER_ID || viewport;
-
-      const container = this.containers[id];
-      if (visible) {
-        container.style.display = 'block';
-        // Align the container with the view
-        container.style.left = `${viewport ? viewport.x : 0}px`;
-        container.style.top = `${viewport ? viewport.y : 0}px`;
-        container.style.width = `${viewport ? viewport.width : canvasWidth}px`;
-        container.style.height = `${viewport ? viewport.height : canvasHeight}px`;
-      } else {
-        container.style.display = 'none';
-      }
     }
   }
 
@@ -277,6 +137,26 @@ export class WidgetManager {
     }
   }
 
+  /** Resolves a viewport's canvas bounds relative to the shared widget root. */
+  getCanvasBounds(viewport?: Viewport | null): WidgetCanvasBounds {
+    const canvas = this.deck?.getCanvas?.();
+    const canvasBounds = canvas?.getBoundingClientRect();
+    const parentBounds = this.parentElement?.getBoundingClientRect();
+    const canvasContext = this.deck?.getCanvasContext?.(viewport?.id);
+    if (canvasContext && parentBounds) {
+      canvasContext.updatePosition();
+      const [x, y] = canvasContext.getPosition();
+      const [width, height] = canvasContext.getCSSSize();
+      return {x: x - parentBounds.left, y: y - parentBounds.top, width, height};
+    }
+    return {
+      x: canvasBounds && parentBounds ? canvasBounds.left - parentBounds.left : 0,
+      y: canvasBounds && parentBounds ? canvasBounds.top - parentBounds.top : 0,
+      width: canvasBounds?.width || this.deck?.width || 0,
+      height: canvasBounds?.height || this.deck?.height || 0
+    };
+  }
+
   onEvent(info: PickingInfo, event: MjolnirGestureEvent) {
     const eventHandlerProp = EVENT_HANDLERS[event.type];
     if (!eventHandlerProp) {
@@ -288,5 +168,159 @@ export class WidgetManager {
         widget[eventHandlerProp]?.(info, event);
       }
     }
+  }
+
+  // INTERNAL METHODS
+
+  /**
+   * Resolve widgets from the declarative prop
+   * Initialize new widgets and remove old ones
+   * Update props of existing widgets
+   */
+  private _setWidgets(nextWidgets: Widget[]) {
+    const oldWidgetMap: Record<string, Widget | null> = {};
+
+    for (const widget of this.resolvedWidgets) {
+      oldWidgetMap[widget.id] = widget;
+    }
+    // Clear and rebuild the list
+    this.resolvedWidgets.length = 0;
+
+    // Add all default widgets
+    for (const widget of this.defaultWidgets) {
+      oldWidgetMap[widget.id] = null;
+      this.resolvedWidgets.push(widget);
+    }
+
+    for (let widget of nextWidgets) {
+      const oldWidget = oldWidgetMap[widget.id];
+      if (!oldWidget) {
+        // Widget is new
+        this._addWidget(widget);
+      } else if (
+        // Widget placement changed
+        oldWidget.viewId !== widget.viewId ||
+        oldWidget.placement !== widget.placement
+      ) {
+        this._removeWidget(oldWidget);
+        this._addWidget(widget);
+      } else if (widget !== oldWidget) {
+        // Widget props changed
+        oldWidget.setProps(widget.props);
+        widget = oldWidget;
+      }
+
+      // mark as matched
+      oldWidgetMap[widget.id] = null;
+      this.resolvedWidgets.push(widget);
+    }
+
+    for (const id in oldWidgetMap) {
+      const oldWidget = oldWidgetMap[id];
+      if (oldWidget) {
+        // No longer exists
+        this._removeWidget(oldWidget);
+      }
+    }
+    this.widgets = nextWidgets;
+  }
+
+  /** Initialize new widget */
+  private _addWidget(widget: Widget) {
+    const {viewId = null, placement = DEFAULT_PLACEMENT} = widget;
+    const container = widget.props._container ?? viewId;
+
+    widget.widgetManager = this;
+    widget.deck = this.deck;
+
+    // Create an attach the HTML root element
+    widget.rootElement = widget._onAdd({deck: this.deck, viewId});
+    if (widget.rootElement) {
+      this._getContainer(container, placement).append(widget.rootElement);
+    }
+
+    widget.updateHTML();
+  }
+
+  /** Destroy an old widget */
+  private _removeWidget(widget: Widget) {
+    widget.onRemove?.();
+
+    if (widget.rootElement) {
+      widget.rootElement.remove();
+    }
+    widget.rootElement = undefined;
+    widget.deck = undefined;
+    widget.widgetManager = undefined;
+  }
+
+  /** Get a container element based on view and placement */
+  private _getContainer(
+    viewIdOrContainer: string | HTMLDivElement | null,
+    placement: WidgetPlacement
+  ): HTMLDivElement {
+    if (viewIdOrContainer && typeof viewIdOrContainer !== 'string') {
+      return viewIdOrContainer;
+    }
+    const containerId = viewIdOrContainer || ROOT_CONTAINER_ID;
+    let viewContainer = this.containers[containerId];
+    if (!viewContainer) {
+      viewContainer = document.createElement('div');
+      viewContainer.style.pointerEvents = 'none';
+      viewContainer.style.position = 'absolute';
+      viewContainer.style.overflow = 'hidden';
+      this.parentElement?.append(viewContainer);
+      this.containers[containerId] = viewContainer;
+    }
+    let container = viewContainer.querySelector<HTMLDivElement>(`.${placement}`);
+    if (!container) {
+      container = globalThis.document.createElement('div');
+      container.className = placement;
+      container.style.position = 'absolute';
+      container.style.zIndex = '2';
+      Object.assign(container.style, PLACEMENTS[placement]);
+      viewContainer.append(container);
+    }
+    return container;
+  }
+
+  private _updateContainers() {
+    for (const id in this.containers) {
+      const viewport = this.lastViewports[id] || null;
+      const visible = id === ROOT_CONTAINER_ID || viewport;
+
+      const container = this.containers[id];
+      if (visible) {
+        const bounds = this._getContainerBounds(viewport);
+        container.style.display = 'block';
+        // Align the container with the view
+        container.style.left = `${bounds.x}px`;
+        container.style.top = `${bounds.y}px`;
+        container.style.width = `${bounds.width}px`;
+        container.style.height = `${bounds.height}px`;
+      } else {
+        container.style.display = 'none';
+      }
+    }
+  }
+
+  /** Resolves a root container or view container in the shared widget coordinate system. */
+  private _getContainerBounds(viewport: Viewport | null): WidgetCanvasBounds {
+    if (!viewport) {
+      return {
+        x: 0,
+        y: 0,
+        width: this.parentElement?.clientWidth || this.deck.width,
+        height: this.parentElement?.clientHeight || this.deck.height
+      };
+    }
+
+    const canvasBounds = this.getCanvasBounds(viewport);
+    return {
+      x: canvasBounds.x + viewport.x,
+      y: canvasBounds.y + viewport.y,
+      width: viewport.width,
+      height: viewport.height
+    };
   }
 }

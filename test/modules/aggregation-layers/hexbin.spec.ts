@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {
   pointToHexbin,
   pointToHexbinGLSL,
@@ -11,7 +11,7 @@ import {
 } from '@deck.gl/aggregation-layers/hexagon-layer/hexbin';
 import {binOptionsUniforms} from '@deck.gl/aggregation-layers/hexagon-layer/bin-options-uniforms';
 import {hexbin} from 'd3-hexbin';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {BufferTransform} from '@luma.gl/engine';
 import {equals} from '@math.gl/core';
 
@@ -29,18 +29,16 @@ const TestData: {p: [number, number]; radius: number}[] = [
   {p: [427, 508], radius: 0.04}
 ];
 
-test('pointToHexbin vs d3-hexbin', t => {
+test('pointToHexbin vs d3-hexbin', () => {
   for (const d of TestData) {
     const bin = pointToHexbin(d.p, d.radius);
     const actual = getHexbinCentroid(bin, d.radius);
     const expected = pointToHexbinCentroidD3(d.p, d.radius);
-    t.ok(equals(actual, expected, 1e-7), `point (${d.p}) bin ${bin}`);
+    expect(equals(actual, expected, 1e-7), `point (${d.p}) bin ${bin}`).toBeTruthy();
   }
-
-  t.end();
 });
 
-test('pointToHexbin CPU vs GPU', t => {
+test('pointToHexbin CPU vs GPU', () => {
   const transform = new BufferTransform(device, {
     vs: `#version 300 es
     out vec2 binId;
@@ -67,18 +65,17 @@ test('pointToHexbin CPU vs GPU', t => {
     const result = new Float32Array(outputBuffer.readSyncWebGL().buffer);
     // tape does not consider -0 == 0
     if (equals(result, expected)) {
-      t.pass(`point (${d.p}) bin ${result}`);
+      console.log(`point (${d.p}) bin ${result}`);
     } else {
-      t.fail(`point (${d.p}) bin ${result}, expecting ${expected}`);
+      throw new Error(`point (${d.p}) bin ${result}, expecting ${expected}`);
     }
   }
 
   transform.destroy();
   outputBuffer.destroy();
-  t.end();
 });
 
-test('getHexbinCentroid CPU vs GPU', t => {
+test('getHexbinCentroid CPU vs GPU', () => {
   const transform = new BufferTransform(device, {
     vs: `#version 300 es
     out vec2 position;
@@ -104,10 +101,9 @@ test('getHexbinCentroid CPU vs GPU', t => {
     transform.run({discard: true});
     const expected = getHexbinCentroid(bin, d.radius);
     const result = new Float32Array(outputBuffer.readSyncWebGL().buffer);
-    t.ok(equals(result, expected, 1e-7), `bin ${bin}`);
+    expect(equals(result, expected, 1e-7), `bin ${bin}`).toBeTruthy();
   }
 
   transform.destroy();
   outputBuffer.destroy();
-  t.end();
 });

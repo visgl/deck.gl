@@ -5,8 +5,9 @@
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
-import {QuadbinTileLayer, quadbinTilesetSource} from '@deck.gl/carto';
+import {DeckGL} from '@deck.gl/react';
+import {QuadbinTileLayer} from '@deck.gl/carto';
+import {quadbinTilesetSource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = quadbinTilesetSource({
@@ -58,7 +59,7 @@ new deck.carto.QuadbinTileLayer({});
 
 ## Properties
 
-Inherits all properties from [`QuadkeyLayer`](../geo-layers/quadkey-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions indicated below.
+Inherits all properties from [`QuadkeyLayer`](../geo-layers/quadkey-layer.md) and [`TileLayer`](../geo-layers/tile-layer.md), with exceptions and additions noted below.
 
 
 #### `data` (TilejsonResult) {#data}

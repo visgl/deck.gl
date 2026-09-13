@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LayerExtension, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {LayerExtension} from '@deck.gl/core';
 import project64 from './project64';
 
 import type {Layer} from '@deck.gl/core';
@@ -13,10 +13,7 @@ export default class Fp64Extension extends LayerExtension {
 
   getShaders(this: Layer): any {
     const {coordinateSystem} = this.props;
-    if (
-      coordinateSystem !== COORDINATE_SYSTEM.LNGLAT &&
-      coordinateSystem !== COORDINATE_SYSTEM.DEFAULT
-    ) {
+    if (coordinateSystem !== 'lnglat' && coordinateSystem !== 'default') {
       throw new Error('fp64: coordinateSystem must be LNGLAT');
     }
 

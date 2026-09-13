@@ -3,19 +3,19 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import test from 'tape-promise/tape';
-import {device, getLayerUniforms} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {device, getLayerUniforms} from '@deck.gl/test-utils/vitest';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';
 
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 let cellSize;
 
-test('ScreenGridCellLayer#constructor', t => {
+test('ScreenGridCellLayer#constructor', () => {
   const SAMPLE_BUFFER = device.createBuffer({});
 
   testLayer({
     Layer: ScreenGridCellLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         title: 'Constructor',
@@ -41,12 +41,10 @@ test('ScreenGridCellLayer#constructor', t => {
           cellSize = uniforms.cellSizeClipspace;
         },
         onAfterUpdate({layer}) {
-          t.ok(layer.state, 'should update layer state');
+          expect(layer.state, 'should update layer state').toBeTruthy();
           const uniforms = getLayerUniforms(layer);
-          t.notDeepEqual(
-            uniforms.cellSizeClipspace,
-            cellSize,
-            'should update cellSizeClipspace uniform'
+          expect(uniforms.cellSizeClipspace, 'should update cellSizeClipspace uniform').not.toEqual(
+            cellSize
           );
         }
       },
@@ -56,11 +54,9 @@ test('ScreenGridCellLayer#constructor', t => {
         },
         onAfterUpdate({layer, oldState}) {
           const uniforms = getLayerUniforms(layer);
-          t.deepEqual(uniforms.colorDomain, [5, 50], 'should update colorDomain uniform');
+          expect(uniforms.colorDomain, 'should update colorDomain uniform').toEqual([5, 50]);
         }
       }
     ]
   });
-
-  t.end();
 });

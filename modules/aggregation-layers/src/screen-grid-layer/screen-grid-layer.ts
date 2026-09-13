@@ -55,7 +55,7 @@ export type _ScreenGridLayerProps<DataT> = {
    * Color scale input domain. The color scale maps continues numeric domain into discrete color range.
    * @default [1, max(weight)]
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Specified as an array of colors [color1, color2, ...].
@@ -163,7 +163,7 @@ export default class ScreenGridLayer<
   
   void getBin(out ivec2 binId) {
     vec4 pos = project_position_to_clipspace(positions, positions64Low, vec3(0.0));
-    vec2 screenCoords = vec2(pos.x / pos.w + 1.0, 1.0 - pos.y / pos.w) / 2.0 * project.viewportSize / project.devicePixelRatio;
+    vec2 screenCoords = vec2(pos.x / pos.w + 1.0, 1.0 - pos.y / pos.w) / 2.0 * project.viewportSize.xy / project.devicePixelRatio;
     vec2 gridCoords = floor(screenCoords / binOptions.cellSizePixels);
     binId = ivec2(gridCoords);
   }

@@ -3,7 +3,7 @@
   "description": "UI widgets for deck.gl",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-beta.1",
+  "version": "9.4.0-beta.4",
   "publishConfig": {
     "access": "public"
   },
@@ -17,6 +17,10 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -37,15 +41,17 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "cp ./src/stylesheet.css ./dist/stylesheet.css",
+    "build": "postcss ./src/stylesheet.css -o ./dist/stylesheet.css",
     "build-bundle": "ocular-bundle ./bundle.ts",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.7.5",
     "preact": "^10.17.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.1.0-beta"
+    "@deck.gl/core": "~9.4.0",
+    "@luma.gl/core": "~9.4.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

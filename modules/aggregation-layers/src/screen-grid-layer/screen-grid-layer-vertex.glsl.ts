@@ -10,7 +10,6 @@ export default /* glsl */ `\
 in vec2 positions;
 in vec2 instancePositions;
 in float instanceWeights;
-in vec3 instancePickingColors;
 
 uniform sampler2D colorRange;
 
@@ -37,6 +36,6 @@ void main(void) {
   vColor.a *= layer.opacity;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
+  picking_setPickingColorFromInstanceID();
 }
 `;

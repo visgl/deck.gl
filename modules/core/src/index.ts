@@ -46,11 +46,12 @@ export {default as FirstPersonViewport} from './viewports/first-person-viewport'
 
 // Shader modules
 export {
+  color,
   picking,
   project,
   project32,
-  gouraudLighting,
-  phongLighting,
+  gouraudMaterial,
+  phongMaterial,
   shadow
 } from './shaderlib/index';
 
@@ -64,6 +65,7 @@ export {default as _GlobeView} from './views/globe-view';
 // Controllers
 export {default as Controller} from './controllers/controller';
 export {default as MapController} from './controllers/map-controller';
+export {default as TerrainController} from './controllers/terrain-controller';
 export {default as _GlobeController} from './controllers/globe-controller';
 export {default as FirstPersonController} from './controllers/first-person-controller';
 export {default as OrbitController} from './controllers/orbit-controller';
@@ -93,6 +95,7 @@ export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 export {applyStyles as _applyStyles, removeStyles as _removeStyles} from './utils/apply-styles';
+export {getMaxBoundsRect as _getMaxBoundsRect} from './controllers/utils';
 
 // Types
 export type {CoordinateSystem} from './lib/constants';
@@ -129,7 +132,9 @@ export type {Effect, EffectContext, PreRenderOptions, PostRenderOptions} from '.
 export type {PickingUniforms, ProjectProps, ProjectUniforms} from './shaderlib/index';
 export type {DefaultProps} from './lifecycle/prop-types';
 export type {LayersPassRenderOptions} from './passes/layers-pass';
-export type {Widget, WidgetPlacement} from './lib/widget-manager';
+export {Widget} from './lib/widget';
+export type {WidgetProps} from './lib/widget';
+export type {WidgetPlacement} from './lib/widget-manager';
 export type {LightingEffectProps} from './effects/lighting/lighting-effect';
 export type {AmbientLightOptions} from './effects/lighting/ambient-light';
 export type {DirectionalLightOptions} from './effects/lighting/directional-light';

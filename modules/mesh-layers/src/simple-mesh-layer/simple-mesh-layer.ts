@@ -6,17 +6,27 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, DefaultProps, log, LayerContext, Material} from '@deck.gl/core';
+import {
+  Layer,
+  color,
+  project32,
+  picking,
+  DefaultProps,
+  log,
+  LayerContext,
+  Material,
+  phongMaterial
+} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
-import {phongMaterial} from '@luma.gl/shadertools';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
 import {simpleMeshUniforms, SimpleMeshProps} from './simple-mesh-layer-uniforms';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
+import source from './simple-mesh-layer.wgsl';
 
 import type {
   LayerProps,
@@ -80,7 +90,7 @@ function getGeometry(data: Mesh): Geometry {
   }
 }
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 type Mesh =
   | GeometryType
@@ -112,17 +122,17 @@ type _SimpleMeshLayerProps<DataT> = {
    * @see https://en.wikipedia.org/wiki/Euler_angles
    * @default [0, 0, 0]
    */
-  getOrientation?: Accessor<DataT, [number, number, number]>;
+  getOrientation?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Scaling factor of the model along each axis.
    * @default [1, 1, 1]
    */
-  getScale?: Accessor<DataT, [number, number, number]>;
+  getScale?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * Translation from the anchor point, [x, y, z] in meters.
    * @default [0, 0, 0]
    */
-  getTranslation?: Accessor<DataT, [number, number, number]>;
+  getTranslation?: Accessor<DataT, Readonly<[number, number, number]>>;
   /**
    * TransformMatrix. If specified, `getOrientation`, `getScale` and `getTranslation` are ignored.
    */
@@ -205,7 +215,8 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongMaterial, picking, simpleMeshUniforms]
+      source,
+      modules: [project32, color, phongMaterial, picking, simpleMeshUniforms]
     });
   }
 
@@ -334,27 +345,29 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       isInstanced: true
     });
 
-    const {texture} = this.props;
-    const {emptyTexture} = this.state;
-    const simpleMeshProps: SimpleMeshProps = {
-      sampler: (texture as Texture) || emptyTexture,
-      hasTexture: Boolean(texture)
-    };
-    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
+    model.shaderInputs.setProps({
+      simpleMesh: this.getTextureProps(this.props.texture as Texture)
+    });
     return model;
   }
 
   private setTexture(texture: Texture): void {
-    const {emptyTexture, model} = this.state;
+    const {model} = this.state;
 
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
     if (model) {
-      const simpleMeshProps: SimpleMeshProps = {
-        sampler: texture || emptyTexture,
-        hasTexture: Boolean(texture)
-      };
-      model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
+      model.shaderInputs.setProps({simpleMesh: this.getTextureProps(texture)});
     }
+  }
+
+  private getTextureProps(texture?: Texture | null): SimpleMeshProps {
+    const meshTexture = texture || this.state.emptyTexture;
+    return {
+      ...(this.context.device.type === 'webgpu'
+        ? {simpleMeshTexture: meshTexture}
+        : {sampler: meshTexture}),
+      hasTexture: Boolean(texture)
+    };
   }
 }

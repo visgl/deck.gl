@@ -5,9 +5,13 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map, NavigationControl, Popup, useControl} from 'react-map-gl/maplibre';
+import {setWorkerUrl} from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+setWorkerUrl(maplibreWorkerUrl);
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
@@ -22,6 +26,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);

@@ -1,4 +1,5 @@
 # ScenegraphLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ScenegraphLayerDemo} from '@site/src/doc-demos/mesh-layers';
 
@@ -88,7 +89,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import type {PickingInfo} from '@deck.gl/core';
 

@@ -1,5 +1,4 @@
-import warnings
-
+from .base_map_provider import BaseMapProvider
 
 DARK = "dark"
 LIGHT = "light"
@@ -23,12 +22,19 @@ GOOGLE_SATELLITE = "satellite"
 GOOGLE_ROAD = "roadmap"
 
 styles = {
-    DARK: {"mapbox": MAPBOX_DARK, "carto": CARTO_DARK},
-    DARK_NO_LABELS: {"carto": CARTO_DARK_NO_LABELS},
-    LIGHT: {"mapbox": MAPBOX_LIGHT, "carto": CARTO_LIGHT},
-    LIGHT_NO_LABELS: {"carto": CARTO_LIGHT_NO_LABELS},
-    ROAD: {"carto": CARTO_ROAD, "google_maps": GOOGLE_ROAD, "mapbox": MAPBOX_ROAD},
+    DARK: {"mapbox": MAPBOX_DARK, "carto": CARTO_DARK, "maplibre": CARTO_DARK},
+    DARK_NO_LABELS: {"carto": CARTO_DARK_NO_LABELS, "maplibre": CARTO_DARK_NO_LABELS},
+    LIGHT: {"mapbox": MAPBOX_LIGHT, "carto": CARTO_LIGHT, "maplibre": CARTO_LIGHT},
+    LIGHT_NO_LABELS: {"carto": CARTO_LIGHT_NO_LABELS, "maplibre": CARTO_LIGHT_NO_LABELS},
+    ROAD: {"carto": CARTO_ROAD, "google_maps": GOOGLE_ROAD, "mapbox": MAPBOX_ROAD, "maplibre": CARTO_ROAD},
     SATELLITE: {"mapbox": MAPBOX_SATELLITE, "google_maps": GOOGLE_SATELLITE},
+}
+
+_default_map_identifers = {
+    BaseMapProvider.CARTO: DARK,
+    BaseMapProvider.MAPBOX: DARK,
+    BaseMapProvider.GOOGLE_MAPS: GOOGLE_ROAD,
+    BaseMapProvider.MAPLIBRE: DARK,
 }
 
 
@@ -57,3 +63,12 @@ def get_from_map_identifier(map_identifier: str, provider: str) -> str:
         return styles[map_identifier][provider]
     except KeyError:
         return map_identifier
+
+
+def get_default_map_identifier(provider: str):
+    try:
+        provider_enum = BaseMapProvider(provider)
+    except KeyError:
+        return DARK
+
+    return _default_map_identifers[provider_enum]

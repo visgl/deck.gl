@@ -129,6 +129,14 @@ type _PolygonLayerProps<DataT = unknown> = {
    */
   lineMiterLimit?: number;
 
+  /**
+   * If `true`, the stroke is rendered with smoothed edges. If `false`, it is rendered with rough
+   * edges. Antialiasing can cause artifacts where the stroke overlaps itself.
+   *
+   * @default false
+   */
+  lineAntialiasing?: boolean;
+
   lineDashJustified?: boolean;
 
   /** Called on each object in the data stream to retrieve its corresponding polygon. */
@@ -198,8 +206,8 @@ type _PolygonLayerProps<DataT = unknown> = {
   material?: Material;
 };
 
-const defaultLineColor: [number, number, number, number] = [0, 0, 0, 255];
-const defaultFillColor: [number, number, number, number] = [0, 0, 0, 255];
+const defaultLineColor = [0, 0, 0, 255] as const;
+const defaultFillColor = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<PolygonLayerProps> = {
   stroked: true,
@@ -216,6 +224,7 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
   lineJointRounded: false,
   lineMiterLimit: 4,
+  lineAntialiasing: false,
 
   getPolygon: {type: 'accessor', value: (f: any) => f.polygon},
   // Polygon fill color
@@ -340,6 +349,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
       lineWidthMaxPixels,
       lineJointRounded,
       lineMiterLimit,
+      lineAntialiasing,
       lineDashJustified
     } = this.props;
 
@@ -414,6 +424,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           widthMaxPixels: lineWidthMaxPixels,
           jointRounded: lineJointRounded,
           miterLimit: lineMiterLimit,
+          antialiasing: lineAntialiasing,
           dashJustified: lineDashJustified,
 
           // Already normalized

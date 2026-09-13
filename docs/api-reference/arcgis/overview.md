@@ -8,7 +8,7 @@ that acts as an interface between deck.gl and ArcGIS.
 
 2D integration with `MapView` is supported by the [DeckLayer](./deck-layer.md) class.
 
-3D integration with `SceneView` is experimental: see the [DeckRenderer](./deck-renderer.md) class.
+3D integration with `SceneView` is experimental and currently targets `viewingMode: 'local'`: see the [DeckRenderer](./deck-renderer.md) class.
 
 ## Installation
 
@@ -64,3 +64,9 @@ Not supported features:
 - Multiple views
 - Controller
 - React integration
+
+### Antialiasing
+
+deck.gl renders into an auxiliary framebuffer here and composites the result into the ArcGIS scene. That framebuffer is not multisampled, so layers whose edges depend on MSAA — including [PathLayer](../layers/path-layer.md), [LineLayer](../layers/line-layer.md), [ArcLayer](../layers/arc-layer.md), and [PointCloudLayer](../layers/point-cloud-layer.md) — render with hard, aliased edges regardless of how the ArcGIS API created its context.
+
+Set `antialiasing: true` on those layers to have them compute edge coverage in the shader instead. On composite layers the prop is named `lineAntialiasing` ([GeoJsonLayer](../layers/geojson-layer.md#lineantialiasing), [PolygonLayer](../layers/polygon-layer.md#lineantialiasing)).

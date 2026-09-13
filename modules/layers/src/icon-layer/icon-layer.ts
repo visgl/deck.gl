@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, log, UNIT} from '@deck.gl/core';
+import {Layer, color, project32, picking, log, UNIT} from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
+import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 
 import type {
@@ -43,6 +44,10 @@ type _IconLayerProps<DataT> = {
    * @default 'pixels'
    */
   sizeUnits?: Unit;
+  /**
+   * The dimension to scale the image
+   */
+  sizeBasis?: 'height' | 'width';
   /**
    * The minimum size in pixels. When using non-pixel `sizeUnits`, this prop can be used to prevent the icon from getting too small when zoomed out.
    */
@@ -85,7 +90,7 @@ type _IconLayerProps<DataT> = {
    * Icon offsest accessor, in pixels.
    * @default [0, 0]
    */
-  getPixelOffset?: Accessor<DataT, [number, number]>;
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
   /**
    * Callback called if the attempt to fetch an icon returned by `getIcon` fails.
    */
@@ -97,7 +102,7 @@ type _IconLayerProps<DataT> = {
 
 export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<IconLayerProps> = {
   iconAtlas: {type: 'image', value: null, async: true},
@@ -105,6 +110,7 @@ const defaultProps: DefaultProps<IconLayerProps> = {
   sizeScale: {type: 'number', value: 1, min: 0},
   billboard: true,
   sizeUnits: 'pixels',
+  sizeBasis: 'height',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   alphaCutoff: {type: 'number', value: 0.05, min: 0, max: 1},
@@ -134,7 +140,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, iconUniforms]});
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
+    return super.getShaders({
+      vs,
+      fs,
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
+      modules: [project32, color, picking, iconUniforms]
+    });
   }
 
   initializeState() {
@@ -158,45 +171,61 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       instanceSizes: {
         size: 1,
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getSize',
         defaultValue: 1
       },
-      instanceOffsets: {
-        size: 2,
+      instanceIconDefs: {
+        size: 7,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getIcon',
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceOffset
-      },
-      instanceIconFrames: {
-        size: 4,
-        accessor: 'getIcon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceIconFrame
-      },
-      instanceColorModes: {
-        size: 1,
-        type: 'uint8',
-        accessor: 'getIcon',
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        transform: this.getInstanceColorMode
+        transform: this.getInstanceIconDef,
+        shaderAttributes: {
+          instanceOffsets: {
+            size: 2,
+            elementOffset: 0
+          },
+          instanceIconFrames: {
+            size: 4,
+            elementOffset: 2
+          },
+          instanceColorModes: {
+            size: 1,
+            elementOffset: 6
+          }
+        }
       },
       instanceColors: {
         size: this.props.colorFormat.length,
         type: 'unorm8',
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceAngles: {
         size: 1,
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getAngle'
       },
       instancePixelOffset: {
         size: 2,
         transition: true,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getPixelOffset'
-      }
+      },
+      ...((this.props.data as any)?.attributes?.rowIndexes
+        ? {
+            /** Caller-provided logical picking index per icon instance. */
+            rowIndexes: {
+              size: 1,
+              type: 'uint32',
+              noAlloc: true
+            }
+          }
+        : {})
     });
     /* eslint-enable max-len */
   }
@@ -257,17 +286,22 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   }
 
   draw({uniforms}): void {
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} = this.props;
-    const {iconManager} = this.state;
+    this._drawModel(this.state.model!);
+  }
 
+  /** Draw one icon model with the current atlas and layer props. */
+  protected _drawModel(model: Model): void {
+    const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} =
+      this.props;
+    const {iconManager} = this.state;
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      const model = this.state.model!;
       const iconProps: IconProps = {
         iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
         sizeScale,
+        sizeBasis: sizeBasis === 'height' ? 1.0 : 0.0,
         sizeMinPixels,
         sizeMaxPixels,
         billboard,
@@ -279,14 +313,14 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
-  protected _getModel(): Model {
+  protected _getModel(id = this.props.id): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
-      id: this.props.id,
+      id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
@@ -303,8 +337,13 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     });
   }
 
-  private _onUpdate(): void {
-    this.setNeedsRedraw();
+  private _onUpdate(didFrameChange: boolean): void {
+    if (didFrameChange) {
+      this.getAttributeManager()?.invalidate('getIcon');
+      this.setNeedsUpdate();
+    } else {
+      this.setNeedsRedraw();
+    }
   }
 
   private _onError(evt: LoadIconErrorContext): void {
@@ -316,23 +355,17 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
-  protected getInstanceOffset(icon: string): number[] {
+  protected getInstanceIconDef(icon: string): number[] {
     const {
+      x,
+      y,
       width,
       height,
+      mask,
       anchorX = width / 2,
       anchorY = height / 2
     } = this.state.iconManager.getIconMapping(icon);
-    return [width / 2 - anchorX, height / 2 - anchorY];
-  }
 
-  protected getInstanceColorMode(icon: string): number {
-    const mapping = this.state.iconManager.getIconMapping(icon);
-    return mapping.mask ? 1 : 0;
-  }
-
-  protected getInstanceIconFrame(icon: string): number[] {
-    const {x, y, width, height} = this.state.iconManager.getIconMapping(icon);
-    return [x, y, width, height];
+    return [width / 2 - anchorX, height / 2 - anchorY, x, y, width, height, mask ? 1 : 0];
   }
 }

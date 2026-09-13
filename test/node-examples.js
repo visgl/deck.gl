@@ -23,11 +23,12 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
     headless: false,
     args: [`--window-size=${1000},${800}`]
   });
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const page = await browser.newPage();
-  await page.waitFor(2000);
+  await sleep(2000);
   await page.goto('http://localhost:8080', {timeout: 50000});
   await page.setViewport({width: 1000, height: 800});
-  await page.waitFor(waitingTime);
+  await sleep(waitingTime);
   await page.screenshot({path: 'new.png'});
 
   const golderImageName = `${LIB_DIR}/test/render/golden-images/examples/${folder.replace(
@@ -37,7 +38,7 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
   const result = compareImage('new.png', golderImageName, threshold);
 
   child.kill();
-  await page.waitFor(1000);
+  await sleep(1000);
   await browser.close();
 
   return result;

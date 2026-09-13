@@ -88,8 +88,8 @@ TBA
 
 ### All Viewports Now Geospatially Enabled
 
-All `Viewport` classes are now geospatially enabled: they now take an optional `longitude`/`latitude` reference point. In this mode, `position`s will be treated as meter offsets from that reference point per `COORDINATE_SYSTEM.METER_OFFSET` conventions.
+All `Viewport` classes are now geospatially enabled: they now take an optional `longitude`/`latitude` reference point. In this mode, `position`s will be treated as meter offsets from that reference point per `'meter-offsets'` conventions.
 
-This means that you can now use a FirstPersonViewport (the successor to the `PerspectiveViewport` with layers encoded in `COORDINATE_SYSTEM.LNG_LAT` and `COORDINATE_SYSTEM.METER_OFFSETS`) and place a camera anywhere in the scene (in contrast to the `WebMercatorViewport` which only allows you to look "down" on a position on the map).
+This means that you can now use a FirstPersonViewport (the successor to the `PerspectiveViewport` with layers encoded in `'lnglat'` and `'meter-offsets'`) and place a camera anywhere in the scene (in contrast to the `WebMercatorViewport` which only allows you to look "down" on a position on the map).
 
 Viewports even accept a `modelMatrix` to allow viewport/camera positions to be specified in exactly the same coordinates as `METER_OFFSET` layers, making it possible to place a camera at the exact location any of your existing data points without having to think or do any math.

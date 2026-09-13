@@ -112,6 +112,7 @@ export class WebGLAggregationTransform {
     transform.run({
       id: 'gpu-aggregation-domain',
       framebuffer: target,
+      discard: false,
       parameters: {
         viewport: [0, 0, 2, 1]
       },
@@ -221,6 +222,12 @@ void main() {
   }
 }
 `;
+
+  // Enable intBitsToFloat on Firefox + Nvidia driver: https://github.com/visgl/deck.gl/pull/10069
+  if (device.type === 'webgl') {
+    // @ts-expect-error WebGLDevice method
+    device.getExtension('GL_ARB_shader_bit_encoding');
+  }
 
   return new BufferTransform(device, {
     vs,

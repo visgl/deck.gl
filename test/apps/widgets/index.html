@@ -1,35 +1,21 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta charset='UTF-8' />
-    <title>deck.gl widget example</title>
+    <meta charset="utf-8">
+    <title>deck.gl Example</title>
     <style>
-      body {
-        padding: 0;
-        margin: 0;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      @media screen and (max-width: 600px) {
-        .deck-widget {
-          /* mobile */
-          --button-size: 48px;
-          --button-corner-radius: 12px;
-        }
-      }
-
-      .purple {
-        --button-background: hsl(240, 40%, 40%);
-        --button-stroke: hsla(240, 40%, 40%, 0.3);
-        --button-icon-hover: rgb(236, 236, 236);
-        --button-icon-idle: rgb(174, 174, 202);
-      }
+      body {font-family: Arial, Helvetica, sans-serif;}
+      a {display: block;}
     </style>
   </head>
-
   <body>
-    <script type="module" src="app.js"></script>
+    <main>
+      <a href="./geospatial.html">Pure JS - Geospatial</a>
+      <a href="./multiview.html">Pure JS - Multiview</a>
+      <a href="./infovis.html">Pure JS - Infovis</a>
+      <a href="./react-geospatial.html">React - Geospatial</a>
+      <a href="./react-multiview.html">React - Multiview</a>
+      <a href="./react-infovis.html">React - Infovis</a>
+    </main>
   </body>
 </html>

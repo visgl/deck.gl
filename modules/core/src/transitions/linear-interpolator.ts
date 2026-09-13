@@ -74,6 +74,7 @@ export default class LinearInterpolator extends TransitionInterpolator {
     const result = super.initializeProps(startProps, endProps);
 
     const {makeViewport, around} = this.opts;
+
     if (makeViewport && around) {
       const startViewport = makeViewport(startProps);
       const endViewport = makeViewport(endProps);

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import getPalette from '@deck.gl/carto/style/palette';
 
 const OK_TEST_CASES = [
@@ -86,32 +86,26 @@ const ERROR_TEST_CASES_INVALID_SCHEMA = [
   }
 ];
 
-test('palette', t => {
+test('palette', () => {
   for (const tc of OK_TEST_CASES) {
     const func = getPalette(tc.colorSchema, tc.categories);
-    t.deepEqual(func, tc.result, `${tc.title} color scheme returned expected result`);
+    expect(func, `${tc.title} color scheme returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
-test('palette#invalidCategories', t => {
+test('palette#invalidCategories', () => {
   for (const tc of ERROR_TEST_CASES_NO_CATEGORIES) {
     if (!Number.isInteger(tc.categories)) {
-      t.notOk(tc.categories, 'categories should be a number');
+      expect(tc.categories, 'categories should be a number').toBeFalsy();
     }
   }
-
-  t.end();
 });
 
-test('palette#invalidColorSchema', t => {
+test('palette#invalidColorSchema', () => {
   for (const tc of ERROR_TEST_CASES_INVALID_SCHEMA) {
-    t.throws(
+    expect(
       () => getPalette(tc.colorSchema, tc.categories),
       `throws on ${tc.colorSchema} invalid color schema`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });

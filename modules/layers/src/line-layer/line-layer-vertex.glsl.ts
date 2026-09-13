@@ -12,7 +12,6 @@ in vec3 instanceTargetPositions;
 in vec3 instanceSourcePositions64Low;
 in vec3 instanceTargetPositions64Low;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
 in float instanceWidths;
 
 out vec4 vColor;
@@ -75,7 +74,7 @@ void main(void) {
   geometry.position = mix(source_commonspace, target_commonspace, segmentIndex);
   uv = positions.xy;
   geometry.uv = uv;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(
@@ -88,6 +87,17 @@ void main(void) {
     getExtrusionOffset(target.xy - source.xy, positions.y, widthPixels),
     0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+#ifdef ANTIALIASING
+  float halfWidthPixels = length(offset.xy);
+  if (halfWidthPixels > 0.0) {
+    // The coverage ramp is centered on the declared edge. Extend the rasterized envelope by half
+    // a device pixel so fragments on the outside half of the ramp are generated too.
+    float coverageScale = 1.0 + 0.5 / project.devicePixelRatio / halfWidthPixels;
+    offset.xy *= coverageScale;
+    uv.y *= coverageScale;
+  }
+  geometry.uv = uv;
+#endif
   DECKGL_FILTER_GL_POSITION(p, geometry);
   gl_Position = p + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
 

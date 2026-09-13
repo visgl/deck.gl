@@ -6,7 +6,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {NumberArray2} from '@math.gl/core';
 
 const uniformBlock = /* glsl */ `\
-uniform binOptionsUniforms {
+layout(std140) uniform binOptionsUniforms {
   vec2 hexOriginCommon;
   float radiusCommon;
 } binOptions;

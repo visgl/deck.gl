@@ -10,7 +10,7 @@
 The pydeck library is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
 optimized for a Jupyter environment. To get started, __[see the documentation](https://pydeck.gl/)__.
 
-__[To install pydeck, see the instructions here](https://pydeck.gl/installation.html)__.
+__[To install pydeck, see the instructions here](https://pydeck.gl/en/latest/installation.html)__.
 
 For __interactive demos__, click the binder logo below:
 
@@ -68,4 +68,4 @@ If you encounter an issue, file it in the [deck.gl issues page](https://github.c
 and include your browser's console output, if any.
 
 If you'd like to contribute to pydeck, please follow the [deck.gl contribution guidelines](https://github.com/visgl/deck.gl/blob/master/CONTRIBUTING.md)
-and the [pydeck development installation instructions](https://pydeck.gl/installation.html#development-notes).
+and the [pydeck development installation instructions](https://pydeck.gl/en/latest/contributing.html).

@@ -87,7 +87,10 @@ export function aggregate({
   if (!target || target.length < bins.length) {
     target = new Float32Array(bins.length);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   let min = Infinity;
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   let max = -Infinity;
 
   for (let j = 0; j < bins.length; j++) {

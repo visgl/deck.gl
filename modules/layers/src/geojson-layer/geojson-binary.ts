@@ -62,28 +62,19 @@ function getPropertiesForIndex(
   return feature;
 }
 
-// Custom picking color to keep binary indexes
-export function calculatePickingColors(
-  geojsonBinary: Required<ExtendedBinaryFeatureCollection>,
-  encodePickingColor: (id: number, result: number[]) => void
-): Record<string, Uint8ClampedArray | null> {
-  const pickingColors: Record<string, Uint8ClampedArray | null> = {
+// Custom picking indexes preserve global feature ids in binary data.
+export function calculatePickingIndexes(
+  geojsonBinary: Required<ExtendedBinaryFeatureCollection>
+): Record<string, Uint32Array | null> {
+  const pickingIndexes: Record<string, Uint32Array | null> = {
     points: null,
     lines: null,
     polygons: null
   };
-  for (const key in pickingColors) {
+  for (const key in pickingIndexes) {
     const featureIds = geojsonBinary[key].globalFeatureIds.value;
-    pickingColors[key] = new Uint8ClampedArray(featureIds.length * 4);
-    const pickingColor = [];
-    for (let i = 0; i < featureIds.length; i++) {
-      encodePickingColor(featureIds[i], pickingColor);
-      pickingColors[key][i * 4 + 0] = pickingColor[0];
-      pickingColors[key][i * 4 + 1] = pickingColor[1];
-      pickingColors[key][i * 4 + 2] = pickingColor[2];
-      pickingColors[key][i * 4 + 3] = 255;
-    }
+    pickingIndexes[key] = new Uint32Array(featureIds);
   }
 
-  return pickingColors;
+  return pickingIndexes;
 }

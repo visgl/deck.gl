@@ -4,8 +4,22 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct ArcUniforms {
+  greatCircle: f32,
+  useShortestPath: f32,
+  numSegments: f32,
+  widthScale: f32,
+  widthMinPixels: f32,
+  widthMaxPixels: f32,
+  widthUnits: i32,
+};
+
+@group(0) @binding(auto) var<uniform> arc: ArcUniforms;
+`;
+
 const uniformBlock = `\
-uniform arcUniforms {
+layout(std140) uniform arcUniforms {
   bool greatCircle;
   bool useShortestPath;
   float numSegments;
@@ -28,6 +42,7 @@ export type ArcProps = {
 
 export const arcUniforms = {
   name: 'arc',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   fs: uniformBlock,
   uniformTypes: {

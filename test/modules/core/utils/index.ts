@@ -4,6 +4,7 @@
 
 import './color.spec';
 import './deep-equal.spec';
+import './deep-merge.spec';
 import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';

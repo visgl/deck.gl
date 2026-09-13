@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
   ScatterplotLayer,
   LineLayer,
@@ -39,7 +38,7 @@ const PointCloudLayerExample = {
   getData: dataSamples.getPointCloud,
   props: {
     id: 'pointCloudLayer-meters',
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: dataSamples.positionOrigin,
     getPosition: d => d.position,
     getNormal: d => d.normal,
@@ -55,7 +54,7 @@ const PointCloudLayerExample2 = {
   getData: dataSamples.getPointCloud,
   props: {
     id: 'pointCloudLayer-lnglat',
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+    coordinateSystem: 'lnglat-offsets',
     coordinateOrigin: dataSamples.positionOrigin,
     getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
     getNormal: d => [d.normal[0] * 1e-5, d.normal[1] * 1e-5, d.normal[2]],
@@ -83,7 +82,7 @@ const PathLayerMetersExample = {
     sizeScale: 200,
     rounded: false,
     getMarkerPercentages: () => [],
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: dataSamples.positionOrigin
   }
 };
@@ -95,7 +94,7 @@ const LineLayerMillimetersExample = {
     id: 'lineLayer',
     getColor: f => [Math.random() * 255, 0, 0],
     pickable: true,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: dataSamples.milliMeterOrigin,
     strokeWidth: 20
   }
@@ -112,7 +111,7 @@ const PathLayerMillimetersFilteredExample = {
     getWidth: f => 10,
     widthMinPixels: 1,
     pickable: true,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: dataSamples.milliMeterOrigin
   }
 };
@@ -128,7 +127,7 @@ const PathLayerMillimetersUnfilteredExample = {
     getWidth: f => 10,
     widthMinPixels: 1,
     pickable: true,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: dataSamples.milliMeterOrigin
   }
 };

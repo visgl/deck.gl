@@ -4,14 +4,8 @@
 
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
-import {
-  COORDINATE_SYSTEM,
-  OrbitView,
-  DirectionalLight,
-  LightingEffect,
-  AmbientLight
-} from '@deck.gl/core';
+import {DeckGL} from '@deck.gl/react';
+import {OrbitView, DirectionalLight, LightingEffect, AmbientLight} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
@@ -70,13 +64,15 @@ const background = [
   ]
 ];
 
-export default function App() {
+/** @param {{device?: import('@luma.gl/core').Device}} props */
+export default function App({device}) {
+  const isWebGPU = device?.type === 'webgpu';
   const layers = [
     new SimpleMeshLayer({
       id: 'mini-coopers',
       data: SAMPLE_DATA,
       mesh: MESH_URL,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPosition: d => d.position,
       getColor: d => d.color,
       getOrientation: d => d.orientation
@@ -86,7 +82,7 @@ export default function App() {
       id: 'background',
       data: background,
       extruded: false,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPolygon: f => f,
       getFillColor: [0, 0, 0, 0]
     })
@@ -94,6 +90,7 @@ export default function App() {
 
   return (
     <DeckGL
+      device={device}
       views={
         new OrbitView({
           near: 0.1,
@@ -103,7 +100,7 @@ export default function App() {
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       layers={layers}
-      effects={[lightingEffect]}
+      effects={isWebGPU ? [] : [lightingEffect]}
     />
   );
 }

@@ -12,3 +12,4 @@ exclude =
     dist
     pip-wheel-metadata
     env
+    .venv

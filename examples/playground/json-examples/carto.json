@@ -18,9 +18,9 @@
     {
       "@@type": "VectorTileLayer",
       "data": {
-        "@@function": "cartoVectorTilesetSource",
-        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiI1YjI0OWE2ZCJ9.Y7zB30NJFzq5fPv8W5nkoH5lPXFWQP0uywDtqUg8y8c",
-        "connectionName": "bqconn",
+        "@@function": "vectorTilesetSource",
+        "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJhIjoiYWNfbHFlM3p3Z3UiLCJqdGkiOiI0YTA5YjlmMSJ9.SQlcn7UucERdnq9O6ELm_Wi02dyRIJ_2KSTEnlXFjIc",
+        "connectionName": "carto_dw",
         "tableName": "cartobq.public_account.nyc_taxi_points_demo_id"
       },
       "getFillColor": {

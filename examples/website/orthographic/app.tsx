@@ -5,14 +5,17 @@
 import React from 'react';
 import {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
-import {OrthographicView} from '@deck.gl/core';
+import {OrthographicView, FilterContext} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {scaleLinear} from 'd3-scale';
 import {minIndex, maxIndex} from 'd3-array';
 import {sortData} from './sort-data';
+import {ScrollbarWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
 import type {MeshAttributes} from '@loaders.gl/schema';
 import type {Color, Position, OrthographicViewState, PickingInfo} from '@deck.gl/core';
@@ -87,24 +90,48 @@ function getTooltip({object}: PickingInfo<Station>) {
   `;
 }
 
+function layerFilter({viewport, layer}: FilterContext) {
+  const {plotIndex} = layer.props as any;
+  if (Number.isFinite(plotIndex)) {
+    const [x, y] = getPlotOffset(plotIndex);
+    const [l, t] = viewport.project([x, y]);
+    const [r, b] = viewport.project([x + CHART_WIDTH, y + CHART_HEIGHT]);
+    if (l >= viewport.width || t >= viewport.height || r <= 0 || b <= 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export default function App({
+  device,
   data,
   groupBy = 'Country'
 }: {
+  device?: Device;
   data?: Station[];
   groupBy?: 'Country' | 'Latitude';
 }) {
   const plots: StationGroup[] = useMemo(() => sortData(data, groupBy), [data, groupBy]);
 
-  const initialViewState: OrthographicViewState = useMemo(() => {
-    const centerX = (Math.min(plots.length, ROW_SIZE) / 2) * (CHART_WIDTH + SPACING);
-    const centerY = (Math.ceil(plots.length / ROW_SIZE) / 2) * (CHART_HEIGHT + SPACING);
-    return {
-      target: [centerX, centerY, 0],
-      zoom: -2,
-      minZoom: -2
-    };
+  const contentBounds = useMemo(() => {
+    if (!plots.length) return null;
+
+    return [
+      [0, 0],
+      [
+        Math.min(plots.length, ROW_SIZE) * (CHART_WIDTH + SPACING),
+        Math.ceil(plots.length / ROW_SIZE) * (CHART_HEIGHT + SPACING)
+      ]
+    ];
   }, [plots.length]);
+
+  const initialViewState: OrthographicViewState = {
+    target: [0, 0, 0],
+    zoom: -1,
+    minZoom: -2,
+    maxZoom: 2
+  };
 
   const yLabels = useMemo(
     () =>
@@ -124,8 +151,9 @@ export default function App({
   const layers = [
     plots.map(
       (slice: StationGroup, i: number) =>
-        new PathLayer<Station>({
+        new PathLayer<Station, {plotIndex: number}>({
           id: slice.name,
+          plotIndex: i,
           data: slice.stations,
           modelMatrix: new Matrix4().translate(getPlotOffset(i)),
           getPath: d => d.meanTemp.map(p => [xScale(p[0]), yScale(p[1])] as Position),
@@ -194,11 +222,29 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       views={new OrthographicView()}
       initialViewState={initialViewState}
-      controller={true}
+      controller={{
+        maxBounds: contentBounds,
+        maxBoundsPadding: {left: '10%', top: '10%', right: '10%', bottom: '10%'},
+        rubberBand: true
+      }}
       layers={layers}
+      layerFilter={layerFilter}
       getTooltip={getTooltip}
+      widgets={[
+        new ScrollbarWidget({
+          id: 'horizontal',
+          placement: 'bottom-right',
+          orientation: 'horizontal'
+        }),
+        new ScrollbarWidget({
+          id: 'vertical',
+          placement: 'bottom-right',
+          orientation: 'vertical'
+        })
+      ]}
     />
   );
 }

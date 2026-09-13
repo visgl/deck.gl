@@ -4,9 +4,8 @@
 
 import {registerLoaders} from '@loaders.gl/core';
 import {DefaultProps, LayerProps} from '@deck.gl/core';
-import CartoRasterTileLoader from './schema/carto-raster-tile-loader';
 import CartoSpatialTileLoader from './schema/carto-spatial-tile-loader';
-registerLoaders([CartoRasterTileLoader, CartoSpatialTileLoader]);
+registerLoaders([CartoSpatialTileLoader]);
 
 import {PickingInfo} from '@deck.gl/core';
 import {TileLayer, _Tile2DHeader as Tile2DHeader, TileLayerProps} from '@deck.gl/geo-layers';

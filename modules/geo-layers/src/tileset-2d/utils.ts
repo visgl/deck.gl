@@ -39,7 +39,7 @@ export const urlType = {
   }
 };
 
-function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
+export function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   const transformedCoords = [
     // top-left
     modelMatrix.transformAsPoint([bbox[0], bbox[1]]),
@@ -272,7 +272,9 @@ export function getTileIndices({
   tileSize = TILE_SIZE,
   modelMatrix,
   modelMatrixInverse,
-  zoomOffset = 0
+  zoomOffset = 0,
+  visibleMinZoom,
+  visibleMaxZoom
 }: {
   viewport: Viewport;
   maxZoom?: number;
@@ -283,10 +285,15 @@ export function getTileIndices({
   modelMatrix?: Matrix4;
   modelMatrixInverse?: Matrix4;
   zoomOffset?: number;
+  visibleMinZoom?: number | null;
+  visibleMaxZoom?: number | null;
 }) {
+  // This round/ceil operation ensures that tiles are rendered in the same way as Google Maps, Map Libre, etc.
+  // eg. at viewport.zoom = 9.5, you should fetch tiles at z = 10, not z = 9.
   let z = viewport.isGeospatial
-    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
-    : Math.ceil(viewport.zoom) + zoomOffset;
+    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize) + zoomOffset)
+    : Math.ceil(viewport.zoom + zoomOffset);
+
   if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];
@@ -295,6 +302,12 @@ export function getTileIndices({
   }
   if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
+  }
+  if (visibleMinZoom != null && viewport.zoom < visibleMinZoom) {
+    return [];
+  }
+  if (visibleMaxZoom != null && viewport.zoom > visibleMaxZoom) {
+    return [];
   }
   let transformedExtent = extent;
   if (modelMatrix && modelMatrixInverse && extent && !viewport.isGeospatial) {

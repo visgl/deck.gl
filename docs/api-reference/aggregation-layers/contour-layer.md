@@ -1,4 +1,5 @@
 # ContourLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ContourLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
@@ -91,7 +92,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 import type {PickingInfo} from '@deck.gl/core';
 

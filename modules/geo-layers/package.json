@@ -3,7 +3,7 @@
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-beta.1",
+  "version": "9.4.0-beta.4",
   "publishConfig": {
     "access": "public"
   },
@@ -17,18 +17,27 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/index.js",
+        "require": "./dist.webgl-only/index.cjs"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist",
+    "dist.webgl-only",
     "src",
     "dist.min.js"
   ],
@@ -38,31 +47,32 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/3d-tiles": "^4.2.0",
-    "@loaders.gl/gis": "^4.2.0",
-    "@loaders.gl/loader-utils": "^4.2.0",
-    "@loaders.gl/mvt": "^4.2.0",
-    "@loaders.gl/schema": "^4.2.0",
-    "@loaders.gl/terrain": "^4.2.0",
-    "@loaders.gl/tiles": "^4.2.0",
-    "@loaders.gl/wms": "^4.2.0",
-    "@luma.gl/gltf": "^9.1.0-beta.12",
-    "@luma.gl/shadertools": "^9.1.0-beta.12",
+    "@loaders.gl/3d-tiles": "^4.4.3",
+    "@loaders.gl/gis": "^4.4.3",
+    "@loaders.gl/loader-utils": "^4.4.3",
+    "@loaders.gl/mvt": "^4.4.3",
+    "@loaders.gl/schema": "^4.4.3",
+    "@loaders.gl/terrain": "^4.4.3",
+    "@loaders.gl/tiles": "^4.4.3",
+    "@loaders.gl/wms": "^4.4.3",
+    "@luma.gl/gltf": "^9.4.0",
+    "@luma.gl/shadertools": "^9.4.0",
     "@math.gl/core": "^4.1.0",
     "@math.gl/culling": "^4.1.0",
     "@math.gl/web-mercator": "^4.1.0",
     "@types/geojson": "^7946.0.8",
-    "h3-js": "^4.1.0",
+    "a5-js": "^0.10.0",
+    "h3-js": "^4.4.0",
     "long": "^3.2.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.1.0-beta",
-    "@deck.gl/extensions": "^9.1.0-beta",
-    "@deck.gl/layers": "^9.1.0-beta",
-    "@deck.gl/mesh-layers": "^9.1.0-beta",
-    "@loaders.gl/core": "^4.2.0",
-    "@luma.gl/core": "^9.1.0-beta",
-    "@luma.gl/engine": "^9.1.0-beta"
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/extensions": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
+    "@deck.gl/mesh-layers": "~9.4.0",
+    "@loaders.gl/core": "^4.4.3",
+    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/engine": "~9.4.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

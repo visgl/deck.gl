@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default `\
+export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME scatterplot-layer-fragment-shader
 
@@ -21,7 +21,7 @@ void main(void) {
 
   float distToCenter = length(unitPosition) * outerRadiusPixels;
   float inCircle = scatterplot.antialiasing ?
-    smoothedge(distToCenter, outerRadiusPixels) : 
+    smoothedge(distToCenter, outerRadiusPixels) :
     step(distToCenter, outerRadiusPixels);
 
   if (inCircle == 0.0) {
@@ -29,11 +29,11 @@ void main(void) {
   }
 
   if (scatterplot.stroked > 0.5) {
-    float isLine = scatterplot.antialiasing ? 
+    float isLine = scatterplot.antialiasing ?
       smoothedge(innerUnitRadius * outerRadiusPixels, distToCenter) :
       step(innerUnitRadius * outerRadiusPixels, distToCenter);
 
-    if (scatterplot.filled) {
+    if (scatterplot.filled > 0.5) {
       fragColor = mix(vFillColor, vLineColor, isLine);
     } else {
       if (isLine == 0.0) {
@@ -41,7 +41,7 @@ void main(void) {
       }
       fragColor = vec4(vLineColor.rgb, vLineColor.a * isLine);
     }
-  } else if (scatterplot.filled == false) {
+  } else if (scatterplot.filled < 0.5) {
     discard;
   } else {
     fragColor = vFillColor;

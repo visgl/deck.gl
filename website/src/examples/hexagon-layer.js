@@ -13,6 +13,8 @@ import {makeExample} from '../components';
 class HexagonDemo extends Component {
   static title = 'United Kingdom Road Safety';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/heatmap-data.txt`,
     worker: '/workers/heatmap-data-decoder.js'
@@ -77,6 +79,8 @@ class HexagonDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
+        device={this.props.device}
         data={data}
         radius={params.radius.value}
         upperPercentile={params.upperPercentile.value}

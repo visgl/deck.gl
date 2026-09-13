@@ -106,7 +106,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React, {useState} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 import type {MapViewState} from '@deck.gl/core';

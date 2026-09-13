@@ -9,6 +9,8 @@ To use this extension, first define a terrain source with the prop `operation: '
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
+The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them. When pairing with a `TerrainLayer` source on `GlobeView`, set the source's `tesselator: 'grid'` so its mesh is valid on both projections.
+
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
   <iframe height="450" style={{width: '100%'}} scrolling="no" title="deck.gl TerrainExtension" src="https://codepen.io/vis-gl/embed/VwGLLeR?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">

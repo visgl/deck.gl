@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-catch';
+import {test, expect} from 'vitest';
 import {colorCategories} from '@deck.gl/carto';
 
 const CATEGORIES_TEST_CASES = [
@@ -51,7 +51,7 @@ const ERROR_TEST_CASES_CATEGORIES = [
   }
 ];
 
-test('colorCategories', t => {
+test('colorCategories', () => {
   const colorCategoriesManual = colorCategories({
     attr: 'target',
     domain: ['Category 1', 'Category 2', 'Category 3'],
@@ -64,15 +64,13 @@ test('colorCategories', t => {
 
   for (const tc of CATEGORIES_TEST_CASES) {
     const func = colorCategoriesManual(tc.argument);
-    t.deepEqual(func, tc.result, `colorCategories ${tc.title} returned expected result`);
+    expect(func, `colorCategories ${tc.title} returned expected result`).toEqual(tc.result);
   }
-
-  t.end();
 });
 
-test('colorCategories#invalidColorsArgument', t => {
+test('colorCategories#invalidColorsArgument', () => {
   for (const tc of ERROR_TEST_CASES_COLORS) {
-    t.throws(
+    expect(
       () =>
         colorCategories({
           attr: 'target',
@@ -80,15 +78,13 @@ test('colorCategories#invalidColorsArgument', t => {
           colors: tc.colors
         }),
       `throws on invalid colors ${tc.colors}`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });
 
-test('colorCategories#invalidCategoriesArgument', t => {
+test('colorCategories#invalidCategoriesArgument', () => {
   for (const tc of ERROR_TEST_CASES_CATEGORIES) {
-    t.throws(
+    expect(
       () =>
         colorCategories({
           attr: 'target',
@@ -96,8 +92,6 @@ test('colorCategories#invalidCategoriesArgument', t => {
           colors: tc.colors
         }),
       `throws on invalid domain ${tc.domain}`
-    );
+    ).toThrow();
   }
-
-  t.end();
 });

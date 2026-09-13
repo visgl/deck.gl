@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, WebMercatorViewport, MapView, _flatten as flatten} from '@deck.gl/core';
-import type {DeckProps, MapViewState, Layer} from '@deck.gl/core';
-import type MapboxLayer from './mapbox-layer';
-import type {Map} from './types';
+import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
+import type {Viewport, MapViewState, Layer} from '@deck.gl/core';
+import type {Parameters} from '@luma.gl/core';
+import type MapboxLayerGroup from './mapbox-layer-group';
+import type {LayerOverlayProps, Map} from './types';
+import {getLayerGroupId} from './resolve-layer-groups';
 
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
-import {GL} from '@luma.gl/constants';
+
+export const MAPBOX_VIEW_ID = 'mapbox';
 
 type UserData = {
-  isExternal: boolean;
-  currentViewport?: WebMercatorViewport | null;
-  mapboxLayers: Set<MapboxLayer<any>>;
-  // mapboxVersion: {minor: number; major: number};
+  currentViewport?: Viewport | null;
 };
 
 // Mercator constants
@@ -24,77 +24,59 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 // Create an interleaved deck instance.
 export function getDeckInstance({
   map,
-  gl,
   deck
 }: {
-  map: Map & {__deck?: Deck | null};
-  gl: WebGL2RenderingContext;
-  deck?: Deck;
-}): Deck {
+  map: Map & {__deck?: Deck<any> | null};
+  deck: Deck<any>;
+}): Deck<any> {
   // Only create one deck instance per context
   if (map.__deck) {
     return map.__deck;
   }
 
   // Only initialize certain props once per context
-  const customRender = deck?.props._customRender;
-  const onLoad = deck?.props.onLoad;
+  const customRender = deck.props._customRender;
+  const onLoad = deck.props.onLoad;
 
-  const deckProps = getInterleavedProps({
-    ...deck?.props,
+  const deckProps = {
+    ...deck.props,
     _customRender: () => {
       map.triggerRepaint();
       // customRender may be subscribed by DeckGL React component to update child props
       // make sure it is still called
       // Hack - do not pass a redraw reason here to prevent the React component from clearing the context
-      // Rerender will be triggered by MapboxLayer's render()
+      // Rerender will be triggered by MapboxLayerGroup's render()
       customRender?.('');
     }
+  };
+  deckProps.views ||= getDefaultView(map);
+
+  // deck is using the WebGLContext created by mapbox.
+  // The map and its attached luma canvas context own canvas sizing and DPR state here.
+  // Deck only follows view state and avoids trying to size the shared canvas itself.
+  Object.assign(deckProps, {
+    width: null,
+    height: null,
+    touchAction: 'unset',
+    viewState: getViewState(map)
   });
-
-  let deckInstance: Deck;
-
-  if (!deck || deck.props.gl === gl) {
-    // If deck isn't defined (Internal MapboxLayer use case),
-    // or if deck is defined and is using the WebGLContext created by mapbox (MapboxOverlay and External MapboxLayer use case),
-    // block deck from setting the canvas size, and use the map's viewState to drive deck.
-    // Otherwise, we use deck's viewState to drive the map.
-    Object.assign(deckProps, {
-      gl,
-      width: null,
-      height: null,
-      touchAction: 'unset',
-      viewState: getViewState(map)
-    });
-    if (deck?.isInitialized) {
-      watchMapMove(deck, map);
-    } else {
-      deckProps.onLoad = () => {
-        onLoad?.();
-        watchMapMove(deckInstance, map);
-      };
-    }
-  }
-
-  if (deck) {
-    deckInstance = deck;
-    deck.setProps(deckProps);
-    (deck.userData as UserData).isExternal = true;
+  if (deck.isInitialized) {
+    watchMapMove(deck, map);
   } else {
-    deckInstance = new Deck(deckProps);
-    map.on('remove', () => {
-      removeDeckInstance(map);
-    });
+    deckProps.onLoad = () => {
+      onLoad?.();
+      watchMapMove(deck, map);
+    };
   }
 
-  (deckInstance.userData as UserData).mapboxLayers = new Set();
-  // (deckInstance.userData as UserData).mapboxVersion = getMapboxVersion(map);
-  map.__deck = deckInstance;
+  deck.setProps(deckProps);
+
+  map.__deck = deck;
   map.on('render', () => {
-    if (deckInstance.isInitialized) afterRender(deckInstance, map);
+    if (deck.isInitialized) afterRender(deck, map);
   });
 
-  return deckInstance;
+  return deck;
 }
 
 function watchMapMove(deck: Deck, map: Map & {__deck?: Deck | null}) {
@@ -115,64 +97,87 @@ export function removeDeckInstance(map: Map & {__deck?: Deck | null}) {
   map.__deck = null;
 }
 
-export function getInterleavedProps(currProps: DeckProps) {
-  const nextProps: DeckProps = {
-    ...currProps,
-    // TODO: remove 'any' cast
-    parameters: {
-      depthMask: true,
-      depthWriteEnabled: true,
-      depthCompare: 'less-equal',
-      blend: true,
-      blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
-      polygonOffsetFill: true,
-      depthFunc: GL.LEQUAL,
-      blendEquation: GL.FUNC_ADD,
-      ...currProps.parameters
-    } as any,
-    // @ts-ignore views prop is hidden by the types because it is not expected to work the same way as in standalone Deck, see documentation
-    views: currProps.views || [new MapView({id: 'mapbox'})]
-  };
-
-  return nextProps;
+export function getDefaultParameters(map: Map, interleaved: boolean): Parameters {
+  const result: Parameters = interleaved
+    ? {
+        depthWriteEnabled: true,
+        depthCompare: 'less-equal',
+        depthBias: 0,
+        blend: true,
+        blendColorSrcFactor: 'src-alpha',
+        blendColorDstFactor: 'one-minus-src-alpha',
+        blendAlphaSrcFactor: 'one',
+        blendAlphaDstFactor: 'one-minus-src-alpha',
+        blendColorOperation: 'add',
+        blendAlphaOperation: 'add'
+      }
+    : {};
+  return result;
 }
 
-export function addLayer(deck: Deck, layer: MapboxLayer<any>): void {
-  (deck.userData as UserData).mapboxLayers.add(layer);
-  updateLayers(deck);
-}
+export function drawLayerGroup(
+  deck: Deck,
+  map: Map,
+  group: MapboxLayerGroup,
+  renderParameters: any
+): void {
+  if (!deck.isInitialized) {
+    return;
+  }
 
-export function removeLayer(deck: Deck, layer: MapboxLayer<any>): void {
-  (deck.userData as UserData).mapboxLayers.delete(layer);
-  updateLayers(deck);
-}
-
-export function updateLayer(deck: Deck, layer: MapboxLayer<any>): void {
-  updateLayers(deck);
-}
-
-export function drawLayer(deck: Deck, map: Map, layer: MapboxLayer<any>): void {
   let {currentViewport} = deck.userData as UserData;
   let clearStack: boolean = false;
   if (!currentViewport) {
     // This is the first layer drawn in this render cycle.
     // Generate viewport from the current map state.
-    currentViewport = getViewport(deck, map, true);
+    currentViewport = getViewport(deck, map, renderParameters);
     (deck.userData as UserData).currentViewport = currentViewport;
     clearStack = true;
   }
 
-  if (!deck.isInitialized) {
+  if (!currentViewport) {
     return;
   }
 
   deck._drawLayers('mapbox-repaint', {
     viewports: [currentViewport],
-    layerFilter: ({layer: deckLayer}) =>
-      layer.id === deckLayer.id || deckLayer.props.operation.includes('terrain'),
+    layerFilter: params => {
+      if (deck.props.layerFilter && !deck.props.layerFilter(params)) {
+        return false;
+      }
+
+      const layer = params.layer as Layer<LayerOverlayProps>;
+      if (layer.props.beforeId === group.beforeId && layer.props.slot === group.slot) {
+        return true;
+      }
+      return false;
+    },
     clearStack,
     clearCanvas: false
   });
+}
+
+export function getProjection(map: Map): 'mercator' | 'globe' {
+  const projection = map.getProjection?.();
+  const type =
+    // maplibre projection spec
+    projection?.type ||
+    // mapbox projection spec
+    projection?.name;
+  if (type === 'globe') {
+    return 'globe';
+  }
+  if (type && type !== 'mercator') {
+    throw new Error('Unsupported projection');
+  }
+  return 'mercator';
+}
+
+export function getDefaultView(map: Map): GlobeView | MapView {
+  if (getProjection(map) === 'globe') {
+    return new GlobeView({id: MAPBOX_VIEW_ID});
+  }
+  return new MapView({id: MAPBOX_VIEW_ID});
 }
 
 export function getViewState(map: Map): MapViewState & {
@@ -258,64 +263,81 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
   }
 }
 
-// function getMapboxVersion(map: Map): {minor: number; major: number} {
-//   // parse mapbox version string
-//   let major = 0;
-//   let minor = 0;
-//   // @ts-ignore (2339) undefined property
-//   const version: string = map.version;
-//   if (version) {
-//     [major, minor] = version.split('.').slice(0, 2).map(Number);
-//   }
-//   return {major, minor};
-// }
+// Since maplibre-gl@5
+// https://github.com/maplibre/maplibre-gl-js/blob/main/src/style/style_layer/custom_style_layer.ts
+type MaplibreRenderParameters = {
+  farZ: number;
+  nearZ: number;
+  fov: number;
+  modelViewProjectionMatrix: number[];
+  projectionMatrix: number[];
+};
 
-function getViewport(deck: Deck, map: Map, useMapboxProjection = true): WebMercatorViewport {
-  return new WebMercatorViewport({
-    id: 'mapbox',
-    x: 0,
-    y: 0,
+function getViewport(deck: Deck, map: Map, renderParameters?: unknown): Viewport | null {
+  const viewState = getViewState(map);
+  // View is always MapView or GlobeView in this context
+  const view = (deck.getView(MAPBOX_VIEW_ID) || getDefaultView(map)) as MapView | GlobeView;
+
+  if (renderParameters) {
+    // Called from MapboxLayerGroup.render
+    // Magic number, matches mapbox-gl@>=1.3.0's projection matrix
+    view.props.nearZMultiplier = 0.2;
+  }
+
+  // Get the base map near/far plane
+  // renderParameters is maplibre API but not mapbox
+  // Transform is not an official API, properties could be undefined for older versions
+  const nearZ = (renderParameters as MaplibreRenderParameters)?.nearZ ?? map.transform._nearZ;
+  const farZ = (renderParameters as MaplibreRenderParameters)?.farZ ?? map.transform._farZ;
+  if (Number.isFinite(nearZ)) {
+    viewState.nearZ = nearZ / map.transform.height;
+    viewState.farZ = farZ / map.transform.height;
+  }
+  // Otherwise fallback to default calculation using nearZMultiplier/farZMultiplier
+
+  return view.makeViewport({
     width: deck.width,
     height: deck.height,
-    ...getViewState(map),
-    nearZMultiplier: useMapboxProjection
-      ? // match mapbox-gl@>=1.3.0's projection matrix
-        0.02
-      : // use deck.gl's own default
-        0.1,
-    nearZ: map.transform._nearZ / map.transform.height,
-    farZ: map.transform._farZ / map.transform.height
+    viewState
   });
 }
 
 function afterRender(deck: Deck, map: Map): void {
-  const {mapboxLayers, isExternal} = deck.userData as UserData;
+  // Draw non-Mapbox layers (layers that don't have a corresponding MapboxLayerGroup on the map)
+  const deckLayers = flatten(deck.props.layers, Boolean) as Layer<LayerOverlayProps>[];
+  const hasNonMapboxLayers = deckLayers.some(
+    layer => layer && !map.getLayer(getLayerGroupId(layer))
+  );
+  let viewports = deck.getViewports();
+  const mapboxViewportIdx = viewports.findIndex(vp => vp.id === MAPBOX_VIEW_ID);
+  const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
 
-  if (isExternal) {
-    // Draw non-Mapbox layers
-    const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    const deckLayers = flatten(deck.props.layers, Boolean) as Layer[];
-    const hasNonMapboxLayers = deckLayers.some(
-      layer => layer && !mapboxLayerIds.includes(layer.id)
-    );
-    let viewports = deck.getViewports();
-    const mapboxViewportIdx = viewports.findIndex(vp => vp.id === 'mapbox');
-    const hasNonMapboxViews = viewports.length > 1 || mapboxViewportIdx < 0;
-
-    if (hasNonMapboxLayers || hasNonMapboxViews) {
-      if (mapboxViewportIdx >= 0) {
-        viewports = viewports.slice();
-        viewports[mapboxViewportIdx] = getViewport(deck, map, false);
+  if (hasNonMapboxLayers || hasNonMapboxViews) {
+    if (mapboxViewportIdx >= 0) {
+      viewports = viewports.slice();
+      const mapboxViewport = getViewport(deck, map);
+      if (mapboxViewport) {
+        viewports[mapboxViewportIdx] = mapboxViewport;
+      } else {
+        viewports.splice(mapboxViewportIdx, 1);
       }
-
-      deck._drawLayers('mapbox-repaint', {
-        viewports,
-        layerFilter: params =>
-          (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-          (params.viewport.id !== 'mapbox' || !mapboxLayerIds.includes(params.layer.id)),
-        clearCanvas: false
-      });
     }
+
+    deck._drawLayers('mapbox-repaint', {
+      viewports,
+      layerFilter: params =>
+        (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
+        (params.viewport.id !== MAPBOX_VIEW_ID ||
+          !map.getLayer(getLayerGroupId(params.layer as Layer<LayerOverlayProps>))),
+      clearCanvas: false
+    });
+  } else {
+    // Even when there are no non-Mapbox layers to draw, fire lifecycle callbacks
+    // so that consumers can still track view state changes via onAfterRender
+    const device = (deck as any).device;
+    const gl = device?.gl;
+    deck.props.onBeforeRender?.({device, gl});
+    deck.props.onAfterRender?.({device, gl});
   }
 
   // End of render cycle, clear generated viewport
@@ -330,18 +352,4 @@ function onMapMove(deck: Deck, map: Map): void {
   // Clear any change flag triggered by setting viewState so that deck does not request
   // a second repaint
   deck.needsRedraw({clearRedrawFlags: true});
-}
-
-function updateLayers(deck: Deck): void {
-  if ((deck.userData as UserData).isExternal) {
-    return;
-  }
-
-  const layers: Layer[] = [];
-  (deck.userData as UserData).mapboxLayers.forEach(deckLayer => {
-    const LayerType = deckLayer.props.type;
-    const layer = new LayerType(deckLayer.props);
-    layers.push(layer);
-  });
-  deck.setProps({layers});
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getTypedArrayFromDataType, getDataTypeFromTypedArray} from '@luma.gl/core';
+import {dataTypeDecoder, getTypedArrayConstructor} from '@luma.gl/core';
 import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
 import type {TypedArrayConstructor} from '../../types/types';
 import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
@@ -16,23 +16,37 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
     case 'unorm8':
       return Uint8ClampedArray;
     default:
-      return getTypedArrayFromDataType(type);
+      return getTypedArrayConstructor(type);
   }
 }
 
-export const dataTypeFromTypedArray = getDataTypeFromTypedArray;
+export const dataTypeFromTypedArray = dataTypeDecoder.getDataType.bind(dataTypeDecoder);
 
 export function getBufferAttributeLayout(
   name: string,
-  accessor: BufferAccessor
-): BufferAttributeLayout {
+  accessor: BufferAccessor,
+  deviceType: 'webgpu' | 'webgl' | string
+): BufferAttributeLayout | null {
+  if ((accessor.size as number) > 4) {
+    // Definitely not valid. TODO - stricter validation?
+    return null;
+  }
+  // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
+  const type = deviceType === 'webgpu' && accessor.type === 'uint8' ? 'unorm8' : accessor.type;
+  const size = accessor.size as number;
+  const webglOnly = Boolean(
+    deviceType !== 'webgpu' &&
+      size === 3 &&
+      type &&
+      ['uint8', 'sint8', 'unorm8', 'snorm8', 'uint16', 'sint16', 'unorm16', 'snorm16'].includes(
+        type
+      )
+  );
   return {
     attribute: name,
     // @ts-expect-error Not all combinations are valid vertex formats; it's up to DataColumn to ensure
     format:
-      (accessor.size as number) > 1
-        ? (`${accessor.type}x${accessor.size}` as VertexFormat)
-        : accessor.type,
+      size > 1 ? (`${type}x${size}${webglOnly ? '-webgl' : ''}` as VertexFormat) : accessor.type,
     byteOffset: accessor.offset || 0
     // Note stride is set on the top level
   };

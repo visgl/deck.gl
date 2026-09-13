@@ -5,7 +5,7 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {I3SLoader} from '@loaders.gl/i3s';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
@@ -21,7 +21,15 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 20
 };
 
+/**
+ * @param {{
+ *   device?: import('@luma.gl/core').Device,
+ *   data?: string,
+ *   mapStyle?: string
+ * }} props
+ */
 export default function App({
+  device,
   data = TILESET_URL,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }) {
@@ -29,13 +37,18 @@ export default function App({
     new Tile3DLayer({
       id: 'tile-3d-layer',
       data,
-      loader: I3SLoader
+      loaders: [I3SLoader],
+      loadOptions: {
+        // v9 TODO use compressed textures again
+        i3s: {useCompressedTextures: false}
+      }
     })
   ];
 
   return (
     <div>
       <DeckGL
+        device={device}
         style={{backgroundColor: '#061714'}}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}

@@ -36,6 +36,7 @@ export {
   // Controllers
   Controller,
   MapController,
+  TerrainController,
   OrbitController,
   FirstPersonController,
   OrthographicController,
@@ -44,11 +45,12 @@ export {
   Attribute,
   AttributeManager,
   // Shader modules
+  color,
   picking,
   project,
   project32,
-  gouraudLighting,
-  phongLighting,
+  gouraudMaterial,
+  phongMaterial,
   shadow,
   // Internal classes
   LayerManager,
@@ -74,7 +76,9 @@ export {
   Tesselator,
   fp64LowPart,
   createIterable,
-  getShaderAssembler
+  getShaderAssembler,
+  // Widgets
+  Widget
 } from '@deck.gl/core';
 
 //
@@ -108,6 +112,7 @@ export {
 } from '@deck.gl/aggregation-layers';
 
 export {
+  A5Layer,
   GreatCircleLayer,
   S2Layer,
   QuadkeyLayer,
@@ -125,6 +130,13 @@ export {
 export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 //
+// MAPLIBRE INTEGRATION PACKAGE
+//
+
+export {MapLibreOverlay} from '@deck.gl/maplibre';
+export type {MapLibreOverlayProps} from '@deck.gl/maplibre';
+
+//
 // REACT BINDINGS PACKAGE
 //
 
@@ -134,7 +146,35 @@ export {default, DeckGL} from '@deck.gl/react';
 // WIDGETS PACKAGE
 //
 
-export {FullscreenWidget, ZoomWidget, CompassWidget} from '@deck.gl/widgets';
+export {
+  // Navigation widgets
+  ZoomWidget,
+  ResetViewWidget,
+  GimbalWidget,
+  // Geospatial widgets
+  CompassWidget,
+  _ScaleWidget,
+  _GeocoderWidget,
+  // View widgets
+  FullscreenWidget,
+  _SplitterWidget,
+  buildViewsFromViewLayout,
+  // Information widgets
+  InfoWidget,
+  PopupWidget,
+  ContextMenuWidget,
+  ScrollbarWidget,
+  // Control widgets
+  IconWidget,
+  ToggleWidget,
+  SelectorWidget,
+  _TimelineWidget,
+  // Utility widgets
+  ScreenshotWidget,
+  ThemeWidget,
+  LoadingWidget,
+  _StatsWidget
+} from '@deck.gl/widgets';
 
 /* Types */
 
@@ -162,8 +202,7 @@ export type {
   PickingInfo,
   GetPickingInfoParams,
   BinaryAttribute,
-  Effect,
-  Widget
+  Effect
 } from '@deck.gl/core';
 
 export type {
@@ -196,4 +235,28 @@ export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/ge
 
 export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
 
-export type {FullscreenWidgetProps, ZoomWidgetProps, CompassWidgetProps} from '@deck.gl/widgets';
+export type {
+  FullscreenWidgetProps,
+  CompassWidgetProps,
+  ZoomWidgetProps,
+  ScreenshotWidgetProps,
+  ResetViewWidgetProps,
+  GeocoderWidgetProps,
+  LoadingWidgetProps,
+  IconWidgetProps,
+  ToggleWidgetProps,
+  ScaleWidgetProps,
+  ThemeWidgetProps,
+  InfoWidgetProps,
+  PopupWidgetProps,
+  StatsWidgetProps,
+  ContextMenuWidgetProps,
+  SplitterWidgetProps,
+  SplitterWidgetViewLayout,
+  CompiledDeckViews,
+  ViewLayout,
+  TimelineWidgetProps,
+  SelectorWidgetProps,
+  GimbalWidgetProps,
+  ScrollbarWidgetProps
+} from '@deck.gl/widgets';

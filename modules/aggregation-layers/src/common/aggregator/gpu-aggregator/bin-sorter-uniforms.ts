@@ -6,7 +6,7 @@ import {NumberArray2, NumberArray4} from '@math.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlock = /* glsl */ `\
-uniform binSorterUniforms {
+layout(std140) uniform binSorterUniforms {
   ivec4 binIdRange;
   ivec2 targetSize;
 } binSorter;

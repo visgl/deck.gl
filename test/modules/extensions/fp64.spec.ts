@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {Fp64Extension} from '@deck.gl/extensions';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {getLayerUniforms, testLayer} from '@deck.gl/test-utils';
+import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 
-test('Fp64Extension', t => {
+test('Fp64Extension', () => {
   const testCases = [
     {
       props: {
@@ -27,13 +27,11 @@ test('Fp64Extension', t => {
       },
       onAfterUpdate: ({layer}) => {
         const uniforms = getLayerUniforms(layer);
-        t.ok(uniforms.viewProjectionMatrix, 'has fp64 uniforms');
-        t.ok(uniforms.viewProjectionMatrix64Low, 'has fp64 uniforms');
+        expect(uniforms.viewProjectionMatrix, 'has fp64 uniforms').toBeTruthy();
+        expect(uniforms.viewProjectionMatrix64Low, 'has fp64 uniforms').toBeTruthy();
       }
     }
   ];
 
-  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: ScatterplotLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

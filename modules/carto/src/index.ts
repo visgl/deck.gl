@@ -6,7 +6,7 @@
 import {default as ClusterTileLayer} from './layers/cluster-tile-layer';
 import {default as H3TileLayer} from './layers/h3-tile-layer';
 import {default as HeatmapTileLayer} from './layers/heatmap-tile-layer';
-import {default as _PointLabelLayer} from './layers/point-label-layer';
+import {default as PointLabelLayer} from './layers/point-label-layer';
 import {default as QuadbinTileLayer} from './layers/quadbin-tile-layer';
 import {default as RasterTileLayer} from './layers/raster-tile-layer';
 import {default as VectorTileLayer} from './layers/vector-tile-layer';
@@ -16,7 +16,7 @@ const CARTO_LAYERS = {
   ClusterTileLayer,
   H3TileLayer,
   HeatmapTileLayer,
-  _PointLabelLayer,
+  PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
   VectorTileLayer
@@ -26,7 +26,7 @@ export {
   ClusterTileLayer,
   H3TileLayer,
   HeatmapTileLayer,
-  _PointLabelLayer,
+  PointLabelLayer,
   QuadbinTileLayer,
   RasterTileLayer,
   VectorTileLayer
@@ -61,7 +61,7 @@ export {
 export {default as colorBins} from './style/color-bins-style';
 export {default as colorCategories} from './style/color-categories-style';
 export {default as colorContinuous} from './style/color-continuous-style';
-export {fetchMap} from './api/index';
+export {fetchMap, LayerFactory} from './api/fetch-map';
 export {fetchBasemapProps} from './api/basemap';
 export type {
   FetchMapOptions,
@@ -73,37 +73,8 @@ export type {
 
 // TODO(v10): Consider removing re-exports from '@carto/api-client' below.
 
-import {
-  boundaryQuerySource,
-  boundaryTableSource,
-  h3QuerySource,
-  h3TableSource,
-  h3TilesetSource,
-  rasterSource,
-  quadbinQuerySource,
-  quadbinTableSource,
-  quadbinTilesetSource,
-  vectorQuerySource,
-  vectorTableSource,
-  vectorTilesetSource
-} from '@carto/api-client';
-
-export const CARTO_SOURCES = {
-  boundaryQuerySource,
-  boundaryTableSource,
-  h3QuerySource,
-  h3TableSource,
-  h3TilesetSource,
-  rasterSource,
-  quadbinQuerySource,
-  quadbinTableSource,
-  quadbinTilesetSource,
-  vectorQuerySource,
-  vectorTableSource,
-  vectorTilesetSource
-};
-
 export {
+  CARTO_SOURCES,
   boundaryQuerySource,
   boundaryTableSource,
   h3QuerySource,
@@ -122,8 +93,6 @@ export {
 } from '@carto/api-client';
 
 export type {
-  GeojsonResult,
-  JsonResult,
   TilejsonResult,
   SourceOptions,
   QuerySourceOptions,

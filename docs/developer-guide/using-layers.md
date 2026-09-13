@@ -156,7 +156,7 @@ import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 
 type Flight = {
   callSign: string;
-  lon: number;
+  lng: number;
   lat: number;
   alt: number;
 };
@@ -198,7 +198,7 @@ const deckInstance = new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {LayersList} from '@deck.gl/core';
 import {ScatterplotLayer, TextLayer} from '@deck.gl/layers';
 
@@ -358,7 +358,7 @@ async function update() {
 
 ```tsx
 import React, {useState, useEffect} from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {LayersList} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 

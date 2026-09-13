@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, ArcLayer, ColumnLayer, BitmapLayer, PathLayer} from '@deck.gl/layers';
+import {ResetViewWidget as _ResetViewWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
+import {createSettingsControl} from './settings-control';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const COUNTRIES =
@@ -16,15 +19,23 @@ const WORLD_MAP = './map.jpg';
 const INITIAL_VIEW_STATE = {
   latitude: 51.47,
   longitude: 0.45,
-  zoom: 0
+  minZoom: 1,
+  zoom: 1,
+  bearing: 0,
+  pitch: 0,
+  transitionDuration: 0
 };
+
+let currentViewState = {...INITIAL_VIEW_STATE};
+let zoomAround = 'pointer';
+let viewType = 'globe';
 
 const GRATICULES = getGraticules(30);
 
 export const deck = new Deck({
-  views: new GlobeView(),
+  views: getView(viewType),
   initialViewState: INITIAL_VIEW_STATE,
-  controller: {minZoom: -2},
+  controller: {inertia: 500, zoomAround},
   parameters: {
     cull: true
   },
@@ -70,7 +81,7 @@ export const deck = new Deck({
       filled: true,
       pointRadiusMinPixels: 2,
       pointRadiusScale: 2000,
-      getRadius: f => 11 - f.properties.scalerank,
+      getPointRadius: f => 11 - f.properties.scalerank,
       getFillColor: [200, 0, 80, 180],
       // Interactive props
       pickable: true,
@@ -115,6 +126,44 @@ function getGraticules(resolution) {
   return graticules;
 }
 
-// For automated test cases
-/* global document */
-document.body.style.margin = '0px';
+function getView(nextViewType) {
+  return nextViewType === 'map' ? new MapView() : new GlobeView();
+}
+
+const settingsControl = createSettingsControl({
+  onZoomAroundChange: nextZoomAround => {
+    zoomAround = nextZoomAround;
+    deck.setProps({controller: {inertia: 500, zoomAround}});
+    updateSettingsControl();
+  },
+  onViewChange: nextViewType => {
+    viewType = nextViewType;
+    deck.setProps({views: getView(viewType)});
+    updateSettingsControl();
+  },
+  onReset: () => setViewState(INITIAL_VIEW_STATE)
+});
+
+function setViewState(nextViewState) {
+  currentViewState = {...currentViewState, ...nextViewState};
+  deck.setProps({viewState: currentViewState});
+  updateSettingsControl();
+}
+
+function updateSettingsControl() {
+  settingsControl.update({viewState: currentViewState, zoomAround, viewType});
+}
+
+updateSettingsControl();
+
+deck.setProps({
+  widgets: [
+    new _ResetViewWidget({
+      placement: 'bottom-right',
+      initialViewState: {...INITIAL_VIEW_STATE, transitionDuration: 300}
+    })
+  ],
+  onViewStateChange: ({viewState}) => {
+    setViewState(viewState);
+  }
+});

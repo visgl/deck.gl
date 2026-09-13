@@ -90,9 +90,7 @@ export default function ExampleInfoPanel({title, sourceLink, params, meta, child
 
         {Object.keys(params).length > 0 && <hr />}
 
-        {Object.keys(params)
-          .sort()
-          .map((name, i) => (
+        {Object.keys(params).map((name, i) => (
             <GenericInput
               key={`${i}-${name}`}
               name={name}

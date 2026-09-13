@@ -49,8 +49,7 @@ const config = {
   },
 
   entry: {
-    test: 'test/node.ts',
-    'test-browser': 'index.html',
+    // TODO: Migrate bench and size to vitest (Phase 7)
     bench: 'test/bench/index.js',
     'bench-browser': 'test/bench/browser.html',
     size: 'test/size/import-nothing.js'

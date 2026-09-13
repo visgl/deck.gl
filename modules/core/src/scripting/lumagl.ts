@@ -9,9 +9,7 @@ import {luma} from '@luma.gl/core';
 /* eslint-disable @typescript-eslint/unbound-method */
 export const {
   stats,
-  registerDevices,
   getSupportedAdapters,
-  getBestAvailableAdapter,
   setDefaultDeviceProps,
   attachDevice,
   createDevice,
@@ -22,12 +20,10 @@ export {
   Model,
   BufferTransform,
   TextureTransform,
-
   // Geometry
   Geometry,
   CubeGeometry,
   SphereGeometry,
-
   // Scenegraph
   ScenegraphNode,
   GroupNode,

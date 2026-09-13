@@ -26,6 +26,18 @@ export function getCameraPosition(
   return [viewMatrixInverse[12], viewMatrixInverse[13], viewMatrixInverse[14]];
 }
 
+export function getProjectionParameters(projectionMatrix: Matrix4 | NumericArray): {
+  near: number;
+  far: number;
+} {
+  const m22 = projectionMatrix[10];
+  const m23 = projectionMatrix[14];
+  return {
+    near: m23 / (m22 - 1),
+    far: m23 / (m22 + 1)
+  };
+}
+
 export type FrustumPlane = {
   distance: number;
   normal: Vector3;
@@ -100,7 +112,7 @@ export function fp64LowPart(x: number): number {
 let scratchArray;
 
 /**
- * Split a Float64Array into a double-length Float32Array
+ * Split a Float32Array or Float64Array into a double-length Float32Array
  * @param typedArray
  * @param options
  * @param options.size  - per attribute size
@@ -110,7 +122,7 @@ let scratchArray;
     [1xHi, 1yHi, 1zHi, 1xLow, 1yLow, 1zLow, 2xHi, ...]
  */
 export function toDoublePrecisionArray(
-  typedArray: Float64Array,
+  typedArray: Float32Array | Float64Array,
   options: {size?: number; startIndex?: number; endIndex?: number}
 ): Float32Array {
   const {size = 1, startIndex = 0} = options;

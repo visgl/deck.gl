@@ -1,8 +1,9 @@
 Binary data transfer
 ====================
 
-.. WARNING::
-   Jupyter-specific features are not currently supported in pydeck v0.9+.
+.. NOTE::
+   Binary data transfer requires the Jupyter widget integration, which is not currently
+   functional in pydeck v0.9+. See :doc:`jupyter` for details.
 
 Motivation
 ^^^^^^^^^^

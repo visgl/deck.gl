@@ -8,6 +8,7 @@ import {inheritsFrom} from './inherits-from';
 import {Layer, View} from '@deck.gl/core';
 import {isComponent} from './evaluate-children';
 import type {LayersList, Viewport} from '@deck.gl/core';
+import type {ViewOrViews} from '../deckgl';
 
 export type DeckGLRenderCallbackArgs = {
   /**
@@ -61,18 +62,18 @@ function wrapInView(node: React.ReactNode | DeckGLRenderCallback): React.ReactNo
 }
 
 // extracts any deck.gl layers masquerading as react elements from props.children
-export default function extractJSXLayers({
+export default function extractJSXLayers<ViewsT extends ViewOrViews>({
   children,
   layers = [],
-  views = null
+  views
 }: {
   children?: React.ReactNode | DeckGLRenderCallback;
   layers?: LayersList;
-  views?: View | View[] | null;
+  views?: ViewsT;
 }): {
   children: React.ReactNode[];
   layers: LayersList;
-  views: View | View[] | null;
+  views: ViewsT | undefined;
 } {
   const reactChildren: React.ReactNode[] = []; // extract real react elements (i.e. not deck.gl layers)
   const jsxLayers: LayersList = []; // extracted layer from react children, will add to deck.gl layer array
@@ -111,11 +112,11 @@ export default function extractJSXLayers({
     } else if (views) {
       jsxViews[views.id] = views;
     }
-    views = Object.values(jsxViews);
+    views = Object.values(jsxViews) as ViewsT;
   }
 
   // Avoid modifying layers array if no JSX layers were found
-  layers = jsxLayers.length > 0 ? [...jsxLayers, ...layers] : layers;
+  layers = jsxLayers.length > 0 ? [jsxLayers, layers] : layers;
 
   return {layers, children: reactChildren, views};
 }

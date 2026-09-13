@@ -3,7 +3,7 @@
   "description": "deck.gl layers that aggregate the input data into alternative representations",
   "license": "MIT",
   "type": "module",
-  "version": "9.1.0-beta.1",
+  "version": "9.4.0-beta.4",
   "publishConfig": {
     "access": "public"
   },
@@ -17,18 +17,27 @@
     "type": "git",
     "url": "https://github.com/visgl/deck.gl.git"
   },
+  "bugs": {
+    "url": "https://github.com/visgl/deck.gl/issues"
+  },
+  "homepage": "https://deck.gl",
   "types": "dist/index.d.ts",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/index.js",
+        "require": "./dist.webgl-only/index.cjs"
+      },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
   },
   "files": [
     "dist",
+    "dist.webgl-only",
     "src",
     "dist.min.js"
   ],
@@ -38,17 +47,16 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/constants": "^9.1.0-beta.12",
-    "@luma.gl/shadertools": "^9.1.0-beta.12",
+    "@luma.gl/shadertools": "^9.4.0",
     "@math.gl/core": "^4.1.0",
     "@math.gl/web-mercator": "^4.1.0",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.1.0-beta",
-    "@deck.gl/layers": "^9.1.0-beta",
-    "@luma.gl/core": "^9.1.0-beta",
-    "@luma.gl/engine": "^9.1.0-beta"
+    "@deck.gl/core": "~9.4.0",
+    "@deck.gl/layers": "~9.4.0",
+    "@luma.gl/core": "~9.4.0",
+    "@luma.gl/engine": "~9.4.0"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

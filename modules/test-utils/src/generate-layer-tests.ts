@@ -18,6 +18,7 @@ function defaultAssert(condition: any, comment: string): void {
 
 // Automatically generate testLayer test cases
 export function generateLayerTests<LayerT extends Layer>({
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Layer,
   sampleProps = {},
   assert = defaultAssert,

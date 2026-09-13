@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {device} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {device} from '@deck.gl/test-utils/vitest';
 
 import {Layer, LayerManager, Viewport} from '@deck.gl/core';
 import MaskPass from '@deck.gl/extensions/mask/mask-pass';
@@ -12,7 +12,7 @@ class TestLayer extends Layer {
   initializeState() {}
 }
 
-test('MaskPass#shouldDrawLayer', t => {
+test('MaskPass#shouldDrawLayer', () => {
   const layers = [
     new TestLayer({
       id: 'test-default' // operation: 'draw' is default for Layer
@@ -40,10 +40,8 @@ test('MaskPass#shouldDrawLayer', t => {
     viewports: [new Viewport({id: 'A'})],
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
-    onError: t.notOk
+    onError: err => expect(err).toBeFalsy()
   })[0];
-  t.is(renderStats.totalCount, 4, 'Total # of layers');
-  t.is(renderStats.visibleCount, 1, '# of rendered layers'); // test-mask
-
-  t.end();
+  expect(renderStats.totalCount, 'Total # of layers').toBe(4);
+  expect(renderStats.visibleCount, '# of rendered layers').toBe(1); // test-mask
 });

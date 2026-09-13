@@ -1,4 +1,13 @@
 [
+    {
+    "name": "Toronto Dot Density Map",
+    "url": "https://schoolofcities.github.io/dot-density/",
+    "image": "/images/showcase/dot-density.png",
+    "links": {
+      "by School of Cities": "https://schoolofcities.utoronto.ca/"
+    },
+    "description": "Dot density map for Toronto, Canada, visualizing population density in 3D by rendering dots as a point cloud layer."
+  },
   {
     "name": "Taxo&Map Biodiversity Map",
     "url": "https://taxomap.bioexplora.cat/?lang=en",

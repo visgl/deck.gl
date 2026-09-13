@@ -8,8 +8,8 @@ Extruded terrain using AWS Open Data Terrain Tiles and Mapbox Satellite imagery
 import pydeck as pdk
 import os
 
-# Import Mapbox API Key from environment
-MAPBOX_API_KEY = os.environ["MAPBOX_API_KEY"]
+# Import Mapbox API Key from environment (deck.gl uses MapboxAccessToken, pydeck uses MAPBOX_API_KEY)
+MAPBOX_API_KEY = os.environ.get("MapboxAccessToken") or os.environ.get("MAPBOX_API_KEY", "")
 
 # AWS Open Data Terrain Tiles
 TERRAIN_IMAGE = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"

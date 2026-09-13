@@ -2,11 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {test, expect} from 'vitest';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {GridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {gridUniforms} from '@deck.gl/aggregation-layers/grid-layer/grid-layer-uniforms';
+import {
+  getShaderModuleSource,
+  getShaderModuleUniformLayoutValidationResult
+} from '@luma.gl/shadertools';
 import * as FIXTURES from 'deck.gl-test/data';
-import {device} from '@deck.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -14,40 +19,71 @@ const SAMPLE_PROPS = {
   // gpuAggregation: false
 };
 
-test('GridLayer', t => {
+test('GridLayer#WGSL grid uniform layout', () => {
+  const validationResult = getShaderModuleUniformLayoutValidationResult(gridUniforms, 'wgsl');
+
+  expect(validationResult, 'WGSL grid module exposes a uniform block').toBeTruthy();
+  expect(validationResult?.matches, 'WGSL block matches declared uniform types').toBe(true);
+  expect(validationResult?.expectedUniformNames, 'uniform field order stays stable').toEqual([
+    'colorDomain',
+    'elevationDomain',
+    'elevationRange',
+    'originCommon',
+    'sizeCommon'
+  ]);
+});
+
+test('GridLayer#WGSL color range bindings', () => {
+  const source = getShaderModuleSource(gridUniforms, 'wgsl');
+
+  expect(source, 'WGSL grid module declares its color-range texture').toContain(
+    'var colorRange: texture_2d<f32>'
+  );
+  expect(source, 'WGSL grid module declares its color-range sampler').toContain(
+    'var colorRangeSampler: sampler'
+  );
+});
+
+test('GridLayer', () => {
   const testCases = generateLayerTests({
     Layer: GridLayer,
     sampleProps: SAMPLE_PROPS,
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate({layer}) {
-      t.ok(layer.state.aggregator, 'should have aggregator');
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
+    onAfterUpdate({layer, subLayer}) {
+      expect(layer.state.aggregator, 'should have aggregator').toBeTruthy();
+      const model = subLayer?.state.fillModel!;
+      const bufferNames = model.bufferLayout.map(layout => layout.name);
+      expect(
+        bufferNames.filter(name => name === 'geometry'),
+        `${model.id} has one geometry buffer layout`
+      ).toHaveLength(1);
+      expect(new Set(bufferNames).size, `${model.id} has unique buffer layouts`).toBe(
+        bufferNames.length
+      );
     }
   });
 
-  testLayer({Layer: GridLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: GridLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
-test('GridLayer#getAggregatorType', t => {
+test('GridLayer#getAggregatorType', () => {
   if (!WebGLAggregator.isSupported(device)) {
-    t.comment('GPU aggregation not supported, skipping');
-    t.end();
+    console.log('GPU aggregation not supported, skipping');
     return;
   }
   testLayer({
     Layer: GridLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         title: 'Default',
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
-          t.ok(
+          expect(
             layer.state.aggregator instanceof WebGLAggregator,
             'By default should use GPU Aggregation'
-          );
+          ).toBeTruthy();
         }
       },
       {
@@ -56,10 +92,10 @@ test('GridLayer#getAggregatorType', t => {
           gpuAggregation: false
         },
         onAfterUpdate({layer}) {
-          t.ok(
+          expect(
             layer.state.aggregator instanceof CPUAggregator,
             'Should use CPU Aggregation (gpuAggregation: false)'
-          );
+          ).toBeTruthy();
         }
       },
       {
@@ -68,10 +104,10 @@ test('GridLayer#getAggregatorType', t => {
           gpuAggregation: true
         },
         onAfterUpdate({layer}) {
-          t.ok(
+          expect(
             layer.state.aggregator instanceof WebGLAggregator,
             'Should use GPU Aggregation (gpuAggregation: true)'
-          );
+          ).toBeTruthy();
         }
       },
       {
@@ -80,10 +116,10 @@ test('GridLayer#getAggregatorType', t => {
           getColorValue: points => points.length
         },
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
+          expect(
             layer.state.aggregator instanceof CPUAggregator,
             'Should use CPU Aggregation (getColorValue)'
-          );
+          ).toBeTruthy();
         }
       },
       {
@@ -92,18 +128,17 @@ test('GridLayer#getAggregatorType', t => {
           getElevationValue: points => points.length
         },
         onAfterUpdate({layer, subLayers, spies}) {
-          t.ok(
+          expect(
             layer.state.aggregator instanceof CPUAggregator,
             'Should use CPU Aggregation (getElevationValue)'
-          );
+          ).toBeTruthy();
         }
       }
     ]
   });
-  t.end();
 });
 
-test('GridLayer#non-iterable data', t => {
+test('GridLayer#non-iterable data', () => {
   const dataNonIterable = {
     length: 3,
     positions: FIXTURES.points.slice(0, 3).flatMap(d => d.COORDINATES),
@@ -112,7 +147,7 @@ test('GridLayer#non-iterable data', t => {
 
   testLayer({
     Layer: GridLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         title: 'Non-iterable data with constant weights',
@@ -127,18 +162,24 @@ test('GridLayer#non-iterable data', t => {
           getElevationWeight: 1
         },
         onAfterUpdate: ({subLayer}) => {
-          t.pass('Layer updated with constant get*Weight accessors');
+          console.log('Layer updated with constant get*Weight accessors');
         }
       },
       {
         title: 'Non-iterable data with accessors',
         updateProps: {
           getColorWeight: (_, {index, data}) => {
-            t.ok(Number.isFinite(index) && data, 'point index and context are populated');
+            expect(
+              Number.isFinite(index) && data,
+              'point index and context are populated'
+            ).toBeTruthy();
             return (data as any).weights[index * 2];
           },
           getElevationWeight: (_, {index, data}) => {
-            t.ok(Number.isFinite(index) && data, 'point index and context are populated');
+            expect(
+              Number.isFinite(index) && data,
+              'point index and context are populated'
+            ).toBeTruthy();
             return (data as any).weights[index * 2];
           },
           updateTriggers: {
@@ -147,18 +188,18 @@ test('GridLayer#non-iterable data', t => {
           }
         },
         onAfterUpdate: ({subLayer}) => {
-          t.pass('Layer updated with get*Weight accessors and non-iterable data');
+          console.log('Layer updated with get*Weight accessors and non-iterable data');
         }
       },
       {
         title: 'Non-iterable data with custom aggregation',
         updateProps: {
           getColorValue: (points, {indices, data: {weights}}) => {
-            t.ok(indices && weights, 'context is populated');
+            expect(indices && weights, 'context is populated').toBeTruthy();
             return points.length;
           },
           getElevationValue: (points, {indices, data: {weights}}) => {
-            t.ok(indices && weights, 'context is populated');
+            expect(indices && weights, 'context is populated').toBeTruthy();
             return points.length;
           },
           updateTriggers: {
@@ -167,11 +208,9 @@ test('GridLayer#non-iterable data', t => {
           }
         },
         onAfterUpdate: ({subLayer}) => {
-          t.pass('Layer updated with get*Value accessors and non-iterable data');
+          console.log('Layer updated with get*Value accessors and non-iterable data');
         }
       }
     ]
   });
-
-  t.end();
 });

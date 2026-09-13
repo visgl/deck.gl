@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {createIterable, getAccessorFromBuffer} from '@deck.gl/core/utils/iterable-utils';
 
-test('createIterable', t => {
+test('createIterable', () => {
   const TEST_CASES = [
     {
       title: 'empty data',
@@ -112,15 +112,15 @@ test('createIterable', t => {
       }
     }
 
-    t.is(count, testCase.count, `${testCase.title} yields correct object count`);
-    t.deepEqual(firstObject, testCase.firstObject, `${testCase.title} yields correct first object`);
-    t.is(firstIndex, testCase.firstIndex, `${testCase.title} yields correct first index`);
+    expect(count, `${testCase.title} yields correct object count`).toBe(testCase.count);
+    expect(firstObject, `${testCase.title} yields correct first object`).toEqual(
+      testCase.firstObject
+    );
+    expect(firstIndex, `${testCase.title} yields correct first index`).toBe(testCase.firstIndex);
   }
-
-  t.end();
 });
 
-test('getAccessorFromBuffer', t => {
+test('getAccessorFromBuffer', () => {
   const TEST_CASES = [
     {
       title: 'plain buffer',
@@ -206,14 +206,12 @@ test('getAccessorFromBuffer', t => {
   ];
 
   for (const testCase of TEST_CASES) {
-    t.comment(testCase.title);
+    console.log(testCase.title);
     const accessor = getAccessorFromBuffer(testCase.input.value, testCase.input);
     const context = {index: -1, target: []};
     for (const result of testCase.output) {
       context.index++;
-      t.deepEqual(accessor(null, context), result, `accessor at index ${context.index}`);
+      expect(accessor(null, context), `accessor at index ${context.index}`).toEqual(result);
     }
   }
-
-  t.end();
 });

@@ -5,10 +5,11 @@
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 
-import type {PickingInfo, MapViewState} from '@deck.gl/core';
+import type {PickingInfo, MapViewState, Widget} from '@deck.gl/core';
+import {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL = {
@@ -56,12 +57,16 @@ export default function App({
   airports = DATA_URL.AIRPORTS,
   flightPaths = DATA_URL.FLIGHT_PATHS,
   lineWidth = 3,
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device,
+  widgets
 }: {
   airports?: string | Airport[];
   flightPaths?: string | FlightPath[];
   lineWidth?: number;
   mapStyle?: string;
+  device?: Device;
+  widgets?: Widget[];
 }) {
   const layers = [
     new ScatterplotLayer<Airport>({
@@ -97,15 +102,21 @@ export default function App({
     })
   ];
 
+  const isWebGPU = device?.type === 'webgpu';
+
   return (
     <DeckGL
+      device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
+      widgets={widgets}
       pickingRadius={5}
       parameters={{
         blendColorOperation: 'add',
-        blendColorSrcFactor: 'src-alpha',
+        // WebGPU shaders output premultiplied color, so use `one` here to match
+        // the legacy WebGL visual intensity instead of multiplying alpha twice.
+        blendColorSrcFactor: isWebGPU ? 'one' : 'src-alpha',
         blendColorDstFactor: 'one',
         blendAlphaOperation: 'add',
         blendAlphaSrcFactor: 'one-minus-dst-alpha',

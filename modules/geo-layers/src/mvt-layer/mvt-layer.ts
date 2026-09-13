@@ -226,17 +226,20 @@ export default class MVTLayer<
     const {fetch} = this.props;
     loadOptions = {
       ...loadOptions,
-      mimeType: 'application/x-protobuf',
+      core: {
+        ...loadOptions?.core,
+        mimeType: 'application/x-protobuf'
+      },
       mvt: {
         ...loadOptions?.mvt,
+        shape: binary ? 'binary' : 'geojson',
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
         // Set worker to null to skip web workers
         // workerUrl: null
-      },
-      gis: binary ? {format: 'binary'} : {}
+      }
     };
     return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
   }

@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global setTimeout */
+import {expect} from 'vitest';
 import {Deck, Layer} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
 
@@ -12,25 +13,22 @@ export function sleep(milliseconds) {
   });
 }
 
-export function testAsyncData(t, data) {
+export function testAsyncData(data) {
   class TestLayer extends Layer {
     initializeState() {}
 
     updateState({props, oldProps, changeFlags}) {
       if (oldProps.data) {
-        t.ok(props.data.length > oldProps.data.length, 'data has changed');
+        expect(props.data.length > oldProps.data.length, 'data has changed').toBeTruthy();
       }
       if (Array.isArray(changeFlags.dataChanged)) {
-        t.is(
-          changeFlags.dataChanged[0].startRow,
-          oldProps.data.length,
-          'data diff starts from last position'
+        expect(changeFlags.dataChanged[0].startRow, 'data diff starts from last position').toBe(
+          oldProps.data.length
         );
-        t.is(
+        expect(
           changeFlags.dataChanged[changeFlags.dataChanged.length - 1].endRow,
-          props.data.length,
           'data diff covers rest of range'
-        );
+        ).toBe(props.data.length);
       }
     }
   }

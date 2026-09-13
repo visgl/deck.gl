@@ -1,12 +1,13 @@
 # VectorTileLayer
 
-`VectorTileLayer` is a layer for visualizing tiled vector data. It inherits all the properties from the [`MVTLayer`](../geo-layers/mvt-layer.md).
+`VectorTileLayer` is a layer for visualizing tiled vector data. It extends the [`MVTLayer`](../geo-layers/mvt-layer.md) with CARTO-specific optimizations for efficient vector tile rendering, including binary data format support and separate geometry/attribute loading.
 
 ## Usage 
 
 ```tsx
-import DeckGL from '@deck.gl/react';
-import {VectorTileLayer, vectorTableSource} from '@deck.gl/carto';
+import {DeckGL} from '@deck.gl/react';
+import {VectorTileLayer} from '@deck.gl/carto';
+import {vectorTableSource} from '@carto/api-client';
 
 function App({viewState}) {
   const data = vectorTableSource({
@@ -59,7 +60,7 @@ new deck.carto.VectorTileLayer({});
 
 ## Properties
 
-The properties of [`MVTLayer`](../geo-layers/mvt-layer.md) will be inherited.
+Inherits all properties from [`MVTLayer`](../geo-layers/mvt-layer.md).
 
 #### `data` (TilejsonResult) {#data}
 
@@ -70,6 +71,16 @@ Use one of the following [Data Sources](./data-sources.md) to fetch this from th
 - [vectorTableSource](./data-sources#vectortablesource)
 - [vectorQuerySource](./data-sources#vectorquerysource)
 - [vectorTilesetSource](./data-sources#vectortilesetsource)
+
+#### `autoLabels` (boolean | object, optional) {#autolabels}
+
+* Default: `false`
+
+If `true`, automatically creates labels for lines and polygons at their centroids.
+
+For more control over labeling, pass an object with the following properties:
+
+* `uniqueIdProperty` (string): Property name to use for deduplication. Only creates a single label for each unique feature value.
 
 ## Source
 

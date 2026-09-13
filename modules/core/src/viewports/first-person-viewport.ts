@@ -21,7 +21,7 @@ export type FirstPersonViewportOptions = {
   longitude?: number;
   /** Latitude of the camera, in the geospatial case. */
   latitude?: number;
-  /** Meter offsets of the camera from the lng-lat anchor point. Default `[0, 0, 0]`. */
+  /** Meter offsets of the camera from the lng-lat-elevation anchor point. Default `[0, 0, 0]`. */
   position?: [number, number, number];
   /** Bearing (heading) of the camera in degrees. Default `0` (north). */
   bearing?: number;
@@ -44,8 +44,13 @@ export type FirstPersonViewportOptions = {
 };
 
 export default class FirstPersonViewport extends Viewport {
+  static displayName = 'FirstPersonViewport';
+
   longitude?: number;
   latitude?: number;
+  pitch: number;
+  bearing: number;
+  up: [number, number, number];
 
   constructor(props: FirstPersonViewportOptions) {
     // TODO - push direction handling into Matrix4.lookAt
@@ -75,5 +80,8 @@ export default class FirstPersonViewport extends Viewport {
 
     this.latitude = latitude;
     this.longitude = longitude;
+    this.pitch = pitch;
+    this.bearing = bearing;
+    this.up = up;
   }
 }

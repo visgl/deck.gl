@@ -10,7 +10,14 @@ import {
   scaleToAspectRatio,
   getTextureCoordinates
 } from './heatmap-layer-utils';
-import {Buffer, DeviceFeature, Texture, TextureProps, TextureFormat} from '@luma.gl/core';
+import {
+  Buffer,
+  DeviceFeature,
+  Texture,
+  TextureProps,
+  TextureFormat,
+  TextureFormatColor
+} from '@luma.gl/core';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
 import {
   Accessor,
@@ -18,7 +25,6 @@ import {
   AttributeManager,
   ChangeFlags,
   Color,
-  COORDINATE_SYSTEM,
   Layer,
   LayerContext,
   LayersList,
@@ -35,6 +41,8 @@ import weightsVs from './weights-vs.glsl';
 import weightsFs from './weights-fs.glsl';
 import maxVs from './max-vs.glsl';
 import maxFs from './max-fs.glsl';
+import maxSource from './max.wgsl';
+import weightsSource from './weights.wgsl';
 import {
   MaxWeightProps,
   maxWeightUniforms,
@@ -43,9 +51,12 @@ import {
 } from './heatmap-layer-uniforms';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
+const MAX_WEIGHT_REDUCTION_SIZE = 16;
 const TEXTURE_PROPS: TextureProps = {
   format: 'rgba8unorm',
-  mipmaps: false,
+  dimension: '2d',
+  width: 1,
+  height: 1,
   sampler: {
     minFilter: 'linear',
     magFilter: 'linear',
@@ -53,7 +64,7 @@ const TEXTURE_PROPS: TextureProps = {
     addressModeV: 'clamp-to-edge'
   }
 };
-const DEFAULT_COLOR_DOMAIN = [0, 0];
+const DEFAULT_COLOR_DOMAIN = [0, 0] as const;
 const AGGREGATION_MODE = {
   SUM: 0,
   MEAN: 1
@@ -124,7 +135,7 @@ type _HeatmapLayerProps<DataT> = {
    *
    * @default null
    */
-  colorDomain?: [number, number] | null;
+  colorDomain?: Readonly<[number, number]> | null;
 
   /**
    * Defines the type of aggregation operation
@@ -172,7 +183,7 @@ export default class HeatmapLayer<
   static defaultProps = defaultProps;
 
   state!: AggregationLayer<DataT>['state'] & {
-    colorDomain?: number[];
+    colorDomain?: Readonly<[number, number]>;
     isWeightMapDirty?: boolean;
     weightsTexture?: Texture;
     maxWeightsTexture?: Texture;
@@ -234,6 +245,13 @@ export default class HeatmapLayer<
       // Update weight map immediately
       clearTimeout(this.state.updateTimer);
       this.setState({isWeightMapDirty: true});
+
+      if (changeFlags.dataChanged) {
+        // Recreate weights transform if data changed, as buffer layout may have changed,
+        // happens when binary attibutes passed.
+        const weightsTransformShaders = this.getShaders({vs: weightsVs, fs: weightsFs});
+        this._createWeightsTransform(weightsTransformShaders);
+      }
     } else if (changeFlags.viewportZoomChanged) {
       // Update weight map when zoom stops
       this._debouncedUpdateWeightmap();
@@ -271,7 +289,7 @@ export default class HeatmapLayer<
       {
         // position buffer is filled with world coordinates generated from viewport.unproject
         // i.e. LNGLAT if geospatial, CARTESIAN otherwise
-        coordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+        coordinateSystem: 'default',
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -368,11 +386,26 @@ export default class HeatmapLayer<
 
   _setupAttributes() {
     const attributeManager = this.getAttributeManager()!;
-    attributeManager.add({
-      positions: {size: 3, type: 'float64', accessor: 'getPosition'},
-      weights: {size: 1, accessor: 'getWeight'}
-    });
-    this.setState({positionAttributeName: 'positions'});
+
+    if (this.context.device.type === 'webgpu') {
+      attributeManager.addInstanced({
+        instancePositions: {
+          size: 3,
+          type: 'float64',
+          accessor: 'getPosition',
+          // Normalize binary XY positions into the packed XYZ high/low layout WebGPU requires.
+          transform: (position: Position) => [position[0], position[1], position[2] ?? 0]
+        },
+        instanceWeights: {size: 1, accessor: 'getWeight'}
+      });
+      this.setState({positionAttributeName: 'instancePositions'});
+    } else {
+      attributeManager.add({
+        positions: {size: 3, type: 'float64', accessor: 'getPosition'},
+        weights: {size: 1, accessor: 'getWeight'}
+      });
+      this.setState({positionAttributeName: 'positions'});
+    }
   }
 
   _setupTextureParams() {
@@ -380,8 +413,15 @@ export default class HeatmapLayer<
     const {weightsTextureSize} = this.props;
 
     const textureSize = Math.min(weightsTextureSize, device.limits.maxTextureDimension2D);
-    const floatTargetSupport = FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
-    const format: TextureFormat = floatTargetSupport ? 'rgba32float' : 'rgba8unorm';
+    const isWebGPU = device.type === 'webgpu';
+    const floatTargetSupport = isWebGPU
+      ? device.getTextureFormatCapabilities('rgba16float').blend
+      : FLOAT_TARGET_FEATURES.every(feature => device.features.has(feature));
+    const format: TextureFormat = floatTargetSupport
+      ? isWebGPU
+        ? 'rgba16float'
+        : 'rgba32float'
+      : 'rgba8unorm';
     const weightsScale = floatTargetSupport ? 1 : 1 / 255;
     this.setState({textureSize, format, weightsScale});
     if (!floatTargetSupport) {
@@ -394,24 +434,34 @@ export default class HeatmapLayer<
   _createWeightsTransform(shaders: {vs: string; fs?: string; modules: any[]}) {
     let {weightsTransform} = this.state;
     const {weightsTexture} = this.state;
+    const isWebGPU = this.context.device.type === 'webgpu';
     const attributeManager = this.getAttributeManager()!;
 
     weightsTransform?.destroy();
     weightsTransform = new TextureTransform(this.context.device, {
       id: `${this.id}-weights-transform`,
-      bufferLayout: attributeManager.getBufferLayouts(),
-      vertexCount: 1,
+      ...shaders,
+      source: weightsSource,
+      bufferLayout: attributeManager.getBufferLayouts({isInstanced: isWebGPU}),
+      vertexCount: isWebGPU ? 6 : 1,
+      ...(isWebGPU
+        ? {
+            colorAttachmentFormats: [weightsTexture!.format as TextureFormatColor],
+            isInstanced: true,
+            instanceCount: this.getNumInstances()
+          }
+        : {}),
       targetTexture: weightsTexture!,
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'add',
         blendColorSrcFactor: 'one',
         blendColorDstFactor: 'one',
         blendAlphaSrcFactor: 'one',
         blendAlphaDstFactor: 'one'
       },
-      topology: 'point-list',
-      ...shaders,
+      topology: isWebGPU ? 'triangle-list' : 'point-list',
       modules: [...shaders.modules, weightUniforms]
     } as TextureTransformProps);
 
@@ -430,6 +480,7 @@ export default class HeatmapLayer<
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders({
+      source: maxSource,
       vs: maxVs,
       fs: maxFs,
       modules: [maxWeightUniforms]
@@ -438,10 +489,17 @@ export default class HeatmapLayer<
       id: `${this.id}-max-weights-transform`,
       targetTexture: maxWeightsTexture!,
       ...maxWeightsTransformShaders,
-      vertexCount: textureSize * textureSize,
+      ...(device.type === 'webgpu'
+        ? {colorAttachmentFormats: [maxWeightsTexture!.format as TextureFormatColor]}
+        : {}),
+      vertexCount:
+        device.type === 'webgpu'
+          ? Math.ceil(textureSize / MAX_WEIGHT_REDUCTION_SIZE) ** 2
+          : textureSize * textureSize,
       topology: 'point-list',
       parameters: {
         depthWriteEnabled: false,
+        blend: true,
         blendColorOperation: 'max',
         blendAlphaOperation: 'max',
         blendColorSrcFactor: 'one',
@@ -517,7 +575,7 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (this.props.coordinateSystem === 'lnglat') {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -556,19 +614,13 @@ export default class HeatmapLayer<
     let {colorTexture} = this.state;
     const colors = colorRangeToFlatArray(colorRange, false, Uint8Array as any);
 
-    if (colorTexture && colorTexture?.width === colorRange.length) {
-      // TODO(v9): Unclear whether `setSubImageData` is a public API, or what to use if not.
-      (colorTexture as any).setTexture2DData({data: colors});
-    } else {
-      colorTexture?.destroy();
-      // @ts-expect-error TODO(ib) - texture API change
-      colorTexture = this.context.device.createTexture({
-        ...TEXTURE_PROPS,
-        data: colors,
-        width: colorRange.length,
-        height: 1
-      });
-    }
+    colorTexture?.destroy();
+    colorTexture = this.context.device.createTexture({
+      ...TEXTURE_PROPS,
+      data: colors,
+      width: colorRange.length,
+      height: 1
+    });
     this.setState({colorTexture});
   }
 
@@ -589,7 +641,10 @@ export default class HeatmapLayer<
       const metersPerPixel =
         (viewport.distanceScales.metersPerUnit[2] * (commonBounds[2] - commonBounds[0])) /
         textureSize;
-      this.state.colorDomain = colorDomain.map(x => x * metersPerPixel * weightsScale);
+      this.state.colorDomain = [
+        colorDomain[0] * metersPerPixel * weightsScale,
+        colorDomain[1] * metersPerPixel * weightsScale
+      ];
     } else {
       this.state.colorDomain = colorDomain || DEFAULT_COLOR_DOMAIN;
     }
@@ -598,7 +653,13 @@ export default class HeatmapLayer<
     const attributes = attributeManager.getAttributes();
     const moduleSettings = this.getModuleSettings();
     this._setModelAttributes(weightsTransform.model, attributes);
-    weightsTransform.model.setVertexCount(this.getNumInstances());
+    if (this.context.device.type === 'webgpu') {
+      const instanceCount = this.getNumInstances();
+      weightsTransform.model.setVertexCount(instanceCount > 0 ? 6 : 0);
+      weightsTransform.model.setInstanceCount(instanceCount);
+    } else {
+      weightsTransform.model.setVertexCount(this.getNumInstances());
+    }
 
     const weightProps: WeightProps = {
       radiusPixels,
@@ -655,8 +716,7 @@ export default class HeatmapLayer<
 
     const offsetMode =
       useLayerCoordinateSystem &&
-      (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-        coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS);
+      (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
     const offsetOriginCommon = offsetMode
       ? viewport.projectPosition(this.props.coordinateOrigin)
       : [0, 0];

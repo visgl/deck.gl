@@ -12,6 +12,7 @@ import DataColumn, {
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
+import {toDoublePrecisionArray} from '../../utils/math-utils';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
@@ -49,6 +50,12 @@ export type AttributeOptions = DataColumnOptions<{
   transition?: boolean | Partial<TransitionSettings>;
   stepMode?: 'vertex' | 'instance' | 'dynamic';
   noAlloc?: boolean;
+  /**
+   * @internal
+   * WebGPU-only hint to publish compatible CPU-backed attributes through one shared vertex
+   * buffer. WebGL and unsupported grouped states retain the legacy standalone buffer path.
+   */
+  bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
   transform?: (value: any) => any;
@@ -59,6 +66,8 @@ export type BinaryAttribute = Partial<BufferAccessor> & {value?: TypedArray; buf
 
 type AttributeInternalState = {
   startIndices: NumericArray | null;
+  /** One unnormalized row retained for WebGPU buffer-group interleaving. */
+  constantValue: TypedArray | null;
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
   /** External binary supplied via accessor name */
@@ -77,6 +86,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   constructor(device: Device, opts: AttributeOptions) {
     super(device, opts, {
       startIndices: null,
+      constantValue: null,
       lastExternalBuffer: null,
       binaryValue: null,
       binaryAccessor: null,
@@ -182,7 +192,9 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
 
     if (settings.update) {
+      const wasConstant = this.isConstant;
       super.allocate(numInstances, state.updateRanges !== range.FULL);
+      state.layoutChanged ||= wasConstant && this.device.type === 'webgpu';
       return true;
     }
 
@@ -222,10 +234,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         !this.buffer ||
         this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
       ) {
-        this.setData({
-          value: this.value,
-          constant: this.constant
-        });
+        if (this.constant) {
+          // Route legacy constant updater output through the same path used by constant accessors.
+          const constantValue = this.value;
+          this.value = null;
+          this.setConstantValue(context, constantValue);
+        } else {
+          this.setData({
+            value: this.value,
+            constant: this.constant
+          });
+        }
         // Setting attribute.constant in updater is a legacy approach that interferes with allocation in the next cycle
         // Respect it here but reset after use
         this.constant = false;
@@ -254,18 +273,56 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
   // Use generic value
   // Returns true if successful
-  setConstantValue(value?: NumericArray): boolean {
+  setConstantValue(context: any, value?: any): boolean {
     if (value === undefined || typeof value === 'function') {
       return false;
     }
 
-    const hasChanged = this.setData({constant: true, value});
+    const wasConstant = this.isConstant;
+    const transformedValue =
+      this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+    const ArrayType = this.settings.defaultType;
+    // DataColumn normalizes constants for shader consumption. Buffer grouping needs the original
+    // vertex-format bytes so that interleaving preserves integer and normalized attribute formats.
+    this.state.constantValue = this._normalizeValue(
+      transformedValue,
+      new ArrayType(this.size),
+      0
+    ) as TypedArray;
+    const hasChanged = this.setData({constant: true, value: transformedValue});
+    if (this.device.type === 'webgpu') {
+      let bufferValue = this.state.constantValue;
+      if (
+        this.doublePrecision &&
+        (bufferValue instanceof Float32Array || bufferValue instanceof Float64Array)
+      ) {
+        // A zero low tuple must be present in the buffer on WebGPU even when the source is fp32.
+        bufferValue = toDoublePrecisionArray(bufferValue, {size: this.size});
+        this.setAccessor({
+          ...this.getAccessor(),
+          stride: this.size * 2 * Float32Array.BYTES_PER_ELEMENT
+        });
+      }
+      let buffer = this._buffer;
+      if (!buffer || buffer.byteLength < bufferValue.byteLength) {
+        buffer = this._createBuffer(bufferValue.byteLength);
+      }
+      buffer.write(bufferValue);
+      this.state.layoutChanged ||= !wasConstant;
+      // `constant` is the legacy updater signal; persistent state lives in DataColumn.isConstant.
+      this.constant = false;
+    }
 
     if (hasChanged) {
       this.setNeedsRedraw();
     }
     this.clearNeedsUpdate();
     return true;
+  }
+
+  /** Returns one row in its vertex-buffer representation for WebGPU buffer grouping. */
+  getConstantValue(): TypedArray | null {
+    return this.isConstant ? this.state.constantValue : null;
   }
 
   // Use external buffer
@@ -419,9 +476,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       numInstances: number;
     }
   ): void {
-    if (attribute.constant) {
-      return;
-    }
     const {settings, state, value, size, startIndices} = attribute;
 
     const {accessor, transform} = settings;
@@ -429,7 +483,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       state.binaryAccessor ||
       // @ts-ignore
       (typeof accessor === 'function' ? accessor : props[accessor]);
-
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = attribute.getVertexOffset(startRow);

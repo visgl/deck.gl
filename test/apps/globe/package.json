@@ -8,6 +8,6 @@
     "@deck.gl/layers": "^8.0.0"
   },
   "devDependencies": {
-    "vite": "^4.0.0"
+    "vite": "^7.3.1"
   }
 }

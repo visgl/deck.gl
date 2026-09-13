@@ -5,11 +5,12 @@
 /* global window */
 
 import React, {PureComponent} from 'react';
-import {Map} from 'react-map-gl/maplibre';
+import {Map, useControl} from 'react-map-gl/maplibre';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import autobind from 'react-autobind';
 
-import DeckGL from '@deck.gl/react';
-import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
+import {DeckGL} from '@deck.gl/react';
+import {View} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';
 import {RenderMetrics} from './render-metrics';
@@ -42,9 +43,15 @@ const INITIAL_VIEW_STATES = {
   }
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
+
+function DeckGLOverlay(props) {
+  const overlay = useControl(() => new MapLibreOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
 
 export default class DeckMap extends PureComponent {
   constructor(props) {
@@ -55,7 +62,6 @@ export default class DeckMap extends PureComponent {
       hoveredItem: null,
       clickedItem: null,
       queriedItems: null,
-
       enableDepthPickOnClick: false,
       metrics: null
     };
@@ -122,7 +128,7 @@ export default class DeckMap extends PureComponent {
   // Only show infovis layers in infovis mode and vice versa
   _layerFilter({layer, renderPass}) {
     const {settings} = this.props;
-    const isIdentity = layer.props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN;
+    const isIdentity = layer.props.coordinateSystem === 'cartesian';
     return settings.infovis ? isIdentity : !isIdentity;
   }
 
@@ -132,45 +138,36 @@ export default class DeckMap extends PureComponent {
       layers,
       views,
       effects,
-      settings: {pickingRadius, drawPickingColors, useDevicePixels}
+      settings: {pickingRadius, drawPickingColors, useDevicePixels, interleaved}
     } = this.props;
 
     return (
-      <div style={{backgroundColor: '#eeeeee'}}>
+      <div style={{backgroundColor: '#eeeeee', height: '100vh', width: '100vw'}}>
         <div style={{position: 'absolute', top: '10px', left: '100px', zIndex: 999}}>
           <RenderMetrics metrics={this.state.metrics} />
         </div>
-        <DeckGL
-          ref={this.deckRef}
-          id="default-deckgl-overlay"
-          layers={layers}
-          layerFilter={this._layerFilter}
-          views={views}
-          initialViewState={INITIAL_VIEW_STATES}
-          effects={effects}
-          pickingRadius={pickingRadius}
-          onHover={this._onHover}
-          onClick={this._onClick}
-          useDevicePixels={useDevicePixels}
-          debug={true}
-          drawPickingColors={drawPickingColors}
-          _onMetrics={this._onMetrics}
+        <Map
+          key={`map-${interleaved}`}
+          mapStyle={MAP_STYLE}
+          initialViewState={INITIAL_VIEW_STATES.basemap}
         >
-          <View id="basemap">
-            <Map key="map" mapStyle={MAP_STYLE} />
-            <ViewportLabel key="label">Map View</ViewportLabel>
-          </View>
-
-          <View id="first-person">
-            <ViewportLabel>First Person View</ViewportLabel>
-          </View>
-
-          <View id="infovis">
-            <ViewportLabel>Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
-          </View>
-
+          <DeckGLOverlay
+            layers={layers.map(l => l.clone({beforeId: 'watername_ocean'}))}
+            initialViewState={INITIAL_VIEW_STATES}
+            layerFilter={this._layerFilter}
+            {...(!interleaved && {views})}
+            effects={effects}
+            pickingRadius={pickingRadius}
+            onHover={this._onHover}
+            onClick={this._onClick}
+            useDevicePixels={useDevicePixels}
+            debug={true}
+            drawPickingColors={drawPickingColors}
+            _onMetrics={this._onMetrics}
+            interleaved={interleaved}
+          />
           <LayerInfo hovered={hoveredItem} clicked={clickedItem} queried={queriedItems} />
-        </DeckGL>
+        </Map>
       </div>
     );
   }

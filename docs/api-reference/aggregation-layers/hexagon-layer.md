@@ -1,4 +1,5 @@
 # HexagonLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {HexagonLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
@@ -89,7 +90,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {HexagonLayer, HexagonLayerPickingInfo} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {
@@ -170,7 +171,7 @@ Inherits from all [Base Layer](../core/layer.md) and [CompositeLayer](../core/co
 
 #### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
-* Default: `false`
+* Default: `true`
 
 When set to `true`, aggregation is performed on the GPU. 
 

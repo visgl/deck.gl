@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+export type LayerOverlayProps = {
+  slot?: 'bottom' | 'middle' | 'top';
+  beforeId?: string;
+};
+
 // Types that offer basic interface compatible with mapbox-gl and maplibre-gl
 
 type Listener = (event?: any) => any;
@@ -40,11 +45,11 @@ export type FreeCameraOptions = {
 };
 
 export interface IControl {
-  onAdd(map: Map): HTMLElement;
+  onAdd(map: unknown): HTMLElement;
 
-  onRemove(map: Map): void;
+  onRemove(map: unknown): void;
 
-  getDefaultPosition?: (() => string) | undefined;
+  getDefaultPosition?: (() => ControlPosition) | undefined;
 }
 
 export type ControlPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -111,6 +116,8 @@ export interface Map extends Evented {
 
   // mapbox v2+, maplibre v3+
   getTerrain?(): any;
+  // mapbox v2+, maplibre v5+
+  getProjection?(): any;
   // mapbox v2+
   getFreeCameraOptions?(): FreeCameraOptions;
 

@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 import {PolygonLayer} from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-test('PolygonLayer', t => {
+test('PolygonLayer', () => {
   const testCases = generateLayerTests({
     Layer: PolygonLayer,
     sampleProps: {
@@ -18,19 +18,20 @@ test('PolygonLayer', t => {
       getPolygon: f => f,
       getFillColor: (f, {index}) => [index, 0, 0]
     },
-    assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
+    onBeforeUpdate: ({testCase}) => console.log(testCase.title),
     onAfterUpdate({layer}) {
       if (layer.props.data && layer.props.data.length) {
-        t.ok(layer.state.paths.length, 'should update state.paths');
+        expect(layer.state.paths.length, 'should update state.paths').toBeTruthy();
       }
       if (Object.prototype.hasOwnProperty.call(layer.props, '_dataDiff') && layer.props._dataDiff) {
-        t.ok(Array.isArray(layer.state.pathsDiff), 'created diff for sub path layer');
+        expect(
+          Array.isArray(layer.state.pathsDiff),
+          'created diff for sub path layer'
+        ).toBeTruthy();
       }
     }
   });
 
-  testLayer({Layer: PolygonLayer, testCases, onError: t.notOk});
-
-  t.end();
+  testLayer({Layer: PolygonLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });

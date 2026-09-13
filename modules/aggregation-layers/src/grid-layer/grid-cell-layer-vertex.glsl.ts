@@ -12,7 +12,6 @@ in vec3 normals;
 in vec2 instancePositions;
 in float instanceElevationValues;
 in float instanceColorValues;
-in vec3 instancePickingColors;
 
 uniform sampler2D colorRange;
 
@@ -30,7 +29,7 @@ vec4 interp(float value, vec2 domain, sampler2D range) {
 }
 
 void main(void) {
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   if (isnan(instanceColorValues) ||
     instanceColorValues < grid.colorDomain.z ||

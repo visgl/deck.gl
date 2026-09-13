@@ -145,11 +145,7 @@ export default abstract class CompositeLayer<PropsT extends {} = {}> extends Lay
   /** Returns sub layer props for a specific sublayer */
   // eslint-disable-next-line complexity
   protected getSubLayerProps(
-    sublayerProps: {
-      id?: string;
-      updateTriggers?: Record<string, any>;
-      [propName: string]: any;
-    } = {}
+    sublayerProps: {id?: string; updateTriggers?: Record<string, any>; [propName: string]: any} = {}
   ): any {
     const {
       opacity,

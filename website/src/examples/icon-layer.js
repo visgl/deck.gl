@@ -47,6 +47,8 @@ class IconDemo extends Component {
 
   static code = `${GITHUB_TREE}/examples/website/icon`;
 
+  static hasDeviceTabs = true;
+
   static parameters = {
     cluster: {displayName: 'Cluster', type: 'checkbox', value: true}
   };
@@ -82,6 +84,8 @@ class IconDemo extends Component {
     return (
       <IconDemoContainer>
         <App
+          key={this.props.device?.type}
+          device={this.props.device}
           {...otherProps}
           data={data}
           iconAtlas={`${DATA_URI}/../examples/icon/location-icon-atlas.png`}

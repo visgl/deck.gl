@@ -93,6 +93,7 @@ export default class PlotLayer extends CompositeLayer<Required<_PlotLayerProps>>
     }
   }
 
+  // eslint-disable-next-line max-statements
   getSamples() {
     const {uCount, vCount, getPosition, onAxesChange} = this.props;
     const samples: Vec3[] = new Array(uCount * vCount);

@@ -12,7 +12,7 @@ jobs:
       should_build: ${{ steps.permitted.outputs.result }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Fetch remote branches
         run: |
@@ -30,22 +30,32 @@ jobs:
           echo "result=${result}" >> "$GITHUB_OUTPUT"
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: check_branch
     permissions:
       contents: write
+      id-token: write
 
     if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_build }}
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_ACCESS_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - uses: volta-cli/action@2d68418f32546fd191eb666e232b321d5726484d # v4.1.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          cache: 'yarn'
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Update npm
+        run: npm install --global npm@^11.15.0
+
+      - name: Enable Corepack
+        run: corepack enable yarn
 
       - name: Install dependencies
         run: yarn
@@ -54,10 +64,7 @@ jobs:
         run: yarn build
       
       - name: Run tests from transpiled code
-        run: npx ocular-test dist
-
-      - name: Login to NPM
-        run: npm config set "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}"
+        run: yarn test-fast
 
       - name: Publish to NPM
         run: npx ocular-publish from-git

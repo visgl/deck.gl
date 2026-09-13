@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable no-template-curly-in-string */
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
   ArcLayer,
   BitmapLayer,
@@ -157,11 +156,10 @@ export const PathLayerDemo = makeLayerDemo({
 export const PointCloudLayerDemo = makeLayerDemo({
   Layer: PointCloudLayer,
   getTooltip: `({object}) => object && object.position.join(', ')`,
-  imports: {COORDINATE_SYSTEM},
   props: `{
     data: '${DATA_URI}/pointcloud.json',
     pickable: true,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: [-122.4, 37.74],
     pointSize: 2,
     getPosition: d => d.position,

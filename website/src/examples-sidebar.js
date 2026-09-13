@@ -27,6 +27,8 @@ const sidebars = {
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
+        'global-grids',
+        // 'grid-layer',
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',
@@ -35,8 +37,10 @@ const sidebars = {
         'scatterplot-layer',
         'scenegraph-layer',
         'screen-grid-layer',
+        // 'simple-mesh-layer',
         'terrain-layer',
         'text-layer',
+        'text-layer-clipping',
         'tile-layer',
         'tile-layer-non-geospatial',
         'tile-3d-layer',
@@ -47,12 +51,12 @@ const sidebars = {
     {
       type: 'category',
       label: 'Integrations',
-      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox']
+      items: ['arcgis', 'carto', 'google-3d-tiles', 'google-maps', 'mapbox', 'maplibre']
     },
     {
       type: 'category',
       label: 'Views',
-      items: ['multi-view', 'globe-view', 'plot', 'orthographic-view', 'first-person-view']
+      items: ['multi-view', 'globe-view', 'plot', 'orthographic-view']
     },
     {
       type: 'category',
@@ -73,6 +77,11 @@ const sidebars = {
           type: 'link',
           label: 'Playground',
           href: `/playground`
+        },
+        {
+          type: 'link',
+          label: 'pydeck',
+          href: `/pydeck`
         }
       ]
     }

@@ -3,10 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import LayersPass from './layers-pass';
+import type {LayersPassRenderOptions, RenderStats} from './layers-pass';
 
 export default class DrawLayersPass extends LayersPass {
   shouldDrawLayer(layer) {
     const {operation} = layer.props;
     return operation.includes('draw') || operation.includes('terrain');
+  }
+
+  render(options: LayersPassRenderOptions): RenderStats[] {
+    return this._render(options);
   }
 }

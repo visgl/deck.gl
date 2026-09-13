@@ -1,4 +1,5 @@
 # PathLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {PathLayerDemo} from '@site/src/doc-demos/layers';
 
@@ -86,7 +87,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {PathLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -216,6 +217,14 @@ If `false`, the width always faces up.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `jointRounded` is `false`.
 
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+When enabled, this prop computes edge coverage in the shader. When disabled, the layer relies on render-target multisampling. Shader-computed coverage can cause artifacts where a path overlaps itself. Only the edges along the width of the path are smoothed — flat caps at the two ends of a path are not; set `capRounded` to `true` if those need smoothing.
+
+Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
+
 #### `_pathType` (object, optional) {#_pathtype}
 
 * Default: `null`
@@ -323,6 +332,19 @@ new PathLayer({
   },
   _pathType: 'open' // this instructs the layer to skip normalization and use the binary as-is
 })
+```
+
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, paths may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure paths are visible from both sides, set:
+
+```js
+new PathLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
 ```
 
 ## Source

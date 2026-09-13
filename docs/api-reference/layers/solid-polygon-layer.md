@@ -1,4 +1,5 @@
 # SolidPolygonLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {SolidPolygonLayerDemo} from '@site/src/doc-demos/layers';
 
@@ -85,7 +86,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -297,7 +298,7 @@ Only applies if `extruded: true`.
 
 This section is about the special requirements when [supplying attributes directly](../../developer-guide/performance.md#supply-attributes-directly) to a `SolidPolygonLayer`.
 
-Because each polygon has a different number of vertices, when `data.attributes.getPolygon` is supplied, the layer also requires an array `data.startIndices` that describes the vertex index at the start of each polygon. For example, if there are 3 polygons of 3, 4, and 5 vertices each (including the end vertex that overlaps with the first vertex to close the loop), `startIndices` should be `[0, 3, 7, 12]`. *Polygons with holes are not supported when using precalculated attributes.*
+Because each polygon has a different number of vertices, when `data.attributes.getPolygon` is supplied, the layer also requires an array `data.startIndices` that describes the vertex index at the start of each polygon. For example, if there are 3 polygons of 5, 6, and 7 vertices each (including the end vertex that overlaps with the first vertex to close the loop), `startIndices` should be `[0, 5, 13, 20]`. When the polygon data contains holes, an additional array must be passed as `data.attributes.vertexValid`. This array must be a mask where all vertices are `1` except for the index of the last vertex of each polygon ring, which should be `0`. For instance, if the second polygon contains an outer ring with 3 vertices followed by an inner ring of 3 vertices then `vertexValid` should be passed as `[1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0]`. For reference see https://github.com/visgl/deck.gl/blob/master/modules/layers/src/geojson-layer/geojson-layer-props.ts#L107-L111.
 
 Additionally, all other attributes (`getFillColor`, `getElevation`, etc.), if supplied, must contain the same layout (number of vertices) as the `getPolygon` buffer.
 

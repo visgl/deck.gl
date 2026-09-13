@@ -1,4 +1,5 @@
 # ScreenGridLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ScreenGridLayerDemo} from '@site/src/doc-demos/aggregation-layers';
 
@@ -97,7 +98,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScreenGridLayer, ScreenGridLayerPickingInfo} from '@deck.gl/aggregation-layers';
 
 type BikeRack = {

@@ -33,15 +33,17 @@ export default function evaluateChildren(
   return children;
 }
 
-export function isComponent(child: React.ReactNode): child is React.ReactElement {
-  return (child && typeof child === 'object' && 'type' in child) || false;
+export function isComponent(
+  child: React.ReactNode
+): child is React.ReactElement<Record<string, any>> {
+  return React.isValidElement(child);
 }
 
-function isReactMap(child: React.ReactElement): boolean {
+function isReactMap(child: React.ReactElement<Record<string, any>>): boolean {
   return child.props?.mapStyle;
 }
 
-function needsDeckGLViewProps(child: React.ReactElement): boolean {
+function needsDeckGLViewProps(child: React.ReactElement<Record<string, any>>): boolean {
   const componentClass = child.type;
   // @ts-expect-error deckGLViewProps is a custom hack defined on the constructor (nebula.gl)
   return componentClass && componentClass.deckGLViewProps;

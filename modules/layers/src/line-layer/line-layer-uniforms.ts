@@ -4,8 +4,8 @@
 
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
-uniform lineUniforms {
+const uniformBlockGLSL = /* glsl */ `\
+layout(std140) uniform lineUniforms {
   float widthScale;
   float widthMinPixels;
   float widthMaxPixels;
@@ -24,8 +24,9 @@ export type LineProps = {
 
 export const lineUniforms = {
   name: 'line',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: '',
+  vs: uniformBlockGLSL,
+  fs: uniformBlockGLSL,
   uniformTypes: {
     widthScale: 'f32',
     widthMinPixels: 'f32',

@@ -6,20 +6,21 @@ import {Texture} from '@luma.gl/core';
 import {UpdateParameters, Color} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
+import source from './hexagon-cell-layer.wgsl';
 import vs from './hexagon-cell-layer-vertex.glsl';
 import {HexagonProps, hexagonUniforms} from './hexagon-layer-uniforms';
 import type {ScaleType} from '../common/types';
 
 /** Proprties added by HexagonCellLayer. */
 export type _HexagonCellLayerProps = {
-  hexOriginCommon: [number, number];
-  colorDomain: [number, number];
-  colorCutoff: [number, number] | null;
+  hexOriginCommon: Readonly<[number, number]>;
+  colorDomain: Readonly<[number, number]>;
+  colorCutoff: Readonly<[number, number]> | null;
   colorRange: Color[];
   colorScaleType: ScaleType;
-  elevationDomain: [number, number];
-  elevationCutoff: [number, number] | null;
-  elevationRange: [number, number];
+  elevationDomain: Readonly<[number, number]>;
+  elevationCutoff: Readonly<[number, number]> | null;
+  elevationRange: Readonly<[number, number]>;
 };
 
 export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
@@ -35,7 +36,7 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
   getShaders() {
     const shaders = super.getShaders();
     shaders.modules.push(hexagonUniforms);
-    return {...shaders, vs};
+    return {...shaders, source, vs};
   }
 
   initializeState() {
@@ -107,13 +108,6 @@ export default class HexagonCellLayer<ExtraPropsT extends {} = {}> extends Colum
     const colorCutoff = this.props.colorCutoff || [-Infinity, Infinity];
     const elevationCutoff = this.props.elevationCutoff || [-Infinity, Infinity];
     const fillModel = this.state.fillModel!;
-
-    if (fillModel.vertexArray.indexBuffer) {
-      // indices are for drawing wireframe, disable them
-      // TODO - this should be handled in ColumnLayer?
-      fillModel.setIndexBuffer(null);
-    }
-    fillModel.setVertexCount(this.state.fillVertexCount);
 
     const hexagonProps: Omit<HexagonProps, 'colorRange'> = {
       colorDomain: [

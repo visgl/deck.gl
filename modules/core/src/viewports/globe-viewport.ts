@@ -2,18 +2,27 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, vec3, vec4} from '@math.gl/core';
+import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
-import {altitudeToFovy, fovyToAltitude} from '@math.gl/web-mercator';
-import {MAX_LATITUDE} from '@math.gl/web-mercator';
-
-import {vec3, vec4} from '@math.gl/core';
+import {mod} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
+const NORTH_UP_BEARING_THRESHOLD = 1;
 const EARTH_RADIUS = 6370972;
-const GLOBE_RADIUS = 256;
+export const GLOBE_RADIUS = 256;
+// Pointer correction depends on distance from the screen-space limb, not latitude.
+// Smoothly release edge and off-globe anchors so they converge to center without a snap.
+const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
+const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
+
+/** Returns whether a globe bearing uses the default north-up constraints. @internal */
+export function isGlobeNorthUp(bearing: number): boolean {
+  const normalizedBearing = mod(bearing + 180, 360) - 180;
+  return Math.abs(normalizedBearing) < NORTH_UP_BEARING_THRESHOLD;
+}
 
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
@@ -44,9 +53,13 @@ export type GlobeViewportOptions = {
   longitude?: number;
   /** Latitude in degrees */
   latitude?: number;
+  /** Bearing in degrees. Default `0` */
+  bearing?: number;
+  /** Pitch in degrees. Default `0` */
+  pitch?: number;
   /** Camera altitude relative to the viewport height, used to control the FOV. Default `1.5` */
   altitude?: number;
-  /* Meter offsets of the viewport center from lng, lat */
+  /* Meter offsets of the viewport center from lng, lat, elevation */
   position?: number[];
   /** Zoom level */
   zoom?: number;
@@ -58,18 +71,29 @@ export type GlobeViewportOptions = {
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default `1` */
   farZMultiplier?: number;
+  /** Optionally override the near plane position. `nearZMultiplier` is ignored if `nearZ` is supplied. */
+  nearZ?: number;
+  /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
+  farZ?: number;
   /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
   resolution?: number;
 };
 
 export default class GlobeViewport extends Viewport {
-  longitude!: number;
-  latitude!: number;
-  resolution!: number;
+  static displayName = 'GlobeViewport';
+
+  longitude: number;
+  latitude: number;
+  bearing: number;
+  pitch: number;
+  fovy: number;
+  resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
       longitude = 0,
+      bearing = 0,
+      pitch = 0,
       zoom = 0,
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
@@ -80,8 +104,8 @@ export default class GlobeViewport extends Viewport {
 
     let {latitude = 0, height, altitude = 1.5, fovy} = opts;
 
-    // Clamp to web mercator limit to prevent bad inputs
-    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+    // Clamp to valid range
+    latitude = Math.max(Math.min(latitude, 90), -90);
 
     height = height || 1;
     if (fovy) {
@@ -92,15 +116,34 @@ export default class GlobeViewport extends Viewport {
     // Exagerate distance by latitude to match the Web Mercator distortion
     // The goal is that globe and web mercator projection results converge at high zoom
     // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L575-L577
-    const scaleAdjust = 1 / Math.PI / Math.cos((latitude * Math.PI) / 180);
-    const scale = Math.pow(2, zoom) * scaleAdjust;
-    const farZ = altitude + (GLOBE_RADIUS * 2 * scale) / height;
+    // Cap latitude for scale calculation to avoid the singularity at the poles
+    // where cos(90°)=0 → scale→∞. GlobeController applies the same cap when
+    // compensating zoom during pan (MAX_LATITUDE).
+    const scaleLatitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+    const scale = Math.pow(2, zoom - zoomAdjust(scaleLatitude));
+    // Adjust far plane for pitch — tilted camera can see further across the globe
+    const pitchRadians = pitch * DEGREES_TO_RADIANS;
+    const nearZ = opts.nearZ ?? nearZMultiplier;
+    const farZ =
+      opts.farZ ??
+      (altitude + (GLOBE_RADIUS * 2 * scale) / height / Math.max(Math.cos(pitchRadians), 0.1)) *
+        farZMultiplier;
 
     // Calculate view matrix
-    const viewMatrix = new Matrix4().lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]});
-    viewMatrix.rotateX(latitude * DEGREES_TO_RADIANS);
-    viewMatrix.rotateZ(-longitude * DEGREES_TO_RADIANS);
-    viewMatrix.scale(scale / height);
+    // The lookAt places the camera along -Y looking toward origin.
+    // After the globe rotation (Rx(lat) * Rz(-lng)), the surface normal at the target
+    // aligns with -Y, East with +X, and North with +Z.
+    const viewMatrix = new Matrix4()
+      .lookAt({eye: [0, -altitude, 0], up: [0, 0, 1]})
+      // Pitch: tilt the camera away from straight-down
+      .rotateX(-pitchRadians)
+      // Bearing: rotate around the surface normal.
+      // Negative sign matches the WebMercator convention (bearing > 0 = clockwise from North).
+      .rotateY(-bearing * DEGREES_TO_RADIANS)
+      // Globe orientation: position the target's surface at the top
+      .rotateX(latitude * DEGREES_TO_RADIANS)
+      .rotateZ(-longitude * DEGREES_TO_RADIANS)
+      .scale(scale / height);
 
     super({
       ...opts,
@@ -117,13 +160,16 @@ export default class GlobeViewport extends Viewport {
       distanceScales: getDistanceScales(),
       fovy,
       focalDistance: altitude,
-      near: nearZMultiplier,
-      far: farZ * farZMultiplier
+      near: nearZ,
+      far: farZ
     });
 
     this.scale = scale;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.bearing = bearing;
+    this.pitch = pitch;
+    this.fovy = fovy;
     this.resolution = resolution;
   }
 
@@ -154,6 +200,92 @@ export default class GlobeViewport extends Viewport {
     ];
   }
 
+  /**
+   * Builds the screen-pixel → globe-center ray and the intermediate ray/sphere
+   * math reused by `unproject` and anchored zoom. One function so the same
+   * pixelUnprojectionMatrix work isn't duplicated.
+   */
+  private _getRayToGlobe(
+    screenPosition: number[],
+    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+  ): {
+    rayStartPosition: number[];
+    rayEndPosition: number[];
+    radius: number;
+    rayLengthSquared: number;
+    rayStartDistanceSquared: number;
+    distanceToCenterSquared: number;
+  } {
+    const [screenX, screenY] = screenPosition;
+    const adjustedScreenY = topLeft ? screenY : this.height - screenY;
+    const {pixelUnprojectionMatrix} = this;
+
+    const rayStartPosition = transformVector(pixelUnprojectionMatrix, [
+      screenX,
+      adjustedScreenY,
+      -1,
+      1
+    ]);
+    const rayEndPosition = transformVector(pixelUnprojectionMatrix, [
+      screenX,
+      adjustedScreenY,
+      1,
+      1
+    ]);
+
+    const radius = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
+    const rayLengthSquared = vec3.sqrLen(vec3.sub([], rayStartPosition, rayEndPosition));
+    const rayStartDistanceSquared = vec3.sqrLen(rayStartPosition);
+    const rayEndDistanceSquared = vec3.sqrLen(rayEndPosition);
+    const triangleAreaSquared =
+      (4 * rayStartDistanceSquared * rayEndDistanceSquared -
+        (rayLengthSquared - rayStartDistanceSquared - rayEndDistanceSquared) ** 2) /
+      16;
+    const distanceToCenterSquared = (4 * triangleAreaSquared) / rayLengthSquared;
+
+    return {
+      rayStartPosition,
+      rayEndPosition,
+      radius,
+      rayLengthSquared,
+      rayStartDistanceSquared,
+      distanceToCenterSquared
+    };
+  }
+
+  private _getRayDistanceToGlobeCenterRatio(
+    screenPosition: number[],
+    options?: {topLeft?: boolean; targetZ?: number}
+  ): number {
+    const {distanceToCenterSquared, radius} = this._getRayToGlobe(screenPosition, options);
+
+    return Math.sqrt(Math.max(0, distanceToCenterSquared)) / radius;
+  }
+
+  /**
+   * Returns how strongly a screen position should anchor zoom on the visible globe.
+   * A value of `0` means that the controller should fall back to center zoom.
+   * @param screenPosition - Screen position to evaluate.
+   * @returns Anchor strength from `0` to `1`.
+   */
+  getZoomAnchorStrength(screenPosition: number[]): number {
+    const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
+    if (distanceRatio >= GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+      return 0;
+    }
+
+    const edgeProgress = Math.max(
+      0,
+      Math.min(
+        1,
+        (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
+          (GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+      )
+    );
+    const smoothProgress = edgeProgress * edgeProgress * (3 - 2 * edgeProgress);
+    return 1 - smoothProgress;
+  }
+
   unproject(
     xyz: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
@@ -170,20 +302,24 @@ export default class GlobeViewport extends Viewport {
     } else {
       // since we don't know the correct projected z value for the point,
       // unproject two points to get a line and then find the point on that line that intersects with the sphere
-      const coord0 = transformVector(pixelUnprojectionMatrix, [x, y2, -1, 1]);
-      const coord1 = transformVector(pixelUnprojectionMatrix, [x, y2, 1, 1]);
+      const {
+        rayStartPosition,
+        rayEndPosition,
+        radius,
+        rayLengthSquared,
+        rayStartDistanceSquared,
+        distanceToCenterSquared
+      } = this._getRayToGlobe(xyz, {topLeft, targetZ});
+      const rayStartToClosestApproach = Math.sqrt(
+        rayStartDistanceSquared - distanceToCenterSquared
+      );
+      const closestApproachToIntersection = Math.sqrt(
+        Math.max(0, radius * radius - distanceToCenterSquared)
+      );
+      const intersectionRatio =
+        (rayStartToClosestApproach - closestApproachToIntersection) / Math.sqrt(rayLengthSquared);
 
-      const lt = ((targetZ || 0) / EARTH_RADIUS + 1) * GLOBE_RADIUS;
-      const lSqr = vec3.sqrLen(vec3.sub([], coord0, coord1));
-      const l0Sqr = vec3.sqrLen(coord0);
-      const l1Sqr = vec3.sqrLen(coord1);
-      const sSqr = (4 * l0Sqr * l1Sqr - (lSqr - l0Sqr - l1Sqr) ** 2) / 16;
-      const dSqr = (4 * sSqr) / lSqr;
-      const r0 = Math.sqrt(l0Sqr - dSqr);
-      const dr = Math.sqrt(Math.max(0, lt * lt - dSqr));
-      const t = (r0 - dr) / Math.sqrt(lSqr);
-
-      coord = vec3.lerp([], coord0, coord1, t);
+      coord = vec3.lerp([], rayStartPosition, rayEndPosition, intersectionRatio);
     }
     const [X, Y, Z] = this.unprojectPosition(coord);
 
@@ -223,13 +359,70 @@ export default class GlobeViewport extends Viewport {
     return xyz as [number, number];
   }
 
-  panByPosition(coords: number[], pixel: number[]): GlobeViewportOptions {
-    const fromPosition = this.unproject(pixel);
-    return {
-      longitude: coords[0] - fromPosition[0] + this.longitude,
-      latitude: coords[1] - fromPosition[1] + this.latitude
-    };
+  /**
+   * Pan the globe to place geographic coordinates at a screen pixel.
+   * When `dragStartPosition` is supplied, applies the delta-based movement used by globe dragging.
+   * @param coordinates - Geographic anchor, or the starting longitude, latitude and zoom.
+   * @param screenPosition - Current screen position.
+   * @param dragStartPosition - Screen position where a drag started.
+   * @returns Updated viewport options.
+   */
+  panByPosition(
+    coordinates: number[],
+    screenPosition: number[],
+    dragStartPosition?: number[]
+  ): GlobeViewportOptions {
+    if (!dragStartPosition) {
+      let anchorStrength = this.getZoomAnchorStrength(screenPosition);
+      if (anchorStrength === 0) {
+        return {longitude: this.longitude, latitude: this.latitude};
+      }
+
+      const currentCoordinates = this.unproject(screenPosition);
+      const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
+      const latitudeDelta = coordinates[1] - currentCoordinates[1];
+      const crossesPole =
+        Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90;
+      if (isGlobeNorthUp(this.bearing) && crossesPole) {
+        // A zoom gesture keeps its original geographic anchor. Once the
+        // pointer crosses a pole it can reappear in the opposite hemisphere,
+        // reversing longitude. Continue zooming around center in either case.
+        return {longitude: this.longitude, latitude: this.latitude};
+      }
+      if (isGlobeNorthUp(this.bearing) && latitudeDelta !== 0) {
+        // Longitude and latitude are one coupled correction. If north-up runs
+        // out of latitude headroom, scale both axes together instead of
+        // clipping latitude while applying the full sideways rotation.
+        const latitudeLimit = latitudeDelta > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
+        const latitudeConstraintStrength = (latitudeLimit - this.latitude) / latitudeDelta;
+        anchorStrength = Math.min(anchorStrength, Math.max(0, latitudeConstraintStrength));
+      }
+      const longitude = this.longitude + longitudeDelta * anchorStrength;
+      const latitude = Math.max(Math.min(this.latitude + latitudeDelta * anchorStrength, 90), -90);
+
+      return {longitude, latitude};
+    }
+
+    const [startLongitude, startLatitude, startZoom] = coordinates;
+    // Scale rotation speed inversely with zoom, to approximate constant panning speed
+    const scale = Math.pow(2, this.zoom - zoomAdjust(this.latitude));
+    const rotationSpeed = 0.25 / scale;
+
+    const longitude = startLongitude + rotationSpeed * (dragStartPosition[0] - screenPosition[0]);
+    let latitude = startLatitude - rotationSpeed * (dragStartPosition[1] - screenPosition[1]);
+    latitude = Math.max(Math.min(latitude, 90), -90);
+    const nextViewState = {longitude, latitude, zoom: startZoom - zoomAdjust(startLatitude)};
+    nextViewState.zoom += zoomAdjust(nextViewState.latitude);
+    return nextViewState;
   }
+}
+
+export function zoomAdjust(latitude: number, clampToPoles?: boolean): number {
+  if (clampToPoles) {
+    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
+  }
+  const scaleAdjust = Math.PI * Math.cos((latitude * Math.PI) / 180);
+  return Math.log2(scaleAdjust);
 }
 
 function transformVector(matrix: number[], vector: number[]): number[] {

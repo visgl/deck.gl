@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import AggregationLayer from '@deck.gl/aggregation-layers/heatmap-layer/aggregation-layer';
 import {Layer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer} from '@deck.gl/test-utils/vitest';
 
 const BASE_LAYER_ID = 'composite-layer-id';
 const defaultProps = {
@@ -71,16 +71,15 @@ class TestAggregationLayer extends AggregationLayer {
 TestAggregationLayer.layerName = 'TestAggregationLayer';
 TestAggregationLayer.defaultProps = defaultProps;
 
-test('AggregationLayer#constructor', t => {
+test('AggregationLayer#constructor', () => {
   const layer = new TestAggregationLayer(Object.assign({id: BASE_LAYER_ID}, defaultProps));
-  t.ok(layer, 'AggregationLayer created');
-  t.end();
+  expect(layer, 'AggregationLayer created').toBeTruthy();
 });
 
-test('AggregationLayer#updateState', t => {
+test('AggregationLayer#updateState', () => {
   testLayer({
     Layer: TestAggregationLayer,
-    onError: t.notOk,
+    onError: err => expect(err).toBeFalsy(),
     testCases: [
       {
         props: {
@@ -91,10 +90,19 @@ test('AggregationLayer#updateState', t => {
           prop1: 10
         },
         onAfterUpdate({layer}) {
-          t.ok(layer.getAttributeManager(), 'should create AttributeManager');
-          t.ok(layer.state.aggregationDirty, 'Aggregation should be dirty on the first update');
-          t.ok(layer.state.anyAttributeChanged, 'All attributes should change on first update');
-          t.ok(layer.state.aOneAttributeChanged, 'Attribute should change on first update');
+          expect(layer.getAttributeManager(), 'should create AttributeManager').toBeTruthy();
+          expect(
+            layer.state.aggregationDirty,
+            'Aggregation should be dirty on the first update'
+          ).toBeTruthy();
+          expect(
+            layer.state.anyAttributeChanged,
+            'All attributes should change on first update'
+          ).toBeTruthy();
+          expect(
+            layer.state.aOneAttributeChanged,
+            'Attribute should change on first update'
+          ).toBeTruthy();
         }
       },
       {
@@ -107,14 +115,14 @@ test('AggregationLayer#updateState', t => {
         },
         spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({spies, layer}) {
-          t.ok(spies.updateAttributes.called, 'should always call updateAttributes');
-          t.notOk(
-            spies.updateShaders.called,
+          expect(spies.updateAttributes, 'should always call updateAttributes').toHaveBeenCalled();
+          expect(
+            spies.updateShaders,
             'should not call updateShaders when extensions not changed'
-          );
-          t.notOk(layer.state.aggregationDirty, 'Aggregation should not be dirty');
-          t.ok(layer.state.anyAttributeChanged, 'Should change one attribute');
-          t.notOk(layer.state.aOneAttributeChanged, 'Should not update attribute');
+          ).not.toHaveBeenCalled();
+          expect(layer.state.aggregationDirty, 'Aggregation should not be dirty').toBeFalsy();
+          expect(layer.state.anyAttributeChanged, 'Should change one attribute').toBeTruthy();
+          expect(layer.state.aOneAttributeChanged, 'Should not update attribute').toBeFalsy();
         }
       },
       {
@@ -123,10 +131,10 @@ test('AggregationLayer#updateState', t => {
         },
         spies: ['updateShaders', 'updateAttributes'],
         onAfterUpdate({layer}) {
-          t.ok(
+          expect(
             layer.state.aggregationDirty,
             'Aggregation should be dirty when an aggregation prop is changed'
-          );
+          ).toBeTruthy();
         }
       },
       {
@@ -135,8 +143,14 @@ test('AggregationLayer#updateState', t => {
         },
         spies: ['updateShaders'],
         onAfterUpdate({spies, layer}) {
-          t.ok(spies.updateShaders.called, 'should call updateShaders when extensions changed');
-          t.ok(layer.state.aggregationDirty, 'Aggregation should be dirty when extensions changed');
+          expect(
+            spies.updateShaders,
+            'should call updateShaders when extensions changed'
+          ).toHaveBeenCalled();
+          expect(
+            layer.state.aggregationDirty,
+            'Aggregation should be dirty when extensions changed'
+          ).toBeTruthy();
         }
       },
       {
@@ -145,7 +159,10 @@ test('AggregationLayer#updateState', t => {
         },
         spies: ['updateState'],
         onAfterUpdate({spies, layer}) {
-          t.notOk(spies.updateState.called, 'should not call updateState nothing changed');
+          expect(
+            spies.updateState,
+            'should not call updateState nothing changed'
+          ).not.toHaveBeenCalled();
         }
       },
       {
@@ -153,14 +170,12 @@ test('AggregationLayer#updateState', t => {
           filterEnabled: false // default true earlier
         },
         onAfterUpdate({layer}) {
-          t.ok(
+          expect(
             layer.state.aggregationDirty,
             'Aggregation should be dirty when extension prop is changed'
-          );
+          ).toBeTruthy();
         }
       }
     ]
   });
-
-  t.end();
 });

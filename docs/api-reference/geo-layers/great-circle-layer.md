@@ -91,7 +91,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GreatCircleLayer} from '@deck.gl/geo-layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -171,6 +171,19 @@ new deck.GreatCircleLayer({});
 ## Properties
 
 Inherits from all [Base Layer](../core/layer.md) and [ArcLayer](../layers/arc-layer.md) properties.
+
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, arcs may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure arcs are visible from both sides, set:
+
+```js
+new GreatCircleLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
+```
 
 ## Source
 

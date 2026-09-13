@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import test from 'tape-promise/tape';
+import {test, expect} from 'vitest';
 import {replaceInRange} from '@deck.gl/layers/utils';
 
 const TEST_DATA = ['A0', 'A1', 'A2', 'B0', 'B1', 'C0', 'D0', 'D1', 'D2', 'D3'];
@@ -52,7 +52,7 @@ const TEST_CASES = [
   }
 ];
 
-test('replaceInRange', t => {
+test('replaceInRange', () => {
   for (const testCase of TEST_CASES) {
     const data = TEST_DATA.slice();
     const outDataRange = replaceInRange({
@@ -61,8 +61,7 @@ test('replaceInRange', t => {
       dataRange: testCase.dataRange,
       replace: testCase.replace
     });
-    t.deepEquals(data, testCase.result, `${testCase.title} replaces sub data`);
-    t.deepEquals(outDataRange, testCase.returns, `${testCase.title} returns correct reult`);
+    expect(data, `${testCase.title} replaces sub data`).toEqual(testCase.result);
+    expect(outDataRange, `${testCase.title} returns correct reult`).toEqual(testCase.returns);
   }
-  t.end();
 });

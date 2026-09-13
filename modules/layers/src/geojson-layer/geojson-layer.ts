@@ -166,6 +166,15 @@ type _GeoJsonLayerStrokeProps<FeaturePropertiesT> = {
   lineCapRounded?: boolean;
 
   /**
+   * If `true`, lines are rendered with smoothed edges. If `false`, lines are rendered with rough
+   * edges. Antialiasing can cause artifacts where a line overlaps itself. Only the edges along the
+   * width of the line are smoothed - flat caps at the two ends are not.
+   *
+   * @default false
+   */
+  lineAntialiasing?: boolean;
+
+  /**
    * If `true`, extrude the line in screen space (width always faces the camera).
    * If `false`, the width always faces up.
    *
@@ -216,7 +225,7 @@ type _GeoJsonLayer3DProps<FeaturePropertiesT> = {
    *
    * @default 1
    */
-  elevationScale?: boolean;
+  elevationScale?: number;
 
   /**
    * Material settings for lighting effect. Applies to extruded polgons.
@@ -367,7 +376,7 @@ export default class GeoJsonLayer<
 
   private _updateStateBinary({props, changeFlags}): void {
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const layerProps = createLayerPropsFromBinary(props.data, this.encodePickingColor);
+    const layerProps = createLayerPropsFromBinary(props.data);
     this.setState({layerProps});
   }
 
@@ -535,11 +544,13 @@ export default class GeoJsonLayer<
         let pointsLayerProps = layerProps.points;
 
         if (type === 'text' && binary) {
-          // Picking colors are per-point but for text per-character are required
+          // Picking indexes are per-point but for text per-character are required
           // getPickingInfo() maps back to the correct index
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           // @ts-expect-error TODO - type binary data
-          const {instancePickingColors, ...rest} = pointsLayerProps.data.attributes;
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const {rowIndexes, ...rest} = pointsLayerProps.data.attributes;
           pointsLayerProps = {
             ...pointsLayerProps,
             // @ts-expect-error TODO - type binary data

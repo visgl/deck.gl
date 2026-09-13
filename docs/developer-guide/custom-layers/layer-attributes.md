@@ -55,7 +55,7 @@ For _variable primitive layers_ there are two options:
 
 2) Copy each descriptive attribute `N` times (`N` being the number of vertices generated for that row during tesselation). This is the method that is used in deck.gl today.
 
-3) Add a single `rowIndex` attribute and copy the same index `N` times as above. In this approach, descriptive values could then be read from textures where they are stored a single time. This provides flexibility at the price of performance (texture access latency) and complexity (working with data in textures).
+3) Add a single `rowIndexes` attribute and copy the same index `N` times as above. In this approach, descriptive values could then be read from textures where they are stored a single time. This provides flexibility at the price of performance (texture access latency) and complexity (working with data in textures).
 
 
 Remarks:

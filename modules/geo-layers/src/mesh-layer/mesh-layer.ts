@@ -4,15 +4,16 @@
 
 import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
-import {pbrMaterial} from '@luma.gl/shadertools';
 import {Model} from '@luma.gl/engine';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
 import {MeshProps, meshUniforms} from './mesh-layer-uniforms';
+import {meshPbrMaterial} from './mesh-pbr-material';
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
+import source from './mesh-layer.wgsl';
 
 export type Mesh = {
   attributes: MeshAttributes;
@@ -62,9 +63,13 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   getShaders() {
     const shaders = super.getShaders();
-    const modules = shaders.modules;
-    modules.push(pbrMaterial, meshUniforms);
-    return {...shaders, vs, fs};
+    return {
+      ...shaders,
+      vs,
+      fs,
+      source,
+      modules: [...shaders.modules, meshPbrMaterial, meshUniforms]
+    };
   }
 
   initializeState() {
@@ -75,12 +80,13 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     if (featureIds) {
       // attributeManager is always defined in a primitive layer
       attributeManager!.add({
-        featureIdsPickingColors: {
-          type: 'uint8',
-          size: 3,
+        /** Feature id for each mesh vertex. */
+        rowIndexes: {
+          type: 'uint32',
+          size: 1,
           noAlloc: true,
           // eslint-disable-next-line @typescript-eslint/unbound-method
-          update: this.calculateFeatureIdsPickingColors
+          update: this.calculateFeatureIdsPickingIndexes
         }
       });
     }
@@ -105,8 +111,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       pickFeatureIds: Boolean(featureIds)
     };
     const pbrProjectionProps = {
-      // Needed for PBR (TODO: find better way to get it)
-      camera: model.uniforms.cameraPosition as [number, number, number]
+      camera: this.context.viewport.cameraPosition as [number, number, number]
     };
     model.shaderInputs.setProps({
       pbrProjection: pbrProjectionProps,
@@ -131,7 +136,8 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       defines: {
         ...shaders.defines,
         ...parsedPBRMaterial?.defines,
-        HAS_UV_REGIONS: mesh.attributes.uvRegions ? 1 : 0
+        HAS_UV_REGIONS: mesh.attributes.uvRegions ? 1 : 0,
+        HAS_FEATURE_IDS: this.props.featureIds ? 1 : 0
       },
       parameters: parsedPBRMaterial?.parameters,
       isInstanced: true
@@ -150,10 +156,14 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
       const {pbr_baseColorSampler} = parsedPBRMaterial.bindings;
       const {emptyTexture} = this.state;
+      const meshTexture = pbr_baseColorSampler || emptyTexture;
       const simpleMeshProps = {
-        sampler: pbr_baseColorSampler || emptyTexture,
+        ...(this.context.device.type === 'webgpu'
+          ? {simpleMeshTexture: meshTexture}
+          : {sampler: meshTexture}),
         hasTexture: Boolean(pbr_baseColorSampler)
       };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const {camera, ...pbrMaterialProps} = {
         ...parsedPBRMaterial.bindings,
         ...parsedPBRMaterial.uniforms
@@ -179,21 +189,10 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     );
   }
 
-  calculateFeatureIdsPickingColors(attribute) {
+  calculateFeatureIdsPickingIndexes(attribute) {
     // This updater is only called if featureIds is not null
     const featureIds = this.props.featureIds!;
-    const value = new Uint8ClampedArray(featureIds.length * attribute.size);
-
-    const pickingColor = [];
-    for (let index = 0; index < featureIds.length; index++) {
-      this.encodePickingColor(featureIds[index], pickingColor);
-
-      value[index * 3] = pickingColor[0];
-      value[index * 3 + 1] = pickingColor[1];
-      value[index * 3 + 2] = pickingColor[2];
-    }
-
-    attribute.value = value;
+    attribute.value = new Uint32Array(featureIds);
   }
 
   finalizeState(context: LayerContext) {

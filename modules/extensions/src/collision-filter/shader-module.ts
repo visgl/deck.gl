@@ -11,7 +11,7 @@ in float collisionPriorities;
 
 uniform sampler2D collision_texture;
 
-uniform collisionUniforms {
+layout(std140) uniform collisionUniforms {
   bool sort;
   bool enabled;
 } collision;

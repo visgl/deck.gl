@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
+import {Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
+import {getShaderWGSL} from './scatterplot-layer.wgsl';
+import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -21,7 +22,7 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 /** All props supported by the ScatterplotLayer */
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
@@ -117,6 +118,11 @@ type _ScatterplotLayerProps<DataT> = {
    */
   getLineWidth?: Accessor<DataT, number>;
   /**
+   * Pixel offset accessor, [x, y] in pixels.
+   * @default [0, 0]
+   */
+  getPixelOffset?: Accessor<DataT, Readonly<[number, number]>>;
+  /**
    * @deprecated Use `getLineWidth` instead
    */
   strokeWidth?: number;
@@ -151,6 +157,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
 
   // deprecated
   strokeWidth: {deprecatedFor: 'getLineWidth'},
@@ -170,14 +177,33 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   };
 
   getShaders() {
+    const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, picking, scatterplotUniforms]
+      source: getShaderWGSL(useRowIndexes),
+      defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
+      modules: [
+        project32,
+        color,
+        picking,
+        scatterplotUniforms,
+        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
+      ]
     });
   }
 
   initializeState() {
+    const attributes: Record<string, any> = (this.props.data as any)?.attributes?.rowIndexes
+      ? {
+          /** Caller-provided logical picking index per point instance. */
+          rowIndexes: {
+            size: 1,
+            type: 'uint32',
+            noAlloc: true
+          }
+        }
+      : {};
     this.getAttributeManager()!.addInstanced({
       instancePositions: {
         size: 3,
@@ -190,28 +216,39 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         size: 1,
         transition: true,
         accessor: 'getRadius',
-        defaultValue: 1
+        defaultValue: 1,
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
         transition: true,
         type: 'unorm8',
         accessor: 'getFillColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: [0, 0, 0, 255],
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
         transition: true,
         type: 'unorm8',
         accessor: 'getLineColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: [0, 0, 0, 255],
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
         size: 1,
         transition: true,
         accessor: 'getLineWidth',
-        defaultValue: 1
-      }
+        defaultValue: 1,
+        bufferGroup: 'scatterplot-instance-data'
+      },
+      instancePixelOffset: {
+        size: 2,
+        transition: true,
+        accessor: 'getPixelOffset',
+        bufferGroup: 'scatterplot-instance-data'
+      },
+      ...attributes
     });
   }
 

@@ -1,77 +1,70 @@
 # Widget
 
-A widget is a UI component that can interact with deck.gl's cameras and layers. Some examples are:
+A widget is a UI component that can interact with deck.gl's layers and views.
+You can write your own widgets, or use any of the many ready-to-use widgets in the [`@deck.gl/widgets`](../widgets/overview.md) module.
 
-- A tooltip that follows the pointer and provide information for the hovered object
-- A marker pinned to a geo-location containing HTML content
-- Buttons to manipulate the camera, such as +/- zoom buttons, a compass rose for the MapView, a gimble widget for the OrbitView, etc.
-- A legend that offers visual comparison of sizes, colors etc. corresponding to the rendered layers and viewport. For example a distance ruler, a color scale for the HeatmapLayer, etc.
+## Usage
 
-You may find many ready-to-use widgets in the `@deck.gl/widgets` module.
+The `Widget` class is a base class used to define new widgets and should not be instantiated directly by an application. See the [Widget Documentation](../widgets/overview.md) for information about how to write your own widgets.
 
-A widget is expected to implement the `Widget` interface. Here is a custom widget that shows a spinner while layers are loading:
+## Types 
+
+### `WidgetProps` (object) {#widgetprops}
+
+Options for the widget, as passed into the constructor and can be updated with `setProps`.
+
+#### `id` (string, optional) {#id}
+
+* Default: the widget's name.
+
+The `id` string must be unique among all your widgets at a given time. While a default `id` is provided, it is recommended to set `id` explicitly if you have multiple widgets of the same type.
+
+Remarks:
+
+* `id` is used to match widgets between rendering calls. deck.gl requires each widget to have a unique `id`. A default `id` is assigned based on widget type, which means if you are using more than one widget of the same type (e.g. two `InfoWidget`s) you need to provide a custom `id` for at least one of them.
+
+#### `style` (object, optional) {#style}
+
+* Default: `{}`
+
+Additional inline CSS styles on the top HTML element of the widget. camelCase CSS properties (e.g. `backgroundColor`) and kebab-case CSS variables are accepted (e.g. `--button-size`).
 
 ```ts
-import {Deck, Widget} from '@deck.gl/core';
-
-class LoadingIndicator implements Widget {
-  element?: HTMLDivElement;
-  size: number;
-
-  constructor(options: {
-    size: number;
-  }) {
-    this.id = 'loading-indicator'
-    this.size = options.size;
-  }
-
-  onAdd() {
-    const el = document.createElement('div');
-    el.className = 'spinner';
-    el.style.width = `${this.size}px`;
-    // TODO - create animation for .spinner in the CSS stylesheet
-    this.element = el;
-    return el;
-  }
-
-  onRedraw({layers}) {
-    const isVisible = layers.some(layer => !layer.isLoaded);
-    this.element.style.display = isVisible ? 'block' : 'none';
-  }
-}
-
-new Deck({
-  widgets: [new LoadingIndicator({size: 48})]
-});
+  style?: Partial<CSSStyleDeclaration>;
 ```
 
-## Widget Interface
+#### `className` (string, optional) {#classname}
 
-When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
+* Default: `''`
 
-### Members
+Additional CSS classnames on the top HTML element.
 
-A `Widget` implements the following members.
+#### `_container` (string | HTMLDivElement, optional) {#_container}
 
-#### `id` {#id}
+Experimental. Selects the DOM container used for this widget. Defaults to `viewId`.
 
-Unique identifier of the widget.
+- If set to `'root'`, the widget is placed relative to the shared widget root.
+- If set to a valid view id, the widget is placed relative to that view.
+- If set to an HTMLElement, `placement` is ignored and the widget is appended into the given element.
 
-#### `props` (object) {#props}
+Deck-managed containers remain under one shared widget root. In multi-canvas mode, a view-specific container is positioned using the bounds of the presentation canvas assigned to that view; the widget is not appended to the canvas element.
 
-Any options for the widget, as passed into the constructor and can be updated with `setProps`.
+
+### Additional `WidgetProps` on UI Widgets
 
 #### `viewId` (string | null) {#viewid}
 
 * Default: `null`
 
-The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
+The `viewId` prop controls both positioning and event scope. If defined, the widget is positioned relative to the matching view and only responds to events inside that view. If `null`, the widget is positioned in the shared root widget container and receives events from all views.
+
+In multi-canvas mode, the matching view's `canvasId` determines which presentation-canvas bounds are used to position the widget. The widget DOM remains under the shared widget root rather than being reparented into that canvas.
 
 #### `placement` (string, optional) {#placement}
 
 * Default: `'top-left'`
 
-Widget positioning within the view. One of:
+Widget positioning within the selected view, or within the shared widget root when `viewId` is `null`. One of:
 
 - `'top-left'`
 - `'top-right'`
@@ -79,7 +72,23 @@ Widget positioning within the view. One of:
 - `'bottom-right'`
 - `'fill'`
 
-### Methods
+### Methods for Widget Writers
+
+#### `constructor` {#constructor}
+
+Supply the props and default props to the base class.
+
+#### `setProps` {#setprops}
+
+Called to update widget options.
+
+#### `updateHTML` {#updatehtml}
+
+Updates the widget. Called by the specific widget when state has changed. Calls `onRenderHTML()`
+
+#### `onRenderHTML` {#onrenderhtml}
+
+This function is implemented by the specific widget subclass to update the HTML for the widget
 
 #### `onAdd` {#onadd}
 
@@ -96,10 +105,6 @@ Returns an optional UI element that should be appended to the Deck container.
 #### `onRemove` {#onremove}
 
 Optional. Called when the widget is removed.
-
-#### `setProps` {#setprops}
-
-Optional. Called to update widget options.
 
 #### `onViewportChange` {#onviewportchange}
 

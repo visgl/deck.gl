@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 export function createRenderTarget(
   device: Device,
@@ -22,7 +22,9 @@ export function createRenderTarget(
           format: 'rgba32float',
           type: GL.FLOAT
         }),
-        mipmaps: false,
+        dimension: '2d',
+        width: 1,
+        height: 1,
         sampler:
           opts.interpolate === false
             ? {

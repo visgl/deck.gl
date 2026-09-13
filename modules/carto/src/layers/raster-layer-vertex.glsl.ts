@@ -13,8 +13,6 @@ in float instanceElevations;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
 
-in vec3 instancePickingColors;
-
 // Result
 out vec4 vColor;
 #ifdef FLAT_SHADING
@@ -41,10 +39,14 @@ void main(void) {
   // Get position directly from quadbin, rather than projecting
   // Important to set geometry.position before using project_ methods below
   // as geometry.worldPosition is not set (we don't know our lat/long)
-  geometry.position = vec4(tileOrigin + cellCenter, 0.0, 1.0);
+  geometry.position = vec4(tileOrigin, 0.0, 1.0);
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
     geometry.position.xyz -= project.commonOrigin;
   }
+
+  // Important to apply after tileOrigin & commonOrigin as they are large values which often
+  // cancel and thus cellCenter precision is lost if applied first.
+  geometry.position.xy += cellCenter;
 
   // calculate elevation, if 3d not enabled set to 0
   // cylindar geometry height are between -1.0 to 1.0, transform it to between 0, 1
@@ -63,7 +65,7 @@ void main(void) {
     }
   }
 
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   // Cell coordinates centered on origin
   vec2 base = positions.xy * scale * strokeOffsetRatio * column.coverage * shouldRender;

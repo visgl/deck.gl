@@ -3,8 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
-import test from 'tape-promise/tape';
-import convertFunctions from '@deck.gl/json/helpers/convert-functions';
+import {test, expect} from 'vitest';
+import {JSONConfiguration} from '@deck.gl/json';
+import {convertFunctions} from '@deck.gl/json/helpers/convert-functions';
+
+const TEST_CONFIGURATION = new JSONConfiguration({constants: {}, functions: {}});
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
@@ -80,35 +83,36 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-test('convertFunctions#asStrings', t => {
+test('convertFunctions#asStrings', () => {
   const props = {};
   TEST_CASES.forEach((testCase, i) => {
     // Add a mix of function and value props
     props[`value-{i}`] = testCase.expr;
   });
-  const convertedProps = convertFunctions(props, {});
+  const convertedProps = convertFunctions(props, TEST_CONFIGURATION);
   for (const key in convertedProps) {
-    t.ok(
+    expect(
       typeof convertedProps[key] !== 'function',
       'convertFunctions did not convert string to function'
-    );
+    ).toBeTruthy();
   }
-  t.end();
 });
 
-test('convertFunctions#asFunctions', t => {
+test('convertFunctions#asFunctions', () => {
   const props = {};
   TEST_CASES.forEach((testCase, i) => {
     props[`func-{i}`] = `@@=${testCase.expr}`;
   });
-  const convertedProps = convertFunctions(props, {});
+  const convertedProps = convertFunctions(props, TEST_CONFIGURATION);
   for (const key in convertedProps) {
-    t.ok(typeof convertedProps[key] === 'function', 'convertFunctions converted prop to function');
+    expect(
+      typeof convertedProps[key] === 'function',
+      'convertFunctions converted prop to function'
+    ).toBeTruthy();
   }
-  t.end();
 });
 
-test('convertFunctions#assureAllKeysPresent', t => {
+test('convertFunctions#assureAllKeysPresent', () => {
   const EXAMPLE_PROPS = {
     data: 'shp.geojson',
     stroked: true,
@@ -118,21 +122,20 @@ test('convertFunctions#assureAllKeysPresent', t => {
     opacity: 0.9
   };
 
-  const convertedProps = convertFunctions(EXAMPLE_PROPS, {});
+  const convertedProps = convertFunctions(EXAMPLE_PROPS, TEST_CONFIGURATION);
   for (const key in EXAMPLE_PROPS) {
     if (key !== 'getElevation') {
-      t.ok(
+      expect(
         EXAMPLE_PROPS[key] === convertedProps[key],
         `convertFunctions converted prop ${key} input to expected value ${EXAMPLE_PROPS[key]}`
-      );
+      ).toBeTruthy();
     } else {
-      t.ok(
+      expect(
         convertedProps.getElevation({x: 10}) === 100,
         `convertFunctions converted function ${key} to expected value, ${convertedProps.getElevation(
           10
         )}`
-      );
+      ).toBeTruthy();
     }
   }
-  t.end();
 });

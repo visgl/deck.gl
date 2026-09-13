@@ -6,7 +6,6 @@
  * Projection utils
  * TODO: move to Viewport class?
  */
-import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
@@ -56,14 +55,14 @@ function normalizeParameters(opts: {
   const {viewport, modelMatrix, coordinateOrigin} = opts;
   let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
 
-  if (coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-    coordinateSystem = viewport.isGeospatial
-      ? COORDINATE_SYSTEM.LNGLAT
-      : COORDINATE_SYSTEM.CARTESIAN;
+  if (coordinateSystem === 'default') {
+    coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
 
   if (fromCoordinateSystem === undefined) {
     fromCoordinateSystem = coordinateSystem;
+  } else if (fromCoordinateSystem === 'default') {
+    fromCoordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
   if (fromCoordinateOrigin === undefined) {
     fromCoordinateOrigin = coordinateOrigin;
@@ -103,28 +102,39 @@ export function getWorldPosition(
   }
 
   switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.LNGLAT:
+    case 'default':
+      return getWorldPosition(position, {
+        viewport,
+        modelMatrix,
+        coordinateSystem: viewport.isGeospatial ? 'lnglat' : 'cartesian',
+        coordinateOrigin,
+        offsetMode
+      });
+
+    case 'lnglat':
       return lngLatZToWorldPosition([x, y, z], viewport, offsetMode);
 
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case 'lnglat-offsets':
       return lngLatZToWorldPosition(
         [x + coordinateOrigin[0], y + coordinateOrigin[1], z + (coordinateOrigin[2] || 0)],
         viewport,
         offsetMode
       );
 
-    case COORDINATE_SYSTEM.METER_OFFSETS:
+    case 'meter-offsets':
       return lngLatZToWorldPosition(
         addMetersToLngLat(coordinateOrigin, [x, y, z]) as [number, number, number],
         viewport,
         offsetMode
       );
 
-    case COORDINATE_SYSTEM.CARTESIAN:
-    default:
+    case 'cartesian':
       return viewport.isGeospatial
         ? [x + coordinateOrigin[0], y + coordinateOrigin[1], z + coordinateOrigin[2]]
         : viewport.projectPosition([x, y, z]);
+
+    default:
+      throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
   }
 }
 

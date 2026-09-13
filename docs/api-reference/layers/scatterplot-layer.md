@@ -1,4 +1,5 @@
 # ScatterplotLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ScatterplotLayerDemo} from '@site/src/doc-demos/layers';
 
@@ -87,7 +88,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -295,6 +296,15 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 * If a number is provided, it is used as the outline width for all objects.
 * If a function is provided, it is called on each object to retrieve its outline width.
 * If not provided, it falls back to `strokeWidth`.
+
+#### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
+
+* Default: `[0, 0]`
+
+Screen space offset relative to the `coordinates` in pixel unit.
+
+* If an array is provided, it is used as the offset for all objects.
+* If a function is provided, it is called on each object to retrieve its offset.
 
 ## Source
 

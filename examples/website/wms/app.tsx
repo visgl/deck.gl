@@ -4,12 +4,13 @@
 
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
 
 import type {MapViewState} from '@deck.gl/core';
 import type {BitmapLayerPickingInfo} from '@deck.gl/layers';
 import type {ImageSourceMetadata} from '@loaders.gl/loader-utils';
+import type {Device} from '@luma.gl/core';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -122.4,
@@ -42,13 +43,15 @@ export default function App({
   layers = SAMPLE_SERVICE.layers,
   initialViewState = INITIAL_VIEW_STATE,
   onMetadataLoad = console.log, // eslint-disable-line
-  onMetadataLoadError = console.error // eslint-disable-line
+  onMetadataLoadError = console.error, // eslint-disable-line
+  device
 }: {
   serviceUrl?: string;
   layers?: string[];
   initialViewState?: MapViewState;
   onMetadataLoad?: (metadata: ImageSourceMetadata) => void;
   onMetadataLoadError?: (error: Error) => void;
+  device?: Device;
 }) {
   const [selection, setSelection] = useState<{
     x: number;
@@ -69,6 +72,7 @@ export default function App({
       if (bitmap) {
         const x = bitmap.pixel[0];
         const y = bitmap.pixel[1];
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         layer.getFeatureInfoText(x, y).then(featureInfo => {
           setSelection({x, y, featureInfo});
         });
@@ -78,7 +82,12 @@ export default function App({
 
   return (
     <>
-      <DeckGL layers={[layer]} initialViewState={initialViewState} controller={CONTROLLER} />
+      <DeckGL
+        device={device}
+        layers={[layer]}
+        initialViewState={initialViewState}
+        controller={CONTROLLER}
+      />
       {selection && (
         <div
           className="selected-feature-info"

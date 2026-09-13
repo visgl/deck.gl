@@ -1,47 +1,180 @@
 # CompassWidget
 
-This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports Map and Globe view.
+<img src="https://img.shields.io/badge/from-v9.0-green.svg?style=flat-square" alt="from v9.0" />
 
-## Props
 
-#### `id` (string, optional) {#id}
+import {CompassWidgetDemo} from '@site/src/doc-demos/widgets';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-Default: `'compass'`
+<CompassWidgetDemo />
 
-The `id` must be unique among all your widgets at a given time. It's recommended to set `id` explicitly. The `id` is used to match widgets between updates, ensuring deck.gl can distinguish between them. A default `id` is assigned based on widget type, so if you have multiple widgets of the same type (e.g., two `compass` widgets), you need to provide a custom `id` for at least one.
+This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports [MapView](../core/map-view.md) and [GlobeView](../core/globe-view.md).
 
-#### `viewId` (string, optional) {#viewid}
+<Tabs groupId="language">
+  <TabItem value="js" label="JavaScript">
 
-Default: `null`
+```js
+import {Deck} from '@deck.gl/core';
+import {CompassWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 11,
+    pitch: 45,
+    bearing: 30
+  },
+  controller: true,
+  widgets: [
+    new CompassWidget({placement: 'top-left'})
+  ]
+});
+```
 
-#### `placement` (string, optional) {#placement}
+  </TabItem>
+  <TabItem value="ts" label="TypeScript">
 
-Default: `'top-left'`
+```ts
+import {Deck} from '@deck.gl/core';
+import {CompassWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 
-Widget position within the view relative to the map container. Valid options are `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `fill`.
+new Deck({
+  initialViewState: {
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 11,
+    pitch: 45,
+    bearing: 30
+  },
+  controller: true,
+  widgets: [
+    new CompassWidget({placement: 'top-left'})
+  ]
+});
+```
+
+  </TabItem>
+  <TabItem value="react" label="React">
+
+```tsx
+import React from 'react';
+import {DeckGL, CompassWidget} from '@deck.gl/react';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  return (
+    <DeckGL
+      initialViewState={{
+        longitude: -122.4,
+        latitude: 37.8,
+        zoom: 11,
+        pitch: 45,
+        bearing: 30
+      }}
+      controller
+    >
+      <CompassWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+  <TabItem value="react-controlled" label="React Controlled">
+
+```tsx
+import React, {useState, useCallback} from 'react';
+import {DeckGL, CompassWidget} from '@deck.gl/react';
+import type {MapViewState} from '@deck.gl/core';
+import '@deck.gl/widgets/stylesheet.css';
+
+function App() {
+  const [viewState, setViewState] = useState<MapViewState>({
+    longitude: -122.4,
+    latitude: 37.8,
+    zoom: 11,
+    pitch: 45,
+    bearing: 30
+  });
+
+  const onViewStateChange = useCallback(({viewState: vs}) => {
+    setViewState(vs as MapViewState);
+  }, []);
+
+  return (
+    <DeckGL viewState={viewState} onViewStateChange={onViewStateChange} controller>
+      <CompassWidget placement="top-left" />
+    </DeckGL>
+  );
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Constructor
+
+```ts
+import {CompassWidget, type CompassWidgetProps} from '@deck.gl/widgets';
+new CompassWidget({} satisfies CompassWidgetProps);
+```
+
+
+## Types
+
+### `CompassWidgetProps` {#compasswidgetprops}
+
+The `CompassWidget` accepts the generic [`WidgetProps`](../core/widget.md#widgetprops) and:
 
 #### `label` (string, optional) {#label}
 
+* Default: `'Compass'`
+
 Tooltip message displayed while hovering a mouse over the widget.
 
-Default: `'Compass'`
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 
-Default: `200`
+* Default: `200`
 
 Bearing and pitch reset transition duration in milliseconds.
 
-#### `style` (object, optional) {#style}
+#### `onReset` (Function, optional) {#onreset}
 
-Default: `{}`
+```ts
+(params: {viewId: string; bearing: number; pitch: number}) => void
+```
 
-Additional CSS styles for the widget. camelCase CSS properties (e.g. `backgroundColor`) and kabab-case CSS variables are accepted (e.g. `--button-size`).
+* Default: `() => {}`
 
-#### `className` (string, optional) {#classname}
+Callback when the compass reset button is clicked. Called for each viewport that will be reset.
 
-Default: `undefined`
+- `viewId`: The view being reset
+- `bearing`: The new bearing value (0)
+- `pitch`: The new pitch value (0 if bearing was already 0)
 
-Class name to attach to the widget element. The element has the default class name of `deck-widget deck-compass-widget`.
+## Styles
+
+Learn more about how to replace icons in the [styling guide](./styling#replacing-icons).
+
+| Name             | Type                     | Default                                        |
+| ---------------- | ------------------------ | ---------------------------------------------- |
+| `--icon-compass` | [SVG Data Url][data_url] | Custom Icon |
+| `--icon-compass-north-color` | [Color][color_url] | `rgb(240, 92, 68)` |
+| `--icon-compass-south-color` | [Color][color_url] | `rgb(204, 204, 204)` |
+
+[data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
+[color_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
+
+## Source
+
+[modules/widgets/src/compass-widget.tsx](https://github.com/visgl/deck.gl/tree/master/modules/widgets/src/compass-widget.tsx)

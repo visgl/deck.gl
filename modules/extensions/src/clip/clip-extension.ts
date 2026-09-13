@@ -16,7 +16,7 @@ export type ClipExtensionProps = {
   /** Rectangular bounds to be used for clipping the rendered region, in `[left, bottom, right, top]`.
    * @default [0, 0, 1, 1]
    */
-  clipBounds?: [number, number, number, number];
+  clipBounds?: Readonly<[number, number, number, number]>;
   /**
    * Controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon).
    * If not specified, it is automatically deduced from the layer.
@@ -25,7 +25,7 @@ export type ClipExtensionProps = {
 };
 
 const shaderFunction = /* glsl */ `
-uniform clipUniforms {
+layout(std140) uniform clipUniforms {
   vec4 bounds;
 } clip;
 
@@ -35,7 +35,12 @@ bool clip_isInBounds(vec2 position) {
 `;
 
 export type ClipModuleProps = {
-  bounds: [number, number, number, number];
+  bounds: Readonly<[number, number, number, number]>;
+};
+
+type WebGPUClipModuleProps = ClipModuleProps & {
+  enabled?: boolean;
+  mode?: 'instance' | 'geometry';
 };
 
 /*
@@ -109,6 +114,10 @@ export default class ClipExtension extends LayerExtension {
     }
     this.state.clipByInstance = clipByInstance;
 
+    if (this.context.device.type === 'webgpu') {
+      return {};
+    }
+
     return clipByInstance
       ? {
           modules: [shaderModuleVs],
@@ -123,7 +132,7 @@ export default class ClipExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as ClipModuleProps;
+    const clipProps = {} as WebGPUClipModuleProps;
     if (this.state.clipByInstance) {
       clipProps.bounds = clipBounds;
     } else {
@@ -136,6 +145,11 @@ export default class ClipExtension extends LayerExtension {
         Math.max(corner0[0], corner1[0]),
         Math.max(corner0[1], corner1[1])
       ];
+    }
+
+    if (this.context.device.type === 'webgpu') {
+      clipProps.enabled = true;
+      clipProps.mode = this.state.clipByInstance ? 'instance' : 'geometry';
     }
 
     this.setShaderModuleProps({clip: clipProps});

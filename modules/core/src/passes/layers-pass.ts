@@ -2,8 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, Parameters, RenderPassParameters} from '@luma.gl/core';
+import type {
+  CanvasContext,
+  Device,
+  Parameters,
+  PresentationContext,
+  RenderPassParameters,
+  RenderPipelineParameters
+} from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -15,9 +23,23 @@ import type {PickingProps} from '@luma.gl/shadertools';
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
+// WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
+const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
+  depthWriteEnabled: true,
+  depthCompare: 'less-equal',
+  blendColorOperation: 'add',
+  blendColorSrcFactor: 'one',
+  blendColorDstFactor: 'one-minus-src-alpha',
+  blendAlphaOperation: 'add',
+  blendAlphaSrcFactor: 'one',
+  blendAlphaDstFactor: 'one-minus-src-alpha'
+};
+
 export type LayersPassRenderOptions = {
   /** @deprecated TODO v9 recommend we rename this to framebuffer to minimize confusion */
   target?: Framebuffer | null;
+  /** Canvas context that provides framebuffer dimensions and pixel conversion. */
+  canvasContext?: CanvasContext | PresentationContext;
   isPicking?: boolean;
   pass: string;
   layers: Layer[];
@@ -64,15 +86,20 @@ export type RenderStats = {
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
 
-  render(options: LayersPassRenderOptions): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const [width, height] = this.device.canvasContext.getDrawingBufferSize();
+  render(options: LayersPassRenderOptions): void {
+    this._render(options);
+  }
+
+  protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    const {canvasContext = this.device.canvasContext!} = options;
+    const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
+    const [width, height] = canvasContext.getDrawingBufferSize();
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
-    const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
-    const clearDepth = clearCanvas ? 1 : false;
-    const clearStencil = clearCanvas ? 0 : false;
+    let clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
+    let clearDepth = clearCanvas ? 1 : false;
+    let clearStencil = clearCanvas ? 0 : false;
     const colorMask = options.colorMask ?? 0xf;
 
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
@@ -80,35 +107,12 @@ export default class LayersPass extends Pass {
       parameters.colorMask = colorMask;
     }
     if (options.scissorRect) {
-      parameters.scissorRect = options.scissorRect as [number, number, number, number];
+      parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
-    const renderPass = this.device.beginRenderPass({
-      framebuffer: options.target,
-      parameters,
-      clearColor: clearColor as [number, number, number, number],
-      clearDepth,
-      clearStencil
-    });
-
-    try {
-      return this._drawLayers(renderPass, options);
-    } finally {
-      renderPass.end();
-    }
-  }
-
-  /** Draw a list of layers in a list of viewports */
-  private _drawLayers(renderPass: RenderPass, options: LayersPassRenderOptions) {
-    const {
-      target,
-      shaderModuleProps,
-      viewports,
-      views,
-      onViewportActive,
-      clearStack = true
-    } = options;
-    options.pass = options.pass || 'unknown';
+    const {shaderModuleProps, viewports, views, onViewportActive, clearStack = true} = options;
+    const pass = options.pass || 'unknown';
+    const submitEachRenderPass = this.device.type === 'webgpu';
 
     if (clearStack) {
       this._lastRenderIndex = -1;
@@ -116,33 +120,76 @@ export default class LayersPass extends Pass {
 
     const renderStats: RenderStats[] = [];
 
-    for (const viewport of viewports) {
-      const view = views && views[viewport.id];
+    if (!viewports.length) {
+      const renderPass = this.device.beginRenderPass({
+        framebuffer,
+        parameters,
+        clearColor: clearColor as NumberArray4,
+        clearDepth,
+        clearStencil
+      });
+      renderPass.end();
+      this.device.submit();
+      return renderStats;
+    }
 
-      // Update context to point to this viewport
-      onViewportActive?.(viewport);
+    try {
+      for (const viewport of viewports) {
+        onViewportActive?.(viewport);
 
-      const drawLayerParams = this._getDrawLayerParams(viewport, options);
+        const drawLayerParams = this._getDrawLayerParams(viewport, options);
+        const view = views && views[viewport.id];
+        const subViewports = viewport.subViewports || [viewport];
+        // WebGL renders one logical viewport per pass. WebGPU must submit each physical
+        // viewport before shared model uniforms are updated for the next one.
+        const renderGroups = submitEachRenderPass
+          ? subViewports.map(subViewport => [subViewport])
+          : [subViewports];
 
-      // render this viewport
-      const subViewports = viewport.subViewports || [viewport];
-      for (const subViewport of subViewports) {
-        const stats = this._drawLayersInViewport(
-          renderPass,
-          {
-            target,
-            shaderModuleProps,
-            viewport: subViewport,
-            view,
-            pass: options.pass,
-            layers: options.layers
-          },
-          drawLayerParams
-        );
-        renderStats.push(stats);
+        for (const renderGroup of renderGroups) {
+          const renderPass = this.device.beginRenderPass({
+            framebuffer,
+            parameters,
+            clearColor: clearColor as NumberArray4,
+            clearDepth,
+            clearStencil
+          });
+
+          try {
+            for (const subViewport of renderGroup) {
+              const stats = this._drawLayersInViewport(
+                renderPass,
+                {
+                  target: framebuffer,
+                  canvasContext,
+                  shaderModuleProps,
+                  viewport: subViewport,
+                  view,
+                  pass,
+                  layers: options.layers,
+                  isPicking: options.isPicking
+                },
+                drawLayerParams
+              );
+              renderStats.push(stats);
+            }
+          } finally {
+            renderPass.end();
+            if (submitEachRenderPass) {
+              this.device.submit();
+            }
+          }
+          clearColor = false;
+          clearDepth = false;
+          clearStencil = false;
+        }
+      }
+      return renderStats;
+    } finally {
+      if (!submitEachRenderPass) {
+        this.device.submit();
       }
     }
-    return renderStats;
   }
 
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
@@ -156,7 +203,9 @@ export default class LayersPass extends Pass {
       isPicking = false,
       layerFilter,
       cullRect,
+      views,
       effects,
+      canvasContext = this.device.canvasContext!,
       shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
@@ -196,10 +245,15 @@ export default class LayersPass extends Pass {
           layer,
           effects,
           pass,
+          canvasContext,
           shaderModuleProps
         );
+        const defaultParams =
+          layer.context.device.type === 'webgpu' ? WEBGPU_DEFAULT_DRAW_PARAMETERS : null;
         layerParam.layerParameters = {
+          ...defaultParams,
           ...layer.context.deck?.props.parameters,
+          ...views?.[viewport.id]?.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
       }
@@ -212,28 +266,76 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  /* eslint-disable max-depth, max-statements */
+  /* eslint-disable max-depth, max-statements, complexity */
   private _drawLayersInViewport(
     renderPass: RenderPass,
-    {layers, shaderModuleProps: globalModuleParameters, pass, target, viewport, view},
+    {
+      layers,
+      shaderModuleProps: globalModuleParameters,
+      pass,
+      target,
+      canvasContext,
+      viewport,
+      view,
+      isPicking
+    }: {
+      layers: Layer[];
+      shaderModuleProps: Record<string, any>;
+      pass: string;
+      target?: Framebuffer | null;
+      canvasContext: CanvasContext | PresentationContext;
+      viewport: Viewport;
+      view?: View;
+      isPicking?: boolean;
+    },
     drawLayerParams: DrawLayerParameters[]
   ): RenderStats {
     const glViewport = getGLViewport(this.device, {
+      canvasContext,
       shaderModuleProps: globalModuleParameters,
       target,
       viewport
     });
 
-    // TODO v9 - remove WebGL specific logic
-    if (view && view.props.clear) {
-      const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
-      this.device.withParametersWebGL(
-        {
-          scissorTest: true,
-          scissor: glViewport
-        },
-        () => this.device.clearWebGL(clearOpts)
-      );
+    if (view) {
+      const {clear, clearColor, clearDepth, clearStencil} = view.props;
+      if (clear) {
+        // If clear option is set, clear all buffers by default.
+        let colorToUse: NumberArray4 | false = [0, 0, 0, 0];
+        let depthToUse: number | false = 1.0;
+        let stencilToUse: number | false = 0;
+
+        // While picking, ignore the view's clearColor: the picking buffer encodes object
+        // references as colors and is already cleared to transparent black.
+        // `clearColor: false` below still means "don't clear color" in both modes.
+        if (Array.isArray(clearColor) && !isPicking) {
+          colorToUse = [...clearColor.slice(0, 3), clearColor[3] || 255].map(
+            c => c / 255
+          ) as NumberArray4;
+        } else if (clearColor === false) {
+          colorToUse = false;
+        }
+
+        if (clearDepth !== undefined) {
+          depthToUse = clearDepth;
+        }
+
+        if (clearStencil !== undefined) {
+          stencilToUse = clearStencil;
+        }
+
+        const clearRenderPass = this.device.beginRenderPass({
+          framebuffer: target,
+          parameters: {
+            viewport: glViewport,
+            scissorRect: glViewport
+          },
+          clearColor: colorToUse,
+          clearDepth: depthToUse,
+          clearStencil: stencilToUse
+        });
+        clearRenderPass.end();
+      }
     }
 
     // render layers in normal colors
@@ -248,7 +350,7 @@ export default class LayersPass extends Pass {
 
     // render layers in normal colors
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-      const layer = layers[layerIndex] as Layer;
+      const layer = layers[layerIndex];
       const drawLayerParameters = drawLayerParams[layerIndex];
       const {shouldDrawLayer} = drawLayerParameters;
 
@@ -355,10 +457,10 @@ export default class LayersPass extends Pass {
     layer: Layer,
     effects: Effect[] | undefined,
     pass: string,
+    canvasContext: CanvasContext | PresentationContext,
     overrides: any
   ): any {
-    // @ts-expect-error TODO - assuming WebGL context
-    const devicePixelRatio = this.device.canvasContext.cssToDeviceRatio();
+    const devicePixelRatio = canvasContext.cssToDeviceRatio();
     const layerProps = layer.internalState?.propsInTransition || layer.props;
 
     const shaderModuleProps = {
@@ -382,6 +484,15 @@ export default class LayersPass extends Pass {
           shaderModuleProps,
           effect.getShaderModuleProps?.(layer, shaderModuleProps)
         );
+      }
+    }
+
+    // Ensure all default shader modules have an entry so their getUniforms is called.
+    // Without this, default modules added by effects (e.g. terrain) may not get their
+    // bindings set when rendered in passes that don't include those effects (e.g. mask pass).
+    for (const module of layer.context.defaultShaderModules) {
+      if (!(module.name in shaderModuleProps)) {
+        shaderModuleProps[module.name] = {};
       }
     }
 
@@ -445,23 +556,22 @@ export function layerIndexResolver(
 function getGLViewport(
   device: Device,
   {
+    canvasContext = device.canvasContext!,
     shaderModuleProps,
     target,
     viewport
   }: {
+    canvasContext?: CanvasContext | PresentationContext;
     shaderModuleProps: any;
-    target?: Framebuffer;
+    target?: Framebuffer | null;
     viewport: Viewport;
   }
 ): [number, number, number, number] {
   const pixelRatio =
-    shaderModuleProps?.project?.devicePixelRatio ??
-    // @ts-expect-error TODO - assuming WebGL context
-    device.canvasContext.cssToDeviceRatio();
+    shaderModuleProps?.project?.devicePixelRatio ?? canvasContext.cssToDeviceRatio();
 
   // Default framebuffer is used when writing to canvas
-  // @ts-expect-error TODO - assuming WebGL context
-  const [, drawingBufferHeight] = device.canvasContext.getDrawingBufferSize();
+  const [, drawingBufferHeight] = canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates

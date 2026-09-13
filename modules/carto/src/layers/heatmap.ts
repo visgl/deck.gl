@@ -15,7 +15,7 @@ import {Texture} from '@luma.gl/core';
  */
 
 const fs = /* glsl */ `\
-uniform heatmapUniforms {
+layout(std140) uniform heatmapUniforms {
   vec2 colorDomain;
   vec2 delta;
   float intensity;
@@ -88,6 +88,9 @@ vec4 heatmap_sampleColor(sampler2D source, vec2 texSize, vec2 texCoord) {
   color.a = smoothstep(0.0, 0.1, f);
   color.a = pow(color.a, 1.0 / 2.2);
   color.a *= heatmap.opacity;
+
+  // Use premultiplied alpha for compatibility with blending in ScreenPass
+  color.rgb *= color.a;
 
   return color;
 }

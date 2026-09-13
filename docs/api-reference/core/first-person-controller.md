@@ -42,7 +42,6 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `keyboard`: arrow keys to move camera, arrow keys with shift/ctrl down to rotate, +/- to move vertically
 - `scrollZoom`: scroll to move in direction of mouse pointer, in horizontal 2D plane
 
-
 ## Custom FirstPersonController
 
 You can further customize the `FirstPersonController`'s behavior by extending the class:

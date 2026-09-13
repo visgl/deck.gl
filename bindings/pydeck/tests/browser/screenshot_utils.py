@@ -15,7 +15,6 @@ except ImportError:
 
 from PIL import Image
 
-
 # Notebook selectors for triggering computations in a notebook
 CELL_DROPDOWN_SELECTOR = "#menus > div > div > ul > li:nth-child(5) > a"
 RUN_ALL_SELECTOR = "#run_all_cells > a"

@@ -6,7 +6,7 @@ import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import type {ShaderModule} from '@luma.gl/shadertools';
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 import Attribute from '../lib/attribute/attribute';
 import {
   getAttributeTypeFromSize,
@@ -112,7 +112,7 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
 }
 
 const uniformBlock = `\
-uniform interpolationUniforms {
+layout(std140) uniform interpolationUniforms {
   float time;
 } interpolation;
 `;
@@ -167,7 +167,7 @@ void main(void) {
 `;
 
 function useFp64(attribute: Attribute): boolean {
-  return attribute.doublePrecision && attribute.value instanceof Float64Array;
+  return attribute.isDoublePrecisionBuffer;
 }
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {
@@ -197,9 +197,9 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
           ]
         }
       ],
-      // @ts-expect-error fp64 module only sets ONE uniform via defaultUniforms
       modules: [fp64arithmetic, interpolationUniforms],
       defines: {
+        // @ts-expect-error TODO fix luma type
         ATTRIBUTE_TYPE: attributeType,
         ATTRIBUTE_SIZE: attributeSize
       },
@@ -218,6 +218,7 @@ function getTransform(device: Device, attribute: Attribute): BufferTransform {
     ],
     modules: [interpolationUniforms],
     defines: {
+      // @ts-expect-error TODO fix luma type
       ATTRIBUTE_TYPE: attributeType
     },
     varyings: ['vCurrent'],

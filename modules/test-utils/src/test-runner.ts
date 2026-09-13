@@ -163,7 +163,7 @@ export abstract class TestRunner<TestCaseT extends TestCase, ResultT, ExtraOptio
     const task = this.runTestCase(testCase);
     const timeoutTask = new Promise((_, reject) => {
       setTimeout(() => {
-        reject('Timeout');
+        reject(`Timeout after ${timeout}ms`);
       }, timeout);
     });
 
@@ -171,8 +171,8 @@ export abstract class TestRunner<TestCaseT extends TestCase, ResultT, ExtraOptio
       await Promise.race([task, timeoutTask]);
       await this.assert(testCase);
     } catch (err: unknown) {
-      if (err === 'Timeout') {
-        this.fail({error: 'Timeout'});
+      if (typeof err === 'string' && err.startsWith('Timeout')) {
+        this.fail({error: err});
       }
     }
   }

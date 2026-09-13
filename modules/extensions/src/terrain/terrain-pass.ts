@@ -73,7 +73,6 @@ export class TerrainPass extends LayersPass {
       target,
       pass: `terrain-cover-${terrainCover.id}`,
       layers,
-      effects: [],
       viewports: [viewport],
       clearColor: [0, 0, 0, 0]
     });

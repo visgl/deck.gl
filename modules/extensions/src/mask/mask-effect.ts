@@ -70,6 +70,7 @@ export default class MaskEffect implements Effect {
     viewports,
     onViewportActive,
     views,
+    effects,
     isPicking
   }: PreRenderOptions): MaskPreRenderStats {
     let didRender = false;
@@ -103,6 +104,7 @@ export default class MaskEffect implements Effect {
         layerFilter,
         onViewportActive,
         views,
+        effects,
         viewport,
         viewportChanged
       });
@@ -120,12 +122,14 @@ export default class MaskEffect implements Effect {
       layerFilter,
       onViewportActive,
       views,
+      effects,
       viewport,
       viewportChanged
     }: {
       layerFilter: PreRenderOptions['layerFilter'];
       onViewportActive: PreRenderOptions['onViewportActive'];
       views: PreRenderOptions['views'];
+      effects: PreRenderOptions['effects'];
       viewport: Viewport;
       viewportChanged: boolean;
     }
@@ -190,6 +194,7 @@ export default class MaskEffect implements Effect {
           viewports: maskViewport ? [maskViewport] : [],
           onViewportActive,
           views,
+          effects,
           shaderModuleProps: {
             project: {
               devicePixelRatio: 1

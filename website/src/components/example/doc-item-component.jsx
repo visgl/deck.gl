@@ -14,7 +14,7 @@ const DemoContainer = styled.div`
   top: 0;
   bottom: 0;
 
-  > h1 {
+  > header > h1 {
     display: none;
   }
 `;

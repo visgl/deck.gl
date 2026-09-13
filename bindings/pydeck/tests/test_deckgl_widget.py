@@ -1,6 +1,5 @@
 import pytest
 
-
 try:
     from pydeck.widget import DeckGLWidget
 except ModuleNotFoundError:

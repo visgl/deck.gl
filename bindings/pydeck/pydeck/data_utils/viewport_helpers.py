@@ -2,6 +2,7 @@
 Functions that make it easier to provide a default centering
 for a view state
 """
+
 import math
 from ..bindings.view_state import ViewState
 from .type_checking import is_pandas_df

@@ -100,6 +100,7 @@ export const LINE_LAYER = {
     lineCapRounded: 'capRounded',
     lineMiterLimit: 'miterLimit',
     lineBillboard: 'billboard',
+    lineAntialiasing: 'antialiasing',
 
     getLineColor: 'getColor',
     getLineWidth: 'getWidth'

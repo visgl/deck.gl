@@ -15,7 +15,6 @@ in vec2 texCoords;
 in vec3 instancePositions;
 in vec3 instancePositions64Low;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
 in vec3 instanceModelMatrixCol0;
 in vec3 instanceModelMatrixCol1;
 in vec3 instanceModelMatrixCol2;
@@ -31,7 +30,7 @@ out vec4 vColor;
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = texCoords;
-  geometry.pickingColor = instancePickingColors;
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
 
   vTexCoord = texCoords;
   cameraPosition = project.cameraPosition;

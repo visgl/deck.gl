@@ -111,3 +111,26 @@ test('JSONLayer#fetch', t => {
   // restore fetcch
   globalThis.fetch = fetch;
 });
+
+test('JSONLayer#configurationOverride', t => {
+  class CustomTextLayer {}
+
+  const jsonLayer = new JSONLayer({
+    configuration: {
+      classes: {CustomTextLayer}
+    },
+    data: [
+      {
+        '@@type': 'CustomTextLayer',
+        id: 'custom-text-layer'
+      }
+    ]
+  });
+
+  testInitializeLayer({layer: jsonLayer, onError: t.notOk});
+
+  const subLayers = jsonLayer.renderLayers();
+  t.equal(subLayers.length, 1, 'Custom configuration creates one layer');
+  t.ok(subLayers[0] instanceof CustomTextLayer, 'Override configuration merges into defaults');
+  t.end();
+});

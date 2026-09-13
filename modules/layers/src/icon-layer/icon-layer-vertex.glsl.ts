@@ -13,7 +13,9 @@ in vec3 instancePositions64Low;
 in float instanceSizes;
 in float instanceAngles;
 in vec4 instanceColors;
-in vec3 instancePickingColors;
+#ifdef USE_ROW_INDEXES
+in float rowIndexes;
+#endif
 in vec4 instanceIconFrames;
 in float instanceColorModes;
 in vec2 instanceOffsets;
@@ -35,7 +37,11 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
-  geometry.pickingColor = instancePickingColors;
+#ifdef USE_ROW_INDEXES
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
+#else
+  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+#endif
   uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;
@@ -47,8 +53,9 @@ void main(void) {
     icon.sizeMinPixels, icon.sizeMaxPixels
   );
 
-  // scale icon height to match instanceSize
-  float instanceScale = iconSize.y == 0.0 ? 0.0 : sizePixels / iconSize.y;
+  // Choose correct constraint based on the 'sizeBasis' value (0.0 = width, 1.0 = height)
+  float iconConstraint = icon.sizeBasis == 0.0 ? iconSize.x : iconSize.y;
+  float instanceScale = iconConstraint == 0.0 ? 0.0 : sizePixels / iconConstraint;
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
@@ -62,7 +69,6 @@ void main(void) {
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
-
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     DECKGL_FILTER_SIZE(offset_common, geometry);

@@ -47,6 +47,7 @@ export function createTexture(
     };
   }
 
+  const {width, height} = image.data;
   const texture = device.createTexture({
     ...image,
     sampler: {
@@ -54,8 +55,14 @@ export function createTexture(
       ...samplerParameters,
       ...sampler
     },
-    mipmaps: true
+    mipLevels: device.getMipLevelCount(width, height)
   });
+  if (device.type === 'webgl') {
+    texture.generateMipmapsWebGL();
+  } else if (device.type === 'webgpu') {
+    device.generateMipmapsWebGPU(texture);
+  }
+
   // Track this texture
   internalTextures[texture.id] = owner;
   return texture;

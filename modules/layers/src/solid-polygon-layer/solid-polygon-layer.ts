@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, color, project32, picking, gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {gouraudMaterial} from '@luma.gl/shadertools';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -13,6 +12,8 @@ import {solidPolygonUniforms, SolidPolygonProps} from './solid-polygon-layer-uni
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
+import {getSolidPolygonShaderWGSL} from './solid-polygon-layer.wgsl';
+import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -92,7 +93,7 @@ type _SolidPolygonLayerProps<DataT> = {
 /** Render filled and/or extruded polygons. */
 export type SolidPolygonLayerProps<DataT = unknown> = _SolidPolygonLayerProps<DataT> & LayerProps;
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   filled: true,
@@ -134,13 +135,23 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   };
 
   getShaders(type) {
+    const ringWindingOrderCW = !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1;
+
     return super.getShaders({
       vs: type === 'top' ? vsTop : vsSide,
       fs,
+      source: getSolidPolygonShaderWGSL(type, Boolean(ringWindingOrderCW)),
       defines: {
-        RING_WINDING_ORDER_CW: !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1
+        RING_WINDING_ORDER_CW: ringWindingOrderCW
       },
-      modules: [project32, gouraudMaterial, picking, solidPolygonUniforms]
+      modules: [
+        project32,
+        color,
+        gouraudMaterial,
+        picking,
+        solidPolygonUniforms,
+        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
+      ]
     });
   }
 
@@ -156,13 +167,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const {viewport} = this.context;
     let {coordinateSystem} = this.props;
     const {_full3d} = this.props;
-    if (viewport.isGeospatial && coordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-      coordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    if (viewport.isGeospatial && coordinateSystem === 'default') {
+      coordinateSystem = 'lnglat';
     }
 
     let preproject: ((xy: number[]) => number[]) | undefined;
 
-    if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+    if (coordinateSystem === 'lnglat') {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {
@@ -183,8 +194,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     const attributeManager = this.getAttributeManager()!;
     const noAlloc = true;
-
-    attributeManager.remove(['instancePickingColors']);
+    const isWebGPU = this.context.device.type === 'webgpu';
 
     /* eslint-disable max-len */
     attributeManager.add({
@@ -205,15 +215,34 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
-        shaderAttributes: {
-          nextVertexPositions: {
-            vertexOffset: 1
-          }
-        }
+        ...(isWebGPU
+          ? {}
+          : {
+              shaderAttributes: {
+                nextVertexPositions: {
+                  vertexOffset: 1
+                }
+              }
+            })
       },
-      instanceVertexValid: {
+      ...(isWebGPU
+        ? {
+            // WebGPU cannot express WebGL's one-vertex offset view in a buffer layout.
+            nextVertexPositions: {
+              size: 3,
+              type: 'float64',
+              stepMode: 'dynamic',
+              fp64: this.use64bitPositions(),
+              transition: false,
+              // eslint-disable-next-line @typescript-eslint/unbound-method
+              update: this.calculateNextPositions,
+              noAlloc
+            }
+          }
+        : {}),
+      [isWebGPU ? 'vertexValid' : 'instanceVertexValid']: {
         size: 1,
-        type: 'uint16',
+        type: isWebGPU ? 'float32' : 'uint16',
         stepMode: 'instance',
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculateVertexValid,
@@ -223,7 +252,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         size: 1,
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getElevation'
+        accessor: 'getElevation',
+        bufferGroup: 'solid-polygon-instance-data'
       },
       fillColors: {
         size: this.props.colorFormat.length,
@@ -231,7 +261,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        bufferGroup: 'solid-polygon-instance-data'
       },
       lineColors: {
         size: this.props.colorFormat.length,
@@ -239,14 +270,16 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        bufferGroup: 'solid-polygon-instance-data'
       },
-      pickingColors: {
-        size: 4,
-        type: 'uint8',
+      /** Source polygon row, including __source.index for composite data. */
+      rowIndexes: {
+        size: 1,
+        type: 'uint32',
         stepMode: 'dynamic',
-        accessor: (object, {index, target: value}) =>
-          this.encodePickingColor(object && object.__source ? object.__source.index : index, value)
+        accessor: (object, {index}) => (object && object.__source ? object.__source.index : index),
+        bufferGroup: 'solid-polygon-instance-data'
       }
     });
     /* eslint-enable max-len */
@@ -347,7 +380,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         data: props.data,
         normalize: props._normalize,
         geometryBuffer: buffers.getPolygon,
-        buffers,
+        // Keep derived WebGPU attributes independent of external binary accessor buffers.
+        buffers: this.context.device.type === 'webgpu' ? {...buffers} : buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
         wrapLongitude: props.wrapLongitude,
@@ -380,8 +414,18 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     if (filled) {
       const shaders = this.getShaders('top');
-      shaders.defines.NON_INSTANCED_MODEL = 1;
-      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
+      shaders.defines = {...shaders.defines, NON_INSTANCED_MODEL: 1};
+      let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: false});
+      if (this.context.device.type === 'webgpu') {
+        // Indices are bound separately, and the top model does not bind side-only attributes.
+        bufferLayout = bufferLayout.filter(
+          layout =>
+            layout.name !== 'indices' &&
+            layout.name !== 'vertexValid' &&
+            layout.name !== 'instanceVertexValid' &&
+            layout.name !== 'nextVertexPositions'
+        );
+      }
 
       topModel = new Model(this.context.device, {
         ...shaders,
@@ -390,12 +434,20 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferLayout,
         isIndexed: true,
         userData: {
-          excludeAttributes: {instanceVertexValid: true}
+          excludeAttributes: {
+            vertexValid: true,
+            instanceVertexValid: true,
+            nextVertexPositions: true
+          }
         }
       });
     }
     if (extruded) {
-      const bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+      let bufferLayout = this.getAttributeManager()!.getBufferLayouts({isInstanced: true});
+      if (this.context.device.type === 'webgpu') {
+        // Indices are owned by the top model; WebGPU vertex layouts cannot include index buffers.
+        bufferLayout = bufferLayout.filter(layout => layout.name !== 'indices');
+      }
 
       sideModel = new Model(this.context.device, {
         ...this.getShaders('side'),
@@ -455,10 +507,67 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   protected calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
     attribute.startIndices = polygonTesselator.vertexStarts;
+
+    const binaryPositions = (this.props.data as any).attributes?.getPolygon;
+    if (this.context.device.type === 'webgpu' && ArrayBuffer.isView(binaryPositions?.value)) {
+      const {value, size = 3, offset = 0, stride} = binaryPositions;
+      const elementOffset = offset / value.BYTES_PER_ELEMENT;
+      const elementStride = stride ? stride / value.BYTES_PER_ELEMENT : size;
+      const positions = new Float64Array(polygonTesselator.instanceCount * 3);
+
+      for (let vertexIndex = 0; vertexIndex < polygonTesselator.instanceCount; vertexIndex++) {
+        const sourceIndex = elementOffset + vertexIndex * elementStride;
+        const targetIndex = vertexIndex * 3;
+        positions[targetIndex] = value[sourceIndex];
+        positions[targetIndex + 1] = value[sourceIndex + 1];
+        positions[targetIndex + 2] = size > 2 ? value[sourceIndex + 2] : 0;
+      }
+
+      attribute.value = positions;
+      return;
+    }
+
     attribute.value = polygonTesselator.get('positions');
   }
 
   protected calculateVertexValid(attribute) {
-    attribute.value = this.state.polygonTesselator.get('vertexValid');
+    const binaryVertexValid = (this.props.data as any).attributes?.instanceVertexValid?.value;
+    const vertexValid =
+      this.context.device.type === 'webgpu' && binaryVertexValid
+        ? binaryVertexValid
+        : this.state.polygonTesselator.get('vertexValid');
+    attribute.value =
+      this.context.device.type === 'webgpu' && vertexValid
+        ? Float32Array.from(vertexValid)
+        : vertexValid;
+  }
+
+  protected calculateNextPositions(attribute) {
+    const {polygonTesselator} = this.state;
+    const attributes = this.getAttributeManager()!.getAttributes();
+    const positions = attributes.vertexPositions.value;
+    const vertexValid =
+      (this.props.data as any).attributes?.instanceVertexValid?.value ||
+      attributes.vertexValid?.value ||
+      polygonTesselator.get('vertexValid');
+    attribute.startIndices = polygonTesselator.vertexStarts;
+
+    if (!positions) {
+      attribute.value = positions;
+      return;
+    }
+
+    const vertexCount = positions.length / 3;
+    const nextPositions = new (positions.constructor as typeof Float32Array)(positions.length);
+    for (let vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
+      const sourceIndex = vertexIndex * 3;
+      const nextSourceIndex =
+        vertexValid?.[vertexIndex] && vertexIndex + 1 < vertexCount ? sourceIndex + 3 : sourceIndex;
+      for (let componentIndex = 0; componentIndex < 3; componentIndex++) {
+        nextPositions[sourceIndex + componentIndex] = positions[nextSourceIndex + componentIndex];
+      }
+    }
+
+    attribute.value = nextPositions;
   }
 }

@@ -4,9 +4,8 @@
 
 import {webglDevice, NullDevice} from '@luma.gl/test-utils';
 
-/** Test device */
+// Use pre-created device from @luma.gl/test-utils, fall back to NullDevice in Node
 export const device = webglDevice || new NullDevice({});
-
 export const gl = webglDevice?.gl || 1;
 
 globalThis.glContext = globalThis.glContext || gl;

@@ -3,19 +3,28 @@
 // Copyright (c) vis.gl contributors
 
 import Viewport from '../viewports/viewport';
-import {parsePosition, getPosition, Position} from '../utils/positions';
+import {parsePosition, getPosition, LayoutExpression} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
+import {deepMergeViewState} from '../utils/deep-merge';
 import type Controller from '../controllers/controller';
 import type {ControllerOptions} from '../controllers/controller';
 import type {TransitionProps} from '../controllers/transition-manager';
 import type {Padding} from '../viewports/viewport';
 import type {ConstructorOf} from '../types/types';
+import type {Parameters} from '@luma.gl/core';
 
 export type CommonViewState = TransitionProps;
 
 export type CommonViewProps<ViewState> = {
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
+  /**
+   * The id of the presentation canvas this view should render into when `Deck` is using
+   * multi-canvas presentation.
+   *
+   * When not supplied, the view renders into the first configured canvas.
+   */
+  canvasId?: string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
   x?: number | string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
@@ -31,8 +40,16 @@ export type CommonViewProps<ViewState> = {
     top?: number | string;
     bottom?: number | string;
   } | null;
-  /** When using multiple views, set this flag to wipe the pixels drawn by other overlaping views */
+  /** When using multiple views, set this flag to wipe the pixels drawn by other overlapping views. Default `false` */
   clear?: boolean;
+  /** Color to clear the viewport with, in RGBA format [r, g, b, a?]. Values are 0-255. Default `[0, 0, 0, 0]` (transparent). */
+  clearColor?: number[] | false;
+  /** Depth buffer value to clear the viewport with, between 0.0 - 1.0. Default `1.0` (far plane). */
+  clearDepth?: number | false;
+  /** Stencil buffer Value to clear the viewport with, between 0 - 255. Default `0` (clear). */
+  clearStencil?: number | false;
+  /** Override the GPU parameters used to draw layers in this view. */
+  parameters?: Parameters;
   /** State of the view */
   viewState?:
     | string
@@ -57,15 +74,15 @@ export default abstract class View<
   abstract getViewportType(viewState: ViewState): ConstructorOf<Viewport>;
   protected abstract get ControllerType(): ConstructorOf<Controller<any>>;
 
-  private _x: Position;
-  private _y: Position;
-  private _width: Position;
-  private _height: Position;
+  private _x: LayoutExpression;
+  private _y: LayoutExpression;
+  private _width: LayoutExpression;
+  private _height: LayoutExpression;
   private _padding: {
-    left: Position;
-    right: Position;
-    top: Position;
-    bottom: Position;
+    left: LayoutExpression;
+    right: LayoutExpression;
+    top: LayoutExpression;
+    bottom: LayoutExpression;
   } | null;
 
   readonly props: ViewProps;
@@ -105,6 +122,12 @@ export default abstract class View<
     return this.constructor === view.constructor && deepEqual(this.props, view.props, 2);
   }
 
+  /** Clone this view with modified props */
+  clone(newProps: Partial<ViewProps>): this {
+    const ViewConstructor = this.constructor as new (props: ViewProps) => this;
+    return new ViewConstructor({...this.props, ...newProps});
+  }
+
   /** Make viewport from canvas dimensions and view state */
   makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
@@ -136,14 +159,7 @@ export default abstract class View<
         return this.props.viewState as ViewState;
       }
 
-      // Merge in all props from View's viewState, except id
-      const newViewState = {...viewState};
-      for (const key in this.props.viewState) {
-        if (key !== 'id') {
-          newViewState[key] = this.props.viewState[key];
-        }
-      }
-      return newViewState;
+      return deepMergeViewState<ViewState>(viewState, this.props.viewState as ViewState);
     }
 
     return viewState;

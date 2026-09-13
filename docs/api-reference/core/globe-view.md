@@ -18,11 +18,9 @@ It's recommended that you read the [Views and Projections guide](../../developer
 ## Limitations
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
-In the initial release, this class mainly addresses the need to render an overview of the entire globe. The following limitations apply, as features are still under development: 
 
-- No support for rotation (`pitch` or `bearing`). The camera always points towards the center of the earth, with north up.
 - No high-precision rendering at high zoom levels (> 12). Features at the city-block scale may not be rendered accurately.
-- Only supports `COORDINATE_SYSTEM.LNGLAT` (default of the `coordinateSystem` prop).
+- Only supports `'lnglat'` (the default value of the `coordinateSystem` prop).
 - Known rendering issues when using multiple views mixing `GlobeView` and `MapView`, or switching between the two.
 - Support for `TileLayer` and `MVTLayer` is experimental.
 - These layers currently do not work in this view:
@@ -54,6 +52,16 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the edge of the screen. Default to `2`. Overwrites the `far` parameter.
 
+#### `parameters` (object, optional) {#parameters}
+
+`GlobeView` enables back-face culling by default with `parameters: {cullMode: 'back'}`. To override this behavior, supply the desired GPU parameters to the constructor:
+
+```js
+new GlobeView({
+  parameters: {cullMode: 'none'}
+});
+```
+
 
 ## View State
 
@@ -62,8 +70,16 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `longitude` (number) - longitude at the viewport center
 - `latitude` (number) - latitude at the viewport center
 - `zoom` (number) - zoom level
+- `bearing` (number, optional) - bearing angle in degrees. Default `0` (north up).
+- `pitch` (number, optional) - pitch angle in degrees. `0` looks straight down at the earth. Default `0`.
 - `maxZoom` (number, optional) - max zoom level. Default `20`.
 - `minZoom` (number, optional) - min zoom level. Default `0`.
+- `maxPitch` (number, optional) - max pitch angle. Default `60`.
+- `minPitch` (number, optional) - min pitch angle. Default `0`.
+
+The globe behaves like a physical ball. Dragging and pointer-anchored zoom rotate the full camera frame, so an initial `bearing` of `0` does not lock north up: `bearing` evolves naturally as the camera crosses a pole. This avoids orientation discontinuities and keeps interaction consistent across latitudes. Use `zoomAround: 'center'` to zoom without steering the camera frame.
+
+To limit how far the camera can travel, set the shared controller [`maxBounds`](./controller.md#options) option. For example, `maxBounds: [[-180, -85], [180, 85]]` keeps the viewport center between `±85°` latitude.
 
 
 ## Controller

@@ -34,6 +34,7 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./tem
 j2_loader = jinja2.FileSystemLoader(TEMPLATES_PATH)
 j2_env = jinja2.Environment(loader=j2_loader, trim_blocks=True)
 CDN_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist/index.js".format(DECKGL_SEMVER)
+CDN_CSS_URL = "https://cdn.jsdelivr.net/npm/@deck.gl/widgets@{}/dist/stylesheet.css".format(DECKGL_SEMVER)
 
 
 def cdn_picker(offline=False):
@@ -41,10 +42,9 @@ def cdn_picker(offline=False):
     dev_port = os.getenv("PYDECK_DEV_PORT")
     if dev_port:
         print("pydeck running in development mode, expecting @deck.gl/jupyter-widget served at {}".format(dev_port))
-        return (
-            "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>\n"
-            "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js.map'></script>\n"
-        ).format(dev_port=dev_port)
+        return "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>".format(
+            dev_port=dev_port
+        )
     if offline:
         RELPATH_TO_BUNDLE = "../nbextension/static/index.js"
         with open(join(dirname(__file__), RELPATH_TO_BUNDLE), "r", encoding="utf-8") as file:
@@ -52,6 +52,15 @@ def cdn_picker(offline=False):
         return "<script type='text/javascript'>{}</script>".format(js)
 
     return "<script src='{}'></script>".format(CDN_URL)
+
+
+def widget_css_picker():
+    if os.getenv("PYDECK_DEV_PORT"):
+        stylesheet_path = realpath(join(dirname(__file__), "../../../../modules/widgets/dist/stylesheet.css"))
+        if os.path.exists(stylesheet_path):
+            with open(stylesheet_path, "r", encoding="utf-8") as file:
+                return "<style>\n{}\n</style>".format(file.read())
+    return "<link rel='stylesheet' href='{}' />".format(CDN_CSS_URL)
 
 
 def render_json_to_html(
@@ -63,6 +72,7 @@ def render_json_to_html(
     custom_libraries=None,
     configuration=None,
     offline=False,
+    show_error=False,
 ):
     js = j2_env.get_template("index.j2")
     css = j2_env.get_template("style.j2")
@@ -72,10 +82,12 @@ def render_json_to_html(
         google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
+        deckgl_widget_css=widget_css_picker(),
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
         custom_libraries=custom_libraries,
         configuration=configuration,
+        show_error=show_error,
     )
     return html_str
 
@@ -133,6 +145,7 @@ def deck_to_html(
     configuration=None,
     as_string=False,
     offline=False,
+    show_error=False,
 ):
     """Converts deck.gl format JSON to an HTML page"""
     html_str = render_json_to_html(
@@ -144,6 +157,7 @@ def deck_to_html(
         custom_libraries=custom_libraries,
         configuration=configuration,
         offline=offline,
+        show_error=show_error,
     )
 
     if filename:

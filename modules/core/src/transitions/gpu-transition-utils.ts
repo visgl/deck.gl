@@ -6,7 +6,7 @@ import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';
 import Attribute from '../lib/attribute/attribute';
-import {GL} from '@luma.gl/constants';
+import {GL} from '@luma.gl/webgl/constants';
 
 /** Create a new empty attribute with the same settings: type, shader layout etc. */
 export function cloneAttribute(attribute: Attribute): Attribute {
@@ -59,8 +59,8 @@ export function cycleBuffers(buffers: Buffer[]): void {
 }
 
 export function getAttributeBufferLength(attribute: Attribute, numInstances: number): number {
-  const {doublePrecision, settings, value, size} = attribute;
-  const multiplier = doublePrecision && value instanceof Float64Array ? 2 : 1;
+  const {settings, value, size} = attribute;
+  const multiplier = attribute.isDoublePrecisionBuffer ? 2 : 1;
   let maxVertexOffset = 0;
   const {shaderAttributes} = attribute.settings;
   if (shaderAttributes) {
@@ -123,8 +123,7 @@ export function padBuffer({
 }): Buffer {
   // TODO: move the precisionMultiplier logic to the attribute when retrieving
   // its `size` and `elementOffset`?
-  const precisionMultiplier =
-    attribute.doublePrecision && attribute.value instanceof Float64Array ? 2 : 1;
+  const precisionMultiplier = attribute.isDoublePrecisionBuffer ? 2 : 1;
   const size = attribute.size * precisionMultiplier;
   const byteOffset = attribute.byteOffset;
   // Transform feedback can only write to float varyings
@@ -150,9 +149,8 @@ export function padBuffer({
     ? (attribute.value as TypedArray)
     : // TODO(v9.1): Avoid non-portable synchronous reads.
       new ArrayType(
-        attribute
-          .getBuffer()!
-          .readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT).buffer
+        attribute.getBuffer()!.readSyncWebGL(byteOffset, toLength * ArrayType.BYTES_PER_ELEMENT)
+          .buffer as ArrayBuffer
       );
   if (attribute.settings.normalized && !isConstant) {
     const getter = getData;
@@ -166,7 +164,7 @@ export function padBuffer({
 
   // TODO(v9.1): Avoid non-portable synchronous reads.
   const source = buffer
-    ? new Float32Array(buffer.readSyncWebGL(targetByteOffset, fromLength * 4).buffer)
+    ? new Float32Array(buffer.readSyncWebGL(targetByteOffset, fromLength * 4).buffer as ArrayBuffer)
     : new Float32Array(0);
   const target = new Float32Array(toLength);
   padArray({

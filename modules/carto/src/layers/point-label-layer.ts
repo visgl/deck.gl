@@ -9,13 +9,15 @@ import {
   CompositeLayerProps,
   DefaultProps,
   Layer,
-  LayersList
+  LayersList,
+  log
 } from '@deck.gl/core';
 import {
   TextLayer,
   TextLayerProps,
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
+import VectorTileLayer from './vector-tile-layer';
 
 const [LEFT, TOP, RIGHT, BOTTOM] = [0, 1, 2, 3];
 
@@ -97,6 +99,12 @@ type _PointLabelLayerProps<DataT> = TextLayerProps<DataT> & {
   secondarySizeScale?: number;
 };
 
+/**
+ * PointLabelLayer is a layer that renders point labels.
+ * It is a composite layer that renders a primary and secondary label.
+ * It behaves like a TextLayer except that getTextSize is **not supported**
+ * and the text size for the primary label must be set with **sizeScale**.
+ */
 export default class PointLabelLayer<
   DataT = any,
   ExtraProps extends {} = {}
@@ -193,6 +201,15 @@ export default class PointLabelLayer<
 
       updateTriggers
     } = this.props;
+
+    if (sizeScale < 2) {
+      const propName = (this.parent as VectorTileLayer)?.props?.textSizeScale
+        ? 'textSizeScale'
+        : 'sizeScale';
+      log.warn(
+        `${propName} has small value (${sizeScale}). Note getTextSize is not supported on PointLabelLayer`
+      )();
+    }
 
     return new EnhancedTextLayer(
       this.getSubLayerProps({

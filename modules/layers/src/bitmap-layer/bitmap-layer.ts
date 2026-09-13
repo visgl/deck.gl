@@ -4,10 +4,10 @@
 
 import {
   Layer,
+  color as colorModule,
   project32,
   picking,
   CoordinateSystem,
-  COORDINATE_SYSTEM,
   LayerProps,
   PickingInfo,
   GetPickingInfoParams,
@@ -24,13 +24,14 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 import createMesh from './create-mesh';
 
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
+import source from './bitmap-layer.wgsl';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
   image: {type: 'image', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
-  _imageCoordinateSystem: COORDINATE_SYSTEM.DEFAULT,
+  _imageCoordinateSystem: 'default',
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
   // More context: because of the blending mode we're using for ground imagery,
@@ -130,13 +131,17 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
+    return super.getShaders({
+      vs,
+      fs,
+      source,
+      modules: [colorModule, project32, picking, bitmapUniforms]
+    });
   }
 
   initializeState() {
     const attributeManager = this.getAttributeManager()!;
 
-    attributeManager.remove(['instancePickingColors']);
     const noAlloc = true;
 
     attributeManager.add({
@@ -258,10 +263,18 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
        |       |
       0,1 --- 1,1
     */
+    const bufferLayout =
+      this.context.device.type === 'webgpu'
+        ? this.getAttributeManager()!
+            .getBufferLayouts({isInstanced: false})
+            // WebGPU index buffers are bound separately from vertex buffer layouts.
+            .filter(layout => layout.name !== 'indices')
+        : this.getAttributeManager()!.getBufferLayouts();
+
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout,
       topology: 'triangle-list',
       isInstanced: false
     });
@@ -293,23 +306,24 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   _getCoordinateUniforms() {
-    const {LNGLAT, CARTESIAN, DEFAULT} = COORDINATE_SYSTEM;
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== DEFAULT) {
+    if (imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
       if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
       }
 
       // The default behavior (linearly interpolated tex coords)
-      const defaultImageCoordinateSystem = this.context.viewport.resolution ? LNGLAT : CARTESIAN;
-      imageCoordinateSystem = imageCoordinateSystem === LNGLAT ? LNGLAT : CARTESIAN;
+      const defaultImageCoordinateSystem = this.context.viewport.resolution
+        ? 'lnglat'
+        : 'cartesian';
+      imageCoordinateSystem = imageCoordinateSystem === 'lnglat' ? 'lnglat' : 'cartesian';
 
-      if (imageCoordinateSystem === LNGLAT && defaultImageCoordinateSystem === CARTESIAN) {
+      if (imageCoordinateSystem === 'lnglat' && defaultImageCoordinateSystem === 'cartesian') {
         // LNGLAT in Mercator, e.g. display LNGLAT-encoded image in WebMercator projection
         return {coordinateConversion: -1, bounds};
       }
-      if (imageCoordinateSystem === CARTESIAN && defaultImageCoordinateSystem === LNGLAT) {
+      if (imageCoordinateSystem === 'cartesian' && defaultImageCoordinateSystem === 'lnglat') {
         // Mercator in LNGLAT, e.g. display WebMercator encoded image in Globe projection
         const bottomLeft = lngLatToWorld([bounds[0], bounds[1]]);
         const topRight = lngLatToWorld([bounds[2], bounds[3]]);

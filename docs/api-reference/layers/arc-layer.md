@@ -1,4 +1,5 @@
 # ArcLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ArcLayerDemo} from '@site/src/doc-demos/layers';
 
@@ -88,7 +89,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {ArcLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 
@@ -206,6 +207,14 @@ The minimum line width in pixels. This prop can be used to prevent the line from
 
 The maximum line width in pixels. This prop can be used to prevent the line from getting too thick when zoomed in.
 
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+When enabled, this prop computes edge coverage in the shader. When disabled, the layer relies on render-target multisampling. Shader-computed coverage can cause artifacts where arcs overlap. Only the edges along the width of the arc are smoothed — the two ends are not.
+
+Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
+
 
 ### Data Accessors
 
@@ -260,6 +269,19 @@ Multiplier of layer height. `0` will make the layer flat.
 
 Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
 In degrees, can be positive or negative (`-90 to +90`).
+
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, arcs may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure arcs are visible from both sides, set:
+
+```js
+new ArcLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
+```
 
 ## Source
 

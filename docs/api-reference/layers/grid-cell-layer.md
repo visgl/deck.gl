@@ -1,4 +1,5 @@
 # GridCellLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {GridCellLayerDemo} from '@site/src/doc-demos/layers';
 
@@ -88,7 +89,7 @@ new Deck({
 
 ```tsx
 import React from 'react';
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GridCellLayer} from '@deck.gl/layers';
 import type {PickingInfo} from '@deck.gl/core';
 

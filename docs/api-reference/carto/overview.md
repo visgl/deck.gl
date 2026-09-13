@@ -37,8 +37,9 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 ### Custom layers connected to CARTO datasource
 
 ```jsx
-import DeckGL from '@deck.gl/react';
-import {VectorTileLayer, vectorQuerySource} from '@deck.gl/carto';
+import {DeckGL} from '@deck.gl/react';
+import {VectorTileLayer} from '@deck.gl/carto';
+import {vectorQuerySource} from '@carto/api-client';
 
 function App() {
   const data = vectorQuerySource({
@@ -92,7 +93,7 @@ It is also straightforward to request data directly using the CARTO [SQL API](ht
 
 
 ```jsx
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {query} from '@deck.gl/carto';
 

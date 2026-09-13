@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable complexity */
-import type {Device} from '@luma.gl/core';
-import {Buffer, BufferLayout, BufferAttributeLayout, VertexType} from '@luma.gl/core';
+import type {Device, NormalizedDataType} from '@luma.gl/core';
+import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 
 import {
   typedArrayFromDataType,
@@ -18,7 +18,7 @@ import log from '../../utils/log';
 
 import type {TypedArray, NumericArray, TypedArrayConstructor} from '../../types/types';
 
-export type DataType = Exclude<VertexType, 'float16'>;
+export type DataType = Exclude<NormalizedDataType, 'float16'>;
 export type LogicalDataType = DataType | 'float64';
 
 export type BufferAccessor = {
@@ -102,7 +102,7 @@ export type DataColumnOptions<Options> = Options &
     /** Internal API, use `type` instead */
     logicalType?: LogicalDataType;
     isIndexed?: boolean;
-    defaultValue?: number | number[];
+    defaultValue?: number | Readonly<number[]>;
   };
 
 export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
@@ -219,16 +219,22 @@ export default class DataColumn<Options, State> {
     this.state.numInstances = n;
   }
 
+  /** @internal Whether this column's GPU buffer contains interleaved high and low components. */
+  get isDoublePrecisionBuffer(): boolean {
+    return this._shouldSplitDoublePrecisionValue(this.value);
+  }
+
   delete(): void {
     if (this._buffer) {
       this._buffer.delete();
       this._buffer = null;
     }
     typedArrayManager.release(this.state.allocatedValue);
+    this.state.allocatedValue = null;
   }
 
   getBuffer(): Buffer | null {
-    if (this.state.constant) {
+    if (this.state.constant && this.device.type !== 'webgpu') {
       return null;
     }
     return this.state.externalBuffer || this._buffer;
@@ -241,7 +247,9 @@ export default class DataColumn<Options, State> {
     const result: Record<string, Buffer | TypedArray | null> = {};
     if (this.state.constant) {
       const value = this.value as TypedArray;
-      if (options) {
+      if (this.device.type === 'webgpu' && this._buffer) {
+        result[attributeName] = this._buffer;
+      } else if (options) {
         const shaderAttributeDef = resolveShaderAttribute(this.getAccessor(), options);
         const offset = shaderAttributeDef.offset / value.BYTES_PER_ELEMENT;
         const size = shaderAttributeDef.size || this.size;
@@ -253,7 +261,9 @@ export default class DataColumn<Options, State> {
       result[attributeName] = this.getBuffer();
     }
     if (this.doublePrecision) {
-      if (this.value instanceof Float64Array) {
+      if (this.isDoublePrecisionBuffer) {
+        // WebGPU cannot override the low part with a constant. Float32 sources are therefore
+        // uploaded as interleaved high/zero-low rows and share this buffer with the low attribute.
         result[`${attributeName}64Low`] = result[attributeName];
       } else {
         // Disable fp64 low part
@@ -268,11 +278,12 @@ export default class DataColumn<Options, State> {
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {
     const accessor = this.getAccessor();
-    const attributes: BufferAttributeLayout[] = [];
+    const attributes: (BufferAttributeLayout | null)[] = [];
     const result: BufferLayout = {
       name: this.id,
-      byteStride: getStride(accessor),
-      attributes
+      // WebGPU has no constant vertex attributes. A one-row buffer with zero stride provides
+      // equivalent broadcast semantics without scaling allocation with the instance count.
+      byteStride: this.device.type === 'webgpu' && this.state.constant ? 0 : getStride(accessor)
     };
 
     if (this.doublePrecision) {
@@ -281,20 +292,33 @@ export default class DataColumn<Options, State> {
         options || {}
       );
       attributes.push(
-        getBufferAttributeLayout(attributeName, {...accessor, ...doubleShaderAttributeDefs.high}),
-        getBufferAttributeLayout(`${attributeName}64Low`, {
-          ...accessor,
-          ...doubleShaderAttributeDefs.low
-        })
+        getBufferAttributeLayout(
+          attributeName,
+          {...accessor, ...doubleShaderAttributeDefs.high},
+          this.device.type
+        ),
+        getBufferAttributeLayout(
+          `${attributeName}64Low`,
+          {
+            ...accessor,
+            ...doubleShaderAttributeDefs.low
+          },
+          this.device.type
+        )
       );
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
       attributes.push(
-        getBufferAttributeLayout(attributeName, {...accessor, ...shaderAttributeDef})
+        getBufferAttributeLayout(
+          attributeName,
+          {...accessor, ...shaderAttributeDef},
+          this.device.type
+        )
       );
     } else {
-      attributes.push(getBufferAttributeLayout(attributeName, accessor));
+      attributes.push(getBufferAttributeLayout(attributeName, accessor, this.device.type));
     }
+    result.attributes = attributes.filter(Boolean) as BufferAttributeLayout[];
     return result;
   }
 
@@ -375,7 +399,9 @@ export default class DataColumn<Options, State> {
           accessor.type = 'float32';
         } else {
           const type = dataTypeFromTypedArray(opts.value);
-          accessor.type = accessor.normalized ? (type.replace('int', 'norm') as DataType) : type;
+          // (lint wants to remove the cast)
+          // eslint-disable-next-line
+          accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;
         }
       }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
@@ -407,18 +433,22 @@ export default class DataColumn<Options, State> {
     } else if (opts.value) {
       this._checkExternalBuffer(opts);
 
-      let value = opts.value as TypedArray;
+      const sourceValue = opts.value as TypedArray;
+      let value = sourceValue;
       state.externalBuffer = null;
       state.constant = false;
-      this.value = value;
+      this.value = sourceValue;
+
+      if (this._shouldSplitDoublePrecisionValue(value)) {
+        value = toDoublePrecisionArray(value, accessor);
+        if (sourceValue instanceof Float32Array) {
+          accessor.stride = accessor.size * 2 * Float32Array.BYTES_PER_ELEMENT;
+        }
+      }
 
       let {buffer} = this;
       const stride = getStride(accessor);
       const byteOffset = (accessor.vertexOffset || 0) * stride;
-
-      if (this.doublePrecision && value instanceof Float64Array) {
-        value = toDoublePrecisionArray(value, accessor);
-      }
       if (this.settings.isIndexed) {
         const ArrayType = this.settings.defaultType;
         if (value.constructor !== ArrayType) {
@@ -442,25 +472,21 @@ export default class DataColumn<Options, State> {
     return true;
   }
 
-  updateSubBuffer(
-    opts: {
-      startOffset?: number;
-      endOffset?: number;
-    } = {}
-  ): void {
+  updateSubBuffer(opts: {startOffset?: number; endOffset?: number} = {}): void {
     this.state.bounds = null; // clear cached bounds
 
     const value = this.value as TypedArray;
     const {startOffset = 0, endOffset} = opts;
+    const splitDoublePrecisionValue = this._shouldSplitDoublePrecisionValue(value);
     this.buffer.write(
-      this.doublePrecision && value instanceof Float64Array
+      splitDoublePrecisionValue
         ? toDoublePrecisionArray(value, {
             size: this.size,
             startIndex: startOffset,
             endIndex: endOffset
           })
         : value.subarray(startOffset, endOffset),
-      startOffset * value.BYTES_PER_ELEMENT + this.byteOffset
+      startOffset * (splitDoublePrecisionValue ? 8 : value.BYTES_PER_ELEMENT) + this.byteOffset
     );
   }
 
@@ -477,17 +503,28 @@ export default class DataColumn<Options, State> {
 
     this.value = value;
 
+    const splitDoublePrecisionValue = this._shouldSplitDoublePrecisionValue(value);
+    const accessor =
+      splitDoublePrecisionValue && value instanceof Float32Array
+        ? {...this.settings, stride: this.size * 2 * Float32Array.BYTES_PER_ELEMENT}
+        : this.settings;
+    this.setAccessor(accessor);
+
     const {byteOffset} = this;
     let {buffer} = this;
+    const bufferByteLength =
+      value.byteLength * (splitDoublePrecisionValue && value instanceof Float32Array ? 2 : 1);
 
-    if (!buffer || buffer.byteLength < value.byteLength + byteOffset) {
-      buffer = this._createBuffer(value.byteLength + byteOffset);
+    if (!buffer || buffer.byteLength < bufferByteLength + byteOffset) {
+      buffer = this._createBuffer(bufferByteLength + byteOffset);
       if (copy && oldValue) {
         // Upload the full existing attribute value to the GPU, so that updateBuffer
         // can choose to only update a partial range.
         // TODO - copy old buffer to new buffer on the GPU
         buffer.write(
-          oldValue instanceof Float64Array ? toDoublePrecisionArray(oldValue, this) : oldValue,
+          this._shouldSplitDoublePrecisionValue(oldValue)
+            ? toDoublePrecisionArray(oldValue, this)
+            : oldValue,
           byteOffset
         );
       }
@@ -496,11 +533,20 @@ export default class DataColumn<Options, State> {
     state.allocatedValue = value;
     state.constant = false;
     state.externalBuffer = null;
-    this.setAccessor(this.settings);
     return true;
   }
 
   // PRIVATE HELPER METHODS
+  private _shouldSplitDoublePrecisionValue(
+    value: NumericArray | null
+  ): value is Float32Array | Float64Array {
+    return Boolean(
+      this.doublePrecision &&
+        (value instanceof Float64Array ||
+          (this.device.type === 'webgpu' && value instanceof Float32Array))
+    );
+  }
+
   protected _checkExternalBuffer(opts: {value?: NumericArray; normalized?: boolean}): void {
     const {value} = opts;
     if (!ArrayBuffer.isView(value)) {
@@ -607,10 +653,15 @@ export default class DataColumn<Options, State> {
     }
 
     const {isIndexed, type} = this.settings;
+    const usage =
+      this.device.type === 'webgpu' && !isIndexed
+        ? Buffer.VERTEX | Buffer.STORAGE | Buffer.COPY_DST | Buffer.COPY_SRC
+        : (isIndexed ? Buffer.INDEX : Buffer.VERTEX) | Buffer.COPY_DST;
     this._buffer = this.device.createBuffer({
       ...this._buffer?.props,
       id: this.id,
-      usage: isIndexed ? Buffer.INDEX : Buffer.VERTEX,
+      // Grouped WebGPU attribute interleave binds vertex attributes as storage buffers.
+      usage,
       indexType: isIndexed ? (type as 'uint16' | 'uint32') : undefined,
       byteLength
     });

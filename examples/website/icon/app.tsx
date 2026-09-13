@@ -4,8 +4,8 @@
 
 import React, {useState, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl//maplibre';
-import DeckGL from '@deck.gl/react';
+import {Map} from 'react-map-gl/maplibre';
+import {DeckGL} from '@deck.gl/react';
 import {MapView} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
 
@@ -13,6 +13,7 @@ import IconClusterLayer from './icon-cluster-layer';
 import type {IconClusterLayerPickingInfo} from './icon-cluster-layer';
 import type {PickingInfo, MapViewState} from '@deck.gl/core';
 import type {IconLayerProps} from '@deck.gl/layers';
+import {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL =
@@ -75,11 +76,19 @@ function renderTooltip(info: IconClusterLayerPickingInfo<Meterite>) {
 
 /* eslint-disable react/no-deprecated */
 export default function App({
+  device,
   data = DATA_URL,
   iconMapping = 'data/location-icon-mapping.json',
   iconAtlas = 'data/location-icon-atlas.png',
   showCluster = true,
   mapStyle = MAP_STYLE
+}: {
+  device?: Device;
+  showCluster?: boolean;
+  data?: string | Meterite[];
+  iconMapping?: string;
+  iconAtlas?: string;
+  mapStyle?: string;
 }) {
   const [hoverInfo, setHoverInfo] = useState<IconClusterLayerPickingInfo<Meterite> | null>(null);
 
@@ -119,6 +128,7 @@ export default function App({
       });
   return (
     <DeckGL
+      device={device}
       layers={[layer]}
       views={MAP_VIEW}
       initialViewState={INITIAL_VIEW_STATE}

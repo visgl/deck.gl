@@ -97,6 +97,15 @@ export class Map {
         };
       }
     };
+
+    /* global document */
+    this._mapDiv = document.createElement('div');
+    const firstChild = document.createElement('div');
+    firstChild.style.width = `${opts.width}px`;
+    firstChild.style.height = `${opts.height}px`;
+    Object.defineProperty(firstChild, 'offsetWidth', {value: opts.width});
+    Object.defineProperty(firstChild, 'offsetHeight', {value: opts.height});
+    this._mapDiv.appendChild(firstChild);
   }
 
   addListener(event, cb) {
@@ -125,18 +134,18 @@ export class Map {
       if (this.getRenderingType() === RenderingType.RASTER) {
         overlay.draw();
       } else {
-        overlay.onDraw({transformer: this.transformer});
+        // For vector maps, we may have both OverlayView (with draw) and WebGLOverlayView (with onDraw)
+        if (overlay.onDraw) {
+          overlay.onDraw({transformer: this.transformer});
+        } else if (overlay.draw) {
+          overlay.draw();
+        }
       }
     }
   }
 
   getDiv() {
-    return {
-      firstChild: {
-        offsetWidth: this.opts.width,
-        offsetHeight: this.opts.height
-      }
-    };
+    return this._mapDiv;
   }
 
   getBounds() {
@@ -166,7 +175,7 @@ export class Map {
   _addOverlay(overlay) {
     this._overlays.add(overlay);
     overlay.onAdd();
-    if (this.getRenderingType() === RenderingType.VECTOR) {
+    if (this.getRenderingType() === RenderingType.VECTOR && overlay.onContextRestored) {
       overlay.onContextRestored({});
     }
   }
@@ -186,8 +195,12 @@ export class OverlayView {
 
   setMap(map) {
     this.map?._removeOverlay(this);
-    map?._addOverlay(this);
     this.map = map;
+    map?._addOverlay(this);
+  }
+
+  getMap() {
+    return this.map;
   }
 
   getProjection() {
@@ -195,11 +208,13 @@ export class OverlayView {
   }
 
   getPanes() {
+    // For proper testing, overlayLayer should be part of the map's div
+    if (!this.map) return null;
     return {
       floatPane: this._container,
       mapPane: this._container,
       markerLayer: this._container,
-      overlayLayer: this._container
+      overlayLayer: this.map._mapDiv
     };
   }
 }
@@ -213,14 +228,12 @@ export class WebGLOverlayView {
 
   setMap(map) {
     this.map?._removeOverlay(this);
-    map?._addOverlay(this);
     this.map = map;
+    map?._addOverlay(this);
   }
 
   getMap() {
-    return {
-      getDiv: () => this._container
-    };
+    return this.map;
   }
 
   requestRedraw() {

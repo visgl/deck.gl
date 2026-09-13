@@ -2,15 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, assert} from '@deck.gl/core';
-import {getViewState, getDeckInstance, removeDeckInstance, getInterleavedProps} from './deck-utils';
+import {Deck, assert, log} from '@deck.gl/core';
+import {
+  getViewState,
+  getDefaultView,
+  getDeckInstance,
+  removeDeckInstance,
+  getDefaultParameters,
+  getProjection,
+  MAPBOX_VIEW_ID
+} from './deck-utils';
 
 import type {Map, IControl, MapMouseEvent, ControlPosition} from './types';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
-import type {DeckProps} from '@deck.gl/core';
-import {log} from '@deck.gl/core';
+import type {DeckProps, LayersList} from '@deck.gl/core';
 
-import {resolveLayers} from './resolve-layers';
+import {resolveLayerGroups} from './resolve-layer-groups';
 
 export type MapboxOverlayProps = Omit<
   DeckProps,
@@ -24,6 +31,9 @@ export type MapboxOverlayProps = Omit<
   | 'initialViewState'
   | 'controller'
 > & {
+  /**
+   * deck.gl layers are inserted into mapbox-gl's layer stack, and share the same WebGL2RenderingContext as the base map.
+   */
   interleaved?: boolean;
 };
 
@@ -33,35 +43,56 @@ export type MapboxOverlayProps = Omit<
  */
 export default class MapboxOverlay implements IControl {
   private _props: MapboxOverlayProps;
-  private _deck?: Deck;
+  private _deck?: Deck<any>;
   private _map?: Map;
   private _container?: HTMLDivElement;
   private _interleaved: boolean;
   private _lastMouseDownPoint?: {x: number; y: number; clientX: number; clientY: number};
 
   constructor(props: MapboxOverlayProps) {
-    const {interleaved = false, ...otherProps} = props;
+    const {interleaved = false} = props;
     this._interleaved = interleaved;
-    this._props = otherProps;
+    this._props = this.filterProps(props);
+  }
+
+  /** Filter out props to pass to Deck **/
+  filterProps(props: MapboxOverlayProps): MapboxOverlayProps {
+    const {interleaved: _, useDevicePixels, ...deckProps} = props;
+    // In interleaved mode the base map owns the WebGL context and the canvas drawing buffer size,
+    // so useDevicePixels cannot be applied and is dropped here. Use MapLibre's `pixelRatio` map
+    // option instead. Mapbox GL JS has no equivalent option.
+    if (!this._interleaved && useDevicePixels !== undefined) {
+      (deckProps as MapboxOverlayProps).useDevicePixels = useDevicePixels;
+    }
+    return deckProps;
   }
 
   /** Update (partial) props of the underlying Deck instance. */
   setProps(props: MapboxOverlayProps): void {
     if (this._interleaved && props.layers) {
-      resolveLayers(this._map, this._deck, this._props.layers, props.layers);
+      this._resolveLayers(this._map, this._deck, this._props.layers, props.layers);
     }
 
-    Object.assign(this._props, props);
+    Object.assign(this._props, this.filterProps(props));
 
-    if (this._deck) {
-      this._deck.setProps(this._interleaved ? getInterleavedProps(this._props) : this._props);
+    if (this._deck && this._map) {
+      this._deck.setProps({
+        ...this._props,
+        views: this._getViews(this._map),
+        parameters: {
+          ...getDefaultParameters(this._map, this._interleaved),
+          ...this._props.parameters
+        }
+      });
     }
   }
 
+  // The local Map type is for internal typecheck only. It does not necesarily satisefy mapbox/maplibre types at runtime.
+  // Do not restrict the argument type here to avoid type conflict.
   /** Called when the control is added to a map */
-  onAdd(map: Map): HTMLDivElement {
-    this._map = map;
-    return this._interleaved ? this._onAddInterleaved(map) : this._onAddOverlaid(map);
+  onAdd(map: unknown): HTMLDivElement {
+    this._map = map as Map;
+    return this._interleaved ? this._onAddInterleaved(map as Map) : this._onAddOverlaid(map as Map);
   }
 
   private _onAddOverlaid(map: Map): HTMLDivElement {
@@ -76,9 +107,20 @@ export default class MapboxOverlay implements IControl {
     });
     this._container = container;
 
-    this._deck = new Deck({
+    this._deck = new Deck<any>({
       ...this._props,
       parent: container,
+      deviceProps: {
+        ...this._props.deviceProps,
+        createCanvasContext: {
+          ...(typeof this._props.deviceProps?.createCanvasContext === 'object'
+            ? this._props.deviceProps.createCanvasContext
+            : undefined),
+          pixelSizeSource: 'css-dpr'
+        }
+      },
+      parameters: {...getDefaultParameters(map, false), ...this._props.parameters},
+      views: this._getViews(map),
       viewState: getViewState(map)
     });
 
@@ -99,7 +141,7 @@ export default class MapboxOverlay implements IControl {
 
   private _onAddInterleaved(map: Map): HTMLDivElement {
     // @ts-ignore non-public map property
-    const gl = map.painter.context.gl;
+    const gl: WebGL2RenderingContext = map.painter.context.gl;
     if (gl instanceof WebGLRenderingContext) {
       log.warn(
         'Incompatible basemap library. See: https://deck.gl/docs/api-reference/mapbox/overview#compatibility'
@@ -107,17 +149,27 @@ export default class MapboxOverlay implements IControl {
     }
     this._deck = getDeckInstance({
       map,
-      gl,
       deck: new Deck({
         ...this._props,
-        gl
+        views: this._getViews(map),
+        gl,
+        parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
       })
     });
 
     map.on('styledata', this._handleStyleChange);
-    resolveLayers(map, this._deck, [], this._props.layers);
+    this._resolveLayers(map, this._deck, [], this._props.layers);
 
     return document.createElement('div');
+  }
+
+  private _resolveLayers(
+    map: Map | undefined,
+    _deck: Deck | undefined,
+    prevLayers: LayersList | undefined,
+    newLayers: LayersList | undefined
+  ): void {
+    resolveLayerGroups(map, prevLayers, newLayers);
   }
 
   /** Called when the control is removed from a map */
@@ -153,7 +205,7 @@ export default class MapboxOverlay implements IControl {
 
   private _onRemoveInterleaved(map: Map): void {
     map.off('styledata', this._handleStyleChange);
-    resolveLayers(map, this._deck, this._props.layers, []);
+    this._resolveLayers(map, this._deck, this._props.layers, []);
     removeDeckInstance(map);
   }
 
@@ -197,7 +249,15 @@ export default class MapboxOverlay implements IControl {
   }
 
   private _handleStyleChange = () => {
-    resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    this._resolveLayers(this._map, this._deck, this._props.layers, this._props.layers);
+    if (!this._map) return;
+
+    // getProjection() returns undefined before style is loaded
+    const projection = getProjection(this._map);
+    if (projection) {
+      // Update views to match new projection (MapView vs GlobeView)
+      this._deck?.setProps({views: this._getViews(this._map)});
+    }
   };
 
   private _updateContainerSize = () => {
@@ -210,11 +270,28 @@ export default class MapboxOverlay implements IControl {
     }
   };
 
+  private _getViews(map: Map) {
+    if (!this._props.views) {
+      return getDefaultView(map);
+    }
+    // Check if custom views already include a 'mapbox' view
+    const views = Array.isArray(this._props.views) ? this._props.views : [this._props.views];
+    const hasMapboxView = views.some((v: any) => v.id === MAPBOX_VIEW_ID);
+    if (hasMapboxView) {
+      return this._props.views;
+    }
+    // Add default 'mapbox' view to custom views for consistency with interleaved mode
+    return [getDefaultView(map), ...views];
+  }
+
   private _updateViewState = () => {
     const deck = this._deck;
-    if (deck) {
-      // @ts-ignore (2345) map is always defined if deck is
-      deck.setProps({viewState: getViewState(this._map)});
+    const map = this._map;
+    if (deck && map) {
+      deck.setProps({
+        views: this._getViews(map),
+        viewState: getViewState(map)
+      });
       // Redraw immediately if view state has changed
       if (deck.isInitialized) {
         deck.redraw();

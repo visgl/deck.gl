@@ -6,7 +6,8 @@
 import React, {useState, useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 
-import DeckGL from '@deck.gl/react';
+import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {OrthographicView} from '@deck.gl/core';
 import {TileLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -36,9 +37,11 @@ function getTooltip({tile, bitmap}: TileLayerPickingInfo<ImageBitmap, BitmapLaye
 }
 
 export default function App({
+  device,
   autoHighlight = true,
   onTilesLoad
 }: {
+  device?: Device;
   autoHighlight?: boolean;
   onTilesLoad?: () => void;
 }) {
@@ -71,6 +74,7 @@ export default function App({
         )
       });
     };
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     getMetaData();
   }, []);
 
@@ -97,7 +101,7 @@ export default function App({
         const {width, height} = dimensions;
         const {data, ...otherProps} = props;
         return new BitmapLayer(otherProps, {
-          image: props.data,
+          image: data,
           bounds: [
             clamp(left, 0, width),
             clamp(top, 0, height),
@@ -110,6 +114,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       views={[new OrthographicView({id: 'ortho'})]}
       layers={[tileLayer]}
       initialViewState={INITIAL_VIEW_STATE}

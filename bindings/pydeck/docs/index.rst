@@ -16,6 +16,11 @@ Gallery
 Overview
 ^^^^^^^^
 
+`pydeck Playground <https://deck.gl/pydeck>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Try pydeck scripts directly in the browser with the `pydeck playground <https://deck.gl/pydeck>`__. No installation needed — edit Python code and see the visualization update in real time.
+
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -27,10 +32,10 @@ with the Jupyter kernel. Read more about usage in Jupyter `here <jupyter.html>`_
    `Conway's Game of Life <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life>`__ in pydeck
 
 .. figure:: https://camo.githubusercontent.com/020e7749ebfb7a8f50403fcbc8650833608c006d/68747470733a2f2f6d7962696e6465722e6f72672f7374617469632f6c6f676f2e7376673f763d6639663064393237623637636339646339396437383863383232636132316330
-   :target: https://mybinder.org/v2/gh/uber/deck.gl/binder
+   :target: https://mybinder.org/v2/gh/visgl/deck.gl/binder
    :alt: Hosted Jupyter notebook examples
 
-   `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/uber/deck.gl/binder>`__
+   `See hosted examples on mybinder.org <https://mybinder.org/v2/gh/visgl/deck.gl/binder>`__
 
 `Layers <layer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,10 +66,20 @@ a user's zoom level
 Used to enable or disable map controls and also modify the kind of map projection,
 like plotting in flat plane instead of plotting on a mercator projection
 
-`LightSettings (Experimental) <light_settings.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Effects <effect.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Configure the lighting within a visualization.
+Configure lighting and screen-space post-processing effects.
+
+`Widgets <widget.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configure one of the many deck.gl UI widgets for displaying and controlling deck.gl state in pydeck.
+
+`Extensions <extension.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add optional deck.gl layer extensions, like data-driven filtering or masking, to a layer.
 
 .. note::
    The pydeck library assumes Internet access. You will need an Internet connection or the visualization will not render.
@@ -98,7 +113,10 @@ Index
    data_utils
    view_state
    view
-   light_settings
+   effect
+   widget
+   extension
+   types
 
 .. toctree::
    :maxdepth: 1

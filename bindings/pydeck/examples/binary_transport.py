@@ -9,10 +9,10 @@ Since binary transfer relies on Jupyter's kernel communication,
 note that the .html in the pydeck documentation does not use binary transfer
 and is just for illustration.
 """
+
 import pydeck as pdk
 
 import pandas as pd
-
 
 NODES_URL = "https://raw.githubusercontent.com/ajduberstein/geo_datasets/master/social_nodes.csv"
 

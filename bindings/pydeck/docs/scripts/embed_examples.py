@@ -3,6 +3,7 @@
 These populate the files you see once you click into a grid cell
 on the pydeck gallery page
 """
+
 from multiprocessing import Pool
 import os
 import subprocess
@@ -31,7 +32,8 @@ def create_rst(pydeck_example_file_name):
         ),
         shell=True,
     )
-    python_code = open(pydeck_example_file_name, "r").read()
+    with open(pydeck_example_file_name, "r") as f:
+        python_code = f.read()
     doc_source = DOC_TEMPLATE.render(
         page_title=to_presentation_name(asset_name),
         snake_name=asset_name,
@@ -40,10 +42,9 @@ def create_rst(pydeck_example_file_name):
         deckgl_doc_url=deckgl_doc_url,
     )
     rst_path = os.path.join(GALLERY_DIR, asset_name + ".rst")
-    f = open(rst_path, "w+")
-    print("* Converted %s to %s" % (pydeck_example_file_name, rst_path))
-    f.write(doc_source)
-    f.close()
+    with open(rst_path, "w") as f:
+        print("* Converted %s to %s" % (pydeck_example_file_name, rst_path))
+        f.write(doc_source)
 
 
 def main():

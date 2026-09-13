@@ -45,28 +45,28 @@ async function loadArcGISModule(
     const Layer = esri.layers.Layer;
     const Accessor = esri.core.Accessor;
     const BaseLayerViewGL2D = esri.views['2d'].layers.BaseLayerViewGL2D;
-    const externalRenderers = esri.views['3d'].externalRenderers;
+    const RenderNode = esri.views['3d'].webgl.RenderNode;
 
-    return initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers);
+    return initialize(Layer, Accessor, BaseLayerViewGL2D, RenderNode);
   }
 
-  const [Layer, Accessor, BaseLayerViewGL2D, externalRenderers] = await esriLoaderLoadModules(
+  const [Layer, Accessor, BaseLayerViewGL2D, RenderNode] = await esriLoaderLoadModules(
     [
       'esri/layers/Layer',
       'esri/core/Accessor',
       'esri/views/2d/layers/BaseLayerViewGL2D',
-      'esri/views/3d/externalRenderers'
+      'esri/views/3d/webgl/RenderNode'
     ],
     loadScriptOptions
   );
-  return initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers);
+  return initialize(Layer, Accessor, BaseLayerViewGL2D, RenderNode);
 }
 
-function initialize(Layer, Accessor, BaseLayerViewGL2D, externalRenderers): LoadedModules {
+function initialize(Layer, Accessor, BaseLayerViewGL2D, RenderNode): LoadedModules {
   const DeckProps = createDeckProps(Accessor);
   const DeckLayerView2D = createDeckLayerView2D(BaseLayerViewGL2D);
   const DeckLayer = createDeckLayer(DeckProps, Layer, DeckLayerView2D);
-  const DeckRenderer = createDeckRenderer(DeckProps, externalRenderers);
+  const DeckRenderer = createDeckRenderer(DeckProps, RenderNode);
 
   arcGIS = {DeckLayer, DeckRenderer};
   return arcGIS;

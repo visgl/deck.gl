@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  color,
   project32,
   picking,
   UNIT,
@@ -18,19 +19,21 @@ import {
   Material,
   DefaultProps
 } from '@deck.gl/core';
+import {gouraudMaterial} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
-import {gouraudMaterial} from '@luma.gl/shadertools';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
+import {shaderWGSL} from './point-cloud-layer.wgsl';
 
-const DEFAULT_COLOR: [number, number, number, number] = [0, 0, 0, 255];
-const DEFAULT_NORMAL: [number, number, number] = [0, 0, 1];
+const DEFAULT_COLOR = [0, 0, 0, 255] as const;
+const DEFAULT_NORMAL = [0, 0, 1] as const;
 
 const defaultProps: DefaultProps<PointCloudLayerProps> = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
+  antialiasing: false,
 
   getPosition: {type: 'accessor', value: (x: any) => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
@@ -82,6 +85,14 @@ type _PointCloudLayerProps<DataT> = {
   pointSize?: number;
 
   /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where points overlap.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
+
+  /**
    * @deprecated Use `pointSize` instead
    */
   radiusPixels?: number;
@@ -104,7 +115,7 @@ type _PointCloudLayerProps<DataT> = {
    * The normal of each object, in `[nx, ny, nz]`.
    * @default [0, 0, 1]
    */
-  getNormal?: Accessor<DataT, [number, number, number]>;
+  getNormal?: Accessor<DataT, Readonly<[number, number, number]>>;
 
   /**
    * The rgba color is in the format of `[r, g, b, [a]]`
@@ -125,10 +136,13 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   };
 
   getShaders() {
+    const {antialiasing} = this.props;
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, gouraudMaterial, picking, pointCloudUniforms]
+      source: shaderWGSL,
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
+      modules: [project32, color, gouraudMaterial, picking, pointCloudUniforms]
     });
   }
 
@@ -158,9 +172,9 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   updateState(params: UpdateParameters<this>): void {
-    const {changeFlags, props} = params;
+    const {changeFlags, props, oldProps} = params;
     super.updateState(params);
-    if (changeFlags.extensionsChanged) {
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();

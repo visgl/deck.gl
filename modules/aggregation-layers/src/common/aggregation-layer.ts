@@ -39,9 +39,7 @@ export default abstract class AggregationLayer<
   /** Called when some attributes change, a chance to mark Aggregator as dirty */
   abstract onAttributeChange(id: string): void;
 
-  initializeState(): void {
-    this.getAttributeManager()!.remove(['instancePickingColors']);
-  }
+  initializeState(): void {}
 
   // Extend Layer.updateState to update the Aggregator instance
   // returns true if aggregator is changed

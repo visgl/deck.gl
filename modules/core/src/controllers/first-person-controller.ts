@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import Controller from './controller';
+import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
+import {getMaxBoundsRect} from './utils';
 import {mod} from '../utils/math-utils';
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
@@ -27,6 +28,9 @@ type FirstPersonStateProps = {
 
   maxPitch?: number;
   minPitch?: number;
+
+  maxBounds?: ControllerProps['maxBounds'];
+  maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };
 
 type FirstPersonStateInternal = {
@@ -43,8 +47,6 @@ class FirstPersonState extends ViewState<
   FirstPersonStateProps,
   FirstPersonStateInternal
 > {
-  makeViewport: (props: Record<string, any>) => Viewport;
-
   constructor(
     options: FirstPersonStateProps &
       FirstPersonStateInternal & {
@@ -69,6 +71,9 @@ class FirstPersonState extends ViewState<
       maxPitch = 90,
       minPitch = -90,
 
+      maxBounds = null,
+      maxBoundsPadding = null,
+
       // Model state when the rotate operation first started
       startRotatePos,
       startBearing,
@@ -88,7 +93,9 @@ class FirstPersonState extends ViewState<
         longitude,
         latitude,
         maxPitch,
-        minPitch
+        minPitch,
+        maxBounds,
+        maxBoundsPadding
       },
       {
         startRotatePos,
@@ -97,10 +104,9 @@ class FirstPersonState extends ViewState<
         startZoomPosition,
         startPanPos,
         startPanPosition
-      }
+      },
+      options.makeViewport
     );
-
-    this.makeViewport = options.makeViewport;
   }
 
   /* Public API */
@@ -366,7 +372,7 @@ class FirstPersonState extends ViewState<
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   applyConstraints(props: Required<FirstPersonStateProps>): Required<FirstPersonStateProps> {
     // Ensure pitch and zoom are within specified range
-    const {pitch, maxPitch, minPitch, longitude, bearing} = props;
+    const {pitch, maxPitch, minPitch, longitude, position, bearing, maxBounds} = props;
     props.pitch = clamp(pitch, minPitch, maxPitch);
 
     // Normalize degrees
@@ -375,6 +381,17 @@ class FirstPersonState extends ViewState<
     }
     if (bearing < -180 || bearing > 180) {
       props.bearing = mod(bearing + 180, 360) - 180;
+    }
+    if (maxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      if (maxBoundsRect.width >= 0 && maxBoundsRect.height >= 0) {
+        const x = clamp(position[0], maxBounds[0][0], maxBounds[1][0]);
+        const y = clamp(position[1], maxBounds[0][1], maxBounds[1][1]);
+        const z = clamp(position[2] ?? 0, maxBounds[0][2] ?? 0, maxBounds[1][2] ?? 0);
+        if (x !== position[0] || y !== position[1] || z !== position[2]) {
+          props.position = [x, y, z];
+        }
+      }
     }
 
     return props;
