@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
-import type {Layer, Viewport} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
+import type {CoordinateSystem, Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
+import type {NumericArray} from '@math.gl/core';
 
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
@@ -26,6 +27,86 @@ export function lngLatToMercatorCommon(lngLat: number[]): [number, number] {
 /** Returns a Mercator viewport for bounds computation, bypassing GlobeView. */
 export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
   return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
+}
+
+/*
+ * Flat common space
+ * -----------------
+ * Texture/bounds based extensions (mask, clip, fill pattern, terrain) index a FLAT plane:
+ * Web Mercator for geospatial viewports, cartesian for OrthographicView. GlobeViewport's common
+ * space is sphere XYZ, so positions must be converted. The GPU side is
+ * `project_common_position_to_flat()` in the core `project` shader module; the helpers below are
+ * its CPU twins.
+ * Adding a non-flat projection: (1) core project.glsl.ts / project.wgsl.ts flatten branch,
+ * (2) isFlatViewport() here, (3) a preset in test/render/view-presets.ts.
+ */
+
+/**
+ * True when the viewport's common space is a flat plane. GlobeViewport is the only non-flat
+ * viewport today. This is the only place in @deck.gl/extensions that tests for globe; swap the
+ * body for a projectionMode comparison if core ever exports PROJECTION_MODE constants.
+ */
+export function isFlatViewport(viewport: Viewport): boolean {
+  return !(viewport instanceof _GlobeViewport);
+}
+
+export type FlatProjectOptions = {
+  fromCoordinateSystem?: CoordinateSystem;
+  fromCoordinateOrigin?: [number, number, number];
+  modelMatrix?: NumericArray | null;
+};
+
+/**
+ * CPU twin of `project_common_position_to_flat(project_position(position))` for the viewport the
+ * layer is drawn into:
+ * - flat viewport: `Layer.projectPosition` with autoOffset, i.e. exactly `geometry.position`
+ *   (offset-relative under WEB_MERCATOR_AUTO_OFFSET at zoom >= 12)
+ * - non-flat viewport: absolute Mercator through the reference viewport (autoOffset off)
+ * Always pair with the GPU function; a raw `layer.projectPosition()` on either side silently
+ * disagrees in one of the two modes.
+ */
+export function projectToFlatCommon(
+  layer: Layer,
+  position: number[],
+  opts: FlatProjectOptions = {}
+): [number, number, number] {
+  // Same resolution as Layer.projectPosition so multi-view setups stay consistent
+  const viewport = layer.internalState?.viewport || layer.context.viewport;
+  return isFlatViewport(viewport)
+    ? layer.projectPosition(position, opts)
+    : layer.projectPosition(position, {
+        ...opts,
+        viewport: getMercatorReferenceViewport(viewport),
+        autoOffset: false
+      });
+}
+
+/**
+ * Projects `[minX, minY, maxX, maxY]` in the layer's (or `opts.fromCoordinateSystem`) coordinates
+ * into normalized flat common bounds.
+ */
+export function projectBoundsToFlatCommon(
+  layer: Layer,
+  bounds: Readonly<[number, number, number, number]>,
+  opts?: FlatProjectOptions
+): Bounds {
+  const a = projectToFlatCommon(layer, [bounds[0], bounds[1], 0], opts);
+  const b = projectToFlatCommon(layer, [bounds[2], bounds[3], 0], opts);
+  return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
+}
+
+/**
+ * The origin that `project_common_position_to_flat()` results are relative to:
+ * `project.commonOrigin` on flat viewports, `[0, 0]` on non-flat ones (absolute Mercator).
+ * For GLOBE + meter-offsets, commonOrigin holds a sphere-space position that must never be re-added.
+ */
+export function getFlatCommonOrigin(
+  projectUniforms: ProjectUniforms,
+  viewport: Viewport
+): [number, number] {
+  return isFlatViewport(viewport)
+    ? [projectUniforms.commonOrigin[0], projectUniforms.commonOrigin[1]]
+    : [0, 0];
 }
 
 /*
@@ -179,6 +260,12 @@ export function getRenderBounds(
 ): Bounds {
   if (!layerBounds) {
     return [0, 0, 1, 1];
+  }
+
+  // layerBounds are flat (Mercator) but getViewportBounds() would return sphere coordinates for a
+  // non-flat viewport; the two cannot be intersected. Render the full layer extent instead.
+  if (!isFlatViewport(viewport)) {
+    return layerBounds;
   }
 
   const viewportBounds = getViewportBounds(viewport, zRange);

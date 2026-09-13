@@ -140,6 +140,16 @@ vec4 project_common_position_to_clipspace(vec4 position)
 Converts the coordinates of a point from the common space to the clip space, which can be assigned to `gl_Position` as the "return value" from the vertex shader.
 
 
+### project_common_position_to_flat
+
+```glsl
+vec2 project_common_position_to_flat(vec3 commonPosition)
+vec2 project_common_position_to_flat(vec4 commonPosition)
+```
+
+Converts a position in the common space of the current projection mode into flat common space: Web Mercator for geospatial views, cartesian otherwise. Returns `commonPosition.xy` unchanged for flat projections; in `GlobeView` the sphere position is inverted back to absolute Mercator. Use it when looking up textures or bounds that were computed in a flat viewport, such as an effect's framebuffer.
+
+
 ### project_get_orientation_matrix
 
 ```glsl
