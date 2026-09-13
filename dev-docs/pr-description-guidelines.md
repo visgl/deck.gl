@@ -292,8 +292,7 @@ links for the full text.
 
 ## Before and after
 
-The following are made up from real descriptions and rewritten so that no individual PR is singled
-out.
+The following are descriptions with problems rewritten to demonstrate how to fix them.
 
 ### Empty template
 

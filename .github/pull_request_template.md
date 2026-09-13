@@ -1,7 +1,7 @@
-<!-- If AI helped draft this description (discouraged), remove the authorship declaration below. Maintainers are under no obligation to read AI summaries. See CONTRIBUTING.md -->
+<!-- If AI helped draft this description (discouraged), remove the line below. Maintainers are under no obligation to read AI summaries. See CONTRIBUTING.md -->
 Text below is written by me without [AI assistance](https://github.com/visgl/deck.gl/blob/master/CONTRIBUTING.md)
 
-<!-- See dev-docs/pr-description-guidelines.md. Most good descriptions are under 900 characters. Keep the headings below and do not add others (no Summary, Test plan, file tables or footers). -->
+<!-- See dev-docs/pr-description-guidelines.md. Most good descriptions are under 900 characters. Keep the headings below and do not add others. -->
 <!-- For a feature, enhancement or bug fix, create an issue first. Anything that doesn't work as expected is a bug, including code, docs and tests. -->
 
 <!-- Link the issue this resolves. Use "For #" if it only partially resolves it, "Follow up of #" for related work. Remove the line if there is no issue. -->
