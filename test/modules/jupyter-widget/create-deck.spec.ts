@@ -12,6 +12,7 @@ import {
   DirectionalLight,
   LayerExtension,
   LightingEffect,
+  MapView,
   PointLight,
   PostProcessEffect,
   _CameraLight as CameraLight,
@@ -20,6 +21,7 @@ import {
 } from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
+import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
 import {NullDevice} from '@luma.gl/test-utils';
 import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
 
@@ -219,5 +221,36 @@ describe('jupyter-widget: view aliases', () => {
       props.views[0] instanceof GlobeView,
       '_GlobeView @@type remains registered for back-compat'
     ).toBeTruthy();
+  });
+});
+
+describe('jupyter-widget: widget view layouts', () => {
+  test('SplitterWidget hydrates nested @@type views', () => {
+    // pydeck passes SplitterWidget.view_layout as plain JSON with pydeck.View leaves. The
+    // converter must hydrate those leaves into View instances before the widget constructor
+    // adapts the layout, otherwise the widget cannot manage deck.props.views.
+    const props = jsonConverter.convert({
+      widgets: [
+        {
+          '@@type': 'SplitterWidget',
+          viewLayout: {
+            orientation: 'horizontal',
+            initialSplit: 0.5,
+            views: [
+              {'@@type': 'MapView', id: 'left', controller: true},
+              {'@@type': 'MapView', id: 'right', controller: true}
+            ]
+          }
+        }
+      ]
+    });
+
+    const [widget] = props.widgets;
+    expect(widget).toBeInstanceOf(SplitterWidget);
+    const {views} = widget.props.viewLayout;
+    expect(views[0]).toBeInstanceOf(MapView);
+    expect(views[1]).toBeInstanceOf(MapView);
+    expect(views.map(view => view.id)).toEqual(['left', 'right']);
+    expect(props.views, 'pydeck omits views so the widget can manage them').toBeUndefined();
   });
 });

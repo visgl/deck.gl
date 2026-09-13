@@ -56,7 +56,9 @@ class Deck(JSONMixin):
         layers : pydeck.Layer or list of pydeck.Layer, default None
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
         views : list of pydeck.View, default ``[pydeck.View(type="MapView", controller=True)]``
-            List of :class:`pydeck.bindings.view.View` objects to render.
+            List of :class:`pydeck.bindings.view.View` objects to render. Views may be positioned with the
+            deck.gl ``x``, ``y``, ``width`` and ``height`` props to build multi-view layouts. Set to ``None``
+            when a widget such as ``SplitterWidget`` manages the views.
         api_keys : dict, default None
             Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
             and the values are the API key. Defaults to None if not set. Environment variables are checked automatically:
