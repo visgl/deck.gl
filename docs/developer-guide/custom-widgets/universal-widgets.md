@@ -181,7 +181,7 @@ Remarks:
 
 ### Removing the Widget
 
-[`onRemove()`](../../api-reference/core/widget.md#onremove) - Called when your widget is removed from the `widgets` prop or the `Deck` is finalized. Clean up any listeners and resources you created in `onAdd`. deck.gl removes the root element from the DOM and clears `this.deck`, `this.rootElement` and `this.widgetManager` for you.
+[`onRemove()`](../../api-reference/core/widget.md#onremove) - Called when your widget is removed from the `widgets` prop or the `Deck` is finalized. Clean up any listeners and resources you created in `onAdd`. deck.gl removes the root element from the DOM and clears `this.deck`, `this.rootElement` and `this.widgetManager` for you, but it does not know about UI frameworks: if you render with [Preact](./preact-widgets.md#rendering-with-preact), unmount the tree here with `render(null, this.rootElement)`.
 
 -----
 

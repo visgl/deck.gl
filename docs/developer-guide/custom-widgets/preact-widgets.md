@@ -91,10 +91,20 @@ export class CounterWidget extends Widget<CounterWidgetProps> {
       rootElement
     );
   }
+
+  onRemove() {
+    // Unmount the Preact tree so that effects and hooks are cleaned up
+    if (this.rootElement) {
+      render(null, this.rootElement);
+    }
+  }
 }
 ```
 
-Keep state on the widget class rather than in Preact hooks, and call `this.updateHTML()` when it changes. Widget state must survive re-renders triggered by `setProps`, and deck.gl needs to be able to read it (for example, through `getXxx()` methods).
+Remarks:
+
+* Keep state on the widget class rather than in Preact hooks, and call `this.updateHTML()` when it changes. Widget state must survive re-renders triggered by `setProps`, and deck.gl needs to be able to read it (for example, through `getXxx()` methods).
+* deck.gl only removes the root element from the DOM when a widget is removed. Call `render(null, this.rootElement)` in `onRemove` so Preact runs effect cleanups and releases event handlers, as the built-in widgets do.
 
 ### Reusing Built-in Components
 
@@ -191,6 +201,12 @@ export class LayerListWidget extends Widget<LayerListWidgetProps> {
       this.layers = topLevelLayers;
       this.viewports = viewports;
       this.updateHTML();
+    }
+  }
+
+  onRemove() {
+    if (this.rootElement) {
+      render(null, this.rootElement);
     }
   }
 
