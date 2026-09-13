@@ -15,7 +15,7 @@ When contributing, please consider that there are still humans in the loop thoug
 - **Think**. If a contribution will take more effort to review than it took you to create, something is wrong.
 - Avoid **copy-pasting** responses from AI into conversations with humans (a.k.a. "don't be a meat-proxy").
 - Avoid AI-generated **PR descriptions**, they will likely *not* be read. The maintainers of this repo are perfectly capable of generating their own AI summary of a PR.
-- The best PR description is a short set of **bulletpoints written by a human**. [Example](https://github.com/visgl/deck.gl/pull/10570)
+- The best PR description is a short set of **bulletpoints written by a human**. See the [PR description guidelines](dev-docs/pr-description-guidelines.md). Maintainers may ask for a rewrite or close a PR whose description does not follow them.
 - If you must, **label any AI-generated context** in a PR message, under a heading: "Context for AI".
 - Break larger contributions into **manageable chunks**. AI is a great tool for refactoring into multiple PRs.
 
@@ -82,6 +82,7 @@ If you consider opening a PR, here is some documentation to get you started:
 
 - vis.gl [developer process](https://www.github.com/visgl/tsc/tree/master/developer-process)
 - [deck.gl API design guidelines](https://github.com/visgl/deck.gl/tree/master/dev-docs/deckgl-api-guidelines.md)
+- [PR description guidelines](https://github.com/visgl/deck.gl/tree/master/dev-docs/pr-description-guidelines.md)
 
 ## Testing examples with modified deck.gl source
 

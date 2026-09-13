@@ -26,6 +26,27 @@ subdirectories may add local guidance.
 - Do not reformat files you are not otherwise changing. Keep formatting-only churn separate from
   logic changes when practical.
 
+## Pull Request Descriptions
+
+- Follow `dev-docs/pr-description-guidelines.md`. Use the headings from
+  `.github/pull_request_template.md` as they are: an issue reference, an optional
+  `#### Background` and a `#### Change List`. Do not add `Summary`, `Test plan`, `Validation`,
+  `Impact` or `Goal` sections.
+- Keep it short. Most good descriptions are under 900 characters. Background is one to three
+  present-tense sentences on what is wrong or missing today; remove it if the linked issue already
+  explains it.
+- The Change List has one bullet per module, class, API or artifact, starting with a verb or the
+  name of the thing changed, identifiers in backticks, no trailing periods. Include updated golden
+  images (and why), removed workarounds, and deleted or skipped tests. Put the reasoning and impact
+  of a breaking change as sub-bullets under it. End with `Unit tests`, `Render tests`,
+  `Documentation` and `Upgrade guide` as applicable.
+- State how the change was verified in one line or as Change List bullets, listing what was
+  actually run. Do not leave checkboxes for the reviewer.
+- Do not add footers, emoji, links to tool sessions, `Co-Authored-By` lines, tables of files, or
+  the template's authorship declaration.
+- Do not make up an issue number. Leave `Closes #` for the contributor if the issue is not known.
+- Hand the draft to the contributor. Do not open the PR.
+
 ## Ready For Merge
 
 When asked to "get ready for merge", do a full merge-readiness pass:
@@ -45,8 +66,10 @@ When asked to "get ready for merge", do a full merge-readiness pass:
   Typical commands are `yarn test`, `yarn test-headless`, `yarn test-render`, `yarn test-browser`,
   and `yarn test-website`.
 - For website or docs changes, run the website check from the repo root with `yarn test-website`.
-- Prepare a copyable Markdown PR description based on the branch diff compared to `master`. Start
-  with the PR goals, then list the actual changes and validation.
+- Prepare a copyable Markdown PR description based on the branch diff compared to `master`,
+  following `dev-docs/pr-description-guidelines.md` and the headings in
+  `.github/pull_request_template.md`. Do not include the authorship declaration line. The
+  contributor decides what to disclose, then edits, verifies and submits the description.
 - In the final handoff, call out which merge-readiness gates passed, which were not run, and any
   remaining risk or unrelated pre-existing failures.
 
