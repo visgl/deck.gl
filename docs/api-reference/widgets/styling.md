@@ -117,7 +117,7 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `28px` |
-| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `8px` |
+| `--button-corner-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `8px` |
 | `--widget-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
 | `--icon-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `75%` |
 
