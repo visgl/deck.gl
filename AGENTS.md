@@ -35,16 +35,17 @@ subdirectories may add local guidance.
 - Keep it short. Most good descriptions are under 900 characters. Background is one to three
   present-tense sentences on what is wrong or missing today; remove it if the linked issue already
   explains it.
-- The Change List has one bullet per module, class, API or artifact, starting with a verb or the
-  name of the thing changed, identifiers in backticks, no trailing periods. Include updated golden
-  images (and why), removed workarounds, and deleted or skipped tests. Put the reasoning and impact
-  of a breaking change as sub-bullets under it. End with `Unit tests`, `Render tests`,
-  `Documentation` and `Upgrade guide` as applicable.
+- The Change List has one bullet per module, class, API or artifact, ten words or less, starting
+  with a verb or the name of the thing changed, identifiers in backticks, no trailing periods.
+  Include updated golden images (and why), removed workarounds, and deleted or skipped tests. Put
+  the reasoning and impact of a breaking change as sub-bullets under it. End with `Unit tests`,
+  `Render tests`, `Documentation` and `Upgrade guide` as applicable.
 - State how the change was verified in one line or as Change List bullets, listing what was
   actually run. Do not leave checkboxes for the reviewer.
 - Do not add footers, emoji, links to tool sessions, `Co-Authored-By` lines, tables of files, or
   the template's authorship declaration.
-- Do not make up an issue number. Leave `Closes #` for the contributor if the issue is not known.
+- Do not make up an issue number. Ask the contributor for it if it is not known, and remove the
+  line if there is none.
 
 ## Ready For Merge
 

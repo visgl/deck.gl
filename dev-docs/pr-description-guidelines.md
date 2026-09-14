@@ -65,7 +65,8 @@ paragraph if the cause is not obvious.
 
 ### Change List
 
-* One bullet per change. Start with a verb or with the name of the thing that changed, e.g.
+* One bullet per change, ten words or less. Start with a verb or with the name of the thing that
+  changed, e.g.
   ``Add `stepMode` to attribute settings`` or `` `TileLayer`: sub layer visibility handling``.
 * Put code identifiers in backticks. Do not end bullets with a period.
 * Include the changes a reviewer might otherwise question: updated golden images (and why they
@@ -336,8 +337,8 @@ After:
 > (`depthTest: false`), so deck layers are drawn over basemap buildings.
 >
 > #### Change List
-> - `MapboxOverlay`: pass interleaved default parameters (`depthTest: true`, premultiplied blend) when constructing the `Deck`
-> - Render test for interleaved overlay against a 3D basemap layer
+> - `MapboxOverlay`: use interleaved default parameters when constructing the `Deck`
+> - Render test for interleaved overlay over a 3D basemap layer
 
 ### Sections without content
 
@@ -378,11 +379,12 @@ After:
 > so dashes bunch up or stretch along tilted or widened segments.
 >
 > #### Change List
-> - `PathStyleExtension`: measure dash distance along the path in common space, before billboarding and offset are applied
-> - Golden images for `path-dash-*` updated: dash spacing is now uniform along tilted segments (left old, right new below)
+> - `PathStyleExtension`: measure dash distance before billboarding and offset are applied
+> - Update `path-dash-*` golden images: dash spacing now uniform on tilted segments
 > - Unit tests
 >
 > ![before-after](...)
+> Left old, right new.
 >
 > #### TODO
 > - Justified dashes (part 3)
@@ -400,6 +402,6 @@ When drafting a PR description for a contributor, follow the guidelines above. I
 * Do not add footers, emoji, links to tool sessions, `Co-Authored-By` lines, or a table of files.
 * Do not include the authorship declaration from the template. The contributor decides what to
   disclose. See the "AI-assisted contributions" section of `CONTRIBUTING.md`.
-* Do not make up an issue number. If the issue is not known, leave `Closes #` for the contributor
-  to fill in.
+* Do not make up an issue number. Ask the contributor for it if it is not known, and remove the
+  line if there is none.
 * When golden images change, say which ones and why in the Change List.
