@@ -14,7 +14,13 @@ import {
 import type {Texture} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
 import MaskPass from './mask-pass';
-import {joinLayerBounds, getRenderBounds, makeViewport, Bounds} from '../utils/projection-utils';
+import {
+  joinLayerBounds,
+  getRenderBounds,
+  makeViewport,
+  getMercatorReferenceViewport,
+  Bounds
+} from '../utils/projection-utils';
 // import {debugFBO} from '../utils/debug';
 
 type Mask = {
@@ -94,11 +100,6 @@ export default class MaskEffect implements Effect {
     const viewport = viewports[0];
     const viewportChanged = !this.lastViewport || !this.lastViewport.equals(viewport);
 
-    if (viewport.resolution !== undefined) {
-      log.warn('MaskExtension is not supported in GlobeView')();
-      return {didRender};
-    }
-
     for (const maskId in channelMap) {
       const result = this._renderChannel(channelMap[maskId], {
         layerFilter,
@@ -166,7 +167,12 @@ export default class MaskEffect implements Effect {
       // Recalculate mask bounds
       this.lastViewport = viewport;
 
-      const layerBounds = joinLayerBounds(channelInfo.layers, viewport);
+      // The mask texture is rendered flat (absolute Mercator for geospatial views); layers read
+      // it back through projectToFlatCommon / project_common_position_to_flat, not the active viewport.
+      const layerBounds = joinLayerBounds(
+        channelInfo.layers,
+        getMercatorReferenceViewport(viewport)
+      );
       channelInfo.bounds = layerBounds && getRenderBounds(layerBounds, viewport);
 
       if (maskChanged || !equals(channelInfo.bounds, oldChannelInfo.bounds)) {
