@@ -124,14 +124,12 @@ const config = {
             '@luma.gl/gpgpu/gpu-data': resolve('../node_modules/@luma.gl/gpgpu/dist/gpu-data'),
             '@luma.gl/shadertools/wgsl': resolve('../node_modules/@luma.gl/shadertools/dist/wgsl'),
             '@luma.gl': resolve('../node_modules/@luma.gl'),
-            '@math.gl': resolve('../node_modules/@math.gl'),
-            '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
-            '@loaders.gl/i3s': resolve('node_modules/@loaders.gl/i3s'),
-            '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
-            '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
-            '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
-            '@loaders.gl/schema': resolve('../node_modules/@loaders.gl/schema-utils'),
-            '@loaders.gl': resolve('../node_modules/@loaders.gl')
+            '@loaders.gl/compression$': resolve('node_modules/@loaders.gl/compression'),
+            '@loaders.gl/i3s$': resolve('node_modules/@loaders.gl/i3s'),
+            '@loaders.gl/las$': resolve('node_modules/@loaders.gl/las'),
+            '@loaders.gl/obj$': resolve('node_modules/@loaders.gl/obj'),
+            '@loaders.gl/ply$': resolve('node_modules/@loaders.gl/ply'),
+            '@loaders.gl/schema$': resolve('../node_modules/@loaders.gl/schema')
           }
         },
         plugins: [
