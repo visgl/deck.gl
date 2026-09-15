@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable complexity */
-import type {Device, NormalizedDataType} from '@luma.gl/core';
+import type {Device, NormalizedDataType, TypedArray as LumaTypedArray} from '@luma.gl/core';
 import {Buffer, BufferLayout, BufferAttributeLayout} from '@luma.gl/core';
 
 import {
@@ -398,7 +398,7 @@ export default class DataColumn<Options, State> {
         if (is64Bit) {
           accessor.type = 'float32';
         } else {
-          const type = dataTypeFromTypedArray(opts.value);
+          const type = dataTypeFromTypedArray(opts.value as LumaTypedArray);
           // (lint wants to remove the cast)
           // eslint-disable-next-line
           accessor.type = (accessor.normalized ? type.replace('int', 'norm') : type) as DataType;

@@ -28,7 +28,7 @@
   "sideEffects": false,
   "scripts": {
     "watch": "npm run build -- --watch",
-    "build": "ocular-bundle ./src/index.js --output=./dist/index.js --globalName= --sourcemap --format=umd --externals=@jupyter-widgets/base",
+    "build": "ocular-bundle ./src/index.js --output=./dist/index.js --globalName= --sourcemap --format=umd --externals=@jupyter-widgets/base,@loaders.gl/geoarrow,module,compress-utils/brotli/compress,compress-utils/brotli/decompress,compress-utils/bz2/compress,compress-utils/bz2/decompress,compress-utils/gzip/compress,compress-utils/gzip/decompress,compress-utils/lz4/compress,compress-utils/lz4/decompress,compress-utils/snappy/compress,compress-utils/snappy/decompress,compress-utils/xz/compress,compress-utils/xz/decompress,compress-utils/zlib/compress,compress-utils/zlib/decompress,compress-utils/zstd/compress,compress-utils/zstd/decompress",
     "build:labextension": "npm pack",
     "prepublishOnly": "npm run build"
   },
@@ -45,9 +45,9 @@
     "@deck.gl/mesh-layers": "9.4.0-beta.4",
     "@deck.gl/widgets": "9.4.0-beta.4",
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4",
-    "@loaders.gl/3d-tiles": "^4.4.3",
-    "@loaders.gl/core": "^4.4.3",
-    "@loaders.gl/csv": "^4.4.3",
+    "@loaders.gl/3d-tiles": "^5.0.0-alpha.6",
+    "@loaders.gl/core": "^5.0.0-alpha.6",
+    "@loaders.gl/csv": "^5.0.0-alpha.6",
     "@luma.gl/core": "^9.4.0",
     "@luma.gl/effects": "^9.4.0",
     "@luma.gl/webgl": "^9.4.0",

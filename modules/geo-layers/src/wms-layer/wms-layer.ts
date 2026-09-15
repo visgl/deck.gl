@@ -170,7 +170,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
         core: {
           type: props.serviceType,
           loadOptions: props.loadOptions
-        }
+        },
+        wms: {}
       }) as ImageSource;
     }
 

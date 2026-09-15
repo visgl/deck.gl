@@ -48,8 +48,8 @@
   },
   "dependencies": {
     "@luma.gl/shadertools": "^9.4.0",
-    "@math.gl/core": "^4.1.0",
-    "@math.gl/web-mercator": "^4.1.0",
+    "@math.gl/core": "^5.0.0-alpha.5",
+    "@math.gl/web-mercator": "^5.0.0-alpha.5",
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {

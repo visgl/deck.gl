@@ -232,7 +232,7 @@ export default class MVTLayer<
       },
       mvt: {
         ...loadOptions?.mvt,
-        shape: binary ? 'binary' : 'geojson',
+        shape: binary ? 'binary-geometry' : 'geojson-table',
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: index
         // Local worker debug
@@ -241,7 +241,9 @@ export default class MVTLayer<
         // workerUrl: null
       }
     };
-    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+    return fetch(url, {propName: 'data', layer: this, loadOptions, signal}).then(data =>
+      !Array.isArray(data) && data?.shape === 'geojson-table' ? data.features : data
+    );
   }
 
   renderSubLayers(
