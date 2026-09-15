@@ -2739,7 +2739,7 @@ header {
     filter: drop-shadow(0 0 12px #333);
 }
 
-.header .header_ribbon {
+.header, .header_ribbon {
     display: flex;
     flex-direction: column;
     color: #fff;
