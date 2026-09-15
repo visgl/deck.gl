@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4, vec3, vec4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';

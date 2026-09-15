@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import type {Color} from '@deck.gl/core';
-import type {Device, Texture} from '@luma.gl/core';
-import type {NumericArray, TypedArray, TypedArrayConstructor} from '@math.gl/types';
+import type {Device, Texture, TypedArray, TypedArrayConstructor} from '@luma.gl/core';
+import type {NumericArray} from '@math.gl/types';
 import type {ScaleType} from '../types';
 
 export const defaultColorRange: Color[] = [

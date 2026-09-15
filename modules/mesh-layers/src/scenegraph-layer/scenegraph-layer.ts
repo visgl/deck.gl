@@ -422,7 +422,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           sizeMinPixels,
           sizeMaxPixels,
           composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem) ? 1 : 0,
-          sceneModelMatrix: worldMatrix
+          sceneModelMatrix: worldMatrix as unknown as ScenegraphProps['sceneModelMatrix']
         };
 
         model.shaderInputs.setProps({

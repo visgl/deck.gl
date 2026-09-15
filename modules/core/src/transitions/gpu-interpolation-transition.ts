@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device} from '@luma.gl/core';
+import type {Device, TypedArray as LumaTypedArray} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import {fp64arithmetic} from '@luma.gl/shadertools';
 import type {ShaderModule} from '@luma.gl/shadertools';
@@ -18,7 +18,6 @@ import {
 import {GPUTransitionBase} from './gpu-transition';
 
 import type {InterpolationTransitionSettings} from '../lib/attribute/transition-settings';
-import type {TypedArray} from '../types/types';
 
 export default class GPUInterpolationTransition extends GPUTransitionBase<InterpolationTransitionSettings> {
   type = 'interpolation';
@@ -81,7 +80,7 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     model.setVertexCount(vertexCount);
     if (attribute.isConstant) {
       model.setAttributes({aFrom: buffers[0]});
-      model.setConstantAttributes({aTo: attribute.value as TypedArray});
+      model.setConstantAttributes({aTo: attribute.value as LumaTypedArray});
     } else {
       model.setAttributes({
         aFrom: buffers[0],

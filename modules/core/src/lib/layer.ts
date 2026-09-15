@@ -811,7 +811,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             attributeBuffers[attributeName] = value;
           }
         } else if (value) {
-          constantAttributes[attributeName] = value;
+          constantAttributes[attributeName] = value as TypedArray;
         }
       }
     }
@@ -857,7 +857,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
             attributeBuffers[attributeName] = value;
           }
         } else if (value) {
-          constantAttributes[attributeName] = value;
+          constantAttributes[attributeName] = value as TypedArray;
         }
       }
     }

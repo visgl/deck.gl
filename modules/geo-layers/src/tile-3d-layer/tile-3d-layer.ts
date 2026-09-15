@@ -28,6 +28,7 @@ import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 import {load} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/schema';
 import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
+import type {Tileset3DSource} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
@@ -233,9 +234,13 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       }
       Object.assign(options, preloadOptions);
     }
-    const tilesetJson = await load(actualTilesetUrl, loader, options.loadOptions);
+    const tilesetSource = (await load(
+      actualTilesetUrl,
+      loader,
+      options.loadOptions
+    )) as Tileset3DSource;
 
-    const tileset3d = new Tileset3D(tilesetJson, {
+    const tileset3d = new Tileset3D(tilesetSource, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileError: this.props.onTileError,

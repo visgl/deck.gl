@@ -17,6 +17,29 @@ const LUMA_ALIASES_LOCAL = {
 
 const useLocalLuma = false;
 
+// Optional Node.js codecs referenced by loaders.gl through dynamic imports. Keep them out of
+// browser bundles; applications that need these codecs can install and import them separately.
+const LOADERS_OPTIONAL_EXTERNALS = [
+  '@loaders.gl/geoarrow',
+  'module',
+  'compress-utils/brotli/compress',
+  'compress-utils/brotli/decompress',
+  'compress-utils/bz2/compress',
+  'compress-utils/bz2/decompress',
+  'compress-utils/gzip/compress',
+  'compress-utils/gzip/decompress',
+  'compress-utils/lz4/compress',
+  'compress-utils/lz4/decompress',
+  'compress-utils/snappy/compress',
+  'compress-utils/snappy/decompress',
+  'compress-utils/xz/compress',
+  'compress-utils/xz/decompress',
+  'compress-utils/zlib/compress',
+  'compress-utils/zlib/decompress',
+  'compress-utils/zstd/compress',
+  'compress-utils/zstd/decompress'
+];
+
 /** @type {OcularConfig} */
 const config = {
   lint: {
@@ -28,7 +51,7 @@ const config = {
 
   bundle: {
     globalName: 'deck',
-    externals: ['h3-js'],
+    externals: ['h3-js', ...LOADERS_OPTIONAL_EXTERNALS],
     target: ['chrome110', 'firefox110', 'safari15'],
     format: 'umd',
     globals: {
@@ -36,6 +59,9 @@ const config = {
       '@luma.gl/core': 'globalThis.luma',
       '@luma.gl/engine': 'globalThis.luma',
       '@loaders.gl/core': 'globalThis.loaders',
+      '@loaders.gl/geoarrow': '{}',
+      'compress-utils/': '{}',
+      module: '{}',
       'h3-js': 'globalThis.h3 || {}'
     }
   },
