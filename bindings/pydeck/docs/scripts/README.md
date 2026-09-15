@@ -10,13 +10,16 @@ Helper scripts for generating pydeck documentation.
 * `snap_thumbnails.py` creates the .png files used as those thumbnails from examples.
 
 
-Adding a new layer to the gallery
-=================================
+Adding an example to the gallery
+================================
 
-To add a new layer to the gallery:
-
-0) Run `pip install pyppeteer && pip install Image`
-1) Add the layer into the `docs/images.rst`
-2) Run `make html-grid-page`
-3) Create a thumbnail, e.g., `python scripts/snap_thumbnails.py ../examples/arc_layer.py`.
-   If you have to create a thumbnail for multiple example files, run `make html-thumbnails`
+1) Add a script under `examples/`, or under `examples/<group>/` to place it in its own gallery section
+   (the folder name becomes the section title, e.g. `examples/charts/` -> "Charts"). The script must write
+   `<basename>.html` to the working directory. Avoid `layer` or `view` in the file name unless it names a
+   deck.gl class: `to_presentation_name` turns `scatter_plot` into "Scatter Plot" but `multi_view` into
+   "MultiView".
+2) Install the screenshot dependencies: `uv pip install playwright Pillow && playwright install chromium`.
+3) Create the thumbnail: `python scripts/snap_thumbnails.py ../examples/<group>/<name>.py`
+   (or `make html-thumbnails` for every example). It writes `gallery/images/<name>.png`.
+4) Regenerate the registry and grid: `python scripts/update_images_rst.py` then
+   `python scripts/generate_grid_html.py`. Commit the PNG, `images.rst` and `gallery/html/grid.html`.
