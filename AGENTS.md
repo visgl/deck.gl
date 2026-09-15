@@ -30,8 +30,7 @@ subdirectories may add local guidance.
 
 - Follow `dev-docs/pr-description-guidelines.md`. Use the headings from
   `.github/pull_request_template.md` as they are: an issue reference, an optional
-  `#### Background` and a `#### Change List`. Do not add `Summary`, `Test plan`, `Validation`,
-  `Impact` or `Goal` sections.
+  `#### Background` and a `#### Change List`. Do not add `Test plan` or `Validation` sections.
 - Keep it short. Most good descriptions are under 900 characters. Background is one to three
   present-tense sentences on what is wrong or missing today; remove it if the linked issue already
   explains it.

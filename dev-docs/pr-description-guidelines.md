@@ -1,44 +1,28 @@
 # Pull Request Description Guidelines
 
-An evolving set of guidelines for writing pull request descriptions in deck.gl. They are based on
-the descriptions maintainers have written since 2016, and on the ones that needed a lot of back and
-forth in review.
+An evolving set of guidelines for writing pull request descriptions in deck.gl.
 
-The description is what a reviewer reads before the diff. It should tell them what problem the PR
-solves and what they are about to see, so that they can spend their time on the code. After the PR
-is merged, the description and the linked issue are the main record of why a change was made.
+PR descriptions are read before the diff. It should tell the reader what problem the PR solves and what they are about to see, so that they can spend their time on the code. After the PR is merged, the description and linked issue are the main record of _why_ a change was made.
 
-These guidelines apply to all PRs, whether the description was typed by hand or drafted with the
-help of a tool. Maintainers may ask for the description to be rewritten before reviewing, and may
-close a PR whose description does not follow these guidelines.
+These guidelines apply to all PRs, whether the description was typed by hand or drafted with the help of a tool. Maintainers may ask for the description to be rewritten before reviewing, and may close a PR whose description does not follow these guidelines.
 
 
 ## Structure
 
-The PR template has three parts. Keep the headings as they are (`####` level) and do not add other
-sections unless one of the optional ones below applies.
+The PR template has three parts. Keep the headings as they are (`####` level) and do not add other sections unless one of the optional ones below applies.
 
-* **Issue reference** - The first line links the issue or PR this change relates to. Use
-  `Closes #123` if the PR fully resolves the issue and `For #123` if it only partially resolves it.
-  Other common forms are `Follow up of #123` and `Requires https://github.com/visgl/luma.gl/pull/456`.
+* **Issue reference** - The first line links the issue or PR this change relates to. Use `Closes #123` if the PR fully resolves the issue and `For #123` if it only partially resolves it. Other common forms are `Follow up of #123` and `Requires https://github.com/visgl/luma.gl/pull/456`.
   If there is no issue, remove the line. Do not leave `Closes #` without a number.
-* **Background** (optional) - One to three sentences on what is wrong or missing today and how
-  this PR addresses it. If the linked issue already explains this, remove the section.
-* **Change List** - A list of the changes in this PR, one bullet per module, class, API or
-  artifact. This section is required.
+* **Background** (optional) - One to three sentences on what is wrong or missing today and how this PR addresses it. If the linked issue already explains this, remove the section.
+* **Change List** - A list of the changes in this PR, one bullet per module, class, API or artifact.
 
 Optional additions:
 
-* **Screenshot or GIF** - If the change is visual, add a before/after image next to the text that
-  describes the change, with a short caption on what to look for.
-* **TODO** - If some work is intentionally left for a follow up PR, list it under a `#### TODO`
-  heading.
+* **Screenshot or GIF** - If the change is visual, add a before/after image next to the text that describes the change, with a short caption on what to look for.
+* **TODO** - If some work is intentionally left for a follow up PR, list it under a `#### TODO` heading.
 * **Questions** - Open design questions for the reviewers, e.g. under `#### Questions`.
 
-Most good descriptions are between 300 and 900 characters. The length should depend on how much of
-the reasoning is new to the reviewer, not on the size of the diff. A large mechanical change (e.g.
-a TypeScript migration) may only need a few bullets, while a one line shader fix may need a
-paragraph if the cause is not obvious.
+Most good descriptions are between 300 and 900 characters. The length should depend on how much of the reasoning is new to the reviewer, not on the size of the diff. A large mechanical change (e.g. a TypeScript migration) may only need a few bullets, while a one line shader fix may need a paragraph if the cause is not obvious.
 
 
 ## Guidelines
@@ -380,7 +364,7 @@ After:
 >
 > #### Change List
 > - `PathStyleExtension`: measure dash distance before billboarding and offset are applied
-> - Update `path-dash-*` golden images: dash spacing now uniform on tilted segments
+> - Update `path-dash-*` golden images: uniform spacing on tilted segments
 > - Unit tests
 >
 > ![before-after](...)
