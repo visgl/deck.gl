@@ -60,6 +60,87 @@ test('CollisionFilterEffect#constructor', () => {
   collisionFilterEffect.cleanup();
 });
 
+test.each([false, true])('CollisionFilterEffect#visibility capacity (greedy=%s)', greedy => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  const limitsSpy = vi.spyOn(device, 'limits', 'get').mockReturnValue({
+    ...device.limits,
+    maxTextureDimension2D: 8
+  });
+  const textLayer = TEST_LAYER.clone({
+    id: 'text',
+    getCollisionRect: () => [0, 0, 1, 1],
+    collisionGreedy: greedy
+  });
+  const otherLayer = TEST_LAYER.clone({id: 'other'});
+  vi.spyOn(textLayer, 'getNumInstances').mockReturnValue(1);
+  const countSpy = vi.spyOn(otherLayer, 'getNumInstances').mockReturnValue(2);
+  const group = TEST_LAYER.props.collisionGroup;
+
+  try {
+    // Three objects plus the reserved zero ID fill all four atlas cells.
+    collisionFilterEffect._groupByCollisionGroup(device, [otherLayer, textLayer]);
+    const visibilityFBO = collisionFilterEffect.visibilityFBOs[group];
+    const collisionFBO = collisionFilterEffect.collisionFBOs[group];
+    expect([visibilityFBO.width, visibilityFBO.height]).toEqual([8, 8]);
+    expect(collisionFilterEffect.getShaderModuleProps(textLayer).collision.enabled).toBe(true);
+
+    const resizeSpy = vi.spyOn(visibilityFBO, 'resize');
+    const destroyVisibilitySpy = vi.spyOn(visibilityFBO, 'destroy');
+    const destroyCollisionSpy = vi.spyOn(collisionFBO, 'destroy');
+    countSpy.mockReturnValue(3);
+    expect(
+      Object.keys(collisionFilterEffect._groupByCollisionGroup(device, [otherLayer, textLayer]))
+    ).toEqual([]);
+    expect(resizeSpy).not.toHaveBeenCalled();
+    expect(destroyVisibilitySpy).toHaveBeenCalledOnce();
+    expect(destroyCollisionSpy).toHaveBeenCalledOnce();
+    expect(collisionFilterEffect.channels[group]).toBeUndefined();
+    for (const layer of [otherLayer, textLayer]) {
+      expect(collisionFilterEffect.getShaderModuleProps(layer).collision.enabled).toBe(false);
+    }
+
+    // A rejected group must also be safe when it has no existing resources.
+    const createTextureSpy = vi.spyOn(device, 'createTexture');
+    collisionFilterEffect._groupByCollisionGroup(device, [otherLayer, textLayer]);
+    expect(createTextureSpy).not.toHaveBeenCalled();
+
+    countSpy.mockReturnValue(2);
+    collisionFilterEffect._groupByCollisionGroup(device, [otherLayer, textLayer]);
+    expect(collisionFilterEffect.getShaderModuleProps(textLayer).collision.enabled).toBe(true);
+    expect(collisionFilterEffect.visibilityFBOs[group]).not.toBe(visibilityFBO);
+    expect(collisionFilterEffect.channels[group].objectCount).toBe(3);
+  } finally {
+    collisionFilterEffect.cleanup();
+    limitsSpy.mockRestore();
+    vi.restoreAllMocks();
+  }
+});
+
+test('CollisionFilterEffect#picking ID capacity', () => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  const firstLayer = TEST_LAYER.clone({id: 'first'});
+  const secondLayer = TEST_LAYER.clone({id: 'second'});
+  vi.spyOn(firstLayer, 'getNumInstances').mockReturnValue(0xfffffe);
+  const countSpy = vi.spyOn(secondLayer, 'getNumInstances').mockReturnValue(1);
+  const group = TEST_LAYER.props.collisionGroup;
+
+  try {
+    collisionFilterEffect._groupByCollisionGroup(device, [firstLayer, secondLayer]);
+    expect(collisionFilterEffect.channels[group].objectCount).toBe(0xffffff);
+    expect(collisionFilterEffect.getShaderModuleProps(secondLayer).collision.enabled).toBe(true);
+
+    countSpy.mockReturnValue(2);
+    expect(
+      Object.keys(collisionFilterEffect._groupByCollisionGroup(device, [firstLayer, secondLayer]))
+    ).toEqual([]);
+    expect(collisionFilterEffect.channels[group]).toBeUndefined();
+    expect(collisionFilterEffect.getShaderModuleProps(secondLayer).collision.enabled).toBe(false);
+  } finally {
+    collisionFilterEffect.cleanup();
+    vi.restoreAllMocks();
+  }
+});
+
 test('CollisionFilterEffect#cleanup', () => {
   const collisionFilterEffect = new CollisionFilterEffect();
 
