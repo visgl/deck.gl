@@ -19,6 +19,8 @@ export type GlobeViewState = {
   latitude: number;
   /** Zoom level */
   zoom: number;
+  /** Camera roll in degrees, positive counter-clockwise on screen. Default `0`. */
+  roll?: number;
   /** Min zoom, default `0` */
   minZoom?: number;
   /** Max zoom, default `20` */

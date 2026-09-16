@@ -94,6 +94,7 @@ export function getMapLibreViewState(map: MapLibreMap): MapViewState & {
     zoom: map.getZoom(),
     bearing: map.getBearing(),
     pitch: map.getPitch(),
+    roll: map.getRoll?.() ?? 0,
     padding: {
       top: padding.top ?? 0,
       bottom: padding.bottom ?? 0,

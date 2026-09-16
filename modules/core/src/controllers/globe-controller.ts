@@ -90,8 +90,10 @@ class GlobeState extends MapState {
     const dx = startPanPos[0] - pos[0];
     const dy = startPanPos[1] - pos[1];
 
-    const hAngle = dx * rate;
-    const vAngle = -dy * rate;
+    // Convert screen deltas back into the camera frame before roll.
+    const roll = (this.getViewportProps().roll || 0) * DEGREES_TO_RADIANS;
+    const hAngle = (Math.cos(roll) * dx - Math.sin(roll) * dy) * rate;
+    const vAngle = -(Math.sin(roll) * dx + Math.cos(roll) * dy) * rate;
     const rotated = Globe.rotateFrame(frame, hAngle, vAngle);
     const zoom = startZoom + zoomAdjust(rotated.latitude, true) - zoomAdjust(frame.latitude, true);
 
@@ -152,6 +154,9 @@ class GlobeState extends MapState {
     if (props.bearing < -180 || props.bearing > 180) {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
+    if (props.roll < -180 || props.roll > 180) {
+      props.roll = mod(props.roll + 180, 360) - 180;
+    }
     props.latitude = clamp(props.latitude, -90, 90);
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
 
@@ -169,7 +174,7 @@ class GlobeState extends MapState {
     }
 
     if (maxBounds && maxBoundsRect) {
-      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
+      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0, roll: 0});
       const screenExtents = getMaxBoundsExtents(
         viewport,
         [props.longitude, props.latitude],
@@ -271,7 +276,7 @@ export default class GlobeController extends Controller<MapState> {
     transitionDuration: 300,
     transitionInterpolator: new LinearInterpolator({
       transitionProps: {
-        compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
+        compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch', 'roll'],
         required: ['longitude', 'latitude', 'zoom']
       }
     })
