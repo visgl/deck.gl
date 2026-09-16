@@ -22,6 +22,7 @@ import {
   Tileset2D,
   Tile2DHeader,
   RefinementStrategy,
+  LODStrategy,
   STRATEGY_DEFAULT,
   Tileset2DProps
 } from '../tileset-2d/index';
@@ -47,6 +48,7 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   maxCacheSize: null,
   maxCacheByteSize: null,
   refinementStrategy: STRATEGY_DEFAULT,
+  lodStrategy: 'none',
   zRange: null,
   maxRequests: 6,
   debounceTime: 0,
@@ -125,6 +127,13 @@ type _TileLayerProps<DataT> = {
    * @default 'best-available'
    */
   refinementStrategy?: RefinementStrategy;
+
+  /**
+   * How the tile layer prefetches lower resolution coverage for smooth transitions.
+   *
+   * @default 'none'
+   */
+  lodStrategy?: LODStrategy;
 
   /** Range of minimum and maximum heights in the tile. */
   zRange?: ZRange | null;
@@ -261,6 +270,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       maxCacheSize,
       maxCacheByteSize,
       refinementStrategy,
+      lodStrategy,
       extent,
       maxZoom,
       minZoom,
@@ -278,6 +288,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       minZoom,
       tileSize,
       refinementStrategy,
+      lodStrategy,
       extent,
       maxRequests,
       debounceTime,
