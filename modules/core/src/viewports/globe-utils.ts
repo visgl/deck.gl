@@ -127,7 +127,8 @@ export class Globe {
   /**
    * Rotate a camera frame by horizontal/vertical angles (radians).
    * Returns a new frame with updated position, up, longitude, latitude,
-   * and bearing. If lockBearing is true, bearing is forced to 0.
+   * and bearing. If lockBearing is true, preserve the input bearing and rebuild
+   * the up vector at the new position to match it.
    */
   static rotateFrame(
     frame: CameraFrame,
@@ -137,11 +138,17 @@ export class Globe {
   ): CameraFrame {
     let position = Globe.rotate(frame.position, frame.axisHorizontal, horizontalAngle);
     position = Globe.rotate(position, frame.axisVertical, verticalAngle);
-    let up = Globe.rotate(frame.up, frame.axisHorizontal, horizontalAngle);
-    up = Globe.rotate(up, frame.axisVertical, verticalAngle);
-
     const [longitude, latitude] = Globe.toLngLat(position);
-    const b = lockBearing ? 0 : Globe.bearing(up, longitude, latitude);
+    let up: Vec3;
+    let bearing: number;
+    if (lockBearing) {
+      bearing = frame.bearing;
+      up = Globe.upVector(longitude, latitude, bearing);
+    } else {
+      up = Globe.rotate(frame.up, frame.axisHorizontal, horizontalAngle);
+      up = Globe.rotate(up, frame.axisVertical, verticalAngle);
+      bearing = Globe.bearing(up, longitude, latitude);
+    }
 
     return {
       ...frame, // preserve axes
@@ -149,7 +156,50 @@ export class Globe {
       up,
       longitude,
       latitude,
-      bearing: b
+      bearing
+    };
+  }
+
+  /**
+   * Rotate a camera frame so one globe position moves toward another.
+   * The position and camera up vector share one rigid-body rotation, allowing
+   * bearing to evolve continuously as the camera moves around the sphere.
+   */
+  static rotateFrameToMatch(
+    frame: CameraFrame,
+    currentCoordinates: [number, number],
+    targetCoordinates: [number, number],
+    strength: number = 1
+  ): CameraFrame {
+    const currentPosition = Globe.toPosition(...currentCoordinates);
+    const targetPosition = Globe.toPosition(...targetCoordinates);
+    let rotationAxis = vec3.cross([], currentPosition, targetPosition);
+    const axisLength = vec3.len(rotationAxis);
+    const cosine = clamp(vec3.dot(currentPosition, targetPosition), -1, 1);
+
+    if (axisLength < 1e-12) {
+      if (cosine > 0) {
+        return frame;
+      }
+      rotationAxis = vec3.cross([], currentPosition, frame.up);
+      if (vec3.len(rotationAxis) < 1e-12) {
+        rotationAxis = vec3.cross([], currentPosition, frame.axisVertical);
+      }
+    }
+
+    vec3.normalize(rotationAxis, rotationAxis);
+    const angle = Math.atan2(axisLength, cosine) * clamp(strength, 0, 1);
+    const position = Globe.rotate(frame.position, rotationAxis, angle);
+    const up = Globe.rotate(frame.up, rotationAxis, angle);
+    const [longitude, latitude] = Globe.toLngLat(position);
+
+    return {
+      ...frame,
+      position,
+      up,
+      longitude,
+      latitude,
+      bearing: Globe.bearing(up, longitude, latitude)
     };
   }
 }
