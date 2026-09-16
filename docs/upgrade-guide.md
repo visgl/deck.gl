@@ -4,10 +4,11 @@
 
 ### Globe navigation
 
-`GlobeController` defaults to `navigation: 'map'`, preserving the current bearing during panning and
-zooming and limiting latitude to approximately `±85.051°`. If you relied on the free-rotation behavior
-introduced during the v9.4 prereleases, set `controller: {navigation: 'ball'}` to retain pole crossing
-and evolving bearing. Explicit rotation gestures remain available in both modes.
+`GlobeController` no longer switches to free rotation implicitly when the bearing changes. The default
+`navigation: 'map'` preserves the current bearing during panning, zooming, and inertia, and limits latitude
+to approximately `±85.051°`. If you relied on the implicit free rotation in earlier v9.4 prereleases,
+set `controller: {navigation: 'ball'}` to retain pole crossing and evolving bearing. Explicit rotation
+gestures remain available in both modes.
 
 ### pydeck lighting
 
@@ -16,6 +17,8 @@ The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
 lighting effects instead:
 
 ```python
+import pydeck as pdk
+
 lighting = pdk.Effect(
     "LightingEffect",
     ambient=pdk.Effect("AmbientLight", intensity=0.6),
