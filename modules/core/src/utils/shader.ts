@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+declare module '@luma.gl/shadertools' {
+  interface ShaderModule {
+    /**
+     * Names of modules that cannot co-exist with this module.
+     * When multiple mutually exclusive modules are present, the one appearing
+     * later in the merge order takes precedence.
+     */
+    excludes?: string[];
+  }
+}
+
 // Merge two luma.gl shader descriptors
 export function mergeShaders(target, source) {
   if (!source) {
@@ -15,13 +26,27 @@ export function mergeShaders(target, source) {
   if ('modules' in source) {
     result.modules = (target.modules || []).concat(source.modules);
 
-    // Hack: prject32 and project64 cannot co-exist
-    if (source.modules.some(module => module.name === 'project64')) {
-      const index = result.modules.findIndex(module => module.name === 'project32');
-      if (index >= 0) {
-        result.modules.splice(index, 1);
+    // Apply module exclusions: when modules are mutually exclusive,
+    // the one appearing later in the merge order takes precedence
+    const lastIndexMap = new Map<string, number>();
+    for (let i = 0; i < result.modules.length; i++) {
+      lastIndexMap.set(result.modules[i].name, i);
+    }
+
+    const namesToExclude = new Set<string>();
+    for (let i = result.modules.length - 1; i >= 0; i--) {
+      const module = result.modules[i];
+      if (module.excludes) {
+        for (const excludedName of module.excludes) {
+          const excludedLastIndex = lastIndexMap.get(excludedName);
+          if (excludedLastIndex !== undefined && excludedLastIndex < i) {
+            namesToExclude.add(excludedName);
+          }
+        }
       }
     }
+
+    result.modules = result.modules.filter(module => !namesToExclude.has(module.name));
   }
   if ('inject' in source) {
     if (!target.inject) {

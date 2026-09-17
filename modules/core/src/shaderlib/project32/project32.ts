@@ -77,6 +77,7 @@ vec4 project_position_to_clipspace(
 export default {
   name: 'project32',
   dependencies: [project],
+  excludes: ['project64'],
   source,
   vs
 } as ShaderModule;
