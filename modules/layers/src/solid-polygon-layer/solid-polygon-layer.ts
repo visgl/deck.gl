@@ -338,6 +338,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     }
 
     if (topModel && filled) {
+      // The tessellator allocates the index buffer by capacity and reuses it across data
+      // updates, so bind the active index count explicitly instead of letting the indexed
+      // draw fall back to the size of the retained buffer allocation.
+      topModel.setIndexCount(polygonTesselator.vertexCount);
       topModel.setVertexCount(polygonTesselator.vertexCount);
       topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       topModel.draw(this.context.renderPass);
