@@ -30,31 +30,33 @@ export function mergeShaders(target, source) {
     // the one appearing later in the merge order takes precedence.
     // Process from end to beginning so later modules are evaluated first,
     // and only surviving modules' exclusions are honored.
-    const toKeep = new Set(result.modules.map((_, idx) => idx));
+    const toKeep = new Set(result.modules.map((_, moduleIndex) => moduleIndex));
 
-    for (let i = result.modules.length - 1; i >= 0; i--) {
-      if (!toKeep.has(i)) continue; // This module was already excluded
+    for (let currentIndex = result.modules.length - 1; currentIndex >= 0; currentIndex--) {
+      if (!toKeep.has(currentIndex)) continue; // This module was already excluded
 
-      const module = result.modules[i];
+      const module = result.modules[currentIndex];
       if (module.excludes) {
         for (const excludedName of module.excludes) {
           // Find all occurrences of the excluded module
-          for (let j = 0; j < result.modules.length; j++) {
-            if (j !== i && toKeep.has(j) && result.modules[j].name === excludedName) {
+          for (let otherIndex = 0; otherIndex < result.modules.length; otherIndex++) {
+            if (otherIndex !== currentIndex && toKeep.has(otherIndex) && result.modules[otherIndex].name === excludedName) {
               // Conflict found: keep the later one
-              if (i > j) {
-                toKeep.delete(j); // Remove the excluded module (earlier)
+              if (currentIndex > otherIndex) {
+                toKeep.delete(otherIndex); // Remove the excluded module (earlier)
               } else {
-                toKeep.delete(i); // Remove this module (earlier)
-                break; // This module is gone, stop processing its exclusions
+                toKeep.delete(currentIndex); // Remove this module (earlier)
+                break; // Exit exclusion loop - this module is gone
               }
             }
           }
+          // If this module was removed, stop processing its remaining exclusions
+          if (!toKeep.has(currentIndex)) break;
         }
       }
     }
 
-    result.modules = result.modules.filter((_, idx) => toKeep.has(idx));
+    result.modules = result.modules.filter((_, moduleIndex) => toKeep.has(moduleIndex));
   }
   if ('inject' in source) {
     if (!target.inject) {

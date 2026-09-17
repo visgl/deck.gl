@@ -66,14 +66,14 @@ test('mergeShaders - module exclusions', () => {
     {modules: [project32Module]},
     {modules: [project64Module]}
   );
-  expect(result1.modules.map(m => m.name)).toEqual(['project64']);
+  expect(result1.modules.map(module => module.name)).toEqual(['project64']);
 
   // Test 2: Reverse case - project32 in source excludes project64 from target
   const result2 = mergeShaders(
     {modules: [project64Module]},
     {modules: [project32Module]}
   );
-  expect(result2.modules.map(m => m.name)).toEqual(['project32']);
+  expect(result2.modules.map(module => module.name)).toEqual(['project32']);
 
   // Test 3: Generic mechanism - synthetic modules to prove it's not hardcoded
   const moduleA = {name: 'moduleA', excludes: ['moduleB']};
@@ -84,7 +84,7 @@ test('mergeShaders - module exclusions', () => {
     {modules: [moduleA, moduleC]},
     {modules: [moduleB]}
   );
-  expect(result3.modules.map(m => m.name)).toEqual(['moduleC', 'moduleB']);
+  expect(result3.modules.map(module => module.name)).toEqual(['moduleC', 'moduleB']);
 
   // Test 4: Non-mutual exclusion - later declaring module wins
   const moduleD = {name: 'moduleD', excludes: ['moduleE']};
@@ -94,21 +94,21 @@ test('mergeShaders - module exclusions', () => {
     {modules: [moduleE]},
     {modules: [moduleD]}
   );
-  expect(result4.modules.map(m => m.name)).toEqual(['moduleD']);
+  expect(result4.modules.map(module => module.name)).toEqual(['moduleD']);
 
   // Test 4b: Non-mutual exclusion reversed - later non-declaring module wins
   const result4b = mergeShaders(
     {modules: [moduleD]},
     {modules: [moduleE]}
   );
-  expect(result4b.modules.map(m => m.name)).toEqual(['moduleE']);
+  expect(result4b.modules.map(module => module.name)).toEqual(['moduleE']);
 
   // Test 5: Excluded module not present - should be no-op
   const result5 = mergeShaders(
     {modules: [moduleC]},
     {modules: [moduleA]}
   );
-  expect(result5.modules.map(m => m.name)).toEqual(['moduleC', 'moduleA']);
+  expect(result5.modules.map(module => module.name)).toEqual(['moduleC', 'moduleA']);
 
   // Test 6: No exclusions - backward compatibility
   const result6 = mergeShaders(
@@ -128,5 +128,20 @@ test('mergeShaders - module exclusions', () => {
   );
   // B2 (later) excludes A2, so A2 is removed.
   // A2 declared exclusion of C2, but since A2 was removed, C2 survives.
-  expect(result7.modules.map(m => m.name)).toEqual(['moduleC2', 'moduleB2']);
+  expect(result7.modules.map(module => module.name)).toEqual(['moduleC2', 'moduleB2']);
+
+  // Test 8: Multiple exclusions - removed module stops processing remaining exclusions
+  const moduleX = {name: 'moduleX'};
+  const moduleY = {name: 'moduleY', excludes: ['moduleX', 'moduleZ']};
+  const moduleZ = {name: 'moduleZ', excludes: ['moduleY']};
+
+  const result8 = mergeShaders(
+    {modules: [moduleX, moduleY, moduleZ]},
+    {modules: []}
+  );
+  // Z (later) excludes Y, so Y is removed.
+  // Y declared exclusions of both X and Z, but since Y was removed on its first
+  // exclusion (Z), it should not continue to process its second exclusion (X).
+  // Result: X and Z survive.
+  expect(result8.modules.map(module => module.name)).toEqual(['moduleX', 'moduleZ']);
 });
