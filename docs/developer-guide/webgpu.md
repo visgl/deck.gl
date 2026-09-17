@@ -56,7 +56,7 @@ The table below covers the public layer exports from the layer packages. It is d
 | `@deck.gl/mesh-layers` | `SimpleMeshLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/mesh-layers` | `ScenegraphLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `A5Layer` | ✅ | ✅ v9.4 |
-| `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ❌ |
+| `@deck.gl/geo-layers` | `GreatCircleLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `S2Layer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `QuadkeyLayer` | ✅ | ✅ v9.4 |
 | `@deck.gl/geo-layers` | `TileLayer` | ✅ | ✅ v9.4 |

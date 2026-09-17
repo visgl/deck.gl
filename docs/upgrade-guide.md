@@ -9,6 +9,8 @@ The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
 lighting effects instead:
 
 ```python
+import pydeck as pdk
+
 lighting = pdk.Effect(
     "LightingEffect",
     ambient=pdk.Effect("AmbientLight", intensity=0.6),
