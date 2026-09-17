@@ -8,9 +8,11 @@ import {
   OrbitController,
   FirstPersonController,
   _GlobeController as GlobeController,
+  _GlobeViewport as GlobeViewport,
   OrbitViewport,
   OrthographicController,
-  Viewport
+  Viewport,
+  WebMercatorViewport
 } from '@deck.gl/core';
 import {normalizeViewportProps} from '@math.gl/web-mercator';
 
@@ -228,6 +230,27 @@ test('GlobeViewState', () => {
     'small bounds#latitude is adjusted'
   ).toBeTruthy();
   expect(viewportProps.zoom > 12, 'small bounds#zoom is adjusted').toBeTruthy();
+});
+
+test('GlobeViewState preserves pointer zoom across the viewport transition', () => {
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+  const makeViewport = (props: Record<string, any>) =>
+    props.zoom > 12 ? new WebMercatorViewport(props) : new GlobeViewport(props);
+  const viewState = new GlobeViewState({
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 11.9,
+    makeViewport
+  });
+
+  const zoomedViewState = viewState.zoom({pos: [500, 250], scale: 2});
+  const viewportProps = zoomedViewState.getViewportProps();
+
+  expect(viewportProps.zoom, 'zoom crosses into WebMercatorViewport').toBeCloseTo(12.9);
+  expect(Number.isFinite(viewportProps.longitude), 'longitude remains finite').toBe(true);
+  expect(Number.isFinite(viewportProps.latitude), 'latitude remains finite').toBe(true);
 });
 
 test('OrbitViewState', () => {

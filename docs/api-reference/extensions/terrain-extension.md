@@ -29,16 +29,17 @@ const layers = [
   new TerrainLayer({
       id: 'terrain',
       minZoom: 0,
-      maxZoom: 23,
+      maxZoom: 12,
       strategy: 'no-overlap',
       elevationDecoder: {
-        rScaler: 6553.6,
-        gScaler: 25.6,
-        bScaler: 0.1,
-        offset: -10000
+        rScaler: 256,
+        gScaler: 1,
+        bScaler: 1 / 256,
+        offset: -32768
       },
-      elevationData: `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`,
-      texture: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
+      elevationData: 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',
+      texture: 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp',
+      tileSize: 512,
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({
