@@ -6,7 +6,7 @@ import LayerManager from './layer-manager';
 import ViewManager, {DEFAULT_CANVAS_ID} from './view-manager';
 import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
-import DeckRenderer from './deck-renderer';
+import DeckRenderer, {type PostProcessColorFormat} from './deck-renderer';
 import DeckPicker from './deck-picker';
 import {Widget} from './widget';
 import {WidgetManager} from './widget-manager';
@@ -125,6 +125,12 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
 
   /** WebGL parameters to be set before each frame is rendered. */
   parameters?: Parameters;
+  /**
+   * Color format of deck.gl's intermediate framebuffers when postprocessing effects are enabled.
+   * Set to `'rgba16float'` to preserve HDR highlights for effects such as bloom.
+   * @default `'rgba8unorm'`
+   */
+  postProcessColorFormat?: PostProcessColorFormat;
   /** If supplied, will be called before a layer is drawn to determine whether it should be rendered. */
   layerFilter?: ((context: FilterContext) => boolean) | null;
 
@@ -263,6 +269,7 @@ const defaultProps: DeckProps = {
   pickAsync: 'auto',
   layerFilter: null,
   parameters: {},
+  postProcessColorFormat: 'rgba8unorm',
   parent: null,
   device: null,
   deviceProps: {} as DeviceProps,
