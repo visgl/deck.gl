@@ -3,15 +3,8 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. 
-
-To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:	
-
-```bash	
-export MapboxAccessToken=<mapbox_access_token>	
-```	
-
-Or set `MAPBOX_TOKEN` directly in `app.tsx`.
+Copy the content of this folder to your project. The example uses public terrain and map tiles and
+does not require an access token.
 
 ```bash
 # install dependencies
@@ -24,7 +17,13 @@ npm start
 
 ### Data format
 
-Mapbox's [terrain API](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb) encodes elevation data in raster tiles.
+[Mapterhorn](https://mapterhorn.com/data-access/) provides 512px WebP elevation tiles using the
+Terrarium encoding. Its [TileJSON endpoint](https://tiles.mapterhorn.com/tilejson.json) describes
+the URL template used by this example. See [Mapterhorn's attribution](https://mapterhorn.com/attribution/)
+for the underlying terrain data sources.
+
+The surface texture uses [VersaTiles satellite imagery](https://versatiles.org/sources/), which has
+global coverage through zoom level 12.
 
 To use other data sources, check out
 the [documentation of TerrainLayer](../../../docs/api-reference/geo-layers/terrain-layer.md).
