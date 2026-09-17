@@ -76,14 +76,14 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `minZoom` (number, optional) - min zoom level. Default `0`.
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
+- `minBearing` (number, optional) - minimum bearing angle in degrees. Unrestricted by default.
+- `maxBearing` (number, optional) - maximum bearing angle in degrees. Unrestricted by default. Use an increasing numerical interval, such as `[-45, 45]` around north or `[170, 190]` across south. With limits enabled, bearings stay unwrapped: use `185`, not `-175`, for the latter interval.
 
-By default, navigation preserves the current bearing, so north stays up when `bearing` is `0`.
-Set `controller: {navigation: 'ball'}` to rotate the globe like a physical ball: dragging and
-pointer-anchored zoom rotate the full camera frame, allowing bearing to evolve naturally through
-the poles. Use `zoomAround: 'center'` to zoom without steering in either mode. See
-[GlobeController navigation](./globe-controller.md#navigation) for the interaction and latitude limits.
+Navigation preserves the current bearing by default, so north stays up when `bearing` is `0`. Panning, pointer-anchored zoom, and pan inertia do not rotate the bearing or cross the poles. Explicit rotation gestures still change bearing and pitch. Set `controller: {navigation: 'ball'}` to opt into full camera-frame rotation through the poles. See [GlobeController navigation](./globe-controller.md#navigation) for details.
 
 To limit how far the camera can travel, set the shared controller [`maxBounds`](./controller.md#options) option. For example, `maxBounds: [[-180, -85], [180, 85]]` keeps the viewport center between `±85°` latitude.
+
+Enable `controller: {rubberBand: true}` for elastic pan, zoom, bearing, and pitch limits during continuous gestures. See [GlobeController](./globe-controller.md#elastic-constraints) for configuration and release behavior.
 
 
 ## Controller

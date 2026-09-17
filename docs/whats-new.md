@@ -72,7 +72,7 @@ New experimental multi-canvas foundations allow integrations to associate each `
 - The new `trackpadGesture` option enables native trackpad gestures, including two-finger pan, pinch-to-zoom, and rotate where supported.
 - The new `zoomAround` option chooses whether pointer-based zoom interactions keep the pointer location or the viewport center fixed.
 - The new `maxBoundsPadding` option fits `maxBounds` within a padded or asymmetrically positioned viewport region, with support for pixels, percentages, and CSS-style layout expressions.
-- `OrthographicController` and `MapController` now support `rubberBand`, allowing pan and zoom interactions to temporarily overshoot their constraints before easing back on release.
+- `OrthographicController`, `MapController`, and [`GlobeController`](./api-reference/core/globe-controller.md#elastic-constraints) now support `rubberBand`, allowing continuous interactions to temporarily overshoot their constraints before easing back on release. GlobeController covers pan bounds, zoom, pitch (tilt), and optional `minBearing`/`maxBearing` limits; bearing remains unrestricted by default.
 
 ### @deck.gl/maplibre
 
