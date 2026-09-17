@@ -23,6 +23,18 @@ export type GlobeViewState = {
   minZoom?: number;
   /** Max zoom, default `20` */
   maxZoom?: number;
+  /** Bearing in degrees clockwise from north. Default `0`. */
+  bearing?: number;
+  /** Camera tilt in degrees from looking straight down. Default `0`. */
+  pitch?: number;
+  /** Minimum pitch in degrees. Default `0`. */
+  minPitch?: number;
+  /** Maximum pitch in degrees. Default `60`. */
+  maxPitch?: number;
+  /** Minimum unwrapped bearing in degrees. Default unbounded. Use with maxBearing to limit rotation. */
+  minBearing?: number;
+  /** Maximum unwrapped bearing in degrees. Default unbounded. May exceed 180 to define a range across south. */
+  maxBearing?: number;
   /** The near plane position */
   nearZ?: number;
   /** The far plane position */
@@ -59,5 +71,11 @@ export default class GlobeView extends View<GlobeViewState, GlobeViewProps> {
 
   get ControllerType() {
     return GlobeController;
+  }
+
+  /** Resolve navigation explicitly so saved view state cannot override the default. */
+  get controller() {
+    const controller = super.controller;
+    return controller && {...controller, navigation: controller.navigation ?? 'map'};
   }
 }

@@ -3,12 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp} from '@math.gl/core';
-import Controller from './controller';
-import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
+import {MAX_LATITUDE} from '@math.gl/web-mercator';
+import Controller, {type ControllerProps} from './controller';
+import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
-import {CONSTRAINT_AROUND, type ConstraintAround} from './view-state';
+import {CONSTRAINT_AROUND, type ConstraintAround, type ConstraintContext} from './view-state';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import GlobeViewport, {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
@@ -23,6 +24,24 @@ import type {MjolnirGestureEvent} from 'mjolnir.js';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
+const ZOOM_RUBBER_BAND_RANGE = 1;
+const ROTATION_RUBBER_BAND_RANGE = 15;
+
+type GlobeConstraintContext = ConstraintContext & {
+  // A compound gesture must not apply resistance twice to an unchanged component.
+  changedProps?: string[];
+};
+
+function hasBearingLimits({minBearing, maxBearing}: Required<MapStateProps>): boolean {
+  return (
+    (Number.isFinite(minBearing) || Number.isFinite(maxBearing)) &&
+    !(Number.isFinite(minBearing) && Number.isFinite(maxBearing) && maxBearing - minBearing >= 360)
+  );
+}
+
+function alignBearing(bearing: number, reference: number): number {
+  return reference + mod(bearing - reference + 180, 360) - 180;
+}
 
 function degreesToPixels(angle: number, zoom: number = 0): number {
   const radians = Math.min(180, angle) * DEGREES_TO_RADIANS;
@@ -47,6 +66,7 @@ class GlobeState extends MapState {
     options: MapStateProps &
       GlobeStateInternal & {
         makeViewport: (props: Record<string, any>) => any;
+        constraintContext?: GlobeConstraintContext;
       }
   ) {
     const {startPanPos, startPanCameraFrame, startPanAngularRate, ...mapStateOptions} = options;
@@ -59,23 +79,34 @@ class GlobeState extends MapState {
     if (startPanAngularRate !== undefined) s.startPanAngularRate = startPanAngularRate;
   }
 
-  panStart({pos}: {pos: [number, number]}): GlobeState {
+  panStart({pos}: {pos: [number, number]}, constraintContext?: ConstraintContext): GlobeState {
     const {latitude, longitude, zoom, bearing = 0} = this.getViewportProps();
     const cameraFrame = Globe.cameraFrame(longitude, latitude, bearing);
+    if (this.getViewportProps().navigation === 'map') {
+      // Resolve map navigation against geographic axes, even with a rotated bearing.
+      cameraFrame.axisHorizontal = [0, 0, 1];
+      cameraFrame.axisVertical = Globe.cameraFrame(longitude, latitude, 0).axisVertical;
+    }
 
     // Radians of arc per pixel, derived from zoom scale
     const scale = Math.pow(2, zoom - zoomAdjust(latitude, true));
     const angularRate = (0.25 / scale) * DEGREES_TO_RADIANS;
 
-    return this._getUpdatedState({
-      startPanPos: pos,
-      startPanCameraFrame: cameraFrame,
-      startPanAngularRate: angularRate,
-      startZoom: zoom
-    }) as GlobeState;
+    return this._getUpdatedState(
+      {
+        startPanPos: pos,
+        startPanCameraFrame: cameraFrame,
+        startPanAngularRate: angularRate,
+        startZoom: zoom
+      },
+      constraintContext
+    );
   }
 
-  pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): GlobeState {
+  pan(
+    {pos, startPos}: {pos: [number, number]; startPos?: [number, number]},
+    constraintContext?: ConstraintContext
+  ): GlobeState {
     const state = this.getState() as GlobeStateInternal;
     const startPanPos = state.startPanPos || startPos;
     if (!startPanPos) return this;
@@ -87,51 +118,106 @@ class GlobeState extends MapState {
       return this;
     }
 
-    const dx = startPanPos[0] - pos[0];
-    const dy = startPanPos[1] - pos[1];
-
-    const hAngle = dx * rate;
-    const vAngle = -dy * rate;
-    const rotated = Globe.rotateFrame(frame, hAngle, vAngle);
+    const deltaX = startPanPos[0] - pos[0];
+    const deltaY = startPanPos[1] - pos[1];
+    const lockBearing = this.getViewportProps().navigation === 'map';
+    let horizontalAngle = deltaX * rate;
+    let verticalAngle = -deltaY * rate;
+    if (lockBearing) {
+      const bearing = frame.bearing * DEGREES_TO_RADIANS;
+      horizontalAngle =
+        ((deltaX * Math.cos(bearing) - deltaY * Math.sin(bearing)) * rate) /
+        Math.max(Math.cos(frame.latitude * DEGREES_TO_RADIANS), 0.25);
+      verticalAngle = clamp(
+        -(deltaX * Math.sin(bearing) + deltaY * Math.cos(bearing)) * rate,
+        -(MAX_LATITUDE + frame.latitude) * DEGREES_TO_RADIANS,
+        (MAX_LATITUDE - frame.latitude) * DEGREES_TO_RADIANS
+      );
+    }
+    const rotated = Globe.rotateFrame(frame, horizontalAngle, verticalAngle, lockBearing);
     const zoom = startZoom + zoomAdjust(rotated.latitude, true) - zoomAdjust(frame.latitude, true);
 
-    return this._getUpdatedState({
-      longitude: rotated.longitude,
-      latitude: rotated.latitude,
-      bearing: rotated.bearing,
-      zoom
-    }) as GlobeState;
+    return this._getUpdatedState(
+      {
+        longitude: rotated.longitude,
+        latitude: rotated.latitude,
+        bearing: hasBearingLimits(this.getViewportProps())
+          ? alignBearing(rotated.bearing, frame.bearing)
+          : rotated.bearing,
+        zoom
+      },
+      constraintContext
+    );
   }
 
-  panEnd(): GlobeState {
-    return this._getUpdatedState({
-      startPanPos: null,
-      startPanCameraFrame: null,
-      startPanAngularRate: null,
-      startZoom: null
-    }) as GlobeState;
+  panEnd(constraintContext?: ConstraintContext): GlobeState {
+    return this._getUpdatedState(
+      {
+        startPanPos: null,
+        startPanCameraFrame: null,
+        startPanAngularRate: null,
+        startZoom: null
+      },
+      constraintContext
+    );
   }
 
-  _panFromCenter(offset: [number, number]): GlobeState {
+  _panFromCenter(offset: [number, number], constraintContext?: ConstraintContext): GlobeState {
     const {width, height} = this.getViewportProps();
     const center: [number, number] = [width / 2, height / 2];
-    return this.panStart({pos: center})
-      .pan({pos: [center[0] + offset[0], center[1] + offset[1]]})
-      .panEnd();
+    return this.panStart({pos: center}, constraintContext)
+      .pan({pos: [center[0] + offset[0], center[1] + offset[1]]}, constraintContext)
+      .panEnd(constraintContext);
   }
 
-  applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
+  applyConstraints(
+    props: Required<MapStateProps>,
+    constraintContext?: GlobeConstraintContext
+  ): Required<MapStateProps> {
     const internalProps = props as typeof props & ConstraintAround;
     const constraintAround = internalProps[CONSTRAINT_AROUND];
     delete internalProps[CONSTRAINT_AROUND];
-    const {latitude, maxBounds} = props;
+    const {latitude, maxBounds, rubberBand} = props;
+    const shouldRubberBand = rubberBand && constraintContext?.mode === 'elastic';
+    const preserve = constraintContext?.mode === 'preserve';
+    const constrain = (key: keyof MapStateProps, value: number, limit: number, range: number) => {
+      if (
+        preserve ||
+        (shouldRubberBand &&
+          constraintContext?.changedProps &&
+          !constraintContext.changedProps.includes(key))
+      ) {
+        return value;
+      }
+      return shouldRubberBand ? applyRubberBand(value, limit, range) : limit;
+    };
 
-    props.zoom = this._constrainZoom(props.zoom, props);
+    props.zoom = constrain(
+      'zoom',
+      props.zoom,
+      this._constrainZoom(props.zoom, props),
+      ZOOM_RUBBER_BAND_RANGE
+    );
 
     if (constraintAround) {
-      const viewport = this.makeViewport(props) as GlobeViewport;
-      const anchorStrength = viewport.getZoomAnchorStrength(constraintAround.screenPosition);
-      if (anchorStrength > 0) {
+      const viewport = this.makeViewport(props);
+      const anchorStrength =
+        viewport instanceof GlobeViewport
+          ? viewport.getZoomAnchorStrength(constraintAround.screenPosition)
+          : 0;
+      if (!(viewport instanceof GlobeViewport) || props.navigation === 'map') {
+        Object.assign(
+          props,
+          viewport instanceof GlobeViewport
+            ? viewport.panByPosition(
+                constraintAround.position,
+                constraintAround.screenPosition,
+                undefined,
+                true
+              )
+            : viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
+        );
+      } else if (anchorStrength > 0) {
         const currentCoordinates = viewport.unproject(constraintAround.screenPosition);
         const cameraFrame = Globe.cameraFrame(props.longitude, props.latitude, props.bearing || 0);
         const rotatedFrame = Globe.rotateFrameToMatch(
@@ -142,23 +228,43 @@ class GlobeState extends MapState {
         );
         props.longitude = rotatedFrame.longitude;
         props.latitude = rotatedFrame.latitude;
-        props.bearing = rotatedFrame.bearing;
+        props.bearing = hasBearingLimits(props)
+          ? alignBearing(rotatedFrame.bearing, props.bearing)
+          : rotatedFrame.bearing;
       }
     }
 
     if (props.longitude < -180 || props.longitude > 180) {
       props.longitude = mod(props.longitude + 180, 360) - 180;
     }
-    if (props.bearing < -180 || props.bearing > 180) {
+    if (hasBearingLimits(props)) {
+      // Keep bounded angles on their configured turn. Wrapping an overshoot can
+      // put it inside the opposite limit and lose the correct rebound direction.
+      props.bearing = constrain(
+        'bearing',
+        props.bearing,
+        clamp(props.bearing, props.minBearing, props.maxBearing),
+        ROTATION_RUBBER_BAND_RANGE
+      );
+    } else {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
-    props.latitude = clamp(props.latitude, -90, 90);
-    props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
+    const latitudeLimit = props.navigation === 'map' ? MAX_LATITUDE : 90;
+    props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
+    props.pitch = constrain(
+      'pitch',
+      props.pitch,
+      clamp(props.pitch, props.minPitch, props.maxPitch),
+      ROTATION_RUBBER_BAND_RANGE
+    );
+
+    const requestedLongitude = props.longitude;
+    const requestedLatitude = props.latitude;
 
     const maxBoundsRect = maxBounds
       ? getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding)
       : null;
-    if (maxBounds && maxBoundsRect) {
+    if (maxBounds && maxBoundsRect && !preserve) {
       // A negative target dimension is inverted and therefore has no legal interval.
       if (maxBoundsRect.width >= 0) {
         props.longitude = clamp(props.longitude, maxBounds[0][0], maxBounds[1][0]);
@@ -168,7 +274,7 @@ class GlobeState extends MapState {
       }
     }
 
-    if (maxBounds && maxBoundsRect) {
+    if (maxBounds && maxBoundsRect && !preserve) {
       const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
       const screenExtents = getMaxBoundsExtents(
         viewport,
@@ -221,14 +327,73 @@ class GlobeState extends MapState {
           maxBounds[1][0] - rightDegrees
         );
       }
+      props.longitude = constrain(
+        'longitude',
+        requestedLongitude,
+        props.longitude,
+        pixelsToDegrees(
+          Math.max(0, maxBoundsRect.width) /
+            2 /
+            Math.max(Math.cos(requestedLatitude * DEGREES_TO_RADIANS), 1e-6),
+          effectiveZoom
+        )
+      );
+      props.latitude = constrain(
+        'latitude',
+        requestedLatitude,
+        props.latitude,
+        pixelsToDegrees(Math.max(0, maxBoundsRect.height) / 2, effectiveZoom)
+      );
     }
     // maxBounds may extend past the globe's coordinate range.
-    props.latitude = clamp(props.latitude, -90, 90);
+    props.latitude = clamp(props.latitude, -latitudeLimit, latitudeLimit);
     if (props.latitude !== latitude) {
       props.zoom += zoomAdjust(props.latitude, true) - zoomAdjust(latitude, true);
     }
 
     return props;
+  }
+
+  shortestPathFrom(viewState: MapState): MapStateProps {
+    const props = super.shortestPathFrom(viewState);
+    const viewportProps = this.getViewportProps();
+    const {maxBounds} = viewportProps;
+    if (maxBounds && maxBounds[1][0] - maxBounds[0][0] < 360) {
+      props.longitude = this.getViewportProps().longitude;
+    }
+    if (hasBearingLimits(viewportProps)) {
+      props.bearing = viewportProps.bearing;
+    }
+    return props;
+  }
+
+  _getUpdatedState(newProps, constraintContext?: ConstraintContext): GlobeState {
+    let globeConstraintContext: GlobeConstraintContext | undefined = constraintContext;
+    if (constraintContext?.mode === 'elastic') {
+      const changedProps = Object.keys(newProps);
+      if (newProps[CONSTRAINT_AROUND]) {
+        changedProps.push('longitude', 'latitude', 'bearing');
+      }
+      globeConstraintContext = {...globeConstraintContext, ...constraintContext, changedProps};
+    }
+    return super._getUpdatedState(newProps, globeConstraintContext) as GlobeState;
+  }
+
+  _getNewRotation(
+    pos: [number, number],
+    startPos: [number, number],
+    startPitch: number,
+    startBearing: number,
+    constraintContext?: ConstraintContext
+  ): {pitch: number; bearing: number} {
+    const rotation = super._getNewRotation(pos, startPos, startPitch, startBearing);
+    const {rubberBand, minPitch, maxPitch, height} = this.getViewportProps();
+    if (rubberBand && constraintContext?.mode === 'elastic' && height > 0) {
+      // Use a fixed angular scale so dragging outwards still works at either pitch limit.
+      rotation.pitch =
+        startPitch + ((startPos[1] - pos[1]) / height) * Math.max(1, maxPitch - minPitch);
+    }
+    return rotation;
   }
 
   _constrainZoom(zoom: number, props?: Required<MapStateProps>): number {
@@ -282,6 +447,32 @@ export default class GlobeController extends Controller<MapState> {
   // Ring buffer tracking globe position during pan for inertia velocity
   private _panHistory: Array<{longitude: number; latitude: number; timestamp: number}> = [];
 
+  /** Update navigation policy without retaining gestures or inertia from the previous mode. */
+  setProps(props: ControllerProps & MapStateProps): void {
+    const navigation = props.navigation || 'map';
+    const navigationChanged = this.props && navigation !== (this.props.navigation || 'map');
+    const oldViewState = navigationChanged
+      ? new this.ControllerState({
+          ...(this.props as ControllerProps & MapStateProps),
+          makeViewport: this.makeViewport
+        }).getViewportProps()
+      : undefined;
+    if (navigationChanged) {
+      this._panHistory = [];
+      this._cancelInteraction();
+      props = {...props, transitionDuration: 0};
+    }
+    super.setProps(props);
+    if (navigationChanged) {
+      this.updateViewport(
+        new this.ControllerState({...props, makeViewport: this.makeViewport}),
+        null,
+        {},
+        oldViewState
+      );
+    }
+  }
+
   protected _onPanStart(event: MjolnirGestureEvent): boolean {
     this._panHistory = [];
     return super._onPanStart(event);
@@ -297,7 +488,10 @@ export default class GlobeController extends Controller<MapState> {
       return false;
     }
     const pos = this.getCenter(event);
-    const newControllerState = this.controllerState.pan({pos});
+    const newControllerState = this.controllerState.pan(
+      {pos},
+      this._getConstraintContext('pan', 'update')
+    );
     this.updateViewport(
       newControllerState,
       {transitionDuration: 0},
@@ -317,6 +511,14 @@ export default class GlobeController extends Controller<MapState> {
   }
 
   protected _onPanMoveEnd(event: MjolnirGestureEvent): boolean {
+    const constraintContext = this._getConstraintContext('pan', 'end');
+    const settledState = this.controllerState.panEnd(constraintContext);
+    const reboundTransition = this._getReboundTransition(constraintContext, settledState);
+    if (reboundTransition) {
+      this._panHistory = [];
+      this.updateViewport(settledState, reboundTransition, {isDragging: false, isPanning: true});
+      return true;
+    }
     const {inertia} = this;
     if (this.dragPan && inertia && this._panHistory.length >= 2) {
       const first = this._panHistory[0];
@@ -330,23 +532,48 @@ export default class GlobeController extends Controller<MapState> {
         const angularVelocity = angularDistance / dt;
 
         if (angularVelocity > 1e-6) {
-          const totalAngle = (angularVelocity * inertia) / 2;
-          // Spin around one fixed axis so position and up stay in the same
-          // rigid camera frame through poles and across the antimeridian.
-          const axis = Globe.greatCircleAxis(first, last);
-          const currentFrame = Globe.cameraFrame(
-            viewportProps.longitude,
-            viewportProps.latitude,
-            viewportProps.bearing || 0
-          );
-          const endFrame = Globe.rotateFrame(
-            {...currentFrame, axisHorizontal: axis},
-            totalAngle,
-            0
-          );
-          const endLng = endFrame.longitude;
-          const endLat = clamp(endFrame.latitude, -90, 90);
-          const interpolator = new GlobeInertiaInterpolator({axis, totalAngle});
+          let endLongitude: number;
+          let endLatitude: number;
+          let endBearing = viewportProps.bearing;
+          let interpolator: GlobeInertiaInterpolator | LinearInterpolator;
+          if (viewportProps.navigation === 'map') {
+            const longitudeDelta = mod(last.longitude - first.longitude + 180, 360) - 180;
+            endLongitude = viewportProps.longitude + (longitudeDelta * inertia) / (2 * dt);
+            const {maxBounds} = viewportProps;
+            if (maxBounds && maxBounds[1][0] - maxBounds[0][0] < 360) {
+              // Preserve fling direction before the endpoint is normalized to longitude.
+              endLongitude = clamp(endLongitude, maxBounds[0][0], maxBounds[1][0]);
+            }
+            endLatitude = clamp(
+              viewportProps.latitude + ((last.latitude - first.latitude) * inertia) / (2 * dt),
+              -MAX_LATITUDE,
+              MAX_LATITUDE
+            );
+            interpolator = new GlobeInertiaInterpolator({targetLongitude: endLongitude});
+          } else {
+            const totalAngle = (angularVelocity * inertia) / 2;
+            const axis = Globe.greatCircleAxis(first, last);
+            const currentFrame = Globe.cameraFrame(
+              viewportProps.longitude,
+              viewportProps.latitude,
+              viewportProps.bearing || 0
+            );
+            const endFrame = Globe.rotateFrame(
+              {...currentFrame, axisHorizontal: axis},
+              totalAngle,
+              0
+            );
+            endLongitude = endFrame.longitude;
+            endLatitude = clamp(endFrame.latitude, -90, 90);
+            endBearing = hasBearingLimits(viewportProps)
+              ? alignBearing(endFrame.bearing, viewportProps.bearing)
+              : endFrame.bearing;
+            interpolator = new GlobeInertiaInterpolator({axis, totalAngle});
+          }
+          // Bounded views must interpolate to the constrained endpoint. A rigid spin
+          // ignores that endpoint and could finish outside the configured limits.
+          const hasBounds = viewportProps.maxBounds || hasBearingLimits(viewportProps);
+          if (hasBounds) interpolator = this.transition.transitionInterpolator;
 
           const newControllerState = this.controllerState.panEnd();
           this.updateViewport(
@@ -355,8 +582,13 @@ export default class GlobeController extends Controller<MapState> {
               transitionInterpolator: interpolator,
               transitionDuration: inertia,
               transitionEasing: GLOBE_INERTIA_EASING,
-              longitude: endLng,
-              latitude: endLat
+              longitude: endLongitude,
+              latitude: endLatitude,
+              bearing: endBearing,
+              zoom:
+                viewportProps.zoom +
+                zoomAdjust(endLatitude, true) -
+                zoomAdjust(viewportProps.latitude, true)
             },
             {
               isDragging: false,
@@ -370,8 +602,7 @@ export default class GlobeController extends Controller<MapState> {
     }
 
     this._panHistory = [];
-    const newControllerState = this.controllerState.panEnd();
-    this.updateViewport(newControllerState, null, {
+    this.updateViewport(settledState, null, {
       isDragging: false,
       isPanning: false
     });

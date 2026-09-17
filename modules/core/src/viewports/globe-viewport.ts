@@ -365,12 +365,14 @@ export default class GlobeViewport extends Viewport {
    * @param coordinates - Geographic anchor, or the starting longitude, latitude and zoom.
    * @param screenPosition - Current screen position.
    * @param dragStartPosition - Screen position where a drag started.
+   * @param lockBearing - Apply fixed-bearing zoom anchor limits. Defaults to whether the viewport is north-up.
    * @returns Updated viewport options.
    */
   panByPosition(
     coordinates: number[],
     screenPosition: number[],
-    dragStartPosition?: number[]
+    dragStartPosition?: number[],
+    lockBearing: boolean = isGlobeNorthUp(this.bearing)
   ): GlobeViewportOptions {
     if (!dragStartPosition) {
       let anchorStrength = this.getZoomAnchorStrength(screenPosition);
@@ -383,14 +385,14 @@ export default class GlobeViewport extends Viewport {
       const latitudeDelta = coordinates[1] - currentCoordinates[1];
       const crossesPole =
         Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90;
-      if (isGlobeNorthUp(this.bearing) && crossesPole) {
+      if (lockBearing && crossesPole) {
         // A zoom gesture keeps its original geographic anchor. Once the
         // pointer crosses a pole it can reappear in the opposite hemisphere,
         // reversing longitude. Continue zooming around center in either case.
         return {longitude: this.longitude, latitude: this.latitude};
       }
-      if (isGlobeNorthUp(this.bearing) && latitudeDelta !== 0) {
-        // Longitude and latitude are one coupled correction. If north-up runs
+      if (lockBearing && latitudeDelta !== 0) {
+        // Longitude and latitude are one coupled correction. If a locked bearing runs
         // out of latitude headroom, scale both axes together instead of
         // clipping latitude while applying the full sideways rotation.
         const latitudeLimit = latitudeDelta > 0 ? MAX_LATITUDE : -MAX_LATITUDE;

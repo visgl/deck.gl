@@ -76,10 +76,14 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `minZoom` (number, optional) - min zoom level. Default `0`.
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
+- `minBearing` (number, optional) - minimum bearing angle in degrees. Unrestricted by default.
+- `maxBearing` (number, optional) - maximum bearing angle in degrees. Unrestricted by default. Use an increasing numerical interval, such as `[-45, 45]` around north or `[170, 190]` across south. With limits enabled, bearings stay unwrapped: use `185`, not `-175`, for the latter interval.
 
-The globe behaves like a physical ball. Dragging and pointer-anchored zoom rotate the full camera frame, so an initial `bearing` of `0` does not lock north up: `bearing` evolves naturally as the camera crosses a pole. This avoids orientation discontinuities and keeps interaction consistent across latitudes. Use `zoomAround: 'center'` to zoom without steering the camera frame.
+Navigation preserves the current bearing by default, so north stays up when `bearing` is `0`. Dragging, pointer-anchored zoom, and inertia do not rotate the bearing or cross the poles. Explicit rotation gestures still change bearing and pitch. Set `controller: {navigation: 'ball'}` to opt into full camera-frame rotation through the poles. See [GlobeController navigation](./globe-controller.md#navigation) for details.
 
 To limit how far the camera can travel, set the shared controller [`maxBounds`](./controller.md#options) option. For example, `maxBounds: [[-180, -85], [180, 85]]` keeps the viewport center between `±85°` latitude.
+
+Enable `controller: {rubberBand: true}` for elastic pan, zoom, bearing, and pitch limits during continuous gestures. See [GlobeController](./globe-controller.md#elastic-constraints) for configuration and release behavior.
 
 
 ## Controller

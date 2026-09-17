@@ -118,10 +118,11 @@ test('GlobeViewState', () => {
     longitude: 0,
     latitude: 90,
     zoom: 5,
+    navigation: 'ball',
     makeViewport: dummyMakeViewport
   });
   viewportProps = viewState.getViewportProps();
-  expect(viewportProps.latitude, 'the default camera can reach the pole').toBe(90);
+  expect(viewportProps.latitude, 'ball navigation can reach the pole').toBe(90);
 
   viewState = new GlobeViewState({
     width: 800,
@@ -130,6 +131,7 @@ test('GlobeViewState', () => {
     latitude: 90,
     zoom: 5,
     bearing: 360,
+    navigation: 'ball',
     makeViewport: dummyMakeViewport
   });
   viewportProps = viewState.getViewportProps();
@@ -157,6 +159,7 @@ test('GlobeViewState', () => {
     longitude: 0,
     latitude: 90,
     zoom: 5,
+    navigation: 'ball',
     maxBounds: [
       [-10, 86],
       [10, 89]

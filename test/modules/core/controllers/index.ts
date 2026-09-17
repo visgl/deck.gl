@@ -4,4 +4,6 @@
 
 import './controllers.spec';
 import './custom-controller.spec';
+import './globe-navigation.spec';
+import './globe-rubber-band.spec';
 import './view-states.spec';

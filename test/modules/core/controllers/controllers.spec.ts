@@ -548,9 +548,9 @@ test('GlobeController falls back to center zoom when the pointer is off the glob
   expect(controller.props.zoom, 'off-globe zoom still changes scale').not.toBeCloseTo(1);
 });
 
-test('GlobeController drags through a pole from bearing zero', () => {
+test('GlobeController ball navigation drags through a pole from bearing zero', () => {
   const controller = createTestController({
-    view: new GlobeView({controller: true}),
+    view: new GlobeView({controller: {navigation: 'ball'}}),
     initialViewState: {
       width: 800,
       height: 600,
@@ -588,7 +588,7 @@ test('GlobeController drags through a pole from bearing zero', () => {
 test('GlobeController keeps pointer zoom stable when the anchor crosses a pole', () => {
   for (const latitude of [-75, 75]) {
     const controller = createTestController({
-      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      view: new GlobeView({controller: {navigation: 'ball', zoomAround: 'pointer'}}),
       initialViewState: {
         width: 1280,
         height: 720,
@@ -626,7 +626,7 @@ test('GlobeController keeps pointer zoom stable when the anchor crosses a pole',
 test('GlobeController rotates pointer zoom smoothly from the north-up latitude limit', () => {
   for (const latitude of [-85, 85]) {
     const controller = createTestController({
-      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      view: new GlobeView({controller: {navigation: 'ball', zoomAround: 'pointer'}}),
       initialViewState: {
         width: 1280,
         height: 720,
@@ -664,7 +664,7 @@ test('GlobeController rotates pointer zoom smoothly from the north-up latitude l
 test('GlobeController pointer zoom rotates the globe uniformly across latitudes', () => {
   for (const latitude of [0, 45, 75, 85]) {
     const controller = createTestController({
-      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      view: new GlobeView({controller: {navigation: 'ball', zoomAround: 'pointer'}}),
       initialViewState: {
         width: 1280,
         height: 720,
@@ -709,7 +709,7 @@ test('GlobeController pointer zoom rotates the globe uniformly across latitudes'
 
 test('GlobeController center zoom does not steer the camera frame', () => {
   const controller = createTestController({
-    view: new GlobeView({controller: {zoomAround: 'center'}}),
+    view: new GlobeView({controller: {navigation: 'ball', zoomAround: 'center'}}),
     initialViewState: {
       width: 1280,
       height: 720,
@@ -733,7 +733,7 @@ test('GlobeController center zoom does not steer the camera frame', () => {
 test('GlobeController smooth wheel zoom rotates the camera frame continuously', () => {
   const controller = createTestController({
     view: new GlobeView({
-      controller: {zoomAround: 'pointer', scrollZoom: {smooth: true}}
+      controller: {navigation: 'ball', zoomAround: 'pointer', scrollZoom: {smooth: true}}
     }),
     initialViewState: {
       width: 1280,
@@ -779,7 +779,7 @@ test('GlobeController smooth wheel zoom rotates the camera frame continuously', 
 test('GlobeController keeps continuous pinch zoom stable across a pole', () => {
   for (const latitude of [-75, 75]) {
     const controller = createTestController({
-      view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+      view: new GlobeView({controller: {navigation: 'ball', zoomAround: 'pointer'}}),
       initialViewState: {
         width: 1280,
         height: 720,
@@ -832,7 +832,7 @@ test('GlobeController keeps continuous pinch zoom stable across a pole', () => {
 test('GlobeController preserves pointer zoom in free rotation mode', () => {
   const makeController = (zoomAround: 'pointer' | 'center') =>
     createTestController({
-      view: new GlobeView({controller: {zoomAround}}),
+      view: new GlobeView({controller: {navigation: 'ball', zoomAround}}),
       initialViewState: {
         width: 1280,
         height: 720,

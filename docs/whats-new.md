@@ -45,7 +45,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
-- Pointer-anchored zoom now rotates the camera frame like a physical ball, keeping steering smooth and consistent around the poles while allowing bearing to evolve naturally.
+- [`GlobeController.navigation`](./api-reference/core/globe-controller.md#navigation) selects `'map'` (the default, preserving bearing) or `'ball'` (free rotation through the poles). Drag, pointer-anchored zoom, keyboard movement, and inertia follow the selected navigation mode.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**
@@ -72,7 +72,7 @@ New experimental multi-canvas foundations allow integrations to associate each `
 - The new `trackpadGesture` option enables native trackpad gestures, including two-finger pan, pinch-to-zoom, and rotate where supported.
 - The new `zoomAround` option chooses whether pointer-based zoom interactions keep the pointer location or the viewport center fixed.
 - The new `maxBoundsPadding` option fits `maxBounds` within a padded or asymmetrically positioned viewport region, with support for pixels, percentages, and CSS-style layout expressions.
-- `OrthographicController` and `MapController` now support `rubberBand`, allowing pan and zoom interactions to temporarily overshoot their constraints before easing back on release.
+- `OrthographicController`, `MapController`, and [`GlobeController`](./api-reference/core/globe-controller.md#elastic-constraints) now support `rubberBand`, allowing continuous interactions to temporarily overshoot their constraints before easing back on release. GlobeController covers pan bounds, zoom, pitch (tilt), and optional `minBearing`/`maxBearing` limits; bearing remains unrestricted by default.
 
 ### @deck.gl/maplibre
 
