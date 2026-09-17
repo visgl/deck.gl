@@ -26,27 +26,35 @@ export function mergeShaders(target, source) {
   if ('modules' in source) {
     result.modules = (target.modules || []).concat(source.modules);
 
-    // Apply module exclusions: when modules are mutually exclusive,
-    // the one appearing later in the merge order takes precedence
-    const lastIndexMap = new Map<string, number>();
-    for (let i = 0; i < result.modules.length; i++) {
-      lastIndexMap.set(result.modules[i].name, i);
-    }
+    // Apply module exclusions: when modules conflict (either declares excludes),
+    // the one appearing later in the merge order takes precedence.
+    // Process from end to beginning so later modules are evaluated first,
+    // and only surviving modules' exclusions are honored.
+    const toKeep = new Set(result.modules.map((_, idx) => idx));
 
-    const namesToExclude = new Set<string>();
     for (let i = result.modules.length - 1; i >= 0; i--) {
+      if (!toKeep.has(i)) continue; // This module was already excluded
+
       const module = result.modules[i];
       if (module.excludes) {
         for (const excludedName of module.excludes) {
-          const excludedLastIndex = lastIndexMap.get(excludedName);
-          if (excludedLastIndex !== undefined && excludedLastIndex < i) {
-            namesToExclude.add(excludedName);
+          // Find all occurrences of the excluded module
+          for (let j = 0; j < result.modules.length; j++) {
+            if (j !== i && toKeep.has(j) && result.modules[j].name === excludedName) {
+              // Conflict found: keep the later one
+              if (i > j) {
+                toKeep.delete(j); // Remove the excluded module (earlier)
+              } else {
+                toKeep.delete(i); // Remove this module (earlier)
+                break; // This module is gone, stop processing its exclusions
+              }
+            }
           }
         }
       }
     }
 
-    result.modules = result.modules.filter(module => !namesToExclude.has(module.name));
+    result.modules = result.modules.filter((_, idx) => toKeep.has(idx));
   }
   if ('inject' in source) {
     if (!target.inject) {

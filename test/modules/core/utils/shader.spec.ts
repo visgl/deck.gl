@@ -86,7 +86,7 @@ test('mergeShaders - module exclusions', () => {
   );
   expect(result3.modules.map(m => m.name)).toEqual(['moduleC', 'moduleB']);
 
-  // Test 4: Non-mutual exclusion (only one module excludes the other)
+  // Test 4: Non-mutual exclusion - later declaring module wins
   const moduleD = {name: 'moduleD', excludes: ['moduleE']};
   const moduleE = {name: 'moduleE'};
 
@@ -95,6 +95,13 @@ test('mergeShaders - module exclusions', () => {
     {modules: [moduleD]}
   );
   expect(result4.modules.map(m => m.name)).toEqual(['moduleD']);
+
+  // Test 4b: Non-mutual exclusion reversed - later non-declaring module wins
+  const result4b = mergeShaders(
+    {modules: [moduleD]},
+    {modules: [moduleE]}
+  );
+  expect(result4b.modules.map(m => m.name)).toEqual(['moduleE']);
 
   // Test 5: Excluded module not present - should be no-op
   const result5 = mergeShaders(
@@ -109,4 +116,17 @@ test('mergeShaders - module exclusions', () => {
     {modules: [phongMaterial]}
   );
   expect(result6.modules.length).toBe(2);
+
+  // Test 7: Transitive exclusion - only surviving modules' exclusions are honored
+  const moduleC2 = {name: 'moduleC2'};
+  const moduleA2 = {name: 'moduleA2', excludes: ['moduleC2']};
+  const moduleB2 = {name: 'moduleB2', excludes: ['moduleA2']};
+
+  const result7 = mergeShaders(
+    {modules: [moduleC2, moduleA2, moduleB2]},
+    {modules: []}
+  );
+  // B2 (later) excludes A2, so A2 is removed.
+  // A2 declared exclusion of C2, but since A2 was removed, C2 survives.
+  expect(result7.modules.map(m => m.name)).toEqual(['moduleC2', 'moduleB2']);
 });
