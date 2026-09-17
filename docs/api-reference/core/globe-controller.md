@@ -61,7 +61,7 @@ new Deck({
     rubberBand: true,
     maxBounds: [[-20, -20], [20, 20]],
     maxBoundsPadding: {left: 40, right: 40, top: 40, bottom: 40},
-    touchRotate: true
+    multiTouchDrag: 'rotate'
   },
   initialViewState: {
     longitude: 0,
