@@ -1,4 +1,13 @@
 [
+  {
+    "name": "Yapmap",
+    "url": "https://yapmap.cc",
+    "image": "/images/showcase/yapmap.jpg",
+    "links": {
+      "by Yapmap": "https://yapmap.cc"
+    },
+    "description": "A free, voice-controlled 3D world map. Speak and an AI guide flies the globe anywhere, then dives into photorealistic terrain rendered with deck.gl Tile3DLayer over Google 3D Tiles, dropping pins and drawing routes while it narrates each place."
+  },
     {
     "name": "Toronto Dot Density Map",
     "url": "https://schoolofcities.github.io/dot-density/",
