@@ -305,14 +305,20 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
 
     const widgetRoot = createElement('div', {
       key: 'deck-widgets-root',
-      className: 'deck-widgets-root'
+      className: 'deck-widgets-root',
+      // Keep widget coordinates aligned with the canvas without requiring widget CSS.
+      style: {position: 'absolute', inset: 0, pointerEvents: 'none'}
     });
 
     // Render deck.gl as the last child
     thisRef.control = createElement(
       'div',
       {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
-      [eventRoot, widgetRoot]
+      // Preserve a containing block even when the caller puts the wrapper in normal flow.
+      createElement('div', {style: {position: 'relative', width: '100%', height: '100%'}}, [
+        eventRoot,
+        widgetRoot
+      ])
     );
   }
 
