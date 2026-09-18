@@ -16,7 +16,15 @@ import {
 } from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {Deck, Layer, Widget, type WebMercatorViewport, type MapViewState} from '@deck.gl/core';
+import {
+  Deck,
+  Layer,
+  Widget,
+  type PickingInfo,
+  type WebMercatorViewport,
+  type MapViewState
+} from '@deck.gl/core';
+import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';
 import DeckGL, {type DeckGLRef} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
@@ -84,6 +92,61 @@ test('DeckGL#mount/unmount', async () => {
   expect(deck!.animationLoop, 'Deck is finalized').toBeFalsy();
 
   container.remove();
+});
+
+test('DeckGL#tooltip positioning without widget CSS', async () => {
+  const ref = createRef<DeckGLRef>();
+  const container = document.createElement('div');
+  Object.assign(container.style, {position: 'absolute', left: '40px', top: '60px'});
+  document.body.append(container);
+  const root = createRoot(container);
+
+  try {
+    // Exercise both initial layout and resizing, with no widget stylesheet loaded.
+    for (const [width, height] of [
+      [200, 100],
+      [300, 200]
+    ]) {
+      const {onAfterRender, waitUntilReady} = createRenderTracker();
+      act(() => {
+        root.render(
+          createElement(DeckGL, {
+            ref,
+            initialViewState: TEST_VIEW_STATE,
+            width,
+            height,
+            getTooltip: () => 'Hovered point',
+            onAfterRender
+          })
+        );
+      });
+      await waitUntilReady(ref);
+
+      const deck = ref.current!.deck!;
+      // @ts-expect-error protected member
+      const widgetManager = deck.widgetManager!;
+      const tooltip = widgetManager.getWidgets().find(widget => widget instanceof TooltipWidget)!;
+      tooltip.onHover({x: 50, y: 25, viewport: deck.getViewports()[0]} as PickingInfo);
+
+      const canvasBounds = deck.getCanvas()!.getBoundingClientRect();
+      const tooltipBounds = tooltip.rootElement!.getBoundingClientRect();
+      expect(tooltip.rootElement!.textContent).toBe('Hovered point');
+      expect(tooltipBounds.left).toBeCloseTo(canvasBounds.left + 50);
+      expect(tooltipBounds.top).toBeCloseTo(canvasBounds.top + 25);
+
+      const widgetRoot = container.querySelector<HTMLElement>('.deck-widgets-root')!;
+      const widgetBounds = widgetRoot.getBoundingClientRect();
+      expect(widgetBounds.width).toBe(width);
+      expect(widgetBounds.height).toBe(height);
+      // The overlay must leave empty map space available for pointer interaction.
+      expect(document.elementFromPoint(canvasBounds.left + 10, canvasBounds.top + 10)).toBe(
+        deck.getCanvas()
+      );
+    }
+  } finally {
+    act(() => root.unmount());
+    container.remove();
+  }
 });
 
 test('DeckGL#external WebGPU device preserves the React custom render loop', () => {

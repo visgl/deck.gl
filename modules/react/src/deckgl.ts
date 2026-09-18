@@ -305,7 +305,9 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
 
     const widgetRoot = createElement('div', {
       key: 'deck-widgets-root',
-      className: 'deck-widgets-root'
+      className: 'deck-widgets-root',
+      // Keep widget coordinates aligned with the canvas without requiring widget CSS.
+      style: {position: 'absolute', inset: 0, pointerEvents: 'none'}
     });
 
     // Render deck.gl as the last child
