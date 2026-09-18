@@ -94,60 +94,98 @@ test('DeckGL#mount/unmount', async () => {
   container.remove();
 });
 
-test('DeckGL#tooltip positioning without widget CSS', async () => {
-  const ref = createRef<DeckGLRef>();
-  const container = document.createElement('div');
-  Object.assign(container.style, {position: 'absolute', left: '40px', top: '60px'});
-  document.body.append(container);
-  const root = createRoot(container);
+test.each([
+  ['absolute', false],
+  ['relative', false],
+  ['static', false],
+  ['absolute', true],
+  ['relative', true],
+  ['static', true]
+] as const)(
+  'DeckGL#widget positioning without widget CSS (position: %s, percentage size: %s)',
+  async (position, percentageSize) => {
+    const ref = createRef<DeckGLRef>();
+    const container = document.createElement('div');
+    Object.assign(container.style, {
+      position: 'absolute',
+      left: '40px',
+      top: '60px',
+      width: '500px',
+      height: '400px'
+    });
+    const widget = new TestWidget({style: {width: '20px', height: '20px', pointerEvents: 'auto'}});
+    widget.placement = 'top-right';
+    document.body.append(container);
+    const root = createRoot(container);
 
-  try {
-    // Exercise both initial layout and resizing, with no widget stylesheet loaded.
-    for (const [width, height] of [
-      [200, 100],
-      [300, 200]
-    ]) {
-      const {onAfterRender, waitUntilReady} = createRenderTracker();
-      act(() => {
-        root.render(
-          createElement(DeckGL, {
-            ref,
-            initialViewState: TEST_VIEW_STATE,
-            width,
-            height,
-            getTooltip: () => 'Hovered point',
-            onAfterRender
-          })
+    try {
+      // Exercise both initial layout and resizing, with no widget stylesheet loaded.
+      for (const [width, height] of [
+        [200, 100],
+        [300, 200]
+      ]) {
+        const {onAfterRender, waitUntilReady} = createRenderTracker();
+        act(() => {
+          root.render(
+            createElement(DeckGL, {
+              ref,
+              initialViewState: TEST_VIEW_STATE,
+              width: percentageSize ? '100%' : width,
+              height: percentageSize ? '100%' : height,
+              style: {
+                position,
+                margin: '20px',
+                ...(percentageSize ? {width: `${width}px`, height: `${height}px`} : {})
+              },
+              widgets: [widget],
+              getTooltip: () => 'Hovered point',
+              onAfterRender
+            })
+          );
+        });
+        await waitUntilReady(ref);
+
+        const deck = ref.current!.deck!;
+        // @ts-expect-error protected member
+        const widgetManager = deck.widgetManager!;
+        const tooltip = widgetManager.getWidgets().find(widget => widget instanceof TooltipWidget)!;
+        tooltip.onHover({x: 50, y: 25, viewport: deck.getViewports()[0]} as PickingInfo);
+
+        const canvasBounds = deck.getCanvas()!.getBoundingClientRect();
+        const tooltipBounds = tooltip.rootElement!.getBoundingClientRect();
+        expect(tooltip.rootElement!.textContent).toBe('Hovered point');
+        expect(tooltipBounds.left).toBeCloseTo(canvasBounds.left + 50);
+        expect(tooltipBounds.top).toBeCloseTo(canvasBounds.top + 25);
+
+        const wrapper = container.querySelector<HTMLElement>('#deckgl-wrapper')!;
+        expect(getComputedStyle(wrapper).position).toBe(position);
+        const wrapperBounds = wrapper.getBoundingClientRect();
+        expect(canvasBounds.left).toBeCloseTo(wrapperBounds.left);
+        expect(canvasBounds.top).toBeCloseTo(wrapperBounds.top);
+        expect(canvasBounds.width).toBe(width);
+        expect(canvasBounds.height).toBe(height);
+        const controlBounds = widget.rootElement!.getBoundingClientRect();
+        expect(controlBounds.right).toBeCloseTo(canvasBounds.right);
+        expect(controlBounds.top).toBeCloseTo(canvasBounds.top);
+        expect(document.elementFromPoint(controlBounds.left + 10, controlBounds.top + 10)).toBe(
+          widget.rootElement
         );
-      });
-      await waitUntilReady(ref);
 
-      const deck = ref.current!.deck!;
-      // @ts-expect-error protected member
-      const widgetManager = deck.widgetManager!;
-      const tooltip = widgetManager.getWidgets().find(widget => widget instanceof TooltipWidget)!;
-      tooltip.onHover({x: 50, y: 25, viewport: deck.getViewports()[0]} as PickingInfo);
-
-      const canvasBounds = deck.getCanvas()!.getBoundingClientRect();
-      const tooltipBounds = tooltip.rootElement!.getBoundingClientRect();
-      expect(tooltip.rootElement!.textContent).toBe('Hovered point');
-      expect(tooltipBounds.left).toBeCloseTo(canvasBounds.left + 50);
-      expect(tooltipBounds.top).toBeCloseTo(canvasBounds.top + 25);
-
-      const widgetRoot = container.querySelector<HTMLElement>('.deck-widgets-root')!;
-      const widgetBounds = widgetRoot.getBoundingClientRect();
-      expect(widgetBounds.width).toBe(width);
-      expect(widgetBounds.height).toBe(height);
-      // The overlay must leave empty map space available for pointer interaction.
-      expect(document.elementFromPoint(canvasBounds.left + 10, canvasBounds.top + 10)).toBe(
-        deck.getCanvas()
-      );
+        const widgetRoot = container.querySelector<HTMLElement>('.deck-widgets-root')!;
+        const widgetBounds = widgetRoot.getBoundingClientRect();
+        expect(widgetBounds.width).toBe(width);
+        expect(widgetBounds.height).toBe(height);
+        // The overlay must leave empty map space available for pointer interaction.
+        expect(document.elementFromPoint(canvasBounds.left + 10, canvasBounds.top + 10)).toBe(
+          deck.getCanvas()
+        );
+      }
+    } finally {
+      act(() => root.unmount());
+      container.remove();
     }
-  } finally {
-    act(() => root.unmount());
-    container.remove();
   }
-});
+);
 
 test('DeckGL#external WebGPU device preserves the React custom render loop', () => {
   let capturedProps: Record<string, any> | undefined;

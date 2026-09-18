@@ -314,7 +314,11 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     thisRef.control = createElement(
       'div',
       {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
-      [eventRoot, widgetRoot]
+      // Preserve a containing block even when the caller puts the wrapper in normal flow.
+      createElement('div', {style: {position: 'relative', width: '100%', height: '100%'}}, [
+        eventRoot,
+        widgetRoot
+      ])
     );
   }
 
