@@ -339,6 +339,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     if (topModel && filled) {
       topModel.setVertexCount(polygonTesselator.vertexCount);
+      // Reused index buffers may be larger than the current triangulation.
+      topModel.setIndexCount(polygonTesselator.vertexCount);
       topModel.shaderInputs.setProps({solidPolygon: renderUniforms});
       topModel.draw(this.context.renderPass);
     }
