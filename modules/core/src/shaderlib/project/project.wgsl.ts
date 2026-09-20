@@ -224,6 +224,19 @@ fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
   return commonPosition.xy;
 }
 
+// project_common_position_to_flat with x made continuous around referenceX: the flat inverse of
+// a non-flat projection has a seam at the antimeridian, where x jumps by TILE_SIZE. Every vertex
+// is moved to within half a world of referenceX (the centre of a bounds rectangle, or the camera
+// for a periodic pattern). No-op for flat projection modes. See project.glsl.ts for details.
+fn project_common_position_to_flat_wrapped(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
+  var flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    let t = flatPosition.x - referenceX + TILE_SIZE * 0.5;
+    flatPosition.x = referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+  }
+  return flatPosition;
+}
+
 // Projects positions (with an optional 64-bit low part) from the input
 // coordinate system to the common space.
 fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {

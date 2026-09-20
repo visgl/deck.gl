@@ -104,3 +104,105 @@ test('projection-utils#projectToFlatCommon pairs with project_common_position_to
     ]
   });
 });
+
+test('projection-utils#projectToFlatCommon mirrors the globe METER_OFFSETS shader branch', () => {
+  const coordinateOrigin: [number, number, number] = [-122.43, 37.75, 0];
+  // 300 km east, 200 km south: large enough for the tangent-plane (shader) and the lng/lat
+  // (Layer.projectPosition) paths to disagree by hundreds of meters
+  const offset = [300000, -200000, 0];
+
+  testLayer({
+    Layer: ScatterplotLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        title: 'GlobeViewport: ENU displacement on the sphere, then Mercator',
+        viewport: globeViewport,
+        props: {
+          data: [offset],
+          getPosition: d => d,
+          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateOrigin
+        },
+        onAfterUpdate: ({layer}) => {
+          // Emulate project_position() under PROJECTION_MODE_GLOBE + COORDINATE_SYSTEM_METER_OFFSETS
+          const uniforms = project.getUniforms({
+            viewport: globeViewport,
+            coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+            coordinateOrigin
+          }) as ProjectUniforms;
+          const origin = Array.from(uniforms.commonOrigin);
+          const uz = normalize(origin);
+          const ux = normalize([uz[1], -uz[0], 0]);
+          const uy = cross(uz, ux);
+          const metersToCommon = 256 / 6370972;
+          const sphere = origin.map(
+            (o, i) =>
+              o + (ux[i] * -offset[0] + uy[i] * -offset[1] + uz[i] * offset[2]) * metersToCommon
+          );
+          // project_globe_to_mercator_
+          const expected = lngLatToMercatorCommon(globeViewport.unprojectPosition(sphere));
+
+          const flat = projectToFlatCommon(layer, offset);
+          expect(flat[0]).toBeCloseTo(expected[0], 6);
+          expect(flat[1]).toBeCloseTo(expected[1], 6);
+
+          // The lng/lat route is not the shader's twin at this distance
+          const viaLngLat = layer.projectPosition(offset, {
+            viewport: new WebMercatorViewport({width: 1, height: 1, zoom: 0}),
+            autoOffset: false
+          });
+          const metersPerCommonUnit = 40075017 / 512;
+          const divergenceMeters =
+            Math.hypot(viaLngLat[0] - expected[0], viaLngLat[1] - expected[1]) *
+            metersPerCommonUnit;
+          expect(divergenceMeters).toBeGreaterThan(50);
+        }
+      }
+    ]
+  });
+});
+
+test('projection-utils#projectBoundsToFlatCommon unwraps bounds across the antimeridian', () => {
+  testLayer({
+    Layer: ScatterplotLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        title: 'GlobeViewport',
+        viewport: globeViewport,
+        props: {data: [POSITION], getPosition: d => d},
+        onAfterUpdate: ({layer}) => {
+          const [x170] = lngLatToMercatorCommon([170, 0]);
+          const [xMinus170] = lngLatToMercatorCommon([-170, 0]);
+          // left edge east of the right edge: the right edge is one world width further on
+          const crossing = projectBoundsToFlatCommon(layer, [170, -20, -170, 20]);
+          expect(crossing[0]).toBeCloseTo(x170, 6);
+          expect(crossing[2]).toBeCloseTo(xMinus170 + 512, 6);
+          expect(crossing[2] - crossing[0]).toBeCloseTo((20 / 360) * 512, 6);
+          // ordinary bounds are untouched
+          const plain = projectBoundsToFlatCommon(layer, [-170, -20, 170, 20]);
+          expect(plain[0]).toBeCloseTo(xMinus170, 6);
+          expect(plain[2]).toBeCloseTo(x170, 6);
+        }
+      },
+      {
+        title: 'WebMercatorViewport',
+        viewport: mercatorViewport,
+        onAfterUpdate: ({layer}) => {
+          const crossing = projectBoundsToFlatCommon(layer, [170, -20, -170, 20]);
+          expect(crossing[2] - crossing[0]).toBeCloseTo((20 / 360) * 512, 6);
+        }
+      }
+    ]
+  });
+});
+
+function normalize(v: number[]): number[] {
+  const length = Math.hypot(v[0], v[1], v[2]);
+  return v.map(c => c / length);
+}
+
+function cross(a: number[], b: number[]): number[] {
+  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+}

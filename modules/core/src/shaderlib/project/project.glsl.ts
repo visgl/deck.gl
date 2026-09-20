@@ -214,6 +214,28 @@ vec2 project_common_position_to_flat(vec4 commonPosition) {
 }
 
 //
+// project_common_position_to_flat with x made continuous around referenceX. A non-flat
+// projection has no seam, but its flat inverse does: at the antimeridian x jumps by TILE_SIZE, so
+// a triangle spanning 180° longitude interpolates across a whole world width. Moving every
+// vertex to within half a world of referenceX removes the seam from wherever the result is
+// compared or sampled; it reappears at the antipode of the reference, which a globe camera
+// cannot see. Pass the flat x of the thing being compared with: the centre of a bounds
+// rectangle, or the camera position for a periodic pattern. No-op for flat projection modes.
+//
+vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX) {
+  vec2 flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    float t = flatPosition.x - referenceX + TILE_SIZE * 0.5;
+    flatPosition.x = referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+  }
+  return flatPosition;
+}
+
+vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX) {
+  return project_common_position_to_flat_wrapped(commonPosition.xyz, referenceX);
+}
+
+//
 // Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {

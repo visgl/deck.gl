@@ -150,6 +150,16 @@ vec2 project_common_position_to_flat(vec4 commonPosition)
 Converts a position in the common space of the current projection mode into flat common space: Web Mercator for geospatial views, cartesian otherwise. Returns `commonPosition.xy` unchanged for flat projections; in `GlobeView` the sphere position is inverted back to absolute Mercator. Use it when looking up textures or bounds that were computed in a flat viewport, such as an effect's framebuffer.
 
 
+### project_common_position_to_flat_wrapped
+
+```glsl
+vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX)
+vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX)
+```
+
+Same as `project_common_position_to_flat`, with the x coordinate made continuous around `referenceX`. The flat inverse of a non-flat projection has a seam at the antimeridian, where x jumps by one world width, so a triangle that spans 180° longitude on the globe would interpolate across the whole world. Every vertex is moved to within half a world of `referenceX`; the seam reappears at the antipode of the reference, which a globe camera cannot see. Pass the flat x of whatever the result is compared with: the centre of a bounds rectangle, or `project_common_position_to_flat(project.cameraPosition).x` for a periodic pattern. No-op for flat projection modes.
+
+
 ### project_get_orientation_matrix
 
 ```glsl
