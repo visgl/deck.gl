@@ -219,7 +219,10 @@ const inject = {
     if (fill.patternEnabled) {
       // Patterns tile a flat plane. geometry.position is sphere XYZ under GlobeView, so flatten
       // it to Mercator; a no-op for flat projections. Pairs with getFlatCommonOrigin() on the CPU.
-      vec2 fill_flatPosition = project_common_position_to_flat(geometry.position);
+      // On the globe the Mercator seam is moved to the far side of the camera, so a polygon that
+      // spans the antimeridian stays continuous; on flat maps the position is used as is.
+      float fill_cameraFlatX = project_common_position_to_flat(project.cameraPosition).x;
+      vec2 fill_flatPosition = project_common_position_to_flat_continuous(geometry.position, fill_cameraFlatX);
       fill_patternPlacement.xy = fillPatternOffsets;
       fill_backgroundColor = fillPatternBackgroundColors;
       if (fill.procedural) {
