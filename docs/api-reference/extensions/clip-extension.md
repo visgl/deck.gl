@@ -71,9 +71,7 @@ Supported format: `[left, bottom, right, top]`
 
 ## Remarks
 
-- The extension works in `MapView`, `OrthographicView` and `GlobeView`.
-- In `GlobeView`, `clipBounds` are evaluated in Web Mercator space: the edges of the clipped region follow parallels and meridians as they are drawn on the globe.
-- Bounds that cross the antimeridian (180° longitude) are not wrapped; split them into two layers with separate bounds.
+- `clipBounds` may cross the antimeridian when clipping by geometry, e.g. `[170, -20, -170, 20]`. With `clipByInstance: true` such bounds must be split into two layers.
 - With `clipByInstance: true` the anchor position is compared with `clipBounds` in the layer's own coordinate system without any projection, so geospatial bounds require the layer's positions to be lng/lat.
 
 ## Source
