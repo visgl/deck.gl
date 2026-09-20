@@ -213,26 +213,51 @@ vec2 project_common_position_to_flat(vec4 commonPosition) {
   return project_common_position_to_flat(commonPosition.xyz);
 }
 
+// Moves a flat Mercator x to the world copy nearest to referenceX (within half a world width)
+float project_wrap_flat_x_(float x, float referenceX) {
+  float t = x - referenceX + TILE_SIZE * 0.5;
+  return referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+}
+
 //
-// project_common_position_to_flat with x made continuous around referenceX. A non-flat
-// projection has no seam, but its flat inverse does: at the antimeridian x jumps by TILE_SIZE, so
-// a triangle spanning 180° longitude interpolates across a whole world width. Moving every
-// vertex to within half a world of referenceX removes the seam from wherever the result is
-// compared or sampled; it reappears at the antipode of the reference, which a globe camera
-// cannot see. Pass the flat x of the thing being compared with: the centre of a bounds
-// rectangle, or the camera position for a periodic pattern. No-op for flat projection modes.
+// project_common_position_to_flat, with x moved to the world copy nearest to referenceX in every
+// geospatial projection mode (no-op for identity). Use when comparing against geospatial bounds
+// or sampling a texture of a geospatial region: pass the flat x of the bounds centre. Bounds that
+// cross the antimeridian are unwrapped past one world width by the CPU helper
+// (projectBoundsToFlatCommon), and this brings positions on either side of 180° into their frame.
+// Under GLOBE this also keeps geometry that spans the antimeridian continuous, see below.
 //
 vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX) {
   vec2 flatPosition = project_common_position_to_flat(commonPosition);
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-    float t = flatPosition.x - referenceX + TILE_SIZE * 0.5;
-    flatPosition.x = referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+  if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
   }
   return flatPosition;
 }
 
 vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX) {
   return project_common_position_to_flat_wrapped(commonPosition.xyz, referenceX);
+}
+
+//
+// project_common_position_to_flat, made continuous across the antimeridian for non-flat
+// projections. A sphere has no seam, but its flat inverse does: at 180° longitude x jumps by
+// TILE_SIZE, so a triangle spanning the antimeridian would interpolate across a whole world
+// width. Under GLOBE every vertex is moved to the world copy nearest to referenceX, which moves
+// the seam to the antipode of the reference; pass the camera's flat x so it is never visible.
+// Identity for flat projection modes, where positions are already continuous. Use for periodic
+// patterns, which must not jump at world boundaries on a flat map.
+//
+vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX) {
+  vec2 flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float referenceX) {
+  return project_common_position_to_flat_continuous(commonPosition.xyz, referenceX);
 }
 
 //

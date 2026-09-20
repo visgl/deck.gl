@@ -224,15 +224,31 @@ fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
   return commonPosition.xy;
 }
 
-// project_common_position_to_flat with x made continuous around referenceX: the flat inverse of
-// a non-flat projection has a seam at the antimeridian, where x jumps by TILE_SIZE. Every vertex
-// is moved to within half a world of referenceX (the centre of a bounds rectangle, or the camera
-// for a periodic pattern). No-op for flat projection modes. See project.glsl.ts for details.
+// Moves a flat Mercator x to the world copy nearest to referenceX (within half a world width)
+fn project_wrap_flat_x_(x: f32, referenceX: f32) -> f32 {
+  let t = x - referenceX + TILE_SIZE * 0.5;
+  return referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+}
+
+// project_common_position_to_flat with x moved to the world copy nearest to referenceX in every
+// geospatial projection mode (no-op for identity). For comparing against geospatial bounds or
+// sampling a texture of a geospatial region; pass the flat x of the bounds centre.
+// See project.glsl.ts for details.
 fn project_common_position_to_flat_wrapped(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
   var flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+// project_common_position_to_flat made continuous across the antimeridian for non-flat
+// projections (the seam moves to the antipode of referenceX; pass the camera's flat x). Identity
+// for flat projection modes. For periodic patterns. See project.glsl.ts for details.
+fn project_common_position_to_flat_continuous(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
+  var flatPosition = project_common_position_to_flat(commonPosition);
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-    let t = flatPosition.x - referenceX + TILE_SIZE * 0.5;
-    flatPosition.x = referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
   }
   return flatPosition;
 }
