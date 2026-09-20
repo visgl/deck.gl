@@ -156,10 +156,11 @@ export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {
     startWatchingMove(map, state);
   } else {
     deckProps.onLoad = () => {
-      onLoad?.();
       if (MAPLIBRE_DECK_STATES.get(map) === state) {
         startWatchingMove(map, state);
+        onMapLibreMove(deck, map);
       }
+      onLoad?.();
     };
   }
 
