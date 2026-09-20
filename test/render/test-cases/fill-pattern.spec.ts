@@ -7,7 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {Unit} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {
@@ -297,11 +297,53 @@ const customPatternTestCase: TestCase = {
   skip: ['webgpu']
 };
 
+/** A rectangle from 150°E across the antimeridian to 150°W (written as 210°), 30°S to 30°N */
+const ANTIMERIDIAN_POLYGON: PatternDatum[] = [
+  {
+    polygon: [
+      [150, -30],
+      [150, 30],
+      [210, 30],
+      [210, -30]
+    ],
+    pattern: 'pattern'
+  }
+];
+
+const ANTIMERIDIAN_VIEW_STATE = {longitude: 180, latitude: 0, zoom: 1.6};
+
+/**
+ * MapView (left half) and GlobeView (right half), both centred on the antimeridian, showing the
+ * same hatched rectangle. Expected: evenly spaced diagonal hatching across the whole rectangle in
+ * both halves. On the globe the pattern is laid out in Mercator, whose seam at 180° would otherwise
+ * squeeze the whole world's worth of hatching into the middle of the rectangle.
+ */
+const antimeridianTestCase: TestCase = {
+  name: 'fill-pattern-antimeridian-map-vs-globe',
+  views: [
+    new MapView({id: 'map', width: '50%'}),
+    new GlobeView({id: 'globe', x: '50%', width: '50%'})
+  ],
+  viewState: {map: ANTIMERIDIAN_VIEW_STATE, globe: ANTIMERIDIAN_VIEW_STATE},
+  layers: [
+    createPatternLayer({
+      id: 'antimeridian',
+      data: ANTIMERIDIAN_POLYGON,
+      mapping: {pattern: {type: 'hatch', angle: 45, strokeWidth: 3, gap: 10}},
+      sizeUnits: 'pixels'
+    })
+  ],
+  imageDiffOptions: {threshold: 0.985},
+  goldenImage: './test/render/golden-images/fill-pattern-antimeridian-map-vs-globe.png',
+  skip: ['webgpu']
+};
+
 const testCases = [
   ...rasterPatternTestCases,
   ...explicitUnitTestCases,
   ...orientationTestCases,
-  customPatternTestCase
+  customPatternTestCase,
+  antimeridianTestCase
 ];
 
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
