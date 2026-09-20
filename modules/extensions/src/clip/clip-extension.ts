@@ -77,8 +77,10 @@ in float clip_isVisible;
  */
 const shaderModuleFs: ShaderModule<ClipModuleProps> = {
   name: 'clip',
-  // The vertex injection below calls project_common_position_to_flat()
+  // The vertex injection below calls project_common_position_to_flat_wrapped()
   dependencies: [project],
+  // The vertex stage reads clip.bounds as the wrap reference
+  vs: shaderFunction,
   fs: shaderFunction,
   uniformTypes: {
     bounds: 'vec4<f32>'
@@ -90,9 +92,13 @@ const injectionFs = {
 out vec2 clip_commonPosition;
 `,
   // Flat (Mercator / cartesian) common space, so that the position can be compared with the
-  // bounds produced by projectBoundsToFlatCommon() in every projection mode, including globe
+  // bounds produced by projectBoundsToFlatCommon() in every projection mode, including globe.
+  // Wrapping around the bounds centre keeps geometry continuous across the antimeridian and lets
+  // bounds that cross it (right edge unwrapped past one world width) clip correctly.
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-  clip_commonPosition = project_common_position_to_flat(geometry.position);
+  clip_commonPosition = project_common_position_to_flat_wrapped(
+    geometry.position, 0.5 * (clip.bounds[0] + clip.bounds[2])
+  );
 `,
   'fs:#decl': /* glsl */ `
 in vec2 clip_commonPosition;
