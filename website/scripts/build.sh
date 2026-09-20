@@ -37,6 +37,9 @@ case $MODE in
 esac
 
 # repair llms.txt / raw Markdown links for base-path deploys (WEBSITE_BASE_URL) and validate them
+if [ "$MODE" = "staging" ]; then
+  export WEBSITE_BASE_URL=/deck.gl/
+fi
 node ./scripts/normalize-llm-output.mjs
 node ./scripts/check-llm-output.mjs
 
