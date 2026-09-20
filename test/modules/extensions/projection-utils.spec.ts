@@ -184,6 +184,12 @@ test('projection-utils#projectBoundsToFlatCommon unwraps bounds across the antim
           const plain = projectBoundsToFlatCommon(layer, [-170, -20, 170, 20]);
           expect(plain[0]).toBeCloseTo(xMinus170, 6);
           expect(plain[2]).toBeCloseTo(x170, 6);
+          // edges less than 180° apart in the wrong order are re-ordered, not unwrapped
+          const [x10] = lngLatToMercatorCommon([10, 0]);
+          const [x20] = lngLatToMercatorCommon([20, 0]);
+          const reversed = projectBoundsToFlatCommon(layer, [20, 20, 10, -20]);
+          expect(reversed[0]).toBeCloseTo(x10, 6);
+          expect(reversed[2]).toBeCloseTo(x20, 6);
         }
       },
       {

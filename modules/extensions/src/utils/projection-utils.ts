@@ -127,10 +127,12 @@ function projectGlobeMeterOffsetsToFlatCommon(
 
 /**
  * Projects `[minX, minY, maxX, maxY]` in the layer's (or `opts.fromCoordinateSystem`) coordinates
- * into normalized flat common bounds. Lng/lat bounds whose left edge is east of their right edge
- * cross the antimeridian: the right edge is unwrapped by one world width, so `maxX` may exceed
- * `TILE_SIZE`. Compare positions against such bounds with
+ * into normalized flat common bounds. Lng/lat bounds whose left edge is more than 180° east of
+ * their right edge cross the antimeridian (the shorter arc between the edges is the one meant):
+ * the right edge is unwrapped by one world width, so `maxX` may exceed `TILE_SIZE`. Compare
+ * positions against such bounds with
  * `project_common_position_to_flat_wrapped(position, 0.5 * (bounds.x + bounds.z))`.
+ * Edges less than 180° apart are simply re-ordered, so `[right, top, left, bottom]` keeps working.
  */
 export function projectBoundsToFlatCommon(
   layer: Layer,
@@ -140,7 +142,7 @@ export function projectBoundsToFlatCommon(
   const a = projectToFlatCommon(layer, [bounds[0], bounds[1], 0], opts);
   const b = projectToFlatCommon(layer, [bounds[2], bounds[3], 0], opts);
   if (
-    bounds[0] > bounds[2] &&
+    bounds[0] - bounds[2] > 180 &&
     getLayerViewport(layer).isGeospatial &&
     getSourceCoordinateSystem(layer, opts) === 'lnglat'
   ) {
