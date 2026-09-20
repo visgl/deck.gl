@@ -11910,7 +11910,7 @@
                 "const": "_SplitterWidget"
               },
               "viewLayout": {
-                "$ref": "#/definitions/ViewLayout",
+                "$ref": "#/definitions/SplitterWidgetViewLayout",
                 "description": "Stacking views descriptor"
               },
               "id": {
@@ -12329,6 +12329,43 @@
                 "type": "boolean",
                 "description": "If `true`, mouse wheel events over the canvas will be intercepted by this scrollbar. Useful when simulating the native scrollbar's behavior.",
                 "default": false
+              },
+              "contentBoundsPadding": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "left": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      },
+                      "right": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      },
+                      "top": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      },
+                      "bottom": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Padding inside the viewport used to display `contentBounds`. If not supplied, falls back to the target view controller's `maxBoundsPadding`."
               },
               "style": {
                 "type": "object",
@@ -14295,7 +14332,7 @@
         "fill"
       ]
     },
-    "ViewLayout": {
+    "SplitterWidgetViewLayout": {
       "type": "object",
       "properties": {
         "orientation": {
@@ -14311,11 +14348,11 @@
           "minItems": 2,
           "items": [
             {
-              "$ref": "#/definitions/ViewLayout",
+              "$ref": "#/definitions/SplitterWidgetViewLayout",
               "title": "view1"
             },
             {
-              "$ref": "#/definitions/ViewLayout",
+              "$ref": "#/definitions/SplitterWidgetViewLayout",
               "title": "view2"
             }
           ],
