@@ -115,6 +115,11 @@ test.each([
     });
     const widget = new TestWidget({style: {width: '20px', height: '20px', pointerEvents: 'auto'}});
     widget.placement = 'top-right';
+    const fillWidget = new TestWidget({
+      id: 'fill-widget',
+      style: {width: '100%', height: '100%'}
+    });
+    fillWidget.placement = 'fill';
     document.body.append(container);
     const root = createRoot(container);
 
@@ -137,7 +142,7 @@ test.each([
                 margin: '20px',
                 ...(percentageSize ? {width: `${width}px`, height: `${height}px`} : {})
               },
-              widgets: [widget],
+              widgets: [widget, fillWidget],
               getTooltip: () => 'Hovered point',
               onAfterRender
             })
@@ -164,6 +169,16 @@ test.each([
         expect(canvasBounds.top).toBeCloseTo(wrapperBounds.top);
         expect(canvasBounds.width).toBe(width);
         expect(canvasBounds.height).toBe(height);
+        // Fill widgets must receive the entire canvas, including after resizing.
+        const fillContainer = fillWidget.rootElement!.parentElement!;
+        expect(fillContainer.classList.contains('fill')).toBe(true);
+        for (const element of [fillContainer, fillWidget.rootElement!]) {
+          const fillBounds = element.getBoundingClientRect();
+          expect(fillBounds.left).toBeCloseTo(canvasBounds.left);
+          expect(fillBounds.top).toBeCloseTo(canvasBounds.top);
+          expect(fillBounds.right).toBeCloseTo(canvasBounds.right);
+          expect(fillBounds.bottom).toBeCloseTo(canvasBounds.bottom);
+        }
         const controlBounds = widget.rootElement!.getBoundingClientRect();
         expect(controlBounds.right).toBeCloseTo(canvasBounds.right);
         expect(controlBounds.top).toBeCloseTo(canvasBounds.top);
