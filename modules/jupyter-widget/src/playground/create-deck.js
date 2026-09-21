@@ -85,11 +85,12 @@ export function addCustomLibraries(customLibraries, onComplete) {
     return;
   }
 
-  const loaded = {};
-  const failed = {};
+  // Every entry settles exactly once (loaded or failed), including entries that share a name
+  let remaining = customLibraries.length;
 
   function onEachFinish() {
-    if (Object.keys(loaded).every(name => loaded[name] || failed[name])) {
+    remaining -= 1;
+    if (remaining === 0) {
       // when all libraries loaded (or failed to load)
       if (typeof onComplete === 'function') onComplete();
     }
@@ -97,7 +98,6 @@ export function addCustomLibraries(customLibraries, onComplete) {
 
   function onModuleLoaded(libraryName, module) {
     addModuleToConverter(module, jsonConverter);
-    loaded[libraryName] = module;
     onEachFinish();
   }
 
@@ -105,15 +105,10 @@ export function addCustomLibraries(customLibraries, onComplete) {
     // eslint-disable-next-line
     console.error(`Could not load custom library ${libraryName}`, error);
     // Settle the registration so initialization completes; the library's classes stay unregistered
-    failed[libraryName] = true;
     onEachFinish();
   }
 
   customLibraries.forEach(({libraryName, resourceUri, module}) => {
-    // set loaded to be false, even if addCustomLibraries is called multiple times
-    // with the same parameters
-    loaded[libraryName] = false;
-
     if (module) {
       // Each registration receives the namespace of the module it asked for (loads are cached per
       // name and URL), so two registrations sharing a name but not a URL both get registered.

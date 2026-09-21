@@ -351,6 +351,47 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('duplicate names in one registration wait for every entry', async () => {
+    const LIBRARY_NAME = 'DuplicateEsmLibrary';
+    const fast = URL.createObjectURL(
+      new Blob(['export class DuplicateFastLayer { constructor(props) { this.props = props; } }'], {
+        type: 'text/javascript'
+      })
+    );
+    const slow = URL.createObjectURL(
+      new Blob(
+        [
+          'await new Promise(resolve => setTimeout(resolve, 100));',
+          'export class DuplicateSlowLayer { constructor(props) { this.props = props; } }'
+        ],
+        {type: 'text/javascript'}
+      )
+    );
+    try {
+      await new Promise<void>(resolve =>
+        addCustomLibraries(
+          [
+            {libraryName: LIBRARY_NAME, resourceUri: fast, module: true},
+            {libraryName: LIBRARY_NAME, resourceUri: slow, module: true}
+          ],
+          resolve
+        )
+      );
+      const props = jsonConverter.convert({
+        layers: [
+          {'@@type': 'DuplicateFastLayer', id: 'f'},
+          {'@@type': 'DuplicateSlowLayer', id: 's'}
+        ]
+      });
+      expect(props.layers[1].constructor.name, 'slow entry registered before completion').toBe(
+        'DuplicateSlowLayer'
+      );
+    } finally {
+      URL.revokeObjectURL(fast);
+      URL.revokeObjectURL(slow);
+    }
+  });
+
   test('a failed custom library can be retried', async () => {
     const LIBRARY_NAME = 'RetryEsmLibrary';
     const missing = `blob:${window.location.origin}/00000000-0000-0000-0000-000000000001`;
