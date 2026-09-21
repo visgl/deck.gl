@@ -1,3 +1,7 @@
+---
+description: "Rendering, data handling and performance tips for building deck.gl applications."
+---
+
 # Tips and Tricks
 
 
