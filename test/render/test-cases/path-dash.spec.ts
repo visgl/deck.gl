@@ -6,7 +6,8 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, MapView, OrbitView, OrthographicView} from '@deck.gl/core';
+import {TripsLayer} from '@deck.gl/geo-layers';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
@@ -247,6 +248,17 @@ const CLIPPED_COMPOSITION_PATHS = {
     [-122.4058975956, 37.7774721913, -127.6160055],
     [-122.4040545969, 37.7774721913, -127.6160055],
     [-122.3985675923, 37.7674874036, 905.1677366]
+  ]
+};
+
+const TRIPS_CLIPPED_PATHS = {
+  reverseTime: [
+    [61.452160935, -600, -18.261531631],
+    [-250, 0, 75]
+  ],
+  forwardTime: [
+    [61.452160935, -600, 18.261531631],
+    [-250, 0, -75]
   ]
 };
 
@@ -1059,6 +1071,61 @@ const clippedCompositionTestCases: TestCase[] = [
         })
     ),
     goldenImage: './test/render/golden-images/path-dash-clipped-composition.png',
+    imageDiffOptions: {threshold: 0.998, includeAA: true}
+  },
+  {
+    // TripsLayer interpolates timestamps along each source segment. Enabling dashes must not
+    // stretch the active time range across only the portion left visible by camera clipping.
+    // The red and blue spans should meet at the same cutoff near the center of the gray rows.
+    name: 'path-dash-trips-clipped-interpolation',
+    views: new OrbitView({near: 1e-6, far: 1000}),
+    viewState: {target: [0, 0, 0], zoom: 0, rotationX: 0, rotationOrbit: 0},
+    layers: [
+      // The gray rows show the complete parts of both segments that survive camera clipping.
+      new PathLayer({
+        id: 'path-dash-trips-clipped-interpolation-underlay',
+        data: Object.values(TRIPS_CLIPPED_PATHS),
+        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        getPath: path => path,
+        billboard: true,
+        antialiasing: true,
+        capRounded: true,
+        widthUnits: 'pixels',
+        getWidth: 18,
+        getColor: [80, 80, 80]
+      }),
+      ...(
+        [
+          ['reverseTime', [100, 0], 80.27, [200, 0, 0]],
+          ['forwardTime', [0, 100], 19.73, [0, 90, 200]]
+        ] as const
+      ).map(
+        ([pathName, timestamps, currentTime, color]) =>
+          new TripsLayer({
+            id: `path-dash-trips-clipped-interpolation-${pathName}`,
+            data: [
+              {
+                path: TRIPS_CLIPPED_PATHS[pathName],
+                timestamps
+              }
+            ],
+            getPath: trip => trip.path,
+            getTimestamps: trip => trip.timestamps,
+            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            billboard: true,
+            antialiasing: true,
+            capRounded: true,
+            widthUnits: 'pixels',
+            getWidth: 10,
+            getColor: color,
+            getDashArray: [1, 0],
+            currentTime,
+            fadeTrail: false,
+            extensions: [new PathStyleExtension({dash: true})]
+          })
+      )
+    ],
+    goldenImage: './test/render/golden-images/path-dash-trips-clipped-interpolation.png',
     imageDiffOptions: {threshold: 0.998, includeAA: true}
   }
 ];
