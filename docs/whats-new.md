@@ -38,6 +38,10 @@ WebGPU support remains experimental and is not yet recommended for production. S
 
 deck.gl v9.4 brings numerous view and controller improvements on top of the substantial changes in v9.3.
 
+**Camera roll**
+
+[`MapView`](./api-reference/core/map-view.md) and [`GlobeView`](./api-reference/core/globe-view.md) now support the `roll` view state property for camera banking. [`LinearInterpolator`](./api-reference/core/linear-interpolator.md) and [`FlyToInterpolator`](./api-reference/core/fly-to-interpolator.md) support roll in camera transitions.
+
 **GlobeView compatibility and UX**
 
 [`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
@@ -77,6 +81,8 @@ New experimental multi-canvas foundations allow integrations to associate each `
 ### @deck.gl/maplibre
 
 New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked from the former `@deck.gl/mapbox` module. It provides support for overlaid and interleaved rendering with MapLibre GL JS v4, v5, and the recently released v6.
+
+Camera roll is synchronized with MapLibre GL JS v5+ in both overlaid and interleaved rendering modes.
 
 ### Layers and Extensions
 
