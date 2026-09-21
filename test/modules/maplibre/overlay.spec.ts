@@ -252,13 +252,18 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
             await waitForRender(() => Boolean(overlay._deck?.isInitialized));
             for (const [roll, width, height] of [
               [28, 640, 400],
+              [28, 740, 460],
               [-32, 740, 460],
+              [-32, 540, 340],
               [28, 540, 340],
               [0, 640, 400]
             ]) {
               container.style.width = `${width}px`;
               container.style.height = `${height}px`;
-              map.setRoll(roll);
+              // Avoid camera updates in the resize-only steps.
+              if (map.getRoll() !== roll) {
+                map.setRoll(roll);
+              }
               map.resize();
               renderedPixel = [];
               map.triggerRepaint();
