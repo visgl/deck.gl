@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {LayerManager, MapView, PolygonLayer, ScatterplotLayer} from 'deck.gl';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
@@ -48,6 +48,70 @@ test('PickLayersPass#drawPickingBuffer', () => {
     getLayerUniforms(subLayers[0], 'lighting').enabled,
     `PickLayersPass lighting disabled correctly`
   ).toBe(0);
+});
+
+test('PickLayersPass#forwards activateViewport to the picking buffer pass', () => {
+  const pickingFBO = device.createFramebuffer({colorAttachments: ['rgba8unorm']});
+  pickingFBO.resize({width: 100, height: 100});
+
+  const view = new MapView();
+  const screenViewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  // Stands in for an off-screen cover viewport (e.g. TerrainPickingPass) that must not become
+  // the layer's bound viewport
+  const coverViewport = view.makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 10, latitude: 10, zoom: 3}
+  });
+  const layer = new ScatterplotLayer({
+    data: [{position: [0, 0]}],
+    getPosition: datum => datum.position,
+    radiusMinPixels: 2,
+    pickable: true
+  });
+  const layerManager = new LayerManager(device, {viewport: screenViewport});
+  const pickLayersPass = new PickLayersPass(device);
+  layerManager.setLayers([layer]);
+  const activateViewport = vi.spyOn(layer, 'activateViewport');
+
+  // A regular screen pick binds the layer to the screen viewport
+  pickLayersPass.render({
+    viewports: [screenViewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    pickingFBO,
+    deviceRect: {x: 0, y: 0, width: 100, height: 100}
+  });
+  expect(layer.internalState!.viewport).toBe(screenViewport);
+  activateViewport.mockClear();
+
+  pickLayersPass.render({
+    viewports: [coverViewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    pickingFBO,
+    deviceRect: {x: 0, y: 0, width: 100, height: 100},
+    activateViewport: false
+  });
+  expect(activateViewport, 'activateViewport is skipped').not.toHaveBeenCalled();
+  expect(layer.internalState!.viewport, 'layer keeps the screen viewport').toBe(screenViewport);
+
+  pickLayersPass.render({
+    viewports: [coverViewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    pickingFBO,
+    deviceRect: {x: 0, y: 0, width: 100, height: 100}
+  });
+  expect(activateViewport, 'activateViewport is called by default').toHaveBeenCalledTimes(1);
+  expect(layer.internalState!.viewport).toBe(coverViewport);
+
+  activateViewport.mockRestore();
+  layerManager.finalize();
 });
 
 test('PickLayersPass#forwards the supplied canvas context', () => {
