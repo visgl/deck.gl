@@ -196,7 +196,11 @@ test.each([
         );
       }
     } finally {
+      const ownedDevice = ref.current?.deck?.device;
       act(() => root.unmount());
+      // Release test-owned contexts before Chromium evicts the shared test device.
+      ownedDevice?.loseDevice();
+      ownedDevice?.destroy();
       container.remove();
     }
   }
