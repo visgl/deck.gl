@@ -1,3 +1,7 @@
+---
+description: "Render deck.gl layers in ArcGIS Maps SDK for JavaScript maps and scenes with @deck.gl/arcgis."
+---
+
 # Using with ArcGIS
 
 | Pure JS | React | Overlaid | Interleaved |

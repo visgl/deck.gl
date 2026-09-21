@@ -1,3 +1,7 @@
+---
+description: "PointCloudLayer renders 3D point clouds with optional normals and per-point colors."
+---
+
 # PointCloudLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

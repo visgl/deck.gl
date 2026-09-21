@@ -1,3 +1,7 @@
+---
+description: "Render deck.gl layers over Mapbox GL JS with MapboxOverlay from @deck.gl/mapbox, overlaid or interleaved."
+---
+
 # Using with Mapbox
 
 | Pure JS | React | Overlaid | Interleaved |

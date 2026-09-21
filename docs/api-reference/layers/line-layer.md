@@ -1,3 +1,7 @@
+---
+description: "LineLayer renders straight lines between pairs of source and target coordinates."
+---
+
 # LineLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

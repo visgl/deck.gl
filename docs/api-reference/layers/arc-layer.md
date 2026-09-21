@@ -1,3 +1,7 @@
+---
+description: "ArcLayer renders arcs between pairs of source and target coordinates."
+---
+
 # ArcLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
