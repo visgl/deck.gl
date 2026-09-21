@@ -534,29 +534,120 @@ test('MVTLayer#dataInWGS84', async () => {
 });
 
 test('MVTLayer#tile clipping', async () => {
+  // Every sub layer must be clipped to its own tile, so the bounds have to differ tile by tile
+  const getClipProps = ({layer, subLayers}) => {
+    const tiles = layer.state.tileset.selectedTiles;
+    return {
+      tileCount: tiles.length,
+      bboxes: tiles.map(tile => tile.bbox),
+      clipped: subLayers.map(subLayer =>
+        subLayer.props.extensions.filter(extension => extension instanceof ClipExtension)
+      ),
+      clipBounds: subLayers.map(subLayer => subLayer.props.clipBounds),
+      coordinateSystems: subLayers.map(subLayer => subLayer.props.coordinateSystem)
+    };
+  };
+
+  const expectClippedPerTile = (clipProps, expectedBounds, coordinateSystem) => {
+    expect(clipProps.tileCount, 'more than one tile is loaded').toBeGreaterThan(1);
+    expect(clipProps.clipBounds.length, 'one sub layer per tile').toBe(clipProps.tileCount);
+    for (const extensions of clipProps.clipped) {
+      expect(extensions.length, 'exactly one ClipExtension per sub layer').toBe(1);
+    }
+    for (const subLayerCoordinateSystem of clipProps.coordinateSystems) {
+      expect(subLayerCoordinateSystem, 'sub layer coordinate system').toBe(coordinateSystem);
+    }
+    const toKey = bounds => bounds.join(',');
+    expect(new Set(clipProps.clipBounds.map(toKey)).size, 'each tile clips to its own bounds').toBe(
+      clipProps.tileCount
+    );
+    expect(clipProps.clipBounds.map(toKey).sort()).toEqual(expectedBounds.map(toKey).sort());
+  };
+
+  const props = {data: ['https://server.com/{z}/{x}/{y}.mvt'], binary: false};
+
+  // Mercator: sub layer data is tile local, so every tile clips to the same unit square
+  class MercatorMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+  MercatorMVTLayer.layerName = 'MercatorMVTLayer';
+
+  expect.hasAssertions();
+  await testLayerAsync({
+    Layer: MercatorMVTLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: 0,
+      latitude: 0,
+      zoom: 2
+    }),
+    testCases: [
+      {
+        props,
+        onAfterUpdate: params => {
+          if (!params.layer.isLoaded) return;
+          const clipProps = getClipProps(params);
+          expect(clipProps.tileCount, 'more than one tile is loaded').toBeGreaterThan(1);
+          for (const extensions of clipProps.clipped) {
+            expect(extensions.length, 'exactly one ClipExtension per sub layer').toBe(1);
+          }
+          for (const bounds of clipProps.clipBounds) {
+            expect(bounds, 'clips to the tile local unit square').toEqual([0, 0, 1, 1]);
+          }
+          for (const coordinateSystem of clipProps.coordinateSystems) {
+            expect(coordinateSystem, 'tile local coordinate system').toBe(
+              COORDINATE_SYSTEM.CARTESIAN
+            );
+          }
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  // Globe: sub layer data is WGS84, so every tile clips to its own lng/lat bounds
+  class GlobeMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONDataWGS84;
+    }
+  }
+  GlobeMVTLayer.layerName = 'GlobeMVTLayer';
+
+  await testLayerAsync({
+    Layer: GlobeMVTLayer,
+    viewport: new GlobeViewport({width: 400, height: 300, longitude: 0, latitude: 0, zoom: 2}),
+    testCases: [
+      {
+        props,
+        onAfterUpdate: params => {
+          if (!params.layer.isLoaded) return;
+          const clipProps = getClipProps(params);
+          const expectedBounds = clipProps.bboxes.map(({west, south, east, north}) => [
+            west,
+            south,
+            east,
+            north
+          ]);
+          expectClippedPerTile(clipProps, expectedBounds, COORDINATE_SYSTEM.DEFAULT);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('MVTLayer#tile clipping overrides user clip props', async () => {
   class TestMVTLayer extends MVTLayer {
     getTileData() {
       return geoJSONData;
     }
   }
-
   TestMVTLayer.layerName = 'TestMVTLayer';
 
-  const getClipProps = ({layer, subLayers}) => {
-    if (!layer.isLoaded) {
-      return null;
-    }
-    const [subLayer] = subLayers;
-    return {
-      bbox: layer.state.tileset.selectedTiles[0].bbox,
-      clipped: subLayer.props.extensions.some(extension => extension instanceof ClipExtension),
-      clipBounds: subLayer.props.clipBounds,
-      coordinateSystem: subLayer.props.coordinateSystem
-    };
-  };
-
-  const props = {data: ['https://server.com/{z}/{x}/{y}.mvt'], binary: false};
-
+  expect.hasAssertions();
   await testLayerAsync({
     Layer: TestMVTLayer,
     viewport: new WebMercatorViewport({
@@ -568,41 +659,24 @@ test('MVTLayer#tile clipping', async () => {
     }),
     testCases: [
       {
-        props,
-        onAfterUpdate: params => {
-          const clipProps = getClipProps(params);
-          if (!clipProps) return;
-          expect(clipProps.clipped, 'tile local sub layer is clipped').toBe(true);
-          expect(clipProps.coordinateSystem, 'tile local coordinate system').toBe(
-            COORDINATE_SYSTEM.CARTESIAN
-          );
-          expect(clipProps.clipBounds, 'clips to the tile local unit square').toEqual([0, 0, 1, 1]);
-        }
-      }
-    ],
-    onError: err => expect(err).toBeFalsy()
-  });
-
-  await testLayerAsync({
-    Layer: TestMVTLayer,
-    viewport: new GlobeViewport({width: 400, height: 300, longitude: 0, latitude: 0, zoom: 0}),
-    testCases: [
-      {
-        props,
-        onAfterUpdate: params => {
-          const clipProps = getClipProps(params);
-          if (!clipProps) return;
-          const {west, south, east, north} = clipProps.bbox;
-          expect(clipProps.clipped, 'WGS84 sub layer is clipped').toBe(true);
-          expect(clipProps.coordinateSystem, 'keeps the default coordinate system').not.toBe(
-            COORDINATE_SYSTEM.CARTESIAN
-          );
-          expect(clipProps.clipBounds, 'clips to the tile bounds in WGS84').toEqual([
-            west,
-            south,
-            east,
-            north
-          ]);
+        props: {
+          data: ['https://server.com/{z}/{x}/{y}.mvt'],
+          binary: false,
+          // A user supplied clip would break the per tile clip, so the layer takes it over
+          clipBounds: [-10, -10, 10, 10],
+          extensions: [new ClipExtension()]
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) return;
+          for (const subLayer of subLayers) {
+            const clipExtensions = subLayer.props.extensions.filter(
+              extension => extension instanceof ClipExtension
+            );
+            expect(clipExtensions.length, 'does not duplicate the ClipExtension').toBe(1);
+            expect(subLayer.props.clipBounds, 'overrides the user clipBounds').toEqual([
+              0, 0, 1, 1
+            ]);
+          }
         }
       }
     ],

@@ -244,6 +244,19 @@ Inherits all properties from [`TileLayer`](./tile-layer.md) and [base `Layer`](.
 
 If using the default `renderSubLayers`, supports all [`GeoJSONLayer`](../layers/geojson-layer.md) properties to style features.
 
+### Sub Layer Clipping
+
+A tiler writes a feature into the buffer of every tile that it touches, so without clipping the
+shared geometry is drawn once per tile. `MVTLayer` therefore adds a
+[`ClipExtension`](../extensions/clip-extension.md) to each sub layer and sets its `clipBounds` to
+that tile, either in tile local coordinates or, when the sub layer data is in WGS84 (under
+[`GlobeView`](../core/globe-view.md)), in longitude and latitude.
+
+`clipBounds` is reserved by this layer. A value passed through `extensions`/`clipBounds` or
+`_subLayerProps` is overridden with a warning, and a `ClipExtension` that is already present is
+reused rather than added twice. To clip to an area of your own, use
+`MVTLayer`'s own [`extent`](./tile-layer.md#extent) prop or clip the source data.
+
 
 #### `data` (string | string[] | object) {#data}
 

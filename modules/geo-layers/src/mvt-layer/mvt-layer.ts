@@ -15,6 +15,7 @@ import {
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
+import type {ClipExtensionProps} from '@deck.gl/extensions';
 
 import {Matrix4} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
@@ -128,7 +129,7 @@ export default class MVTLayer<
   initializeState(): void {
     super.initializeState();
     // GlobeView doesn't work well with binary data
-    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
+    const binary = this._isWGS84() ? false : this.props.binary;
     this.setState({
       binary,
       data: null,
@@ -233,7 +234,7 @@ export default class MVTLayer<
       mvt: {
         ...loadOptions?.mvt,
         shape: binary ? 'binary' : 'geojson',
-        coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
+        coordinates: this._isWGS84() ? 'wgs84' : 'local',
         tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
@@ -245,12 +246,13 @@ export default class MVTLayer<
   }
 
   renderSubLayers(
-    props: TileLayer['props'] & {
-      id: string;
-      data: ParsedMvtTile;
-      _offset: number;
-      tile: Tile2DHeader<ParsedMvtTile>;
-    }
+    props: TileLayer['props'] &
+      ClipExtensionProps & {
+        id: string;
+        data: ParsedMvtTile;
+        _offset: number;
+        tile: Tile2DHeader<ParsedMvtTile>;
+      }
   ): Layer | null | LayersList {
     const {x, y, z} = props.tile.index;
     const worldScale = Math.pow(2, z);
@@ -265,20 +267,41 @@ export default class MVTLayer<
 
     props.autoHighlight = false;
 
-    // A tiler writes a feature into every tile it touches, so each tile must paint only its own
-    // area or the feature is drawn once per tile.
+    // A tiler writes a feature into the buffer of every tile it touches, so each tile must paint
+    // only its own area or the shared geometry is drawn once per tile. This applies to the point
+    // sub layers too: a point inside a neighbor's buffer is emitted by both tiles. `ClipExtension`
+    // clips those by anchor rather than by geometry, so a label or icon still overhangs the edge.
+    let clipBounds: [number, number, number, number] | null = null;
+
     if (!this._isWGS84()) {
       props.modelMatrix = modelMatrix;
       props.coordinateOrigin = [xOffset, yOffset, 0];
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
-      // The default `clipBounds` of [0, 0, 1, 1] is the tile in tile-local coordinates
-      props.extensions = [...(props.extensions || []), new ClipExtension()];
+      clipBounds = [0, 0, 1, 1]; // the tile, in tile-local coordinates
     } else if (isGeoBoundingBox(props.tile.bbox)) {
       // Sub layer data is in WGS84 (see `getTileData`), so the tile-local coordinate system above
-      // does not apply, but the clip does - against the tile's own lng/lat bounds
+      // does not apply - clip against the tile's own lng/lat bounds instead
       const {west, south, east, north} = props.tile.bbox;
-      props.clipBounds = [west, south, east, north];
-      props.extensions = [...(props.extensions || []), new ClipExtension()];
+      clipBounds = [west, south, east, north];
+    }
+    // Otherwise `bbox` is not geographic, which only a custom `TilesetClass` overriding
+    // `getTileMetadata` can cause. Leave the sub layer unclipped rather than clip it against
+    // bounds in the wrong space.
+
+    if (clipBounds) {
+      if (props.clipBounds) {
+        log.warn(
+          `${this.id}: clipBounds is reserved by MVTLayer, which clips each sub layer to its tile`
+        )();
+      }
+      // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
+      // rather than both. That puts the closed edge on opposite sides of the two branches above:
+      // north for tile-local coordinates, where y grows southward, and south for lng/lat.
+      props.clipBounds = clipBounds;
+      // A second ClipExtension would inject the same shader declarations twice and fail to compile
+      if (!props.extensions?.some(extension => extension instanceof ClipExtension)) {
+        props.extensions = [...(props.extensions || []), new ClipExtension()];
+      }
     }
 
     const subLayers = super.renderSubLayers(props);
