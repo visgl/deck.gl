@@ -1,3 +1,7 @@
+---
+description: "ScatterplotLayer renders circles at given coordinates with data-driven radius, fill and stroke."
+---
+
 # ScatterplotLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
