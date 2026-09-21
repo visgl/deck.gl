@@ -1,3 +1,7 @@
+---
+description: "How to write your own deck.gl layer: subclassing, composite layers and the layer lifecycle."
+---
+
 # Writing Your Own Layer
 
 ## Preparations

@@ -1,3 +1,7 @@
+---
+description: "Breaking changes, removals and deprecations for each deck.gl release, with migration notes."
+---
+
 # Upgrade Guide
 
 ## Upgrading to v9.4
