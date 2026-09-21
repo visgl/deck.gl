@@ -140,3 +140,19 @@ def test_repr_html_google_colab():
     pydeck.io.html.iframe_with_srcdoc.assert_not_called()
     pydeck.io.html.render_for_colab.assert_called_once()
     assert output == ""
+
+
+def test_default_views_yield_to_a_view_layout_widget():
+    splitter = pydeck.Widget(
+        "SplitterWidget",
+        view_layout={
+            "orientation": "horizontal",
+            "views": [pydeck.View(type="MapView", id="a"), pydeck.View(type="MapView", id="b")],
+        },
+    )
+    assert "views" not in json.loads(pydeck.Deck(widgets=[splitter]).to_json())
+    # An explicit view list still wins, and other widgets leave the default alone
+    explicit = pydeck.Deck(widgets=[splitter], views=[pydeck.View(type="MapView", id="c")])
+    assert json.loads(explicit.to_json())["views"][0]["id"] == "c"
+    zoom = pydeck.Deck(widgets=[pydeck.Widget("ZoomWidget")])
+    assert json.loads(zoom.to_json())["views"][0]["@@type"] == "MapView"

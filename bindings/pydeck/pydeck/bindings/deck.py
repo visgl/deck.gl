@@ -26,12 +26,26 @@ def has_jupyter_extra():
 
 in_google_colab = "google.colab" in sys.modules
 
+# Distinguishes "views not passed" from an explicit ``views=None``
+_DEFAULT_VIEWS_SENTINEL = object()
+
+
+def _default_views(widgets):
+    """The default view list, or None when a widget manages the views itself
+
+    deck.gl's ``SplitterWidget`` only lays out its ``viewLayout`` when the ``Deck`` has no ``views``,
+    so a widget that carries a ``view_layout`` takes over the default.
+    """
+    if any(getattr(widget, "view_layout", None) is not None for widget in widgets or []):
+        return None
+    return [View(type="MapView", controller=True)]
+
 
 class Deck(JSONMixin):
     def __init__(
         self,
         layers=None,
-        views=[View(type="MapView", controller=True)],
+        views=_DEFAULT_VIEWS_SENTINEL,
         map_style=_DEFAULT_MAP_STYLE_SENTINEL,
         api_keys=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
@@ -57,8 +71,9 @@ class Deck(JSONMixin):
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
         views : list of pydeck.View, default ``[pydeck.View(type="MapView", controller=True)]``
             List of :class:`pydeck.bindings.view.View` objects to render. Views may be positioned with the
-            deck.gl ``x``, ``y``, ``width`` and ``height`` props to build multi-view layouts. Set to ``None``
-            when a widget such as ``SplitterWidget`` manages the views.
+            deck.gl ``x``, ``y``, ``width`` and ``height`` props to build multi-view layouts. When a widget
+            such as ``SplitterWidget`` carries a ``view_layout``, the default is ``None`` so the widget
+            manages the views.
         api_keys : dict, default None
             Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
             and the values are the API key. Defaults to None if not set. Environment variables are checked automatically:
@@ -111,8 +126,8 @@ class Deck(JSONMixin):
             self.layers.append(layers)
         else:
             self.layers = layers or []
-        self.views = views
         self.widgets = widgets
+        self.views = _default_views(widgets) if views is _DEFAULT_VIEWS_SENTINEL else views
         # Use passed view state
         self.initial_view_state = initial_view_state
 

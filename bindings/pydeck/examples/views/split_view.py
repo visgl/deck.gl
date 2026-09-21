@@ -5,7 +5,7 @@ SplitView
 Two independently controlled map views side by side, separated by a draggable divider,
 using the deck.gl SplitterWidget.
 
-The widget manages the ``views`` prop itself, so the ``Deck`` is created with ``views=None``.
+The widget manages the ``views`` prop itself, so the ``Deck`` is created without ``views``.
 Each pane gets its own camera by keying ``initial_view_state`` on the view ids. Either leaf of
 ``view_layout`` can itself be another ``view_layout`` dict to nest more splits.
 """
@@ -56,8 +56,6 @@ splitter = pdk.Widget(
 
 deck = pdk.Deck(
     layers=layers,
-    # The SplitterWidget owns the views; leaving this set would disable the widget.
-    views=None,
     initial_view_state={
         "london": {"latitude": 51.47, "longitude": -0.45, "zoom": 6},
         "new-york": {"latitude": 40.64, "longitude": -73.78, "zoom": 6},

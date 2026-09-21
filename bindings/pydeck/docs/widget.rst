@@ -14,8 +14,9 @@ Split views with SplitterWidget
 
 The deck.gl `SplitterWidget <https://deck.gl/docs/api-reference/widgets/splitter-widget>`__ stacks two
 views side by side (``"horizontal"``) or top and bottom (``"vertical"``) with a draggable divider. The widget
-manages the ``views`` prop itself, so create the ``Deck`` with ``views=None``. Pass ``pydeck.View`` objects as
-the leaves of ``view_layout``; either leaf can be another ``view_layout`` dict to nest more splits.
+manages the ``views`` prop itself: when a widget with a ``view_layout`` is present, ``Deck`` leaves ``views``
+unset. Pass ``pydeck.View`` objects as the leaves of ``view_layout``; either leaf can be another ``view_layout``
+dict to nest more splits.
 
 .. code-block:: python
 
@@ -35,7 +36,6 @@ the leaves of ``view_layout``; either leaf can be another ``view_layout`` dict t
 
    deck = pdk.Deck(
        layers=[...],
-       views=None,
        initial_view_state={
            "left": {"latitude": 51.47, "longitude": -0.45, "zoom": 6},
            "right": {"latitude": 40.64, "longitude": -73.78, "zoom": 6},
