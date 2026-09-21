@@ -265,10 +265,19 @@ export default class MVTLayer<
 
     props.autoHighlight = false;
 
-    if (!this.context.viewport.resolution) {
+    // A tiler writes a feature into every tile it touches, so each tile must paint only its own
+    // area or the feature is drawn once per tile.
+    if (!this._isWGS84()) {
       props.modelMatrix = modelMatrix;
       props.coordinateOrigin = [xOffset, yOffset, 0];
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
+      // The default `clipBounds` of [0, 0, 1, 1] is the tile in tile-local coordinates
+      props.extensions = [...(props.extensions || []), new ClipExtension()];
+    } else if (isGeoBoundingBox(props.tile.bbox)) {
+      // Sub layer data is in WGS84 (see `getTileData`), so the tile-local coordinate system above
+      // does not apply, but the clip does - against the tile's own lng/lat bounds
+      const {west, south, east, north} = props.tile.bbox;
+      props.clipBounds = [west, south, east, north];
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
 

@@ -13,7 +13,11 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -525,6 +529,83 @@ test('MVTLayer#dataInWGS84', async () => {
     Layer: TestMVTLayer,
     viewport,
     testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('MVTLayer#tile clipping', async () => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+
+  TestMVTLayer.layerName = 'TestMVTLayer';
+
+  const getClipProps = ({layer, subLayers}) => {
+    if (!layer.isLoaded) {
+      return null;
+    }
+    const [subLayer] = subLayers;
+    return {
+      bbox: layer.state.tileset.selectedTiles[0].bbox,
+      clipped: subLayer.props.extensions.some(extension => extension instanceof ClipExtension),
+      clipBounds: subLayer.props.clipBounds,
+      coordinateSystem: subLayer.props.coordinateSystem
+    };
+  };
+
+  const props = {data: ['https://server.com/{z}/{x}/{y}.mvt'], binary: false};
+
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    }),
+    testCases: [
+      {
+        props,
+        onAfterUpdate: params => {
+          const clipProps = getClipProps(params);
+          if (!clipProps) return;
+          expect(clipProps.clipped, 'tile local sub layer is clipped').toBe(true);
+          expect(clipProps.coordinateSystem, 'tile local coordinate system').toBe(
+            COORDINATE_SYSTEM.CARTESIAN
+          );
+          expect(clipProps.clipBounds, 'clips to the tile local unit square').toEqual([0, 0, 1, 1]);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new GlobeViewport({width: 400, height: 300, longitude: 0, latitude: 0, zoom: 0}),
+    testCases: [
+      {
+        props,
+        onAfterUpdate: params => {
+          const clipProps = getClipProps(params);
+          if (!clipProps) return;
+          const {west, south, east, north} = clipProps.bbox;
+          expect(clipProps.clipped, 'WGS84 sub layer is clipped').toBe(true);
+          expect(clipProps.coordinateSystem, 'keeps the default coordinate system').not.toBe(
+            COORDINATE_SYSTEM.CARTESIAN
+          );
+          expect(clipProps.clipBounds, 'clips to the tile bounds in WGS84').toEqual([
+            west,
+            south,
+            east,
+            north
+          ]);
+        }
+      }
+    ],
     onError: err => expect(err).toBeFalsy()
   });
 });
