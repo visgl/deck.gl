@@ -1711,9 +1711,9 @@
   integrity sha512-NBkMim3u0xt4UDe4e69L6E/pq5XNxfX60GrggJDzfilVRfIbx5XwKhBXTyNjjtNEk4oc6uYLHWd/05jGRHcfLg==
 
 "@luma.gl/core@^9.4.0":
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.4.0.tgz#50fab3f47e162dc25ffbbc46f17c9696be7ad4cb"
-  integrity sha512-2SIB77DoZ6LMZW/aPS/M3hKHP8UR0WR6f5R2+Sir5FdNVdOvFiOHAxPCafjVTxTqFWWHnh1NSCo5k/qq6sdFQw==
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-9.4.2.tgz#c7c371ae1919a9f688503b94d715d56103c05fe6"
+  integrity sha512-VFol6FUSHQeYR40NrkCM/mkP5DX7aI8pcDewxI8DBjtrcP4+ZJiJwnxWZnsMBzM4RuuvmDoHkPWCxj6Ob9yo+w==
   dependencies:
     "@math.gl/types" "^4.1.0"
     "@probe.gl/env" "^4.1.1"

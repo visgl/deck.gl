@@ -193,7 +193,7 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
   for (const projection of ['mercator', 'globe'] as const) {
     for (const interleaved of [false, true]) {
       webglTest(
-        `MapLibre ${version} ${projection} roll aligns rendering and picking (interleaved=${interleaved})`,
+        `MapLibre ${version} ${projection} roll and resize keep rendering and picking aligned (interleaved=${interleaved})`,
         async () => {
           const container = document.createElement('div');
           Object.assign(container.style, {width: '640px', height: '400px'});
@@ -250,23 +250,30 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
             map.addControl(overlay);
             if (!interleaved) overlayCanvas = overlay.getCanvas();
             await waitForRender(() => Boolean(overlay._deck?.isInitialized));
-            for (const roll of [28, -32, 0]) {
-              renderedPixel = [];
-              // Interleaved resize currently leaves luma's default framebuffer
-              // dimensions stale even at zero roll. Exercise resize overlaid.
-              if (roll === -32 && !interleaved) {
-                container.style.width = '740px';
-                container.style.height = '420px';
-                map.resize();
-              }
+            for (const [roll, width, height] of [
+              [28, 640, 400],
+              [-32, 740, 460],
+              [28, 540, 340],
+              [0, 640, 400]
+            ]) {
+              container.style.width = `${width}px`;
+              container.style.height = `${height}px`;
               map.setRoll(roll);
+              map.resize();
+              renderedPixel = [];
               map.triggerRepaint();
               await waitForRender(
-                () => overlay._deck?.props.viewState.roll === roll && renderedPixel[2] === 255
+                () =>
+                  overlay._deck?.props.viewState.roll === roll &&
+                  overlay._deck.width === width &&
+                  overlay._deck.height === height &&
+                  renderedPixel[2] === 255
               );
               expect(renderedPixel).toEqual([0, 0, 255, 255]);
               const projected = map.project(position);
               const viewport = overlay._deck!.getViewports()[0];
+              expect(viewport.width).toBe(width);
+              expect(viewport.height).toBe(height);
               const actual = viewport.project(position);
               expect(actual[0]).toBeCloseTo(projected.x, 2);
               expect(actual[1]).toBeCloseTo(projected.y, 2);
