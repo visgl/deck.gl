@@ -49,7 +49,6 @@ const LOCATIONS = {
 
 const SURFACE_IMAGES = {
   Satellite: 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp',
-  Sectional: 'https://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
   Street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   None: null
 };
@@ -91,7 +90,7 @@ class TerrainDemo extends Component {
       value: 12,
       step: 1,
       min: 0,
-      max: 16,
+      max: 12,
       accentColor: '#0275ff'
     },
     visibleMinZoom: {
@@ -135,9 +134,6 @@ class TerrainDemo extends Component {
           </div>
           <div>
             <a href="https://versatiles.org/sources/">VersaTiles satellite imagery</a>
-          </div>
-          <div>
-            <a href="http://www.chartbundle.com/charts/">Chartbundle US Sectional</a>
           </div>
           <div>
             <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>

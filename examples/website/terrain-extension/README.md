@@ -4,8 +4,7 @@ The example is showing a GeoJSONLayer with Tour de France cycling routes over a 
 
 ### Usage
 
-Copy the content of this folder to your project. The example uses public terrain and map tiles and
-does not require an access token.
+Copy the content of this folder to your project. The example uses public terrain and map tiles.
 
 ```bash
 # install dependencies

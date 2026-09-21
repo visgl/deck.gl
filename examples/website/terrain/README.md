@@ -3,8 +3,7 @@ on [deck.gl](http://deck.gl) website.
 
 ### Usage
 
-Copy the content of this folder to your project. The example uses public terrain and map tiles and
-does not require an access token.
+Copy the content of this folder to your project. The example uses public terrain and map tiles.
 
 ```bash
 # install dependencies
