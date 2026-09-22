@@ -193,6 +193,21 @@ test('ViewManager#controller without a matching view state', () => {
   expect(viewManager.controllers.a, 'controller a is constructed').toBeTruthy();
   expect(viewManager.controllers.b, 'controller b is constructed').toBeTruthy();
 
+  // A view that fully defines its own view state does not need an entry in the keyed map
+  viewManager.setProps({
+    views: [
+      new MapView({
+        id: 'own-state',
+        controller: true,
+        viewState: {longitude: 0, latitude: 0, zoom: 3}
+      })
+    ]
+  });
+  expect(
+    viewManager.controllers['own-state'],
+    'view-owned state keeps its controller'
+  ).toBeTruthy();
+
   viewManager.finalize();
 });
 

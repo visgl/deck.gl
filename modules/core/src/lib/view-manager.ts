@@ -357,6 +357,11 @@ export default class ViewManager<ViewsT extends View[]> {
    * view states keyed by view id (every value a plain object, no view state fields of its own).
    */
   private _hasViewState(view: View): boolean {
+    const ownViewState = view.props.viewState;
+    if (ownViewState && typeof ownViewState === 'object' && !ownViewState.id) {
+      // The view completely defines its own view state, see View.filterViewState
+      return true;
+    }
     if (this.viewState[view.getViewStateId()]) {
       return true;
     }
