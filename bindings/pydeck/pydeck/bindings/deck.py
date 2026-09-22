@@ -26,12 +26,16 @@ def has_jupyter_extra():
 
 in_google_colab = "google.colab" in sys.modules
 
+# Distinguishes "controller not passed" from an explicit ``controller=None``
+_DEFAULT_CONTROLLER_SENTINEL = object()
+
 
 class Deck(JSONMixin):
     def __init__(
         self,
         layers=None,
-        views=[View(type="MapView", controller=True)],
+        views=None,
+        controller=_DEFAULT_CONTROLLER_SENTINEL,
         map_style=_DEFAULT_MAP_STYLE_SENTINEL,
         api_keys=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
@@ -55,8 +59,12 @@ class Deck(JSONMixin):
 
         layers : pydeck.Layer or list of pydeck.Layer, default None
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
-        views : list of pydeck.View, default ``[pydeck.View(type="MapView", controller=True)]``
-            List of :class:`pydeck.bindings.view.View` objects to render.
+        views : list of pydeck.View, default None
+            List of :class:`pydeck.bindings.view.View` objects to render. Defaults to a single
+            full-screen ``MapView``.
+        controller : bool or dict, default True
+            Enables map interaction. ``False`` renders a static map; a dict passes deck.gl controller
+            options such as ``{"scrollZoom": False}``. Views in ``views`` carry their own ``controller``.
         api_keys : dict, default None
             Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
             and the values are the API key. Defaults to None if not set. Environment variables are checked automatically:
@@ -110,6 +118,10 @@ class Deck(JSONMixin):
         else:
             self.layers = layers or []
         self.views = views
+        if controller is _DEFAULT_CONTROLLER_SENTINEL:
+            # Explicit views carry their own controller settings
+            controller = True if views is None else None
+        self.controller = controller
         self.widgets = widgets
         # Use passed view state
         self.initial_view_state = initial_view_state
