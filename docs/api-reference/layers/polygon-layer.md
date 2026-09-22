@@ -1,3 +1,7 @@
+---
+description: "PolygonLayer renders filled, stroked and optionally extruded polygons."
+---
+
 # PolygonLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
