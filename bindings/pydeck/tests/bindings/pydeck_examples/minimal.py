@@ -26,5 +26,4 @@ def create_minimal_test_object():
         pitch=40.5,
         bearing=-27.396674584323023,
     )
-    view = View(type="MapView", controller=True)
-    return Deck(layers=[layer], effects=[lighting], initial_view_state=view_state, views=[view])
+    return Deck(layers=[layer], effects=[lighting], initial_view_state=view_state)

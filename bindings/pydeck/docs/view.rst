@@ -9,7 +9,8 @@ View
 Multi-view layouts
 ^^^^^^^^^^^^^^^^^^
 
-``Deck`` accepts a list of views. Each view is positioned with the deck.gl ``x``, ``y``, ``width``
+By default ``Deck`` sends no ``views`` and deck.gl renders a single full-screen ``MapView`` driven by the
+``Deck(controller=...)`` argument. ``Deck`` also accepts a list of views. Each view is positioned with the deck.gl ``x``, ``y``, ``width``
 and ``height`` props, which take pixels (``204``), percentages (``"50%"``), or CSS ``calc()``
 expressions (``"calc(100% - 220px)"``). The browser resolves these bounds on every resize, so
 responsive layouts need no JavaScript.

@@ -7,12 +7,26 @@
   "layers": [
     {
       "@@type": "ScatterplotLayer",
-      "data": [[0, 0], [0.01, 0.01]],
+      "data": [
+        [
+          0,
+          0
+        ],
+        [
+          0.01,
+          0.01
+        ]
+      ],
       "getPosition": "@@=-",
       "getRadius": 500,
       "id": "scatterplot",
-      "getFillColor": [255, 0, 0]
+      "getFillColor": [
+        255,
+        0,
+        0
+      ]
     }
   ],
-  "mapProvider": "carto"
+  "mapProvider": "carto",
+  "controller": true
 }

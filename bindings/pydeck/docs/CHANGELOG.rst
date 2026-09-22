@@ -15,6 +15,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop (#10455)
 - Add MapLibre basemap provider with globe projection via ``map_provider="maplibre"`` (#10566)
 - Add multi-view layout and ``SplitterWidget`` documentation and gallery examples
+- ``Deck`` no longer serializes a default ``MapView``; the new ``controller`` argument (default ``True``) is sent instead, so deck.gl supplies the view and widgets such as ``SplitterWidget`` can manage views
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^

@@ -142,7 +142,13 @@ def test_repr_html_google_colab():
     assert output == ""
 
 
-def test_default_views_yield_to_a_view_layout_widget():
+def test_default_deck_has_no_views_and_a_controller():
+    """deck.gl falls back to a full-screen MapView and applies the top-level controller to it"""
+    default = json.loads(pydeck.Deck().to_json())
+    assert "views" not in default
+    assert default["controller"] is True
+    assert "controller" not in json.loads(pydeck.Deck(controller=None).to_json())
+
     splitter = pydeck.Widget(
         "SplitterWidget",
         view_layout={
@@ -151,8 +157,6 @@ def test_default_views_yield_to_a_view_layout_widget():
         },
     )
     assert "views" not in json.loads(pydeck.Deck(widgets=[splitter]).to_json())
-    # An explicit view list still wins, and other widgets leave the default alone
-    explicit = pydeck.Deck(widgets=[splitter], views=[pydeck.View(type="MapView", id="c")])
+
+    explicit = pydeck.Deck(views=[pydeck.View(type="MapView", id="c")])
     assert json.loads(explicit.to_json())["views"][0]["id"] == "c"
-    zoom = pydeck.Deck(widgets=[pydeck.Widget("ZoomWidget")])
-    assert json.loads(zoom.to_json())["views"][0]["@@type"] == "MapView"
