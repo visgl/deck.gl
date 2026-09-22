@@ -158,5 +158,8 @@ def test_default_deck_has_no_views_and_a_controller():
     )
     assert "views" not in json.loads(pydeck.Deck(widgets=[splitter]).to_json())
 
-    explicit = pydeck.Deck(views=[pydeck.View(type="MapView", id="c")])
-    assert json.loads(explicit.to_json())["views"][0]["id"] == "c"
+    explicit = json.loads(pydeck.Deck(views=[pydeck.View(type="MapView", id="c", controller=False)]).to_json())
+    assert explicit["views"][0]["id"] == "c"
+    assert "controller" not in explicit, "explicit views keep their own controller settings"
+    forced = pydeck.Deck(views=[pydeck.View(type="MapView", id="c")], controller={"scrollZoom": False})
+    assert json.loads(forced.to_json())["controller"] == {"scrollZoom": False}

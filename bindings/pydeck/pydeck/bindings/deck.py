@@ -26,13 +26,16 @@ def has_jupyter_extra():
 
 in_google_colab = "google.colab" in sys.modules
 
+# Distinguishes "controller not passed" from an explicit ``controller=None``
+_DEFAULT_CONTROLLER_SENTINEL = object()
+
 
 class Deck(JSONMixin):
     def __init__(
         self,
         layers=None,
         views=None,
-        controller=True,
+        controller=_DEFAULT_CONTROLLER_SENTINEL,
         map_style=_DEFAULT_MAP_STYLE_SENTINEL,
         api_keys=None,
         initial_view_state=ViewState(latitude=0, longitude=0, zoom=1),
@@ -61,10 +64,12 @@ class Deck(JSONMixin):
             full-screen ``MapView`` (or lets a widget such as ``SplitterWidget`` manage the views). Views may
             be positioned with the deck.gl ``x``, ``y``, ``width`` and ``height`` props to build multi-view
             layouts.
-        controller : bool or dict, default True
-            Forwarded to the deck.gl ``controller`` prop and applied to the first view: ``True`` for the
-            default map controls, ``False`` or ``None`` for a static map, or a dict of controller options
-            such as ``{"scrollZoom": False}``.
+        controller : bool or dict, default ``True`` when ``views`` is None
+            Forwarded to the deck.gl ``controller`` prop, which deck.gl applies to its default view or to
+            the first of ``views``: ``True`` for the default map controls, ``False`` or ``None`` for a static
+            map, or a dict of controller options such as ``{"scrollZoom": False}``. When ``views`` are
+            given, nothing is sent by default so each :class:`pydeck.bindings.view.View` keeps its own
+            ``controller`` setting.
         api_keys : dict, default None
             Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
             and the values are the API key. Defaults to None if not set. Environment variables are checked automatically:
@@ -118,6 +123,9 @@ class Deck(JSONMixin):
         else:
             self.layers = layers or []
         self.views = views
+        if controller is _DEFAULT_CONTROLLER_SENTINEL:
+            # Explicit views carry their own controller settings
+            controller = True if views is None else None
         self.controller = controller
         self.widgets = widgets
         # Use passed view state
