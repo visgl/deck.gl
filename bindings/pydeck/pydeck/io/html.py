@@ -1,4 +1,5 @@
 import html
+import json
 import os
 from os.path import realpath, join, dirname
 import sys
@@ -63,6 +64,16 @@ def widget_css_picker():
     return "<link rel='stylesheet' href='{}' />".format(CDN_CSS_URL)
 
 
+def _script_safe_json(value):
+    """Serialize a value as JSON that is safe to inline inside an HTML script element
+
+    Python's repr is not valid JavaScript (True vs true), and JSON leaves "<" as is, so a string
+    containing "</script>" could close the surrounding script element. Escaping "<" keeps the
+    output valid JSON while making that impossible.
+    """
+    return json.dumps(value).replace("<", "\\u003c")
+
+
 def render_json_to_html(
     json_input,
     mapbox_key=None,
@@ -85,7 +96,7 @@ def render_json_to_html(
         deckgl_widget_css=widget_css_picker(),
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
-        custom_libraries=custom_libraries,
+        custom_libraries=_script_safe_json(custom_libraries) if custom_libraries else None,
         configuration=configuration,
         show_error=show_error,
     )
