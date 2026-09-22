@@ -171,6 +171,31 @@ test('ViewManager#controllers', () => {
   ).toBeFalsy();
 });
 
+test('ViewManager#controller without a matching view state', () => {
+  // A deck created with `controller: true`, a per-view `initialViewState` and no `views` (a
+  // widget will provide them) starts out with a default view whose state cannot be resolved
+  const viewState = {
+    a: {longitude: -122, latitude: 38, zoom: 12},
+    b: {longitude: -73, latitude: 40, zoom: 6}
+  };
+  const viewManager = new ViewManager({
+    views: [new MapView({id: 'default-view', controller: true})],
+    viewState,
+    width: 100,
+    height: 100
+  });
+  expect(viewManager.controllers['default-view'], 'no controller without a view state').toBeFalsy();
+  expect(viewManager.getViewports(), 'viewport is still built').toHaveLength(1);
+
+  viewManager.setProps({
+    views: [new MapView({id: 'a', controller: true}), new MapView({id: 'b', controller: true})]
+  });
+  expect(viewManager.controllers.a, 'controller a is constructed').toBeTruthy();
+  expect(viewManager.controllers.b, 'controller b is constructed').toBeTruthy();
+
+  viewManager.finalize();
+});
+
 test('ViewManager#update view props', () => {
   let viewStateChangedEvent;
 
