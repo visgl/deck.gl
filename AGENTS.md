@@ -88,12 +88,14 @@ When asked to "get ready for merge", do a full merge-readiness pass:
 
 ## Logging and Assertions
 
-- Runtime strings ship in every application bundle. Add a `log.warn` only for a developer error
-  that users need to see, and keep the message short.
-- For conditions that cannot happen in correct code, use `assert(condition)` from
-  `utils/assert` with no message and put the explanation in a code comment above it, so that
-  stopping in the debugger shows the reason.
-- Use `log.log(priority, ...)` at priority 3 or higher for lifecycle and diffing detail; see
+- Runtime strings ship in every application bundle. Add a `log.warn('...')()` only for a
+  developer error that users need to see, and keep the message short. probe.gl log calls return
+  a function, so the trailing `()` is required.
+- For conditions that cannot happen in correct code, use `assert(condition)` with no message and
+  put the explanation in a code comment above it, so that stopping in the debugger shows the
+  reason. Inside `@deck.gl/core` import it from the relative `utils/assert` path; other modules
+  import `assert` from `@deck.gl/core`.
+- Use `log.log(priority, '...')()` at priority 3 or higher for lifecycle and diffing detail; see
   `docs/developer-guide/debugging.md`.
 
 ## Dependencies
