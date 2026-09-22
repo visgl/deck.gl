@@ -60,16 +60,11 @@ class Deck(JSONMixin):
         layers : pydeck.Layer or list of pydeck.Layer, default None
             List of :class:`pydeck.bindings.layer.Layer` layers to render.
         views : list of pydeck.View, default None
-            List of :class:`pydeck.bindings.view.View` objects to render. When omitted, deck.gl renders a
-            full-screen ``MapView`` (or lets a widget such as ``SplitterWidget`` manage the views). Views may
-            be positioned with the deck.gl ``x``, ``y``, ``width`` and ``height`` props to build multi-view
-            layouts.
-        controller : bool or dict, default ``True`` when ``views`` is None
-            Forwarded to the deck.gl ``controller`` prop, which deck.gl applies to its default view or to
-            the first of ``views``: ``True`` for the default map controls, ``False`` or ``None`` for a static
-            map, or a dict of controller options such as ``{"scrollZoom": False}``. When ``views`` are
-            given, nothing is sent by default so each :class:`pydeck.bindings.view.View` keeps its own
-            ``controller`` setting.
+            List of :class:`pydeck.bindings.view.View` objects to render. Defaults to a single
+            full-screen ``MapView``.
+        controller : bool or dict, default True
+            Enables map interaction. ``False`` renders a static map; a dict passes deck.gl controller
+            options such as ``{"scrollZoom": False}``. Views in ``views`` carry their own ``controller``.
         api_keys : dict, default None
             Dictionary of geospatial API service providers, where the keys are ``mapbox``, ``google_maps``, or ``carto``
             and the values are the API key. Defaults to None if not set. Environment variables are checked automatically:
