@@ -556,9 +556,9 @@ export default class ViewManager<ViewsT extends View[]> {
       );
       let hasController = Boolean(view.controller);
       if (hasController && !this._hasViewState(view)) {
+        // View has a controller but no view state, controller disabled
         // e.g. the default view created before an application provides views, while the
         // view state is keyed by the ids of the views it will provide
-        log.warn(`View ${view.id} has a controller but no view state, controller disabled`)();
         hasController = false;
       }
       if (hasController && !oldController) {

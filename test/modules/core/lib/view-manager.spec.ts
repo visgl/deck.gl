@@ -187,6 +187,16 @@ test('ViewManager#controller without a matching view state', () => {
   expect(viewManager.controllers['default-view'], 'no controller without a view state').toBeFalsy();
   expect(viewManager.getViewports(), 'viewport is still built').toHaveLength(1);
 
+  // The controller is created once a view state for the view arrives
+  viewManager.setProps({
+    viewState: {...viewState, 'default-view': {longitude: 0, latitude: 0, zoom: 1}}
+  });
+  expect(
+    viewManager.controllers['default-view'],
+    'controller created with late view state'
+  ).toBeTruthy();
+  viewManager.setProps({viewState});
+
   viewManager.setProps({
     views: [new MapView({id: 'a', controller: true}), new MapView({id: 'b', controller: true})]
   });
