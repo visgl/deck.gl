@@ -14,6 +14,7 @@ in vec4 vColor;
 out vec4 fragColor;
 
 void main(void) {
+  geometry.uv = vec2(0.);
   fragColor = vColor;
 
   DECKGL_FILTER_COLOR(fragColor, geometry);
