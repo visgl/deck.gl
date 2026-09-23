@@ -25,7 +25,7 @@ export {
   FirstPersonView,
   OrbitView,
   OrthographicView,
-  CustomProjectionView,
+  _CustomProjectionView,
   _GlobeView,
   // Viewports
   Viewport,
@@ -34,7 +34,7 @@ export {
   OrbitViewport,
   OrthographicViewport,
   FirstPersonViewport,
-  CustomProjectionViewport,
+  _CustomProjectionViewport,
   // Controllers
   Controller,
   MapController,
@@ -42,7 +42,7 @@ export {
   OrbitController,
   FirstPersonController,
   OrthographicController,
-  CustomProjectionController,
+  _CustomProjectionController,
   _GlobeController,
   // For custom layers
   Attribute,

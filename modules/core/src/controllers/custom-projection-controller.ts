@@ -20,14 +20,14 @@ export type CustomProjectionStateProps = {
   height: number;
   target?: [number, number, number];
   zoom?: number;
-  rotationX?: number;
-  rotationOrbit?: number;
+  pitch?: number;
+  bearing?: number;
 
   /** Viewport constraints */
   maxZoom?: number;
   minZoom?: number;
-  minRotationX?: number;
-  maxRotationX?: number;
+  minPitch?: number;
+  maxPitch?: number;
 
   /** Common-space bounds. Defaults to [[0, 0], [512, 512]]; null disables bounds. */
   maxBounds?: ControllerProps['maxBounds'];
@@ -37,8 +37,8 @@ export type CustomProjectionStateProps = {
 type CustomProjectionStateInternal = {
   startPanPosition?: number[];
   startRotatePos?: [number, number];
-  startRotationX?: number;
-  startRotationOrbit?: number;
+  startPitch?: number;
+  startBearing?: number;
   startZoomPosition?: number[];
   startZoom?: number;
 };
@@ -59,14 +59,14 @@ export class CustomProjectionState extends ViewState<
       /* Viewport arguments */
       width, // Width of viewport
       height, // Height of viewport
-      rotationX = 0, // Rotation around x axis
-      rotationOrbit = 0, // Rotation around orbit axis
+      pitch = 0, // Map pitch in degrees
+      bearing = 0, // Map bearing in degrees
       target = [256, 256, 0],
       zoom = 0,
 
       /* Viewport constraints */
-      minRotationX = 0,
-      maxRotationX = 85,
+      minPitch = 0,
+      maxPitch = 85,
       minZoom = -Infinity,
       maxZoom = Infinity,
 
@@ -81,8 +81,8 @@ export class CustomProjectionState extends ViewState<
       startPanPosition,
       // Model state when the rotate operation first started
       startRotatePos,
-      startRotationX,
-      startRotationOrbit,
+      startPitch,
+      startBearing,
       // Model state when the zoom operation first started
       startZoomPosition,
       startZoom
@@ -92,12 +92,12 @@ export class CustomProjectionState extends ViewState<
       {
         width,
         height,
-        rotationX,
-        rotationOrbit,
+        pitch,
+        bearing,
         target,
         zoom,
-        minRotationX,
-        maxRotationX,
+        minPitch,
+        maxPitch,
         minZoom,
         maxZoom,
         maxBounds,
@@ -106,8 +106,8 @@ export class CustomProjectionState extends ViewState<
       {
         startPanPosition,
         startRotatePos,
-        startRotationX,
-        startRotationOrbit,
+        startPitch,
+        startBearing,
         startZoomPosition,
         startZoom
       },
@@ -165,8 +165,8 @@ export class CustomProjectionState extends ViewState<
   rotateStart({pos}: {pos: [number, number]}): CustomProjectionState {
     return this._getUpdatedState({
       startRotatePos: pos,
-      startRotationX: this.getViewportProps().rotationX,
-      startRotationOrbit: this.getViewportProps().rotationOrbit
+      startPitch: this.getViewportProps().pitch,
+      startBearing: this.getViewportProps().bearing
     });
   }
 
@@ -183,18 +183,18 @@ export class CustomProjectionState extends ViewState<
     deltaAngleX?: number;
     deltaAngleY?: number;
   }): CustomProjectionState {
-    const {startRotatePos, startRotationX, startRotationOrbit} = this.getState();
-    if (!startRotatePos || startRotationX === undefined || startRotationOrbit === undefined) {
+    const {startRotatePos, startPitch, startBearing} = this.getState();
+    if (!startRotatePos || startPitch === undefined || startBearing === undefined) {
       return this;
     }
 
     let newRotation;
     if (pos) {
-      newRotation = this._getNewRotation(pos, startRotatePos, startRotationX, startRotationOrbit);
+      newRotation = this._getNewRotation(pos, startRotatePos, startPitch, startBearing);
     } else {
       newRotation = {
-        rotationX: startRotationX + deltaAngleY,
-        rotationOrbit: startRotationOrbit + deltaAngleX
+        pitch: startPitch + deltaAngleY,
+        bearing: startBearing + deltaAngleX
       };
     }
 
@@ -208,8 +208,8 @@ export class CustomProjectionState extends ViewState<
   rotateEnd(): CustomProjectionState {
     return this._getUpdatedState({
       startRotatePos: undefined,
-      startRotationX: undefined,
-      startRotationOrbit: undefined
+      startPitch: undefined,
+      startBearing: undefined
     });
   }
 
@@ -217,10 +217,10 @@ export class CustomProjectionState extends ViewState<
   shortestPathFrom(viewState: CustomProjectionState): CustomProjectionStateProps {
     const fromProps = viewState.getViewportProps();
     const props = {...this.getViewportProps()};
-    const {rotationOrbit} = props;
+    const {bearing} = props;
 
-    if (Math.abs(rotationOrbit - fromProps.rotationOrbit) > 180) {
-      props.rotationOrbit = rotationOrbit < 0 ? rotationOrbit + 360 : rotationOrbit - 360;
+    if (Math.abs(bearing - fromProps.bearing) > 180) {
+      props.bearing = bearing < 0 ? bearing + 360 : bearing - 360;
     }
 
     return props;
@@ -318,25 +318,25 @@ export class CustomProjectionState extends ViewState<
 
   rotateLeft(speed: number = 15): CustomProjectionState {
     return this._getUpdatedState({
-      rotationOrbit: this.getViewportProps().rotationOrbit - speed
+      bearing: this.getViewportProps().bearing - speed
     });
   }
 
   rotateRight(speed: number = 15): CustomProjectionState {
     return this._getUpdatedState({
-      rotationOrbit: this.getViewportProps().rotationOrbit + speed
+      bearing: this.getViewportProps().bearing + speed
     });
   }
 
   rotateUp(speed: number = 10): CustomProjectionState {
     return this._getUpdatedState({
-      rotationX: this.getViewportProps().rotationX + speed
+      pitch: this.getViewportProps().pitch + speed
     });
   }
 
   rotateDown(speed: number = 10): CustomProjectionState {
     return this._getUpdatedState({
-      rotationX: this.getViewportProps().rotationX - speed
+      pitch: this.getViewportProps().pitch - speed
     });
   }
 
@@ -382,17 +382,17 @@ export class CustomProjectionState extends ViewState<
   applyConstraints(
     props: Required<CustomProjectionStateProps>
   ): Required<CustomProjectionStateProps> {
-    props.minRotationX = clamp(props.minRotationX, 0, 85);
-    props.maxRotationX = clamp(props.maxRotationX, props.minRotationX, 85);
-    props.rotationX = clamp(props.rotationX, props.minRotationX, props.maxRotationX);
-    props.rotationOrbit = mod(props.rotationOrbit + 180, 360) - 180;
+    props.minPitch = clamp(props.minPitch, 0, 85);
+    props.maxPitch = clamp(props.maxPitch, props.minPitch, 85);
+    props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
+    props.bearing = mod(props.bearing + 180, 360) - 180;
     props.zoom = this._constrainZoom(props.zoom, props);
     props.target = [props.target[0], props.target[1], 0];
     const {maxBounds} = props;
     if (maxBounds) {
       // Fit and constrain in the unrotated ground plane so rotating does not move the map.
       const rect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
-      const viewport = this.makeViewport({...props, rotationX: 0, rotationOrbit: 0});
+      const viewport = this.makeViewport({...props, pitch: 0, bearing: 0});
       const extents = getMaxBoundsExtents(viewport, props.target, rect);
       const scale = 2 ** props.zoom;
       if (rect.width >= 0) {
@@ -436,8 +436,8 @@ export class CustomProjectionState extends ViewState<
     startPitch: number,
     startBearing: number
   ): {
-    rotationX: number;
-    rotationOrbit: number;
+    pitch: number;
+    bearing: number;
   } {
     const deltaX = pos[0] - startPos[0];
     const deltaY = pos[1] - startPos[1];
@@ -459,35 +459,37 @@ export class CustomProjectionState extends ViewState<
         deltaScaleY = 1 - centerY / startY;
       }
     }
-    // clamp deltaScaleY to [-1, 1] so that rotation is constrained between minRotationX and maxRotationX.
+    // clamp deltaScaleY to [-1, 1] so that rotation is constrained between minPitch and maxPitch.
     // deltaScaleX does not need to be clamped as bearing does not have constraints.
     deltaScaleY = clamp(deltaScaleY, -1, 1);
 
-    const {minRotationX, maxRotationX} = this.getViewportProps();
+    const {minPitch, maxPitch} = this.getViewportProps();
 
     const bearing = startBearing + 180 * deltaScaleX;
     let pitch = startPitch;
     if (deltaScaleY > 0) {
       // Gradually increase pitch
-      pitch = startPitch + deltaScaleY * (maxRotationX - startPitch);
+      pitch = startPitch + deltaScaleY * (maxPitch - startPitch);
     } else if (deltaScaleY < 0) {
       // Gradually decrease pitch
-      pitch = startPitch - deltaScaleY * (minRotationX - startPitch);
+      pitch = startPitch - deltaScaleY * (minPitch - startPitch);
     }
 
     return {
-      rotationX: pitch,
-      rotationOrbit: bearing
+      pitch,
+      bearing
     };
   }
 }
 
-/** Map-like gestures with navigation anchored in common space on z=0. */
+/** Map-like gestures with navigation anchored in common space on z=0.
+ * @experimental Exported as `_CustomProjectionController`; this API may change.
+ */
 export default class CustomProjectionController extends Controller<CustomProjectionState> {
   ControllerState = CustomProjectionState;
   transition = {
     transitionDuration: 300,
-    transitionInterpolator: new LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit'])
+    transitionInterpolator: new LinearInterpolator(['target', 'zoom', 'pitch', 'bearing'])
   };
 
   dragMode: 'pan' | 'rotate' = 'pan';
