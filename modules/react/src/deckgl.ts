@@ -313,11 +313,15 @@ function DeckGLWithRef<ViewsT extends ViewOrViews = null>(
     // Render deck.gl as the last child
     thisRef.control = createElement(
       'div',
-      {id: `${id || 'deckgl'}-wrapper`, ref: containerRef, style: containerStyle},
+      {id: `${id || 'deckgl'}-wrapper`, style: containerStyle},
       // Preserve a containing block even when the caller puts the wrapper in normal flow.
       createElement(
         'div',
-        {className: 'deck-root', style: {position: 'relative', width: '100%', height: '100%'}},
+        {
+          className: 'deck-root',
+          ref: containerRef,
+          style: {position: 'relative', width: '100%', height: '100%'}
+        },
         [eventRoot, widgetRoot]
       )
     );

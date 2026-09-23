@@ -341,106 +341,113 @@ test.skip('DeckGL#real WebGPU device draws through the React custom render loop'
   container.remove();
 });
 
-test('DeckGL#external WebGPU device waits for its final size before mounting React children', () => {
-  let capturedProps: Record<string, any> | undefined;
-  let deckInstance: TestDeck;
+test.each([0, 20])(
+  'DeckGL#external WebGPU device waits for its final size with padding %s',
+  padding => {
+    let capturedProps: Record<string, any> | undefined;
+    let deckInstance: TestDeck;
 
-  class TestDeck {
-    isInitialized = true;
-    device = {type: 'webgpu'};
-    width = 1;
-    height = 1;
-    canvas: HTMLCanvasElement;
-    eventManager = {};
-    viewports = [
+    class TestDeck {
+      isInitialized = true;
+      device = {type: 'webgpu'};
+      width = 1;
+      height = 1;
+      canvas: HTMLCanvasElement;
+      eventManager = {};
+      viewports = [
+        {
+          id: 'default-view',
+          x: 0,
+          y: 0,
+          width: 1,
+          height: 1,
+          padding: null
+        }
+      ];
+      viewManager = {
+        views: [{id: 'default-view'}],
+        getViewport: () => this.viewports[0],
+        getViewState: () => ({})
+      };
+      drawReasons: string[] = [];
+
+      constructor(props: Record<string, any>) {
+        capturedProps = props;
+        this.canvas = props.canvas;
+        deckInstance = this;
+      }
+
+      getViewports() {
+        return this.viewports;
+      }
+
+      _drawLayers(reason: string) {
+        this.drawReasons.push(reason);
+      }
+
+      finalize() {}
+    }
+
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        createElement(DeckGL, {
+          Deck: TestDeck as unknown as typeof Deck,
+          device: {
+            type: 'webgpu',
+            getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
+          } as any,
+          width: 100,
+          height: 50,
+          style: {padding: `${padding}px`, border: '3px solid transparent'},
+          children: createElement('div', {id: 'map-child'})
+        })
+      );
+    });
+
+    const wrapper = container.querySelector('#deckgl-wrapper')!;
+    expect(wrapper.clientWidth).toBe(100 + padding * 2);
+    expect(wrapper.clientHeight).toBe(50 + padding * 2);
+    const canvasContainer = container.querySelector('.deck-root')!;
+    expect(canvasContainer.clientWidth).toBe(100);
+    expect(canvasContainer.clientHeight).toBe(50);
+
+    act(() => {
+      capturedProps?._customRender('placeholder WebGPU viewport');
+    });
+    expect(container.querySelector('#map-child')).toBeNull();
+    expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
+
+    deckInstance!.width = 100;
+    deckInstance!.height = 50;
+    deckInstance!.viewports = [
       {
         id: 'default-view',
         x: 0,
         y: 0,
-        width: 1,
-        height: 1,
+        width: 100,
+        height: 50,
         padding: null
       }
     ];
-    viewManager = {
-      views: [{id: 'default-view'}],
-      getViewport: () => this.viewports[0],
-      getViewState: () => ({})
-    };
-    drawReasons: string[] = [];
+    act(() => {
+      capturedProps?._customRender('resized WebGPU viewport');
+    });
+    expect(container.querySelector('#map-child')).toBeTruthy();
+    expect(deckInstance!.drawReasons).toEqual([
+      'placeholder WebGPU viewport',
+      'resized WebGPU viewport'
+    ]);
 
-    constructor(props: Record<string, any>) {
-      capturedProps = props;
-      this.canvas = props.canvas;
-      deckInstance = this;
-    }
-
-    getViewports() {
-      return this.viewports;
-    }
-
-    _drawLayers(reason: string) {
-      this.drawReasons.push(reason);
-    }
-
-    finalize() {}
+    act(() => {
+      root.render(null);
+    });
+    container.remove();
   }
-
-  const container = document.createElement('div');
-  document.body.append(container);
-  const root = createRoot(container);
-
-  act(() => {
-    root.render(
-      createElement(DeckGL, {
-        Deck: TestDeck as unknown as typeof Deck,
-        device: {
-          type: 'webgpu',
-          getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
-        } as any,
-        children: createElement('div', {id: 'map-child'})
-      })
-    );
-  });
-
-  const wrapper = container.querySelector('#deckgl-wrapper')!;
-  Object.defineProperties(wrapper, {
-    clientWidth: {value: 100},
-    clientHeight: {value: 50}
-  });
-
-  act(() => {
-    capturedProps?._customRender('placeholder WebGPU viewport');
-  });
-  expect(container.querySelector('#map-child')).toBeNull();
-  expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
-
-  deckInstance!.width = 100;
-  deckInstance!.height = 50;
-  deckInstance!.viewports = [
-    {
-      id: 'default-view',
-      x: 0,
-      y: 0,
-      width: 100,
-      height: 50,
-      padding: null
-    }
-  ];
-  act(() => {
-    capturedProps?._customRender('resized WebGPU viewport');
-  });
-  expect(container.querySelector('#map-child')).toBeTruthy();
-  expect(deckInstance!.drawReasons).toEqual([
-    'placeholder WebGPU viewport',
-    'resized WebGPU viewport'
-  ]);
-
-  act(() => {
-    root.render(null);
-  });
-  container.remove();
-});
+);
 
 test('DeckGL#external WebGPU device synchronizes view changes through custom render', () => {
   let capturedProps: Record<string, any> | undefined;
@@ -483,16 +490,13 @@ test('DeckGL#external WebGPU device synchronizes view changes through custom ren
           type: 'webgpu',
           getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
         } as any,
+        width: 100,
+        height: 50,
         initialViewState: TEST_VIEW_STATE
       })
     );
   });
 
-  const wrapper = container.querySelector('#deckgl-wrapper')!;
-  Object.defineProperties(wrapper, {
-    clientWidth: {value: 100},
-    clientHeight: {value: 50}
-  });
   deckInstance!.width = 100;
   deckInstance!.height = 50;
 
