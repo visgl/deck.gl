@@ -101,6 +101,10 @@ export function getWorldPosition(
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
   }
 
+  if (viewport.preproject) {
+    return viewport.preproject([x, y, z]);
+  }
+
   switch (coordinateSystem) {
     case 'default':
       return getWorldPosition(position, {
