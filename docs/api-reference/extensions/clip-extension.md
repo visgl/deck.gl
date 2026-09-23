@@ -71,8 +71,7 @@ Supported format: `[left, bottom, right, top]`
 
 ## Remarks
 
-- `clipBounds` may cross the antimeridian when clipping by geometry, e.g. `[170, -20, -170, 20]`. With `clipByInstance: true` such bounds must be split into two layers.
-- With `clipByInstance: true` the anchor position is compared with `clipBounds` in the layer's own coordinate system without any projection, so geospatial bounds require the layer's positions to be lng/lat.
+- With `clipByInstance: true` the anchor position is compared with `clipBounds` in the layer's own coordinate system without any projection, so geospatial bounds require the layer's positions to be lng/lat, and bounds that cross the antimeridian (e.g. `[170, -20, -170, 20]`) must be split into two layers.
 
 ## Source
 
