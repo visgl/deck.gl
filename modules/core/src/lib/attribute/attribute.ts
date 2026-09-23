@@ -58,7 +58,9 @@ export type AttributeOptions = DataColumnOptions<{
   bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
-  transform?: (value: any) => any;
+  transform?: ((value: any) => any) | null;
+  /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
+  transformSource?: string;
   shaderAttributes?: Record<string, Partial<ShaderAttributeOptions>>;
 }>;
 
