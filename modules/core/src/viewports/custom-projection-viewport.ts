@@ -51,7 +51,9 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
 const converterIds = new WeakMap<CustomProjection, number>();
 let nextConverterId = 0;
 
-/** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core. */
+/** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core.
+ * @experimental Exported as `_CustomProjectionViewport`; this API may change.
+ */
 export default class CustomProjectionViewport extends Viewport {
   static displayName = 'CustomProjectionViewport';
   /** Camera target in normalized common space. */
@@ -103,6 +105,12 @@ export default class CustomProjectionViewport extends Viewport {
     const width = opts.width || 1;
     const altitude = 1.5;
     const fovy = altitudeToFovy(altitude);
+    const {top = 0, bottom = 0} = opts.padding || {};
+    // Match WebMercatorViewport's clipping planes when padding shifts the camera center.
+    const offset: [number, number] = [
+      0,
+      Math.max(0, Math.min(height, (top + height - bottom) / 2)) - height / 2
+    ];
     super({
       ...opts,
       width,
@@ -120,6 +128,7 @@ export default class CustomProjectionViewport extends Viewport {
         pitch,
         scale: 2 ** zoom,
         fovy,
+        offset,
         nearZMultiplier: 0.1,
         farZMultiplier: 1.01
       })

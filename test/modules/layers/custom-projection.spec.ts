@@ -3,7 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {LayerManager, CustomProjectionViewport, WebMercatorViewport} from '@deck.gl/core';
+import {
+  LayerManager,
+  _CustomProjectionViewport as CustomProjectionViewport,
+  WebMercatorViewport
+} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';

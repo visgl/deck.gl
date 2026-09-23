@@ -8,24 +8,24 @@ import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
 import CustomProjectionController from '../controllers/custom-projection-controller';
 
-/** Common-space target and zoom; rotationX is map pitch and rotationOrbit is bearing. */
+/** Common-space target and zoom with MapView-style pitch and bearing. */
 export type CustomProjectionViewState = {
   /** Common-space center. Navigation fixes its Z component at zero. */
   target: [number, number, number];
   /** Zoom level; one increment doubles the scale. */
   zoom: number;
   /** Map pitch in degrees. Default 0. */
-  rotationX?: number;
+  pitch?: number;
   /** Map bearing in degrees. Default 0. */
-  rotationOrbit?: number;
+  bearing?: number;
   /** Minimum zoom. Default -Infinity. */
   minZoom?: number;
   /** Maximum zoom. Default Infinity. */
   maxZoom?: number;
   /** Minimum pitch, constrained to [0, 85]. Default 0. */
-  minRotationX?: number;
-  /** Maximum pitch, constrained to [minRotationX, 85]. Default 85. */
-  maxRotationX?: number;
+  minPitch?: number;
+  /** Maximum pitch, constrained to [minPitch, 85]. Default 85. */
+  maxPitch?: number;
 } & CommonViewState;
 /** Configuration for a custom planar projection. */
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
@@ -42,7 +42,9 @@ export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewStat
     | 'orthographic'
   >;
 
-/** Preliminary view for pluggable input/output coordinate conversion. */
+/** A planar view for pluggable input/output coordinate conversion.
+ * @experimental Exported as `_CustomProjectionView`; this API may change.
+ */
 export default class CustomProjectionView extends View<
   CustomProjectionViewState,
   CustomProjectionViewProps
@@ -65,9 +67,7 @@ export default class CustomProjectionView extends View<
       ...viewState,
       ...this.props,
       ...dimensions,
-      padding: dimensions.padding,
-      pitch: viewState.rotationX || 0,
-      bearing: viewState.rotationOrbit || 0
+      padding: dimensions.padding
     });
   }
 }
