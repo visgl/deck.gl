@@ -329,8 +329,7 @@ export default class CustomProjectionViewport extends Viewport {
   private getAltitudeScale(position: number[]): number {
     if (!this.scaleOptions) return this.distanceScales.unitsPerMeter[2];
     const {projection, toBounds, fromBounds} = this.scaleOptions;
-    const normalization =
-      512 / Math.max(toBounds[2] - toBounds[0], toBounds[3] - toBounds[1]);
+    const normalization = 512 / Math.max(toBounds[2] - toBounds[0], toBounds[3] - toBounds[1]);
     const input = this.postUnproject!([position[0], position[1], 0]);
     return input
       ? estimateUnitsPerMeter(projection, input, fromBounds, this.metersPerUnitCallback)[2] *

@@ -4,7 +4,7 @@
 
 import {describe, expect} from 'vitest';
 import {_CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
-import {GeoJsonLayer, PathLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {ContourLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {
   projectionGrid,
@@ -30,7 +30,6 @@ const projection = {forward: converter.project, inverse: converter.unproject};
 const view = new CustomProjectionView({
   projection,
   toBounds: [-7400000, 0, 2600000, 6500000],
-
   resolution: 1
 });
 const data = states as FeatureCollection<
@@ -128,7 +127,6 @@ const aggregationConverter = new Proj4Projection({
 const aggregationView = new CustomProjectionView({
   projection: {forward: aggregationConverter.project, inverse: aggregationConverter.unproject},
   toBounds: [-4500000, -500000, 4500000, 5500000],
-
   resolution: 1
 });
 const colorRange: [number, number, number][] = [
@@ -237,6 +235,37 @@ testCases.push({
     createGridOutline()
   ],
   goldenImage: './test/render/golden-images/custom-projection-heatmap.png'
+});
+
+const scaleProbePositions: [number, number][] = [];
+for (let longitude = -150; longitude <= 150; longitude += 50) {
+  for (let latitude = -75; latitude <= 75; latitude += 25) {
+    scaleProbePositions.push([longitude, latitude]);
+  }
+}
+testCases.push({
+  name: 'custom-projection-meter-sizes',
+  views: new CustomProjectionView({
+    projection: {forward: p => p.slice(), inverse: p => p.slice()},
+    toBounds: [-180, -90, 180, 90],
+    fromBounds: [-180, -90, 180, 90]
+  }),
+  viewState: {center: [256, 256, 0], zoom: 0.5},
+  layers: [
+    new ScatterplotLayer({
+      id: 'meter-size-probes',
+      data: scaleProbePositions,
+      getPosition: position => position,
+      radiusUnits: 'meters',
+      getRadius: 400000,
+      getFillColor: [255, 80, 150],
+      stroked: true,
+      lineWidthUnits: 'pixels',
+      getLineWidth: 1,
+      getLineColor: [255, 255, 255]
+    })
+  ],
+  goldenImage: './test/render/golden-images/custom-projection-meter-sizes.png'
 });
 
 describe.each(['webgl', 'webgpu'] as const)('CustomProjectionView / %s', deviceType => {

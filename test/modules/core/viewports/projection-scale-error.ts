@@ -36,12 +36,8 @@ export function estimateProjectionScaleError(
   const data = viewport.getSizeScaleData();
   const size = Math.sqrt(data.length / 4);
   const spacing = 512 / size;
-  const normalization =
-    512 / Math.max(toBounds[2] - toBounds[0], toBounds[3] - toBounds[1]);
-  const outputCenter = [
-    (toBounds[0] + toBounds[2]) / 2,
-    (toBounds[1] + toBounds[3]) / 2
-  ];
+  const normalization = 512 / Math.max(toBounds[2] - toBounds[0], toBounds[3] - toBounds[1]);
+  const outputCenter = [(toBounds[0] + toBounds[2]) / 2, (toBounds[1] + toBounds[3]) / 2];
   const region = (): RegionEstimate => ({maxima: [0, 0], positions: 0, boundaries: 0, dropouts: 0});
   const center = region();
   const whole = region();
