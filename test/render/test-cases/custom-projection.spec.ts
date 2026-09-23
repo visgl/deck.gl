@@ -24,7 +24,7 @@ const projection = {forward: converter.project, inverse: converter.unproject};
 const view = new CustomProjectionView({
   projection,
   outputBounds: [-7400000, 0, 2600000, 6500000],
-  inputUnits: 'degrees',
+
   resolution: 1
 });
 const data = states as FeatureCollection<
@@ -96,7 +96,7 @@ const testCases: TestCase[] = [
   {
     name: 'custom-projection-epsg5070-us-states',
     views: view,
-    viewState: {target: [256, 256, 0], zoom: 0.15},
+    viewState: {center: [256, 256, 0], zoom: 0.15},
     layers: createLayers(),
     onAfterRender: checkPickedStates([alaska, colorado]),
     goldenImage: './test/render/golden-images/custom-projection-epsg5070-us-states.png'
@@ -104,7 +104,7 @@ const testCases: TestCase[] = [
   {
     name: 'custom-projection-epsg5070-us-states-pitched',
     views: view,
-    viewState: {target: [256, 256, 0], zoom: 0.15, pitch: 35, bearing: 20},
+    viewState: {center: [256, 256, 0], zoom: 0.15, pitch: 35, bearing: 20},
     layers: createLayers(),
     onAfterRender: checkPickedStates([alaska, colorado]),
     goldenImage: './test/render/golden-images/custom-projection-epsg5070-us-states-pitched.png'

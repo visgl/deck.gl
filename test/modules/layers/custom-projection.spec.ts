@@ -59,7 +59,7 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
       ...options,
       projection: viewportOptionsProjection,
       zoom: 2,
-      target: [200, 200, 0]
+      center: [200, 200, 0]
     });
     const beforeCameraUpdate = calls;
     layer.activateViewport(cameraMoved);
