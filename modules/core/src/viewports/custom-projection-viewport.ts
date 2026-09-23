@@ -4,12 +4,7 @@
 
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales} from './viewport';
-import {
-  getViewMatrix,
-  getProjectionParameters,
-  altitudeToFovy,
-  pixelsToWorld
-} from '@math.gl/web-mercator';
+import {getViewMatrix, getProjectionParameters, altitudeToFovy} from '@math.gl/web-mercator';
 import {PROJECTION_MODE} from '../lib/constants';
 
 /** Forward/inverse functions can be supplied by a proj4js converter. */
@@ -37,7 +32,7 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   bearing?: number;
   /** Maximum tessellation cell size in input-coordinate units. Default 5. */
   resolution?: number;
-  /** Multiplier for output Z before normalization. Default 1, independent of camera position. */
+  /** Multiplier for the estimated altitude meter scale. Default 1. */
   zScale?: number;
   /** Input XY units for local meter-scale estimation. Degrees means longitude/latitude
    * on a sphere; meters assumes locally metric Cartesian coordinates. If omitted,
@@ -151,14 +146,14 @@ export default class CustomProjectionViewport extends Viewport {
       return [
         (projected[0] - centerX) * normalizationScale + 256,
         (projected[1] - centerY) * normalizationScale + 256,
-        (projected[2] ?? position[2] ?? 0) * zScale * normalizationScale
+        projected[2] ?? position[2] ?? 0
       ];
     };
     this.postUnproject = position => {
       const projected = [
         (position[0] - 256) / normalizationScale + centerX,
         (position[1] - 256) / normalizationScale + centerY,
-        (position[2] || 0) / (zScale * normalizationScale)
+        position[2] || 0
       ];
       try {
         const input = projection.inverse(projected.slice());
@@ -201,11 +196,11 @@ export default class CustomProjectionViewport extends Viewport {
   }
 
   projectPosition(position: number[]): [number, number, number] {
-    return [position[0], position[1], position[2] || 0];
+    return super.projectPosition(position);
   }
 
   unprojectPosition(position: number[]): [number, number, number] {
-    return this.projectPosition(position);
+    return super.unprojectPosition(position);
   }
 
   projectFlat(position: number[]): [number, number] {
@@ -215,22 +210,12 @@ export default class CustomProjectionViewport extends Viewport {
     return [position[0], position[1]];
   }
 
-  /** Unprojects onto a common-space plane; targetZ is not a meter distance. */
+  /** Unprojects with altitude and targetZ expressed in meters. */
   unproject(
     position: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
   ): number[] {
-    const [x, y, z] = position;
-    const common = pixelsToWorld(
-      [x, topLeft ? y : this.height - y, z],
-      this.pixelUnprojectionMatrix,
-      targetZ
-    );
-    return Number.isFinite(z)
-      ? common
-      : Number.isFinite(targetZ)
-        ? [common[0], common[1], targetZ!]
-        : common.slice(0, 2);
+    return super.unproject(position, {topLeft, targetZ});
   }
 
   getDistanceScales(): DistanceScales {
