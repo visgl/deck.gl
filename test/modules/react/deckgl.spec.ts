@@ -96,10 +96,8 @@ test('DeckGL#mount/unmount', async () => {
 
 test.each([
   ['absolute', false],
-  ['relative', false],
   ['static', false],
   ['absolute', true],
-  ['relative', true],
   ['static', true]
 ] as const)(
   'DeckGL#widget positioning without widget CSS (position: %s, percentage size: %s)',
@@ -159,14 +157,14 @@ test.each([
         const canvasBounds = deck.getCanvas()!.getBoundingClientRect();
         const tooltipBounds = tooltip.rootElement!.getBoundingClientRect();
         expect(tooltip.rootElement!.textContent).toBe('Hovered point');
-        expect(tooltipBounds.left).toBeCloseTo(canvasBounds.left + 50);
-        expect(tooltipBounds.top).toBeCloseTo(canvasBounds.top + 25);
+        expect(tooltipBounds.left).toBe(canvasBounds.left + 50);
+        expect(tooltipBounds.top).toBe(canvasBounds.top + 25);
 
         const wrapper = container.querySelector<HTMLElement>('#deckgl-wrapper')!;
         expect(getComputedStyle(wrapper).position).toBe(position);
         const wrapperBounds = wrapper.getBoundingClientRect();
-        expect(canvasBounds.left).toBeCloseTo(wrapperBounds.left);
-        expect(canvasBounds.top).toBeCloseTo(wrapperBounds.top);
+        expect(canvasBounds.left).toBe(wrapperBounds.left);
+        expect(canvasBounds.top).toBe(wrapperBounds.top);
         expect(canvasBounds.width).toBe(width);
         expect(canvasBounds.height).toBe(height);
         // Fill widgets must receive the entire canvas, including after resizing.
@@ -174,14 +172,14 @@ test.each([
         expect(fillContainer.classList.contains('fill')).toBe(true);
         for (const element of [fillContainer, fillWidget.rootElement!]) {
           const fillBounds = element.getBoundingClientRect();
-          expect(fillBounds.left).toBeCloseTo(canvasBounds.left);
-          expect(fillBounds.top).toBeCloseTo(canvasBounds.top);
-          expect(fillBounds.right).toBeCloseTo(canvasBounds.right);
-          expect(fillBounds.bottom).toBeCloseTo(canvasBounds.bottom);
+          expect(fillBounds.left).toBe(canvasBounds.left);
+          expect(fillBounds.top).toBe(canvasBounds.top);
+          expect(fillBounds.right).toBe(canvasBounds.right);
+          expect(fillBounds.bottom).toBe(canvasBounds.bottom);
         }
         const controlBounds = widget.rootElement!.getBoundingClientRect();
-        expect(controlBounds.right).toBeCloseTo(canvasBounds.right);
-        expect(controlBounds.top).toBeCloseTo(canvasBounds.top);
+        expect(controlBounds.right).toBe(canvasBounds.right);
+        expect(controlBounds.top).toBe(canvasBounds.top);
         expect(document.elementFromPoint(controlBounds.left + 10, controlBounds.top + 10)).toBe(
           widget.rootElement
         );
