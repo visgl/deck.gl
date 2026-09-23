@@ -12,10 +12,10 @@ get-started examples. The graticule is generated locally. All three use GeoJsonL
 The app uses proj4js's built-in Equal Earth projection (EPSG:8857), which supplies
 the view's forward/inverse callbacks. Core does not depend on proj4js.
 
-The preliminary view requires output bounds and accepts a stable converter object.
+The experimental `_CustomProjectionView` requires output bounds and accepts a stable converter object.
 Bounds establish normalization, not clipping. `resolution` is in input units (degrees
-here). View state uses a common-space `target`, `rotationX` (pitch), and
-`rotationOrbit` (bearing). Z is fixed at zero for navigation. Meter scale is estimated
+here). View state uses a common-space `center`, `pitch`, and
+`bearing`. Z is fixed at zero for navigation. Meter scale is estimated
 by the viewport at the center using `inputUnits: 'degrees'`, while altitude
 normalization is independent of camera position. `getUnitsPerMeter` remains an
 optional override for custom scale calculations.
