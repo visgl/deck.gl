@@ -322,7 +322,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
   _getCoordinateUniforms() {
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== 'default') {
+    // Preprojection has already converted the mesh positions to common space.
+    // Geographic/Mercator fragment conversions cannot use these coordinates.
+    if (!this.context.viewport.preproject && imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
       if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
