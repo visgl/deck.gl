@@ -151,3 +151,15 @@ export type {
 export {default as _Component} from './lifecycle/component';
 // @deprecated internal do not use
 export {default as _ComponentState} from './lifecycle/component-state';
+
+export {default as CustomProjectionView} from './views/custom-projection-view';
+export {default as CustomProjectionViewport} from './viewports/custom-projection-viewport';
+export {default as CustomProjectionController} from './controllers/custom-projection-controller';
+export type {
+  CustomProjectionViewProps,
+  CustomProjectionViewState
+} from './views/custom-projection-view';
+export type {
+  CustomProjection,
+  CustomProjectionViewportOptions
+} from './viewports/custom-projection-viewport';
