@@ -26,8 +26,8 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   expect(viewport.preproject!([0, 0])).toEqual([256, 256, 0]);
   expect(viewport.preproject!([-180, -90])).toEqual([0, 128, 0]);
   expect(viewport.postUnproject!(viewport.preproject!([32, 48, 10]))![0]).toBeCloseTo(32);
-  expect(viewport.projectPosition([32, 48, 10])).toEqual([32, 48, 10]);
-  expect(viewport.unprojectPosition([32, 48, 10])).toEqual([32, 48, 10]);
+  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo((10 * 512) / 360);
+  expect(viewport.unprojectPosition(viewport.projectPosition([32, 48, 10]))).toEqual([32, 48, 10]);
   const moved = new CustomProjectionViewport({...options, zoom: 4, target: [300, 300, 0]});
   expect(moved.projectionSignature).toBe(viewport.projectionSignature);
   expect(moved.preproject!([32, 48, 10])).toEqual(viewport.preproject!([32, 48, 10]));
@@ -42,11 +42,11 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
 const webMercator = {
   forward: ([longitude, latitude, altitude = 0]) => [
     ...lngLatToWorld([longitude, latitude]),
-    altitude * getDistanceScales({longitude, latitude}).unitsPerMeter[2]
+    altitude
   ],
   inverse: ([x, y, z = 0]) => {
     const [longitude, latitude] = worldToLngLat([x, y]);
-    return [longitude, latitude, z / getDistanceScales({longitude, latitude}).unitsPerMeter[2]];
+    return [longitude, latitude, z];
   }
 };
 
@@ -79,6 +79,7 @@ for (const orthographic of [false, true]) {
           const viewport = new CustomProjectionViewport({
             ...camera,
             projection: webMercator,
+            getUnitsPerMeter: () => getDistanceScales({longitude, latitude}).unitsPerMeter,
             outputBounds: [0, 0, 512, 512],
             target: [...lngLatToWorld([longitude, latitude]), 0]
           });
@@ -89,11 +90,12 @@ for (const orthographic of [false, true]) {
           }
           for (const point of [
             [longitude, latitude, 0],
-            [longitude + 0.01, latitude - 0.02, 100]
+            [longitude, latitude, 100],
+            [longitude + 0.01, latitude - 0.02, 0]
           ]) {
             const common = viewport.preproject!(point);
             mercator.projectPosition(point).forEach((value, index) => {
-              expect(common[index], 'common space').toBeCloseTo(value, 8);
+              expect(viewport.projectPosition(common)[index], 'common space').toBeCloseTo(value, 8);
             });
             for (const topLeft of [false, true]) {
               const actual = viewport.project(common, {topLeft});
@@ -150,7 +152,11 @@ test('CustomProjectionView uniforms and picking use the correct coordinate space
     coordinateOrigin: [100, 100, 100],
     modelMatrix: new Array(16).fill(2)
   });
-  expect(uniforms.commonUnitsPerWorldUnit).toEqual([1, 1, 1]);
+  expect(uniforms.commonUnitsPerWorldUnit).toEqual([
+    1,
+    1,
+    viewport.distanceScales.unitsPerMeter[2]
+  ]);
   expect(uniforms.modelMatrix[0]).toBe(1);
   expect(uniforms.modelMatrix[12]).toBe(0);
   const info = getEmptyPickingInfo({viewports: [viewport], pixelRatio: 1, x: 400, y: 300});
@@ -164,16 +170,19 @@ test('CustomProjectionView uniforms and picking use the correct coordinate space
   expect(invalid.unproject([400, 300]).every(Number.isFinite)).toBe(true);
 });
 
-test('CustomProjectionViewport preserves callback altitude and common-space targetZ', () => {
+test('CustomProjectionViewport preserves callback altitude in meters and meter targetZ', () => {
   const viewport = new CustomProjectionViewport({
     ...options,
     pitch: 30,
+    getUnitsPerMeter: () => [2, 3, 7],
     projection: {
       forward: p => [p[0], p[1], (p[2] || 0) + 10],
       inverse: p => [p[0], p[1], p[2] - 10]
     }
   });
   const projected = viewport.preproject!([10, 20, 30]);
+  expect(projected[2]).toBe(40);
+  expect(viewport.projectPosition(projected)[2]).toBeCloseTo((40 * 7 * 512) / 360);
   expect(viewport.postUnproject!(projected)![2]).toBeCloseTo(30);
   const common = [230, 260, 5];
   const pixel = viewport.project(common);
