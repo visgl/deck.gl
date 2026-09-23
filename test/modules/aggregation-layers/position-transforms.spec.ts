@@ -25,6 +25,7 @@ function createViewport(signature: string, projected: boolean, scale = 2, resolu
         width: 400,
         height: 300,
         projectionId: signature,
+        coordinateSystem: 'meter-offsets',
         projection: {
           forward: ([x, y, z = 0]) => [x * scale, y * scale, z * scale],
           inverse: ([x, y, z = 0]) => [x / scale, y / scale, z / scale]

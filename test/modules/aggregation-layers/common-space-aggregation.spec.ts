@@ -34,12 +34,16 @@ function createViewport(signature = 'initial', scale = 1) {
     width: 400,
     height: 300,
     projectionId: signature,
+    coordinateSystem: 'meter-offsets',
     projection: {
       forward: p => project(p).map(v => v * scale),
       inverse: ([x, y, z = 0]) => [Math.sqrt(x / scale), y / (3 * scale), z / scale]
     },
     outputBounds: [0, 0, 512, 512]
   });
+  // Keep cell sizes identical to the Cartesian reference: these tests isolate
+  // position preprocessing, not the converter's meter-scale distortion.
+  viewport.distanceScales = {unitsPerMeter: [1, 1, 1], metersPerUnit: [1, 1, 1]};
   // Count data preprojection, not constructor inverse validation.
   vi.spyOn(viewport, 'preproject');
   return viewport;
@@ -49,7 +53,7 @@ function createReferenceViewport(viewport: CustomProjectionViewport) {
   return new Viewport({
     width: viewport.width,
     height: viewport.height,
-    position: viewport.target,
+    position: viewport.center,
     viewMatrix: viewport.viewMatrixUncentered,
     projectionMatrix: viewport.projectionMatrix
   });

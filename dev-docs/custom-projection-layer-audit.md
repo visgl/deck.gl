@@ -117,9 +117,9 @@ projection-change invalidation.
 `test/modules/aggregation-layers/position-transforms.spec.ts` separately covers
 aggregation position attributes and HeatmapLayer's packed WebGPU layout.
 
-`test/render/test-cases/custom-projection-aggregation.spec.ts` renders an Albers
+`test/render/test-cases/custom-projection.spec.ts` also renders an Albers
 equal-area conic grid spanning [-135, 30, -45, 75]. Its 4,186 deterministic points
-form two smooth weight peaks. Contour isolines/isobands and pitched, extruded
+form two smooth weight peaks. Contour isolines/isobands and flat, top-down
 hexagons compare CPU and GPU aggregation against shared baselines; HeatmapLayer
 checks the projected weight texture against the same geographic boundary.
 The suite uses the existing render test configuration.
