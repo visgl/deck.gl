@@ -155,7 +155,22 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
-        update: attribute => (attribute.value = this.state.mesh.positions),
+        ...this.usePositionTransforms(),
+        update: function (this: BitmapLayer, attribute) {
+          const {positions} = this.state.mesh;
+          const {transform} = attribute.settings;
+          if (!transform) {
+            attribute.value = positions;
+            return;
+          }
+          // Custom updaters do not run Attribute's accessor transform. Keep the source
+          // mesh untouched so projection/modelMatrix changes always start from input space.
+          const projected = new Float64Array(positions.length);
+          for (let i = 0; i < positions.length; i += 3) {
+            projected.set(transform.call(this, positions.subarray(i, i + 3)), i);
+          }
+          attribute.value = projected;
+        },
         noAlloc
       },
       texCoords: {
@@ -176,7 +191,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       attributeManager.invalidateAll();
     }
 
-    if (props.bounds !== oldProps.bounds) {
+    if (props.bounds !== oldProps.bounds || changeFlags.projectionChanged) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
       this.state.model!.setVertexCount(mesh.vertexCount);

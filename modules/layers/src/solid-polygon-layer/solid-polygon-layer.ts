@@ -206,6 +206,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         noAlloc
       },
       vertexPositions: {
+        ...this.usePositionTransforms(),
         size: 3,
         type: 'float64',
         stepMode: 'dynamic',
@@ -348,8 +349,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   protected updateGeometry({props, oldProps, changeFlags}: UpdateParameters<this>) {
+    const projectionChanged =
+      changeFlags.projectionChanged ||
+      (this.context.viewport.preproject && props.modelMatrix !== oldProps.modelMatrix);
     const geometryConfigChanged =
       changeFlags.dataChanged ||
+      projectionChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
@@ -364,12 +369,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         geometryBuffer: buffers.getPolygon,
         buffers,
         getGeometry: props.getPolygon,
+        transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
         wrapLongitude: props.wrapLongitude,
         // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
         fp64: this.use64bitPositions(),
-        dataChanged: changeFlags.dataChanged,
+        dataChanged: projectionChanged ? undefined : changeFlags.dataChanged,
         full3d: props._full3d
       });
 
@@ -378,7 +384,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         startIndices: polygonTesselator.vertexStarts
       });
 
-      if (!changeFlags.dataChanged) {
+      if (!changeFlags.dataChanged || projectionChanged) {
+        // Projection changes affect all triangles, even alongside a partial data update.
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
         this.getAttributeManager()!.invalidateAll();
