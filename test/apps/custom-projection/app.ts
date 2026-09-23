@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Deck, CustomProjectionView} from '@deck.gl/core';
+import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import type {FeatureCollection, LineString} from 'geojson';
 import type {ProjectionName} from './projections';
 import {GeoJsonLayer} from '@deck.gl/layers';
@@ -53,7 +53,6 @@ function createView(name: ProjectionName): CustomProjectionView {
     projection,
     inputBounds,
     outputBounds,
-    inputUnits: 'degrees',
     resolution: 5,
     controller: true
   });
@@ -61,7 +60,7 @@ function createView(name: ProjectionName): CustomProjectionView {
 
 const deck = new Deck({
   views: createView('equalEarth'),
-  initialViewState: {target: [256, 256, 0], zoom: 0.8, rotationX: 0, rotationOrbit: 0},
+  initialViewState: {center: [256, 256, 0], zoom: 0.8, pitch: 0, bearing: 0},
   layers: [
     new GeoJsonLayer({
       id: 'countries',
