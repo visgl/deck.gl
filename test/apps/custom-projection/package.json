@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --config ../vite.config.local.mjs",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "proj4": "^2.22.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}

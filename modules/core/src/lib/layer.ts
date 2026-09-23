@@ -23,6 +23,7 @@ import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
+import {vec3} from '@math.gl/core';
 
 import {load} from '@loaders.gl/core';
 
@@ -367,9 +368,23 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.props.loadOptions;
   }
 
+  /** Opt an attribute into viewport projection and automatic position invalidation.
+   * A layer must retain the same preprojection capability throughout its lifetime.
+   */
+  usePositionTransforms(): Pick<
+    import('./attribute/attribute').AttributeOptions,
+    'transformSource' | 'transform'
+  > {
+    return {
+      transformSource: 'projection',
+      transform: this.context.viewport.preproject ? transformPosition : null
+    };
+  }
+
   use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
+      Boolean(this.context?.viewport?.preproject) ||
       coordinateSystem === 'default' ||
       coordinateSystem === 'lnglat' ||
       coordinateSystem === 'cartesian'
@@ -602,6 +617,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Call subclass lifecycle method
     return (
       this.internalState.needsUpdate ||
+      this.internalState.changeFlags.projectionChanged ||
       this.hasUniformTransition() ||
       this.shouldUpdateState(this._getUpdateParams())
     );
@@ -623,7 +639,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this.internalState.viewport = viewport;
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
-      this.setChangeFlags({viewportChanged: true});
+      this.setChangeFlags({
+        viewportChanged: true,
+        projectionChanged:
+          Boolean(oldViewport?.preproject || viewport.preproject) &&
+          oldViewport?.projectionSignature !== viewport.projectionSignature
+      });
 
       if (this.isComposite) {
         if (this.needsUpdate()) {
@@ -1072,6 +1093,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       const updateParams = this._getUpdateParams();
       const oldModels = this.getModels();
+      if (
+        updateParams.changeFlags.projectionChanged ||
+        (context.viewport.preproject &&
+          updateParams.props.modelMatrix !== updateParams.oldProps.modelMatrix)
+      ) {
+        const attributeManager = this.getAttributeManager();
+        for (const [name, attribute] of Object.entries(attributeManager?.attributes || {})) {
+          if (attribute.settings.transformSource === 'projection') {
+            attributeManager!.invalidate(name);
+          }
+        }
+      }
 
       // Safely call subclass lifecycle methods
       if (context.device) {
@@ -1245,7 +1278,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     );
     changeFlags.propsOrDataChanged = propsOrDataChanged;
     changeFlags.somethingChanged =
-      propsOrDataChanged || changeFlags.viewportChanged || changeFlags.stateChanged;
+      propsOrDataChanged ||
+      changeFlags.viewportChanged ||
+      changeFlags.projectionChanged ||
+      changeFlags.stateChanged;
   }
   /* eslint-enable complexity */
 
@@ -1257,6 +1293,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       propsChanged: false,
       updateTriggersChanged: false,
       viewportChanged: false,
+      projectionChanged: false,
       stateChanged: false,
       extensionsChanged: false,
       propsOrDataChanged: false,
@@ -1517,4 +1554,14 @@ function equalAttachmentFormats(left?: (string | null)[], right?: (string | null
     }
   }
   return true;
+}
+
+// Resolve the current layer at invocation: layer instances are replaced while attributes survive.
+function transformPosition(this: Layer, input: number[]): [number, number, number] {
+  const position: [number, number, number] = [input[0], input[1], input[2] ?? 0];
+  if (this.props.modelMatrix) {
+    // Transform the local copy in place without allocating a matrix for each vertex.
+    vec3.transformMat4(position, position, this.props.modelMatrix);
+  }
+  return this.context.viewport.preproject!(position);
 }
