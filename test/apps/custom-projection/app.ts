@@ -60,6 +60,15 @@ function createView(name: ProjectionName): CustomProjectionView {
   });
 }
 
+// Equal physical radii at regularly spaced input coordinates expose local scale
+// variation without relying on the remote datasets.
+const scaleProbes: [number, number][] = [];
+for (let longitude = -165; longitude <= 165; longitude += 30) {
+  for (let latitude = -75; latitude <= 75; latitude += 15) {
+    scaleProbes.push([longitude, latitude]);
+  }
+}
+
 const deck = new Deck({
   views: createView('equalEarth'),
   initialViewState: {center: [0, 0, 0], zoom: 1},
@@ -72,7 +81,8 @@ const deck = new Deck({
       stroked: true,
       getFillColor: [50, 100, 120],
       getLineColor: [150, 195, 200],
-      lineWidthMinPixels: 0.5,
+      lineWidthUnits: 'meters',
+      getLineWidth: 12000,
       pickable: true
     }),
     new GeoJsonLayer({
@@ -91,6 +101,15 @@ const deck = new Deck({
       pointRadiusUnits: 'meters',
       getPointRadius: 25000,
       getFillColor: [255, 170, 80],
+      pickable: true
+    }),
+    new ScatterplotLayer({
+      id: 'meter-scale-probes',
+      data: scaleProbes,
+      getPosition: position => position,
+      radiusUnits: 'meters',
+      getRadius: 80000,
+      getFillColor: [255, 80, 150, 180],
       pickable: true
     }),
     new LineLayer({
