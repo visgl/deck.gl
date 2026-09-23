@@ -57,10 +57,16 @@ struct ProjectUniforms {
   coordinateOrigin: vec3<f32>,
   commonOrigin: vec3<f32>,
   pseudoMeters: i32,
+  sizeScaleSize: i32,
 };
 
 @group(0) @binding(auto)
 var<uniform> project: ProjectUniforms;
+
+#ifdef USE_EXTERNAL_PROJECTION
+@group(0) @binding(auto)
+var<storage, read> project_sizeScaleBuffer: array<vec4<f32>>;
+#endif
 
 // -----------------------------------------------------------------------------
 // Geometry data shared across the project helpers.
@@ -117,20 +123,63 @@ fn project_size() -> f32 {
   return 1.0;
 }
 
+#ifdef USE_EXTERNAL_PROJECTION
+// Nearest-record Taylor reconstruction: x=scalar XY scale, yz=slopes per common
+// unit, w=Z scale. x=0 marks invalid samples. One load preserves instance aspect ratio.
+// Alternatives if discontinuities/accuracy become visible: blend four local Taylor
+// estimates for continuity, or use four-fetch bicubic Hermite with a mixed derivative
+// for higher accuracy (which would require moving Z scale out of w).
+fn project_external_size_scale_at(mapPosition: vec2<f32>) -> vec3<f32> {
+  if (project.sizeScaleSize <= 0) { return project.commonUnitsPerMeter; }
+  let commonPosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
+  if (any(commonPosition < vec2<f32>(0.0)) || any(commonPosition > vec2<f32>(512.0))) {
+    return project.commonUnitsPerMeter;
+  }
+  let dimensions = vec2<i32>(project.sizeScaleSize);
+  let index = clamp(vec2<i32>(floor(commonPosition / 512.0 * vec2<f32>(dimensions))),
+    vec2<i32>(0), dimensions - 1);
+  let record = project_sizeScaleBuffer[u32(index.y * project.sizeScaleSize + index.x)];
+  if (record.x <= 0.0) { return project.commonUnitsPerMeter; }
+  let center = (vec2<f32>(index) + 0.5) * 512.0 / vec2<f32>(dimensions);
+  let scale = max(0.0, record.x + dot(record.yz, commonPosition - center));
+  return vec3<f32>(scale, scale, record.w * scale / record.x) * project.commonUnitsPerWorldUnit;
+}
+
+fn project_external_size_scale() -> vec3<f32> {
+  return project_external_size_scale_at(select((project.modelMatrix * vec4<f32>(geometry.worldPosition, 1.0)).xy + project.commonOrigin.xy / project.commonUnitsPerWorldUnit.xy - project.coordinateOrigin.xy,
+    (geometry.position.xy + project.commonOrigin.xy) / project.commonUnitsPerWorldUnit.xy, geometry.position.w != 0.0));
+}
+
+#endif
+
 // Overloads to scale offsets (meters to world units)
 fn project_size_float(meters: f32) -> f32 {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) { return meters * project_external_size_scale().z; }
+#endif
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 fn project_size_vec2(meters: vec2<f32>) -> vec2<f32> {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) { return meters * project_external_size_scale().xy; }
+#endif
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 fn project_size_vec3(meters: vec3<f32>) -> vec3<f32> {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) { return meters * project_external_size_scale(); }
+#endif
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
 fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    return vec4<f32>(meters.xyz * project_external_size_scale(), meters.w);
+  }
+#endif
   return vec4<f32>(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
@@ -255,6 +304,17 @@ fn project_common_position_to_flat_continuous(commonPosition: vec3<f32>, referen
 fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {
   var position_world = project.modelMatrix * position;
 
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    let low = (project.modelMatrix * vec4<f32>(position64Low, 0.0)).xyz;
+    let mapPosition = position_world.xy + low.xy + project.commonOrigin.xy / project.commonUnitsPerWorldUnit.xy - project.coordinateOrigin.xy;
+    var altitudeScale = project.commonUnitsPerMeter.z;
+#ifdef USE_EXTERNAL_PROJECTION
+    altitudeScale = project_external_size_scale_at(mapPosition).z;
+#endif
+    return vec4<f32>((position_world.xy - project.coordinateOrigin.xy + low.xy) * project.commonUnitsPerWorldUnit.xy,
+      (position_world.z + low.z + project.commonOrigin.z / project.commonUnitsPerWorldUnit.z - project.coordinateOrigin.z) * altitudeScale - project.commonOrigin.z, position_world.w);
+  }
+
   // Work around for a Mac+NVIDIA bug:
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
@@ -352,6 +412,11 @@ fn project_pixel_size_to_clipspace(pixels: vec2<f32>) -> vec2<f32> {
 }
 
 fn project_meter_size_to_pixel(meters: f32) -> f32 {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    return meters * project_external_size_scale().x * project.scale;
+  }
+#endif
   return project_size_float(meters) * project.scale;
 }
 

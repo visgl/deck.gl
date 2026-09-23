@@ -111,7 +111,7 @@ export function getWorldPosition(
       return [
         (x + coordinateOrigin[0]) * scale[0],
         (y + coordinateOrigin[1]) * scale[1],
-        (z + coordinateOrigin[2]) * scale[2]
+        (z + coordinateOrigin[2]) * viewport.getDistanceScales([x + coordinateOrigin[0], y + coordinateOrigin[1]]).unitsPerMeter[2]
       ];
     }
     return viewport.projectPosition([x, y, z]);

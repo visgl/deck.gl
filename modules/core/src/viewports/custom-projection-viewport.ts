@@ -1,7 +1,26 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-
+    if (!toBounds.every(Number.isFinite) || toBounds[2] <= toBounds[0] || toBounds[3] <= toBounds[1]) {
+      throw new Error('CustomProjectionViewport requires finite, increasing toBounds');
+    }
+    const spherical = isSphericalCrs(fromCrs);
+    const localUnitsPerMeter = (mapPosition: number[]): [number, number, number] => {
+      if (opts.getDistanceScale) {
+        const scale = opts.getDistanceScale([mapPosition[0], mapPosition[1]]);
+        if (scale.length !== 2 || !scale.every(value => Number.isFinite(value) && value > 0)) {
+          throw new Error('getDistanceScale must return two finite, positive scales');
+        }
+        return [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
+      }
+      if (spherical === undefined) return [1, 1, 1];
+      const world = projection.inverse([mapPosition[0], mapPosition[1], 0]);
+      return world ? estimateUnitsPerMeter(projection, world, spherical, fromBounds) : [1, 1, 1];
+    };
+    const localScale = localUnitsPerMeter(projection.forward(worldCenter));
+    const unitsPerMeter = localScale.map(
+      value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
+    ) as [number, number, number];
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales} from './viewport';
 import {

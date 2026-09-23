@@ -144,7 +144,7 @@ export default class ScreenGridLayer<
               viewport.preproject && this.props.coordinateSystem !== 'cartesian'
                 ? worldToPixels(
                     positions.map(
-                      (value, axis) => value * viewport.distanceScales.unitsPerWorldUnit[axis]
+                      (value, axis) => value * (axis === 2 ? viewport.getDistanceScales(positions).unitsPerMeter[2] : viewport.distanceScales.unitsPerWorldUnit[axis])
                     ),
                     viewport.pixelProjectionMatrix
                   )
