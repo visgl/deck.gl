@@ -204,19 +204,21 @@ fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   ) * D;
 }
 
-// Inverse of project_globe_ followed by a Mercator projection: converts a position in
-// globe common space (sphere XYZ) into absolute Mercator common space.
+// Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
+const MAX_MERCATOR_Y: f32 = 7.0439589847;
+
+// Inverse of project_globe_ followed by project_mercator_, without forming lat/lng:
+// Mercator y = atanh(sin(lat)) = log((D + |z|) / |xy|), which stays accurate near the poles
 fn project_globe_to_mercator_(spherePos: vec3<f32>) -> vec2<f32> {
   let D = length(spherePos);
-  let lat = degrees(asin(clamp(spherePos.z / D, -1.0, 1.0)));
-  let lng = degrees(atan2(spherePos.x, -spherePos.y));
-  return project_mercator_(vec2<f32>(lng, lat));
+  let h = max(length(spherePos.xy), 1e-20);
+  let y = sign(spherePos.z) * min(log((D + abs(spherePos.z)) / h), MAX_MERCATOR_Y);
+  let x = atan2(spherePos.x, -spherePos.y);
+  return (vec2<f32>(x, y) + PI) * WORLD_SCALE;
 }
 
-// Projects a common space position into FLAT common space: Web Mercator for geospatial
-// projections, cartesian for identity. Identity for flat projection modes; absolute Mercator
-// under GLOBE (do not add project.commonOrigin to it). See project.glsl.ts for details.
-// WGSL has no function overloading: pass position.xyz for a vec4.
+// Flat common space (Mercator or cartesian) of a common position; identity except under GLOBE.
+// WGSL has no function overloading: pass position.xyz for a vec4. See project.glsl.ts.
 fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     return project_globe_to_mercator_(commonPosition);
@@ -224,16 +226,12 @@ fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
   return commonPosition.xy;
 }
 
-// Moves a flat Mercator x to the world copy nearest to referenceX (within half a world width)
+// World copy of a flat x nearest to referenceX
 fn project_wrap_flat_x_(x: f32, referenceX: f32) -> f32 {
-  let t = x - referenceX + TILE_SIZE * 0.5;
-  return referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+  return x - TILE_SIZE * floor((x - referenceX) / TILE_SIZE + 0.5);
 }
 
-// project_common_position_to_flat with x moved to the world copy nearest to referenceX in every
-// geospatial projection mode (no-op for identity). For comparing against geospatial bounds or
-// sampling a texture of a geospatial region; pass the flat x of the bounds centre.
-// See project.glsl.ts for details.
+// Flat position in the world copy nearest to referenceX (e.g. a bounds centre); geospatial only
 fn project_common_position_to_flat_wrapped(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
   var flatPosition = project_common_position_to_flat(commonPosition);
   if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
@@ -242,9 +240,8 @@ fn project_common_position_to_flat_wrapped(commonPosition: vec3<f32>, referenceX
   return flatPosition;
 }
 
-// project_common_position_to_flat made continuous across the antimeridian for non-flat
-// projections (the seam moves to the antipode of referenceX; pass the camera's flat x). Identity
-// for flat projection modes. For periodic patterns. See project.glsl.ts for details.
+// Flat position continuous across the antimeridian under GLOBE (seam moved opposite referenceX,
+// e.g. the camera); identity for flat modes. For periodic patterns.
 fn project_common_position_to_flat_continuous(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
   var flatPosition = project_common_position_to_flat(commonPosition);
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {

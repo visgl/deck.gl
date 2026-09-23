@@ -182,26 +182,22 @@ vec3 project_globe_(vec3 lnglatz) {
   ) * D;
 }
 
-// Inverse of project_globe_ followed by a Mercator projection: converts a position in
-// globe common space (sphere XYZ) into absolute Mercator common space.
+// Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
+const float MAX_MERCATOR_Y = 7.0439589847;
+
+// Inverse of project_globe_ followed by project_mercator_, without forming lat/lng:
+// Mercator y = atanh(sin(lat)) = log((D + |z|) / |xy|), which stays accurate near the poles
 vec2 project_globe_to_mercator_(vec3 spherePos) {
   float D = length(spherePos);
-  float lat = degrees(asin(clamp(spherePos.z / D, -1.0, 1.0)));
-  float lng = degrees(atan(spherePos.x, -spherePos.y));
-  return project_mercator_(vec2(lng, lat));
+  float h = max(length(spherePos.xy), 1e-20);
+  float y = sign(spherePos.z) * min(log((D + abs(spherePos.z)) / h), MAX_MERCATOR_Y);
+  float x = atan(spherePos.x, -spherePos.y);
+  return (vec2(x, y) + PI) * WORLD_SCALE;
 }
 
-//
-// Projects a common space position (geometry.position, or the output of project_position)
-// into FLAT common space: Web Mercator for geospatial projections, cartesian for identity.
-// Identity for flat projection modes, so the result stays in the same frame as
-// geometry.position (offset-relative under WEB_MERCATOR_AUTO_OFFSET). Under GLOBE the result
-// is absolute Mercator: do NOT add project.commonOrigin to it (for meter-offsets on the globe
-// commonOrigin is a sphere position, not a Mercator one).
-// Use when sampling a texture or testing bounds produced by a flat viewport (mask FBO, clip
-// bounds, fill pattern UVs, terrain height map).
-// Adding a non-flat projection mode: invert it HERE. This is the single GPU switch point.
-//
+// Flat common space (Mercator or cartesian) of a common position; identity except under GLOBE.
+// For sampling textures or testing bounds produced by a flat viewport. Do not add
+// project.commonOrigin to a GLOBE result. Adding a non-flat projection mode: invert it here.
 vec2 project_common_position_to_flat(vec3 commonPosition) {
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     return project_globe_to_mercator_(commonPosition);
@@ -213,20 +209,12 @@ vec2 project_common_position_to_flat(vec4 commonPosition) {
   return project_common_position_to_flat(commonPosition.xyz);
 }
 
-// Moves a flat Mercator x to the world copy nearest to referenceX (within half a world width)
+// World copy of a flat x nearest to referenceX
 float project_wrap_flat_x_(float x, float referenceX) {
-  float t = x - referenceX + TILE_SIZE * 0.5;
-  return referenceX + t - TILE_SIZE * floor(t / TILE_SIZE) - TILE_SIZE * 0.5;
+  return x - TILE_SIZE * floor((x - referenceX) / TILE_SIZE + 0.5);
 }
 
-//
-// project_common_position_to_flat, with x moved to the world copy nearest to referenceX in every
-// geospatial projection mode (no-op for identity). Use when comparing against geospatial bounds
-// or sampling a texture of a geospatial region: pass the flat x of the bounds centre. Bounds that
-// cross the antimeridian are unwrapped past one world width by the CPU helper
-// (projectBoundsToFlatCommon), and this brings positions on either side of 180° into their frame.
-// Under GLOBE this also keeps geometry that spans the antimeridian continuous, see below.
-//
+// Flat position in the world copy nearest to referenceX (e.g. a bounds centre); geospatial only
 vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX) {
   vec2 flatPosition = project_common_position_to_flat(commonPosition);
   if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
@@ -239,15 +227,8 @@ vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenc
   return project_common_position_to_flat_wrapped(commonPosition.xyz, referenceX);
 }
 
-//
-// project_common_position_to_flat, made continuous across the antimeridian for non-flat
-// projections. A sphere has no seam, but its flat inverse does: at 180° longitude x jumps by
-// TILE_SIZE, so a triangle spanning the antimeridian would interpolate across a whole world
-// width. Under GLOBE every vertex is moved to the world copy nearest to referenceX, which moves
-// the seam to the antipode of the reference; pass the camera's flat x so it is never visible.
-// Identity for flat projection modes, where positions are already continuous. Use for periodic
-// patterns, which must not jump at world boundaries on a flat map.
-//
+// Flat position continuous across the antimeridian under GLOBE (seam moved opposite referenceX,
+// e.g. the camera); identity for flat modes. For periodic patterns.
 vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX) {
   vec2 flatPosition = project_common_position_to_flat(commonPosition);
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {

@@ -73,12 +73,12 @@ test('projection-utils#projectToFlatCommon pairs with project_common_position_to
         onAfterUpdate: ({layer}) => {
           // The layer's own projection is sphere XYZ (radius GLOBE_RADIUS = 256)...
           const sphere = layer.projectPosition(POSITION);
-          expect(Math.hypot(sphere[0], sphere[1], sphere[2])).toBeCloseTo(256, 3);
+          expect(Math.hypot(sphere[0], sphere[1], sphere[2])).toBeCloseTo(256, 12);
           // ...while the flat helper yields absolute Mercator common space
           const flat = projectToFlatCommon(layer, POSITION);
           const [x, y] = lngLatToMercatorCommon(POSITION);
-          expect(flat[0]).toBeCloseTo(x, 6);
-          expect(flat[1]).toBeCloseTo(y, 6);
+          expect(flat[0]).toBeCloseTo(x, 12);
+          expect(flat[1]).toBeCloseTo(y, 12);
         }
       },
       {
@@ -144,8 +144,8 @@ test('projection-utils#projectToFlatCommon mirrors the globe METER_OFFSETS shade
           const expected = lngLatToMercatorCommon(globeViewport.unprojectPosition(sphere));
 
           const flat = projectToFlatCommon(layer, offset);
-          expect(flat[0]).toBeCloseTo(expected[0], 6);
-          expect(flat[1]).toBeCloseTo(expected[1], 6);
+          expect(flat[0]).toBeCloseTo(expected[0], 12);
+          expect(flat[1]).toBeCloseTo(expected[1], 12);
 
           // The lng/lat route is not the shader's twin at this distance
           const viaLngLat = layer.projectPosition(offset, {
@@ -177,19 +177,19 @@ test('projection-utils#projectBoundsToFlatCommon unwraps bounds across the antim
           const [xMinus170] = lngLatToMercatorCommon([-170, 0]);
           // left edge east of the right edge: the right edge is one world width further on
           const crossing = projectBoundsToFlatCommon(layer, [170, -20, -170, 20]);
-          expect(crossing[0]).toBeCloseTo(x170, 6);
-          expect(crossing[2]).toBeCloseTo(xMinus170 + 512, 6);
-          expect(crossing[2] - crossing[0]).toBeCloseTo((20 / 360) * 512, 6);
+          expect(crossing[0]).toBeCloseTo(x170, 12);
+          expect(crossing[2]).toBeCloseTo(xMinus170 + 512, 12);
+          expect(crossing[2] - crossing[0]).toBeCloseTo((20 / 360) * 512, 12);
           // ordinary bounds are untouched
           const plain = projectBoundsToFlatCommon(layer, [-170, -20, 170, 20]);
-          expect(plain[0]).toBeCloseTo(xMinus170, 6);
-          expect(plain[2]).toBeCloseTo(x170, 6);
+          expect(plain[0]).toBeCloseTo(xMinus170, 12);
+          expect(plain[2]).toBeCloseTo(x170, 12);
           // edges less than 180° apart in the wrong order are re-ordered, not unwrapped
           const [x10] = lngLatToMercatorCommon([10, 0]);
           const [x20] = lngLatToMercatorCommon([20, 0]);
           const reversed = projectBoundsToFlatCommon(layer, [20, 20, 10, -20]);
-          expect(reversed[0]).toBeCloseTo(x10, 6);
-          expect(reversed[2]).toBeCloseTo(x20, 6);
+          expect(reversed[0]).toBeCloseTo(x10, 12);
+          expect(reversed[2]).toBeCloseTo(x20, 12);
         }
       },
       {
@@ -197,7 +197,7 @@ test('projection-utils#projectBoundsToFlatCommon unwraps bounds across the antim
         viewport: mercatorViewport,
         onAfterUpdate: ({layer}) => {
           const crossing = projectBoundsToFlatCommon(layer, [170, -20, -170, 20]);
-          expect(crossing[2] - crossing[0]).toBeCloseTo((20 / 360) * 512, 6);
+          expect(crossing[2] - crossing[0]).toBeCloseTo((20 / 360) * 512, 12);
         }
       }
     ]
