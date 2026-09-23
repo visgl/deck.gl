@@ -4,13 +4,14 @@
 
 import {test, expect} from 'vitest';
 import {
-  CustomProjectionViewport,
-  CustomProjectionView,
+  _CustomProjectionViewport as CustomProjectionViewport,
+  _CustomProjectionView as CustomProjectionView,
   WebMercatorViewport,
   project
 } from '@deck.gl/core';
 import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection-controller';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
+import {lngLatToWorld, worldToLngLat, getDistanceScales} from '@math.gl/web-mercator';
 
 const projection = {forward: p => p.slice(), inverse: p => p.slice()};
 const options = {
@@ -37,39 +38,91 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   );
 });
 
-test('CustomProjectionViewport matches Web Mercator XY', () => {
-  const mercator = new WebMercatorViewport({width: 800, height: 600});
-  const viewport = new CustomProjectionViewport({
-    ...options,
-    outputBounds: [0, 0, 512, 512],
-    projection: {forward: p => mercator.projectFlat(p), inverse: p => mercator.unprojectFlat(p)}
-  });
-  for (const point of [
-    [0, 0],
-    [-122, 38],
-    [120, -45]
-  ]) {
-    const actual = viewport.preproject!(point);
-    const expected = mercator.projectFlat(point);
-    expect(actual[0]).toBeCloseTo(expected[0], 10);
-    expect(actual[1]).toBeCloseTo(expected[1], 10);
+// Independent converter: do not delegate to the viewport being used as the reference.
+const webMercator = {
+  forward: ([longitude, latitude, altitude = 0]) => [
+    ...lngLatToWorld([longitude, latitude]),
+    altitude * getDistanceScales({longitude, latitude}).unitsPerMeter[2]
+  ],
+  inverse: ([x, y, z = 0]) => {
+    const [longitude, latitude] = worldToLngLat([x, y]);
+    return [longitude, latitude, z / getDistanceScales({longitude, latitude}).unitsPerMeter[2]];
   }
-});
+};
+
+for (const orthographic of [false, true]) {
+  for (const [pitch, bearing] of [
+    [0, 0],
+    [45, 0],
+    [0, 60],
+    [50, -35]
+  ]) {
+    test(`CustomProjectionViewport matches Web Mercator camera: pitch=${pitch}, bearing=${bearing}, orthographic=${orthographic}`, () => {
+      for (const [longitude, latitude, zoom] of [
+        [0, 0, 0],
+        [-122, 38, 5],
+        [120, -45, 13]
+      ]) {
+        for (const padding of [null, {left: 80, right: 20, top: 30, bottom: 70}]) {
+          const camera = {
+            width: 800,
+            height: 600,
+            longitude,
+            latitude,
+            zoom,
+            pitch,
+            bearing,
+            orthographic,
+            padding
+          };
+          const mercator = new WebMercatorViewport(camera);
+          const viewport = new CustomProjectionViewport({
+            ...camera,
+            projection: webMercator,
+            outputBounds: [0, 0, 512, 512],
+            target: [...lngLatToWorld([longitude, latitude]), 0]
+          });
+          for (const key of ['center', 'viewMatrix', 'projectionMatrix'] as const) {
+            Array.from(mercator[key]).forEach((value, index) => {
+              expect(viewport[key][index], key).toBeCloseTo(value, 8);
+            });
+          }
+          for (const point of [
+            [longitude, latitude, 0],
+            [longitude + 0.01, latitude - 0.02, 100]
+          ]) {
+            const common = viewport.preproject!(point);
+            mercator.projectPosition(point).forEach((value, index) => {
+              expect(common[index], 'common space').toBeCloseTo(value, 8);
+            });
+            for (const topLeft of [false, true]) {
+              const actual = viewport.project(common, {topLeft});
+              mercator.project(point, {topLeft}).forEach((value, index) => {
+                expect(actual[index], 'screen space').toBeCloseTo(value, 6);
+              });
+              const inverse = viewport.postUnproject!(viewport.unproject(actual, {topLeft}))!;
+              point.forEach((value, index) => expect(inverse[index]).toBeCloseTo(value, 3));
+            }
+          }
+        }
+      }
+    });
+  }
+}
 
 test('CustomProjectionViewport anchors pan and zoom in common space on z=0', () => {
   const makeViewport = props =>
     new CustomProjectionViewport({
       ...options,
-      ...props,
-      pitch: props.rotationX,
-      bearing: props.rotationOrbit
+      ...props
     });
   const state = new CustomProjectionState({
     width: 800,
     height: 600,
     target: [256, 256, 0],
-    rotationX: 45,
-    rotationOrbit: 20,
+    pitch: 45,
+    bearing: 20,
+    maxBounds: null,
     makeViewport
   });
   const anchor = makeViewport(state.getViewportProps()).unproject([300, 350]);
