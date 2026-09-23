@@ -90,8 +90,8 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       assert(data.startIndices); // binary data missing startIndices
       this.geometryAccessor = this.getGeometryFromBuffer(geometryBuffer);
 
-      if (!normalize) {
-        // skip packing and set attribute value directly
+      if (!normalize && !this.opts.transform) {
+        // Only untransformed geometry can use the input buffer directly.
         // TODO - avoid mutating user-provided object
         buffers.vertexPositions = geometryBuffer;
       }
@@ -150,7 +150,8 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
 
     // @ts-ignore (2322) NumericArray not assignable to GeometryT
     return getAccessorFromBuffer(value, {
-      size: this.positionSize,
+      // The buffer still contains input coordinates; transforms produce XYZ afterwards.
+      size: this.inputPositionSize,
       offset: (geometryBuffer as BinaryAttribute).offset,
       stride: (geometryBuffer as BinaryAttribute).stride,
       startIndices: this.data.startIndices
