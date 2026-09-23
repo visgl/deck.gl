@@ -4528,7 +4528,7 @@ cwise-compiler@^1.0.0, cwise-compiler@^1.1.2:
 
 "d3-array@2 - 3", "d3-array@2.10.0 - 3", d3-array@^3.2.0:
   version "3.2.4"
-  resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-3.2.4.tgz#15fec33b237f97ac5d7c986dc77da273a8ed0bb5"
+  resolved "https://socket-firewall-registry.gateway.unified-30.internal.api.openai.org/npm/d3-array/-/d3-array-3.2.4.tgz#15fec33b237f97ac5d7c986dc77da273a8ed0bb5"
   integrity sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==
   dependencies:
     internmap "1 - 2"
@@ -8467,6 +8467,14 @@ proj4@2.6.2:
     mgrs "1.0.0"
     wkt-parser "^1.2.4"
 
+proj4@^2.22.0:
+  version "2.22.0"
+  resolved "https://socket-firewall-registry.gateway.unified-30.internal.api.openai.org/npm/proj4/-/proj4-2.22.0.tgz#f4fa16ed0b158923be8713d67bf62e5e1400693f"
+  integrity sha512-MVvH09QrYm3A235rcX39WDiCKanrBiblu28l0KYIn/B2DofmYhvP/LLS43kE66jNDfx/P1l/nah3JmsAq8UgbQ==
+  dependencies:
+    mgrs "1.0.0"
+    wkt-parser "^1.5.5"
+
 promise-all-reject-late@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/promise-all-reject-late/-/promise-all-reject-late-1.0.1.tgz#f8ebf13483e5ca91ad809ccc2fcf25f26f8643c2"
@@ -10214,6 +10222,11 @@ wkt-parser@^1.2.4:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/wkt-parser/-/wkt-parser-1.3.3.tgz#46b4e3032dd9c86907f7e630b57e3c6ea2bb772b"
   integrity sha512-ZnV3yH8/k58ZPACOXeiHaMuXIiaTk1t0hSUVisbO0t4RjA5wPpUytcxeyiN2h+LZRrmuHIh/1UlrR9e7DHDvTw==
+
+wkt-parser@^1.5.5:
+  version "1.5.6"
+  resolved "https://socket-firewall-registry.gateway.unified-30.internal.api.openai.org/npm/wkt-parser/-/wkt-parser-1.5.6.tgz#3a19521914b2a21b7a8203590f5b180b9dba8dfa"
+  integrity sha512-cqHU3lzGt/gt2OqIORP0uVy5yeOX43WABmgFkmJsmcqH3HhQo9PiJG6ftytwGKmpQUbegeX7+pQc2BuNCRfcrw==
 
 wordwrap@^1.0.0:
   version "1.0.0"
