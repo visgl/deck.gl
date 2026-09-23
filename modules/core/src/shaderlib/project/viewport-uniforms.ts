@@ -57,6 +57,10 @@ export function getOffsetOrigin(
   }
 
   let shaderCoordinateOrigin = coordinateOrigin;
+  if (viewport.preproject) {
+    coordinateSystem = 'cartesian';
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+  }
   let geospatialOrigin: Vec3 | null;
   let offsetMode = true;
 
@@ -238,6 +242,12 @@ export function getUniformsFromViewport({
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
+  if (viewport.preproject) {
+    coordinateSystem = 'cartesian';
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+    modelMatrix = null;
+    autoWrapLongitude = false;
+  }
   if (coordinateSystem === 'default') {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
@@ -309,7 +319,9 @@ function calculateViewportUniforms({
 
     focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
+    commonUnitsPerWorldUnit: viewport.preproject
+      ? [1, 1, 1]
+      : (distanceScales.unitsPerMeter as Vec3),
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     wrapLongitude: false,

@@ -158,6 +158,14 @@ export default class Viewport {
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
   resolution?: number;
+  /** Optional input-coordinate to common-space conversion, performed before rendering. */
+  preproject: ((position: number[]) => [number, number, number]) | null = null;
+  /** Optional inverse conversion for user-facing coordinates; null means outside the domain. */
+  postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
+  /** Equal signatures must describe identical preprojection, including normalization. */
+  get projectionSignature(): unknown {
+    return null;
+  }
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
@@ -227,6 +235,7 @@ export default class Viewport {
       viewport.scale === this.scale &&
       viewport.projectionMode === this.projectionMode &&
       viewport.resolution === this.resolution &&
+      viewport.projectionSignature === this.projectionSignature &&
       equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
