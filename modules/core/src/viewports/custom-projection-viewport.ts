@@ -1,26 +1,7 @@
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
-    if (!toBounds.every(Number.isFinite) || toBounds[2] <= toBounds[0] || toBounds[3] <= toBounds[1]) {
-      throw new Error('CustomProjectionViewport requires finite, increasing toBounds');
-    }
-    const spherical = isSphericalCrs(fromCrs);
-    const localUnitsPerMeter = (mapPosition: number[]): [number, number, number] => {
-      if (opts.getDistanceScale) {
-        const scale = opts.getDistanceScale([mapPosition[0], mapPosition[1]]);
-        if (scale.length !== 2 || !scale.every(value => Number.isFinite(value) && value > 0)) {
-          throw new Error('getDistanceScale must return two finite, positive scales');
-        }
-        return [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
-      }
-      if (spherical === undefined) return [1, 1, 1];
-      const world = projection.inverse([mapPosition[0], mapPosition[1], 0]);
-      return world ? estimateUnitsPerMeter(projection, world, spherical, fromBounds) : [1, 1, 1];
-    };
-    const localScale = localUnitsPerMeter(projection.forward(worldCenter));
-    const unitsPerMeter = localScale.map(
-      value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
-    ) as [number, number, number];
+
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales} from './viewport';
 import {
@@ -53,6 +34,10 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
    * forward projection and after valid inverse projection; Z is unchanged.
    */
   fromBounds?: [number, number, number, number];
+  /** Map-meter extent in toCrs covered by local meter sizing. Defaults to the Web Mercator extent.
+   * Does not change position normalization or constrain navigation.
+   */
+  toBounds?: [number, number, number, number];
   /** Camera center in fromCrs world coordinates. Defaults to [0, 0, 0]; Z is locked to zero. */
   center?: [number, number, number];
   /** Map pitch in degrees. */
@@ -85,6 +70,7 @@ export default class CustomProjectionViewport extends Viewport {
     const {
       projection,
       fromBounds,
+      toBounds = [-EC / 2, -EC / 2, EC / 2, EC / 2],
       fromCrs = 'WGS84',
       toCrs,
       resolution = 0,
@@ -186,6 +172,124 @@ export default class CustomProjectionViewport extends Viewport {
     return PROJECTION_MODE.CUSTOM_GEOSPATIAL;
   }
 
+  /** Generate four-float records containing scalar XY scale, its X/Y slopes, and Z scale.
+   * Slopes are per sampler-space unit; a zero scalar marks an invalid record.
+   * Internal: generated on demand by the device resource owner, not on camera updates.
+   */
+  getSizeScaleData(size = 64): Float32Array {
+    const {projection, fromBounds} = this.scaleOptions;
+    const toBounds = this.scaleOptions.toBounds!;
+    const [minX, minY, maxX, maxY] = toBounds;
+    const normalization = NORMALIZATION_SCALE;
+    const data = new Float32Array(size * size * 4);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const common = [((x + 0.5) * 512) / size, ((y + 0.5) * 512) / size];
+        const output = [
+          minX + (common[0] / 512) * (maxX - minX),
+          minY + (common[1] / 512) * (maxY - minY),
+          0
+        ];
+        try {
+          if (output[0] < minX || output[0] > maxX || output[1] < minY || output[1] > maxY)
+            continue;
+          const input = projection.inverse(output);
+          if (!input || input.length < 2 || !input.every(Number.isFinite)) continue;
+          if (
+            fromBounds &&
+            (input[0] < fromBounds[0] ||
+              input[0] > fromBounds[2] ||
+              input[1] < fromBounds[1] ||
+              input[1] > fromBounds[3])
+          )
+            continue;
+          const roundTrip = projection.forward(input.slice());
+          if (
+            !roundTrip.every(Number.isFinite) ||
+            Math.hypot(roundTrip[0] - output[0], roundTrip[1] - output[1]) * normalization > 1e-5
+          )
+            continue;
+          const scale = this.localUnitsPerMeter!(output, input);
+          const commonScale = scale.map(value => Math.fround(value));
+          if (!commonScale.every(value => Number.isFinite(value) && value > 0)) continue;
+          const offset = (y * size + x) * 4;
+          data.set([commonScale[2], 0, 0, commonScale[2]], offset);
+        } catch {
+          // A failed inverse or derivative sample leaves an invalid, zero texel.
+        }
+      }
+    }
+    // Derive slopes from the sampled scalar field without more projection calls.
+    // Do not difference across invalid texels. Prefer centered differences, then
+    // second-order one-sided differences at boundaries, then a first-order fallback.
+    const spacing = 512 / size;
+    const sample = (x: number, y: number) =>
+      x >= 0 && x < size && y >= 0 && y < size ? data[(y * size + x) * 4] : 0;
+    const slope = (x: number, y: number, dx: number, dy: number) => {
+      const center = sample(x, y);
+      const before = sample(x - dx, y - dy);
+      const after = sample(x + dx, y + dy);
+      if (before > 0 && after > 0) return (after - before) / (2 * spacing);
+      if (after > 0) {
+        const next = sample(x + 2 * dx, y + 2 * dy);
+        return next > 0
+          ? (-3 * center + 4 * after - next) / (2 * spacing)
+          : (after - center) / spacing;
+      }
+      if (before > 0) {
+        const previous = sample(x - 2 * dx, y - 2 * dy);
+        return previous > 0
+          ? (3 * center - 4 * before + previous) / (2 * spacing)
+          : (center - before) / spacing;
+      }
+      return 0;
+    };
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const offset = (y * size + x) * 4;
+        if (data[offset] > 0) {
+          data[offset + 1] = slope(x, y, 1, 0);
+          data[offset + 2] = slope(x, y, 0, 1);
+        }
+      }
+    }
+    // Bleed one texel (including diagonals) into unsampled space. Instance positions
+    // are already preprojected: an invalid sample center need not mean an invalid
+    // instance position. Read only the original field so padding cannot cascade.
+    const padded = data.slice();
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const offset = (y * size + x) * 4;
+        if (data[offset] > 0) continue;
+        let nearestDistance = Infinity;
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const distance = dx * dx + dy * dy;
+            if (distance >= nearestDistance || sample(x + dx, y + dy) <= 0) continue;
+            const source = ((y + dy) * size + x + dx) * 4;
+            // Recenter the source's Taylor approximation, rather than copying its
+            // scale. Preserve its slopes and the ratio between Z and XY scales.
+            const scale = Math.fround(
+              data[source] - spacing * (dx * data[source + 1] + dy * data[source + 2])
+            );
+            if (!(scale > 0 && Number.isFinite(scale))) continue;
+            nearestDistance = distance;
+            padded.set(
+              [
+                scale,
+                data[source + 1],
+                data[source + 2],
+                (data[source + 3] * scale) / data[source]
+              ],
+              offset
+            );
+          }
+        }
+      }
+    }
+    return padded;
+  }
+
   /** Converts XY in map meters (toCrs) to common-space XY by applying the fixed scale.
    * Does not accept world coordinates in fromCrs or call projection.forward.
    * Ignores Z; use projectPosition to convert a world-coordinate XYZ position.
@@ -207,7 +311,7 @@ export default class CustomProjectionViewport extends Viewport {
     return [
       projected[0] * NORMALIZATION_SCALE,
       projected[1] * NORMALIZATION_SCALE,
-      projected[2] * NORMALIZATION_SCALE
+      projected[2] * this.getDistanceScales(projected).unitsPerMeter[2]
     ];
   }
 
@@ -217,7 +321,7 @@ export default class CustomProjectionViewport extends Viewport {
       this.postUnproject!([
         position[0] / NORMALIZATION_SCALE,
         position[1] / NORMALIZATION_SCALE,
-        (position[2] || 0) / NORMALIZATION_SCALE
+        (position[2] || 0) / this.getDistanceScales([position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE]).unitsPerMeter[2]
       ]) || [NaN, NaN, NaN]
     );
   }
