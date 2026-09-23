@@ -33,23 +33,11 @@ Zero width or height becomes `1`. Bounds must be finite and increasing. `resolut
 
 ## Coordinate Contract
 
-Three spaces are distinct:
+Supply layer positions in the coordinates accepted by `projection.forward`, such as longitude, latitude and altitude. The converter returns projected X/Y coordinates; `projection.inverse` converts them back, or returns `null` outside its domain.
 
-1. **Input coordinates**, such as longitude/latitude/altitude, belong to the application.
-2. **Output projection coordinates** are returned by `projection.forward(input)`. `projection.inverse(output)` converts back to input coordinates or returns `null` outside its domain.
-3. **Common coordinates** are the normalized output used by the camera and GPU.
+Altitude (Z) is in meters, including any Z returned by the converter. If the forward converter omits Z, the input altitude is retained, defaulting to zero. deck.gl handles altitude scaling; the converter should not scale altitude to match its projected X/Y units. Positive Z points out of the map.
 
-For `outputBounds: [minX, minY, maxX, maxY]`, let `scale = 512 / max(maxX - minX, maxY - minY)`. Normalization preserves aspect ratio, centers XY at `[256, 256]`, and maps the longest extent to 512 units:
-
-```text
-commonX = (outputX - (minX + maxX) / 2) * scale + 256
-commonY = (outputY - (minY + maxY) / 2) * scale + 256
-commonZ = outputZ * zScale * scale
-```
-
-If the forward converter omits Z, input Z is retained, defaulting to zero. Positive common Y points up and positive Z points out of the map. Conversion receives a copy of the input array. Optional `inputBounds` clamps XY but does not alter Z.
-
-For Web Mercator alignment, a converter that returns the usual 512-unit Mercator common coordinates and `outputBounds: [0, 0, 512, 512]` needs no additional normalization. Set `target` to the projected map center and use the same `zoom`, `pitch`, `bearing` and dimensions as `WebMercatorViewport`. Converting altitude in meters to common Z is the converter's responsibility.
+Conversion receives a copy of the input array. `inputBounds` clamps X/Y but does not alter altitude.
 
 ## Methods and Properties
 
@@ -57,23 +45,23 @@ Inherits [Viewport](./viewport.md) methods, with the following coordinate semant
 
 ### `preproject(position)`
 
-Converts an input position to `[commonX, commonY, commonZ]`. It is independent of the current camera position, zoom, pitch and bearing.
+Converts an input position to `[commonX, commonY, altitudeInMeters]`. It is independent of the current camera position, zoom, pitch and bearing.
 
 ### `postUnproject(position)`
 
-Converts common coordinates back to input coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `inputBounds`, if supplied.
+Converts preprojected X/Y and altitude in meters back to input coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `inputBounds`, if supplied.
 
 ### `project(position, options)`
 
-Projects **common coordinates** to screen pixels. Call `preproject` first for input coordinates. The inherited `topLeft` option defaults to `true`. Three-component input returns pixel depth as its third component.
+Projects preprojected X/Y and altitude in meters to screen pixels. Call `preproject` first for input coordinates. The inherited `topLeft` option defaults to `true`. Three-component input returns pixel depth as its third component.
 
 ### `unproject(pixels, options)`
 
-Returns **common coordinates**. If pixel depth is absent, `targetZ` selects a common-space plane, defaulting to zero; it is not a meter distance. Call `postUnproject` to recover input coordinates. `topLeft` defaults to `true`.
+Returns preprojected X/Y and altitude in meters. If pixel depth is absent, `targetZ` specifies altitude in meters, defaulting to zero. Call `postUnproject` to recover input coordinates. `topLeft` defaults to `true`.
 
 ### `projectPosition`, `unprojectPosition`, `projectFlat`, `unprojectFlat`
 
-These operate on common coordinates and do not call the converter. The position methods return XYZ (default Z `0`); the flat methods return XY.
+These do not call the converter. `projectPosition` converts altitude in meters to common Z; `unprojectPosition` reverses that conversion. Both preserve X/Y. The flat methods return X/Y unchanged.
 
 ### `panByPosition(position, pixel)`
 
