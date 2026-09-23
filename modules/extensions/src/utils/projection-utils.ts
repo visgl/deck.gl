@@ -7,7 +7,7 @@ import type {CoordinateSystem, Layer, ProjectUniforms, Viewport} from '@deck.gl/
 import {vec3, vec4} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core';
 
-/** World width in common units; TILE_SIZE in the project shader module */
+/** TILE_SIZE in the project shader module */
 const TILE_SIZE = 512;
 /** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
 const GLOBE_METERS_TO_COMMON = 256 / 6370972;
@@ -35,27 +35,16 @@ export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
   return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
 }
 
-/*
- * Flat common space
- * -----------------
- * Texture/bounds based extensions (mask, clip, fill pattern, terrain) index a FLAT plane:
- * Web Mercator for geospatial viewports, cartesian for OrthographicView. GlobeViewport's common
- * space is sphere XYZ, so positions must be converted. The GPU side is
- * `project_common_position_to_flat()` in the core `project` shader module; the helpers below are
- * its CPU twins.
- * Adding a non-flat projection: (1) core project.glsl.ts / project.wgsl.ts flatten branch,
- * (2) isFlatViewport() here, (3) a preset in test/render/view-presets.ts.
- */
+// Flat common space: Mercator (geospatial) or cartesian (OrthographicView). CPU counterparts of
+// project_common_position_to_flat(). Adding a non-flat projection: update the flatten branch in
+// core project.glsl.ts / project.wgsl.ts, isFlatViewport(), and test/render/view-presets.ts.
 
-/**
- * True when the viewport's common space is a flat plane. GlobeViewport is the only non-flat
- * viewport today. This is the only place in @deck.gl/extensions that tests for globe; swap the
- * body for a projectionMode comparison if core ever exports PROJECTION_MODE constants.
- */
+/** False only for GlobeViewport, whose common space is a sphere. The single globe check in this module. */
 export function isFlatViewport(viewport: Viewport): boolean {
   return !(viewport instanceof _GlobeViewport);
 }
 
+/** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
   fromCoordinateSystem?: CoordinateSystem;
   fromCoordinateOrigin?: [number, number, number];
@@ -63,13 +52,9 @@ export type FlatProjectOptions = {
 };
 
 /**
- * CPU twin of `project_common_position_to_flat(project_position(position))` for the viewport the
- * layer is drawn into:
- * - flat viewport: `Layer.projectPosition` with autoOffset, i.e. exactly `geometry.position`
- *   (offset-relative under WEB_MERCATOR_AUTO_OFFSET at zoom >= 12)
- * - non-flat viewport: absolute Mercator through the reference viewport (autoOffset off)
- * Always pair with the GPU function; a raw `layer.projectPosition()` on either side silently
- * disagrees in one of the two modes.
+ * CPU counterpart of `project_common_position_to_flat(project_position(position))`, relative to
+ * `getFlatCommonOrigin()`. Always pair with the GPU function: a raw `layer.projectPosition()`
+ * disagrees with it under globe or auto-offset.
  */
 export function projectToFlatCommon(
   layer: Layer,
@@ -92,11 +77,8 @@ export function projectToFlatCommon(
 }
 
 /**
- * Mirror of the GLOBE + METER_OFFSETS branch of `project_position()` followed by
- * `project_common_position_to_flat()`: the offset is applied linearly in the tangent (ENU) plane
- * of the sphere at the origin, and the displaced point is read back through the sphere's inverse.
- * Going through lng/lat first (as `Layer.projectPosition` does) diverges from the shader with the
- * square of the offset: about 200 m at 300 km.
+ * Mirrors the shader's GLOBE + METER_OFFSETS path: a linear offset in the tangent plane at the
+ * origin. Do not go through lng/lat; the error grows with the square of the offset (~200 m at 300 km).
  */
 function projectGlobeMeterOffsetsToFlatCommon(
   layer: Layer,
@@ -126,13 +108,10 @@ function projectGlobeMeterOffsetsToFlatCommon(
 }
 
 /**
- * Projects `[minX, minY, maxX, maxY]` in the layer's (or `opts.fromCoordinateSystem`) coordinates
- * into normalized flat common bounds. Lng/lat bounds whose left edge is more than 180° east of
- * their right edge cross the antimeridian (the shorter arc between the edges is the one meant):
- * the right edge is unwrapped by one world width, so `maxX` may exceed `TILE_SIZE`. Compare
- * positions against such bounds with
- * `project_common_position_to_flat_wrapped(position, 0.5 * (bounds.x + bounds.z))`.
- * Edges less than 180° apart are simply re-ordered, so `[right, top, left, bottom]` keeps working.
+ * Projects `[minX, minY, maxX, maxY]` into flat common bounds. Lng/lat bounds with
+ * `minX - maxX > 180` take the shorter arc across the antimeridian, so `maxX` may exceed TILE_SIZE;
+ * test against them with `project_common_position_to_flat_wrapped()` about the bounds centre.
+ * Otherwise edges are re-ordered, so `[right, top, left, bottom]` input still works.
  */
 export function projectBoundsToFlatCommon(
   layer: Layer,
@@ -165,9 +144,8 @@ function getSourceCoordinateSystem(layer: Layer, opts: FlatProjectOptions = {}):
 }
 
 /**
- * The origin that `project_common_position_to_flat()` results are relative to:
- * `project.commonOrigin` on flat viewports, `[0, 0]` on non-flat ones (absolute Mercator).
- * For GLOBE + meter-offsets, commonOrigin holds a sphere-space position that must never be re-added.
+ * Origin of `project_common_position_to_flat()` results: `project.commonOrigin` on flat viewports,
+ * `[0, 0]` under globe, where commonOrigin is a sphere position and must never be re-added.
  */
 export function getFlatCommonOrigin(
   projectUniforms: ProjectUniforms,
