@@ -24,6 +24,7 @@ import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
+import {ContourPathLayer, ContourPolygonLayer} from './contour-sublayers';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -189,7 +190,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       counts: {size: 1, accessor: 'getWeight'}
     });
@@ -360,8 +362,15 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {zOffset} = this.props;
     const {cellOriginCommon, cellSizeCommon} = this.state;
 
-    const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
-    const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
+    const preprojected = Boolean(this.context.viewport.preproject);
+    const LinesSubLayerClass = this.getSubLayerClass(
+      'lines',
+      preprojected ? ContourPathLayer : PathLayer
+    );
+    const BandsSubLayerClass = this.getSubLayerClass(
+      'bands',
+      preprojected ? ContourPolygonLayer : SolidPolygonLayer
+    );
     const modelMatrix = new Matrix4()
       .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
       .scale([cellSizeCommon[0], cellSizeCommon[1], zOffset]);

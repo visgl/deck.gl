@@ -32,6 +32,8 @@ import {
   Position,
   UpdateParameters,
   DefaultProps,
+  ProjectUniforms,
+  project,
   project32
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
@@ -349,6 +351,10 @@ export default class HeatmapLayer<
     } = {};
     const {dimensions} = this.state;
     changeFlags.dataChanged =
+      (opts.changeFlags.projectionChanged && 'projection changed') ||
+      (opts.context.viewport.preproject &&
+        opts.props.modelMatrix !== opts.oldProps.modelMatrix &&
+        'model matrix changed') ||
       (this.isAttributeChanged() && 'attribute changed') || // if any attribute is changed
       (this.isAggregationDirty(opts, {
         compareAll: true,
@@ -394,14 +400,22 @@ export default class HeatmapLayer<
           type: 'float64',
           accessor: 'getPosition',
           // Normalize binary XY positions into the packed XYZ high/low layout WebGPU requires.
-          transform: (position: Position) => [position[0], position[1], position[2] ?? 0]
+          ...this.usePositionTransforms(),
+          transform:
+            this.usePositionTransforms().transform ||
+            ((position: Position) => [position[0], position[1], position[2] ?? 0])
         },
         instanceWeights: {size: 1, accessor: 'getWeight'}
       });
       this.setState({positionAttributeName: 'instancePositions'});
     } else {
       attributeManager.add({
-        positions: {size: 3, type: 'float64', accessor: 'getPosition'},
+        positions: {
+          size: 3,
+          type: 'float64',
+          accessor: 'getPosition',
+          ...this.usePositionTransforms()
+        },
         weights: {size: 1, accessor: 'getWeight'}
       });
       this.setState({positionAttributeName: 'positions'});
@@ -575,7 +589,7 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (this.props.coordinateSystem === 'lnglat') {
+      if (!viewport.preproject && this.props.coordinateSystem === 'lnglat') {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -715,18 +729,24 @@ export default class HeatmapLayer<
     const {coordinateSystem} = this.props;
 
     const offsetMode =
+      !viewport.preproject &&
       useLayerCoordinateSystem &&
       (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
-    const offsetOriginCommon = offsetMode
-      ? viewport.projectPosition(this.props.coordinateOrigin)
-      : [0, 0];
+    // The weight shader uses offset common coordinates. Match its precision
+    // origin without projecting the already-common bounds through the converter.
+    const offsetOriginCommon =
+      viewport.preproject && useLayerCoordinateSystem
+        ? (project.getUniforms({viewport}) as ProjectUniforms).commonOrigin
+        : offsetMode
+          ? viewport.projectPosition(this.props.coordinateOrigin)
+          : [0, 0];
     const size = (textureSize * RESOLUTION) / viewport.scale;
 
     let bottomLeftCommon;
     let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
-    if (useLayerCoordinateSystem && !offsetMode) {
+    if (!viewport.preproject && useLayerCoordinateSystem && !offsetMode) {
       bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
       topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
     } else {
