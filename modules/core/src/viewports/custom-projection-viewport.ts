@@ -4,7 +4,12 @@
 
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales} from './viewport';
-import {getViewMatrix, getProjectionParameters, altitudeToFovy} from '@math.gl/web-mercator';
+import {
+  getViewMatrix,
+  getProjectionParameters,
+  altitudeToFovy,
+  pixelsToWorld
+} from '@math.gl/web-mercator';
 import {PROJECTION_MODE} from '../lib/constants';
 
 /** Forward/inverse functions can be supplied by a proj4js converter. */
@@ -52,6 +57,9 @@ export default class CustomProjectionViewport extends Viewport {
   /** Map bearing in degrees. */
   bearing: number;
   private signature: string;
+  private scaleOptions: CustomProjectionViewportOptions;
+  private metersPerUnitCallback?: CustomProjectionViewportOptions['getMetersPerUnit'];
+  readonly sizeScaleSignature: string;
 
   constructor(opts: CustomProjectionViewportOptions) {
     const {
@@ -126,6 +134,9 @@ export default class CustomProjectionViewport extends Viewport {
     this.bearing = bearing;
     this.resolution = resolution;
     this.signature = JSON.stringify([fromCrs, toCrs, resolution]);
+    this.scaleOptions = opts;
+    this.metersPerUnitCallback = metersPerUnitCallback;
+    this.sizeScaleSignature = JSON.stringify([fromCrs, toCrs]);
     this.preproject = position => {
       const projected = projection.forward(clampInput(position, fromBounds));
       return [
@@ -181,15 +192,150 @@ export default class CustomProjectionViewport extends Viewport {
     return this.signature;
   }
   get projectionMode(): number {
-    return PROJECTION_MODE.IDENTITY;
+    return PROJECTION_MODE.EXTERNAL;
+  }
+
+  /** Generate four-float records containing scalar XY scale, its X/Y slopes, and Z scale.
+   * Slopes are per common-space unit; a zero scalar marks an invalid record.
+   * Internal: generated on demand by the device resource owner, not on camera updates.
+   */
+  getSizeScaleData(size = 64): Float32Array {
+    const {projection, toBounds, fromBounds} = this.scaleOptions;
+    const [minX, minY, maxX, maxY] = toBounds;
+    const normalization = 512 / Math.max(maxX - minX, maxY - minY);
+    const data = new Float32Array(size * size * 4);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const common = [((x + 0.5) * 512) / size, ((y + 0.5) * 512) / size];
+        const output = [
+          (common[0] - 256) / normalization + (minX + maxX) / 2,
+          (common[1] - 256) / normalization + (minY + maxY) / 2,
+          0
+        ];
+        try {
+          if (output[0] < minX || output[0] > maxX || output[1] < minY || output[1] > maxY)
+            continue;
+          const input = projection.inverse(output);
+          if (!input || input.length < 2 || !input.every(Number.isFinite)) continue;
+          if (
+            fromBounds &&
+            (input[0] < fromBounds[0] ||
+              input[0] > fromBounds[2] ||
+              input[1] < fromBounds[1] ||
+              input[1] > fromBounds[3])
+          )
+            continue;
+          const roundTrip = projection.forward(input.slice());
+          if (
+            !roundTrip.every(Number.isFinite) ||
+            Math.hypot(roundTrip[0] - output[0], roundTrip[1] - output[1]) * normalization > 1e-5
+          )
+            continue;
+          const scale = estimateUnitsPerMeter(
+            projection,
+            input,
+            fromBounds,
+            this.metersPerUnitCallback
+          );
+          const commonScale = scale.map(value => Math.fround(value * normalization));
+          if (!commonScale.every(value => Number.isFinite(value) && value > 0)) continue;
+          const offset = (y * size + x) * 4;
+          data.set([commonScale[2], 0, 0, commonScale[2]], offset);
+        } catch {
+          // A failed inverse or derivative sample leaves an invalid, zero texel.
+        }
+      }
+    }
+    // Derive slopes from the sampled scalar field without more projection calls.
+    // Do not difference across invalid texels. Prefer centered differences, then
+    // second-order one-sided differences at boundaries, then a first-order fallback.
+    const spacing = 512 / size;
+    const sample = (x: number, y: number) =>
+      x >= 0 && x < size && y >= 0 && y < size ? data[(y * size + x) * 4] : 0;
+    const slope = (x: number, y: number, dx: number, dy: number) => {
+      const center = sample(x, y);
+      const before = sample(x - dx, y - dy);
+      const after = sample(x + dx, y + dy);
+      if (before > 0 && after > 0) return (after - before) / (2 * spacing);
+      if (after > 0) {
+        const next = sample(x + 2 * dx, y + 2 * dy);
+        return next > 0
+          ? (-3 * center + 4 * after - next) / (2 * spacing)
+          : (after - center) / spacing;
+      }
+      if (before > 0) {
+        const previous = sample(x - 2 * dx, y - 2 * dy);
+        return previous > 0
+          ? (3 * center - 4 * before + previous) / (2 * spacing)
+          : (center - before) / spacing;
+      }
+      return 0;
+    };
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const offset = (y * size + x) * 4;
+        if (data[offset] > 0) {
+          data[offset + 1] = slope(x, y, 1, 0);
+          data[offset + 2] = slope(x, y, 0, 1);
+        }
+      }
+    }
+    // Bleed one texel (including diagonals) into unsampled space. Instance positions
+    // are already preprojected: an invalid sample center need not mean an invalid
+    // instance position. Read only the original field so padding cannot cascade.
+    const padded = data.slice();
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const offset = (y * size + x) * 4;
+        if (data[offset] > 0) continue;
+        let nearestDistance = Infinity;
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const distance = dx * dx + dy * dy;
+            if (distance >= nearestDistance || sample(x + dx, y + dy) <= 0) continue;
+            const source = ((y + dy) * size + x + dx) * 4;
+            // Recenter the source's Taylor approximation, rather than copying its
+            // scale. Preserve its slopes and the ratio between Z and XY scales.
+            const scale = Math.fround(
+              data[source] - spacing * (dx * data[source + 1] + dy * data[source + 2])
+            );
+            if (!(scale > 0 && Number.isFinite(scale))) continue;
+            nearestDistance = distance;
+            padded.set(
+              [
+                scale,
+                data[source + 1],
+                data[source + 2],
+                (data[source + 3] * scale) / data[source]
+              ],
+              offset
+            );
+          }
+        }
+      }
+    }
+    return padded;
   }
 
   projectPosition(position: number[]): [number, number, number] {
-    return super.projectPosition(position);
+    return [position[0], position[1], (position[2] || 0) * this.getAltitudeScale(position)];
   }
 
   unprojectPosition(position: number[]): [number, number, number] {
-    return super.unprojectPosition(position);
+    return [position[0], position[1], (position[2] || 0) / this.getAltitudeScale(position)];
+  }
+
+  /** Meter altitude follows the projection's local area-equivalent scale. */
+  private getAltitudeScale(position: number[]): number {
+    if (!this.scaleOptions) return this.distanceScales.unitsPerMeter[2];
+    const {projection, toBounds, fromBounds} = this.scaleOptions;
+    const normalization =
+      512 / Math.max(toBounds[2] - toBounds[0], toBounds[3] - toBounds[1]);
+    const input = this.postUnproject!([position[0], position[1], 0]);
+    return input
+      ? estimateUnitsPerMeter(projection, input, fromBounds, this.metersPerUnitCallback)[2] *
+          normalization
+      : this.distanceScales.unitsPerMeter[2];
   }
 
   projectFlat(position: number[]): [number, number] {
@@ -204,7 +350,23 @@ export default class CustomProjectionViewport extends Viewport {
     position: number[],
     {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
   ): number[] {
-    return super.unproject(position, {topLeft, targetZ});
+    if (Number.isFinite(position[2]) || !targetZ) {
+      return super.unproject(position, {topLeft, targetZ});
+    }
+    const pixel = [position[0], topLeft ? position[1] : this.height - position[1]];
+    let common = pixelsToWorld(pixel, this.pixelUnprojectionMatrix, 0);
+    // Intersect the viewing ray with the locally scaled altitude surface.
+    for (let i = 0; i < 16; i++) {
+      const next = pixelsToWorld(
+        pixel,
+        this.pixelUnprojectionMatrix,
+        targetZ * this.getAltitudeScale(common)
+      );
+      const delta = Math.hypot(next[0] - common[0], next[1] - common[1]);
+      common = next;
+      if (delta < 1e-8) break;
+    }
+    return [common[0], common[1], targetZ];
   }
 
   getDistanceScales(): DistanceScales {

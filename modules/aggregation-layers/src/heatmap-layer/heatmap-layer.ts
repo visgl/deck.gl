@@ -494,6 +494,8 @@ export default class HeatmapLayer<
     this._createWeightsTransform(weightsTransformShaders);
 
     const maxWeightsTransformShaders = this.getShaders({
+      // Reduction operates on texture values, not projected positions or sizes.
+      defines: {USE_EXTERNAL_PROJECTION: false},
       source: maxSource,
       vs: maxVs,
       fs: maxFs,
@@ -685,7 +687,14 @@ export default class HeatmapLayer<
     const {viewport, devicePixelRatio, coordinateSystem, coordinateOrigin} = moduleSettings;
     const {modelMatrix} = this.props;
     weightsTransform.model.shaderInputs.setProps({
-      project: {viewport, devicePixelRatio, modelMatrix, coordinateSystem, coordinateOrigin},
+      project: {
+        viewport,
+        devicePixelRatio,
+        modelMatrix,
+        coordinateSystem,
+        coordinateOrigin,
+        sizeScale: this.context.layerManager.projectionScaleResources.get(viewport)
+      },
       weight: weightProps
     });
     weightsTransform.run({

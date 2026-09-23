@@ -74,11 +74,14 @@ export async function runOnGPU({
     feedbackBuffers: {[varying]: OUT_BUFFER},
     varyings: [varying]
   });
-  transform.model.shaderInputs.setProps(shaderInputProps);
-  transform.run({discard: true});
-
-  const result: Uint8Array = await OUT_BUFFER.readAsync();
-  return new Float32Array(result.buffer);
+  try {
+    transform.model.shaderInputs.setProps(shaderInputProps);
+    transform.run({discard: true});
+    const result: Uint8Array = await OUT_BUFFER.readAsync();
+    return new Float32Array(result.buffer);
+  } finally {
+    transform.destroy();
+  }
 }
 
 export function verifyGPUResult(

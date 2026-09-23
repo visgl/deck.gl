@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {fp32, ShaderModule} from '@luma.gl/shadertools';
+import {Buffer} from '@luma.gl/core';
 import geometry from '../misc/geometry';
 import {getUniformsFromViewport} from './viewport-uniforms';
 import {projectWGSL} from './project.wgsl';
@@ -14,7 +15,17 @@ const INITIAL_MODULE_OPTIONS = {};
 
 function getUniforms(opts: ProjectProps | {} = INITIAL_MODULE_OPTIONS) {
   if ('viewport' in opts) {
-    return getUniformsFromViewport(opts);
+    return {
+      ...getUniformsFromViewport(opts),
+      ...(opts.sizeScale instanceof Buffer
+        ? {
+            project_sizeScaleBuffer: opts.sizeScale,
+            sizeScaleSize: Math.sqrt(opts.sizeScale.byteLength / 16)
+          }
+        : opts.sizeScale
+          ? {project_sizeScaleTexture: opts.sizeScale, sizeScaleSize: opts.sizeScale.width}
+          : {})
+    };
   }
   return {};
 }
@@ -42,7 +53,8 @@ export default {
     cameraPosition: 'vec3<f32>',
     coordinateOrigin: 'vec3<f32>',
     commonOrigin: 'vec3<f32>',
-    pseudoMeters: 'f32'
+    pseudoMeters: 'f32',
+    sizeScaleSize: 'i32'
   }
   // @ts-ignore TODO v9.1
 } as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}>;

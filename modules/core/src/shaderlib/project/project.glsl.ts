@@ -47,6 +47,7 @@ layout(std140) uniform projectUniforms {
   vec3 coordinateOrigin;
   vec3 commonOrigin;
   bool pseudoMeters;
+  int sizeScaleSize;
 } project;
 
 
@@ -90,6 +91,31 @@ float project_size() {
   return 1.0;
 }
 
+#ifdef USE_EXTERNAL_PROJECTION
+// Nearest-texel Taylor reconstruction: R=scalar XY scale, GB=slopes per common
+// unit, A=Z scale. R=0 marks invalid samples. One fetch preserves instance aspect ratio.
+// Alternatives if discontinuities/accuracy become visible: blend four local Taylor
+// estimates for continuity, or use four-fetch bicubic Hermite with a mixed derivative
+// for higher accuracy (which would require moving Z scale out of A).
+uniform highp usampler2D project_sizeScaleTexture;
+vec3 project_external_size_scale_at(vec2 commonPosition) {
+  if (any(lessThan(commonPosition, vec2(0.0))) || any(greaterThan(commonPosition, vec2(512.0)))) return vec3(0.0);
+  ivec2 dimensions = textureSize(project_sizeScaleTexture, 0);
+  ivec2 index = clamp(ivec2(floor(commonPosition / 512.0 * vec2(dimensions))), ivec2(0), dimensions - 1);
+  vec4 texel = uintBitsToFloat(texelFetch(project_sizeScaleTexture, index, 0));
+  if (texel.r <= 0.0) return vec3(0.0);
+  vec2 center = (vec2(index) + 0.5) * 512.0 / vec2(dimensions);
+  float scale = max(0.0, texel.r + dot(texel.gb, commonPosition - center));
+  return vec3(scale, scale, texel.a * scale / texel.r) * project.commonUnitsPerWorldUnit;
+}
+
+vec3 project_external_size_scale() {
+  return project_external_size_scale_at(geometry.position.w == 0.0
+    ? geometry.worldPosition.xy : geometry.position.xy + project.commonOrigin.xy);
+}
+
+#endif
+
 float project_size_at_latitude(float meters, float lat) {
   return meters * project.commonUnitsPerMeter.z * project_size_at_latitude(lat);
 }
@@ -100,18 +126,30 @@ float project_size_at_latitude(float meters, float lat) {
 //
 float project_size(float meters) {
   // For scatter relevant
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return meters * project_external_size_scale().z;
+#endif
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return meters * project_external_size_scale().xy;
+#endif
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return meters * project_external_size_scale();
+#endif
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return vec4(meters.xyz * project_external_size_scale(), meters.w);
+#endif
   return vec4(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
@@ -188,6 +226,15 @@ vec3 project_globe_(vec3 lnglatz) {
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project.modelMatrix * position;
 
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    vec3 low = (project.modelMatrix * vec4(position64Low, 0.0)).xyz;
+    float altitudeScale = project_external_size_scale_at(position_world.xy + low.xy).z;
+    return vec4(position_world.xy - project.coordinateOrigin.xy + low.xy,
+      (position_world.z + low.z) * altitudeScale - project.commonOrigin.z, position_world.w);
+  }
+#endif
+
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
@@ -229,6 +276,9 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+#ifdef USE_EXTERNAL_PROJECTION
+    project.projectionMode == PROJECTION_MODE_EXTERNAL ||
+#endif
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
@@ -278,6 +328,11 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    return meters * project_external_size_scale().x * project.scale;
+  }
+#endif
   return project_size(meters) * project.scale;
 }
 vec2 project_size_to_pixel(vec2 meters) {

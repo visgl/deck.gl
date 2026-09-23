@@ -73,7 +73,7 @@ Returns `{center}` that keeps a common-space ground point under the requested pi
 
 ### `getDistanceScales()`
 
-Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. The estimates combine the converter's local distortion with world-coordinate units deduced from `fromCrs` or supplied by `getMetersPerUnit`.
+Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. These CPU estimates describe the camera center; rendered meter sizes use the scale at each position. See [CustomProjectionView: Meter Size](./custom-projection-view.md#meter-size). The estimates combine the converter's local distortion with world-coordinate units deduced from `fromCrs` or supplied by `getMetersPerUnit`.
 
 ### `projectionSignature`
 

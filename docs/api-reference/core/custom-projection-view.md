@@ -98,6 +98,18 @@ TypeScript configuration types are exported as `CustomProjectionViewProps`, `Cus
 
 Enable interaction with `controller: true`. The default [CustomProjectionController](./custom-projection-controller.md) pans and zooms in common space, with map-style pitch and bearing controls. Its default bounds are the common-space square `[[0, 0], [512, 512]]`; use `controller: {maxBounds: null}` to allow unrestricted panning.
 
+## Meter Size
+
+In `CustomProjectionView`, layers using `sizeUnits: 'meters'` (or `radiusUnits` / `widthUnits`) adjust their size to the custom projection at each object's location. World coordinates are in `fromCrs`; use `getMetersPerUnit` when deck.gl cannot deduce their units correctly.
+
+The size scale is **area-equivalent**: it is the square root of the projection's local area scale. A small geographic circle may become an ellipse under projection, as illustrated by [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix). Instead of stretching a marker into that ellipse, deck.gl keeps its shape and approximates the same projected area. Circles stay circular in the map plane, and icons and text retain their aspect ratios.
+
+For example, equally sized meter-based markers grow toward the poles in Web Mercator, while their sizes remain approximately uniform in an equal-area projection such as Equal Earth. Sizes depend on each object's location, not the camera center.
+
+Meter sizing is approximate, with negligible visual error in most applications. Our tested projection configurations have less than 1% size error; custom projections near singularities may have larger errors. This describes sizing accuracy, not the projection's inherent shape or distance distortion.
+
+`getMetersPerUnit(inputPosition)` describes physical meters per input unit, not projected scale. deck.gl combines these units with the converter's local distortion to size both horizontal geometry and meter-based altitude.
+
 ## Changing Projections
 
 To change the projection at runtime, supply the updated converter, CRS strings and bounds. Changing either `fromCrs` or `toCrs` refreshes projected positions. Replacing `projection` alone does not trigger this refresh. If both CRS strings are omitted, deck.gl assumes the conversion is stable. Changing a registered CRS definition without changing its name is not detected.
@@ -111,7 +123,7 @@ Use a new layer ID when switching a layer between `MapView` and `CustomProjectio
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
 - `BitmapLayer` only approximates the projection within the image. Its corners are projected, but individual image pixels may not align accurately with other map features. `_imageCoordinateSystem` is ignored in this view.
 - Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
-- Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
+- [Meter sizes](#meter-size) approximate local area scale rather than directional distortion. They should not be used as exact geographic distance buffers.
 - The layer's `coordinateSystem` and `coordinateOrigin` are ignored when used with this view. Supply positions in the coordinates expected by `projection.forward`. `modelMatrix` is applied before conversion.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in `fromCrs`. They may be unavailable where `projection.inverse` cannot return a valid position.
