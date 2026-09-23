@@ -160,8 +160,9 @@ export const MATRIX_ATTRIBUTES = {
 // when in LNGLAT and LNGLAT_OFFSET coordinates.
 export function shouldComposeModelMatrix(viewport, coordinateSystem) {
   return (
-    coordinateSystem === 'cartesian' ||
-    coordinateSystem === 'meter-offsets' ||
-    (coordinateSystem === 'default' && !viewport.isGeospatial)
+    !viewport.preproject &&
+    (coordinateSystem === 'cartesian' ||
+      coordinateSystem === 'meter-offsets' ||
+      (coordinateSystem === 'default' && !viewport.isGeospatial))
   );
 }
