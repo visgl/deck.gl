@@ -184,7 +184,8 @@ export default class ScreenGridLayer<
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       // this attribute is used in gpu aggregation path only
       counts: {size: 1, accessor: 'getWeight'}

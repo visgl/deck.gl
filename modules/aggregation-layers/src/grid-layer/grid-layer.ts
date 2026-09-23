@@ -76,6 +76,7 @@ export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & Composite
 type _GridLayerProps<DataT> = {
   /**
    * Custom accessor to retrieve a grid bin index from each data object.
+   * With viewport preprojection, position is in common space.
    * Not supported by GPU aggregation.
    */
   gridAggregator?: ((position: number[], cellSize: number) => [number, number]) | null;
@@ -361,7 +362,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       colorWeights: {size: 1, accessor: 'getColorWeight'},
       elevationWeights: {size: 1, accessor: 'getElevationWeight'}

@@ -90,6 +90,20 @@ export default abstract class AggregationLayer<
     // Although the Buffers have been bound to the sublayer's Model, their content are not populated yet
     // GPUAggregator.preDraw() is called in the draw cycle here right before Buffers are used by sublayer.draw()
     const {aggregator} = this.state;
+    if (this.context.viewport.preproject && shaderModuleProps.project) {
+      // Grid/hexagon/contour aggregation uses a separate precision viewport.
+      // Its inputs are already common-space positions, including the layer matrix.
+      shaderModuleProps = {
+        ...shaderModuleProps,
+        project: {
+          ...shaderModuleProps.project,
+          coordinateSystem: 'cartesian',
+          coordinateOrigin: [0, 0, 0],
+          modelMatrix: null,
+          autoWrapLongitude: false
+        }
+      };
+    }
     // @ts-expect-error only used by GPU aggregators
     aggregator.setProps({shaderModuleProps});
     aggregator.preDraw();
