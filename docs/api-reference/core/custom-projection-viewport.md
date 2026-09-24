@@ -29,7 +29,7 @@ const input = viewport.postUnproject(viewport.unproject(pixel)); // [0, 0, 0]
 
 Accepts the [View's projection options](./custom-projection-view.md#constructor), plus `width`, `height`, `x`, `y`, pixel `padding`, `zoom` (default `0`), `target` (default `[256, 256, 0]`), `pitch` (default `0`) and `bearing` (default `0`). The view state and viewport both use MapView-style `pitch` and `bearing`.
 
-Zero width or height becomes `1`. Bounds must be finite and increasing. `resolution` and `zScale` must be finite and positive. The camera uses the same default field of view and clipping multipliers as `WebMercatorViewport`. `orthographic` defaults to `false`.
+Zero width or height becomes `1`. Bounds must be finite and increasing. `resolution` must be finite and positive. The camera uses the same default field of view and clipping multipliers as `WebMercatorViewport`. `orthographic` defaults to `false`.
 
 ## Coordinate Contract
 
@@ -38,6 +38,8 @@ Supply layer positions in the coordinates accepted by `projection.forward`, such
 Altitude (Z) is in meters, including any Z returned by the converter. If the forward converter omits Z, the input altitude is retained, defaulting to zero. deck.gl handles altitude scaling; the converter should not scale altitude to match its projected X/Y units. Positive Z points out of the map.
 
 Conversion receives a copy of the input array. `inputBounds` clamps X/Y but does not alter altitude.
+
+Use `getUnitsPerMeter(inputPosition)` to override scale, returning `[x, y, z]` in projected units per meter. This lets you specify the scale when the converter uses custom coordinate units, including an independent altitude scale.
 
 ## Methods and Properties
 
@@ -73,7 +75,7 @@ Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current targe
 
 ### `projectionSignature`
 
-An opaque signature identifying conversion and tessellation configuration. It changes with converter identity, `projectionId`, input/output bounds, `zScale` and `resolution`, but not navigation. Layers use it to invalidate projected positions.
+An opaque signature identifying conversion and tessellation configuration. It changes with converter identity, `projectionId`, input/output bounds and `resolution`, but not navigation. Layers use it to invalidate projected positions.
 
 ## Source
 

@@ -214,11 +214,10 @@ test('CustomProjectionViewport estimates local meter scales from input units', (
     ...options,
     outputBounds: [0, 0, 512, 512],
     inputUnits: 'meters',
-    zScale: 4,
     projection: {forward: p => [2 * p[0], 3 * p[1], p[2]], inverse: p => [p[0] / 2, p[1] / 3, p[2]]}
   });
-  expect(metric.distanceScales.unitsPerMeter).toEqual([2, 3, 4]);
-  expect(metric.distanceScales.metersPerUnit).toEqual([0.5, 1 / 3, 0.25]);
+  expect(metric.distanceScales.unitsPerMeter).toEqual([2, 3, 1]);
+  expect(metric.distanceScales.metersPerUnit).toEqual([0.5, 1 / 3, 1]);
   const override = new CustomProjectionViewport({
     ...options,
     outputBounds: [0, 0, 512, 512],

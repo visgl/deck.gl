@@ -32,8 +32,6 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   bearing?: number;
   /** Maximum tessellation cell size in input-coordinate units. Default 5. */
   resolution?: number;
-  /** Multiplier for the estimated altitude meter scale. Default 1. */
-  zScale?: number;
   /** Input XY units for local meter-scale estimation. Degrees means longitude/latitude
    * on a sphere; meters assumes locally metric Cartesian coordinates. If omitted,
    * output XY units are assumed to be meters unless getUnitsPerMeter is supplied.
@@ -64,7 +62,6 @@ export default class CustomProjectionViewport extends Viewport {
       projection,
       outputBounds,
       inputBounds,
-      zScale = 1,
       resolution = 5,
       target = [256, 256, 0],
       pitch = 0,
@@ -76,14 +73,10 @@ export default class CustomProjectionViewport extends Viewport {
       !outputBounds.every(Number.isFinite) ||
       maxX <= minX ||
       maxY <= minY ||
-      !Number.isFinite(zScale) ||
-      zScale <= 0 ||
       !Number.isFinite(resolution) ||
       resolution <= 0
     ) {
-      throw new Error(
-        'CustomProjectionViewport requires finite bounds and positive zScale/resolution'
-      );
+      throw new Error('CustomProjectionViewport requires finite bounds and positive resolution');
     }
     if (
       inputBounds &&
@@ -138,7 +131,6 @@ export default class CustomProjectionViewport extends Viewport {
       opts.projectionId,
       ...outputBounds,
       inputBounds,
-      zScale,
       resolution
     ]);
     this.preproject = position => {
@@ -181,8 +173,8 @@ export default class CustomProjectionViewport extends Viewport {
       inputCenter &&
       (opts.getUnitsPerMeter
         ? opts.getUnitsPerMeter(inputCenter)
-        : estimateUnitsPerMeter(projection, inputCenter, opts.inputUnits, zScale, inputBounds));
-    const unitsPerMeter = (localScale || [1, 1, zScale]).map(
+        : estimateUnitsPerMeter(projection, inputCenter, opts.inputUnits, inputBounds));
+    const unitsPerMeter = (localScale || [1, 1, 1]).map(
       value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
     );
     this.distanceScales = {unitsPerMeter, metersPerUnit: unitsPerMeter.map(value => 1 / value)};
@@ -239,10 +231,9 @@ function estimateUnitsPerMeter(
   projection: CustomProjection,
   center: number[],
   inputUnits: CustomProjectionViewportOptions['inputUnits'],
-  zScale: number,
   inputBounds?: CustomProjectionViewportOptions['inputBounds']
 ): [number, number, number] {
-  if (!inputUnits) return [1, 1, zScale];
+  if (!inputUnits) return [1, 1, 1];
   const geographic = inputUnits === 'degrees';
   const step = geographic ? 0.0001 : 1;
   // Sample toward the interior at longitude/latitude limits to avoid crossing a seam or pole.
@@ -266,11 +257,11 @@ function estimateUnitsPerMeter(
     return [
       Math.hypot(x[0] - origin[0], x[1] - origin[1]) / metersX,
       Math.hypot(y[0] - origin[0], y[1] - origin[1]) / metersY,
-      zScale
+      1
     ];
   } catch {
     // Converters may reject samples outside their domain; retain a finite fallback scale.
-    return [1, 1, zScale];
+    return [1, 1, 1];
   }
 }
 

@@ -60,7 +60,6 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | `inputBounds` | None | The projection's valid input domain, expressed as `[minX, minY, maxX, maxY]` in input coordinates. |
 | `projectionId` | None | Change this string or number when you change the projection's behavior without replacing the projection object. |
 | `resolution` | `5` | Controls how closely paths and polygon edges follow the projection. Lower values produce smoother curves but take longer to process. Measured in input-coordinate units. |
-| `zScale` | `1` | Multiplier for heights returned by the converter (Z). Does not control horizontal marker sizes. |
 | `inputUnits` | None | `'degrees'` or `'meters'` for local meter-scale estimation. If omitted, output XY units are assumed to be meters. |
 | `getUnitsPerMeter` | None | `(inputPosition) => [x, y, z]` in converter output units per meter; overrides the estimate. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
