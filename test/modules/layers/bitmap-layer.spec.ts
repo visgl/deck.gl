@@ -74,7 +74,7 @@ test('BitmapLayer#imageCoordinateSystem with preprojection', () => {
       forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
       inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
     },
-    outputBounds: [0, 0, 512, 512]
+    toBounds: [0, 0, 512, 512]
   });
   const bounds: NonNullable<BitmapLayer['props']['bounds']>[] = [
     [0, -30, 45, 0],
