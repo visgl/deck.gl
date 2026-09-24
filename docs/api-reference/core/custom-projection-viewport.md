@@ -13,7 +13,9 @@ const viewport = new CustomProjectionViewport({
   width: 800,
   height: 600,
   projection: {forward: p => p.slice(), inverse: p => p.slice()},
-  outputBounds: [-180, -90, 180, 90],
+  fromCrs: 'EPSG:4326',
+  toCrs: 'EPSG:4326',
+  toBounds: [-180, -90, 180, 90],
   center: [256, 256, 0],
   zoom: 0,
   pitch: 30,
@@ -37,7 +39,7 @@ Supply layer positions in the coordinates accepted by `projection.forward`, such
 
 Altitude (Z) defaults to meters, including any Z returned by the converter. If your world coordinates use another vertical unit, describe it with the third component of `getMetersPerUnit`. If the forward converter omits Z, the input altitude is retained, defaulting to zero. deck.gl handles altitude scaling; the converter should not scale altitude to match its projected X/Y units. Positive Z points out of the map.
 
-Conversion receives a copy of the input array. `inputBounds` clamps X/Y but does not alter altitude.
+Conversion receives a copy of the input array. `fromBounds` clamps X/Y but does not alter altitude.
 
 Set the view's `coordinateSystem` to describe world coordinates: `'lnglat'` (the default) for longitude/latitude in degrees and altitude in meters, or `'meter-offsets'` for meters along all axes. For `'other'`, supply `getMetersPerUnit(inputPosition)` to describe physical meters per input unit along X, Y and Z. For example, X/Y in feet and altitude in meters uses `[0.3048, 0.3048, 1]`. deck.gl derives projected scale through the converter.
 
@@ -51,7 +53,7 @@ Converts an input position to `[commonX, commonY, altitudeInMeters]`. It is inde
 
 ### `postUnproject(position)`
 
-Converts preprojected X/Y and altitude in meters back to input coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `inputBounds`, if supplied.
+Converts preprojected X/Y and altitude in meters back to input coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `fromBounds`, if supplied.
 
 ### `project(position, options)`
 
@@ -75,7 +77,7 @@ Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current cente
 
 ### `projectionSignature`
 
-An opaque signature identifying conversion and tessellation configuration. It changes with converter or active `getMetersPerUnit` callback identity, `coordinateSystem`, `projectionId`, input/output bounds and `resolution`, but not navigation. Layers use it to invalidate projected positions.
+An opaque signature identifying conversion and tessellation configuration. It changes with `fromCrs`, `toCrs`, `getMetersPerUnit` callback identity, input/output bounds and `resolution`, but not converter identity or navigation. Layers use it to invalidate projected positions.
 
 ## Source
 

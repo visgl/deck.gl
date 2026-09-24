@@ -13,7 +13,7 @@ const gpuTest = device.type === 'webgl' ? test : test.skip;
 gpuTest('CustomProjectionViewport projects meter altitude on CPU and GPU', async () => {
   const viewport = new CustomProjectionViewport({
     projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    outputBounds: [0, 0, 1024, 1024],
+    toBounds: [0, 0, 1024, 1024],
     coordinateSystem: 'other',
     getMetersPerUnit: () => [0.25, 0.25, 1]
   });
