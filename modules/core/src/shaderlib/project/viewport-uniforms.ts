@@ -320,7 +320,7 @@ function calculateViewportUniforms({
     focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit: viewport.preproject
-      ? [1, 1, 1]
+      ? [1, 1, distanceScales.unitsPerMeter[2]]
       : (distanceScales.unitsPerMeter as Vec3),
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)

@@ -59,6 +59,44 @@ function getPositions(layer: PositionLayer) {
   return Array.from(layer.getAttributeManager()!.attributes.positions.value!.slice(0, 3));
 }
 
+test('Layer transforms accessor-keyed binary positions but bypasses direct attribute buffers', () => {
+  const viewport = new ProjectionViewport('initial');
+  const manager = createManager(viewport);
+  const transform = vi.spyOn(viewport, 'preproject');
+  const world = new Float32Array([2, 3, 4]);
+  const prepared = new Float32Array([4, 9, 16]);
+  const buffer = device.createBuffer({data: prepared});
+  const accessor = new PositionLayer({
+    id: 'accessor',
+    data: {length: 1, attributes: {getPosition: {value: world, size: 3}}}
+  });
+  const direct = new PositionLayer({
+    id: 'direct',
+    data: {length: 1, attributes: {positions: prepared}}
+  });
+  const gpu = new PositionLayer({id: 'gpu', data: {length: 1, attributes: {positions: buffer}}});
+  try {
+    manager.setLayers([accessor, direct, gpu]);
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(getPositions(accessor)).toEqual([4, 9, 16]);
+    expect(getPositions(direct)).toEqual([4, 9, 16]);
+    expect(gpu.getAttributeManager()!.attributes.positions.getBuffer()).toBe(buffer);
+    const changed = new ProjectionViewport('changed');
+    changed.preproject = vi.fn(([x, y, z]) => [x + 10, y + 20, z]);
+    manager.activateViewport(changed);
+    for (const layer of [accessor, direct, gpu]) layer.activateViewport(changed);
+    expect(changed.preproject).toHaveBeenCalledTimes(1);
+    expect(getPositions(accessor)).toEqual([12, 23, 4]);
+    expect(getPositions(direct)).toEqual([4, 9, 16]);
+    expect(gpu.getAttributeManager()!.attributes.positions.getBuffer()).toBe(buffer);
+    expect(Array.from(world)).toEqual([2, 3, 4]);
+  } finally {
+    manager.finalize();
+    buffer.destroy();
+    transform.mockRestore();
+  }
+});
+
 for (const projected of [false, true]) {
   test(`Layer initializes position attributes with preproject=${projected}`, () => {
     const viewport = new ProjectionViewport('initial', projected);
