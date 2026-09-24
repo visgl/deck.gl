@@ -28,7 +28,7 @@ class TestProjectionView extends CustomProjectionView {
 for (const inertia of [false, true]) {
   test(`CustomProjectionController shared gesture suite, inertia=${inertia}`, async () => {
     await testController(TestProjectionView, {
-      target: [256, 256, 0],
+      center: [256, 256, 0],
       zoom: 2,
       pitch: 30,
       bearing: -45,
@@ -42,7 +42,7 @@ test('CustomProjectionController honors pointer and center zoom anchors', () => 
   for (const zoomAround of ['pointer', 'center'] as const) {
     const controller = createTestController({
       view: new TestProjectionView({controller: {zoomAround, maxBounds: null}}),
-      initialViewState: {target: [256, 256, 0], zoom: 2, pitch: 30, bearing: 20}
+      initialViewState: {center: [256, 256, 0], zoom: 2, pitch: 30, bearing: 20}
     });
     try {
       controller.handleEvent({
@@ -55,10 +55,10 @@ test('CustomProjectionController honors pointer and center zoom anchors', () => 
       } as any);
       expect(controller.props.zoom).toBeLessThan(2);
       if (zoomAround === 'center') {
-        expect(controller.props.target[0]).toBeCloseTo(256);
-        expect(controller.props.target[1]).toBeCloseTo(256);
+        expect(controller.props.center[0]).toBeCloseTo(256);
+        expect(controller.props.center[1]).toBeCloseTo(256);
       } else {
-        expect(controller.props.target).not.toEqual([256, 256, 0]);
+        expect(controller.props.center).not.toEqual([256, 256, 0]);
       }
     } finally {
       controller.finalize();
@@ -91,10 +91,10 @@ test('CustomProjectionState applies both zoom limits, rotation wrapping and padd
   const unconstrained = new CustomProjectionState({
     ...options,
     ...bounds,
-    target: [1000, 1000, 0],
+    center: [1000, 1000, 0],
     maxBoundsPadding: {left: 1000, top: 1000}
   });
-  expect(unconstrained.getViewportProps().target).toEqual([1000, 1000, 0]);
+  expect(unconstrained.getViewportProps().center).toEqual([1000, 1000, 0]);
   const constrained = new CustomProjectionState({
     ...options,
     pitch: 100,
@@ -128,7 +128,7 @@ test('CustomProjectionController transitions pitch and bearing using the shortes
       to.shortestPathFrom(from)
     );
     expect(transitionInterpolator.interpolateProps(start, end, 0.5)).toEqual({
-      target: [256, 256, 0],
+      center: [256, 256, 0],
       zoom: 0,
       pitch: 40,
       bearing: 180
@@ -204,7 +204,7 @@ test('CustomProjectionState anchors pan and continuous zoom without an inverse p
     const pixel = makeViewport(result.getViewportProps()).project(anchor);
     expect(pixel[0]).toBeCloseTo(pos[0]);
     expect(pixel[1]).toBeCloseTo(pos[1]);
-    expect(result.getViewportProps().target[2]).toBe(0);
+    expect(result.getViewportProps().center[2]).toBe(0);
   }
   expect(zoomed.getViewportProps().zoom).toBe(1);
   const ended = zoomed.zoomEnd();
@@ -216,26 +216,26 @@ test('CustomProjectionState anchors pan and continuous zoom without an inverse p
 test('CustomProjectionState constraints and keyboard navigation use a fixed ground plane', () => {
   const state = new CustomProjectionState({
     ...options,
-    target: [1000, -1000, 100],
+    center: [1000, -1000, 100],
     pitch: -20,
     bearing: 370,
     zoom: 10,
     maxZoom: 3
   });
   expect(state.getViewportProps()).toMatchObject({
-    target: [1000, -1000, 0],
+    center: [1000, -1000, 0],
     pitch: 0,
     bearing: 10,
     zoom: 3
   });
   const centered = new CustomProjectionState(options);
-  expect(centered.moveLeft().getViewportProps().target[0]).toBeLessThan(256);
-  expect(centered.moveRight().getViewportProps().target[0]).toBeGreaterThan(256);
-  expect(centered.moveUp().getViewportProps().target[1]).toBeGreaterThan(256);
-  expect(centered.moveDown().getViewportProps().target[1]).toBeLessThan(256);
+  expect(centered.moveLeft().getViewportProps().center[0]).toBeLessThan(256);
+  expect(centered.moveRight().getViewportProps().center[0]).toBeGreaterThan(256);
+  expect(centered.moveUp().getViewportProps().center[1]).toBeGreaterThan(256);
+  expect(centered.moveDown().getViewportProps().center[1]).toBeLessThan(256);
   const bounded = new CustomProjectionState({
     ...options,
-    target: [1000, 1000, 10],
+    center: [1000, 1000, 10],
     maxBounds: undefined
   });
   expect(bounded.getViewportProps().maxBounds).toEqual([
@@ -243,8 +243,8 @@ test('CustomProjectionState constraints and keyboard navigation use a fixed grou
     [512, 512]
   ]);
   expect(bounded.getViewportProps().zoom).toBeCloseTo(Math.log2(800 / 512));
-  expect(bounded.getViewportProps().target[0]).toBeCloseTo(256);
-  expect(bounded.getViewportProps().target[2]).toBe(0);
+  expect(bounded.getViewportProps().center[0]).toBeCloseTo(256);
+  expect(bounded.getViewportProps().center[2]).toBe(0);
   const from = new CustomProjectionState({...options, bearing: 170});
   const to = new CustomProjectionState({...options, bearing: -170});
   expect(to.shortestPathFrom(from).bearing).toBe(190);
