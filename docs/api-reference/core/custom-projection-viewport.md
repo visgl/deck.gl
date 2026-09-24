@@ -41,7 +41,7 @@ Altitude (Z) defaults to meters, including any Z returned by the converter. If y
 
 Conversion receives a copy of the input array. `fromBounds` clamps X/Y but does not alter altitude.
 
-Set the view's `coordinateSystem` to describe world coordinates: `'lnglat'` (the default) for longitude/latitude in degrees and altitude in meters, or `'meter-offsets'` for meters along all axes. For `'other'`, supply `getMetersPerUnit(inputPosition)` to describe physical meters per input unit along X, Y and Z. For example, X/Y in feet and altitude in meters uses `[0.3048, 0.3048, 1]`. deck.gl derives projected scale through the converter.
+World coordinates are expressed in `fromCrs`. deck.gl makes a best effort to deduce their units from `fromCrs`. When it cannot, supply `getMetersPerUnit(worldPosition)` to override the default longitude/latitude estimation. The callback returns physical meters per world-coordinate unit along X, Y and Z. For example, X/Y in feet and altitude in meters uses `[0.3048, 0.3048, 1]`.
 
 ## Methods and Properties
 
@@ -73,11 +73,11 @@ Returns `{center}` that keeps a common-space ground point under the requested pi
 
 ### `getDistanceScales()`
 
-Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. The estimates combine the converter's local distortion with the physical input units selected by the view's `coordinateSystem` and, for `'other'`, `getMetersPerUnit`.
+Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. The estimates combine the converter's local distortion with world-coordinate units deduced from `fromCrs` or supplied by `getMetersPerUnit`.
 
 ### `projectionSignature`
 
-An opaque signature identifying conversion and tessellation configuration. It changes with `fromCrs`, `toCrs`, `getMetersPerUnit` callback identity, input/output bounds and `resolution`, but not converter identity or navigation. Layers use it to invalidate projected positions.
+An opaque signature based only on `fromCrs`, `toCrs` and `resolution`. Bounds, callback identities and navigation do not affect it. Layers use it to invalidate projected positions.
 
 ## Source
 

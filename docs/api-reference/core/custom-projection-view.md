@@ -102,7 +102,7 @@ Enable interaction with `controller: true`. The default [CustomProjectionControl
 
 To change the projection at runtime, supply the updated converter, CRS strings and bounds. Changing either `fromCrs` or `toCrs` refreshes projected positions. Replacing `projection` alone does not trigger this refresh. If both CRS strings are omitted, deck.gl assumes the conversion is stable. Changing a registered CRS definition without changing its name is not detected.
 
-Changes to bounds, `resolution` or the `getMetersPerUnit` callback also refresh projected positions; camera navigation does not.
+Changing `resolution` also refreshes projected positions. Bounds are properties of the CRS and do not independently trigger a refresh. Replacing `getMetersPerUnit` or navigating the camera does not trigger a refresh either.
 
 Use a new layer ID when switching a layer between `MapView` and `CustomProjectionView`. When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
 

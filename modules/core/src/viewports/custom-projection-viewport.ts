@@ -40,9 +40,7 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   getMetersPerUnit?: (position: number[]) => [number, number, number];
 };
 
-const callbackIds = new WeakMap<object, number>();
 const METERS_PER_METER = (): [number, number, number] => [1, 1, 1];
-let nextCallbackId = 0;
 
 /** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core.
  * @experimental Exported as `_CustomProjectionViewport`; this API may change.
@@ -127,17 +125,7 @@ export default class CustomProjectionViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.resolution = resolution;
-    if (metersPerUnitCallback && !callbackIds.has(metersPerUnitCallback)) {
-      callbackIds.set(metersPerUnitCallback, ++nextCallbackId);
-    }
-    this.signature = JSON.stringify([
-      fromCrs,
-      toCrs,
-      ...toBounds,
-      fromBounds,
-      metersPerUnitCallback && callbackIds.get(metersPerUnitCallback),
-      resolution
-    ]);
+    this.signature = JSON.stringify([fromCrs, toCrs, resolution]);
     this.preproject = position => {
       const projected = projection.forward(clampInput(position, fromBounds));
       return [
