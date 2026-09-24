@@ -263,7 +263,7 @@ test('CustomProjectionViewport derives projected scales from physical input unit
   feet.postUnproject!(feet.unproject(pixel))!.forEach((value, i) =>
     expect(value).toBeCloseTo(input[i], 6)
   );
-  expect(feet.projectionSignature).not.toBe(metric.projectionSignature);
+  expect(feet.projectionSignature).toBe(metric.projectionSignature);
 });
 
 test('CustomProjectionViewport supports UTM input with degree output', () => {
@@ -292,7 +292,7 @@ test('CustomProjectionViewport supports UTM input with degree output', () => {
   );
 });
 
-test('CustomProjectionViewport scale callbacks receive input positions and invalidate geometry', () => {
+test('CustomProjectionViewport scale callbacks receive world positions without changing the signature', () => {
   const getMetersPerUnit = (position: number[]): [number, number, number] => [
     1 + position[0] / 512,
     1,
@@ -310,7 +310,7 @@ test('CustomProjectionViewport scale callbacks receive input positions and inval
   expect(first.distanceScales.unitsPerMeter[0]).toBeCloseTo(1 / 1.25);
   expect(moved.distanceScales.unitsPerMeter[0]).toBeCloseTo(1 / 1.75);
   expect(moved.projectionSignature).toBe(first.projectionSignature);
-  expect(create([128, 128, 0], () => [1, 1, 1]).projectionSignature).not.toBe(
+  expect(create([128, 128, 0], () => [1, 1, 1]).projectionSignature).toBe(
     first.projectionSignature
   );
   expect(() => create([128, 128, 0], () => [0, 1, 1]).preproject!([128, 128, 0])).toThrow(
@@ -371,6 +371,27 @@ test('CustomProjectionViewport recognizes meter input units and preserves explic
     });
     override.distanceScales.unitsPerMeter.forEach(value => expect(value).toBeCloseTo(512 / 720));
     expect(override.preproject!([0, 0, 10])[2]).toBe(3.048);
+  }
+});
+
+test('CustomProjectionViewport signature excludes bounds and all callback identities', () => {
+  const config = {...options, fromCrs: 'EPSG:4326', toCrs: 'EPSG:4326'};
+  const viewport = new CustomProjectionViewport(config);
+  const changes = [
+    {projection: {forward: p => p.slice(), inverse: p => p.slice()}},
+    {getMetersPerUnit: () => [1, 1, 1] as [number, number, number]},
+    {fromBounds: [-170, -80, 170, 80] as [number, number, number, number]},
+    {toBounds: [-200, -100, 200, 100] as [number, number, number, number]}
+  ];
+  for (const change of changes) {
+    expect(new CustomProjectionViewport({...config, ...change}).projectionSignature).toBe(
+      viewport.projectionSignature
+    );
+  }
+  for (const change of [{fromCrs: 'WGS84'}, {toCrs: 'other'}, {resolution: 1}]) {
+    expect(new CustomProjectionViewport({...config, ...change}).projectionSignature).not.toBe(
+      viewport.projectionSignature
+    );
   }
 });
 
@@ -447,7 +468,7 @@ test('CustomProjectionViewport clamps input bounds in both directions without ch
     toBounds: [0, 0, 512, 512],
     fromBounds: [10, 20, 100, 201]
   });
-  expect(changed.projectionSignature).not.toBe(viewport.projectionSignature);
+  expect(changed.projectionSignature).toBe(viewport.projectionSignature);
   const invalid = new CustomProjectionViewport({
     ...options,
     fromBounds: [-180, -90, 180, 90],
