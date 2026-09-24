@@ -14,7 +14,9 @@ import {
 
 const view = new CustomProjectionView({
   projection: {forward: p => p.slice(), inverse: p => p.slice()},
-  outputBounds: [-180, -90, 180, 90],
+  fromCrs: 'EPSG:4326',
+  toCrs: 'EPSG:4326',
+  toBounds: [-180, -90, 180, 90],
   controller: {
     type: CustomProjectionController, // Also selected by controller: true
     maxBounds: null,
