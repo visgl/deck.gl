@@ -374,7 +374,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
-        getPosition: [0, 0, 0],
+        getPosition: () => [0, 0, 0],
         _offset: 0,
         onFirstDraw: () => {
           tileHeader.tileDrawn = true;
