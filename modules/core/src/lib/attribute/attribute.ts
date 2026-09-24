@@ -369,7 +369,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    if (state.binaryValue === buffer) {
+    // The source buffer can be unchanged while its projection/model matrix is invalidated.
+    if (state.binaryValue === buffer && !(settings.transform && this.needsUpdate())) {
       this.clearNeedsUpdate();
       return true;
     }
