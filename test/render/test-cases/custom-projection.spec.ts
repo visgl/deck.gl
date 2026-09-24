@@ -70,7 +70,9 @@ function createLayers() {
 }
 
 function checkPickedStates(probes: (typeof alaska)[]): TestCase['onAfterRender'] {
-  return params =>
+  return params => {
+    // The initial render callback can run before the canvas has a viewport.
+    if (!params.deck.getViewports().length) return;
     defaultOnAfterRender({
       ...params,
       done: () => {
@@ -90,6 +92,7 @@ function checkPickedStates(probes: (typeof alaska)[]): TestCase['onAfterRender']
         params.done();
       }
     });
+  };
 }
 
 const testCases: TestCase[] = [
