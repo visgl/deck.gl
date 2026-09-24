@@ -68,6 +68,10 @@ When using a non-iterable `data` object, the object may optionally contain a fie
 
 The keys in `data.attributes` correspond to the [accessor](../../developer-guide/using-layers.md#accessors) name that the binary should replace, for example `getPosition`, `getColor`. See each layer's documentation for available accessor props.
 
+Accessor-keyed values are source data and still pass through the layer's transforms. When a transform runs on the CPU, supply a typed array or an object with `value`, rather than a GPU-only buffer.
+
+Advanced users may instead supply a buffer under an internal attribute name, such as `instancePositions` or IconLayer's `instanceIconDefs`. These buffers bypass transforms and attribute generation; they must contain the final values expected by the shader. Internal attribute names and layouts are layer-specific and may change. For a viewport using `preproject`, accessor-keyed positions are world coordinates, while direct position attributes must already contain common-space XY and altitude in meters.
+
 Each value in `data.attributes` may be one of the following formats:
 
 - luma.gl [Buffer](https://luma.gl/docs/api-reference/core/resources/buffer) instance

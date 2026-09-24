@@ -158,6 +158,16 @@ export default class Viewport {
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
   resolution?: number;
+  /** Optional world-coordinate conversion before rendering: XY in common space, Z in meters.
+   * projectPosition must accept this result and convert altitude to common units exactly once.
+   */
+  preproject: ((position: number[]) => [number, number, number]) | null = null;
+  /** Inverse of preproject: accepts common-space XY and meter Z; null means outside the domain. */
+  postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
+  /** Equal signatures must describe identical preprojection, including normalization. */
+  get projectionSignature(): unknown {
+    return null;
+  }
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
@@ -227,6 +237,7 @@ export default class Viewport {
       viewport.scale === this.scale &&
       viewport.projectionMode === this.projectionMode &&
       viewport.resolution === this.resolution &&
+      viewport.projectionSignature === this.projectionSignature &&
       equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
