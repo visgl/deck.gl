@@ -31,7 +31,7 @@ new Deck({
     inputUnits: 'degrees',
     controller: true
   }),
-  initialViewState: {target: [256, 256, 0], zoom: 1},
+  initialViewState: {center: [256, 256, 0], zoom: 1},
   layers: [new ScatterplotLayer({
     id: 'cities',
     data: [
@@ -70,14 +70,14 @@ Coordinates outside `inputBounds` are clamped to its boundary, not clipped. The 
 
 | Property | Default | Description |
 | --- | --- | --- |
-| `target` | `[256, 256, 0]` | Camera center in normalized common coordinates, not longitude/latitude. Navigation locks Z to zero. |
+| `center` | `[256, 256, 0]` | Camera center in normalized common coordinates, not longitude/latitude. Navigation locks Z to zero. |
 | `zoom` | `0` | Each increment doubles the scale. |
 | `pitch` | `0` | Map pitch in degrees, as in `MapView`. |
 | `bearing` | `0` | Map bearing in degrees, as in `MapView`. |
 | `minZoom`, `maxZoom` | `-Infinity`, `Infinity` | Zoom constraints; controller bounds may impose an additional minimum. |
 | `minPitch`, `maxPitch` | `0`, `85` | Pitch constraints, clamped to the range 0–85 degrees. |
 
-To center on an input position, such as a city's longitude/latitude, use the viewport's `preproject(position)` result as `target`.
+To center on an input position, such as a city's longitude/latitude, use the viewport's `preproject(position)` result as `center`.
 
 TypeScript configuration types are exported as `CustomProjectionViewProps`, `CustomProjectionViewState`, `CustomProjectionViewportOptions` and `CustomProjection`. Like the classes, these types are experimental.
 

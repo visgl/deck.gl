@@ -24,8 +24,8 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   outputBounds: [number, number, number, number];
   /** Change this when a converter changes internally without changing object identity. */
   projectionId?: string | number;
-  /** Camera target in normalized common coordinates. Z is locked to zero. */
-  target?: [number, number, number];
+  /** Camera center in normalized common coordinates. Z is locked to zero. */
+  center?: [number, number, number];
   /** Map pitch in degrees. */
   pitch?: number;
   /** Map bearing in degrees. */
@@ -49,8 +49,6 @@ let nextConverterId = 0;
  */
 export default class CustomProjectionViewport extends Viewport {
   static displayName = 'CustomProjectionViewport';
-  /** Camera target in normalized common space. */
-  target: [number, number, number];
   /** Map pitch in degrees. */
   pitch: number;
   /** Map bearing in degrees. */
@@ -63,7 +61,7 @@ export default class CustomProjectionViewport extends Viewport {
       outputBounds,
       inputBounds,
       resolution = 5,
-      target = [256, 256, 0],
+      center = [256, 256, 0],
       pitch = 0,
       bearing = 0,
       zoom = 0
@@ -106,7 +104,7 @@ export default class CustomProjectionViewport extends Viewport {
       longitude: undefined,
       latitude: undefined,
       modelMatrix: null,
-      position: [target[0], target[1], 0],
+      position: [center[0], center[1], 0],
       zoom,
       fovy,
       viewMatrix: getViewMatrix({height, pitch, bearing, scale: 2 ** zoom, altitude}),
@@ -121,7 +119,6 @@ export default class CustomProjectionViewport extends Viewport {
         farZMultiplier: 1.01
       })
     });
-    this.target = [target[0], target[1], 0];
     this.pitch = pitch;
     this.bearing = bearing;
     this.resolution = resolution;
@@ -168,7 +165,7 @@ export default class CustomProjectionViewport extends Viewport {
         return null;
       }
     };
-    const inputCenter = this.postUnproject(this.target);
+    const inputCenter = this.postUnproject(this.center);
     const localScale =
       inputCenter &&
       (opts.getUnitsPerMeter
@@ -214,12 +211,12 @@ export default class CustomProjectionViewport extends Viewport {
     return this.distanceScales;
   }
 
-  panByPosition(position: number[], pixel: number[]): {target: [number, number, number]} {
+  panByPosition(position: number[], pixel: number[]): {center: [number, number, number]} {
     const underPointer = this.unproject(pixel, {targetZ: 0});
     return {
-      target: [
-        this.target[0] + position[0] - underPointer[0],
-        this.target[1] + position[1] - underPointer[1],
+      center: [
+        this.center[0] + position[0] - underPointer[0],
+        this.center[1] + position[1] - underPointer[1],
         0
       ]
     };
