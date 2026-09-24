@@ -127,7 +127,7 @@ const aggregationConverter = new Proj4Projection({
 });
 const aggregationView = new CustomProjectionView({
   projection: {forward: aggregationConverter.project, inverse: aggregationConverter.unproject},
-  outputBounds: [-4500000, -500000, 4500000, 5500000],
+  toBounds: [-4500000, -500000, 4500000, 5500000],
 
   resolution: 1
 });
