@@ -274,6 +274,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getPosition'
       },
