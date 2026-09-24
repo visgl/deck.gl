@@ -28,8 +28,9 @@ unrotated map footprint; they do not use OrbitController's spherical bounds.
 
 Position transforms ignore layer coordinateSystem/coordinateOrigin and consume
 modelMatrix before projection. Picking returns input coordinates; viewport
-project/unproject operate on common coordinates. Increment projectionId if a converter
-changes internally. Camera changes do not invalidate projected positions.
+project/unproject operate on common coordinates. Change fromCrs or toCrs along with
+the converter to refresh projected positions; converter identity alone does not
+trigger updates. Camera changes do not invalidate projected positions.
 
 Initial support covers ScatterplotLayer, PathLayer, PolygonLayer/SolidPolygonLayer,
 and the corresponding GeoJsonLayer sublayers. Binary position inputs, projection
@@ -52,7 +53,7 @@ packages, typecheck the demo from the repository root with:
 yarn tsc -p test/apps/custom-projection/tsconfig.json
 ```
 
-Projection converters are passed directly to the view. `inputBounds` specifies
+Projection converters are passed directly to the view. `fromBounds` specifies
 input-space XY clamping before projection and after valid inverse projection;
 Z is preserved. This clamps coordinates rather than clipping geometry. Out-of-range
 picking returns a boundary coordinate when the converter has a valid inverse;
