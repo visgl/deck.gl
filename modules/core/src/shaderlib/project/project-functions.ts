@@ -102,7 +102,7 @@ export function getWorldPosition(
   }
 
   if (viewport.preproject) {
-    return viewport.preproject([x, y, z]);
+    return viewport.projectPosition(viewport.preproject([x, y, z]));
   }
 
   switch (coordinateSystem) {

@@ -82,7 +82,8 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       // @ts-ignore (2339) when geometryBuffer is a luma Buffer, size falls back to positionFormat
       (geometryBuffer && geometryBuffer.size) || (positionFormat === 'XY' ? 2 : 3);
     this.positionSize = this.opts.transform ? 3 : this.inputPositionSize;
-    this.buffers = buffers;
+    // Derived buffer bindings belong to this update, not to the caller's options.
+    this.buffers = {...buffers};
     this.normalize = normalize;
 
     // Handle external logical value
@@ -92,11 +93,10 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
 
       if (!normalize && !this.opts.transform) {
         // Only untransformed geometry can use the input buffer directly.
-        // TODO - avoid mutating user-provided object
-        buffers.vertexPositions = geometryBuffer;
+        this.buffers.vertexPositions = geometryBuffer;
       }
     }
-    this.geometryBuffer = buffers.vertexPositions;
+    this.geometryBuffer = this.buffers.vertexPositions;
 
     if (Array.isArray(dataChanged)) {
       // is partial update

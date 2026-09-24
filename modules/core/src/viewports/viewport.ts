@@ -158,9 +158,11 @@ export default class Viewport {
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
   resolution?: number;
-  /** Optional input-coordinate to common-space conversion, performed before rendering. */
+  /** Optional world-coordinate conversion before rendering: XY in common space, Z in meters.
+   * projectPosition must accept this result and convert altitude to common units exactly once.
+   */
   preproject: ((position: number[]) => [number, number, number]) | null = null;
-  /** Optional inverse conversion for user-facing coordinates; null means outside the domain. */
+  /** Inverse of preproject: accepts common-space XY and meter Z; null means outside the domain. */
   postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
   /** Equal signatures must describe identical preprojection, including normalization. */
   get projectionSignature(): unknown {
