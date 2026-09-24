@@ -33,13 +33,13 @@ function createViewport(signature = 'initial', scale = 1) {
   const viewport = new CustomProjectionViewport({
     width: 400,
     height: 300,
-    projectionId: signature,
-    coordinateSystem: 'meter-offsets',
+    toCrs: signature,
+    fromCrs: '+units=m',
     projection: {
       forward: p => project(p).map(v => v * scale),
       inverse: ([x, y, z = 0]) => [Math.sqrt(x / scale), y / (3 * scale), z / scale]
     },
-    outputBounds: [0, 0, 512, 512]
+    toBounds: [0, 0, 512, 512]
   });
   // Keep cell sizes identical to the Cartesian reference: these tests isolate
   // position preprocessing, not the converter's meter-scale distortion.
