@@ -35,11 +35,11 @@ Zero width or height becomes `1`. Bounds must be finite and increasing. `resolut
 
 Supply layer positions in the coordinates accepted by `projection.forward`, such as longitude, latitude and altitude. The converter returns projected X/Y coordinates; `projection.inverse` converts them back, or returns `null` outside its domain.
 
-Altitude (Z) is in meters, including any Z returned by the converter. If the forward converter omits Z, the input altitude is retained, defaulting to zero. deck.gl handles altitude scaling; the converter should not scale altitude to match its projected X/Y units. Positive Z points out of the map.
+Altitude (Z) defaults to meters, including any Z returned by the converter. If your world coordinates use another vertical unit, describe it with the third component of `getMetersPerUnit`. If the forward converter omits Z, the input altitude is retained, defaulting to zero. deck.gl handles altitude scaling; the converter should not scale altitude to match its projected X/Y units. Positive Z points out of the map.
 
 Conversion receives a copy of the input array. `inputBounds` clamps X/Y but does not alter altitude.
 
-Use `getUnitsPerMeter(inputPosition)` to override scale, returning `[x, y, z]` in projected units per meter. This lets you specify the scale when the converter uses custom coordinate units, including an independent altitude scale.
+Set the view's `coordinateSystem` to describe world coordinates: `'lnglat'` (the default) for longitude/latitude in degrees and altitude in meters, or `'meter-offsets'` for meters along all axes. For `'other'`, supply `getMetersPerUnit(inputPosition)` to describe physical meters per input unit along X, Y and Z. For example, X/Y in feet and altitude in meters uses `[0.3048, 0.3048, 1]`. deck.gl derives projected scale through the converter.
 
 ## Methods and Properties
 
@@ -71,11 +71,11 @@ Returns `{center}` that keeps a common-space ground point under the requested pi
 
 ### `getDistanceScales()`
 
-Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. `getUnitsPerMeter` overrides automatic estimation.
+Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. The estimates combine the converter's local distortion with the physical input units selected by the view's `coordinateSystem` and, for `'other'`, `getMetersPerUnit`.
 
 ### `projectionSignature`
 
-An opaque signature identifying conversion and tessellation configuration. It changes with converter identity, `projectionId`, input/output bounds and `resolution`, but not navigation. Layers use it to invalidate projected positions.
+An opaque signature identifying conversion and tessellation configuration. It changes with converter or active `getMetersPerUnit` callback identity, `coordinateSystem`, `projectionId`, input/output bounds and `resolution`, but not navigation. Layers use it to invalidate projected positions.
 
 ## Source
 
