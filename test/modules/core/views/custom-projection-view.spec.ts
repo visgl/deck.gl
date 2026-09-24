@@ -40,7 +40,8 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
     height: '75%',
     padding: {left: '10%', bottom: 20},
     resolution: 2,
-    getUnitsPerMeter: () => [1, 1, 3],
+    coordinateSystem: 'other',
+    getMetersPerUnit: () => [1 / 3, 1 / 3, 1],
     inputBounds: [0, 0, 400, 400]
   });
   const viewport = view.makeViewport({
