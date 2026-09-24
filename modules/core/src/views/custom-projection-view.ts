@@ -32,12 +32,12 @@ export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewStat
   Pick<
     CustomProjectionViewportOptions,
     | 'projection'
-    | 'outputBounds'
-    | 'inputBounds'
-    | 'projectionId'
+    | 'toBounds'
+    | 'fromBounds'
+    | 'fromCrs'
+    | 'toCrs'
     | 'resolution'
     | 'getMetersPerUnit'
-    | 'coordinateSystem'
     | 'orthographic'
   >;
 
