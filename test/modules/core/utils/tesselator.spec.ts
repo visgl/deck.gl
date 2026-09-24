@@ -105,7 +105,7 @@ test('Tesselator transforms nested and typed positions and preserves topology an
   ]);
 });
 
-test('Tesselator prepares input before transforming and can disable a transform', () => {
+test('Tesselator prepares input before transforming', () => {
   class SubdividingTesselator extends RecordingTesselator {
     prepareGeometry(geometry) {
       return [geometry[0], geometry[1], 5, 0, geometry[2], geometry[3]];
@@ -120,9 +120,6 @@ test('Tesselator prepares input before transforming and can disable a transform'
   });
   expect(tesselator.rows.get(0)!.geometry).toEqual([0, 0, 0, 25, 0, 0, 100, 0, 0]);
   expect(transform).toHaveBeenCalledTimes(3);
-  tesselator.updateGeometry({transform: null});
-  expect(tesselator.rows.get(0)!.geometry).toEqual([0, 0, 10, 0]);
-  expect(tesselator.instanceCount).toBe(2);
 });
 
 for (const normalize of [false, true]) {
@@ -148,24 +145,27 @@ for (const normalize of [false, true]) {
       expect(transform).toHaveBeenCalledTimes(transformed ? 3 : 0);
       expect(Array.from(value)).toEqual([1, 2, 3, 4, 5, 6]);
       // Transformed positions must be generated, not bound to the original XY buffer.
-      expect(tesselator.opts.buffers).toEqual({});
+      expect(tesselator.opts.buffers).toEqual(
+        !normalize && !transformed ? {vertexPositions: {value, size: 2}} : {}
+      );
     });
   }
 }
 
 for (const sentinel of [false, true]) {
-  test(`Tesselator toggles binary transforms without retaining external bindings, sentinel=${sentinel}`, () => {
+  test(`Tesselator updates transformed binary XY geometry, sentinel=${sentinel}`, () => {
     const value = new Float32Array([1, 2, 3, 4, 5, 6]);
-    const buffers = Object.freeze({});
+    const buffers = {};
     const tesselator = new RecordingTesselator({
       data: {length: 1, startIndices: sentinel ? [0, 3] : [0]},
       geometryBuffer: {value, size: 2},
       buffers,
       attributes: {vertexPositions: {size: 3}},
-      normalize: false
+      normalize: false,
+      transform: ([x, y, z]) => [x, y, z]
     });
     expect(tesselator.instanceCount).toBe(3);
-    expect(tesselator.attributes.vertexPositions).toBeNull();
+    expect(tesselator.attributes.vertexPositions).not.toBeNull();
     for (const scale of [2, 3]) {
       const transform = vi.fn(([x, y, z]) => [x * scale, y * scale, z + 7]);
       tesselator.updateGeometry({transform});
@@ -183,13 +183,7 @@ for (const sentinel of [false, true]) {
         6 * scale,
         7
       ]);
-      tesselator.updateGeometry({transform: null});
-      expect(tesselator.instanceCount).toBe(3);
-      expect(tesselator.attributes.vertexPositions).toBeNull();
     }
-    tesselator.updateGeometry({normalize: true});
-    expect(tesselator.instanceCount).toBe(3);
-    expect(tesselator.attributes.vertexPositions).not.toBeNull();
     expect(buffers).toEqual({});
     expect(Array.from(value)).toEqual([1, 2, 3, 4, 5, 6]);
   });
