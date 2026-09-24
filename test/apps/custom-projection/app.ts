@@ -5,7 +5,7 @@
 import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import type {FeatureCollection, LineString} from 'geojson';
 import type {ProjectionName} from './projections';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {projections} from './projections';
 
 // The same Natural Earth datasets as examples/get-started/pure-js/basic.
@@ -60,6 +60,15 @@ function createView(name: ProjectionName): CustomProjectionView {
   });
 }
 
+// Equal physical radii at regularly spaced input coordinates expose local scale
+// variation without relying on the remote datasets.
+const scaleProbes: [number, number][] = [];
+for (let longitude = -165; longitude <= 165; longitude += 30) {
+  for (let latitude = -75; latitude <= 75; latitude += 15) {
+    scaleProbes.push([longitude, latitude]);
+  }
+}
+
 const deck = new Deck({
   views: createView('equalEarth'),
   initialViewState: {center: [256, 256, 0], zoom: 0.8, pitch: 0, bearing: 0},
@@ -72,7 +81,8 @@ const deck = new Deck({
       stroked: true,
       getFillColor: [50, 100, 120],
       getLineColor: [150, 195, 200],
-      lineWidthMinPixels: 0.5,
+      lineWidthUnits: 'meters',
+      getLineWidth: 12000,
       pickable: true
     }),
     new GeoJsonLayer({
@@ -80,15 +90,25 @@ const deck = new Deck({
       transitions: {geometry: GEOMETRY_TRANSITION},
       data: graticules,
       getLineColor: [140, 170, 200, 100],
-      lineWidthMinPixels: 1
+      lineWidthUnits: 'pixels',
+      getLineWidth: 1
     }),
     new GeoJsonLayer({
       id: 'airports',
       transitions: {geometry: GEOMETRY_TRANSITION},
       data: AIRPORTS,
-      pointRadiusUnits: 'pixels',
-      getPointRadius: 2,
+      pointRadiusUnits: 'meters',
+      getPointRadius: 25000,
       getFillColor: [255, 170, 80],
+      pickable: true
+    }),
+    new ScatterplotLayer({
+      id: 'meter-scale-probes',
+      data: scaleProbes,
+      getPosition: position => position,
+      radiusUnits: 'meters',
+      getRadius: 80000,
+      getFillColor: [255, 80, 150, 180],
       pickable: true
     })
   ],

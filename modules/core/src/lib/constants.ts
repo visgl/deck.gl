@@ -75,6 +75,9 @@ export const PROJECTION_MODE = {
    */
   GLOBE: 2,
 
+  /** CPU-projected common-space positions with an external local size-scale field. */
+  EXTERNAL: 3,
+
   /**
    * (Internal use only) Web Mercator projection at high zoom
    */

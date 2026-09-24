@@ -27,7 +27,7 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   expect(viewport.preproject!([0, 0])).toEqual([256, 256, 0]);
   expect(viewport.preproject!([-180, -90])).toEqual([0, 128, 0]);
   expect(viewport.postUnproject!(viewport.preproject!([32, 48, 10]))![0]).toBeCloseTo(32);
-  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo(
+  expect(viewport.projectPosition(viewport.preproject!([0, 0, 10]))[2]).toBeCloseTo(
     (10 * 512) / 360 / ((Math.PI * 6371008.8) / 180),
     10
   );
@@ -167,11 +167,7 @@ test('CustomProjectionView uniforms and picking use the correct coordinate space
     coordinateOrigin: [100, 100, 100],
     modelMatrix: new Array(16).fill(2)
   });
-  expect(uniforms.commonUnitsPerWorldUnit).toEqual([
-    1,
-    1,
-    viewport.distanceScales.unitsPerMeter[2]
-  ]);
+  expect(uniforms.commonUnitsPerWorldUnit).toEqual([1, 1, 1]);
   expect(uniforms.modelMatrix[0]).toBe(1);
   expect(uniforms.modelMatrix[12]).toBe(0);
   const info = getEmptyPickingInfo({viewports: [viewport], pixelRatio: 1, x: 400, y: 300});
@@ -432,6 +428,32 @@ test('CustomProjectionViewport invalidates by CRS strings, not converter identit
     getMetersPerUnit
   });
   expect(first.projectionSignature).not.toBe(second.projectionSignature);
+});
+
+test('CustomProjectionViewport uses per-position meter scale for altitude and unprojection', () => {
+  const viewport = new CustomProjectionViewport({
+    projection,
+    toBounds: [0, 0, 512, 512],
+    getMetersPerUnit: ([x]) => [1 / (1 + x / 512), 1 / (1 + x / 512), 1],
+    width: 800,
+    height: 600,
+    pitch: 35,
+    bearing: 25
+  });
+  for (const x of [100, 400]) {
+    for (const altitude of [-20, 0, 30]) {
+      const position = viewport.preproject!([x, 200, altitude]);
+      expect(position[2]).toBe(altitude);
+      expect(viewport.projectPosition(position)[2]).toBeCloseTo(altitude * (1 + x / 512));
+      const pixel = viewport.project(position);
+      for (const unprojected of [
+        viewport.unproject(pixel),
+        viewport.unproject(pixel.slice(0, 2), {targetZ: altitude})
+      ]) {
+        position.forEach((value, i) => expect(unprojected[i]).toBeCloseTo(value, 5));
+      }
+    }
+  }
 });
 
 test('CustomProjectionViewport scale sampling stays inside geographic limits', () => {

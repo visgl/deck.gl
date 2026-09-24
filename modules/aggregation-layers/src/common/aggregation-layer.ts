@@ -85,6 +85,20 @@ export default abstract class AggregationLayer<
   }
 
   draw({shaderModuleProps}) {
+    // Aggregators can also be drawn directly, without a LayersPass.
+    if (shaderModuleProps.project && !shaderModuleProps.project.sizeScale) {
+      shaderModuleProps = {
+        ...shaderModuleProps,
+        project: {
+          ...shaderModuleProps.project,
+          sizeScale: this.context.layerManager.projectionScaleResources.get(
+            // Shader variants follow the layer's view, not the aggregator's
+            // temporary Cartesian precision viewport.
+            this.context.viewport
+          )
+        }
+      };
+    }
     // GPU aggregation needs `shaderModuleProps` for projection/filter uniforms which are only accessible at draw time
     // GPUAggregator's Buffers are pre-allocated during `update()` and passed down to the sublayer attributes in renderLayers()
     // Although the Buffers have been bound to the sublayer's Model, their content are not populated yet

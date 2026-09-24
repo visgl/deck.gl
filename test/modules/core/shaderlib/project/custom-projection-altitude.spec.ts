@@ -7,6 +7,7 @@ import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@d
 import {device} from '@deck.gl/test-utils/vitest';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
+import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
 
 const gpuTest = device.type === 'webgl' ? test : test.skip;
 
@@ -29,14 +30,20 @@ gpuTest('CustomProjectionViewport projects meter altitude on CPU and GPU', async
       coordinateOrigin: [0, 0, 0]
     })
   ).toEqual(common);
+  const resources = new ProjectionScaleResources(device);
   const result = await runOnGPU({
     vs: `#version 300 es
       out vec3 result;
       void main() { result = project_position(test.uPos, test.uPos64Low) + project.commonOrigin; }`,
     modules: [project, testUniforms],
+    defines: {USE_EXTERNAL_PROJECTION: true},
     vertexCount: 1,
     varying: 'result',
-    shaderInputProps: {project: {viewport}, test: {uPos: position, uPos64Low: [0, 0, 0]}}
+    shaderInputProps: {
+      project: {viewport, sizeScale: resources.get(viewport)},
+      test: {uPos: position, uPos64Low: [0, 0, 0]}
+    }
   });
   common.forEach((value, i) => expect(result[i]).toBeCloseTo(value));
+  resources.destroy();
 });

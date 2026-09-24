@@ -15,10 +15,22 @@ the view's forward/inverse callbacks. Core does not depend on proj4js.
 The experimental `_CustomProjectionView` requires output bounds and accepts a stable converter object.
 Bounds establish normalization, not clipping. `resolution` is in input units (degrees
 here). View state uses a common-space `center`, `pitch`, and
-`bearing`. Z is fixed at zero for navigation. Meter scale is estimated
-by the viewport at the center using `inputUnits: 'degrees'`, while altitude
-normalization is independent of camera position. `getUnitsPerMeter` remains an
-optional override for custom scale calculations.
+`bearing`. Z is fixed at zero for navigation. For longitude/latitude input,
+meter-based sizes follow the projection's local area scale while preserving marker
+shapes and aspect ratios. Equal Earth keeps equally sized markers approximately
+uniform; Web Mercator enlarges them toward the poles. See
+[Meter Size](../../../docs/api-reference/core/custom-projection-view.md#meter-size)
+for the scale definition, accuracy expectations, and `fromCrs` / `getMetersPerUnit` options.
+
+Pink grid markers have an 80 km radius, airports a 25 km radius, country outlines
+a 12 km width, and graticules a fixed 1 pixel width. The probe grid spans −75° to
+75° latitude. No pixel-size clamp hides the meter-sized geometry's variation.
+Switch to Web Mercator or equirectangular to compare marker sizes by
+latitude, then pan without zooming to check that sizes do not follow the camera
+center. The pink grid works even if the remote Natural Earth datasets cannot load.
+
+The browser console logs `Size scale sampler` timings when preparing sizing for a
+projection. Camera-only changes do not emit another timing.
 
 The controller has an independent planar view state. Rotation gestures and keyboard
 navigation follow MapController: dragging upward increases pitch. Pan and zoom

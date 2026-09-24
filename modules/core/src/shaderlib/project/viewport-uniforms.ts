@@ -11,6 +11,7 @@ import {PROJECTION_MODE} from '../../lib/constants';
 import memoize from '../../utils/memoize';
 
 import type Viewport from '../../viewports/viewport';
+import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';
 
 type Vec3 = [number, number, number];
@@ -102,6 +103,7 @@ export function getOffsetOrigin(
       break;
 
     case PROJECTION_MODE.IDENTITY:
+    case PROJECTION_MODE.EXTERNAL:
       shaderCoordinateOrigin = viewport.position.map(Math.fround) as Vec3;
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
       break;
@@ -195,6 +197,8 @@ export type ProjectUniforms = {
   // Backward compatibility
   // TODO: remove in v9
   pseudoMeters: boolean;
+  /** Width and height of the square local size-scale field. */
+  sizeScaleSize: number;
 
   // Screen size
   viewportSize: [number, number];
@@ -217,6 +221,11 @@ export type ProjectUniforms = {
 
 export type ProjectProps = {
   viewport: Viewport;
+  /** Scalar XY scale, X/Y slopes and Z scale: float32 storage buffer on WebGPU,
+   * RGBA32Uint float-bit texture on WebGL. Required when USE_EXTERNAL_PROJECTION
+   * is enabled; ordinary projection shader variants do not use this binding.
+   */
+  sizeScale?: Buffer | Texture;
   devicePixelRatio?: number;
   modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
@@ -312,6 +321,7 @@ function calculateViewportUniforms({
     // TODO: remove in v9
     // @ts-expect-error _pseudoMeters is only defined on WebMercator viewport
     pseudoMeters: Boolean(viewport._pseudoMeters),
+    sizeScaleSize: 1,
 
     // Screen size
     viewportSize,
@@ -320,7 +330,11 @@ function calculateViewportUniforms({
     focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit: viewport.preproject
-      ? [1, 1, distanceScales.unitsPerMeter[2]]
+      ? [
+          1,
+          1,
+          viewport.projectionMode === PROJECTION_MODE.EXTERNAL ? 1 : distanceScales.unitsPerMeter[2]
+        ]
       : (distanceScales.unitsPerMeter as Vec3),
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
