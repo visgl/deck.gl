@@ -4,6 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {Layer, LayerManager, Viewport, CompositeLayer} from '@deck.gl/core';
+import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
@@ -136,6 +137,56 @@ test('Projection-dependent generated attributes do not acquire position transfor
     manager.setLayers([layer]);
     expect('transform' in attribute.settings).toBe(false);
     expect(Array.from(attribute.value!.slice(0, 3))).toEqual([2, 3, 4]);
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Layer refreshes custom projection attributes only when CRS metadata changes', () => {
+  const options = {toBounds: [0, 0, 512, 512] as [number, number, number, number]};
+  const projection = {forward: p => p.slice(), inverse: p => p.slice()};
+  const initial = new CustomProjectionViewport({...options, projection});
+  const manager = createManager(initial);
+  const accessor = vi.fn(point => point);
+  const layer = new PositionLayer({data: [[2, 3, 4]], getPosition: accessor});
+  try {
+    manager.setLayers([layer]);
+    layer.activateViewport(initial);
+    accessor.mockClear();
+    const changedProjection = {
+      forward: ([x, y, z]) => [x * 2, y, z],
+      inverse: ([x, y, z]) => [x / 2, y, z]
+    };
+    for (const crs of [
+      {},
+      {fromCrs: 'EPSG:4326', toCrs: 'first'},
+      {fromCrs: 'WGS84', toCrs: 'first'},
+      {fromCrs: 'WGS84', toCrs: 'second'}
+    ]) {
+      const viewport = new CustomProjectionViewport({
+        ...options,
+        ...crs,
+        projection: changedProjection
+      });
+      manager.activateViewport(viewport);
+      layer.activateViewport(viewport);
+      if ('fromCrs' in crs) {
+        expect(accessor).toHaveBeenCalledTimes(1);
+        expect(getPositions(layer)).toEqual([4, 3, 4]);
+      } else {
+        expect(accessor).not.toHaveBeenCalled();
+        expect(getPositions(layer)).toEqual([2, 3, 4]);
+      }
+      accessor.mockClear();
+      const replacement = new CustomProjectionViewport({
+        ...options,
+        ...crs,
+        projection: {...changedProjection}
+      });
+      manager.activateViewport(replacement);
+      layer.activateViewport(replacement);
+      expect(accessor).not.toHaveBeenCalled();
+    }
   } finally {
     manager.finalize();
   }

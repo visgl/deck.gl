@@ -10,7 +10,7 @@ import testController, {createTestController} from './test-controller';
 
 const view = new CustomProjectionView({
   projection: {forward: p => p.slice(), inverse: () => null},
-  outputBounds: [0, 0, 512, 512]
+  toBounds: [0, 0, 512, 512]
 });
 const makeViewport = props => view.makeViewport({width: 800, height: 600, viewState: props})!;
 const options = {width: 800, height: 600, makeViewport, maxBounds: null};
@@ -19,7 +19,7 @@ class TestProjectionView extends CustomProjectionView {
   constructor(props = {}) {
     super({
       projection: {forward: p => p.slice(), inverse: p => p.slice()},
-      outputBounds: [0, 0, 512, 512],
+      toBounds: [0, 0, 512, 512],
       ...props
     });
   }

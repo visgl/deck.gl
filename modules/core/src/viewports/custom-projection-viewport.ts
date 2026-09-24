@@ -8,22 +8,24 @@ import {getViewMatrix, getProjectionParameters, altitudeToFovy} from '@math.gl/w
 import {PROJECTION_MODE} from '../lib/constants';
 
 /** Forward/inverse functions can be supplied by a proj4js converter. */
-export type CustomProjection = {
+export type ProjectionConverter = {
   forward: (position: number[]) => number[];
   inverse: (position: number[]) => number[] | null;
 };
 
 export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> & {
   /** Conversion from input coordinates into output projection units, and its inverse. */
-  projection: CustomProjection;
-  /** Optional [minX, minY, maxX, maxY] in input coordinates. Clamps XY before
+  projection: ProjectionConverter;
+  /** Input CRS name or PROJ string. +units=m defaults to meters; otherwise assumes lnglat degrees. */
+  fromCrs?: string;
+  /** Output CRS name or PROJ string. Changing either CRS refreshes projected positions. */
+  toCrs?: string;
+  /** Optional [minX, minY, maxX, maxY] in fromCrs world coordinates. Clamps XY before
    * forward projection and after valid inverse projection; Z is unchanged.
    */
-  inputBounds?: [number, number, number, number];
-  /** Output extent used for stable, aspect-preserving normalization into a 512-unit box. */
-  outputBounds: [number, number, number, number];
-  /** Change this when a converter changes internally without changing object identity. */
-  projectionId?: string | number;
+  fromBounds?: [number, number, number, number];
+  /** Projection extent in toCrs, used for stable, aspect-preserving normalization into a 512-unit box. */
+  toBounds: [number, number, number, number];
   /** Camera center in normalized common coordinates. Z is locked to zero. */
   center?: [number, number, number];
   /** Map pitch in degrees. */
@@ -32,17 +34,15 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   bearing?: number;
   /** Maximum tessellation cell size in input-coordinate units. Default 5. */
   resolution?: number;
-  /** Input world-coordinate units. Defaults to 'lnglat'; 'other' requires getMetersPerUnit. */
-  coordinateSystem?: 'lnglat' | 'meter-offsets' | 'other';
   /** Physical meters per input world-coordinate unit along X, Y and Z.
-   * Required and used when coordinateSystem is 'other'.
+   * Overrides the default inferred from fromCrs. Supply this for other input units.
    */
   getMetersPerUnit?: (position: number[]) => [number, number, number];
 };
 
-const converterIds = new WeakMap<object, number>();
+const callbackIds = new WeakMap<object, number>();
 const METERS_PER_METER = (): [number, number, number] => [1, 1, 1];
-let nextConverterId = 0;
+let nextCallbackId = 0;
 
 /** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core.
  * @experimental Exported as `_CustomProjectionViewport`; this API may change.
@@ -58,32 +58,22 @@ export default class CustomProjectionViewport extends Viewport {
   constructor(opts: CustomProjectionViewportOptions) {
     const {
       projection,
-      outputBounds,
-      inputBounds,
-      coordinateSystem = 'lnglat',
+      toBounds,
+      fromBounds,
+      fromCrs,
+      toCrs,
       resolution = 5,
       center = [256, 256, 0],
       pitch = 0,
       bearing = 0,
       zoom = 0
     } = opts;
-    if (!['lnglat', 'meter-offsets', 'other'].includes(coordinateSystem)) {
-      throw new Error('CustomProjectionViewport requires a supported coordinateSystem');
-    }
-    if (coordinateSystem === 'other' && typeof opts.getMetersPerUnit !== 'function') {
-      throw new Error(
-        "CustomProjectionViewport requires getMetersPerUnit for coordinateSystem: 'other'"
-      );
-    }
     const metersPerUnitCallback =
-      coordinateSystem === 'other'
-        ? opts.getMetersPerUnit
-        : coordinateSystem === 'meter-offsets'
-          ? METERS_PER_METER
-          : undefined;
-    const [minX, minY, maxX, maxY] = outputBounds;
+      opts.getMetersPerUnit ??
+      (/(?:^|\s)\+units=m(?:\s|$)/.test(fromCrs || '') ? METERS_PER_METER : undefined);
+    const [minX, minY, maxX, maxY] = toBounds;
     if (
-      !outputBounds.every(Number.isFinite) ||
+      !toBounds.every(Number.isFinite) ||
       maxX <= minX ||
       maxY <= minY ||
       !Number.isFinite(resolution) ||
@@ -92,12 +82,12 @@ export default class CustomProjectionViewport extends Viewport {
       throw new Error('CustomProjectionViewport requires finite bounds and positive resolution');
     }
     if (
-      inputBounds &&
-      (!inputBounds.every(Number.isFinite) ||
-        inputBounds[2] <= inputBounds[0] ||
-        inputBounds[3] <= inputBounds[1])
+      fromBounds &&
+      (!fromBounds.every(Number.isFinite) ||
+        fromBounds[2] <= fromBounds[0] ||
+        fromBounds[3] <= fromBounds[1])
     ) {
-      throw new Error('CustomProjectionViewport requires finite, increasing inputBounds');
+      throw new Error('CustomProjectionViewport requires finite, increasing fromBounds');
     }
     const normalizationScale = 512 / Math.max(maxX - minX, maxY - minY);
     const centerX = (minX + maxX) / 2;
@@ -137,21 +127,19 @@ export default class CustomProjectionViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.resolution = resolution;
-    if (!converterIds.has(projection)) converterIds.set(projection, ++nextConverterId);
-    if (metersPerUnitCallback && !converterIds.has(metersPerUnitCallback)) {
-      converterIds.set(metersPerUnitCallback, ++nextConverterId);
+    if (metersPerUnitCallback && !callbackIds.has(metersPerUnitCallback)) {
+      callbackIds.set(metersPerUnitCallback, ++nextCallbackId);
     }
     this.signature = JSON.stringify([
-      converterIds.get(projection),
-      opts.projectionId,
-      ...outputBounds,
-      inputBounds,
-      coordinateSystem,
-      metersPerUnitCallback && converterIds.get(metersPerUnitCallback),
+      fromCrs,
+      toCrs,
+      ...toBounds,
+      fromBounds,
+      metersPerUnitCallback && callbackIds.get(metersPerUnitCallback),
       resolution
     ]);
     this.preproject = position => {
-      const projected = projection.forward(clampInput(position, inputBounds));
+      const projected = projection.forward(clampInput(position, fromBounds));
       return [
         (projected[0] - centerX) * normalizationScale + 256,
         (projected[1] - centerY) * normalizationScale + 256,
@@ -185,7 +173,7 @@ export default class CustomProjectionViewport extends Viewport {
           return null;
         // Validate the inverse before clamping: bounded picking deliberately returns
         // the boundary coordinate, which need not round-trip to the original pixel.
-        const bounded = clampInput(input, inputBounds);
+        const bounded = clampInput(input, fromBounds);
         return [bounded[0], bounded[1], bounded[2] ?? projected[2]];
       } catch {
         return null;
@@ -194,7 +182,7 @@ export default class CustomProjectionViewport extends Viewport {
     const inputCenter = this.postUnproject(this.center);
     const localScale =
       inputCenter &&
-      estimateUnitsPerMeter(projection, inputCenter, inputBounds, metersPerUnitCallback);
+      estimateUnitsPerMeter(projection, inputCenter, fromBounds, metersPerUnitCallback);
     const unitsPerMeter = (localScale || [1, 1, 1]).map(
       value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
     );
@@ -268,9 +256,9 @@ function getMetersPerUnit(
 
 /** Combine the converter's local derivative with the physical scale of its input. */
 function estimateUnitsPerMeter(
-  projection: CustomProjection,
+  projection: ProjectionConverter,
   center: number[],
-  inputBounds?: CustomProjectionViewportOptions['inputBounds'],
+  fromBounds?: CustomProjectionViewportOptions['fromBounds'],
   callback?: CustomProjectionViewportOptions['getMetersPerUnit']
 ): [number, number, number] {
   const metersPerUnit = getMetersPerUnit(center, callback);
@@ -278,14 +266,14 @@ function estimateUnitsPerMeter(
   const stepX = 1 / metersPerUnit[0];
   const stepY = 1 / metersPerUnit[1];
   // Sample toward the interior at longitude/latitude limits to avoid crossing a seam or pole.
-  const midX = inputBounds ? (inputBounds[0] + inputBounds[2]) / 2 : 0;
-  const midY = inputBounds ? (inputBounds[1] + inputBounds[3]) / 2 : 0;
+  const midX = fromBounds ? (fromBounds[0] + fromBounds[2]) / 2 : 0;
+  const midY = fromBounds ? (fromBounds[1] + fromBounds[3]) / 2 : 0;
   const dx = center[0] > midX ? -stepX : stepX;
   const dy = center[1] > midY ? -stepY : stepY;
   try {
-    const origin = projection.forward(clampInput(center, inputBounds));
-    const inputX = clampInput([center[0] + dx, center[1], center[2] ?? 0], inputBounds);
-    const inputY = clampInput([center[0], center[1] + dy, center[2] ?? 0], inputBounds);
+    const origin = projection.forward(clampInput(center, fromBounds));
+    const inputX = clampInput([center[0] + dx, center[1], center[2] ?? 0], fromBounds);
+    const inputY = clampInput([center[0], center[1] + dy, center[2] ?? 0], fromBounds);
     const x = projection.forward(inputX.slice());
     const y = projection.forward(inputY.slice());
     const metersX = Math.abs(inputX[0] - center[0]) * metersPerUnit[0];
@@ -304,7 +292,7 @@ function estimateUnitsPerMeter(
 
 function clampInput(
   position: number[],
-  bounds?: CustomProjectionViewportOptions['inputBounds']
+  bounds?: CustomProjectionViewportOptions['fromBounds']
 ): number[] {
   const result = position.slice();
   if (bounds) {
