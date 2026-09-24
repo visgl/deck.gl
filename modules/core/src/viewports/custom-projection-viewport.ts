@@ -32,12 +32,9 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   bearing?: number;
   /** Maximum tessellation cell size in input-coordinate units. Default 5. */
   resolution?: number;
-  /** Input XY units for local meter-scale estimation. Degrees means longitude/latitude
-   * on a sphere; meters assumes locally metric Cartesian coordinates. If omitted,
-   * output XY units are assumed to be meters unless getUnitsPerMeter is supplied.
+  /** Overrides automatic longitude/latitude scale estimation. Required for other input
+   * coordinate systems. Returns output units per meter at an input coordinate.
    */
-  inputUnits?: 'degrees' | 'meters';
-  /** Overrides the local scale estimate, in output units per meter, at an input coordinate. */
   getUnitsPerMeter?: (position: number[]) => [number, number, number];
 };
 
@@ -170,7 +167,7 @@ export default class CustomProjectionViewport extends Viewport {
       inputCenter &&
       (opts.getUnitsPerMeter
         ? opts.getUnitsPerMeter(inputCenter)
-        : estimateUnitsPerMeter(projection, inputCenter, opts.inputUnits, inputBounds));
+        : estimateUnitsPerMeter(projection, inputCenter, inputBounds));
     const unitsPerMeter = (localScale || [1, 1, 1]).map(
       value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
     );
@@ -223,26 +220,22 @@ export default class CustomProjectionViewport extends Viewport {
   }
 }
 
-/** Estimate local axis scales without assuming the converter's input is geographic. */
+/** Estimate local axis scales for longitude/latitude input coordinates. */
 function estimateUnitsPerMeter(
   projection: CustomProjection,
   center: number[],
-  inputUnits: CustomProjectionViewportOptions['inputUnits'],
   inputBounds?: CustomProjectionViewportOptions['inputBounds']
 ): [number, number, number] {
-  if (!inputUnits) return [1, 1, 1];
-  const geographic = inputUnits === 'degrees';
-  const step = geographic ? 0.0001 : 1;
+  const step = 0.0001;
   // Sample toward the interior at longitude/latitude limits to avoid crossing a seam or pole.
   const midX = inputBounds ? (inputBounds[0] + inputBounds[2]) / 2 : 0;
   const midY = inputBounds ? (inputBounds[1] + inputBounds[3]) / 2 : 0;
-  const dx = (geographic || inputBounds) && center[0] > midX ? -step : step;
-  const dy = (geographic || inputBounds) && center[1] > midY ? -step : step;
+  const dx = center[0] > midX ? -step : step;
+  const dy = center[1] > midY ? -step : step;
   const metersPerDegree = (Math.PI * 6371008.8) / 180;
-  const metersX = geographic
-    ? step * metersPerDegree * Math.max(1e-6, Math.abs(Math.cos((center[1] * Math.PI) / 180)))
-    : step;
-  const metersY = geographic ? step * metersPerDegree : step;
+  const metersX =
+    step * metersPerDegree * Math.max(1e-6, Math.abs(Math.cos((center[1] * Math.PI) / 180)));
+  const metersY = step * metersPerDegree;
   try {
     const origin = projection.forward(clampInput(center, inputBounds));
     const x = projection.forward(

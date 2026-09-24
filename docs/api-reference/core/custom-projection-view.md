@@ -28,7 +28,6 @@ new Deck({
     projection,
     inputBounds: [-180, -90, 180, 90],
     outputBounds: [-east, -north, east, north],
-    inputUnits: 'degrees',
     controller: true
   }),
   initialViewState: {center: [256, 256, 0], zoom: 1},
@@ -49,6 +48,33 @@ new Deck({
 
 deck.gl does not bundle a projection library. Reuse the projection object between renders to avoid unnecessary recalculation.
 
+### Data already in UTM coordinates
+
+Automatic meter-scale estimation assumes longitude/latitude input. If your data is already projected, supply `getUnitsPerMeter` instead. This example accepts UTM zone 10N eastings and northings in meters; the identity converter keeps those coordinates unchanged.
+
+```js
+const utm = proj4('EPSG:4326', '+proj=utm +zone=10 +datum=WGS84 +units=m');
+const west = utm.forward([-126, 0])[0];
+const east = utm.forward([-120, 0])[0];
+const north = utm.forward([-126, 84])[1];
+
+const view = new CustomProjectionView({
+  projection: {
+    forward: position => position.slice(),
+    inverse: position => position.slice()
+  },
+  outputBounds: [west, 0, east, north],
+  getUnitsPerMeter: () => [1, 1, 1],
+  resolution: 10000,
+  controller: true
+});
+
+// Layer positions use [easting, northing, altitudeInMeters].
+const sanFrancisco = [...utm.forward([-122.4, 37.8]), 0];
+```
+
+Here `[1, 1, 1]` treats one projected meter as one physical meter along each axis. This deliberately ignores UTM's local scale distortion; return position-dependent values if your application needs to account for it. `resolution` is also in the input coordinate units—meters in this example.
+
 ## Constructor
 
 Inherits [View options](./view.md#constructor), including layout, padding, controller settings and GPU parameters. Additional options:
@@ -60,8 +86,7 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | `inputBounds` | None | The projection's valid input domain, expressed as `[minX, minY, maxX, maxY]` in input coordinates. |
 | `projectionId` | None | Change this string or number when you change the projection's behavior without replacing the projection object. |
 | `resolution` | `5` | Controls how closely paths and polygon edges follow the projection. Lower values produce smoother curves but take longer to process. Measured in input-coordinate units. |
-| `inputUnits` | None | `'degrees'` or `'meters'` for local meter-scale estimation. If omitted, output XY units are assumed to be meters. |
-| `getUnitsPerMeter` | None | `(inputPosition) => [x, y, z]` in converter output units per meter; overrides the estimate. |
+| `getUnitsPerMeter` | None | `(inputPosition) => [x, y, z]` in converter output units per meter. Overrides automatic longitude/latitude scale estimation; required for other input coordinate systems. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
 Coordinates outside `inputBounds` are clamped to its boundary, not clipped. The bounds describe the projection itself; use the view state to choose the visible region.
