@@ -36,7 +36,8 @@ export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewStat
     | 'inputBounds'
     | 'projectionId'
     | 'resolution'
-    | 'getUnitsPerMeter'
+    | 'getMetersPerUnit'
+    | 'coordinateSystem'
     | 'orthographic'
   >;
 

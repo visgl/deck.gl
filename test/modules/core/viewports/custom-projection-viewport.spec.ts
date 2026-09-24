@@ -12,6 +12,7 @@ import {
 import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection-controller';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {lngLatToWorld, worldToLngLat, getDistanceScales} from '@math.gl/web-mercator';
+import {Proj4Projection} from '@math.gl/proj4';
 
 const projection = {forward: p => p.slice(), inverse: p => p.slice()};
 const options = {
@@ -26,8 +27,13 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   expect(viewport.preproject!([0, 0])).toEqual([256, 256, 0]);
   expect(viewport.preproject!([-180, -90])).toEqual([0, 128, 0]);
   expect(viewport.postUnproject!(viewport.preproject!([32, 48, 10]))![0]).toBeCloseTo(32);
-  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo((10 * 512) / 360);
-  expect(viewport.unprojectPosition(viewport.projectPosition([32, 48, 10]))).toEqual([32, 48, 10]);
+  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo(
+    (10 * 512) / 360 / ((Math.PI * 6371008.8) / 180),
+    10
+  );
+  viewport
+    .unprojectPosition(viewport.projectPosition([32, 48, 10]))
+    .forEach((value, i) => expect(value).toBeCloseTo([32, 48, 10][i], 10));
   const moved = new CustomProjectionViewport({...options, zoom: 4, center: [300, 300, 0]});
   expect(moved.projectionSignature).toBe(viewport.projectionSignature);
   expect(moved.preproject!([32, 48, 10])).toEqual(viewport.preproject!([32, 48, 10]));
@@ -79,7 +85,15 @@ for (const orthographic of [false, true]) {
           const viewport = new CustomProjectionViewport({
             ...camera,
             projection: webMercator,
-            getUnitsPerMeter: () => getDistanceScales({longitude, latitude}).unitsPerMeter,
+            coordinateSystem: 'other',
+            getMetersPerUnit: () => {
+              const scales = getDistanceScales({longitude, latitude});
+              return [
+                scales.unitsPerDegree[0] / scales.unitsPerMeter[0],
+                scales.unitsPerDegree[1] / scales.unitsPerMeter[1],
+                1
+              ];
+            },
             outputBounds: [0, 0, 512, 512],
             center: [...lngLatToWorld([longitude, latitude]), 0]
           });
@@ -174,7 +188,8 @@ test('CustomProjectionViewport preserves callback altitude in meters and meter t
   const viewport = new CustomProjectionViewport({
     ...options,
     pitch: 30,
-    getUnitsPerMeter: () => [2, 3, 7],
+    coordinateSystem: 'other',
+    getMetersPerUnit: () => [1 / 7, 1 / 7, 1],
     projection: {
       forward: p => [p[0], p[1], (p[2] || 0) + 10],
       inverse: p => [p[0], p[1], p[2] - 10]
@@ -212,17 +227,132 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   const metric = new CustomProjectionViewport({
     ...options,
     outputBounds: [0, 0, 512, 512],
-    getUnitsPerMeter: () => [2, 3, 1],
+    coordinateSystem: 'meter-offsets',
     projection: {forward: p => [2 * p[0], 3 * p[1], p[2]], inverse: p => [p[0] / 2, p[1] / 3, p[2]]}
   });
-  expect(metric.distanceScales.unitsPerMeter).toEqual([2, 3, 1]);
-  expect(metric.distanceScales.metersPerUnit).toEqual([0.5, 1 / 3, 1]);
+  expect(metric.distanceScales.unitsPerMeter).toEqual([2, 3, Math.sqrt(6)]);
+  expect(metric.distanceScales.metersPerUnit).toEqual([0.5, 1 / 3, 1 / Math.sqrt(6)]);
   const override = new CustomProjectionViewport({
     ...options,
     outputBounds: [0, 0, 512, 512],
-    getUnitsPerMeter: () => [5, 6, 7]
+    coordinateSystem: 'other',
+    getMetersPerUnit: () => [5, 6, 1]
   });
-  expect(override.distanceScales.unitsPerMeter).toEqual([5, 6, 7]);
+  expect(override.distanceScales.unitsPerMeter).toEqual([1 / 5, 1 / 6, 1 / Math.sqrt(30)]);
+});
+
+test('CustomProjectionViewport derives projected scales from physical input units', () => {
+  const create = (metersPerUnit: [number, number, number]) =>
+    new CustomProjectionViewport({
+      projection: {
+        forward: ([x, y, z = 0]) => [2 * x + y, 3 * y, z],
+        inverse: ([x, y, z = 0]) => [(x - y / 3) / 2, y / 3, z]
+      },
+      outputBounds: [0, 0, 512, 512],
+      coordinateSystem: 'other',
+      getMetersPerUnit: () => metersPerUnit
+    });
+  const metric = create([1, 1, 1]);
+  const feet = create([0.3048, 0.3048, 0.3048]);
+  [2, Math.sqrt(10), Math.sqrt(6)].forEach((value, i) => {
+    expect(metric.distanceScales.unitsPerMeter[i]).toBeCloseTo(value, 9);
+    expect(feet.distanceScales.unitsPerMeter[i]).toBeCloseTo(value / 0.3048, 9);
+  });
+  const input = [10, 20, 100];
+  const projected = feet.preproject!(input);
+  expect(projected[2]).toBeCloseTo(30.48);
+  const pixel = feet.project(projected);
+  feet.postUnproject!(feet.unproject(pixel))!.forEach((value, i) =>
+    expect(value).toBeCloseTo(input[i], 6)
+  );
+  expect(feet.projectionSignature).not.toBe(metric.projectionSignature);
+});
+
+test('CustomProjectionViewport supports UTM input with degree output', () => {
+  const converter = new Proj4Projection({
+    from: '+proj=utm +zone=10 +datum=WGS84 +units=m',
+    to: 'EPSG:4326'
+  });
+  const viewport = new CustomProjectionViewport({
+    projection: {forward: converter.project, inverse: converter.unproject},
+    outputBounds: [-126, 0, -120, 84],
+    coordinateSystem: 'meter-offsets'
+  });
+  // Zone center is 42 degrees north. Expected output is degrees per meter,
+  // not the callback's input-unit value of 1, then normalized by the viewport.
+  const normalizedDegreesPerMeter = 512 / 84 / ((Math.PI * 6371008.8) / 180);
+  expect(
+    viewport.distanceScales.unitsPerMeter[0] /
+      (normalizedDegreesPerMeter / Math.cos((42 * Math.PI) / 180))
+  ).toBeCloseTo(1, 2);
+  expect(viewport.distanceScales.unitsPerMeter[1] / normalizedDegreesPerMeter).toBeCloseTo(1, 2);
+  const input = [552821.3829931148, 4183794.4989348184, 100];
+  viewport.postUnproject!(viewport.preproject!(input))!.forEach((value, i) =>
+    expect(value).toBeCloseTo(input[i], 5)
+  );
+});
+
+test('CustomProjectionViewport scale callbacks receive input positions and invalidate geometry', () => {
+  const getMetersPerUnit = (position: number[]): [number, number, number] => [
+    1 + position[0] / 512,
+    1,
+    1
+  ];
+  const create = (center: [number, number, number], callback = getMetersPerUnit) =>
+    new CustomProjectionViewport({
+      projection,
+      outputBounds: [0, 0, 512, 512],
+      center,
+      coordinateSystem: 'other',
+      getMetersPerUnit: callback
+    });
+  const first = create([128, 128, 0]);
+  const moved = create([384, 128, 0]);
+  expect(first.distanceScales.unitsPerMeter[0]).toBeCloseTo(1 / 1.25);
+  expect(moved.distanceScales.unitsPerMeter[0]).toBeCloseTo(1 / 1.75);
+  expect(moved.projectionSignature).toBe(first.projectionSignature);
+  expect(create([128, 128, 0], () => [1, 1, 1]).projectionSignature).not.toBe(
+    first.projectionSignature
+  );
+  expect(() => create([128, 128, 0], () => [0, 1, 1]).preproject!([128, 128, 0])).toThrow(
+    'getMetersPerUnit'
+  );
+});
+
+test('CustomProjectionViewport selects world units by coordinateSystem', () => {
+  const implicit = new CustomProjectionViewport(options);
+  const lnglat = new CustomProjectionViewport({...options, coordinateSystem: 'lnglat'});
+  expect(lnglat.distanceScales).toEqual(implicit.distanceScales);
+  expect(lnglat.projectionSignature).toBe(implicit.projectionSignature);
+
+  const metric = new CustomProjectionViewport({...options, coordinateSystem: 'meter-offsets'});
+  expect(metric.distanceScales.unitsPerMeter).toEqual([512 / 360, 512 / 360, 512 / 360]);
+  expect(metric.projectionSignature).not.toBe(lnglat.projectionSignature);
+  expect(metric.preproject!([0, 0, 10])[2]).toBe(10);
+
+  const unusedCallback = () => {
+    throw new Error('callback should only run for other');
+  };
+  for (const coordinateSystem of ['lnglat', 'meter-offsets'] as const) {
+    const viewport = new CustomProjectionViewport({
+      ...options,
+      coordinateSystem,
+      getMetersPerUnit: unusedCallback
+    });
+    expect(viewport.preproject!([0, 0, 10])[2]).toBe(10);
+    expect(viewport.postUnproject!(viewport.preproject!([0, 0, 10]))![2]).toBe(10);
+  }
+  expect(() => new CustomProjectionViewport({...options, coordinateSystem: 'other'})).toThrow(
+    'requires getMetersPerUnit'
+  );
+  expect(
+    () =>
+      new CustomProjectionViewport({
+        ...options,
+        // @ts-expect-error Reject unsupported values from JavaScript callers too.
+        coordinateSystem: 'cartesian'
+      })
+  ).toThrow('supported coordinateSystem');
 });
 
 test('CustomProjectionViewport scale sampling stays inside geographic limits', () => {
