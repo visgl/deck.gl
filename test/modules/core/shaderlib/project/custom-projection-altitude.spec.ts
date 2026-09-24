@@ -14,7 +14,8 @@ gpuTest('CustomProjectionViewport projects meter altitude on CPU and GPU', async
   const viewport = new CustomProjectionViewport({
     projection: {forward: p => p.slice(), inverse: p => p.slice()},
     outputBounds: [0, 0, 1024, 1024],
-    getUnitsPerMeter: () => [2, 3, 4]
+    coordinateSystem: 'other',
+    getMetersPerUnit: () => [0.25, 0.25, 1]
   });
   const input = [200, 300, 50];
   const position = viewport.preproject!(input);
