@@ -15,7 +15,7 @@ const options = {
   projection: {forward: position => position.slice(), inverse: position => position.slice()},
   outputBounds: [0, 0, 512, 512] as [number, number, number, number]
 };
-const viewState = {target: [256, 256, 0] as [number, number, number], zoom: 2};
+const viewState = {center: [256, 256, 0] as [number, number, number], zoom: 2};
 
 test('Custom projection classes are exported only under experimental names', () => {
   for (const name of [

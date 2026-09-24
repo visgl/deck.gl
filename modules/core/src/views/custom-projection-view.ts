@@ -8,10 +8,10 @@ import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
 import CustomProjectionController from '../controllers/custom-projection-controller';
 
-/** Common-space target and zoom with MapView-style pitch and bearing. */
+/** Common-space center and zoom with MapView-style pitch and bearing. */
 export type CustomProjectionViewState = {
   /** Common-space center. Navigation fixes its Z component at zero. */
-  target: [number, number, number];
+  center: [number, number, number];
   /** Zoom level; one increment doubles the scale. */
   zoom: number;
   /** Map pitch in degrees. Default 0. */

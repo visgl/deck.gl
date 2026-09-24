@@ -18,7 +18,7 @@ const PITCH_ACCEL = 1.2;
 export type CustomProjectionStateProps = {
   width: number;
   height: number;
-  target?: [number, number, number];
+  center?: [number, number, number];
   zoom?: number;
   pitch?: number;
   bearing?: number;
@@ -61,7 +61,7 @@ export class CustomProjectionState extends ViewState<
       height, // Height of viewport
       pitch = 0, // Map pitch in degrees
       bearing = 0, // Map bearing in degrees
-      target = [256, 256, 0],
+      center = [256, 256, 0],
       zoom = 0,
 
       /* Viewport constraints */
@@ -94,7 +94,7 @@ export class CustomProjectionState extends ViewState<
         height,
         pitch,
         bearing,
-        target,
+        center,
         zoom,
         minPitch,
         maxPitch,
@@ -239,8 +239,8 @@ export class CustomProjectionState extends ViewState<
 
   /**
    * Zoom
-   * @param {[Number, Number]} pos - position on screen where the current target is
-   * @param {[Number, Number]} startPos - the target position at
+   * @param {[Number, Number]} pos - position on screen where the current center is
+   * @param {[Number, Number]} startPos - the center position at
    *   the start of the operation. Must be supplied of `zoomStart()` was not called
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
@@ -378,7 +378,7 @@ export class CustomProjectionState extends ViewState<
     });
   }
 
-  /** Constrain the planar camera without wrapping its common-space target. */
+  /** Constrain the planar camera without wrapping its common-space center. */
   applyConstraints(
     props: Required<CustomProjectionStateProps>
   ): Required<CustomProjectionStateProps> {
@@ -387,24 +387,24 @@ export class CustomProjectionState extends ViewState<
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
     props.bearing = mod(props.bearing + 180, 360) - 180;
     props.zoom = this._constrainZoom(props.zoom, props);
-    props.target = [props.target[0], props.target[1], 0];
+    props.center = [props.center[0], props.center[1], 0];
     const {maxBounds} = props;
     if (maxBounds) {
       // Fit and constrain in the unrotated ground plane so rotating does not move the map.
       const rect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const viewport = this.makeViewport({...props, pitch: 0, bearing: 0});
-      const extents = getMaxBoundsExtents(viewport, props.target, rect);
+      const extents = getMaxBoundsExtents(viewport, props.center, rect);
       const scale = 2 ** props.zoom;
       if (rect.width >= 0) {
-        props.target[0] = clamp(
-          props.target[0],
+        props.center[0] = clamp(
+          props.center[0],
           maxBounds[0][0] + extents.left / scale,
           maxBounds[1][0] - extents.right / scale
         );
       }
       if (rect.height >= 0) {
-        props.target[1] = clamp(
-          props.target[1],
+        props.center[1] = clamp(
+          props.center[1],
           maxBounds[0][1] + extents.bottom / scale,
           maxBounds[1][1] - extents.top / scale
         );
@@ -489,7 +489,7 @@ export default class CustomProjectionController extends Controller<CustomProject
   ControllerState = CustomProjectionState;
   transition = {
     transitionDuration: 300,
-    transitionInterpolator: new LinearInterpolator(['target', 'zoom', 'pitch', 'bearing'])
+    transitionInterpolator: new LinearInterpolator(['center', 'zoom', 'pitch', 'bearing'])
   };
 
   dragMode: 'pan' | 'rotate' = 'pan';
