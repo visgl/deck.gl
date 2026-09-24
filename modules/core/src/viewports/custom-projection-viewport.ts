@@ -32,13 +32,16 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   bearing?: number;
   /** Maximum tessellation cell size in input-coordinate units. Default 5. */
   resolution?: number;
-  /** Overrides automatic longitude/latitude scale estimation. Required for other input
-   * coordinate systems. Returns output units per meter at an input coordinate.
+  /** Input world-coordinate units. Defaults to 'lnglat'; 'other' requires getMetersPerUnit. */
+  coordinateSystem?: 'lnglat' | 'meter-offsets' | 'other';
+  /** Physical meters per input world-coordinate unit along X, Y and Z.
+   * Required and used when coordinateSystem is 'other'.
    */
-  getUnitsPerMeter?: (position: number[]) => [number, number, number];
+  getMetersPerUnit?: (position: number[]) => [number, number, number];
 };
 
-const converterIds = new WeakMap<CustomProjection, number>();
+const converterIds = new WeakMap<object, number>();
+const METERS_PER_METER = (): [number, number, number] => [1, 1, 1];
 let nextConverterId = 0;
 
 /** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core.
@@ -57,12 +60,27 @@ export default class CustomProjectionViewport extends Viewport {
       projection,
       outputBounds,
       inputBounds,
+      coordinateSystem = 'lnglat',
       resolution = 5,
       center = [256, 256, 0],
       pitch = 0,
       bearing = 0,
       zoom = 0
     } = opts;
+    if (!['lnglat', 'meter-offsets', 'other'].includes(coordinateSystem)) {
+      throw new Error('CustomProjectionViewport requires a supported coordinateSystem');
+    }
+    if (coordinateSystem === 'other' && typeof opts.getMetersPerUnit !== 'function') {
+      throw new Error(
+        "CustomProjectionViewport requires getMetersPerUnit for coordinateSystem: 'other'"
+      );
+    }
+    const metersPerUnitCallback =
+      coordinateSystem === 'other'
+        ? opts.getMetersPerUnit
+        : coordinateSystem === 'meter-offsets'
+          ? METERS_PER_METER
+          : undefined;
     const [minX, minY, maxX, maxY] = outputBounds;
     if (
       !outputBounds.every(Number.isFinite) ||
@@ -120,11 +138,16 @@ export default class CustomProjectionViewport extends Viewport {
     this.bearing = bearing;
     this.resolution = resolution;
     if (!converterIds.has(projection)) converterIds.set(projection, ++nextConverterId);
+    if (metersPerUnitCallback && !converterIds.has(metersPerUnitCallback)) {
+      converterIds.set(metersPerUnitCallback, ++nextConverterId);
+    }
     this.signature = JSON.stringify([
       converterIds.get(projection),
       opts.projectionId,
       ...outputBounds,
       inputBounds,
+      coordinateSystem,
+      metersPerUnitCallback && converterIds.get(metersPerUnitCallback),
       resolution
     ]);
     this.preproject = position => {
@@ -132,7 +155,7 @@ export default class CustomProjectionViewport extends Viewport {
       return [
         (projected[0] - centerX) * normalizationScale + 256,
         (projected[1] - centerY) * normalizationScale + 256,
-        projected[2] ?? position[2] ?? 0
+        (projected[2] ?? position[2] ?? 0) * getMetersPerUnit(position, metersPerUnitCallback)[2]
       ];
     };
     this.postUnproject = position => {
@@ -142,8 +165,14 @@ export default class CustomProjectionViewport extends Viewport {
         position[2] || 0
       ];
       try {
-        const input = projection.inverse(projected.slice());
+        let input = projection.inverse(projected.slice());
         if (!input || input.length < 2 || !input.every(Number.isFinite)) return null;
+        const metersPerZUnit = getMetersPerUnit(input, metersPerUnitCallback)[2];
+        if (metersPerZUnit !== 1) {
+          projected[2] /= metersPerZUnit;
+          input = projection.inverse(projected.slice());
+          if (!input || input.length < 2 || !input.every(Number.isFinite)) return null;
+        }
         // Some converters return finite extrapolations outside their inverse domain.
         const roundTrip = projection.forward(input.slice());
         if (
@@ -165,9 +194,7 @@ export default class CustomProjectionViewport extends Viewport {
     const inputCenter = this.postUnproject(this.center);
     const localScale =
       inputCenter &&
-      (opts.getUnitsPerMeter
-        ? opts.getUnitsPerMeter(inputCenter)
-        : estimateUnitsPerMeter(projection, inputCenter, inputBounds));
+      estimateUnitsPerMeter(projection, inputCenter, inputBounds, metersPerUnitCallback);
     const unitsPerMeter = (localScale || [1, 1, 1]).map(
       value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
     );
@@ -220,35 +247,55 @@ export default class CustomProjectionViewport extends Viewport {
   }
 }
 
-/** Estimate local axis scales for longitude/latitude input coordinates. */
+/** Physical scale of world coordinates; altitude defaults to meters. */
+function getMetersPerUnit(
+  position: number[],
+  callback?: CustomProjectionViewportOptions['getMetersPerUnit']
+): [number, number, number] {
+  const metersPerDegree = (Math.PI * 6371008.8) / 180;
+  const scale = callback
+    ? callback(position.slice())
+    : [
+        metersPerDegree * Math.max(1e-6, Math.abs(Math.cos((position[1] * Math.PI) / 180))),
+        metersPerDegree,
+        1
+      ];
+  if (scale.length !== 3 || !scale.every(value => Number.isFinite(value) && value > 0)) {
+    throw new Error('getMetersPerUnit must return three finite, positive scales');
+  }
+  return scale as [number, number, number];
+}
+
+/** Combine the converter's local derivative with the physical scale of its input. */
 function estimateUnitsPerMeter(
   projection: CustomProjection,
   center: number[],
-  inputBounds?: CustomProjectionViewportOptions['inputBounds']
+  inputBounds?: CustomProjectionViewportOptions['inputBounds'],
+  callback?: CustomProjectionViewportOptions['getMetersPerUnit']
 ): [number, number, number] {
-  const step = 0.0001;
+  const metersPerUnit = getMetersPerUnit(center, callback);
+  // Sample a one-meter displacement in each input direction.
+  const stepX = 1 / metersPerUnit[0];
+  const stepY = 1 / metersPerUnit[1];
   // Sample toward the interior at longitude/latitude limits to avoid crossing a seam or pole.
   const midX = inputBounds ? (inputBounds[0] + inputBounds[2]) / 2 : 0;
   const midY = inputBounds ? (inputBounds[1] + inputBounds[3]) / 2 : 0;
-  const dx = center[0] > midX ? -step : step;
-  const dy = center[1] > midY ? -step : step;
-  const metersPerDegree = (Math.PI * 6371008.8) / 180;
-  const metersX =
-    step * metersPerDegree * Math.max(1e-6, Math.abs(Math.cos((center[1] * Math.PI) / 180)));
-  const metersY = step * metersPerDegree;
+  const dx = center[0] > midX ? -stepX : stepX;
+  const dy = center[1] > midY ? -stepY : stepY;
   try {
     const origin = projection.forward(clampInput(center, inputBounds));
-    const x = projection.forward(
-      clampInput([center[0] + dx, center[1], center[2] ?? 0], inputBounds)
+    const inputX = clampInput([center[0] + dx, center[1], center[2] ?? 0], inputBounds);
+    const inputY = clampInput([center[0], center[1] + dy, center[2] ?? 0], inputBounds);
+    const x = projection.forward(inputX.slice());
+    const y = projection.forward(inputY.slice());
+    const metersX = Math.abs(inputX[0] - center[0]) * metersPerUnit[0];
+    const metersY = Math.abs(inputY[1] - center[1]) * metersPerUnit[1];
+    const scaleX = Math.hypot(x[0] - origin[0], x[1] - origin[1]) / metersX;
+    const scaleY = Math.hypot(y[0] - origin[0], y[1] - origin[1]) / metersY;
+    const areaScale = Math.abs(
+      (x[0] - origin[0]) * (y[1] - origin[1]) - (x[1] - origin[1]) * (y[0] - origin[0])
     );
-    const y = projection.forward(
-      clampInput([center[0], center[1] + dy, center[2] ?? 0], inputBounds)
-    );
-    return [
-      Math.hypot(x[0] - origin[0], x[1] - origin[1]) / metersX,
-      Math.hypot(y[0] - origin[0], y[1] - origin[1]) / metersY,
-      1
-    ];
+    return [scaleX, scaleY, Math.sqrt(areaScale / (metersX * metersY))];
   } catch {
     // Converters may reject samples outside their domain; retain a finite fallback scale.
     return [1, 1, 1];

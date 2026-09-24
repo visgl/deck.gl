@@ -6,11 +6,10 @@ This API is experimental and may change. Import it as `_CustomProjectionView` fr
 
 ## Usage
 
-This example uses [proj4](https://github.com/proj4js/proj4js) to display city markers in the Equal Earth projection. Install it with `npm install proj4@^2.22.0` alongside deck.gl.
+This example uses [proj4](https://github.com/proj4js/proj4js) to configure an Equal Earth view. Install it with `npm install proj4@^2.22.0` alongside deck.gl.
 
 ```js
 import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
 import proj4 from 'proj4';
 
 // WGS 84 longitude/latitude to Equal Earth (EPSG:8857), in meters.
@@ -30,50 +29,33 @@ new Deck({
     outputBounds: [-east, -north, east, north],
     controller: true
   }),
-  initialViewState: {center: [256, 256, 0], zoom: 1},
-  layers: [new ScatterplotLayer({
-    id: 'cities',
-    data: [
-      {name: 'San Francisco', position: [-122.4, 37.8]},
-      {name: 'London', position: [-0.12, 51.5]},
-      {name: 'Tokyo', position: [139.7, 35.7]}
-    ],
-    getPosition: d => d.position,
-    radiusUnits: 'meters',
-    getRadius: 100000,
-    getFillColor: [255, 140, 0]
-  })]
+  initialViewState: {center: [256, 256, 0], zoom: 1}
 });
 ```
 
 deck.gl does not bundle a projection library. Reuse the projection object between renders to avoid unnecessary recalculation.
 
-### Data already in UTM coordinates
+### Converting UTM coordinates to longitude/latitude
 
-Automatic meter-scale estimation assumes longitude/latitude input. If your data is already projected, supply `getUnitsPerMeter` instead. This example accepts UTM zone 10N eastings and northings in meters; the identity converter keeps those coordinates unchanged.
+This example accepts UTM zone 10N eastings and northings in meters and converts them to degrees. With `coordinateSystem: 'other'`, `getMetersPerUnit` tells deck.gl that each input unit represents one meter; deck.gl derives the projected scale through the converter.
 
 ```js
-const utm = proj4('EPSG:4326', '+proj=utm +zone=10 +datum=WGS84 +units=m');
-const west = utm.forward([-126, 0])[0];
-const east = utm.forward([-120, 0])[0];
-const north = utm.forward([-126, 84])[1];
+const projection = proj4(
+  '+proj=utm +zone=10 +datum=WGS84 +units=m',
+  'EPSG:4326'
+);
 
 const view = new CustomProjectionView({
-  projection: {
-    forward: position => position.slice(),
-    inverse: position => position.slice()
-  },
-  outputBounds: [west, 0, east, north],
-  getUnitsPerMeter: () => [1, 1, 1],
+  projection,
+  outputBounds: [-126, 0, -120, 84],
+  coordinateSystem: 'other',
+  getMetersPerUnit: () => [1, 1, 1],
   resolution: 10000,
   controller: true
 });
-
-// Layer positions use [easting, northing, altitudeInMeters].
-const sanFrancisco = [...utm.forward([-122.4, 37.8]), 0];
 ```
 
-Here `[1, 1, 1]` treats one projected meter as one physical meter along each axis. This deliberately ignores UTM's local scale distortion; return position-dependent values if your application needs to account for it. `resolution` is also in the input coordinate units—meters in this example.
+The callback describes the input units, not the converter's output degrees. Since these inputs are in meters, you can equivalently use `coordinateSystem: 'meter-offsets'` and omit the callback. `resolution` is also in the input coordinate units—UTM meters in this example.
 
 ## Constructor
 
@@ -86,7 +68,8 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | `inputBounds` | None | The projection's valid input domain, expressed as `[minX, minY, maxX, maxY]` in input coordinates. |
 | `projectionId` | None | Change this string or number when you change the projection's behavior without replacing the projection object. |
 | `resolution` | `5` | Controls how closely paths and polygon edges follow the projection. Lower values produce smoother curves but take longer to process. Measured in input-coordinate units. |
-| `getUnitsPerMeter` | None | `(inputPosition) => [x, y, z]` in converter output units per meter. Overrides automatic longitude/latitude scale estimation; required for other input coordinate systems. |
+| `coordinateSystem` | `'lnglat'` | World coordinates accepted by the converter. `'lnglat'` uses the longitude/latitude scale estimate with altitude in meters (WGS 84). `'meter-offsets'` uses one meter per input unit along each axis. `'other'` requires `getMetersPerUnit`. |
+| `getMetersPerUnit` | None | `(inputPosition) => [x, y, z]`: finite, positive physical meters per world-coordinate unit along each input axis. Required and used only when this view's `coordinateSystem` is `'other'`. deck.gl derives projection scaling automatically. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
 Coordinates outside `inputBounds` are clamped to its boundary, not clipped. The bounds describe the projection itself; use the view state to choose the visible region.
@@ -121,7 +104,7 @@ Use a new layer ID when switching a layer between `MapView` and `CustomProjectio
 - Supported layers are `ScatterplotLayer`, `PathLayer` and `SolidPolygonLayer`, including their use by `PolygonLayer` and the corresponding `GeoJsonLayer` sublayers. Other layers are not yet supported.
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
 - Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
-- `coordinateSystem` and `coordinateOrigin` are ignored when a layer is used with this view. Supply positions in the coordinates expected by `projection.forward`. `modelMatrix` is applied before conversion.
+- The layer's `coordinateSystem` and `coordinateOrigin` are ignored when used with this view. Set `coordinateSystem` on the view and supply positions in the coordinates expected by `projection.forward`. `modelMatrix` is applied before conversion.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned in your projection's input coordinates. They may be unavailable where `projection.inverse` cannot return a valid position.
 
