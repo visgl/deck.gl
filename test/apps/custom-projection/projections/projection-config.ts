@@ -6,7 +6,7 @@ import type {CustomProjectionViewportOptions} from '@deck.gl/core';
 
 export type ProjectionConfig = Pick<
   CustomProjectionViewportOptions,
-  'projection' | 'outputBounds' | 'inputBounds'
+  'projection' | 'toBounds' | 'fromBounds' | 'fromCrs' | 'toCrs'
 > & {
   note: string;
 };
