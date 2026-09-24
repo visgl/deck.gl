@@ -16,7 +16,7 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 const projection = {forward: p => p, inverse: p => p};
 const options = {
   projection,
-  outputBounds: [0, 0, 512, 512] as [number, number, number, number],
+  toBounds: [0, 0, 512, 512] as [number, number, number, number],
   width: 800,
   height: 600
 };
@@ -64,7 +64,7 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
     const beforeCameraUpdate = calls;
     layer.activateViewport(cameraMoved);
     expect(calls).toBe(beforeCameraUpdate);
-    const changedViewport = new CustomProjectionViewport({...options, projectionId: 'changed'});
+    const changedViewport = new CustomProjectionViewport({...options, toCrs: 'changed'});
     manager.activateViewport(changedViewport);
     layer.activateViewport(changedViewport);
     expect(Array.from(positions().slice(0, 3))).toEqual([10, 20, 0]);

@@ -23,7 +23,7 @@ const projection = {forward: converter.project, inverse: converter.unproject};
 // Fixed meter bounds enclose all 50 states, including Hawaii and the Aleutian Islands.
 const view = new CustomProjectionView({
   projection,
-  outputBounds: [-7400000, 0, 2600000, 6500000],
+  toBounds: [-7400000, 0, 2600000, 6500000],
 
   resolution: 1
 });
