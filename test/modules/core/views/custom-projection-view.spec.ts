@@ -13,7 +13,7 @@ import {
 
 const options = {
   projection: {forward: position => position.slice(), inverse: position => position.slice()},
-  outputBounds: [0, 0, 512, 512] as [number, number, number, number]
+  toBounds: [0, 0, 512, 512] as [number, number, number, number]
 };
 const viewState = {center: [256, 256, 0] as [number, number, number], zoom: 2};
 
@@ -40,9 +40,10 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
     height: '75%',
     padding: {left: '10%', bottom: 20},
     resolution: 2,
-    coordinateSystem: 'other',
+    fromCrs: 'local',
+    toCrs: 'local-output',
     getMetersPerUnit: () => [1 / 3, 1 / 3, 1],
-    inputBounds: [0, 0, 400, 400]
+    fromBounds: [0, 0, 400, 400]
   });
   const viewport = view.makeViewport({
     width: 800,
@@ -71,7 +72,7 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
 test('CustomProjectionView clone, equality, state overrides and zero dimensions', () => {
   const view = new CustomProjectionView({...options, viewState: {zoom: 4}});
   expect(view.clone({}).equals(view)).toBe(true);
-  expect(view.clone({projectionId: 'changed'}).equals(view)).toBe(false);
+  expect(view.clone({toCrs: 'changed'}).equals(view)).toBe(false);
   expect(view.makeViewport({width: 800, height: 600, viewState})!.zoom).toBe(4);
   expect(view.makeViewport({width: 800, height: 600, viewState})!.pitch).toBe(0);
   expect(view.makeViewport({width: 0, height: 600, viewState})).toBeNull();
