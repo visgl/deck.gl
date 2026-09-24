@@ -14,7 +14,7 @@ const viewport = new CustomProjectionViewport({
   height: 600,
   projection: {forward: p => p.slice(), inverse: p => p.slice()},
   outputBounds: [-180, -90, 180, 90],
-  target: [256, 256, 0],
+  center: [256, 256, 0],
   zoom: 0,
   pitch: 30,
   bearing: 20
@@ -27,7 +27,7 @@ const input = viewport.postUnproject(viewport.unproject(pixel)); // [0, 0, 0]
 
 ## Constructor
 
-Accepts the [View's projection options](./custom-projection-view.md#constructor), plus `width`, `height`, `x`, `y`, pixel `padding`, `zoom` (default `0`), `target` (default `[256, 256, 0]`), `pitch` (default `0`) and `bearing` (default `0`). The view state and viewport both use MapView-style `pitch` and `bearing`.
+Accepts the [View's projection options](./custom-projection-view.md#constructor), plus `width`, `height`, `x`, `y`, pixel `padding`, `zoom` (default `0`), `center` (default `[256, 256, 0]`), `pitch` (default `0`) and `bearing` (default `0`). The view state and viewport both use MapView-style `pitch` and `bearing`.
 
 Zero width or height becomes `1`. Bounds must be finite and increasing. `resolution` must be finite and positive. The camera uses the same default field of view and clipping multipliers as `WebMercatorViewport`. `orthographic` defaults to `false`.
 
@@ -67,11 +67,11 @@ These do not call the converter. `projectPosition` converts altitude in meters t
 
 ### `panByPosition(position, pixel)`
 
-Returns `{target}` that keeps a common-space ground point under the requested pixel. The returned target has Z `0`.
+Returns `{center}` that keeps a common-space ground point under the requested pixel. The returned center has Z `0`.
 
 ### `getDistanceScales()`
 
-Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current target. These affect meter-sized styling, not coordinate normalization. `getUnitsPerMeter` overrides automatic estimation.
+Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. `getUnitsPerMeter` overrides automatic estimation.
 
 ### `projectionSignature`
 

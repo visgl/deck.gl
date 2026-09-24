@@ -28,7 +28,7 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   expect(viewport.postUnproject!(viewport.preproject!([32, 48, 10]))![0]).toBeCloseTo(32);
   expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo((10 * 512) / 360);
   expect(viewport.unprojectPosition(viewport.projectPosition([32, 48, 10]))).toEqual([32, 48, 10]);
-  const moved = new CustomProjectionViewport({...options, zoom: 4, target: [300, 300, 0]});
+  const moved = new CustomProjectionViewport({...options, zoom: 4, center: [300, 300, 0]});
   expect(moved.projectionSignature).toBe(viewport.projectionSignature);
   expect(moved.preproject!([32, 48, 10])).toEqual(viewport.preproject!([32, 48, 10]));
   const changed = new CustomProjectionViewport({...options, projectionId: 'new'});
@@ -81,7 +81,7 @@ for (const orthographic of [false, true]) {
             projection: webMercator,
             getUnitsPerMeter: () => getDistanceScales({longitude, latitude}).unitsPerMeter,
             outputBounds: [0, 0, 512, 512],
-            target: [...lngLatToWorld([longitude, latitude]), 0]
+            center: [...lngLatToWorld([longitude, latitude]), 0]
           });
           for (const key of ['center', 'viewMatrix', 'projectionMatrix'] as const) {
             Array.from(mercator[key]).forEach((value, index) => {
@@ -121,7 +121,7 @@ test('CustomProjectionViewport anchors pan and zoom in common space on z=0', () 
   const state = new CustomProjectionState({
     width: 800,
     height: 600,
-    target: [256, 256, 0],
+    center: [256, 256, 0],
     pitch: 45,
     bearing: 20,
     maxBounds: null,
@@ -136,7 +136,7 @@ test('CustomProjectionViewport anchors pan and zoom in common space on z=0', () 
   const panPixel = makeViewport(panned.getViewportProps()).project(anchor);
   expect(panPixel[0]).toBeCloseTo(400);
   expect(panPixel[1]).toBeCloseTo(400);
-  expect(panned.getViewportProps().target[2]).toBe(0);
+  expect(panned.getViewportProps().center[2]).toBe(0);
 });
 
 test('CustomProjectionView uniforms and picking use the correct coordinate space', () => {
@@ -144,7 +144,7 @@ test('CustomProjectionView uniforms and picking use the correct coordinate space
   const viewport = view.makeViewport({
     width: 800,
     height: 600,
-    viewState: {target: [256, 256, 0], zoom: 0}
+    viewState: {center: [256, 256, 0], zoom: 0}
   })!;
   const uniforms = project.getUniforms({
     viewport,
@@ -198,7 +198,7 @@ test('CustomProjectionViewport estimates local meter scales from input units', (
   const moved = new CustomProjectionViewport({
     ...options,
     inputUnits: 'degrees',
-    target: geographic.preproject!([0, 60]) as [number, number, number]
+    center: geographic.preproject!([0, 60]) as [number, number, number]
   });
   expect(geographic.distanceScales.unitsPerMeter[0]).toBeCloseTo(512 / 360 / metersPerDegree, 10);
   expect(moved.distanceScales.unitsPerMeter[0]).toBeCloseTo(
@@ -232,7 +232,7 @@ test('CustomProjectionViewport scale sampling stays inside geographic limits', (
   const viewport = new CustomProjectionViewport({
     ...options,
     inputUnits: 'degrees',
-    target: [512, 384, 0],
+    center: [512, 384, 0],
     projection: {
       forward: p => {
         if (Math.abs(p[0]) > 180 || Math.abs(p[1]) > 90) throw new Error('outside domain');
