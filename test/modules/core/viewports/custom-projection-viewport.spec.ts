@@ -192,12 +192,11 @@ test('CustomProjectionViewport preserves callback altitude in meters and meter t
   expect(roundTrip[2]).toBe(5);
 });
 
-test('CustomProjectionViewport estimates local meter scales from input units', () => {
+test('CustomProjectionViewport defaults to geographic scale estimation and supports metric overrides', () => {
   const metersPerDegree = (Math.PI * 6371008.8) / 180;
-  const geographic = new CustomProjectionViewport({...options, inputUnits: 'degrees'});
+  const geographic = new CustomProjectionViewport(options);
   const moved = new CustomProjectionViewport({
     ...options,
-    inputUnits: 'degrees',
     center: geographic.preproject!([0, 60]) as [number, number, number]
   });
   expect(geographic.distanceScales.unitsPerMeter[0]).toBeCloseTo(512 / 360 / metersPerDegree, 10);
@@ -213,7 +212,7 @@ test('CustomProjectionViewport estimates local meter scales from input units', (
   const metric = new CustomProjectionViewport({
     ...options,
     outputBounds: [0, 0, 512, 512],
-    inputUnits: 'meters',
+    getUnitsPerMeter: () => [2, 3, 1],
     projection: {forward: p => [2 * p[0], 3 * p[1], p[2]], inverse: p => [p[0] / 2, p[1] / 3, p[2]]}
   });
   expect(metric.distanceScales.unitsPerMeter).toEqual([2, 3, 1]);
@@ -221,7 +220,6 @@ test('CustomProjectionViewport estimates local meter scales from input units', (
   const override = new CustomProjectionViewport({
     ...options,
     outputBounds: [0, 0, 512, 512],
-    inputUnits: 'degrees',
     getUnitsPerMeter: () => [5, 6, 7]
   });
   expect(override.distanceScales.unitsPerMeter).toEqual([5, 6, 7]);
@@ -231,7 +229,6 @@ test('CustomProjectionViewport scale sampling stays inside geographic limits', (
   const samples: number[][] = [];
   const viewport = new CustomProjectionViewport({
     ...options,
-    inputUnits: 'degrees',
     center: [512, 384, 0],
     projection: {
       forward: p => {
