@@ -23,8 +23,8 @@ fn deckgl_filter_gl_position(p: vec4<f32>, geometry: Geometry) -> vec4<f32> {
 fn getExtrusionOffset(line_clipspace: vec2<f32>, offset_direction: f32, width: f32) -> vec2<f32> {
   // project.viewportSize should be provided as a uniform (not shown here)
   let dir_screenspace = normalize(line_clipspace * project.viewportSize);
-  // Rotate by 90°: (x,y) becomes (-y,x)
-  let rotated = vec2<f32>(-dir_screenspace.y, dir_screenspace.x);
+  // Rotate by 90° clockwise so the strip (-1 side first) winds counter-clockwise
+  let rotated = vec2<f32>(dir_screenspace.y, -dir_screenspace.x);
   return rotated * offset_direction * width / 2.0;
 }
 
