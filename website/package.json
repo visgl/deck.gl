@@ -32,7 +32,7 @@
     "d3-scale": "^4.0.0",
     "expr-eval": "^2.0.2",
     "mapbox-gl": "^3.0.0",
-    "maplibre-gl": "^5.0.0",
+    "maplibre-gl": "^6.4.1",
     "monaco-editor": "^0.39.0",
     "popmotion": "^11.0.0",
     "react": "^18.0.0",
