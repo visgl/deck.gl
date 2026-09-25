@@ -453,7 +453,7 @@ export default class GeoJsonLayer<
       this.getSubLayerClass(id, POLYGON_LAYER.type);
 
     if (PolygonFillLayer) {
-      const forwardedProps = forwardProps(this, POLYGON_LAYER.props);
+      const forwardedProps = forwardProps(this, POLYGON_LAYER.props, 'getPolygon');
       // Avoid building the lineColors attribute if wireframe is off
       const useLineColor = extruded && wireframe;
       if (!useLineColor) {
@@ -490,7 +490,7 @@ export default class GeoJsonLayer<
       this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
 
     if (PolygonStrokeLayer || LineStringsLayer) {
-      const forwardedProps = forwardProps(this, LINE_LAYER.props);
+      const forwardedProps = forwardProps(this, LINE_LAYER.props, 'getPath');
 
       return [
         PolygonStrokeLayer &&
