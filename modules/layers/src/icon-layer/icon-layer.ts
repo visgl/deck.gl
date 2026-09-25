@@ -316,7 +316,9 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   protected _getModel(id = this.props.id): Model {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
-    const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
+    // Top row first: the shader flips y, so this order keeps the strip front-facing (counter-
+    // clockwise) and it survives back-face culling, which GlobeView enables by default
+    const positions = [-1, 1, 1, 1, -1, -1, 1, -1];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
