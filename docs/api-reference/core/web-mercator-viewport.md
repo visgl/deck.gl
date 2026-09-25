@@ -50,6 +50,7 @@ Parameters:
 
   + `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`.
   + `farZMultiplier` (number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`.
+  + `minimumElevation` (number, optional) - Lowest elevation in meters used to extend the automatic far plane below elevation zero. Default `0`; positive values retain the default range. The camera and geometry are unchanged. Explicit `farZ` or `projectionMatrix` overrides take precedence. See [MapView](./map-view.md#minimumelevation).
   + `orthographic` (boolean, optional) - Default `false`.
   + `projectionMatrix` (number[16], optional) - Optional 16-element 4x4 projection matrix, that overrides the matrix created from the parameters above.
 

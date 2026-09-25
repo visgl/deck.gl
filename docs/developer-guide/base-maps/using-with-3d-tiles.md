@@ -13,10 +13,11 @@ import TabItem from '@theme/TabItem';
   <TabItem value="ts" label="TypeScript">
 
 ```ts
-import {Deck, TerrainController} from '@deck.gl/core';
+import {Deck, MapView, TerrainController} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 const deckgl = new Deck({
+  views: new MapView({minimumElevation: -500}),
   initialViewState: {
     latitude: 50.089,
     longitude: 14.42,
@@ -91,6 +92,12 @@ The [TerrainController](../../api-reference/core/terrain-controller.md) extends 
 The controller works by picking the terrain elevation at the center of the viewport. For this to work, the layer used as the elevation data source (e.g. `Tile3DLayer`) must be marked with `pickable: '3d'`. Without a `pickable: '3d'` layer in the scene, the controller has no elevation data and will behave like a standard `MapController`.
 
 Without `TerrainController`, the camera will orbit around the sea-level plane, which can cause it to clip through the terrain.
+
+## Below-ellipsoid terrain and clipping
+
+3D Tiles heights may be negative relative to the WGS84 ellipsoid, including in coastal areas. The default `MapView` far plane follows elevation zero, so at high zoom a top-down camera can clip this terrain even though a slightly tilted camera shows it. `minimumElevation` extends the automatic far plane to a chosen elevation floor, with the same projection used for rendering and tile traversal. The example above uses -500 m; choose a floor appropriate for your data. It does not correct a camera below elevated terrain or move the terrain itself.
+
+`TerrainController` needs rendered terrain for depth picking, so terrain-aware navigation alone cannot recover a surface that the initial projection clips. Explicit `farZ` and custom projection matrices remain application-controlled. For interleaved Mapbox/MapLibre overlays, configure the host map's camera instead.
 
 ## Integrating Layers with the Terrain
 
