@@ -137,7 +137,7 @@ Returns `true` when the globe hides `commonPosition` from the camera in `GlobeVi
 vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition)
 ```
 
-Adjusts the clip-space position of a billboard anchored at `commonPosition` so that in `GlobeView` its depth is that of the globe surface point nearest to the camera. A sprite whose anchor is visible is then never clipped by the curve of the globe around it, for example by a basemap or a `SolidPolygonLayer` drawn as the earth's surface. Returns `clipPosition` unchanged in flat projections. Pair with `project_globe_is_occluded`.
+Adjusts the clip-space position of a billboard anchored at `commonPosition` so that in `GlobeView` its depth moves toward the camera by the amount the globe surface rises within a 64 pixel radius around the anchor. A sprite whose anchor is visible is then not clipped by the curve of the globe around it, for example by a basemap or a `SolidPolygonLayer` drawn as the earth's surface. The shift only depends on where the anchor is on the globe, so sprites at different altitudes and other geometry keep their depth order, and it vanishes where the surface is flat on screen. Returns `clipPosition` unchanged in flat projections. Pair with `project_globe_is_occluded`.
 
 
 ### project_normal

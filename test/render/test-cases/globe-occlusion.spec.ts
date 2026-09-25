@@ -14,9 +14,9 @@ import fontMapping from '../../data/font-atlas.json';
 /**
  * Camera-facing geometry on GlobeView. Back-face culling cannot tell the near side of the globe
  * from the far side for billboards, so IconLayer, TextLayer and billboard ScatterplotLayer hide
- * objects whose anchor is behind the globe with `project_globe_is_occluded`, and take their depth
- * from the nearest globe surface point with `project_globe_billboard_clipspace` so the curve of
- * the globe never clips a visible sprite.
+ * objects whose anchor is behind the globe with `project_globe_is_occluded`, and shift their depth
+ * toward the camera with `project_globe_billboard_clipspace` so the curve of the globe does not
+ * clip a visible sprite. Non-billboard marks lie on the surface and are handled by culling.
  *
  * Every case looks at the globe from above lng 0, lat 10 at zoom 0.9. Blue objects are on the near
  * side and must be visible; red objects are on the far side and must be hidden.
@@ -30,8 +30,14 @@ import fontMapping from '../../data/font-atlas.json';
  *   raised anchor is visible past the horizon of the ground below it.
  * - `globe-occlusion-text`: labels at the same grid. Expected: near-side labels with their
  *   backgrounds, no far-side labels.
+ * - `globe-occlusion-text-content-box`: the same labels with a fixed-height content box, which
+ *   routes the background through its clip-rect path. Expected: near-side labels in tall boxes,
+ *   no far-side labels.
  * - `globe-occlusion-points-billboard`: billboard ScatterplotLayer at the same grid. Expected:
  *   20 blue dots, no red ones.
+ * - `globe-occlusion-marks-surface`: non-billboard ScatterplotLayer and IconLayer at the grid and
+ *   along the horizon. Expected: near-side marks foreshortened on the surface, whole up to the
+ *   limb, no far-side marks and no marks torn across the viewport.
  */
 
 const ICON_ATLAS = '/test/data/icon-atlas.png';
@@ -69,17 +75,40 @@ const NEAR_COLOR = [30, 90, 200];
 const FAR_COLOR = [220, 40, 40];
 const getSideColor = (d: Marker) => (d.farSide ? FAR_COLOR : NEAR_COLOR);
 
-function createIconLayer(id: string, data: {position: number[]}[], getColor: any): IconLayer {
+function createIconLayer(
+  id: string,
+  data: {position: number[]}[],
+  getColor: any,
+  billboard: boolean = true
+): IconLayer {
   return new IconLayer({
     id,
     data,
     iconAtlas: ICON_ATLAS,
     iconMapping,
     sizeScale: 12,
+    billboard,
     getPosition: d => d.position,
     getColor,
     getIcon: () => 'marker',
     getSize: 2
+  });
+}
+
+function createTextLayer(id: string, props: Partial<TextLayer<Marker>['props']> = {}): TextLayer {
+  return new TextLayer<Marker>({
+    id,
+    data: GRID,
+    _getFontRenderer: () => fontRenderer,
+    fontFamily: 'Arial',
+    getPosition: d => d.position,
+    getText: d => d.label,
+    getColor: getSideColor,
+    getSize: 14,
+    background: true,
+    getBackgroundColor: [225, 225, 225],
+    backgroundPadding: [2, 1],
+    ...props
   });
 }
 
@@ -150,22 +179,17 @@ const testCases: TestCase[] = [
     name: 'globe-occlusion-text',
     views: new GlobeView(),
     viewState: VIEW_STATE,
-    layers: [
-      new TextLayer<Marker>({
-        id: 'labels',
-        data: GRID,
-        _getFontRenderer: () => fontRenderer,
-        fontFamily: 'Arial',
-        getPosition: d => d.position,
-        getText: d => d.label,
-        getColor: getSideColor,
-        getSize: 14,
-        background: true,
-        getBackgroundColor: [225, 225, 225],
-        backgroundPadding: [2, 1]
-      })
-    ],
+    layers: [createTextLayer('labels')],
     goldenImage: './test/render/golden-images/globe-occlusion-text.png'
+  },
+  {
+    name: 'globe-occlusion-text-content-box',
+    views: new GlobeView(),
+    viewState: VIEW_STATE,
+    // Content boxes are in meters; this one fixes the height at about 40 px at zoom 0.9 and leaves
+    // the width free, so the background takes its clip-rect path while no glyph is cut
+    layers: [createTextLayer('labels', {getContentBox: [0, -835000, -1, 1670000]})],
+    goldenImage: './test/render/golden-images/globe-occlusion-text-content-box.png'
   },
   {
     name: 'globe-occlusion-points-billboard',
@@ -183,6 +207,33 @@ const testCases: TestCase[] = [
       })
     ],
     goldenImage: './test/render/golden-images/globe-occlusion-points-billboard.png'
+  },
+  {
+    name: 'globe-occlusion-marks-surface',
+    views: new GlobeView(),
+    viewState: VIEW_STATE,
+    layers: [
+      new SolidPolygonLayer({
+        id: 'earth',
+        data: [EARTH],
+        getPolygon: d => d,
+        getFillColor: [225, 225, 225]
+      }),
+      new ScatterplotLayer<Marker>({
+        id: 'points',
+        data: [
+          ...GRID,
+          ...HORIZON.filter(d => d.position[2] === 0).map(d => ({...d, farSide: false, label: ''}))
+        ],
+        billboard: false,
+        radiusUnits: 'pixels',
+        getRadius: 8,
+        getPosition: d => d.position,
+        getFillColor: getSideColor
+      }),
+      createIconLayer('icons', GRID, getSideColor, false)
+    ],
+    goldenImage: './test/render/golden-images/globe-occlusion-marks-surface.png'
   }
 ];
 
@@ -191,8 +242,7 @@ describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
     testCases.map(testCase => ({
       ...testCase,
       // The sphere is tessellated and SwiftShader's trig drifts on the globe, like other globe cases
-      imageDiffOptions: {threshold: 0.985},
-      skip: ['webgpu']
+      imageDiffOptions: {threshold: 0.985}
     })),
     deviceType,
     {beforeAll: loadPrepackedFontAtlas}
