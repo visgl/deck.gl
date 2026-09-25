@@ -53,11 +53,13 @@ for (const geospatial of [false, true]) {
     expect(
       getWorldPosition([10, 20, 50], {
         viewport,
-        coordinateSystem: 'cartesian',
+        coordinateSystem: 'default',
         coordinateOrigin: [0, 0, 0]
       })
     ).toEqual([30, 80, 100]);
-    expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual([2, 2, 2]);
+    expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual(
+      viewport.distanceScales.unitsPerMeter
+    );
     viewport
       .unproject(viewport.project(position))
       .forEach((value, i) => expect(value).toBeCloseTo(position[i]));

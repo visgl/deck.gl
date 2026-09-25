@@ -29,6 +29,7 @@ import {load} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
+import {PROJECTION_MODE} from './constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
@@ -377,14 +378,17 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   > {
     return {
       transformSource: 'projection',
-      transform: this.context.viewport.preproject ? transformPosition : null
+      transform:
+        this.context.viewport.preproject && this.props.coordinateSystem !== 'cartesian'
+          ? transformPosition
+          : null
     };
   }
 
   use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
-      Boolean(this.context?.viewport?.preproject) ||
+      this.context?.viewport?.projectionMode === PROJECTION_MODE.EXTERNAL ||
       coordinateSystem === 'default' ||
       coordinateSystem === 'lnglat' ||
       coordinateSystem === 'cartesian'
@@ -642,8 +646,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       this.setChangeFlags({
         viewportChanged: true,
         projectionChanged:
-          Boolean(oldViewport?.preproject || viewport.preproject) &&
-          oldViewport?.projectionSignature !== viewport.projectionSignature
+          (oldViewport?.projectionSignature ?? null) !== (viewport.projectionSignature ?? null)
       });
 
       if (this.isComposite) {
@@ -1093,14 +1096,21 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       const updateParams = this._getUpdateParams();
       const oldModels = this.getModels();
+      const coordinateSystemChanged =
+        updateParams.props.coordinateSystem !== updateParams.oldProps.coordinateSystem;
       if (
         updateParams.changeFlags.projectionChanged ||
         (context.viewport.preproject &&
-          updateParams.props.modelMatrix !== updateParams.oldProps.modelMatrix)
+          (coordinateSystemChanged ||
+            (this.usePositionTransforms().transform &&
+              updateParams.props.modelMatrix !== updateParams.oldProps.modelMatrix)))
       ) {
         const attributeManager = this.getAttributeManager();
         for (const [name, attribute] of Object.entries(attributeManager?.attributes || {})) {
           if (attribute.settings.transformSource === 'projection') {
+            if (coordinateSystemChanged && 'transform' in attribute.settings) {
+              attribute.settings.transform = this.usePositionTransforms().transform;
+            }
             attributeManager!.invalidate(name);
           }
         }

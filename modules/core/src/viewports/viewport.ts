@@ -162,12 +162,11 @@ export default class Viewport {
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
   resolution?: number;
-  /** Optional world-coordinate conversion before rendering: XY in common space,
-   * Z in this viewport's altitude units (meters by default).
-   * Used for position attributes; projectPosition still accepts world coordinates.
+  /** Optional world-coordinate conversion for position attributes.
+   * The subclass defines the output coordinate space; projectPosition still accepts world coordinates.
    */
   preproject: ((position: number[]) => [number, number, number]) | null = null;
-  /** Inverse of preproject: accepts common-space XY and viewport altitude units; null means outside the domain. */
+  /** Inverse of preproject; null means outside the domain. */
   postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
   /** Equal signatures must describe identical preprojection, including normalization. */
   get projectionSignature(): unknown {
