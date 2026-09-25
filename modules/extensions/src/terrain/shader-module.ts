@@ -17,6 +17,7 @@ export type TerrainModuleProps = {
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
+  heightMapRange?: [number, number];
   dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
