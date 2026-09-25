@@ -97,7 +97,11 @@ Visit the [GlobeController](./globe-controller.md) documentation for a full list
 
 ## Occlusion
 
-In the MapView, it is often sufficient to provide a solid background color where there is no geometry. In the GlobeView, the user can "see through" to the other side of the earth. There are two ways to fix this:
+In the MapView, it is often sufficient to provide a solid background color where there is no geometry. In the GlobeView, the user can "see through" to the other side of the earth.
+
+Camera-facing geometry is handled by the layers themselves: `IconLayer`, `TextLayer` and billboard `ScatterplotLayer` hide objects whose anchor is behind the globe, and never let the curve of the globe clip an object whose anchor is visible. Positions with altitude stay visible past the horizon of the ground below them.
+
+For geometry that follows the surface, such as paths and polygons, there are two ways to hide the far side:
 
 - Render a polygon that represents the surface of the earth:
 
@@ -114,13 +118,7 @@ new SolidPolygonLayer({
 })
 ```
 
-- Discard all surfaces that face away from the camera by passing the following prop to `Deck`:
-
-```js
-parameters: {
-  cull: true
-}
-```
+- Discard surfaces that face away from the camera. This is the default: `GlobeView` sets `parameters: {cullMode: 'back'}`, see [parameters](#parameters).
 
 
 

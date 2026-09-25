@@ -75,6 +75,7 @@ void main(void) {
   vec2 anchorPosScreen;
   if (icon.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+    gl_Position = project_globe_billboard_clipspace(gl_Position, geometry.position.xyz);
     anchorPosScreen = gl_Position.xy / gl_Position.w;
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = vec3(pixelOffset, 0.0);
@@ -88,9 +89,12 @@ void main(void) {
     DECKGL_FILTER_SIZE(offset_common, geometry);
     vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
     anchorPosScreen = anchorPos.xy / anchorPos.w;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position); 
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   }
+
+  // Hide glyphs whose anchor is behind the globe
+  bool globeOccluded = project_globe_is_occluded(geometry.position.xyz);
 
   anchorPosScreen = vec2(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0 * project.viewportSize / project.devicePixelRatio;
   vec2 xy = project_size_to_pixel(instanceClipRect.xy);
@@ -133,6 +137,10 @@ void main(void) {
         gl_Position = vec4(0.0);
       }
     }
+  }
+
+  if (globeOccluded) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
 
   vTextureCoords = mix(

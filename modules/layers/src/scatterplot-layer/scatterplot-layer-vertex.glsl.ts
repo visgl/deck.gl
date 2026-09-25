@@ -59,6 +59,7 @@ void main(void) {
   
   if (scatterplot.billboard) {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+    gl_Position = project_globe_billboard_clipspace(gl_Position, geometry.position.xyz);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
     vec3 offset = edgePadding * positions * outerRadiusPixels;
     offset.xy += instancePixelOffset;
@@ -70,6 +71,11 @@ void main(void) {
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset, geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  }
+
+  // Hide points whose anchor is behind the globe
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
 
   // Apply opacity to instance color, or return instance picking color

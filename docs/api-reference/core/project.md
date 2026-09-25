@@ -122,6 +122,24 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels)
 Converts the size of a geometry from the screen space to the clip space.
 
 
+### project_globe_is_occluded
+
+```glsl
+bool project_globe_is_occluded(vec3 commonPosition)
+```
+
+Returns `true` when the globe hides `commonPosition` from the camera in `GlobeView`, that is, when the segment from the camera to the position passes through the sphere. The test is exact at any altitude, so a position above the surface stays visible past the horizon of the ground below it. Always `false` in flat projections. Layers with camera-facing geometry such as icons, text and billboard points use it to hide objects whose anchor is behind the globe, since back-face culling cannot tell the near side from the far side for such geometry.
+
+
+### project_globe_billboard_clipspace
+
+```glsl
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition)
+```
+
+Adjusts the clip-space position of a billboard anchored at `commonPosition` so that in `GlobeView` its depth is that of the globe surface point nearest to the camera. A sprite whose anchor is visible is then never clipped by the curve of the globe around it, for example by a basemap or a `SolidPolygonLayer` drawn as the earth's surface. Returns `clipPosition` unchanged in flat projections. Pair with `project_globe_is_occluded`.
+
+
 ### project_normal
 
 ```glsl

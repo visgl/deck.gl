@@ -101,12 +101,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     );
   }
 
+  let anchorCommon = project_position_vec3_f64(attributes.instancePositions, attributes.instancePositions64Low);
   if (textBackground.billboard > 0.5) {
     var position = project_position_to_clipspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
       vec3<f32>(0.0)
     );
+    position = project_globe_billboard_clipspace(position, anchorCommon);
     let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
     position = vec4<f32>(
       position.x + clipOffset.x,
@@ -125,6 +127,11 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.instancePositions64Low,
       offsetCommon
     );
+  }
+
+  // Hide backgrounds whose anchor is behind the globe
+  if (project_globe_is_occluded(anchorCommon)) {
+    varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
   }
 
   varyings.vFillColor = vec4<f32>(
