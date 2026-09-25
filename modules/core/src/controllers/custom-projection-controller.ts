@@ -5,7 +5,8 @@
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
-import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
+import {getMaxBoundsRect} from './utils';
+import {pixelsToWorld, worldToPixels} from '@math.gl/web-mercator';
 import {mod} from '../utils/math-utils';
 
 import type Viewport from '../viewports/viewport';
@@ -18,6 +19,7 @@ const PITCH_ACCEL = 1.2;
 export type CustomProjectionStateProps = {
   width: number;
   height: number;
+  /** Camera center in fromCrs world coordinates. */
   center?: [number, number, number];
   zoom?: number;
   pitch?: number;
@@ -29,7 +31,7 @@ export type CustomProjectionStateProps = {
   minPitch?: number;
   maxPitch?: number;
 
-  /** Common-space bounds. Defaults to [[0, 0], [512, 512]]; null disables bounds. */
+  /** Optional world-coordinate bounds in fromCrs. Defaults to null (unrestricted). */
   maxBounds?: ControllerProps['maxBounds'];
   maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };
@@ -43,7 +45,7 @@ type CustomProjectionStateInternal = {
   startZoom?: number;
 };
 
-/** Independent planar navigation state; all anchors and bounds are in common space. */
+/** Planar navigation with common-space anchors and world-coordinate bounds. */
 export class CustomProjectionState extends ViewState<
   CustomProjectionState,
   CustomProjectionStateProps,
@@ -61,7 +63,7 @@ export class CustomProjectionState extends ViewState<
       height, // Height of viewport
       pitch = 0, // Map pitch in degrees
       bearing = 0, // Map bearing in degrees
-      center = [256, 256, 0],
+      center = [0, 0, 0],
       zoom = 0,
 
       /* Viewport constraints */
@@ -70,10 +72,7 @@ export class CustomProjectionState extends ViewState<
       minZoom = -Infinity,
       maxZoom = Infinity,
 
-      maxBounds = [
-        [0, 0],
-        [512, 512]
-      ],
+      maxBounds = null,
       maxBoundsPadding = null,
 
       /** Interaction states, required to calculate change during transform */
@@ -143,7 +142,7 @@ export class CustomProjectionState extends ViewState<
     }
 
     const viewport = this.makeViewport(this.getViewportProps());
-    const newProps = viewport.panByPosition(startPanPosition, pos);
+    const newProps = this._panByPosition(viewport, startPanPosition, pos);
 
     return this._getUpdatedState(newProps);
   }
@@ -273,7 +272,7 @@ export class CustomProjectionState extends ViewState<
 
     return this._getUpdatedState({
       zoom: newZoom,
-      ...zoomedViewport.panByPosition(startZoomPosition, pos)
+      ...this._panByPosition(zoomedViewport, startZoomPosition, pos)
     });
   }
 
@@ -346,8 +345,26 @@ export class CustomProjectionState extends ViewState<
     if (!pos) return undefined;
     // Navigation anchors stay on the common-space ground plane, regardless of picked geometry.
     const viewport = this.makeViewport(this.getViewportProps());
-    const position = viewport.unproject(pos, {targetZ: 0});
+    const position = pixelsToWorld(pos, viewport.pixelUnprojectionMatrix, 0);
     return position.every(Number.isFinite) ? position : undefined;
+  }
+
+  private _panByPosition(
+    viewport: Viewport,
+    position: number[],
+    pixel: number[]
+  ): {center: [number, number, number]} {
+    const underPointer = pixelsToWorld(pixel, viewport.pixelUnprojectionMatrix, 0);
+    const center = viewport.unprojectPosition([
+      viewport.center[0] + position[0] - underPointer[0],
+      viewport.center[1] + position[1] - underPointer[1],
+      0
+    ]);
+    return {
+      center: center.every(Number.isFinite)
+        ? [center[0], center[1], 0]
+        : this.getViewportProps().center
+    };
   }
 
   // Calculates new zoom
@@ -386,35 +403,50 @@ export class CustomProjectionState extends ViewState<
     props.maxPitch = clamp(props.maxPitch, props.minPitch, 85);
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
     props.bearing = mod(props.bearing + 180, 360) - 180;
-    props.zoom = this._constrainZoom(props.zoom, props);
+    const maxBounds = this._projectMaxBounds(props);
+    props.zoom = this._constrainZoom(props.zoom, props, maxBounds);
     props.center = [props.center[0], props.center[1], 0];
-    const {maxBounds} = props;
     if (maxBounds) {
       // Fit and constrain in the unrotated ground plane so rotating does not move the map.
       const rect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const viewport = this.makeViewport({...props, pitch: 0, bearing: 0});
-      const extents = getMaxBoundsExtents(viewport, props.center, rect);
+      const commonCenter = viewport.center.slice();
+      const [x, y] = worldToPixels(commonCenter, viewport.pixelProjectionMatrix);
+      const extents = {
+        left: x - rect.x,
+        right: rect.x + rect.width - x,
+        top: y - rect.y,
+        bottom: rect.y + rect.height - y
+      };
       const scale = 2 ** props.zoom;
       if (rect.width >= 0) {
-        props.center[0] = clamp(
-          props.center[0],
+        commonCenter[0] = clamp(
+          commonCenter[0],
           maxBounds[0][0] + extents.left / scale,
           maxBounds[1][0] - extents.right / scale
         );
       }
       if (rect.height >= 0) {
-        props.center[1] = clamp(
-          props.center[1],
+        commonCenter[1] = clamp(
+          commonCenter[1],
           maxBounds[0][1] + extents.bottom / scale,
           maxBounds[1][1] - extents.top / scale
         );
+      }
+      if (commonCenter[0] !== viewport.center[0] || commonCenter[1] !== viewport.center[1]) {
+        const worldCenter = viewport.unprojectPosition(commonCenter);
+        if (worldCenter.every(Number.isFinite)) props.center = [worldCenter[0], worldCenter[1], 0];
       }
     }
     return props;
   }
 
-  _constrainZoom(zoom: number, props = this.getViewportProps()): number {
-    const {maxZoom, maxBounds} = props;
+  _constrainZoom(
+    zoom: number,
+    props = this.getViewportProps(),
+    maxBounds = this._projectMaxBounds(props)
+  ): number {
+    const {maxZoom} = props;
     let {minZoom} = props;
     if (maxBounds && props.width > 0 && props.height > 0) {
       const rect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
@@ -429,6 +461,38 @@ export class CustomProjectionState extends ViewState<
       minZoom = Math.min(minZoom, maxZoom);
     }
     return clamp(zoom, minZoom, maxZoom);
+  }
+
+  /** Approximate the projected envelope, including curved edges between corners. */
+  private _projectMaxBounds(
+    props: Required<CustomProjectionStateProps>
+  ): [[number, number], [number, number]] | null {
+    if (!props.maxBounds) return null;
+    const viewport = this.makeViewport(props);
+    const [[minX, minY], [maxX, maxY]] = props.maxBounds;
+    const bounds: [[number, number], [number, number]] = [
+      [Infinity, Infinity],
+      [-Infinity, -Infinity]
+    ];
+    const subdivisions = 32;
+    for (let i = 0; i <= subdivisions; i++) {
+      const x = minX + ((maxX - minX) * i) / subdivisions;
+      const y = minY + ((maxY - minY) * i) / subdivisions;
+      for (const point of [
+        [x, minY, 0],
+        [x, maxY, 0],
+        [minX, y, 0],
+        [maxX, y, 0]
+      ]) {
+        const position = viewport.projectPosition(point);
+        if (!Number.isFinite(position[0]) || !Number.isFinite(position[1])) continue;
+        for (let axis = 0; axis < 2; axis++) {
+          bounds[0][axis] = Math.min(bounds[0][axis], position[axis]);
+          bounds[1][axis] = Math.max(bounds[1][axis], position[axis]);
+        }
+      }
+    }
+    return Number.isFinite(bounds[0][0]) ? bounds : null;
   }
   _getNewRotation(
     pos: [number, number],

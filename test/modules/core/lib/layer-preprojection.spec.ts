@@ -143,9 +143,9 @@ test('Projection-dependent generated attributes do not acquire position transfor
 });
 
 test('Layer refreshes custom projection attributes only when CRS metadata changes', () => {
-  const options = {toBounds: [0, 0, 512, 512] as [number, number, number, number]};
+  const normalizationScale = 512 / 40075016.6855;
   const projection = {forward: p => p.slice(), inverse: p => p.slice()};
-  const initial = new CustomProjectionViewport({...options, projection});
+  const initial = new CustomProjectionViewport({projection});
   const manager = createManager(initial);
   const accessor = vi.fn(point => point);
   const layer = new PositionLayer({data: [[2, 3, 4]], getPosition: accessor});
@@ -164,7 +164,6 @@ test('Layer refreshes custom projection attributes only when CRS metadata change
       {fromCrs: 'WGS84', toCrs: 'second'}
     ]) {
       const viewport = new CustomProjectionViewport({
-        ...options,
         ...crs,
         projection: changedProjection
       });
@@ -172,14 +171,21 @@ test('Layer refreshes custom projection attributes only when CRS metadata change
       layer.activateViewport(viewport);
       if ('fromCrs' in crs) {
         expect(accessor).toHaveBeenCalledTimes(1);
-        expect(getPositions(layer)).toEqual([4, 3, 4]);
+        expect(getPositions(layer)).toEqual([
+          256 + 4 * normalizationScale,
+          256 + 3 * normalizationScale,
+          4
+        ]);
       } else {
         expect(accessor).not.toHaveBeenCalled();
-        expect(getPositions(layer)).toEqual([2, 3, 4]);
+        expect(getPositions(layer)).toEqual([
+          256 + 2 * normalizationScale,
+          256 + 3 * normalizationScale,
+          4
+        ]);
       }
       accessor.mockClear();
       const replacement = new CustomProjectionViewport({
-        ...options,
         ...crs,
         projection: {...changedProjection}
       });

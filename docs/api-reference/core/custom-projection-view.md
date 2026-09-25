@@ -6,7 +6,7 @@ This API is experimental and may change. Import it as `_CustomProjectionView` fr
 
 ## Usage
 
-This example uses [proj4](https://github.com/proj4js/proj4js) to configure an Equal Earth view. Install it with `npm install proj4@^2.22.0` alongside deck.gl.
+This example uses [proj4](https://github.com/proj4js/proj4js) to configure an Equal Earth view. deck.gl does not bundle a projection library.
 
 ```js
 import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
@@ -15,50 +15,33 @@ import proj4 from 'proj4';
 // WGS 84 longitude/latitude to Equal Earth (EPSG:8857), in meters.
 const fromCrs = 'EPSG:4326';
 const toCrs = '+proj=eqearth +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m';
-const projection = proj4(fromCrs, toCrs);
-
-// Equal Earth's full-world projected extent.
-const east = projection.forward([180, 0])[0];
-const north = projection.forward([0, 90])[1];
 
 new Deck({
   views: new CustomProjectionView({
-    projection,
     fromCrs,
     toCrs,
+    projection: proj4(fromCrs, toCrs),
     fromBounds: [-180, -90, 180, 90],
-    toBounds: [-east, -north, east, north]
+    resolution: 5 // degrees in fromCrs
   }),
   controller: true,
-  initialViewState: {center: [256, 256, 0], zoom: 1}
+  initialViewState: {center: [0, 0, 0], zoom: 1}
 });
 ```
 
-deck.gl does not bundle a projection library. Supply the converter through `projection`. Changing `projection` alone does not trigger an update to layer positions. Change `fromCrs` or `toCrs` along with the converter to trigger that update.
-
-### Converting UTM coordinates to Web Mercator
-
-This example uses UTM zone 10N eastings and northings as world coordinates and converts them to Web Mercator. `getMetersPerUnit` tells deck.gl that each world-coordinate unit represents one meter; deck.gl derives the projected scale through the converter.
+This example uses UTM zone 10N eastings and northings as world coordinates and converts them to Web Mercator.
 
 ```js
 const fromCrs = '+proj=utm +zone=10 +datum=WGS84 +units=m';
 const toCrs = 'EPSG:3857';
-const projection = proj4(fromCrs, toCrs);
-
-// Web Mercator's standard world extent in meters.
-const extent = Math.PI * 6378137;
 
 const view = new CustomProjectionView({
-  projection,
   fromCrs,
   toCrs,
-  toBounds: [-extent, -extent, extent, extent],
-  getMetersPerUnit: () => [1, 1, 1],
-  resolution: 100000
+  projection: proj4(fromCrs, toCrs),
+  resolution: 100000  // in world-coordinate (fromCrs) units aka meters
 });
 ```
-
-The callback describes meters per unit of world coordinates, which are expressed in `fromCrs`—UTM meters in this example. deck.gl makes a best effort to deduce world-coordinate units from `fromCrs`. When it cannot, `getMetersPerUnit` is required to override the default longitude/latitude estimation. `resolution` is also measured in world-coordinate units.
 
 ## Constructor
 
@@ -67,44 +50,45 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | Option | Default | Description |
 | --- | --- | --- |
 | `projection` | Required | `{forward, inverse}` conversion functions. See the [coordinate contract](./custom-projection-viewport.md#coordinate-contract). |
-| `fromCrs` | None | CRS name or PROJ string describing world coordinates. Changing this string refreshes projected positions. A PROJ string containing `+units=m` defaults to meter units; otherwise longitude/latitude degrees are assumed. |
-| `toCrs` | None | Output CRS name or PROJ string. Changing this string refreshes projected positions. |
+| `fromCrs` | `'WGS84'` | CRS name or PROJ string describing world coordinates. |
+| `toCrs` | None | Output CRS name or PROJ string. |
 | `fromBounds` | None | The projection's valid domain, expressed as `[minX, minY, maxX, maxY]` in world coordinates (`fromCrs`). |
-| `toBounds` | Required | The projection's extent, expressed as `[minX, minY, maxX, maxY]` in `toCrs`. |
-| `resolution` | `5` | Controls how closely paths and polygon edges follow the projection. Lower values produce smoother curves but take longer to process. Measured in world-coordinate units (`fromCrs`). |
-| `getMetersPerUnit` | None | `(worldPosition) => [x, y, z]`: finite, positive physical meters per world-coordinate unit along each axis. `worldPosition` is expressed in `fromCrs`. Overrides the inferred scale when supplied. With `+units=m` in `fromCrs`, defaults to `() => [1, 1, 1]`; otherwise uses longitude/latitude estimation with altitude in meters. Supply this callback for other world-coordinate units. |
+| `toBounds` | `[-EC/2, -EC/2, EC/2, EC/2]` | Extent expressed as `[minX, minY, maxX, maxY]` in `toCrs`, with `EC = 40075016.6855` (Earth circumference). Aligns Web Mercator's common space with `MapView` and keeps a consistent coordinate scale across projections. Override to adjust common-space scale and origin. Does not clip geometry. |
+| `resolution` | `0` | Set a positive value in world-coordinate units (`fromCrs`) to subdivide paths and polygon edges so they follow the projection. Smaller positive values produce smoother curves but take longer to process. `0` disables subdivision. |
+| `getDistanceScale` | None | `(positionInToCrs) => [x, y, z]`: real-world meters per unit along the axes of `toCrs`, to adjust for projection distortion. See [meter size](./custom-projection-viewport.md#meter-size). |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
-Coordinates outside `fromBounds` are clamped to its boundary, not clipped. The bounds describe the projection itself; use the view state to choose the visible region.
+Coordinates outside `fromBounds` are clamped to its boundary, not clipped. `fromBounds` describes the projection's valid domain. `toBounds` controls how coordinates in `toCrs` is mapped to common space.
 
-CRS strings do not construct or configure the converter. Named CRSs are not resolved to their definitions: `'EPSG:4326'`, `'WGS84'`, NAD83, NAD27 and unrecognized names all use longitude/latitude estimation by default. When world coordinates use a named projected CRS measured in meters, supply `getMetersPerUnit: () => [1, 1, 1]` or use a PROJ string containing `+units=m`.
+CRS strings are used to uniquely identify the projection. They do not construct the converter.
+
 
 ## View State
 
 | Property | Default | Description |
 | --- | --- | --- |
-| `center` | `[256, 256, 0]` | Camera center in normalized common coordinates, not longitude/latitude. Navigation locks Z to zero. |
+| `center` | `[0, 0, 0]` | Camera center in world coordinates (`fromCrs`). Navigation locks Z to zero. |
 | `zoom` | `0` | Each increment doubles the scale. |
 | `pitch` | `0` | Map pitch in degrees, as in `MapView`. |
 | `bearing` | `0` | Map bearing in degrees, as in `MapView`. |
 | `minZoom`, `maxZoom` | `-Infinity`, `Infinity` | Zoom constraints; controller bounds may impose an additional minimum. |
 | `minPitch`, `maxPitch` | `0`, `85` | Pitch constraints, clamped to the range 0–85 degrees. |
 
-To center on a world position in `fromCrs`, such as a city's longitude/latitude when using `'EPSG:4326'`, use the viewport's `preproject(position)` result as `center`.
+To center on a city when using `fromCrs: 'EPSG:4326'`, supply its longitude and latitude directly, for example `center: [-122.4, 37.8, 0]`.
 
 TypeScript configuration types are exported as `CustomProjectionViewProps`, `CustomProjectionViewState`, `CustomProjectionViewportOptions` and `ProjectionConverter`. Like the classes, these types are experimental.
 
 ## Controller
 
-Enable interaction with `controller: true`. The default [CustomProjectionController](./custom-projection-controller.md) pans and zooms in common space, with map-style pitch and bearing controls. Its default bounds are the common-space square `[[0, 0], [512, 512]]`; use `controller: {maxBounds: null}` to allow unrestricted panning.
+Enable interaction with `controller: true`. The default [CustomProjectionController](./custom-projection-controller.md) pans and zooms in common space, with map-style pitch and bearing controls. Panning is unrestricted unless you supply `controller.maxBounds` in world coordinates (`fromCrs`).
 
 ## Changing Projections
 
-To change the projection at runtime, supply the updated converter, CRS strings and bounds. Changing either `fromCrs` or `toCrs` refreshes projected positions. Replacing `projection` alone does not trigger this refresh. If both CRS strings are omitted, deck.gl assumes the conversion is stable. Changing a registered CRS definition without changing its name is not detected.
+`CustomProjectionView` supports swapping the custom projection at runtime. To avoid unnecessary updates, a new `projection` object alone does not trigger layer updates. To refresh projected positions, change one or more of: `fromCrs`, `toCrs`, or `resolution` alongside the updated converter.
 
-Changing `resolution` also refreshes projected positions. Bounds are properties of the CRS and do not independently trigger a refresh. Replacing `getMetersPerUnit` or navigating the camera does not trigger a refresh either.
+Use a new layer ID when switching a layer between `MapView` and `CustomProjectionView`.
 
-Use a new layer ID when switching a layer between `MapView` and `CustomProjectionView`. When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
+When displaying multiple views with different projections, create a separate layer instance with a unique ID for each view, and use `layerFilter` to restrict each instance to its intended view.
 
 ## Limitations
 
