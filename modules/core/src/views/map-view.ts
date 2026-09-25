@@ -42,6 +42,8 @@ export type MapViewProps = {
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter. */
   farZMultiplier?: number;
+  /** Lowest elevation in meters used to extend the automatic far plane below elevation zero. Default `0`. */
+  minimumElevation?: number;
   /** Custom projection matrix */
   projectionMatrix?: NumericArray;
   /** Field of view covered by the camera, in the perspective case. In degrees. If not supplied, will be calculated from `altitude`. */
