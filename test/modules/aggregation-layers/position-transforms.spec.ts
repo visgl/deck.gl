@@ -19,6 +19,8 @@ import {
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 
+const normalizationScale = 512 / 40075016.6855;
+
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
   return projected
     ? new CustomProjectionViewport({
@@ -30,7 +32,6 @@ function createViewport(signature: string, projected: boolean, scale = 2, resolu
           forward: ([x, y, z = 0]) => [x * scale, y * scale, z * scale],
           inverse: ([x, y, z = 0]) => [x / scale, y / scale, z / scale]
         },
-        toBounds: [0, 0, 512, 512],
         resolution
       })
     : new Viewport({width: 400, height: 300});
@@ -65,6 +66,10 @@ for (const [LayerType, attributeNames] of layerCases) {
           weightsTextureSize: 32
         } as any);
         const check = (expected: number[]) => {
+          if (projected)
+            expected = expected.map((value, i) =>
+              i < 2 ? 256 + value * normalizationScale : value
+            );
           for (const name of attributeNames) {
             const attribute = layer.getAttributeManager()!.attributes[name];
             expect(attribute.settings.transformSource).toBe('projection');
@@ -116,7 +121,9 @@ test('HeatmapLayer packed position layout composes projection with XY normalizat
         props: layer.props,
         context: layer
       });
-      expect(Array.from(position.value!.slice(0, 3))).toEqual(projected ? [4, 6, 0] : [2, 3, 0]);
+      expect(Array.from(position.value!.slice(0, 3))).toEqual(
+        projected ? [256 + 4 * normalizationScale, 256 + 6 * normalizationScale, 0] : [2, 3, 0]
+      );
       expect(Array.from(value)).toEqual([2, 3]);
     } finally {
       attributes.finalize();

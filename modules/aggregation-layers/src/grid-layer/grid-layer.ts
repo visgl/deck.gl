@@ -457,12 +457,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       // Offset common space to center at the origin of the grid cell where the data center is in
       // This improves precision without affecting the cell positions
-      const centroidCommon = viewport.projectFlat(centroid);
+      const centroidCommon = viewport.preproject ? centroid : viewport.projectFlat(centroid);
       cellOriginCommon = [
         Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
         Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1]
       ];
-      centroid = viewport.unprojectFlat(cellOriginCommon);
+      centroid = viewport.preproject ? cellOriginCommon : viewport.unprojectFlat(cellOriginCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
