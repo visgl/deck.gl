@@ -174,7 +174,7 @@ fn project_normal(vector: vec3<f32>) -> vec3<f32> {
 // Applies a scale offset based on y-offset (dy)
 fn project_offset_(offset: vec4<f32>) -> vec4<f32> {
   if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
-    // XY is already in common space, for both high and low position components.
+    // Both preprojected and Cartesian positions use common-space XY and meter Z.
     return vec4<f32>(offset.xy, offset.z * project.commonUnitsPerWorldUnit.z, offset.w);
   }
   let dy: f32 = offset.y;
