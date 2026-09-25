@@ -2,13 +2,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
   _CustomProjectionViewport as CustomProjectionViewport,
   WebMercatorViewport
 } from '@deck.gl/core';
-import {ScatterplotLayer, PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import {
+  ArcLayer,
+  LineLayer,
+  ScatterplotLayer,
+  PathLayer,
+  PolygonLayer,
+  SolidPolygonLayer
+} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
@@ -21,6 +28,58 @@ const options = {
   width: 800,
   height: 600
 };
+
+for (const LayerType of [LineLayer, ArcLayer]) {
+  for (const projected of [false, true]) {
+    for (const wrapLongitude of [false, true]) {
+      test(`${LayerType.layerName} wrapping: projected=${projected}, wrapLongitude=${wrapLongitude}`, () => {
+        const viewport = projected
+          ? new CustomProjectionViewport(options)
+          : new WebMercatorViewport({width: 800, height: 600});
+        const manager = new LayerManager(device, {viewport});
+        manager.setProps({
+          onError: error => {
+            throw error;
+          }
+        });
+        const layer = new LayerType({
+          data: [{}],
+          getSourcePosition: () => [170, 0],
+          getTargetPosition: () => [-170, 1],
+          wrapLongitude
+        });
+        try {
+          manager.setLayers([layer]);
+          const model = layer.state.model!;
+          const draw = vi.spyOn(model, 'draw').mockReturnValue(true);
+          const setProps = vi.spyOn(model.shaderInputs, 'setProps');
+          const wraps = wrapLongitude && !projected;
+          layer.draw({uniforms: {}});
+          if (LayerType === LineLayer) {
+            expect(draw).toHaveBeenCalledTimes(wraps ? 2 : 1);
+            expect(setProps).toHaveBeenNthCalledWith(1, {
+              line: expect.objectContaining({useShortestPath: wraps ? 1 : 0})
+            });
+            if (wraps) {
+              expect(setProps).toHaveBeenNthCalledWith(2, {
+                line: expect.objectContaining({useShortestPath: -1})
+              });
+            }
+          } else {
+            expect(draw).toHaveBeenCalledTimes(1);
+            expect(setProps).toHaveBeenCalledWith({
+              arc: expect.objectContaining({useShortestPath: wraps})
+            });
+          }
+          expect(layer.props.wrapLongitude).toBe(wrapLongitude);
+        } finally {
+          vi.restoreAllMocks();
+          manager.finalize();
+        }
+      });
+    }
+  }
+}
 
 test('position opt-in invalidates on projection and matrix changes, not navigation', () => {
   let calls = 0;
