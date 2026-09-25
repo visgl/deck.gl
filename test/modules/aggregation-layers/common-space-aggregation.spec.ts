@@ -17,6 +17,7 @@ import {
 } from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
+import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
 
 const data = [
@@ -178,10 +179,18 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
         expect(layer.state.contourData).toEqual(reference.state.contourData);
         expect(layer.getSubLayers()).toHaveLength(2);
         for (const child of layer.getSubLayers()) {
-          const transform = child.usePositionTransforms().transform!;
-          expect(transform.call(child, [2, 3, 0])).toEqual(
+          expect(child.usePositionTransforms().transform).toBeNull();
+          expect(child.props.coordinateSystem).toBe('cartesian');
+          expect(child.projectPosition([2, 3, 0], {autoOffset: false})).toEqual(
             new Matrix4(child.props.modelMatrix!).transformAsPoint([2, 3, 0])
           );
+          const uniforms = getUniformsFromViewport({
+            viewport,
+            coordinateSystem: child.props.coordinateSystem,
+            coordinateOrigin: child.props.coordinateOrigin,
+            modelMatrix: child.props.modelMatrix
+          });
+          expect(uniforms.modelMatrix).toBe(child.props.modelMatrix);
         }
         expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
       }
@@ -223,6 +232,50 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
     }
   });
 }
+
+test('ContourLayer supports ordinary application-provided Cartesian sublayers', () => {
+  class CustomPathLayer extends PathLayer {
+    static layerName = 'CustomPathLayer';
+  }
+  class CustomPolygonLayer extends SolidPolygonLayer {
+    static layerName = 'CustomPolygonLayer';
+  }
+  const viewport = createViewport();
+  const manager = createManager(viewport);
+  const layer = new ContourLayer({
+    data,
+    getPosition: p => p,
+    modelMatrix,
+    coordinateOrigin: [100, 200, 300],
+    cellSize: 20,
+    gpuAggregation: false,
+    contours: [{threshold: 0.5}, {threshold: [0.5, 10]}],
+    _subLayerProps: {
+      lines: {type: CustomPathLayer},
+      bands: {type: CustomPolygonLayer}
+    }
+  });
+  try {
+    manager.setLayers([layer]);
+    const children = layer.getSubLayers();
+    expect(children).toHaveLength(2);
+    expect(children[0].constructor).toBe(CustomPathLayer);
+    expect(children[1].constructor).toBe(CustomPolygonLayer);
+    for (const child of children) {
+      expect(child.props.coordinateSystem).toBe('cartesian');
+      expect(child.props.coordinateOrigin).toEqual([0, 0, 0]);
+      expect(child.usePositionTransforms().transform).toBeNull();
+      const position = [2, 3, 4];
+      expect(child.projectPosition(position, {autoOffset: false})).toEqual(
+        new Matrix4(child.props.modelMatrix!).transformAsPoint(position)
+      );
+    }
+    expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
+  } finally {
+    manager.finalize();
+    vi.restoreAllMocks();
+  }
+});
 
 for (const [LayerType, accessor] of [
   [GridLayer, 'gridAggregator'],
