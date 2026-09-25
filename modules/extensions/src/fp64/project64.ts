@@ -18,6 +18,7 @@ type Project64ModuleProps = {
 export default {
   name: 'project64',
   dependencies: [project, fp64],
+  excludes: ['project32'],
   vs: project64Shader,
   getUniforms,
   uniformTypes: {
