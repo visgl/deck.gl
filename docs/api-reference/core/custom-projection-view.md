@@ -55,12 +55,11 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | `fromCrs` | `'WGS84'` | CRS name or PROJ string describing world coordinates. |
 | `toCrs` | None | Planar, meter-based map CRS name or PROJ string. |
 | `fromBounds` | None | The projection's valid domain, expressed as `[minX, minY, maxX, maxY]` in world coordinates (`fromCrs`). |
-| `toBounds` | `[-EC/2, -EC/2, EC/2, EC/2]` | Extent expressed as `[minX, minY, maxX, maxY]` in `toCrs`, with `EC = 40075016.6855` (Earth circumference). Aligns Web Mercator's common space with `MapView` and keeps a consistent coordinate scale across projections. Override to adjust common-space scale and origin. Does not clip geometry. |
 | `resolution` | `0` | Set a positive value in world-coordinate units (`fromCrs`) to subdivide paths and polygon edges so they follow the projection. Smaller positive values produce smoother curves but take longer to process. `0` disables subdivision. |
 | `getDistanceScale` | None | `([x, y]) => [xScale, yScale]`, with `[x, y]` in `toCrs`: real-world ground meters per map meter along X/Y, to adjust for horizontal projection distortion. Altitude does not affect scale. See [meter size](./custom-projection-viewport.md#meter-size). |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
-Coordinates outside `fromBounds` are clamped to its boundary, not clipped. `fromBounds` describes the projection's valid domain. `toBounds` controls how coordinates in `toCrs` is mapped to common space.
+Coordinates outside `fromBounds` are clamped to its boundary, not clipped. `fromBounds` describes the projection's valid domain.
 
 CRS strings are used to uniquely identify the projection. They do not construct the converter.
 
@@ -97,7 +96,7 @@ When displaying multiple views with different projections, create a separate lay
 - Supported layers are `ScatterplotLayer`, `PathLayer` and `SolidPolygonLayer`, including their use by `PolygonLayer` and the corresponding `GeoJsonLayer` sublayers. Other layers are not yet supported.
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
 - Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
-- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in `fromCrs`. `modelMatrix` is applied before conversion,  and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in normalized `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
+- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in `fromCrs`. `modelMatrix` is applied before conversion,  and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in map meters in `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in `fromCrs`. They may be unavailable where `projection.inverse` cannot return a valid position.
 
