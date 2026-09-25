@@ -7,7 +7,45 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
+import {Matrix4} from '@math.gl/core';
 import {geoJSONData} from './data/fixtures';
+
+test('SolidPolygonLayer#binary positions without preprojection remain in world coordinates', () => {
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  expect(viewport.preproject).toBeFalsy();
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const positions = {value: new Float32Array([0, 0, 1, 0, 1, 1, 0, 0]), size: 2};
+  const layer = new SolidPolygonLayer({
+    id: 'binary-unprojected',
+    data: {
+      length: 1,
+      startIndices: [0, 4],
+      attributes: {getPolygon: positions, indices: new Uint32Array([0, 1, 2])}
+    },
+    _normalize: false,
+    positionFormat: 'XY',
+    modelMatrix: new Matrix4().translate([10, 20, 0]).scale([2, 3, 1])
+  });
+  try {
+    manager.setLayers([layer]);
+    const attribute = layer.getAttributeManager()!.getAttributes().vertexPositions;
+    expect(attribute.value).toBe(positions.value);
+    expect(attribute.settings.transform).toBeFalsy();
+    expect(layer.state.polygonTesselator.instanceCount).toBe(4);
+  } finally {
+    manager.finalize();
+  }
+});
 
 test('SolidPolygonLayer#WebGPU binary extruded polygons', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();

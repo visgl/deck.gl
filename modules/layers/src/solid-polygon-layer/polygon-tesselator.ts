@@ -73,7 +73,7 @@ export default class PolygonTesselator extends Tesselator<
     if (externalIndices) {
       // @ts-ignore (2339) value is not defined on TypedArray (fall through)
       this.vertexCount = (externalIndices.value || externalIndices).length;
-    } else if (this.data && !this.getGeometry) {
+    } else if (this.data && !this.geometryAccessor) {
       throw new Error('missing indices buffer');
     }
   }

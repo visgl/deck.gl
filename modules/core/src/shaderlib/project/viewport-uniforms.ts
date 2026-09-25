@@ -57,6 +57,10 @@ export function getOffsetOrigin(
   }
 
   let shaderCoordinateOrigin = coordinateOrigin;
+  if (viewport.preproject) {
+    coordinateSystem = 'cartesian';
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+  }
   let geospatialOrigin: Vec3 | null;
   let offsetMode = true;
 
@@ -98,8 +102,14 @@ export function getOffsetOrigin(
       break;
 
     case PROJECTION_MODE.IDENTITY:
-      shaderCoordinateOrigin = viewport.position.map(Math.fround) as Vec3;
+    case PROJECTION_MODE.EXTERNAL:
+      shaderCoordinateOrigin = (
+        viewport.projectionMode === PROJECTION_MODE.EXTERNAL ? viewport.center : viewport.position
+      ).map(Math.fround) as Vec3;
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
+      if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
+        geospatialOrigin = null;
+      }
       break;
 
     case PROJECTION_MODE.GLOBE:
@@ -147,7 +157,10 @@ function calculateMatrixAndOffset(
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
     // @ts-expect-error the 4th component is assigned below
-    originCommon = viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+    originCommon =
+      viewport.projectionMode === PROJECTION_MODE.EXTERNAL
+        ? shaderCoordinateOrigin.slice()
+        : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
       cameraPosCommon[0] - originCommon[0],
@@ -238,6 +251,12 @@ export function getUniformsFromViewport({
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
+  if (viewport.preproject) {
+    coordinateSystem = 'cartesian';
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+    modelMatrix = null;
+    autoWrapLongitude = false;
+  }
   if (coordinateSystem === 'default') {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
