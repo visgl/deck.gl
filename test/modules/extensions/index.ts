@@ -11,3 +11,4 @@ import './path.spec';
 import './fill-style.spec';
 import './mask';
 import './terrain';
+import './projection-utils.spec';

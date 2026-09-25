@@ -204,6 +204,52 @@ fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   ) * D;
 }
 
+// Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
+const MAX_MERCATOR_Y: f32 = 7.0439589847;
+
+// Inverse of project_globe_ followed by project_mercator_, without forming lat/lng:
+// Mercator y = atanh(sin(lat)) = log((D + |z|) / |xy|), which stays accurate near the poles
+fn project_globe_to_mercator_(spherePos: vec3<f32>) -> vec2<f32> {
+  let D = length(spherePos);
+  let h = max(length(spherePos.xy), 1e-20);
+  let y = sign(spherePos.z) * min(log((D + abs(spherePos.z)) / h), MAX_MERCATOR_Y);
+  let x = atan2(spherePos.x, -spherePos.y);
+  return (vec2<f32>(x, y) + PI) * WORLD_SCALE;
+}
+
+// Flat common space (Mercator or cartesian) of a common position; identity except under GLOBE.
+// WGSL has no function overloading: pass position.xyz for a vec4. See project.glsl.ts.
+fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    return project_globe_to_mercator_(commonPosition);
+  }
+  return commonPosition.xy;
+}
+
+// World copy of a flat x nearest to referenceX
+fn project_wrap_flat_x_(x: f32, referenceX: f32) -> f32 {
+  return x - TILE_SIZE * floor((x - referenceX) / TILE_SIZE + 0.5);
+}
+
+// Flat position in the world copy nearest to referenceX (e.g. a bounds centre); geospatial only
+fn project_common_position_to_flat_wrapped(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
+  var flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+// Flat position continuous across the antimeridian under GLOBE (seam moved opposite referenceX,
+// e.g. the camera); identity for flat modes. For periodic patterns.
+fn project_common_position_to_flat_continuous(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
+  var flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
 // Projects positions (with an optional 64-bit low part) from the input
 // coordinate system to the common space.
 fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {
