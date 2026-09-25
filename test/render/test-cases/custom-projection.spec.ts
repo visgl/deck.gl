@@ -20,10 +20,9 @@ const converter = new Proj4Projection({
   to: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 });
 const projection = {forward: converter.project, inverse: converter.unproject};
-// Fixed meter bounds enclose all 50 states, including Hawaii and the Aleutian Islands.
+// Frame all 50 states, including Hawaii and the Aleutian Islands.
 const view = new CustomProjectionView({
   projection,
-  toBounds: [-7400000, 0, 2600000, 6500000],
 
   resolution: 1
 });
@@ -99,7 +98,10 @@ const testCases: TestCase[] = [
   {
     name: 'custom-projection-epsg5070-us-states',
     views: view,
-    viewState: {center: converter.unproject([-2400000, 3250000, 0]), zoom: 0.15},
+    viewState: {
+      center: converter.unproject([-2400000, 3250000, 0]),
+      zoom: 0.15 + Math.log2(40075016.6855 / 10000000)
+    },
     layers: createLayers(),
     onAfterRender: checkPickedStates([alaska, colorado]),
     goldenImage: './test/render/golden-images/custom-projection-epsg5070-us-states.png'
@@ -109,7 +111,7 @@ const testCases: TestCase[] = [
     views: view,
     viewState: {
       center: converter.unproject([-2400000, 3250000, 0]),
-      zoom: 0.15,
+      zoom: 0.15 + Math.log2(40075016.6855 / 10000000),
       pitch: 35,
       bearing: 20
     },

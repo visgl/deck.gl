@@ -24,8 +24,6 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 
-const normalizationScale = 512 / 40075016.6855;
-
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
   return projected
     ? new CustomProjectionViewport({
@@ -85,10 +83,6 @@ for (const [LayerType, attributeNames] of layerCases) {
           weightsTextureSize: 32
         } as any);
         const check = (expected: number[]) => {
-          if (projected)
-            expected = expected.map((value, i) =>
-              i < 2 ? 256 + value * normalizationScale : value
-            );
           for (const name of attributeNames) {
             const attribute = layer.getAttributeManager()!.attributes[name];
             expect(attribute.settings.transformSource).toBe('projection');
@@ -133,10 +127,7 @@ test('BitmapLayer transforms tessellated vertices without mutating the input mes
       const positions = layer.getAttributeManager()!.attributes.positions.value!;
       for (let i = 0; i < source.length; i++) {
         const projected = (source[i] + (i % 3 === 0 ? offset : 0)) * scale;
-        expect(positions[i]).toBeCloseTo(
-          i % 3 < 2 ? 256 + projected * normalizationScale : projected,
-          6
-        );
+        expect(positions[i]).toBeCloseTo(projected, 6);
       }
       expect(layer.state.mesh.positions).toEqual(source);
     };
