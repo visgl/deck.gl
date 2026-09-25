@@ -30,7 +30,14 @@ const renderTestDefine = {
 
 const headlessPlaywright = playwright({
   launchOptions: {
-    args: chromiumGpuLaunchArgs
+    args: [
+      ...chromiumLaunchArgs,
+      '--enable-unsafe-webgpu',
+      '--use-webgpu-adapter=swiftshader',
+      ...(process.platform === 'linux'
+        ? ['--enable-features=Vulkan', '--use-vulkan=swiftshader', '--disable-vulkan-surface']
+        : [])
+    ]
   }
 });
 
@@ -232,6 +239,7 @@ const projects = [
       // Used by test-headless and test-ci
       {
         extends: true,
+        define: {...renderTestDefine},
         resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
@@ -301,7 +309,7 @@ const projects = [
       // Used by test-render
       {
         extends: true,
-        define: renderTestDefine,
+        define: {...renderTestDefine},
         resolve: {alias: browserAliases},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
