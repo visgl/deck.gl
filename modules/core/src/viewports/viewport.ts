@@ -19,6 +19,8 @@ import {
 import {PROJECTION_MODE} from '../lib/constants';
 
 export type DistanceScales = {
+  /** Linear position-unit to common-unit scale, when distinct from ground-meter scaling. */
+  unitsPerWorldUnit?: number[];
   unitsPerMeter: number[];
   metersPerUnit: number[];
 };
@@ -288,7 +290,9 @@ export default class Viewport {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
-    const targetZWorld = targetZ && targetZ * this.distanceScales.unitsPerMeter[2];
+    const targetZWorld =
+      targetZ &&
+      targetZ * (this.distanceScales.unitsPerWorldUnit || this.distanceScales.unitsPerMeter)[2];
     const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
     const [X, Y, Z] = this.unprojectPosition(coord);
 

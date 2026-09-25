@@ -107,10 +107,11 @@ export function getWorldPosition(
 
   if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
     if (coordinateSystem === 'cartesian') {
+      const scale = viewport.distanceScales.unitsPerWorldUnit!;
       return [
-        x + coordinateOrigin[0],
-        y + coordinateOrigin[1],
-        (z + coordinateOrigin[2]) * viewport.distanceScales.unitsPerMeter[2]
+        (x + coordinateOrigin[0]) * scale[0],
+        (y + coordinateOrigin[1]) * scale[1],
+        (z + coordinateOrigin[2]) * scale[2]
       ];
     }
     return viewport.projectPosition([x, y, z]);
@@ -194,6 +195,7 @@ export function projectPosition(
   const {
     geospatialOrigin = DEFAULT_COORDINATE_ORIGIN,
     shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+    commonOrigin,
     offsetMode = false
   } = autoOffset ? getOffsetOrigin(viewport, coordinateSystem, coordinateOrigin) : {};
 
@@ -207,9 +209,7 @@ export function projectPosition(
 
   if (offsetMode) {
     const positionCommonSpace =
-      viewport.projectionMode === PROJECTION_MODE.EXTERNAL
-        ? viewport.center.map(Math.fround)
-        : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
     vec3.sub(worldPosition, worldPosition, positionCommonSpace);
   }
 
