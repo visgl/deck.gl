@@ -10,6 +10,7 @@ import {
   OrbitView,
   OrthographicView,
   FirstPersonView,
+  WebMercatorViewport,
   _GlobeView as GlobeView
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
@@ -621,6 +622,35 @@ test('GlobeController keeps pointer zoom stable when the anchor crosses a pole',
       previousViewState = controller.props;
     }
   }
+});
+
+test('GlobeController zooms around the pointer past zoom 12, where GlobeView switches to WebMercatorViewport', () => {
+  // Above zoom 12 the view renders with a WebMercatorViewport, which has no
+  // getZoomAnchorStrength; the wheel handler threw on it (#10736).
+  const pointer: [number, number] = [840, 240];
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 1280,
+      height: 720,
+      longitude: 10,
+      latitude: 45,
+      zoom: 12.5,
+      minZoom: 0,
+      maxZoom: 20
+    }
+  });
+  const anchor = new WebMercatorViewport(controller.props).unproject(pointer);
+  const wheelEvent = makeWheelEvent();
+  wheelEvent.offsetCenter = {x: pointer[0], y: pointer[1]};
+  wheelEvent.delta = 60;
+
+  controller.handleEvent(wheelEvent as any);
+
+  expect(controller.props.zoom, 'the wheel zooms in').toBeGreaterThan(12.5);
+  const underPointer = new WebMercatorViewport(controller.props).unproject(pointer);
+  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 4);
+  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 4);
 });
 
 test('GlobeController rotates pointer zoom smoothly from the north-up latitude limit', () => {

@@ -129,8 +129,13 @@ class GlobeState extends MapState {
     props.zoom = this._constrainZoom(props.zoom, props);
 
     if (constraintAround) {
-      const viewport = this.makeViewport(props) as GlobeViewport;
-      const anchorStrength = viewport.getZoomAnchorStrength(constraintAround.screenPosition);
+      const viewport = this.makeViewport(props);
+      // Past zoom 12 GlobeView renders with a WebMercatorViewport, whose map covers the whole
+      // screen, so the pointer anchor holds at full strength there.
+      const anchorStrength =
+        viewport instanceof GlobeViewport
+          ? viewport.getZoomAnchorStrength(constraintAround.screenPosition)
+          : 1;
       if (anchorStrength > 0) {
         const currentCoordinates = viewport.unproject(constraintAround.screenPosition);
         const cameraFrame = Globe.cameraFrame(props.longitude, props.latitude, props.bearing || 0);
