@@ -113,3 +113,13 @@ certification of the issue-listed layers.
 preprojected aggregation with equivalent Cartesian input, checks contour output
 does not invoke preprojection, GPU projection settings, heatmap bounds, and
 projection-change invalidation.
+
+`test/modules/aggregation-layers/position-transforms.spec.ts` separately covers
+aggregation position attributes and HeatmapLayer's packed WebGPU layout.
+
+`test/render/test-cases/custom-projection.spec.ts` also renders an Albers
+equal-area conic grid spanning [-135, 30, -45, 75]. Its 4,186 deterministic points
+form two smooth weight peaks. Contour isolines/isobands and flat, top-down
+hexagons compare CPU and GPU aggregation against shared baselines; HeatmapLayer
+checks the projected weight texture against the same geographic boundary.
+The suite uses the existing render test configuration.

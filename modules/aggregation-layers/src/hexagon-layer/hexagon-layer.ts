@@ -83,6 +83,7 @@ type _HexagonLayerProps<DataT> = {
 
   /**
    * Custom accessor to retrieve a hexagonal bin index from each data object.
+   * With viewport preprojection, position is in common space.
    * Not supported by GPU aggregation.
    * @default null
    */
@@ -366,7 +367,8 @@ export default class HexagonLayer<
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       colorWeights: {size: 1, accessor: 'getColorWeight'},
       elevationWeights: {size: 1, accessor: 'getElevationWeight'}
@@ -452,15 +454,22 @@ export default class HexagonLayer<
     let viewport = this.context.viewport;
 
     if (bounds && Number.isFinite(bounds[0][0])) {
-      let centroid = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      let centroid: [number, number] = [
+        (bounds[0][0] + bounds[1][0]) / 2,
+        (bounds[0][1] + bounds[1][1]) / 2
+      ];
       const {radius} = this.props;
       const {unitsPerMeter} = viewport.getDistanceScales(centroid);
       radiusCommon = unitsPerMeter[0] * radius;
 
       // Use the centroid of the hex at the center of the data
       // This offsets the common space without changing the bins
-      const centerHex = pointToHexbin(viewport.projectFlat(centroid), radiusCommon);
-      centroid = viewport.unprojectFlat(getHexbinCentroid(centerHex, radiusCommon));
+      const centerHex = pointToHexbin(
+        viewport.preproject ? centroid : viewport.projectFlat(centroid),
+        radiusCommon
+      );
+      const centerCommon = getHexbinCentroid(centerHex, radiusCommon);
+      centroid = viewport.preproject ? centerCommon : viewport.unprojectFlat(centerCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
@@ -637,6 +646,10 @@ export default class HexagonLayer<
           bin.id as [number, number],
           this.state.radiusCommon
         );
+        if (this.context.viewport.preproject) {
+          centroidCommon[0] += this.state.hexOriginCommon[0];
+          centroidCommon[1] += this.state.hexOriginCommon[1];
+        }
         const centroid = this.context.viewport.unprojectFlat(centroidCommon);
 
         object = {
