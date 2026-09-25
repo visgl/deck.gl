@@ -74,6 +74,85 @@ function getPositions(layer: PositionLayer) {
   return Array.from(layer.getAttributeManager()!.attributes.positions.value!.slice(0, 3));
 }
 
+test('Cartesian sublayers bypass preprojection and use common XY and meter Z', () => {
+  const viewport = new CustomProjectionViewport({
+    projection: {forward: p => p.slice(), inverse: p => p.slice()},
+    getDistanceScale: () => [0.25, 1]
+  });
+  const manager = createManager(viewport);
+  const transform = vi.spyOn(viewport, 'preproject');
+  const layer = new PositionLayer({
+    data: [[1, 2, 3]],
+    coordinateSystem: 'cartesian',
+    coordinateOrigin: [5, 6, 7],
+    modelMatrix: new Matrix4().translate([256, 256, 0]).scale([2, 3, 4])
+  });
+  try {
+    manager.setLayers([layer]);
+    expect(getPositions(layer)).toEqual([1, 2, 3]);
+    expect(layer.getAttributeManager()!.attributes.positions.settings.transform).toBeNull();
+    const commonZ = 19 * viewport.distanceScales.unitsPerMeter[2];
+    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})).toEqual([263, 268, commonZ]);
+    expect(layer.projectPosition([1, 2, 3])).toEqual([7, 12, commonZ]);
+    expect(transform).not.toHaveBeenCalled();
+    const worldLayer = layer.clone({coordinateSystem: 'default'});
+    manager.setLayers([worldLayer]);
+    expect(getPositions(worldLayer)).toEqual(viewport.preproject!([258, 262, 12]));
+    const cartesianLayer = worldLayer.clone({coordinateSystem: 'cartesian'});
+    transform.mockClear();
+    manager.setLayers([cartesianLayer]);
+    expect(getPositions(cartesianLayer)).toEqual([1, 2, 3]);
+    expect(transform).not.toHaveBeenCalled();
+  } finally {
+    manager.finalize();
+    vi.restoreAllMocks();
+  }
+});
+
+test('Layer position precision follows projection mode, not preproject availability', () => {
+  for (const external of [false, true]) {
+    const viewport = new ProjectionViewport('precision', !external);
+    vi.spyOn(viewport, 'projectionMode', 'get').mockReturnValue(
+      external ? PROJECTION_MODE.EXTERNAL : PROJECTION_MODE.IDENTITY
+    );
+    const manager = createManager(viewport);
+    const layer = new PositionLayer({coordinateSystem: 'meter-offsets'});
+    try {
+      manager.setLayers([layer]);
+      expect(layer.use64bitPositions()).toBe(external);
+    } finally {
+      manager.finalize();
+      vi.restoreAllMocks();
+    }
+  }
+});
+
+test('Cartesian model matrix updates do not rebuild position attributes', () => {
+  const viewport = new CustomProjectionViewport({
+    projection: {forward: p => p.slice(), inverse: p => p.slice()}
+  });
+  const manager = createManager(viewport);
+  const accessor = vi.fn(position => position);
+  let layer = new PositionLayer({
+    data: [[1, 2, 3]],
+    getPosition: accessor,
+    coordinateSystem: 'cartesian'
+  });
+  try {
+    manager.setLayers([layer]);
+    accessor.mockClear();
+    const attribute = layer.getAttributeManager()!.attributes.positions;
+    layer = layer.clone({modelMatrix: new Matrix4().translate([10, 20, 30])});
+    manager.setLayers([layer]);
+    expect(accessor).not.toHaveBeenCalled();
+    expect(layer.getAttributeManager()!.attributes.positions).toBe(attribute);
+    expect(getPositions(layer)).toEqual([1, 2, 3]);
+    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})[0]).toBe(11);
+  } finally {
+    manager.finalize();
+  }
+});
+
 test('Layer transforms accessor-keyed binary positions but bypasses direct attribute buffers', () => {
   const viewport = new ProjectionViewport('initial');
   const manager = createManager(viewport);
