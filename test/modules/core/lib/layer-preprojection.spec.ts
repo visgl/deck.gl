@@ -8,6 +8,8 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
+import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 class ProjectionViewport extends Viewport {
   constructor(
@@ -24,6 +26,17 @@ class ProjectionViewport extends Viewport {
 
   get projectionSignature() {
     return this.signature;
+  }
+  get projectionMode() {
+    return this.preproject ? PROJECTION_MODE.EXTERNAL : PROJECTION_MODE.IDENTITY;
+  }
+  projectPosition(position: number[]): [number, number, number] {
+    return this.preproject ? this.preproject(position) : super.projectPosition(position);
+  }
+  unprojectPosition(position: number[]): [number, number, number] {
+    return this.postUnproject
+      ? this.postUnproject(position) || [NaN, NaN, NaN]
+      : super.unprojectPosition(position);
   }
 }
 
@@ -193,18 +206,21 @@ for (const projected of [false, true]) {
       expect(layer.projectPosition(point, {autoOffset: false})).toEqual(common);
       expect(layer.projectPosition(point)).toEqual([common[0] - 10, common[1] - 20, common[2]]);
       const pixel = layer.project(point);
-      viewport.project(common).forEach((value, index) => expect(pixel[index]).toBeCloseTo(value));
-      // unproject returns viewport coordinates, without reversing the layer matrix or preproject.
+      worldToPixels(common, viewport.pixelProjectionMatrix)
+        .slice(0, 3)
+        .forEach((value, index) => expect(pixel[index]).toBeCloseTo(value));
+      // unproject returns world coordinates, without reversing the layer model matrix.
       const inverse = projected ? vi.spyOn(viewport, 'postUnproject') : null;
-      layer.unproject(pixel).forEach((value, index) => expect(value).toBeCloseTo(common[index]));
-      if (inverse) expect(inverse).not.toHaveBeenCalled();
+      layer
+        .unproject(pixel)
+        .forEach((value, index) => expect(value).toBeCloseTo([12, 23, 34][index]));
+      if (inverse) expect(inverse).toHaveBeenCalledTimes(1);
       expect(point).toEqual([2, 3, 4]);
 
       const common2D = projected ? [24, 69, 120] : [12, 23, 30];
       const pixel2D = layer.project([2, 3]);
       expect(pixel2D).toHaveLength(2);
-      viewport
-        .project(common2D)
+      worldToPixels(common2D, viewport.pixelProjectionMatrix)
         .slice(0, 2)
         .forEach((value, index) => {
           expect(pixel2D[index]).toBeCloseTo(value);
@@ -230,8 +246,10 @@ for (const projected of [false, true]) {
       const common = projected ? [4, 9, 16] : [2, 3, 4];
       expect(layer.projectPosition([2, 3, 4], {autoOffset: false})).toEqual(common);
       const pixel = layer.project([2, 3, 4]);
-      active.project(common).forEach((value, index) => expect(pixel[index]).toBeCloseTo(value));
-      layer.unproject(pixel).forEach((value, index) => expect(value).toBeCloseTo(common[index]));
+      worldToPixels(common, active.pixelProjectionMatrix)
+        .slice(0, 3)
+        .forEach((value, index) => expect(pixel[index]).toBeCloseTo(value));
+      layer.unproject(pixel).forEach((value, index) => expect(value).toBeCloseTo([2, 3, 4][index]));
     } finally {
       manager.finalize();
     }
@@ -240,8 +258,7 @@ for (const projected of [false, true]) {
   test(`Picking inverse and shader uniforms with preproject=${projected}`, () => {
     const viewport = new ProjectionViewport('initial', projected);
     const input = [2, 3, 4];
-    const common = projected ? [4, 9, 16] : input;
-    const [x, y, z] = viewport.project(common);
+    const [x, y, z] = viewport.project(input);
     const pick = () => getEmptyPickingInfo({viewports: [viewport], pixelRatio: 1, x, y, z});
     pick().coordinate!.forEach((value, index) => expect(value).toBeCloseTo(input[index]));
     if (projected) {

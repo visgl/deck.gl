@@ -4,14 +4,19 @@
 
 import {test, expect} from 'vitest';
 import {Viewport, project} from '@deck.gl/core';
+import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
-// Exercise both the initial uniform scale and the geospatial Cartesian override.
+// External projection must not acquire a geospatial Cartesian scale override.
 class MeterAltitudeViewport extends Viewport {
   longitude = 0;
   latitude = 0;
+
+  get projectionMode() {
+    return PROJECTION_MODE.EXTERNAL;
+  }
 
   constructor(geospatial: boolean) {
     super({
@@ -29,11 +34,13 @@ class MeterAltitudeViewport extends Viewport {
   }
 
   projectFlat(position: number[]): [number, number] {
-    return [position[0], position[1]];
+    const projected = this.preproject ? this.preproject(position) : position;
+    return [projected[0], projected[1]];
   }
 
   unprojectFlat(position: number[]): [number, number] {
-    return [position[0], position[1]];
+    const world = this.postUnproject!(position)!;
+    return [world[0], world[1]];
   }
 }
 
@@ -42,7 +49,7 @@ for (const geospatial of [false, true]) {
     const viewport = new MeterAltitudeViewport(geospatial);
     const position = viewport.preproject!([10, 20, 50]);
     expect(position).toEqual([30, 80, 50]);
-    expect(viewport.projectPosition(position)).toEqual([30, 80, 100]);
+    expect(viewport.projectPosition([10, 20, 50])).toEqual([30, 80, 100]);
     expect(
       getWorldPosition([10, 20, 50], {
         viewport,
@@ -50,7 +57,7 @@ for (const geospatial of [false, true]) {
         coordinateOrigin: [0, 0, 0]
       })
     ).toEqual([30, 80, 100]);
-    expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual([1, 1, 2]);
+    expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual([2, 2, 2]);
     viewport
       .unproject(viewport.project(position))
       .forEach((value, i) => expect(value).toBeCloseTo(position[i]));

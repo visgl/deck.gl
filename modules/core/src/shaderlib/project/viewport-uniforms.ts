@@ -102,8 +102,14 @@ export function getOffsetOrigin(
       break;
 
     case PROJECTION_MODE.IDENTITY:
-      shaderCoordinateOrigin = viewport.position.map(Math.fround) as Vec3;
+    case PROJECTION_MODE.EXTERNAL:
+      shaderCoordinateOrigin = (
+        viewport.projectionMode === PROJECTION_MODE.EXTERNAL ? viewport.center : viewport.position
+      ).map(Math.fround) as Vec3;
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
+      if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
+        geospatialOrigin = null;
+      }
       break;
 
     case PROJECTION_MODE.GLOBE:
@@ -151,7 +157,10 @@ function calculateMatrixAndOffset(
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
     // @ts-expect-error the 4th component is assigned below
-    originCommon = viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+    originCommon =
+      viewport.projectionMode === PROJECTION_MODE.EXTERNAL
+        ? shaderCoordinateOrigin.slice()
+        : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
       cameraPosCommon[0] - originCommon[0],
@@ -319,9 +328,7 @@ function calculateViewportUniforms({
 
     focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit: viewport.preproject
-      ? [1, 1, distanceScales.unitsPerMeter[2]]
-      : (distanceScales.unitsPerMeter as Vec3),
+    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     wrapLongitude: false,
