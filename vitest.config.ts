@@ -21,8 +21,10 @@ const chromiumGpuLaunchArgs =
         '--enable-unsafe-webgpu',
         '--ignore-gpu-blocklist',
         '--enable-gpu',
-        '--enable-features=Vulkan',
-        '--use-vulkan=swiftshader'
+        '--use-webgpu-adapter=swiftshader',
+        ...(process.platform === 'linux'
+          ? ['--enable-features=Vulkan', '--use-vulkan=swiftshader', '--disable-vulkan-surface']
+          : [])
       ];
 const renderTestDefine = {
   'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null)
@@ -213,6 +215,7 @@ const projects = [
       // Used by test-headless and test-ci
       {
         extends: true,
+        define: renderTestDefine,
         resolve: {alias: browserAliases},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,

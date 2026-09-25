@@ -65,6 +65,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.position = projected.clipPosition;
   }
 
+  deckgl_filter_position(&varyings.position);
   varyings.color = vec4<f32>(
     attributes.colors * attributes.instanceColors.rgb,
     attributes.instanceColors.a

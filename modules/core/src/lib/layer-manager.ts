@@ -4,7 +4,7 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderAssembler, ShaderModule, ShaderPlugin} from '@luma.gl/shadertools';
 import {getShaderAssembler, layerUniforms} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
@@ -29,6 +29,7 @@ export type LayerContext = {
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
+  defaultShaderPlugins: ShaderPlugin[];
   renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
@@ -91,6 +92,7 @@ export default class LayerManager {
       deck,
       shaderAssembler: getShaderAssembler(device?.info?.shadingLanguage || 'glsl'),
       defaultShaderModules: [layerUniforms],
+      defaultShaderPlugins: [],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
@@ -229,11 +231,12 @@ export default class LayerManager {
     }
   };
 
-  /** Register a default shader module */
-  addDefaultShaderModule(module: ShaderModule) {
+  /** Register a default shader module and optional companion plugin, removed together. */
+  addDefaultShaderModule(module: ShaderModule, plugin?: ShaderPlugin) {
     const {defaultShaderModules} = this.context;
     if (!defaultShaderModules.find(m => m.name === module.name)) {
       defaultShaderModules.push(module);
+      if (plugin) this.context.defaultShaderPlugins.push({...plugin, name: module.name});
       this._defaultShaderModulesChanged = true;
     }
   }
@@ -244,6 +247,8 @@ export default class LayerManager {
     const i = defaultShaderModules.findIndex(m => m.name === module.name);
     if (i >= 0) {
       defaultShaderModules.splice(i, 1);
+      const pluginIndex = this.context.defaultShaderPlugins.findIndex(p => p.name === module.name);
+      if (pluginIndex >= 0) this.context.defaultShaderPlugins.splice(pluginIndex, 1);
       this._defaultShaderModulesChanged = true;
     }
   }
