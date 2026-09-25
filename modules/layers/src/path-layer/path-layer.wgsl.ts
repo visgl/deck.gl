@@ -400,6 +400,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
+  deckgl_filter_position(&varyings.position);
   varyings.clipCoordinates = geometry.position.xy;
   clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 

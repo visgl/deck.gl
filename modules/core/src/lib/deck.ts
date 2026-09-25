@@ -31,7 +31,7 @@ import type {
   Parameters,
   PresentationContext
 } from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shadertools';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -887,8 +887,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.effectManager!.addDefaultEffect(effect);
   }
 
-  _addDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
-    this.layerManager!.addDefaultShaderModule(module);
+  _addDefaultShaderModule(module: ShaderModule<Record<string, unknown>>, plugin?: ShaderPlugin) {
+    this.layerManager!.addDefaultShaderModule(module, plugin);
   }
 
   _removeDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {

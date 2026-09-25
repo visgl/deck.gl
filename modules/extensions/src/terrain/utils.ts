@@ -11,10 +11,12 @@ export function createRenderTarget(
     id: string;
     float?: boolean;
     interpolate?: boolean;
+    depth?: boolean;
   }
 ) {
   return device.createFramebuffer({
     id: opts.id,
+    depthStencilAttachment: opts.depth ? 'depth32float' : undefined,
     colorAttachments: [
       device.createTexture({
         id: opts.id,

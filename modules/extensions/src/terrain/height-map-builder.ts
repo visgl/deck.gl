@@ -31,6 +31,9 @@ export class HeightMapBuilder {
   /** Bounds of the height map texture, in cartesian space */
   bounds: Bounds | null = null;
 
+  /** Elevation interval in absolute common space, used to order WebGPU depth writes. */
+  heightRange: [number, number] = [0, 1];
+
   protected fbo?: Framebuffer;
   protected device: Device;
   /** Last rendered layers */
@@ -42,7 +45,7 @@ export class HeightMapBuilder {
   private lastViewport: Viewport | null = null;
 
   static isSupported(device: Device): boolean {
-    return device.isTextureFormatRenderable('rgba32float');
+    return device.type === 'webgpu' || device.isTextureFormatRenderable('rgba32float');
   }
 
   constructor(device: Device) {
@@ -57,7 +60,12 @@ export class HeightMapBuilder {
       return null;
     }
     if (!this.fbo) {
-      this.fbo = createRenderTarget(this.device, {id: 'height-map', float: true});
+      this.fbo = createRenderTarget(this.device, {
+        id: 'height-map',
+        float: this.device.type !== 'webgpu',
+        interpolate: this.device.type !== 'webgpu',
+        depth: this.device.type === 'webgpu'
+      });
     }
     return this.fbo;
   }
@@ -83,7 +91,28 @@ export class HeightMapBuilder {
       // Recalculate cached bounds in absolute Mercator common space
       this.layers = layers;
       this.layersBounds = layers.map(layer => layer.getBounds());
-      this.layersBoundsCommon = joinLayerBounds(layers, getMercatorReferenceViewport(viewport));
+      const referenceViewport = getMercatorReferenceViewport(viewport);
+      this.layersBoundsCommon = joinLayerBounds(layers, referenceViewport);
+      if (this.device.type === 'webgpu') {
+        let minHeight = 0;
+        let maxHeight = 0;
+        for (const layer of layers) {
+          const bounds = layer.getBounds();
+          if (!bounds) continue;
+          // Include every corner: model matrices may rotate the terrain mesh.
+          for (let corner = 0; corner < 8; corner++) {
+            const position = [0, 1, 2].map(axis => bounds[(corner >> axis) & 1][axis] || 0);
+            const height = layer.projectPosition(position, {
+              viewport: referenceViewport,
+              autoOffset: false
+            })[2];
+            minHeight = Math.min(minHeight, height);
+            maxHeight = Math.max(maxHeight, height);
+          }
+        }
+        const padding = Math.max((maxHeight - minHeight) * 0.01, 0.001);
+        this.heightRange = [minHeight - padding, maxHeight + padding];
+      }
     }
 
     const viewportChanged = !this.lastViewport || !viewport.equals(this.lastViewport);
