@@ -145,8 +145,25 @@ export default class CustomProjectionViewport extends Viewport {
         return null;
       }
     };
-    const commonCenter = preproject([center[0], center[1], 0]);
-    commonCenter[2] = 0;
+    const position = [center[0], center[1], 0];
+    const worldCenter = clampInput(position, fromBounds);
+    let localScale: number[];
+    if (opts.getDistanceScale) {
+      const scale = opts.getDistanceScale(projection.forward(worldCenter));
+      if (scale.length !== 3 || !scale.every(value => Number.isFinite(value) && value > 0)) {
+        throw new Error('getDistanceScale must return three finite, positive scales');
+      }
+      localScale = [1 / scale[0], 1 / scale[1], scale[2] / Math.sqrt(scale[0] * scale[1])];
+    } else {
+      const spherical = isSphericalCrs(fromCrs);
+      localScale =
+        spherical === undefined
+          ? [1, 1, 1]
+          : estimateUnitsPerMeter(projection, worldCenter, spherical, fromBounds);
+    }
+    const unitsPerMeter = localScale.map(
+      value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
+    );
     super({
       ...opts,
       width,
@@ -154,8 +171,8 @@ export default class CustomProjectionViewport extends Viewport {
       longitude: undefined,
       latitude: undefined,
       modelMatrix: null,
-      position: [center[0], center[1], 0],
-      commonCenter,
+      position,
+      distanceScales: {unitsPerMeter, metersPerUnit: unitsPerMeter.map(value => 1 / value)},
       preproject,
       postUnproject,
       zoom,
@@ -176,32 +193,6 @@ export default class CustomProjectionViewport extends Viewport {
     this.bearing = bearing;
     this.resolution = resolution;
     this.signature = JSON.stringify([fromCrs, toCrs, resolution]);
-    let localScale: number[] | null;
-    if (opts.getDistanceScale) {
-      const positionInToCrs = [
-        (this.center[0] - 256) / normalizationScale + centerX,
-        (this.center[1] - 256) / normalizationScale + centerY,
-        0
-      ];
-      const scale = opts.getDistanceScale(positionInToCrs);
-      if (scale.length !== 3 || !scale.every(value => Number.isFinite(value) && value > 0)) {
-        throw new Error('getDistanceScale must return three finite, positive scales');
-      }
-      localScale = [1 / scale[0], 1 / scale[1], scale[2] / Math.sqrt(scale[0] * scale[1])];
-    } else {
-      const spherical = isSphericalCrs(fromCrs);
-      if (spherical === undefined) {
-        localScale = [1, 1, 1];
-      } else {
-        const worldCenter = postUnproject(this.center);
-        localScale =
-          worldCenter && estimateUnitsPerMeter(projection, worldCenter, spherical, fromBounds);
-      }
-    }
-    const unitsPerMeter = (localScale || [1, 1, 1]).map(
-      value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
-    );
-    this.distanceScales = {unitsPerMeter, metersPerUnit: unitsPerMeter.map(value => 1 / value)};
   }
 
   get projectionSignature(): string {

@@ -27,7 +27,8 @@ test('Viewport installs the projection pair before invoking overridden projectPo
   class ProjectedViewport extends Viewport {
     projectPosition(position: number[]): [number, number, number] {
       expect(this.postUnproject).toBeTypeOf('function');
-      return this.preproject!(position);
+      const projected = this.preproject!(position);
+      return [projected[0], projected[1], projected[2] * this.distanceScales.unitsPerMeter[2]];
     }
   }
   const preproject = vi.fn(([x, y, z = 0]): [number, number, number] => [x * 2, y * 3, z]);
@@ -37,14 +38,14 @@ test('Viewport installs the projection pair before invoking overridden projectPo
   expect(viewport.center).toEqual([20, 60, 0]);
   expect(viewport.postUnproject!(viewport.center)).toEqual([10, 20, 0]);
   preproject.mockClear();
-  const centered = new ProjectedViewport({
+  const scaled = new ProjectedViewport({
     preproject,
     postUnproject,
-    position: [10, 20, 0],
-    commonCenter: [300, 200, 0]
+    position: [10, 20, 5],
+    distanceScales: {unitsPerMeter: [2, 2, 2], metersPerUnit: [0.5, 0.5, 0.5]}
   });
-  expect(centered.center).toEqual([300, 200, 0]);
-  expect(preproject).not.toHaveBeenCalled();
+  expect(scaled.center).toEqual([20, 60, 10]);
+  expect(preproject).toHaveBeenCalledExactlyOnceWith([10, 20, 5]);
 });
 
 test('CustomProjectionViewport centers the camera on world coordinates, defaulting to zero', () => {
@@ -79,6 +80,9 @@ test('CustomProjectionViewport public methods convert world XYZ exactly once', (
     projection: {forward, inverse},
     getDistanceScale: () => [1, 1, 1]
   });
+  // The base constructor must use the final distance scales when deriving the camera center.
+  expect(viewport.center).toEqual(viewport.projectPosition(viewport.position));
+  expect(viewport.center[2]).toBe(10 * normalizationScale);
   const world = [20, 30, 40];
   const common = [
     256 + 140 * normalizationScale,
@@ -725,8 +729,8 @@ test('CustomProjectionViewport scale sampling stays inside geographic limits', (
       inverse: p => p
     }
   });
-  expect(samples).toHaveLength(5);
-  const [origin, sampleX, sampleY] = samples.slice(-3);
+  expect(samples).toHaveLength(4);
+  const [origin, sampleX, sampleY] = samples;
   expect(origin[0]).toBeCloseTo(180, 5);
   expect(origin[1]).toBeCloseTo(90, 5);
   expect(sampleX[0]).toBeLessThan(origin[0]);
