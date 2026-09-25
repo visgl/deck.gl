@@ -264,6 +264,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             // WebGPU cannot express WebGL's vertexOffset window in one vertex buffer layout.
             // Pack each segment's [left, start, end, right] high and low position parts instead.
             pathPositions: {
+              ...this.usePositionTransforms(),
               size: 24,
               type: 'float32',
               transition: false,
@@ -285,6 +286,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           }
         : {
             vertexPositions: {
+              ...this.usePositionTransforms(),
               size: 3,
               // Start filling buffer from 1 vertex in
               vertexOffset: 1,
@@ -371,6 +373,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath);
     const geometryConfigurationChanged =
+      changeFlags.projectionChanged ||
+      (viewport.preproject && props.modelMatrix !== oldProps.modelMatrix) ||
       getPathChanged ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
@@ -389,6 +393,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         normalize: !props._pathType,
         loop: props._pathType === 'loop',
         getGeometry: props.getPath,
+        transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
         wrapLongitude: props.wrapLongitude,
         // TODO - move the flag out of the viewport

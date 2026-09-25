@@ -81,9 +81,17 @@ export default class PathTesselator extends Tesselator<
     return null;
   }
 
+  protected prepareGeometry(path: PathGeometry): PathGeometry {
+    return (
+      this.normalize
+        ? normalizePath(path, this.inputPositionSize, this.opts.resolution, this.opts.wrapLongitude)
+        : path
+    ) as PathGeometry;
+  }
+
   /* Implement base Tesselator interface */
   protected normalizeGeometry(path: PathGeometry): NormalizedPathGeometry {
-    if (this.normalize) {
+    if (this.normalize && !this.opts.transform) {
       return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
     }
     return path as NormalizedPathGeometry;
