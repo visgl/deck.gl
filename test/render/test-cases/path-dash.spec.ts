@@ -215,23 +215,10 @@ function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, numbe
 }
 
 /**
- * Renders a MapView case as two identical views side by side: MapView on the left, GlobeView on
- * the right, same viewState and layers. Any difference in dash size, gap or phase between the
- * two projections shows up as a seam at the centre of a single image. Only meaningful at
- * zoom <= 12: above that GlobeView instantiates a WebMercatorViewport and both halves are
- * Mercator (GlobeView.getViewportType).
- *
- * Expect the globe half to be slightly magnified (about 4% at zoom 12, 1% at zoom 10 for a
- * San Francisco view) and shifted by a few pixels relative to the map half, so paths away from
- * the image centre do not meet exactly at the seam. The CPU projection of GlobeViewport matches
- * WebMercatorViewport to within 0.03 px; the offset comes from the vertex shader, where
- * `project_globe_` evaluates fp32 sin/cos of the absolute longitude and latitude. Under
- * SwiftShader those have an absolute error of roughly 5e-5, which displaces the whole sphere
- * surface by a constant ~0.015 common units. The radial part moves the surface toward the camera
- * (1.5 viewport heights away at this scale), which perspective turns into a uniform scale; the
- * tangential part is a constant shift. It vanishes at (0, 0), where sin and cos are exact, and
- * for METER_OFFSETS geometry, whose origin is projected on the CPU. This is also why globe cases
- * use a looser image-diff threshold than map cases.
+ * Renders a case twice in one image: MapView on the left, GlobeView on the right, same viewState
+ * and layers, so dash size, gap and phase can be compared across the seam. Only meaningful at
+ * zoom <= 12, where GlobeView still builds a GlobeViewport. The globe half renders a few pixels
+ * off the map half (fp32 sin/cos in `project_globe_`), hence its looser image-diff threshold.
  */
 function withGlobeSideBySide(testCase: TestCase): TestCase {
   const {viewState} = testCase;
