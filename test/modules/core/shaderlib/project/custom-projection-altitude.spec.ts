@@ -11,8 +11,36 @@ import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-function
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
+import {Matrix4} from '@math.gl/core';
 
 const gpuTest = device.type === 'webgl' ? test : test.skip;
+
+gpuTest('Cartesian common XY and meter Z retain their model matrix and origin', async () => {
+  const viewport = new CustomProjectionViewport({
+    projection: {forward: p => p.slice(), inverse: p => p.slice()},
+    getDistanceScale: () => [0.25, 1]
+  });
+  const props = {
+    viewport,
+    coordinateSystem: 'cartesian' as const,
+    coordinateOrigin: [5, 6, 7] as [number, number, number],
+    modelMatrix: new Matrix4().translate([256, 256, 0]).scale([2, 3, 4])
+  };
+  const position = [1, 2, 3];
+  const expected = [263, 268, 19 * viewport.distanceScales.unitsPerMeter[2]];
+  expect(viewport.isGeospatial).toBe(true);
+  expect(getWorldPosition(position, props)).toEqual(expected);
+  const result = await runOnGPU({
+    vs: `#version 300 es
+      out vec3 result;
+      void main() { result = project_position(test.uPos, test.uPos64Low) + project.commonOrigin; }`,
+    modules: [project, testUniforms],
+    vertexCount: 1,
+    varying: 'result',
+    shaderInputProps: {project: props, test: {uPos: position, uPos64Low: [0, 0, 0]}}
+  });
+  expected.forEach((value, i) => expect(result[i]).toBeCloseTo(value, 6));
+});
 
 test('external projection WGSL preserves XY and uses scalar and per-axis distance scales', async ({
   skip
@@ -86,7 +114,9 @@ for (const metersPerZUnit of [1, 0.3048]) {
         50 * metersPerZUnit
       ]);
       const common = viewport.projectPosition(input);
-      expect(common).toEqual([position[0], position[1], position[2] * (2 * normalizationScale)]);
+      [position[0], position[1], position[2] * viewport.distanceScales.unitsPerMeter[2]].forEach(
+        (value, i) => expect(common[i]).toBeCloseTo(value, 12)
+      );
       expect(project.getUniforms({viewport}).commonUnitsPerMeter).toEqual([
         4 * normalizationScale,
         normalizationScale,
@@ -94,6 +124,13 @@ for (const metersPerZUnit of [1, 0.3048]) {
       ]);
       expect(
         getWorldPosition(input, {
+          viewport,
+          coordinateSystem: 'default',
+          coordinateOrigin: [0, 0, 0]
+        })
+      ).toEqual(common);
+      expect(
+        getWorldPosition(position, {
           viewport,
           coordinateSystem: 'cartesian',
           coordinateOrigin: [0, 0, 0]
@@ -118,7 +155,10 @@ for (const metersPerZUnit of [1, 0.3048]) {
         modules: [project, testUniforms],
         vertexCount: 1,
         varying: 'result',
-        shaderInputProps: {project: {viewport}, test: {uPos: position, uPos64Low: low}}
+        shaderInputProps: {
+          project: {viewport, coordinateSystem: 'cartesian'},
+          test: {uPos: position, uPos64Low: low}
+        }
       });
       const expectedPosition = [
         position[0] + low[0],

@@ -193,6 +193,7 @@ export default class CustomProjectionViewport extends Viewport {
       })
     });
     this.pitch = pitch;
+    this.isGeospatial = true;
     this.bearing = bearing;
     this.resolution = resolution;
     this.signature = JSON.stringify([fromCrs, toCrs, resolution]);
