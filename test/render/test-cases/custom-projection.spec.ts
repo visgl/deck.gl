@@ -178,7 +178,7 @@ for (const gpuAggregation of [false, true]) {
     {
       name: `custom-projection-contour-${backend}`,
       views: aggregationView,
-      viewState: {center: [256, 256, 0], zoom: 0.1},
+      viewState: {center: aggregationConverter.unproject([0, 2500000, 0]), zoom: 0.1},
       layers: [
         new ContourLayer({
           ...commonProps,
@@ -202,7 +202,7 @@ for (const gpuAggregation of [false, true]) {
     {
       name: `custom-projection-hexagon-${backend}`,
       views: aggregationView,
-      viewState: {center: [256, 256, 0], zoom: 0.1},
+      viewState: {center: aggregationConverter.unproject([0, 2500000, 0]), zoom: 0.1},
       layers: [
         new HexagonLayer({
           ...commonProps,
@@ -229,7 +229,7 @@ for (const gpuAggregation of [false, true]) {
 testCases.push({
   name: 'custom-projection-heatmap',
   views: aggregationView,
-  viewState: {center: [256, 256, 0], zoom: 0.1},
+  viewState: {center: aggregationConverter.unproject([0, 2500000, 0]), zoom: 0.1},
   layers: [
     new HeatmapLayer({
       ...commonProps,

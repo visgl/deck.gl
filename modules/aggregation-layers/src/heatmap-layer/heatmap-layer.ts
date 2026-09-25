@@ -19,6 +19,7 @@ import {
   TextureFormatColor
 } from '@luma.gl/core';
 import {TextureTransform, TextureTransformProps} from '@luma.gl/engine';
+import {pixelsToWorld} from '@math.gl/web-mercator';
 import {
   Accessor,
   AccessorFunction,
@@ -564,11 +565,16 @@ export default class HeatmapLayer<
     // Unproject all 4 corners of the current screen coordinates into world coordinates (lng/lat)
     // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
     const viewportCorners = [
-      viewport.unproject([0, 0]),
-      viewport.unproject([viewport.width, 0]),
-      viewport.unproject([0, viewport.height]),
-      viewport.unproject([viewport.width, viewport.height])
-    ].map(p => p.map(Math.fround));
+      [0, 0],
+      [viewport.width, 0],
+      [0, viewport.height],
+      [viewport.width, viewport.height]
+    ].map(pixel =>
+      (viewport.preproject
+        ? pixelsToWorld(pixel, viewport.pixelUnprojectionMatrix, 0)
+        : viewport.unproject(pixel)
+      ).map(Math.fround)
+    );
 
     // #1: get world bounds for current viewport extends
     const visibleWorldBounds = getBounds(viewportCorners); // TODO: Change to visible bounds
@@ -618,7 +624,10 @@ export default class HeatmapLayer<
     triPositionBuffer!.write(packVertices(viewportCorners, 3));
 
     const textureBounds = viewportCorners.map(p =>
-      getTextureCoordinates(viewport.projectPosition(p), normalizedCommonBounds!)
+      getTextureCoordinates(
+        viewport.preproject ? p : viewport.projectPosition(p),
+        normalizedCommonBounds!
+      )
     );
     triTexCoordBuffer!.write(packVertices(textureBounds, 2));
   }
@@ -746,7 +755,10 @@ export default class HeatmapLayer<
     let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
-    if (!viewport.preproject && useLayerCoordinateSystem && !offsetMode) {
+    if (viewport.preproject) {
+      bottomLeftCommon = [minLong, minLat, 0];
+      topRightCommon = [maxLong, maxLat, 0];
+    } else if (useLayerCoordinateSystem && !offsetMode) {
       bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
       topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
     } else {
@@ -769,6 +781,8 @@ export default class HeatmapLayer<
   // input commonBounds: [xMin, yMin, xMax, yMax]
   // output worldBounds: [minLong, minLat, maxLong, maxLat]
   _commonToWorldBounds(commonBounds) {
+    // Preprojected heatmaps maintain their working bounds entirely in common space.
+    if (this.context.viewport.preproject) return commonBounds.slice();
     const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
     const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin]);
