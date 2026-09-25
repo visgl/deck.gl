@@ -78,7 +78,7 @@ test('CustomProjectionViewport public methods convert world XYZ exactly once', (
     pitch: 35,
     bearing: 20,
     projection: {forward, inverse},
-    getDistanceScale: () => [1, 1, 1]
+    getDistanceScale: () => [1, 1]
   });
   // The base constructor must use the final distance scales when deriving the camera center.
   expect(viewport.center).toEqual(viewport.projectPosition(viewport.position));
@@ -105,7 +105,7 @@ test('CustomProjectionViewport public methods convert world XYZ exactly once', (
 
 test('CustomProjectionViewport defaults to Earth-circumference bounds and allows overrides', () => {
   const circumference = 40075016.6855;
-  const viewport = new CustomProjectionViewport({projection, getDistanceScale: () => [1, 1, 1]});
+  const viewport = new CustomProjectionViewport({projection, getDistanceScale: () => [1, 1]});
   expect(viewport.preproject!([0, 0, 20])).toEqual([256, 256, 20]);
   expect(viewport.preproject!([-circumference / 2, -circumference / 2])).toEqual([0, 0, 0]);
   expect(viewport.preproject!([circumference / 2, circumference / 2])).toEqual([512, 512, 0]);
@@ -113,7 +113,7 @@ test('CustomProjectionViewport defaults to Earth-circumference bounds and allows
   const overridden = new CustomProjectionViewport({
     projection,
     toBounds: [100, 200, 1124, 712],
-    getDistanceScale: () => [1, 1, 1]
+    getDistanceScale: () => [1, 1]
   });
   expect(overridden.preproject!([100, 200, 20])).toEqual([0, 128, 20]);
   expect(overridden.distanceScales.unitsPerMeter).toEqual([0.5, 0.5, 0.5]);
@@ -252,8 +252,7 @@ for (const orthographic of [false, true]) {
               const scales = getDistanceScales({longitude, latitude});
               return [
                 scales.metersPerUnit[0] * normalizationScale,
-                scales.metersPerUnit[1] * normalizationScale,
-                1
+                scales.metersPerUnit[1] * normalizationScale
               ];
             },
 
@@ -346,7 +345,7 @@ test('CustomProjectionViewport preserves converter altitude and applies the dist
   const viewport = new CustomProjectionViewport({
     ...options,
     pitch: 30,
-    getDistanceScale: () => [1 / 7, 1 / 7, 1],
+    getDistanceScale: () => [1 / 7, 1 / 7],
     projection: {
       forward: p => [p[0], p[1], (p[2] || 0) + 10],
       inverse: p => [p[0], p[1], p[2] - 10]
@@ -399,7 +398,7 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   expect(moved.projectionSignature).toBe(geographic.projectionSignature);
   const metric = new CustomProjectionViewport({
     ...options,
-    getDistanceScale: () => [0.5, 1 / 3, 1],
+    getDistanceScale: () => [0.5, 1 / 3],
     projection: {forward: p => [2 * p[0], 3 * p[1], p[2]], inverse: p => [p[0] / 2, p[1] / 3, p[2]]}
   });
   [2, 3, Math.sqrt(6)].forEach((value, i) => {
@@ -408,77 +407,72 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   });
   const override = new CustomProjectionViewport({
     ...options,
-    getDistanceScale: () => [5, 6, 1]
+    getDistanceScale: () => [5, 6]
   });
   [1 / 5, 1 / 6, 1 / Math.sqrt(30)].forEach((value, i) =>
     expect(override.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 10)
   );
 });
 
-test('CustomProjectionViewport stores the combined scalar in distanceScales', () => {
-  const create = (metersPerUnit: [number, number, number]) =>
+test('CustomProjectionViewport altitude unit conversion does not change meter sizes', () => {
+  const create = (metersPerZUnit: number) =>
     new CustomProjectionViewport({
       projection: {
-        forward: ([x, y, z = 0]) => [2 * x + y, 3 * y, z],
-        inverse: ([x, y, z = 0]) => [(x - y / 3) / 2, y / 3, z]
+        forward: ([x, y, z = 0]) => [2 * x + y, 3 * y, z * metersPerZUnit],
+        inverse: ([x, y, z = 0]) => [(x - y / 3) / 2, y / 3, z / metersPerZUnit]
       },
-      getDistanceScale: () => metersPerUnit
+      getDistanceScale: () => [1, 1]
     });
-  const metric = create([1, 1, 1]);
-  const feet = create([1, 1, 0.3048]);
+  const metric = create(1);
+  const feet = create(0.3048);
+  expect(feet.distanceScales).toEqual(metric.distanceScales);
   [1, 1, 1].forEach((value, i) => {
     expect(metric.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 9);
-    const scale = i === 2 ? 0.3048 : value;
-    expect(feet.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(scale, 9);
-    expect(feet.distanceScales.metersPerUnit[i] * normalizationScale).toBeCloseTo(1 / scale, 9);
+    expect(feet.distanceScales.metersPerUnit[i] * normalizationScale).toBeCloseTo(1, 9);
   });
   const input = [10, 20, 100];
   const projected = feet.preproject!(input);
-  expect(projected[2]).toBe(100);
+  expect(projected[2]).toBe(30.48);
   expect(feet.projectPosition(input)[2] / normalizationScale).toBeCloseTo(30.48, 9);
   expect(metric.projectPosition(input)[2] / normalizationScale).toBeCloseTo(100, 9);
   const groundPixel = feet.project(input).slice(0, 2);
   feet
-    .unproject(groundPixel, {targetZ: 100})
+    .unproject(groundPixel, {targetZ: 30.48})
+    .slice(0, 2)
     .forEach((value, i) => expect(value).toBeCloseTo(input[i], 6));
   const pixel = feet.project(input);
   feet.unproject(pixel).forEach((value, i) => expect(value).toBeCloseTo(input[i], 6));
   expect(feet.projectionSignature).toBe(metric.projectionSignature);
 });
 
-test('CustomProjectionViewport supports UTM input with degree output', () => {
+test('CustomProjectionViewport supports UTM world coordinates and Web Mercator map meters', () => {
   const converter = new Proj4Projection({
     from: '+proj=utm +zone=10 +datum=WGS84 +units=m',
-    to: 'EPSG:4326'
+    to: 'EPSG:3857'
   });
   const viewport = new CustomProjectionViewport({
     projection: {forward: converter.project, inverse: converter.unproject},
-    center: converter.unproject([-123, 42, 0]) as [number, number, number],
+    center: [500000, 4649776.22482, 0],
     fromCrs: '+proj=utm +zone=10 +datum=WGS84 +units=m',
-    toCrs: 'EPSG:4326',
-    getDistanceScale: ([, latitude]) => {
-      const metersPerDegree = 40075016.6855 / 360;
-      return [metersPerDegree * Math.cos((latitude * Math.PI) / 180), metersPerDegree, 1];
+    toCrs: 'EPSG:3857',
+    getDistanceScale: ([, y]) => {
+      const latitude = Math.atan(Math.sinh(y / 6378137));
+      return [Math.cos(latitude), Math.cos(latitude)];
     }
   });
-  // Zone center is 42 degrees north. Expected output is degrees per meter,
-  // derived from the callback's meters per degree, then normalized by the viewport.
-  const normalizedDegreesPerMeter = normalizationScale / (40075016.6855 / 360);
-  expect(
-    viewport.distanceScales.unitsPerMeter[0] /
-      (normalizedDegreesPerMeter / Math.cos((42 * Math.PI) / 180))
-  ).toBeCloseTo(1, 2);
-  expect(viewport.distanceScales.unitsPerMeter[1] / normalizedDegreesPerMeter).toBeCloseTo(1, 2);
+  // Web Mercator's local distance distortion at 42 degrees north applies to all meter sizes.
+  const expected = normalizationScale / Math.cos((42 * Math.PI) / 180);
+  viewport.distanceScales.unitsPerMeter.forEach(value =>
+    expect(value / expected).toBeCloseTo(1, 6)
+  );
   const input = [552821.3829931148, 4183794.4989348184, 100];
   viewport.postUnproject!(viewport.preproject!(input))!.forEach((value, i) =>
-    // Degree output occupies a tiny common-space extent under the default bounds.
-    // Allow sub-millimeter round-trip error after converting it back to UTM meters.
     expect(value).toBeCloseTo(input[i], 3)
   );
 });
 
 test('CustomProjectionViewport only evaluates distance scale at the toCrs center', () => {
-  const getDistanceScale = vi.fn((_position: number[]): [number, number, number] => [2, 4, 0.3048]);
+  const getDistanceScale = vi.fn((_position: [number, number]): [number, number] => [2, 4]);
   const forward = vi.fn(([x, y, z = 0]) => [x + 1000, y * 2, z * 10]);
   const inverse = vi.fn(([x, y, z = 0]) => [x - 1000, y / 2, z / 10]);
   const viewport = new CustomProjectionViewport({
@@ -487,9 +481,7 @@ test('CustomProjectionViewport only evaluates distance scale at the toCrs center
     getDistanceScale
   });
   expect(getDistanceScale).toHaveBeenCalledTimes(1);
-  getDistanceScale.mock.calls[0][0].forEach((value, i) =>
-    expect(value).toBeCloseTo([1128, 256, 0][i], 6)
-  );
+  expect(getDistanceScale).toHaveBeenCalledExactlyOnceWith([1128, 256]);
   getDistanceScale.mockClear();
   inverse.mockClear();
   const position = viewport.preproject!([20, 30, 40]);
@@ -500,19 +492,15 @@ test('CustomProjectionViewport only evaluates distance scale at the toCrs center
   expect(inverse).toHaveBeenCalledTimes(1);
   expect(getDistanceScale).not.toHaveBeenCalled();
   expect(viewport.projectPosition([20, 30, 40])[2] / normalizationScale).toBeCloseTo(
-    (400 * 0.3048) / Math.sqrt(8)
+    400 / Math.sqrt(8)
   );
   expect(
     project.getUniforms({viewport}).commonUnitsPerWorldUnit[2] / normalizationScale
-  ).toBeCloseTo(0.3048 / Math.sqrt(8));
+  ).toBeCloseTo(1 / Math.sqrt(8));
 });
 
 test('CustomProjectionViewport scale callbacks receive toCrs positions without changing the signature', () => {
-  const getDistanceScale = (position: number[]): [number, number, number] => [
-    1 + position[0] / 512,
-    1,
-    1
-  ];
+  const getDistanceScale = (position: number[]): [number, number] => [1 + position[0] / 512, 1];
   const create = (center: [number, number, number], callback = getDistanceScale) =>
     new CustomProjectionViewport({
       projection,
@@ -525,12 +513,22 @@ test('CustomProjectionViewport scale callbacks receive toCrs positions without c
   expect(first.distanceScales.unitsPerMeter[0] / normalizationScale).toBeCloseTo(1 / 1.25);
   expect(moved.distanceScales.unitsPerMeter[0] / normalizationScale).toBeCloseTo(1 / 1.75);
   expect(moved.projectionSignature).toBe(first.projectionSignature);
-  expect(create([128, 128, 0], () => [1, 1, 1]).projectionSignature).toBe(
-    first.projectionSignature
-  );
-  expect(() => create([128, 128, 0], () => [0, 1, 1]).preproject!([128, 128, 0])).toThrow(
+  expect(create([128, 128, 0], () => [1, 1]).projectionSignature).toBe(first.projectionSignature);
+  expect(() => create([128, 128, 0], () => [0, 1]).preproject!([128, 128, 0])).toThrow(
     'getDistanceScale'
   );
+});
+
+test('CustomProjectionViewport requires exactly two positive finite distance scales', () => {
+  for (const scale of [[1], [1, 1, 1], [0, 1], [1, -1], [NaN, 1], [1, Infinity]]) {
+    expect(
+      () =>
+        new CustomProjectionViewport({
+          ...options,
+          getDistanceScale: () => scale as [number, number]
+        })
+    ).toThrow('getDistanceScale must return two finite, positive scales');
+  }
 });
 
 test('CustomProjectionViewport recognizes geographic CRS aliases and permits scale overrides', () => {
@@ -555,15 +553,15 @@ test('CustomProjectionViewport recognizes geographic CRS aliases and permits sca
     const viewport = new CustomProjectionViewport({
       ...options,
       fromCrs,
-      getDistanceScale: () => [1, 1, 0.3048]
+      getDistanceScale: () => [1, 1]
     });
     expect(viewport.distanceScales.unitsPerMeter).toEqual([
       normalizationScale,
       normalizationScale,
-      0.3048 * normalizationScale
+      normalizationScale
     ]);
     expect(viewport.preproject!([0, 0, 10])[2]).toBe(10);
-    expect(viewport.projectPosition([0, 0, 10])[2]).toBeCloseTo(3.048 * normalizationScale, 12);
+    expect(viewport.projectPosition([0, 0, 10])[2]).toBeCloseTo(10 * normalizationScale, 12);
     expect(viewport.postUnproject!(viewport.preproject!([0, 0, 10]))![2]).toBe(10);
   }
   const outputOnly = new CustomProjectionViewport({...options, toCrs: '+units=m'});
@@ -607,16 +605,13 @@ test('CustomProjectionViewport estimates planar distance for recognized linear u
     const override = new CustomProjectionViewport({
       ...options,
       fromCrs,
-      getDistanceScale: () => [2, 2, 0.3048]
+      getDistanceScale: () => [2, 2]
     });
-    override.distanceScales.unitsPerMeter.forEach((value, i) =>
-      expect(value / normalizationScale).toBeCloseTo(i === 2 ? 0.3048 / 2 : 0.5, 10)
+    override.distanceScales.unitsPerMeter.forEach(value =>
+      expect(value / normalizationScale).toBeCloseTo(0.5, 10)
     );
     expect(override.preproject!([0, 0, 10])[2]).toBe(10);
-    expect(override.projectPosition([0, 0, 10])[2]).toBeCloseTo(
-      (3.048 * normalizationScale) / 2,
-      12
-    );
+    expect(override.projectPosition([0, 0, 10])[2]).toBeCloseTo((10 * normalizationScale) / 2, 12);
   }
 });
 
@@ -645,7 +640,7 @@ test('CustomProjectionViewport unknown CRS skips estimation but allows a callbac
     const override = new CustomProjectionViewport({
       projection: {forward, inverse},
       fromCrs,
-      getDistanceScale: () => [0.5, 1 / 3, 1]
+      getDistanceScale: () => [0.5, 1 / 3]
     });
     [2, 3, Math.sqrt(6)].forEach((value, i) =>
       expect(override.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 10)
@@ -658,7 +653,7 @@ test('CustomProjectionViewport signature excludes bounds and all callback identi
   const viewport = new CustomProjectionViewport(config);
   const changes = [
     {projection: {forward: p => p.slice(), inverse: p => p.slice()}},
-    {getDistanceScale: () => [1, 1, 1] as [number, number, number]},
+    {getDistanceScale: () => [1, 1] as [number, number]},
     {fromBounds: [-170, -80, 170, 80] as [number, number, number, number]},
     {toBounds: [-200, -100, 200, 100] as [number, number, number, number]}
   ];
@@ -690,14 +685,14 @@ test('CustomProjectionViewport invalidates by CRS strings, not converter identit
     expect(replacement.projectionSignature).toBe(viewport.projectionSignature);
     for (const change of [
       {fromCrs: 'EPSG:4326', toCrs: 'changed'},
-      {fromCrs: 'local', getDistanceScale: () => [1, 1, 1] as [number, number, number]}
+      {fromCrs: 'local', getDistanceScale: () => [1, 1] as [number, number]}
     ]) {
       expect(
         new CustomProjectionViewport({...options, ...crs, ...change}).projectionSignature
       ).not.toBe(viewport.projectionSignature);
     }
   }
-  const getDistanceScale = (): [number, number, number] => [1, 1, 1];
+  const getDistanceScale = (): [number, number] => [1, 1];
   const first = new CustomProjectionViewport({
     ...options,
     fromCrs: 'a-b',

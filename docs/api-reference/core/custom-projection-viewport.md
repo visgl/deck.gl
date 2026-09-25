@@ -37,13 +37,17 @@ Zero width or height becomes `1`. Bounds must be finite and increasing. `resolut
 
 ### Coordinate Contract
 
-Layer data is supplied in `fromCrs`, for example `fromCrs:'WGS84'` indicates that a XYZ position represents longitude, latitude and altitude. `projection.forward` converts them to `toCrs`; `projection.inverse` converts them back, or returns `null` outside its domain. If `forward` omits Z, the original Z value is retained, defaulting to zero.
+Layer data is supplied in `fromCrs`, for example `fromCrs: 'WGS84'` indicates that an XYZ position represents longitude, latitude and altitude. `projection.forward` returns XYZ in **map meters** in `toCrs`: X/Y locate a point on the planar map, and Z represents altitude in meters. X/Y must be expressed in meters, not degrees or arbitrary units, so their scale is consistent with altitude.
+
+Both converter functions may accept and return three-component positions: if world altitude uses another unit, `forward` must convert it to meters and `inverse` must reverse that conversion.
+
+`projection.inverse` converts map-meter XYZ back to world coordinates in `fromCrs`, or returns `null` outside its domain. If `forward` omits Z, the original Z value is retained and must already be in meters, defaulting to zero.
 
 If `fromBounds` is supplied, X and Y are clamped by the given range before projected.
 
 ### Meter Size
 
-deck.gl layers allows an app to specify [size units](../../developer-guide/coordinate-systems.md#dimensions) in meters. But even when `toCrs` is expressed in meters, one meter on the map may not represent one meter on the ground. All projections that flatten the Earth's spherical surface onto a 2D plane end up distorting distances and/or angles somehow. This **projection distortion** can vary by location and direction: for example, Web Mercator stretches distances more strongly toward the poles. See [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for how projections distort local shapes and sizes.
+deck.gl layers allow an app to specify [size units](../../developer-guide/coordinate-systems.md#dimensions) in meters. One map meter may not represent one meter on the ground. All projections that flatten the Earth's spherical surface onto a 2D plane end up distorting distances and/or angles somehow. This **projection distortion** can vary by location and direction: for example, Web Mercator stretches distances more strongly toward the poles. See [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for how projections distort local shapes and sizes.
 
 This viewport projects meter sizes (altitude, width, radius, etc.) so that they are true to ground distance.
 
@@ -52,12 +56,12 @@ By default, it makes a best effort to estimate the real-world distance between t
 The user may override the default meter size mapping by supplying a `getDistanceScale` callback:
 
 ```ts
-getDistanceScale(positionInToCrs: [x: number, y: number, z: number]) => [xScale: number, yScale: number, zScale: number]
+getDistanceScale(positionInToCrs: [x: number, y: number]) => [xScale: number, yScale: number]
 ```
 
-The returned vector represents the scaling factor to convert 1 unit along each axis of `toCrs` to real-world meters at the given position. The X and Y components describe local horizontal distance adjusted for projection distortion. The Z component is usually `1`, as common 2D projections do not process the altitude.
+The two positive, finite values describe the real-world ground distance represented by one map meter along X and Y at the given position. The callback receives only the viewport center's X/Y in `toCrs`; altitude does not affect scale. It controls horizontal distortion correction, not altitude-unit conversion. Altitude and scalar meter sizes such as radii use a uniform scale derived from the geometric mean of the two horizontal factors, preserving aspect ratio.
 
-Specify `getDistanceScale: () => [1, 1, 1]` to suppress distortion correction.
+Specify `getDistanceScale: () => [1, 1]` to suppress distortion correction.
 
 
 ## Methods and Properties
@@ -70,7 +74,7 @@ Converts world coordinates to preprojected XY, preserving Z returned by the conv
 
 ### `postUnproject(position)`
 
-Converts preprojected XY and Z in the converter's altitude units back to world coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `fromBounds`, if supplied.
+Converts preprojected XY and altitude Z in meters back to world coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `fromBounds`, if supplied.
 
 ### `project(position, options)`
 
@@ -90,7 +94,7 @@ Returns `{center}` that keeps a world-coordinate ground point under the requeste
 
 ### `getDistanceScales()`
 
-Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. X and Y describe independent axis scales. Z combines planar distortion with the third component of `getDistanceScale` and is used both for altitude and uniform, aspect-ratio-preserving sizing.
+Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. X and Y describe independent axis scales. Z describes a uniform scale based on horizontal projection distortion, used for both altitude in meters and aspect-ratio-preserving meter sizes.
 
 ### `projectionSignature`
 

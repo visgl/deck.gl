@@ -12,18 +12,20 @@ import {
 } from '@math.gl/web-mercator';
 import {PROJECTION_MODE} from '../lib/constants';
 
-/** Forward/inverse functions can be supplied by a proj4js converter. */
+/** A planar map converter, compatible with proj4js converters targeting a meter-based CRS. */
 export type ProjectionConverter = {
+  /** Converts world XYZ to map meters: planar X/Y and altitude Z in meters. */
   forward: (position: number[]) => number[];
+  /** Converts map-meter XYZ back to world coordinates, or returns null outside its domain. */
   inverse: (position: number[]) => number[] | null;
 };
 
 export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> & {
-  /** Converts XYZ from fromCrs to toCrs, and back. */
+  /** Converts world XYZ in fromCrs to planar map-meter XYZ in toCrs, and back. */
   projection: ProjectionConverter;
   /** World-coordinate CRS name or PROJ string. Defaults to WGS84. */
   fromCrs?: string;
-  /** Output CRS name or PROJ string. Changing either CRS refreshes projected positions. */
+  /** Planar, meter-based map CRS name or PROJ string. Changing either CRS refreshes projected positions. */
   toCrs?: string;
   /** Optional [minX, minY, maxX, maxY] in fromCrs world coordinates. Clamps XY before
    * forward projection and after valid inverse projection; Z is unchanged.
@@ -42,12 +44,12 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   bearing?: number;
   /** Maximum tessellation cell size in fromCrs world-coordinate units. Default 0 disables subdivision. */
   resolution?: number;
-  /** Real-world meters per unit along the axes of toCrs, evaluated at a position in toCrs.
-   * Includes local planar distortion. Z describes the converter's returned altitude units.
+  /** Ground meters per map meter along the X/Y axes, evaluated at [x, y] in toCrs.
+   * Describes horizontal projection distortion; converted altitude is always in meters.
    * Without this callback, estimates distance from fromCrs: spherical for degrees, planar
    * for recognized linear units, or no distortion correction for an unknown CRS.
    */
-  getDistanceScale?: (position: number[]) => [number, number, number];
+  getDistanceScale?: (position: [number, number]) => [number, number];
 };
 
 const EC = 40075016.6855; // Earth circumference in meters.
@@ -149,11 +151,12 @@ export default class CustomProjectionViewport extends Viewport {
     const worldCenter = clampInput(position, fromBounds);
     let localScale: number[];
     if (opts.getDistanceScale) {
-      const scale = opts.getDistanceScale(projection.forward(worldCenter));
-      if (scale.length !== 3 || !scale.every(value => Number.isFinite(value) && value > 0)) {
-        throw new Error('getDistanceScale must return three finite, positive scales');
+      const [x, y] = projection.forward(worldCenter);
+      const scale = opts.getDistanceScale([x, y]);
+      if (scale.length !== 2 || !scale.every(value => Number.isFinite(value) && value > 0)) {
+        throw new Error('getDistanceScale must return two finite, positive scales');
       }
-      localScale = [1 / scale[0], 1 / scale[1], scale[2] / Math.sqrt(scale[0] * scale[1])];
+      localScale = [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
     } else {
       const spherical = isSphericalCrs(fromCrs);
       localScale =

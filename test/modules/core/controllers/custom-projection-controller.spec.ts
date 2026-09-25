@@ -66,7 +66,7 @@ test('CustomProjectionState bounds include curved edges and reversed projected a
       forward: ([x, y, z = 0]) => [-x * 1000000, (y + 1 - x * x) * 1000000, z],
       inverse: ([x, y, z = 0]) => [-x / 1000000, y / 1000000 - 1 + (x / 1000000) ** 2, z]
     },
-    getDistanceScale: () => [1, 1, 1]
+    getDistanceScale: () => [1, 1]
   });
   const state = new CustomProjectionState({
     ...options,
