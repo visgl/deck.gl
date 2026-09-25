@@ -78,7 +78,6 @@ const testCases: TestCase[] = [
       goldenImage: './test/render/golden-images/line-lnglat.png',
       overrides: {
         globe: {
-          skip: ['webgpu'],
           imageDiffOptions: {threshold: 0.985}
         }
       }
