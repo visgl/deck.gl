@@ -47,9 +47,7 @@ fn paraboloid(
 
 fn getExtrusionOffset(lineClipspace: vec2<f32>, side: f32, width: f32) -> vec2<f32> {
   var direction = normalize(lineClipspace * project.viewportSize);
-  // Rotate by 90° clockwise. The strip emits the -1 side before the +1 side, so this winds the
-  // quad counter-clockwise in clip space (front-facing): it must survive cullMode: 'back', which
-  // GlobeView applies to every layer by default.
+  // Rotate by 90° clockwise so the strip (-1 side first) winds counter-clockwise
   direction = vec2<f32>(direction.y, -direction.x);
   return direction * side * width / 2.0;
 }
