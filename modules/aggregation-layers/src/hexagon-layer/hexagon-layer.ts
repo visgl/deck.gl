@@ -25,6 +25,7 @@ import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
 import {getBinIdRange} from '../common/utils/bounds-utils';
+import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import HexagonCellLayer from './hexagon-cell-layer';
 import {pointToHexbin, HexbinVertices, getHexbinCentroid, pointToHexbinGLSL} from './hexbin';
@@ -83,7 +84,7 @@ type _HexagonLayerProps<DataT> = {
 
   /**
    * Custom accessor to retrieve a hexagonal bin index from each data object.
-   * With viewport preprojection, position is in common space.
+   * With CustomProjectionView, position is in map meters in toCrs.
    * Not supported by GPU aggregation.
    * @default null
    */
@@ -464,10 +465,8 @@ export default class HexagonLayer<
 
       // Use the centroid of the hex at the center of the data
       // This offsets the common space without changing the bins
-      const centerHex = pointToHexbin(
-        viewport.preproject ? centroid : viewport.projectFlat(centroid),
-        radiusCommon
-      );
+      const centroidCommon = viewport.projectFlat(centroid);
+      const centerHex = pointToHexbin([centroidCommon[0], centroidCommon[1]], radiusCommon);
       const centerCommon = getHexbinCentroid(centerHex, radiusCommon);
       centroid = viewport.preproject ? centerCommon : viewport.unprojectFlat(centerCommon);
 
@@ -478,7 +477,9 @@ export default class HexagonLayer<
       viewport =
         viewport.isGeospatial && !viewport.preproject
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+          : viewport.preproject
+            ? createAggregationViewport(viewport, centroid)
+            : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       hexOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
 
@@ -651,12 +652,15 @@ export default class HexagonLayer<
           centroidCommon[0] += this.state.hexOriginCommon[0];
           centroidCommon[1] += this.state.hexOriginCommon[1];
         }
-        const centroid = this.context.viewport.unprojectFlat(centroidCommon);
+        const viewport = this.context.viewport;
+        const centroid = viewport.preproject
+          ? viewport.unprojectPosition(centroidCommon)
+          : viewport.unprojectFlat(centroidCommon);
 
         object = {
           col: bin.id[0],
           row: bin.id[1],
-          position: centroid,
+          position: [centroid[0], centroid[1]],
           colorValue: bin.value[0],
           elevationValue: bin.value[1],
           count: bin.count

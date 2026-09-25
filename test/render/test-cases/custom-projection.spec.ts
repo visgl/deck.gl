@@ -134,7 +134,6 @@ const aggregationConverter = new Proj4Projection({
 });
 const aggregationView = new CustomProjectionView({
   projection: {forward: aggregationConverter.project, inverse: aggregationConverter.unproject},
-  toBounds: [-4500000, -500000, 4500000, 5500000],
 
   resolution: 1
 });
@@ -178,7 +177,10 @@ for (const gpuAggregation of [false, true]) {
     {
       name: `custom-projection-contour-${backend}`,
       views: aggregationView,
-      viewState: {center: aggregationConverter.unproject([0, 2500000, 0]), zoom: 0.1},
+      viewState: {
+        center: aggregationConverter.unproject([0, 2500000, 0]),
+        zoom: 0.1 + Math.log2(40075016.6855 / 9000000)
+      },
       layers: [
         new ContourLayer({
           ...commonProps,
@@ -202,7 +204,10 @@ for (const gpuAggregation of [false, true]) {
     {
       name: `custom-projection-hexagon-${backend}`,
       views: aggregationView,
-      viewState: {center: aggregationConverter.unproject([0, 2500000, 0]), zoom: 0.1},
+      viewState: {
+        center: aggregationConverter.unproject([0, 2500000, 0]),
+        zoom: 0.1 + Math.log2(40075016.6855 / 9000000)
+      },
       layers: [
         new HexagonLayer({
           ...commonProps,
@@ -229,7 +234,10 @@ for (const gpuAggregation of [false, true]) {
 testCases.push({
   name: 'custom-projection-heatmap',
   views: aggregationView,
-  viewState: {center: aggregationConverter.unproject([0, 2500000, 0]), zoom: 0.1},
+  viewState: {
+    center: aggregationConverter.unproject([0, 2500000, 0]),
+    zoom: 0.1 + Math.log2(40075016.6855 / 9000000)
+  },
   layers: [
     new HeatmapLayer({
       ...commonProps,
