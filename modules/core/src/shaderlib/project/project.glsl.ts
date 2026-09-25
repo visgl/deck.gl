@@ -150,7 +150,7 @@ vec3 project_normal(vec3 vector) {
 
 vec4 project_offset_(vec4 offset) {
   if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
-    // XY is already in common space, for both high and low position components.
+    // Both preprojected and Cartesian positions use common-space XY and meter Z.
     return vec4(offset.xy, offset.z * project.commonUnitsPerWorldUnit.z, offset.w);
   }
   float dy = offset.y;

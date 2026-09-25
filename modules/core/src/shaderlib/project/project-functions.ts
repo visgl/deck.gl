@@ -57,13 +57,16 @@ function normalizeParameters(opts: {
   const {viewport, modelMatrix, coordinateOrigin} = opts;
   let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
 
-  if (coordinateSystem === 'default') {
+  if (coordinateSystem === 'default' && viewport.projectionMode !== PROJECTION_MODE.EXTERNAL) {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
 
   if (fromCoordinateSystem === undefined) {
     fromCoordinateSystem = coordinateSystem;
-  } else if (fromCoordinateSystem === 'default') {
+  } else if (
+    fromCoordinateSystem === 'default' &&
+    viewport.projectionMode !== PROJECTION_MODE.EXTERNAL
+  ) {
     fromCoordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
   if (fromCoordinateOrigin === undefined) {
@@ -104,6 +107,13 @@ export function getWorldPosition(
   }
 
   if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
+    if (coordinateSystem === 'cartesian') {
+      return [
+        x + coordinateOrigin[0],
+        y + coordinateOrigin[1],
+        (z + coordinateOrigin[2]) * viewport.distanceScales.unitsPerMeter[2]
+      ];
+    }
     return viewport.projectPosition([x, y, z]);
   }
 
@@ -199,7 +209,7 @@ export function projectPosition(
   if (offsetMode) {
     const positionCommonSpace =
       viewport.projectionMode === PROJECTION_MODE.EXTERNAL
-        ? shaderCoordinateOrigin
+        ? viewport.center.map(Math.fround)
         : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
     vec3.sub(worldPosition, worldPosition, positionCommonSpace);
   }

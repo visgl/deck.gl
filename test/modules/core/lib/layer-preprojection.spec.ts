@@ -110,6 +110,36 @@ test('Layer transforms accessor-keyed binary positions but bypasses direct attri
   }
 });
 
+test('Projection-dependent generated attributes do not acquire position transforms', () => {
+  class GeneratedPositionLayer extends PositionLayer {
+    static layerName = 'GeneratedPositionLayer';
+
+    initializeState() {
+      super.initializeState();
+      this.getAttributeManager()!.add({
+        generatedPositions: {
+          size: 3,
+          accessor: 'getPosition',
+          transformSource: 'projection'
+        }
+      });
+    }
+  }
+  const manager = createManager(new ProjectionViewport('initial'));
+  let layer = new GeneratedPositionLayer({data: [[2, 3, 4]]});
+  try {
+    manager.setLayers([layer]);
+    const attribute = layer.getAttributeManager()!.attributes.generatedPositions;
+    expect('transform' in attribute.settings).toBe(false);
+    layer = layer.clone({coordinateSystem: 'cartesian'});
+    manager.setLayers([layer]);
+    expect('transform' in attribute.settings).toBe(false);
+    expect(Array.from(attribute.value!.slice(0, 3))).toEqual([2, 3, 4]);
+  } finally {
+    manager.finalize();
+  }
+});
+
 for (const projected of [false, true]) {
   test(`Layer initializes position attributes with preproject=${projected}`, () => {
     const viewport = new ProjectionViewport('initial', projected);
@@ -153,18 +183,16 @@ for (const projected of [false, true]) {
       if (projected) changed.preproject = ([x, y, z]) => [x + 100, y, z];
       manager.activateViewport(changed);
       layer.activateViewport(changed);
-      expect(update).toHaveBeenCalledTimes(projected ? 1 : 0);
-      expect(accessor).toHaveBeenCalledTimes(projected ? 1 : 0);
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(accessor).toHaveBeenCalledTimes(1);
       expect(getPositions(layer)).toEqual(projected ? [102, 3, 4] : [2, 3, 4]);
-      if (projected) {
-        expect(update.mock.calls[0][0].changeFlags.projectionChanged).toBe(true);
-      }
+      expect(update.mock.calls[0][0].changeFlags.projectionChanged).toBe(true);
       expect(
         Array.from(layer.getAttributeManager()!.attributes.ordinaryPositions.value!.slice(0, 3))
       ).toEqual([2, 3, 4]);
       expect(layer.internalState!.changeFlags.projectionChanged).toBe(false);
       layer.activateViewport(changed);
-      expect(update).toHaveBeenCalledTimes(projected ? 1 : 0);
+      expect(update).toHaveBeenCalledTimes(1);
     } finally {
       manager.finalize();
       vi.restoreAllMocks();
@@ -195,7 +223,7 @@ for (const projected of [false, true]) {
     const viewport = new ProjectionViewport('initial', projected);
     const manager = createManager(viewport);
     const layer = new PositionLayer({
-      coordinateSystem: 'cartesian',
+      coordinateSystem: 'default',
       coordinateOrigin: [100, 200, 300],
       modelMatrix: new Matrix4().translate([10, 20, 30])
     });
@@ -238,7 +266,7 @@ for (const projected of [false, true]) {
 
   test(`Layer coordinate helpers use the activated viewport with preproject=${projected}`, () => {
     const manager = createManager(new ProjectionViewport('context', projected));
-    const layer = new PositionLayer({coordinateSystem: 'cartesian'});
+    const layer = new PositionLayer({coordinateSystem: 'default'});
     try {
       manager.setLayers([layer]);
       const active = new ProjectionViewport('active', projected, 1);

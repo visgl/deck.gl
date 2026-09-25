@@ -59,7 +59,7 @@ export function getOffsetOrigin(
   }
 
   let shaderCoordinateOrigin = coordinateOrigin;
-  if (viewport.preproject) {
+  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
     coordinateSystem = 'cartesian';
     coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
   }
@@ -111,6 +111,10 @@ export function getOffsetOrigin(
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
       if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
         geospatialOrigin = null;
+        shaderCoordinateOrigin[2] *= viewport.distanceScales.metersPerUnit[2];
+        shaderCoordinateOrigin = shaderCoordinateOrigin.map(
+          (value, i) => value - coordinateOrigin[i]
+        ) as Vec3;
       }
       break;
 
@@ -161,7 +165,7 @@ function calculateMatrixAndOffset(
     // @ts-expect-error the 4th component is assigned below
     originCommon =
       viewport.projectionMode === PROJECTION_MODE.EXTERNAL
-        ? shaderCoordinateOrigin.slice()
+        ? viewport.center.map(Math.fround)
         : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
@@ -253,7 +257,7 @@ export function getUniformsFromViewport({
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
-  if (viewport.preproject) {
+  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
     coordinateSystem = 'cartesian';
     coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
     modelMatrix = null;
