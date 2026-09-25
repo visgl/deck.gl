@@ -31,11 +31,6 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
    * forward projection and after valid inverse projection; Z is unchanged.
    */
   fromBounds?: [number, number, number, number];
-  /** Extent in toCrs mapped into a 512-unit box, preserving aspect ratio.
-   * Defaults to [-EC/2, -EC/2, EC/2, EC/2], where EC = 40075016.6855.
-   * Override to customize common-space scale and origin.
-   */
-  toBounds?: [number, number, number, number];
   /** Camera center in fromCrs world coordinates. Defaults to [0, 0, 0]; Z is locked to zero. */
   center?: [number, number, number];
   /** Map pitch in degrees. */
@@ -53,7 +48,7 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
 };
 
 const EC = 40075016.6855; // Earth circumference in meters.
-const DEFAULT_TO_BOUNDS: [number, number, number, number] = [-EC / 2, -EC / 2, EC / 2, EC / 2];
+const NORMALIZATION_SCALE = 512 / EC;
 
 /** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core.
  * @experimental Exported as `_CustomProjectionViewport`; this API may change.
@@ -69,7 +64,6 @@ export default class CustomProjectionViewport extends Viewport {
   constructor(opts: CustomProjectionViewportOptions) {
     const {
       projection,
-      toBounds = DEFAULT_TO_BOUNDS,
       fromBounds,
       fromCrs = 'WGS84',
       toCrs,
@@ -79,17 +73,8 @@ export default class CustomProjectionViewport extends Viewport {
       bearing = 0,
       zoom = 0
     } = opts;
-    const [minX, minY, maxX, maxY] = toBounds;
-    if (
-      !toBounds.every(Number.isFinite) ||
-      maxX <= minX ||
-      maxY <= minY ||
-      !Number.isFinite(resolution) ||
-      resolution < 0
-    ) {
-      throw new Error(
-        'CustomProjectionViewport requires finite bounds and non-negative resolution'
-      );
+    if (!Number.isFinite(resolution) || resolution < 0) {
+      throw new Error('CustomProjectionViewport requires finite, non-negative resolution');
     }
     if (
       fromBounds &&
@@ -99,9 +84,6 @@ export default class CustomProjectionViewport extends Viewport {
     ) {
       throw new Error('CustomProjectionViewport requires finite, increasing fromBounds');
     }
-    const normalizationScale = 512 / Math.max(maxX - minX, maxY - minY);
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
     const height = opts.height || 1;
     const width = opts.width || 1;
     const altitude = 1.5;
@@ -114,18 +96,10 @@ export default class CustomProjectionViewport extends Viewport {
     ];
     const preproject = (position: number[]): [number, number, number] => {
       const projected = projection.forward(clampInput(position, fromBounds));
-      return [
-        (projected[0] - centerX) * normalizationScale + 256,
-        (projected[1] - centerY) * normalizationScale + 256,
-        projected[2] ?? position[2] ?? 0
-      ];
+      return [projected[0], projected[1], projected[2] ?? position[2] ?? 0];
     };
     const postUnproject = (position: number[]): [number, number, number] | null => {
-      const projected = [
-        (position[0] - 256) / normalizationScale + centerX,
-        (position[1] - 256) / normalizationScale + centerY,
-        position[2] || 0
-      ];
+      const projected = [position[0], position[1], position[2] || 0];
       try {
         const input = projection.inverse(projected.slice());
         if (!input || input.length < 2 || !input.every(Number.isFinite)) return null;
@@ -135,7 +109,7 @@ export default class CustomProjectionViewport extends Viewport {
           !Number.isFinite(roundTrip[0]) ||
           !Number.isFinite(roundTrip[1]) ||
           Math.hypot(roundTrip[0] - projected[0], roundTrip[1] - projected[1]) *
-            normalizationScale >
+            NORMALIZATION_SCALE >
             1e-5
         )
           return null;
@@ -165,7 +139,7 @@ export default class CustomProjectionViewport extends Viewport {
           : estimateUnitsPerMeter(projection, worldCenter, spherical, fromBounds);
     }
     const unitsPerMeter = localScale.map(
-      value => (Number.isFinite(value) && value > 0 ? value : 1) * normalizationScale
+      value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
     );
     super({
       ...opts,
@@ -175,7 +149,11 @@ export default class CustomProjectionViewport extends Viewport {
       latitude: undefined,
       modelMatrix: null,
       position,
-      distanceScales: {unitsPerMeter, metersPerUnit: unitsPerMeter.map(value => 1 / value)},
+      distanceScales: {
+        unitsPerWorldUnit: [NORMALIZATION_SCALE, NORMALIZATION_SCALE, NORMALIZATION_SCALE],
+        unitsPerMeter,
+        metersPerUnit: unitsPerMeter.map(value => 1 / value)
+      },
       preproject,
       postUnproject,
       zoom,
@@ -206,30 +184,38 @@ export default class CustomProjectionViewport extends Viewport {
     return PROJECTION_MODE.EXTERNAL;
   }
 
-  /** Converts world coordinates to common-space XY. */
+  /** Converts XY in map meters (toCrs) to common-space XY by applying the fixed scale.
+   * Does not accept world coordinates in fromCrs or call projection.forward.
+   * Ignores Z; use projectPosition to convert a world-coordinate XYZ position.
+   */
   projectFlat(position: number[]): [number, number] {
-    const projected = this.preproject!(position);
-    return [projected[0], projected[1]];
+    return [position[0] * NORMALIZATION_SCALE, position[1] * NORMALIZATION_SCALE];
   }
-  /** Converts common-space XY to world coordinates; invalid inverses return NaN. */
+  /** Converts common-space XY to XY in map meters (toCrs) by reversing the fixed scale.
+   * Does not return world coordinates in fromCrs or call projection.inverse.
+   * Ignores Z; use unprojectPosition to convert common XYZ to world coordinates.
+   */
   unprojectFlat(position: number[]): [number, number] {
-    const world = this.postUnproject!([position[0], position[1], 0]);
-    return world ? [world[0], world[1]] : [NaN, NaN];
+    return [position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE];
   }
 
   /** Converts world XYZ to common XYZ, including the converter's altitude conversion. */
   projectPosition(position: number[]): [number, number, number] {
     const projected = this.preproject!(position);
-    return [projected[0], projected[1], (projected[2] || 0) * this.distanceScales.unitsPerMeter[2]];
+    return [
+      projected[0] * NORMALIZATION_SCALE,
+      projected[1] * NORMALIZATION_SCALE,
+      projected[2] * NORMALIZATION_SCALE
+    ];
   }
 
   /** Converts common XYZ to world XYZ; invalid inverses return NaN. */
   unprojectPosition(position: number[]): [number, number, number] {
     return (
       this.postUnproject!([
-        position[0],
-        position[1],
-        (position[2] || 0) * this.distanceScales.metersPerUnit[2]
+        position[0] / NORMALIZATION_SCALE,
+        position[1] / NORMALIZATION_SCALE,
+        (position[2] || 0) / NORMALIZATION_SCALE
       ]) || [NaN, NaN, NaN]
     );
   }
@@ -241,13 +227,13 @@ export default class CustomProjectionViewport extends Viewport {
   panByPosition(position: number[], pixel: number[]): {center: [number, number, number]} {
     const underPointer = pixelsToWorld(pixel, this.pixelUnprojectionMatrix, 0);
     const common = this.projectPosition(position);
-    const nextCenter =
-      this.postUnproject!([
-        this.center[0] + common[0] - underPointer[0],
-        this.center[1] + common[1] - underPointer[1],
-        0
-      ]) || this.position;
-    return {center: [nextCenter[0], nextCenter[1], 0]};
+    const nextCenter = this.unprojectPosition([
+      this.center[0] + common[0] - underPointer[0],
+      this.center[1] + common[1] - underPointer[1],
+      0
+    ]);
+    const center = nextCenter.every(Number.isFinite) ? nextCenter : this.position;
+    return {center: [center[0], center[1], 0]};
   }
 }
 
