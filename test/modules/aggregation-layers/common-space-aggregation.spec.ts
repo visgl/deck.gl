@@ -13,9 +13,12 @@ import {
   HexagonLayer,
   ContourLayer,
   HeatmapLayer,
+  ScreenGridLayer,
+  CPUAggregator,
   WebGLAggregator
 } from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils/vitest';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Matrix4} from '@math.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
@@ -39,8 +42,13 @@ const getCommonData = (scale = 1) =>
   );
 const commonData = getCommonData();
 
-function createViewport(signature = 'initial', scale = 1) {
+function createViewport(
+  signature = 'initial',
+  scale = 1,
+  camera: {pitch?: number; bearing?: number; zoom?: number} = {}
+) {
   const viewport = new CustomProjectionViewport({
+    ...camera,
     width: 400,
     height: 300,
     toCrs: signature,
@@ -72,8 +80,8 @@ function createReferenceViewport(viewport: CustomProjectionViewport) {
   });
 }
 
-function createManager(viewport: Viewport) {
-  const manager = new LayerManager(device, {viewport});
+function createManager(viewport: Viewport, targetDevice = device) {
+  const manager = new LayerManager(targetDevice, {viewport});
   manager.setProps({
     onError: error => {
       throw error;
@@ -81,6 +89,156 @@ function createManager(viewport: Viewport) {
   });
   return manager;
 }
+
+for (const binary of [false, true]) {
+  for (const aggregation of ['SUM', 'MEAN'] as const) {
+    for (const gpuAggregation of [false, true]) {
+      test(`ScreenGridLayer screen bins: gpu=${gpuAggregation}, binary=${binary}, aggregation=${aggregation}`, ({
+        skip
+      }) => {
+        if (gpuAggregation && !WebGLAggregator.isSupported(device)) return skip();
+        const points = [
+          [-9, -18, 0],
+          [-9, -18, 0],
+          [1, 2, 3],
+          [3, 4, 5],
+          [1000, 1000, 0]
+        ];
+        const weights = [2, 4, 8, 16, 32];
+        const cellSizePixels = 40;
+        const initial = createViewport();
+        const manager = createManager(initial);
+        const layer = new ScreenGridLayer<number[]>({
+          data: binary
+            ? {
+                length: points.length,
+                attributes: {
+                  getPosition: {value: new Float64Array(points.flat()), size: 3},
+                  getWeight: {value: new Float32Array(weights), size: 1}
+                }
+              }
+            : points,
+          getPosition: p => p as [number, number, number],
+          getWeight: (_, {index}) => weights[index],
+          modelMatrix,
+          coordinateSystem: 'lnglat-offsets',
+          coordinateOrigin: [100, 200, 300],
+          cellSizePixels,
+          aggregation,
+          gpuAggregation
+        });
+        const sortBins = (bins: {id: number[]; count: number; value: number[]}[]) =>
+          bins.sort((a, b) => a.id[1] - b.id[1] || a.id[0] - b.id[0]);
+        try {
+          manager.setLayers([layer]);
+          expect(layer.state.aggregator).toBeInstanceOf(
+            gpuAggregation ? WebGLAggregator : CPUAggregator
+          );
+          for (const viewport of [
+            initial,
+            createViewport('initial', 1, {pitch: 35, bearing: 25, zoom: 0.3})
+          ]) {
+            manager.activateViewport(viewport);
+            layer.activateViewport(viewport);
+            manager.updateLayers();
+            for (const devicePixelRatio of [1, 2]) {
+              layer.state.aggregator.setNeedsUpdate();
+              layer.draw({
+                shaderModuleProps: {
+                  project: {
+                    viewport,
+                    devicePixelRatio,
+                    modelMatrix,
+                    coordinateSystem: layer.props.coordinateSystem,
+                    coordinateOrigin: layer.props.coordinateOrigin
+                  }
+                }
+              } as any);
+              const expected = new Map<string, {id: number[]; count: number; value: number[]}>();
+              points.forEach((position, i) => {
+                // Independent world-to-screen reference, not the ScreenGrid CPU aggregator.
+                const [x, y] = viewport.project(modelMatrix.transformAsPoint(position));
+                if (x < 0 || x >= viewport.width || y < 0 || y >= viewport.height) return;
+                const id = [Math.floor(x / cellSizePixels), Math.floor(y / cellSizePixels)];
+                const key = id.join(',');
+                const bin = expected.get(key) || {id, count: 0, value: [0]};
+                bin.count++;
+                bin.value[0] += weights[i];
+                expected.set(key, bin);
+              });
+              const expectedBins = Array.from(expected.values());
+              expect(expectedBins.length).toBeGreaterThan(0);
+              expect(expectedBins.reduce((sum, bin) => sum + bin.count, 0)).toBeLessThan(
+                points.length
+              );
+              if (aggregation === 'MEAN') {
+                for (const bin of expectedBins) bin.value[0] /= bin.count;
+              }
+              const aggregator = layer.state.aggregator;
+              const actual = Array.from({length: aggregator.binCount}, (_, i) =>
+                aggregator.getBin(i)
+              )
+                .filter(bin => bin && bin.count > 0)
+                .map(bin => ({id: bin!.id, count: bin!.count, value: bin!.value}));
+              expect(sortBins(actual)).toEqual(sortBins(expectedBins));
+            }
+          }
+        } finally {
+          manager.finalize();
+          vi.restoreAllMocks();
+        }
+      });
+    }
+  }
+}
+
+test('ScreenGridLayer reuses packed positions across backend changes and WebGPU CPU fallback', async () => {
+  for (const targetDevice of [device, await getWebGPUTestDevice()]) {
+    if (!targetDevice) continue;
+    const viewport = createViewport();
+    const manager = createManager(viewport, targetDevice);
+    const points = [
+      [-9, -18, 0],
+      [-9, -18, 0]
+    ];
+    const getPosition = vi.fn(p => p);
+    let layer = new ScreenGridLayer({
+      data: points,
+      getPosition,
+      modelMatrix,
+      cellSizePixels: 40,
+      gpuAggregation: false
+    });
+    try {
+      manager.setLayers([layer]);
+      const positions = layer.getAttributeManager()!.attributes.positions.value;
+      getPosition.mockClear();
+      vi.mocked(viewport.preproject!).mockClear();
+      for (const gpuAggregation of [true, false, true]) {
+        layer = layer.clone({gpuAggregation});
+        manager.setLayers([layer]);
+        const expectedType =
+          gpuAggregation && WebGLAggregator.isSupported(targetDevice)
+            ? WebGLAggregator
+            : CPUAggregator;
+        expect(layer.state.aggregator).toBeInstanceOf(expectedType);
+        layer.draw({shaderModuleProps: {project: {viewport, modelMatrix}}} as any);
+        expect(layer.getAttributeManager()!.attributes.positions.value).toBe(positions);
+        expect(getPosition).not.toHaveBeenCalled();
+        expect(viewport.preproject).not.toHaveBeenCalled();
+        const aggregator = layer.state.aggregator;
+        const bins = Array.from({length: aggregator.binCount}, (_, i) =>
+          aggregator.getBin(i)
+        ).filter(bin => bin && bin.count > 0);
+        expect(bins).toHaveLength(1);
+        expect(bins[0]).toMatchObject({id: [5, 3], count: 2, value: [2]});
+      }
+    } finally {
+      manager.finalize();
+      vi.restoreAllMocks();
+    }
+  }
+});
 
 for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
   test(`${LayerType.layerName} GPU aggregation matches preprojected Cartesian input`, ({skip}) => {

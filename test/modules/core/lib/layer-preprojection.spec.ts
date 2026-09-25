@@ -3,7 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {Layer, LayerManager, Viewport, CompositeLayer} from '@deck.gl/core';
+import {
+  Layer,
+  LayerManager,
+  Viewport,
+  CompositeLayer,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
@@ -113,6 +120,52 @@ test('Cartesian sublayers bypass preprojection and use map-meter XYZ', () => {
   } finally {
     manager.finalize();
     vi.restoreAllMocks();
+  }
+});
+
+test('Layer.projectPackedPosition matches world projection without repeating position transforms', () => {
+  const viewports = [
+    new CustomProjectionViewport({
+      projection: {
+        forward: ([x, y, z = 0]) => [x * 100000, y * 200000, z * 0.3048],
+        inverse: ([x, y, z = 0]) => [x / 100000, y / 200000, z / 0.3048]
+      },
+      getDistanceScale: () => [0.25, 1],
+      pitch: 35,
+      bearing: 20,
+      width: 400,
+      height: 300
+    }),
+    new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 4, width: 400, height: 300}),
+    new GlobeViewport({longitude: 0, latitude: 0, zoom: 1, width: 400, height: 300}),
+    new Viewport({width: 400, height: 300})
+  ];
+  for (const viewport of viewports) {
+    for (const coordinateSystem of ['default', 'cartesian'] as const) {
+      const manager = createManager(viewport);
+      const point = [2, 3, 4];
+      const layer = new PositionLayer({
+        data: [point],
+        coordinateSystem,
+        coordinateOrigin: [10, 20, 30],
+        modelMatrix: new Matrix4().translate([1, 2, 3])
+      });
+      try {
+        manager.setLayers([layer]);
+        const expected = layer.project(point);
+        const packed = getPositions(layer);
+        const preproject = viewport.preproject ? vi.spyOn(viewport, 'preproject') : null;
+        const actual = layer.projectPackedPosition(packed);
+        actual.forEach((value, i) => expect(value).toBeCloseTo(expected[i], 8));
+        expect(layer.projectPackedPosition(packed.slice(0, 2))).toHaveLength(2);
+        if (preproject) expect(preproject).not.toHaveBeenCalled();
+        expect(getPositions(layer)).toEqual(packed);
+        expect(point).toEqual([2, 3, 4]);
+      } finally {
+        manager.finalize();
+        vi.restoreAllMocks();
+      }
+    }
   }
 });
 
