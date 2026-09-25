@@ -68,7 +68,10 @@ void main(void) {
   }
   if (instanceClipRect.w >= 0.0) {
     dimensions.y = wh.y;
-    pixelOffset.y = xy.y + uv.y * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, uv.y);
+    // Assign the same corners in the flipped order of the default offset above so the strip
+    // stays front-facing
+    float v = 1.0 - uv.y;
+    pixelOffset.y = xy.y + v * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, v);
   }
 
   if (textBackground.billboard)  {
@@ -78,6 +81,10 @@ void main(void) {
     vec3 offset = vec3(pixelOffset, 0.0);
     DECKGL_FILTER_SIZE(offset, geometry);
     gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+    // Hide backgrounds whose anchor is behind the globe; culling handles non-billboard ones
+    if (project_globe_is_occluded(geometry.position.xyz)) {
+      gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+    }
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
     if (text.flipY) {
@@ -86,11 +93,6 @@ void main(void) {
     DECKGL_FILTER_SIZE(offset_common, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-  }
-
-  // Hide backgrounds whose anchor is behind the globe
-  if (project_globe_is_occluded(geometry.position.xyz)) {
-    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
 
   // Apply opacity to instance color, or return instance picking color

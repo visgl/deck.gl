@@ -382,16 +382,51 @@ fn project_globe_is_occluded(commonPosition: vec3<f32>) -> bool {
   return t < 1.0 && dot(closest, closest) < GLOBE_RADIUS * GLOBE_RADIUS;
 }
 
-// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the depth is that
-// of the globe surface point nearest to the camera, so a visible sprite is never clipped by the
-// curve of the globe. Pair with project_globe_is_occluded. Identity for flat projections.
+// Distance from eye along the unit direction to the first globe surface point, or fallback
+fn project_globe_ray_distance_(eye: vec3<f32>, direction: vec3<f32>, fallback: f32) -> f32 {
+  let b = dot(eye, direction);
+  let discriminant = b * b - dot(eye, eye) + GLOBE_RADIUS * GLOBE_RADIUS;
+  if (discriminant < 0.0) {
+    return fallback;
+  }
+  let distance = -b - sqrt(discriminant);
+  return select(fallback, distance, distance > 0.0);
+}
+
+// Screen-space radius, in pixels, that a billboard is assumed to cover around its anchor
+const GLOBE_BILLBOARD_FOOTPRINT_PIXELS: f32 = 64.0;
+
+// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
+// moved toward the camera by the amount the globe surface rises within its footprint, so the
+// curve of the globe does not clip a sprite whose anchor is visible, while depth ordering
+// against other geometry is kept. Pair with project_globe_is_occluded. Identity for flat projections.
 fn project_globe_billboard_clipspace(clipPosition: vec4<f32>, commonPosition: vec3<f32>) -> vec4<f32> {
   if (project.projectionMode != PROJECTION_MODE_GLOBE) {
     return clipPosition;
   }
   let eye = project.cameraPosition;
-  let nearest = eye + normalize(commonPosition - eye) * (length(eye) - GLOBE_RADIUS);
-  let nearestClip = project_common_position_to_clipspace(vec4<f32>(nearest, 1.0));
-  return vec4<f32>(clipPosition.xy, nearestClip.z / nearestClip.w * clipPosition.w, clipPosition.w);
+  let ray = commonPosition - eye;
+  let anchorDistance = length(ray);
+  if (anchorDistance == 0.0) {
+    return clipPosition;
+  }
+  let direction = ray / anchorDistance;
+  // On screen, the surface is nearest toward the point of the globe below the camera
+  let inward = -eye - dot(-eye, direction) * direction;
+  let inwardLength = length(inward);
+  if (inwardLength == 0.0) {
+    return clipPosition;
+  }
+  // Ray through the inward edge of the footprint
+  let footprint = project_pixel_size_float(GLOBE_BILLBOARD_FOOTPRINT_PIXELS);
+  let edgeDirection = normalize(ray + inward / inwardLength * footprint);
+  let surfaceDistance = project_globe_ray_distance_(eye, direction, anchorDistance);
+  let edgeDistance = project_globe_ray_distance_(eye, edgeDirection, surfaceDistance);
+  let shift = surfaceDistance - edgeDistance;
+  if (shift <= 0.0) {
+    return clipPosition;
+  }
+  let shiftedClip = project_common_position_to_clipspace(vec4<f32>(commonPosition - direction * shift, 1.0));
+  return vec4<f32>(clipPosition.xy, shiftedClip.z / shiftedClip.w * clipPosition.w, clipPosition.w);
 }
 `;

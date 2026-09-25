@@ -94,15 +94,18 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   }
   if (attributes.instanceClipRect.w >= 0.0) {
     varyings.dimensions.y = wh.y;
-    pixelOffset.y = xy.y + varyings.uv.y * wh.y + mix(
+    // Assign the same corners in the flipped order of the default offset above so the strip
+    // stays front-facing
+    let v = 1.0 - varyings.uv.y;
+    pixelOffset.y = xy.y + v * wh.y + mix(
       -textBackground.padding.y,
       textBackground.padding.w,
-      varyings.uv.y
+      v
     );
   }
 
-  let anchorCommon = project_position_vec3_f64(attributes.instancePositions, attributes.instancePositions64Low);
   if (textBackground.billboard > 0.5) {
+    let anchorCommon = project_position_vec3_f64(attributes.instancePositions, attributes.instancePositions64Low);
     var position = project_position_to_clipspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
@@ -116,6 +119,10 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       position.z,
       position.w
     );
+    // Hide backgrounds whose anchor is behind the globe; culling handles non-billboard ones
+    if (project_globe_is_occluded(anchorCommon)) {
+      position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+    }
     varyings.position = position;
   } else {
     var offsetCommon = vec3<f32>(project_pixel_size_vec2(pixelOffset), 0.0);
@@ -127,11 +134,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.instancePositions64Low,
       offsetCommon
     );
-  }
-
-  // Hide backgrounds whose anchor is behind the globe
-  if (project_globe_is_occluded(anchorCommon)) {
-    varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
   }
 
   varyings.vFillColor = vec4<f32>(

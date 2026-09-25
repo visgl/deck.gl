@@ -99,7 +99,7 @@ Visit the [GlobeController](./globe-controller.md) documentation for a full list
 
 In the MapView, it is often sufficient to provide a solid background color where there is no geometry. In the GlobeView, the user can "see through" to the other side of the earth.
 
-Camera-facing geometry is handled by the layers themselves: `IconLayer`, `TextLayer` and billboard `ScatterplotLayer` hide objects whose anchor is behind the globe, and never let the curve of the globe clip an object whose anchor is visible. Positions with altitude stay visible past the horizon of the ground below them.
+Camera-facing geometry is handled by the layers themselves: `IconLayer`, `TextLayer` and billboard `ScatterplotLayer` hide objects whose anchor is behind the globe, and keep the curve of the globe from clipping an object whose anchor is visible. Positions with altitude stay visible past the horizon of the ground below them. Objects that are not billboards lie on the surface and are culled with it.
 
 For geometry that follows the surface, such as paths and polygons, there are two ways to hide the far side:
 
