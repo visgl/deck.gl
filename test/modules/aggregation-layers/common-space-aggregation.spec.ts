@@ -37,7 +37,7 @@ const projectedUnit = 100000;
 const getCommonData = (scale = 1) =>
   data.map(p =>
     project(modelMatrix.transformAsPoint(p)).map((value, i) =>
-      i < 2 ? 256 + value * scale * projectedUnit * normalizationScale : value * scale
+      i < 2 ? value * scale * projectedUnit * normalizationScale : value * scale
     )
   );
 const commonData = getCommonData();
@@ -64,7 +64,11 @@ function createViewport(
   });
   // Keep cell sizes identical to the Cartesian reference: these tests isolate
   // position preprocessing, not the converter's meter-scale distortion.
-  viewport.distanceScales = {unitsPerMeter: [1, 1, 1], metersPerUnit: [1, 1, 1]};
+  viewport.distanceScales = {
+    ...viewport.distanceScales,
+    unitsPerMeter: [1, 1, 1],
+    metersPerUnit: [1, 1, 1]
+  };
   // Count data preprojection, not constructor inverse validation.
   vi.spyOn(viewport, 'preproject');
   return viewport;
@@ -328,7 +332,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
         const referencePosition = reference.getPickingInfo({info: {index: 0}} as any).object!
           .position;
         const worldPosition = layer.getPickingInfo(picking as any).object!.position;
-        const expectedWorld = viewport.unprojectFlat(
+        const expectedWorld = viewport.unprojectPosition(
           referencePosition.map((value, i) => value + layer.state.hexOriginCommon[i])
         );
         worldPosition.forEach((value, i) => expect(value).toBeCloseTo(expectedWorld[i], 8));
@@ -340,7 +344,9 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
           expect(child.usePositionTransforms().transform).toBeNull();
           expect(child.props.coordinateSystem).toBe('cartesian');
           expect(child.projectPosition([2, 3, 0], {autoOffset: false})).toEqual(
-            new Matrix4(child.props.modelMatrix!).transformAsPoint([2, 3, 0])
+            new Matrix4(child.props.modelMatrix!)
+              .transformAsPoint([2, 3, 0])
+              .map(value => value * normalizationScale)
           );
           const uniforms = getUniformsFromViewport({
             viewport,
@@ -425,7 +431,9 @@ test('ContourLayer supports ordinary application-provided Cartesian sublayers', 
       expect(child.usePositionTransforms().transform).toBeNull();
       const position = [2, 3, 4];
       expect(child.projectPosition(position, {autoOffset: false})).toEqual(
-        new Matrix4(child.props.modelMatrix!).transformAsPoint(position)
+        new Matrix4(child.props.modelMatrix!)
+          .transformAsPoint(position)
+          .map(value => value * normalizationScale)
       );
     }
     expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
@@ -439,8 +447,9 @@ for (const [LayerType, accessor] of [
   [GridLayer, 'gridAggregator'],
   [HexagonLayer, 'hexagonAggregator']
 ] as const) {
-  test(`${LayerType.layerName} custom binning receives common coordinates`, () => {
-    const manager = createManager(createViewport());
+  test(`${LayerType.layerName} custom binning receives map-meter coordinates`, () => {
+    const viewport = createViewport();
+    const manager = createManager(viewport);
     const received: number[][] = [];
     const aggregate = (position: number[]) => {
       // The aggregator reuses its accessor target between rows.
@@ -456,7 +465,9 @@ for (const [LayerType, accessor] of [
     } as any);
     try {
       manager.setLayers([layer]);
-      expect(received).toEqual(commonData);
+      expect(received).toEqual(
+        data.map(p => viewport.preproject!(modelMatrix.transformAsPoint(p)))
+      );
     } finally {
       manager.finalize();
     }

@@ -22,6 +22,7 @@ import {AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
+import {createAggregationViewport} from '../common/utils/projection-utils';
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
@@ -250,7 +251,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       // Offset common space to center at the origin of the grid cell where the data center is in
       // This improves precision without affecting the cell positions
-      const centroidCommon = viewport.preproject ? centroid : viewport.projectFlat(centroid);
+      const centroidCommon = viewport.projectFlat(centroid);
       cellOriginCommon = [
         Math.floor((centroidCommon[0] - gridOrigin[0]) / cellSizeCommon[0]) * cellSizeCommon[0] +
           gridOrigin[0],
@@ -266,7 +267,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       viewport =
         viewport.isGeospatial && !viewport.preproject
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+          : viewport.preproject
+            ? createAggregationViewport(viewport, centroid)
+            : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
@@ -364,7 +367,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
-    const modelMatrix = new Matrix4()
+    const scale = this.context.viewport.distanceScales.unitsPerWorldUnit;
+    const modelMatrix = new Matrix4();
+    if (scale) {
+      modelMatrix.scale(scale.map(value => 1 / value));
+    }
+    modelMatrix
       .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
       .scale([cellSizeCommon[0], cellSizeCommon[1], zOffset]);
 

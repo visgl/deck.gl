@@ -621,7 +621,12 @@ export default class HeatmapLayer<
 
     const {viewport} = this.context;
 
-    triPositionBuffer!.write(packVertices(viewportCorners, 3));
+    triPositionBuffer!.write(
+      packVertices(
+        viewport.preproject ? viewportCorners.map(p => viewport.unprojectFlat(p)) : viewportCorners,
+        3
+      )
+    );
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(

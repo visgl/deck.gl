@@ -25,6 +25,7 @@ import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
 import {getBinIdRange} from '../common/utils/bounds-utils';
+import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
@@ -76,7 +77,7 @@ export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & Composite
 type _GridLayerProps<DataT> = {
   /**
    * Custom accessor to retrieve a grid bin index from each data object.
-   * With viewport preprojection, position is in common space.
+   * With CustomProjectionView, position is in map meters in toCrs.
    * Not supported by GPU aggregation.
    */
   gridAggregator?: ((position: number[], cellSize: number) => [number, number]) | null;
@@ -457,7 +458,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       // Offset common space to center at the origin of the grid cell where the data center is in
       // This improves precision without affecting the cell positions
-      const centroidCommon = viewport.preproject ? centroid : viewport.projectFlat(centroid);
+      const centroidCommon = viewport.projectFlat(centroid);
       cellOriginCommon = [
         Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
         Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1]
@@ -471,7 +472,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       viewport =
         viewport.isGeospatial && !viewport.preproject
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+          : viewport.preproject
+            ? createAggregationViewport(viewport, centroid)
+            : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
