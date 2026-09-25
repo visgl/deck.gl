@@ -202,8 +202,9 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
   }
 
   protected _getModel(): Model {
-    // a square that minimally cover the unit circle
-    const positions = [0, 0, 1, 0, 0, 1, 1, 1];
+    // Unit square, top row first: the shader flips y, so this order keeps the strip front-facing
+    // (counter-clockwise) and it survives back-face culling, which GlobeView enables by default
+    const positions = [0, 1, 1, 1, 0, 0, 1, 0];
 
     return new Model(this.context.device, {
       ...this.getShaders(),
