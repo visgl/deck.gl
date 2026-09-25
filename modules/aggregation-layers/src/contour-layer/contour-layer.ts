@@ -24,7 +24,6 @@ import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
 import {Matrix4} from '@math.gl/core';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
-import {ContourPathLayer, ContourPolygonLayer} from './contour-sublayers';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
@@ -264,9 +263,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
-      viewport = viewport.isGeospatial
-        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+      viewport =
+        viewport.isGeospatial && !viewport.preproject
+          ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+          : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
@@ -362,15 +362,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {zOffset} = this.props;
     const {cellOriginCommon, cellSizeCommon} = this.state;
 
-    const preprojected = Boolean(this.context.viewport.preproject);
-    const LinesSubLayerClass = this.getSubLayerClass(
-      'lines',
-      preprojected ? ContourPathLayer : PathLayer
-    );
-    const BandsSubLayerClass = this.getSubLayerClass(
-      'bands',
-      preprojected ? ContourPolygonLayer : SolidPolygonLayer
-    );
+    const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
+    const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
     const modelMatrix = new Matrix4()
       .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
       .scale([cellSizeCommon[0], cellSizeCommon[1], zOffset]);
@@ -386,6 +379,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         {
           data: lines,
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPath: d => d.vertices,
           getColor: d => d.contour.color ?? DEFAULT_COLOR,
@@ -405,6 +399,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         {
           data: polygons,
           coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,
           getFillColor: d => d.contour.color ?? DEFAULT_COLOR

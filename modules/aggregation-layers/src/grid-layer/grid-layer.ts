@@ -468,9 +468,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
-      viewport = viewport.isGeospatial
-        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+      viewport =
+        viewport.isGeospatial && !viewport.preproject
+          ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+          : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
