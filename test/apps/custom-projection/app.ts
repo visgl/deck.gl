@@ -5,7 +5,7 @@
 import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import type {FeatureCollection, LineString} from 'geojson';
 import type {ProjectionName} from './projections';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, LineLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {projections} from './projections';
 
 // The same Natural Earth datasets as examples/get-started/pure-js/basic.
@@ -47,14 +47,14 @@ for (let latitude = -90; latitude <= 90; latitude += 15) {
 }
 
 function createView(name: ProjectionName): CustomProjectionView {
-  const {projection, fromCrs, toCrs, fromBounds, toBounds, note} = projections[name];
+  const {projection, fromCrs, toCrs, fromBounds, getDistanceScale, note} = projections[name];
   document.getElementById('projection-note')!.textContent = note;
   return new CustomProjectionView({
     fromCrs,
     toCrs,
     projection,
     fromBounds,
-    toBounds,
+    getDistanceScale,
     resolution: 5,
     controller: true
   });
@@ -62,7 +62,7 @@ function createView(name: ProjectionName): CustomProjectionView {
 
 const deck = new Deck({
   views: createView('equalEarth'),
-  initialViewState: {center: [256, 256, 0], zoom: 0.8, pitch: 0, bearing: 0},
+  initialViewState: {center: [0, 0, 0], zoom: 1},
   layers: [
     new GeoJsonLayer({
       id: 'countries',
@@ -80,16 +80,47 @@ const deck = new Deck({
       transitions: {geometry: GEOMETRY_TRANSITION},
       data: graticules,
       getLineColor: [140, 170, 200, 100],
+      lineWidthUnits: 'pixels',
+      getLineWidth: 1,
       lineWidthMinPixels: 1
     }),
     new GeoJsonLayer({
       id: 'airports',
       transitions: {geometry: GEOMETRY_TRANSITION},
       data: AIRPORTS,
-      pointRadiusUnits: 'pixels',
-      getPointRadius: 2,
+      pointRadiusUnits: 'meters',
+      getPointRadius: 25000,
       getFillColor: [255, 170, 80],
       pickable: true
+    }),
+    new LineLayer({
+      id: 'altitude-probes',
+      data: [
+        [-90, 0],
+        [0, 0],
+        [90, 0],
+        [0, 60],
+        [0, -60]
+      ],
+      getSourcePosition: ([x, y]) => [x, y, 0],
+      getTargetPosition: ([x, y]) => [x, y, 500000],
+      getColor: [255, 100, 180],
+      widthUnits: 'pixels',
+      getWidth: 2
+    }),
+    new ScatterplotLayer({
+      id: 'altitude-probe-circles',
+      data: [
+        [-90, 0, 500000],
+        [0, 0, 500000],
+        [90, 0, 500000],
+        [0, 60, 500000],
+        [0, -60, 500000]
+      ],
+      getPosition: position => position,
+      radiusUnits: 'meters',
+      getRadius: 100000,
+      getFillColor: [255, 100, 180]
     })
   ],
   onHover: ({coordinate}) => {
