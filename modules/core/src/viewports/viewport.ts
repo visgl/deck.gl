@@ -48,8 +48,6 @@ export type ViewportOptions = {
   latitude?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
-  /** Explicit camera center in common space. Overrides the center derived from position. */
-  commonCenter?: number[];
   /** World-coordinate conversion installed before camera initialization. */
   preproject?: ((position: number[]) => [number, number, number]) | null;
   /** Inverse conversion paired with preproject, installed before camera initialization. */
@@ -462,9 +460,7 @@ export default class Viewport {
         : position;
     }
 
-    if (opts.commonCenter) {
-      this.center = opts.commonCenter.slice();
-    } else if (this.isGeospatial) {
+    if (this.isGeospatial) {
       // Determine camera center in common space
       const center = this.projectPosition([longitude, latitude, 0]);
 
