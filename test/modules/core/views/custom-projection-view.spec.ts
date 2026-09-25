@@ -12,10 +12,16 @@ import {
 } from '@deck.gl/core';
 
 const options = {
-  projection: {forward: position => position.slice(), inverse: position => position.slice()},
-  toBounds: [0, 0, 512, 512] as [number, number, number, number]
+  projection: {forward: position => position.slice(), inverse: position => position.slice()}
 };
-const viewState = {center: [256, 256, 0] as [number, number, number], zoom: 2};
+const viewState = {center: [0, 0, 0] as [number, number, number], zoom: 2};
+
+test('CustomProjectionView does not require toBounds', () => {
+  const view = new CustomProjectionView({projection: options.projection});
+  const viewport = view.makeViewport({width: 800, height: 600, viewState})!;
+  expect(viewport.preproject!([0, 0])).toEqual([256, 256, 0]);
+  expect(viewport.preproject!([40075016.6855 / 2, 0])).toEqual([512, 256, 0]);
+});
 
 test('Custom projection classes are exported only under experimental names', () => {
   for (const name of [
@@ -42,7 +48,7 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
     resolution: 2,
     fromCrs: 'local',
     toCrs: 'local-output',
-    getMetersPerUnit: () => [1 / 3, 1 / 3, 1],
+    getDistanceScale: () => [1 / 3, 1 / 3, 1],
     fromBounds: [0, 0, 400, 400]
   });
   const viewport = view.makeViewport({
@@ -65,8 +71,13 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
   });
   expect(viewport.padding).toMatchObject({left: 80, bottom: 20});
   const position = viewport.preproject!([450, -5, 2]);
-  expect(position).toEqual([400, 0, 2]);
-  expect(viewport.projectPosition(position)).toEqual([400, 0, 6]);
+  const normalizationScale = 512 / 40075016.6855;
+  expect(position).toEqual([256 + 400 * normalizationScale, 256, 2]);
+  expect(viewport.projectPosition([450, -5, 2])).toEqual([
+    position[0],
+    position[1],
+    6 * normalizationScale
+  ]);
 });
 
 test('CustomProjectionView clone, equality, state overrides and zero dimensions', () => {

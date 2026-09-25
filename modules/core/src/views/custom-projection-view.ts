@@ -8,9 +8,9 @@ import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
 import CustomProjectionController from '../controllers/custom-projection-controller';
 
-/** Common-space center and zoom with MapView-style pitch and bearing. */
+/** World-coordinate center and zoom with MapView-style pitch and bearing. */
 export type CustomProjectionViewState = {
-  /** Common-space center. Navigation fixes its Z component at zero. */
+  /** Center in fromCrs world coordinates. Navigation fixes its Z component at zero. */
   center: [number, number, number];
   /** Zoom level; one increment doubles the scale. */
   zoom: number;
@@ -37,7 +37,7 @@ export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewStat
     | 'fromCrs'
     | 'toCrs'
     | 'resolution'
-    | 'getMetersPerUnit'
+    | 'getDistanceScale'
     | 'orthographic'
   >;
 
