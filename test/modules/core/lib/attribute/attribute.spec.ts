@@ -1061,6 +1061,15 @@ test('Attribute#setBinaryValue', () => {
   expect(attribute.state.binaryAccessor, 'binaryAccessor is assigned').toBeTruthy();
   expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
+  attribute.clearNeedsUpdate();
+  expect(attribute.setBinaryValue(value), 'unchanged source without invalidation').toBeTruthy();
+  attribute.setNeedsUpdate('projection changed');
+  expect(
+    attribute.setBinaryValue(value),
+    'retransform unchanged source after invalidation'
+  ).toBeFalsy();
+  expect(attribute.needsUpdate(), 'preserve transform invalidation').toBeTruthy();
+
   expect(
     () => attribute.setBinaryValue([0, 1, 2, 3]),
     'should throw if external value is invalid'
