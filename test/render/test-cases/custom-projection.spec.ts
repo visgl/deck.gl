@@ -78,7 +78,7 @@ function checkPickedStates(probes: (typeof alaska)[]): TestCase['onAfterRender']
       done: () => {
         const viewport = params.deck.getViewports()[0];
         for (const {position, state} of probes) {
-          const [x, y] = viewport.project(viewport.preproject!(position));
+          const [x, y] = viewport.project(position);
           expect(x).toBeGreaterThan(0);
           expect(x).toBeLessThan(WIDTH);
           expect(y).toBeGreaterThan(0);
@@ -99,7 +99,7 @@ const testCases: TestCase[] = [
   {
     name: 'custom-projection-epsg5070-us-states',
     views: view,
-    viewState: {center: [256, 256, 0], zoom: 0.15},
+    viewState: {center: converter.unproject([-2400000, 3250000, 0]), zoom: 0.15},
     layers: createLayers(),
     onAfterRender: checkPickedStates([alaska, colorado]),
     goldenImage: './test/render/golden-images/custom-projection-epsg5070-us-states.png'
@@ -107,7 +107,12 @@ const testCases: TestCase[] = [
   {
     name: 'custom-projection-epsg5070-us-states-pitched',
     views: view,
-    viewState: {center: [256, 256, 0], zoom: 0.15, pitch: 35, bearing: 20},
+    viewState: {
+      center: converter.unproject([-2400000, 3250000, 0]),
+      zoom: 0.15,
+      pitch: 35,
+      bearing: 20
+    },
     layers: createLayers(),
     onAfterRender: checkPickedStates([alaska, colorado]),
     goldenImage: './test/render/golden-images/custom-projection-epsg5070-us-states-pitched.png'
