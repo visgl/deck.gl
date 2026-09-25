@@ -149,6 +149,10 @@ vec3 project_normal(vec3 vector) {
 }
 
 vec4 project_offset_(vec4 offset) {
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    // XY is already in common space, for both high and low position components.
+    return vec4(offset.xy, offset.z * project.commonUnitsPerWorldUnit.z, offset.w);
+  }
   float dy = offset.y;
   vec3 commonUnitsPerWorldUnit = project.commonUnitsPerWorldUnit + project.commonUnitsPerWorldUnit2 * dy;
   return vec4(offset.xyz * commonUnitsPerWorldUnit, offset.w);
@@ -288,6 +292,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+    project.projectionMode == PROJECTION_MODE_EXTERNAL ||
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {

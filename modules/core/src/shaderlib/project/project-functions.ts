@@ -8,6 +8,7 @@
  */
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
+import {PROJECTION_MODE} from '../../lib/constants';
 
 import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
@@ -102,8 +103,8 @@ export function getWorldPosition(
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
   }
 
-  if (viewport.preproject) {
-    return viewport.projectPosition(viewport.preproject([x, y, z]));
+  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
+    return viewport.projectPosition([x, y, z]);
   }
 
   switch (coordinateSystem) {
@@ -196,9 +197,10 @@ export function projectPosition(
   });
 
   if (offsetMode) {
-    const positionCommonSpace = viewport.projectPosition(
-      geospatialOrigin || shaderCoordinateOrigin
-    );
+    const positionCommonSpace =
+      viewport.projectionMode === PROJECTION_MODE.EXTERNAL
+        ? shaderCoordinateOrigin
+        : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
     vec3.sub(worldPosition, worldPosition, positionCommonSpace);
   }
 
