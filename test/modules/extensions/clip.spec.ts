@@ -3,14 +3,22 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {
+  LayerManager,
+  MapView,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
+import {lngLatToMercatorCommon} from '@deck.gl/extensions/utils/projection-utils';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils/vitest';
+import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
-import {geojson} from 'deck.gl-test/data';
+import {geojson, polygons, points} from 'deck.gl-test/data';
+
+const webglTest = device.type === 'webgl' ? test : test.skip;
 
 class DashArclengthPathLayer extends PathLayer {
   static layerName = 'DashArclengthPathLayer';
@@ -75,6 +83,93 @@ test('ClipExtension#clipByInstance', () => {
   ];
 
   testLayer({Layer: GeoJsonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+webglTest('ClipExtension#bounds uniform per viewport', () => {
+  const SF = {longitude: -122.42694203247012, latitude: 37.751537058389985, zoom: 11.5};
+  const SIZE = {width: 800, height: 450};
+  const mercatorViewport = new WebMercatorViewport({...SF, ...SIZE});
+  const globeViewport = new GlobeViewport({...SF, ...SIZE});
+  // Deliberately reversed corners: the geometry-mode bounds must be re-ordered to min/max
+  const clipBounds: [number, number, number, number] = [-122.39, 37.78, -122.47, 37.73];
+
+  const [ax, ay] = lngLatToMercatorCommon([clipBounds[0], clipBounds[1]]);
+  const [bx, by] = lngLatToMercatorCommon([clipBounds[2], clipBounds[3]]);
+  const mercatorBounds = [Math.min(ax, bx), Math.min(ay, by), Math.max(ax, bx), Math.max(ay, by)];
+
+  const expectBounds = (layer, expected: number[], message: string) => {
+    const {bounds} = getLayerUniforms(layer, 'clip');
+    expect(bounds, `${message}: has bounds`).toHaveLength(4);
+    for (let i = 0; i < 4; i++) {
+      expect(bounds[i], `${message}: bounds[${i}]`).toBeCloseTo(expected[i], 6);
+    }
+  };
+
+  // Geometry mode: bounds are compared with project_common_position_to_flat(geometry.position),
+  // i.e. Mercator common space on both flat and globe viewports
+  testLayer({
+    Layer: SolidPolygonLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        title: 'WebMercatorViewport',
+        viewport: mercatorViewport,
+        props: {
+          data: polygons,
+          getPolygon: f => f,
+          clipBounds,
+          extensions: [new ClipExtension()]
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.clipByInstance).toBe(false);
+          expectBounds(layer, mercatorBounds, 'mercator geometry mode');
+        }
+      },
+      {
+        title: 'GlobeViewport',
+        viewport: globeViewport,
+        updateProps: {},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.clipByInstance).toBe(false);
+          // Not the sphere XYZ that layer.projectPosition() yields on the globe
+          const sphere = layer.projectPosition([clipBounds[0], clipBounds[1], 0]);
+          expect(Math.hypot(sphere[0], sphere[1], sphere[2])).toBeCloseTo(256, 3);
+          expectBounds(layer, mercatorBounds, 'globe geometry mode');
+        }
+      }
+    ]
+  });
+
+  // Instance mode: bounds are compared with geometry.worldPosition (raw lng/lat) in every view
+  testLayer({
+    Layer: ScatterplotLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        title: 'WebMercatorViewport',
+        viewport: mercatorViewport,
+        props: {
+          data: points,
+          getPosition: d => d.COORDINATES,
+          clipBounds,
+          extensions: [new ClipExtension()]
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.clipByInstance).toBe(true);
+          expectBounds(layer, clipBounds, 'mercator instance mode');
+        }
+      },
+      {
+        title: 'GlobeViewport',
+        viewport: globeViewport,
+        updateProps: {},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.clipByInstance).toBe(true);
+          expectBounds(layer, clipBounds, 'globe instance mode');
+        }
+      }
+    ]
+  });
 });
 
 test('ClipExtension#WebGPU GeoJson sublayers', async ({skip}) => {
