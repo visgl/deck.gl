@@ -27,7 +27,16 @@ const data = [
 ];
 const modelMatrix = new Matrix4().translate([10, 20, 0]);
 const project = ([x, y, z = 0]: number[]): [number, number, number] => [x * x, y * 3, z];
-const commonData = data.map(p => project(modelMatrix.transformAsPoint(p)));
+const normalizationScale = 512 / 40075016.6855;
+// Use meter-scale projected extents so the data spans multiple aggregation cells.
+const projectedUnit = 100000;
+const getCommonData = (scale = 1) =>
+  data.map(p =>
+    project(modelMatrix.transformAsPoint(p)).map((value, i) =>
+      i < 2 ? 256 + value * scale * projectedUnit * normalizationScale : value * scale
+    )
+  );
+const commonData = getCommonData();
 
 function createViewport(signature = 'initial', scale = 1) {
   const viewport = new CustomProjectionViewport({
@@ -36,10 +45,13 @@ function createViewport(signature = 'initial', scale = 1) {
     toCrs: signature,
     fromCrs: '+units=m',
     projection: {
-      forward: p => project(p).map(v => v * scale),
-      inverse: ([x, y, z = 0]) => [Math.sqrt(x / scale), y / (3 * scale), z / scale]
-    },
-    toBounds: [0, 0, 512, 512]
+      forward: p => project(p).map((v, i) => v * scale * (i < 2 ? projectedUnit : 1)),
+      inverse: ([x, y, z = 0]) => [
+        Math.sqrt(x / (scale * projectedUnit)),
+        y / (3 * scale * projectedUnit),
+        z / scale
+      ]
+    }
   });
   // Keep cell sizes identical to the Cartesian reference: these tests isolate
   // position preprocessing, not the converter's meter-scale distortion.
@@ -154,9 +166,13 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
       expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
       if (layer instanceof HexagonLayer && reference instanceof HexagonLayer) {
         const picking = {info: {index: 0}};
-        expect(layer.getPickingInfo(picking as any).object?.position).toEqual(
-          reference.getPickingInfo({info: {index: 0}} as any).object?.position
+        const referencePosition = reference.getPickingInfo({info: {index: 0}} as any).object!
+          .position;
+        const worldPosition = layer.getPickingInfo(picking as any).object!.position;
+        const expectedWorld = viewport.unprojectFlat(
+          referencePosition.map((value, i) => value + layer.state.hexOriginCommon[i])
         );
+        worldPosition.forEach((value, i) => expect(value).toBeCloseTo(expectedWorld[i], 8));
       }
       if (layer instanceof ContourLayer && reference instanceof ContourLayer) {
         expect(layer.state.contourData).toEqual(reference.state.contourData);
@@ -197,7 +213,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
       layer.activateViewport(changed);
       manager.updateLayers();
       layer = manager.getLayers().find(l => l.id === layer.id) as typeof layer;
-      const updatedReference = reference.clone({data: commonData.map(p => p.map(v => v * 2))});
+      const updatedReference = reference.clone({data: getCommonData(2)});
       referenceManager.setLayers([updatedReference]);
       expect(bins(layer)).toEqual(bins(updatedReference));
     } finally {
