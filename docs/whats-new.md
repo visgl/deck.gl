@@ -47,6 +47,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
 - [`BrushingExtension`](./api-reference/extensions/brushing-extension.md) works in `GlobeView`, comparing `brushingRadius` against the 3D distance between the pointer and each object.
+- [`BrushingExtension`](./api-reference/extensions/brushing-extension.md#brushingradius) measures `brushingRadius` in meters on `MapView` at every zoom level; below zoom 12 it was previously shrunk by cos(latitude).
 - Pointer-anchored zoom now rotates the camera frame like a physical ball, keeping steering smooth and consistent around the poles while allowing bearing to evolve naturally.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 

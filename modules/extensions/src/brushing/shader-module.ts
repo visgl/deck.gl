@@ -47,6 +47,13 @@ const vertex = /* glsl */ `
     vec3 source_commonspace = project_position(vec3(position, 0.0));
     vec3 target_commonspace = project_position(vec3(brushing.mousePos, 0.0));
     float distance = length((target_commonspace - source_commonspace) / project.commonUnitsPerMeter);
+    if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
+        project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+        project.pseudoMeters == false) {
+      // Below the auto-offset zoom commonUnitsPerMeter is equatorial; scale by latitude so the
+      // radius is true meters, as project_size() does
+      distance /= project_size_at_latitude(0.5 * (brushing.mousePos.y + position.y));
+    }
 
     return distance <= brushing.radius;
   }
