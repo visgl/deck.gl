@@ -97,7 +97,7 @@ When displaying multiple views with different projections, create a separate lay
 - Supported layers are `ScatterplotLayer`, `PathLayer` and `SolidPolygonLayer`, including their use by `PolygonLayer` and the corresponding `GeoJsonLayer` sublayers. Other layers are not yet supported.
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
 - Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
-- The layer's `coordinateSystem` and `coordinateOrigin` are ignored when used with this view. Supply positions in the coordinates expected by `projection.forward`. `modelMatrix` is applied before conversion.
+- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in `fromCrs`. `modelMatrix` is applied before conversion,  and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in normalized `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in `fromCrs`. They may be unavailable where `projection.inverse` cannot return a valid position.
 

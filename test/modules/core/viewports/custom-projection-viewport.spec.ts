@@ -341,6 +341,20 @@ test('CustomProjectionView uniforms and picking use the correct coordinate space
   expect(invalid.unproject([400, 300]).every(Number.isNaN)).toBe(true);
 });
 
+test('External projection uniforms do not inspect the layer position conversion callback', () => {
+  const viewport = new CustomProjectionViewport(options);
+  Object.defineProperty(viewport, 'preproject', {
+    get() {
+      throw new Error('Projection uniforms must not access preproject');
+    }
+  });
+  for (const coordinateSystem of ['default', 'cartesian'] as const) {
+    const uniforms = project.getUniforms({viewport, coordinateSystem});
+    expect(uniforms.projectionMode).toBe(viewport.projectionMode);
+    expect(uniforms.commonUnitsPerWorldUnit).toEqual(viewport.distanceScales.unitsPerMeter);
+  }
+});
+
 test('CustomProjectionViewport preserves converter altitude and applies the distance scale', () => {
   const viewport = new CustomProjectionViewport({
     ...options,
