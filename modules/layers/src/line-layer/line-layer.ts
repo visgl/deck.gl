@@ -189,7 +189,8 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   draw({uniforms}): void {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
+    const wrapLongitude = this.props.wrapLongitude && !this.context.viewport.preproject;
     const model = this.state.model!;
     const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],

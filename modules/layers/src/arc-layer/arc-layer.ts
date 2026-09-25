@@ -260,7 +260,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMinPixels,
       widthMaxPixels,
       greatCircle,
-      useShortestPath: wrapLongitude
+      useShortestPath: wrapLongitude && !this.context.viewport.preproject
     };
 
     const model = this.state.model!;
