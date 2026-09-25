@@ -5,6 +5,7 @@
 import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
 import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
+import {projectBoundsToFlatCommon} from '../utils/projection-utils';
 
 const defaultProps = {
   maskId: '',
@@ -71,10 +72,12 @@ export default class MaskExtension extends LayerExtension {
           ? COORDINATE_SYSTEM.LNGLAT
           : COORDINATE_SYSTEM.CARTESIAN;
       }
-      const opts = {modelMatrix: null, fromCoordinateOrigin, fromCoordinateSystem};
-      const bl = this.projectPosition([bounds[0], bounds[1], 0], opts);
-      const tr = this.projectPosition([bounds[2], bounds[3], 0], opts);
-      maskProps.bounds = [bl[0], bl[1], tr[0], tr[1]];
+      // Flat common space, matching project_common_position_to_flat() in the shader
+      maskProps.bounds = projectBoundsToFlatCommon(this, bounds, {
+        modelMatrix: null,
+        fromCoordinateOrigin,
+        fromCoordinateSystem
+      });
     } else {
       if (maskId) {
         log.warn(`Could not find a mask layer with id: ${maskId}`)();
