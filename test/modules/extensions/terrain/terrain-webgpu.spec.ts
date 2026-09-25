@@ -5,6 +5,7 @@
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 import {luma, Buffer, Texture, type Device, type Framebuffer} from '@luma.gl/core';
 import {webgl2Adapter, type WebGLDevice} from '@luma.gl/webgl';
+import {webglDevice as sharedWebGLDevice} from '@luma.gl/test-utils';
 import {webgpuAdapter, type WebGPUDevice} from '@luma.gl/webgpu';
 import {COORDINATE_SYSTEM, Deck, OrbitView, type Layer} from '@deck.gl/core';
 import {
@@ -99,12 +100,20 @@ afterEach(async () => {
   framebuffer?.destroy();
   colorTexture?.destroy();
   device?.destroy();
+  // WebGLDevice.destroy does not release the browser context. Without this,
+  // per-test canvases evict the shared device used by later lifecycle tests.
+  if (device?.type === 'webgl') {
+    (device as WebGLDevice).gl.getExtension('WEBGL_lose_context')?.loseContext();
+  }
   container?.remove();
   deck = undefined;
   device = undefined;
   framebuffer = undefined;
   colorTexture = undefined;
   expect(validationErrors.splice(0)).toEqual([]);
+  expect(sharedWebGLDevice?.isLost, 'The shared lifecycle-test context must remain valid').toBe(
+    false
+  );
 });
 
 function renderFrame(
