@@ -8,40 +8,57 @@ This API is experimental and may change. Import it as `_CustomProjectionViewport
 
 ```js
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
+import proj4 from 'proj4';
 
 const viewport = new CustomProjectionViewport({
   width: 800,
   height: 600,
-  projection: {forward: p => p.slice(), inverse: p => p.slice()},
+  projection: proj4('EPSG:4326', 'EPSG:3857'),
   fromCrs: 'EPSG:4326',
-  toCrs: 'EPSG:4326',
-  toBounds: [-180, -90, 180, 90],
-  center: [256, 256, 0],
+  toCrs: 'EPSG:3857',
+  center: [0, 0, 0],
   zoom: 0,
   pitch: 30,
   bearing: 20
 });
 
-const common = viewport.preproject([0, 0]); // [256, 256, 0]
-const pixel = viewport.project(common); // [400, 300, depth]
-const input = viewport.postUnproject(viewport.unproject(pixel)); // [0, 0, 0]
+const common = viewport.projectPosition([0, 0, 0]); // [256, 256, 0]
+const pixel = viewport.project([0, 0, 0]); // [400, 300, depth]
+const world = viewport.unproject(pixel); // [0, 0, 0]
 ```
 
 ## Constructor
 
-Accepts the [View's projection options](./custom-projection-view.md#constructor), plus `width`, `height`, `x`, `y`, pixel `padding`, `zoom` (default `0`), `center` (default `[256, 256, 0]`), `pitch` (default `0`) and `bearing` (default `0`). The view state and viewport both use MapView-style `pitch` and `bearing`.
+Accepts the [View's projection options](./custom-projection-view.md#constructor), plus `width`, `height`, `x`, `y`, pixel `padding`, `zoom` (default `0`), `center` in `fromCrs` (default `[0, 0, 0]`), `pitch` (default `0`) and `bearing` (default `0`). The view state and viewport both use MapView-style `pitch` and `bearing`.
 
-Zero width or height becomes `1`. Bounds must be finite and increasing. `resolution` must be finite and positive. The camera uses the same default field of view and clipping multipliers as `WebMercatorViewport`. `orthographic` defaults to `false`.
+`toBounds` is optional. It defaults to `[-EC/2, -EC/2, EC/2, EC/2]`, where `EC = 40075016.6855`. This matches Web Mercator's common-space mapping in `MapView`. Override it when another scale or origin is needed.
 
-## Coordinate Contract
+Zero width or height becomes `1`. Bounds must be finite and increasing. `resolution` must be finite and non-negative; its default of `0` disables subdivision. Set a positive value in `fromCrs` units to enable subdivision. The camera uses the same default field of view and clipping multipliers as `WebMercatorViewport`. `orthographic` defaults to `false`.
 
-Supply layer positions in the coordinates accepted by `projection.forward`, such as longitude, latitude and altitude. The converter returns projected X/Y coordinates; `projection.inverse` converts them back, or returns `null` outside its domain.
+### Coordinate Contract
 
-Altitude (Z) defaults to meters, including any Z returned by the converter. If your world coordinates use another vertical unit, describe it with the third component of `getMetersPerUnit`. If the forward converter omits Z, the input altitude is retained, defaulting to zero. deck.gl handles altitude scaling; the converter should not scale altitude to match its projected X/Y units. Positive Z points out of the map.
+Layer data is supplied in `fromCrs`, for example `fromCrs:'WGS84'` indicates that a XYZ position represents longitude, latitude and altitude. `projection.forward` converts them to `toCrs`; `projection.inverse` converts them back, or returns `null` outside its domain. If `forward` omits Z, the original Z value is retained, defaulting to zero.
 
-Conversion receives a copy of the input array. `fromBounds` clamps X/Y but does not alter altitude.
+If `fromBounds` is supplied, X and Y are clamped by the given range before projected.
 
-World coordinates are expressed in `fromCrs`. deck.gl makes a best effort to deduce their units from `fromCrs`. When it cannot, supply `getMetersPerUnit(worldPosition)` to override the default longitude/latitude estimation. The callback returns physical meters per world-coordinate unit along X, Y and Z. For example, X/Y in feet and altitude in meters uses `[0.3048, 0.3048, 1]`.
+### Meter Size
+
+deck.gl layers allows an app to specify [size units](../../developer-guide/coordinate-systems.md#dimensions) in meters. But even when `toCrs` is expressed in meters, one meter on the map may not represent one meter on the ground. All projections that flatten the Earth's spherical surface onto a 2D plane end up distorting distances and/or angles somehow. This **projection distortion** can vary by location and direction: for example, Web Mercator stretches distances more strongly toward the poles. See [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for how projections distort local shapes and sizes.
+
+This viewport projects meter sizes (altitude, width, radius, etc.) so that they are true to ground distance.
+
+By default, it makes a best effort to estimate the real-world distance between two coordinates in `fromCrs`. If `fromCrs` is detected as lng-lat in degrees, distance is calculated along the spherical surface of the earth. If `fromCrs` units is detected as meters (e.g. UTM) distance is calculated using their planar difference. Otherwise, no distortion correction is applied.
+
+The user may override the default meter size mapping by supplying a `getDistanceScale` callback:
+
+```ts
+getDistanceScale(positionInToCrs: [x: number, y: number, z: number]) => [xScale: number, yScale: number, zScale: number]
+```
+
+The returned vector represents the scaling factor to convert 1 unit along each axis of `toCrs` to real-world meters at the given position. The X and Y components describe local horizontal distance adjusted for projection distortion. The Z component is usually `1`, as common 2D projections do not process the altitude.
+
+Specify `getDistanceScale: () => [1, 1, 1]` to suppress distortion correction.
+
 
 ## Methods and Properties
 
@@ -49,31 +66,31 @@ Inherits [Viewport](./viewport.md) methods, with the following coordinate semant
 
 ### `preproject(position)`
 
-Converts an input position to `[commonX, commonY, altitudeInMeters]`. It is independent of the current camera position, zoom, pitch and bearing.
+Converts world coordinates to preprojected XY, preserving Z returned by the converter. It is independent of the current camera position, zoom, pitch and bearing.
 
 ### `postUnproject(position)`
 
-Converts preprojected X/Y and altitude in meters back to input coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `fromBounds`, if supplied.
+Converts preprojected XY and Z in the converter's altitude units back to world coordinates. Returns `null` when the inverse throws, returns non-finite values, or fails an XY forward round-trip check. A valid inverse is then clamped to `fromBounds`, if supplied.
 
 ### `project(position, options)`
 
-Projects preprojected X/Y and altitude in meters to screen pixels. Call `preproject` first for input coordinates. The inherited `topLeft` option defaults to `true`. Three-component input returns pixel depth as its third component.
+Projects world coordinates in `fromCrs` to screen pixels. The inherited `topLeft` option defaults to `true`. Three-component positions return pixel depth as their third component.
 
 ### `unproject(pixels, options)`
 
-Returns preprojected X/Y and altitude in meters. If pixel depth is absent, `targetZ` specifies altitude in meters, defaulting to zero. Call `postUnproject` to recover input coordinates. `topLeft` defaults to `true`.
+Returns world coordinates in `fromCrs`. If pixel depth is absent, `targetZ` specifies altitude, defaulting to zero; this assumes the converter leaves altitude unchanged. `topLeft` defaults to `true`. Coordinates are non-finite when the converter cannot invert the position.
 
 ### `projectPosition`, `unprojectPosition`, `projectFlat`, `unprojectFlat`
 
-These do not call the converter. `projectPosition` converts altitude in meters to common Z; `unprojectPosition` reverses that conversion. Both preserve X/Y. The flat methods return X/Y unchanged.
+`projectPosition` converts world XYZ to common XYZ, including the converter's altitude conversion and the rendering scale. `unprojectPosition` reverses it. `projectFlat` and `unprojectFlat` perform the XY conversion between world and common coordinates.
 
 ### `panByPosition(position, pixel)`
 
-Returns `{center}` that keeps a common-space ground point under the requested pixel. The returned center has Z `0`.
+Returns `{center}` that keeps a world-coordinate ground point under the requested pixel. The returned center has Z `0`.
 
 ### `getDistanceScales()`
 
-Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. These affect meter-sized styling, not coordinate normalization. The estimates combine the converter's local distortion with world-coordinate units deduced from `fromCrs` or supplied by `getMetersPerUnit`.
+Returns local `unitsPerMeter` and `metersPerUnit` estimates at the current center. X and Y describe independent axis scales. Z combines planar distortion with the third component of `getDistanceScale` and is used both for altitude and uniform, aspect-ratio-preserving sizing.
 
 ### `projectionSignature`
 
