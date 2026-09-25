@@ -163,6 +163,7 @@
         "items": [
           "api-reference/core/viewport",
           "api-reference/core/globe-viewport",
+          "api-reference/core/custom-projection-viewport",
           "api-reference/core/web-mercator-viewport"
         ]
       },
@@ -173,6 +174,7 @@
           "api-reference/core/view",
           "api-reference/core/map-view",
           "api-reference/core/globe-view",
+          "api-reference/core/custom-projection-view",
           "api-reference/core/first-person-view",
           "api-reference/core/orthographic-view",
           "api-reference/core/orbit-view"
@@ -186,6 +188,7 @@
           "api-reference/core/map-controller",
           "api-reference/core/terrain-controller",
           "api-reference/core/globe-controller",
+          "api-reference/core/custom-projection-controller",
           "api-reference/core/first-person-controller",
           "api-reference/core/orthographic-controller",
           "api-reference/core/orbit-controller"
