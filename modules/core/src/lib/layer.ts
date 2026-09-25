@@ -290,6 +290,26 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // Public API for custom layer implementation
 
+  /** Projects a position attribute's coordinates to screen pixels.
+   * Accepts the output of this layer's position transform, without applying it again.
+   * Layers without preprojection, including explicit Cartesian layers, retain their
+   * normal model matrix and coordinate settings.
+   */
+  projectPackedPosition(xyz: number[]): number[] {
+    assert(this.internalState);
+    const viewport = this.internalState.viewport || this.context.viewport;
+    if (!viewport.preproject || this.props.coordinateSystem === 'cartesian') {
+      return this.project(xyz);
+    }
+    const commonPosition = getWorldPosition(xyz, {
+      viewport,
+      coordinateSystem: 'cartesian',
+      coordinateOrigin: [0, 0, 0]
+    });
+    const [x, y, z] = worldToPixels(commonPosition, viewport.pixelProjectionMatrix);
+    return xyz.length === 2 ? [x, y] : [x, y, z];
+  }
+
   /** `true` if this layer renders other layers */
   get isComposite(): boolean {
     return false;
