@@ -18,6 +18,7 @@ class ProjectionViewport extends Viewport {
     zoom = 0
   ) {
     super({width: 400, height: 300, position: [10, 20, 0], zoom});
+    this.distanceScales = {...this.distanceScales, unitsPerWorldUnit: [1, 1, 1]};
     if (projected) {
       this.preproject = ([x, y, z = 0]) => [x * 2, y * 3, z * 4];
       this.postUnproject = ([x, y, z]) => [x / 2, y / 3, z / 4];

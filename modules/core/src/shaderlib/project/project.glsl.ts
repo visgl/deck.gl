@@ -149,10 +149,6 @@ vec3 project_normal(vec3 vector) {
 }
 
 vec4 project_offset_(vec4 offset) {
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
-    // Both preprojected and Cartesian positions use common-space XY and meter Z.
-    return vec4(offset.xy, offset.z * project.commonUnitsPerWorldUnit.z, offset.w);
-  }
   float dy = offset.y;
   vec3 commonUnitsPerWorldUnit = project.commonUnitsPerWorldUnit + project.commonUnitsPerWorldUnit2 * dy;
   return vec4(offset.xyz * commonUnitsPerWorldUnit, offset.w);

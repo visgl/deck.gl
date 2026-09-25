@@ -50,6 +50,7 @@ export function getOffsetOrigin(
 ): {
   geospatialOrigin: Vec3 | null;
   shaderCoordinateOrigin: Vec3;
+  commonOrigin?: Vec3;
   offsetMode: boolean;
 } {
   if (coordinateOrigin.length < 3) {
@@ -57,6 +58,7 @@ export function getOffsetOrigin(
   }
 
   let shaderCoordinateOrigin = coordinateOrigin;
+  let commonOrigin: Vec3 | undefined;
   if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
     coordinateSystem = 'cartesian';
     coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
@@ -102,19 +104,23 @@ export function getOffsetOrigin(
       break;
 
     case PROJECTION_MODE.IDENTITY:
-    case PROJECTION_MODE.EXTERNAL:
-      shaderCoordinateOrigin = (
-        viewport.projectionMode === PROJECTION_MODE.EXTERNAL ? viewport.center : viewport.position
-      ).map(Math.fround) as Vec3;
+      shaderCoordinateOrigin = viewport.position.map(Math.fround) as Vec3;
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
-      if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
-        geospatialOrigin = null;
-        shaderCoordinateOrigin[2] *= viewport.distanceScales.metersPerUnit[2];
-        shaderCoordinateOrigin = shaderCoordinateOrigin.map(
-          (value, i) => value - coordinateOrigin[i]
-        ) as Vec3;
-      }
       break;
+
+    case PROJECTION_MODE.EXTERNAL: {
+      geospatialOrigin = null;
+      const scale = viewport.distanceScales.unitsPerWorldUnit!;
+      // Round in the units stored in position attributes, so the GPU receives
+      // this exact origin. Derive its common position from the same value.
+      shaderCoordinateOrigin = viewport.center.map((value, i) =>
+        Math.fround(value / scale[i] - coordinateOrigin[i])
+      ) as Vec3;
+      commonOrigin = shaderCoordinateOrigin.map(
+        (value, i) => (value + coordinateOrigin[i]) * scale[i]
+      ) as Vec3;
+      break;
+    }
 
     case PROJECTION_MODE.GLOBE:
       offsetMode = false;
@@ -126,7 +132,7 @@ export function getOffsetOrigin(
       offsetMode = false;
   }
 
-  return {geospatialOrigin, shaderCoordinateOrigin, offsetMode};
+  return {geospatialOrigin, shaderCoordinateOrigin, commonOrigin, offsetMode};
 }
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -150,7 +156,7 @@ function calculateMatrixAndOffset(
   let projectionCenter = ZERO_VECTOR;
   let originCommon: Vec4 = ZERO_VECTOR;
   let cameraPosCommon: Vec3 = viewport.cameraPosition as Vec3;
-  const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
+  const {geospatialOrigin, shaderCoordinateOrigin, commonOrigin, offsetMode} = getOffsetOrigin(
     viewport,
     coordinateSystem,
     coordinateOrigin
@@ -162,9 +168,7 @@ function calculateMatrixAndOffset(
     // (avoids doing this addition in 32 bit precision in GLSL)
     // @ts-expect-error the 4th component is assigned below
     originCommon =
-      viewport.projectionMode === PROJECTION_MODE.EXTERNAL
-        ? viewport.center.map(Math.fround)
-        : viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
       cameraPosCommon[0] - originCommon[0],
@@ -332,7 +336,8 @@ function calculateViewportUniforms({
 
     focalDistance,
     commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
+    commonUnitsPerWorldUnit: (distanceScales.unitsPerWorldUnit ||
+      distanceScales.unitsPerMeter) as Vec3,
     commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     wrapLongitude: false,

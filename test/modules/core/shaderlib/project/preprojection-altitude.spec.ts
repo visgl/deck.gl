@@ -10,37 +10,37 @@ import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-function
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
 // External projection must not acquire a geospatial Cartesian scale override.
+const normalizationScale = 512 / 40075016.6855;
 class MeterAltitudeViewport extends Viewport {
   longitude = 0;
   latitude = 0;
-
-  get projectionMode() {
-    return PROJECTION_MODE.EXTERNAL;
-  }
 
   constructor(geospatial: boolean) {
     super({
       width: 800,
       height: 600,
-      distanceScales: {unitsPerMeter: [2, 2, 2], metersPerUnit: [0.5, 0.5, 0.5]}
+      preproject: ([x, y, z = 0]) => [x * 3, y * 4, z],
+      postUnproject: ([x, y, z = 0]) => [x / 3, y / 4, z],
+      distanceScales: {
+        unitsPerWorldUnit: Array(3).fill(normalizationScale),
+        unitsPerMeter: Array(3).fill(2 * normalizationScale),
+        metersPerUnit: Array(3).fill(1 / (2 * normalizationScale))
+      }
     });
     this.isGeospatial = geospatial;
-    this.preproject = ([x, y, z = 0]) => [x * 3, y * 4, z];
-    this.postUnproject = ([x, y, z]) => [x / 3, y / 4, z];
   }
 
-  getDistanceScales() {
-    return {...this.distanceScales, unitsPerMeter2: [0, 0, 0]};
+  get projectionMode() {
+    return PROJECTION_MODE.EXTERNAL;
   }
 
-  projectFlat(position: number[]): [number, number] {
-    const projected = this.preproject ? this.preproject(position) : position;
-    return [projected[0], projected[1]];
+  projectPosition(position: number[]): [number, number, number] {
+    const [x, y, z] = this.preproject!(position);
+    return [x * normalizationScale, y * normalizationScale, z * normalizationScale];
   }
 
-  unprojectFlat(position: number[]): [number, number] {
-    const world = this.postUnproject!(position)!;
-    return [world[0], world[1]];
+  unprojectPosition(position: number[]): [number, number, number] {
+    return this.postUnproject!(position.map(value => value / normalizationScale))!;
   }
 }
 
@@ -49,16 +49,20 @@ for (const geospatial of [false, true]) {
     const viewport = new MeterAltitudeViewport(geospatial);
     const position = viewport.preproject!([10, 20, 50]);
     expect(position).toEqual([30, 80, 50]);
-    expect(viewport.projectPosition([10, 20, 50])).toEqual([30, 80, 100]);
+    expect(viewport.projectPosition([10, 20, 50])).toEqual([
+      30 * normalizationScale,
+      80 * normalizationScale,
+      50 * normalizationScale
+    ]);
     expect(
       getWorldPosition([10, 20, 50], {
         viewport,
         coordinateSystem: 'default',
         coordinateOrigin: [0, 0, 0]
       })
-    ).toEqual([30, 80, 100]);
+    ).toEqual([30 * normalizationScale, 80 * normalizationScale, 50 * normalizationScale]);
     expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual(
-      viewport.distanceScales.unitsPerMeter
+      viewport.distanceScales.unitsPerWorldUnit
     );
     viewport
       .unproject(viewport.project(position))
@@ -79,7 +83,9 @@ for (const geospatial of [false, true]) {
         varying: 'result',
         shaderInputProps: {project: {viewport}, test: {uPos: position, uPos64Low: [0, 0, 0]}}
       });
-      [30, 80, 100].forEach((value, i) => expect(result[i]).toBeCloseTo(value));
+      [30 * normalizationScale, 80 * normalizationScale, 50 * normalizationScale].forEach(
+        (value, i) => expect(result[i]).toBeCloseTo(value)
+      );
     }
   );
 }
