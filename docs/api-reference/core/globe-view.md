@@ -25,7 +25,7 @@ The goal of `GlobeView` is to provide a generic solution to rendering and naviga
 - Support for `TileLayer` and `MVTLayer` is experimental.
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
-  + `TerrainLayer`
+- Support for `TerrainLayer` and [TerrainExtension](../extensions/terrain-extension.md) is experimental.
 - [MaskExtension](../extensions/mask-extension.md) is not supported in this view.
 
 When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](../geo-layers/great-circle-layer.md).
