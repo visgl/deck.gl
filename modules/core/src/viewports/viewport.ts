@@ -47,6 +47,12 @@ export type ViewportOptions = {
   latitude?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
+  /** Explicit camera center in common space. Overrides the center derived from position. */
+  commonCenter?: number[];
+  /** World-coordinate conversion installed before camera initialization. */
+  preproject?: ((position: number[]) => [number, number, number]) | null;
+  /** Inverse conversion paired with preproject, installed before camera initialization. */
+  postUnproject?: ((position: number[]) => [number, number, number] | null) | null;
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
@@ -158,11 +164,12 @@ export default class Viewport {
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
   resolution?: number;
-  /** Optional world-coordinate conversion before rendering: XY in common space, Z in meters.
-   * projectPosition must accept this result and convert altitude to common units exactly once.
+  /** Optional world-coordinate conversion before rendering: XY in common space,
+   * Z in this viewport's altitude units (meters by default).
+   * Used for position attributes; projectPosition still accepts world coordinates.
    */
   preproject: ((position: number[]) => [number, number, number]) | null = null;
-  /** Inverse of preproject: accepts common-space XY and meter Z; null means outside the domain. */
+  /** Inverse of preproject: accepts common-space XY and viewport altitude units; null means outside the domain. */
   postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
   /** Equal signatures must describe identical preprojection, including normalization. */
   get projectionSignature(): unknown {
@@ -187,6 +194,8 @@ export default class Viewport {
     this.focalDistance = opts.focalDistance || 1;
     this.position = opts.position || ZERO_VECTOR;
     this.modelMatrix = opts.modelMatrix || null;
+    this.preproject = opts.preproject || null;
+    this.postUnproject = opts.postUnproject || null;
 
     const {longitude, latitude} = opts;
     this.isGeospatial = Number.isFinite(latitude) && Number.isFinite(longitude);
@@ -452,7 +461,9 @@ export default class Viewport {
         : position;
     }
 
-    if (this.isGeospatial) {
+    if (opts.commonCenter) {
+      this.center = opts.commonCenter.slice();
+    } else if (this.isGeospatial) {
       // Determine camera center in common space
       const center = this.projectPosition([longitude, latitude, 0]);
 

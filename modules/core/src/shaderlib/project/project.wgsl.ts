@@ -173,6 +173,10 @@ fn project_normal(vector: vec3<f32>) -> vec3<f32> {
 
 // Applies a scale offset based on y-offset (dy)
 fn project_offset_(offset: vec4<f32>) -> vec4<f32> {
+  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+    // XY is already in common space, for both high and low position components.
+    return vec4<f32>(offset.xy, offset.z * project.commonUnitsPerWorldUnit.z, offset.w);
+  }
   let dy: f32 = offset.y;
   let commonUnitsPerWorldUnit = project.commonUnitsPerWorldUnit + project.commonUnitsPerWorldUnit2 * dy;
   return vec4<f32>(offset.xyz * commonUnitsPerWorldUnit, offset.w);
@@ -294,6 +298,7 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+      project.projectionMode == PROJECTION_MODE_EXTERNAL ||
       (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
        (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
         project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
