@@ -1,6 +1,8 @@
 # CustomProjectionView (Experimental)
 
-`CustomProjectionView` renders a planar map using application-supplied coordinate conversion functions. It uses [CustomProjectionViewport](./custom-projection-viewport.md) and [CustomProjectionController](./custom-projection-controller.md).
+`CustomProjectionView` renders a planar map using application-supplied coordinate conversion functions. It supports 2D map projections, not globe projections or arbitrary 3D coordinate transformations. Layers can still display altitude and extruded geometry. It uses [CustomProjectionViewport](./custom-projection-viewport.md) and [CustomProjectionController](./custom-projection-controller.md).
+
+The converter returns XYZ in **map meters**: X/Y locate a point on the planar map, and Z represents altitude in meters. World coordinates can use other units, provided the converter converts them to map meters. See the [coordinate contract](./custom-projection-viewport.md#coordinate-contract).
 
 This API is experimental and may change. Import it as `_CustomProjectionView` from `@deck.gl/core` or `deck.gl`.
 
@@ -51,11 +53,11 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | --- | --- | --- |
 | `projection` | Required | `{forward, inverse}` conversion functions. See the [coordinate contract](./custom-projection-viewport.md#coordinate-contract). |
 | `fromCrs` | `'WGS84'` | CRS name or PROJ string describing world coordinates. |
-| `toCrs` | None | Output CRS name or PROJ string. |
+| `toCrs` | None | Planar, meter-based map CRS name or PROJ string. |
 | `fromBounds` | None | The projection's valid domain, expressed as `[minX, minY, maxX, maxY]` in world coordinates (`fromCrs`). |
 | `toBounds` | `[-EC/2, -EC/2, EC/2, EC/2]` | Extent expressed as `[minX, minY, maxX, maxY]` in `toCrs`, with `EC = 40075016.6855` (Earth circumference). Aligns Web Mercator's common space with `MapView` and keeps a consistent coordinate scale across projections. Override to adjust common-space scale and origin. Does not clip geometry. |
 | `resolution` | `0` | Set a positive value in world-coordinate units (`fromCrs`) to subdivide paths and polygon edges so they follow the projection. Smaller positive values produce smoother curves but take longer to process. `0` disables subdivision. |
-| `getDistanceScale` | None | `(positionInToCrs) => [x, y, z]`: real-world meters per unit along the axes of `toCrs`, to adjust for projection distortion. See [meter size](./custom-projection-viewport.md#meter-size). |
+| `getDistanceScale` | None | `([x, y]) => [xScale, yScale]`, with `[x, y]` in `toCrs`: real-world ground meters per map meter along X/Y, to adjust for horizontal projection distortion. Altitude does not affect scale. See [meter size](./custom-projection-viewport.md#meter-size). |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
 Coordinates outside `fromBounds` are clamped to its boundary, not clipped. `fromBounds` describes the projection's valid domain. `toBounds` controls how coordinates in `toCrs` is mapped to common space.
