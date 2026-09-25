@@ -16,11 +16,11 @@ const options = {
 };
 const viewState = {center: [0, 0, 0] as [number, number, number], zoom: 2};
 
-test('CustomProjectionView does not require toBounds', () => {
+test('CustomProjectionView uses the fixed Earth-circumference scale', () => {
   const view = new CustomProjectionView({projection: options.projection});
   const viewport = view.makeViewport({width: 800, height: 600, viewState})!;
-  expect(viewport.preproject!([0, 0])).toEqual([256, 256, 0]);
-  expect(viewport.preproject!([40075016.6855 / 2, 0])).toEqual([512, 256, 0]);
+  expect(viewport.projectPosition([0, 0])).toEqual([0, 0, 0]);
+  expect(viewport.projectPosition([40075016.6855 / 2, 0])).toEqual([256, 0, 0]);
 });
 
 test('Custom projection classes are exported only under experimental names', () => {
@@ -72,11 +72,11 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
   expect(viewport.padding).toMatchObject({left: 80, bottom: 20});
   const position = viewport.preproject!([450, -5, 2]);
   const normalizationScale = 512 / 40075016.6855;
-  expect(position).toEqual([256 + 400 * normalizationScale, 256, 2]);
+  expect(position).toEqual([400, 0, 2]);
   expect(viewport.projectPosition([450, -5, 2])).toEqual([
-    position[0],
-    position[1],
-    6 * normalizationScale
+    400 * normalizationScale,
+    0,
+    2 * normalizationScale
   ]);
 });
 

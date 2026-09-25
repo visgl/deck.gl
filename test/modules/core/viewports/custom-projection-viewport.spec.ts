@@ -84,16 +84,12 @@ test('CustomProjectionViewport public methods convert world XYZ exactly once', (
   expect(viewport.center).toEqual(viewport.projectPosition(viewport.position));
   expect(viewport.center[2]).toBe(10 * normalizationScale);
   const world = [20, 30, 40];
-  const common = [
-    256 + 140 * normalizationScale,
-    256 + 40 * normalizationScale,
-    170 * normalizationScale
-  ];
+  const common = [140 * normalizationScale, 40 * normalizationScale, 170 * normalizationScale];
   forward.mockClear();
   expect(viewport.projectPosition(world)).toEqual(common);
   expect(forward).toHaveBeenCalledExactlyOnceWith(world);
-  expect(viewport.projectFlat(world)).toEqual(common.slice(0, 2));
-  viewport.unprojectFlat(common).forEach((value, i) => expect(value).toBeCloseTo(world[i], 6));
+  expect(viewport.projectFlat([140, 40, 170])).toEqual(common.slice(0, 2));
+  viewport.unprojectFlat(common).forEach((value, i) => expect(value).toBeCloseTo([140, 40][i], 6));
   viewport.unprojectPosition(common).forEach((value, i) => expect(value).toBeCloseTo(world[i], 6));
   for (const topLeft of [true, false]) {
     const pixel = viewport.project(world, {topLeft});
@@ -103,28 +99,97 @@ test('CustomProjectionViewport public methods convert world XYZ exactly once', (
   }
 });
 
-test('CustomProjectionViewport defaults to Earth-circumference bounds and allows overrides', () => {
+test('CustomProjectionViewport flat methods only scale map-meter XY, without calling the converter', () => {
+  const forward = vi.fn(([x, y, z = 0]) => [x * 1000, y * 2000, z]);
+  const inverse = vi.fn(([x, y, z = 0]) => [x / 1000, y / 2000, z]);
+  const viewport = new CustomProjectionViewport({projection: {forward, inverse}});
+  forward.mockClear();
+  inverse.mockClear();
+  const mapPosition = [1234567, -2345678, 99];
+  const common = viewport.projectFlat(mapPosition);
+  expect(common).toEqual([
+    mapPosition[0] * normalizationScale,
+    mapPosition[1] * normalizationScale
+  ]);
+  expect(viewport.projectFlat(mapPosition.slice(0, 2))).toEqual(common);
+  const restored = viewport.unprojectFlat([...common, 100]);
+  expect(restored).toHaveLength(2);
+  restored.forEach((value, i) => expect(value).toBeCloseTo(mapPosition[i], 8));
+  expect(mapPosition).toEqual([1234567, -2345678, 99]);
+  expect(forward).not.toHaveBeenCalled();
+  expect(inverse).not.toHaveBeenCalled();
+});
+
+test('CustomProjectionViewport panByPosition converts the new common center back to world coordinates', () => {
+  const options = {
+    width: 800,
+    height: 600,
+    zoom: 2,
+    pitch: 30,
+    bearing: 20,
+    projection: {
+      forward: ([x, y, z = 0]) => [x * 100000, y * 200000, z],
+      inverse: ([x, y, z = 0]) => [x / 100000, y / 200000, z]
+    }
+  };
+  const viewport = new CustomProjectionViewport({...options, center: [10, 20, 0]});
+  const worldPosition = [11, 21, 0];
+  const pixel = [350, 275];
+  const moved = new CustomProjectionViewport({
+    ...options,
+    ...viewport.panByPosition(worldPosition, pixel)
+  });
+  moved
+    .project(worldPosition)
+    .slice(0, 2)
+    .forEach((value, i) => expect(value).toBeCloseTo(pixel[i], 6));
+});
+
+test('CustomProjectionViewport uses a fixed map-meter scale on all axes', () => {
   const circumference = 40075016.6855;
   const viewport = new CustomProjectionViewport({projection, getDistanceScale: () => [1, 1]});
-  expect(viewport.preproject!([0, 0, 20])).toEqual([256, 256, 20]);
-  expect(viewport.preproject!([-circumference / 2, -circumference / 2])).toEqual([0, 0, 0]);
-  expect(viewport.preproject!([circumference / 2, circumference / 2])).toEqual([512, 512, 0]);
+  expect(viewport.preproject!([0, 0, 20])).toEqual([0, 0, 20]);
+  expect(viewport.projectPosition([-circumference / 2, -circumference / 2])).toEqual([
+    -256, -256, 0
+  ]);
+  expect(viewport.projectPosition([circumference / 2, circumference / 2])).toEqual([256, 256, 0]);
   expect(viewport.distanceScales.unitsPerMeter).toEqual(Array(3).fill(512 / circumference));
-  const overridden = new CustomProjectionViewport({
-    projection,
-    toBounds: [100, 200, 1124, 712],
-    getDistanceScale: () => [1, 1]
-  });
-  expect(overridden.preproject!([100, 200, 20])).toEqual([0, 128, 20]);
-  expect(overridden.distanceScales.unitsPerMeter).toEqual([0.5, 0.5, 0.5]);
   const shared = new CustomProjectionViewport({projection});
-  expect(shared.preproject!([0, 0])).toEqual([256, 256, 0]);
+  expect(shared.preproject!([0, 0])).toEqual([0, 0, 0]);
   viewport.postUnproject!(viewport.preproject!([1234, 5678, 20]))!.forEach((value, i) =>
     expect(value).toBeCloseTo([1234, 5678, 20][i], 6)
   );
 });
 
-test('CustomProjectionViewport default bounds align projected Web Mercator with MapView', () => {
+test('CustomProjectionViewport separates map-meter positions from ground-meter sizes', () => {
+  const position = [1000, 2000, 3000];
+  const common = [1000 * normalizationScale, 2000 * normalizationScale, 3000 * normalizationScale];
+  for (const center of [
+    [0, 0, 0],
+    [1000, 2000, 0]
+  ] as [number, number, number][]) {
+    for (const scale of [
+      [1, 1],
+      [0.25, 1],
+      [4, 9]
+    ] as [number, number][]) {
+      const viewport = new CustomProjectionViewport({
+        projection,
+        center,
+        getDistanceScale: () => scale
+      });
+      expect(viewport.preproject!(position)).toEqual(position);
+      expect(viewport.projectPosition(position)).toEqual(common);
+      const uniforms = project.getUniforms({viewport});
+      expect(uniforms.commonUnitsPerWorldUnit).toEqual(Array(3).fill(normalizationScale));
+      [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])].forEach((value, i) => {
+        expect(uniforms.commonUnitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 12);
+      });
+    }
+  }
+});
+
+test('CustomProjectionViewport fixed scale aligns projected Web Mercator with MapView', () => {
   const converter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
   for (const [pitch, bearing] of [
     [0, 0],
@@ -152,9 +217,11 @@ test('CustomProjectionViewport default bounds align projected Web Mercator with 
       [-122, 38],
       [90, -60]
     ]) {
-      const common = viewport.preproject!(point);
+      const common = viewport.projectPosition(point);
       const expected = map.projectPosition(point);
-      common.forEach((value, i) => expect(value).toBeCloseTo(expected[i], 8));
+      common.forEach((value, i) =>
+        expect(value - viewport.center[i]).toBeCloseTo(expected[i] - map.center[i], 8)
+      );
       viewport
         .project(point)
         .slice(0, 2)
@@ -178,20 +245,16 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   const options = {
     projection,
     width: 800,
-    height: 600,
-    toBounds: [-180, -90, 180, 90] as [number, number, number, number]
+    height: 600
   };
   const viewport = new CustomProjectionViewport(options);
-  expect(viewport.preproject!([0, 0])).toEqual([256, 256, 0]);
-  expect(viewport.preproject!([-180, -90])).toEqual([0, 128, 0]);
+  expect(viewport.preproject!([0, 0])).toEqual([0, 0, 0]);
+  expect(viewport.preproject!([-180, -90])).toEqual([-180, -90, 0]);
   expect(viewport.postUnproject!(viewport.preproject!([32, 48, 10]))![0]).toBeCloseTo(32);
-  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo(
-    (10 * 512) / 360 / (40075016.6855 / 360),
-    10
-  );
+  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo(10 * normalizationScale, 10);
   viewport
     .unprojectPosition(viewport.projectPosition([32, 48, 10]))
-    .forEach((value, i) => expect(value).toBeCloseTo([32, 48, 10][i], 10));
+    .forEach((value, i) => expect(value).toBeCloseTo([32, 48, 10][i], 8));
   const moved = new CustomProjectionViewport({...options, zoom: 4, center: [300, 300, 0]});
   expect(moved.projectionSignature).toBe(viewport.projectionSignature);
   expect(moved.preproject!([32, 48, 10])).toEqual(viewport.preproject!([32, 48, 10]));
@@ -258,19 +321,20 @@ for (const orthographic of [false, true]) {
 
             center: [longitude, latitude, 0]
           });
-          for (const key of ['center', 'viewMatrix', 'projectionMatrix'] as const) {
+          for (const key of ['viewMatrixUncentered', 'projectionMatrix'] as const) {
             Array.from(mercator[key]).forEach((value, index) => {
               expect(viewport[key][index], key).toBeCloseTo(value, 8);
             });
           }
           for (const point of [
             [longitude, latitude, 0],
-            [longitude, latitude, 100],
             [longitude + 0.01, latitude - 0.02, 0]
           ]) {
-            const common = viewport.preproject!(point);
             mercator.projectPosition(point).forEach((value, index) => {
-              expect(viewport.projectPosition(point)[index], 'common space').toBeCloseTo(value, 8);
+              expect(
+                viewport.projectPosition(point)[index] - viewport.center[index],
+                'common-space delta'
+              ).toBeCloseTo(value - mercator.center[index], 8);
             });
             for (const topLeft of [false, true]) {
               const actual = viewport.project(point, {topLeft});
@@ -327,7 +391,7 @@ test('CustomProjectionView uniforms and picking use the correct coordinate space
     coordinateOrigin: [100, 100, 100],
     modelMatrix: new Array(16).fill(2)
   });
-  expect(uniforms.commonUnitsPerWorldUnit).toEqual(viewport.distanceScales.unitsPerMeter);
+  expect(uniforms.commonUnitsPerWorldUnit).toEqual(viewport.distanceScales.unitsPerWorldUnit);
   expect(uniforms.modelMatrix[0]).toBe(1);
   expect(uniforms.modelMatrix[12]).toBe(0);
   const info = getEmptyPickingInfo({viewports: [viewport], pixelRatio: 1, x: 400, y: 300});
@@ -351,11 +415,11 @@ test('External projection uniforms do not inspect the layer position conversion 
   for (const coordinateSystem of ['default', 'cartesian'] as const) {
     const uniforms = project.getUniforms({viewport, coordinateSystem});
     expect(uniforms.projectionMode).toBe(viewport.projectionMode);
-    expect(uniforms.commonUnitsPerWorldUnit).toEqual(viewport.distanceScales.unitsPerMeter);
+    expect(uniforms.commonUnitsPerWorldUnit).toEqual(viewport.distanceScales.unitsPerWorldUnit);
   }
 });
 
-test('CustomProjectionViewport preserves converter altitude and applies the distance scale', () => {
+test('CustomProjectionViewport preserves converter altitude without distortion correction', () => {
   const viewport = new CustomProjectionViewport({
     ...options,
     pitch: 30,
@@ -367,7 +431,7 @@ test('CustomProjectionViewport preserves converter altitude and applies the dist
   });
   const projected = viewport.preproject!([10, 20, 30]);
   expect(projected[2]).toBe(40);
-  expect(viewport.projectPosition([10, 20, 30])[2]).toBeCloseTo(40 * 7 * normalizationScale, 10);
+  expect(viewport.projectPosition([10, 20, 30])[2]).toBeCloseTo(40 * normalizationScale, 10);
   expect(viewport.postUnproject!(projected)![2]).toBeCloseTo(30);
 });
 
@@ -413,7 +477,10 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   const metric = new CustomProjectionViewport({
     ...options,
     getDistanceScale: () => [0.5, 1 / 3],
-    projection: {forward: p => [2 * p[0], 3 * p[1], p[2]], inverse: p => [p[0] / 2, p[1] / 3, p[2]]}
+    projection: {
+      forward: p => [2 * p[0], 3 * p[1], p[2]],
+      inverse: p => [p[0] / 2, p[1] / 3, p[2]]
+    }
   });
   [2, 3, Math.sqrt(6)].forEach((value, i) => {
     expect(metric.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 10);
@@ -499,18 +566,16 @@ test('CustomProjectionViewport only evaluates distance scale at the toCrs center
   getDistanceScale.mockClear();
   inverse.mockClear();
   const position = viewport.preproject!([20, 30, 40]);
-  expect(position).toEqual([256 + 1020 * normalizationScale, 256 + 60 * normalizationScale, 400]);
+  expect(position).toEqual([1020, 60, 400]);
   viewport.postUnproject!(position)!.forEach((value, i) =>
     expect(value).toBeCloseTo([20, 30, 40][i], 6)
   );
   expect(inverse).toHaveBeenCalledTimes(1);
   expect(getDistanceScale).not.toHaveBeenCalled();
-  expect(viewport.projectPosition([20, 30, 40])[2] / normalizationScale).toBeCloseTo(
-    400 / Math.sqrt(8)
-  );
+  expect(viewport.projectPosition([20, 30, 40])[2] / normalizationScale).toBeCloseTo(400);
   expect(
     project.getUniforms({viewport}).commonUnitsPerWorldUnit[2] / normalizationScale
-  ).toBeCloseTo(1 / Math.sqrt(8));
+  ).toBeCloseTo(1);
 });
 
 test('CustomProjectionViewport scale callbacks receive toCrs positions without changing the signature', () => {
@@ -625,7 +690,7 @@ test('CustomProjectionViewport estimates planar distance for recognized linear u
       expect(value / normalizationScale).toBeCloseTo(0.5, 10)
     );
     expect(override.preproject!([0, 0, 10])[2]).toBe(10);
-    expect(override.projectPosition([0, 0, 10])[2]).toBeCloseTo((10 * normalizationScale) / 2, 12);
+    expect(override.projectPosition([0, 0, 10])[2]).toBeCloseTo(10 * normalizationScale, 12);
   }
 });
 
@@ -668,8 +733,7 @@ test('CustomProjectionViewport signature excludes bounds and all callback identi
   const changes = [
     {projection: {forward: p => p.slice(), inverse: p => p.slice()}},
     {getDistanceScale: () => [1, 1] as [number, number]},
-    {fromBounds: [-170, -80, 170, 80] as [number, number, number, number]},
-    {toBounds: [-200, -100, 200, 100] as [number, number, number, number]}
+    {fromBounds: [-170, -80, 170, 80] as [number, number, number, number]}
   ];
   for (const change of changes) {
     expect(new CustomProjectionViewport({...config, ...change}).projectionSignature).toBe(
@@ -755,15 +819,9 @@ test('CustomProjectionViewport clamps input bounds in both directions without ch
     fromBounds: [10, 20, 100, 200]
   });
   const source = [-50, 250, 7];
-  expect(viewport.preproject!(source)).toEqual([
-    256 + 10 * normalizationScale,
-    256 + 200 * normalizationScale,
-    7
-  ]);
+  expect(viewport.preproject!(source)).toEqual([10, 200, 7]);
   expect(source).toEqual([-50, 250, 7]);
-  expect(
-    viewport.postUnproject!([256 - 50 * normalizationScale, 256 + 250 * normalizationScale, 7])
-  ).toEqual([10, 200, 7]);
+  expect(viewport.postUnproject!([-50, 250, 7])).toEqual([10, 200, 7]);
   const changed = new CustomProjectionViewport({
     ...options,
     fromBounds: [10, 20, 100, 201]

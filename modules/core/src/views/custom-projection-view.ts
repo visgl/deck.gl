@@ -32,7 +32,6 @@ export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewStat
   Pick<
     CustomProjectionViewportOptions,
     | 'projection'
-    | 'toBounds'
     | 'fromBounds'
     | 'fromCrs'
     | 'toCrs'

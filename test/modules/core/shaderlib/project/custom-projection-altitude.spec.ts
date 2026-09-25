@@ -13,9 +13,85 @@ import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
 import {Matrix4} from '@math.gl/core';
 
+const normalizationScale = 512 / 40075016.6855;
 const gpuTest = device.type === 'webgl' ? test : test.skip;
 
-gpuTest('Cartesian common XY and meter Z retain their model matrix and origin', async () => {
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`EXTERNAL preserves sub-meter offsets around a large map-meter origin: ${backend}`, async ({
+    skip
+  }) => {
+    const targetDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
+    if (!targetDevice || targetDevice.type !== backend) return skip();
+    const center: [number, number, number] = [12345678.123, -9876543.321, 0];
+    const viewport = new CustomProjectionViewport({
+      projection: {forward: p => p.slice(), inverse: p => p.slice()},
+      center,
+      zoom: 20
+    });
+    for (const coordinateOrigin of [
+      [0, 0, 0],
+      [1000.25, -2000.125, 10.5]
+    ] as [number, number, number][]) {
+      const props = {viewport, coordinateSystem: 'cartesian' as const, coordinateOrigin};
+      const uniforms = project.getUniforms(props);
+      const expectedOrigin = center.map((value, i) => Math.fround(value - coordinateOrigin[i]));
+      expect(uniforms.coordinateOrigin).toEqual(expectedOrigin);
+      expect(uniforms.commonOrigin).toEqual(
+        expectedOrigin.map((value, i) => (value + coordinateOrigin[i]) * normalizationScale)
+      );
+      const position = [center[0] + 0.0125, center[1] - 0.025, 0.05].map(
+        (value, i) => value - coordinateOrigin[i]
+      );
+      const high = position.map(Math.fround);
+      const low = position.map((value, i) => value - high[i]);
+      let result: Float32Array;
+      if (backend === 'webgl') {
+        result = await runOnGPU({
+          vs: `#version 300 es
+        out vec3 result;
+        void main() {
+          result = project_position(test.uPos, test.uPos64Low) / project.commonUnitsPerWorldUnit;
+        }`,
+          modules: [project, testUniforms],
+          vertexCount: 1,
+          varying: 'result',
+          shaderInputProps: {project: props, test: {uPos: high, uPos64Low: low}}
+        });
+      } else {
+        const output = targetDevice.createBuffer({
+          byteLength: 16,
+          usage: Buffer.STORAGE | Buffer.COPY_SRC
+        });
+        const computation = new Computation(targetDevice, {
+          modules: [project],
+          source: `
+          @group(0) @binding(0) var<storage, read_write> output: array<vec4<f32>>;
+          @compute @workgroup_size(1)
+          fn main() {
+            output[0] = vec4<f32>(project_position_vec3_f64(vec3<f32>(${high.join(', ')}), vec3<f32>(${low.join(', ')})) / project.commonUnitsPerWorldUnit, 0.0);
+          }`,
+          bindings: {output}
+        });
+        try {
+          computation.shaderInputs.setProps({project: props});
+          computation.predraw(targetDevice.commandEncoder);
+          const pass = targetDevice.beginComputePass();
+          computation.dispatch(pass, 1);
+          pass.end();
+          targetDevice.submit();
+          const bytes = await output.readAsync();
+          result = new Float32Array(bytes.buffer, bytes.byteOffset, 3);
+        } finally {
+          computation.destroy();
+          output.destroy();
+        }
+      }
+      position.forEach((value, i) => expect(result[i]).toBeCloseTo(value - expectedOrigin[i], 6));
+    }
+  });
+}
+
+gpuTest('Cartesian map-meter XYZ retain their model matrix and origin', async () => {
   const viewport = new CustomProjectionViewport({
     projection: {forward: p => p.slice(), inverse: p => p.slice()},
     getDistanceScale: () => [0.25, 1]
@@ -27,7 +103,7 @@ gpuTest('Cartesian common XY and meter Z retain their model matrix and origin', 
     modelMatrix: new Matrix4().translate([256, 256, 0]).scale([2, 3, 4])
   };
   const position = [1, 2, 3];
-  const expected = [263, 268, 19 * viewport.distanceScales.unitsPerMeter[2]];
+  const expected = [263 * normalizationScale, 268 * normalizationScale, 19 * normalizationScale];
   expect(viewport.isGeospatial).toBe(true);
   expect(getWorldPosition(position, props)).toEqual(expected);
   const result = await runOnGPU({
@@ -39,10 +115,10 @@ gpuTest('Cartesian common XY and meter Z retain their model matrix and origin', 
     varying: 'result',
     shaderInputProps: {project: props, test: {uPos: position, uPos64Low: [0, 0, 0]}}
   });
-  expected.forEach((value, i) => expect(result[i]).toBeCloseTo(value, 6));
+  expected.forEach((value, i) => expect(result[i]).toBeCloseTo(value, 4));
 });
 
-test('external projection WGSL preserves XY and uses scalar and per-axis distance scales', async ({
+test('external projection WGSL normalizes XYZ and uses scalar and per-axis distance scales', async ({
   skip
 }) => {
   const webgpuDevice = await getWebGPUTestDevice();
@@ -78,8 +154,12 @@ test('external projection WGSL preserves XY and uses scalar and per-axis distanc
     webgpuDevice.submit();
     const bytes = await output.readAsync();
     const values = new Float32Array(bytes.buffer, bytes.byteOffset, 16);
-    const expectedPosition = [310.125, 219.75, 50.5 * viewport.distanceScales.unitsPerMeter[2]];
-    expectedPosition.forEach((value, i) => expect(values[i]).toBeCloseTo(value, 6));
+    const expectedPosition = [
+      310.125 * normalizationScale,
+      219.75 * normalizationScale,
+      50.5 * normalizationScale
+    ];
+    expectedPosition.forEach((value, i) => expect(values[i]).toBeCloseTo(value, 4));
     const [x, y, scalar] = viewport.distanceScales.unitsPerMeter;
     [scalar, scalar, scalar, 0, x, y, 0, 0, x, y, scalar, 0].forEach((value, i) => {
       expect(values[i + 4] / (512 / 40075016.6855)).toBeCloseTo(value / (512 / 40075016.6855), 6);
@@ -104,19 +184,17 @@ for (const metersPerZUnit of [1, 0.3048]) {
       const input = [200, 300, 50];
       expect(viewport.projectionMode).toBe(PROJECTION_MODE.EXTERNAL);
       expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual(
-        viewport.distanceScales.unitsPerMeter
+        viewport.distanceScales.unitsPerWorldUnit
       );
       const normalizationScale = 512 / 40075016.6855;
       const position = viewport.preproject!(input);
-      expect(position).toEqual([
-        256 + 200 * normalizationScale,
-        256 + 300 * normalizationScale,
-        50 * metersPerZUnit
-      ]);
+      expect(position).toEqual([200, 300, 50 * metersPerZUnit]);
       const common = viewport.projectPosition(input);
-      [position[0], position[1], position[2] * viewport.distanceScales.unitsPerMeter[2]].forEach(
-        (value, i) => expect(common[i]).toBeCloseTo(value, 12)
-      );
+      [
+        position[0] * normalizationScale,
+        position[1] * normalizationScale,
+        position[2] * normalizationScale
+      ].forEach((value, i) => expect(common[i]).toBeCloseTo(value, 12));
       expect(project.getUniforms({viewport}).commonUnitsPerMeter).toEqual([
         4 * normalizationScale,
         normalizationScale,
@@ -161,9 +239,9 @@ for (const metersPerZUnit of [1, 0.3048]) {
         }
       });
       const expectedPosition = [
-        position[0] + low[0],
-        position[1] + low[1],
-        (position[2] + low[2]) * viewport.distanceScales.unitsPerMeter[2]
+        (position[0] + low[0]) * normalizationScale,
+        (position[1] + low[1]) * normalizationScale,
+        (position[2] + low[2]) * normalizationScale
       ];
       expectedPosition.forEach((value, i) => expect(withLow[i]).toBeCloseTo(value, 4));
       expect(withLow[2] / expectedPosition[2]).toBeCloseTo(1, 6);

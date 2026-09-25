@@ -74,7 +74,7 @@ function getPositions(layer: PositionLayer) {
   return Array.from(layer.getAttributeManager()!.attributes.positions.value!.slice(0, 3));
 }
 
-test('Cartesian sublayers bypass preprojection and use common XY and meter Z', () => {
+test('Cartesian sublayers bypass preprojection and use map-meter XYZ', () => {
   const viewport = new CustomProjectionViewport({
     projection: {forward: p => p.slice(), inverse: p => p.slice()},
     getDistanceScale: () => [0.25, 1]
@@ -91,9 +91,16 @@ test('Cartesian sublayers bypass preprojection and use common XY and meter Z', (
     manager.setLayers([layer]);
     expect(getPositions(layer)).toEqual([1, 2, 3]);
     expect(layer.getAttributeManager()!.attributes.positions.settings.transform).toBeNull();
-    const commonZ = 19 * viewport.distanceScales.unitsPerMeter[2];
-    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})).toEqual([263, 268, commonZ]);
-    expect(layer.projectPosition([1, 2, 3])).toEqual([7, 12, commonZ]);
+    const scale = 512 / 40075016.6855;
+    const commonZ = 19 * scale;
+    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})).toEqual([
+      263 * scale,
+      268 * scale,
+      commonZ
+    ]);
+    layer
+      .projectPosition([1, 2, 3])
+      .forEach((value, i) => expect(value).toBeCloseTo([263 * scale, 268 * scale, commonZ][i], 12));
     expect(transform).not.toHaveBeenCalled();
     const worldLayer = layer.clone({coordinateSystem: 'default'});
     manager.setLayers([worldLayer]);
@@ -147,7 +154,9 @@ test('Cartesian model matrix updates do not rebuild position attributes', () => 
     expect(accessor).not.toHaveBeenCalled();
     expect(layer.getAttributeManager()!.attributes.positions).toBe(attribute);
     expect(getPositions(layer)).toEqual([1, 2, 3]);
-    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})[0]).toBe(11);
+    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})[0]).toBe(
+      11 * (512 / 40075016.6855)
+    );
   } finally {
     manager.finalize();
   }
@@ -222,7 +231,6 @@ test('Projection-dependent generated attributes do not acquire position transfor
 });
 
 test('Layer refreshes custom projection attributes only when CRS metadata changes', () => {
-  const normalizationScale = 512 / 40075016.6855;
   const projection = {forward: p => p.slice(), inverse: p => p.slice()};
   const initial = new CustomProjectionViewport({projection});
   const manager = createManager(initial);
@@ -250,18 +258,10 @@ test('Layer refreshes custom projection attributes only when CRS metadata change
       layer.activateViewport(viewport);
       if ('fromCrs' in crs) {
         expect(accessor).toHaveBeenCalledTimes(1);
-        expect(getPositions(layer)).toEqual([
-          256 + 4 * normalizationScale,
-          256 + 3 * normalizationScale,
-          4
-        ]);
+        expect(getPositions(layer)).toEqual([4, 3, 4]);
       } else {
         expect(accessor).not.toHaveBeenCalled();
-        expect(getPositions(layer)).toEqual([
-          256 + 2 * normalizationScale,
-          256 + 3 * normalizationScale,
-          4
-        ]);
+        expect(getPositions(layer)).toEqual([2, 3, 4]);
       }
       accessor.mockClear();
       const replacement = new CustomProjectionViewport({
