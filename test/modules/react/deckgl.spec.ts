@@ -16,7 +16,15 @@ import {
 } from 'react';
 import {createRoot} from 'react-dom/client';
 
-import {Deck, Layer, Widget, type WebMercatorViewport, type MapViewState} from '@deck.gl/core';
+import {
+  Deck,
+  Layer,
+  Widget,
+  type PickingInfo,
+  type WebMercatorViewport,
+  type MapViewState
+} from '@deck.gl/core';
+import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';
 import DeckGL, {type DeckGLRef} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
@@ -85,6 +93,116 @@ test('DeckGL#mount/unmount', async () => {
 
   container.remove();
 });
+
+test.each([
+  ['absolute', false],
+  ['static', false],
+  ['absolute', true],
+  ['static', true]
+] as const)(
+  'DeckGL#widget positioning without widget CSS (position: %s, percentage size: %s)',
+  async (position, percentageSize) => {
+    const ref = createRef<DeckGLRef>();
+    const container = document.createElement('div');
+    Object.assign(container.style, {
+      position: 'absolute',
+      left: '40px',
+      top: '60px',
+      width: '500px',
+      height: '400px'
+    });
+    const widget = new TestWidget({style: {width: '20px', height: '20px', pointerEvents: 'auto'}});
+    widget.placement = 'top-right';
+    const fillWidget = new TestWidget({
+      id: 'fill-widget',
+      style: {width: '100%', height: '100%'}
+    });
+    fillWidget.placement = 'fill';
+    document.body.append(container);
+    const root = createRoot(container);
+
+    try {
+      // Exercise both initial layout and resizing, with no widget stylesheet loaded.
+      for (const [width, height] of [
+        [200, 100],
+        [300, 200]
+      ]) {
+        const {onAfterRender, waitUntilReady} = createRenderTracker();
+        act(() => {
+          root.render(
+            createElement(DeckGL, {
+              ref,
+              initialViewState: TEST_VIEW_STATE,
+              width: percentageSize ? '100%' : width,
+              height: percentageSize ? '100%' : height,
+              style: {
+                position,
+                margin: '20px',
+                ...(percentageSize ? {width: `${width}px`, height: `${height}px`} : {})
+              },
+              widgets: [widget, fillWidget],
+              getTooltip: () => 'Hovered point',
+              onAfterRender
+            })
+          );
+        });
+        await waitUntilReady(ref);
+
+        const deck = ref.current!.deck!;
+        // @ts-expect-error protected member
+        const widgetManager = deck.widgetManager!;
+        const tooltip = widgetManager.getWidgets().find(widget => widget instanceof TooltipWidget)!;
+        tooltip.onHover({x: 50, y: 25, viewport: deck.getViewports()[0]} as PickingInfo);
+
+        const canvasBounds = deck.getCanvas()!.getBoundingClientRect();
+        const tooltipBounds = tooltip.rootElement!.getBoundingClientRect();
+        expect(tooltip.rootElement!.textContent).toBe('Hovered point');
+        expect(tooltipBounds.left).toBe(canvasBounds.left + 50);
+        expect(tooltipBounds.top).toBe(canvasBounds.top + 25);
+
+        const wrapper = container.querySelector<HTMLElement>('#deckgl-wrapper')!;
+        expect(getComputedStyle(wrapper).position).toBe(position);
+        const wrapperBounds = wrapper.getBoundingClientRect();
+        expect(canvasBounds.left).toBe(wrapperBounds.left);
+        expect(canvasBounds.top).toBe(wrapperBounds.top);
+        expect(canvasBounds.width).toBe(width);
+        expect(canvasBounds.height).toBe(height);
+        // Fill widgets must receive the entire canvas, including after resizing.
+        const fillContainer = fillWidget.rootElement!.parentElement!;
+        expect(fillContainer.classList.contains('fill')).toBe(true);
+        for (const element of [fillContainer, fillWidget.rootElement!]) {
+          const fillBounds = element.getBoundingClientRect();
+          expect(fillBounds.left).toBe(canvasBounds.left);
+          expect(fillBounds.top).toBe(canvasBounds.top);
+          expect(fillBounds.right).toBe(canvasBounds.right);
+          expect(fillBounds.bottom).toBe(canvasBounds.bottom);
+        }
+        const controlBounds = widget.rootElement!.getBoundingClientRect();
+        expect(controlBounds.right).toBe(canvasBounds.right);
+        expect(controlBounds.top).toBe(canvasBounds.top);
+        expect(document.elementFromPoint(controlBounds.left + 10, controlBounds.top + 10)).toBe(
+          widget.rootElement
+        );
+
+        const widgetRoot = container.querySelector<HTMLElement>('.deck-widgets-root')!;
+        const widgetBounds = widgetRoot.getBoundingClientRect();
+        expect(widgetBounds.width).toBe(width);
+        expect(widgetBounds.height).toBe(height);
+        // The overlay must leave empty map space available for pointer interaction.
+        expect(document.elementFromPoint(canvasBounds.left + 10, canvasBounds.top + 10)).toBe(
+          deck.getCanvas()
+        );
+      }
+    } finally {
+      const ownedDevice = ref.current?.deck?.device;
+      act(() => root.unmount());
+      // Release test-owned contexts before Chromium evicts the shared test device.
+      ownedDevice?.loseDevice();
+      ownedDevice?.destroy();
+      container.remove();
+    }
+  }
+);
 
 test('DeckGL#external WebGPU device preserves the React custom render loop', () => {
   let capturedProps: Record<string, any> | undefined;
@@ -223,106 +341,113 @@ test.skip('DeckGL#real WebGPU device draws through the React custom render loop'
   container.remove();
 });
 
-test('DeckGL#external WebGPU device waits for its final size before mounting React children', () => {
-  let capturedProps: Record<string, any> | undefined;
-  let deckInstance: TestDeck;
+test.each([0, 20])(
+  'DeckGL#external WebGPU device waits for its final size with padding %s',
+  padding => {
+    let capturedProps: Record<string, any> | undefined;
+    let deckInstance: TestDeck;
 
-  class TestDeck {
-    isInitialized = true;
-    device = {type: 'webgpu'};
-    width = 1;
-    height = 1;
-    canvas: HTMLCanvasElement;
-    eventManager = {};
-    viewports = [
+    class TestDeck {
+      isInitialized = true;
+      device = {type: 'webgpu'};
+      width = 1;
+      height = 1;
+      canvas: HTMLCanvasElement;
+      eventManager = {};
+      viewports = [
+        {
+          id: 'default-view',
+          x: 0,
+          y: 0,
+          width: 1,
+          height: 1,
+          padding: null
+        }
+      ];
+      viewManager = {
+        views: [{id: 'default-view'}],
+        getViewport: () => this.viewports[0],
+        getViewState: () => ({})
+      };
+      drawReasons: string[] = [];
+
+      constructor(props: Record<string, any>) {
+        capturedProps = props;
+        this.canvas = props.canvas;
+        deckInstance = this;
+      }
+
+      getViewports() {
+        return this.viewports;
+      }
+
+      _drawLayers(reason: string) {
+        this.drawReasons.push(reason);
+      }
+
+      finalize() {}
+    }
+
+    const container = document.createElement('div');
+    document.body.append(container);
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        createElement(DeckGL, {
+          Deck: TestDeck as unknown as typeof Deck,
+          device: {
+            type: 'webgpu',
+            getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
+          } as any,
+          width: 100,
+          height: 50,
+          style: {padding: `${padding}px`, border: '3px solid transparent'},
+          children: createElement('div', {id: 'map-child'})
+        })
+      );
+    });
+
+    const wrapper = container.querySelector('#deckgl-wrapper')!;
+    expect(wrapper.clientWidth).toBe(100 + padding * 2);
+    expect(wrapper.clientHeight).toBe(50 + padding * 2);
+    const canvasContainer = container.querySelector('.deck-root')!;
+    expect(canvasContainer.clientWidth).toBe(100);
+    expect(canvasContainer.clientHeight).toBe(50);
+
+    act(() => {
+      capturedProps?._customRender('placeholder WebGPU viewport');
+    });
+    expect(container.querySelector('#map-child')).toBeNull();
+    expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
+
+    deckInstance!.width = 100;
+    deckInstance!.height = 50;
+    deckInstance!.viewports = [
       {
         id: 'default-view',
         x: 0,
         y: 0,
-        width: 1,
-        height: 1,
+        width: 100,
+        height: 50,
         padding: null
       }
     ];
-    viewManager = {
-      views: [{id: 'default-view'}],
-      getViewport: () => this.viewports[0],
-      getViewState: () => ({})
-    };
-    drawReasons: string[] = [];
+    act(() => {
+      capturedProps?._customRender('resized WebGPU viewport');
+    });
+    expect(container.querySelector('#map-child')).toBeTruthy();
+    expect(deckInstance!.drawReasons).toEqual([
+      'placeholder WebGPU viewport',
+      'resized WebGPU viewport'
+    ]);
 
-    constructor(props: Record<string, any>) {
-      capturedProps = props;
-      this.canvas = props.canvas;
-      deckInstance = this;
-    }
-
-    getViewports() {
-      return this.viewports;
-    }
-
-    _drawLayers(reason: string) {
-      this.drawReasons.push(reason);
-    }
-
-    finalize() {}
+    act(() => {
+      root.render(null);
+    });
+    container.remove();
   }
-
-  const container = document.createElement('div');
-  document.body.append(container);
-  const root = createRoot(container);
-
-  act(() => {
-    root.render(
-      createElement(DeckGL, {
-        Deck: TestDeck as unknown as typeof Deck,
-        device: {
-          type: 'webgpu',
-          getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
-        } as any,
-        children: createElement('div', {id: 'map-child'})
-      })
-    );
-  });
-
-  const wrapper = container.querySelector('#deckgl-wrapper')!;
-  Object.defineProperties(wrapper, {
-    clientWidth: {value: 100},
-    clientHeight: {value: 50}
-  });
-
-  act(() => {
-    capturedProps?._customRender('placeholder WebGPU viewport');
-  });
-  expect(container.querySelector('#map-child')).toBeNull();
-  expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
-
-  deckInstance!.width = 100;
-  deckInstance!.height = 50;
-  deckInstance!.viewports = [
-    {
-      id: 'default-view',
-      x: 0,
-      y: 0,
-      width: 100,
-      height: 50,
-      padding: null
-    }
-  ];
-  act(() => {
-    capturedProps?._customRender('resized WebGPU viewport');
-  });
-  expect(container.querySelector('#map-child')).toBeTruthy();
-  expect(deckInstance!.drawReasons).toEqual([
-    'placeholder WebGPU viewport',
-    'resized WebGPU viewport'
-  ]);
-
-  act(() => {
-    root.render(null);
-  });
-  container.remove();
-});
+);
 
 test('DeckGL#external WebGPU device synchronizes view changes through custom render', () => {
   let capturedProps: Record<string, any> | undefined;
@@ -365,16 +490,13 @@ test('DeckGL#external WebGPU device synchronizes view changes through custom ren
           type: 'webgpu',
           getDefaultCanvasContext: () => ({canvas: document.createElement('canvas')})
         } as any,
+        width: 100,
+        height: 50,
         initialViewState: TEST_VIEW_STATE
       })
     );
   });
 
-  const wrapper = container.querySelector('#deckgl-wrapper')!;
-  Object.defineProperties(wrapper, {
-    clientWidth: {value: 100},
-    clientHeight: {value: 50}
-  });
   deckInstance!.width = 100;
   deckInstance!.height = 50;
 
