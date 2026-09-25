@@ -11,9 +11,6 @@ import type {MapViewState} from '@deck.gl/core';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 46.24,
   longitude: -122.18,
@@ -23,16 +20,15 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxPitch: 89
 };
 
-const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
-const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+const TERRAIN_IMAGE = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp';
+const SURFACE_IMAGE = 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp';
 
-// https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
-// Note - the elevation rendered by this example is greatly exagerated!
+// Mapterhorn serves Terrarium-encoded elevation tiles.
 const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
-  rScaler: 6553.6,
-  gScaler: 25.6,
-  bScaler: 0.1,
-  offset: -10000
+  rScaler: 256,
+  gScaler: 1,
+  bScaler: 1 / 256,
+  offset: -32768
 };
 
 export default function App({
@@ -42,9 +38,9 @@ export default function App({
   globeView = false,
   zoomOffset = 0,
   minZoom = 0,
-  maxZoom = 14,
+  maxZoom = 12,
   visibleMinZoom = 0,
-  visibleMaxZoom = 14,
+  visibleMaxZoom = 16,
   initialViewState = INITIAL_VIEW_STATE,
   onZoomChange
 }: {
@@ -75,6 +71,7 @@ export default function App({
     maxZoom,
     visibleMinZoom,
     visibleMaxZoom,
+    tileSize: 512,
     refinementStrategy: 'best-available',
     elevationDecoder: ELEVATION_DECODER,
     elevationData: TERRAIN_IMAGE,
@@ -92,7 +89,7 @@ export default function App({
       viewState={viewState}
       onViewStateChange={onViewStateChange}
       controller={true}
-      parameters={{cull: true}}
+      parameters={{cullMode: 'back'}}
       layers={[layer]}
       getTooltip={info => {
         if (info.picked && info.coordinate && info.coordinate.length === 3) {
