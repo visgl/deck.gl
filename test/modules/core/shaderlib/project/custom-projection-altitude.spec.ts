@@ -21,7 +21,7 @@ test('external projection WGSL preserves XY and uses scalar and per-axis distanc
   if (!webgpuDevice) return skip();
   const viewport = new CustomProjectionViewport({
     projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    getDistanceScale: () => [0.25, 1, 0.3048],
+    getDistanceScale: () => [0.25, 1],
     center: [300, 200, 0]
   });
   const output = webgpuDevice.createBuffer({
@@ -64,11 +64,14 @@ test('external projection WGSL preserves XY and uses scalar and per-axis distanc
 
 for (const metersPerZUnit of [1, 0.3048]) {
   gpuTest(
-    `CustomProjectionViewport projects altitude on CPU and GPU, metersPerZUnit=${metersPerZUnit}`,
+    `CustomProjectionViewport converts world altitude to meters without changing meter sizes, metersPerZUnit=${metersPerZUnit}`,
     async () => {
       const viewport = new CustomProjectionViewport({
-        projection: {forward: p => p.slice(), inverse: p => p.slice()},
-        getDistanceScale: () => [0.25, 1, metersPerZUnit]
+        projection: {
+          forward: ([x, y, z = 0]) => [x, y, z * metersPerZUnit],
+          inverse: ([x, y, z = 0]) => [x, y, z / metersPerZUnit]
+        },
+        getDistanceScale: () => [0.25, 1]
       });
       const input = [200, 300, 50];
       expect(viewport.projectionMode).toBe(PROJECTION_MODE.EXTERNAL);
@@ -80,18 +83,14 @@ for (const metersPerZUnit of [1, 0.3048]) {
       expect(position).toEqual([
         256 + 200 * normalizationScale,
         256 + 300 * normalizationScale,
-        50
+        50 * metersPerZUnit
       ]);
       const common = viewport.projectPosition(input);
-      expect(common).toEqual([
-        position[0],
-        position[1],
-        50 * (2 * metersPerZUnit * normalizationScale)
-      ]);
+      expect(common).toEqual([position[0], position[1], position[2] * (2 * normalizationScale)]);
       expect(project.getUniforms({viewport}).commonUnitsPerMeter).toEqual([
         4 * normalizationScale,
         normalizationScale,
-        2 * metersPerZUnit * normalizationScale
+        2 * normalizationScale
       ]);
       expect(
         getWorldPosition(input, {
@@ -130,9 +129,9 @@ for (const metersPerZUnit of [1, 0.3048]) {
       expect(withLow[2] / expectedPosition[2]).toBeCloseTo(1, 6);
       // Scalar sizing preserves aspect ratio; vector sizing uses each axis scale.
       for (const [expression, expected] of [
-        ['vec3(project_size(1.0))', [2 * metersPerZUnit, 2 * metersPerZUnit, 2 * metersPerZUnit]],
+        ['vec3(project_size(1.0))', [2, 2, 2]],
         ['vec3(project_size(vec2(1.0)), 0.0)', [4, 1, 0]],
-        ['project_size(vec3(1.0))', [4, 1, 2 * metersPerZUnit]]
+        ['project_size(vec3(1.0))', [4, 1, 2]]
       ] as const) {
         const size = await runOnGPU({
           vs: `#version 300 es
