@@ -173,7 +173,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     let preproject: ((xy: number[]) => number[]) | undefined;
 
-    if (coordinateSystem === 'lnglat') {
+    if (!viewport.preproject && coordinateSystem === 'lnglat') {
       if (_full3d) {
         preproject = viewport.projectPosition.bind(viewport);
       } else {

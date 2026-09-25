@@ -14,9 +14,10 @@ import {Matrix4} from '@math.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 const projection = {forward: p => p, inverse: p => p};
+const normalizationScale = 512 / 40075016.6855;
 const options = {
   projection,
-  toBounds: [0, 0, 512, 512] as [number, number, number, number],
+
   width: 800,
   height: 600
 };
@@ -50,7 +51,11 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
     });
     manager.setLayers([layer]);
     const positions = () => layer.getAttributeManager()!.attributes.instancePositions.value!;
-    expect(Array.from(positions().slice(0, 3))).toEqual([20, 20, 0]);
+    expect(Array.from(positions().slice(0, 3))).toEqual([
+      256 + 20 * normalizationScale,
+      256 + 20 * normalizationScale,
+      0
+    ]);
     layer.activateViewport(viewport);
     const before = calls;
     layer.activateViewport(viewport);
@@ -67,10 +72,18 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
     const changedViewport = new CustomProjectionViewport({...options, toCrs: 'changed'});
     manager.activateViewport(changedViewport);
     layer.activateViewport(changedViewport);
-    expect(Array.from(positions().slice(0, 3))).toEqual([10, 20, 0]);
+    expect(Array.from(positions().slice(0, 3))).toEqual([
+      256 + 10 * normalizationScale,
+      256 + 20 * normalizationScale,
+      0
+    ]);
     layer = layer.clone({modelMatrix: new Matrix4().translate([5, 0, 0])});
     manager.setLayers([layer]);
-    expect(Array.from(positions().slice(0, 3))).toEqual([15, 20, 0]);
+    expect(Array.from(positions().slice(0, 3))).toEqual([
+      256 + 15 * normalizationScale,
+      256 + 20 * normalizationScale,
+      0
+    ]);
   } finally {
     manager.finalize();
   }
@@ -112,8 +125,8 @@ test('generated paths and polygon fills project without mutating input geometry'
     manager.setLayers([path, polygon, composite]);
     for (const layer of [path, polygon]) {
       const values = layer.getAttributeManager()!.attributes.vertexPositions.value!;
-      expect(values[0]).toBeGreaterThanOrEqual(110);
-      expect(values[1]).toBeGreaterThanOrEqual(60);
+      expect(values[0]).toBeGreaterThanOrEqual(256 + 110 * normalizationScale - 1e-5);
+      expect(values[1]).toBeGreaterThanOrEqual(256 + 60 * normalizationScale - 1e-5);
     }
     expect(JSON.stringify(data)).toBe(original);
   } finally {
@@ -149,12 +162,18 @@ test('WebGPU generated positions use preprojection before packing high/low neigh
     const polygon = new SolidPolygonLayer({id: 'gpu-polygon', data, getPolygon: p => p});
     manager.setLayers([path, polygon]);
     const pathPositions = path.getAttributeManager()!.attributes.pathPositions.value!;
-    expect(pathPositions[3]).toBeGreaterThanOrEqual(110);
-    expect(pathPositions[4]).toBeGreaterThanOrEqual(60);
+    expect(pathPositions[3]).toBeGreaterThanOrEqual(256 + 110 * normalizationScale - 1e-5);
+    expect(pathPositions[4]).toBeGreaterThanOrEqual(256 + 60 * normalizationScale - 1e-5);
     const attributes = polygon.getAttributeManager()!.attributes;
-    expect(attributes.vertexPositions.value![0]).toBeGreaterThanOrEqual(110);
-    expect(attributes.nextVertexPositions.value![0]).toBeGreaterThanOrEqual(110);
-    expect(attributes.nextVertexPositions.value![0]).toBeLessThanOrEqual(120);
+    expect(attributes.vertexPositions.value![0]).toBeGreaterThanOrEqual(
+      256 + 110 * normalizationScale - 1e-5
+    );
+    expect(attributes.nextVertexPositions.value![0]).toBeGreaterThanOrEqual(
+      256 + 110 * normalizationScale - 1e-5
+    );
+    expect(attributes.nextVertexPositions.value![0]).toBeLessThanOrEqual(
+      256 + 120 * normalizationScale + 1e-5
+    );
   } finally {
     manager.finalize();
   }
@@ -199,7 +218,7 @@ test('geometry layers retessellate all rows on projection and model matrix chang
       const values = layer.getAttributeManager()!.attributes.vertexPositions.value!;
       for (let row = 0; row < data.length; row++) {
         const offset = layer.state.startIndices[row] * 3;
-        expect(values[offset]).toBeCloseTo(sources[j][offset] + 100);
+        expect(values[offset]).toBeCloseTo(sources[j][offset] + 100 * normalizationScale, 6);
       }
     }
     const viewport = new CustomProjectionViewport({
@@ -216,7 +235,7 @@ test('geometry layers retessellate all rows on projection and model matrix chang
       const values = layer.getAttributeManager()!.attributes.vertexPositions.value!;
       for (let row = 0; row < data.length; row++) {
         const offset = layer.state.startIndices[row] * 3;
-        expect(values[offset]).toBeCloseTo(sources[j][offset] + 150);
+        expect(values[offset]).toBeCloseTo(sources[j][offset] + 150 * normalizationScale, 6);
       }
     }
   } finally {
