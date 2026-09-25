@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>deck.gl CustomProjectionView</title>
+    <style>
+      body {margin: 0; background: #101d2a; color: #dce8f0; font: 14px sans-serif;}
+      aside {position: absolute; z-index: 1; top: 16px; left: 16px; padding: 16px;
+        background: #101d2add; border-radius: 8px; pointer-events: none;}
+      h1 {font-size: 18px; margin: 0 0 8px;}
+      select {pointer-events: auto; margin: 0 0 10px 8px; padding: 4px;}
+      #projection-note {margin-bottom: 8px; color: #aabcc8;}
+      #coordinates {margin-top: 8px; font-variant-numeric: tabular-nums;}
+    </style>
+  </head>
+  <body>
+    <aside><h1>Custom projection</h1>
+      <label for="projection">Projection</label>
+      <select id="projection">
+        <option value="mercator">Web Mercator</option>
+        <option value="equalEarth" selected>Equal Earth</option>
+        <option value="equirectangular">Equirectangular</option>
+        <option value="stereographic">Stereographic</option>
+      </select>
+      <div id="projection-note"></div>
+      <div>Pink markers: 500 km altitude, 100 km radius. Scale is estimated at the view center.</div>
+      Drag to pan · Scroll to zoom · Shift-drag to tilt/rotate
+      <div id="coordinates">Hover to see input coordinates</div></aside>
+    <script type="module" src="app.ts"></script>
+  </body>
+</html>
