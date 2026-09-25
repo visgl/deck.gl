@@ -43,7 +43,6 @@ const testCases = [
       goldenImage: './test/render/golden-images/arc-lnglat.png',
       overrides: {
         globe: {
-          skip: ['webgpu'],
           imageDiffOptions: {threshold: 0.985}
         }
       }
