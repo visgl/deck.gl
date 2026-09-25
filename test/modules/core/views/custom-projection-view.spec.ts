@@ -48,7 +48,7 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
     resolution: 2,
     fromCrs: 'local',
     toCrs: 'local-output',
-    getDistanceScale: () => [1 / 3, 1 / 3, 1],
+    getDistanceScale: () => [1 / 3, 1 / 3],
     fromBounds: [0, 0, 400, 400]
   });
   const viewport = view.makeViewport({
