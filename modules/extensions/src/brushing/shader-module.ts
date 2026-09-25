@@ -50,11 +50,8 @@ const vertex = /* glsl */ `
     if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
         project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
         project.pseudoMeters == false) {
-      // Below the auto-offset zoom, commonUnitsPerMeter is the equatorial Web Mercator value:
-      // scale it by the latitude of the segment so brushingRadius is measured in meters, like
-      // project_size() does for geometry sizes and like the auto-offset and globe modes already do.
-      // The mean latitude of pointer and object keeps the correction symmetric north and south of
-      // the pointer; the residual error is second order in the latitude difference.
+      // Below the auto-offset zoom commonUnitsPerMeter is equatorial; scale by latitude so the
+      // radius is true meters, as project_size() does
       distance /= project_size_at_latitude(0.5 * (brushing.mousePos.y + position.y));
     }
 
