@@ -25,9 +25,9 @@ import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
-import {load} from '@loaders.gl/core';
+import {coreApi} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/schema';
-import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
+import {I3SSource, Tiles3DSource, Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
@@ -215,33 +215,20 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const {tileset: tilesetOptions, ...remainingLoadOptions} = loadOptions;
 
     const options = {loadOptions: {...remainingLoadOptions}, ...tilesetOptions};
-    let actualTilesetUrl = tilesetUrl;
-    if ('preload' in loader && typeof loader.preload === 'function') {
-      const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
-      if (preloadOptions.url) {
-        actualTilesetUrl = preloadOptions.url;
-      }
+    const sourceOptions = {url: tilesetUrl, loader, coreApi};
+    const tilesetSource =
+      loader.id === 'i3s'
+        ? new I3SSource(sourceOptions, options.loadOptions)
+        : new Tiles3DSource(sourceOptions, options.loadOptions);
 
-      if (preloadOptions.headers) {
-        options.loadOptions.core = {
-          ...options.loadOptions.core,
-          fetch: {
-            ...options.loadOptions.core?.fetch,
-            headers: preloadOptions.headers
-          }
-        };
-      }
-      Object.assign(options, preloadOptions);
-    }
-    const tilesetJson = await load(actualTilesetUrl, loader, options.loadOptions);
-
-    const tileset3d = new Tileset3D(tilesetJson, {
+    const tileset3d = new Tileset3D(tilesetSource, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileError: this.props.onTileError,
       onUpdate: () => this.setNeedsUpdate(),
       ...options
     });
+    await tileset3d.tilesetInitializationPromise;
 
     this.setState({
       tileset3d,

@@ -19,7 +19,8 @@ import {
 } from '@math.gl/web-mercator';
 import {Padding} from './viewport';
 
-import {Matrix4, clamp, vec2} from '@math.gl/core';
+import {Matrix4, clamp} from '@math.gl/core';
+import * as vec2 from '@math.gl/core/vec2';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
