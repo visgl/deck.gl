@@ -96,7 +96,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       vec3<f32>(0.0)
     );
     geometry.position = projectedPosition.commonPosition;
-    varyings.position = projectedPosition.clipPosition;
+    varyings.position = project_globe_billboard_clipspace(projectedPosition.clipPosition, geometry.position.xyz);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
     var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
@@ -119,6 +119,11 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     geometry.position = projectedPosition.commonPosition;
     varyings.position = projectedPosition.clipPosition;
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
+  }
+
+  // Hide points whose anchor is behind the globe
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
   }
 
   varyings.clipCoordinates = geometry.position.xy;

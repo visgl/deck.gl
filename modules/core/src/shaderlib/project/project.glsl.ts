@@ -354,4 +354,38 @@ float project_pixel_size(float pixels) {
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project.scale;
 }
+
+// True when the globe hides commonPosition from the camera: the segment from the camera to the
+// position passes through the sphere. Exact for positions at any altitude, so a point above the
+// surface stays visible past the horizon of the ground below it. Always false for flat projections.
+bool project_globe_is_occluded(vec3 commonPosition) {
+  if (project.projectionMode != PROJECTION_MODE_GLOBE) {
+    return false;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float rayLength2 = dot(ray, ray);
+  if (rayLength2 == 0.0) {
+    return false;
+  }
+  // Closest approach of the segment to the globe centre, before reaching the position
+  float t = clamp(-dot(eye, ray) / rayLength2, 0.0, 1.0);
+  vec3 closest = eye + ray * t;
+  return t < 1.0 && dot(closest, closest) < GLOBE_RADIUS * GLOBE_RADIUS;
+}
+
+// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the depth is that
+// of the globe surface point nearest to the camera, so a sprite whose anchor is visible is never
+// clipped by the curve of the globe around it. Pair with project_globe_is_occluded, which hides
+// the sprite once the anchor itself is behind the globe. Identity for flat projections.
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
+  if (project.projectionMode != PROJECTION_MODE_GLOBE) {
+    return clipPosition;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 nearest = eye + normalize(commonPosition - eye) * (length(eye) - GLOBE_RADIUS);
+  vec4 nearestClip = project_common_position_to_clipspace(vec4(nearest, 1.0));
+  clipPosition.z = nearestClip.z / nearestClip.w * clipPosition.w;
+  return clipPosition;
+}
 `;
