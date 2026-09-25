@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {BitmapLayer} from '@deck.gl/layers';
+import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
 import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
@@ -178,6 +178,7 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
       expect(viewState.longitude).toBeCloseTo(map.getCenter().lng);
       expect(viewState.latitude).toBeCloseTo(map.getCenter().lat);
       expect(viewState.zoom).toBe(map.getZoom());
+      expect(viewState.roll).toBe(0);
 
       map.removeControl(overlay);
       expect(overlay._deck).toBeFalsy();
@@ -186,4 +187,116 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
     map.remove();
     container.remove();
   });
+}
+
+for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
+  for (const projection of ['mercator', 'globe'] as const) {
+    for (const interleaved of [false, true]) {
+      webglTest(
+        `MapLibre ${version} ${projection} roll and resize keep rendering and picking aligned (interleaved=${interleaved})`,
+        async () => {
+          const container = document.createElement('div');
+          Object.assign(container.style, {width: '640px', height: '400px'});
+          document.body.append(container);
+          const position: [number, number] = projection === 'globe' ? [20, 55] : [8.53, 47.32];
+          const map = new MapClass({
+            container,
+            style: {version: 8, sources: {}, layers: []},
+            center: [8.5, 47.3],
+            zoom: projection === 'globe' ? 2 : 11,
+            pitch: 45,
+            bearing: 25,
+            attributionControl: false
+          }) as unknown as MapLibreMap;
+          let overlayCanvas: HTMLCanvasElement | null = null;
+          try {
+            await new Promise<void>(resolve => map.once('load', () => resolve()));
+            map.setProjection({type: projection});
+            map.setPadding({left: 70, right: 10, top: 25, bottom: 5});
+            const data = [{position}];
+            let renderedPixel: number[] = [];
+            const overlay = new MapLibreOverlay({
+              interleaved,
+              layers: [
+                new ScatterplotLayer({
+                  id: 'rolled-point',
+                  data,
+                  getPosition: d => d.position,
+                  getRadius: 8,
+                  radiusUnits: 'pixels',
+                  getFillColor: [0, 0, 255],
+                  pickable: true
+                })
+              ],
+              onAfterRender: ({gl}) => {
+                if (!gl) return;
+                const pixelPosition = map.project(position);
+                const pixelRatio = gl.drawingBufferWidth / map.getCanvas().clientWidth;
+                const pixel = new Uint8Array(4);
+                gl.readPixels(
+                  Math.floor(pixelPosition.x * pixelRatio),
+                  Math.floor(gl.drawingBufferHeight - pixelPosition.y * pixelRatio),
+                  1,
+                  1,
+                  gl.RGBA,
+                  gl.UNSIGNED_BYTE,
+                  pixel
+                );
+                if (pixel[2] === 255) {
+                  renderedPixel = Array.from(pixel);
+                }
+              }
+            });
+            map.addControl(overlay);
+            if (!interleaved) overlayCanvas = overlay.getCanvas();
+            await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+            for (const [roll, width, height] of [
+              [28, 640, 400],
+              [28, 740, 460],
+              [-32, 740, 460],
+              [-32, 540, 340],
+              [28, 540, 340],
+              [0, 640, 400]
+            ]) {
+              container.style.width = `${width}px`;
+              container.style.height = `${height}px`;
+              // Avoid camera updates in the resize-only steps.
+              if (map.getRoll() !== roll) {
+                map.setRoll(roll);
+              }
+              map.resize();
+              renderedPixel = [];
+              map.triggerRepaint();
+              await waitForRender(
+                () =>
+                  overlay._deck?.props.viewState.roll === roll &&
+                  overlay._deck.width === width &&
+                  overlay._deck.height === height &&
+                  renderedPixel[2] === 255
+              );
+              expect(renderedPixel).toEqual([0, 0, 255, 255]);
+              const projected = map.project(position);
+              const viewport = overlay._deck!.getViewports()[0];
+              expect(viewport.width).toBe(width);
+              expect(viewport.height).toBe(height);
+              const actual = viewport.project(position);
+              expect(actual[0]).toBeCloseTo(projected.x, 2);
+              expect(actual[1]).toBeCloseTo(projected.y, 2);
+              const picked = overlay.pickObject({x: projected.x, y: projected.y});
+              expect(picked?.object).toBe(data[0]);
+              expect(picked!.coordinate![0]).toBeCloseTo(position[0], 2);
+              expect(picked!.coordinate![1]).toBeCloseTo(position[1], 2);
+            }
+          } finally {
+            map.remove();
+            // Deck.finalize removes its canvas but does not release the WebGL context.
+            // Avoid exhausting the browser context limit in the shared test page.
+            overlayCanvas?.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();
+            container.remove();
+            expect(device.isLost).toBe(false);
+          }
+        }
+      );
+    }
+  }
 }
