@@ -64,8 +64,10 @@ export function getDeckInstance({
     watchMapMove(deck, map);
   } else {
     deckProps.onLoad = () => {
-      onLoad?.();
       watchMapMove(deck, map);
+      // Sync any camera changes made by the app between control creation and Deck initialization
+      onMapMove(deck, map);
+      onLoad?.();
     };
   }
 
