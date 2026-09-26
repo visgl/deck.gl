@@ -42,7 +42,12 @@ test('Viewport installs the projection pair before invoking overridden projectPo
     preproject,
     postUnproject,
     position: [10, 20, 5],
-    distanceScales: {unitsPerMeter: [2, 2, 2], metersPerUnit: [0.5, 0.5, 0.5]}
+    distanceScales: {
+      unitsPerMeter: [2, 2, 2],
+      unitsPerWorldUnit: [2, 2, 2],
+      unitsPerMeter2: [0, 0, 0],
+      unitsPerWorldUnit2: [0, 0, 0]
+    }
   });
   expect(scaled.center).toEqual([20, 60, 10]);
   expect(preproject).toHaveBeenCalledExactlyOnceWith([10, 20, 5]);
@@ -484,7 +489,7 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   });
   [2, 3, Math.sqrt(6)].forEach((value, i) => {
     expect(metric.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 10);
-    expect(metric.distanceScales.metersPerUnit[i] * normalizationScale).toBeCloseTo(1 / value, 10);
+    expect(normalizationScale / metric.distanceScales.unitsPerMeter[i]).toBeCloseTo(1 / value, 10);
   });
   const override = new CustomProjectionViewport({
     ...options,
@@ -509,7 +514,7 @@ test('CustomProjectionViewport altitude unit conversion does not change meter si
   expect(feet.distanceScales).toEqual(metric.distanceScales);
   [1, 1, 1].forEach((value, i) => {
     expect(metric.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 9);
-    expect(feet.distanceScales.metersPerUnit[i] * normalizationScale).toBeCloseTo(1, 9);
+    expect(normalizationScale / feet.distanceScales.unitsPerMeter[i]).toBeCloseTo(1, 9);
   });
   const input = [10, 20, 100];
   const projected = feet.preproject!(input);
@@ -672,7 +677,7 @@ test('CustomProjectionViewport estimates planar distance for recognized linear u
     // Planar differences, including shear. Scalar sizing uses area distortion.
     [2, Math.sqrt(10), Math.sqrt(6)].forEach((value, i) => {
       expect(viewport.distanceScales.unitsPerMeter[i] / normalizationScale).toBeCloseTo(value, 6);
-      expect(viewport.distanceScales.metersPerUnit[i] * normalizationScale).toBeCloseTo(
+      expect(normalizationScale / viewport.distanceScales.unitsPerMeter[i]).toBeCloseTo(
         1 / value,
         6
       );
