@@ -4,7 +4,8 @@
 
 import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
 import type {CoordinateSystem, Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
-import {vec3, vec4} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
 import type {NumericArray} from '@math.gl/core';
 
 /** TILE_SIZE in the project shader module */

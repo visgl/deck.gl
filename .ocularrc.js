@@ -28,7 +28,8 @@ const config = {
 
   bundle: {
     globalName: 'deck',
-    externals: ['h3-js'],
+    // LERC loads this Node builtin only in its Node.js initialization branch.
+    externals: ['h3-js', 'module'],
     target: ['chrome110', 'firefox110', 'safari15'],
     format: 'umd',
     globals: {
@@ -36,7 +37,8 @@ const config = {
       '@luma.gl/core': 'globalThis.luma',
       '@luma.gl/engine': 'globalThis.luma',
       '@loaders.gl/core': 'globalThis.loaders',
-      'h3-js': 'globalThis.h3 || {}'
+      'h3-js': 'globalThis.h3 || {}',
+      module: "globalThis.process?.getBuiltinModule?.('module') || {}"
     }
   },
 

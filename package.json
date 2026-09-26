@@ -48,6 +48,7 @@
   "devDependencies": {
     "@floating-ui/dom": "^1.7.5",
     "@loaders.gl/csv": "^5.0.0-alpha.7",
+    "@loaders.gl/geoarrow": "^5.0.0-alpha.7",
     "@loaders.gl/polyfills": "^5.0.0-alpha.7",
     "@luma.gl/core": "^10.0.0-alpha.2",
     "@luma.gl/effects": "^10.0.0-alpha.2",
@@ -63,6 +64,7 @@
     "@vitest/browser-playwright": "^4.1.0",
     "@vitest/coverage-v8": "^4.1.0",
     "autoprefixer": "^10.5.4",
+    "compress-utils": "^0.8.0",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
     "pixelmatch": "^7.1.0",

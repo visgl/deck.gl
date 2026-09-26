@@ -1463,6 +1463,20 @@
     "@loaders.gl/worker-utils" "5.0.0-alpha.7"
     draco3d "1.5.7"
 
+"@loaders.gl/geoarrow@^5.0.0-alpha.7":
+  version "5.0.0-alpha.7"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/geoarrow/-/geoarrow-5.0.0-alpha.7.tgz#199989b2a467edae5b49aa095f380491f1a65d17"
+  integrity sha512-SkudKGq5/aLMuKmyYKT4PRaRU0NcSaO04eieso/+VWN6ykUFwzzPVNu5nZbt7FOOw8W/U4j/5zDzZbrPvc7LzQ==
+  dependencies:
+    "@loaders.gl/gis" "5.0.0-alpha.7"
+    "@loaders.gl/loader-utils" "5.0.0-alpha.7"
+    "@loaders.gl/schema" "5.0.0-alpha.7"
+    "@loaders.gl/schema-utils" "5.0.0-alpha.7"
+    "@math.gl/geoarrow" "5.0.0-alpha.9"
+    "@math.gl/polygon" "5.0.0-alpha.9"
+    "@math.gl/wkb" "5.0.0-alpha.9"
+    apache-arrow ">= 17.0.0"
+
 "@loaders.gl/gis@5.0.0-alpha.7", "@loaders.gl/gis@^5.0.0-alpha.7":
   version "5.0.0-alpha.7"
   resolved "https://registry.yarnpkg.com/@loaders.gl/gis/-/gis-5.0.0-alpha.7.tgz#4b4a057c61d7eeaebddf659f45ae47b7542f0083"
@@ -2105,6 +2119,16 @@
     a5-js "^0.10.0"
     h3-js "^4.5.0"
     open-location-code "^1.0.3"
+
+"@math.gl/geoarrow@5.0.0-alpha.9":
+  version "5.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@math.gl/geoarrow/-/geoarrow-5.0.0-alpha.9.tgz#9bcd6efad3c293756f4f85b9e2358cea7832c8c5"
+  integrity sha512-9vy8xzDnIrOPBEocnh9FEr0wx4hKpAESHPqrFzo1pLB9jcxiyHQ7JStp+xwaegSDZwT0m0ELbcQiwUgBZrhPBQ==
+  dependencies:
+    "@math.gl/crs" "5.0.0-alpha.9"
+    "@math.gl/polygon" "5.0.0-alpha.9"
+    "@math.gl/types" "5.0.0-alpha.9"
+    "@math.gl/wkb" "5.0.0-alpha.9"
 
 "@math.gl/geoid@5.0.0-alpha.9":
   version "5.0.0-alpha.9"
@@ -4319,6 +4343,11 @@ composed-offset-position@0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/composed-offset-position/-/composed-offset-position-0.0.6.tgz#0b027a880401ed5a9f777f59134ff606b406d0a7"
   integrity sha512-Q7dLompI6lUwd7LWyIcP66r4WcS9u7AL2h8HaeipiRfCRPLMWqRx8fYsjb4OHi6UQFifO7XtNC2IlEJ1ozIFxw==
+
+compress-utils@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/compress-utils/-/compress-utils-0.8.0.tgz#b331bb0bc5543e8075c59d11b31f51d711071f21"
+  integrity sha512-aUk794YEft2+9mzgITcjXIgWTyWPpZj0EjSWWnbk9G2JhJjfsUCh7v6Aal/4VXmpN/0M1wKv39vWiUEtF156Zw==
 
 concat-map@0.0.1:
   version "0.0.1"
