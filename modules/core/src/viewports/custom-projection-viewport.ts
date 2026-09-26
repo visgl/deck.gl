@@ -140,7 +140,7 @@ export default class CustomProjectionViewport extends Viewport {
     }
     const unitsPerMeter = localScale.map(
       value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
-    );
+    ) as [number, number, number];
     super({
       ...opts,
       width,
@@ -151,8 +151,7 @@ export default class CustomProjectionViewport extends Viewport {
       position,
       distanceScales: {
         unitsPerWorldUnit: [NORMALIZATION_SCALE, NORMALIZATION_SCALE, NORMALIZATION_SCALE],
-        unitsPerMeter,
-        metersPerUnit: unitsPerMeter.map(value => 1 / value)
+        unitsPerMeter
       },
       preproject,
       postUnproject,
