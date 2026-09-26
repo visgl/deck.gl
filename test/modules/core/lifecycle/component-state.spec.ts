@@ -266,7 +266,9 @@ webglTest('ComponentState#async props with transform', async () => {
   image = component.props.image;
   expect(image, 'Async value for image should be transformed').toBeTruthy();
 
-  const loadDataAsync = load('./test/data/bart-stations.csv', [CSVLoader]);
+  const loadDataAsync = load('./test/data/bart-stations.csv', [CSVLoader], {
+    csv: {shape: 'object-row-table'}
+  });
   component = makeComponent({
     data: loadDataAsync,
     image: testImageAsync

@@ -97,10 +97,10 @@ The container to append the auto-created canvas to.
 
 * Default: `false`
 
-Flag to enable GPU debug mode. Also requires an extra luma.gl import:
+Flag to enable GPU debug mode. Import the luma.gl WebGL debug subpath to register the optional debugging tools. The tools are loaded on demand when debug mode is enabled:
 
 ```js
-import '@luma.gl/debug';
+import '@luma.gl/webgl/debug';
 import {Deck} from '@deck.gl/core';
 
 new Deck({

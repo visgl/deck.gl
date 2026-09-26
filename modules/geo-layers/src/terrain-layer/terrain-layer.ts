@@ -216,6 +216,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       terrain: {
         skirtHeight: this.state.isTiled ? effectiveMeshMaxError * 2 : 0,
         ...loadOptions?.terrain,
+        shape: 'mesh',
         bounds,
         meshMaxError: effectiveMeshMaxError,
         elevationDecoder
