@@ -6,6 +6,7 @@ import {test, expect} from 'vitest';
 import {equals, config, Vector3} from '@math.gl/core';
 import {WebMercatorViewport} from 'deck.gl';
 import {Matrix4} from '@math.gl/core';
+import {getDistanceScales} from '@math.gl/web-mercator';
 
 // Adjust sensitivity of math.gl's equals
 const LNGLAT_TOLERANCE = 1e-6;
@@ -135,38 +136,25 @@ test('WebMercatorViewport.getScales', () => {
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new WebMercatorViewport(vc);
     const distanceScales = viewport.getDistanceScales();
-    expect(
-      distanceScales.metersPerUnit &&
-        distanceScales.unitsPerMeter &&
-        distanceScales.degreesPerUnit &&
-        distanceScales.unitsPerDegree,
-      'distanceScales defined'
-    ).toBeTruthy();
-
-    expect(
-      equals(
-        distanceScales.metersPerUnit.map((d, i) => d * distanceScales.unitsPerMeter[i]),
-        [1, 1, 1]
-      ),
-      'metersPerUnit/unitsPerMeter match'
-    ).toBeTruthy();
-
-    expect(
-      equals(
-        distanceScales.degreesPerUnit.map((d, i) => d * distanceScales.unitsPerDegree[i]),
-        [1, 1, 1]
-      ),
-      'degreesPerUnit/unitsPerDegree match'
-    ).toBeTruthy();
+    const expected = getDistanceScales({longitude: vc.longitude, latitude: vc.latitude});
+    expect(distanceScales.unitsPerMeter).toEqual(expected.unitsPerMeter);
+    expect(distanceScales.unitsPerWorldUnit).toEqual(expected.unitsPerDegree);
+    expect(distanceScales.unitsPerMeter2).toEqual([0, 0, 0]);
+    expect(distanceScales.unitsPerWorldUnit2).toEqual([0, 0, 0]);
+    const origin = [vc.longitude, vc.latitude, 0];
+    const highPrecision = getDistanceScales({...vc, highPrecision: true});
+    const scalesAtOrigin = viewport.getDistanceScales(origin);
+    expect(scalesAtOrigin.unitsPerMeter2).toEqual(highPrecision.unitsPerMeter2);
+    expect(scalesAtOrigin.unitsPerWorldUnit2).toEqual(highPrecision.unitsPerDegree2);
 
     for (const offset of [-0.01, 0.005, 0.01]) {
       const xyz0 = [
-        viewport.center[0] + distanceScales.unitsPerDegree[0] * offset,
-        viewport.center[1] + distanceScales.unitsPerDegree[1] * offset
+        viewport.center[0] + distanceScales.unitsPerWorldUnit[0] * offset,
+        viewport.center[1] + distanceScales.unitsPerWorldUnit[1] * offset
       ];
       const xyz1 = viewport.projectFlat([vc.longitude + offset, vc.latitude + offset, 0]);
 
-      expect(equals(xyz0, xyz1), 'unitsPerDegree matches projection').toBeTruthy();
+      expect(equals(xyz0, xyz1), 'unitsPerWorldUnit matches projection').toBeTruthy();
     }
   }
   config.EPSILON = oldEpsilon;

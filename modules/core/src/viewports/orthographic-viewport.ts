@@ -7,7 +7,7 @@ import Viewport from '../viewports/viewport';
 import {Matrix4, clamp, vec2} from '@math.gl/core';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
-import type {Padding} from './viewport';
+import type {DistanceScales, Padding} from './viewport';
 
 const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 1]});
 
@@ -108,15 +108,14 @@ export default class OrthographicViewport extends Viewport {
     const zoom_ = Number.isFinite(props.zoom) ? (props.zoom as number) : Math.min(zoomX, zoomY);
     const scale = Math.pow(2, zoom_);
 
-    let distanceScales;
+    let distanceScales: Partial<DistanceScales> | undefined;
     // Axis-specific zoom overrides the scalar base zoom independently on each axis.
     if (zoomX !== zoom_ || zoomY !== zoom_) {
       const scaleX = Math.pow(2, zoomX);
       const scaleY = Math.pow(2, zoomY);
 
       distanceScales = {
-        unitsPerMeter: [scaleX / scale, scaleY / scale, 1],
-        metersPerUnit: [scale / scaleX, scale / scaleY, 1]
+        unitsPerWorldUnit: [scaleX / scale, scaleY / scale, 1]
       };
     }
 
@@ -145,13 +144,13 @@ export default class OrthographicViewport extends Viewport {
   }
 
   projectFlat([X, Y]: number[]): [number, number] {
-    const {unitsPerMeter} = this.distanceScales;
-    return [X * unitsPerMeter[0], Y * unitsPerMeter[1]];
+    const {unitsPerWorldUnit} = this.distanceScales;
+    return [X * unitsPerWorldUnit[0], Y * unitsPerWorldUnit[1]];
   }
 
   unprojectFlat([x, y]: number[]): [number, number] {
-    const {metersPerUnit} = this.distanceScales;
-    return [x * metersPerUnit[0], y * metersPerUnit[1]];
+    const {unitsPerWorldUnit} = this.distanceScales;
+    return [x / unitsPerWorldUnit[0], y / unitsPerWorldUnit[1]];
   }
 
   /* Needed by LinearInterpolator */

@@ -6,6 +6,15 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v9.4
 
+### Viewport distance scales
+
+For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+
+- `unitsPerDegree` and `unitsPerDegree2` are renamed to `unitsPerWorldUnit` and `unitsPerWorldUnit2`.
+- `degreesPerUnit` is removed. Divide by the corresponding component of `unitsPerWorldUnit` instead.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
+
 ### pydeck lighting
 
 The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
