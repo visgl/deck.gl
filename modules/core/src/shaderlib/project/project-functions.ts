@@ -107,7 +107,7 @@ export function getWorldPosition(
 
   if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
     if (coordinateSystem === 'cartesian') {
-      const scale = viewport.distanceScales.unitsPerWorldUnit!;
+      const scale = viewport.distanceScales.unitsPerWorldUnit;
       return [
         (x + coordinateOrigin[0]) * scale[0],
         (y + coordinateOrigin[1]) * scale[1],

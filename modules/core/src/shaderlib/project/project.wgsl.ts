@@ -223,6 +223,14 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     }
   }
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+      // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
+      let position_low = project.modelMatrix * vec4<f32>(position64Low, 0.0);
+      return vec4<f32>(
+        position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter,
+        position_world.w
+      );
+    }
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4<f32>(
         project_globe_(position_world.xyz),
@@ -231,8 +239,7 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     }
     if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
       let enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      let metersToCommon = GLOBE_RADIUS / EARTH_RADIUS;
-      let offsetCommon = (enuMatrix * vec3<f32>(-position_world.x, -position_world.y, position_world.z)) * metersToCommon;
+      let offsetCommon = (enuMatrix * vec3<f32>(-position_world.x, -position_world.y, position_world.z)) * project.commonUnitsPerMeter;
       return vec4<f32>(project.commonOrigin + offsetCommon, position_world.w);
     }
   }

@@ -148,10 +148,69 @@ test('Viewport.getScales', () => {
     const viewport = new Viewport(vc.mapState);
     const distanceScales = viewport.getDistanceScales();
     expect(
-      distanceScales.metersPerUnit && distanceScales.unitsPerMeter,
+      distanceScales.unitsPerWorldUnit && distanceScales.unitsPerMeter,
       'distanceScales defined'
     ).toBeTruthy();
+    expect(distanceScales.unitsPerWorldUnit2).toEqual([0, 0, 0]);
+    expect(distanceScales.unitsPerMeter2).toEqual([0, 0, 0]);
   }
+});
+
+test('Viewport normalizes partial distance scales', () => {
+  for (const geospatial of [false, true]) {
+    const options = geospatial ? {longitude: -122, latitude: 38} : {};
+    const defaults = new Viewport({...options, distanceScales: {}}).distanceScales;
+    expect(defaults).toEqual({
+      unitsPerWorldUnit: [1, 1, 1],
+      unitsPerMeter: [1, 1, 1],
+      metersPerUnit: [1, 1, 1],
+      unitsPerWorldUnit2: [0, 0, 0],
+      unitsPerMeter2: [0, 0, 0]
+    });
+    const worldOnly = new Viewport({
+      ...options,
+      distanceScales: {unitsPerWorldUnit: [2, 4, 8]}
+    }).distanceScales;
+    expect(worldOnly.unitsPerMeter).toEqual([2, 4, 8]);
+    expect(worldOnly.metersPerUnit).toEqual([0.5, 0.25, 0.125]);
+    const metersOnly = new Viewport({
+      ...options,
+      distanceScales: {unitsPerMeter: [4, 8, 16]}
+    }).distanceScales;
+    expect(metersOnly.unitsPerWorldUnit).toEqual([1, 1, 1]);
+    expect(metersOnly.metersPerUnit).toEqual([0.25, 0.125, 0.0625]);
+    const supplied = Object.freeze({
+      unitsPerWorldUnit: [2, 4, 8] as [number, number, number],
+      unitsPerMeter: [4, 8, 16] as [number, number, number],
+      metersPerUnit: [99, 99, 99] as [number, number, number],
+      unitsPerWorldUnit2: [1, 2, 3] as [number, number, number],
+      unitsPerMeter2: [4, 5, 6] as [number, number, number]
+    });
+    const scales = new Viewport({...options, distanceScales: supplied}).distanceScales;
+    expect(scales).toEqual({...supplied, metersPerUnit: [0.25, 0.125, 0.0625]});
+    expect(supplied.metersPerUnit).toEqual([99, 99, 99]);
+  }
+  expect(new Viewport().distanceScales.metersPerUnit).toEqual([1, 1, 1]);
+});
+
+test('Viewport uses position scales independently of ground-meter scales', () => {
+  const viewport = new Viewport({
+    width: 800,
+    height: 600,
+    zoom: 2,
+    distanceScales: {
+      unitsPerWorldUnit: [1, 1, 3],
+      unitsPerMeter: [2, 2, 6],
+      unitsPerWorldUnit2: [0, 0, 0],
+      unitsPerMeter2: [0, 0, 0]
+    }
+  });
+  expect(viewport.projectPosition([4, 5, 7])).toEqual([4, 5, 21]);
+  expect(viewport.unprojectPosition([4, 5, 21])).toEqual([4, 5, 7]);
+  expect(viewport.metersPerPixel).toBeCloseTo(1 / 24);
+  const pixel = viewport.project([4, 5, 7]);
+  const world = viewport.unproject(pixel.slice(0, 2), {targetZ: 7});
+  world.forEach((value, i) => expect(value).toBeCloseTo([4, 5, 7][i]));
 });
 
 test('Viewport.containsPixel', () => {
