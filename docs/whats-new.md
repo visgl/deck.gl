@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+### Custom projections (Experimental)
+
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Positions are projected on the CPU, with initial support for scatterplots, paths and polygons. See the view documentation for coordinate conventions and limitations.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

@@ -3,15 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {Viewport, project} from '@deck.gl/core';
-import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
+import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
 // External projection must not acquire a geospatial Cartesian scale override.
 const normalizationScale = 512 / 40075016.6855;
-class MeterAltitudeViewport extends Viewport {
+class MeterAltitudeViewport extends CustomProjectionViewport {
   longitude = 0;
   latitude = 0;
 
@@ -19,28 +18,13 @@ class MeterAltitudeViewport extends Viewport {
     super({
       width: 800,
       height: 600,
-      preproject: ([x, y, z = 0]) => [x * 3, y * 4, z],
-      postUnproject: ([x, y, z = 0]) => [x / 3, y / 4, z],
-      distanceScales: {
-        unitsPerWorldUnit: Array(3).fill(normalizationScale),
-        unitsPerMeter: Array(3).fill(2 * normalizationScale),
-        metersPerUnit: Array(3).fill(1 / (2 * normalizationScale))
-      }
+      projection: {
+        forward: ([x, y, z = 0]) => [x * 3, y * 4, z],
+        inverse: ([x, y, z = 0]) => [x / 3, y / 4, z]
+      },
+      getDistanceScale: () => [0.5, 0.5]
     });
     this.isGeospatial = geospatial;
-  }
-
-  get projectionMode() {
-    return PROJECTION_MODE.EXTERNAL;
-  }
-
-  projectPosition(position: number[]): [number, number, number] {
-    const [x, y, z] = this.preproject!(position);
-    return [x * normalizationScale, y * normalizationScale, z * normalizationScale];
-  }
-
-  unprojectPosition(position: number[]): [number, number, number] {
-    return this.postUnproject!(position.map(value => value / normalizationScale))!;
   }
 }
 

@@ -4,6 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {Layer, LayerManager, Viewport, CompositeLayer} from '@deck.gl/core';
+import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
@@ -73,6 +74,94 @@ function getPositions(layer: PositionLayer) {
   return Array.from(layer.getAttributeManager()!.attributes.positions.value!.slice(0, 3));
 }
 
+test('Cartesian sublayers bypass preprojection and use map-meter XYZ', () => {
+  const viewport = new CustomProjectionViewport({
+    projection: {forward: p => p.slice(), inverse: p => p.slice()},
+    getDistanceScale: () => [0.25, 1]
+  });
+  const manager = createManager(viewport);
+  const transform = vi.spyOn(viewport, 'preproject');
+  const layer = new PositionLayer({
+    data: [[1, 2, 3]],
+    coordinateSystem: 'cartesian',
+    coordinateOrigin: [5, 6, 7],
+    modelMatrix: new Matrix4().translate([256, 256, 0]).scale([2, 3, 4])
+  });
+  try {
+    manager.setLayers([layer]);
+    expect(getPositions(layer)).toEqual([1, 2, 3]);
+    expect(layer.getAttributeManager()!.attributes.positions.settings.transform).toBeNull();
+    const scale = 512 / 40075016.6855;
+    const commonZ = 19 * scale;
+    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})).toEqual([
+      263 * scale,
+      268 * scale,
+      commonZ
+    ]);
+    layer
+      .projectPosition([1, 2, 3])
+      .forEach((value, i) => expect(value).toBeCloseTo([263 * scale, 268 * scale, commonZ][i], 12));
+    expect(transform).not.toHaveBeenCalled();
+    const worldLayer = layer.clone({coordinateSystem: 'default'});
+    manager.setLayers([worldLayer]);
+    expect(getPositions(worldLayer)).toEqual(viewport.preproject!([258, 262, 12]));
+    const cartesianLayer = worldLayer.clone({coordinateSystem: 'cartesian'});
+    transform.mockClear();
+    manager.setLayers([cartesianLayer]);
+    expect(getPositions(cartesianLayer)).toEqual([1, 2, 3]);
+    expect(transform).not.toHaveBeenCalled();
+  } finally {
+    manager.finalize();
+    vi.restoreAllMocks();
+  }
+});
+
+test('Layer position precision follows projection mode, not preproject availability', () => {
+  for (const external of [false, true]) {
+    const viewport = new ProjectionViewport('precision', !external);
+    vi.spyOn(viewport, 'projectionMode', 'get').mockReturnValue(
+      external ? PROJECTION_MODE.EXTERNAL : PROJECTION_MODE.IDENTITY
+    );
+    const manager = createManager(viewport);
+    const layer = new PositionLayer({coordinateSystem: 'meter-offsets'});
+    try {
+      manager.setLayers([layer]);
+      expect(layer.use64bitPositions()).toBe(external);
+    } finally {
+      manager.finalize();
+      vi.restoreAllMocks();
+    }
+  }
+});
+
+test('Cartesian model matrix updates do not rebuild position attributes', () => {
+  const viewport = new CustomProjectionViewport({
+    projection: {forward: p => p.slice(), inverse: p => p.slice()}
+  });
+  const manager = createManager(viewport);
+  const accessor = vi.fn(position => position);
+  let layer = new PositionLayer({
+    data: [[1, 2, 3]],
+    getPosition: accessor,
+    coordinateSystem: 'cartesian'
+  });
+  try {
+    manager.setLayers([layer]);
+    accessor.mockClear();
+    const attribute = layer.getAttributeManager()!.attributes.positions;
+    layer = layer.clone({modelMatrix: new Matrix4().translate([10, 20, 30])});
+    manager.setLayers([layer]);
+    expect(accessor).not.toHaveBeenCalled();
+    expect(layer.getAttributeManager()!.attributes.positions).toBe(attribute);
+    expect(getPositions(layer)).toEqual([1, 2, 3]);
+    expect(layer.projectPosition([1, 2, 3], {autoOffset: false})[0]).toBe(
+      11 * (512 / 40075016.6855)
+    );
+  } finally {
+    manager.finalize();
+  }
+});
+
 test('Layer transforms accessor-keyed binary positions but bypasses direct attribute buffers', () => {
   const viewport = new ProjectionViewport('initial');
   const manager = createManager(viewport);
@@ -136,6 +225,53 @@ test('Projection-dependent generated attributes do not acquire position transfor
     manager.setLayers([layer]);
     expect('transform' in attribute.settings).toBe(false);
     expect(Array.from(attribute.value!.slice(0, 3))).toEqual([2, 3, 4]);
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Layer refreshes custom projection attributes only when CRS metadata changes', () => {
+  const projection = {forward: p => p.slice(), inverse: p => p.slice()};
+  const initial = new CustomProjectionViewport({projection});
+  const manager = createManager(initial);
+  const accessor = vi.fn(point => point);
+  const layer = new PositionLayer({data: [[2, 3, 4]], getPosition: accessor});
+  try {
+    manager.setLayers([layer]);
+    layer.activateViewport(initial);
+    accessor.mockClear();
+    const changedProjection = {
+      forward: ([x, y, z]) => [x * 2, y, z],
+      inverse: ([x, y, z]) => [x / 2, y, z]
+    };
+    for (const crs of [
+      {},
+      {fromCrs: 'EPSG:4326', toCrs: 'first'},
+      {fromCrs: 'WGS84', toCrs: 'first'},
+      {fromCrs: 'WGS84', toCrs: 'second'}
+    ]) {
+      const viewport = new CustomProjectionViewport({
+        ...crs,
+        projection: changedProjection
+      });
+      manager.activateViewport(viewport);
+      layer.activateViewport(viewport);
+      if ('fromCrs' in crs) {
+        expect(accessor).toHaveBeenCalledTimes(1);
+        expect(getPositions(layer)).toEqual([4, 3, 4]);
+      } else {
+        expect(accessor).not.toHaveBeenCalled();
+        expect(getPositions(layer)).toEqual([2, 3, 4]);
+      }
+      accessor.mockClear();
+      const replacement = new CustomProjectionViewport({
+        ...crs,
+        projection: {...changedProjection}
+      });
+      manager.activateViewport(replacement);
+      layer.activateViewport(replacement);
+      expect(accessor).not.toHaveBeenCalled();
+    }
   } finally {
     manager.finalize();
   }
