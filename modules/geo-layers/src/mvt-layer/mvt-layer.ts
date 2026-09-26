@@ -214,7 +214,7 @@ export default class MVTLayer<
     return super.renderLayers();
   }
 
-  getTileData(loadProps: TileLoadProps): Promise<ParsedMvtTile> {
+  async getTileData(loadProps: TileLoadProps): Promise<ParsedMvtTile> {
     const {data, binary} = this.state;
     const {index, signal} = loadProps;
 
@@ -232,7 +232,7 @@ export default class MVTLayer<
       },
       mvt: {
         ...loadOptions?.mvt,
-        shape: binary ? 'binary' : 'geojson',
+        shape: binary ? 'binary-geometry' : 'geojson-table',
         coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
         tileIndex: index
         // Local worker debug
@@ -241,7 +241,9 @@ export default class MVTLayer<
         // workerUrl: null
       }
     };
-    return fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+    const tileData = await fetch(url, {propName: 'data', layer: this, loadOptions, signal});
+    // Keep the layer's feature-array contract when loaders.gl returns a GeoJSON table.
+    return tileData?.shape === 'geojson-table' ? tileData.features : tileData;
   }
 
   renderSubLayers(
