@@ -47,15 +47,15 @@
   },
   "dependencies": {
     "@carto/api-client": "^0.5.19",
-    "@loaders.gl/compression": "^4.4.3",
-    "@loaders.gl/gis": "^4.4.3",
-    "@loaders.gl/loader-utils": "^4.4.3",
-    "@loaders.gl/mvt": "^4.4.3",
-    "@loaders.gl/schema": "^4.4.3",
-    "@loaders.gl/tiles": "^4.4.3",
-    "@luma.gl/core": "^10.0.0-alpha.1",
-    "@luma.gl/shadertools": "^10.0.0-alpha.1",
-    "@math.gl/web-mercator": "^4.1.0",
+    "@loaders.gl/compression": "^5.0.0-alpha.7",
+    "@loaders.gl/gis": "^5.0.0-alpha.7",
+    "@loaders.gl/loader-utils": "^5.0.0-alpha.7",
+    "@loaders.gl/mvt": "^5.0.0-alpha.7",
+    "@loaders.gl/schema": "^5.0.0-alpha.7",
+    "@loaders.gl/tiles": "^5.0.0-alpha.7",
+    "@luma.gl/core": "^10.0.0-alpha.2",
+    "@luma.gl/shadertools": "^10.0.0-alpha.2",
+    "@math.gl/web-mercator": "^5.0.0-alpha.9",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^3.1.3",
     "@types/d3-scale": "^3.0.0",
@@ -76,8 +76,8 @@
     "@deck.gl/extensions": "~9.4.0",
     "@deck.gl/geo-layers": "~9.4.0",
     "@deck.gl/layers": "~9.4.0",
-    "@loaders.gl/core": "^4.4.3",
-    "@luma.gl/core": "~10.0.0-alpha.1"
+    "@loaders.gl/core": "^5.0.0-alpha.7",
+    "@luma.gl/core": "~10.0.0-alpha.2"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

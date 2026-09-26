@@ -47,13 +47,13 @@
   },
   "devDependencies": {
     "@floating-ui/dom": "^1.7.5",
-    "@loaders.gl/csv": "^4.4.3",
-    "@loaders.gl/polyfills": "^4.4.3",
-    "@luma.gl/core": "^10.0.0-alpha.1",
-    "@luma.gl/effects": "^10.0.0-alpha.1",
-    "@luma.gl/webgl": "^10.0.0-alpha.1",
-    "@luma.gl/webgpu": "^10.0.0-alpha.1",
-    "@math.gl/proj4": "^4.1.0",
+    "@loaders.gl/csv": "^5.0.0-alpha.7",
+    "@loaders.gl/polyfills": "^5.0.0-alpha.7",
+    "@luma.gl/core": "^10.0.0-alpha.2",
+    "@luma.gl/effects": "^10.0.0-alpha.2",
+    "@luma.gl/webgl": "^10.0.0-alpha.2",
+    "@luma.gl/webgpu": "^10.0.0-alpha.2",
+    "@math.gl/proj4": "^5.0.0-alpha.9",
     "@probe.gl/bench": "^4.1.1",
     "@probe.gl/test-utils": "^4.1.1",
     "@types/jscodeshift": "^17.3.0",
@@ -86,5 +86,8 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@1.22.19",
+  "resolutions": {
+    "@luma.gl/engine/@math.gl/core": "5.0.0-alpha.9"
+  }
 }
