@@ -38,7 +38,7 @@ import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
-import type {BinaryAttribute} from './attribute/attribute';
+import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
 
@@ -372,10 +372,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Opt an attribute into viewport projection and automatic position invalidation.
    * A layer must retain the same preprojection capability throughout its lifetime.
    */
-  usePositionTransforms(): Pick<
-    import('./attribute/attribute').AttributeOptions,
-    'transformSource' | 'transform'
-  > {
+  usePositionTransforms(): Pick<AttributeOptions, 'transformSource' | 'transform'> {
     return {
       transformSource: 'projection',
       transform:
