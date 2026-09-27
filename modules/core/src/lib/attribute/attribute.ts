@@ -55,12 +55,19 @@ export type AttributeOptions = DataColumnOptions<{
   shaderAttributes?: Record<string, Partial<ShaderAttributeOptions>>;
 }>;
 
-export type BinaryAttribute = Partial<BufferAccessor> & {value?: TypedArray; buffer?: Buffer};
+export type BinaryAttribute = Partial<BufferAccessor> & {
+  value?: TypedArray;
+  buffer?: Buffer;
+  version?: number;
+  updateRange?: {start: number; end: number};
+};
 
 type AttributeInternalState = {
   startIndices: NumericArray | null;
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
+  /** Version of last external buffer for version-based invalidation */
+  lastExternalVersion: number | null;
   /** External binary supplied via accessor name */
   binaryValue: TypedArray | Buffer | BinaryAttribute | null;
   binaryAccessor: Accessor<any, any> | null;
@@ -78,6 +85,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     super(device, opts, {
       startIndices: null,
       lastExternalBuffer: null,
+      lastExternalVersion: null,
       binaryValue: null,
       binaryAccessor: null,
       needsUpdate: true,
@@ -342,15 +350,40 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
     if (!buffer) {
       state.lastExternalBuffer = null;
+      state.lastExternalVersion = null;
       return false;
     }
 
     this.clearNeedsUpdate();
 
+    // Extract version if present
+    const version = (buffer as BinaryAttribute).version;
+
+    // VERSION-BASED PATH (when version present)
+    if (version !== undefined) {
+      const needsUpdate = state.lastExternalVersion !== version;
+
+      if (!needsUpdate) {
+        // Same version → no update
+        state.lastExternalBuffer = buffer;
+        return true;
+      }
+
+      // Version changed → update
+      state.lastExternalVersion = version;
+      state.lastExternalBuffer = buffer;
+      this.setNeedsRedraw();
+      this.setData(buffer);
+      return true;
+    }
+
+    // OBJECT IDENTITY PATH (backward compatibility)
     if (state.lastExternalBuffer === buffer) {
       return true;
     }
+
     state.lastExternalBuffer = buffer;
+    state.lastExternalVersion = null;
     this.setNeedsRedraw();
     this.setData(buffer);
     return true;

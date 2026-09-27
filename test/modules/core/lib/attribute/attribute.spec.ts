@@ -850,6 +850,157 @@ test('Attribute#setExternalBuffer', () => {
   attribute.delete();
 });
 
+test('Attribute#setExternalBuffer - version-based invalidation', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 3,
+    update: () => {}
+  });
+
+  const buffer1 = new Float32Array([1, 2, 3]);
+  const buffer2 = new Float32Array([4, 5, 6]);
+  const spy = vi.spyOn(attribute, 'setData');
+
+  // Same object, same version → no setData
+  attribute.setExternalBuffer({value: buffer1, version: 1});
+  spy.mockClear();
+  attribute.setExternalBuffer({value: buffer1, version: 1});
+  expect(spy, 'Same object, same version should not call setData').not.toHaveBeenCalled();
+
+  // Same object, new version → setData
+  attribute.setExternalBuffer({value: buffer1, version: 2});
+  expect(spy, 'Same object, new version should call setData').toHaveBeenCalledTimes(1);
+  spy.mockClear();
+
+  // New object, same version → no setData
+  attribute.setExternalBuffer({value: buffer2, version: 2});
+  expect(spy, 'New object, same version should not call setData').not.toHaveBeenCalled();
+
+  // New object, no version → setData (backward compat)
+  spy.mockClear();
+  attribute.setExternalBuffer({value: buffer1});
+  expect(spy, 'New object, no version should call setData').toHaveBeenCalledTimes(1);
+
+  spy.mockRestore();
+  attribute.delete();
+});
+
+test('Attribute#setExternalBuffer - version triggers bounds recomputation', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 2,
+    update: () => {}
+  });
+  attribute.numInstances = 2;
+
+  attribute.setExternalBuffer({value: new Float32Array([0, 0, 10, 10]), version: 1});
+  expect(attribute.getBounds(), 'Bounds should be computed for version 1').toEqual([
+    [0, 0],
+    [10, 10]
+  ]);
+
+  // Version change triggers bounds recompute
+  attribute.setExternalBuffer({value: new Float32Array([5, 5, 15, 15]), version: 2});
+  expect(attribute.getBounds(), 'Bounds should be recomputed for version 2').toEqual([
+    [5, 5],
+    [15, 15]
+  ]);
+
+  // Same version, different data → uses old bounds (no recompute)
+  attribute.setExternalBuffer({value: new Float32Array([20, 20, 30, 30]), version: 2});
+  expect(attribute.getBounds(), 'Bounds should not change with same version').toEqual([
+    [5, 5],
+    [15, 15]
+  ]);
+
+  attribute.delete();
+});
+
+test('Attribute#setExternalBuffer - backward compatibility without version', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 2,
+    update: () => {}
+  });
+
+  const buffer1 = new Float32Array([1, 2]);
+  const buffer2 = new Float32Array([3, 4]);
+  const spy = vi.spyOn(attribute, 'setData');
+
+  // Plain array/buffer uses object identity
+  attribute.setExternalBuffer(buffer1);
+  spy.mockClear();
+
+  attribute.setExternalBuffer(buffer1); // Same object
+  expect(spy, 'Same object without version should not call setData').not.toHaveBeenCalled();
+
+  attribute.setExternalBuffer(buffer2); // Different object
+  expect(spy, 'Different object without version should call setData').toHaveBeenCalledTimes(1);
+
+  spy.mockRestore();
+  attribute.delete();
+});
+
+test('Attribute#setExternalBuffer - updateRange parameter', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 2,
+    update: () => {}
+  });
+
+  const buffer = new Float32Array([1, 2, 3, 4]);
+  const spy = vi.spyOn(attribute, 'setData');
+
+  // updateRange accepted (v1: no optimization, full update)
+  attribute.setExternalBuffer({
+    value: buffer,
+    version: 1,
+    updateRange: {start: 0, end: 2}
+  });
+  expect(spy, 'updateRange should be accepted').toHaveBeenCalled();
+
+  spy.mockClear();
+  attribute.setExternalBuffer({
+    value: buffer,
+    version: 1, // Same version
+    updateRange: {start: 2, end: 4} // Different range
+  });
+  expect(spy, 'Version wins, range ignored').not.toHaveBeenCalled(); // Version wins, range ignored
+
+  spy.mockRestore();
+  attribute.delete();
+});
+
+test('Attribute#setExternalBuffer - version 0 is valid', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 2,
+    update: () => {}
+  });
+
+  const buffer = new Float32Array([1, 2]);
+  const spy = vi.spyOn(attribute, 'setData');
+
+  attribute.setExternalBuffer({value: buffer, version: 0});
+  spy.mockClear();
+
+  // version: 0 should be treated as present (not absent)
+  attribute.setExternalBuffer({value: buffer, version: 0});
+  expect(spy, 'Version 0 should be treated as valid version').not.toHaveBeenCalled();
+
+  // Change to version 1
+  attribute.setExternalBuffer({value: buffer, version: 1});
+  expect(spy, 'Changing from version 0 to 1 should call setData').toHaveBeenCalledTimes(1);
+
+  spy.mockRestore();
+  attribute.delete();
+});
+
 test('Attribute#setExternalBuffer#shaderAttributes', () => {
   const attribute = new Attribute(device, {
     id: 'test-attribute-with-shader-attributes',
