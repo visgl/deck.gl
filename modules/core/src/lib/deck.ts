@@ -12,6 +12,7 @@ import {Widget} from './widget';
 import {WidgetManager} from './widget-manager';
 import {TooltipWidget} from './tooltip-widget';
 import CanvasManager from './canvas-manager';
+import {FrameTimer} from './frame-timer';
 import log from '../utils/log';
 import {deepEqual} from '../utils/deep-equal';
 import typedArrayManager from '../utils/typed-array-manager';
@@ -51,6 +52,7 @@ import type {PickingInfo} from './picking/pick-info';
 import type {PickByPointOptions, PickByRectOptions} from './deck-picker';
 import type {LayersList} from './layer-manager';
 import type {TooltipContent} from './tooltip-widget';
+import type {FrameTimings} from './frame-timer';
 import type {ViewStateMap, AnyViewStateOf, ViewOrViews, ViewStateObject} from './view-manager';
 import {CreateDeviceProps} from '@luma.gl/core';
 
@@ -240,6 +242,11 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   _customRender?: ((reason: string) => void) | null;
   /** (Experimental) Called once every second with performance metrics. */
   _onMetrics?: ((metrics: DeckMetrics) => void) | null;
+  /**
+   * (Experimental) Called after each frame is drawn with the CPU and GPU time spent rendering layers.
+   * `gpuMs` is only measured when the device supports `'timestamp-query'`.
+   */
+  _onFrameTimings?: ((timings: FrameTimings) => void) | null;
 
   /** A custom callback to retrieve the cursor type. */
   getCursor?: (state: CursorState) => string;
@@ -298,6 +305,7 @@ const defaultProps: DeckProps = {
   onDrag: null,
   onDragEnd: null,
   _onMetrics: null,
+  _onFrameTimings: null,
 
   getCursor,
   getTooltip: null,
@@ -369,6 +377,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     gpuMemory: 0
   };
   private _metricsCounter: number = 0;
+  private frameTimer: FrameTimer | null = null;
   private _hoverPickSequence: number = 0;
   private _pointerDownPickSequence: number = 0;
 
@@ -480,6 +489,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     this.deckRenderer?.finalize();
     this.deckRenderer = null;
+
+    this.frameTimer?.destroy();
+    this.frameTimer = null;
 
     this.deckPicker?.finalize();
     this.deckPicker = null;
@@ -1744,12 +1756,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       ...renderOptions
     };
 
-    if (
+    const isMultiCanvasRender =
       this._isMultiCanvasMode() &&
       opts.pass === 'screen' &&
       !opts.target &&
-      this._canvasManager.order.length
-    ) {
+      this._canvasManager.order.length > 0;
+    // Nothing is drawn without viewports
+    const frameTimer = opts.viewports.length ? this._getFrameTimer() : null;
+    // GPU time is only measured when all viewports are drawn by a single renderLayers call
+    const timestampQuerySet = frameTimer?.beginFrame({measureGpuTime: !isMultiCanvasRender});
+
+    if (isMultiCanvasRender) {
       for (const canvasId of this._canvasManager.order) {
         const canvasViewports = opts.viewports.filter(
           viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
@@ -1780,8 +1797,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         target.presentationContext.present();
       }
     } else {
-      this.deckRenderer?.renderLayers(opts);
+      this.deckRenderer?.renderLayers({...opts, timestampQuerySet});
     }
+    frameTimer?.endFrame(this.props._onFrameTimings!);
 
     if (opts.pass === 'screen') {
       // This method could be called when drawing to picking buffer, texture etc.
@@ -1793,6 +1811,17 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+  }
+
+  /** Returns the frame timer if `_onFrameTimings` is set. No GPU resources are created otherwise. */
+  private _getFrameTimer(): FrameTimer | null {
+    if (!this.props._onFrameTimings) {
+      this.frameTimer?.destroy();
+      this.frameTimer = null;
+      return null;
+    }
+    this.frameTimer ||= new FrameTimer(this.device!);
+    return this.frameTimer;
   }
 
   // Callbacks

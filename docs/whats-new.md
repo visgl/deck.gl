@@ -116,6 +116,7 @@ New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked
 - Built-in widget buttons now use [styled, customizable tooltips](./api-reference/widgets/tooltips.md) that support text, HTML content, theming, and per-button disabling.
 - Built-in widget icons now use Google Material Symbols, with a new [`--icon-size`](./api-reference/widgets/styling.md#size) theme variable for consistent sizing.
 - [ScrollbarWidget](./api-reference/widgets/scrollbar-widget.md) now supports `contentBoundsPadding` to align its scroll range with padded content bounds. When explicit values are omitted, `contentBounds` and `contentBoundsPadding` fall back to the target view controller's `maxBounds` and `maxBoundsPadding`, respectively.
+- New experimental `Deck` prop [`_onFrameTimings`](./api-reference/core/deck.md#_onframetimings) reports per-frame CPU time and, on devices with the `'timestamp-query'` feature, GPU time of the layers render pass.
 - `@deck.gl/arcgis`'s [`DeckRenderer`](./api-reference/arcgis/deck-renderer.md) now integrates with ArcGIS `SceneView` through the modern [`RenderNode`](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) API instead of the deprecated `externalRenderers` API.
 
 ### pydeck

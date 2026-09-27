@@ -1439,3 +1439,58 @@ test('Deck#props omitted are unchanged', async () => {
     });
   });
 });
+
+test('Deck#_onFrameTimings', async () => {
+  const timings: {cpuMs: number; gpuMs?: number}[] = [];
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [new ScatterplotLayer({data: [[0, 0]], getPosition: d => d})],
+    _onFrameTimings: frameTimings => timings.push(frameTimings)
+  });
+
+  for (let frame = 0; frame < 120 && timings.length === 0; frame++) {
+    await sleep(16);
+  }
+
+  expect(timings.length, '_onFrameTimings called').toBeGreaterThan(0);
+  const [frameTimings] = timings;
+  expect(frameTimings.cpuMs).toBeGreaterThanOrEqual(0);
+  if (device.features.has('timestamp-query')) {
+    expect(frameTimings.gpuMs === undefined || frameTimings.gpuMs >= 0).toBe(true);
+  } else {
+    expect(frameTimings.gpuMs, 'gpuMs omitted without timestamp-query').toBeUndefined();
+  }
+
+  deck.finalize();
+});
+
+test('Deck#_onFrameTimings absent creates no QuerySet', async () => {
+  const createQuerySetSpy = vi.spyOn(device, 'createQuerySet');
+  let renderCount = 0;
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [new ScatterplotLayer({data: [[0, 0]], getPosition: d => d})],
+    _animate: true,
+    onAfterRender: () => renderCount++
+  });
+
+  for (let frame = 0; frame < 120 && renderCount < 5; frame++) {
+    await sleep(16);
+  }
+
+  expect(renderCount, 'deck rendered').toBeGreaterThanOrEqual(5);
+  // luma.gl's own debug GPU timer may create a QuerySet on devices with timestamp-query
+  const deckQuerySetCalls = createQuerySetSpy.mock.calls.filter(
+    ([props]) => props.id === 'deck-frame-timer'
+  );
+  expect(deckQuerySetCalls).toEqual([]);
+
+  deck.finalize();
+  createQuerySetSpy.mockRestore();
+});

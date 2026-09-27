@@ -611,6 +611,22 @@ Receives arguments:
 
 - `metrics` - an object with fields specified [here](#metrics).
 
+#### `_onFrameTimings` (Function) {#_onframetimings}
+
+* Default: `null`
+
+(Experimental) Called after each frame is drawn with the time spent rendering layers. No GPU resources are created unless this prop is set.
+
+Receives arguments:
+
+- `timings` (object)
+  + `cpuMs` (number) - CPU time, in milliseconds, spent encoding and submitting the frame's render passes.
+  + `gpuMs` (number, optional) - GPU time, in milliseconds, from the start of the first to the end of the last layers render pass, measured with timestamp queries. Post-processing effect passes are not included. Omitted when the device does not support the `'timestamp-query'` feature, when views are rendered to multiple canvases, or when the measurement failed or was skipped because too many frames were awaiting readback.
+
+On WebGPU, the feature must be requested when the device is created, e.g. with `deviceProps: {optionalFeatures: ['timestamp-query']}`.
+
+When `gpuMs` is measured, the callback is invoked asynchronously once the GPU timestamps have been read back, typically a few frames later. Otherwise it is invoked synchronously at the end of the frame.
+
 
 ## Methods
 

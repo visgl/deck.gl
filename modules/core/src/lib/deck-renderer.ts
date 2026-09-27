@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
+import type {CanvasContext, Device, PresentationContext, QuerySet} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
@@ -69,13 +69,16 @@ export default class DeckRenderer {
     layerFilter?: LayerFilter;
     clearStack?: boolean;
     clearCanvas?: boolean;
+    /** Receives the begin and end timestamps of the layers render pass */
+    timestampQuerySet?: QuerySet | null;
   }) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
+    const {timestampQuerySet, ...otherOpts} = opts;
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
-      ...opts
+      ...otherOpts
     };
 
     if (!opts.viewports.length) {
@@ -95,7 +98,7 @@ export default class DeckRenderer {
       renderOpts.clearColor = [0, 0, 0, 0];
       renderOpts.clearCanvas = true;
     }
-    const renderResult = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderResult = layerPass.render({...renderOpts, target: outputBuffer, timestampQuerySet});
     const renderStats = 'stats' in renderResult ? renderResult.stats : renderResult;
 
     if (renderOpts.effects) {

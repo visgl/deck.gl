@@ -10,7 +10,7 @@ import type {
   RenderPassParameters,
   RenderPipelineParameters
 } from '@luma.gl/core';
-import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {Framebuffer, QuerySet, RenderPass} from '@luma.gl/core';
 import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
@@ -58,6 +58,9 @@ export type LayersPassRenderOptions = {
   shaderModuleProps?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
+  /** If supplied, the first render pass writes its begin timestamp to index 0 and the last
+   * render pass writes its end timestamp to index 1 */
+  timestampQuerySet?: QuerySet | null;
 };
 
 export type DrawLayerParameters = {
@@ -110,7 +113,14 @@ export default class LayersPass extends Pass {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
-    const {shaderModuleProps, viewports, views, onViewportActive, clearStack = true} = options;
+    const {
+      shaderModuleProps,
+      viewports,
+      views,
+      onViewportActive,
+      clearStack = true,
+      timestampQuerySet
+    } = options;
     const pass = options.pass || 'unknown';
     const submitEachRenderPass = this.device.type === 'webgpu';
 
@@ -133,6 +143,7 @@ export default class LayersPass extends Pass {
       return renderStats;
     }
 
+    let isFirstRenderPass = true;
     try {
       for (const viewport of viewports) {
         onViewportActive?.(viewport);
@@ -147,13 +158,24 @@ export default class LayersPass extends Pass {
           : [subViewports];
 
         for (const renderGroup of renderGroups) {
+          const isLastRenderPass =
+            viewport === viewports[viewports.length - 1] &&
+            renderGroup === renderGroups[renderGroups.length - 1];
           const renderPass = this.device.beginRenderPass({
             framebuffer,
             parameters,
             clearColor: clearColor as NumberArray4,
             clearDepth,
-            clearStencil
+            clearStencil,
+            // Timestamps span from the start of the first pass to the end of the last
+            ...(timestampQuerySet &&
+              (isFirstRenderPass || isLastRenderPass) && {
+                timestampQuerySet,
+                beginTimestampIndex: isFirstRenderPass ? 0 : undefined,
+                endTimestampIndex: isLastRenderPass ? 1 : undefined
+              })
           });
+          isFirstRenderPass = false;
 
           try {
             for (const subViewport of renderGroup) {
