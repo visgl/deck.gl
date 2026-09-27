@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Device, Framebuffer, Texture} from '@luma.gl/core';
+import type {Device, Framebuffer, Texture, TypedArray as LumaTypedArray} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {
@@ -16,7 +16,6 @@ import Attribute from '../lib/attribute/attribute';
 import {GPUTransitionBase} from './gpu-transition';
 
 import type {SpringTransitionSettings} from '../lib/attribute/transition-settings';
-import type {TypedArray} from '../types/types';
 
 export default class GPUSpringTransition extends GPUTransitionBase<SpringTransitionSettings> {
   type = 'spring';
@@ -69,7 +68,7 @@ export default class GPUSpringTransition extends GPUTransitionBase<SpringTransit
     const {model} = this.transform;
     model.setVertexCount(Math.floor(this.currentLength / attribute.size));
     if (attribute.isConstant) {
-      model.setConstantAttributes({aTo: attribute.value as TypedArray});
+      model.setConstantAttributes({aTo: attribute.value as LumaTypedArray});
     } else {
       model.setAttributes({aTo: attribute.getBuffer()!});
     }

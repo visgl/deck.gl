@@ -222,7 +222,25 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       }
     };
     const {fetch} = this.props;
-    return fetch(elevationData, {propName: 'elevationData', layer: this, loadOptions, signal});
+    return fetch(elevationData, {
+      propName: 'elevationData',
+      layer: this,
+      loadOptions,
+      signal
+    }).then(mesh => {
+      const indices = mesh.indices;
+      if (
+        indices &&
+        !(indices.value instanceof Uint16Array) &&
+        !(indices.value instanceof Uint32Array)
+      ) {
+        return {
+          ...mesh,
+          indices: {...indices, value: Uint32Array.from(indices.value)}
+        };
+      }
+      return mesh;
+    });
   }
 
   getTiledTerrainData(tile: TileLoadProps): Promise<MeshAndTexture> {

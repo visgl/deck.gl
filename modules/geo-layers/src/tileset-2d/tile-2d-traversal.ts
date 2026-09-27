@@ -87,7 +87,7 @@ class OSMNode {
     }
 
     const isInside = cullingVolume.computeVisibility(boundingVolume);
-    if (isInside < 0) {
+    if (isInside === 'outside') {
       return false;
     }
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Matrix4} from '@math.gl/core';
+import type {Matrix4, NumberArray16} from '@math.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
 const uniformBlockWGSL = /* wgsl */ `\
@@ -36,6 +36,10 @@ export type ScenegraphProps = {
   composeModelMatrix: number;
 };
 
+type ScenegraphUniforms = Omit<ScenegraphProps, 'sceneModelMatrix'> & {
+  sceneModelMatrix: NumberArray16;
+};
+
 export const scenegraphUniforms = {
   name: 'scenegraph',
   source: uniformBlockWGSL,
@@ -48,4 +52,4 @@ export const scenegraphUniforms = {
     sceneModelMatrix: 'mat4x4<f32>',
     composeModelMatrix: 'f32'
   }
-} as const satisfies ShaderModule<ScenegraphProps>;
+} as const satisfies ShaderModule<ScenegraphProps, ScenegraphUniforms, Record<never, never>>;
