@@ -564,7 +564,7 @@ export default class DataColumn<Options, State> {
   /**
    * @internal
    * Returns the accessor of the data as uploaded to the GPU.
-   * On WebGPU, 8/16-bit vertex attributes whose size, stride or offset is not 4-byte aligned
+   * On WebGPU, 8/16-bit vertex attributes with a size of 3 or an unaligned stride or offset
    * are repacked into a dense, padded layout (e.g. `unorm8x3` -> `unorm8x4`).
    * Otherwise `accessor` itself is returned.
    */
@@ -575,11 +575,12 @@ export default class DataColumn<Options, State> {
     if (this.device.type !== 'webgpu' || this.settings.isIndexed || bytesPerElement >= 4) {
       return accessor;
     }
-    const isAligned =
-      (size * bytesPerElement) % 4 === 0 &&
+    // WebGPU has no 8/16-bit x3 formats and requires 4-byte aligned strides
+    const isValid =
+      size !== 3 &&
       getStride(accessor) % 4 === 0 &&
-      (accessor.offset || 0) % 4 === 0;
-    if (isAligned || size > 4) {
+      (accessor.offset || 0) % Math.min(size * bytesPerElement, 4) === 0;
+    if (isValid || size > 4) {
       return accessor;
     }
     const paddedSize = getWebGPUVertexSize(size, bytesPerElement);

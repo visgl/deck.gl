@@ -180,6 +180,23 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute upload',
     attribute.delete();
   });
 
+  test('WebGPU aligned external Buffer with a valid small format is accepted', () => {
+    const attribute = new Attribute(device, {
+      id: 'pairs',
+      size: 2,
+      type: 'unorm8',
+      accessor: 'getValue'
+    });
+    const buffer = device.createBuffer({byteLength: 12, usage: Buffer.VERTEX | Buffer.COPY_DST});
+
+    attribute.setExternalBuffer({buffer, stride: 4, offset: 0});
+    const layout = attribute.getBufferLayout();
+    expect(layout.byteStride).toBe(4);
+    expect(layout.attributes![0].format).toBe('unorm8x2');
+    buffer.destroy();
+    attribute.delete();
+  });
+
   test('WebGPU render pipeline accepts padded RGB color layout', async () => {
     const attribute = createColorAttribute(3);
     // 4 vertices = 12 bytes, so the upload itself is 4-byte aligned even on main
