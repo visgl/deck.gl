@@ -7,6 +7,7 @@ import {
   LayerManager,
   Viewport,
   WebMercatorViewport,
+  _GlobeViewport as GlobeViewport,
   _CustomProjectionViewport as CustomProjectionViewport
 } from '@deck.gl/core';
 import {
@@ -94,6 +95,52 @@ function createManager(viewport: Viewport, targetDevice = device) {
   });
   return manager;
 }
+
+test('CPU ScreenGrid projects packed attributes without repeating position transforms', () => {
+  const viewports = [
+    createViewport('screen', 1, {pitch: 35, bearing: 20}),
+    new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 4, width: 400, height: 300}),
+    new GlobeViewport({longitude: 0, latitude: 0, zoom: 1, width: 400, height: 300}),
+    new Viewport({width: 400, height: 300})
+  ];
+  for (const viewport of viewports) {
+    for (const coordinateSystem of ['default', 'cartesian'] as const) {
+      const manager = createManager(viewport);
+      const point = [2, 3, 4];
+      const layer = new ScreenGridLayer({
+        data: [point],
+        getPosition: p => p,
+        coordinateSystem,
+        coordinateOrigin: [10, 20, 30],
+        modelMatrix: new Matrix4().translate([1, 2, 3]),
+        gpuAggregation: false,
+        cellSizePixels: 40
+      });
+      try {
+        manager.setLayers([layer]);
+        const [x, y] = layer.project(point);
+        const expected =
+          x < 0 || x >= viewport.width || y < 0 || y >= viewport.height
+            ? null
+            : [Math.floor(x / 40), Math.floor(y / 40)];
+        const packed = Array.from(
+          layer.getAttributeManager()!.attributes.positions.value!.slice(0, 3)
+        );
+        const preproject = viewport.preproject ? vi.spyOn(viewport, 'preproject') : null;
+        preproject?.mockClear();
+        const aggregator = layer.state.aggregator as CPUAggregator;
+        const getBin = aggregator.props.getBin;
+        if (typeof getBin === 'function') throw new Error('Expected a position accessor');
+        expect(getBin.getValue({positions: packed}, 0, {cellSizePixels: 40})).toEqual(expected);
+        if (preproject) expect(preproject).not.toHaveBeenCalled();
+        expect(point).toEqual([2, 3, 4]);
+      } finally {
+        manager.finalize();
+        vi.restoreAllMocks();
+      }
+    }
+  }
+});
 
 for (const binary of [false, true]) {
   for (const aggregation of ['SUM', 'MEAN'] as const) {

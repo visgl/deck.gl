@@ -20,6 +20,7 @@ import AggregationLayer from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
@@ -138,7 +139,16 @@ export default class ScreenGridLayer<
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
             const viewport = this.context.viewport;
-            const p = this.projectPackedPosition(positions);
+            // Position attributes have already applied the converter and model matrix.
+            const p =
+              viewport.preproject && this.props.coordinateSystem !== 'cartesian'
+                ? worldToPixels(
+                    positions.map(
+                      (value, axis) => value * viewport.distanceScales.unitsPerWorldUnit[axis]
+                    ),
+                    viewport.pixelProjectionMatrix
+                  )
+                : this.project(positions);
             const cellSizePixels: number = opts.cellSizePixels;
             if (p[0] < 0 || p[0] >= viewport.width || p[1] < 0 || p[1] >= viewport.height) {
               // Not on screen
