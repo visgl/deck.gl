@@ -1,3 +1,7 @@
+---
+description: "Using deck.gl with TypeScript: typed layer props, generic data types and type-checked accessors."
+---
+
 # Using deck.gl with TypeScript
 
 ## deck.gl v9+
