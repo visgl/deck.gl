@@ -6,6 +6,7 @@ import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
   Viewport,
+  WebMercatorViewport,
   _CustomProjectionViewport as CustomProjectionViewport
 } from '@deck.gl/core';
 import {
@@ -396,6 +397,42 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
     }
   });
 }
+
+test('ContourLayer preserves Web Mercator common-space contour coordinates', () => {
+  const viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -122,
+    latitude: 38,
+    zoom: 12
+  });
+  const manager = createManager(viewport);
+  const layer = new ContourLayer({
+    data: [
+      [-122, 38, 0],
+      [-122.001, 38.001, 0]
+    ],
+    getPosition: p => p,
+    cellSize: 200,
+    gpuAggregation: false,
+    contours: [{threshold: 0.5}, {threshold: [0.5, 10]}]
+  });
+  try {
+    manager.setLayers([layer]);
+    const children = layer.getSubLayers();
+    expect(children).toHaveLength(2);
+    const {cellOriginCommon, cellSizeCommon} = layer.state;
+    const expectedMatrix = new Matrix4()
+      .translate([cellOriginCommon[0], cellOriginCommon[1], 0])
+      .scale([cellSizeCommon[0], cellSizeCommon[1], layer.props.zOffset]);
+    for (const child of children) {
+      expect(child.props.coordinateSystem).toBe('cartesian');
+      expect(Array.from(child.props.modelMatrix!)).toEqual(Array.from(expectedMatrix));
+    }
+  } finally {
+    manager.finalize();
+  }
+});
 
 test('ContourLayer supports ordinary application-provided Cartesian sublayers', () => {
   class CustomPathLayer extends PathLayer {
