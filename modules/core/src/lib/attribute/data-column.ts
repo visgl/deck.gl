@@ -10,6 +10,8 @@ import {
   typedArrayFromDataType,
   getBufferAttributeLayout,
   getStride,
+  getWebGPUVertexSize,
+  padVertexValues,
   dataTypeFromTypedArray
 } from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
@@ -206,7 +208,7 @@ export default class DataColumn<Options, State> {
   get byteOffset(): number {
     const accessor = this.getAccessor();
     if (accessor.vertexOffset) {
-      return accessor.vertexOffset * getStride(accessor);
+      return accessor.vertexOffset * getStride(this.getUploadAccessor(accessor));
     }
     return 0;
   }
@@ -277,7 +279,7 @@ export default class DataColumn<Options, State> {
     attributeName: string = this.id,
     options: Partial<ShaderAttributeOptions> | null = null
   ): BufferLayout {
-    const accessor = this.getAccessor();
+    const accessor = this.getUploadAccessor();
     const attributes: (BufferAttributeLayout | null)[] = [];
     const result: BufferLayout = {
       name: this.id,
@@ -426,6 +428,14 @@ export default class DataColumn<Options, State> {
       state.constant = true;
       this.value = ArrayBuffer.isView(value) ? value : new Float32Array(value);
     } else if (opts.buffer) {
+      const uploadAccessor = this.getUploadAccessor(accessor);
+      if (uploadAccessor !== accessor) {
+        throw new Error(
+          `Attribute ${this.id}: ${accessor.type}x${accessor.size} (stride ${getStride(accessor)}) ` +
+            'is not a valid WebGPU vertex format; ' +
+            `supply a ${accessor.type}x${uploadAccessor.size} buffer or a typed array.`
+        );
+      }
       const buffer = opts.buffer;
       state.externalBuffer = buffer;
       state.constant = false;
@@ -447,8 +457,6 @@ export default class DataColumn<Options, State> {
       }
 
       let {buffer} = this;
-      const stride = getStride(accessor);
-      const byteOffset = (accessor.vertexOffset || 0) * stride;
       if (this.settings.isIndexed) {
         const ArrayType = this.settings.defaultType;
         if (value.constructor !== ArrayType) {
@@ -456,6 +464,9 @@ export default class DataColumn<Options, State> {
           value = new ArrayType(value);
         }
       }
+      value = this._getUploadValue(value, accessor);
+      const stride = getStride(this.getUploadAccessor(accessor));
+      const byteOffset = (accessor.vertexOffset || 0) * stride;
 
       // A small over allocation is used as safety margin
       // Shader attributes may try to access this buffer with bigger offsets
@@ -477,6 +488,18 @@ export default class DataColumn<Options, State> {
 
     const value = this.value as TypedArray;
     const {startOffset = 0, endOffset} = opts;
+    const uploadAccessor = this.getUploadAccessor(this.settings);
+    if (uploadAccessor !== this.settings) {
+      // Padded upload: write whole vertices at their padded position
+      const {size} = this;
+      const startVertex = Math.floor(startOffset / size);
+      const endVertex = Math.ceil((endOffset ?? value.length) / size);
+      this.buffer.write(
+        this._getUploadValue(value.subarray(startVertex * size, endVertex * size), this.settings),
+        startVertex * getStride(uploadAccessor) + this.byteOffset
+      );
+      return;
+    }
     const splitDoublePrecisionValue = this._shouldSplitDoublePrecisionValue(value);
     this.buffer.write(
       splitDoublePrecisionValue
@@ -513,7 +536,9 @@ export default class DataColumn<Options, State> {
     const {byteOffset} = this;
     let {buffer} = this;
     const bufferByteLength =
-      value.byteLength * (splitDoublePrecisionValue && value instanceof Float32Array ? 2 : 1);
+      splitDoublePrecisionValue && value instanceof Float32Array
+        ? value.byteLength * 2
+        : this._getUploadByteLength(value, accessor);
 
     if (!buffer || buffer.byteLength < bufferByteLength + byteOffset) {
       buffer = this._createBuffer(bufferByteLength + byteOffset);
@@ -524,7 +549,7 @@ export default class DataColumn<Options, State> {
         buffer.write(
           this._shouldSplitDoublePrecisionValue(oldValue)
             ? toDoublePrecisionArray(oldValue, this)
-            : oldValue,
+            : this._getUploadValue(oldValue, accessor),
           byteOffset
         );
       }
@@ -536,7 +561,52 @@ export default class DataColumn<Options, State> {
     return true;
   }
 
+  /**
+   * @internal
+   * Returns the accessor of the data as uploaded to the GPU.
+   * On WebGPU, 8/16-bit vertex attributes whose size, stride or offset is not 4-byte aligned
+   * are repacked into a dense, padded layout (e.g. `unorm8x3` -> `unorm8x4`).
+   * Otherwise `accessor` itself is returned.
+   */
+  getUploadAccessor(
+    accessor: DataColumnSettings<Options> = this.getAccessor()
+  ): DataColumnSettings<Options> {
+    const {size, bytesPerElement} = accessor;
+    if (this.device.type !== 'webgpu' || this.settings.isIndexed || bytesPerElement >= 4) {
+      return accessor;
+    }
+    const isAligned =
+      (size * bytesPerElement) % 4 === 0 &&
+      getStride(accessor) % 4 === 0 &&
+      (accessor.offset || 0) % 4 === 0;
+    if (isAligned || size > 4) {
+      return accessor;
+    }
+    const paddedSize = getWebGPUVertexSize(size, bytesPerElement);
+    return {...accessor, size: paddedSize, stride: paddedSize * bytesPerElement, offset: 0};
+  }
+
   // PRIVATE HELPER METHODS
+
+  /** Returns `value`, described by `accessor`, as uploaded to the GPU */
+  protected _getUploadValue(value: TypedArray, accessor: DataColumnSettings<Options>): TypedArray {
+    const uploadAccessor = this.getUploadAccessor(accessor);
+    return uploadAccessor === accessor
+      ? value
+      : padVertexValues(value, accessor, uploadAccessor.size);
+  }
+
+  /** Returns the byte length of the densely packed `value` once uploaded to the GPU */
+  protected _getUploadByteLength(
+    value: TypedArray,
+    accessor: DataColumnSettings<Options> = this.getAccessor()
+  ): number {
+    const uploadAccessor = this.getUploadAccessor(accessor);
+    return uploadAccessor === accessor
+      ? value.byteLength
+      : Math.ceil(value.length / accessor.size) * getStride(uploadAccessor);
+  }
+
   private _shouldSplitDoublePrecisionValue(
     value: NumericArray | null
   ): value is Float32Array | Float64Array {
