@@ -5,6 +5,7 @@
 import {
   Accessor,
   COORDINATE_SYSTEM,
+  _PROJECTION_MODE as PROJECTION_MODE,
   GetPickingInfoParams,
   project32,
   LayersList,
@@ -367,9 +368,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const LinesSubLayerClass = this.getSubLayerClass('lines', PathLayer);
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
-    const scale = this.context.viewport.distanceScales.unitsPerWorldUnit;
+    const {viewport} = this.context;
     const modelMatrix = new Matrix4();
-    if (scale) {
+    if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
+      const scale = viewport.distanceScales.unitsPerWorldUnit;
       modelMatrix.scale(scale.map(value => 1 / value));
     }
     modelMatrix
