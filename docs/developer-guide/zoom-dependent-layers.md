@@ -1,10 +1,10 @@
 # Zoom-Dependent Layers
 
-Map styles often change what is drawn as the camera zooms: coarse summaries at low zoom give way to finer ones, labels thin out, lines keep a readable width. The [MapLibre style spec](https://maplibre.org/maplibre-style-spec/) expresses this declaratively with layer `minzoom`/`maxzoom` and `["zoom"]` expressions.
+Map styles often change what is drawn as the camera zooms: coarse summaries at low zoom give way to finer ones, labels thin out, lines keep a readable width. The [MapLibre](https://maplibre.org/maplibre-style-spec/) and [Mapbox](https://docs.mapbox.com/style-spec/) style specs express this declaratively with layer `minzoom`/`maxzoom` and `["zoom"]` expressions. The two specs share the syntax used on this page.
 
 deck.gl handles these effects efficiently. Zoom-dependent props such as `opacity` are uniforms, so they can be updated on every frame without regenerating attributes or re-running aggregation. The patterns below show how to achieve each effect with existing layer props and extensions.
 
-| MapLibre style spec | deck.gl |
+| MapLibre / Mapbox style spec | deck.gl |
 | --- | --- |
 | Layer `minzoom` / `maxzoom` | [`visible` or `layerFilter`](#zoom-ranges) |
 | `["interpolate", ["linear"], ["zoom"], ...]` on `*-opacity` | [`opacity` computed from zoom](#crossfading-between-zoom-bands) |
@@ -16,7 +16,7 @@ deck.gl handles these effects efficiently. Zoom-dependent props such as `opacity
 
 ## Interpolating by zoom
 
-A small helper reproduces MapLibre's `["interpolate", ["linear"], ["zoom"], z0, v0, z1, v1, ...]`: linear between stops, clamped at both ends.
+A small helper reproduces the style spec's `["interpolate", ["linear"], ["zoom"], z0, v0, z1, v1, ...]`: linear between stops, clamped at both ends.
 
 ```ts
 type ZoomStops = [zoom: number, value: number][];
@@ -36,7 +36,7 @@ function interpolateZoom(zoom: number, stops: ZoomStops): number {
 }
 ```
 
-A MapLibre `step` expression is the same with two stops at the same zoom, e.g. `[[5, 0], [5, 1]]`.
+A `step` expression is the same with two stops at the same zoom, e.g. `[[5, 0], [5, 1]]`.
 
 ## Zoom ranges
 
@@ -45,7 +45,7 @@ The equivalent of `minzoom`/`maxzoom` is to hide a layer outside a range of zoom
 ```ts
 new ScatterplotLayer({
   id: 'parcels',
-  // MapLibre semantics: minzoom is inclusive, maxzoom is exclusive
+  // Style spec semantics: minzoom is inclusive, maxzoom is exclusive
   visible: zoom >= 14 && zoom < 24
   // ...
 });
@@ -175,7 +175,7 @@ Things to keep in mind:
 
 ## Sizes that scale with the map
 
-MapLibre styles often interpolate a size exponentially with base 2, e.g. `"circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 10, 2, 20, 2048]`, so that a circle keeps its geographic size. In deck.gl, that is the default behavior of sizes in meters. Pixel bounds keep them legible at low zoom:
+Map styles often interpolate a size exponentially with base 2, e.g. `"circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 10, 2, 20, 2048]`, so that a circle keeps its geographic size. In deck.gl, that is the default behavior of sizes in meters. Pixel bounds keep them legible at low zoom:
 
 ```ts
 new ScatterplotLayer({
@@ -219,7 +219,7 @@ A GeoJSON source with `cluster: true` groups points differently at each zoom lev
 
 ## Label collision
 
-MapLibre hides overlapping symbols by default and prioritizes them with `symbol-sort-key`. The [CollisionFilterExtension](../api-reference/extensions/collision-filter-extension.md) does the same on the GPU for any layer. Collisions are re-evaluated as the camera moves, so labels thin out automatically when zooming out:
+Symbol layers hide overlapping symbols by default and prioritizes them with `symbol-sort-key`. The [CollisionFilterExtension](../api-reference/extensions/collision-filter-extension.md) does the same on the GPU for any layer. Collisions are re-evaluated as the camera moves, so labels thin out automatically when zooming out:
 
 ```ts
 import {CollisionFilterExtension} from '@deck.gl/extensions';
