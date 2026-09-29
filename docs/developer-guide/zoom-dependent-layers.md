@@ -84,6 +84,21 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 type Point = {position: [number, number]};
+type ZoomStops = [zoom: number, value: number][];
+
+function interpolateZoom(zoom: number, stops: ZoomStops): number {
+  if (zoom <= stops[0][0]) {
+    return stops[0][1];
+  }
+  for (let i = 1; i < stops.length; i++) {
+    const [z1, v1] = stops[i];
+    if (zoom <= z1) {
+      const [z0, v0] = stops[i - 1];
+      return v0 + ((v1 - v0) * (zoom - z0)) / (z1 - z0);
+    }
+  }
+  return stops[stops.length - 1][1];
+}
 
 const BANDS: {cellSize: number; opacity: ZoomStops}[] = [
   {cellSize: 16000, opacity: [[0, 1], [7, 1], [8, 0]]},
@@ -121,6 +136,7 @@ function getLayers(data: Point[], zoom: number) {
 }
 
 const INITIAL_VIEW_STATE: MapViewState = {longitude: -74, latitude: 40.7, zoom: 6};
+
 const data: Point[] = await fetch('/path/to/points.json').then(resp => resp.json());
 
 const deckInstance = new Deck({
@@ -140,13 +156,66 @@ const deckInstance = new Deck({
 import React, {useCallback, useMemo, useState} from 'react';
 import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
+import {GridLayer} from '@deck.gl/aggregation-layers';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+type Point = {position: [number, number]};
+type ZoomStops = [zoom: number, value: number][];
+
+function interpolateZoom(zoom: number, stops: ZoomStops): number {
+  if (zoom <= stops[0][0]) {
+    return stops[0][1];
+  }
+  for (let i = 1; i < stops.length; i++) {
+    const [z1, v1] = stops[i];
+    if (zoom <= z1) {
+      const [z0, v0] = stops[i - 1];
+      return v0 + ((v1 - v0) * (zoom - z0)) / (z1 - z0);
+    }
+  }
+  return stops[stops.length - 1][1];
+}
+
+const BANDS: {cellSize: number; opacity: ZoomStops}[] = [
+  {cellSize: 16000, opacity: [[0, 1], [7, 1], [8, 0]]},
+  {cellSize: 4000, opacity: [[7, 0], [8, 1], [9, 1], [10, 0]]},
+  {cellSize: 1000, opacity: [[9, 0], [10, 1], [11, 1], [12, 0]]},
+  {cellSize: 250, opacity: [[11, 0], [12, 1], [13, 1], [14, 0]]}
+];
+
+function getLayers(data: Point[], zoom: number) {
+  const gridLayers = BANDS.map(({cellSize, opacity: stops}) => {
+    const opacity = interpolateZoom(zoom, stops);
+    return new GridLayer<Point>({
+      id: `grid-${cellSize}`,
+      data,
+      getPosition: d => d.position,
+      cellSize,
+      gpuAggregation: true,
+      opacity,
+      visible: opacity > 0,
+      pickable: opacity > 0.5
+    });
+  });
+  const pointOpacity = interpolateZoom(zoom, [[13, 0], [14, 1]]);
+  const pointLayer = new ScatterplotLayer<Point>({
+    id: 'points',
+    data,
+    getPosition: d => d.position,
+    radiusUnits: 'pixels',
+    getRadius: 2,
+    opacity: pointOpacity,
+    visible: pointOpacity > 0,
+    pickable: pointOpacity > 0.5
+  });
+  return [...gridLayers, pointLayer];
+}
 
 const INITIAL_VIEW_STATE: MapViewState = {longitude: -74, latitude: 40.7, zoom: 6};
 
 function App({data}: {data: Point[]}) {
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(({viewState}) => setZoom(viewState.zoom), []);
-  // getLayers() as defined in the TypeScript tab
   const layers = useMemo(() => getLayers(data, zoom), [data, zoom]);
 
   return (
