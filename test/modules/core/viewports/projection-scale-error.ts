@@ -36,7 +36,8 @@ export function estimateProjectionScaleError(
   const data = viewport.getSizeScaleData();
   const size = Math.sqrt(data.length / 4);
   const spacing = 512 / size;
-  const normalization = 512 / Math.max(toBounds[2] - toBounds[0], toBounds[3] - toBounds[1]);
+  const normalization = 1;
+  const samplerScale = [512 / (toBounds[2] - toBounds[0]), 512 / (toBounds[3] - toBounds[1])];
   const outputCenter = [(toBounds[0] + toBounds[2]) / 2, (toBounds[1] + toBounds[3]) / 2];
   const region = (): RegionEstimate => ({maxima: [0, 0], positions: 0, boundaries: 0, dropouts: 0});
   const center = region();
@@ -45,14 +46,14 @@ export function estimateProjectionScaleError(
 
   function toCommon(input: number[]): number[] {
     const output = projection.forward(input.slice());
-    return output.map((value, axis) => (value - outputCenter[axis]) * normalization + 256);
+    return output.map((value, axis) => (value - outputCenter[axis]) * samplerScale[axis] + 256);
   }
 
   function inputAt(x: number, y: number): number[] | null {
     try {
       const output = [
-        (x - 256) / normalization + outputCenter[0],
-        (y - 256) / normalization + outputCenter[1]
+        (x - 256) / samplerScale[0] + outputCenter[0],
+        (y - 256) / samplerScale[1] + outputCenter[1]
       ];
       const input = projection.inverse(output);
       if (
@@ -82,7 +83,7 @@ export function estimateProjectionScaleError(
     const origin = projection.forward(input.slice());
     const east = projection.forward([input[0] + dx, input[1]]);
     const north = projection.forward([input[0], input[1] + dy]);
-    const meters = (step * Math.PI * 6371008.8) / 180;
+    const meters = (step * 40075016.6855) / 360;
     return (
       normalization *
       Math.sqrt(

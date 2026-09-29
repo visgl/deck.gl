@@ -305,25 +305,28 @@ export default class CustomProjectionViewport extends Viewport {
     return [position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE];
   }
 
-  /** Converts world XYZ to common XYZ, including the converter's altitude conversion. */
-  projectPosition(position: number[]): [number, number, number] {
-    const projected = this.preproject!(position);
+  /** Converts world XYZ, or preprojected map-meter XYZ, to common XYZ with local altitude scale. */
+  projectPosition(position: number[], preprojected = false): [number, number, number] {
+    const projected = preprojected ? position : this.preproject!(position);
     return [
       projected[0] * NORMALIZATION_SCALE,
       projected[1] * NORMALIZATION_SCALE,
-      projected[2] * this.getDistanceScales(projected).unitsPerMeter[2]
+      (projected[2] || 0) * this.getDistanceScales(projected).unitsPerMeter[2]
     ];
   }
 
-  /** Converts common XYZ to world XYZ; invalid inverses return NaN. */
-  unprojectPosition(position: number[]): [number, number, number] {
-    return (
-      this.postUnproject!([
-        position[0] / NORMALIZATION_SCALE,
-        position[1] / NORMALIZATION_SCALE,
-        (position[2] || 0) / this.getDistanceScales([position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE]).unitsPerMeter[2]
-      ]) || [NaN, NaN, NaN]
-    );
+  /** Converts common XYZ to world XYZ or preprojected map-meter XYZ; invalid inverses return NaN. */
+  unprojectPosition(position: number[], preprojected = false): [number, number, number] {
+    const projected: [number, number, number] = [
+      position[0] / NORMALIZATION_SCALE,
+      position[1] / NORMALIZATION_SCALE,
+      (position[2] || 0) /
+        this.getDistanceScales([
+          position[0] / NORMALIZATION_SCALE,
+          position[1] / NORMALIZATION_SCALE
+        ]).unitsPerMeter[2]
+    ];
+    return preprojected ? projected : this.postUnproject!(projected) || [NaN, NaN, NaN];
   }
 
   /** Returns ground-meter scales at a map-meter anchor in toCrs, or the camera center.

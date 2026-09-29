@@ -78,13 +78,19 @@ Converts XYZ in map meters in `toCrs` back to world coordinates. Returns `null` 
 
 Projects world coordinates in `fromCrs` to screen pixels. The inherited `topLeft` option defaults to `true`. Three-component positions return pixel depth as their third component.
 
+With `preprojected: true`, accepts XYZ in map meters in `toCrs` instead. Local altitude scaling still applies.
+
 ### `unproject(pixels, options)`
 
-Returns world coordinates in `fromCrs`. If pixel depth is absent, `targetZ` specifies altitude, defaulting to zero; this assumes the converter leaves altitude unchanged. `topLeft` defaults to `true`. Coordinates are non-finite when the converter cannot invert the position.
+Returns world coordinates in `fromCrs`. If pixel depth is absent, `targetZ` specifies world-coordinate altitude, defaulting to zero. `topLeft` defaults to `true`. Coordinates are non-finite when the converter cannot invert the position.
+
+With `preprojected: true`, skips the conversion back to `fromCrs` and returns map-meter coordinates in `toCrs`. The inherited `targetZ` plane calculation is unchanged.
 
 ### `projectPosition`, `unprojectPosition`
 
-`projectPosition` converts world XYZ in `fromCrs` to common XYZ, including the converter's altitude conversion and the rendering scale. `unprojectPosition` reverses it.
+`projectPosition` converts world XYZ in `fromCrs` to common XYZ, including the converter's altitude conversion and local altitude scale. `unprojectPosition` reverses it.
+
+Pass `true` as the second argument to accept or return preprojected XYZ in map meters in `toCrs`. Only the world-coordinate conversion is skipped; common-space normalization and local altitude scaling still apply.
 
 ### `projectFlat`, `unprojectFlat`
 

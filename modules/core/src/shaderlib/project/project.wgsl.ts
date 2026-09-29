@@ -58,6 +58,7 @@ struct ProjectUniforms {
   commonOrigin: vec3<f32>,
   pseudoMeters: i32,
   sizeScaleSize: i32,
+  sizeScaleTransform: vec4<f32>,
 };
 
 @group(0) @binding(auto)
@@ -124,24 +125,24 @@ fn project_size() -> f32 {
 }
 
 #ifdef USE_EXTERNAL_PROJECTION
-// Nearest-record Taylor reconstruction: x=scalar XY scale, yz=slopes per common
+// Nearest-record Taylor reconstruction: x=scalar XY scale, yz=slopes per sampler
 // unit, w=Z scale. x=0 marks invalid samples. One load preserves instance aspect ratio.
 // Alternatives if discontinuities/accuracy become visible: blend four local Taylor
 // estimates for continuity, or use four-fetch bicubic Hermite with a mixed derivative
 // for higher accuracy (which would require moving Z scale out of w).
 fn project_external_size_scale_at(mapPosition: vec2<f32>) -> vec3<f32> {
   if (project.sizeScaleSize <= 0) { return project.commonUnitsPerMeter; }
-  let commonPosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
-  if (any(commonPosition < vec2<f32>(0.0)) || any(commonPosition > vec2<f32>(512.0))) {
+  let samplePosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
+  if (any(samplePosition < vec2<f32>(0.0)) || any(samplePosition > vec2<f32>(512.0))) {
     return project.commonUnitsPerMeter;
   }
   let dimensions = vec2<i32>(project.sizeScaleSize);
-  let index = clamp(vec2<i32>(floor(commonPosition / 512.0 * vec2<f32>(dimensions))),
+  let index = clamp(vec2<i32>(floor(samplePosition / 512.0 * vec2<f32>(dimensions))),
     vec2<i32>(0), dimensions - 1);
   let record = project_sizeScaleBuffer[u32(index.y * project.sizeScaleSize + index.x)];
   if (record.x <= 0.0) { return project.commonUnitsPerMeter; }
   let center = (vec2<f32>(index) + 0.5) * 512.0 / vec2<f32>(dimensions);
-  let scale = max(0.0, record.x + dot(record.yz, commonPosition - center));
+  let scale = max(0.0, record.x + dot(record.yz, samplePosition - center));
   return vec3<f32>(scale, scale, record.w * scale / record.x) * project.commonUnitsPerWorldUnit;
 }
 

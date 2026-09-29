@@ -290,10 +290,14 @@ export default class Viewport {
    * @param {Array} lngLatZ - [lng, lat] or [lng, lat, Z]
    * @param {Object} opts - options
    * @param {Object} opts.topLeft=true - Whether projected coords are top left
+   * @param {boolean} opts.preprojected=false - Accept coordinates after preproject instead of world coordinates
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
-  project(xyz: number[], {topLeft = true}: {topLeft?: boolean} = {}): number[] {
-    const worldPosition = this.projectPosition(xyz);
+  project(
+    xyz: number[],
+    {topLeft = true, preprojected = false}: {topLeft?: boolean; preprojected?: boolean} = {}
+  ): number[] {
+    const worldPosition = this.projectPosition(xyz, preprojected);
     const coord = worldToPixels(worldPosition, this.pixelProjectionMatrix);
 
     const [x, y] = coord;
@@ -309,18 +313,24 @@ export default class Viewport {
    * @param {Array} xyz -
    * @param {Object} opts - options
    * @param {Object} opts.topLeft=true - Whether origin is top left
+   * @param {boolean} opts.preprojected=false - Return coordinates before postUnproject
+   * @param {number} opts.targetZ - Elevation plane used when pixel depth is absent
    * @return {Array|null} - [lng, lat, Z] or [X, Y, Z]
    */
   unproject(
     xyz: number[],
-    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+    {
+      topLeft = true,
+      preprojected = false,
+      targetZ
+    }: {topLeft?: boolean; preprojected?: boolean; targetZ?: number} = {}
   ): number[] {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
     const targetZWorld = targetZ && targetZ * this.distanceScales.unitsPerWorldUnit[2];
     const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
-    const [X, Y, Z] = this.unprojectPosition(coord);
+    const [X, Y, Z] = this.unprojectPosition(coord, preprojected);
 
     if (Number.isFinite(z)) {
       return [X, Y, Z];
@@ -331,16 +341,22 @@ export default class Viewport {
   // NON_LINEAR PROJECTION HOOKS
   // Used for web meractor projection
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  /** Converts world coordinates to common coordinates; preprojected skips preproject only. */
+  projectPosition(xyz: number[], preprojected = false): [number, number, number] {
+    if (!preprojected && this.preproject) xyz = this.preproject(xyz);
     const [X, Y] = this.projectFlat(xyz);
     const Z = (xyz[2] || 0) * this.distanceScales.unitsPerWorldUnit[2];
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: number[]): [number, number, number] {
+  /** Converts common coordinates to world coordinates; preprojected skips postUnproject only. */
+  unprojectPosition(xyz: number[], preprojected = false): [number, number, number] {
     const [X, Y] = this.unprojectFlat(xyz);
     const Z = (xyz[2] || 0) / this.distanceScales.unitsPerWorldUnit[2];
-    return [X, Y, Z];
+    const position: [number, number, number] = [X, Y, Z];
+    return !preprojected && this.postUnproject
+      ? this.postUnproject(position) || [NaN, NaN, NaN]
+      : position;
   }
 
   /**

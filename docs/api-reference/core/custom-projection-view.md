@@ -55,6 +55,7 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | `fromCrs` | `'WGS84'` | CRS name or PROJ string describing world coordinates. |
 | `toCrs` | None | Planar, meter-based map CRS name or PROJ string. |
 | `fromBounds` | None | The projection's valid domain, expressed as `[minX, minY, maxX, maxY]` in world coordinates (`fromCrs`). |
+| `toBounds` | `[-EC/2, -EC/2, EC/2, EC/2]`, where `EC = 40075016.6855` | Extent for local meter sizing, as `[minX, minY, maxX, maxY]` in map meters in `toCrs`. Defaults to the Web Mercator extent. Set this to cover your map; it does not clip geometry or change the map's coordinate scale. |
 | `resolution` | `0` | Set a positive value in world-coordinate units (`fromCrs`) to subdivide paths and polygon edges so they follow the projection. Smaller positive values produce smoother curves but take longer to process. `0` disables subdivision. |
 | `getDistanceScale` | None | `([x, y]) => [xScale, yScale]`, with `[x, y]` in `toCrs`: real-world ground meters per map meter along X/Y, to adjust for horizontal projection distortion. Altitude does not affect scale. See [meter size](./custom-projection-viewport.md#meter-size). |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
@@ -82,6 +83,14 @@ TypeScript configuration types are exported as `CustomProjectionViewProps`, `Cus
 ## Controller
 
 Enable interaction with `controller: true`. The default [CustomProjectionController](./custom-projection-controller.md) pans and zooms in common space, with map-style pitch and bearing controls. Panning is unrestricted unless you supply `controller.maxBounds` in world coordinates (`fromCrs`).
+
+## Meter Size
+
+Layers using `sizeUnits: 'meters'`, `radiusUnits: 'meters'` or `widthUnits: 'meters'` adjust their sizes at each object's location. Altitude receives the same local correction.
+
+The correction is area-equivalent: a small geographic circle can become an ellipse under projection, as illustrated by [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix). Instead of stretching a marker into that ellipse, deck.gl preserves its shape and approximates the same projected area. Equally sized markers grow toward the poles in Web Mercator and remain approximately uniform in Equal Earth.
+
+Local sizing is approximate. Set `toBounds` to cover the area you display. Outside that extent, or where local scale cannot be evaluated, rendering falls back to the viewport-center scale. Changing `toBounds` updates meter sizing without changing position normalization.
 
 ## Changing Projections
 

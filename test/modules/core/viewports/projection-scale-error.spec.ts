@@ -124,7 +124,7 @@ test('scale error harness includes invalid records and measures one-sided bounda
     fromBounds: [-180, -80, 180, 80] as [number, number, number, number],
     toBounds: [-180, -80, 180, 80] as [number, number, number, number]
   };
-  const settings = {divisions: 16, getReferenceScale: () => 360 / 512};
+  const settings = {divisions: 16, getReferenceScale: () => 1};
   try {
     const constant = estimateProjectionScaleError(options, settings);
     expect(constant.center.maxima).toEqual([0, 0]);

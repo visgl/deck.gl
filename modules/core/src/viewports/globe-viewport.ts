@@ -201,7 +201,7 @@ export default class GlobeViewport extends Viewport {
    */
   private _getRayToGlobe(
     screenPosition: number[],
-    {topLeft = true, targetZ}: {topLeft?: boolean; targetZ?: number} = {}
+    {topLeft = true, targetZ}: {topLeft?: boolean; preprojected?: boolean; targetZ?: number} = {}
   ): {
     rayStartPosition: number[];
     rayEndPosition: number[];
@@ -322,7 +322,7 @@ export default class GlobeViewport extends Viewport {
     return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: number[], _preprojected = false): [number, number, number] {
     const [lng, lat, Z = 0] = xyz;
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;
@@ -332,7 +332,7 @@ export default class GlobeViewport extends Viewport {
     return [Math.sin(lambda) * cosPhi * D, -Math.cos(lambda) * cosPhi * D, Math.sin(phi) * D];
   }
 
-  unprojectPosition(xyz: number[]): [number, number, number] {
+  unprojectPosition(xyz: number[], _preprojected = false): [number, number, number] {
     const [x, y, z] = xyz;
     const D = vec3.len(xyz);
     const phi = Math.asin(z / D);

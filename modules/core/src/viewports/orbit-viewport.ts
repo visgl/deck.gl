@@ -141,7 +141,10 @@ export default class OrbitViewport extends Viewport {
     this.projectedCenter = this.project(this.center);
   }
 
-  unproject(xyz: number[], {topLeft = true}: {topLeft?: boolean} = {}): [number, number, number] {
+  unproject(
+    xyz: number[],
+    {topLeft = true}: {topLeft?: boolean; preprojected?: boolean} = {}
+  ): [number, number, number] {
     const [x, y, z = this.projectedCenter[2]] = xyz;
 
     const y2 = topLeft ? y : this.height - y;

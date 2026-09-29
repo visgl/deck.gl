@@ -10,12 +10,68 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
 
+const normalizationScale = 512 / 40075016.6855;
 const projection = {forward: p => p.slice(), inverse: p => p.slice()};
 const options = {
   projection,
   fromCrs: '+units=m',
   toBounds: [0, 0, 512, 512] as [number, number, number, number]
 };
+
+test('sampler bounds are independent of common-space normalization', () => {
+  const defaultViewport = new CustomProjectionViewport({projection, fromCrs: '+units=m'});
+  expect(defaultViewport.sizeScaleTransform).toEqual([
+    normalizationScale,
+    normalizationScale,
+    256,
+    256
+  ]);
+  const viewport = new CustomProjectionViewport({...options, toBounds: [1000, -3000, 2024, 1096]});
+  expect(viewport.sizeScaleTransform).toEqual([0.5, 0.125, -500, 375]);
+  expect(viewport.projectPosition([1500, -2000, 10])).toEqual(
+    defaultViewport.projectPosition([1500, -2000, 10])
+  );
+  expect(viewport.projectionSignature).toBe(defaultViewport.projectionSignature);
+  expect(viewport.sizeScaleSignature).not.toBe(defaultViewport.sizeScaleSignature);
+  for (const toBounds of [
+    [0, 0, 0, 1],
+    [0, 2, 1, 1],
+    [0, 0, Infinity, 1]
+  ]) {
+    expect(
+      () =>
+        new CustomProjectionViewport({
+          ...options,
+          toBounds: toBounds as [number, number, number, number]
+        })
+    ).toThrow('toBounds');
+  }
+});
+
+test('local altitude and picking are independent of camera center', () => {
+  for (const centerX of [1200, 1800]) {
+    const viewport = new CustomProjectionViewport({
+      ...options,
+      width: 800,
+      height: 600,
+      pitch: 35,
+      bearing: 20,
+      zoom: 10,
+      center: [centerX, -1000, 0],
+      toBounds: [1000, -3000, 2024, 1096],
+      projection: {
+        forward: ([x, y, z = 0]) => [x, y, z * 0.3048],
+        inverse: ([x, y, z = 0]) => [x, y, z / 0.3048]
+      },
+      getDistanceScale: ([x]) => [1000 / x, 1000 / x]
+    });
+    const world = [1500, -1000, 100];
+    expect(viewport.preproject!(world)[2]).toBe(30.48);
+    expect(viewport.projectPosition(world)[2] / normalizationScale).toBeCloseTo(30.48 * 1.5, 9);
+    const pixel = viewport.project(world);
+    viewport.unproject(pixel).forEach((value, i) => expect(value).toBeCloseTo(world[i], 5));
+  }
+});
 
 test.each([
   {name: 'area-preserving shear', a: 1, b: 2, c: 0, d: 1, scale: 1},
@@ -37,7 +93,10 @@ test.each([
   }
   // CPU axis-specific estimates remain available for aggregation etc.
   [Math.hypot(a, c), Math.hypot(b, d), scale].forEach((value, i) =>
-    expect(viewport.getDistanceScales().unitsPerMeter[i]).toBeCloseTo(value, 6)
+    expect(viewport.getDistanceScales().unitsPerMeter[i]).toBeCloseTo(
+      value * normalizationScale,
+      12
+    )
   );
 });
 
@@ -45,7 +104,8 @@ test('external scale field bleeds scale and Z from valid neighbors', () => {
   const viewport = new CustomProjectionViewport({
     ...options,
     projection: {forward: projection.forward, inverse: p => (p[0] < 256 ? null : p)},
-    getMetersPerUnit: ([x]) => [1 / x, 1 / x, 1]
+    center: [384, 256, 0],
+    getDistanceScale: ([x]) => [1 / x, 1 / x]
   });
   expect(Array.from(viewport.getSizeScaleData(2))).toEqual([
     384, 0, 0, 384, 384, 0, 0, 384, 384, 0, 0, 384, 384, 0, 0, 384
@@ -53,17 +113,17 @@ test('external scale field bleeds scale and Z from valid neighbors', () => {
 });
 
 test('external scale field does not clamp invalid samples onto input boundaries', () => {
-  const getMetersPerUnit = vi.fn(() => [1, 1, 1] as [number, number, number]);
+  const getDistanceScale = vi.fn(() => [1, 1] as [number, number]);
   const viewport = new CustomProjectionViewport({
     ...options,
     fromBounds: [0, 0, 256, 256],
-    getMetersPerUnit
+    getDistanceScale
   });
-  getMetersPerUnit.mockClear();
+  getDistanceScale.mockClear();
   expect(Array.from(viewport.getSizeScaleData(2))).toEqual([
     1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1
   ]);
-  expect(getMetersPerUnit).toHaveBeenCalledTimes(1);
+  expect(getDistanceScale).toHaveBeenCalledTimes(1);
 });
 
 test('scale bleeding extrapolates one ring, including diagonals, without extra projection calls', () => {
@@ -72,7 +132,7 @@ test('scale bleeding extrapolates one ring, including diagonals, without extra p
     ...options,
     projection: {forward: projection.forward, inverse},
     fromBounds: [192, 192, 320, 320],
-    getMetersPerUnit: ([x, y]) => [1 / (10 + x + 2 * y), 1 / (10 + x + 2 * y), 1]
+    getDistanceScale: ([x, y]) => [1 / (10 + x + 2 * y), 1 / (10 + x + 2 * y)]
   });
   inverse.mockClear();
   const data = viewport.getSizeScaleData(8);
@@ -97,8 +157,9 @@ test('scale bleeding extrapolates one ring, including diagonals, without extra p
 test('scale bleeding leaves nonpositive extrapolations and wholly invalid fields empty', () => {
   const viewport = new CustomProjectionViewport({
     ...options,
+    center: [400, 0, 0],
     fromBounds: [256, 0, 512, 512],
-    getMetersPerUnit: ([x]) => [1 / (x - 300), 1 / (x - 300), 1]
+    getDistanceScale: ([x]) => [1 / (x - 300), 1 / (x - 300)]
   });
   const data = viewport.getSizeScaleData(4);
   expect(Array.from(data.slice(0, 8))).toEqual(new Array(8).fill(0));
@@ -116,24 +177,24 @@ test('external scale field estimates latitude-dependent scale for XY and meter a
   });
   const data = viewport.getSizeScaleData(8);
   const offset = (5 * 8 + 4) * 4;
-  const latitude = 67.5;
-  const metersPerDegree = (Math.PI * 6371008.8) / 180;
+  const latitude = 33.75;
+  const metersPerDegree = 40075016.6855 / 360;
   expect(data[offset]).toBeCloseTo(
-    512 / 360 / metersPerDegree / Math.sqrt(Math.cos((latitude * Math.PI) / 180)),
+    1 / metersPerDegree / Math.sqrt(Math.cos((latitude * Math.PI) / 180)),
     9
   );
   expect(data[offset + 1]).toBeCloseTo(0, 9);
   expect(data[offset + 2]).toBeGreaterThan(0);
   expect(data[offset + 3]).toBe(data[offset]);
-  expect(Array.from(data.slice(0, 4))).toEqual([0, 0, 0, 0]);
+  expect(data[0]).toBeGreaterThan(0);
 });
 
-test('scalar slopes use common units and require no extra inverse calls', () => {
+test('scalar slopes use sampler units and require no extra inverse calls', () => {
   const inverse = vi.fn(p => p.slice());
   const viewport = new CustomProjectionViewport({
     ...options,
     projection: {forward: projection.forward, inverse},
-    getMetersPerUnit: ([x, y]) => [1 / (10 + x + 2 * y), 1 / (10 + x + 2 * y), 1]
+    getDistanceScale: ([x, y]) => [1 / (10 + x + 2 * y), 1 / (10 + x + 2 * y)]
   });
   inverse.mockClear();
   const data = viewport.getSizeScaleData(4);
@@ -157,7 +218,7 @@ test('64x64 nearest-slope Mercator sizing stays within 0.14 percent including bo
     const row = Math.min(63, Math.floor(y / 8));
     const offset = (row * 64 + 32) * 4;
     const scale = data[offset] + data[offset + 1] * -4 + data[offset + 2] * (y - (row + 0.5) * 8);
-    const exact = (Math.cosh((y / 512 - 0.5) * 2 * Math.PI) * 512) / (2 * Math.PI * 6371008.8);
+    const exact = (Math.cosh((y / 512 - 0.5) * 2 * Math.PI) * 512) / 40075016.6855;
     maxError = Math.max(maxError, Math.abs(scale / exact - 1));
   }
   expect(maxError).toBeLessThan(0.0014);
@@ -229,7 +290,7 @@ test('WebGPU external scale uses float storage records and no resource for ordin
   }
 });
 
-test('external scale identity tracks CRS, but not callbacks, bounds, camera or tessellation', () => {
+test('external scale identity tracks CRS, and bounds, but not callbacks, camera or tessellation', () => {
   const original = new CustomProjectionViewport(options);
   expect(
     new CustomProjectionViewport({...options, resolution: 1, zoom: 4}).sizeScaleSignature
@@ -240,15 +301,18 @@ test('external scale identity tracks CRS, but not callbacks, bounds, camera or t
   ).toBe(original.sizeScaleSignature);
   for (const change of [
     {
-      getMetersPerUnit: () => [2, 3, 4] as [number, number, number]
-    },
-    {toBounds: [0, 0, 1024, 512] as [number, number, number, number]}
+      getDistanceScale: () => [2, 3] as [number, number]
+    }
   ]) {
     expect(new CustomProjectionViewport({...options, ...change}).sizeScaleSignature).toBe(
       original.sizeScaleSignature
     );
   }
-  for (const change of [{toCrs: 'changed'}, {fromCrs: '+proj=utm +zone=10 +units=m'}]) {
+  for (const change of [
+    {toCrs: 'changed'},
+    {fromCrs: '+proj=utm +zone=10 +units=m'},
+    {toBounds: [0, 0, 1024, 512] as [number, number, number, number]}
+  ]) {
     expect(new CustomProjectionViewport({...options, ...change}).sizeScaleSignature).not.toBe(
       original.sizeScaleSignature
     );

@@ -15,5 +15,6 @@ export default {
   toCrs,
   projection,
   fromBounds: [-180, -60, 180, 90],
+  toBounds: [-extent, -extent, extent, extent],
   note: 'A view centered on the North Pole that preserves local angles, with increasing scale distortion away from the center. Latitude clamped at 60°S.'
 } satisfies ProjectionConfig;
