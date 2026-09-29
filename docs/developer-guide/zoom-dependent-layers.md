@@ -70,7 +70,7 @@ new Deck({
 
 ## Crossfading between zoom bands
 
-Hard cutoffs make layers pop in and out. To fade instead, compute each layer's `opacity` from the zoom and let neighboring bands overlap. The example below draws a sequence of [GridLayer](../api-reference/aggregation-layers/grid-layer.md)s whose cells get smaller as you zoom in, and switches to the raw points at street level:
+Hard cutoffs make layers pop in and out. To fade instead, compute each layer's `opacity` from the zoom and let neighboring bands overlap. The example below draws a sequence of [GridLayer](../api-reference/aggregation-layers/grid-layer.md)s whose cells get smaller as you zoom in, and switches to the raw points at street level. The [GridLayer example](https://deck.gl/examples/grid-layer) applies the same approach to Paris street trees:
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
