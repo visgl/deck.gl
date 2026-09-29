@@ -21,6 +21,7 @@ import {
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {NullDevice} from '@luma.gl/test-utils';
+import {device} from '@deck.gl/test-utils/vitest';
 import {
   addCustomLibraries,
   convertInitialJson,
@@ -104,7 +105,10 @@ describe('jupyter-widget: dynamic-registration', () => {
     document.body.appendChild(container);
     const deck = createDeck({
       container,
+      // The headless project runs every spec in one page, so render through the shared test device
+      configuration: {constants: {TEST_DEVICE: device}},
       jsonInput: {
+        device: '@@#TEST_DEVICE',
         initialViewState: {longitude: 0, latitude: 0, zoom: 1},
         // Without an id
         layers: [
