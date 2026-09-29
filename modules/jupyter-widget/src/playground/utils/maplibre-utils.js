@@ -80,10 +80,11 @@ export function createMapLibreDeckOverlay({
     });
   }
 
-  // Expose setProps method to update layers
+  // Only forward layer updates; the map owns the camera
+  const setOverlayProps = deckOverlay.setProps.bind(deckOverlay);
   deckOverlay.setProps = function (props) {
     if (props.layers) {
-      deckOverlay.setProps({layers: props.layers});
+      setOverlayProps({layers: props.layers});
     }
   };
 
