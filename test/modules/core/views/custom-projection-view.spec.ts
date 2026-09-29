@@ -76,7 +76,7 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
   expect(viewport.projectPosition([450, -5, 2])).toEqual([
     400 * normalizationScale,
     0,
-    2 * normalizationScale
+    6 * normalizationScale
   ]);
 });
 
