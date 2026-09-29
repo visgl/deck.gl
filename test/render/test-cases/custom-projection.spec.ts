@@ -255,6 +255,7 @@ testCases.push({
 });
 
 const scaleProbePositions: [number, number][] = [];
+const metersPerDegree = 40075016.6855 / 360;
 for (let longitude = -150; longitude <= 150; longitude += 50) {
   for (let latitude = -75; latitude <= 75; latitude += 25) {
     scaleProbePositions.push([longitude, latitude]);
@@ -263,11 +264,22 @@ for (let longitude = -150; longitude <= 150; longitude += 50) {
 testCases.push({
   name: 'custom-projection-meter-sizes',
   views: new CustomProjectionView({
-    projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    toBounds: [-180, -90, 180, 90],
+    // Equirectangular projection: map-meter XY with latitude-dependent ground scale.
+    projection: {
+      forward: ([x, y, z = 0]) => [x * metersPerDegree, y * metersPerDegree, z],
+      inverse: ([x, y, z = 0]) => [x / metersPerDegree, y / metersPerDegree, z]
+    },
+    fromCrs: 'EPSG:4326',
+    toCrs: '+proj=eqc +R=6378137 +units=m',
+    toBounds: [
+      -180 * metersPerDegree,
+      -90 * metersPerDegree,
+      180 * metersPerDegree,
+      90 * metersPerDegree
+    ],
     fromBounds: [-180, -90, 180, 90]
   }),
-  viewState: {center: [256, 256, 0], zoom: 0.5},
+  viewState: {center: [0, 0, 0], zoom: 0.5},
   layers: [
     new ScatterplotLayer({
       id: 'meter-size-probes',
