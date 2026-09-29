@@ -21,7 +21,11 @@ import {
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {NullDevice} from '@luma.gl/test-utils';
-import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
+import {
+  addCustomLibraries,
+  convertInitialJson,
+  jsonConverter
+} from '@deck.gl/jupyter-widget/playground/create-deck';
 
 class DemoCompositeLayer extends CompositeLayer {
   renderLayers() {
@@ -60,6 +64,30 @@ describe('jupyter-widget: dynamic-registration', () => {
       ],
       onComplete
     );
+  });
+
+  test('convertInitialJson defers layers with unloaded custom extensions', () => {
+    const jsonInput = {
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        {
+          '@@type': 'ScatterplotLayer',
+          id: 'points',
+          data: [],
+          extensions: [{'@@type': 'NotYetLoadedExtension'}]
+        }
+      ]
+    };
+    const customLibraries = [{libraryName: 'notYetLoaded', resourceUri: '/index.js'}];
+
+    const props = convertInitialJson(jsonInput, customLibraries);
+    expect(props.layers, 'Layers are deferred until custom libraries load').toEqual([]);
+    expect(props.initialViewState, 'Other props are converted').toEqual(jsonInput.initialViewState);
+
+    expect(
+      () => convertInitialJson({...jsonInput}, null),
+      'Errors are rethrown without custom libraries'
+    ).toThrow();
   });
 });
 

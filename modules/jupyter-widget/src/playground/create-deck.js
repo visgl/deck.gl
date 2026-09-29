@@ -130,6 +130,25 @@ function updateDeck(inputJson, deckgl) {
   deckgl.setProps(results);
 }
 
+/**
+ * Converts the JSON props used for the first render.
+ * Custom libraries load asynchronously, after this conversion. A layer that references an
+ * unloaded class as a nested object (e.g. `extensions: [{'@@type': 'CustomExtension'}]`)
+ * throws when constructed, which would otherwise prevent the deck from being created. In that
+ * case, render without layers and widgets, and add them once the custom libraries have loaded.
+ */
+export function convertInitialJson(jsonInput, customLibraries) {
+  try {
+    return jsonConverter.convert(jsonInput);
+  } catch (err) {
+    if (!customLibraries || !customLibraries.length) {
+      throw err;
+    }
+    log.warn(`Deferring layers until custom libraries load: ${err.message}`)();
+    return jsonConverter.convert({...jsonInput, layers: [], widgets: []});
+  }
+}
+
 function missingProps(oldProps, newProps) {
   return oldProps.filter(op => op && op.id && !newProps.find(np => np.id === op.id));
 }
@@ -242,7 +261,7 @@ function createDeck({
 
     const oldLayers = jsonInput.layers || [];
     const oldWidgets = jsonInput.widgets || [];
-    const props = jsonConverter.convert(jsonInput);
+    const props = convertInitialJson(jsonInput, customLibraries);
 
     addSupportComponents(container, props);
 
@@ -266,20 +285,24 @@ function createDeck({
 
     const onComplete = () => {
       if (layersToLoad.length || widgetsToLoad.length) {
-        const newProps = jsonConverter.convert({
-          layers: jsonInput.layers,
-          widgets: jsonInput.widgets
-        });
+        try {
+          const newProps = jsonConverter.convert({
+            layers: jsonInput.layers,
+            widgets: jsonInput.widgets
+          });
 
-        const newLayers = (newProps.layers || []).filter(l => l);
-        const newWidgets = (newProps.widgets || []).filter(w => w);
+          const newLayers = (newProps.layers || []).filter(l => l);
+          const newWidgets = (newProps.widgets || []).filter(w => w);
 
-        if (
-          newLayers.length > convertedLayers.length ||
-          newWidgets.length > convertedWidgets.length
-        ) {
-          // if more layers/widgets are converted
-          deckgl.setProps({layers: newLayers, widgets: newWidgets});
+          if (
+            newLayers.length > convertedLayers.length ||
+            newWidgets.length > convertedWidgets.length
+          ) {
+            // if more layers/widgets are converted
+            deckgl.setProps({layers: newLayers, widgets: newWidgets});
+          }
+        } catch (err) {
+          onError(err);
         }
       }
     };
