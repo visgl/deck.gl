@@ -9,7 +9,9 @@ import {DeckGL} from '@deck.gl/react';
 import {FlyToInterpolator} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 
-import type {MapViewState, PickingInfo} from '@deck.gl/core';
+import TourControls from './tour-controls';
+
+import type {InteractionState, MapViewState, PickingInfo} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
 export type OldMap = {
@@ -88,8 +90,10 @@ export const OLD_MAPS: OldMap[] = [
     title: 'Peking',
     author: 'Unknown',
     date: '1914',
-    bounds: [116.3503962, 39.8510207, 116.4574079, 39.9857523],
-    viewState: {longitude: 116.4039, latitude: 39.9184, zoom: 11.3}
+    // Its control points only cover a strip down the middle of the scan, so the image was
+    // re-warped from them with an affine fit instead of Map Warper's curved polynomial one
+    bounds: [116.3392079, 39.8654237, 116.4388368, 39.9517812],
+    viewState: {longitude: 116.389, latitude: 39.9086, zoom: 11.7}
   },
   {
     id: '21028',
@@ -132,10 +136,11 @@ export default function App({
   // The map the camera last finished flying to. Starting a new flight interrupts the previous
   // one, so each transition reports its own target and stale callbacks are ignored.
   const [arrivedId, setArrivedId] = useState<string | null>(mapId);
-  const [lastInteraction, setLastInteraction] = useState(0);
+  const [playing, setPlaying] = useState(autoplay);
 
   const currentIndex = OLD_MAPS.findIndex(m => m.id === currentId);
   const nextMap = OLD_MAPS[(currentIndex + 1) % OLD_MAPS.length];
+  const previousMap = OLD_MAPS[(currentIndex + OLD_MAPS.length - 1) % OLD_MAPS.length];
   const arrived = arrivedId === currentId;
 
   const goTo = (id: string) => {
@@ -146,19 +151,37 @@ export default function App({
     }
   };
 
+  // Navigation from within the app, which the host is told about
+  const navigate = (map: OldMap) => {
+    goTo(map.id);
+    onMapChange?.(map);
+  };
+
   useEffect(() => goTo(mapId), [mapId]);
 
-  // Advance the tour after the camera has settled and the user has stopped interacting
+  // Advance the tour once the camera has settled
   useEffect(() => {
-    if (!autoplay || !arrived) {
+    if (!playing || !arrived) {
       return undefined;
     }
-    const timer = setTimeout(() => {
-      goTo(nextMap.id);
-      onMapChange?.(nextMap);
-    }, DWELL_TIME);
+    const timer = setTimeout(() => navigate(nextMap), DWELL_TIME);
     return () => clearTimeout(timer);
-  }, [autoplay, arrived, nextMap, lastInteraction]);
+  }, [playing, arrived, nextMap]);
+
+  const onPlayingChange = (nextPlaying: boolean) => {
+    setPlaying(nextPlaying);
+    // Resuming moves straight on rather than lingering where the user was exploring
+    if (nextPlaying && arrived) {
+      navigate(nextMap);
+    }
+  };
+
+  // Exploring the map pauses the tour
+  const onInteractionStateChange = (state: InteractionState) => {
+    if (state.isDragging || state.isPanning || state.isRotating || state.isZooming) {
+      setPlaying(false);
+    }
+  };
 
   const initialViewState = useMemo(() => {
     const {id, viewState} = OLD_MAPS[currentIndex];
@@ -189,16 +212,24 @@ export default function App({
   );
 
   return (
-    <DeckGL
-      device={device}
-      layers={layers}
-      initialViewState={initialViewState}
-      controller={true}
-      getTooltip={getTooltip}
-      onInteractionStateChange={() => setLastInteraction(Date.now())}
-    >
-      <Map reuseMaps mapStyle={mapStyle} />
-    </DeckGL>
+    <>
+      <DeckGL
+        device={device}
+        layers={layers}
+        initialViewState={initialViewState}
+        controller={true}
+        getTooltip={getTooltip}
+        onInteractionStateChange={onInteractionStateChange}
+      >
+        <Map reuseMaps mapStyle={mapStyle} />
+      </DeckGL>
+      <TourControls
+        playing={playing}
+        onPlayingChange={onPlayingChange}
+        onPrevious={() => navigate(previousMap)}
+        onNext={() => navigate(nextMap)}
+      />
+    </>
   );
 }
 

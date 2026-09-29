@@ -25,7 +25,6 @@ class BitmapLayerDemo extends Component {
       options: Object.keys(MAPS_BY_LABEL),
       value: getLabel(OLD_MAPS[0])
     },
-    autoplay: {displayName: 'Autoplay', type: 'checkbox', value: true},
     opacity: {displayName: 'Opacity', type: 'range', value: 1, step: 0.05, min: 0, max: 1}
   };
 
@@ -37,6 +36,7 @@ class BitmapLayerDemo extends Component {
           Scanned historical maps, each drawn as a single image stretched over its geographic bounds
           with a BitmapLayer. Fade the opacity to compare the old city with the new.
         </p>
+        <p>Moving the map pauses the tour. Use the buttons at the bottom to resume it or skip ahead.</p>
         {map && (
           <p>
             <i>{map.title}</i>
@@ -82,7 +82,6 @@ class BitmapLayerDemo extends Component {
         key={device?.type}
         device={device}
         mapId={MAPS_BY_LABEL[params.map.value].id}
-        autoplay={params.autoplay.value}
         opacity={params.opacity.value}
         onMapChange={this._onMapChange}
       />
