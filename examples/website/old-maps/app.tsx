@@ -101,8 +101,10 @@ export const OLD_MAPS: OldMap[] = [
     title: 'Central Edo (Tokyo)',
     author: 'Unknown',
     date: '1858',
-    bounds: [139.7283079, 35.6495956, 139.7562121, 35.6697272],
-    viewState: {longitude: 139.7423, latitude: 35.6597, zoom: 13.7}
+    // Its few control points are bunched together near Zōjō-ji, so the image was re-warped
+    // from new control points on landmarks that survive today
+    bounds: [139.724641, 35.6486265, 139.7614962, 35.6722775],
+    viewState: {longitude: 139.7431, latitude: 35.6605, zoom: 13.5}
   }
 ];
 
