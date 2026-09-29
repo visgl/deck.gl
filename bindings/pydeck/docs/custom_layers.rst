@@ -95,3 +95,5 @@ support esm.sh's ``?external=`` parameter. CDNs that rewrite every import, such 
 a second copy of deck.gl and do not work.
 
 This is experimental and may change in a later release.
+
+To use layers and extensions from deck.gl-community, see :doc:`community_libraries`.
