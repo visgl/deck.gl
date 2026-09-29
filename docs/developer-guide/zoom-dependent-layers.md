@@ -36,7 +36,7 @@ function interpolateZoom(zoom: number, stops: ZoomStops): number {
 }
 ```
 
-A `step` expression is the same with two stops at the same zoom, e.g. `[[5, 0], [5, 1]]`.
+A `step` expression such as `["step", ["zoom"], 0, 5, 1]` is a comparison: `zoom >= 5 ? 1 : 0`.
 
 ## Zoom ranges
 
@@ -118,7 +118,7 @@ function getLayers(data: Point[], zoom: number) {
       gpuAggregation: true,
       opacity,
       visible: opacity > 0,
-      pickable: opacity > 0.5
+      pickable: opacity >= 0.5
     });
   });
   const pointOpacity = interpolateZoom(zoom, [[13, 0], [14, 1]]);
@@ -130,7 +130,7 @@ function getLayers(data: Point[], zoom: number) {
     getRadius: 2,
     opacity: pointOpacity,
     visible: pointOpacity > 0,
-    pickable: pointOpacity > 0.5
+    pickable: pointOpacity >= 0.5
   });
   return [...gridLayers, pointLayer];
 }
@@ -194,7 +194,7 @@ function getLayers(data: Point[], zoom: number) {
       gpuAggregation: true,
       opacity,
       visible: opacity > 0,
-      pickable: opacity > 0.5
+      pickable: opacity >= 0.5
     });
   });
   const pointOpacity = interpolateZoom(zoom, [[13, 0], [14, 1]]);
@@ -206,7 +206,7 @@ function getLayers(data: Point[], zoom: number) {
     getRadius: 2,
     opacity: pointOpacity,
     visible: pointOpacity > 0,
-    pickable: pointOpacity > 0.5
+    pickable: pointOpacity >= 0.5
   });
   return [...gridLayers, pointLayer];
 }
@@ -282,11 +282,11 @@ new TextLayer({
 A GeoJSON source with `cluster: true` groups points differently at each zoom level. In deck.gl, there are two ways to do this:
 
 - **Aggregation layers per zoom band**, as in [Crossfading between zoom bands](#crossfading-between-zoom-bands). Each band is aggregated once, on the GPU, and zooming only changes opacity. This scales to millions of points.
-- **Re-clustering on zoom** in a custom composite layer that returns `changeFlags.viewportChanged` from `shouldUpdateState` and rebuilds clusters when the integer zoom changes. This fits icon or label clusters that need an exact count per cluster. See the [IconLayer example](https://github.com/visgl/deck.gl/tree/master/examples/website/icon), which uses [supercluster](https://github.com/mapbox/supercluster).
+- **Re-clustering on zoom** in a custom composite layer that returns `changeFlags.somethingChanged` from `shouldUpdateState`, so that `updateState` also runs on viewport changes, and rebuilds clusters when the integer zoom changes. This fits icon or label clusters that need an exact count per cluster. See the [IconLayer example](https://github.com/visgl/deck.gl/tree/master/examples/website/icon), which uses [supercluster](https://github.com/mapbox/supercluster).
 
 ## Label collision
 
-Symbol layers hide overlapping symbols by default and prioritizes them with `symbol-sort-key`. The [CollisionFilterExtension](../api-reference/extensions/collision-filter-extension.md) does the same on the GPU for any layer. Collisions are re-evaluated as the camera moves, so labels thin out automatically when zooming out:
+Symbol layers hide overlapping symbols by default and prioritize them with `symbol-sort-key`. The [CollisionFilterExtension](../api-reference/extensions/collision-filter-extension.md) does the same on the GPU for any layer. Collisions are re-evaluated as the camera moves, so labels thin out automatically when zooming out:
 
 ```ts
 import {CollisionFilterExtension} from '@deck.gl/extensions';
@@ -296,8 +296,8 @@ new TextLayer({
   data: cities,
   getText: d => d.name,
   getPosition: d => d.coordinates,
-  // Larger values win
-  getCollisionPriority: d => d.population,
+  // Larger values win. Priorities are clamped to [-1000, 1000]
+  getCollisionPriority: d => Math.log10(d.population) * 100,
   extensions: [new CollisionFilterExtension()]
 });
 ```
