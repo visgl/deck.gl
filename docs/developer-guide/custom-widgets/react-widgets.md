@@ -252,7 +252,8 @@ export const Rotate = (props: RotateWidgetProps = {}) => {
   const element = useMemo(() => document.createElement('div'), []);
   const widget = useWidget(RotateWidget, {...props, element});
   return createPortal(
-    <div className="deck-widget">
+    // The widget supplies its own root, so add its class name here for CSS targeting
+    <div className="deck-widget deck-widget-rotate">
       <div className="deck-widget-button-group horizontal">
         <div className="deck-widget-button">
           <button type="button" className="deck-widget-icon-button" aria-label="Rotate counter-clockwise" onClick={() => widget.rotate(-90)}>

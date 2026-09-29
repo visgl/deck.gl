@@ -90,6 +90,8 @@ export class CustomWidget extends Widget<CustomWidgetProps> {
   onRenderHTML(rootElement: HTMLElement) {
     const button = document.createElement('button');
     button.type = 'button';
+    // Widget containers block pointer events; re-enable them on interactive elements
+    button.style.pointerEvents = 'auto';
     button.textContent = `Clicked ${this.count} times`;
     button.onclick = () => {
       this.count++;
@@ -288,6 +290,7 @@ export class SwitchWidget extends Widget<SwitchWidgetProps> {
   onRenderHTML(rootElement: HTMLElement) {
     const button = document.createElement('button');
     button.type = 'button';
+    button.style.pointerEvents = 'auto';
     button.setAttribute('aria-pressed', String(this.getOn()));
     button.textContent = this.getOn() ? 'On' : 'Off';
     button.onclick = () => this.handleClick();
@@ -323,7 +326,7 @@ Give your root element a unique class name via the `className` member and define
 ```css
 .deck-widget-custom {
   background: var(--custom-widget-background, var(--button-background, #fff));
-  color: var(--button-text-color, rgba(24, 24, 26, 1));
+  color: var(--button-text, rgb(24, 24, 26));
   border-radius: var(--button-corner-radius, 8px);
   box-shadow: var(--button-shadow, 0px 0px 8px 0px rgba(0, 0, 0, 0.25));
 }
