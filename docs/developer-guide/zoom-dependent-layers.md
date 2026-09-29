@@ -297,7 +297,7 @@ new TextLayer({
   getText: d => d.name,
   getPosition: d => d.coordinates,
   // Larger values win. Priorities are clamped to [-1000, 1000]
-  getCollisionPriority: d => Math.log10(d.population) * 100,
+  getCollisionPriority: d => Math.log10(d.population + 1) * 100,
   extensions: [new CollisionFilterExtension()]
 });
 ```
