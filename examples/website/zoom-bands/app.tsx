@@ -224,7 +224,7 @@ export default function App({
           // Hidden layers keep their aggregation results
           visible: opacity > 0,
           // Layers are pickable at any opacity, so only pick the dominant band
-          pickable: opacity > 0.5,
+          pickable: opacity >= 0.5,
           // Flat bands are drawn in order, finer on top
           parameters: {depthCompare: 'always'}
         })
@@ -245,7 +245,7 @@ export default function App({
         getFillColor: TREE_COLOR,
         opacity,
         visible: opacity > 0,
-        pickable: opacity > 0.5,
+        pickable: opacity >= 0.5,
         parameters: {depthCompare: 'always'}
       })
     );
