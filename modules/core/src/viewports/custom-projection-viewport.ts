@@ -68,7 +68,10 @@ export default class CustomProjectionViewport extends Viewport {
   readonly sizeScaleSignature: string;
   /** Map-meter XY to sampler XY: scale followed by translation. */
   readonly sizeScaleTransform: [number, number, number, number];
-  private localUnitsPerMeter?: (mapPosition: number[], worldPosition?: number[]) => [number, number, number];
+  private localUnitsPerMeter?: (
+    mapPosition: number[],
+    worldPosition?: number[]
+  ) => [number, number, number];
 
   constructor(opts: CustomProjectionViewportOptions) {
     const {
@@ -133,11 +136,18 @@ export default class CustomProjectionViewport extends Viewport {
     };
     const position = [center[0], center[1], 0];
     const worldCenter = clampInput(position, fromBounds);
-    if (!toBounds.every(Number.isFinite) || toBounds[2] <= toBounds[0] || toBounds[3] <= toBounds[1]) {
+    if (
+      !toBounds.every(Number.isFinite) ||
+      toBounds[2] <= toBounds[0] ||
+      toBounds[3] <= toBounds[1]
+    ) {
       throw new Error('CustomProjectionViewport requires finite, increasing toBounds');
     }
     const spherical = isSphericalCrs(fromCrs);
-    const localUnitsPerMeter = (mapPosition: number[], worldPosition?: number[]): [number, number, number] => {
+    const localUnitsPerMeter = (
+      mapPosition: number[],
+      worldPosition?: number[]
+    ): [number, number, number] => {
       if (opts.getDistanceScale) {
         const scale = opts.getDistanceScale([mapPosition[0], mapPosition[1]]);
         if (scale.length !== 2 || !scale.every(value => Number.isFinite(value) && value > 0)) {
@@ -149,7 +159,11 @@ export default class CustomProjectionViewport extends Viewport {
       const world = worldPosition || projection.inverse([mapPosition[0], mapPosition[1], 0]);
       return world ? estimateUnitsPerMeter(projection, world, spherical, fromBounds) : [1, 1, 1];
     };
-    const localScale = localUnitsPerMeter(projection.forward(worldCenter), worldCenter);
+    const localScale = opts.getDistanceScale
+      ? localUnitsPerMeter(projection.forward(worldCenter), worldCenter)
+      : spherical === undefined
+        ? [1, 1, 1]
+        : estimateUnitsPerMeter(projection, worldCenter, spherical, fromBounds);
     const unitsPerMeter = localScale.map(
       value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
     ) as [number, number, number];
@@ -334,50 +348,42 @@ export default class CustomProjectionViewport extends Viewport {
     return [position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE];
   }
 
-  /** Converts world XYZ to common XYZ, including the converter's altitude conversion. */
-  projectPosition(position: number[]): [number, number, number] {
-    const projected = this.preproject!(position);
+  /** Converts world XYZ, or preprojected map-meter XYZ, to common XYZ with local altitude scale. */
+  projectPosition(position: number[], preprojected = false): [number, number, number] {
+    const projected = preprojected ? position : this.preproject!(position);
     return [
       projected[0] * NORMALIZATION_SCALE,
       projected[1] * NORMALIZATION_SCALE,
-      projected[2] * this.getDistanceScales(projected).unitsPerMeter[2]
+      (projected[2] || 0) * this.getDistanceScales(projected).unitsPerMeter[2]
     ];
   }
 
-  /** Converts common XYZ to world XYZ; invalid inverses return NaN. */
-  unprojectPosition(position: number[]): [number, number, number] {
-    return (
-      this.postUnproject!([
-        position[0] / NORMALIZATION_SCALE,
-        position[1] / NORMALIZATION_SCALE,
-        (position[2] || 0) / this.getDistanceScales([position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE]).unitsPerMeter[2]
-      ]) || [NaN, NaN, NaN]
-    );
+  /** Converts common XYZ to world XYZ or preprojected map-meter XYZ; invalid inverses return NaN. */
+  unprojectPosition(position: number[], preprojected = false): [number, number, number] {
+    const projected: [number, number, number] = [
+      position[0] / NORMALIZATION_SCALE,
+      position[1] / NORMALIZATION_SCALE,
+      (position[2] || 0) /
+        this.getDistanceScales([
+          position[0] / NORMALIZATION_SCALE,
+          position[1] / NORMALIZATION_SCALE
+        ]).unitsPerMeter[2]
+    ];
+    return preprojected ? projected : this.postUnproject!(projected) || [NaN, NaN, NaN];
   }
 
   /** Returns local scales at XY in map meters (toCrs), or viewport-center scales when omitted. */
   getDistanceScales(mapPosition?: number[]): DistanceScales {
     // The base constructor projects the center before this instance's callback is assigned.
     if (!mapPosition || !this.localUnitsPerMeter) return this.distanceScales;
-    const unitsPerMeter = this.localUnitsPerMeter(mapPosition).map(value => value * NORMALIZATION_SCALE) as [number, number, number];
-    return {...this.distanceScales, unitsPerMeter, metersPerUnit: unitsPerMeter.map(value => 1 / value) as [number, number, number]};
-  }
-
-  /** Intersects the viewing ray with the locally scaled world-altitude surface. */
-  unproject(position: number[], options: {topLeft?: boolean; targetZ?: number} = {}): number[] {
-    if (Number.isFinite(position[2]) || !options.targetZ) return super.unproject(position, options);
-    const {topLeft = true, targetZ} = options;
-    const pixel = [position[0], topLeft ? position[1] : this.height - position[1]];
-    let common = pixelsToWorld(pixel, this.pixelUnprojectionMatrix, 0);
-    for (let i = 0; i < 16; i++) {
-      const world = this.unprojectPosition(common);
-      world[2] = targetZ;
-      const next = pixelsToWorld(pixel, this.pixelUnprojectionMatrix, this.projectPosition(world)[2]);
-      const delta = Math.hypot(next[0] - common[0], next[1] - common[1]);
-      common = next;
-      if (delta < 1e-8) break;
-    }
-    return this.unprojectPosition(common);
+    const unitsPerMeter = this.localUnitsPerMeter(mapPosition).map(
+      value => value * NORMALIZATION_SCALE
+    ) as [number, number, number];
+    return {
+      ...this.distanceScales,
+      unitsPerMeter,
+      metersPerUnit: unitsPerMeter.map(value => 1 / value) as [number, number, number]
+    };
   }
 
   panByPosition(position: number[], pixel: number[]): {center: [number, number, number]} {

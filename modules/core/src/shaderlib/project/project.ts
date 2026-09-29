@@ -18,7 +18,8 @@ function getUniforms(opts: ProjectProps | {} = INITIAL_MODULE_OPTIONS) {
   if ('viewport' in opts) {
     return {
       ...getUniformsFromViewport(opts),
-      sizeScaleTransform: opts.sizeScaleTransform || (opts.viewport as CustomProjectionViewport).sizeScaleTransform || [1, 1, 0, 0],
+      sizeScaleTransform: opts.sizeScaleTransform ||
+        (opts.viewport as CustomProjectionViewport).sizeScaleTransform || [1, 1, 0, 0],
       ...(opts.sizeScale instanceof Buffer
         ? {
             project_sizeScaleBuffer: opts.sizeScale,

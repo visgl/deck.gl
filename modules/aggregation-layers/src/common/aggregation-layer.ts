@@ -92,7 +92,8 @@ export default abstract class AggregationLayer<
         ...shaderModuleProps,
         project: {
           ...shaderModuleProps.project,
-          sizeScaleTransform: (this.context.viewport as CustomProjectionViewport).sizeScaleTransform,
+          sizeScaleTransform: (this.context.viewport as CustomProjectionViewport)
+            .sizeScaleTransform,
           sizeScale: this.context.layerManager.projectionScaleResources.get(
             // Shader variants follow the layer's view, not the aggregator's
             // temporary Cartesian precision viewport.

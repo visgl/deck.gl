@@ -93,7 +93,7 @@ float project_size() {
 }
 
 #ifdef USE_EXTERNAL_PROJECTION
-// Nearest-texel Taylor reconstruction: R=scalar XY scale, GB=slopes per common
+// Nearest-texel Taylor reconstruction: R=scalar XY scale, GB=slopes per sampler
 // unit, A=Z scale. R=0 marks invalid samples. One fetch preserves instance aspect ratio.
 // Alternatives if discontinuities/accuracy become visible: blend four local Taylor
 // estimates for continuity, or use four-fetch bicubic Hermite with a mixed derivative
@@ -101,14 +101,14 @@ float project_size() {
 uniform highp usampler2D project_sizeScaleTexture;
 vec3 project_external_size_scale_at(vec2 mapPosition) {
   if (project.sizeScaleSize <= 0) return project.commonUnitsPerMeter;
-  vec2 commonPosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
-  if (any(lessThan(commonPosition, vec2(0.0))) || any(greaterThan(commonPosition, vec2(512.0)))) return project.commonUnitsPerMeter;
+  vec2 samplePosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
+  if (any(lessThan(samplePosition, vec2(0.0))) || any(greaterThan(samplePosition, vec2(512.0)))) return project.commonUnitsPerMeter;
   ivec2 dimensions = textureSize(project_sizeScaleTexture, 0);
-  ivec2 index = clamp(ivec2(floor(commonPosition / 512.0 * vec2(dimensions))), ivec2(0), dimensions - 1);
+  ivec2 index = clamp(ivec2(floor(samplePosition / 512.0 * vec2(dimensions))), ivec2(0), dimensions - 1);
   vec4 texel = uintBitsToFloat(texelFetch(project_sizeScaleTexture, index, 0));
   if (texel.r <= 0.0) return project.commonUnitsPerMeter;
   vec2 center = (vec2(index) + 0.5) * 512.0 / vec2(dimensions);
-  float scale = max(0.0, texel.r + dot(texel.gb, commonPosition - center));
+  float scale = max(0.0, texel.r + dot(texel.gb, samplePosition - center));
   return vec3(scale, scale, texel.a * scale / texel.r) * project.commonUnitsPerWorldUnit;
 }
 
@@ -125,7 +125,7 @@ float project_size_at_latitude(float meters, float lat) {
 
 //
 // Scaling offsets - scales meters to "world distance"
-// Note the scalar version of project_size is for scaling the z component only
+// The scalar overload preserves aspect ratio; vector overloads support per-axis scales.
 //
 float project_size(float meters) {
   // For scatter relevant
