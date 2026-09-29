@@ -15,6 +15,8 @@ export MapboxAccessToken="dummy-mapbox-access-token"
 # clean up cache
 docusaurus clear
 docusaurus build
+node ./scripts/normalize-llm-output.mjs
+node ./scripts/check-llm-output.mjs
 
 # build gallery (scripting) examples
 (
