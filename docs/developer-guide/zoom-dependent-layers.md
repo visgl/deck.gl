@@ -236,10 +236,8 @@ Things to keep in mind:
 
 - **Aggregation runs once per band.** Aggregation layers bin in world space, so changing the zoom only changes uniforms. A band is re-aggregated only when its `data` or bin size changes, so pass the same `data` object every time.
 - **Faded layers can still be picked.** `opacity` does not affect picking, so tie `pickable` (or `visible`) to the band as above, or cull with `layerFilter`.
-- **Pick bin sizes by screen size.** A bin size that stays roughly `n` pixels wide in the middle of a band is `n * 156543 * cos(latitude) / 2 ** zoom` meters. Doubling the size for every zoom level makes each cell split into four when you zoom in one level.
 - **Share buffers for large data.** Every layer uploads its own copy of the positions. For millions of points, supply the positions as [binary attributes](./performance.md#supply-attributes-directly) and pass the same buffer to every layer.
 - **Color domains differ between bands.** Coarser cells hold larger counts, so each band's automatic color domain is different. Normalize the value (e.g. count per area) or set `colorDomain` if colors should mean the same thing across bands.
-- **Transparency adds up.** Where two bands overlap at partial opacity, the result is lighter than either band at full opacity. Keep overlaps short, or use flat (non-extruded) layers so depth testing does not hide one band behind the other.
 - **Opacity is per layer, not per view.** With multiple views at different zooms, compute the value for the main view, or use `layerFilter` for hard per-view cutoffs.
 
 ## Sizes that scale with the map
