@@ -2,7 +2,7 @@
 
 Map styles often change what is drawn as the camera zooms: coarse summaries at low zoom give way to finer ones, labels thin out, lines keep a readable width. The [MapLibre style spec](https://maplibre.org/maplibre-style-spec/) expresses this declaratively with layer `minzoom`/`maxzoom` and `["zoom"]` expressions.
 
-deck.gl has no expression language. Layer props are plain values, and the application computes them from the current view state. This is cheap: most zoom-dependent props are uniforms, so updating them every frame does not regenerate attributes or re-run aggregation. The patterns below are compositions of existing features, not separate APIs.
+deck.gl handles these effects efficiently. Zoom-dependent props such as `opacity` are uniforms, so they can be updated on every frame without regenerating attributes or re-running aggregation. The patterns below show how to achieve each effect with existing layer props and extensions.
 
 | MapLibre style spec | deck.gl |
 | --- | --- |

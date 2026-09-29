@@ -230,7 +230,7 @@ function App() {
 
 ### Styling layers by zoom
 
-deck.gl layers do not accept MapLibre style expressions such as `minzoom`, `maxzoom` or `["zoom"]`. See [Zoom-Dependent Layers](../zoom-dependent-layers.md) for the deck.gl equivalents.
+To fade, resize or filter deck.gl layers by zoom the way MapLibre's `minzoom`, `maxzoom` and `["zoom"]` expressions do, see [Zoom-Dependent Layers](../zoom-dependent-layers.md).
 
 ### react-map-gl
 
