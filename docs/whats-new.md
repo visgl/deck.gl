@@ -138,6 +138,8 @@ layer = pdk.Layer(
 
 Experiment with these features via the new [pydeck playground](https://deck.gl/pydeck).
 
+pydeck can also draw [charts](https://deckgl.readthedocs.io/en/latest/view.html#non-geospatial-charts) on `OrthographicView` and `OrbitView` without a basemap, with new scatter plot, bar chart and surface plot examples. `settings.register_library(name, uri, module=True)` loads custom libraries published as ES modules.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026
