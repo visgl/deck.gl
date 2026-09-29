@@ -7,8 +7,9 @@ These modules are maintained by the community and are not included in pydeck, bu
 loaded into a pydeck visualization as custom libraries.
 
 .. note::
-   deck.gl-community packages do not publish script (UMD) bundles yet, so they cannot be loaded
-   into pydeck today. The URLs and global names on this page are placeholders until they do.
+   Script (UMD) bundles for deck.gl-community packages are added in
+   `visgl/deck.gl-community#782 <https://github.com/visgl/deck.gl-community/pull/782>`__. The
+   bundle URLs on this page work once a release includes it.
 
 How custom libraries are loaded
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -23,7 +24,7 @@ JSON into deck.gl objects, resolving each ``@@type`` against a catalog of the cl
 
     pdk.settings.custom_libraries = [
         {
-            "libraryName": "deckCommunity",
+            "libraryName": "deckCommunityLayers",
             "resourceUri": "https://unpkg.com/@deck.gl-community/layers@~9.4.0/dist/dist.min.js",
         }
     ]
@@ -95,34 +96,34 @@ Available packages
 
    * - Package
      - Contents
-     - Loadable in pydeck
+     - Script bundle global
    * - `@deck.gl-community/layers <https://visgl.github.io/deck.gl-community/docs/modules/layers>`__
      - Add-on layers and ``ZoomOpacityExtension``
-     - Pending script bundle
+     - ``deckCommunityLayers``
    * - `@deck.gl-community/geo-layers <https://visgl.github.io/deck.gl-community/docs/modules/geo-layers>`__
      - Geospatial layers
-     - Pending script bundle
+     - No script bundle
    * - `@deck.gl-community/infovis-layers <https://visgl.github.io/deck.gl-community/docs/modules/infovis-layers>`__
      - Non-geospatial layers
-     - Pending script bundle
+     - ``deckCommunityInfovisLayers``
    * - `@deck.gl-community/graph-layers <https://visgl.github.io/deck.gl-community/docs/modules/graph-layers>`__
      - Graph visualization
-     - Pending script bundle
+     - No script bundle
    * - `@deck.gl-community/timeline-layers <https://visgl.github.io/deck.gl-community/docs/modules/timeline-layers>`__
      - Timeline layers
-     - Pending script bundle
+     - ``deckCommunityTimelineLayers``
    * - `@deck.gl-community/basemap-layers <https://visgl.github.io/deck.gl-community/docs/modules/basemap-layers>`__
      - Basemap layer and map style helpers
-     - Pending script bundle
+     - No script bundle
    * - `@deck.gl-community/widgets <https://visgl.github.io/deck.gl-community/docs/modules/widgets>`__
      - UI widgets
-     - Pending script bundle
+     - No script bundle
    * - `@deck.gl-community/editable-layers <https://visgl.github.io/deck.gl-community/docs/modules/editable-layers>`__
      - Interactive editing of geometries
-     - Pending script bundle. Edits are not sent back to Python.
+     - ``deckCommunityEditableLayers``. Edits are not sent back to Python.
    * - `@deck.gl-community/three <https://visgl.github.io/deck.gl-community/docs/modules/three>`__
      - Layers rendered with three.js
-     - Pending script bundle
+     - No script bundle
    * - ``@deck.gl-community/leaflet``, ``bing-maps``, ``react``
      - Integrations with other frameworks
      - Not applicable
