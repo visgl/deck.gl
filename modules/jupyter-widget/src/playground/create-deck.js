@@ -135,7 +135,8 @@ function updateDeck(inputJson, deckgl) {
  * Custom libraries load asynchronously, after this conversion. A layer that references an
  * unloaded class as a nested object (e.g. `extensions: [{'@@type': 'CustomExtension'}]`)
  * throws when constructed, which would otherwise prevent the deck from being created. In that
- * case, render without layers and widgets, and add them once the custom libraries have loaded.
+ * case, render the layers and widgets that can be converted, and add the others once the custom
+ * libraries have loaded.
  */
 export function convertInitialJson(jsonInput, customLibraries) {
   try {
@@ -144,13 +145,31 @@ export function convertInitialJson(jsonInput, customLibraries) {
     if (!customLibraries || !customLibraries.length) {
       throw err;
     }
-    log.warn(`Deferring layers until custom libraries load: ${err.message}`)();
-    return jsonConverter.convert({...jsonInput, layers: [], widgets: []});
+    const props = jsonConverter.convert({...jsonInput, layers: [], widgets: []});
+    return {
+      ...props,
+      ...convertLayersAndWidgets(jsonInput, error =>
+        log.warn(`Deferring until custom libraries load: ${error.message}`)()
+      )
+    };
   }
 }
 
-function missingProps(oldProps, newProps) {
-  return oldProps.filter(op => op && op.id && !newProps.find(np => np.id === op.id));
+/**
+ * Converts each layer and widget on its own, so that one that cannot be converted (e.g. because
+ * its custom library failed to load) is left out without hiding the others.
+ */
+export function convertLayersAndWidgets({layers = [], widgets = []}, onError) {
+  const convertEach = (items, key) =>
+    items.map(item => {
+      try {
+        return jsonConverter.convert({[key]: [item]})[key][0];
+      } catch (error) {
+        onError(error);
+        return null;
+      }
+    });
+  return {layers: convertEach(layers, 'layers'), widgets: convertEach(widgets, 'widgets')};
 }
 
 function createStandaloneFromProvider({
@@ -269,8 +288,8 @@ function createDeck({
     const convertedWidgets = (props.widgets || []).filter(w => w);
 
     // loading custom library is async, some layers/widgets might not be convertable before custom library loads
-    const layersToLoad = missingProps(oldLayers, convertedLayers);
-    const widgetsToLoad = missingProps(oldWidgets, convertedWidgets);
+    const hasMissingProps =
+      convertedLayers.length < oldLayers.length || convertedWidgets.length < oldWidgets.length;
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = createStandaloneFromProvider({
@@ -284,25 +303,19 @@ function createDeck({
     });
 
     const onComplete = () => {
-      if (layersToLoad.length || widgetsToLoad.length) {
-        try {
-          const newProps = jsonConverter.convert({
-            layers: jsonInput.layers,
-            widgets: jsonInput.widgets
-          });
+      if (hasMissingProps) {
+        // Layers and widgets that still cannot be converted are reported and left out
+        const newProps = convertLayersAndWidgets(jsonInput, onError);
 
-          const newLayers = (newProps.layers || []).filter(l => l);
-          const newWidgets = (newProps.widgets || []).filter(w => w);
+        const newLayers = newProps.layers.filter(l => l);
+        const newWidgets = newProps.widgets.filter(w => w);
 
-          if (
-            newLayers.length > convertedLayers.length ||
-            newWidgets.length > convertedWidgets.length
-          ) {
-            // if more layers/widgets are converted
-            deckgl.setProps({layers: newLayers, widgets: newWidgets});
-          }
-        } catch (err) {
-          onError(err);
+        if (
+          newLayers.length > convertedLayers.length ||
+          newWidgets.length > convertedWidgets.length
+        ) {
+          // if more layers/widgets are converted
+          deckgl.setProps({layers: newLayers, widgets: newWidgets});
         }
       }
     };
