@@ -228,6 +228,10 @@ function App() {
 
 ## Additional Information
 
+### Styling layers by zoom
+
+deck.gl layers do not accept MapLibre style expressions such as `minzoom`, `maxzoom` or `["zoom"]`. See [Zoom-Dependent Layers](../zoom-dependent-layers.md) for the deck.gl equivalents.
+
 ### react-map-gl
 
 [react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around maplibre-gl maintained by the vis.gl community. If you'd like to use deck.gl together with maplibre-gl and React, this library is the recommended companion.
