@@ -223,36 +223,38 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
       pitch: 60,
       attributionControl: false
     }) as unknown as MapLibreMap;
-    await new Promise<void>(resolve => map.once('load', () => resolve()));
 
-    const overlay = new MapLibreOverlay({
-      interleaved: true,
-      layers: [
-        new ScatterplotLayer<[number, number, number]>({
-          id: 'summit',
-          data: [summit],
-          getPosition: d => d,
-          getRadius: 8,
-          radiusUnits: 'pixels',
-          pickable: true
-        })
-      ]
-    });
-    map.addControl(overlay);
-    await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+    try {
+      await new Promise<void>(resolve => map.once('load', () => resolve()));
 
-    // MapLibre raises the center elevation as the terrain loads, without a move event
-    map.setTerrain({source: 'dem'});
-    await new Promise<void>(resolve => map.once('idle', () => resolve()));
+      const overlay = new MapLibreOverlay({
+        interleaved: true,
+        layers: [
+          new ScatterplotLayer<[number, number, number]>({
+            id: 'summit',
+            data: [summit],
+            getPosition: d => d,
+            getRadius: 8,
+            radiusUnits: 'pixels',
+            pickable: true
+          })
+        ]
+      });
+      map.addControl(overlay);
+      await waitForRender(() => Boolean(overlay._deck?.isInitialized));
 
-    const elevation = getMapLibreElevation(map);
-    expect(elevation).toBeCloseTo(1000);
-    expect(overlay._deck!.props.viewState.position).toEqual([0, 0, elevation]);
-    expect(overlay.pickObject({x: 200, y: 150})?.layer?.id).toBe('summit');
+      // MapLibre raises the center elevation as the terrain loads, without a move event
+      map.setTerrain({source: 'dem'});
+      await new Promise<void>(resolve => map.once('idle', () => resolve()));
 
-    map.removeControl(overlay);
-    map.remove();
-    container.remove();
-    URL.revokeObjectURL(demTileURL);
+      const elevation = getMapLibreElevation(map);
+      expect(elevation).toBeCloseTo(1000);
+      expect(overlay._deck!.props.viewState.position).toEqual([0, 0, elevation]);
+      expect(overlay.pickObject({x: 200, y: 150})?.layer?.id).toBe('summit');
+    } finally {
+      map.remove();
+      container.remove();
+      URL.revokeObjectURL(demTileURL);
+    }
   });
 }

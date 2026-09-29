@@ -310,8 +310,9 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
  * changes without a move event while terrain loads.
  */
 function syncMapLibreElevation(deck: Deck, map: MapLibreMap): void {
+  const elevation = getMapLibreElevation(map);
   const viewState = deck.props.viewState as MapViewState | null;
-  if (viewState?.position?.[2] !== getMapLibreViewState(map).position?.[2]) {
+  if (Number.isFinite(elevation) && viewState?.position?.[2] !== elevation) {
     onMapLibreMove(deck, map);
   }
 }
