@@ -127,20 +127,22 @@ export default function App({
   onMapChange?: (map: OldMap) => void;
 }) {
   const [currentId, setCurrentId] = useState(mapId);
-  // Whether the camera has finished flying to the current map
-  const [arrived, setArrived] = useState(true);
+  // The map the camera is flying away from, kept on screen until the flight ends
+  const [previousId, setPreviousId] = useState<string | null>(null);
+  // The map the camera last finished flying to. Starting a new flight interrupts the previous
+  // one, so each transition reports its own target and stale callbacks are ignored.
+  const [arrivedId, setArrivedId] = useState<string | null>(mapId);
   const [lastInteraction, setLastInteraction] = useState(0);
-  // Images are only loaded once a map is visited (or about to be)
-  const [visited, setVisited] = useState(() => new Set([mapId]));
 
   const currentIndex = OLD_MAPS.findIndex(m => m.id === currentId);
   const nextMap = OLD_MAPS[(currentIndex + 1) % OLD_MAPS.length];
+  const arrived = arrivedId === currentId;
 
   const goTo = (id: string) => {
     if (id !== currentId) {
+      setPreviousId(currentId);
       setCurrentId(id);
-      setArrived(false);
-      setVisited(v => new Set(v).add(id));
+      setArrivedId(null);
     }
   };
 
@@ -158,20 +160,24 @@ export default function App({
     return () => clearTimeout(timer);
   }, [autoplay, arrived, nextMap, lastInteraction]);
 
-  const initialViewState = useMemo(
-    () => ({
+  const initialViewState = useMemo(() => {
+    const {id, viewState} = OLD_MAPS[currentIndex];
+    return {
       pitch: 0,
       bearing: 0,
-      ...OLD_MAPS[currentIndex].viewState,
+      ...viewState,
       transitionDuration: 'auto' as const,
       transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
-      onTransitionEnd: () => setArrived(true),
-      onTransitionInterrupt: () => setArrived(true)
-    }),
-    [currentIndex]
-  );
+      onTransitionEnd: () => setArrivedId(id),
+      onTransitionInterrupt: () => setArrivedId(id)
+    };
+  }, [currentIndex]);
 
-  const layers = OLD_MAPS.filter(m => visited.has(m.id) || m === nextMap).map(
+  // Only keep the current, upcoming and (while flying) previous images on the GPU. Removed
+  // layers release their textures, which matters for large scans on memory-constrained devices.
+  const layers = OLD_MAPS.filter(
+    m => m.id === currentId || m === nextMap || (!arrived && m.id === previousId)
+  ).map(
     m =>
       new BitmapLayer({
         id: m.id,
