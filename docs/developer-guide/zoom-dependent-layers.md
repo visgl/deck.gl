@@ -236,7 +236,7 @@ Things to keep in mind:
 
 - **Aggregation runs once per band.** Aggregation layers bin in world space, so changing the zoom only changes uniforms. A band is re-aggregated only when its `data` or bin size changes, so pass the same `data` object every time.
 - **Faded layers can still be picked.** `opacity` does not affect picking, so tie `pickable` (or `visible`) to the band as above, or cull with `layerFilter`.
-- **Share buffers for large data.** Every layer uploads its own copy of the positions. For millions of points, supply the positions as [binary attributes](./performance.md#supply-attributes-directly) and pass the same buffer to every layer.
+- **Share typed arrays for large data.** Every layer runs its own accessors over the data. For millions of points, supply the positions as a `Float64Array` in [binary attributes](./performance.md#supply-attributes-directly) and pass the same array to every layer. Each layer still uploads its own copy to the GPU.
 - **Color domains differ between bands.** Coarser cells hold larger counts, so each band's automatic color domain is different. Normalize the value (e.g. count per area) or set `colorDomain` if colors should mean the same thing across bands.
 - **Opacity is per layer, not per view.** With multiple views at different zooms, compute the value for the main view, or use `layerFilter` for hard per-view cutoffs.
 
