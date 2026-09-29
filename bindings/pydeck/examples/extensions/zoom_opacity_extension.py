@@ -16,12 +16,12 @@ like a MapLibre ``["interpolate", ["linear"], ["zoom"], ...]`` expression.
 
 import pydeck as pdk
 
-# TODO: confirm the bundle URL and global name once @deck.gl-community/layers publishes a UMD
-# bundle. The package version should match the deck.gl version used by pydeck (9.4).
+# The script bundle is added in visgl/deck.gl-community#782 and works once a release includes it.
+# The package version should match the deck.gl version used by pydeck (9.4).
 COMMUNITY_LAYERS_URL = "https://unpkg.com/@deck.gl-community/layers@~9.4.0/dist/dist.min.js"
 
 pdk.settings.custom_libraries = [
-    {"libraryName": "deckCommunity", "resourceUri": COMMUNITY_LAYERS_URL},
+    {"libraryName": "deckCommunityLayers", "resourceUri": COMMUNITY_LAYERS_URL},
 ]
 
 DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv"
