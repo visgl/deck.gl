@@ -137,6 +137,57 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('createDeck adds the layers of the libraries that loaded when another fails', async () => {
+    class LoadedTestExtension extends LayerExtension {}
+    window.LoadedTestExtension = LoadedTestExtension;
+    const script = 'window.loadedTestLibrary = {LoadedTestExtension: window.LoadedTestExtension};';
+    const resourceUri = URL.createObjectURL(new Blob([script], {type: 'text/javascript'}));
+    const missingScript = `${window.location.origin}/no-such-custom-library-${Date.now()}.js`;
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const deck = createDeck({
+      container,
+      configuration: {constants: {TEST_DEVICE: device}},
+      jsonInput: {
+        device: '@@#TEST_DEVICE',
+        initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+        layers: [
+          {
+            '@@type': 'ScatterplotLayer',
+            id: 'loaded',
+            data: [],
+            extensions: [{'@@type': 'LoadedTestExtension'}]
+          },
+          {
+            '@@type': 'ScatterplotLayer',
+            id: 'failed',
+            data: [],
+            extensions: [{'@@type': 'FailedTestExtension'}]
+          }
+        ]
+      },
+      customLibraries: [
+        {libraryName: 'loadedTestLibrary', resourceUri},
+        {libraryName: 'failedTestLibrary', resourceUri: missingScript}
+      ]
+    });
+
+    try {
+      await vi.waitFor(() => expect(deck.props.layers).toHaveLength(1), {timeout: 5000});
+      expect(deck.props.layers[0].id).toBe('loaded');
+      // One error for the library, one for the layer that still cannot be converted
+      expect(errors).toHaveBeenCalledTimes(2);
+    } finally {
+      deck.finalize();
+      container.remove();
+      errors.mockRestore();
+      URL.revokeObjectURL(resourceUri);
+      delete window.LoadedTestExtension;
+    }
+  });
+
   test('addCustomLibraries loads ES modules', async () => {
     const LIBRARY_NAME = 'DemoEsmLibrary';
     // Stands in for the `deck` global that an externalized custom build reads its base classes from.
