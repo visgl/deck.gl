@@ -108,8 +108,8 @@ export const terrainPlugin: ShaderPlugin = {
     // Preserve screen-space extrusion already applied by billboard paths.
     let anchorClip = project_common_position_to_clipspace(geometry.position);
     let screenOffset = (*position).xyz / (*position).w - anchorClip.xyz / anchorClip.w;
-    geometry.position += vec4<f32>(offset * height, 0.0);
-    let fittedClip = project_common_position_to_clipspace(geometry.position);
+    // Keep the source elevation available for layers that sample their full footprint.
+    let fittedClip = project_common_position_to_clipspace(geometry.position + vec4<f32>(offset * height, 0.0));
     *position = vec4<f32>(fittedClip.xyz + screenOffset * fittedClip.w, fittedClip.w);
   }
 `
