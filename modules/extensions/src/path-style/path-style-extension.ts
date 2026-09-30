@@ -14,6 +14,7 @@ import {
   dashShaders,
   Defines,
   offsetShaders,
+  pathStylePipelineShaders,
   scatterplotDashShaders,
   textBackgroundDashShaders
 } from './shaders.glsl';
@@ -318,8 +319,11 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       return {modules: [pathStyle]};
     }
 
-    // PathLayer: existing logic
+    // PathLayer: one ordered coordinate stage plus capability-specific declarations and setup.
     let result = {} as {inject: Record<string, string>};
+    if (extension.opts.dash || extension.opts.offset) {
+      result = mergeShaders(result, pathStylePipelineShaders);
+    }
     const defines: Defines = {};
     if (extension.opts.dash) {
       result = mergeShaders(result, dashShaders);
