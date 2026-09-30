@@ -133,12 +133,3 @@ Widgets with internal state, such as a toggle or a slider, should follow the sam
 
 See [Controlled vs Uncontrolled Mode](../../api-reference/widgets/overview.md#controlled-vs-uncontrolled-mode) for the application-facing description of this pattern, and the [Universal Widgets](./universal-widgets.md#managing-widget-state) guide for an implementation.
 
-## Best Practices
-
-- **Plan Your API:** Clearly define the properties and callbacks your widget will expose so that it is easy for developers to integrate into their applications. Follow the naming conventions of the built-in widgets (`label`, `tooltip`, `initial*`, `on*Change`).
-- **Render from `onRenderHTML`:** Keep all DOM updates inside `onRenderHTML` and call `this.updateHTML()` whenever internal state changes. This keeps props, state and UI in sync.
-- **Handle Lifecycle Events:** Register global listeners (for example on `document` or `window`) in `onAdd` and remove them in `onRemove`.
-- **Prefer view state helpers:** Use `this.viewIds`, `this.getViewState()` and `this.setViewState()` to read and drive the camera instead of reaching into `deck.props`.
-- **Optimize for Performance:** `onRedraw` and `onViewportChange` can be called on every animation frame. Compare against previous state and only call `updateHTML()` when something the user can see has changed.
-- **Ensure Accessibility:** Use real `<button>` elements, set `aria-label`s, and make interactive elements keyboard reachable. See [Widget Tooltips](../../api-reference/widgets/tooltips.md#accessibility) for the patterns used by the built-in widgets.
-- **Make Styling Customizable:** Give your root element a unique class name and read colors and sizes from [CSS variables](../../api-reference/widgets/styling.md) so applications can theme your widget along with the built-in ones.
