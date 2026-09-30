@@ -133,8 +133,9 @@ export default function App({
   onMapChange?: (map: OldMap) => void;
 }) {
   const [currentId, setCurrentId] = useState(mapId);
-  // The map the camera is flying away from, kept on screen until the flight ends
-  const [previousId, setPreviousId] = useState<string | null>(null);
+  // Maps the camera has left since it last completed a flight. An interrupted flight can leave
+  // the camera anywhere along the way, so they stay on screen until a flight lands.
+  const [departedIds, setDepartedIds] = useState<string[]>([]);
   // The map the camera last finished flying to. Starting a new flight interrupts the previous
   // one, so each transition reports its own target and stale callbacks are ignored.
   const [arrivedId, setArrivedId] = useState<string | null>(mapId);
@@ -147,7 +148,7 @@ export default function App({
 
   const goTo = (id: string) => {
     if (id !== currentId) {
-      setPreviousId(currentId);
+      setDepartedIds(ids => [...ids.filter(d => d !== id && d !== currentId), currentId]);
       setCurrentId(id);
       setArrivedId(null);
     }
@@ -193,15 +194,18 @@ export default function App({
       ...viewState,
       transitionDuration: 'auto' as const,
       transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
-      onTransitionEnd: () => setArrivedId(id),
+      onTransitionEnd: () => {
+        setArrivedId(id);
+        setDepartedIds([]);
+      },
       onTransitionInterrupt: () => setArrivedId(id)
     };
   }, [currentIndex]);
 
-  // Only keep the current, upcoming and (while flying) previous images on the GPU. Removed
-  // layers release their textures, which matters for large scans on memory-constrained devices.
+  // Only keep the current, upcoming and departed images on the GPU. Removed layers release
+  // their textures, which matters for large scans on memory-constrained devices.
   const layers = OLD_MAPS.filter(
-    m => m.id === currentId || m === nextMap || (!arrived && m.id === previousId)
+    m => m.id === currentId || m === nextMap || departedIds.includes(m.id)
   ).map(
     m =>
       new BitmapLayer({
