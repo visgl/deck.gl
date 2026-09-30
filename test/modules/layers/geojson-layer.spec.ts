@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests, getLayerUniforms, device} from '@deck.gl/test-utils/vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {GeoJsonLayer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
+import AttributeTransitionManager from '@deck.gl/core/lib/attribute/attribute-transition-manager';
 
 import * as FIXTURES from 'deck.gl-test/data';
 import {testPickingLayer} from './test-picking-layer';
@@ -315,4 +316,49 @@ test('GeoJsonLayer#picking', async () => {
       }
     ]
   });
+});
+
+webglTest('GeoJsonLayer forwards geometry transitions to each sublayer accessor', () => {
+  const geometry = {duration: 1000};
+  // Test forwarding and attribute setting resolution without allocating GPU transition resources.
+  const updateTransitions = vi
+    .spyOn(AttributeTransitionManager.prototype, 'update')
+    .mockImplementation(() => {});
+  try {
+    testLayer({
+      Layer: GeoJsonLayer,
+      testCases: [
+        {
+          props: {
+            data: FIXTURES.geojson,
+            transitions: {geometry, getLineWidth: 200, getFillColor: 300}
+          },
+          onAfterUpdate: ({subLayers}) => {
+            const accessors = new Set<string>();
+            for (const layer of subLayers) {
+              const accessor = layer.id.endsWith('polygons-fill')
+                ? 'getPolygon'
+                : layer.id.endsWith('points-circle')
+                  ? 'getPosition'
+                  : 'getPath';
+              accessors.add(accessor);
+              expect(layer.props.transitions[accessor]).toEqual(geometry);
+              const attribute = Object.values(layer.getAttributeManager().attributes).find(
+                attribute => attribute.settings.accessor === accessor
+              );
+              expect(attribute.getTransitionSetting(layer.props.transitions).duration).toBe(1000);
+              if (accessor === 'getPath') expect(layer.props.transitions.getWidth).toBe(200);
+              else expect(layer.props.transitions.getFillColor).toBe(300);
+            }
+            expect([...accessors].sort()).toEqual(['getPath', 'getPolygon', 'getPosition']);
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+  } finally {
+    updateTransitions.mockRestore();
+  }
 });
