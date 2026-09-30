@@ -17,6 +17,7 @@ import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/gltf';
 import {Geometry} from '@luma.gl/engine';
+import {Matrix4} from '@math.gl/core';
 import {
   PathLayer,
   ScatterplotLayer,
@@ -320,6 +321,50 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     }
   });
 
+  it('fits paths to translated terrain and updates its elevation', async () => {
+    const terrain = createTerrain(() => 0);
+    for (const elevation of backend === 'webgpu' ? [70, -40] : [70, 40]) {
+      const reference = await renderFrame(
+        {data: [{path: DATA[0].path.map(([x, y]) => [x, y, elevation])}]},
+        35
+      );
+      const fitted = await renderFrame(
+        {extensions: [new TerrainExtension()], terrainDrawMode: 'offset'},
+        35,
+        0,
+        terrain.clone({getPosition: [0, 0, elevation]})
+      );
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+    }
+  });
+
+  it('preserves billboard path width and joins while fitting terrain', async () => {
+    const props = {
+      billboard: true,
+      getWidth: 20,
+      data: [
+        {
+          path: [
+            [-90, -30, 0],
+            [0, 35, 0],
+            [90, -30, 0]
+          ]
+        }
+      ]
+    };
+    const reference = await renderFrame(
+      {...props, modelMatrix: new Matrix4().translate([0, 0, 40])},
+      35
+    );
+    const fitted = await renderFrame(
+      {...props, extensions: [new TerrainExtension()], terrainDrawMode: 'offset'},
+      35,
+      0,
+      createTerrain(() => 40)
+    );
+    expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+  });
+
   it('selects the upper surface regardless of terrain draw order and updates changed meshes', async () => {
     const extensions = [new TerrainExtension()];
     const props = {extensions, terrainDrawMode: 'offset' as const};
@@ -405,15 +450,28 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
             getBackgroundColor: [255, 255, 255]
           })
       };
+      const layer = layers[kind]();
+      const reference = await renderFrame(
+        {},
+        35,
+        0,
+        undefined,
+        0,
+        layer.clone({
+          id: `${kind}-reference`,
+          extensions: [],
+          modelMatrix: new Matrix4().translate([0, 0, 40])
+        })
+      );
       const pixels = await renderFrame(
         {},
         35,
         0,
         createTerrain(() => 40),
         0,
-        layers[kind]()
+        layer
       );
-      expect(totalBrightness(pixels)).toBeGreaterThan(1000);
+      expect(pixelDifference(reference, pixels)).toBeLessThan(0.08);
     }
   );
 

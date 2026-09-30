@@ -220,6 +220,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     });
   }
 
+  /** Returns mesh bounds translated by the instance positions for non-instanced meshes. */
   getBounds(): [number[], number[]] | null {
     if (this.props._instanced) {
       return super.getBounds();
@@ -244,6 +245,14 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       result = getMeshBoundingBox(attributes);
     }
 
+    // Non-instanced terrain still applies getPosition in its vertex shader.
+    // Include it in the bounds used by terrain's render viewport and height range.
+    const instanceBounds = super.getBounds();
+    if (result && instanceBounds) {
+      result = result.map((corner, i) =>
+        corner.map((value, axis) => value + (instanceBounds[i][axis] || 0))
+      ) as [number[], number[]];
+    }
     this.state.positionBounds = result;
     return result;
   }
@@ -284,6 +293,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
+    if (changeFlags.propsOrDataChanged) {
+      this.state.positionBounds = null;
+    }
     if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
       this.state.positionBounds = null;
       this.state.model?.destroy();

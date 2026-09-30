@@ -105,7 +105,12 @@ export const terrainPlugin: ShaderPlugin = {
       offset = normalize(commonPos) * cos(radians(geometry.worldPosition.y)) * PI;
     }
     let height = terrain_get_height(anchorMerc);
-    *position = project_common_position_to_clipspace(geometry.position + vec4<f32>(offset * height, 0.0));
+    // Preserve screen-space extrusion already applied by billboard paths.
+    let anchorClip = project_common_position_to_clipspace(geometry.position);
+    let screenOffset = (*position).xyz / (*position).w - anchorClip.xyz / anchorClip.w;
+    geometry.position += vec4<f32>(offset * height, 0.0);
+    let fittedClip = project_common_position_to_clipspace(geometry.position);
+    *position = vec4<f32>(fittedClip.xyz + screenOffset * fittedClip.w, fittedClip.w);
   }
 `
       },
