@@ -1,3 +1,7 @@
+---
+description: "GridCellLayer renders extruded square grid cells at given coordinates."
+---
+
 # GridCellLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

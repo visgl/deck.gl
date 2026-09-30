@@ -139,13 +139,15 @@ export function getDefaultProps({
 
 export function forwardProps(
   layer: CompositeLayer,
-  mapping: Record<string, string>
+  mapping: Record<string, string>,
+  geometryAccessor: 'getPosition' | 'getPath' | 'getPolygon' = 'getPosition'
 ): Record<string, any> {
   const {transitions, updateTriggers} = layer.props;
   const result: Record<string, any> = {
     updateTriggers: {},
     transitions: transitions && {
-      getPosition: transitions.geometry
+      // Geometry uses different accessor names in point, path, and polygon sublayers.
+      [geometryAccessor]: transitions.geometry
     }
   };
 
