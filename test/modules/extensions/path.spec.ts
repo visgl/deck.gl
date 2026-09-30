@@ -23,7 +23,11 @@ import {
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {preprocess} from '@luma.gl/shadertools';
-import {dashShaders, offsetShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
+import {
+  dashShaders,
+  offsetShaders,
+  pathStylePipelineShaders
+} from '../../../modules/extensions/src/path-style/shaders.glsl';
 import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
@@ -553,8 +557,7 @@ test('PathStyleExtension#shader defines', () => {
       },
       onAfterUpdate: ({layer}) => {
         const {defines} = layer.getShaders();
-        // The offset shaders rescale vDashOffset, which only exists when the dash shaders
-        // are injected too, so they are guarded on this define.
+        // The shared coordinate stage guards dash-only varyings and calculations on this define.
         expect(defines.DASH_ENABLED, 'DASH_ENABLED is set when dash is enabled').toBe(true);
         expect(
           defines.HIGH_PRECISION_DASH,
@@ -626,12 +629,87 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   );
 });
 
-test('PathStyleExtension#offset keeps dash coordinates in the same units', () => {
-  const offsetVertexShader = offsetShaders.inject['vs:#main-end'];
-  expect(offsetVertexShader).toContain('vPathPosition.y *= offsetWidth');
-  expect(offsetVertexShader).toContain('vPathLength *= offsetWidth');
-  expect(offsetVertexShader).toContain('vPathBounds *= offsetWidth');
-  expect(offsetVertexShader).toContain('vDashOffset *= offsetWidth');
+test('PathStyleExtension#orders offset remapping before dash conversion', () => {
+  const vertexInjection = pathStylePipelineShaders.inject['vs:#main-end'];
+  const offsetVertexShader = preprocess(vertexInjection, {
+    defines: {PATH_STYLE_OFFSET: 1}
+  });
+  const dashVertexShader = preprocess(vertexInjection, {
+    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1}
+  });
+  const combinedVertexShader = preprocess(vertexInjection, {
+    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1, PATH_STYLE_OFFSET: 1}
+  });
+  const remapIndex = combinedVertexShader.indexOf('vPathPosition.y *= offsetWidth');
+  const widthRestoreIndex = combinedVertexShader.indexOf('strokeHalfWidth /= offsetWidth');
+  const dashArrayIndex = combinedVertexShader.indexOf('vDashArray = instanceDashArrays');
+  const dashOffsetIndex = combinedVertexShader.indexOf('vDashOffset = dashPeriod');
+
+  expect(remapIndex, 'restores the along-path coordinate').toBeGreaterThanOrEqual(0);
+  expect(combinedVertexShader, 'restores segment length in the same stage').toContain(
+    'vPathLength *= offsetWidth'
+  );
+  expect(combinedVertexShader, 'restores clipped path bounds in the same stage').toContain(
+    'vPathBounds *= offsetWidth'
+  );
+  expect(widthRestoreIndex, 'recovers the pre-offset stroke width after remapping').toBeGreaterThan(
+    remapIndex
+  );
+  expect(dashArrayIndex, 'converts the dash array after restoring width').toBeGreaterThan(
+    widthRestoreIndex
+  );
+  expect(dashOffsetIndex, 'reduces phase once after restoring width').toBeGreaterThan(
+    dashArrayIndex
+  );
+  expect(combinedVertexShader, 'does not need a second repaired dash period').not.toContain(
+    'restoredDashPeriod'
+  );
+  expect(
+    combinedVertexShader.match(/vDashOffset = dashPeriod/g),
+    'combined path mode reduces phase exactly once'
+  ).toHaveLength(1);
+
+  expect(offsetVertexShader, 'offset-only keeps the coordinate remap').toContain(
+    'vPathPosition.y *= offsetWidth'
+  );
+  expect(offsetVertexShader, 'offset-only does not compile dash calculations').not.toContain(
+    'vDashArray'
+  );
+  expect(offsetVertexShader, 'offset-only does not access dash path bounds').not.toContain(
+    'vPathBounds'
+  );
+
+  expect(dashVertexShader, 'dash-only keeps dash conversion').toContain(
+    'vDashArray = instanceDashArrays'
+  );
+  expect(dashVertexShader, 'dash-only does not compile offset remapping').not.toContain(
+    'offsetWidth'
+  );
+  expect(
+    dashShaders.inject,
+    'dash capability has no competing vertex-end injection'
+  ).not.toHaveProperty('vs:#main-end');
+  expect(
+    offsetShaders.inject,
+    'offset capability has no competing vertex-end injection'
+  ).not.toHaveProperty('vs:#main-end');
+
+  const fragmentInjection = pathStylePipelineShaders.inject['fs:#main-end'];
+  const antialiasedFragmentShader = preprocess(fragmentInjection, {
+    defines: {ANTIALIASING: 1, DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
+  });
+  const nonAntialiasedFragmentShader = preprocess(fragmentInjection, {
+    defines: {DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
+  });
+  expect(antialiasedFragmentShader, 'AA keeps deferred dash coverage').toContain(
+    'min(pathCoverage, roundedDashResolvedCoverage)'
+  );
+  expect(antialiasedFragmentShader, 'AA uses PathLayer coverage for the offset edge').not.toContain(
+    'abs(vPathPosition.x) > 1.0'
+  );
+  expect(nonAntialiasedFragmentShader, 'non-AA rejects dash gaps before the offset edge').toMatch(
+    /if \(shouldDiscardDash\)[\s\S]*if \(abs\(vPathPosition\.x\) > 1\.0\)/
+  );
 });
 
 test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
