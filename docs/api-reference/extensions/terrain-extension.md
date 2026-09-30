@@ -7,7 +7,7 @@ The `TerrainExtension` renders otherwise 2D data along a 3D surface. For example
 
 To use this extension, first define a terrain source with the prop `operation: 'terrain'` or `operation: 'terrain+draw'`. A terrain source provides the 3D surface to fit other data on to.
 
-A base map integration can also add a layer with `operation: 'terrain'` that stands for the terrain the base map draws, as `@deck.gl/maplibre` does for MapLibre terrain. Terrain sources that deck.gl draws take precedence over it. Without any terrain, layers with the extension draw as they would without it.
+A base map integration can also add a layer with `operation: 'terrain'` and an `externalTerrain` prop, which stands for the terrain the base map draws. Terrain sources that deck.gl draws take precedence over it. Without any terrain, layers with the extension draw as they would without it.
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
