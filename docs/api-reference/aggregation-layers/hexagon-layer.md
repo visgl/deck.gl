@@ -1,3 +1,7 @@
+---
+description: "HexagonLayer aggregates points into hexagonal bins and encodes counts or weights as color and elevation."
+---
+
 # HexagonLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
