@@ -44,6 +44,7 @@ export class HeightMapBuilder {
   private layersBoundsCommon: Bounds | null = null;
   private lastViewport: Viewport | null = null;
 
+  /** Whether the device supports a renderable elevation texture. */
   static isSupported(device: Device): boolean {
     return device.type === 'webgpu' || device.isTextureFormatRenderable('rgba32float');
   }

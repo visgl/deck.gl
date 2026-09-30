@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
+import {log} from '@deck.gl/core';
 import {luma, Buffer, Texture, type Device, type Framebuffer} from '@luma.gl/core';
 import {webgl2Adapter, type WebGLDevice} from '@luma.gl/webgl';
 import {webglDevice as sharedWebGLDevice} from '@luma.gl/test-utils';
@@ -300,6 +301,24 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       expect(difference / totalBrightness(reference)).toBeLessThan(0.08);
     }
   );
+
+  it('encodes terrain picking only when the terrain is pickable', async () => {
+    const terrain = createTerrain(() => 25, true);
+    const props = {extensions: [new TerrainExtension()], terrainDrawMode: 'offset' as const};
+    await renderFrame(props, false, 0, terrain);
+    const errors = vi.spyOn(log, 'error');
+    try {
+      // Away from the fitted path, the visible mesh must not decode as layer 255.
+      expect(await deck!.pickObjectAsync({x: SIZE / 2, y: SIZE / 4})).toBeNull();
+      expect(errors).not.toHaveBeenCalled();
+      await renderFrame(props, false, 0, terrain.clone({pickable: true}));
+      const picked = await deck!.pickObjectAsync({x: SIZE / 2, y: SIZE / 4});
+      expect(picked?.layer?.id).toBe(terrain.id);
+      expect(errors).not.toHaveBeenCalled();
+    } finally {
+      errors.mockRestore();
+    }
+  });
 
   it('selects the upper surface regardless of terrain draw order and updates changed meshes', async () => {
     const extensions = [new TerrainExtension()];

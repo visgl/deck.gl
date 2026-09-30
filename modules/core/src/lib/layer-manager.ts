@@ -29,6 +29,7 @@ export type LayerContext = {
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
+  /** Plugins installed with default shader modules, applied to every layer. */
   defaultShaderPlugins: ShaderPlugin[];
   renderPass: RenderPass;
   stats: Stats;

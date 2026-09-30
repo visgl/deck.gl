@@ -887,6 +887,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.effectManager!.addDefaultEffect(effect);
   }
 
+  /** Installs a shared shader module and optional plugin for every layer. */
   _addDefaultShaderModule(module: ShaderModule<Record<string, unknown>>, plugin?: ShaderPlugin) {
     this.layerManager!.addDefaultShaderModule(module, plugin);
   }
