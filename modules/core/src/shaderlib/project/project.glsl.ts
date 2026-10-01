@@ -182,6 +182,65 @@ vec3 project_globe_(vec3 lnglatz) {
   ) * D;
 }
 
+// Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
+const float MAX_MERCATOR_Y = 7.0439589847;
+
+// Inverse of project_globe_ followed by project_mercator_, without forming lat/lng:
+// Mercator y = atanh(sin(lat)) = log((D + |z|) / |xy|), which stays accurate near the poles
+vec2 project_globe_to_mercator_(vec3 spherePos) {
+  float D = length(spherePos);
+  float h = max(length(spherePos.xy), 1e-20);
+  float y = sign(spherePos.z) * min(log((D + abs(spherePos.z)) / h), MAX_MERCATOR_Y);
+  float x = atan(spherePos.x, -spherePos.y);
+  return (vec2(x, y) + PI) * WORLD_SCALE;
+}
+
+// Flat common space (Mercator or cartesian) of a common position; identity except under GLOBE.
+// For sampling textures or testing bounds produced by a flat viewport. Do not add
+// project.commonOrigin to a GLOBE result. Adding a non-flat projection mode: invert it here.
+vec2 project_common_position_to_flat(vec3 commonPosition) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    return project_globe_to_mercator_(commonPosition);
+  }
+  return commonPosition.xy;
+}
+
+vec2 project_common_position_to_flat(vec4 commonPosition) {
+  return project_common_position_to_flat(commonPosition.xyz);
+}
+
+// World copy of a flat x nearest to referenceX
+float project_wrap_flat_x_(float x, float referenceX) {
+  return x - TILE_SIZE * floor((x - referenceX) / TILE_SIZE + 0.5);
+}
+
+// Flat position in the world copy nearest to referenceX (e.g. a bounds centre); geospatial only
+vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX) {
+  vec2 flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX) {
+  return project_common_position_to_flat_wrapped(commonPosition.xyz, referenceX);
+}
+
+// Flat position continuous across the antimeridian under GLOBE (seam moved opposite referenceX,
+// e.g. the camera); identity for flat modes. For periodic patterns.
+vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX) {
+  vec2 flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float referenceX) {
+  return project_common_position_to_flat_continuous(commonPosition.xyz, referenceX);
+}
+
 //
 // Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //

@@ -1,3 +1,7 @@
+---
+description: "ContourLayer aggregates points into a grid and renders iso-lines or iso-bands at given thresholds."
+---
+
 # ContourLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

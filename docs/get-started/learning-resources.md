@@ -1,3 +1,7 @@
+---
+description: "Where to learn deck.gl: API reference, developer guide, examples, tutorials and community channels."
+---
+
 # Learning Resources
 
 ## API Documentation
