@@ -10,6 +10,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### Performance
 
+- [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md#_maxtileprocessingtime) can spread scenegraph creation across frames with the experimental `_maxTileProcessingTime` option. Parent coverage is retained until replacement models successfully draw.
+
 - Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, instead using shader builtins `instance_index` / `gl_InstanceID`, reducing memory usage and initialization times.
 
 ## deck.gl v9.3
