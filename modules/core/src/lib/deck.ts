@@ -243,8 +243,9 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** (Experimental) Called once every second with performance metrics. */
   _onMetrics?: ((metrics: DeckMetrics) => void) | null;
   /**
-   * (Experimental) Called after each frame is drawn with the CPU and GPU time spent rendering layers.
-   * `gpuMs` is only measured when the device supports `'timestamp-query'`.
+   * (Experimental) Reports CPU and GPU timings for each draw operation (not necessarily a whole frame).
+   * GPU timing requires `'timestamp-query'` and is disabled with WebGL debug GPU profiling.
+   * GPU readbacks (including failures) deliver asynchronous samples; CPU-only draws are synchronous.
    */
   _onFrameTimings?: ((timings: FrameTimings) => void) | null;
 
@@ -1766,38 +1767,43 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // GPU time is only measured when all viewports are drawn by a single renderLayers call
     const timestampQuerySet = frameTimer?.beginFrame({measureGpuTime: !isMultiCanvasRender});
 
-    if (isMultiCanvasRender) {
-      for (const canvasId of this._canvasManager.order) {
-        const canvasViewports = opts.viewports.filter(
-          viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
-        );
-        if (!canvasViewports.length) {
+    try {
+      if (isMultiCanvasRender) {
+        for (const canvasId of this._canvasManager.order) {
+          const canvasViewports = opts.viewports.filter(
+            viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
+          );
+          if (!canvasViewports.length) {
+            const target = this._canvasManager.targets[canvasId];
+            this._resizeForCanvasTarget(canvasId);
+            this.deckRenderer?.renderLayers({
+              ...opts,
+              canvasContext: target.presentationContext,
+              target: target.presentationContext.getCurrentFramebuffer(),
+              viewports: [],
+              clearCanvas: true
+            });
+            target.presentationContext.present();
+            continue;
+          }
+
           const target = this._canvasManager.targets[canvasId];
           this._resizeForCanvasTarget(canvasId);
+          const framebuffer = target.presentationContext.getCurrentFramebuffer();
           this.deckRenderer?.renderLayers({
             ...opts,
             canvasContext: target.presentationContext,
-            target: target.presentationContext.getCurrentFramebuffer(),
-            viewports: [],
-            clearCanvas: true
+            target: framebuffer,
+            viewports: canvasViewports
           });
           target.presentationContext.present();
-          continue;
         }
-
-        const target = this._canvasManager.targets[canvasId];
-        this._resizeForCanvasTarget(canvasId);
-        const framebuffer = target.presentationContext.getCurrentFramebuffer();
-        this.deckRenderer?.renderLayers({
-          ...opts,
-          canvasContext: target.presentationContext,
-          target: framebuffer,
-          viewports: canvasViewports
-        });
-        target.presentationContext.present();
+      } else {
+        this.deckRenderer?.renderLayers({...opts, timestampQuerySet});
       }
-    } else {
-      this.deckRenderer?.renderLayers({...opts, timestampQuerySet});
+    } catch (error) {
+      frameTimer?.abortFrame();
+      throw error;
     }
     frameTimer?.endFrame(this.props._onFrameTimings!);
 

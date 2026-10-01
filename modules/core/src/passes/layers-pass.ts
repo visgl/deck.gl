@@ -12,6 +12,7 @@ import type {
 } from '@luma.gl/core';
 import type {Framebuffer, QuerySet, RenderPass} from '@luma.gl/core';
 import type {NumberArray4} from '@math.gl/core';
+import type {WEBGLCommandEncoder} from '@luma.gl/webgl';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
@@ -144,6 +145,7 @@ export default class LayersPass extends Pass {
     }
 
     let isFirstRenderPass = true;
+    let timestampQueryEnded = false;
     try {
       for (const viewport of viewports) {
         onViewportActive?.(viewport);
@@ -197,6 +199,7 @@ export default class LayersPass extends Pass {
             }
           } finally {
             renderPass.end();
+            timestampQueryEnded = isLastRenderPass;
             if (submitEachRenderPass) {
               this.device.submit();
             }
@@ -208,6 +211,16 @@ export default class LayersPass extends Pass {
       }
       return renderStats;
     } finally {
+      // A later viewport's callbacks may throw before the final pass is created.
+      // WebGL's elapsed-time query must still end before the query set is discarded.
+      if (
+        this.device.type === 'webgl' &&
+        timestampQuerySet &&
+        !isFirstRenderPass &&
+        !timestampQueryEnded
+      ) {
+        (this.device.commandEncoder as WEBGLCommandEncoder).writeTimestamp(timestampQuerySet, 1);
+      }
       if (!submitEachRenderPass) {
         this.device.submit();
       }

@@ -615,17 +615,21 @@ Receives arguments:
 
 * Default: `null`
 
-(Experimental) Called after each frame is drawn with the time spent rendering layers. No GPU resources are created unless this prop is set.
+(Experimental) Reports the time spent in each deck.gl draw operation. A standalone frame normally produces one sample. Interleaved Mapbox/MapLibre rendering may draw multiple layer groups in a displayed frame, producing a separate sample for each group. No timing query sets are created unless this prop is set.
 
 Receives arguments:
 
 - `timings` (object)
-  + `cpuMs` (number) - CPU time, in milliseconds, spent encoding and submitting the frame's render passes.
-  + `gpuMs` (number, optional) - GPU time, in milliseconds, from the start of the first to the end of the last layers render pass, measured with timestamp queries. Post-processing effect passes are not included. Omitted when the device does not support the `'timestamp-query'` feature, when views are rendered to multiple canvases, or when the measurement failed or was skipped because too many frames were awaiting readback.
+  + `cpuMs` (number) - CPU time, in milliseconds, spent in the draw operation's `renderLayers` calls, including effect passes. Layer updates, picking, timestamp readback, widgets and the timing callback are excluded.
+  + `gpuMs` (number, optional) - Elapsed GPU time, in milliseconds, from the start of the first to the end of the last layers render pass in this draw operation, measured with timestamp queries. This interval can include gaps between passes; it is not a sum of individual pass durations. Effect pre/post-render passes are excluded. Omitted when the device does not support the `'timestamp-query'` feature, when views are rendered to multiple canvases, when WebGL's debug GPU profiler is active, or when the measurement failed or was skipped because too many draws were awaiting readback.
 
 On WebGPU, the feature must be requested when the device is created, e.g. with `deviceProps: {optionalFeatures: ['timestamp-query']}`.
 
-When `gpuMs` is measured, the callback is invoked asynchronously once the GPU timestamps have been read back, typically a few frames later. Otherwise it is invoked synchronously at the end of the frame.
+On WebGL, luma's debug GPU profiler (enabled by `deviceProps.debug` or `deviceProps.debugGPUTime`) retains control of GPU queries, and this callback reports CPU-only timings.
+
+When a GPU readback is attempted, the callback is asynchronous, typically a few frames later. A failed readback also delivers its CPU-only sample asynchronously. When no GPU query is used, the callback is synchronous at the end of the draw operation. Samples may therefore arrive out of draw order. Interrupted draws produce no sample, and pending callbacks are suppressed after finalization.
+
+Timing is opt-in but has overhead. In particular, WebGPU timestamp readback adds a query resolve/copy submission and asynchronous buffer mapping. This readback cost is not included in `cpuMs`; use external measurements when comparing instrumentation overhead.
 
 
 ## Methods

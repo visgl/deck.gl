@@ -9,6 +9,8 @@ import {luma, Buffer, Texture} from '@luma.gl/core';
 import type {Device, Framebuffer, QuerySet} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 import type {WebGPUDevice} from '@luma.gl/webgpu';
+import {webgl2Adapter} from '@luma.gl/webgl';
+import type {WebGLDevice} from '@luma.gl/webgl';
 import {Deck, MapView} from '@deck.gl/core';
 import type {DeckProps} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -351,3 +353,77 @@ test('Deck without _onFrameTimings creates no QuerySet', async () => {
   framebuffer.destroy();
   spy.mockRestore();
 });
+
+// Use this hardware project's full Chromium for the WebGL timer extension too.
+test.each([false, true])(
+  'Deck#WebGL frame timings recover between views (debugGPUTime: %s)',
+  async debugGPUTime => {
+    const device = await luma.createDevice({
+      type: 'webgl',
+      adapters: [webgl2Adapter],
+      debug: false,
+      debugGPUTime,
+      createCanvasContext: {width: SIZE, height: SIZE}
+    });
+    const framebuffer = createFramebuffer(device);
+    const timings: FrameTimings[] = [];
+    const errors: Error[] = [];
+    const deck = createDeck(device, framebuffer, {
+      views: ['left', 'center', 'right'].map(
+        (id, index) => new MapView({id, x: index * 80, width: 80})
+      ),
+      layers: [
+        new ScatterplotLayer({
+          data: [[-122.4, 37.75]],
+          getPosition: d => d,
+          radiusMinPixels: 5
+        })
+      ],
+      _onFrameTimings: timing => timings.push(timing),
+      onError: error => errors.push(error)
+    });
+    try {
+      expect(device.features.has('timestamp-query')).toBe(true);
+      await waitForIdle(deck);
+      await waitForFrames(() => timings.length > 0, 'missing WebGL timing');
+      const gl = (device as WebGLDevice).gl;
+      const extension = gl.getExtension('EXT_disjoint_timer_query_webgl2')!;
+      expect(gl.getError()).toBe(gl.NO_ERROR);
+
+      const layerManager = deck['layerManager']!;
+      const activateViewport = layerManager.activateViewport.bind(layerManager);
+      const interrupted = vi
+        .spyOn(layerManager, 'activateViewport')
+        .mockImplementation(viewport => {
+          if (viewport.id === 'center') throw new Error('interrupted viewport');
+          activateViewport(viewport);
+        });
+      try {
+        expect(() => deck._drawLayers('interrupted')).toThrow('interrupted viewport');
+        expect(gl.getQuery(extension.TIME_ELAPSED_EXT, gl.CURRENT_QUERY)).toBeNull();
+        expect(gl.getError()).toBe(gl.NO_ERROR);
+      } finally {
+        interrupted.mockRestore();
+      }
+
+      const previousCount = timings.length;
+      expect(() => deck._drawLayers('recovered')).not.toThrow();
+      await waitForFrames(() => timings.length > previousCount, 'missing recovered WebGL timing');
+      expect(gl.getError()).toBe(gl.NO_ERROR);
+      expect(errors).toEqual([]);
+      for (const timing of timings) {
+        expect(timing.cpuMs).toBeGreaterThanOrEqual(0);
+        if (debugGPUTime) {
+          expect(timing.gpuMs).toBeUndefined();
+        } else {
+          expect(timing.gpuMs).toBeGreaterThanOrEqual(0);
+        }
+      }
+      expect(device._isDebugGPUTimeEnabled()).toBe(debugGPUTime);
+    } finally {
+      deck.finalize();
+      framebuffer.destroy();
+      device.destroy();
+    }
+  }
+);

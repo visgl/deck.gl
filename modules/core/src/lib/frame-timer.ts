@@ -4,14 +4,14 @@
 
 import type {Device, QuerySet} from '@luma.gl/core';
 
-/** Timings of a single deck.gl frame, reported by `Deck.props._onFrameTimings` */
+/** Timings of one deck.gl draw operation, reported by `Deck.props._onFrameTimings` */
 export type FrameTimings = {
-  /** CPU time, in milliseconds, spent encoding and submitting the frame's render passes */
+  /** CPU time, in milliseconds, around layer rendering, including effects but excluding readback */
   cpuMs: number;
   /**
-   * GPU time, in milliseconds, from the start of the frame's first layers render pass
+   * GPU time, in milliseconds, from the start of the draw operation's first layers render pass
    * to the end of its last one.
-   * Omitted when the device does not support `'timestamp-query'` or the measurement failed.
+   * Omitted when timestamp queries are unavailable, disabled, exhausted or fail.
    */
   gpuMs?: number;
 };
@@ -44,10 +44,8 @@ export class FrameTimer {
    * or null if GPU time is not measured for this frame
    */
   beginFrame({measureGpuTime = true}: {measureGpuTime?: boolean} = {}): QuerySet | null {
-    // The previous frame did not reach `endFrame`, e.g. because rendering threw
-    if (this.frameQuerySet) {
-      this._releaseQuerySet(this.frameQuerySet);
-    }
+    // Never reuse an incomplete measurement from an interrupted draw.
+    this.abortFrame();
     this.frameStartTime = performance.now();
     this.frameQuerySet = measureGpuTime ? this._getQuerySet() : null;
     return this.frameQuerySet;
@@ -55,10 +53,11 @@ export class FrameTimer {
 
   /**
    * Finishes timing a frame. The timed render pass must have been submitted.
-   * `onFrameTimings` is called synchronously when GPU time is not measured,
-   * otherwise once the GPU timestamps have been read back.
+   * `onFrameTimings` is called synchronously when no GPU query is used,
+   * otherwise after readback settles, including failures reported without `gpuMs`.
    */
   endFrame(onFrameTimings: (timings: FrameTimings) => void): void {
+    if (this.isDestroyed) return;
     const cpuMs = performance.now() - this.frameStartTime;
     const querySet = this.frameQuerySet;
     this.frameQuerySet = null;
@@ -86,8 +85,18 @@ export class FrameTimer {
       .finally(() => this._releaseQuerySet(querySet));
   }
 
+  /** Discards an interrupted measurement. The rendering pass must first close any active query. */
+  abortFrame(): void {
+    if (this.frameQuerySet) {
+      this.frameQuerySet.destroy();
+      this.frameQuerySet = null;
+      this.querySetCount--;
+    }
+  }
+
   destroy(): void {
     this.isDestroyed = true;
+    this.abortFrame();
     for (const querySet of this.freeQuerySets) {
       querySet.destroy();
     }
@@ -96,7 +105,12 @@ export class FrameTimer {
 
   /** Returns a query set for this frame, or null if GPU time cannot be measured */
   private _getQuerySet(): QuerySet | null {
-    if (!this.device.features.has('timestamp-query')) {
+    if (
+      this.isDestroyed ||
+      !this.device.features.has('timestamp-query') ||
+      // WebGL elapsed-time queries cannot nest with luma's automatic pass profiling.
+      (this.device.type === 'webgl' && this.device._isDebugGPUTimeEnabled())
+    ) {
       return null;
     }
     const querySet = this.freeQuerySets.pop();
@@ -106,8 +120,13 @@ export class FrameTimer {
     if (this.querySetCount >= MAX_PENDING_QUERY_SETS) {
       return null;
     }
+    const newQuerySet = this.device.createQuerySet({
+      id: 'deck-frame-timer',
+      type: 'timestamp',
+      count: 2
+    });
     this.querySetCount++;
-    return this.device.createQuerySet({id: 'deck-frame-timer', type: 'timestamp', count: 2});
+    return newQuerySet;
   }
 
   private _releaseQuerySet(querySet: QuerySet): void {
