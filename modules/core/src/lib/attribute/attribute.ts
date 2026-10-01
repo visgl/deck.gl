@@ -76,6 +76,8 @@ type AttributeInternalState = {
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
   layoutChanged: boolean;
+  /** Whether the last published accessor reads the low part from a zero buffer */
+  hasZeroLowBuffer: boolean;
   updateRanges: number[][];
 };
 
@@ -93,6 +95,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       needsUpdate: true,
       needsRedraw: false,
       layoutChanged: false,
+      hasZeroLowBuffer: false,
       updateRanges: range.FULL
     });
 
@@ -129,7 +132,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   }
 
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
-    this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
+    const {hasZeroLowBuffer} = this;
+    this.state.layoutChanged ||=
+      !bufferLayoutEqual(accessor, this.getAccessor()) ||
+      hasZeroLowBuffer !== this.state.hasZeroLowBuffer;
+    this.state.hasZeroLowBuffer = hasZeroLowBuffer;
     super.setAccessor(accessor);
   }
 
@@ -457,6 +464,22 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       result.attributes.push(...map.attributes);
     }
     return result;
+  }
+
+  /** Generate all WebGPU-style buffer layout descriptors of this attribute */
+  getBufferLayouts(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {isInstanced?: boolean}
+  ): BufferLayout[] {
+    const result = this.getBufferLayout(modelInfo);
+    if (!this.hasZeroLowBuffer) {
+      return [result];
+    }
+    const {shaderAttributes} = this.settings;
+    const lowLayout = super._getZeroLowBufferLayout(
+      shaderAttributes && {[this.id]: null, ...shaderAttributes}
+    );
+    return [result, {...lowLayout, stepMode: result.stepMode}];
   }
 
   /* eslint-disable max-depth, max-statements */

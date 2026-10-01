@@ -5,6 +5,7 @@
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
 import AttributeBufferGroups, {type AttributeBufferGroupBindings} from './attribute-buffer-groups';
+import {mergeZeroLowBufferLayouts} from './gl-utils';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
@@ -315,8 +316,12 @@ export default class AttributeManager {
     if (this.hasBufferGroups()) {
       return this.attributeBufferGroups!.getBufferLayouts(this.getAttributes(), modelInfo);
     }
-    return Object.values(this.getAttributes()).map(attribute =>
-      attribute.getBufferLayout(modelInfo)
+    const attributes = Object.values(this.getAttributes());
+    if (this.device.type !== 'webgpu') {
+      return attributes.map(attribute => attribute.getBufferLayout(modelInfo));
+    }
+    return mergeZeroLowBufferLayouts(
+      attributes.flatMap(attribute => attribute.getBufferLayouts(modelInfo))
     );
   }
 

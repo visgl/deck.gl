@@ -1215,6 +1215,28 @@ describe('Attribute#doublePrecision', () => {
 
     attribute.delete();
   });
+
+  test('external float32 Buffer on WebGL', () => {
+    const attribute = new Attribute(device, {
+      id: 'positions',
+      type: 'float64',
+      size: 3,
+      accessor: 'getPosition'
+    });
+    attribute.numInstances = 4;
+    // Tightly packed float32x3 rows: the low part is a constant on WebGL
+    const buffer = device.createBuffer({byteLength: 4 * 12});
+
+    attribute.setExternalBuffer({buffer, stride: 12});
+    expect(attribute.getBuffer(), 'external Buffer is bound').toBe(buffer);
+    expect(attribute.getBufferLayouts(), 'no separate low layout on WebGL').toHaveLength(1);
+    expect(attribute.getValue().positions64Low, 'low part is a constant').toEqual(
+      new Float32Array(3)
+    );
+
+    buffer.delete();
+    attribute.delete();
+  });
 });
 
 test('Attribute#updateBuffer', () => {
