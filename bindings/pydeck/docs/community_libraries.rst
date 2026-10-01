@@ -84,9 +84,6 @@ the layer's ``zoom_opacity`` keyword argument:
         extensions=[pdk.Extension("ZoomOpacityExtension")],
     )
 
-See the `ZoomOpacityExtension gallery example <gallery/zoom_opacity_extension.html>`__ for a
-complete script, which shows hexagons of decreasing size in consecutive zoom bands.
-
 Available packages
 ^^^^^^^^^^^^^^^^^^
 
