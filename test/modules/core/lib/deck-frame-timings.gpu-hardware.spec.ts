@@ -385,6 +385,42 @@ test('Deck#_onFrameTimings leaves WebGPU render passes to the luma debug GPU tim
   }
 });
 
+// Creates WebGL contexts, so it does not run in the shared headless page, where Chrome's context
+// limit would evict the shared test device
+test('Deck#_onFrameTimings recreates its timer for a new device', async () => {
+  const createDevice = () =>
+    luma.createDevice({
+      type: 'webgl',
+      adapters: [webgl2Adapter],
+      createCanvasContext: {width: SIZE, height: SIZE}
+    });
+  const firstDevice = await createDevice();
+  const secondDevice = await createDevice();
+  const timings: FrameTimings[] = [];
+  const deck = new Deck({
+    device: firstDevice,
+    width: SIZE,
+    height: SIZE,
+    viewState: {longitude: -122.4, latitude: 37.75, zoom: 9},
+    layers: [new ScatterplotLayer({data: [[-122.4, 37.75]], getPosition: d => d})],
+    _onFrameTimings: frameTimings => timings.push(frameTimings)
+  });
+  try {
+    await waitForFrames(() => Boolean(deck['frameTimer']), 'timer not created');
+    const firstTimer = deck['frameTimer']!;
+    expect(firstTimer.device).toBe(firstDevice);
+    const destroySpy = vi.spyOn(firstTimer, 'destroy');
+
+    deck.setProps({device: secondDevice});
+    await waitForFrames(() => deck['frameTimer']?.device === secondDevice, 'timer not recreated');
+    expect(destroySpy).toHaveBeenCalled();
+  } finally {
+    deck.finalize();
+    firstDevice.destroy();
+    secondDevice.destroy();
+  }
+});
+
 test('Deck without _onFrameTimings creates no QuerySet', async () => {
   const device = timestampDevice;
   const {spy} = spyOnQuerySets(device);

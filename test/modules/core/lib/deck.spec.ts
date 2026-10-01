@@ -8,9 +8,7 @@ import type {DeckProps, FrameTimings} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
-import {luma} from '@luma.gl/core';
 import type {CanvasContext, CanvasContextProps, QuerySet} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -1597,36 +1595,6 @@ test('Deck#_onFrameTimings removed during a draw', async () => {
   } finally {
     layerManager.activateViewport = activateViewport;
     deck.finalize();
-  }
-});
-
-test('Deck#_onFrameTimings recreates its timer for a new device', async () => {
-  const createDevice = () =>
-    luma.createDevice({
-      type: 'webgl',
-      adapters: [webgl2Adapter],
-      createCanvasContext: {width: 1, height: 1}
-    });
-  const firstDevice = await createDevice();
-  const secondDevice = await createDevice();
-  const timings: FrameTimings[] = [];
-  const deck = createTimedDeck({
-    device: firstDevice,
-    _onFrameTimings: frameTimings => timings.push(frameTimings)
-  });
-  try {
-    await waitFor(() => Boolean(deck['frameTimer']), 'timer created');
-    const firstTimer = deck['frameTimer']!;
-    expect(firstTimer.device).toBe(firstDevice);
-    const destroySpy = vi.spyOn(firstTimer, 'destroy');
-
-    deck.setProps({device: secondDevice});
-    await waitFor(() => deck['frameTimer']?.device === secondDevice, 'timer recreated');
-    expect(destroySpy).toHaveBeenCalled();
-  } finally {
-    deck.finalize();
-    firstDevice.destroy();
-    secondDevice.destroy();
   }
 });
 
