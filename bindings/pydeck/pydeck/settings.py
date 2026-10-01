@@ -7,7 +7,7 @@ class Settings:
     Parameters
     ----------
     custom_libraries : list
-        List of dictionaries of the format {'libraryName': 'LibraryName', 'resouceUri': 'deck.gl class URL'}.
+        List of dictionaries of the format {'libraryName': 'LibraryName', 'resourceUri': 'deck.gl class URL'}.
         For example, if there was a custom deck.gl Layer classed `TagmapLayer`
         bundled for distribution at the path `https://demourl.libpath/bundle.js`,
         one could load it into pydeck by doing the following:
@@ -35,7 +35,16 @@ class Settings:
         self.default_layer_attributes = default_layer_attributes
 
     def register_library(self, name, uri):
-        self.custom_libraries.append({"libraryName": name, "uri": uri})
+        """Registers a JavaScript library to load into the pydeck frontend.
+
+        Parameters
+        ----------
+        name : str
+            Name of the global variable the library's bundle assigns on ``window``.
+        uri : str
+            URL of the library's bundle.
+        """
+        self.custom_libraries.append({"libraryName": name, "resourceUri": uri})
 
 
 if not settings:

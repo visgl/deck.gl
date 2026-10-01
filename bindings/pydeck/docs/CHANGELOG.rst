@@ -16,6 +16,8 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - Add MapLibre basemap provider with globe projection via ``map_provider="maplibre"`` (#10566)
 - Add multi-view layout and ``SplitterWidget`` documentation and gallery examples
 - ``Deck`` no longer serializes a default ``MapView``; the new ``controller`` argument (default ``True``) is sent instead, so deck.gl supplies the view and widgets such as ``SplitterWidget`` can manage views
+- Fix ``register_library`` writing a ``uri`` key instead of ``resourceUri``, which left the library
+  unloaded (#10759)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^
