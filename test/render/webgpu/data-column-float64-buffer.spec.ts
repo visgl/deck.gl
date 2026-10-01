@@ -7,7 +7,7 @@
 
 /// <reference types="@webgpu/types" />
 
-import {test, expect, beforeAll, describe} from 'vitest';
+import {test, expect, beforeAll, describe, vi} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
@@ -215,13 +215,37 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))(
         {attribute: 'source64Low', format: 'float32x3', byteOffset: 0},
         {attribute: 'target64Low', format: 'float32x3', byteOffset: 0}
       ]);
+      const createBufferSpy = vi.spyOn(device, 'createBuffer');
+      const attributes = manager.getAttributes();
+      let lowBuffer: Buffer;
+      try {
+        lowBuffer = attributes.source.getValue()[ZERO_LOW_BUFFER_NAME] as Buffer;
+        expect(attributes.target.getValue()[ZERO_LOW_BUFFER_NAME]).toBe(lowBuffer);
+        expect(attributes.source.getValue()[ZERO_LOW_BUFFER_NAME]).toBe(lowBuffer);
+        expect(createBufferSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        createBufferSpy.mockRestore();
+      }
       if (grouped) {
         const bindings = manager.getBufferGroupBindings({}, {isInstanced: true});
         expect(bindings.bufferLayouts).toEqual(layouts);
         expect(bindings.groupedAttributeIds).toEqual(new Set(['width', 'height']));
       }
 
+      manager.remove(['source']);
+      expect(lowBuffer.destroyed, 'removing an attribute preserves the shared buffer').toBe(false);
+      expect(manager.getAttributes().target.getValue()[ZERO_LOW_BUFFER_NAME]).toBe(lowBuffer);
+
+      manager.addInstanced({source: {size: 3, type: 'float64', accessor: 'getSource'}});
+      manager.getAttributes().source.setExternalBuffer({buffer, stride: 12});
+      expect(manager.getAttributes().source.getValue()[ZERO_LOW_BUFFER_NAME]).toBe(lowBuffer);
+
+      const destroySpy = vi.spyOn(lowBuffer, 'destroy');
       manager.finalize();
+      expect(lowBuffer.destroyed, 'the manager owns the shared buffer').toBe(true);
+      manager.finalize();
+      expect(destroySpy).toHaveBeenCalledTimes(1);
+      destroySpy.mockRestore();
       buffer.destroy();
     });
 

@@ -85,7 +85,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Legacy approach to set attribute value - read `isConstant` instead for attribute state */
   constant: boolean = false;
 
-  constructor(device: Device, opts: AttributeOptions) {
+  constructor(
+    device: Device,
+    opts: AttributeOptions,
+    /** @internal Supplies a shared zero row owned and released by the attribute manager. */
+    private readonly getSharedZeroLowBuffer?: () => Buffer
+  ) {
     super(device, opts, {
       startIndices: null,
       constantValue: null,
@@ -480,6 +485,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       shaderAttributes && {[this.id]: null, ...shaderAttributes}
     );
     return [result, {...lowLayout, stepMode: result.stepMode}];
+  }
+
+  /** Borrow the manager's row; standalone attributes own their fallback buffer. */
+  protected override _getZeroLowBuffer(): Buffer {
+    return this.getSharedZeroLowBuffer?.() || super._getZeroLowBuffer();
   }
 
   /* eslint-disable max-depth, max-statements */

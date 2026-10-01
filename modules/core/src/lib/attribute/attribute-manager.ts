@@ -14,6 +14,7 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
+import {Buffer} from '@luma.gl/core';
 import type {Device, BufferLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
@@ -59,6 +60,7 @@ export default class AttributeManager {
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
   private attributeBufferGroups: AttributeBufferGroups | null;
+  private zeroLowBuffer: Buffer | null = null;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
@@ -107,6 +109,8 @@ export default class AttributeManager {
       this.attributes[attributeName].delete();
     }
     this.attributeTransitionManager.finalize();
+    this.zeroLowBuffer?.destroy();
+    this.zeroLowBuffer = null;
   }
 
   // Returns the redraw flag, optionally clearing it.
@@ -355,6 +359,17 @@ export default class AttributeManager {
 
   // PRIVATE METHODS
 
+  /** Lazily creates the zero row borrowed by this manager's external float64 attributes. */
+  private _getZeroLowBuffer = (): Buffer => {
+    this.zeroLowBuffer ||= this.device.createBuffer({
+      id: `${this.id}-zero-low`,
+      usage: Buffer.VERTEX,
+      // Cover binary and shader size overrides up to four components.
+      data: new Float32Array(4)
+    });
+    return this.zeroLowBuffer;
+  };
+
   /** Register new attributes */
   private _add(
     /** A map from attribute name to attribute descriptors */
@@ -373,7 +388,7 @@ export default class AttributeManager {
       };
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      this.attributes[attributeName] = new Attribute(this.device, props);
+      this.attributes[attributeName] = new Attribute(this.device, props, this._getZeroLowBuffer);
     }
 
     this._mapUpdateTriggersToAttributes();
