@@ -20,6 +20,8 @@ type UserData = {
 // Mercator constants
 const TILE_SIZE = 512;
 const DEGREES_TO_RADIANS = Math.PI / 180;
+// Zoom range in which maplibre-gl's `globe` projection transitions to Web Mercator
+const MAPLIBRE_GLOBE_TRANSITION_ZOOMS = [11, 12] as const;
 
 // Create an interleaved deck instance.
 export function getDeckInstance({
@@ -259,7 +261,14 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
   else if (typeof map.transform.elevation === 'number') {
     // maplibre-gl
     // @ts-ignore transform is not typed
-    viewState.position = [0, 0, map.transform.elevation];
+    let elevation: number = map.transform.elevation;
+    if (getProjection(map) === 'globe') {
+      // The globe camera targets sea level and the Web Mercator camera the terrain.
+      // During the transition, maplibre-gl blends the two, which a target in between approximates
+      const [startZoom, endZoom] = MAPLIBRE_GLOBE_TRANSITION_ZOOMS;
+      elevation *= Math.min(Math.max((viewState.zoom! - startZoom) / (endZoom - startZoom), 0), 1);
+    }
+    viewState.position = [0, 0, elevation];
   }
 }
 
