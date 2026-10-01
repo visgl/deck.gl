@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {log, BinaryAttribute} from '@deck.gl/core';
-import {Geometry} from '@luma.gl/engine';
+import {log} from '@deck.gl/core';
+import {Geometry, type GeometryAttribute} from '@luma.gl/engine';
 
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
@@ -15,13 +15,20 @@ type ColumnGeometryProps = {
   vertices?: number[];
 };
 
+type ColumnGeometryAttributes = {
+  POSITION: GeometryAttribute;
+  NORMAL: GeometryAttribute;
+};
+
 export default class ColumnGeometry extends Geometry {
+  readonly attributes!: ColumnGeometryAttributes;
+
   constructor(props: ColumnGeometryProps) {
     const {indices, attributes} = tesselateColumn(props);
     super({
       ...props,
+      topology: 'line-list',
       indices,
-      // @ts-expect-error
       attributes
     });
   }
@@ -30,7 +37,7 @@ export default class ColumnGeometry extends Geometry {
 /* eslint-disable max-statements, complexity */
 function tesselateColumn(props: ColumnGeometryProps): {
   indices: Uint16Array;
-  attributes: Record<string, BinaryAttribute>;
+  attributes: ColumnGeometryAttributes;
 } {
   const {radius, height = 1, nradial = 10} = props;
   let {vertices} = props;

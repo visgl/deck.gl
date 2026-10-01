@@ -32,7 +32,7 @@ test('CompassWidget', async () => {
   });
 
   await testInstance.idle();
-  testInstance.click('.deck-widget-button > button');
+  testInstance.click('.deck-widget-button button');
   expect(onReset).toHaveBeenCalledWith({
     viewId: 'default-view',
     bearing: 0,
@@ -41,7 +41,7 @@ test('CompassWidget', async () => {
   expect(viewState.bearing).toBe(0);
 
   await testInstance.idle();
-  testInstance.click('.deck-widget-button > button');
+  testInstance.click('.deck-widget-button button');
   expect(onReset).toHaveBeenCalledWith({
     viewId: 'default-view',
     bearing: 0,

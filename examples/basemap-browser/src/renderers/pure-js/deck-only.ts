@@ -7,8 +7,16 @@ import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
 
 export function mount(container: HTMLElement, config: Config): () => void {
-  const {initialViewState, layers, multiView, views, layerFilter, globe, onViewStateChange} =
-    config;
+  const {
+    initialViewState,
+    layers,
+    multiView,
+    views,
+    layerFilter,
+    globe,
+    useDevicePixels,
+    onViewStateChange
+  } = config;
 
   // Create a wrapper div for Deck to render into
   const wrapper = document.createElement('div');
@@ -24,7 +32,8 @@ export function mount(container: HTMLElement, config: Config): () => void {
     height: '100%',
     initialViewState: viewState,
     controller: true,
-    layers
+    layers,
+    useDevicePixels
   };
 
   // Use GlobeView for globe projection

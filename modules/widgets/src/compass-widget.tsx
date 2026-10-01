@@ -5,6 +5,7 @@
 import {Widget, FlyToInterpolator, WebMercatorViewport, _GlobeViewport} from '@deck.gl/core';
 import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
+import {Tooltip} from './lib/components/tooltip';
 
 export type CompassWidgetProps = WidgetProps & {
   /** Widget positioning within the view. Default 'top-left'. */
@@ -13,6 +14,8 @@ export type CompassWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message. */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement | false;
   /** Bearing and pitch reset transition duration in ms. */
   transitionDuration?: number;
   /**
@@ -36,6 +39,7 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
     placement: 'top-left',
     viewId: null,
     label: 'Reset Compass',
+    tooltip: undefined!,
     transitionDuration: 200,
     onReset: () => {}
   };
@@ -60,31 +64,35 @@ export class CompassWidget extends Widget<CompassWidgetProps> {
     const widgetViewport = this.viewports[viewId];
     const [rz, rx] = this.getRotation(widgetViewport);
 
+    const tooltipContent =
+      this.props.tooltip === false ? undefined : (this.props.tooltip ?? this.props.label);
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100}}>
-        <button
-          type="button"
-          onClick={() => {
-            for (const viewport of Object.values(this.viewports)) {
-              this.handleCompassReset(viewport);
-            }
-          }}
-          title={this.props.label}
-          style={{transform: `rotateX(${rx}deg)`}}
-        >
-          <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
-            <g transform={`rotate(${rz},13,13)`}>
-              <path
-                d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
-                fill="var(--icon-compass-north-color, rgb(240, 92, 68))"
-              />
-              <path
-                d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
-                fill="var(--icon-compass-south-color, rgb(204, 204, 204))"
-              />
-            </g>
-          </svg>
-        </button>
+        <Tooltip content={tooltipContent}>
+          <button
+            type="button"
+            onClick={() => {
+              for (const viewport of Object.values(this.viewports)) {
+                this.handleCompassReset(viewport);
+              }
+            }}
+            aria-label={this.props.label}
+            style={{transform: `rotateX(${rx}deg)`}}
+          >
+            <svg fill="none" width="100%" height="100%" viewBox="0 0 26 26">
+              <g transform={`rotate(${rz},13,13)`}>
+                <path
+                  d="M10 13.0001L12.9999 5L15.9997 13.0001H10Z"
+                  fill="var(--icon-compass-north-color, rgb(240, 92, 68))"
+                />
+                <path
+                  d="M16.0002 12.9999L13.0004 21L10.0005 12.9999H16.0002Z"
+                  fill="var(--icon-compass-south-color, rgb(204, 204, 204))"
+                />
+              </g>
+            </svg>
+          </button>
+        </Tooltip>
       </div>
     );
 

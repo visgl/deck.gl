@@ -1,18 +1,41 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>deck.gl Example</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {margin: 0; font-family: sans-serif; width: 100vw; height: 100vh; overflow: hidden; background: #111;}
-  </style>
-</head>
-<body>
-<div id="app"></div>
-</body>
-<script type="module">
-  import {renderToDOM} from './app.tsx';
-  renderToDOM(document.getElementById('app'));
-</script>
+  <head>
+    <meta charset="utf-8" />
+    <title>deck.gl Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      html,
+      body,
+      #app {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+        font-family: sans-serif;
+        background: #111;
+      }
+
+      /*
+       * See https://deck.gl/docs/developer-guide/tips-and-tricks#optimization-for-mobile
+       * for CSS guards when using deck.gl controllers in mobile experiences.
+       */
+      #app,
+      #app canvas {
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  <script type="module">
+    import {renderToDOM} from './app.tsx';
+    renderToDOM(document.getElementById('app'));
+  </script>
 </html>

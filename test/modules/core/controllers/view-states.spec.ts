@@ -341,3 +341,160 @@ test('FirstPersonViewState', () => {
 
   expect(viewportProps.position, 'updated position to constraints').toEqual([-100, 100, 0]);
 });
+
+test('maxBoundsPadding adjusts fitting across controller states', () => {
+  const padding = {left: '25%', right: '25%', top: '25%', bottom: '25%'};
+
+  const MapViewState = new MapController({} as any).ControllerState;
+  const mapOptions = {
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 50,
+    zoom: 0,
+    maxBounds: [
+      [-5, 45],
+      [5, 55]
+    ],
+    makeViewport: dummyMakeViewport
+  };
+  const mapZoom = new MapViewState(mapOptions).getViewportProps().zoom;
+  const paddedMapZoom = new MapViewState({
+    ...mapOptions,
+    maxBoundsPadding: padding
+  }).getViewportProps().zoom;
+  expect(paddedMapZoom, 'MapState fits bounds into the padded viewport').toBeCloseTo(mapZoom - 1);
+
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+  const globeOptions = {
+    width: 800,
+    height: 600,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0,
+    maxBounds: [
+      [-180, -90],
+      [180, 90]
+    ],
+    makeViewport: dummyMakeViewport
+  };
+  const globeZoom = new GlobeViewState(globeOptions).getViewportProps().zoom;
+  const paddedGlobeZoom = new GlobeViewState({
+    ...globeOptions,
+    maxBoundsPadding: padding
+  }).getViewportProps().zoom;
+  expect(paddedGlobeZoom, 'GlobeState fits bounds into the padded viewport').toBeCloseTo(
+    globeZoom - 1
+  );
+
+  const OrbitViewState = new OrbitController({} as any).ControllerState;
+  const orbitOptions = {
+    width: 800,
+    height: 600,
+    target: [0, 0, 0] as [number, number, number],
+    zoom: 0,
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    makeViewport: (props: any) => new OrbitViewport(props)
+  };
+  const orbitZoom = new OrbitViewState(orbitOptions).getViewportProps().zoom;
+  const paddedOrbitZoom = new OrbitViewState({
+    ...orbitOptions,
+    maxBoundsPadding: padding
+  }).getViewportProps().zoom;
+  expect(paddedOrbitZoom, 'OrbitState fits bounds into the padded viewport').toBeCloseTo(
+    orbitZoom - 1
+  );
+
+  const FirstPersonViewState = new FirstPersonController({} as any).ControllerState;
+  const firstPersonProps = new FirstPersonViewState({
+    width: 800,
+    height: 600,
+    position: [-200, 100, 0],
+    maxBounds: [
+      [-100, -100],
+      [100, 100]
+    ],
+    maxBoundsPadding: padding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect(firstPersonProps.position, 'FirstPersonState keeps point constraints unchanged').toEqual([
+    -100, 100, 0
+  ]);
+  expect(firstPersonProps.maxBoundsPadding, 'FirstPersonState carries the shared option').toEqual(
+    padding
+  );
+});
+
+test('negative maxBoundsPadding dimensions skip target constraints', () => {
+  const maxBoundsPadding = {left: 60, right: 60, top: 60, bottom: 60};
+  const geographicBounds = [
+    [-10, -10],
+    [10, 10]
+  ];
+
+  const MapViewState = new MapController({} as any).ControllerState;
+  const mapProps = new MapViewState({
+    width: 100,
+    height: 100,
+    longitude: 50,
+    latitude: 50,
+    zoom: -10,
+    minZoom: -20,
+    maxBounds: geographicBounds,
+    maxBoundsPadding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect([mapProps.longitude, mapProps.latitude], 'MapState leaves target unconstrained').toEqual([
+    50, 50
+  ]);
+
+  const GlobeViewState = new GlobeController({} as any).ControllerState;
+  const globeProps = new GlobeViewState({
+    width: 100,
+    height: 100,
+    longitude: 50,
+    latitude: 50,
+    zoom: -10,
+    minZoom: -20,
+    maxBounds: geographicBounds,
+    maxBoundsPadding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect(
+    [globeProps.longitude, globeProps.latitude],
+    'GlobeState leaves target unconstrained'
+  ).toEqual([50, 50]);
+
+  const OrbitViewState = new OrbitController({} as any).ControllerState;
+  const orbitProps = new OrbitViewState({
+    width: 100,
+    height: 100,
+    target: [100, 100, 100],
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    maxBoundsPadding,
+    makeViewport: (props: any) => new OrbitViewport(props)
+  }).getViewportProps();
+  expect(orbitProps.target, 'OrbitState leaves target unconstrained').toEqual([100, 100, 100]);
+
+  const FirstPersonViewState = new FirstPersonController({} as any).ControllerState;
+  const firstPersonProps = new FirstPersonViewState({
+    width: 100,
+    height: 100,
+    position: [100, 100, 100],
+    maxBounds: [
+      [-1, -1, -1],
+      [1, 1, 1]
+    ],
+    maxBoundsPadding,
+    makeViewport: dummyMakeViewport
+  }).getViewportProps();
+  expect(firstPersonProps.position, 'FirstPersonState leaves position unconstrained').toEqual([
+    100, 100, 100
+  ]);
+});

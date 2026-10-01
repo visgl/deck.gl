@@ -133,7 +133,7 @@ new Deck({
 
 Widgets with UI (e.g. a button or panel) can be positioned relative to the deck.gl view they are controlling, via the `viewId` and `placement` props. See [WidgetProps](../core/widget.md#widgetprops).
 
-The `viewId` controls which HTML container will mount to, and the `placement` prop will position it relative to the container it is in, like so:
+The `viewId` selects a deck-managed view container under the shared widget root, and the `placement` prop positions the widget within that container:
 
 ```ts
 new Deck({
@@ -182,6 +182,27 @@ Remarks:
 * Widget UI with dynamic positioning, such as an `InfoWidget`, may not expose the `placement` prop as they control positioning internally.
 * For more information about using multiple deck.gl views, see the [Using Multiple Views](../../developer-guide/views.md#using-multiple-views) guide.
 
+### Using with Multiple Canvases
+
+When [`Deck._canvases`](../core/deck.md#_canvases) is supplied, deck.gl still mounts generated widget DOM under one shared `.deck-widget-container`. A widget's `viewId` selects the view used for positioning and event handling; that view's [`canvasId`](../core/view.md#canvasid) determines which presentation-canvas bounds offset the view container. The widget is not reparented into the canvas element.
+
+```ts
+new Deck({
+  parent: document.getElementById('deck-root'),
+  _canvases: ['canvas-london', 'canvas-tokyo'],
+  views: [
+    new MapView({id: 'london', canvasId: 'canvas-london'}),
+    new MapView({id: 'tokyo', canvasId: 'canvas-tokyo'})
+  ],
+  widgets: [
+    new ZoomWidget({viewId: 'london'}),
+    new ZoomWidget({id: 'tokyo-zoom', viewId: 'tokyo'})
+  ]
+});
+```
+
+Widgets without a `viewId` stay in the root widget container and are positioned relative to the shared parent, not a specific presentation canvas. Use a common `parent` that covers the presentation canvases when deck-managed widgets need to span them. To opt out of deck-managed positioning, supply an HTMLElement through [`_container`](../core/widget.md#_container).
+
 ## Controlled vs Uncontrolled Mode
 
 Many deck.gl widgets support both controlled and uncontrolled modes, similar to React form components.
@@ -219,31 +240,47 @@ Widgets with internal state expose getter methods (e.g., `getThemeMode()`, `getF
 
 ## Writing new Widgets
 
-A widget should inherit the `Widget` class. 
+A widget should extend the [`Widget`](../core/widget.md) class.
 Here is a custom widget that shows a spinner while layers are loading:
 
 ```ts
 import {Deck, Widget} from '@deck.gl/core';
+import type {Layer, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 
-class LoadingIndicator extends Widget {
-  element?: HTMLDivElement;
-  size: number;
+type LoadingIndicatorProps = WidgetProps & {
+  placement?: WidgetPlacement;
+  size?: number;
+};
 
-  constructor(options: {
-    size: number;
-  }) {
-    this.size = options.size;
+class LoadingIndicator extends Widget<LoadingIndicatorProps> {
+  static defaultProps: Required<LoadingIndicatorProps> = {
+    ...Widget.defaultProps,
+    id: 'loading-indicator',
+    placement: 'top-left',
+    size: 32
+  };
+
+  className = 'spinner';
+  placement: WidgetPlacement = 'top-left';
+  loading = false;
+
+  constructor(props: LoadingIndicatorProps = {}) {
+    super(props);
+    this.placement = this.props.placement;
   }
 
   onRenderHTML(el: HTMLElement) {
-    el.className = 'spinner';
-    el.style.width = `${this.size}px`;
+    el.style.width = `${this.props.size}px`;
+    el.style.display = this.loading ? 'block' : 'none';
     // TODO - create animation for .spinner in the CSS stylesheet
   }
 
-  onRedraw({layers}) {
-    const isVisible = layers.some(layer => !layer.isLoaded);
-    this.rootElement.style.display = isVisible ? 'block' : 'none';
+  onRedraw({layers}: {layers: Layer[]}) {
+    const loading = layers.some(layer => !layer.isLoaded);
+    if (loading !== this.loading) {
+      this.loading = loading;
+      this.updateHTML();
+    }
   }
 }
 
@@ -251,6 +288,12 @@ new Deck({
   widgets: [new LoadingIndicator({size: 48})]
 });
 ```
+
+For a full walk-through of the widget lifecycle, styling, and using Preact or React to render widget UI, see the [Writing Custom Widgets](../../developer-guide/custom-widgets/README.md) developer guide.
+
+## Tooltips
+
+Built-in button widgets show styled tooltips on hover. See [Widget Tooltips](./tooltips) for customization and usage in custom widgets.
 
 ## Themes and Styling
 

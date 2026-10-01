@@ -17,6 +17,7 @@
     {"path": "../json"},
     {"path": "../layers"},
     {"path": "../mapbox"},
+    {"path": "../maplibre"},
     {"path": "../mesh-layers"},
     {"path": "../react"},
     {"path": "../widgets"}

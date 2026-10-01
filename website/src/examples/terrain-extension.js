@@ -63,6 +63,12 @@ class TerrainExtensionDemo extends Component {
       type: 'select',
       options: Object.keys(LOCATIONS),
       value: 'Day 5. Pau to Laruns'
+    },
+    view: {
+      displayName: 'View',
+      type: 'select',
+      options: ['MapView', 'GlobeView'],
+      value: 'MapView'
     }
   };
 
@@ -84,7 +90,7 @@ class TerrainExtensionDemo extends Component {
   }
 
   render() {
-    const {location} = this.props.params;
+    const {location, view} = this.props.params;
 
     const initialViewState = {
       ...LOCATIONS[location.value],
@@ -96,7 +102,7 @@ class TerrainExtensionDemo extends Component {
 
     return (
       <div style={{background: '#111', width: '100%', height: '100%', position: 'absolute'}}>
-        <App initialViewState={initialViewState} />
+        <App key={location.value} initialViewState={initialViewState} view={view.value} />
       </div>
     );
   }

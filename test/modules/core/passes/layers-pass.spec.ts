@@ -2,14 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
+import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
+import {Buffer, Texture} from '@luma.gl/core';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {getGLParameters} from '@luma.gl/webgl';
 import {GL} from '@luma.gl/webgl/constants';
+import type {CanvasContext} from '@luma.gl/core';
 
 class TestLayer extends Layer {
   initializeState() {}
@@ -319,6 +324,8 @@ test('LayersPass#viewParameters', () => {
     })
   };
 
+  const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
+  const submit = vi.spyOn(device, 'submit');
   layersPass.render({
     viewports: [new Viewport({id: 'A'}), new Viewport({id: 'B'})],
     views,
@@ -327,6 +334,10 @@ test('LayersPass#viewParameters', () => {
     onError: err => expect(err).toBeFalsy()
   });
 
+  expect(beginRenderPass, 'each logical WebGL viewport owns a render pass').toHaveBeenCalledTimes(
+    2
+  );
+  expect(submit, 'all WebGL viewports are submitted together').toHaveBeenCalledOnce();
   expect(drawCalls, 'layer drawn once in each view').toHaveLength(2);
   expect(drawCalls[0].viewport, 'first viewport id').toBe('A');
   expect(drawCalls[0].parameters, 'view parameters are merged for view A').toMatchObject({
@@ -344,6 +355,178 @@ test('LayersPass#viewParameters', () => {
     blendColorSrcFactor: 'src-alpha',
     cullMode: 'none'
   });
+  beginRenderPass.mockRestore();
+  submit.mockRestore();
+});
+
+test('LayersPass#WebGPU renders and picks each repeated world in a separate pass', async ({
+  skip
+}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+
+  const width = 1152;
+  const height = 128;
+  const view = new MapView({repeat: true});
+  const viewport = view.makeViewport({
+    width,
+    height,
+    viewState: {longitude: 0, latitude: 0, zoom: 0}
+  });
+  const subViewports = viewport.subViewports!;
+  expect(subViewports, 'the viewport includes three visible world copies').toHaveLength(3);
+
+  const colorTexture = webgpuDevice.createTexture({
+    format: 'rgba8unorm',
+    width,
+    height,
+    usage: Texture.RENDER | Texture.COPY_SRC
+  });
+  const framebuffer = webgpuDevice.createFramebuffer({
+    width,
+    height,
+    colorAttachments: [colorTexture],
+    depthStencilAttachment: 'depth24plus'
+  });
+  const readbackOptions = {x: 0, y: height / 2, width, height: 1};
+  const readbackLayout = colorTexture.computeMemoryLayout(readbackOptions);
+  const readbackBuffer = webgpuDevice.createBuffer({
+    byteLength: readbackLayout.byteLength,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  const layer = new ScatterplotLayer({
+    id: 'webgpu-repeated-world',
+    data: [{position: [0, 0]}],
+    getPosition: point => point.position,
+    getFillColor: [255, 0, 0, 255],
+    radiusMinPixels: 8,
+    pickable: true
+  });
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  const layersPass = new DrawLayersPass(webgpuDevice);
+  const pickLayersPass = new PickLayersPass(webgpuDevice);
+  const beginRenderPass = vi.spyOn(webgpuDevice, 'beginRenderPass');
+  const submit = vi.spyOn(webgpuDevice, 'submit');
+
+  try {
+    layerManager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    layerManager.setLayers([layer]);
+    beginRenderPass.mockClear();
+    submit.mockClear();
+
+    const renderStats = layersPass.render({
+      target: framebuffer,
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      pass: 'webgpu-repeat-regression'
+    });
+    expect(renderStats, 'one render result is returned for each world copy').toHaveLength(3);
+    expect(beginRenderPass, 'each world copy owns a render pass').toHaveBeenCalledTimes(3);
+    expect(submit, 'each world copy is submitted in its own pass').toHaveBeenCalledTimes(3);
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const worldColors = subViewports.map(subViewport => {
+      const pixelIndex = Math.round(subViewport.project([0, 0])[0]) * 4;
+      return Array.from(pixels.subarray(pixelIndex, pixelIndex + 4));
+    });
+
+    expect(worldColors, 'each world copy is visible at its projected position').toEqual([
+      [255, 0, 0, 255],
+      [255, 0, 0, 255],
+      [255, 0, 0, 255]
+    ]);
+
+    beginRenderPass.mockClear();
+    submit.mockClear();
+    const {decodePickingColor, stats: pickingStats} = pickLayersPass.render({
+      pickingFBO: framebuffer,
+      deviceRect: {x: 0, y: 0, width, height},
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      pass: 'webgpu-repeat-picking-regression',
+      pickZ: false
+    });
+
+    expect(pickingStats, 'one picking result is returned for each world copy').toHaveLength(3);
+    expect(beginRenderPass, 'each picked world owns a render pass').toHaveBeenCalledTimes(3);
+    expect(submit, 'each world copy is picked in its own pass').toHaveBeenCalledTimes(3);
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pickingPixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const pickedWorlds = subViewports.map(subViewport => {
+      const pixelIndex = Math.round(subViewport.project([0, 0])[0]) * 4;
+      return decodePickingColor?.(pickingPixels.subarray(pixelIndex, pixelIndex + 4));
+    });
+
+    expect(
+      pickedWorlds.map(pickedWorld => pickedWorld?.pickedLayer.id),
+      'each world copy decodes to the pickable layer'
+    ).toEqual([layer.id, layer.id, layer.id]);
+    for (const pickedWorld of pickedWorlds) {
+      expect(pickedWorld?.pickedObjectIndex, 'the selected object index is preserved').toBe(0);
+      expect(pickedWorld?.pickedViewports, 'the logical viewport is recorded exactly once').toEqual(
+        [viewport]
+      );
+    }
+  } finally {
+    beginRenderPass.mockRestore();
+    submit.mockRestore();
+    readbackBuffer.destroy();
+    layerManager.finalize();
+    framebuffer.destroy();
+    colorTexture.destroy();
+  }
+});
+
+test('LayersPass#uses the supplied canvas context for viewport and clear passes', () => {
+  const layer = new TestLayer({id: 'canvas-context-layer'});
+  const layerManager = new LayerManager(device, {});
+  const layersPass = new DrawLayersPass(device);
+  const framebuffer = device.createFramebuffer({
+    width: 60,
+    height: 40,
+    colorAttachments: ['rgba8unorm']
+  });
+  const canvasContext = {
+    getCurrentFramebuffer: () => framebuffer,
+    getDrawingBufferSize: () => [60, 40],
+    cssToDeviceRatio: () => 2
+  } as CanvasContext;
+  const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
+
+  layerManager.setLayers([layer]);
+  const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
+  layersPass.render({
+    canvasContext,
+    views: {[viewport.id]: new MapView({id: viewport.id, clear: true})},
+    viewports: [viewport],
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport
+  });
+
+  expect(
+    // @ts-expect-error glParameters not exposed
+    layerManager.context.renderPass.glParameters.viewport,
+    'viewport uses the supplied drawing-buffer height and pixel ratio'
+  ).toEqual([4, 18, 20, 16]);
+  expect(beginRenderPass).toHaveBeenCalledTimes(2);
+  expect(beginRenderPass.mock.calls[0][0].framebuffer).toBe(framebuffer);
+  expect(beginRenderPass.mock.calls[1][0].framebuffer).toBe(framebuffer);
+
+  beginRenderPass.mockRestore();
+  layerManager.finalize();
+  framebuffer.destroy();
 });
 
 test('LayersPass#GLViewport', () => {

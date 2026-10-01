@@ -4,7 +4,9 @@
 
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
+import {LayerManager, MapView} from '@deck.gl/core';
 import {HexagonLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -13,6 +15,51 @@ const SAMPLE_PROPS = {
   getPosition: d => d.COORDINATES
   // gpuAggregation: false
 };
+
+test('HexagonLayer#WebGPU renders with automatic CPU aggregation', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: -122, latitude: 38, zoom: 10}
+  });
+  const errors: Error[] = [];
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  layerManager.setProps({onError: error => errors.push(error)});
+
+  const layer = new HexagonLayer({
+    id: 'webgpu-hexagons',
+    ...SAMPLE_PROPS,
+    gpuAggregation: true,
+    radius: 1000,
+    extruded: true
+  });
+
+  webgpuDevice.handle.pushErrorScope('validation');
+  layerManager.setLayers([layer]);
+
+  expect(errors).toEqual([]);
+  expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+  expect(
+    layerManager
+      .getLayers()
+      .some(
+        renderedLayer =>
+          renderedLayer.id.startsWith('webgpu-hexagons') && renderedLayer.getModels().length > 0
+      )
+  ).toBe(true);
+
+  await webgpuDevice.handle.queue.onSubmittedWorkDone();
+  expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+
+  layerManager.finalize();
+});
 
 test('HexagonLayer', () => {
   const testCases = generateLayerTests({

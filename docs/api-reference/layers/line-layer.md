@@ -1,3 +1,7 @@
+---
+description: "LineLayer renders straight lines between pairs of source and target coordinates."
+---
+
 # LineLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
@@ -196,6 +200,14 @@ The minimum line width in pixels. This prop can be used to prevent the line from
 
 The maximum line width in pixels. This prop can be used to prevent the line from getting to thick when zoomed in.
 
+#### `antialiasing` (boolean, optional) {#antialiasing}
+
+* Default: `false`
+
+When enabled, this prop computes edge coverage in the shader. When disabled, the layer relies on render-target multisampling. Shader-computed coverage can cause artifacts where lines overlap. Only the edges along the width of the line are smoothed — the two ends are not.
+
+Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
+
 
 ### Data Accessors
 
@@ -228,6 +240,19 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
+
+## Remarks
+
+### Using with GlobeView
+
+When using this layer with [GlobeView](../core/globe-view.md) or MapLibre's globe projection, lines may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure lines are visible from both sides, set:
+
+```js
+new LineLayer({
+  // ...other props
+  parameters: {cullMode: 'none'}
+});
+```
 
 ## Source
 

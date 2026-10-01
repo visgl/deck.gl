@@ -27,7 +27,7 @@ new Deck({
     new SolidPolygonLayer({
       id: 'background',
       data: [
-        // prettier-ignore
+        // biome-ignore format: preserve layout
         [[-180, 90], [0, 90], [180, 90], [180, -90], [0, -90], [-180, -90]]
       ],
       opacity: 0.5,
@@ -71,7 +71,8 @@ new Deck({
       getTargetPosition: f => f.geometry.coordinates,
       getSourceColor: [0, 128, 200],
       getTargetColor: [200, 0, 80],
-      getWidth: 1
+      getWidth: 1,
+      parameters: {cullMode: 'none'}
     })
   ]
 });

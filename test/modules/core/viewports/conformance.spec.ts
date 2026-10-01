@@ -91,3 +91,18 @@ test('Viewport#recreate', () => {
     expect(viewport.equals(clone), String(viewport.id)).toBeTruthy();
   }
 });
+
+test('OrthographicViewport axis zoom overrides scalar zoom', () => {
+  const viewport = new OrthographicViewport({
+    width: 100,
+    height: 100,
+    target: [0, 0],
+    zoom: 0,
+    zoomX: 1,
+    zoomY: 1
+  });
+
+  const projected = viewport.project([10, 10]);
+  expect(projected[0], 'zoomX overrides scalar zoom').toBeCloseTo(70);
+  expect(projected[1], 'zoomY overrides scalar zoom').toBeCloseTo(70);
+});

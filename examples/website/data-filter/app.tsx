@@ -6,6 +6,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
@@ -89,9 +90,11 @@ function getTooltip({object}: PickingInfo<Earthquake>) {
 }
 
 export default function App({
+  device,
   data,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: Earthquake[];
   mapStyle?: string;
 }) {
@@ -132,6 +135,7 @@ export default function App({
   return (
     <>
       <DeckGL
+        device={device}
         views={MAP_VIEW}
         layers={layers}
         initialViewState={INITIAL_VIEW_STATE}

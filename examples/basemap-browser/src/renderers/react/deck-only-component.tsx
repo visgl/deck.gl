@@ -13,8 +13,16 @@ type DeckOnlyComponentProps = {
 };
 
 export default function DeckOnlyComponent({config}: DeckOnlyComponentProps) {
-  const {initialViewState, layers, multiView, views, layerFilter, globe, onViewStateChange} =
-    config;
+  const {
+    initialViewState,
+    layers,
+    multiView,
+    views,
+    layerFilter,
+    globe,
+    useDevicePixels,
+    onViewStateChange
+  } = config;
 
   const handleViewStateChange = useCallback(
     ({viewState: vs}: {viewState: any}) => {
@@ -63,6 +71,7 @@ export default function DeckOnlyComponent({config}: DeckOnlyComponentProps) {
         controller={true}
         layers={layers}
         views={effectiveViews}
+        useDevicePixels={useDevicePixels}
         layerFilter={multiView ? layerFilter : undefined}
         onViewStateChange={handleViewStateChange}
       />

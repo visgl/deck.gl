@@ -14,7 +14,7 @@ import {
 } from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {makePointGrid, makeLineGrid, Point} from './data';
-import {Map, Source, Layer} from '@vis.gl/react-maplibre';
+import {Map, Source, Layer} from 'react-map-gl/maplibre';
 // Use dev build for source map and debugging
 import maplibregl from 'maplibre-gl/dist/maplibre-gl-dev';
 import {CPULineLayer} from './cpu-line-layer';

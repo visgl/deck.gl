@@ -3,7 +3,7 @@ GlobeView
 =========
 
 Over 33,000 power plants of the world plotted by their production capacity (given by height)
-and fuel type (green if renewable) on an experimental deck.gl GlobeView.
+and fuel type (green if renewable) on a deck.gl GlobeView.
 """
 
 import pydeck as pdk
@@ -27,7 +27,7 @@ df["color"] = df["primary_fuel"].apply(is_green)
 view_state = pdk.ViewState(latitude=51.47, longitude=0.45, zoom=2, min_zoom=2)
 
 # Set height and width variables
-view = pdk.View(type="_GlobeView", controller=True, width=1000, height=700)
+view = pdk.View(type="GlobeView", controller=True, width=1000, height=700)
 
 
 layers = [

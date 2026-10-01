@@ -217,10 +217,8 @@ test('AttributeManager.update - constant attribute webgpu', async ({skip}) => {
   });
 
   expect(updateCalled, 'legacy constant path skips updater').toBe(0);
-  expect(attribute.state.constant, 'webgpu constant is materialized as a buffer').toBeFalsy();
-  expect(attribute.value, 'constant value is expanded for each instance').toEqual([
-    0.5, 0.75, 0.125, 0.5, 0.75, 0.125
-  ]);
+  expect(attribute.state.constant, 'webgpu constant remains constant').toBeTruthy();
+  expect(attribute.value, 'constant value is retained once').toEqual([0.5, 0.75, 0.125]);
 
   attributeManager.invalidate('colors');
   attributeManager.update({
@@ -230,10 +228,8 @@ test('AttributeManager.update - constant attribute webgpu', async ({skip}) => {
   });
 
   expect(updateCalled, 'updater still runs for legacy constant updaters').toBe(1);
-  expect(attribute.state.constant, 'updater-backed constant also becomes a buffer').toBeFalsy();
-  expect(attribute.value, 'updater constant is expanded for each instance').toEqual([
-    0.25, 0.5, 0.75, 0.25, 0.5, 0.75
-  ]);
+  expect(attribute.state.constant, 'updater-backed constant remains constant').toBeTruthy();
+  expect(attribute.value, 'updater constant is retained once').toEqual([0.25, 0.5, 0.75]);
 });
 
 test('AttributeManager.update - external virtual buffers', () => {
