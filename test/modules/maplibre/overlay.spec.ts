@@ -11,6 +11,7 @@ import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
 import {test, expect} from 'vitest';
 
 import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
+import {getMapLibreViewState} from '../../../modules/maplibre/src/deck-utils';
 
 import type {Map as MapLibreMap} from 'maplibre-gl-v6';
 
@@ -117,6 +118,32 @@ test('MapLibreOverlay overlaid uses only public MapLibre APIs', () => {
 
   overlay.onRemove(map);
   expect(overlay._deck).toBeFalsy();
+});
+
+test('MapLibreOverlay targets the terrain elevation like the MapLibre camera', () => {
+  const TEST_CASES = [
+    {projection: 'mercator', zoom: 10, position: [0, 0, 125]},
+    // MapLibre's globe camera targets sea level, it transitions to Web Mercator from zoom 11 to 12
+    {projection: 'globe', zoom: 10, position: [0, 0, 0]},
+    {projection: 'globe', zoom: 11.5, position: [0, 0, 62.5]},
+    {projection: 'globe', zoom: 12, position: [0, 0, 125]},
+    {projection: 'globe', zoom: 13, position: [0, 0, 125]}
+  ];
+
+  for (const {projection, zoom, position} of TEST_CASES) {
+    const map = {
+      getCenter: () => ({lng: 13.47, lat: 48.57}),
+      getZoom: () => zoom,
+      getBearing: () => 0,
+      getPitch: () => 60,
+      getPadding: () => ({left: 0, right: 0, top: 0, bottom: 0}),
+      getRenderWorldCopies: () => true,
+      getCenterElevation: () => 125,
+      getProjection: () => ({type: projection})
+    } as unknown as Parameters<typeof getMapLibreViewState>[0];
+
+    expect(getMapLibreViewState(map).position, `${projection} at zoom ${zoom}`).toEqual(position);
+  }
 });
 
 for (const {version, MapClass} of MAPLIBRE_VERSIONS) {

@@ -5,7 +5,7 @@
 import {Deck, MapView, _GlobeView as GlobeView, _flatten as flatten} from '@deck.gl/core';
 
 import {
-  getMapLibreElevation,
+  getMapLibreCameraElevation,
   getMapLibreProjection,
   type MapLibreRenderParameters
 } from './compatibility';
@@ -103,8 +103,8 @@ export function getMapLibreViewState(map: MapLibreMap): MapViewState & {
     repeat: map.getRenderWorldCopies()
   };
 
-  const elevation = getMapLibreElevation(map);
-  if (typeof elevation === 'number' && Number.isFinite(elevation)) {
+  const elevation = getMapLibreCameraElevation(map, viewState.zoom);
+  if (elevation !== undefined) {
     viewState.position = [0, 0, elevation];
   }
 
@@ -310,9 +310,9 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
  * changes without a move event while terrain loads.
  */
 function syncMapLibreElevation(deck: Deck, map: MapLibreMap): void {
-  const elevation = getMapLibreElevation(map);
+  const elevation = getMapLibreCameraElevation(map, map.getZoom());
   const viewState = deck.props.viewState as MapViewState | null;
-  if (Number.isFinite(elevation) && viewState?.position?.[2] !== elevation) {
+  if (viewState?.position?.[2] !== elevation) {
     onMapLibreMove(deck, map);
   }
 }
