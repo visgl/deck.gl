@@ -4,7 +4,7 @@
 
 // eslint-disable-next-line
 /* global document, window, global */
-import {test, expect, describe} from 'vitest';
+import {test, expect, describe, vi} from 'vitest';
 
 import {
   AmbientLight,
@@ -21,7 +21,13 @@ import {
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {NullDevice} from '@luma.gl/test-utils';
-import {addCustomLibraries, jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
+import {device} from '@deck.gl/test-utils/vitest';
+import {
+  addCustomLibraries,
+  convertInitialJson,
+  createDeck,
+  jsonConverter
+} from '@deck.gl/jupyter-widget/playground/create-deck';
 
 class DemoCompositeLayer extends CompositeLayer {
   renderLayers() {
@@ -60,6 +66,74 @@ describe('jupyter-widget: dynamic-registration', () => {
       ],
       onComplete
     );
+  });
+
+  test('convertInitialJson defers layers with unloaded custom extensions', () => {
+    const jsonInput = {
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        {
+          '@@type': 'ScatterplotLayer',
+          id: 'points',
+          data: [],
+          extensions: [{'@@type': 'NotYetLoadedExtension'}]
+        },
+        {'@@type': 'ScatterplotLayer', id: 'other-points', data: []}
+      ]
+    };
+    const customLibraries = [{libraryName: 'notYetLoaded', resourceUri: '/index.js'}];
+
+    const props = convertInitialJson(jsonInput, customLibraries);
+    expect(props.layers[0], 'Layers are deferred until custom libraries load').toBe(null);
+    expect(props.layers[1], 'Other layers are rendered').toBeInstanceOf(ScatterplotLayer);
+    expect(props.initialViewState, 'Other props are converted').toEqual(jsonInput.initialViewState);
+
+    expect(
+      () => convertInitialJson({...jsonInput}, null),
+      'Errors are rethrown without custom libraries'
+    ).toThrow();
+  });
+
+  test('createDeck adds deferred layers once custom libraries load', async () => {
+    class DeferredTestExtension extends LayerExtension {}
+    window.DeferredTestExtension = DeferredTestExtension;
+    const script =
+      'window.deferredTestLibrary = {DeferredTestExtension: window.DeferredTestExtension};';
+    const resourceUri = URL.createObjectURL(new Blob([script], {type: 'text/javascript'}));
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const deck = createDeck({
+      container,
+      // The headless project runs every spec in one page, so render through the shared test device
+      configuration: {constants: {TEST_DEVICE: device}},
+      jsonInput: {
+        device: '@@#TEST_DEVICE',
+        initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+        // Without an id
+        layers: [
+          {
+            '@@type': 'ScatterplotLayer',
+            data: [],
+            extensions: [{'@@type': 'DeferredTestExtension'}]
+          }
+        ]
+      },
+      customLibraries: [{libraryName: 'deferredTestLibrary', resourceUri}]
+    });
+
+    try {
+      expect(deck.props.layers, 'Layer is deferred').toEqual([null]);
+      await vi.waitFor(() => expect(deck.props.layers[0]).toBeInstanceOf(ScatterplotLayer), {
+        timeout: 5000
+      });
+      expect(deck.props.layers[0].props.extensions[0]).toBeInstanceOf(DeferredTestExtension);
+    } finally {
+      deck.finalize();
+      container.remove();
+      URL.revokeObjectURL(resourceUri);
+      delete window.DeferredTestExtension;
+    }
   });
 });
 
