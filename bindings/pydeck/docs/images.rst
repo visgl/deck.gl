@@ -57,9 +57,6 @@
 .. image:: gallery/images/terrain_extension.png
    :width: 0
 
-.. image:: gallery/images/zoom_opacity_extension.png
-   :width: 0
-
 .. image:: gallery/images/geojson_layer.png
    :width: 0
 
@@ -248,8 +245,6 @@
    gallery/path_style_extension
 
    gallery/terrain_extension
-
-   gallery/zoom_opacity_extension
 
    gallery/geojson_layer
 
