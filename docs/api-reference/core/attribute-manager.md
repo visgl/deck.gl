@@ -116,6 +116,11 @@ Parameters:
 * `dataRange` (object, optional) - A partial range of the attributes to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attributes for all data.
 
 
+#### `isTransitioning` {#istransitioning}
+
+Returns `true` if any attribute transition is in progress.
+
+
 #### `update` {#update}
 
 Ensure all attribute buffers are updated from props or data.
