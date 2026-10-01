@@ -6,6 +6,7 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
@@ -29,9 +30,11 @@ const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function App({
+  device,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
   updateAttributions
 }: {
+  device?: Device;
   mapStyle?: string;
   updateAttributions?: (attributions: any) => void;
 }) {
@@ -62,7 +65,12 @@ export default function App({
   });
 
   return (
-    <DeckGL layers={[tile3DLayer]} initialViewState={initialViewState} controller={true}>
+    <DeckGL
+      device={device}
+      layers={[tile3DLayer]}
+      initialViewState={initialViewState}
+      controller={true}
+    >
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );

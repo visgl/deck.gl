@@ -6,6 +6,8 @@ import {test, expect} from 'vitest';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
 import {RequestScheduler} from '@loaders.gl/loader-utils';
 
+const getRequestPriority = tile => (tile.isSelected ? 1 : -1);
+
 test('Tile2DHeader', async () => {
   let onTileLoadCalled = false;
   let onTileErrorCalled = false;
@@ -14,6 +16,7 @@ test('Tile2DHeader', async () => {
   let tile2d = new Tile2DHeader({});
   await tile2d.loadData({
     requestScheduler,
+    getRequestPriority,
     getData: () => 'loaded data',
     onLoad: () => (onTileLoadCalled = true),
     onError: () => (onTileErrorCalled = true)
@@ -26,6 +29,7 @@ test('Tile2DHeader', async () => {
   tile2d = new Tile2DHeader({});
   await tile2d.loadData({
     requestScheduler,
+    getRequestPriority,
     getData: () => {
       throw new Error('getTileData error');
     },
@@ -44,6 +48,7 @@ test('Tile2DHeader#Cancel request if not selected', async () => {
   const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
   const opts = {
     requestScheduler,
+    getRequestPriority,
     getData: () => tileRequestCount++,
     onLoad: () => onTileLoadCalled++,
     onError: () => onTileErrorCalled++
@@ -66,6 +71,35 @@ test('Tile2DHeader#Cancel request if not selected', async () => {
   expect(onTileLoadCalled === 1 && onTileErrorCalled === 0, 'Callbacks invoked').toBeTruthy();
 });
 
+test('Tile2DHeader#request priority', async () => {
+  const requestOrder: string[] = [];
+  const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
+  const opts = {
+    requestScheduler,
+    getRequestPriority: tile => (tile.id === 'preferred' ? 0 : 10),
+    getData: ({id}) => {
+      requestOrder.push(id);
+      return id;
+    },
+    onLoad: () => {},
+    onError: () => {}
+  };
+
+  const edgeTile = new Tile2DHeader({});
+  edgeTile.id = 'edge';
+  edgeTile.isSelected = true;
+  const preferredTile = new Tile2DHeader({});
+  preferredTile.id = 'preferred';
+  preferredTile.isSelected = true;
+
+  const edgeLoader = edgeTile.loadData(opts);
+  const preferredLoader = preferredTile.loadData(opts);
+  await edgeLoader;
+  await preferredLoader;
+
+  expect(requestOrder, 'lower request priority values load first').toEqual(['preferred', 'edge']);
+});
+
 test('Tile2DHeader#abort', async () => {
   const requestScheduler = new RequestScheduler({throttleRequests: true, maxRequests: 1});
   let onTileLoadCalled = false;
@@ -73,6 +107,7 @@ test('Tile2DHeader#abort', async () => {
 
   const opts = {
     requestScheduler,
+    getRequestPriority,
     getData: () => null,
     onLoad: () => (onTileLoadCalled = true),
     onError: () => (onTileErrorCalled = true)
@@ -104,6 +139,7 @@ test('Tile2DHeader#reload', async () => {
   let onTileErrorCalled = 0;
   const opts = {
     requestScheduler,
+    getRequestPriority,
     onLoad: () => onTileLoadCalled++,
     onError: () => onTileErrorCalled++
   };

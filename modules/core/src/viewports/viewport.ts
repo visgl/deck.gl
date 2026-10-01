@@ -211,8 +211,8 @@ export default class Viewport {
     return PROJECTION_MODE.IDENTITY;
   }
 
-  // Two viewports are equal if width and height are identical, and if
-  // their view and projection matrices are (approximately) equal.
+  // Two viewports are equal if their dimensions, common-space scale, and
+  // view and projection matrices are (approximately) equal.
   equals(viewport: Viewport): boolean {
     if (!(viewport instanceof Viewport)) {
       return false;
@@ -225,10 +225,12 @@ export default class Viewport {
       viewport.width === this.width &&
       viewport.height === this.height &&
       viewport.scale === this.scale &&
+      viewport.projectionMode === this.projectionMode &&
+      viewport.resolution === this.resolution &&
+      equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
     );
-    // TODO - check distance scales?
   }
 
   /**

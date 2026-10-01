@@ -8,6 +8,7 @@ import {useState, useMemo, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {
   _GlobeView as GlobeView,
   LightingEffect,
@@ -69,7 +70,7 @@ type DailyFlights = {
   flights: Flight[];
 };
 
-export default function App({data}: {data?: DailyFlights[]}) {
+export default function App({device, data}: {device?: Device; data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
@@ -118,13 +119,15 @@ export default function App({data}: {data?: DailyFlights[]}) {
           getWidth: 1,
           timeRange,
           getSourceColor: [255, 0, 128],
-          getTargetColor: [0, 128, 255]
+          getTargetColor: [0, 128, 255],
+          parameters: {cullMode: 'none'}
         })
     );
 
   return (
     <>
       <DeckGL
+        device={device}
         views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
@@ -153,6 +156,10 @@ function getDate(data: DailyFlights[], t: number) {
 }
 
 export async function renderToDOM(container: HTMLDivElement) {
+  // See https://deck.gl/docs/developer-guide/tips-and-tricks#optimization-for-mobile
+  // for browser UI guards that keep mobile controller gestures focused on the canvas.
+  addCanvasInteractionGuards(container);
+
   const root = createRoot(container);
   root.render(<App />);
 
@@ -184,5 +191,24 @@ export async function renderToDOM(container: HTMLDivElement) {
     }
     data.push({flights, date});
     root.render(<App data={data} />);
+  }
+}
+
+function addCanvasInteractionGuards(container: HTMLDivElement): void {
+  const preventCanvasBrowserUI = (event: Event) => {
+    if (event.target instanceof HTMLCanvasElement) {
+      event.preventDefault();
+    }
+  };
+  const listenerOptions = {passive: false};
+
+  for (const type of [
+    'contextmenu',
+    'selectstart',
+    'gesturestart',
+    'gesturechange',
+    'gestureend'
+  ]) {
+    container.addEventListener(type, preventCanvasBrowserUI, listenerOptions);
   }
 }

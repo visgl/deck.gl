@@ -4,12 +4,14 @@
 
 import {clamp} from '@math.gl/core';
 import Controller from './controller';
+import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 
 import {MapState, MapStateProps} from './map-controller';
 import type {MapStateInternal} from './map-controller';
+import {CONSTRAINT_AROUND, type ConstraintAround} from './view-state';
 import {mod} from '../utils/math-utils';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
+import GlobeViewport, {zoomAdjust, GLOBE_RADIUS} from '../viewports/globe-viewport';
 import {
   Globe,
   type CameraFrame,
@@ -142,12 +144,6 @@ class GlobeState extends MapState {
     }) as GlobeState;
   }
 
-  zoom({scale}: {scale: number}): MapState {
-    const startZoom = this.getState().startZoom || this.getViewportProps().zoom;
-    const zoom = startZoom + Math.log2(scale);
-    return this._getUpdatedState({zoom});
-  }
-
   _panFromCenter(offset: [number, number]): GlobeState {
     const {width, height} = this.getViewportProps();
     const center: [number, number] = [width / 2, height / 2];
@@ -157,51 +153,95 @@ class GlobeState extends MapState {
   }
 
   applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
-    const {longitude, latitude, maxBounds} = props;
+    const internalProps = props as typeof props & ConstraintAround;
+    const constraintAround = internalProps[CONSTRAINT_AROUND];
+    delete internalProps[CONSTRAINT_AROUND];
+    const {latitude, maxBounds} = props;
 
     props.zoom = this._constrainZoom(props.zoom, props);
 
-    if (longitude < -180 || longitude > 180) {
-      props.longitude = mod(longitude + 180, 360) - 180;
+    if (constraintAround) {
+      const viewport = this.makeViewport(props);
+      Object.assign(
+        props,
+        viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
+      );
     }
-    props.latitude = clamp(latitude, -90, 90);
+
+    if (props.longitude < -180 || props.longitude > 180) {
+      props.longitude = mod(props.longitude + 180, 360) - 180;
+    }
+    props.latitude = clamp(props.latitude, -90, 90);
 
     if (props.bearing < -180 || props.bearing > 180) {
       props.bearing = mod(props.bearing + 180, 360) - 180;
     }
     props.pitch = clamp(props.pitch, props.minPitch, props.maxPitch);
 
-    if (maxBounds) {
-      props.longitude = clamp(props.longitude, maxBounds[0][0], maxBounds[1][0]);
-      props.latitude = clamp(props.latitude, maxBounds[0][1], maxBounds[1][1]);
+    const maxBoundsRect = maxBounds
+      ? getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding)
+      : null;
+    if (maxBounds && maxBoundsRect) {
+      // A negative target dimension is inverted and therefore has no legal interval.
+      if (maxBoundsRect.width >= 0) {
+        props.longitude = clamp(props.longitude, maxBounds[0][0], maxBounds[1][0]);
+      }
+      if (maxBoundsRect.height >= 0) {
+        props.latitude = clamp(props.latitude, maxBounds[0][1], maxBounds[1][1]);
+      }
     }
 
-    if (maxBounds) {
+    if (maxBounds && maxBoundsRect) {
+      const viewport = this.makeViewport({...props, bearing: 0, pitch: 0});
+      const screenExtents = getMaxBoundsExtents(
+        viewport,
+        [props.longitude, props.latitude],
+        maxBoundsRect
+      );
       const effectiveZoom = props.zoom - zoomAdjust(latitude);
       const lngSpan = maxBounds[1][0] - maxBounds[0][0];
       const latSpan = maxBounds[1][1] - maxBounds[0][1];
-      if (latSpan > 0 && latSpan < 180) {
-        const halfHeightDegrees =
-          Math.min(pixelsToDegrees(props.height, effectiveZoom), latSpan) / 2;
+      if (maxBoundsRect.height >= 0 && latSpan > 0 && latSpan < 180) {
+        const heightDegrees = Math.min(
+          pixelsToDegrees(maxBoundsRect.height, effectiveZoom),
+          latSpan
+        );
+        const bottomDegrees = maxBoundsRect.height
+          ? (heightDegrees * screenExtents.bottom) / maxBoundsRect.height
+          : pixelsToDegrees(screenExtents.bottom, effectiveZoom);
+        const topDegrees = maxBoundsRect.height
+          ? (heightDegrees * screenExtents.top) / maxBoundsRect.height
+          : pixelsToDegrees(screenExtents.top, effectiveZoom);
         props.latitude = clamp(
           props.latitude,
-          maxBounds[0][1] + halfHeightDegrees,
-          maxBounds[1][1] - halfHeightDegrees
+          maxBounds[0][1] + bottomDegrees,
+          maxBounds[1][1] - topDegrees
         );
       }
-      if (lngSpan > 0 && lngSpan < 360) {
-        const halfWidthDegrees =
-          Math.min(
-            pixelsToDegrees(
-              props.width / Math.cos(props.latitude * DEGREES_TO_RADIANS),
+      if (maxBoundsRect.width >= 0 && lngSpan > 0 && lngSpan < 360) {
+        const widthDegrees = Math.min(
+          pixelsToDegrees(
+            maxBoundsRect.width / Math.cos(props.latitude * DEGREES_TO_RADIANS),
+            effectiveZoom
+          ),
+          lngSpan
+        );
+        const leftDegrees = maxBoundsRect.width
+          ? (widthDegrees * screenExtents.left) / maxBoundsRect.width
+          : pixelsToDegrees(
+              screenExtents.left / Math.cos(props.latitude * DEGREES_TO_RADIANS),
               effectiveZoom
-            ),
-            lngSpan
-          ) / 2;
+            );
+        const rightDegrees = maxBoundsRect.width
+          ? (widthDegrees * screenExtents.right) / maxBoundsRect.width
+          : pixelsToDegrees(
+              screenExtents.right / Math.cos(props.latitude * DEGREES_TO_RADIANS),
+              effectiveZoom
+            );
         props.longitude = clamp(
           props.longitude,
-          maxBounds[0][0] + halfWidthDegrees,
-          maxBounds[1][0] - halfWidthDegrees
+          maxBounds[0][0] + leftDegrees,
+          maxBounds[1][0] - rightDegrees
         );
       }
     }
@@ -219,6 +259,7 @@ class GlobeState extends MapState {
 
     const shouldApplyMaxBounds = maxBounds !== null && props.width > 0 && props.height > 0;
     if (shouldApplyMaxBounds) {
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
       const minLatitude = maxBounds[0][1];
       const maxLatitude = maxBounds[1][1];
       const fitLatitude =
@@ -230,11 +271,11 @@ class GlobeState extends MapState {
         degreesToPixels(maxBounds[1][0] - maxBounds[0][0]) *
         Math.cos(fitLatitude * DEGREES_TO_RADIANS);
       const h = degreesToPixels(maxBounds[1][1] - maxBounds[0][1]);
-      if (w > 0) {
-        minZoom = Math.max(minZoom, Math.log2(props.width / w) + ZOOM0);
+      if (maxBoundsRect.width > 0 && w > 0) {
+        minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.width / w) + ZOOM0);
       }
-      if (h > 0) {
-        minZoom = Math.max(minZoom, Math.log2(props.height / h) + ZOOM0);
+      if (maxBoundsRect.height > 0 && h > 0) {
+        minZoom = Math.max(minZoom, Math.log2(maxBoundsRect.height / h) + ZOOM0);
       }
       if (minZoom > maxZoom) minZoom = maxZoom;
     }
@@ -259,12 +300,28 @@ export default class GlobeController extends Controller<MapState> {
 
   dragMode: 'pan' | 'rotate' = 'pan';
 
+  protected getZoomPosition(position: [number, number]): [number, number] {
+    const zoomPosition = super.getZoomPosition(position);
+    const viewport = this.makeViewport(this.controllerState.getViewportProps()) as GlobeViewport;
+
+    if (viewport.getZoomAnchorStrength(zoomPosition) > 0) {
+      return zoomPosition;
+    }
+
+    return viewport.project([viewport.longitude, viewport.latitude]) as [number, number];
+  }
+
   // Ring buffer tracking globe position during pan for inertia velocity
   private _panHistory: Array<{longitude: number; latitude: number; timestamp: number}> = [];
 
   protected _onPanStart(event: MjolnirGestureEvent): boolean {
     this._panHistory = [];
     return super._onPanStart(event);
+  }
+
+  protected _onMultiPanStart(event: MjolnirGestureEvent): boolean {
+    this._panHistory = [];
+    return super._onMultiPanStart(event);
   }
 
   protected _onPanMove(event: MjolnirGestureEvent): boolean {

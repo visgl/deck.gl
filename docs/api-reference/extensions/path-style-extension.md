@@ -78,7 +78,7 @@ When added to a layer via the `extensions` prop, the `PathStyleExtension` adds t
 
 Must be specified if the `dash` option is enabled.
 
-The dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
+The dash array to draw each path with: `[dashSize, gapSize]` relative to *half* the width of the path. A `getDashArray` of `[4, 5]` on a path 10 pixels wide therefore draws 20 pixel dashes separated by 25 pixel gaps.
 
 * If an array is provided, it is used as the dash array for all paths.
 * If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.

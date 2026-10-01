@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class ScreenGridDemo extends Component {
   static title = 'Uber Pickup Locations In NewYork City';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/screen-grid`;
 
   static data = {
@@ -95,6 +97,8 @@ class ScreenGridDemo extends Component {
     return (
       <App
         {...this.props}
+        key={this.props.device?.type}
+        device={this.props.device}
         data={this.state.dataSample || data}
         cellSize={cellSize}
         gpuAggregation={gpuAggregation}

@@ -10,7 +10,7 @@ import createDeckRenderer from './deck-renderer';
 import Accessor from '@arcgis/core/core/Accessor';
 import Layer from '@arcgis/core/layers/Layer';
 import BaseLayerViewGL2D from '@arcgis/core/views/2d/layers/BaseLayerViewGL2D';
-import * as externalRenderers from '@arcgis/core/views/3d/externalRenderers';
+import RenderNode from '@arcgis/core/views/3d/webgl/RenderNode';
 
 // require-style loader
 export {loadArcGISModules} from './load-modules';
@@ -19,4 +19,4 @@ export {loadArcGISModules} from './load-modules';
 const DeckProps = createDeckProps(Accessor);
 const DeckLayerView2D = createDeckLayerView2D(BaseLayerViewGL2D);
 export const DeckLayer = createDeckLayer(DeckProps, Layer, DeckLayerView2D);
-export const DeckRenderer = createDeckRenderer(DeckProps, externalRenderers);
+export const DeckRenderer = createDeckRenderer(DeckProps, RenderNode);

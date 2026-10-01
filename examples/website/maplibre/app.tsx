@@ -7,7 +7,7 @@ import {useState, useCallback, useEffect} from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {Map, useControl, useMap} from 'react-map-gl/maplibre';
 import type {ViewState} from 'react-map-gl/maplibre';
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 
 import {createRoot} from 'react-dom/client';
 import {load} from '@loaders.gl/core';

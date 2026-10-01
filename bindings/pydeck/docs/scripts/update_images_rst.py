@@ -2,8 +2,8 @@
 
 import os
 
-from templates import LOCAL_DOCS_PATH, IMAGES_RST_TEMPLATE
-from const import EXAMPLE_NAMES
+from templates import IMAGES_RST_TEMPLATE
+from const import EXAMPLE_NAMES, LOCAL_DOCS_PATH
 
 
 def main():

@@ -166,6 +166,15 @@ type _GeoJsonLayerStrokeProps<FeaturePropertiesT> = {
   lineCapRounded?: boolean;
 
   /**
+   * If `true`, lines are rendered with smoothed edges. If `false`, lines are rendered with rough
+   * edges. Antialiasing can cause artifacts where a line overlaps itself. Only the edges along the
+   * width of the line are smoothed - flat caps at the two ends are not.
+   *
+   * @default false
+   */
+  lineAntialiasing?: boolean;
+
+  /**
    * If `true`, extrude the line in screen space (width always faces the camera).
    * If `false`, the width always faces up.
    *
@@ -444,7 +453,7 @@ export default class GeoJsonLayer<
       this.getSubLayerClass(id, POLYGON_LAYER.type);
 
     if (PolygonFillLayer) {
-      const forwardedProps = forwardProps(this, POLYGON_LAYER.props);
+      const forwardedProps = forwardProps(this, POLYGON_LAYER.props, 'getPolygon');
       // Avoid building the lineColors attribute if wireframe is off
       const useLineColor = extruded && wireframe;
       if (!useLineColor) {
@@ -481,7 +490,7 @@ export default class GeoJsonLayer<
       this.getSubLayerClass(lineStringsLayerId, LINE_LAYER.type);
 
     if (PolygonStrokeLayer || LineStringsLayer) {
-      const forwardedProps = forwardProps(this, LINE_LAYER.props);
+      const forwardedProps = forwardProps(this, LINE_LAYER.props, 'getPath');
 
       return [
         PolygonStrokeLayer &&

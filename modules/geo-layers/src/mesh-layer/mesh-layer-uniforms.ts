@@ -10,6 +10,14 @@ layout(std140) uniform meshUniforms {
 } mesh;
 `;
 
+const source = /* wgsl */ `\
+struct MeshUniforms {
+  pickFeatureIds: f32,
+};
+
+@group(0) @binding(auto) var<uniform> mesh: MeshUniforms;
+`;
+
 export type MeshProps = {
   pickFeatureIds: boolean;
 };
@@ -18,6 +26,7 @@ export const meshUniforms = {
   name: 'mesh',
   vs: uniformBlock,
   fs: uniformBlock,
+  source,
   uniformTypes: {
     pickFeatureIds: 'f32'
   }

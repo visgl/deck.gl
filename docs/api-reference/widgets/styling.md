@@ -1,3 +1,7 @@
+---
+description: "Styling deck.gl widgets with CSS variables, themes and custom class names."
+---
+
 import {WidgetThemes} from '@site/src/doc-demos/widgets';
 
 # Styling Widgets
@@ -117,8 +121,9 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | Name | Type | Default |
 | ---- | ---- | ------- |
 | `--button-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `28px` |
-| `--button-border-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `8px` |
+| `--button-corner-radius` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `8px` |
 | `--widget-margin` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `12px` |
+| `--icon-size` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `75%` |
 
 ### Color
 
@@ -131,7 +136,7 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | `--button-backdrop-filter` | [Backdrop Filter](https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter) | `unset` |
 | `--button-icon-idle` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(97, 97, 102, 1)` |
 | `--button-icon-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
-| `--button-text-color` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(24, 24, 26, 1)` |
+| `--button-text` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgb(24, 24, 26)` |
 
 ### Menu
 
@@ -144,6 +149,13 @@ Additionally, refer to each widget's API reference for variables specific to tha
 | `--menu-shadow` | [Box Shadow](https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow) | `0px 0px 8px 0px rgba(0, 0, 0, 0.25)` |
 | `--menu-text` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgb(24, 24, 26)` |
 | `--menu-item-hover` | [Color](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `rgba(0, 0, 0, 0.08)` |
+
+### Tooltip
+
+| Name | Type | Default |
+| ---- | ---- | ------- |
+| `--tooltip-max-width` | [Dimension](https://developer.mozilla.org/en-US/docs/Web/CSS/dimension) | `240px` |
+| `--tooltip-z-index` | Number | `1000` |
 
 ### Range input
 

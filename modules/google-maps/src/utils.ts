@@ -49,6 +49,17 @@ export function createDeckInstance(
     // The basemap owns the shared canvas in interleaved mode; Deck only forwards the preferred DPR.
     // In non-interleaved mode this still feeds the luma canvas context that Deck creates.
     useDevicePixels: props.useDevicePixels ?? true,
+    ...(!props.gl && {
+      deviceProps: {
+        ...props.deviceProps,
+        createCanvasContext: {
+          ...(typeof props.deviceProps?.createCanvasContext === 'object'
+            ? props.deviceProps.createCanvasContext
+            : undefined),
+          pixelSizeSource: 'css-dpr'
+        }
+      }
+    }),
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     views: new MapView({repeat: true}),

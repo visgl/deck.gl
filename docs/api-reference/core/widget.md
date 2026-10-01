@@ -41,10 +41,13 @@ Additional CSS classnames on the top HTML element.
 
 #### `_container` (string | HTMLDivElement, optional) {#_container}
 
-Experimental. The container that this widget is being attached to. Default to `viewId`.
-- If set to `'root'`, the widget is placed relative to the whole deck.gl canvas.
+Experimental. Selects the DOM container used for this widget. Defaults to `viewId`.
+
+- If set to `'root'`, the widget is placed relative to the shared widget root.
 - If set to a valid view id, the widget is placed relative to that view.
-- If set to a HTMLElement, `placement` is ignored and the widget is appended into the given element.
+- If set to an HTMLElement, `placement` is ignored and the widget is appended into the given element.
+
+Deck-managed containers remain under one shared widget root. In multi-canvas mode, a view-specific container is positioned using the bounds of the presentation canvas assigned to that view; the widget is not appended to the canvas element.
 
 
 ### Additional `WidgetProps` on UI Widgets
@@ -53,19 +56,15 @@ Experimental. The container that this widget is being attached to. Default to `v
 
 * Default: `null`
 
-The `viewId` prop controls how a widget interacts with views. If `viewId` is defined, the widget is placed in that view and interacts exclusively with it; otherwise, it is placed in the root widget container and affects all views.
+The `viewId` prop controls both positioning and event scope. If defined, the widget is positioned relative to the matching view and only responds to events inside that view. If `null`, the widget is positioned in the shared root widget container and receives events from all views.
 
-When a widget instance is added to Deck, the user can optionally specify a `viewId` that it is attached to (default `null`). If assigned, this widget will only respond to events occurred inside the specific view that matches this id.
-
-The id of the view that the widget is attached to. If `null`, the widget receives events from all views. Otherwise, it only receives events from the view that matches this id.
+In multi-canvas mode, the matching view's `canvasId` determines which presentation-canvas bounds are used to position the widget. The widget DOM remains under the shared widget root rather than being reparented into that canvas.
 
 #### `placement` (string, optional) {#placement}
 
 * Default: `'top-left'`
 
-Widget position within the view relative to the map container.
-
-Widget positioning within the view. One of:
+Widget positioning within the selected view, or within the shared widget root when `viewId` is `null`. One of:
 
 - `'top-left'`
 - `'top-right'`

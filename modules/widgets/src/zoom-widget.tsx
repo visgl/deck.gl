@@ -19,8 +19,16 @@ export type ZoomWidgetProps = WidgetProps & {
   zoomInLabel?: string;
   /** Tooltip message on zoom out button. */
   zoomOutLabel?: string;
+  /** Custom tooltip content for zoom in button. Overrides zoomInLabel for tooltip display. */
+  zoomInTooltip?: string | HTMLElement | false;
+  /** Custom tooltip content for zoom out button. Overrides zoomOutLabel for tooltip display. */
+  zoomOutTooltip?: string | HTMLElement | false;
   /** Zoom transition duration in ms. 0 disables the transition */
   transitionDuration?: number;
+  /** Zoom level delta applied by each button click.
+   * @default 1
+   */
+  zoomStep?: number;
   /**  Which axes to apply zoom to. One of 'X', 'Y' or 'all'.
    * Only effective if the current view is OrthographicView.
    */
@@ -50,8 +58,11 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
     placement: 'top-left',
     orientation: 'vertical',
     transitionDuration: 200,
+    zoomStep: 1,
     zoomInLabel: 'Zoom In',
     zoomOutLabel: 'Zoom Out',
+    zoomInTooltip: undefined!,
+    zoomOutTooltip: undefined!,
     zoomAxis: 'all',
     viewId: null,
     onZoom: () => {}
@@ -77,11 +88,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
         <IconButton
           onClick={() => this.handleZoomIn()}
           label={this.props.zoomInLabel}
+          tooltip={this.props.zoomInTooltip}
           className="deck-widget-zoom-in"
         />
         <IconButton
           onClick={() => this.handleZoomOut()}
           label={this.props.zoomOutLabel}
+          tooltip={this.props.zoomOutTooltip}
           className="deck-widget-zoom-out"
         />
       </ButtonGroup>
@@ -164,13 +177,13 @@ export class ZoomWidget extends Widget<ZoomWidgetProps> {
 
   handleZoomIn() {
     for (const viewId of this.viewIds) {
-      this.handleZoom(viewId, 1);
+      this.handleZoom(viewId, this.props.zoomStep);
     }
   }
 
   handleZoomOut() {
     for (const viewId of this.viewIds) {
-      this.handleZoom(viewId, -1);
+      this.handleZoom(viewId, -this.props.zoomStep);
     }
   }
 }

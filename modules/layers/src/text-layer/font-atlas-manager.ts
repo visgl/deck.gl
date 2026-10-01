@@ -338,6 +338,7 @@ export default class FontAtlasManager {
     if (renderer) {
       for (const char of characterSet) {
         const frame = mapping[char];
+        const measuredWidth = frame.width;
         const {data, left = 0, top = 0} = renderer.draw(char);
         const x = frame.x - left;
         const y = frame.y - top;
@@ -348,8 +349,14 @@ export default class FontAtlasManager {
         const h = Math.min(data.height, canvas.height - y0);
         ctx.putImageData(data, x0, y0, 0, 0, w, h);
 
-        frame.x += x0 - x;
-        frame.y += y0 - y;
+        // The rendered image may extend beyond the measured glyph bounds, e.g. an SDF halo.
+        // Use the entire copied image as the icon frame while preserving its layout position.
+        frame.x = x0;
+        frame.y = y0;
+        frame.width = w;
+        frame.height = h;
+        frame.anchorX += w / 2 - left - measuredWidth / 2;
+        frame.anchorY += top;
       }
     } else {
       for (const char of characterSet) {

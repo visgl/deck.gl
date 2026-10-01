@@ -72,6 +72,16 @@
           "developer-guide/custom-layers/attribute-management",
           "developer-guide/custom-layers/writing-shaders"
         ]
+      },
+      {
+        "type": "category",
+        "label": "Writing Custom Widgets",
+        "items": [
+          "developer-guide/custom-widgets/README",
+          "developer-guide/custom-widgets/universal-widgets",
+          "developer-guide/custom-widgets/preact-widgets",
+          "developer-guide/custom-widgets/react-widgets"
+        ]
       }
     ]
   },
@@ -296,6 +306,13 @@
       },
       {
         "type": "category",
+        "label": "@deck.gl/maplibre",
+        "items": [
+          "api-reference/maplibre/overview"
+        ]
+      },
+      {
+        "type": "category",
         "label": "@deck.gl/react",
         "items": [
           "api-reference/react/overview",
@@ -319,6 +336,7 @@
         "items": [
           "api-reference/widgets/overview",
           "api-reference/widgets/styling",
+          "api-reference/widgets/tooltips",
           "api-reference/widgets/compass-widget",
           "api-reference/widgets/context-menu-widget",
           "api-reference/widgets/fullscreen-widget",
