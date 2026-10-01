@@ -153,20 +153,190 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute upload',
 
   test('WebGPU uint16 size 1 and size 3 are padded on upload', async () => {
     const cases = [
-      {size: 1, paddedSize: 2, values: [1, 2, 3], padValues: [0, 0]},
-      {size: 3, paddedSize: 4, values: [1, 2, 3, 4, 5, 6], padValues: [0, 0, 0, 1]}
+      // Size 1 keeps its format; only the stride is padded to 4 bytes
+      {size: 1, paddedSize: 2, format: 'uint16', values: [1, 2, 3], padValues: [0, 0]},
+      {
+        size: 3,
+        paddedSize: 4,
+        format: 'uint16x4',
+        values: [1, 2, 3, 4, 5, 6],
+        padValues: [0, 0, 0, 1]
+      }
     ];
-    for (const {size, paddedSize, values, padValues} of cases) {
+    for (const {size, paddedSize, format, values, padValues} of cases) {
       const attribute = new Attribute(device, {id: `uint16x${size}`, size, accessor: 'getValue'});
       const error = await getValidationError(device, () =>
         attribute.setExternalBuffer(new Uint16Array(values))
       );
       expect(error, `no WebGPU error for uint16x${size}`).toBeNull();
 
+      const layout = attribute.getBufferLayout();
+      expect(layout.attributes![0].format).toBe(format);
+      expect(layout.byteStride).toBe(paddedSize * 2);
       const expected = padReference(values, size, paddedSize, padValues);
       expect(await readAttribute(attribute, Uint16Array, expected.length)).toEqual(expected);
       attribute.delete();
     }
+  });
+
+  test('WebGPU alpha is padded like WebGL, ignoring the default value', async () => {
+    const attribute = new Attribute(device, {
+      id: 'colors',
+      size: 3,
+      type: 'unorm8',
+      accessor: 'getColor',
+      defaultValue: [0, 0, 0, 0]
+    });
+    attribute.setExternalBuffer(new Uint8Array([1, 2, 3]));
+
+    // WebGL reads a missing fourth component as 1.0
+    expect(await readAttribute(attribute, Uint8Array, 4)).toEqual([1, 2, 3, 255]);
+    attribute.delete();
+  });
+
+  test('WebGPU float32 external Buffer on an unorm8 attribute is not padded', () => {
+    const attribute = createColorAttribute(3);
+    const buffer = device.createBuffer({byteLength: 36, usage: Buffer.VERTEX | Buffer.COPY_DST});
+
+    // e.g. normalized float colors interleaved with positions, see the performance guide
+    attribute.setExternalBuffer({buffer, type: 'float32', size: 3, stride: 12});
+    expect(attribute.needsWebGPUPadding()).toBe(false);
+    const layout = attribute.getBufferLayout();
+    expect(layout.byteStride).toBe(12);
+    expect(layout.attributes![0].format).toBe('float32x3');
+    buffer.destroy();
+    attribute.delete();
+  });
+
+  test('WebGPU padded attributes respect vertexOffset', async () => {
+    const attributeManager = new AttributeManager(device);
+    // Same shape as DataFilterExtension's filterVertexIndices
+    attributeManager.add({
+      indices: {
+        size: 2,
+        type: 'unorm8',
+        vertexOffset: 1,
+        accessor: 'getIndex',
+        shaderAttributes: {previousIndices: {vertexOffset: 0}}
+      }
+    });
+    const data = [{index: [1, 2]}, {index: [3, 4]}];
+    const error = await getValidationError(device, () =>
+      attributeManager.update({
+        data,
+        numInstances: 2,
+        props: {getIndex: (d: {index: number[]}) => d.index}
+      } as any)
+    );
+    expect(error, 'no WebGPU error during update').toBeNull();
+
+    const attribute = attributeManager.getAttributes().indices;
+    expect(attribute.byteOffset, 'one padded row').toBe(4);
+    expect(attribute.getBufferLayout().byteStride).toBe(4);
+    expect(await readAttribute(attribute, Uint8Array, 12)).toEqual([
+      0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 0, 0
+    ]);
+    attributeManager.finalize();
+  });
+
+  test('WebGPU padded attributes keep old rows when the buffer grows', async () => {
+    const attributeManager = new AttributeManager(device);
+    attributeManager.add({
+      colors: {size: 3, type: 'unorm8', accessor: 'getColor', defaultValue: DEFAULT_COLOR}
+    });
+    const props = {getColor: (d: {color: number[]}) => d.color};
+    const data = [{color: [1, 2, 3]}, {color: [4, 5, 6]}];
+    attributeManager.update({data, numInstances: 2, props} as any);
+
+    // A partial update allocates with copy: true, re-uploading the existing rows padded
+    data.push({color: [7, 8, 9]}, {color: [10, 11, 12]}, {color: [13, 14, 15]});
+    attributeManager.invalidate('getColor', {startRow: 2, endRow: 5});
+    const error = await getValidationError(device, () =>
+      attributeManager.update({data, numInstances: 5, props} as any)
+    );
+    expect(error, 'no WebGPU error during growth').toBeNull();
+
+    const attribute = attributeManager.getAttributes().colors;
+    expect(await readAttribute(attribute, Uint8Array, 20)).toEqual(
+      padReference(
+        data.flatMap(d => d.color),
+        3,
+        4,
+        DEFAULT_COLOR
+      )
+    );
+    attributeManager.finalize();
+  });
+
+  test('WebGPU updater arrays of another type replace the padded layout', async () => {
+    const values = new Float32Array([0.25, 0.5, 0.75, 1, 0.5, 0]);
+    const attributeManager = new AttributeManager(device);
+    attributeManager.add({
+      colors: {
+        size: 3,
+        type: 'unorm8',
+        update: attribute => {
+          attribute.value = values;
+        }
+      }
+    });
+    for (let i = 0; i < 2; i++) {
+      attributeManager.invalidate('colors');
+      const error = await getValidationError(device, () =>
+        attributeManager.update({data: [{}, {}], numInstances: 2, props: {}} as any)
+      );
+      expect(error, `no WebGPU error during update ${i}`).toBeNull();
+    }
+
+    const attribute = attributeManager.getAttributes().colors;
+    expect(attribute.getBufferLayout().attributes![0].format).toBe('float32x3');
+    const bytes = await attribute.getBuffer()!.readAsync(0, values.byteLength);
+    expect(new Float32Array(bytes.buffer, bytes.byteOffset, values.length)).toEqual(values);
+    attributeManager.finalize();
+  });
+
+  test('WebGPU buffer groups interleave padded RGB colors', async () => {
+    const attributeManager = new AttributeManager(device);
+    attributeManager.addInstanced({
+      widths: {size: 1, accessor: 'getWidth', bufferGroup: 'instance-data'},
+      colors: {
+        size: 3,
+        type: 'unorm8',
+        accessor: 'getColor',
+        defaultValue: DEFAULT_COLOR,
+        bufferGroup: 'instance-data'
+      }
+    });
+    const data = [
+      {width: 1, color: [1, 2, 3]},
+      {width: 2, color: [4, 5, 6]}
+    ];
+    attributeManager.update({
+      data,
+      numInstances: 2,
+      props: {
+        getWidth: (d: {width: number}) => d.width,
+        getColor: (d: {color: number[]}) => d.color
+      }
+    } as any);
+
+    const attributes = attributeManager.getAttributes();
+    const bindings = attributeManager.getBufferGroupBindings(attributes, {isInstanced: true});
+    expect(bindings.bufferLayouts.map(layout => layout.name)).toEqual(['instance-data']);
+    const [layout] = bindings.bufferLayouts;
+    expect(layout.byteStride).toBe(8);
+    expect(layout.attributes).toEqual([
+      {attribute: 'widths', format: 'float32', byteOffset: 0},
+      {attribute: 'colors', format: 'unorm8x4', byteOffset: 4}
+    ]);
+
+    const bytes = await bindings.buffers['instance-data'].readAsync(0, 16);
+    const dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    expect(dataView.getFloat32(0, true)).toBe(1);
+    expect(Array.from(bytes.slice(4, 8))).toEqual([1, 2, 3, 255]);
+    expect(dataView.getFloat32(8, true)).toBe(2);
+    expect(Array.from(bytes.slice(12, 16))).toEqual([4, 5, 6, 255]);
+    attributeManager.finalize();
   });
 
   test('WebGPU unaligned external Buffer throws a descriptive error', () => {
@@ -174,7 +344,7 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute upload',
     const buffer = device.createBuffer({byteLength: 12, usage: Buffer.VERTEX | Buffer.COPY_DST});
 
     expect(() => attribute.setExternalBuffer(buffer)).toThrow(
-      /unorm8x3 .*not a valid WebGPU vertex format/
+      /unorm8x3 with stride 3 and offset 0 is not a valid WebGPU vertex layout/
     );
     buffer.destroy();
     attribute.delete();

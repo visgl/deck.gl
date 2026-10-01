@@ -10,7 +10,8 @@ import {
   typedArrayFromDataType,
   getBufferAttributeLayout,
   getStride,
-  getWebGPUVertexSize,
+  getDataTypeByteLength,
+  getWebGPUPaddedAccessor,
   padVertexValues,
   dataTypeFromTypedArray
 } from './gl-utils';
@@ -428,12 +429,13 @@ export default class DataColumn<Options, State> {
       state.constant = true;
       this.value = ArrayBuffer.isView(value) ? value : new Float32Array(value);
     } else if (opts.buffer) {
-      const uploadAccessor = this.getUploadAccessor(accessor);
-      if (uploadAccessor !== accessor) {
+      if (this.needsWebGPUPadding(accessor)) {
+        // deck.gl cannot repack an external Buffer on the CPU
+        const {size, stride} = this.getUploadAccessor(accessor);
         throw new Error(
-          `Attribute ${this.id}: ${accessor.type}x${accessor.size} (stride ${getStride(accessor)}) ` +
-            'is not a valid WebGPU vertex format; ' +
-            `supply a ${accessor.type}x${uploadAccessor.size} buffer or a typed array.`
+          `Attribute ${this.id}: ${accessor.type}x${accessor.size} with stride ` +
+            `${getStride(accessor)} and offset ${accessor.offset || 0} is not a valid WebGPU ` +
+            `vertex layout; supply a typed array, or ${size} components with stride ${stride}.`
         );
       }
       const buffer = opts.buffer;
@@ -488,14 +490,19 @@ export default class DataColumn<Options, State> {
 
     const value = this.value as TypedArray;
     const {startOffset = 0, endOffset} = opts;
-    const uploadAccessor = this.getUploadAccessor(this.settings);
-    if (uploadAccessor !== this.settings) {
+    const accessor = this.getAccessor();
+    if (this.needsWebGPUPadding(accessor)) {
       // Padded upload: write whole vertices at their padded position
       const {size} = this;
       const startVertex = Math.floor(startOffset / size);
       const endVertex = Math.ceil((endOffset ?? value.length) / size);
+      const uploadAccessor = this.getUploadAccessor(accessor);
       this.buffer.write(
-        this._getUploadValue(value.subarray(startVertex * size, endVertex * size), this.settings),
+        padVertexValues(
+          value.subarray(startVertex * size, endVertex * size),
+          accessor,
+          uploadAccessor
+        ),
         startVertex * getStride(uploadAccessor) + this.byteOffset
       );
       return;
@@ -563,38 +570,45 @@ export default class DataColumn<Options, State> {
 
   /**
    * @internal
-   * Returns the accessor of the data as uploaded to the GPU.
-   * On WebGPU, 8/16-bit vertex attributes with a size of 3 or an unaligned stride or offset
-   * are repacked into a dense, padded layout (e.g. `unorm8x3` -> `unorm8x4`).
-   * Otherwise `accessor` itself is returned.
+   * Whether data described by `accessor` must be repacked before upload.
+   * WebGPU has no 8/16-bit x3 vertex formats, and requires vertex strides to be a multiple of
+   * 4 bytes and attribute offsets to be a multiple of min(4, format byte size).
+   */
+  needsWebGPUPadding(accessor: DataColumnSettings<Options> = this.getAccessor()): boolean {
+    if (this.device.type !== 'webgpu' || this.settings.isIndexed) {
+      return false;
+    }
+    const {size} = accessor;
+    // `bytesPerElement` describes the CPU array, an external Buffer may declare another `type`
+    const bytesPerElement = getDataTypeByteLength(accessor.type);
+    if (bytesPerElement >= 4 || size > 4) {
+      return false;
+    }
+    return (
+      size === 3 ||
+      getStride(accessor) % 4 !== 0 ||
+      (accessor.offset || 0) % Math.min(size * bytesPerElement, 4) !== 0
+    );
+  }
+
+  /**
+   * @internal
+   * Returns the accessor of the data as uploaded to the GPU: on WebGPU, a dense, padded layout
+   * when `needsWebGPUPadding(accessor)` (e.g. `unorm8x3` becomes `unorm8x4`), otherwise `accessor`.
    */
   getUploadAccessor(
     accessor: DataColumnSettings<Options> = this.getAccessor()
   ): DataColumnSettings<Options> {
-    const {size, bytesPerElement} = accessor;
-    if (this.device.type !== 'webgpu' || this.settings.isIndexed || bytesPerElement >= 4) {
-      return accessor;
-    }
-    // WebGPU has no 8/16-bit x3 formats and requires 4-byte aligned strides
-    const isValid =
-      size !== 3 &&
-      getStride(accessor) % 4 === 0 &&
-      (accessor.offset || 0) % Math.min(size * bytesPerElement, 4) === 0;
-    if (isValid || size > 4) {
-      return accessor;
-    }
-    const paddedSize = getWebGPUVertexSize(size, bytesPerElement);
-    return {...accessor, size: paddedSize, stride: paddedSize * bytesPerElement, offset: 0};
+    return this.needsWebGPUPadding(accessor) ? getWebGPUPaddedAccessor(accessor) : accessor;
   }
 
   // PRIVATE HELPER METHODS
 
   /** Returns `value`, described by `accessor`, as uploaded to the GPU */
   protected _getUploadValue(value: TypedArray, accessor: DataColumnSettings<Options>): TypedArray {
-    const uploadAccessor = this.getUploadAccessor(accessor);
-    return uploadAccessor === accessor
-      ? value
-      : padVertexValues(value, accessor, uploadAccessor.size);
+    return this.needsWebGPUPadding(accessor)
+      ? padVertexValues(value, accessor, this.getUploadAccessor(accessor))
+      : value;
   }
 
   /** Returns the byte length of the densely packed `value` once uploaded to the GPU */
@@ -602,10 +616,9 @@ export default class DataColumn<Options, State> {
     value: TypedArray,
     accessor: DataColumnSettings<Options> = this.getAccessor()
   ): number {
-    const uploadAccessor = this.getUploadAccessor(accessor);
-    return uploadAccessor === accessor
-      ? value.byteLength
-      : Math.ceil(value.length / accessor.size) * getStride(uploadAccessor);
+    return this.needsWebGPUPadding(accessor)
+      ? Math.ceil(value.length / accessor.size) * getStride(this.getUploadAccessor(accessor))
+      : value.byteLength;
   }
 
   private _shouldSplitDoublePrecisionValue(

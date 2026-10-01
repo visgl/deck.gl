@@ -22,6 +22,11 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
 
 export const dataTypeFromTypedArray = dataTypeDecoder.getDataType.bind(dataTypeDecoder);
 
+/** Returns the byte length of one element of `type` in a vertex buffer */
+export function getDataTypeByteLength(type: DataType): number {
+  return dataTypeDecoder.getDataTypeInfo(type).byteLength;
+}
+
 export function getBufferAttributeLayout(
   name: string,
   accessor: BufferAccessor,
@@ -53,26 +58,26 @@ export function getBufferAttributeLayout(
 }
 
 /**
- * Returns the number of components to upload per vertex on WebGPU.
- * WebGPU requires vertex strides to be a multiple of 4 bytes and has no 8/16-bit x3 formats,
- * so 8-bit attributes are widened to 4 components and 16-bit x1/x3 to 2/4 components.
+ * Returns the vertex layout of `accessor` as uploaded to a WebGPU buffer.
+ * WebGPU has no 8/16-bit x3 formats, so these are widened to x4. Other sizes keep their format.
+ * Rows are densely packed with a stride rounded up to a multiple of 4 bytes, as WebGPU requires.
  */
-export function getWebGPUVertexSize(size: number, bytesPerElement: number): number {
-  if (bytesPerElement >= 4 || size > 4) {
-    return size;
-  }
-  return (Math.ceil((size * bytesPerElement) / 4) * 4) / bytesPerElement;
+export function getWebGPUPaddedAccessor<T extends DataColumnSettings<unknown>>(accessor: T): T {
+  const bytesPerElement = getDataTypeByteLength(accessor.type);
+  const size = accessor.size === 3 ? 4 : accessor.size;
+  const stride = Math.ceil((size * bytesPerElement) / 4) * 4;
+  return {...accessor, size, stride, offset: 0};
 }
 
-/** Value of a missing vertex component (0, 0, 0, 1), expressed in the units of `type` */
-function getMissingComponentValue(type: DataType, index: number): number {
-  if (index < 3) {
-    return 0;
-  }
+/**
+ * Value of a missing fourth vertex component, in the units of `type`. Like WebGL, which fills
+ * missing components with (0, 0, 0, 1), this is 1.0 for normalized types and 1 otherwise.
+ */
+function getMissingWValue(type: DataType): number {
   switch (type) {
+    // uint8 is uploaded as unorm8 when widened, see getBufferAttributeLayout
     case 'uint8':
     case 'unorm8':
-      // uint8 is uploaded as unorm8 on WebGPU
       return 255;
     case 'snorm8':
       return 127;
@@ -86,37 +91,34 @@ function getMissingComponentValue(type: DataType, index: number): number {
 }
 
 /**
- * Repacks `value`, described by `accessor` (offset and stride in bytes), into a dense array
- * of `paddedSize` components per vertex. Added components are filled from `defaultValue`,
- * falling back to the (0, 0, 0, 1) missing component rule.
+ * Repacks `value`, described by `accessor` (offset and stride in bytes), into the dense rows of
+ * `uploadAccessor`. A widened fourth component is filled like WebGL's missing components, and
+ * any remaining bytes of a row are zero.
  */
 export function padVertexValues(
   value: TypedArray,
   accessor: DataColumnSettings<unknown>,
-  paddedSize: number
+  uploadAccessor: DataColumnSettings<unknown>
 ): TypedArray {
-  const {size, type, defaultValue} = accessor;
+  const {size, type} = accessor;
   const bytesPerElement = value.BYTES_PER_ELEMENT;
   const offset = (accessor.offset || 0) / bytesPerElement;
   const stride = getStride(accessor) / bytesPerElement;
+  const uploadStride = getStride(uploadAccessor) / bytesPerElement;
   const vertexCount =
     value.length < offset + size ? 0 : Math.floor((value.length - offset - size) / stride) + 1;
-
-  const padValues: number[] = [];
-  for (let component = size; component < paddedSize; component++) {
-    padValues[component] = Number.isFinite(defaultValue[component])
-      ? defaultValue[component]
-      : getMissingComponentValue(type, component);
-  }
+  const missingW = uploadAccessor.size > size ? getMissingWValue(type) : 0;
 
   const ArrayType = value.constructor as TypedArrayConstructor;
-  const result = new ArrayType(vertexCount * paddedSize);
+  const result = new ArrayType(vertexCount * uploadStride);
   for (let vertex = 0; vertex < vertexCount; vertex++) {
     const sourceIndex = offset + vertex * stride;
-    const targetIndex = vertex * paddedSize;
-    for (let component = 0; component < paddedSize; component++) {
-      result[targetIndex + component] =
-        component < size ? value[sourceIndex + component] : padValues[component];
+    const targetIndex = vertex * uploadStride;
+    for (let component = 0; component < size; component++) {
+      result[targetIndex + component] = value[sourceIndex + component];
+    }
+    if (missingW) {
+      result[targetIndex + 3] = missingW;
     }
   }
   return result;

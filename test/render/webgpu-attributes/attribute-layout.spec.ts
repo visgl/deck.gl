@@ -104,6 +104,18 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute layouts'
     }
   }
 
+  test('getBufferLayout on WebGPU - sizes 1 and 2 keep their format', () => {
+    for (const [type, size, format, byteStride] of [
+      ['uint8', 1, 'uint8', 4],
+      ['unorm8', 2, 'unorm8x2', 4],
+      ['uint16', 1, 'uint16', 4]
+    ] as const) {
+      const layout = getLayoutForAttribute(webgpuDevice, type, size);
+      expect(layout.attributes![0].format, `${type}x${size}`).toBe(format);
+      expect(layout.byteStride, `${type}x${size} stride`).toBe(byteStride);
+    }
+  });
+
   test('getBufferLayout on WebGL - unaligned layouts are unchanged', async () => {
     const webglDevice = await getWebGLTestDevice();
     const layout = getLayoutForAttribute(webglDevice, 'unorm8', 3);

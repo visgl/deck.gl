@@ -233,7 +233,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         this.constant ||
         !this.buffer ||
         this.buffer.byteLength <
-          this._getUploadByteLength(this.value as TypedArray) + this.byteOffset
+          this._getUploadByteLength(this.value as TypedArray) + this.byteOffset ||
+        // A padded buffer cannot take an updater array of another type in place
+        (this.needsWebGPUPadding() &&
+          (this.value as TypedArray).BYTES_PER_ELEMENT !== this.getAccessor().bytesPerElement)
       ) {
         if (this.constant) {
           // Route legacy constant updater output through the same path used by constant accessors.
