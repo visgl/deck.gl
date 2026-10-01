@@ -5,6 +5,7 @@
 import {test, expect} from 'vitest';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport, OrbitViewport, project} from '@deck.gl/core';
+import type {ProjectUniforms} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 
 const TEST_VIEWPORTS = {
@@ -152,6 +153,36 @@ test('project#getUniforms', () => {
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   ).toBeTruthy();
+});
+
+test('project#getUniforms CARTESIAN z scale is continuous across zoom 12', () => {
+  // Common space positions with z in meters, e.g. TerrainLayer meshes.
+  // Their z must be scaled at the viewport latitude in both WEB_MERCATOR (zoom < 12)
+  // and WEB_MERCATOR_AUTO_OFFSET (zoom >= 12) modes
+  for (const zoom of [11.99, 12]) {
+    const viewport = new WebMercatorViewport({
+      width: 800,
+      height: 600,
+      latitude: 46.2,
+      longitude: -122.19,
+      zoom,
+      pitch: 60
+    });
+    const uniforms = project.getUniforms({
+      viewport,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    }) as ProjectUniforms;
+    const unitsPerMeter = viewport.getDistanceScales().unitsPerMeter[2];
+
+    expect(
+      uniforms.commonUnitsPerWorldUnit[2] / unitsPerMeter,
+      `z is scaled at the viewport latitude at zoom ${zoom}`
+    ).toBeCloseTo(1, 6);
+    expect(
+      uniforms.commonUnitsPerMeter[2] / unitsPerMeter,
+      `sizes are scaled at the viewport latitude at zoom ${zoom}`
+    ).toBeCloseTo(1, 6);
+  }
 });
 
 test('project#getUniforms rejects legacy numeric coordinate systems', () => {

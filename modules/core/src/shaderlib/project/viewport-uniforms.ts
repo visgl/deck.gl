@@ -71,8 +71,12 @@ export function getOffsetOrigin(
 
   switch (viewport.projectionMode) {
     case PROJECTION_MODE.WEB_MERCATOR:
-      if (coordinateSystem === 'lnglat' || coordinateSystem === 'cartesian') {
+      if (coordinateSystem === 'lnglat') {
         geospatialOrigin = [0, 0, 0];
+        offsetMode = false;
+      } else if (coordinateSystem === 'cartesian') {
+        // Positions are already in common space and only z is in meters. Keep the viewport center
+        // as geospatial origin so that z is scaled the same as in WEB_MERCATOR_AUTO_OFFSET mode
         offsetMode = false;
       }
       break;
