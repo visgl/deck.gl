@@ -24,6 +24,8 @@ Releases and associated GitHub PRs for pydeck are documented here.
 ^^^^^^^^^^^
 - Add typed lighting and post-processing effects through ``pydeck.Effect``
 - Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop
+- Fix ``register_library`` writing a ``uri`` key instead of ``resourceUri``, which left the library
+  unloaded (#10759)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^

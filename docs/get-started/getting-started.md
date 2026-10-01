@@ -1,3 +1,7 @@
+---
+description: "Install deck.gl with npm or from a CDN, run the examples, and pick a base map integration."
+---
+
 # Installing and Running Examples
 
 ## Installation

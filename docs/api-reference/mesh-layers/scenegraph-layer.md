@@ -1,3 +1,7 @@
+---
+description: "ScenegraphLayer renders glTF scenegraph models at given coordinates."
+---
+
 # ScenegraphLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
