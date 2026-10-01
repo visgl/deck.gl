@@ -116,10 +116,7 @@ async function getSharedDeviceContext(deviceType: TestDeviceType): Promise<{
 
 async function createIsolatedDeviceContext(
   deviceType: TestDeviceType,
-  /**
-   * WebGL context attributes. Defaults to the browser's, which enables MSAA - pass
-   * `{antialias: false}` to test what applications get when a base map owns the context.
-   */
+  /** Additional WebGL context attributes. MSAA is disabled by default. */
   webgl?: {antialias?: boolean}
 ): Promise<{
   container: HTMLDivElement;
@@ -186,7 +183,7 @@ function getRenderTestEnvironment(
   deviceType: TestDeviceType,
   options: RenderTestSuiteOptions = {}
 ): Record<string, string> {
-  const webglAntialiasing = options.deviceMode !== 'isolated' || options.webgl?.antialias !== false;
+  const webglAntialiasing = options.webgl?.antialias ?? false;
   return {
     os: OS.toLowerCase(),
     deviceType,

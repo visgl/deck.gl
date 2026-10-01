@@ -33,19 +33,37 @@ const variants = [
   },
   {
     id: 'segment-widths',
-    label: 'segment dash',
-    extensionOptions: {dash: true}
+    label: "dashMode 'segment', widths",
+    extensionOptions: {dashMode: 'segment'}
   },
   {
     id: 'path-widths',
-    label: 'continuous path dash',
-    extensionOptions: {highPrecisionDash: true}
+    label: "dashMode 'path', widths",
+    extensionOptions: {dashMode: 'path'}
+  },
+  {
+    id: 'path-pixels',
+    label: "dashMode 'path', pixels",
+    extensionOptions: {dashMode: 'path'},
+    layerProps: {dashUnits: 'pixels'}
+  },
+  {
+    id: 'path-pixels-justified',
+    label: "dashMode 'path', pixels, justified",
+    extensionOptions: {dashMode: 'path'},
+    layerProps: {dashUnits: 'pixels', dashJustified: true}
   },
   {
     id: 'offset-only',
     label: 'offset capability',
     extensionOptions: {offset: true},
     layerProps: {getOffset: 0}
+  },
+  {
+    id: 'all-controls',
+    label: 'path, pixels, justified, offset capability',
+    extensionOptions: {dashMode: 'path', offset: true},
+    layerProps: {dashUnits: 'pixels', dashJustified: true, getOffset: 0}
   }
 ];
 
