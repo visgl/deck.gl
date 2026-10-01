@@ -7,10 +7,12 @@
   "scripts": {
     "start": "vite --config vite.config.mjs --open",
     "start-local": "vite --config vite.config.mjs",
-    "build": "tsc --noEmit && vite build --config vite.config.mjs",
-    "test": "../../../node_modules/.bin/vitest run --root ../../.. --config vitest.config.ts --project headless test/modules/gaussian-splats/coit-frontier-retention.spec.ts"
+    "build": "node typecheck.mjs && vite build --config vite.config.mjs",
+    "test-layer": "../../../node_modules/.bin/vitest run --config vitest.layer.config.mjs",
+    "test": "yarn test-layer && ../../../node_modules/.bin/vitest run --root ../../.. --config vitest.config.ts --project headless test/modules/gaussian-splats/coit-frontier-retention.spec.ts"
   },
   "dependencies": {
+    "@loaders.gl/loader-utils": "5.0.0-alpha.3",
     "@loaders.gl/splats": "5.0.0-alpha.3",
     "@luma.gl/core": "9.4.0-beta.3",
     "@luma.gl/splats": "9.4.0-beta.3",

@@ -24,6 +24,7 @@ canvas {
 }
 
 .canvas-host {
+  background: #cafefe;
   width: 100%;
   height: 100%;
 }
@@ -113,14 +114,14 @@ h1 {
   content: "";
 }
 
-.status[data-phase="initializing"]::before,
-.status[data-phase="streaming"]::before {
+.status[data-phase="loading"]::before,
+.status[data-phase="refining"]::before,
+.status[data-phase="budget-limited"]::before {
   background: #ffd08a;
   box-shadow: 0 0 0 4px rgb(255 208 138 / 14%);
 }
 
-.status[data-phase="error"]::before,
-.status[data-phase="unsupported"]::before {
+.status[data-phase="error"]::before {
   background: #ff9ba5;
   box-shadow: 0 0 0 4px rgb(255 155 165 / 14%);
 }
