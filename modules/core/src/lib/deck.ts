@@ -252,6 +252,13 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   drawPickingColors?: boolean;
 };
 
+/** A pending `Deck.waitForFrameReady` call */
+type FrameReadyWaiter = {
+  /** Called after renders, resolves the call if the scene is settled */
+  onRender: () => void;
+  reject: (error: Error) => void;
+};
+
 const defaultProps: DeckProps = {
   id: '',
   width: '100%',
@@ -369,6 +376,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     gpuMemory: 0
   };
   private _metricsCounter: number = 0;
+  /** Pending `waitForFrameReady` calls */
+  private _frameReadyWaiters = new Set<FrameReadyWaiter>();
+  private _isFrameReadyCheckScheduled = false;
   private _hoverPickSequence: number = 0;
   private _pointerDownPickSequence: number = 0;
 
@@ -460,6 +470,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Stop rendering and dispose all resources */
   finalize() {
     this._restoreDeviceResizeHandler();
+
+    for (const waiter of this._frameReadyWaiters) {
+      waiter.reject(new Error('Deck is finalized'));
+    }
 
     this.animationLoop?.stop();
     this.animationLoop?.destroy();
@@ -687,119 +701,45 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /**
-   * Wait until all pending updates have settled and a frame has been rendered.
-   *
-   * Resolves when:
-   * - All layers report `isLoaded === true` (no pending async props/resources)
-   * - The layer manager has no pending updates (`needsUpdate() === false`)
-   * - No redraw is queued (`needsRedraw() === false`)
-   * - An `onAfterRender` cycle has completed since the call started
-   *
-   * This is intended for use cases such as headless capture / video export where
-   * a caller needs to know that the next read of the canvas will reflect a
-   * fully-settled scene.
-   *
-   * @param options.timeout      Maximum wait time in ms before rejecting. Default 5000.
-   * @param options.checkLayers  If false, skip the per-layer `isLoaded` check. Default true.
-   * @param options.checkAttributes If false, skip the layer-manager `needsUpdate` check. Default true.
-   * @returns Resolves with a status object describing the final state and elapsed time.
-   *          Rejects with an Error if the deadline is reached before settle.
+   * Returns a Promise that resolves once a frame has been rendered with the scene settled:
+   * all layers are loaded, no layer update, transition or redraw is pending.
+   * With `_animate`, the pending redraw check is skipped.
+   * Rejects when the timeout elapses or the Deck is finalized.
    */
-  async waitForFrameReady(options?: {
-    timeout?: number;
-    checkLayers?: boolean;
-    checkAttributes?: boolean;
-  }): Promise<{
-    layersReady: boolean;
-    attributesReady: boolean;
-    duration: number;
-  }> {
-    const {timeout = 5000, checkLayers = true, checkAttributes = true} = options || {};
-
-    if (!this.layerManager) {
-      throw new Error('Deck.waitForFrameReady: Deck is not initialized');
-    }
-
-    const start = Date.now();
-    const deadline = start + timeout;
-
-    const layersAreReady = (): boolean => {
-      if (!checkLayers) return true;
-      const layers = this.layerManager!.getLayers();
-      for (const layer of layers) {
-        if (!layer.isLoaded) return false;
+  waitForFrameReady({timeout = 5000}: {timeout?: number} = {}): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.animationLoop) {
+        reject(new Error('Deck is finalized'));
+        return;
       }
-      return true;
-    };
+      // A non-animated Deck has drawn every change once no redraw is pending
+      if (!this.props._animate && this._isSceneSettled()) {
+        resolve();
+        return;
+      }
 
-    const attributesAreReady = (): boolean => {
-      if (!checkAttributes) return true;
-      return this.layerManager!.needsUpdate() === false;
-    };
-
-    const sceneIsSettled = (): boolean => {
-      if (!layersAreReady()) return false;
-      if (!attributesAreReady()) return false;
-      if (this.needsRedraw({clearRedrawFlags: false})) return false;
-      return true;
-    };
-
-    // If the scene is already settled, resolve immediately - no need to wait for a frame.
-    if (sceneIsSettled()) {
-      return {
-        layersReady: layersAreReady(),
-        attributesReady: attributesAreReady(),
-        duration: Date.now() - start
+      const waiter: FrameReadyWaiter = {
+        onRender: () => {
+          if (this._isSceneSettled()) {
+            removeWaiter();
+            resolve();
+          }
+        },
+        reject: error => {
+          removeWaiter();
+          reject(error);
+        }
       };
-    }
-
-    // Capture the user-installed onAfterRender once; we'll wrap it with a chained
-    // handler that signals each completed frame, and restore it before returning.
-    const userOnAfterRender = this.props.onAfterRender;
-    const signalState: {pending: (() => void) | null} = {pending: null};
-    this.setProps({
-      onAfterRender: (ctx: {device: Device; gl: WebGL2RenderingContext}) => {
-        userOnAfterRender?.(ctx);
-        const signal = signalState.pending;
-        signalState.pending = null;
-        signal?.();
-      }
+      const timer = setTimeout(
+        () => waiter.reject(new Error('waitForFrameReady timed out')),
+        timeout
+      );
+      const removeWaiter = () => {
+        clearTimeout(timer);
+        this._frameReadyWaiters.delete(waiter);
+      };
+      this._frameReadyWaiters.add(waiter);
     });
-
-    const waitOneFrame = (remaining: number): Promise<void> =>
-      new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(() => {
-          signalState.pending = null;
-          reject(new Error(`Deck.waitForFrameReady: timed out after ${timeout}ms`));
-        }, remaining);
-        signalState.pending = () => {
-          clearTimeout(timer);
-          resolve();
-        };
-      });
-
-    try {
-      for (;;) {
-        if (Date.now() > deadline) {
-          throw new Error(
-            `Deck.waitForFrameReady: timed out after ${timeout}ms (` +
-              `layersReady=${layersAreReady()}, attributesReady=${attributesAreReady()})`
-          );
-        }
-
-        await waitOneFrame(Math.max(0, deadline - Date.now()));
-
-        if (sceneIsSettled()) {
-          return {
-            layersReady: layersAreReady(),
-            attributesReady: attributesAreReady(),
-            duration: Date.now() - start
-          };
-        }
-      }
-    } finally {
-      this.setProps({onAfterRender: userOnAfterRender});
-    }
   }
 
   /** Flag indicating that the Deck instance has initialized its resources and it's safe to call public methods. */
@@ -1928,6 +1868,35 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+    this._scheduleFrameReadyCheck();
+  }
+
+  /** Returns `true` if the last render reflects all loaded data, updates and transitions */
+  private _isSceneSettled(): boolean {
+    return Boolean(
+      this.layerManager &&
+        this.layerManager.getLayers().every(layer => layer.isLoaded) &&
+        !this.layerManager.needsUpdate() &&
+        !this.hasActiveTransitions() &&
+        (this.props._animate || !this.needsRedraw({clearRedrawFlags: false}))
+    );
+  }
+
+  /**
+   * Checks pending `waitForFrameReady` calls once the current task's renders are done.
+   * Interleaved basemap integrations draw several layer groups per frame.
+   */
+  private _scheduleFrameReadyCheck(): void {
+    if (this._frameReadyWaiters.size === 0 || this._isFrameReadyCheckScheduled) {
+      return;
+    }
+    this._isFrameReadyCheckScheduled = true;
+    queueMicrotask(() => {
+      this._isFrameReadyCheckScheduled = false;
+      for (const waiter of this._frameReadyWaiters) {
+        waiter.onRender();
+      }
+    });
   }
 
   // Callbacks

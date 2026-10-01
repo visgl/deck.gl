@@ -747,39 +747,28 @@ Data loading is not a transition. Check `layer.isLoaded` separately for async da
 
 #### `waitForFrameReady` {#waitforframeready}
 
-Wait until all pending updates have settled and a frame has been rendered. Useful for headless capture, video export, or any flow that needs to read back canvas pixels and must know that the next read will reflect a fully-settled scene.
+Returns a Promise that resolves once a frame has been rendered with the scene settled. Useful for headless capture, video export, or any flow that reads back canvas pixels and needs them to reflect all pending changes.
 
-The returned Promise resolves once:
+The scene is settled when:
 
-* All layers report `layer.isLoaded === true` (no pending async props or resources)
-* The layer manager has no pending updates (`needsUpdate() === false`)
-* No redraw is queued (`needsRedraw() === false`)
-* If the scene was not already settled, an `onAfterRender` cycle has completed since the call started
+* All layers report [`isLoaded`](./layer.md#isloaded) (no pending async data or props)
+* No layer update is pending
+* No transition is in progress (see [`hasActiveTransitions`](#hasactivetransitions))
+* No redraw is pending. With `_animate: true`, Deck redraws every frame, so this check is skipped and the Promise resolves after the next render of a settled scene.
 
-If the deadline passes before the scene settles, the Promise rejects with an `Error`.
+If the scene is already settled and drawn, the Promise resolves without waiting for a render. Otherwise the scene is checked after each render. `waitForFrameReady` can be called before the Deck has initialized, and concurrent calls are independent.
 
 ```ts
-const result = await deck.waitForFrameReady({timeout: 5000});
-// result: {layersReady: boolean, attributesReady: boolean, duration: number}
+deck.setProps({layers: getLayersAtTime(time)});
+await deck.waitForFrameReady();
+captureFrame();
 ```
 
 Parameters:
 
-* `options.timeout` (number, optional) - maximum wait time in milliseconds before the Promise rejects. Default `5000`.
-* `options.checkLayers` (boolean, optional) - if `false`, skip the per-layer `isLoaded` check. Default `true`.
-* `options.checkAttributes` (boolean, optional) - if `false`, skip the layer-manager `needsUpdate` check. Default `true`.
+* `options.timeout` (number, optional) - maximum wait time in milliseconds. Default `5000`.
 
-Returns:
-
-* A Promise that resolves with an object describing the final state:
-  + `layersReady` (boolean) - whether all layers reported loaded
-  + `attributesReady` (boolean) - whether the attribute manager reported settled
-  + `duration` (number) - elapsed time in milliseconds
-
-Notes:
-
-* `waitForFrameReady` does not force a redraw on its own. If you need to ensure a render happens, call `setProps`, mutate `layers`, or call `redraw('forced')` before/while awaiting.
-* The implementation chains its own `onAfterRender` handler over the user-provided one and restores the original handler before resolving or rejecting.
+The Promise rejects if the timeout elapses first, or if the Deck is finalized while waiting. It does not force a redraw and does not wait for GPU work to complete; reading pixels back from the canvas synchronizes with the GPU.
 
 
 #### `pickObjectAsync` {#pickobjectasync}

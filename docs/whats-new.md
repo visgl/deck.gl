@@ -7,6 +7,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 ### Other Improvements
 
 - New [`Deck.hasActiveTransitions`](./api-reference/core/deck.md#hasactivetransitions) method reports whether any view state, layer prop or attribute transition is in progress.
+- New [`Deck.waitForFrameReady`](./api-reference/core/deck.md#waitforframeready) method resolves once a frame has been rendered with all data loaded and transitions finished.
 
 ## deck.gl v9.4
 
