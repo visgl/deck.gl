@@ -5,6 +5,11 @@
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {GridLayer, WebGLAggregator, CPUAggregator} from '@deck.gl/aggregation-layers';
+import {gridUniforms} from '@deck.gl/aggregation-layers/grid-layer/grid-layer-uniforms';
+import {
+  getShaderModuleSource,
+  getShaderModuleUniformLayoutValidationResult
+} from '@luma.gl/shadertools';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -14,14 +19,48 @@ const SAMPLE_PROPS = {
   // gpuAggregation: false
 };
 
+test('GridLayer#WGSL grid uniform layout', () => {
+  const validationResult = getShaderModuleUniformLayoutValidationResult(gridUniforms, 'wgsl');
+
+  expect(validationResult, 'WGSL grid module exposes a uniform block').toBeTruthy();
+  expect(validationResult?.matches, 'WGSL block matches declared uniform types').toBe(true);
+  expect(validationResult?.expectedUniformNames, 'uniform field order stays stable').toEqual([
+    'colorDomain',
+    'elevationDomain',
+    'elevationRange',
+    'originCommon',
+    'sizeCommon'
+  ]);
+});
+
+test('GridLayer#WGSL color range bindings', () => {
+  const source = getShaderModuleSource(gridUniforms, 'wgsl');
+
+  expect(source, 'WGSL grid module declares its color-range texture').toContain(
+    'var colorRange: texture_2d<f32>'
+  );
+  expect(source, 'WGSL grid module declares its color-range sampler').toContain(
+    'var colorRangeSampler: sampler'
+  );
+});
+
 test('GridLayer', () => {
   const testCases = generateLayerTests({
     Layer: GridLayer,
     sampleProps: SAMPLE_PROPS,
     assert: (cond, msg) => expect(cond, msg).toBeTruthy(),
     onBeforeUpdate: ({testCase}) => console.log(testCase.title),
-    onAfterUpdate({layer}) {
+    onAfterUpdate({layer, subLayer}) {
       expect(layer.state.aggregator, 'should have aggregator').toBeTruthy();
+      const model = subLayer?.state.fillModel!;
+      const bufferNames = model.bufferLayout.map(layout => layout.name);
+      expect(
+        bufferNames.filter(name => name === 'geometry'),
+        `${model.id} has one geometry buffer layout`
+      ).toHaveLength(1);
+      expect(new Set(bufferNames).size, `${model.id} has unique buffer layouts`).toBe(
+        bufferNames.length
+      );
     }
   });
 

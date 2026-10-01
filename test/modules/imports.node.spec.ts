@@ -18,6 +18,7 @@ import * as core from '@deck.gl/core';
 import * as json from '@deck.gl/json';
 import * as googleMaps from '@deck.gl/google-maps';
 import * as mapbox from '@deck.gl/mapbox';
+import * as maplibre from '@deck.gl/maplibre';
 import * as react from '@deck.gl/react';
 import * as testUtils from '@deck.gl/test-utils';
 
@@ -64,6 +65,7 @@ describe('Top-level imports', () => {
       'No empty top-level export in @deck.gl/google-maps'
     ).toBeFalsy();
     expect(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox').toBeFalsy();
+    expect(hasEmptyExports(maplibre), 'No empty top-level export in @deck.gl/maplibre').toBeFalsy();
     expect(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react').toBeFalsy();
     expect(
       hasEmptyExports(testUtils),
@@ -77,6 +79,7 @@ describe('Top-level imports', () => {
     expect(deck.ScreenGridLayer, 'ScreenGridLayer symbol imported').toBeTruthy();
     expect(deck.ArcLayer, 'ArcLayer symbol imported').toBeTruthy();
     expect(deck.LineLayer, 'LineLayer symbol imported').toBeTruthy();
+    expect(deck.MapLibreOverlay, 'MapLibreOverlay symbol imported').toBeTruthy();
 
     expect(deck.COORDINATE_SYSTEM.LNGLAT, 'COORDINATE_SYSTEM.LNGLAT imported').toBe('lnglat');
     expect(deck.COORDINATE_SYSTEM.METER_OFFSETS, 'COORDINATE_SYSTEM.METERS imported').toBe(
@@ -123,5 +126,9 @@ test('deck.gl re-exports', () => {
   expect(
     findMissingExports(meshLayers, deck),
     'deck.gl re-exports everything from @deck.gl/mesh-layers'
+  ).toBeFalsy();
+  expect(
+    findMissingExports(maplibre, deck),
+    'deck.gl re-exports everything from @deck.gl/maplibre'
   ).toBeFalsy();
 });

@@ -18,11 +18,19 @@ void main(void) {
 
   float distToCenter = length(unitPosition);
 
+#ifdef ANTIALIASING
+  float edgePixels = (1.0 - distToCenter) / max(fwidth(distToCenter), 1e-6);
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+#else
   if (distToCenter > 1.0) {
+#endif
     discard;
   }
 
   fragColor = vColor;
+#ifdef ANTIALIASING
+  fragColor.a *= smoothedge(0.0, edgePixels);
+#endif
   DECKGL_FILTER_COLOR(fragColor, geometry);
 }
 `;

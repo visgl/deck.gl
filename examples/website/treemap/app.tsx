@@ -8,6 +8,8 @@ import {DeckGL} from '@deck.gl/react';
 import {OrthographicView} from '@deck.gl/core';
 import type {PickingInfo, Color} from '@deck.gl/core';
 import {TextLayer} from '@deck.gl/layers';
+
+import type {Device} from '@luma.gl/core';
 import {scaleOrdinal} from 'd3-scale';
 import {
   hierarchy,
@@ -52,10 +54,12 @@ const HEADER_SIZE = 20;
 const GAP_SIZE = 1;
 
 export default function App({
+  device,
   data,
   width = 800,
   height = 800
 }: {
+  device?: Device;
   data?: HierarchyNode<Datum>;
   width?: number;
   height?: number;
@@ -162,6 +166,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       views={new OrthographicView()}
       initialViewState={INITIAL_VIEW_STATE}

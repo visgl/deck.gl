@@ -5,9 +5,7 @@
 import TransitionInterpolator from './transition-interpolator';
 import {lerp} from '@math.gl/core';
 
-import log from '../utils/log';
 import type Viewport from '../viewports/viewport';
-import GlobeViewport from '../viewports/globe-viewport';
 
 const DEFAULT_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const DEFAULT_REQUIRED_PROPS = ['longitude', 'latitude', 'zoom'];
@@ -78,21 +76,16 @@ export default class LinearInterpolator extends TransitionInterpolator {
     const {makeViewport, around} = this.opts;
 
     if (makeViewport && around) {
-      const TestViewport = makeViewport(startProps);
-      if (TestViewport instanceof GlobeViewport) {
-        log.warn('around not supported in GlobeView')();
-      } else {
-        const startViewport = makeViewport(startProps);
-        const endViewport = makeViewport(endProps);
-        const aroundPosition = startViewport.unproject(around);
-        result.start.around = around;
-        Object.assign(result.end, {
-          around: endViewport.project(aroundPosition),
-          aroundPosition,
-          width: endProps.width,
-          height: endProps.height
-        });
-      }
+      const startViewport = makeViewport(startProps);
+      const endViewport = makeViewport(endProps);
+      const aroundPosition = startViewport.unproject(around);
+      result.start.around = around;
+      Object.assign(result.end, {
+        around: endViewport.project(aroundPosition),
+        aroundPosition,
+        width: endProps.width,
+        height: endProps.height
+      });
     }
 
     return result;

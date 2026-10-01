@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {SCALE_TYPE} from './layer-map';
+import type {ScaleType as SCALE_TYPE} from '@carto/api-client';
 
 export type VisualChannelField = {
   name: string;
@@ -98,23 +98,11 @@ export type MapLayerConfig = {
   visConfig: VisConfig;
 };
 
-export type MapTextSubLayerConfig = Omit<MapLayerConfig, 'textLabel'> & {
-  textLabel?: TextLabel;
-};
-
 export type MapConfigLayer = {
   type: string;
   id: string;
   config: MapLayerConfig;
   visualChannels: VisualChannels;
-};
-
-export type MapDataset = {
-  id: string;
-  data: any;
-  aggregationExp: string | null;
-  aggregationResLevel: number | null;
-  geoColumn: string;
 };
 
 export interface CustomStyle {

@@ -2,14 +2,35 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {defineConfig, configDefaults, TestUserConfig} from 'vitest/config';
+import {getVitestConfig} from '@vis.gl/dev-tools';
+import {TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
+const renderTestDeviceValue = process.env.RENDER_TEST_DEVICE;
+const renderTestDevice = renderTestDeviceValue === 'null' ? undefined : renderTestDeviceValue;
+if (renderTestDevice && renderTestDevice !== 'webgl' && renderTestDevice !== 'webgpu') {
+  throw new Error(`Invalid RENDER_TEST_DEVICE: ${renderTestDevice}`);
+}
+
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+const chromiumGpuLaunchArgs =
+  renderTestDevice === 'webgl'
+    ? chromiumLaunchArgs
+    : [
+        ...chromiumLaunchArgs,
+        '--enable-unsafe-webgpu',
+        '--ignore-gpu-blocklist',
+        '--enable-gpu',
+        '--enable-features=Vulkan',
+        '--use-vulkan=swiftshader'
+      ];
+const renderTestDefine = {
+  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null)
+};
 
 const headlessPlaywright = playwright({
   launchOptions: {
-    args: chromiumLaunchArgs
+    args: chromiumGpuLaunchArgs
   }
 });
 
@@ -26,7 +47,7 @@ const browserPlaywright = playwright({
 // Playwright provider with viewport configured for render tests
 const renderPlaywright = playwright({
   launchOptions: {
-    args: chromiumLaunchArgs
+    args: chromiumGpuLaunchArgs
   },
   contextOptions: {
     viewport: {width: 1024, height: 768}
@@ -69,6 +90,7 @@ const aliases = {
   '@deck.gl/jupyter-widget': resolve(rootDir, 'modules/jupyter-widget/src'),
   '@deck.gl/layers': resolve(rootDir, 'modules/layers/src'),
   '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
+  '@deck.gl/maplibre': resolve(rootDir, 'modules/maplibre/src'),
   '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
   '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
   '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),
@@ -107,12 +129,16 @@ const optimizeDepsConfig = {
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',
+    'maplibre-gl-v4',
+    'maplibre-gl-v5',
     // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'
-  ]
+  ],
+  // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
+  exclude: ['maplibre-gl-v6']
 };
 
 // Server configuration for serving test data files with correct MIME types
@@ -135,12 +161,7 @@ const assetsIncludeConfig = [
   '**/*.terrain' // Terrain files
 ];
 
-export default defineConfig({
-  test: {
-    // Globally exclude tape-based tests from all vitest projects
-    exclude: [...configDefaults.exclude, '**/*.tape.spec.ts'],
-    coverage: coverageConfig,
-    projects: [
+const projects = [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation
       {
@@ -169,6 +190,21 @@ export default defineConfig({
           globals: false,
           testTimeout: 30000,
           // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: 0}
+        }
+      },
+
+      // Tape compatibility project - verifies the legacy @deck.gl/test-utils entry point
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'tape-compat',
+          environment: 'node',
+          include: ['test/smoke/**/*.tape.spec.js'],
+          globals: false,
+          testTimeout: 30000,
+          setupFiles: ['./test/setup/vitest-node-setup.ts'],
           sequence: {groupOrder: 0}
         }
       },
@@ -246,6 +282,7 @@ export default defineConfig({
       // Used by test-render
       {
         extends: true,
+        define: renderTestDefine,
         resolve: {alias: browserAliases},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
@@ -278,6 +315,9 @@ export default defineConfig({
           sequence: {groupOrder: 4}
         }
       }
-    ]
-  }
+];
+
+export default getVitestConfig({
+  coverage: coverageConfig,
+  projects: Object.fromEntries(projects.map(project => [project.test.name, project]))
 });

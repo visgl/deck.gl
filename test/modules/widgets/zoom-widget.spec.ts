@@ -43,12 +43,46 @@ test('ZoomWidget', async () => {
   expect(viewState.zoom).toBe(8);
 });
 
+test('ZoomWidget#zoomStep', async () => {
+  let viewState: MapViewState = {
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 8
+  };
+  const onZoom = vi.fn();
+  testInstance = new WidgetTester({
+    initialViewState: viewState,
+    onViewStateChange: (evt: any) => {
+      viewState = evt.viewState;
+    },
+    widgets: [new ZoomWidget({zoomStep: 0.5, onZoom})]
+  });
+
+  await testInstance.idle();
+  testInstance.click('.deck-widget-zoom-in');
+  expect(viewState.zoom).toBe(8.5);
+  expect(onZoom).toHaveBeenLastCalledWith({
+    delta: 0.5,
+    viewId: 'default-view',
+    zoom: 8.5
+  });
+
+  await testInstance.idle();
+  testInstance.click('.deck-widget-zoom-out');
+  expect(viewState.zoom).toBe(8);
+  expect(onZoom).toHaveBeenLastCalledWith({
+    delta: -0.5,
+    viewId: 'default-view',
+    zoom: 8
+  });
+});
+
 test('ZoomWidget#constraints', async () => {
   let viewState: MapViewState = {
     longitude: -122.45,
     latitude: 37.78,
     zoom: 8,
-    maxZoom: 8.5,
+    maxZoom: 8.25,
     minZoom: 7.8
   };
   testInstance = new WidgetTester({
@@ -56,12 +90,12 @@ test('ZoomWidget#constraints', async () => {
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
     },
-    widgets: [new ZoomWidget()]
+    widgets: [new ZoomWidget({zoomStep: 0.5})]
   });
 
   await testInstance.idle();
   testInstance.click('.deck-widget-zoom-in');
-  expect(viewState.zoom).toBe(8.5);
+  expect(viewState.zoom).toBe(8.25);
 
   await testInstance.idle();
   testInstance.click('.deck-widget-zoom-out');
@@ -81,7 +115,7 @@ test('ZoomWidget#zoomAxis', async () => {
     onViewStateChange: (evt: any) => {
       viewState = evt.viewState;
     },
-    widgets: [new ZoomWidget()]
+    widgets: [new ZoomWidget({zoomStep: 0.5})]
   });
 
   await testInstance.idle();

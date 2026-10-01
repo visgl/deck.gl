@@ -257,6 +257,44 @@ test('MapboxOverlay#resolveLayerGroups - style change handling', async () => {
   expect(map.style._order, 'Groups restored to correct positions').toEqual(expectedOrderInitial);
 });
 
+test('MapboxOverlay#resolveLayerGroups - beforeId layer removed from style', async () => {
+  const MAP_STYLE = {
+    layers: [{id: 'water'}, {id: 'park'}, {id: 'building'}]
+  };
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12,
+    style: MAP_STYLE
+  });
+
+  // Wait for style to load
+  await sleep(10);
+
+  const layers = [new ScatterplotLayer({id: 'poi', beforeId: 'park'})];
+
+  resolveLayerGroups(map, undefined, layers);
+
+  const parkGroup = 'deck-layer-group-before:park';
+  expect(map.getLayer(parkGroup), 'Park group exists').toBeTruthy();
+  expect(map.style._order, 'Group positioned before park').toEqual([
+    'water',
+    parkGroup,
+    'park',
+    'building'
+  ]);
+
+  map.removeLayer('park');
+
+  expect(
+    () => resolveLayerGroups(map, layers, layers),
+    'Does not throw on missing beforeId'
+  ).not.toThrow();
+
+  expect(map.getLayer(parkGroup), 'Group still exists').toBeTruthy();
+  expect(map.style._order, 'Group left in place').toEqual(['water', parkGroup, 'building']);
+});
+
 /* global setTimeout */
 function sleep(ms) {
   return new Promise(resolve => {

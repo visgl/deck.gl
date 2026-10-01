@@ -1,0 +1,5 @@
+{
+  // Measure published package entry points. Inheriting the root `paths` aliases
+  // would resolve imports to `src` before package export conditions are applied.
+  "compilerOptions": {}
+}

@@ -2,43 +2,85 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './quadkey-layer';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+import {QuadkeyLayer} from '@deck.gl/geo-layers';
+import {quadkeys} from 'deck.gl-test/data';
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+const testCases = [
+  {
+    name: 'quadkey-layer',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.45,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new QuadkeyLayer({
+        data: quadkeys,
+        opacity: 0.8,
+        filled: true,
+        stroked: false,
+        getQuadkey: f => f.quadkey,
+        getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128],
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/quadkey-layer.png'
+  },
+  {
+    name: 'quadkey-layer-extruded',
+    viewState: {
+      latitude: 37.79,
+      longitude: -122.45,
+      zoom: 10.5,
+      pitch: 50,
+      bearing: 10
+    },
+    layers: [
+      new QuadkeyLayer({
+        data: quadkeys,
+        opacity: 0.8,
+        filled: true,
+        stroked: false,
+        extruded: true,
+        elevationScale: 100,
+        getElevation: f => 100 * f.value,
+        getQuadkey: f => f.quadkey,
+        getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128],
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/quadkey-layer-extruded.png'
+  },
+  {
+    name: 'quadkey-layer-world',
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new QuadkeyLayer({
+        data: ['0', '00', '000', '33'],
+        opacity: 0.6,
+        getQuadkey: f => f,
+        filled: false,
+        stroked: true,
+        lineWidthMinPixels: 4,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/quadkey-layer-world.png'
+  }
+];
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
-
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });

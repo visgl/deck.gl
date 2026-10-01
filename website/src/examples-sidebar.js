@@ -28,6 +28,7 @@ const sidebars = {
         'geojson-layer-polygons',
         'geojson-layer-paths',
         'global-grids',
+        // 'grid-layer',
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',
@@ -36,6 +37,7 @@ const sidebars = {
         'scatterplot-layer',
         'scenegraph-layer',
         'screen-grid-layer',
+        // 'simple-mesh-layer',
         'terrain-layer',
         'text-layer',
         'text-layer-clipping',
@@ -75,6 +77,11 @@ const sidebars = {
           type: 'link',
           label: 'Playground',
           href: `/playground`
+        },
+        {
+          type: 'link',
+          label: 'pydeck',
+          href: `/pydeck`
         }
       ]
     }

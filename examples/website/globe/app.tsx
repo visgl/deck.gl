@@ -8,6 +8,7 @@ import {useState, useMemo, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {
   _GlobeView as GlobeView,
   LightingEffect,
@@ -69,7 +70,7 @@ type DailyFlights = {
   flights: Flight[];
 };
 
-export default function App({data}: {data?: DailyFlights[]}) {
+export default function App({device, data}: {device?: Device; data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
@@ -126,6 +127,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
   return (
     <>
       <DeckGL
+        device={device}
         views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}

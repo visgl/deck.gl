@@ -7,6 +7,7 @@ import React, {useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {BrushingExtension} from '@deck.gl/extensions';
 import {scaleSqrt} from 'd3-scale';
@@ -107,6 +108,7 @@ function getTooltip({object}: PickingInfo<MigrationDestination>) {
 
 /* eslint-disable react/no-deprecated */
 export default function App({
+  device,
   data,
   enableBrushing = true,
   brushRadius = 100000,
@@ -114,6 +116,7 @@ export default function App({
   opacity = 0.7,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: County[];
   enableBrushing?: boolean;
   brushRadius?: number;
@@ -195,6 +198,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

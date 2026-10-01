@@ -113,6 +113,7 @@ new MapboxOverlay(props: MapboxOverlayProps);
 - `parent` / `canvas` / `device` - context creation is managed internally.
 - `viewState` / `initialViewState` - camera state is managed internally.
 - `controller` - always disabled (to use Mapbox's interaction handlers).
+- `useDevicePixels` - ignored in interleaved mode, where the base map owns the WebGL context and the canvas drawing buffer size. To control pixel ratio in interleaved mode, use MapLibre's [`pixelRatio`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/#pixelratio) constructor option on the Map instance. Mapbox GL JS does not expose an equivalent option.
 
 The constructor additionally accepts the following options:
 
@@ -163,6 +164,10 @@ Removes the control and deletes all resources.
 See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`, returns the base map's `canvas`.
 
 ## Remarks
+
+### Antialiasing
+
+Base maps create their WebGL context with `antialias: false`, so in interleaved mode deck.gl layers receive no multisampling. Layers that rely on it — including [PathLayer](../layers/path-layer.md), [LineLayer](../layers/line-layer.md), [ArcLayer](../layers/arc-layer.md), and [PointCloudLayer](../layers/point-cloud-layer.md) — will look aliased against the base map. Set `antialiasing: true` on those layers, or enable MSAA on the base map itself.
 
 ### Multi-view usage
 

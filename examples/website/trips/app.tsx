@@ -7,6 +7,7 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import {animate} from 'popmotion';
@@ -85,6 +86,7 @@ type Trip = {
 };
 
 export default function App({
+  device,
   buildings = DATA_URL.BUILDINGS,
   trips = DATA_URL.TRIPS,
   trailLength = 180,
@@ -94,6 +96,7 @@ export default function App({
   loopLength = 1800, // unit corresponds to the timestamp in source data
   animationSpeed = 1
 }: {
+  device?: Device;
   buildings?: string | Building[];
   trips?: string | Trip[];
   trailLength?: number;
@@ -154,6 +157,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       effects={theme.effects}
       initialViewState={initialViewState}

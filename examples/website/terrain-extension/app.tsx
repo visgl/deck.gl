@@ -5,6 +5,7 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {GeoJsonLayer, IconLayer, TextLayer} from '@deck.gl/layers';
@@ -81,9 +82,11 @@ function getTooltip({object}: PickingInfo<Route>) {
 }
 
 export default function App({
+  device,
   initialViewState = INITIAL_VIEW_STATE,
   view = 'GlobeView'
 }: {
+  device?: Device;
   initialViewState?: MapViewState;
   view?: ViewType;
 }) {
@@ -165,6 +168,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       views={deckView}
       viewState={viewState}
       onViewStateChange={e => setViewState(e.viewState as MapViewState)}

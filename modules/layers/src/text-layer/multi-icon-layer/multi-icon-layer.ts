@@ -10,6 +10,7 @@ import {TextModuleProps, textUniforms, ContentAlignModes} from '../text-uniforms
 
 import vs from './multi-icon-layer-vertex.glsl';
 import fs from './multi-icon-layer-fragment.glsl';
+import {shaderWGSL as source} from './multi-icon-layer.wgsl';
 
 import type {IconLayerProps} from '../../icon-layer/icon-layer';
 import type {
@@ -20,6 +21,7 @@ import type {
   UpdateParameters,
   DefaultProps
 } from '@deck.gl/core';
+import type {Model} from '@luma.gl/engine';
 
 // TODO expose as layer properties
 const DEFAULT_BUFFER = 192.0 / 256;
@@ -65,11 +67,19 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
 
   state!: IconLayer['state'] & {
     outlineColor: [number, number, number, number];
+    fillModel?: Model;
+    models?: Model[];
   };
 
   getShaders() {
     const shaders = super.getShaders();
-    return {...shaders, modules: [...shaders.modules, textUniforms, sdfUniforms], vs, fs};
+    return {
+      ...shaders,
+      modules: [...shaders.modules, textUniforms, sdfUniforms],
+      vs,
+      fs,
+      source
+    };
   }
 
   initializeState() {
@@ -84,10 +94,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       rowIndexes: {
         type: 'uint32',
         size: 1,
+        bufferGroup: 'icon-instance-data',
         accessor: (object, {index}) => index
       },
       instanceClipRect: {
         size: 4,
+        bufferGroup: 'icon-instance-data',
         accessor: 'getContentBox',
         defaultValue: [0, 0, -1, -1]
       }
@@ -98,6 +110,19 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.updateState(params);
     const {props, oldProps, changeFlags} = params;
     const {outlineColor} = props;
+
+    if (changeFlags.extensionsChanged) {
+      this.state.fillModel?.destroy();
+
+      // WebGPU records both passes before submitting them. Separate models keep each pass's
+      // SDF uniforms in a distinct buffer so the fill update cannot overwrite the outline pass.
+      const fillModel =
+        this.context.device.type === 'webgpu' ? this._getModel(`${this.props.id}-fill`) : undefined;
+      this.setState({
+        fillModel,
+        models: fillModel ? [this.state.model!, fillModel] : [this.state.model!]
+      });
+    }
 
     if (
       changeFlags.updateTriggersChanged &&
@@ -162,8 +187,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
       const iconsTexture = iconManager.getTexture();
 
       if (iconsTexture) {
-        model.shaderInputs.setProps({sdf: {...sdfProps, outlineBuffer: DEFAULT_BUFFER}});
-        model.draw(this.context.renderPass);
+        const fillModel = this.state.fillModel || model;
+        fillModel.shaderInputs.setProps({
+          sdf: {...sdfProps, outlineBuffer: DEFAULT_BUFFER},
+          text: textProps
+        });
+        this._drawModel(fillModel);
       }
     }
   }
