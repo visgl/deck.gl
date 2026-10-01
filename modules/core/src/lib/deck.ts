@@ -216,14 +216,8 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Called just before the canvas rerenders. */
   onBeforeRender?: (context: {device: Device; gl: WebGL2RenderingContext}) => void;
-  /** Called right after the canvas rerenders.
-   * @param context.pass - The render pass type: 'screen' for main render, 'picking' for mouse picking, 'shadow' for shadow maps, etc.
-   */
-  onAfterRender?: (context: {
-    device: Device;
-    gl: WebGL2RenderingContext;
-    pass: string;
-  }) => void;
+  /** Called right after the canvas rerenders. */
+  onAfterRender?: (context: {device: Device; gl: WebGL2RenderingContext}) => void;
   /** Called once after gl context and all Deck components are created. */
   onLoad?: () => void;
   /** Called if deck.gl encounters an error.
@@ -646,18 +640,23 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     return redraw;
   }
 
-  /** Returns true if any viewport or layer uniform transitions are currently active. */
+  /**
+   * Returns `true` while any view state, layer prop or attribute transition is in progress.
+   * Transitions advance once per animation frame, so this can be checked after each render.
+   */
   hasActiveTransitions(): boolean {
     if (!this.layerManager || !this.viewManager) {
       return false;
     }
-    const hasViewportTransition = Object.values(this.viewManager.controllers).some(
-      controller => controller && (controller as any).transitionManager?.transition?.inProgress
+    const controllers = Object.values(this.viewManager.controllers);
+    return (
+      controllers.some(controller => controller?.isTransitioning()) ||
+      this.layerManager
+        .getLayers()
+        .some(
+          layer => layer.hasUniformTransition() || layer.getAttributeManager()?.isTransitioning()
+        )
     );
-    const hasLayerTransition = this.layerManager
-      .getLayers()
-      .some(layer => layer.hasUniformTransition());
-    return hasViewportTransition || hasLayerTransition;
   }
 
   /**
@@ -1812,7 +1811,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       });
     }
 
-    this.props.onAfterRender({device, gl, pass: opts.pass});
+    this.props.onAfterRender({device, gl});
   }
 
   // Callbacks

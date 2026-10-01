@@ -589,7 +589,6 @@ Called right after the canvas rerenders.
 Receives arguments:
 
 * `gl` - the WebGL context.
-* `pass` (string) - the render pass type. `'screen'` for the main canvas render, `'picking'` for mouse picking passes, `'shadow'` for shadow map passes.
 
 
 #### `onError` (Function) {#onerror}
@@ -731,13 +730,19 @@ Parameters:
 
 #### `hasActiveTransitions` {#hasactivetransitions}
 
-Returns `true` if any viewport or layer uniform transitions are currently in progress.
+Returns `true` while any view state transition, layer prop transition or attribute transition is in progress. Transitions advance once per animation frame, so a check in `onAfterRender` reflects the frame that was just drawn.
 
 ```ts
-if (!deck.hasActiveTransitions()) {
-  captureFrame();
-}
+const deck = new Deck({
+  onAfterRender: () => {
+    if (!deck.hasActiveTransitions()) {
+      captureFrame();
+    }
+  }
+});
 ```
+
+Data loading is not a transition. Check `layer.isLoaded` separately for async data.
 
 
 #### `pickObjectAsync` {#pickobjectasync}
