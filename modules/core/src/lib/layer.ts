@@ -1272,7 +1272,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
     // Binary attributes can be versioned in place, without changing the data object
     // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
-    if (this.getAttributeManager()?.hasExternalVersionChanged(newProps.data?.attributes)) {
+    if (this.getAttributeManager()?.hasVersionedBinaryChanged(newProps.data?.attributes)) {
       // @ts-ignore (TS2531) internalState is always defined when this method is called
       this.internalState.needsUpdate = true;
     }

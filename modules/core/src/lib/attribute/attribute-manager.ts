@@ -171,14 +171,14 @@ export default class AttributeManager {
   }
 
   /** Returns `true` if any attribute has a versioned binary input in `buffers` that has not been applied */
-  hasExternalVersionChanged(
+  hasVersionedBinaryChanged(
     buffers: Record<string, TypedArray | Buffer | BinaryAttribute> | undefined
   ): boolean {
     if (!buffers) {
       return false;
     }
     for (const attributeName in this.attributes) {
-      if (this.attributes[attributeName].hasExternalVersionChanged(buffers)) {
+      if (this.attributes[attributeName].hasVersionedBinaryChanged(buffers)) {
         return true;
       }
     }

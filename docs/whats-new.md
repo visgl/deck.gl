@@ -6,7 +6,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### Core
 
-- Binary attributes in `data.attributes` accept an optional `version` and `updateRange`, so buffers rewritten in place are re-uploaded without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
+- Binary attributes in `data.attributes` accept an optional `version` and `dataRange`, so buffers rewritten in place are re-uploaded, fully or by row range, without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
 
 ## deck.gl v9.4
 

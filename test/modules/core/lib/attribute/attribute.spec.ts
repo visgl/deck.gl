@@ -955,9 +955,18 @@ test('Attribute#setExternalBuffer - version-based invalidation', () => {
   expect(spy, 'Same object, new version should call setData').toHaveBeenCalledTimes(1);
   spy.mockClear();
 
-  // New object, same version → no setData
+  // New wrapper, same value and version → no setData
+  attribute.setExternalBuffer({value: buffer1, version: 2});
+  expect(spy, 'New wrapper, same value and version should not call setData').not.toHaveBeenCalled();
+
+  // New value, same version → setData
   attribute.setExternalBuffer({value: buffer2, version: 2});
-  expect(spy, 'New object, same version should not call setData').not.toHaveBeenCalled();
+  expect(spy, 'New value, same version should call setData').toHaveBeenCalledTimes(1);
+
+  // Same value and version, different layout → setData
+  spy.mockClear();
+  attribute.setExternalBuffer({value: buffer2, version: 2, stride: 12});
+  expect(spy, 'Changed layout, same version should call setData').toHaveBeenCalledTimes(1);
 
   // New object, no version → setData (backward compat)
   spy.mockClear();
@@ -990,11 +999,20 @@ test('Attribute#setExternalBuffer - version triggers bounds recomputation', () =
     [15, 15]
   ]);
 
-  // Same version, different data → uses old bounds (no recompute)
-  attribute.setExternalBuffer({value: new Float32Array([20, 20, 30, 30]), version: 2});
-  expect(attribute.getBounds(), 'Bounds should not change with same version').toEqual([
-    [5, 5],
-    [15, 15]
+  // Same version, new array → bounds recomputed
+  const value = new Float32Array([20, 20, 30, 30]);
+  attribute.setExternalBuffer({value, version: 2});
+  expect(attribute.getBounds(), 'Bounds should be recomputed for a new array').toEqual([
+    [20, 20],
+    [30, 30]
+  ]);
+
+  // Same array and version, rewritten without a version bump → bounds kept
+  value.set([40, 40], 2);
+  attribute.setExternalBuffer({value, version: 2});
+  expect(attribute.getBounds(), 'Bounds should not change without a version bump').toEqual([
+    [20, 20],
+    [30, 30]
   ]);
 
   attribute.delete();
@@ -1026,7 +1044,7 @@ test('Attribute#setExternalBuffer - backward compatibility without version', () 
   attribute.delete();
 });
 
-test('Attribute#setExternalBuffer - updateRange', () => {
+test('Attribute#setExternalBuffer - dataRange', () => {
   const attribute = new Attribute(device, {
     id: 'positions',
     type: 'float32',
@@ -1041,7 +1059,7 @@ test('Attribute#setExternalBuffer - updateRange', () => {
   const updateSubBufferSpy = vi.spyOn(attribute, 'updateSubBuffer');
 
   value.set([7, 8], 2);
-  attribute.setExternalBuffer({value, version: 2, updateRange: {start: 1, end: 2}});
+  attribute.setExternalBuffer({value, version: 2, dataRange: {startRow: 1, endRow: 2}});
   expect(setDataSpy, 'same array: no full upload').toHaveBeenCalledTimes(0);
   expect(updateSubBufferSpy, 'same array: row range uploaded').toHaveBeenCalledTimes(1);
   expect(updateSubBufferSpy).toHaveBeenCalledWith({startOffset: 2, endOffset: 4});
@@ -1050,16 +1068,24 @@ test('Attribute#setExternalBuffer - updateRange', () => {
     [7, 8]
   ]);
 
+  updateSubBufferSpy.mockClear();
+  value.set([9, 9], 4);
+  attribute.setExternalBuffer({value, version: 2.5, dataRange: {startRow: 2}});
+  expect(updateSubBufferSpy, 'open-ended range is clamped').toHaveBeenCalledWith({
+    startOffset: 4,
+    endOffset: 6
+  });
+
   setDataSpy.mockClear();
   updateSubBufferSpy.mockClear();
-  attribute.setExternalBuffer({value, version: 2, updateRange: {start: 0, end: 1}});
+  attribute.setExternalBuffer({value, version: 2.5, dataRange: {startRow: 0, endRow: 1}});
   expect(setDataSpy, 'same version: range ignored').toHaveBeenCalledTimes(0);
   expect(updateSubBufferSpy, 'same version: range ignored').toHaveBeenCalledTimes(0);
 
   attribute.setExternalBuffer({
     value: new Float32Array(6),
     version: 3,
-    updateRange: {start: 0, end: 1}
+    dataRange: {startRow: 0, endRow: 1}
   });
   expect(setDataSpy, 'new array: full upload').toHaveBeenCalledTimes(1);
   expect(updateSubBufferSpy, 'new array: no partial write').toHaveBeenCalledTimes(0);
@@ -1069,7 +1095,7 @@ test('Attribute#setExternalBuffer - updateRange', () => {
     value: attribute.value as Float32Array,
     stride: 16,
     version: 4,
-    updateRange: {start: 0, end: 1}
+    dataRange: {startRow: 0, endRow: 1}
   });
   expect(setDataSpy, 'interleaved layout: full upload').toHaveBeenCalledTimes(1);
   expect(updateSubBufferSpy, 'interleaved layout: no partial write').toHaveBeenCalledTimes(0);
@@ -1122,12 +1148,14 @@ test('Attribute#setBinaryValue - version', () => {
 
   expect(attribute.setBinaryValue(binary)).toBe(true);
   expect(attribute.setBinaryValue(binary)).toBe(true);
+  expect(attribute.setBinaryValue({value: binary.value, version: 1})).toBe(true);
+  expect(spy, 'same value and version: single upload').toHaveBeenCalledTimes(1);
   expect(attribute.setBinaryValue({value: new Float32Array(2), version: 1})).toBe(true);
-  expect(spy, 'same version: single upload').toHaveBeenCalledTimes(1);
+  expect(spy, 'new value, same version: upload').toHaveBeenCalledTimes(2);
 
   binary.version = 2;
   attribute.setBinaryValue(binary);
-  expect(spy, 'same object, new version: upload').toHaveBeenCalledTimes(2);
+  expect(spy, 'same object, new version: upload').toHaveBeenCalledTimes(3);
 
   const scale = {value: new Float32Array([1]), version: 1};
   transformed.setBinaryValue(scale);

@@ -839,27 +839,13 @@ for (const bufferName of ['instancePositions', 'getPosition']) {
           }
         },
         {
-          title: 'new object, same version',
-          updateProps: {
-            data: {
-              length: 2,
-              attributes: {[bufferName]: {value: new Float32Array(6).fill(9), size: 3, version: 2}}
-            }
-          },
-          onBeforeUpdate: resetSpies,
-          onAfterUpdate: () => {
-            expectCallCounts({[entryMethod]: 1, setData: 0, write: 0});
-            expect(readBufferFloat32(attribute, 6)).toEqual([2, 2, 2, 3, 3, 3]);
-          }
-        },
-        {
-          title: 'new version with updateRange',
+          title: 'new version with dataRange',
           updateProps: {data},
           onBeforeUpdate: () => {
             resetSpies();
             positions.value.set([4, 4, 4], 3);
             positions.version = 3;
-            positions.updateRange = {start: 1, end: 2};
+            positions.dataRange = {startRow: 1, endRow: 2};
           },
           onAfterUpdate: () => {
             expectCallCounts({[entryMethod]: 1, setData: 0, updateSubBuffer: 1, write: 1});
@@ -869,6 +855,33 @@ for (const bufferName of ['instancePositions', 'getPosition']) {
               [2, 2, 2],
               [4, 4, 4]
             ]);
+          }
+        },
+        {
+          title: 'new object, same value and version',
+          updateProps: {
+            data: {
+              length: 2,
+              attributes: {[bufferName]: {value: positions.value, size: 3, version: 3}}
+            }
+          },
+          onBeforeUpdate: resetSpies,
+          onAfterUpdate: () => {
+            expectCallCounts({[entryMethod]: 1, setData: 0, write: 0});
+          }
+        },
+        {
+          title: 'new value, same version',
+          updateProps: {
+            data: {
+              length: 2,
+              attributes: {[bufferName]: {value: new Float32Array(6).fill(9), size: 3, version: 3}}
+            }
+          },
+          onBeforeUpdate: resetSpies,
+          onAfterUpdate: () => {
+            expectCallCounts({[entryMethod]: 1, setData: 1, write: 1});
+            expect(readBufferFloat32(attribute, 6)).toEqual([9, 9, 9, 9, 9, 9]);
           }
         }
       ]
