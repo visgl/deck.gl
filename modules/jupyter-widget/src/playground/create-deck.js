@@ -13,7 +13,7 @@ import {GL as GLConstants} from '@luma.gl/webgl/constants';
 import makeTooltip from './widget-tooltip';
 
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
-import {loadScript} from './utils/script-utils';
+import {loadModule, loadScript} from './utils/script-utils';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
@@ -85,43 +85,64 @@ export function addCustomLibraries(customLibraries, onComplete) {
     return;
   }
 
-  const loaded = {};
+  // Every entry settles exactly once (loaded or failed), including entries that share a name
+  let remaining = customLibraries.length;
 
   function onEachFinish() {
-    if (Object.values(loaded).every(f => f)) {
-      // when all libraries loaded
+    remaining -= 1;
+    if (remaining === 0) {
+      // when all libraries loaded (or failed to load)
       if (typeof onComplete === 'function') onComplete();
     }
   }
 
   function onModuleLoaded(libraryName, module) {
     addModuleToConverter(module, jsonConverter);
-    loaded[libraryName] = module;
     onEachFinish();
   }
 
-  customLibraries.forEach(({libraryName, resourceUri}) => {
-    // set loaded to be false, even if addCustomLibraries is called multiple times
-    // with the same parameters
-    loaded[libraryName] = false;
+  function onModuleFailed(libraryName, error) {
+    // eslint-disable-next-line
+    console.error(`Could not load custom library ${libraryName}`, error);
+    // Settle the registration so initialization completes; the library's classes stay unregistered
+    onEachFinish();
+  }
 
-    if (libraryName in window) {
-      // do not redefine
-      onModuleLoaded(libraryName, window[libraryName]);
+  customLibraries.forEach(({libraryName, resourceUri, module}) => {
+    if (module) {
+      // Each registration receives the namespace of the module it asked for (loads are cached per
+      // name and URL), so two registrations sharing a name but not a URL both get registered.
+      loadModule(resourceUri, libraryName).then(
+        namespace => onModuleLoaded(libraryName, namespace),
+        error => onModuleFailed(libraryName, error)
+      );
       return;
     }
 
-    // because loadscript is async and scipt execution is untraceble
-    // the only way we can listen on its execution complete is to observe on the
-    // window.libraryName property
-    Object.defineProperty(window, libraryName, {
-      set: module => onModuleLoaded(libraryName, module),
-      get: () => {
-        return loaded[libraryName];
-      }
-    });
+    const existing = window[libraryName];
+    if (existing) {
+      // already loaded, by a script global or an earlier call
+      onModuleLoaded(libraryName, existing);
+      return;
+    }
 
-    loadScript(resourceUri);
+    // A classic script's load event fires right after it has executed, so window[libraryName] holds
+    // what this script assigned (another script registered under the same name cannot have run in
+    // between). Loads are cached per URL.
+    loadScript(resourceUri).then(
+      () => {
+        const library = window[libraryName];
+        if (library) {
+          onModuleLoaded(libraryName, library);
+        } else {
+          onModuleFailed(
+            libraryName,
+            new Error(`${resourceUri} did not define window.${libraryName}`)
+          );
+        }
+      },
+      error => onModuleFailed(libraryName, error)
+    );
   });
 }
 
