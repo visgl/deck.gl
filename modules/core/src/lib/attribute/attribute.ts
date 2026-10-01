@@ -76,6 +76,8 @@ type AttributeInternalState = {
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
   layoutChanged: boolean;
+  /** Whether the last published accessor reads the low part from a zero buffer */
+  hasZeroLowBuffer: boolean;
   updateRanges: number[][];
 };
 
@@ -83,7 +85,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Legacy approach to set attribute value - read `isConstant` instead for attribute state */
   constant: boolean = false;
 
-  constructor(device: Device, opts: AttributeOptions) {
+  constructor(
+    device: Device,
+    opts: AttributeOptions,
+    /** @internal Supplies a shared zero row owned and released by the attribute manager. */
+    private readonly getSharedZeroLowBuffer?: () => Buffer
+  ) {
     super(device, opts, {
       startIndices: null,
       constantValue: null,
@@ -93,6 +100,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       needsUpdate: true,
       needsRedraw: false,
       layoutChanged: false,
+      hasZeroLowBuffer: false,
       updateRanges: range.FULL
     });
 
@@ -128,8 +136,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return this.state.layoutChanged;
   }
 
+  /**
+   * Publishes the accessor of the current data source.
+   * Callers must update `value`, `externalBuffer` and `constant` first, because
+   * `hasZeroLowBuffer` is derived from them and changes the number of buffer layouts.
+   */
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
-    this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
+    const {hasZeroLowBuffer} = this;
+    this.state.layoutChanged ||=
+      !bufferLayoutEqual(accessor, this.getAccessor()) ||
+      hasZeroLowBuffer !== this.state.hasZeroLowBuffer;
+    this.state.hasZeroLowBuffer = hasZeroLowBuffer;
     super.setAccessor(accessor);
   }
 
@@ -425,7 +442,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
-  /** Generate WebGPU-style buffer layout descriptor from this attribute */
+  /**
+   * Generate the WebGPU-style buffer layout descriptor of this attribute's own buffer.
+   * @note On WebGPU, an external Buffer bound to a double-precision attribute reads its low part
+   * from a separate zero buffer, which this layout does not declare. Use `getBufferLayouts()`,
+   * or `AttributeManager.getBufferLayouts()`, to build a `Model`'s complete buffer layout.
+   */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}
@@ -457,6 +479,30 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       result.attributes.push(...map.attributes);
     }
     return result;
+  }
+
+  /**
+   * Generate all WebGPU-style buffer layout descriptors of this attribute, including the
+   * zero low-part layout of `hasZeroLowBuffer` attributes. Prefer this over `getBufferLayout()`.
+   */
+  getBufferLayouts(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {isInstanced?: boolean}
+  ): BufferLayout[] {
+    const result = this.getBufferLayout(modelInfo);
+    if (!this.hasZeroLowBuffer) {
+      return [result];
+    }
+    const {shaderAttributes} = this.settings;
+    const lowLayout = super._getZeroLowBufferLayout(
+      shaderAttributes && {[this.id]: null, ...shaderAttributes}
+    );
+    return [result, {...lowLayout, stepMode: result.stepMode}];
+  }
+
+  /** Borrow the manager's row; standalone attributes own their fallback buffer. */
+  protected override _getZeroLowBuffer(): Buffer {
+    return this.getSharedZeroLowBuffer?.() || super._getZeroLowBuffer();
   }
 
   /* eslint-disable max-depth, max-statements */
