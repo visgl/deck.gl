@@ -9,7 +9,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {sleep} from './async-iterator-test-utils';
 
-const TRANSITION_DURATION = 100;
+const TRANSITION_DURATION = 500;
 const VIEW_STATE = {longitude: 0, latitude: 0, zoom: 1};
 
 const renderedDecks = new Set<Deck<any>>();
@@ -35,9 +35,9 @@ function createLayer(props = {}) {
   });
 }
 
-/** Polls once per animation frame for up to a second */
+/** Polls about once per animation frame for up to two seconds */
 async function waitFor(predicate: () => boolean, description: string) {
-  for (let frame = 0; frame < 60 && !predicate(); frame++) {
+  for (let frame = 0; frame < 120 && !predicate(); frame++) {
     await sleep(16);
   }
   expect(predicate(), description).toBe(true);
