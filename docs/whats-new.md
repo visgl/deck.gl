@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v9.4
 
+### Layers
+
+- [TileLayer.getTileLoadingState](./api-reference/geo-layers/tile-layer.md#gettileloadingstate) reports successful, failed, and pending requests for selected tiles. Successful empty results count as loaded.
+
 ### Views
 
 - Views now support a `parameters` prop for per-view GPU draw state overrides. `GlobeView` uses this to enable back-face culling by default, and applications can override it with `new GlobeView({parameters: {cullMode: 'none'}})`.

@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {TileLayer} from '@deck.gl/geo-layers';
+import {TileLayer, _Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
+import {RequestScheduler} from '@loaders.gl/loader-utils';
 
 const TEST_DATA = [{position: [0, 0]}, {position: [1, 1]}];
 
@@ -57,9 +58,9 @@ test('TileLayer#getTileLoadingState - some tiles failed', () => {
     tileset: {
       selectedTiles: [
         {isLoaded: true, content: TEST_DATA},
-        {isLoaded: true, content: null},
+        {isLoaded: true, isFailed: true, content: null},
         {isLoaded: true, content: TEST_DATA},
-        {isLoaded: true, content: null}
+        {isLoaded: true, isFailed: true, content: null}
       ]
     }
   } as any;
@@ -85,7 +86,7 @@ test('TileLayer#getTileLoadingState - tiles still loading', () => {
         {isLoaded: true, content: TEST_DATA},
         {isLoaded: false, content: null},
         {isLoaded: false, content: null},
-        {isLoaded: true, content: null}
+        {isLoaded: true, isFailed: true, content: null}
       ]
     }
   } as any;
@@ -110,9 +111,9 @@ test('TileLayer#getTileLoadingState - all tiles failed', () => {
   layer.state = {
     tileset: {
       selectedTiles: [
-        {isLoaded: true, content: null},
-        {isLoaded: true, content: null},
-        {isLoaded: true, content: null}
+        {isLoaded: true, isFailed: true, content: null},
+        {isLoaded: true, isFailed: true, content: null},
+        {isLoaded: true, isFailed: true, content: null}
       ]
     }
   } as any;
@@ -123,4 +124,34 @@ test('TileLayer#getTileLoadingState - all tiles failed', () => {
   expect(state.loaded).toBe(0);
   expect(state.failed).toBe(3);
   expect(state.pending).toBe(0);
+});
+
+test('TileLayer#getTileLoadingState distinguishes empty success, errors, reload and cancellation', async () => {
+  const layer = new TileLayer({id: 'request-outcomes', data: []});
+  const tiles = [new Tile2DHeader({}), new Tile2DHeader({})];
+  layer.state = {tileset: {selectedTiles: tiles}} as any;
+  const callbacks = {
+    requestScheduler: new RequestScheduler({throttleRequests: false}),
+    onLoad: () => {},
+    onError: () => {}
+  };
+  await tiles[0].loadData({...callbacks, getData: async () => null});
+  await tiles[1].loadData({
+    ...callbacks,
+    getData: async () => {
+      throw new Error('request failed');
+    }
+  });
+  expect(layer.getTileLoadingState()).toEqual({total: 2, loaded: 1, failed: 1, pending: 0});
+
+  tiles[1].setNeedsReload();
+  expect(tiles[1].isFailed).toBe(false);
+  expect(layer.getTileLoadingState()).toEqual({total: 2, loaded: 1, failed: 0, pending: 1});
+  await tiles[1].loadData({...callbacks, getData: async () => []});
+  expect(layer.getTileLoadingState()).toEqual({total: 2, loaded: 2, failed: 0, pending: 0});
+
+  const cancelled = tiles[1].loadData({...callbacks, getData: async () => null});
+  tiles[1].abort();
+  await cancelled;
+  expect(layer.getTileLoadingState()).toEqual({total: 2, loaded: 1, failed: 0, pending: 1});
 });

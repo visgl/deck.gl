@@ -33,6 +33,7 @@ export class Tile2DHeader<DataT = any> {
   private _loader: Promise<void> | undefined;
   private _loaderId: number;
   private _isLoaded: boolean;
+  private _hasError = false;
   private _isCancelled: boolean;
   private _needsReload: boolean;
   private _bbox!: TileBoundingBox;
@@ -84,6 +85,11 @@ export class Tile2DHeader<DataT = any> {
 
   get isLoaded(): boolean {
     return this._isLoaded && !this._needsReload;
+  }
+
+  /** Whether the current request settled with an error, excluding cancellation. */
+  get isFailed(): boolean {
+    return this.isLoaded && this._hasError;
   }
 
   get isLoading(): boolean {
@@ -161,6 +167,7 @@ export class Tile2DHeader<DataT = any> {
     // as loaded so higher-level layers can treat expected missing tiles as settled instead of
     // waiting forever for content or sublayers that will never exist.
     this._isLoaded = true;
+    this._hasError = Boolean(error);
     this._isCancelled = false;
 
     if (error) {
@@ -172,6 +179,7 @@ export class Tile2DHeader<DataT = any> {
 
   loadData(opts: TileLoadDataProps): Promise<void> {
     this._isLoaded = false;
+    this._hasError = false;
     this._isCancelled = false;
     this._needsReload = false;
     this._loaderId++;
