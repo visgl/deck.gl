@@ -1100,7 +1100,24 @@ test('Attribute#setExternalBuffer - dataRange', () => {
   expect(setDataSpy, 'interleaved layout: full upload').toHaveBeenCalledTimes(1);
   expect(updateSubBufferSpy, 'interleaved layout: no partial write').toHaveBeenCalledTimes(0);
 
+  // Same array and version, now with an external buffer: bind it instead of writing rows
+  const packed = new Float32Array(6);
+  attribute.setExternalBuffer({value: packed, version: 5});
+  const externalBuffer = device.createBuffer({byteLength: packed.byteLength});
+  setDataSpy.mockClear();
+  updateSubBufferSpy.mockClear();
+  attribute.setExternalBuffer({
+    value: packed,
+    buffer: externalBuffer,
+    version: 5,
+    dataRange: {startRow: 0, endRow: 1}
+  });
+  expect(setDataSpy, 'external buffer: full setData').toHaveBeenCalledTimes(1);
+  expect(updateSubBufferSpy, 'external buffer: no partial write').toHaveBeenCalledTimes(0);
+  expect(attribute.getBuffer(), 'external buffer is bound').toBe(externalBuffer);
+
   attribute.delete();
+  externalBuffer.destroy();
 });
 
 test('Attribute#setExternalBuffer - switching between versioned and unversioned', () => {
@@ -1141,7 +1158,7 @@ test('Attribute#setBinaryValue - version', () => {
     type: 'float32',
     size: 1,
     accessor: 'getScale',
-    transform: x => x * 2
+    transform: scale => scale * 2
   });
   const binary = {value: new Float32Array([1, 2]), version: 1};
   const spy = vi.spyOn(attribute, 'setData');

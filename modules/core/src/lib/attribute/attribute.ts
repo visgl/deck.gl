@@ -512,11 +512,15 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     }
   }
 
-  /** Row offsets map to element offsets only for the same, tightly packed, deck-owned array */
-  private _canWriteRows({value, type, size, offset, stride}: BinaryAttribute): boolean {
+  /**
+   * Row offsets map to element offsets only for the same, tightly packed, deck-owned array.
+   * An input with its own `buffer` must be bound instead, so rows are never written for it.
+   */
+  private _canWriteRows({value, buffer, type, size, offset, stride}: BinaryAttribute): boolean {
     const accessor = this.getAccessor();
     return Boolean(
       value &&
+        !buffer &&
         value === this.value &&
         this.buffer &&
         !this.state.externalBuffer &&
