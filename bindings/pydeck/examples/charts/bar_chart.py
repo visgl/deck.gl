@@ -19,7 +19,7 @@ TEXT = [209, 213, 219]
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 VALUES = [42, 48, 57, 61, 70, 84, 91, 88, 73, 64, 52, 46]  # e.g. monthly ridership, thousands
-best = max(VALUES)
+BEST = max(VALUES)
 
 bars = []
 labels = []
@@ -30,7 +30,7 @@ for i, (month, value) in enumerate(zip(MONTHS, VALUES)):
             "month": month,
             "value": value,
             "polygon": [[x0, 0], [x0 + 6, 0], [x0 + 6, value], [x0, value]],
-            "color": ORANGE if value == best else BLUE,
+            "color": ORANGE if value == BEST else BLUE,
         }
     )
     labels.append({"position": [x0 + 3, -3], "text": month, "anchor": "middle", "baseline": "top"})
