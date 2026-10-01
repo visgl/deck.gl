@@ -22,8 +22,9 @@ import {
   LayerContext
 } from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
+import Tile3DScenegraphLayer from './tile-3d-scenegraph-layer';
+import TileProcessingScheduler from './tile-processing-scheduler';
 
 import {coreApi} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/schema';
@@ -35,6 +36,7 @@ const SINGLE_DATA = [0];
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
+  _maxTileProcessingTime: {type: 'number', value: 0, min: 0},
 
   // Disable async data loading (handling it in _loadTileSet)
   data: '',
@@ -58,6 +60,14 @@ type _Tile3DLayerProps<DataT> = {
 
   /** Global radius of all points in pixels. **/
   pointSize?: number;
+
+  /**
+   * (Experimental) Soft CPU budget in milliseconds per animation frame for creating
+   * scenegraph GPU assets. Zero disables scheduling. Individual tiles are indivisible
+   * and may exceed the budget. Custom scenegraph sublayers manage their own scheduling.
+   * @default 0
+   */
+  _maxTileProcessingTime?: number;
 
   /** A loader which is used to decode the fetched tiles.
    * @deprecated Use `loaders` instead
@@ -89,6 +99,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   state!: {
     activeViewports: {};
+    tileProcessingScheduler: TileProcessingScheduler;
     frameNumber?: number;
     lastUpdatedViewports: {[viewportId: string]: Viewport} | null;
     layerMap: {[layerId: string]: any};
@@ -101,6 +112,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
     // prop verification
     this.state = {
+      tileProcessingScheduler: new TileProcessingScheduler(this.props._maxTileProcessingTime),
       layerMap: {},
       tileset3d: null,
       activeViewports: {},
@@ -117,6 +129,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    this.state.tileProcessingScheduler.timeBudget = props._maxTileProcessingTime;
     if (props.data && props.data !== oldProps.data) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._loadTileset(props.data);
@@ -140,6 +153,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   finalizeState(context: LayerContext): void {
+    this.state.tileProcessingScheduler.destroy();
     this.state.tileset3d?.destroy();
     this.state.tileset3d = null;
     this.state.layerMap = {};
@@ -276,10 +290,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     });
   }
 
-  private _getSubLayer(
-    tileHeader: Tile3D,
-    oldLayer?: Layer
-  ): MeshLayer<DataT> | PointCloudLayer<DataT> | ScenegraphLayer<DataT> | null {
+  private _getSubLayer(tileHeader: Tile3D, oldLayer?: Layer): Layer | null {
     if (!tileHeader.content) {
       return null;
     }
@@ -340,14 +351,15 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     );
   }
 
-  private _make3DModelLayer(tileHeader: Tile3D): ScenegraphLayer<DataT> {
+  private _make3DModelLayer(tileHeader: Tile3D): Layer {
     const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
 
-    const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
+    const SubLayerClass = this.getSubLayerClass('scenegraph', Tile3DScenegraphLayer);
 
     return new SubLayerClass(
       {
-        _lighting: 'pbr'
+        _lighting: 'pbr',
+        tileProcessingScheduler: this.state.tileProcessingScheduler
       },
       this.getSubLayerProps({
         id: 'scenegraph'

@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v10 (In Development)
+
+### Performance
+
+- `Tile3DLayer` adds an experimental `_maxTileProcessingTime` option to spread scenegraph creation across frames while retaining parent coverage until replacement tiles draw. The budget is soft: an individual tile can exceed it.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

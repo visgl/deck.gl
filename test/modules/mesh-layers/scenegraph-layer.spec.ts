@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
 import {project32} from '@deck.gl/core';
@@ -131,4 +131,54 @@ test('ScenegraphLayer#tests', () => {
   });
 
   testLayer({Layer: ScenegraphLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('ScenegraphLayer keeps fallback coverage until every model draws', () => {
+  const onFirstDraw = vi.fn();
+  testLayer({
+    Layer: ScenegraphLayer,
+    testCases: [
+      {
+        props: {
+          data: [{position: [0, 0, 0]}],
+          scenegraph: true,
+          onFirstDraw,
+          getScene: (_scenegraph, {device}) =>
+            new GroupNode(
+              [0, 1].map(
+                () =>
+                  new ModelNode({
+                    model: new Model(device!, {
+                      geometry: new CubeGeometry(),
+                      vs,
+                      fs,
+                      modules: [project32],
+                      disableWarnings: true
+                    })
+                  })
+              )
+            )
+        },
+        onAfterUpdate: ({layer}) => {
+          // The lifecycle test draws once before this hook; start a fresh first-draw check.
+          onFirstDraw.mockClear();
+          layer.state.firstDrawSignaled = false;
+          const models = layer.getModels();
+          const firstDraw = vi.spyOn(models[0], 'draw').mockReturnValue(true);
+          const secondDraw = vi.spyOn(models[1], 'draw').mockReturnValue(false);
+          layer.draw({context: layer.context});
+          expect(onFirstDraw).not.toHaveBeenCalled();
+          expect(layer.state.firstDrawSignaled).toBe(false);
+          secondDraw.mockReturnValue(true);
+          layer.draw({context: layer.context});
+          expect(onFirstDraw).toHaveBeenCalledOnce();
+          layer.draw({context: layer.context});
+          expect(onFirstDraw).toHaveBeenCalledOnce();
+          firstDraw.mockRestore();
+          secondDraw.mockRestore();
+        }
+      }
+    ],
+    onError: error => expect(error).toBeFalsy()
+  });
 });
