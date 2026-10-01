@@ -10,12 +10,12 @@ import type {
   RenderPassParameters,
   RenderPipelineParameters
 } from '@luma.gl/core';
-import type {Framebuffer, QuerySet, RenderPass} from '@luma.gl/core';
+import type {Framebuffer, RenderPass} from '@luma.gl/core';
 import type {NumberArray4} from '@math.gl/core';
-import type {WEBGLCommandEncoder} from '@luma.gl/webgl';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
+import type {RenderPassTimestamps} from '../lib/frame-timer';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
 import type {Effect} from '../lib/effect';
@@ -59,9 +59,8 @@ export type LayersPassRenderOptions = {
   shaderModuleProps?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
-  /** If supplied, the first render pass writes its begin timestamp to index 0 and the last
-   * render pass writes its end timestamp to index 1 */
-  timestampQuerySet?: QuerySet | null;
+  /** If supplied, called once per render pass to get the timestamps that pass should write */
+  getRenderPassTimestamps?: (() => RenderPassTimestamps | null) | null;
 };
 
 export type DrawLayerParameters = {
@@ -120,7 +119,7 @@ export default class LayersPass extends Pass {
       views,
       onViewportActive,
       clearStack = true,
-      timestampQuerySet
+      getRenderPassTimestamps
     } = options;
     const pass = options.pass || 'unknown';
     const submitEachRenderPass = this.device.type === 'webgpu';
@@ -144,8 +143,6 @@ export default class LayersPass extends Pass {
       return renderStats;
     }
 
-    let isFirstRenderPass = true;
-    let timestampQueryEnded = false;
     try {
       for (const viewport of viewports) {
         onViewportActive?.(viewport);
@@ -160,24 +157,14 @@ export default class LayersPass extends Pass {
           : [subViewports];
 
         for (const renderGroup of renderGroups) {
-          const isLastRenderPass =
-            viewport === viewports[viewports.length - 1] &&
-            renderGroup === renderGroups[renderGroups.length - 1];
           const renderPass = this.device.beginRenderPass({
             framebuffer,
             parameters,
             clearColor: clearColor as NumberArray4,
             clearDepth,
             clearStencil,
-            // Timestamps span from the start of the first pass to the end of the last
-            ...(timestampQuerySet &&
-              (isFirstRenderPass || isLastRenderPass) && {
-                timestampQuerySet,
-                beginTimestampIndex: isFirstRenderPass ? 0 : undefined,
-                endTimestampIndex: isLastRenderPass ? 1 : undefined
-              })
+            ...getRenderPassTimestamps?.()
           });
-          isFirstRenderPass = false;
 
           try {
             for (const subViewport of renderGroup) {
@@ -199,7 +186,6 @@ export default class LayersPass extends Pass {
             }
           } finally {
             renderPass.end();
-            timestampQueryEnded = isLastRenderPass;
             if (submitEachRenderPass) {
               this.device.submit();
             }
@@ -211,16 +197,6 @@ export default class LayersPass extends Pass {
       }
       return renderStats;
     } finally {
-      // A later viewport's callbacks may throw before the final pass is created.
-      // WebGL's elapsed-time query must still end before the query set is discarded.
-      if (
-        this.device.type === 'webgl' &&
-        timestampQuerySet &&
-        !isFirstRenderPass &&
-        !timestampQueryEnded
-      ) {
-        (this.device.commandEncoder as WEBGLCommandEncoder).writeTimestamp(timestampQuerySet, 1);
-      }
       if (!submitEachRenderPass) {
         this.device.submit();
       }

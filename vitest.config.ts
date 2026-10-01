@@ -54,10 +54,10 @@ const renderPlaywright = playwright({
   }
 });
 
-// Playwright provider for WebGPU tests. The 'chromium' channel runs full Chromium in new
-// headless mode (not chrome-headless-shell), which exposes a real WebGPU adapter.
-// Developer features disable timestamp-query quantization.
-const webgpuPlaywright = playwright({
+// Playwright provider for GPU hardware tests. The 'chromium' channel runs full Chromium in new
+// headless mode (not chrome-headless-shell), which exposes a real WebGPU adapter and the WebGL
+// timer query extension. Developer features disable timestamp-query quantization.
+const gpuHardwarePlaywright = playwright({
   launchOptions: {
     channel: 'chromium',
     args: ['--enable-unsafe-webgpu', '--enable-webgpu-developer-features']
@@ -237,7 +237,7 @@ const projects = [
           exclude: [
             ...excludedTests,
             'test/modules/**/*.node.spec.ts',
-            'test/modules/**/*.webgpu.spec.ts'
+            'test/modules/**/*.gpu-hardware.spec.ts'
           ],
           globals: false,
           testTimeout: 30000,
@@ -275,7 +275,7 @@ const projects = [
           exclude: [
             ...excludedTests,
             'test/modules/**/*.node.spec.ts',
-            'test/modules/**/*.webgpu.spec.ts'
+            'test/modules/**/*.gpu-hardware.spec.ts'
           ],
           globals: false,
           testTimeout: 30000,
@@ -334,8 +334,9 @@ const projects = [
         }
       },
 
-      // WebGPU hardware project - tests that require a hardware WebGPU adapter (*.webgpu.spec.ts only)
-      // Not part of `test`/`test-ci` since CI machines have no GPU. Used by test-webgpu-hardware
+      // GPU hardware project - tests that require a hardware WebGPU adapter or WebGL timer queries
+      // (*.gpu-hardware.spec.ts only). Not part of `test`/`test-ci` since CI machines have no GPU.
+      // Used by test-gpu-hardware
       {
         extends: true,
         resolve: {alias: browserAliases},
@@ -343,8 +344,8 @@ const projects = [
         assetsInclude: assetsIncludeConfig,
         server: serverConfig,
         test: {
-          name: 'webgpu-hardware',
-          include: ['test/modules/**/*.webgpu.spec.ts'],
+          name: 'gpu-hardware',
+          include: ['test/modules/**/*.gpu-hardware.spec.ts'],
           globals: false,
           testTimeout: 60000,
           isolate: false,
@@ -352,7 +353,7 @@ const projects = [
           setupFiles: ['./test/setup/vitest-browser-setup.ts'],
           browser: {
             enabled: true,
-            provider: webgpuPlaywright,
+            provider: gpuHardwarePlaywright,
             instances: [{browser: 'chromium'}],
             headless: true,
             screenshotFailures: false,

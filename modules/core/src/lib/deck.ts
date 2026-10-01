@@ -7,6 +7,7 @@ import ViewManager, {DEFAULT_CANVAS_ID} from './view-manager';
 import MapView from '../views/map-view';
 import EffectManager from './effect-manager';
 import DeckRenderer from './deck-renderer';
+import type {RenderLayersOptions} from './deck-renderer';
 import DeckPicker from './deck-picker';
 import {Widget} from './widget';
 import {WidgetManager} from './widget-manager';
@@ -244,7 +245,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   _onMetrics?: ((metrics: DeckMetrics) => void) | null;
   /**
    * (Experimental) Reports CPU and GPU timings for each draw operation (not necessarily a whole frame).
-   * GPU timing requires `'timestamp-query'` and is disabled with WebGL debug GPU profiling.
+   * GPU timing requires `'timestamp-query'` and is disabled while luma's debug GPU timer is active.
    * GPU readbacks (including failures) deliver asynchronous samples; CPU-only draws are synchronous.
    */
   _onFrameTimings?: ((timings: FrameTimings) => void) | null;
@@ -1622,6 +1623,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   private _setDevice(device: Device) {
     this.device = device;
+    // Query sets cannot be used across devices
+    this.frameTimer?.destroy();
+    this.frameTimer = null;
     this._validateInternalPickingMode();
 
     if (!this.animationLoop) {
@@ -1757,55 +1761,27 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       ...renderOptions
     };
 
-    const isMultiCanvasRender =
-      this._isMultiCanvasMode() &&
-      opts.pass === 'screen' &&
-      !opts.target &&
-      this._canvasManager.order.length > 0;
     // Nothing is drawn without viewports
     const frameTimer = opts.viewports.length ? this._getFrameTimer() : null;
-    // GPU time is only measured when all viewports are drawn by a single renderLayers call
-    const timestampQuerySet = frameTimer?.beginFrame({measureGpuTime: !isMultiCanvasRender});
+    frameTimer?.beginFrame();
+    const getRenderPassTimestamps = frameTimer && (() => frameTimer.getRenderPassTimestamps());
 
     try {
-      if (isMultiCanvasRender) {
-        for (const canvasId of this._canvasManager.order) {
-          const canvasViewports = opts.viewports.filter(
-            viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
-          );
-          if (!canvasViewports.length) {
-            const target = this._canvasManager.targets[canvasId];
-            this._resizeForCanvasTarget(canvasId);
-            this.deckRenderer?.renderLayers({
-              ...opts,
-              canvasContext: target.presentationContext,
-              target: target.presentationContext.getCurrentFramebuffer(),
-              viewports: [],
-              clearCanvas: true
-            });
-            target.presentationContext.present();
-            continue;
-          }
-
-          const target = this._canvasManager.targets[canvasId];
-          this._resizeForCanvasTarget(canvasId);
-          const framebuffer = target.presentationContext.getCurrentFramebuffer();
-          this.deckRenderer?.renderLayers({
-            ...opts,
-            canvasContext: target.presentationContext,
-            target: framebuffer,
-            viewports: canvasViewports
-          });
-          target.presentationContext.present();
-        }
+      if (
+        this._isMultiCanvasMode() &&
+        opts.pass === 'screen' &&
+        !opts.target &&
+        this._canvasManager.order.length
+      ) {
+        this._drawLayersToCanvases({...opts, getRenderPassTimestamps});
       } else {
-        this.deckRenderer?.renderLayers({...opts, timestampQuerySet});
+        this.deckRenderer?.renderLayers({...opts, getRenderPassTimestamps});
       }
     } catch (error) {
       frameTimer?.abortFrame();
       throw error;
     }
-    frameTimer?.endFrame(this.props._onFrameTimings!);
+    frameTimer?.endFrame();
 
     if (opts.pass === 'screen') {
       // This method could be called when drawing to picking buffer, texture etc.
@@ -1819,6 +1795,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this.props.onAfterRender({device, gl});
   }
 
+  /** Draws each canvas's viewports into its presentation context */
+  private _drawLayersToCanvases(opts: RenderLayersOptions): void {
+    for (const canvasId of this._canvasManager.order) {
+      const canvasViewports = opts.viewports.filter(
+        viewport => this.viewManager!.getCanvasId(viewport.id) === canvasId
+      );
+      const target = this._canvasManager.targets[canvasId];
+      this._resizeForCanvasTarget(canvasId);
+      this.deckRenderer?.renderLayers({
+        ...opts,
+        canvasContext: target.presentationContext,
+        target: target.presentationContext.getCurrentFramebuffer(),
+        viewports: canvasViewports,
+        // Canvases without viewports are cleared
+        ...(!canvasViewports.length && {clearCanvas: true})
+      });
+      target.presentationContext.present();
+    }
+  }
+
   /** Returns the frame timer if `_onFrameTimings` is set. No GPU resources are created otherwise. */
   private _getFrameTimer(): FrameTimer | null {
     if (!this.props._onFrameTimings) {
@@ -1826,7 +1822,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.frameTimer = null;
       return null;
     }
-    this.frameTimer ||= new FrameTimer(this.device!);
+    // Samples go to the callback that is current when they are delivered
+    this.frameTimer ||= new FrameTimer(this.device!, timings =>
+      this.props._onFrameTimings?.(timings)
+    );
     return this.frameTimer;
   }
 

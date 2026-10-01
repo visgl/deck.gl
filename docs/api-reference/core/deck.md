@@ -620,16 +620,16 @@ Receives arguments:
 Receives arguments:
 
 - `timings` (object)
-  + `cpuMs` (number) - CPU time, in milliseconds, spent in the draw operation's `renderLayers` calls, including effect passes. Layer updates, picking, timestamp readback, widgets and the timing callback are excluded.
-  + `gpuMs` (number, optional) - Elapsed GPU time, in milliseconds, from the start of the first to the end of the last layers render pass in this draw operation, measured with timestamp queries. This interval can include gaps between passes; it is not a sum of individual pass durations. Effect pre/post-render passes are excluded. Omitted when the device does not support the `'timestamp-query'` feature, when views are rendered to multiple canvases, when WebGL's debug GPU profiler is active, or when the measurement failed or was skipped because too many draws were awaiting readback.
+  + `cpuTime` (number) - CPU time, in milliseconds, spent in the draw operation's `renderLayers` calls, including effect passes. Layer updates, picking, timestamp readback, widgets and the timing callback are excluded.
+  + `gpuTime` (number, optional) - Sum of the GPU durations, in milliseconds, of the layers render passes in this draw operation, measured with timestamp queries. Each viewport is at least one render pass; on WebGPU, each repeated world copy is a separate pass. Idle time between passes is not counted. Effect pre/post-render passes are excluded. Omitted when the device does not support the `'timestamp-query'` feature, when luma's debug GPU timer is active, when a draw uses more than 32 render passes, or when the measurement failed or was skipped because too many draws were awaiting readback.
 
 On WebGPU, the feature must be requested when the device is created, e.g. with `deviceProps: {optionalFeatures: ['timestamp-query']}`.
 
-On WebGL, luma's debug GPU profiler (enabled by `deviceProps.debug` or `deviceProps.debugGPUTime`) retains control of GPU queries, and this callback reports CPU-only timings.
+luma's debug GPU timer (enabled by `deviceProps.debug` or `deviceProps.debugGPUTime`, and used by [`_onMetrics`](#_onmetrics) `gpuTime`) retains control of render pass timestamps, and this callback then reports CPU-only timings.
 
-When a GPU readback is attempted, the callback is asynchronous, typically a few frames later. A failed readback also delivers its CPU-only sample asynchronously. When no GPU query is used, the callback is synchronous at the end of the draw operation. Samples may therefore arrive out of draw order. Interrupted draws produce no sample, and pending callbacks are suppressed after finalization.
+When a GPU readback is attempted, the callback is asynchronous, typically a few frames later. A failed readback also delivers its CPU-only sample asynchronously. When no GPU query is used, the callback is synchronous at the end of the draw operation. Samples may therefore arrive out of draw order. Samples are delivered to the `_onFrameTimings` callback that is current at delivery time, and are dropped if it has been removed. Interrupted draws produce no sample, and pending callbacks are suppressed after finalization or a device change.
 
-Timing is opt-in but has overhead. In particular, WebGPU timestamp readback adds a query resolve/copy submission and asynchronous buffer mapping. This readback cost is not included in `cpuMs`; use external measurements when comparing instrumentation overhead.
+Timing is opt-in but has overhead. In particular, WebGPU timestamp readback adds a query resolve/copy submission and asynchronous buffer mapping. This readback cost is not included in `cpuTime`; use external measurements when comparing instrumentation overhead.
 
 
 ## Methods
