@@ -478,7 +478,9 @@ const quadkeyTileLayer = new TileLayer({
 
 ### `getTileLoadingState()` {#gettileloadingstate}
 
-Returns granular loading counts for the tiles in the current viewport. Unlike `layer.isLoaded`, which is `true` once all tile requests settle (including failures), this method distinguishes between tiles that loaded successfully, failed, and are still pending.
+Returns request-outcome counts for the tiles selected in the current viewport, distinguishing successful, failed, and pending requests. Successful requests include empty results.
+
+These counts describe tile requests only. `layer.isLoaded` also waits for sublayers generated from successful tile content to finish loading. Therefore, `pending === 0` does not by itself mean that the layer is ready to render or that GPU work has completed.
 
 Returns a `TileLoadingState` object:
 

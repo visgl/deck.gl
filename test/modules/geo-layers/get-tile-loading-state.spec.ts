@@ -128,7 +128,7 @@ test('TileLayer#getTileLoadingState - all tiles failed', () => {
 
 test('TileLayer#getTileLoadingState distinguishes empty success, errors, reload and cancellation', async () => {
   const layer = new TileLayer({id: 'request-outcomes', data: []});
-  const tiles = [new Tile2DHeader({}), new Tile2DHeader({})];
+  const tiles = [new Tile2DHeader({x: 0, y: 0, z: 1}), new Tile2DHeader({x: 1, y: 0, z: 1})];
   layer.state = {tileset: {selectedTiles: tiles}} as any;
   const callbacks = {
     requestScheduler: new RequestScheduler({throttleRequests: false}),
