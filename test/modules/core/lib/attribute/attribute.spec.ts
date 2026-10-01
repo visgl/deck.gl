@@ -944,35 +944,118 @@ test('Attribute#setExternalBuffer - backward compatibility without version', () 
   attribute.delete();
 });
 
-test('Attribute#setExternalBuffer - updateRange parameter', () => {
+test('Attribute#setExternalBuffer - updateRange', () => {
   const attribute = new Attribute(device, {
     id: 'positions',
     type: 'float32',
     size: 2,
     update: () => {}
   });
+  attribute.numInstances = 3;
 
-  const buffer = new Float32Array([1, 2, 3, 4]);
+  const value = new Float32Array([1, 2, 3, 4, 5, 6]);
+  attribute.setExternalBuffer({value, version: 1});
+  const setDataSpy = vi.spyOn(attribute, 'setData');
+  const updateSubBufferSpy = vi.spyOn(attribute, 'updateSubBuffer');
+
+  value.set([7, 8], 2);
+  attribute.setExternalBuffer({value, version: 2, updateRange: {start: 1, end: 2}});
+  expect(setDataSpy, 'same array: no full upload').toHaveBeenCalledTimes(0);
+  expect(updateSubBufferSpy, 'same array: row range uploaded').toHaveBeenCalledTimes(1);
+  expect(updateSubBufferSpy).toHaveBeenCalledWith({startOffset: 2, endOffset: 4});
+  expect(attribute.getBounds(), 'bounds are reset').toEqual([
+    [1, 2],
+    [7, 8]
+  ]);
+
+  setDataSpy.mockClear();
+  updateSubBufferSpy.mockClear();
+  attribute.setExternalBuffer({value, version: 2, updateRange: {start: 0, end: 1}});
+  expect(setDataSpy, 'same version: range ignored').toHaveBeenCalledTimes(0);
+  expect(updateSubBufferSpy, 'same version: range ignored').toHaveBeenCalledTimes(0);
+
+  attribute.setExternalBuffer({
+    value: new Float32Array(6),
+    version: 3,
+    updateRange: {start: 0, end: 1}
+  });
+  expect(setDataSpy, 'new array: full upload').toHaveBeenCalledTimes(1);
+  expect(updateSubBufferSpy, 'new array: no partial write').toHaveBeenCalledTimes(0);
+
+  setDataSpy.mockClear();
+  attribute.setExternalBuffer({
+    value: attribute.value as Float32Array,
+    stride: 16,
+    version: 4,
+    updateRange: {start: 0, end: 1}
+  });
+  expect(setDataSpy, 'interleaved layout: full upload').toHaveBeenCalledTimes(1);
+  expect(updateSubBufferSpy, 'interleaved layout: no partial write').toHaveBeenCalledTimes(0);
+
+  attribute.delete();
+});
+
+test('Attribute#setExternalBuffer - switching between versioned and unversioned', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 2,
+    update: () => {}
+  });
+  const binary: {value: Float32Array; version?: number} = {
+    value: new Float32Array([1, 2]),
+    version: 1
+  };
+  attribute.setExternalBuffer(binary);
   const spy = vi.spyOn(attribute, 'setData');
 
-  // updateRange accepted (v1: no optimization, full update)
-  attribute.setExternalBuffer({
-    value: buffer,
-    version: 1,
-    updateRange: {start: 0, end: 2}
-  });
-  expect(spy, 'updateRange should be accepted').toHaveBeenCalled();
+  delete binary.version;
+  attribute.setExternalBuffer(binary);
+  expect(spy, 'same object without version: no upload').toHaveBeenCalledTimes(0);
 
-  spy.mockClear();
-  attribute.setExternalBuffer({
-    value: buffer,
-    version: 1, // Same version
-    updateRange: {start: 2, end: 4} // Different range
-  });
-  expect(spy, 'Version wins, range ignored').not.toHaveBeenCalled(); // Version wins, range ignored
+  binary.value[0] = 9;
+  binary.version = 1;
+  attribute.setExternalBuffer(binary);
+  expect(spy, 'version restored after unversioned use: upload').toHaveBeenCalledTimes(1);
 
-  spy.mockRestore();
   attribute.delete();
+});
+
+test('Attribute#setBinaryValue - version', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    type: 'float32',
+    size: 2,
+    accessor: 'getPosition'
+  });
+  const transformed = new Attribute(device, {
+    id: 'scaled',
+    type: 'float32',
+    size: 1,
+    accessor: 'getScale',
+    transform: x => x * 2
+  });
+  const binary = {value: new Float32Array([1, 2]), version: 1};
+  const spy = vi.spyOn(attribute, 'setData');
+
+  expect(attribute.setBinaryValue(binary)).toBe(true);
+  expect(attribute.setBinaryValue(binary)).toBe(true);
+  expect(attribute.setBinaryValue({value: new Float32Array(2), version: 1})).toBe(true);
+  expect(spy, 'same version: single upload').toHaveBeenCalledTimes(1);
+
+  binary.version = 2;
+  attribute.setBinaryValue(binary);
+  expect(spy, 'same object, new version: upload').toHaveBeenCalledTimes(2);
+
+  const scale = {value: new Float32Array([1]), version: 1};
+  transformed.setBinaryValue(scale);
+  transformed.clearNeedsUpdate();
+  scale.version = 2;
+  expect(transformed.setBinaryValue(scale), 'transform falls through to updater').toBe(false);
+  expect(transformed.needsUpdate(), 'version bump requests the auto updater').toBeTruthy();
+
+  attribute.delete();
+  transformed.delete();
 });
 
 test('Attribute#setExternalBuffer - version 0 is valid', () => {

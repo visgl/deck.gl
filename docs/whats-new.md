@@ -11,6 +11,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 ### Performance
 
 - Picking in most instanced layers no longer allocates an `instancePickingColors` attribute buffer, instead using shader builtins `instance_index` / `gl_InstanceID`, reducing memory usage and initialization times.
+- Binary attributes in `data.attributes` accept an optional `version` and `updateRange`, so buffers rewritten in place are re-uploaded without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
 
 ## deck.gl v9.3
 

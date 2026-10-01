@@ -1217,6 +1217,13 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   private _diffProps(newProps: Layer<PropsT>['props'], oldProps: Layer<PropsT>['props']) {
     const changeFlags = diffProps(newProps, oldProps);
 
+    // Binary attributes can be versioned in place, without changing the data object
+    // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
+    if (this.getAttributeManager()?.hasExternalVersionChanged(newProps.data?.attributes)) {
+      // @ts-ignore (TS2531) internalState is always defined when this method is called
+      this.internalState.needsUpdate = true;
+    }
+
     // iterate over changedTriggers
     if (changeFlags.updateTriggersChanged) {
       for (const key in changeFlags.updateTriggersChanged) {

@@ -13,7 +13,7 @@ import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
 import {fillArray} from '../../utils/flatten';
 import * as range from '../../utils/range';
-import {bufferLayoutEqual} from './gl-utils';
+import {bufferLayoutEqual, getStride} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
 import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 
@@ -58,7 +58,16 @@ export type AttributeOptions = DataColumnOptions<{
 export type BinaryAttribute = Partial<BufferAccessor> & {
   value?: TypedArray;
   buffer?: Buffer;
+  /**
+   * Content version. When set, it is the only change signal for this attribute: a different
+   * version re-uploads the data and resets bounds, the same version is ignored even if the
+   * object identity changed.
+   */
   version?: number;
+  /**
+   * Rows `[start, end)` that changed since the previous `version`. When `value` is the same
+   * tightly packed array as before, only these rows are uploaded; otherwise the whole value is.
+   */
   updateRange?: {start: number; end: number};
 };
 
@@ -66,10 +75,10 @@ type AttributeInternalState = {
   startIndices: NumericArray | null;
   /** Legacy: external binary supplied via attribute name */
   lastExternalBuffer: TypedArray | Buffer | BinaryAttribute | null;
-  /** Version of last external buffer for version-based invalidation */
   lastExternalVersion: number | null;
   /** External binary supplied via accessor name */
   binaryValue: TypedArray | Buffer | BinaryAttribute | null;
+  binaryVersion: number | null;
   binaryAccessor: Accessor<any, any> | null;
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
@@ -87,6 +96,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       lastExternalBuffer: null,
       lastExternalVersion: null,
       binaryValue: null,
+      binaryVersion: null,
       binaryAccessor: null,
       needsUpdate: true,
       needsRedraw: false,
@@ -356,42 +366,39 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
     this.clearNeedsUpdate();
 
-    // Extract version if present
     const version = (buffer as BinaryAttribute).version;
-
-    // VERSION-BASED PATH (when version present)
-    if (version !== undefined) {
-      const needsUpdate = state.lastExternalVersion !== version;
-
-      if (!needsUpdate) {
-        // Same version → no update
-        state.lastExternalBuffer = buffer;
-        return true;
-      }
-
-      // Version changed → update
-      state.lastExternalVersion = version;
-      state.lastExternalBuffer = buffer;
-      this.setNeedsRedraw();
-      this.setData(buffer);
-      return true;
-    }
-
-    // OBJECT IDENTITY PATH (backward compatibility)
-    if (state.lastExternalBuffer === buffer) {
-      return true;
-    }
-
+    const unchanged =
+      version === undefined
+        ? state.lastExternalBuffer === buffer
+        : state.lastExternalVersion === version;
     state.lastExternalBuffer = buffer;
-    state.lastExternalVersion = null;
+    state.lastExternalVersion = version ?? null;
+    if (unchanged) {
+      return true;
+    }
     this.setNeedsRedraw();
-    this.setData(buffer);
+    this._uploadBinary(buffer);
     return true;
+  }
+
+  /** Returns `true` if `buffers` holds a versioned binary for this attribute that has not been applied */
+  hasExternalVersionChanged(
+    buffers: Record<string, TypedArray | Buffer | BinaryAttribute>
+  ): boolean {
+    const {accessor} = this.settings;
+    const external = buffers[this.id] as BinaryAttribute | undefined;
+    if (external) {
+      return external.version !== undefined && external.version !== this.state.lastExternalVersion;
+    }
+    const binary =
+      typeof accessor === 'string' ? (buffers[accessor] as BinaryAttribute | undefined) : undefined;
+    return binary?.version !== undefined && binary.version !== this.state.binaryVersion;
   }
 
   // Binary value is a typed array packed from mapping the source data with the accessor
   // If the returned value from the accessor is the same as the attribute value, set it directly
   // Otherwise use the auto updater for transform/normalization
+  // eslint-disable-next-line max-statements
   setBinaryValue(
     buffer?: TypedArray | Buffer | BinaryAttribute,
     startIndices: NumericArray | null = null
@@ -400,6 +407,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
 
     if (!buffer) {
       state.binaryValue = null;
+      state.binaryVersion = null;
       state.binaryAccessor = null;
       return false;
     }
@@ -409,7 +417,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    if (state.binaryValue === buffer) {
+    const version = (buffer as BinaryAttribute).version;
+    const unchanged =
+      version === undefined ? state.binaryValue === buffer : state.binaryVersion === version;
+    state.binaryVersion = version ?? null;
+    if (unchanged) {
       this.clearNeedsUpdate();
       return true;
     }
@@ -433,13 +445,49 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         startIndices: startIndices as NumericArray,
         nested: needsNormalize
       });
+      if (version !== undefined) {
+        // A version bump may arrive without dataChanged, so the auto updater must be requested here
+        this.setNeedsUpdate();
+      }
       // Fall through to auto updater
       return false;
     }
 
     this.clearNeedsUpdate();
-    this.setData(buffer);
+    this._uploadBinary(buffer);
     return true;
+  }
+
+  /** Uploads a changed binary input, limited to `updateRange` rows when the layout allows it */
+  private _uploadBinary(buffer: TypedArray | Buffer | BinaryAttribute): void {
+    const {version, updateRange} = buffer as BinaryAttribute;
+    if (version !== undefined && updateRange && this._canWriteRows(buffer as BinaryAttribute)) {
+      this.updateSubBuffer({
+        startOffset: this.getVertexOffset(updateRange.start),
+        endOffset: this.getVertexOffset(updateRange.end)
+      });
+    } else {
+      this.setData(buffer);
+    }
+  }
+
+  /** Row offsets map to element offsets only for the same, tightly packed, deck-owned array */
+  private _canWriteRows({value, type, size, offset, stride}: BinaryAttribute): boolean {
+    const accessor = this.getAccessor();
+    return Boolean(
+      value &&
+        value === this.value &&
+        this.buffer &&
+        !this.state.externalBuffer &&
+        !this.settings.isIndexed &&
+        !offset &&
+        !accessor.offset &&
+        (!type || type === accessor.type) &&
+        (size ?? this.size) === this.size &&
+        accessor.size === this.size &&
+        getStride(accessor) === this.size * value.BYTES_PER_ELEMENT &&
+        (!stride || stride === getStride(accessor))
+    );
   }
 
   getVertexOffset(row: number): number {

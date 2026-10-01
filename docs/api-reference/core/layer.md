@@ -80,6 +80,8 @@ Each value in `data.attributes` may be one of the following formats:
   + `offset` (number) - offset of the first vertex attribute into the buffer, in bytes
   + `stride` (number) - the offset between the beginning of consecutive vertex attributes, in bytes
   + `normalized` (boolean) - whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default.
+  + `version` (number) - content version. When set, it replaces object identity as the change signal for this attribute: changing it re-uploads the data and resets bounds, even if the object and the `data` container are the same. Keeping it the same skips the update, even if a new object is supplied. Use this when rewriting a buffer in place, e.g. compute output.
+  + `updateRange` (`{start: number, end: number}`) - rows `[start, end)` that changed with the latest `version`. When `value` is the same tightly packed array as before, only these rows are uploaded; otherwise the full `value` is uploaded. Ignored without `version`.
 
 **Remarks**
 
