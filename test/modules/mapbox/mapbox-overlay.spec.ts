@@ -7,7 +7,7 @@ import {test, expect, vi} from 'vitest';
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
+import {getDeckInstance, getViewState} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -672,6 +672,34 @@ for (const {projection, ExpectedView} of PROJECTION_TEST_CASES) {
     await renderPromise;
   });
 }
+
+test('MapboxOverlay#getViewState targets the MapLibre terrain like the MapLibre camera', () => {
+  const TEST_CASES = [
+    {projection: 'mercator', zoom: 10, position: [0, 0, 125]},
+    // MapLibre's globe camera targets sea level, it transitions to Web Mercator from zoom 11 to 12
+    {projection: 'globe', zoom: 10, position: [0, 0, 0]},
+    {projection: 'globe', zoom: 11.5, position: [0, 0, 62.5]},
+    {projection: 'globe', zoom: 12, position: [0, 0, 125]},
+    {projection: 'globe', zoom: 13, position: [0, 0, 125]}
+  ];
+
+  for (const {projection, zoom, position} of TEST_CASES) {
+    // maplibre-gl with terrain
+    const map = {
+      transform: {elevation: 125},
+      getCenter: () => ({lng: 13.47, lat: 48.57}),
+      getZoom: () => zoom,
+      getBearing: () => 0,
+      getPitch: () => 60,
+      getPadding: () => ({left: 0, right: 0, top: 0, bottom: 0}),
+      getRenderWorldCopies: () => true,
+      getTerrain: () => ({source: 'terrain'}),
+      getProjection: () => ({type: projection})
+    } as unknown as Parameters<typeof getViewState>[0];
+
+    expect(getViewState(map).position, `${projection} at zoom ${zoom}`).toEqual(position);
+  }
+});
 
 webglTest('MapboxOverlay#renderLayersInGroups - constructor', async () => {
   const map = new MockMapboxMap({
