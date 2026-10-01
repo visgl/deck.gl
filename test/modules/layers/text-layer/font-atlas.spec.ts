@@ -86,3 +86,15 @@ test('FontAtlasManager - SDF glyph frames hold the full distance field', () => {
     '.': 0
   });
 });
+
+test('FontAtlasManager - SDF glyph padding fits the atlas with a large radius', () => {
+  const fontAtlasManager = new FontAtlasManager();
+  fontAtlasManager.setProps({sdf: true, radius: 1400, characterSet: 'H'});
+  const {width: atlasWidth, mapping} = fontAtlasManager.atlas!;
+  const frame = mapping.H;
+
+  expect(frame.x + frame.width, 'glyph frame fits the atlas width').toBeLessThanOrEqual(atlasWidth);
+  // The anchor is the glyph center. It falls outside the frame if the bitmap is clipped.
+  expect(frame.anchorX, 'glyph is horizontally inside its frame').toBeGreaterThan(0);
+  expect(frame.anchorX, 'glyph is horizontally inside its frame').toBeLessThan(frame.width);
+});

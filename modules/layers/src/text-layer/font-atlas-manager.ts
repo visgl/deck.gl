@@ -395,9 +395,15 @@ export default class FontAtlasManager {
  * Space to reserve around each glyph in the atlas. A signed distance field extends
  * `radius * (1 - cutoff)` pixels beyond the glyph edge before reaching zero. Outlines are drawn
  * inside that range, so a smaller padding clips them at the edges of the glyph frame.
+ * The padding is capped so that a glyph up to twice `fontSize` wide still fits the atlas width.
  */
-function getGlyphPadding({sdf, buffer, radius, cutoff}: Required<FontSettings>): number {
-  return sdf ? Math.max(buffer, Math.ceil(radius * (1 - cutoff))) : buffer;
+function getGlyphPadding({sdf, buffer, radius, cutoff, fontSize}: Required<FontSettings>): number {
+  if (!sdf) {
+    return buffer;
+  }
+  const fieldPadding = Math.ceil(radius * (1 - cutoff));
+  const maxPadding = Math.floor(MAX_CANVAS_WIDTH / 2 - fontSize);
+  return Math.max(buffer, Math.min(fieldPadding, maxPadding));
 }
 
 function getSdfFontRenderer({
