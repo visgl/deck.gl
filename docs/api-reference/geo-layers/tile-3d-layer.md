@@ -228,6 +228,14 @@ Along with other options as below,
 
 The opacity of the layer. The same as defined in [layer](../core/layer.md).
 
+#### `_maxTileProcessingTime` (number, optional) {#_maxtileprocessingtime}
+
+- Default: `0` (disabled)
+
+Experimental CPU time budget, in milliseconds per animation frame, for creating scenegraph GPU assets. For example, `8` spreads bursts of arriving tiles over several frames so camera interaction can continue between uploads. The budget is shared by the default scenegraph sublayers of this Tile3DLayer. Custom scenegraph sublayers manage their own scheduling.
+
+This is a soft limit: creation of one tile cannot be interrupted and may exceed the budget. Smaller values can improve frame pacing while delaying full refinement. Parent coverage remains until replacement models have successfully drawn. Point cloud and mesh tiles are not scheduled by this option.
+
 #### `pointSize` (number, Optional) {#pointsize}
 
 - Default `1.0`
