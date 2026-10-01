@@ -350,6 +350,21 @@ test('TerrainEffect#external terrain', async () => {
   );
   tile.destroy();
 
+  // A host that draws the layers in groups shares one height map between them
+  const hutLayer = new ScatterplotLayer({
+    id: 'hut',
+    data: [[-122.45, 37.75]],
+    getPosition: d => d,
+    extensions: [new TerrainExtension()]
+  });
+  await lifecycle.update({layers: [externalTerrainLayer, summitLayer, hutLayer, glacierLayer]});
+  externalTerrain.renderHeightMap.mockClear();
+  lifecycle.render({layerFilter: ({layer}) => layer.id !== 'hut'});
+  expect(
+    externalTerrain.renderHeightMap,
+    'Height map covers the layers of every group'
+  ).not.toHaveBeenCalled();
+
   // Terrain layers take precedence
   externalTerrain.renderHeightMap.mockClear();
   await lifecycle.update({
