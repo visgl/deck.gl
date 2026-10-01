@@ -129,6 +129,35 @@ test('GlobeViewport#project, unproject#center', () => {
   config.EPSILON = oldEpsilon;
 });
 
+test('GlobeViewport#position', () => {
+  for (const testCase of TEST_VIEWPORTS) {
+    for (const pitch of [0, 60]) {
+      // Base maps with terrain set the elevation of the map center as position
+      const viewport = new GlobeViewport({...testCase, pitch, bearing: 30, position: [0, 0, 2000]});
+      const [x, y] = viewport.project([viewport.longitude, viewport.latitude, 2000]);
+      expect(
+        Math.hypot(x - viewport.width / 2, y - viewport.height / 2),
+        `point at the elevation of position is projected to screen center (pitch ${pitch})`
+      ).toBeLessThan(1e-3);
+    }
+  }
+
+  // x and y are meter offsets to the east and to the north. The target below is computed on a
+  // local flat approximation, hence the looser tolerance
+  const viewport = new GlobeViewport({...TEST_VIEWPORTS[0], pitch: 45, position: [1000, 2000, 0]});
+  const {metersPerUnit, unitsPerDegree} = viewport.getDistanceScales();
+  const metersPerDegree = metersPerUnit[0] * unitsPerDegree[0];
+  const target = [
+    viewport.longitude + 1000 / metersPerDegree / Math.cos((viewport.latitude * Math.PI) / 180),
+    viewport.latitude + 2000 / metersPerDegree
+  ];
+  const [x, y] = viewport.project(target);
+  expect(
+    Math.hypot(x - viewport.width / 2, y - viewport.height / 2),
+    'point at the meter offsets of position is projected to screen center'
+  ).toBeLessThan(0.1);
+});
+
 test('GlobeViewport#project, unproject', () => {
   const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-7;

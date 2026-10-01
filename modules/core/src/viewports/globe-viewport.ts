@@ -20,6 +20,23 @@ const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
 const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
 const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
 
+/**
+ * Rotation from meter offsets to the east, north and up at a location to common space,
+ * where the z axis is the polar axis (see `GlobeViewport.projectPosition`).
+ */
+function getEastNorthUpMatrix(longitude: number, latitude: number): Matrix4 {
+  const lambda = longitude * DEGREES_TO_RADIANS;
+  const phi = latitude * DEGREES_TO_RADIANS;
+  const sinLambda = Math.sin(lambda);
+  const cosLambda = Math.cos(lambda);
+  const sinPhi = Math.sin(phi);
+  const cosPhi = Math.cos(phi);
+  const east = [cosLambda, sinLambda, 0];
+  const north = [-sinLambda * sinPhi, cosLambda * sinPhi, cosPhi];
+  const up = [sinLambda * cosPhi, -cosLambda * cosPhi, sinPhi];
+  return new Matrix4([...east, 0, ...north, 0, ...up, 0, 0, 0, 0, 1]);
+}
+
 function getDistanceScales() {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
   const unitsPerDegree = (Math.PI / 180) * GLOBE_RADIUS;
@@ -151,6 +168,9 @@ export default class GlobeViewport extends Viewport {
       longitude,
       latitude,
       zoom,
+      // `position` holds meter offsets to the east, north and up from the target, e.g. the
+      // elevation of the map center when a base map has terrain
+      modelMatrix: opts.position ? getEastNorthUpMatrix(longitude, latitude) : null,
 
       // projection matrix parameters
       distanceScales: getDistanceScales(),
