@@ -8,7 +8,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ### WebGPU external position buffers
 
-Standalone external `Buffer` objects supplied to `float64` attributes now use a zero `64Low` part on WebGPU, matching WebGL. WebGPU previously read the low part from the same buffer, which could consume unrelated interleaved data or exceed the buffer's bounds. Applications that intentionally supplied nonzero high/low pairs through an external buffer must supply a `Float64Array` instead to retain double precision. Existing padded rows can keep their stride; tightly packed float32x3 positions should specify `stride: 12`.
+Standalone external `Buffer` objects supplied to `float64` attributes now use a zero `64Low` part on WebGPU, matching WebGL. WebGPU previously read the low part from the same buffer, which could consume unrelated interleaved data or exceed the buffer's bounds. The same applies when a typed array `value` is supplied alongside the `buffer`; previously a `Float64Array` value (or a `Float32Array` value on WebGPU) made deck.gl read the low part from the buffer. Applications that intentionally supplied nonzero high/low pairs through an external buffer must supply a `Float64Array` instead to retain double precision. Existing padded rows can keep their stride; tightly packed float32x3 positions should specify `stride: 12`.
 
 ### pydeck lighting
 

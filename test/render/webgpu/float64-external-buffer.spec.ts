@@ -316,7 +316,7 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
       bound.buffer!.destroy();
     }
 
-    test('REF: deck-managed Float64Array renders', async () => {
+    test('deck-managed Float64Array renders (reference)', async () => {
       const frame = await renderFrame({
         isCartesian,
         createLayers: () => [makeLayer({coordinateSystem, data: positions, getPosition: d => d})]
@@ -326,15 +326,21 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
       await expectGoldenImage(goldenImage);
     });
 
-    test("A: float32x3 Buffer with type 'float32' and stride 12 renders", async () => {
+    test("float32x3 Buffer with type 'float32' and stride 12 renders", async () => {
       await renderBuffer(PACKED_ROW, buffer => ({
         instancePositions: {buffer, type: 'float32', stride: 12}
       }));
     });
 
-    test('A: float32x3 Buffer passed as getPosition renders', async () => {
+    test('float32x3 Buffer passed as getPosition renders', async () => {
       await renderBuffer(PACKED_ROW, buffer => ({
         getPosition: {buffer, size: 3, type: 'float32', stride: 12}
+      }));
+    });
+
+    test('a Float32Array value supplied with the Buffer does not change how it is read', async () => {
+      await renderBuffer(PACKED_ROW, buffer => ({
+        getPosition: {buffer, value: new Float32Array(positions.flat()), size: 3, stride: 12}
       }));
     });
 
@@ -345,7 +351,7 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
       );
     });
 
-    test('B: Buffer written as [x, y, z, 0, 0, 0] rows renders', async () => {
+    test('Buffer written as [x, y, z, 0, 0, 0] rows renders', async () => {
       await renderBuffer(HIGH_LOW_ROW, buffer => ({instancePositions: buffer}));
     });
 
@@ -356,7 +362,7 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
       }));
     });
 
-    test('E: Float32Array (deck-managed) renders', async () => {
+    test('deck-managed Float32Array renders', async () => {
       const frame = await renderFrame({
         isCartesian,
         createLayers: () => [
@@ -487,7 +493,7 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
       bound.buffer!.destroy();
     }
 
-    test('REF: deck-managed positions render', async () => {
+    test('deck-managed positions render (reference)', async () => {
       const frame = await renderFrame({
         createLayers: () => [makeLayer({...layerProps, data: METER_POINTS, getPosition: d => d})]
       });
@@ -495,11 +501,11 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
       expectPointsRendered(frame, METER_POINTS, METER_ORIGIN);
     });
 
-    test('C: float32x3 Buffer renders', async () => {
+    test('float32x3 Buffer with the default stride renders', async () => {
       await renderBuffer(PACKED_ROW, buffer => ({instancePositions: buffer}));
     });
 
-    test('D: float32x3 Buffer with stride 12 renders', async () => {
+    test('float32x3 Buffer with stride 12 renders', async () => {
       await renderBuffer(PACKED_ROW, buffer => ({instancePositions: {buffer, stride: 12}}));
     });
 

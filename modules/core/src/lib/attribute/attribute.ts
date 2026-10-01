@@ -136,6 +136,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return this.state.layoutChanged;
   }
 
+  /**
+   * Publishes the accessor of the current data source.
+   * Callers must update `value`, `externalBuffer` and `constant` first, because
+   * `hasZeroLowBuffer` is derived from them and changes the number of buffer layouts.
+   */
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
     const {hasZeroLowBuffer} = this;
     this.state.layoutChanged ||=
@@ -437,7 +442,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
-  /** Generate WebGPU-style buffer layout descriptor from this attribute */
+  /**
+   * Generate the WebGPU-style buffer layout descriptor of this attribute's own buffer.
+   * @note On WebGPU, an external Buffer bound to a double-precision attribute reads its low part
+   * from a separate zero buffer, which this layout does not declare. Use `getBufferLayouts()`,
+   * or `AttributeManager.getBufferLayouts()`, to build a `Model`'s complete buffer layout.
+   */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}
@@ -471,7 +481,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
-  /** Generate all WebGPU-style buffer layout descriptors of this attribute */
+  /**
+   * Generate all WebGPU-style buffer layout descriptors of this attribute, including the
+   * zero low-part layout of `hasZeroLowBuffer` attributes. Prefer this over `getBufferLayout()`.
+   */
   getBufferLayouts(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}

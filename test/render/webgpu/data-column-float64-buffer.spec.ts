@@ -272,6 +272,61 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))(
       attribute.delete();
     });
 
+    test.each([
+      ['Float32Array', Float32Array],
+      ['Float64Array', Float64Array]
+    ])('ignores the type of a %s value supplied with a Buffer', (_, ArrayType) => {
+      const attribute = createPositionAttribute();
+      const buffer = createBuffer(NUM_INSTANCES * 12);
+      attribute.setExternalBuffer({buffer, value: new ArrayType(NUM_INSTANCES * 3), stride: 12});
+
+      expect(attribute.isDoublePrecisionBuffer, 'the Buffer holds high parts only').toBe(false);
+      expect(attribute.hasZeroLowBuffer).toBe(true);
+      const [layout, lowLayout] = attribute.getBufferLayouts();
+      expect(layout.attributes?.map(attribute => attribute.attribute)).toEqual([
+        'instancePositions'
+      ]);
+      expect(lowLayout.name).toBe(ZERO_LOW_BUFFER_NAME);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test('reads interleaved rows from a Buffer marked as double precision', () => {
+      const attribute = createPositionAttribute();
+      const buffer = createBuffer(NUM_INSTANCES * 24);
+      // Internal option used by GPU transitions, whose output keeps [high, low] rows
+      attribute.setData({buffer, stride: 24, isDoublePrecisionBuffer: true});
+
+      expect(attribute.hasZeroLowBuffer).toBe(false);
+      const layouts = attribute.getBufferLayouts();
+      expect(layouts).toHaveLength(1);
+      expect(layouts[0].attributes).toEqual([
+        {attribute: 'instancePositions', format: 'float32x3', byteOffset: 0},
+        {attribute: 'instancePositions64Low', format: 'float32x3', byteOffset: 12}
+      ]);
+      expect(attribute.getValue().instancePositions64Low).toBe(buffer);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test('flags a layout change when an external Buffer is replaced by allocated data', () => {
+      const attribute = createPositionAttribute();
+      const buffer = createBuffer(NUM_INSTANCES * 12);
+      attribute.setExternalBuffer({buffer, stride: 12});
+      expect(attribute.getBufferLayouts()).toHaveLength(2);
+
+      attribute.setExternalBuffer(undefined);
+      attribute.allocate(NUM_INSTANCES);
+      expect(attribute.layoutChanged(), 'the zero low layout is removed').toBe(true);
+      expect(attribute.hasZeroLowBuffer).toBe(false);
+      expect(attribute.getBufferLayouts()).toHaveLength(1);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
     test('GPU transitions of an external Buffer are not supported, as for deck-managed data', () => {
       // BufferTransform is WebGL-only, so the zero buffer never feeds a transition
       const attribute = createPositionAttribute({transition: true});

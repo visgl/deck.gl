@@ -1237,6 +1237,26 @@ describe('Attribute#doublePrecision', () => {
     buffer.delete();
     attribute.delete();
   });
+  test('external Buffer with a Float64Array value on WebGL', () => {
+    const attribute = new Attribute(device, {
+      id: 'positions',
+      type: 'float64',
+      size: 3,
+      accessor: 'getPosition'
+    });
+    attribute.numInstances = 4;
+    const buffer = device.createBuffer({byteLength: 4 * 12});
+
+    // The value does not change how the Buffer is read: it holds high parts only
+    attribute.setExternalBuffer({buffer, value: new Float64Array(4 * 3), stride: 12});
+    expect(attribute.isDoublePrecisionBuffer).toBe(false);
+    expect(attribute.getValue().positions64Low, 'low part is a constant').toEqual(
+      new Float32Array(3)
+    );
+
+    buffer.delete();
+    attribute.delete();
+  });
 });
 
 test('Attribute#updateBuffer', () => {

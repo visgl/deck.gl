@@ -118,6 +118,8 @@ export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
 
 type DataColumnInternalState<Options, State> = State & {
   externalBuffer: Buffer | null;
+  /** Whether `externalBuffer` holds interleaved [high, low] rows, e.g. GPU transition output */
+  isExternalDoublePrecisionBuffer: boolean;
   bufferAccessor: DataColumnSettings<Options>;
   allocatedValue: TypedArray | null;
   numInstances: number;
@@ -189,6 +191,7 @@ export default class DataColumn<Options, State> {
     this.state = {
       ...state,
       externalBuffer: null,
+      isExternalDoublePrecisionBuffer: false,
       bufferAccessor: this.settings,
       allocatedValue: null,
       numInstances: 0,
@@ -224,6 +227,11 @@ export default class DataColumn<Options, State> {
 
   /** @internal Whether this column's GPU buffer contains interleaved high and low components. */
   get isDoublePrecisionBuffer(): boolean {
+    if (this.state.externalBuffer) {
+      // External Buffers hold high parts only, regardless of the type of an accompanying `value`.
+      // Only deck.gl-produced buffers, e.g. transitions, opt into interleaved rows explicitly.
+      return this.doublePrecision && this.state.isExternalDoublePrecisionBuffer;
+    }
     return this._shouldSplitDoublePrecisionValue(this.value);
   }
 
@@ -421,6 +429,11 @@ export default class DataColumn<Options, State> {
           buffer?: Buffer;
           /** Set to `true` if supplying float values to a unorm attribute */
           normalized?: boolean;
+          /**
+           * @internal Set to `true` if `buffer` holds interleaved [high, low] rows of a
+           * double-precision attribute. Otherwise an external buffer supplies the high part only.
+           */
+          isDoublePrecisionBuffer?: boolean;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;
@@ -429,6 +442,7 @@ export default class DataColumn<Options, State> {
       constant?: boolean;
       value?: NumericArray;
       buffer?: Buffer;
+      isDoublePrecisionBuffer?: boolean;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
@@ -477,6 +491,7 @@ export default class DataColumn<Options, State> {
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;
+      state.isExternalDoublePrecisionBuffer = Boolean(opts.isDoublePrecisionBuffer);
       state.constant = false;
       this.value = opts.value || null;
     } else if (opts.value) {
@@ -551,6 +566,9 @@ export default class DataColumn<Options, State> {
     });
 
     this.value = value;
+    // Clear the previous source first: setAccessor derives layout state from it
+    state.constant = false;
+    state.externalBuffer = null;
 
     const splitDoublePrecisionValue = this._shouldSplitDoublePrecisionValue(value);
     const accessor =
@@ -580,8 +598,6 @@ export default class DataColumn<Options, State> {
     }
 
     state.allocatedValue = value;
-    state.constant = false;
-    state.externalBuffer = null;
     return true;
   }
 
