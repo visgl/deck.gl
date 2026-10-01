@@ -10,32 +10,24 @@ import {getRequiredWebGPUDevice} from './webgpu-test-device';
 import {isRenderTestDeviceEnabled} from '../render-test-suite';
 
 // https://www.w3.org/TR/webgpu/#enumdef-gpuvertexformat
+// Excludes the single-component 8/16-bit formats, which not every implementation supports
 const GPU_VERTEX_FORMATS = new Set([
-  'uint8',
   'uint8x2',
   'uint8x4',
-  'sint8',
   'sint8x2',
   'sint8x4',
-  'unorm8',
   'unorm8x2',
   'unorm8x4',
-  'snorm8',
   'snorm8x2',
   'snorm8x4',
-  'uint16',
   'uint16x2',
   'uint16x4',
-  'sint16',
   'sint16x2',
   'sint16x4',
-  'unorm16',
   'unorm16x2',
   'unorm16x4',
-  'snorm16',
   'snorm16x2',
   'snorm16x4',
-  'float16',
   'float16x2',
   'float16x4',
   'float32',
@@ -100,15 +92,20 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute layouts'
         expect(layout.byteStride! % 4, `byteStride ${layout.byteStride} is a multiple of 4`).toBe(
           0
         );
+        // uint8 vectors are read as unorm8 on WebGPU; scalars keep their integer type
+        const expectedType = type === 'uint8' && size > 1 ? 'unorm8' : type;
+        expect(layout.attributes![0].format.split('x')[0], 'component type').toBe(expectedType);
       });
     }
   }
 
-  test('getBufferLayout on WebGPU - sizes 1 and 2 keep their format', () => {
+  test('getBufferLayout on WebGPU - scalars are read as x2 of the same type', () => {
     for (const [type, size, format, byteStride] of [
-      ['uint8', 1, 'uint8', 4],
-      ['unorm8', 2, 'unorm8x2', 4],
-      ['uint16', 1, 'uint16', 4]
+      ['uint8', 1, 'uint8x2', 4],
+      ['unorm8', 1, 'unorm8x2', 4],
+      ['snorm16', 1, 'snorm16x2', 4],
+      ['uint16', 1, 'uint16x2', 4],
+      ['unorm8', 2, 'unorm8x2', 4]
     ] as const) {
       const layout = getLayoutForAttribute(webgpuDevice, type, size);
       expect(layout.attributes![0].format, `${type}x${size}`).toBe(format);

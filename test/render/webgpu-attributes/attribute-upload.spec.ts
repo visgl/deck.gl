@@ -153,8 +153,8 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute upload',
 
   test('WebGPU uint16 size 1 and size 3 are padded on upload', async () => {
     const cases = [
-      // Size 1 keeps its format; only the stride is padded to 4 bytes
-      {size: 1, paddedSize: 2, format: 'uint16', values: [1, 2, 3], padValues: [0, 0]},
+      // Size 1 is read as x2 of the same type; the second component is 0, as on WebGL
+      {size: 1, paddedSize: 2, format: 'uint16x2', values: [1, 2, 3], padValues: [0, 0]},
       {
         size: 3,
         paddedSize: 4,
@@ -364,6 +364,48 @@ describe.skipIf(!isRenderTestDeviceEnabled('webgpu'))('WebGPU attribute upload',
     expect(layout.byteStride).toBe(4);
     expect(layout.attributes![0].format).toBe('unorm8x2');
     buffer.destroy();
+    attribute.delete();
+  });
+
+  test('WebGPU uint8 scalars are read as uint8x2 by an integer shader input', async () => {
+    const attribute = new Attribute(device, {id: 'flags', size: 1, accessor: 'getFlag'});
+    attribute.setExternalBuffer(new Uint8Array([1, 2, 3]));
+    expect(await readAttribute(attribute, Uint8Array, 12)).toEqual([
+      1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0
+    ]);
+    const layout = attribute.getBufferLayout();
+    expect(layout.attributes![0].format).toBe('uint8x2');
+
+    const source = /* wgsl */ `\
+  @vertex
+  fn vertexMain(@location(0) flags: u32) -> @builtin(position) vec4<f32> {
+    return vec4<f32>(f32(flags), 0.0, 0.0, 1.0);
+  }
+
+  @fragment
+  fn fragmentMain() -> @location(0) vec4<f32> {
+    return vec4<f32>(1.0);
+  }
+  `;
+    const error = await getValidationError(device, () => {
+      const shader = device.createShader({id: 'scalar-uint8', source});
+      const pipeline = device.createRenderPipeline({
+        id: 'scalar-uint8',
+        vs: shader,
+        fs: shader,
+        vertexEntryPoint: 'vertexMain',
+        fragmentEntryPoint: 'fragmentMain',
+        topology: 'point-list',
+        shaderLayout: {
+          attributes: [{name: 'flags', location: 0, type: 'u32', stepMode: 'vertex'}],
+          bindings: []
+        },
+        bufferLayout: [layout]
+      });
+      pipeline.destroy();
+      shader.destroy();
+    });
+    expect(error, 'createRenderPipeline reports no WebGPU error').toBeNull();
     attribute.delete();
   });
 

@@ -584,10 +584,12 @@ export default class DataColumn<Options, State> {
     if (bytesPerElement >= 4 || size > 4) {
       return false;
     }
+    // Scalars are read as x2, see getBufferAttributeLayout
+    const formatByteLength = Math.max(size, 2) * bytesPerElement;
     return (
       size === 3 ||
       getStride(accessor) % 4 !== 0 ||
-      (accessor.offset || 0) % Math.min(size * bytesPerElement, 4) !== 0
+      (accessor.offset || 0) % Math.min(formatByteLength, 4) !== 0
     );
   }
 
