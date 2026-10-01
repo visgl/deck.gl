@@ -485,24 +485,25 @@ const quadkeyTileLayer = new TileLayer({
 
 ### `getTileLoadingState()` {#gettileloadingstate}
 
-Returns request-outcome counts for the tiles selected in the current viewport, distinguishing successful, failed, and pending requests. Successful requests include empty results.
+Returns counts of request outcomes for the tiles selected for the current viewport, or `null` if the tileset has not selected tiles yet (before the first update or after the layer is finalized).
 
-These counts describe tile requests only. `layer.isLoaded` also waits for sublayers generated from successful tile content to finish loading. Therefore, `pending === 0` does not by itself mean that the layer is ready to render or that GPU work has completed.
+Only selected tiles are counted. Placeholder tiles drawn from the cache while selected tiles load (see [`refinementStrategy`](#refinementstrategy)) are not. When the viewport selects no tiles, e.g. below `minZoom` without an `extent` or outside the `visibleMinZoom`/`visibleMaxZoom` range, all counts are `0`.
+
+The counts describe tile requests only. `layer.isLoaded` also waits for the sublayers rendered from successful tiles, so `pending === 0` does not mean that the layer is ready to render.
 
 Returns a `TileLoadingState` object:
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `total` | `number` | Total tiles in the current viewport |
-| `loaded` | `number` | Tiles that loaded successfully, including empty results |
-| `failed` | `number` | Tiles whose requests threw or rejected |
-| `pending` | `number` | Tiles not yet settled, including cancelled requests awaiting reload |
+- `loaded` (number) - requests that succeeded, including empty results
+- `failed` (number) - requests that threw or rejected
+- `pending` (number) - requests not yet settled, including cancelled requests and tiles awaiting reload
 
 ```ts
 import type {TileLoadingState} from '@deck.gl/geo-layers';
 
-const state: TileLoadingState = tileLayer.getTileLoadingState();
-console.log(`${state.loaded}/${state.total} tiles loaded, ${state.failed} failed`);
+const state: TileLoadingState | null = tileLayer.getTileLoadingState();
+if (state && state.pending === 0 && state.failed > 0) {
+  console.warn(`${state.failed} tiles failed to load`);
+}
 ```
 
 ## Source

@@ -18,17 +18,6 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import {LayersList} from '@deck.gl/core';
 
 import type {TileLoadProps, ZRange} from '../tileset-2d/index';
-
-export type TileLoadingState = {
-  /** Number of selected tiles in the current viewport. */
-  total: number;
-  /** Successful requests, including valid empty results. */
-  loaded: number;
-  /** Requests that settled with an error. */
-  failed: number;
-  /** Requests not yet settled, including tiles awaiting reload. */
-  pending: number;
-};
 import {
   Tileset2D,
   Tile2DHeader,
@@ -38,6 +27,16 @@ import {
 } from '../tileset-2d/index';
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 import {Matrix4} from '@math.gl/core';
+
+/** Request outcomes of the tiles selected for the current viewport. */
+export type TileLoadingState = {
+  /** Requests that succeeded, including empty results. */
+  loaded: number;
+  /** Requests that threw or rejected. */
+  failed: number;
+  /** Requests not yet settled, including cancelled requests and tiles awaiting reload. */
+  pending: number;
+};
 
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
@@ -233,18 +232,30 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     );
   }
 
-  /** Report request outcomes for the tiles selected by the current viewport. */
-  getTileLoadingState(): TileLoadingState {
-    const selectedTiles: Tile2DHeader<DataT>[] = this.state?.tileset?.selectedTiles ?? [];
+  /**
+   * Count request outcomes of the tiles selected for the current viewport.
+   * Returns `null` before the tileset has selected tiles (before the first update or after
+   * finalization). All counts are zero when the viewport selects no tiles, e.g. outside the
+   * `minZoom` or `visibleMinZoom`/`visibleMaxZoom` range.
+   */
+  getTileLoadingState(): TileLoadingState | null {
+    const selectedTiles = this.state?.tileset?.selectedTiles;
+    if (!selectedTiles) {
+      return null;
+    }
     let loaded = 0;
     let failed = 0;
     let pending = 0;
     for (const tile of selectedTiles) {
-      if (!tile.isLoaded) pending++;
-      else if (tile.isFailed) failed++;
-      else loaded++;
+      if (!tile.isLoaded) {
+        pending++;
+      } else if (tile.isFailed) {
+        failed++;
+      } else {
+        loaded++;
+      }
     }
-    return {total: selectedTiles.length, loaded, failed, pending};
+    return {loaded, failed, pending};
   }
 
   shouldUpdateState({changeFlags}): boolean {

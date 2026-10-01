@@ -34,7 +34,7 @@ export class Tile2DHeader<DataT = any> {
   private _loader: Promise<void> | undefined;
   private _loaderId: number;
   private _isLoaded: boolean;
-  private _hasError = false;
+  private _hasError: boolean;
   private _isCancelled: boolean;
   private _needsReload: boolean;
   private _bbox!: TileBoundingBox;
@@ -52,6 +52,7 @@ export class Tile2DHeader<DataT = any> {
     this._abortController = null;
     this._loaderId = 0;
     this._isLoaded = false;
+    this._hasError = false;
     this._isCancelled = false;
     this._needsReload = false;
   }
