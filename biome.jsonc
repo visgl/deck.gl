@@ -1,0 +1,115 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
+  "extends": ["@vis.gl/dev-tools/biome.jsonc"],
+  "formatter": {
+    "includes": [
+      "modules/**/*.{js,mjs,jsx,ts,tsx}",
+      "test/**/*.{js,mjs,jsx,ts,tsx}",
+      "examples/**/*.{js,mjs,jsx,ts,tsx}",
+      "!**/dist*/**",
+      "!**/node-modules/**",
+      "!**/dist.js",
+      "!**/*.min.js",
+      "!**/mapbox-gl.js",
+      "!**/mapbox-gl-dev.js"
+    ],
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "bracketSpacing": false
+  },
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded",
+      "bracketSpacing": false,
+      "jsxQuoteStyle": "double",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "none"
+    },
+    "globals": ["Iterable", "AsyncIterable", "__VERSION__"]
+  },
+  "linter": {
+    "includes": [
+      "modules/**/*.{js,mjs,jsx,ts,tsx}",
+      "examples/**/*.{js,mjs,jsx,ts,tsx}",
+      "!**/dist*/**",
+      "!**/dist.js",
+      "!**/*.min.js",
+      "!**/mapbox-gl.js",
+      "!**/.cache/**",
+      "!**/.docusaurus/**",
+      "!**/workers/**",
+      "!examples/layer-browser/**",
+      "!examples/vite.config.local.mjs"
+    ],
+    "rules": {
+      "recommended": false,
+      "complexity": {
+        "useMaxParams": "warn"
+      },
+      "correctness": {
+        "noInvalidUseBeforeDeclaration": "off",
+        "noUndeclaredDependencies": "off",
+        "noUnreachable": "error",
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "warn",
+        "useParseIntRadix": "off"
+      },
+      "style": {
+        "noCommonJs": "off",
+        "noInferrableTypes": "off",
+        "noNonNullAssertion": "off",
+        "useBlockStatements": "off",
+        "useDefaultSwitchClause": "warn"
+      },
+      "suspicious": {
+        "noAsyncPromiseExecutor": "error",
+        "noConsole": "warn",
+        "noDebugger": "error",
+        "noDoubleEquals": "warn",
+        "noEmptyBlockStatements": "off",
+        "noExplicitAny": "off",
+        "noNonNullAssertedOptionalChain": "off",
+        "noRedeclare": "error",
+        "noShadowRestrictedNames": "off",
+        "useAwait": "off",
+        "useGuardForIn": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDuplicateClassMembers": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/test/**/*.js",
+        "**/test/**/*.ts",
+        "**/scripts/**/*.js",
+        "*.config.js",
+        "*.config.ts",
+        "*.workspace.ts",
+        "*.config.local.js",
+        "*.config.local.mjs"
+      ],
+      "javascript": {
+        "globals": ["process"]
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUndeclaredDependencies": "off"
+          }
+        }
+      }
+    }
+  ]
+}

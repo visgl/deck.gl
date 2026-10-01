@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "start": "vite",
+    "start-local": "vite --config ../vite.config.local.mjs"
+  },
+  "dependencies": {
+    "deck.gl": "^9.0.0",
+    "mapbox-gl": "^3.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^8.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.3"
+  }
+}

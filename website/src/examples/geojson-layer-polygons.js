@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class GeoJsonDemo extends Component {
   static title = 'Vancouver Property Value';
 
+  static hasDeviceTabs = true;
+
   static data = {
     url: `${DATA_URI}/vancouver-blocks.txt`,
     worker: '/workers/geojson-data-decoder.js'

@@ -16,6 +16,11 @@ Gallery
 Overview
 ^^^^^^^^
 
+`pydeck Playground <https://deck.gl/pydeck>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Try pydeck scripts directly in the browser with the `pydeck playground <https://deck.gl/pydeck>`__. No installation needed — edit Python code and see the visualization update in real time.
+
 `pydeck in Jupyter <jupyter.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -61,15 +66,20 @@ a user's zoom level
 Used to enable or disable map controls and also modify the kind of map projection,
 like plotting in flat plane instead of plotting on a mercator projection
 
-`LightSettings (Experimental) <light_settings.html>`__
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+`Effects <effect.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Configure the lighting within a visualization.
+Configure lighting and screen-space post-processing effects.
 
 `Widgets <widget.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Configure one of the many deck.gl UI widgets for displaying and controlling deck.gl state in pydeck.
+
+`Extensions <extension.html>`__
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add optional deck.gl layer extensions, like data-driven filtering or masking, to a layer.
 
 .. note::
    The pydeck library assumes Internet access. You will need an Internet connection or the visualization will not render.
@@ -103,8 +113,9 @@ Index
    data_utils
    view_state
    view
-   light_settings
+   effect
    widget
+   extension
    types
 
 .. toctree::

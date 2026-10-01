@@ -56,6 +56,20 @@ test('GoogleMapsOverlay#interleaved prop', () => {
   expect(!overlay.props.interleaved, 'interleaved set to false').toBeTruthy();
 });
 
+test('GoogleMapsOverlay#pixelSizeSource css-dpr when no external gl', () => {
+  const map = new mapsApi.Map({width: 1, height: 1, longitude: 0, latitude: 0, zoom: 1});
+
+  const overlay = new GoogleMapsOverlay(withDevice({interleaved: false, layers: []}));
+  overlay.setMap(map);
+  map.emit({type: 'renderingtype_changed'});
+  expect(
+    overlay._deck.props.deviceProps?.createCanvasContext?.pixelSizeSource,
+    'pixelSizeSource is css-dpr when Deck creates its own context'
+  ).toBe('css-dpr');
+
+  overlay.finalize();
+});
+
 test('GoogleMapsOverlay#useDevicePixels prop', () => {
   const map = new mapsApi.Map({width: 1, height: 1, longitude: 0, latitude: 0, zoom: 1});
 

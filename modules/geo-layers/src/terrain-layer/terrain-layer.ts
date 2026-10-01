@@ -6,17 +6,17 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
+  COORDINATE_SYSTEM,
   DefaultProps,
+  _GlobeViewport as GlobeViewport,
   Layer,
   LayersList,
   log,
   Material,
   TextureSource,
-  UpdateParameters,
-  _GlobeViewport as GlobeViewport
+  UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import type {MeshAttributes} from '@loaders.gl/schema';
 import {TerrainWorkerLoader} from '@loaders.gl/terrain';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
@@ -27,7 +27,7 @@ import type {
   TileLoadProps,
   ZRange
 } from '../tileset-2d/index';
-import {Tile2DHeader, urlType, getURLFromTemplate, URLTemplate} from '../tileset-2d/index';
+import {getURLFromTemplate, Tile2DHeader, URLTemplate, urlType} from '../tileset-2d/index';
 
 const DUMMY_DATA = [1];
 const TILE_OVERLAP_PIXELS = 1;
@@ -356,7 +356,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       onTileError,
       maxCacheSize,
       maxCacheByteSize,
-      refinementStrategy
+      refinementStrategy,
+      zoomOffset
     } = this.props;
 
     if (this.state.isTiled) {
@@ -373,7 +374,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
               texture: urlTemplateToUpdateTrigger(texture),
               meshMaxError,
               elevationDecoder,
-              projectionMode: this.context.viewport.projectionMode
+              projectionMode: this.context.viewport.projectionMode,
+              zoomOffset
             }
           },
           onViewportLoad: this.onViewportLoad.bind(this),
@@ -388,7 +390,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
           onTileError,
           maxCacheSize,
           maxCacheByteSize,
-          refinementStrategy
+          refinementStrategy,
+          zoomOffset
         }
       );
     }

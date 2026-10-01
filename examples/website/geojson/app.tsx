@@ -6,6 +6,7 @@ import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, PolygonLayer} from '@deck.gl/layers';
 import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';
 import {scaleThreshold} from 'd3-scale';
@@ -89,9 +90,11 @@ function getTooltip({object}: PickingInfo<Feature<Geometry, BlockProperties>>) {
 }
 
 export default function App({
+  device,
   data = DATA_URL,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: string | Feature<Geometry, BlockProperties>[];
   mapStyle?: string;
 }) {
@@ -127,6 +130,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       effects={effects}
       initialViewState={INITIAL_VIEW_STATE}

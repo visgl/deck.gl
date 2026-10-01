@@ -84,6 +84,67 @@ test('ScrollbarWidget - slider placement#horizontal', async () => {
   expect(thumb.style.left).toBe('20%');
 });
 
+test.each([
+  {
+    description: 'controller fallback',
+    contentBoundsPadding: undefined,
+    expectedValue: '250',
+    expectedWidth: '50%',
+    expectedLeft: '25%'
+  },
+  {
+    description: 'null controller fallback',
+    contentBoundsPadding: null,
+    expectedValue: '250',
+    expectedWidth: '50%',
+    expectedLeft: '25%'
+  },
+  {
+    description: 'widget override',
+    contentBoundsPadding: {left: 100, right: 100},
+    expectedValue: '300',
+    expectedWidth: '40%',
+    expectedLeft: '30%'
+  }
+])(
+  'ScrollbarWidget - contentBoundsPadding#$description',
+  async ({contentBoundsPadding, expectedValue, expectedWidth, expectedLeft}) => {
+    testInstance = new WidgetTester({
+      views: new OrthographicView({
+        id: 'ortho',
+        controller: {
+          maxBoundsPadding: {left: 50, right: 50}
+        }
+      }),
+      initialViewState: {
+        target: [0, 0],
+        zoom: 0
+      } satisfies OrthographicViewState,
+      widgets: [
+        new ScrollbarWidget({
+          viewId: 'ortho',
+          orientation: 'horizontal',
+          contentBounds: [
+            [-500, -50],
+            [500, 50]
+          ],
+          contentBoundsPadding
+        })
+      ]
+    });
+
+    await testInstance.idle();
+    const scrollbar = testInstance.findElements(
+      '.deck-widget-range--horizontal'
+    )[0] as HTMLDivElement;
+    const thumb = testInstance.findElements('.deck-widget-range__thumb')[0] as HTMLDivElement;
+
+    expect(scrollbar.getAttribute('aria-valuenow')).toBe(expectedValue);
+    expect(thumb.style.width).toBe(expectedWidth);
+    expect(thumb.style.left).toBe(expectedLeft);
+  }
+);
+
 test('ScrollbarWidget - step button and wheel events', async () => {
   let viewState: OrthographicViewState = {
     target: [0, 0],

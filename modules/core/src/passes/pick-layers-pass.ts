@@ -74,6 +74,7 @@ export default class PickLayersPass extends LayersPass {
     effects,
     pass = 'picking',
     pickZ,
+    canvasContext,
     shaderModuleProps,
     clearColor
   }: PickLayersPassRenderOptions): {
@@ -99,6 +100,7 @@ export default class PickLayersPass extends LayersPass {
       cullRect,
       effects: effects?.filter(e => e.useInPicking),
       pass,
+      canvasContext,
       isPicking: true,
       shaderModuleProps,
       clearColor: clearColor ?? [0, 0, 0, 0],

@@ -7,6 +7,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
 import {scaleQuantile} from 'd3-scale';
 
@@ -103,10 +104,12 @@ function getTooltip({object}: PickingInfo<County>) {
 
 /* eslint-disable react/no-deprecated */
 export default function App({
+  device,
   data,
   strokeWidth = 1,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: County[];
   strokeWidth?: number;
   mapStyle?: string;
@@ -138,6 +141,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

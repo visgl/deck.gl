@@ -56,6 +56,10 @@ export type TimelineWidgetProps = WidgetProps & {
   onPlayingChange?: (playing: boolean) => void;
   /** Callback to get label from time value */
   formatLabel?: (value: number) => string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  playTooltip?: string | HTMLElement | false;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  pauseTooltip?: string | HTMLElement | false;
 };
 
 export class TimelineWidget extends Widget<TimelineWidgetProps> {
@@ -101,7 +105,9 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
     playInterval: 1000,
     playing: undefined!,
     onPlayingChange: () => {},
-    formatLabel: String
+    formatLabel: String,
+    playTooltip: undefined!,
+    pauseTooltip: undefined!
   };
 
   constructor(props: TimelineWidgetProps = {}) {
@@ -151,7 +157,7 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
   }
 
   onRenderHTML(rootElement: HTMLElement): void {
-    const {timeRange, step, formatLabel} = this.props;
+    const {timeRange, step, formatLabel, playTooltip, pauseTooltip} = this.props;
     const isPlaying = this.getPlaying();
     const currentTime = this.getTime();
 
@@ -162,12 +168,14 @@ export class TimelineWidget extends Widget<TimelineWidgetProps> {
         {isPlaying ? (
           <IconButton
             label="Pause"
+            tooltip={pauseTooltip}
             className="deck-widget-timeline-pause"
             onClick={this.handlePlayPause}
           />
         ) : (
           <IconButton
             label="Play"
+            tooltip={playTooltip}
             className="deck-widget-timeline-play"
             onClick={this.handlePlayPause}
           />

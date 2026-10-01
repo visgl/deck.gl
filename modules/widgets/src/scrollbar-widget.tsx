@@ -1,5 +1,11 @@
-import {Widget} from '@deck.gl/core';
-import type {Position, Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
+import {Widget, _getMaxBoundsRect} from '@deck.gl/core';
+import type {
+  ControllerProps,
+  Position,
+  Viewport,
+  WidgetPlacement,
+  WidgetProps
+} from '@deck.gl/core';
 import {render} from 'preact';
 import {RangeInput, type RangeInputDecoration} from './lib/components/range-input';
 
@@ -31,6 +37,10 @@ export type ScrollbarWidgetProps = WidgetProps & {
    * If not supplied, the scrollbar will always be hidden.
    */
   contentBounds?: ContentBounds | null;
+  /** Padding inside the viewport used to display `contentBounds`.
+   * If not supplied, falls back to the target view controller's `maxBoundsPadding`.
+   */
+  contentBoundsPadding?: ControllerProps['maxBoundsPadding'];
   placement?: WidgetPlacement;
   viewId?: string | null;
   /** Direction of the scrollbar. `'horizontal'` scrolls the camera along the X axis, and `'vertical'` scrolls the camera along the Y axis.
@@ -69,6 +79,7 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
   static override defaultProps: ScrollbarWidgetRequiredProps = {
     ...Widget.defaultProps,
     contentBounds: null,
+    contentBoundsPadding: null,
     placement: 'top-right',
     viewId: null,
     orientation: 'vertical',
@@ -152,6 +163,14 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
     return this.props.contentBounds ?? this.deck?.getView(viewId)?.controller?.maxBounds ?? null;
   }
 
+  private getContentBoundsPadding(viewId: string): ControllerProps['maxBoundsPadding'] {
+    return (
+      this.props.contentBoundsPadding ??
+      this.deck?.getView(viewId)?.controller?.maxBoundsPadding ??
+      null
+    );
+  }
+
   private updateViewport(viewport?: Viewport): void {
     if (!viewport) {
       this.contentSize = 0;
@@ -165,10 +184,17 @@ export class ScrollbarWidget extends Widget<ScrollbarWidgetProps> {
     const projectedBounds = contentBounds
       ? projectBounds(contentBounds, viewport, isVertical)
       : ([0, 0] as [number, number]);
+    const contentRect = _getMaxBoundsRect(
+      viewport.width,
+      viewport.height,
+      this.getContentBoundsPadding(viewport.id)
+    );
+    const contentStart = isVertical ? contentRect.y : contentRect.x;
+    const viewportSize = isVertical ? contentRect.height : contentRect.width;
 
     this.contentSize = projectedBounds[1] - projectedBounds[0];
-    this.scrollOffset = -projectedBounds[0];
-    this.viewportSize = isVertical ? viewport.height : viewport.width;
+    this.scrollOffset = contentStart - projectedBounds[0];
+    this.viewportSize = Math.max(0, viewportSize);
   }
 
   private getDecorations(viewport?: Viewport): RangeInputDecoration[] {

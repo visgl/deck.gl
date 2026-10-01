@@ -36,7 +36,6 @@ test('InfoWidget', async () => {
     coordinate: [0, 0],
     object: {id: 1}
   } as any);
-  widget.updateHTML();
   await testInstance.idle();
 
   expect(getTooltip).toHaveBeenCalledWith(
@@ -76,7 +75,6 @@ test('InfoWidget#hover mode', async () => {
     coordinate: [0, 0],
     object: {id: 2}
   } as any);
-  widget.updateHTML();
   await testInstance.idle();
 
   expect(getTooltip).toHaveBeenCalledWith(
@@ -91,6 +89,29 @@ test('InfoWidget#hover mode', async () => {
   expect(popupContent).toBeTruthy();
   expect(popupContent.textContent).toContain('Hovered feature info');
   expect(popupContent.className).toContain('hover-tooltip');
+});
+
+test('InfoWidget#onHover clears tooltip when no object', async () => {
+  const getTooltip = vi.fn().mockReturnValue({text: 'Hover info'});
+  const widget = new InfoWidget({mode: 'hover', getTooltip});
+  testInstance = new WidgetTester({
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    widgets: [widget]
+  });
+
+  await testInstance.idle();
+  widget.onHover({coordinate: [0, 0], object: {id: 1}} as any);
+  await testInstance.idle();
+
+  let popupContent = testInstance.findElements('.deck-widget-popup-content')[0];
+  expect(popupContent).toBeTruthy();
+
+  getTooltip.mockReturnValue(null);
+  widget.onHover({coordinate: [0, 0], object: null} as any);
+  await testInstance.idle();
+
+  popupContent = testInstance.findElements('.deck-widget-popup-content')[0];
+  expect(popupContent).toBeFalsy();
 });
 
 test('InfoWidget#getTooltip', () => {

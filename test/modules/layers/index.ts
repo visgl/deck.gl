@@ -21,3 +21,7 @@ import './column-geometry.spec';
 import './column-layer.spec';
 import './utils.spec';
 import './scatterplot-layer.spec';
+import './path-antialiasing.spec';
+import './line-antialiasing.spec';
+import './arc-antialiasing.spec';
+import './antialiasing-composite.spec';

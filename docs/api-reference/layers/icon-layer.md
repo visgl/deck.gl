@@ -1,4 +1,9 @@
+---
+description: "IconLayer renders raster icons from an atlas or auto-packed images at given coordinates."
+---
+
 # IconLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {IconLayerDemo} from '@site/src/doc-demos/layers';
 

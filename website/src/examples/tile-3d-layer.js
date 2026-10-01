@@ -11,6 +11,8 @@ import {makeExample} from '../components';
 class Tiles3DDemo extends Component {
   static title = 'City of Melbourne 3D Point Cloud';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/3d-tiles`;
 
   static parameters = {};

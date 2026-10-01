@@ -31,7 +31,7 @@ def bump(release_type):
 
 def rewrite_version_file(semver):
     with open("pydeck/_version.py", "w+") as f:
-        t = jinja2.Template("__version__ = '{{semver_str}}'")
+        t = jinja2.Template('__version__ = "{{semver_str}}"\n')
         contents = t.render(semver_str=str(semver))
         f.write(contents)
 
@@ -58,11 +58,13 @@ def rewrite_frontend_version_file():
     """Current associated version of NPM modules deck.gl and @deck.gl/jupyter-widget"""
     with open("../../lerna.json") as f:
         lerna_version = json.loads(f.read())["version"]
+    version_info = semver.parse_version_info(lerna_version)
+    semver_range = "~{}.{}.*".format(version_info.major, version_info.minor)
     with open("pydeck/frontend_semver.py", "w+") as f:
-        t = jinja2.Template("DECKGL_SEMVER = '{{semver_str}}'")
-        contents = t.render(semver_str=str(lerna_version))
+        t = jinja2.Template('DECKGL_SEMVER = "{{semver_str}}"\n')
+        contents = t.render(semver_str=semver_range)
         f.write(contents)
-    return lerna_version
+    return semver_range
 
 
 parser = argparse.ArgumentParser(description="Bump semver for pydeck. Modifies pydeck/_version.py directly.")

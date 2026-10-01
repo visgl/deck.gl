@@ -14,6 +14,8 @@ function makeEvent(type, opts, seed) {
   const event = {
     type,
     handled: opts.handled,
+    pointerType: opts.pointerType || (type === 'wheel' ? 'mouse' : 'touch'),
+    device: opts.device,
     offsetCenter: {x: 100 + seed, y: 100 - seed},
     delta: -seed - 1,
     deltaX: seed / 2,
@@ -134,8 +136,8 @@ const TEST_CASES = [
     title: 'multipan#disabled',
     props: {touchRotate: false},
     events: () => makeEvents(['multipanstart', 'multipanmove', 'multipanend']),
-    viewStateChanges: 2,
-    interactionStates: 1 // isDragging
+    viewStateChanges: 0,
+    interactionStates: 0
   },
 
   {
@@ -168,6 +170,13 @@ const TEST_CASES = [
     interactionStates: 2
   },
   {
+    title: 'dblclickdrag',
+    props: {},
+    events: () => makeEvents(['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend']),
+    viewStateChanges: 3,
+    interactionStates: 3
+  },
+  {
     title: 'dblclick#out of bounds',
     props: {x: 200},
     events: () => makeEvents(['dblclick']),
@@ -175,9 +184,23 @@ const TEST_CASES = [
     interactionStates: 0
   },
   {
+    title: 'dblclickdrag#out of bounds',
+    props: {x: 200},
+    events: () => makeEvents(['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend']),
+    viewStateChanges: 0,
+    interactionStates: 0
+  },
+  {
     title: 'dblclick#disabled',
     props: {doubleClickZoom: false},
     events: () => makeEvents(['dblclick']),
+    viewStateChanges: 0,
+    interactionStates: 0
+  },
+  {
+    title: 'dblclickdrag#disabled',
+    props: {doubleClickDragZoom: false},
+    events: () => makeEvents(['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend']),
     viewStateChanges: 0,
     interactionStates: 0
   },

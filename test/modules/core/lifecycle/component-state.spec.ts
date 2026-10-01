@@ -195,7 +195,7 @@ webglTest('ComponentState#async props with transform', async () => {
   const testContext = {device};
 
   const testData = [0, 1, 2, 3, 4];
-  // prettier-ignore
+  // biome-ignore format: preserve layout
   const testImage = {data: new Uint8ClampedArray([
     0, 0, 0, 255,
     255, 0, 0, 255,

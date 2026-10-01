@@ -6,6 +6,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
 import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
@@ -51,12 +52,14 @@ type CaseReport = {
 };
 
 export default function App({
+  device,
   data = DATA_URL,
   week = 35,
   contours = BANDS,
   cellSize = 60000,
   mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 }: {
+  device?: Device;
   data?: string | CaseReport[];
   week?: number;
   contours?: ContourLayerProps['contours'];
@@ -101,6 +104,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       layers={layers}

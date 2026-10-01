@@ -6,6 +6,17 @@ Releases and associated GitHub PRs for pydeck are documented here.
 0.9 Releases
 ------------
 
+0.9.4 - TBD
+^^^^^^^^^^^
+- Add typed lighting and post-processing effects through ``pydeck.Effect``
+- Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop
+
+0.9.3 - Jul 2026
+^^^^^^^^^^^^^^^^^^^
+- Update to deck.gl v9.3 (#10242)
+- Add PopupWidget and InfoWidget to widget gallery example
+- Add pydeck playground at `deck.gl/pydeck <https://deck.gl/pydeck>`__
+
 0.9.2 - Apr 16 2026
 ^^^^^^^^^^^^^^^^^^^
 - Update to deck.gl v9.2 (#9895)
