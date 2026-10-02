@@ -759,3 +759,132 @@ test('Layer#updateModules', async () => {
     onError: err => expect(err).toBeFalsy()
   });
 });
+
+class VersionedAttributeLayer extends Layer {
+  initializeState() {
+    this.getAttributeManager().addInstanced({
+      instancePositions: {size: 3, accessor: 'getPosition'}
+    });
+  }
+}
+VersionedAttributeLayer.layerName = 'VersionedAttributeLayer';
+VersionedAttributeLayer.defaultProps = {
+  getPosition: {type: 'accessor', value: d => d.position}
+};
+
+function readBufferFloat32(attribute, length: number): number[] {
+  const bytes = attribute.getBuffer().readSyncWebGL(0, length * Float32Array.BYTES_PER_ELEMENT);
+  return Array.from(new Float32Array(bytes.slice().buffer));
+}
+
+for (const bufferName of ['instancePositions', 'getPosition']) {
+  test(`Layer#data.attributes.${bufferName}#version`, () => {
+    const entryMethod = bufferName === 'instancePositions' ? 'setExternalBuffer' : 'setBinaryValue';
+    const positions: Record<string, any> = {
+      value: new Float32Array([0, 0, 0, 1, 1, 1]),
+      size: 3,
+      version: 1
+    };
+    const data = {length: 2, attributes: {[bufferName]: positions}};
+    let attribute;
+    let spies: Record<string, ReturnType<typeof vi.spyOn>> = {};
+    const resetSpies = () => Object.values(spies).forEach(spy => spy.mockClear());
+    const expectCallCounts = (counts: Record<string, number>) => {
+      for (const name in counts) {
+        expect(spies[name], `${name} call count`).toHaveBeenCalledTimes(counts[name]);
+      }
+    };
+
+    testLayer({
+      Layer: VersionedAttributeLayer,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {
+          title: 'initial upload',
+          props: {data},
+          onAfterUpdate: ({layer}) => {
+            attribute = layer.getAttributeManager().getAttributes().instancePositions;
+            expect(readBufferFloat32(attribute, 6)).toEqual([0, 0, 0, 1, 1, 1]);
+            spies = {
+              [entryMethod]: vi.spyOn(attribute, entryMethod),
+              setData: vi.spyOn(attribute, 'setData'),
+              updateSubBuffer: vi.spyOn(attribute, 'updateSubBuffer'),
+              write: vi.spyOn(attribute.getBuffer(), 'write')
+            };
+          }
+        },
+        {
+          title: 'same object, same version',
+          updateProps: {data},
+          onBeforeUpdate: resetSpies,
+          onAfterUpdate: () => expectCallCounts({[entryMethod]: 0, setData: 0, write: 0})
+        },
+        {
+          title: 'same object, new version',
+          updateProps: {data},
+          onBeforeUpdate: () => {
+            resetSpies();
+            positions.value.set([2, 2, 2, 3, 3, 3]);
+            positions.version = 2;
+          },
+          onAfterUpdate: () => {
+            expectCallCounts({[entryMethod]: 1, setData: 1, write: 1});
+            expect(readBufferFloat32(attribute, 6)).toEqual([2, 2, 2, 3, 3, 3]);
+            expect(attribute.getBounds()).toEqual([
+              [2, 2, 2],
+              [3, 3, 3]
+            ]);
+          }
+        },
+        {
+          title: 'new version with dataRange',
+          updateProps: {data},
+          onBeforeUpdate: () => {
+            resetSpies();
+            positions.value.set([4, 4, 4], 3);
+            positions.version = 3;
+            positions.dataRange = {startRow: 1, endRow: 2};
+          },
+          onAfterUpdate: () => {
+            expectCallCounts({[entryMethod]: 1, setData: 0, updateSubBuffer: 1, write: 1});
+            expect(spies.write.mock.calls[0][1], 'writes only the changed row').toBe(12);
+            expect(readBufferFloat32(attribute, 6)).toEqual([2, 2, 2, 4, 4, 4]);
+            expect(attribute.getBounds()).toEqual([
+              [2, 2, 2],
+              [4, 4, 4]
+            ]);
+          }
+        },
+        {
+          title: 'new object, same value and version',
+          updateProps: {
+            data: {
+              length: 2,
+              attributes: {[bufferName]: {value: positions.value, size: 3, version: 3}}
+            }
+          },
+          onBeforeUpdate: resetSpies,
+          onAfterUpdate: () => {
+            expectCallCounts({[entryMethod]: 1, setData: 0, write: 0});
+          }
+        },
+        {
+          title: 'new value, same version',
+          updateProps: {
+            data: {
+              length: 2,
+              attributes: {[bufferName]: {value: new Float32Array(6).fill(9), size: 3, version: 3}}
+            }
+          },
+          onBeforeUpdate: resetSpies,
+          onAfterUpdate: () => {
+            expectCallCounts({[entryMethod]: 1, setData: 1, write: 1});
+            expect(readBufferFloat32(attribute, 6)).toEqual([9, 9, 9, 9, 9, 9]);
+          }
+        }
+      ]
+    });
+  });
+}

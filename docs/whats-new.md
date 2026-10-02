@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v10.0 (in development)
+
+### Core
+
+- Binary attributes in `data.attributes` accept an optional `version` and `dataRange`, so buffers rewritten in place are re-uploaded, fully or by row range, without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
