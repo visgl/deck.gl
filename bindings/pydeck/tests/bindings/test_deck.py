@@ -140,3 +140,26 @@ def test_repr_html_google_colab():
     pydeck.io.html.iframe_with_srcdoc.assert_not_called()
     pydeck.io.html.render_for_colab.assert_called_once()
     assert output == ""
+
+
+def test_default_deck_has_no_views_and_a_controller():
+    """deck.gl falls back to a full-screen MapView and applies the top-level controller to it"""
+    default = json.loads(pydeck.Deck().to_json())
+    assert "views" not in default
+    assert default["controller"] is True
+    assert "controller" not in json.loads(pydeck.Deck(controller=None).to_json())
+
+    splitter = pydeck.Widget(
+        "SplitterWidget",
+        view_layout={
+            "orientation": "horizontal",
+            "views": [pydeck.View(type="MapView", id="a"), pydeck.View(type="MapView", id="b")],
+        },
+    )
+    assert "views" not in json.loads(pydeck.Deck(widgets=[splitter]).to_json())
+
+    explicit = json.loads(pydeck.Deck(views=[pydeck.View(type="MapView", id="c", controller=False)]).to_json())
+    assert explicit["views"][0]["id"] == "c"
+    assert "controller" not in explicit, "explicit views keep their own controller settings"
+    forced = pydeck.Deck(views=[pydeck.View(type="MapView", id="c")], controller={"scrollZoom": False})
+    assert json.loads(forced.to_json())["controller"] == {"scrollZoom": False}
