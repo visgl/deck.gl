@@ -9,6 +9,50 @@ import path from 'node:path';
 const rootDir = path.resolve(import.meta.dirname, '../..');
 const modulesDir = path.join(rootDir, 'modules');
 const SOURCE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
+/**
+ * Extract module specifiers the way a bundler reads the file: comments and
+ * non-import strings are skipped, and only quoted literals in import/export
+ * position are returned, so a comment mentioning `from '../../core/...'`
+ * cannot fail the check and a dynamic `import(/* chunk *\/ '../../core/...')`
+ * cannot slip past it.
+ */
+function extractModuleSpecifiers(source: string): string[] {
+  const specifiers: string[] = [];
+  let i = 0;
+  let expectSpecifier = false;
+  while (i < source.length) {
+    const c = source[i];
+    if (c === '/' && source[i + 1] === '/') {
+      while (i < source.length && source[i] !== '\n') i++;
+    } else if (c === '/' && source[i + 1] === '*') {
+      i += 2;
+      while (i < source.length && !(source[i] === '*' && source[i + 1] === '/')) i++;
+      i += 2;
+    } else if (c === '"' || c === "'" || c === '`') {
+      const quote = c;
+      const start = ++i;
+      while (i < source.length && source[i] !== quote) {
+        if (source[i] === '\\') i++;
+        i++;
+      }
+      if (expectSpecifier) {
+        specifiers.push(source.slice(start, i));
+        expectSpecifier = false;
+      }
+      i++;
+    } else if (/[A-Za-z_$]/.test(c)) {
+      const start = i;
+      while (i < source.length && /[A-Za-z0-9_$]/.test(source[i])) i++;
+      expectSpecifier = source.slice(start, i) === 'import' || source.slice(start, i) === 'from';
+    } else if (c === '(' || /\s/.test(c)) {
+      i++;
+    } else {
+      expectSpecifier = false;
+      i++;
+    }
+  }
+  return specifiers;
+}
 
 /**
  * Published packages only ship their own files plus their npm dependencies.
@@ -42,13 +86,8 @@ function findCrossPackageRelativeImports(): string[] {
     };
 
     const collectFromFile = (file: string) => {
-      const source = fs.readFileSync(file, 'utf-8');
-      // `... from '<specifier>'`, bare `import '<specifier>'` and dynamic `import('<specifier>')`
-      const specifiers =
-        source.match(/\bfrom\s+['"]([^'"]+)['"]|\bimport\s*\(?\s*['"]([^'"]+)['"]/g) || [];
-      for (const match of specifiers) {
-        const specifier = match.match(/['"]([^'"]+)['"]/)?.[1];
-        if (!specifier?.startsWith('.')) {
+      for (const specifier of extractModuleSpecifiers(fs.readFileSync(file, 'utf-8'))) {
+        if (!specifier.startsWith('.')) {
           continue;
         }
         const resolved = path.resolve(path.dirname(file), specifier);
