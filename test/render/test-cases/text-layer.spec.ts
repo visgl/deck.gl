@@ -174,7 +174,8 @@ const sdfGlyphDefinitions = {
   }
 };
 
-const sdfFontRenderer = {
+/** SDF renderer that pads glyphs by `padding` pixels, like TinySDF does with `buffer` */
+const createSdfFontRenderer = (padding: number) => ({
   measure: char => {
     if (!char) {
       return {advance: 0, width: 0, ascent: 38, descent: 16};
@@ -184,14 +185,14 @@ const sdfFontRenderer = {
   },
   draw: char => {
     const glyph = sdfGlyphDefinitions[char];
-    const width = glyph.width + sdfGlyphPadding * 2;
-    const height = glyph.height + sdfGlyphPadding * 2;
+    const width = glyph.width + padding * 2;
+    const height = glyph.height + padding * 2;
     const imageData = new ImageData(width, height);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const glyphX = x - sdfGlyphPadding + 0.5;
-        const glyphY = y - sdfGlyphPadding + 0.5;
+        const glyphX = x - padding + 0.5;
+        const glyphY = y - padding + 0.5;
         const distance = glyph.getDistance(glyphX, glyphY);
         const alpha = Math.max(
           0,
@@ -201,9 +202,9 @@ const sdfFontRenderer = {
       }
     }
 
-    return {data: imageData, left: sdfGlyphPadding, top: sdfGlyphPadding};
+    return {data: imageData, left: padding, top: padding};
   }
-};
+});
 
 const testCases = [
   {
@@ -245,7 +246,7 @@ const testCases = [
       new TextLayer({
         id: 'text-layer-sdf-outline',
         data: [0],
-        _getFontRenderer: () => sdfFontRenderer,
+        _getFontRenderer: () => createSdfFontRenderer(sdfGlyphPadding),
         fontFamily: 'Render Test SDF Variants',
         characterSet: 'auto',
         fontSettings: {
@@ -267,6 +268,44 @@ const testCases = [
         outlineColor: [0, 128, 255, 255]
       })
     ],
+    goldenImage: './test/render/golden-images/text-layer-sdf-outline.png',
+    imageDiffOptions: {threshold: 0.999}
+  },
+  {
+    // https://github.com/visgl/deck.gl/issues/9032
+    name: 'text-layer-sdf-outline-default-buffer',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new TextLayer({
+        id: 'text-layer-sdf-outline-default-buffer',
+        data: [0],
+        // Pad glyphs by the `buffer` setting passed to the renderer, like TinySDF
+        _getFontRenderer: ({buffer}) => createSdfFontRenderer(buffer),
+        fontFamily: 'Render Test SDF Default Buffer',
+        characterSet: 'auto',
+        fontSettings: {
+          sdf: true,
+          fontSize: 64,
+          radius: sdfRadius,
+          cutoff: sdfCutoff,
+          smoothing: 0.1
+        },
+        getText: () => 'HOgI.',
+        getPosition: () => [-126, 0],
+        getColor: [255, 255, 255],
+        getSize: 96,
+        getTextAnchor: 'start',
+        getAlignmentBaseline: 'bottom',
+        getPixelOffset: [12, 0],
+        outlineWidth: 8,
+        outlineColor: [0, 128, 255, 255]
+      })
+    ],
+    // Matches the explicit-buffer case above once the padding covers the distance field
     goldenImage: './test/render/golden-images/text-layer-sdf-outline.png',
     imageDiffOptions: {threshold: 0.999}
   },
