@@ -641,6 +641,25 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /**
+   * Returns `true` while any view state, layer prop or attribute transition is in progress.
+   * Transitions advance once per animation frame, so this can be checked after each render.
+   */
+  hasActiveTransitions(): boolean {
+    if (!this.layerManager || !this.viewManager) {
+      return false;
+    }
+    const controllers = Object.values(this.viewManager.controllers);
+    return (
+      controllers.some(controller => controller?.isTransitioning()) ||
+      this.layerManager
+        .getLayers()
+        .some(
+          layer => layer.hasUniformTransition() || layer.getAttributeManager()?.isTransitioning()
+        )
+    );
+  }
+
+  /**
    * Redraw the GL context
    * @param reason If not provided, only redraw if deemed necessary. Otherwise redraw regardless of internal states.
    * @returns

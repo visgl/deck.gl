@@ -728,6 +728,23 @@ Parameters:
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
+#### `hasActiveTransitions` {#hasactivetransitions}
+
+Returns `true` while any view state transition, layer prop transition or attribute transition is in progress. Transitions advance once per animation frame, so a check in `onAfterRender` reflects the frame that was just drawn.
+
+```ts
+const deck = new Deck({
+  onAfterRender: () => {
+    if (!deck.hasActiveTransitions()) {
+      captureFrame();
+    }
+  }
+});
+```
+
+Data loading is not a transition. Check `layer.isLoaded` separately for async data.
+
+
 #### `pickObjectAsync` {#pickobjectasync}
 
 Get the closest pickable and visible object at the given screen coordinate.
