@@ -244,6 +244,66 @@ test('TileLayer#error tiles do not block isLoaded', async () => {
   expect(tileErrorCalled, 'onTileError is called for failed tiles').toBe(2);
 });
 
+test('TileLayer#getTileLoadingState', async () => {
+  let tileRequestCount = 0;
+  let tileLayer: TileLayer | null = null;
+  const statesByTestCase: Record<string, ReturnType<TileLayer['getTileLoadingState']>[]> = {
+    outcomes: [],
+    'below minZoom': []
+  };
+
+  expect(new TileLayer({}).getTileLoadingState(), 'null before the first update').toBeNull();
+
+  await testLayerAsync({
+    Layer: TileLayer,
+    viewport: new WebMercatorViewport({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 60,
+      zoom: 2
+    }),
+    testCases: [
+      {
+        title: 'outcomes',
+        props: {
+          // The first request returns an empty tile, the second one fails
+          getTileData: () =>
+            tileRequestCount++ === 0 ? Promise.resolve(null) : Promise.reject(new Error('404'))
+        },
+        onAfterUpdate: ({layer}) => {
+          statesByTestCase.outcomes.push(layer.getTileLoadingState());
+        }
+      },
+      {
+        title: 'below minZoom',
+        updateProps: {minZoom: 5},
+        onAfterUpdate: ({layer}) => {
+          tileLayer = layer;
+          statesByTestCase['below minZoom'].push(layer.getTileLoadingState());
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  const {outcomes} = statesByTestCase;
+  expect(outcomes[0], 'requests are pending after the first update').toEqual({
+    loaded: 0,
+    failed: 0,
+    pending: 2
+  });
+  expect(outcomes[outcomes.length - 1], 'empty tile is loaded, error tile is failed').toEqual({
+    loaded: 1,
+    failed: 1,
+    pending: 0
+  });
+  expect(statesByTestCase['below minZoom'], 'no tiles are selected below minZoom').toEqual([
+    {loaded: 0, failed: 0, pending: 0}
+  ]);
+  expect(tileLayer!.getTileLoadingState(), 'null after finalization').toBeNull();
+});
+
 test('TileLayer#AbortRequestsOnUpdateTrigger', async () => {
   const testViewport = new WebMercatorViewport({
     width: 1200,

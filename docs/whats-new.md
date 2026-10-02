@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v10.0 (in development)
+
+### Layers
+
+- [`TileLayer.getTileLoadingState`](./api-reference/geo-layers/tile-layer.md#gettileloadingstate) counts the selected tiles whose requests succeeded, failed, or are still pending. Empty results count as loaded.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
