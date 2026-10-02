@@ -159,33 +159,18 @@ vec3 getLineJoinOffset(
 #ifdef ANTIALIASING
   // The physical stroke still ends at offsetVec; the scaled coordinates and vertices only extend
   // its rasterized envelope to include the outer half of the centered coverage ramp.
-  vec2 coverageOffsetVec = offsetVec * coverageScale;
-  vPathLength = L;
-  vCornerOffset = coverageOffsetVec;
-  vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
-  vMiterLength = isCap ? isJoint : vMiterLength;
-
-  vec2 offsetFromStartOfPath = coverageOffsetVec + deltaA * float(isEnd);
-  float positionAlongPath = dot(offsetFromStartOfPath, dir);
-  vPathPosition = vec2(dot(offsetFromStartOfPath, perp), positionAlongPath);
-#ifdef DASH_ENABLED
-  vDashSegment = vec2(
-    dashPositionOffset + positionAlongPath * dashArcLengthRatio,
-    dashSegmentLength
-  );
-#endif
-  geometry.uv = vPathPosition;
-
-  float isValid = step(instanceTypes, 3.5);
-  vec3 offset = vec3(coverageOffsetVec * width * isValid, 0.0);
+  vec2 renderOffsetVec = offsetVec * coverageScale;
 #else
+  vec2 renderOffsetVec = offsetVec;
+#endif
+
   // Generate variables for fragment shader
   vPathLength = L;
-  vCornerOffset = offsetVec;
+  vCornerOffset = renderOffsetVec;
   vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
   vMiterLength = isCap ? isJoint : vMiterLength;
 
-  vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
+  vec2 offsetFromStartOfPath = renderOffsetVec + deltaA * float(isEnd);
   float positionAlongPath = dot(offsetFromStartOfPath, dir);
   vPathPosition = vec2(dot(offsetFromStartOfPath, perp), positionAlongPath);
 #ifdef DASH_ENABLED
@@ -197,8 +182,7 @@ vec3 getLineJoinOffset(
   geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
-  vec3 offset = vec3(offsetVec * width * isValid, 0.0);
-#endif
+  vec3 offset = vec3(renderOffsetVec * width * isValid, 0.0);
 
   if (needsRotation) {
     offset = rotationMatrix * offset;
