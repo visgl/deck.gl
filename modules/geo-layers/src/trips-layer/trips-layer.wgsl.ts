@@ -42,10 +42,18 @@ export const tripsShaderInjectionsWGSL = {
 
   '    attributes.instanceColors.a * layer.opacity\n  );': /* wgsl */ `
 
+  let tripsPathProgress =
+#ifdef DASH_ENABLED
+    // Camera clipping shortens the visible geometry, but trip time still follows the original segment.
+    varyings.vDashSegment.x / varyings.vDashSegment.y;
+#else
+    varyings.vPathPosition.y / varyings.vPathLength;
+#endif
+
   varyings.vTime = mix(
     attributes.instanceTimestamps.x,
     attributes.instanceTimestamps.y,
-    varyings.vPathPosition.y / varyings.vPathLength
+    tripsPathProgress
   );
 
   if (trips.fadeTrail > 0.5) {

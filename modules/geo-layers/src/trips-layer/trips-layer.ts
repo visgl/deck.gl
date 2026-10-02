@@ -25,7 +25,13 @@ out float vTime;
 `,
   // Timestamp of the vertex
   'vs:#main-end': `\
-vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
+#ifdef DASH_ENABLED
+// Camera clipping shortens the visible geometry, but trip time still follows the original segment.
+float tripsPathProgress = vDashSegment.x / vDashSegment.y;
+#else
+float tripsPathProgress = vPathPosition.y / vPathLength;
+#endif
+vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * tripsPathProgress;
 `,
   'fs:#decl': `\
 in float vTime;

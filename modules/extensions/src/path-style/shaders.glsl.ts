@@ -15,7 +15,7 @@
  *    At the dash injection point, the pre-offset stroke half-width is in common units for a
  *    flat path but pixels for a billboarded path, whose conversion also includes
  *    `project.focalDistance`.
- * 3. **Half-widths along the path** — the units of `vPathPosition.y`, tested by the fragment
+ * 3. **Half-widths along the path** — the units of `vDashSegment.x`, tested by the fragment
  *    shader. One unit spans `dashWidthPixels` screen pixels.
  *
  * Convert explicitly whenever a value crosses these spaces. Mixing them directly makes dash
@@ -57,7 +57,7 @@ export const pathStylePipelineShaders = {
   vPathPosition.y *= offsetWidth;
   vPathLength *= offsetWidth;
 #ifdef DASH_ENABLED
-  vPathBounds *= offsetWidth;
+  vDashSegment *= offsetWidth;
 #endif
 #endif
 
@@ -69,7 +69,7 @@ float strokeHalfWidth = width.x;
 strokeHalfWidth /= offsetWidth;
 #endif
 
-// How many screen pixels one unit of vPathPosition.y covers. Flat paths extrude in common space;
+// How many screen pixels one unit of vDashSegment.x covers. Flat paths extrude in common space;
 // billboarded paths extrude in clip space, whose conversion also includes focalDistance.
 float dashWidthPixels = path.billboard
   ? strokeHalfWidth * project.focalDistance
@@ -98,7 +98,7 @@ vDashPathLength = dashOffsetAndLength.y;
 
 // Reduce the phase into the first period here rather than in the fragment shader. On a long
 // path at high zoom the raw offset reaches into the millions, and adding the much smaller
-// vPathPosition.y to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
+// vDashSegment.x to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
 // The dash function is periodic, so this discards nothing - but it has to be reduced modulo
 // whichever period the fragment stage will actually test against, hence dashAlignMode here.
 float dashUnitLength = vDashArray.x + vDashArray.y;
@@ -184,6 +184,8 @@ layout(std140) uniform pathStyleUniforms {
 in vec2 vDashArray;
 in float vDashOffset;
 in float vDashPathLength;
+// [position along the source segment, complete source-segment length]
+in vec2 vDashSegment;
 
 // Integral of the dash square wave from 0 to position, i.e. how much solid stroke lies before it.
 float dashPatternIntegral(float position, float solidLength, float unitLength) {
@@ -254,7 +256,7 @@ float dashPatternCoverage(
       // period in the vertex shader.
       unitLength = vDashPathLength / max(round(vDashPathLength / unitLength), 1.0);
 #else
-      unitLength = vPathLength / max(round(vPathLength / unitLength), 1.0);
+      unitLength = vDashSegment.y / max(round(vDashSegment.y / unitLength), 1.0);
 #endif
       // A short segment or path can make the fitted period shorter than the requested dash.
       // Bound the solid interval to that period so coverage and duty cycle remain valid.
@@ -265,7 +267,7 @@ float dashPatternCoverage(
 #endif
     }
 
-    float alongPath = vPathPosition.y + offset;
+    float alongPath = vDashSegment.x + offset;
     float unitOffset = mod(alongPath, unitLength);
     float filterWidth = max(fwidth(alongPath), 0.0001);
 
