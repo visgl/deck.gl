@@ -237,7 +237,7 @@ export default class AttributeBufferGroups {
           byteOffset: byteStride + (layoutAttribute.byteOffset || 0)
         });
       }
-      byteStride += getStride(attribute.getAccessor());
+      byteStride += getStride(attribute.getUploadAccessor());
     }
 
     byteStride = alignTo4(byteStride);
@@ -329,7 +329,8 @@ export default class AttributeBufferGroups {
   }
 
   private _getInterleaveInput(group: PackedGroup, attribute: Attribute): GPUDataEvaluator {
-    const rowByteLength = getStride(attribute.getAccessor());
+    const uploadAccessor = attribute.getUploadAccessor();
+    const rowByteLength = getStride(uploadAccessor);
     const groupByteOffset = group.byteOffsets[attribute.id];
 
     assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
@@ -359,7 +360,7 @@ export default class AttributeBufferGroups {
 
     const buffer = attribute.getBuffer();
     const byteOffset = attribute.byteOffset;
-    const stride = attribute.getAccessor().stride || rowByteLength;
+    const stride = uploadAccessor.stride || rowByteLength;
 
     assertU32Aligned(`${group.id}.${attribute.id} byteOffset`, byteOffset);
     assertU32Aligned(`${group.id}.${attribute.id} stride`, stride);
