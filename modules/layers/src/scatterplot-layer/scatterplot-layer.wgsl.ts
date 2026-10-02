@@ -97,7 +97,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     );
     geometry.position = projectedPosition.commonPosition;
     varyings.position = projectedPosition.clipPosition;
-    // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
+    deckgl_filter_position(&varyings.position);
     var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
     // DECKGL_FILTER_SIZE(offset, geometry);
@@ -118,7 +118,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     );
     geometry.position = projectedPosition.commonPosition;
     varyings.position = projectedPosition.clipPosition;
-    // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
+    deckgl_filter_position(&varyings.position);
   }
 
   varyings.clipCoordinates = geometry.position.xy;

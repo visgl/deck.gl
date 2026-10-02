@@ -20,9 +20,7 @@ const SHADER_HOOKS_GLSL = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
-const SHADER_HOOKS_WGSL = [
-  // Not yet supported
-];
+const SHADER_HOOKS_WGSL = ['vs:deckgl_filter_position(position: ptr<function, vec4<f32>>)'];
 
 export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler(language);

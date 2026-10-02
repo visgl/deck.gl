@@ -182,7 +182,10 @@ fn vertexMain(inp: Attributes) -> Varyings {
   var pos: vec4<f32>;
   var anchorPosScreen: vec2<f32>;
   if (icon.billboard != 0) {
-    pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0));
+    let projected = project_position_to_clipspace_and_commonspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0));
+    geometry.position = projected.commonPosition;
+    pos = projected.clipPosition;
+    deckgl_filter_position(&pos);
     anchorPosScreen = pos.xy / pos.w;
 
     let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
@@ -194,7 +197,10 @@ fn vertexMain(inp: Attributes) -> Varyings {
     }
     let anchorPos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0));
     anchorPosScreen = anchorPos.xy / anchorPos.w;
-    pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, offsetCommon);
+    let projected = project_position_to_clipspace_and_commonspace(inp.instancePositions, inp.instancePositions64Low, offsetCommon);
+    geometry.position = projected.commonPosition;
+    pos = projected.clipPosition;
+    deckgl_filter_position(&pos);
   }
 
   anchorPosScreen = vec2<f32>(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0 *

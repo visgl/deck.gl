@@ -5,6 +5,7 @@
 import {LayerExtension, UpdateParameters} from '@deck.gl/core';
 import {TerrainEffect} from './terrain-effect';
 import {terrainModule} from './shader-module';
+import {terrainModuleWGSL} from './shader-module.wgsl';
 
 import type {Layer} from '@deck.gl/core';
 
@@ -15,7 +16,7 @@ const defaultProps = {
 export type TerrainExtensionProps = {
   /**
    * controls whether an object is drawn over the terrain surface by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
-   * If not specified, it is automatically deduced from the layer.
+   * If not specified, it is automatically deduced from the layer. WebGPU supports `offset` only.
    */
   terrainDrawMode?: 'offset' | 'drape';
 };
@@ -27,14 +28,14 @@ type TerrainExtensionState = {
   terrainCoverNeedsRedraw: boolean;
 };
 
-/** Allows layers to show/hide objects by a geofence. */
+/** Fits layer anchors or geometry to terrain. WebGPU currently supports offset mode. */
 export default class TerrainExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'TerrainExtension';
 
   getShaders(this: Layer<TerrainExtensionProps>): any {
     return {
-      modules: [terrainModule]
+      modules: [this.context.device.type === 'webgpu' ? terrainModuleWGSL : terrainModule]
     };
   }
 
@@ -65,6 +66,9 @@ export default class TerrainExtension extends LayerExtension {
       const attributes = this.getAttributeManager()?.attributes;
       const hasAnchor = attributes && 'instancePositions' in attributes;
       terrainDrawMode = is3d || hasAnchor ? 'offset' : 'drape';
+    }
+    if (this.context.device.type === 'webgpu' && terrainDrawMode === 'drape') {
+      throw new Error('TerrainExtension: WebGPU supports terrainDrawMode: "offset" only');
     }
     this.setState({terrainDrawMode});
   }

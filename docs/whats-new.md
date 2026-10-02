@@ -2,6 +2,10 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+`TerrainExtension` now supports GPU height-map fitting (`terrainDrawMode: 'offset'`) on WebGPU, including full float32 elevation precision and overlapping terrain surfaces. Texture draping remains WebGL-only.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

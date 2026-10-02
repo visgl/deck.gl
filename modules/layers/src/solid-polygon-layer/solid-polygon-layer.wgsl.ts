@@ -123,6 +123,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.vColor = apply_polygon_color(colors, normal, geometry.position);
   outp.pickingColor = geometry.pickingColor;
 
+  deckgl_filter_position(&outp.position);
   outp.clipCoordinates = geometry.position.xy;
   clip_filterPosition(&outp.position, geometry.worldPosition.xy);
 
@@ -218,6 +219,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.vColor = apply_polygon_color(colors, normal, geometry.position);
   outp.pickingColor = geometry.pickingColor;
 
+  deckgl_filter_position(&outp.position);
   outp.clipCoordinates = geometry.position.xy;
   clip_filterPosition(&outp.position, geometry.worldPosition.xy);
 
