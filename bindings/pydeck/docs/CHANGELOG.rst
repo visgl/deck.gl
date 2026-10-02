@@ -18,6 +18,10 @@ Releases and associated GitHub PRs for pydeck are documented here.
 - ``Deck`` no longer serializes a default ``MapView``; the new ``controller`` argument (default ``True``) is sent instead, so deck.gl supplies the view and widgets such as ``SplitterWidget`` can manage views
 - Fix ``register_library`` writing a ``uri`` key instead of ``resourceUri``, which left the library
   unloaded (#10759)
+- Add non-geospatial chart gallery examples (scatter plot, bar chart, surface plot) and document
+  ``OrthographicView`` and ``OrbitView`` view states (#10454)
+- Load ES module custom libraries with ``pydeck.settings.register_library(name, uri, module=True)``
+  (#10454)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^
