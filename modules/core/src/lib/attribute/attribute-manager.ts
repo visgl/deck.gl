@@ -256,6 +256,11 @@ export default class AttributeManager {
     });
   }
 
+  /** Returns `true` if any attribute transition is in progress */
+  isTransitioning(): boolean {
+    return this.attributeTransitionManager.isTransitioning();
+  }
+
   // Update attribute transition to the current timestamp
   // Returns `true` if any transition is in progress
   updateTransition() {

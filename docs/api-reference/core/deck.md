@@ -728,6 +728,49 @@ Parameters:
 * `force` (boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
+#### `hasActiveTransitions` {#hasactivetransitions}
+
+Returns `true` while any view state transition, layer prop transition or attribute transition is in progress. Transitions advance once per animation frame, so a check in `onAfterRender` reflects the frame that was just drawn.
+
+```ts
+const deck = new Deck({
+  onAfterRender: () => {
+    if (!deck.hasActiveTransitions()) {
+      captureFrame();
+    }
+  }
+});
+```
+
+Data loading is not a transition. Check `layer.isLoaded` separately for async data.
+
+
+#### `waitForFrameReady` {#waitforframeready}
+
+Returns a Promise that resolves once a frame has been rendered with the scene settled. Useful for headless capture, video export, or any flow that reads back canvas pixels and needs them to reflect all pending changes.
+
+The scene is settled when:
+
+* All layers report [`isLoaded`](./layer.md#isloaded) (no pending async data or props)
+* No layer update is pending
+* No transition is in progress (see [`hasActiveTransitions`](#hasactivetransitions))
+* No redraw is pending. With `_animate: true`, Deck redraws every frame, so this check is skipped and the Promise resolves after the next render of a settled scene.
+
+If the scene is already settled and drawn, the Promise resolves without waiting for a render. Otherwise the scene is checked after each render. `waitForFrameReady` can be called before the Deck has initialized, and concurrent calls are independent.
+
+```ts
+deck.setProps({layers: getLayersAtTime(time)});
+await deck.waitForFrameReady();
+captureFrame();
+```
+
+Parameters:
+
+* `options.timeout` (number, optional) - maximum wait time in milliseconds. Default `5000`.
+
+The Promise rejects if the timeout elapses first, or if the Deck is finalized while waiting. It does not force a redraw and does not wait for GPU work to complete; reading pixels back from the canvas synchronizes with the GPU.
+
+
 #### `pickObjectAsync` {#pickobjectasync}
 
 Get the closest pickable and visible object at the given screen coordinate.
