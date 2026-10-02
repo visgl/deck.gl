@@ -38,7 +38,7 @@ const config = {
       '@luma.gl/engine': 'globalThis.luma',
       '@loaders.gl/core': 'globalThis.loaders',
       'h3-js': 'globalThis.h3 || {}',
-      module: "globalThis.process?.getBuiltinModule?.('module') || {}"
+      module: 'globalThis.process?.getBuiltinModule?.(\'module\') || {}'
     }
   },
 

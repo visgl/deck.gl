@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@loaders.gl/3d-tiles": "^5.0.0-alpha.7",
+    "@loaders.gl/geoarrow": "^5.0.0-alpha.7",
     "@loaders.gl/gis": "^5.0.0-alpha.7",
     "@loaders.gl/loader-utils": "^5.0.0-alpha.7",
     "@loaders.gl/mvt": "^5.0.0-alpha.7",
@@ -62,6 +63,7 @@
     "@math.gl/web-mercator": "^5.0.0-alpha.9",
     "@types/geojson": "^7946.0.8",
     "a5-js": "^0.10.0",
+    "compress-utils": "^0.8.0",
     "h3-js": "^4.4.0",
     "long": "^3.2.0"
   },
