@@ -7,6 +7,8 @@ import {log} from '@deck.gl/core';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {Map, NavigationControl} from 'maplibre-gl';
 
+import {forwardLayerUpdates} from './overlay-utils';
+
 export function createMapLibreDeckOverlay({
   container,
   onClick,
@@ -80,13 +82,7 @@ export function createMapLibreDeckOverlay({
     });
   }
 
-  // Only forward layer updates; the map owns the camera
-  const setOverlayProps = deckOverlay.setProps.bind(deckOverlay);
-  deckOverlay.setProps = function (props) {
-    if (props.layers) {
-      setOverlayProps({layers: props.layers});
-    }
-  };
+  forwardLayerUpdates(deckOverlay);
 
   return deckOverlay;
 }

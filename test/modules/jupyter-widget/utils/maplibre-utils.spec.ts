@@ -2,20 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect, vi} from 'vitest';
+import {test, expect} from 'vitest';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {createMapLibreDeckOverlay} from '@deck.gl/jupyter-widget/playground/utils/maplibre-utils';
-
-vi.mock('maplibre-gl', () => ({
-  Map: class {
-    on() {}
-  },
-  NavigationControl: class {}
-}));
+import {MapLibreOverlay} from '@deck.gl/maplibre';
+import {forwardLayerUpdates} from '@deck.gl/jupyter-widget/playground/utils/overlay-utils';
 
 test('jupyter-widget: MapLibre overlay forwards layer updates', () => {
-  const overlay = createMapLibreDeckOverlay({container: document.createElement('div'), layers: []});
+  // The overlay is not attached to a map: creating one needs a WebGL context, which other specs
+  // in the shared headless page cannot share
+  const overlay = forwardLayerUpdates(new MapLibreOverlay({layers: []}));
   const layers = [new ScatterplotLayer({id: 'points', data: []})];
 
   overlay.setProps({layers, initialViewState: {longitude: 10, latitude: 10, zoom: 5}});
