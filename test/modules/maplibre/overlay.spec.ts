@@ -285,3 +285,62 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
     }
   });
 }
+
+// MapLibre has a globe from 5.0. Its globe blends into Web Mercator from zoom 11 to 12, where
+// map.project() does not follow the rendered camera, so this compares below and above the blend
+for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
+  webglTest(`MapLibreOverlay matches the globe with terrain of MapLibre ${version}`, async () => {
+    const container = document.createElement('div');
+    Object.assign(container.style, {width: '400px', height: '300px'});
+    document.body.append(container);
+    const demTileURL = await createDemTileURL(1000);
+
+    const center: [number, number] = [8.5, 47.3];
+    const map = new MapClass({
+      container,
+      style: {
+        version: 8,
+        projection: {type: 'globe'},
+        sources: {dem: {type: 'raster-dem', tiles: [demTileURL], tileSize: 256, maxzoom: 12}},
+        layers: []
+      },
+      center,
+      zoom: 10,
+      pitch: 60,
+      attributionControl: false
+    }) as unknown as MapLibreMap;
+
+    try {
+      await new Promise<void>(resolve => map.once('load', () => resolve()));
+
+      const overlay = new MapLibreOverlay({layers: []});
+      map.addControl(overlay);
+      await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+      map.setTerrain({source: 'dem'});
+      await new Promise<void>(resolve => map.once('idle', () => resolve()));
+
+      for (const zoom of [10, 11, 12]) {
+        map.jumpTo({zoom});
+        await waitForRender(() => overlay._deck!.props.viewState.zoom === map.getZoom());
+        const viewport = overlay._deck!.getViewports()[0];
+        for (const [dx, dy] of [
+          [0, 0],
+          [0.01, 0.005],
+          [-0.01, -0.005]
+        ]) {
+          const lngLat: [number, number] = [center[0] + dx, center[1] + dy];
+          const expected = map.project(lngLat);
+          const [x, y] = viewport.project([lngLat[0], lngLat[1], 1000]);
+          expect(
+            Math.hypot(x - expected.x, y - expected.y),
+            `[${lngLat}] at zoom ${zoom}`
+          ).toBeLessThan(1);
+        }
+      }
+    } finally {
+      map.remove();
+      container.remove();
+      URL.revokeObjectURL(demTileURL);
+    }
+  });
+}
