@@ -126,6 +126,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     disablePicking?: boolean;
     model?: Model;
     mesh?: any;
+    meshResolution?: number;
     coordinateConversion: number;
     bounds: [number, number, number, number];
   };
@@ -166,9 +167,14 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
+    return changeFlags.propsOrDataChanged || changeFlags.viewportChanged;
+  }
+
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     // setup model first
     const attributeManager = this.getAttributeManager()!;
+    const meshResolution = this.context.viewport.resolution;
 
     if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
@@ -176,18 +182,18 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       attributeManager.invalidateAll();
     }
 
-    if (props.bounds !== oldProps.bounds) {
+    if (props.bounds !== oldProps.bounds || meshResolution !== this.state.meshResolution) {
       const oldMesh = this.state.mesh;
-      const mesh = this._createMesh();
+      const mesh = this._createMesh(meshResolution);
       this.state.model!.setVertexCount(mesh.vertexCount);
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
           attributeManager.invalidate(key);
         }
       }
-      this.setState({mesh, ...this._getCoordinateUniforms()});
+      this.setState({mesh, meshResolution, ...this._getCoordinateUniforms(meshResolution)});
     } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
-      this.setState(this._getCoordinateUniforms());
+      this.setState(this._getCoordinateUniforms(meshResolution));
     }
   }
 
@@ -233,7 +239,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  protected _createMesh() {
+  protected _createMesh(resolution?: number) {
     const {bounds} = this.props;
 
     let normalizedBounds = bounds;
@@ -254,7 +260,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ];
     }
 
-    return createMesh(normalizedBounds, this.context.viewport.resolution);
+    return createMesh(normalizedBounds, resolution);
   }
 
   protected _getModel(): Model {
@@ -305,7 +311,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
   }
 
-  _getCoordinateUniforms() {
+  _getCoordinateUniforms(resolution?: number) {
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
     if (imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
@@ -314,9 +320,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       }
 
       // The default behavior (linearly interpolated tex coords)
-      const defaultImageCoordinateSystem = this.context.viewport.resolution
-        ? 'lnglat'
-        : 'cartesian';
+      const defaultImageCoordinateSystem = resolution ? 'lnglat' : 'cartesian';
       imageCoordinateSystem = imageCoordinateSystem === 'lnglat' ? 'lnglat' : 'cartesian';
 
       if (imageCoordinateSystem === 'lnglat' && defaultImageCoordinateSystem === 'cartesian') {
