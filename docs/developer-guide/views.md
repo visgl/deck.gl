@@ -416,6 +416,8 @@ new Deck({
 });
 ```
 
+For a larger standalone TypeScript example, see the multi-canvas cities test app in the [repository](https://github.com/visgl/deck.gl/tree/master/test/apps/multi-canvas-cities).
+
 ### Using Multiple Views with View States
 
 When using multiple views, each `View` can either have its own independent view state, or share the same view state as other views. To define the view state of a specific view, add a key to the `viewState` object that matches its view id.
