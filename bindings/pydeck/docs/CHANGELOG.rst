@@ -22,6 +22,7 @@ Releases and associated GitHub PRs for pydeck are documented here.
   ``OrthographicView`` and ``OrbitView`` view states (#10454)
 - Load ES module custom libraries with ``pydeck.settings.register_library(name, uri, module=True)``
   (#10454)
+- Embed the deck JSON in ``to_html`` output compactly to reduce file size
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^

@@ -94,9 +94,15 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     return attrs
 
 
-def serialize(serializable):
+def serialize(serializable, compact=False):
     """Takes a serializable object and JSONifies it"""
-    return json.dumps(serializable, sort_keys=True, default=default_serialize, indent=2)
+    return json.dumps(
+        serializable,
+        sort_keys=True,
+        default=default_serialize,
+        indent=None if compact else 2,
+        separators=(",", ":") if compact else None,
+    )
 
 
 class JSONMixin(object):
@@ -107,8 +113,11 @@ class JSONMixin(object):
         """
         return serialize(self)
 
-    def to_json(self):
+    def to_json(self, compact=False):
         """
         Return a JSON-ified version of the Deck object.
+
+        Set ``compact=True`` to serialize without indentation or separator
+        whitespace, which reduces the size of large payloads.
         """
-        return serialize(self)
+        return serialize(self, compact=compact)

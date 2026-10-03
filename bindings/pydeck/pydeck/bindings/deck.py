@@ -257,12 +257,17 @@ class Deck(JSONMixin):
         css_background_color : str, default None
             Background color for visualization, specified as a string in any format accepted for CSS colors.
 
+        Notes
+        -----
+        The deck JSON is embedded in the HTML in compact form, without
+        indentation or separator whitespace, to reduce file size.
+
         Returns
         -------
         str
             Returns absolute path of the file
         """
-        deck_json = self.to_json()
+        deck_json = self.to_json(compact=True)
         f = deck_to_html(
             deck_json,
             mapbox_key=self.mapbox_key,
