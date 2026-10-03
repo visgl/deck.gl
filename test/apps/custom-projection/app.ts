@@ -47,17 +47,28 @@ for (let latitude = -90; latitude <= 90; latitude += 15) {
 }
 
 function createView(name: ProjectionName): CustomProjectionView {
-  const {projection, fromCrs, toCrs, fromBounds, getDistanceScale, note} = projections[name];
+  const {projection, fromCrs, toCrs, fromBounds, toBounds, getDistanceScale, note} =
+    projections[name];
   document.getElementById('projection-note')!.textContent = note;
   return new CustomProjectionView({
     fromCrs,
     toCrs,
     projection,
     fromBounds,
+    toBounds,
     getDistanceScale,
     resolution: 5,
     controller: true
   });
+}
+
+// Equal physical radii at regularly spaced input coordinates expose local scale
+// variation without relying on the remote datasets.
+const scaleProbes: [number, number][] = [];
+for (let longitude = -165; longitude <= 165; longitude += 30) {
+  for (let latitude = -75; latitude <= 75; latitude += 15) {
+    scaleProbes.push([longitude, latitude]);
+  }
 }
 
 const deck = new Deck({
@@ -72,7 +83,8 @@ const deck = new Deck({
       stroked: true,
       getFillColor: [50, 100, 120],
       getLineColor: [150, 195, 200],
-      lineWidthMinPixels: 0.5,
+      lineWidthUnits: 'pixels',
+      getLineWidth: 1,
       pickable: true
     }),
     new GeoJsonLayer({
@@ -93,34 +105,14 @@ const deck = new Deck({
       getFillColor: [255, 170, 80],
       pickable: true
     }),
-    new LineLayer({
-      id: 'altitude-probes',
-      data: [
-        [-90, 0],
-        [0, 0],
-        [90, 0],
-        [0, 60],
-        [0, -60]
-      ],
-      getSourcePosition: ([x, y]) => [x, y, 0],
-      getTargetPosition: ([x, y]) => [x, y, 500000],
-      getColor: [255, 100, 180],
-      widthUnits: 'pixels',
-      getWidth: 2
-    }),
     new ScatterplotLayer({
-      id: 'altitude-probe-circles',
-      data: [
-        [-90, 0, 500000],
-        [0, 0, 500000],
-        [90, 0, 500000],
-        [0, 60, 500000],
-        [0, -60, 500000]
-      ],
+      id: 'meter-scale-probes',
+      data: scaleProbes,
       getPosition: position => position,
       radiusUnits: 'meters',
-      getRadius: 100000,
-      getFillColor: [255, 100, 180]
+      getRadius: 80000,
+      getFillColor: [255, 80, 150, 180],
+      pickable: true
     })
   ],
   onHover: ({coordinate}) => {

@@ -245,7 +245,7 @@ export default class WebMercatorViewport extends Viewport {
     );
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: number[], _preprojected = false): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.projectPosition(xyz);
@@ -255,7 +255,7 @@ export default class WebMercatorViewport extends Viewport {
     return [X, Y, Z];
   }
 
-  unprojectPosition(xyz: number[]): [number, number, number] {
+  unprojectPosition(xyz: number[], _preprojected = false): [number, number, number] {
     if (this._pseudoMeters) {
       // Backward compatibility
       return super.unprojectPosition(xyz);

@@ -55,6 +55,9 @@ function createViewport(
     height: 300,
     toCrs: signature,
     fromCrs: '+units=m',
+    // Keep cell sizes identical to the Cartesian reference on CPU and GPU.
+    // These tests isolate position preprocessing, not meter-scale distortion.
+    getDistanceScale: () => [normalizationScale, normalizationScale],
     projection: {
       forward: p => project(p).map((v, i) => v * scale * (i < 2 ? projectedUnit : 1)),
       inverse: ([x, y, z = 0]) => [
@@ -64,13 +67,6 @@ function createViewport(
       ]
     }
   });
-  // Keep cell sizes identical to the Cartesian reference: these tests isolate
-  // position preprocessing, not the converter's meter-scale distortion.
-  viewport.distanceScales = {
-    ...viewport.distanceScales,
-    unitsPerMeter: [1, 1, 1],
-    metersPerUnit: [1, 1, 1]
-  };
   // Count data preprojection, not constructor inverse validation.
   vi.spyOn(viewport, 'preproject');
   return viewport;
@@ -517,7 +513,10 @@ test('ContourLayer supports ordinary application-provided Cartesian sublayers', 
       expect(child.projectPosition(position, {autoOffset: false})).toEqual(
         new Matrix4(child.props.modelMatrix!)
           .transformAsPoint(position)
-          .map(value => value * normalizationScale)
+          .map(
+            (value, axis) =>
+              value * (axis === 2 ? viewport.distanceScales.unitsPerMeter[2] : normalizationScale)
+          )
       );
     }
     expect(viewport.preproject).toHaveBeenCalledTimes(data.length);

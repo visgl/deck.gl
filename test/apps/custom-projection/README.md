@@ -15,14 +15,13 @@ the view's forward/inverse callbacks. Core does not depend on proj4js.
 
 The experimental `_CustomProjectionView` accepts a stable converter object. Optional
 `toBounds` defaults to `[-EC/2, -EC/2, EC/2, EC/2]`, with `EC = 40075016.6855`.
-The app uses this shared scale for all projections rather than fitting each to its extent.
+These bounds control local size sampling, not the map's position normalization.
 `resolution` is in world-coordinate units (degrees here). View state uses `center` in `fromCrs`,
-`pitch`, and `bearing`; navigation locks center Z to zero. Meter scale is estimated
-at the viewport center. The optional `getDistanceScale(positionInToCrs)` returns
+`pitch`, and `bearing`; navigation locks center Z to zero. Meter scale is evaluated locally. The optional `getDistanceScale(positionInToCrs)` returns
 real-world meters per unit along the axes of `toCrs`, including local distortion.
 The converter's Z is preserved by preprojection and scaled during rendering.
 
-Pink markers have heights of 500 km. Airports use 25 km radii; graticules use pixel widths.
+Pink altitude markers have heights of 500 km; the pink grid markers have radii of 80 km. Airports use 25 km radii; graticules use pixel widths.
 
 The controller has an independent planar view state. Rotation gestures and keyboard
 navigation follow MapController: dragging upward increases pitch. Pan and zoom

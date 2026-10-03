@@ -25,6 +25,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     const center: [number, number, number] = [12345678.123, -9876543.321, 0];
     const viewport = new CustomProjectionViewport({
       projection: {forward: p => p.slice(), inverse: p => p.slice()},
+      fromCrs: '+units=m',
       center,
       zoom: 20
     });
@@ -103,7 +104,7 @@ gpuTest('Cartesian map-meter XYZ retain their model matrix and origin', async ()
     modelMatrix: new Matrix4().translate([256, 256, 0]).scale([2, 3, 4])
   };
   const position = [1, 2, 3];
-  const expected = [263 * normalizationScale, 268 * normalizationScale, 19 * normalizationScale];
+  const expected = [263 * normalizationScale, 268 * normalizationScale, 38 * normalizationScale];
   expect(viewport.isGeospatial).toBe(true);
   expect(getWorldPosition(position, props)).toEqual(expected);
   const result = await runOnGPU({
@@ -157,7 +158,7 @@ test('external projection WGSL normalizes XYZ and uses scalar and per-axis dista
     const expectedPosition = [
       310.125 * normalizationScale,
       219.75 * normalizationScale,
-      50.5 * normalizationScale
+      101 * normalizationScale
     ];
     expectedPosition.forEach((value, i) => expect(values[i]).toBeCloseTo(value, 4));
     const [x, y, scalar] = viewport.distanceScales.unitsPerMeter;
@@ -193,7 +194,7 @@ for (const metersPerZUnit of [1, 0.3048]) {
       [
         position[0] * normalizationScale,
         position[1] * normalizationScale,
-        position[2] * normalizationScale
+        position[2] * 2 * normalizationScale
       ].forEach((value, i) => expect(common[i]).toBeCloseTo(value, 12));
       expect(project.getUniforms({viewport}).commonUnitsPerMeter).toEqual([
         4 * normalizationScale,
@@ -241,7 +242,7 @@ for (const metersPerZUnit of [1, 0.3048]) {
       const expectedPosition = [
         (position[0] + low[0]) * normalizationScale,
         (position[1] + low[1]) * normalizationScale,
-        (position[2] + low[2]) * normalizationScale
+        (position[2] + low[2]) * 2 * normalizationScale
       ];
       expectedPosition.forEach((value, i) => expect(withLow[i]).toBeCloseTo(value, 4));
       expect(withLow[2] / expectedPosition[2]).toBeCloseTo(1, 6);
