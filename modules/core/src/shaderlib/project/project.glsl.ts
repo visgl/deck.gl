@@ -261,6 +261,14 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+      // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
+      vec4 position_low = project.modelMatrix * vec4(position64Low, 0.0);
+      return vec4(
+        position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter,
+        position_world.w
+      );
+    }
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_globe_(position_world.xyz),
@@ -269,8 +277,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
     if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      float metersToCommon = GLOBE_RADIUS / EARTH_RADIUS;
-      vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * metersToCommon;
+      vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * project.commonUnitsPerMeter;
       return vec4(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
@@ -288,6 +295,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+    project.projectionMode == PROJECTION_MODE_EXTERNAL ||
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {

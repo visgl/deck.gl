@@ -21,7 +21,6 @@ const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
 const VECTOR_TO_POINT_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-const DEFAULT_PIXELS_PER_UNIT2: Vec3 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
 
 /** Coordinate system constants */
@@ -50,6 +49,7 @@ export function getOffsetOrigin(
 ): {
   geospatialOrigin: Vec3 | null;
   shaderCoordinateOrigin: Vec3;
+  commonOrigin?: Vec3;
   offsetMode: boolean;
 } {
   if (coordinateOrigin.length < 3) {
@@ -57,6 +57,11 @@ export function getOffsetOrigin(
   }
 
   let shaderCoordinateOrigin = coordinateOrigin;
+  let commonOrigin: Vec3 | undefined;
+  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
+    coordinateSystem = 'cartesian';
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+  }
   let geospatialOrigin: Vec3 | null;
   let offsetMode = true;
 
@@ -102,6 +107,20 @@ export function getOffsetOrigin(
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
       break;
 
+    case PROJECTION_MODE.EXTERNAL: {
+      geospatialOrigin = null;
+      const scale = viewport.distanceScales.unitsPerWorldUnit;
+      // Round in the units stored in position attributes, so the GPU receives
+      // this exact origin. Derive its common position from the same value.
+      shaderCoordinateOrigin = viewport.center.map((value, i) =>
+        Math.fround(value / scale[i] - coordinateOrigin[i])
+      ) as Vec3;
+      commonOrigin = shaderCoordinateOrigin.map(
+        (value, i) => (value + coordinateOrigin[i]) * scale[i]
+      ) as Vec3;
+      break;
+    }
+
     case PROJECTION_MODE.GLOBE:
       offsetMode = false;
       geospatialOrigin = null;
@@ -112,7 +131,7 @@ export function getOffsetOrigin(
       offsetMode = false;
   }
 
-  return {geospatialOrigin, shaderCoordinateOrigin, offsetMode};
+  return {geospatialOrigin, shaderCoordinateOrigin, commonOrigin, offsetMode};
 }
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -136,7 +155,7 @@ function calculateMatrixAndOffset(
   let projectionCenter = ZERO_VECTOR;
   let originCommon: Vec4 = ZERO_VECTOR;
   let cameraPosCommon: Vec3 = viewport.cameraPosition as Vec3;
-  const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
+  const {geospatialOrigin, shaderCoordinateOrigin, commonOrigin, offsetMode} = getOffsetOrigin(
     viewport,
     coordinateSystem,
     coordinateOrigin
@@ -147,7 +166,8 @@ function calculateMatrixAndOffset(
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
     // @ts-expect-error the 4th component is assigned below
-    originCommon = viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+    originCommon =
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
       cameraPosCommon[0] - originCommon[0],
@@ -238,6 +258,12 @@ export function getUniformsFromViewport({
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
+  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
+    coordinateSystem = 'cartesian';
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+    modelMatrix = null;
+    autoWrapLongitude = false;
+  }
   if (coordinateSystem === 'default') {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
@@ -308,9 +334,9 @@ function calculateViewportUniforms({
     devicePixelRatio,
 
     focalDistance,
-    commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
+    commonUnitsPerMeter: distanceScales.unitsPerMeter,
+    commonUnitsPerWorldUnit: distanceScales.unitsPerWorldUnit,
+    commonUnitsPerWorldUnit2: distanceScales.unitsPerWorldUnit2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     wrapLongitude: false,
 
@@ -323,15 +349,7 @@ function calculateViewportUniforms({
 
   if (geospatialOrigin) {
     // Get high-precision DistanceScales from geospatial viewport
-    // TODO: stricter types in Viewport classes
-    const distanceScalesAtOrigin = viewport.getDistanceScales(geospatialOrigin) as {
-      unitsPerMeter: Vec3;
-      metersPerUnit: Vec3;
-      unitsPerMeter2: Vec3;
-      unitsPerDegree: Vec3;
-      degreesPerUnit: Vec3;
-      unitsPerDegree2: Vec3;
-    };
+    const distanceScalesAtOrigin = viewport.getDistanceScales(geospatialOrigin);
     switch (coordinateSystem) {
       case 'meter-offsets':
         uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
@@ -344,8 +362,8 @@ function calculateViewportUniforms({
         if (!viewport._pseudoMeters) {
           uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
         }
-        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
-        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
+        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerWorldUnit;
+        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerWorldUnit2;
         break;
 
       // a.k.a "preprojected" positions

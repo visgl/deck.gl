@@ -58,7 +58,9 @@ export type AttributeOptions = DataColumnOptions<{
   bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
-  transform?: (value: any) => any;
+  transform?: ((value: any) => any) | null;
+  /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
+  transformSource?: string;
   shaderAttributes?: Record<string, Partial<ShaderAttributeOptions>>;
 }>;
 
@@ -367,7 +369,8 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    if (state.binaryValue === buffer) {
+    // The source buffer can be unchanged while its projection/model matrix is invalidated.
+    if (state.binaryValue === buffer && !(settings.transform && this.needsUpdate())) {
       this.clearNeedsUpdate();
       return true;
     }

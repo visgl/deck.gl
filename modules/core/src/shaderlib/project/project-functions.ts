@@ -8,6 +8,7 @@
  */
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
+import {PROJECTION_MODE} from '../../lib/constants';
 
 import {vec3, vec4} from '@math.gl/core';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
@@ -55,13 +56,16 @@ function normalizeParameters(opts: {
   const {viewport, modelMatrix, coordinateOrigin} = opts;
   let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
 
-  if (coordinateSystem === 'default') {
+  if (coordinateSystem === 'default' && viewport.projectionMode !== PROJECTION_MODE.EXTERNAL) {
     coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
 
   if (fromCoordinateSystem === undefined) {
     fromCoordinateSystem = coordinateSystem;
-  } else if (fromCoordinateSystem === 'default') {
+  } else if (
+    fromCoordinateSystem === 'default' &&
+    viewport.projectionMode !== PROJECTION_MODE.EXTERNAL
+  ) {
     fromCoordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
   }
   if (fromCoordinateOrigin === undefined) {
@@ -99,6 +103,18 @@ export function getWorldPosition(
 
   if (modelMatrix) {
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
+  }
+
+  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL) {
+    if (coordinateSystem === 'cartesian') {
+      const scale = viewport.distanceScales.unitsPerWorldUnit;
+      return [
+        (x + coordinateOrigin[0]) * scale[0],
+        (y + coordinateOrigin[1]) * scale[1],
+        (z + coordinateOrigin[2]) * scale[2]
+      ];
+    }
+    return viewport.projectPosition([x, y, z]);
   }
 
   switch (coordinateSystem) {
@@ -179,6 +195,7 @@ export function projectPosition(
   const {
     geospatialOrigin = DEFAULT_COORDINATE_ORIGIN,
     shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+    commonOrigin,
     offsetMode = false
   } = autoOffset ? getOffsetOrigin(viewport, coordinateSystem, coordinateOrigin) : {};
 
@@ -191,9 +208,8 @@ export function projectPosition(
   });
 
   if (offsetMode) {
-    const positionCommonSpace = viewport.projectPosition(
-      geospatialOrigin || shaderCoordinateOrigin
-    );
+    const positionCommonSpace =
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
     vec3.sub(worldPosition, worldPosition, positionCommonSpace);
   }
 

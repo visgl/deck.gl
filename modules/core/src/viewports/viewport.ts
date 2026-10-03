@@ -8,7 +8,7 @@ import {createMat4, getCameraPosition, getFrustumPlanes, FrustumPlane} from '../
 import {Matrix4, Vector3, equals, clamp, mat4} from '@math.gl/core';
 
 import {
-  getDistanceScales,
+  getDistanceScales as getMercatorDistanceScales,
   getMeterZoom,
   lngLatToWorld,
   worldToLngLat,
@@ -19,8 +19,16 @@ import {
 import {PROJECTION_MODE} from '../lib/constants';
 
 export type DistanceScales = {
-  unitsPerMeter: number[];
-  metersPerUnit: number[];
+  /** Local scale from position units to common units (after preprojection, if applicable). */
+  unitsPerWorldUnit: [number, number, number];
+  /** Local scale from ground meters to common units. */
+  unitsPerMeter: [number, number, number];
+  /** Reciprocal of unitsPerMeter, derived when the viewport is constructed. */
+  metersPerUnit: [number, number, number];
+  /** Latitude-dependent correction to unitsPerWorldUnit; zero for linear projections. */
+  unitsPerWorldUnit2: [number, number, number];
+  /** Latitude-dependent correction to unitsPerMeter; zero for linear projections. */
+  unitsPerMeter2: [number, number, number];
 };
 
 export type Padding = {
@@ -47,11 +55,16 @@ export type ViewportOptions = {
   latitude?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
+  /** World-coordinate conversion installed before camera initialization. */
+  preproject?: ((position: number[]) => [number, number, number]) | null;
+  /** Inverse conversion paired with preproject, installed before camera initialization. */
+  postUnproject?: ((position: number[]) => [number, number, number] | null) | null;
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
   padding?: Padding | null;
-  distanceScales?: DistanceScales;
+  /** Partial scales; omitted scales are defaulted and metersPerUnit is always derived. */
+  distanceScales?: Partial<DistanceScales>;
   /** Model matrix of viewport center */
   modelMatrix?: number[] | null;
   /** Custom view matrix */
@@ -78,10 +91,30 @@ const IDENTITY = createMat4();
 
 const ZERO_VECTOR = [0, 0, 0];
 
-const DEFAULT_DISTANCE_SCALES: DistanceScales = {
-  unitsPerMeter: [1, 1, 1],
-  metersPerUnit: [1, 1, 1]
-};
+function normalizeDistanceScales(scales: Partial<DistanceScales> = {}): DistanceScales {
+  const unitsPerWorldUnit: [number, number, number] = scales.unitsPerWorldUnit ?? [1, 1, 1];
+  const unitsPerMeter = scales.unitsPerMeter ?? unitsPerWorldUnit;
+  return {
+    unitsPerWorldUnit,
+    unitsPerMeter,
+    unitsPerWorldUnit2: scales.unitsPerWorldUnit2 ?? [0, 0, 0],
+    unitsPerMeter2: scales.unitsPerMeter2 ?? [0, 0, 0],
+    metersPerUnit: [1 / unitsPerMeter[0], 1 / unitsPerMeter[1], 1 / unitsPerMeter[2]]
+  };
+}
+
+/** Adapt math.gl's geographic scale names to the viewport scale contract. */
+function getDistanceScales(
+  options: Parameters<typeof getMercatorDistanceScales>[0]
+): DistanceScales {
+  const scales = getMercatorDistanceScales(options);
+  return normalizeDistanceScales({
+    unitsPerMeter: scales.unitsPerMeter as [number, number, number],
+    unitsPerWorldUnit: scales.unitsPerDegree as [number, number, number],
+    unitsPerMeter2: (scales.unitsPerMeter2 || [0, 0, 0]) as [number, number, number],
+    unitsPerWorldUnit2: (scales.unitsPerDegree2 || [0, 0, 0]) as [number, number, number]
+  });
+}
 
 // / Helpers
 function createProjectionMatrix({
@@ -158,6 +191,16 @@ export default class Viewport {
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
   resolution?: number;
+  /** Optional world-coordinate conversion for position attributes.
+   * The subclass defines the output coordinate space; projectPosition still accepts world coordinates.
+   */
+  preproject: ((position: number[]) => [number, number, number]) | null = null;
+  /** Inverse of preproject; null means outside the domain. */
+  postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
+  /** Equal signatures must describe identical preprojection, including normalization. */
+  get projectionSignature(): unknown {
+    return null;
+  }
 
   private _frustumPlanes: {[name: string]: FrustumPlane} = {};
 
@@ -173,10 +216,12 @@ export default class Viewport {
     this.height = opts.height || 1;
     this.zoom = opts.zoom || 0;
     this.padding = opts.padding;
-    this.distanceScales = opts.distanceScales || DEFAULT_DISTANCE_SCALES;
+    this.distanceScales = normalizeDistanceScales(opts.distanceScales);
     this.focalDistance = opts.focalDistance || 1;
     this.position = opts.position || ZERO_VECTOR;
     this.modelMatrix = opts.modelMatrix || null;
+    this.preproject = opts.preproject || null;
+    this.postUnproject = opts.postUnproject || null;
 
     const {longitude, latitude} = opts;
     this.isGeospatial = Number.isFinite(latitude) && Number.isFinite(longitude);
@@ -199,7 +244,7 @@ export default class Viewport {
   }
 
   get metersPerPixel(): number {
-    return this.distanceScales.metersPerUnit[2] / this.scale;
+    return 1 / this.distanceScales.unitsPerMeter[2] / this.scale;
   }
 
   get projectionMode(): number {
@@ -227,6 +272,7 @@ export default class Viewport {
       viewport.scale === this.scale &&
       viewport.projectionMode === this.projectionMode &&
       viewport.resolution === this.resolution &&
+      viewport.projectionSignature === this.projectionSignature &&
       equals(viewport.distanceScales.unitsPerMeter, this.distanceScales.unitsPerMeter) &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
@@ -271,7 +317,7 @@ export default class Viewport {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
-    const targetZWorld = targetZ && targetZ * this.distanceScales.unitsPerMeter[2];
+    const targetZWorld = targetZ && targetZ * this.distanceScales.unitsPerWorldUnit[2];
     const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
     const [X, Y, Z] = this.unprojectPosition(coord);
 
@@ -286,13 +332,13 @@ export default class Viewport {
 
   projectPosition(xyz: number[]): [number, number, number] {
     const [X, Y] = this.projectFlat(xyz);
-    const Z = (xyz[2] || 0) * this.distanceScales.unitsPerMeter[2];
+    const Z = (xyz[2] || 0) * this.distanceScales.unitsPerWorldUnit[2];
     return [X, Y, Z];
   }
 
   unprojectPosition(xyz: number[]): [number, number, number] {
     const [X, Y] = this.unprojectFlat(xyz);
-    const Z = (xyz[2] || 0) * this.distanceScales.metersPerUnit[2];
+    const Z = (xyz[2] || 0) / this.distanceScales.unitsPerWorldUnit[2];
     return [X, Y, Z];
   }
 
@@ -428,7 +474,9 @@ export default class Viewport {
       if (!Number.isFinite(opts.zoom)) {
         this.zoom = getMeterZoom({latitude}) + Math.log2(this.focalDistance);
       }
-      this.distanceScales = opts.distanceScales || getDistanceScales({latitude, longitude});
+      if (!opts.distanceScales) {
+        this.distanceScales = getDistanceScales({latitude, longitude});
+      }
     }
     const scale = Math.pow(2, this.zoom);
     this.scale = scale;
