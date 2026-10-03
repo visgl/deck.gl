@@ -146,9 +146,44 @@ export function addCustomLibraries(customLibraries, onComplete) {
   });
 }
 
-function updateDeck(inputJson, deckgl) {
-  const results = jsonConverter.convert(inputJson);
-  deckgl.setProps(results);
+// Latest JSON applied to each deck, reconverted once its custom libraries have loaded
+const latestInput = new WeakMap();
+
+const identity = props => props;
+
+function hasUnconverted(props) {
+  return (props.layers || []).includes(null) || (props.widgets || []).includes(null);
+}
+
+function dropUnconverted(props) {
+  const result = {...props};
+  if (props.layers) {
+    result.layers = props.layers.filter(l => l);
+  }
+  if (props.widgets) {
+    result.widgets = props.widgets.filter(w => w);
+  }
+  return result;
+}
+
+/**
+ * Applies new JSON props to an existing deck.
+ * While the deck's custom libraries are still loading, layers and widgets that cannot be
+ * converted yet are left out and added once the libraries have loaded.
+ * `transformProps` adjusts the converted props before they are applied, e.g. to attach binary data.
+ */
+function updateDeck(inputJson, deckgl, transformProps = identity) {
+  // The widget's binary messages carry the JSON as a string
+  const json = typeof inputJson === 'string' ? JSON.parse(inputJson) : inputJson;
+  const entry = latestInput.get(deckgl) || {librariesLoading: false};
+  const props = convertJson(json, entry.librariesLoading);
+  latestInput.set(deckgl, {
+    ...entry,
+    inputJson: json,
+    transformProps,
+    hasMissing: hasUnconverted(props)
+  });
+  deckgl.setProps(transformProps(dropUnconverted(props)));
 }
 
 /**
@@ -160,10 +195,14 @@ function updateDeck(inputJson, deckgl) {
  * libraries have loaded.
  */
 export function convertInitialJson(jsonInput, customLibraries) {
+  return convertJson(jsonInput, Boolean(customLibraries && customLibraries.length));
+}
+
+function convertJson(jsonInput, canDefer) {
   try {
     return jsonConverter.convert(jsonInput);
   } catch (err) {
-    if (!customLibraries || !customLibraries.length) {
+    if (!canDefer) {
       throw err;
     }
     const props = jsonConverter.convert({...jsonInput, layers: [], widgets: []});
@@ -299,22 +338,14 @@ function createDeck({
       jsonConverter.mergeConfiguration(configuration);
     }
 
-    const oldLayers = jsonInput.layers || [];
-    const oldWidgets = jsonInput.widgets || [];
     const props = convertInitialJson(jsonInput, customLibraries);
 
     addSupportComponents(container, props);
 
-    const convertedLayers = (props.layers || []).filter(l => l);
-    const convertedWidgets = (props.widgets || []).filter(w => w);
-
-    // loading custom library is async, some layers/widgets might not be convertable before custom library loads
-    const hasMissingProps =
-      convertedLayers.length < oldLayers.length || convertedWidgets.length < oldWidgets.length;
     const getTooltip = makeTooltip(tooltip);
 
     deckgl = createStandaloneFromProvider({
-      props,
+      props: dropUnconverted(props),
       mapboxApiKey,
       googleMapsKey,
       handleEvent,
@@ -323,21 +354,23 @@ function createDeck({
       onError
     });
 
+    // Recorded before the libraries are requested: onComplete runs synchronously when a library
+    // global already exists
+    latestInput.set(deckgl, {
+      inputJson: jsonInput,
+      transformProps: identity,
+      librariesLoading: Boolean(customLibraries && customLibraries.length),
+      hasMissing: hasUnconverted(props)
+    });
+
     const onComplete = () => {
-      if (hasMissingProps) {
+      const entry = latestInput.get(deckgl);
+      entry.librariesLoading = false;
+      if (entry.hasMissing) {
         // Layers and widgets that still cannot be converted are reported and left out
-        const newProps = convertLayersAndWidgets(jsonInput, onError);
-
-        const newLayers = newProps.layers.filter(l => l);
-        const newWidgets = newProps.widgets.filter(w => w);
-
-        if (
-          newLayers.length > convertedLayers.length ||
-          newWidgets.length > convertedWidgets.length
-        ) {
-          // if more layers/widgets are converted
-          deckgl.setProps({layers: newLayers, widgets: newWidgets});
-        }
+        const newProps = dropUnconverted(convertLayersAndWidgets(entry.inputJson, onError));
+        entry.hasMissing = false;
+        deckgl.setProps(entry.transformProps(newProps));
       }
     };
 
