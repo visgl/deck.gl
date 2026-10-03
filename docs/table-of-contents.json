@@ -35,6 +35,7 @@
           "developer-guide/coordinate-systems",
           "developer-guide/views",
           "developer-guide/animations-and-transitions",
+          "developer-guide/zoom-dependent-layers",
           "developer-guide/loading-data",
           "developer-guide/using-effects",
           "developer-guide/performance",
