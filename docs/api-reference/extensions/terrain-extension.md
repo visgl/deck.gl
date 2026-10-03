@@ -7,6 +7,17 @@ The `TerrainExtension` renders otherwise 2D data along a 3D surface. For example
 
 To use this extension, first define a terrain source with the prop `operation: 'terrain'` or `operation: 'terrain+draw'`. A terrain source provides the 3D surface to fit other data on to.
 
+A base map integration can also add a layer with `operation: 'terrain'` and an `externalTerrain` prop, which stands for the terrain the base map draws. Terrain sources that deck.gl draws take precedence over it. Without any terrain, layers with the extension draw as they would without it.
+
+The `externalTerrain` object is experimental, and has the following fields:
+
+- `revision` (number): changes whenever the surface changes other than by camera movement.
+- `renderHeightMap` (Function): `renderHeightMap(target, bounds)` draws the ground elevation in meters into the red channel of the framebuffer `target`, and 1 into its alpha where the elevation is known. `bounds` is `[minX, minY, maxX, maxY]` in Web Mercator common space, with `minY` in the first row.
+- `setDrapeRenderer` (Function, optional): receives the function that draws the draped layers, or `null` when they stop following this terrain. The base map calls `render(target, bounds, {layerFilter, devicePixelRatio})` to draw them into its own framebuffer, over what it holds.
+- `onDrapeChange` (Function, optional): called with the draped layers when they, or what they draw, change.
+
+For draped layers to be picked, the layer's `draw` calls `shaderModuleProps.terrain.drawPickingSurface({renderPass, parameters, shaderModuleProps})` when the terrain module passes that function.
+
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
 The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them.
