@@ -96,7 +96,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       vec3<f32>(0.0)
     );
     geometry.position = projectedPosition.commonPosition;
-    varyings.position = projectedPosition.clipPosition;
+    varyings.position = project_globe_billboard_clipspace(projectedPosition.clipPosition, geometry.position.xyz);
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
     var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
@@ -107,6 +107,10 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       geometry.position.xy + project_pixel_size_vec2(offset.xy),
       geometry.position.zw
     );
+    // Hide points whose anchor is behind the globe; culling handles non-billboard points
+    if (project_globe_is_occluded(projectedPosition.commonPosition.xyz)) {
+      varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+    }
   } else {
     var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);

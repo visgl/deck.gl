@@ -181,8 +181,13 @@ fn vertexMain(inp: Attributes) -> Varyings {
 
   var pos: vec4<f32>;
   var anchorPosScreen: vec2<f32>;
+  // Hide glyphs whose anchor is behind the globe; culling handles non-billboard glyphs
+  var globeOccluded = false;
   if (icon.billboard != 0) {
+    let anchorCommon = project_position_vec3_f64(inp.instancePositions, inp.instancePositions64Low);
     pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0));
+    pos = project_globe_billboard_clipspace(pos, anchorCommon);
+    globeOccluded = project_globe_is_occluded(anchorCommon);
     anchorPosScreen = pos.xy / pos.w;
 
     let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
@@ -250,6 +255,10 @@ fn vertexMain(inp: Attributes) -> Varyings {
   }
   `
       : ''
+  }
+
+  if (globeOccluded) {
+    pos = vec4<f32>(0.0, 0.0, 2.0, 1.0);
   }
 
   let uvMix = (inp.positions.xy + vec2<f32>(1.0, 1.0)) * 0.5;

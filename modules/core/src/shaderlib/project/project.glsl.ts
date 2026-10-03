@@ -354,4 +354,74 @@ float project_pixel_size(float pixels) {
 vec2 project_pixel_size(vec2 pixels) {
   return pixels / project.scale;
 }
+
+// True when the globe hides commonPosition from the camera: the segment from the camera to the
+// position passes through the sphere. Exact for positions at any altitude, so a point above the
+// surface stays visible past the horizon of the ground below it. Always false for flat projections.
+bool project_globe_is_occluded(vec3 commonPosition) {
+  if (project.projectionMode != PROJECTION_MODE_GLOBE) {
+    return false;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float rayLength2 = dot(ray, ray);
+  if (rayLength2 == 0.0) {
+    return false;
+  }
+  // Closest approach of the segment to the globe centre, before reaching the position
+  float t = clamp(-dot(eye, ray) / rayLength2, 0.0, 1.0);
+  vec3 closest = eye + ray * t;
+  return t < 1.0 && dot(closest, closest) < GLOBE_RADIUS * GLOBE_RADIUS;
+}
+
+// Distance from eye along the unit direction to the first globe surface point, or fallback
+float project_globe_ray_distance_(vec3 eye, vec3 direction, float fallback) {
+  float b = dot(eye, direction);
+  float discriminant = b * b - dot(eye, eye) + GLOBE_RADIUS * GLOBE_RADIUS;
+  if (discriminant < 0.0) {
+    return fallback;
+  }
+  float distance = -b - sqrt(discriminant);
+  return distance > 0.0 ? distance : fallback;
+}
+
+// Screen-space radius, in pixels, that a billboard is assumed to cover around its anchor
+#define GLOBE_BILLBOARD_FOOTPRINT_PIXELS 64.0
+
+// Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
+// moved toward the camera by the amount the globe surface rises within its footprint, so the
+// curve of the globe does not clip a sprite whose anchor is visible. The shift is the same at
+// every altitude for a given anchor direction and vanishes where the surface is flat on screen,
+// so depth ordering against other geometry is kept. Pair with project_globe_is_occluded, which
+// hides the sprite once the anchor itself is behind the globe. Identity for flat projections.
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
+  if (project.projectionMode != PROJECTION_MODE_GLOBE) {
+    return clipPosition;
+  }
+  vec3 eye = project.cameraPosition;
+  vec3 ray = commonPosition - eye;
+  float anchorDistance = length(ray);
+  if (anchorDistance == 0.0) {
+    return clipPosition;
+  }
+  vec3 direction = ray / anchorDistance;
+  // On screen, the surface is nearest toward the point of the globe below the camera
+  vec3 inward = -eye - dot(-eye, direction) * direction;
+  float inwardLength = length(inward);
+  if (inwardLength == 0.0) {
+    return clipPosition;
+  }
+  // Ray through the inward edge of the footprint
+  float footprint = project_pixel_size(GLOBE_BILLBOARD_FOOTPRINT_PIXELS);
+  vec3 edgeDirection = normalize(ray + inward / inwardLength * footprint);
+  float surfaceDistance = project_globe_ray_distance_(eye, direction, anchorDistance);
+  float edgeDistance = project_globe_ray_distance_(eye, edgeDirection, surfaceDistance);
+  float shift = surfaceDistance - edgeDistance;
+  if (shift <= 0.0) {
+    return clipPosition;
+  }
+  vec4 shiftedClip = project_common_position_to_clipspace(vec4(commonPosition - direction * shift, 1.0));
+  clipPosition.z = shiftedClip.z / shiftedClip.w * clipPosition.w;
+  return clipPosition;
+}
 `;
