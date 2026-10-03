@@ -42,7 +42,8 @@
           "developer-guide/building-apps",
           "developer-guide/debugging",
           "developer-guide/testing",
-          "developer-guide/webgpu"
+          "developer-guide/webgpu",
+          "developer-guide/working-with-ai"
         ]
       },
       {
