@@ -19,9 +19,6 @@ const DATA_URL_BASE =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/terrain';
 const DATA_URL = `${DATA_URL_BASE}/tour_de_france_2023.json`;
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 43.09822,
   longitude: -0.6194,
@@ -32,16 +29,15 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxPitch: 89
 };
 
-const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
-const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+const TERRAIN_IMAGE = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp';
+const SURFACE_IMAGE = 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp';
 
-// https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
-// Note - the elevation rendered by this example is greatly exagerated!
+// Mapterhorn serves Terrarium-encoded elevation tiles.
 const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
-  rScaler: 6553.6,
-  gScaler: 25.6,
-  bScaler: 0.1,
-  offset: -10000
+  rScaler: 256,
+  gScaler: 1,
+  bScaler: 1 / 256,
+  offset: -32768
 };
 
 const COLOR_SCHEME: Color[] = [
@@ -115,6 +111,8 @@ export default function App({
     new TerrainLayer({
       id: 'terrain',
       minZoom: 0,
+      maxZoom: 12,
+      tileSize: 512,
       strategy: 'no-overlap',
       elevationDecoder: ELEVATION_DECODER,
       elevationData: TERRAIN_IMAGE,

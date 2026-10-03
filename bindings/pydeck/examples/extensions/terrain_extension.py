@@ -3,16 +3,16 @@ TerrainExtension
 ================
 
 A route draped over 3D terrain using the deck.gl ``TerrainExtension``. A ``TerrainLayer``
-builds the surface from the free AWS Terrain Tiles (terrarium-encoded elevation, no access
-token required) with a CARTO basemap as the texture. The ``PathLayer`` uses the extension
+builds the surface from free Mapterhorn tiles (Terrarium-encoded elevation, no access token
+required) with VersaTiles satellite imagery as the texture. The ``PathLayer`` uses the extension
 with ``terrain_draw_mode="drape"`` so it follows the elevation of the surface below it.
 """
 
 import pydeck as pdk
 
-# Free, token-free elevation tiles (AWS Terrain Tiles, terrarium encoding)
-ELEVATION_DATA = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
-TEXTURE = "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"
+# Free, token-free elevation tiles (Mapterhorn, Terrarium encoding)
+ELEVATION_DATA = "https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"
+TEXTURE = "https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp"
 ELEVATION_DECODER = {"rScaler": 256, "gScaler": 1, "bScaler": 1 / 256, "offset": -32768}
 
 terrain = pdk.Layer(
@@ -20,6 +20,8 @@ terrain = pdk.Layer(
     elevation_data=ELEVATION_DATA,
     texture=TEXTURE,
     elevation_decoder=ELEVATION_DECODER,
+    max_zoom=12,
+    tile_size=512,
     operation="'terrain+draw'",
 )
 
