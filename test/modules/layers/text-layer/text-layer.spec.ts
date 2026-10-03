@@ -5,6 +5,7 @@
 import {test, expect} from 'vitest';
 
 import {TextLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
@@ -260,4 +261,71 @@ test('TextLayer - fontAtlasCacheLimit', () => {
     }
   });
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - collision layout and accessor updates', () => {
+  const data = [
+    {text: 'Hello\nworld', position: [0, 0]},
+    {text: '   ', position: [0, 0]}
+  ];
+  const layouts: number[][] = [];
+  testLayer({
+    Layer: TextLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        props: {data, extensions: [new CollisionFilterExtension()]},
+        onAfterUpdate: ({layer}) => {
+          const [background, characters] = layer.getSubLayers();
+          expect(background.id).toBe(`${layer.id}-background`);
+          const rect = background.props.getBoundingRect(data[0], {index: 0});
+          layouts.push(rect);
+          expect(rect[2]).toBeGreaterThan(0);
+          expect(rect[3]).toBeGreaterThan(0);
+          expect(background.props.getBoundingRect(data[1], {index: 1})).toEqual([0, 0, 0, 0]);
+          expect(characters.props.getCollisionRect(data[0], {index: 0})).toEqual(rect);
+          for (const renderPass of ['screen', 'picking:hover', 'collision']) {
+            expect(layer.filterSubLayer({layer: background, renderPass})).toBe(
+              renderPass === 'collision'
+            );
+            expect(layer.filterSubLayer({layer: characters, renderPass})).toBe(
+              renderPass !== 'collision'
+            );
+          }
+        }
+      },
+      {
+        updateProps: {getTextAnchor: 'end', getAlignmentBaseline: 'bottom'},
+        onAfterUpdate: ({layer}) => {
+          const [background, characters] = layer.getSubLayers();
+          const rect = background.props.getBoundingRect(data[0], {index: 0});
+          expect(rect[0]).toBeLessThan(layouts[0][0]);
+          expect(rect[1]).toBeLessThan(layouts[0][1]);
+          const attributes = characters.getAttributeManager().getAttributes();
+          const offset = characters.props.getCollisionRect(data[0], {index: 0});
+          Array.from(attributes.instanceCollisionRects.value.slice(0, 4)).forEach(
+            (value, index) => {
+              expect(value).toBeCloseTo(offset[index], 4);
+            }
+          );
+          layouts.push(rect);
+        }
+      },
+      {
+        updateProps: {background: true},
+        onAfterUpdate: ({layer}) => {
+          const [background] = layer.getSubLayers();
+          expect(layer.filterSubLayer({layer: background, renderPass: 'screen'})).toBe(true);
+          expect(background.props.getBoundingRect(data[1], {index: 1})[2]).toBeGreaterThan(0);
+        }
+      },
+      {
+        updateProps: {collisionEnabled: false, background: false},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.getSubLayers()).toHaveLength(1);
+          expect(layer.getSubLayers()[0].id).toBe(`${layer.id}-characters`);
+        }
+      }
+    ]
+  });
 });
