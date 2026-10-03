@@ -23,22 +23,13 @@ Via conda
 Using it on Jupyter notebook
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. WARNING::
-   Jupyter-specific features are not currently supported in pydeck v0.9+.
-
-In order to use the library in Jupyter notebook (or jupyter lab) requires that pydeck would be properly enabled
-
-Please follow the latest instructions to enable pydeck for Jupyter `here <https://pydeck.gl/installation.html#enabling-pydeck-for-jupyter>`_
+pydeck 0.10 and later render in Jupyter through `anywidget <https://anywidget.dev>`_, so no
+extension installation or enablement step is needed. Install pydeck with its ``jupyter`` extra
+alongside pydeck-carto:
 
 .. code-block::
 
-    jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-    jupyter nbextension enable --sys-prefix --py pydeck
+    pip install "pydeck[jupyter]" pydeck-carto
 
-To enable pydeck for JupyterLab (on Mac/Unix-like systems):
-
-.. code-block:: bash
-
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
-    jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
+This works in JupyterLab 4, Jupyter Notebook 7, VS Code and Google Colab. See the pydeck
+`installation guide <https://pydeck.gl/installation.html>`_ for details.

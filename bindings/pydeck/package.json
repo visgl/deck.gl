@@ -1,0 +1,10 @@
+{
+  "name": "pydeck-build",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Build glue for pydeck: builds @deck.gl/jupyter-widget and copies its bundles into pydeck/static. Invoked by hatch-jupyter-builder and `make copy-bundle`.",
+  "scripts": {
+    "build": "node scripts/build_widget.mjs",
+    "copy": "node scripts/build_widget.mjs --copy-only"
+  }
+}

@@ -1,10 +1,6 @@
 version: 2
 sphinx:
   configuration: docs/conf.py
-python:
-  install:
-    - method: pip
-      path: .
 build:
   os: "ubuntu-24.04"
   tools:
@@ -13,11 +9,8 @@ build:
     post_checkout:
       # CWD for readthedocs is repository root.
       - cp -r bindings/pydeck/* .
-      # Skip broken Jupyter widget build. Remove pyproject.toml and write stubs
-      # for setup.py's data_files. https://github.com/visgl/deck.gl/issues/8469
-      - rm pyproject.toml
-      - touch pydeck/nbextension/static/index.js & touch pydeck/nbextension/static/index.js.map
     post_create_environment:
       - pip install uv
-    post_install:
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH uv pip install --no-cache-dir -r requirements/requirements-dev.txt
+    install:
+      # The docs builder has no node: skip building the widget bundles. Deck.show() falls back to HTML.
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH SKIP_JUPYTER_BUILDER=1 uv pip install --no-cache-dir -e . -r requirements/requirements-dev.txt

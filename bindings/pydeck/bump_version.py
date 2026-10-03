@@ -36,14 +36,6 @@ def rewrite_version_file(semver):
         f.write(contents)
 
 
-def rewrite_pyproject_toml(semver):
-    with open("pyproject.toml", "r") as f:
-        content = f.read()
-    content = re.sub(r'^version = ".*"', 'version = "{}"'.format(semver), content, count=1, flags=re.MULTILINE)
-    with open("pyproject.toml", "w") as f:
-        f.write(content)
-
-
 def rewrite_docs_conf(semver):
     with open("docs/conf.py", "r") as f:
         content = f.read()
@@ -67,7 +59,9 @@ def rewrite_frontend_version_file():
     return semver_range
 
 
-parser = argparse.ArgumentParser(description="Bump semver for pydeck. Modifies pydeck/_version.py directly.")
+parser = argparse.ArgumentParser(
+    description="Bump semver for pydeck. Modifies pydeck/_version.py directly (pyproject.toml reads it)."
+)
 parser.add_argument("release_type", action="store", choices=RELEASE_TYPES, help="Release type to bump")
 parser.add_argument("-y", "--yes", action="store_true", dest="yes", help="Automatically answer yes")
 
@@ -84,7 +78,6 @@ if __name__ == "__main__":
         if response != "Y":
             sys.exit(0)
     rewrite_version_file(bumped_version)
-    rewrite_pyproject_toml(bumped_version)
     rewrite_docs_conf(bumped_version)
     deckgl_version = rewrite_frontend_version_file()
     print("Locked to deck.gl@{}".format(deckgl_version))

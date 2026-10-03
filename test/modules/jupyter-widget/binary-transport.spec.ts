@@ -5,7 +5,7 @@
 import {test, expect, describe} from 'vitest';
 import {deserializeMatrix} from '@deck.gl/jupyter-widget/lib/utils/deserialize-matrix';
 import {jsonConverter} from '@deck.gl/jupyter-widget/playground/create-deck';
-import {processDataBuffer} from '@deck.gl/jupyter-widget/playground/playground';
+import {processDataBuffer} from '@deck.gl/jupyter-widget/lib/widget-utils';
 
 const DEMO_ARRAY = new Uint32Array([0, 10, 2, 20]);
 
@@ -78,5 +78,46 @@ describe('jupyter-widget: binary-transport', () => {
       newDeckProps.layers[0].props.data,
       'should convert buffer input and props to new layers'
     ).toEqual(EXPECTED_CONVERSION['layer-id']);
+  });
+
+  test('deserializeMatrix honors DataView byteOffset', () => {
+    const buffer = new ArrayBuffer(8 + 16);
+    new Float32Array(buffer, 8, 4).set([1, 2, 3, 4]);
+    const converted = deserializeMatrix({
+      'layer-id': {
+        length: 2,
+        attributes: {getPosition: {value: new DataView(buffer, 8, 16), size: 2, dtype: 'float32'}}
+      }
+    });
+    const {value} = converted['layer-id'].attributes.getPosition;
+    expect(value).toBeInstanceOf(Float32Array);
+    expect(Array.from(value)).toEqual([1, 2, 3, 4]);
+  });
+
+  test('deserializeMatrix does not mutate its input and is idempotent', () => {
+    const input = {
+      'layer-id': {
+        length: 2,
+        attributes: {getPosition: {value: DEMO_VALUE, size: 2, dtype: 'uint32'}}
+      }
+    };
+    const first = deserializeMatrix(input);
+    expect(input['layer-id'].attributes.getPosition.value).toBe(DEMO_VALUE);
+    const again = deserializeMatrix(first);
+    expect(again).toEqual(EXPECTED_CONVERSION);
+  });
+
+  test('processDataBuffer keeps layers without binary data', () => {
+    const props = processDataBuffer({
+      binary: EXPECTED_CONVERSION,
+      convertedJson: jsonConverter.convert({
+        layers: [
+          {id: 'layer-id', '@@type': 'ScatterplotLayer'},
+          {id: 'other-layer', '@@type': 'ScatterplotLayer', data: [{position: [0, 0]}]}
+        ]
+      })
+    });
+    expect(props.layers[0].props.data).toEqual(EXPECTED_CONVERSION['layer-id']);
+    expect(props.layers[1].props.data).toEqual([{position: [0, 0]}]);
   });
 });

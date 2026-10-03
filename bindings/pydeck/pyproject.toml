@@ -1,21 +1,78 @@
+[build-system]
+requires = ["hatchling>=1.21", "hatch-jupyter-builder>=0.9.1"]
+build-backend = "hatchling.build"
+
 [project]
 name = "pydeck"
-version = "0.9.3"
-requires-python = ">=3.8"
-dynamic = ["readme", "license", "authors", "keywords", "classifiers", "dependencies", "optional-dependencies", "description", "urls"]
-
-[build-system]
-requires = [
-  "setuptools",
-  "wheel",
+description = "Widget for deck.gl maps"
+readme = "README.md"
+license = {text = "Apache License 2.0"}
+authors = [{name = "Andrew Duberstein", email = "ajduberstein@gmail.com"}]
+keywords = ["data", "visualization", "graphics", "GIS", "maps"]
+requires-python = ">=3.10"
+dynamic = ["version"]
+classifiers = [
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Topic :: Multimedia :: Graphics",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Framework :: Jupyter",
 ]
+dependencies = [
+  "jinja2>=2.10.1",
+  "numpy>=1.16.4",
+]
+
+[project.optional-dependencies]
+carto = ["pydeck-carto"]
+jupyter = [
+  "anywidget>=0.11",
+  "ipykernel>=5.1.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/visgl/deck.gl/tree/master/bindings/pydeck"
+Documentation = "https://pydeck.gl"
+
+[tool.hatch.version]
+path = "pydeck/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pydeck"]
+# The built widget bundles are gitignored; list them so hatchling ships them anyway.
+artifacts = ["pydeck/static/*"]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["pydeck/static/*"]
+exclude = ["/docs/_build", "/tests/build", "/examples/*.html", "/examples/*.png", "**/.ipynb_checkpoints"]
+
+# Builds @deck.gl/jupyter-widget and copies the bundles into pydeck/static when building a wheel or sdist.
+# Set SKIP_JUPYTER_BUILDER=1 to skip (e.g. on ReadTheDocs, where the bundles are not needed).
+[tool.hatch.build.hooks.jupyter-builder]
+dependencies = ["hatch-jupyter-builder>=0.9.1"]
+build-function = "hatch_jupyter_builder.npm_builder"
+ensured-targets = ["pydeck/static/widget.js", "pydeck/static/widget.css", "pydeck/static/standalone.js"]
+skip-if-exists = ["pydeck/static/widget.js", "pydeck/static/widget.css", "pydeck/static/standalone.js"]
+# Editable installs (`pip install -e .`) only warn when node is unavailable; run `make copy-bundle` afterwards.
+optional-editable-build = true
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
+path = "."
+build_cmd = "build"
+npm = ["npm"]
+source_dir = "../../modules/jupyter-widget/src"
+build_dir = "pydeck/static"
 
 [tool.uv]
 python-preference = "managed"
 
 [tool.black]
 line-length = 120
-target-version = ['py38']
+target-version = ['py310']
 include = '\.pyi?$'
 exclude = '''
 (

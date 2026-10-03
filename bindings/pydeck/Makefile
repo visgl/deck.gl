@@ -5,7 +5,6 @@ help:
 	@echo "\nPlease use \`make target\` where target is one of\n"
 	@echo "init - build deck.gl and install all requirements for development"
 	@echo "test - run tests"
-	@echo "prepare-jupyter - initiate pydeck-related extensions in JupyterLab and Jupyter Notebook"
 	@echo "bump-version - bump the version files for the pydeck frontend and backend"
 	@echo "publish-pypi - prepare pydeck for publication to PyPI"
 	@echo "publish-test-pypi - prepare pydeck for publication to the test.pypi.org"
@@ -14,26 +13,26 @@ help:
 	@echo "setup-env - detect basic requirements and set up a virtualenv using uv"
 	@echo "pre-commit - run pre-commit hook for pydeck"
 
-WIDGET_DIST=../../modules/jupyter-widget/dist
-NBEXT_STATIC=pydeck/nbextension/static
+WIDGET_DIR=../../modules/jupyter-widget
 
+# Copy the built @deck.gl/jupyter-widget bundles into pydeck/static (no rebuild)
 copy-bundle:
-	cp $(WIDGET_DIST)/index.js $(NBEXT_STATIC)/index.js
-	cp $(WIDGET_DIST)/index.js.map $(NBEXT_STATIC)/index.js.map
+	node scripts/build_widget.mjs --copy-only
 
+# Build deck.gl from the repository root (this directory has its own package.json for the
+# widget bundle step, so yarn must not be run here), then copy the bundles into pydeck/static
 init:
 	. $(BIN)/activate; \
-	yarn bootstrap; \
-	yarn build
+	cd ../.. && yarn bootstrap && yarn build
 	$(MAKE) copy-bundle
 	uv pip install -r requirements/requirements.txt && \
 	uv pip install -r requirements/requirements-dev.txt && \
-	uv pip install -e .
+	SKIP_JUPYTER_BUILDER=1 uv pip install -e ".[jupyter]"
 
+# Rebuild only the widget bundles (requires a prior `yarn build` at the repo root for the dist aliases)
 fast-build:
-	cd ../../modules/jupyter-widget; webpack; cd -
+	cd $(WIDGET_DIR) && yarn build
 	$(MAKE) copy-bundle
-	uv pip install -e .
 
 pre-commit:
 	$(BIN)/python -m black . && $(MAKE) test
@@ -45,18 +44,6 @@ setup-env:
 	uv venv --python 3.13 $(VENV)
 #	avoid conflict between any js code in the venv and the root
 	echo '{"type": "commonjs"}' > $(VENV)/package.json
-
-prepare-jupyter:
-	# Enable the notebook extension
-	python -m jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck; \
-	python -m jupyter nbextension enable --sys-prefix --py pydeck; \
-	# Build and install the JS module
-	cd ../../modules/jupyter-widget/; \
-	python -m jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build; \
-	python -m jupyter labextension install . --no-build; \
-	python -m jupyter labextension link .; \
-	python -m jupyter lab build; \
-	cd ../../bindings/pydeck
 
 test:
 	$(BIN)/python -m flake8 . && \

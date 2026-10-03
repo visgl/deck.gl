@@ -36,15 +36,10 @@ and install development and testing dependencies:
         source .venv/bin/activate
         make init
 
-..
-   ``make prepare-jupyter`` was previously required here to enable the Jupyter
-   widget integration (nbextension + labextension). This is not currently needed
-   because ``.show()`` renders via HTML iframe in v0.9+. Restore this step when
-   the ipywidgets-based widget path is re-enabled in ``pydeck/bindings/deck.py``.
-
-   .. code-block:: bash
-
-           make prepare-jupyter
+``make init`` also copies the built ``@deck.gl/jupyter-widget`` bundles into ``pydeck/static``
+(``make copy-bundle``), which the Jupyter widget and ``to_html(offline=True)`` load from. After changing the
+JavaScript, rebuild them with ``make fast-build``. Installing pydeck in editable mode without those bundles
+only prints a warning; ``Deck.show()`` then falls back to static HTML until you run ``make copy-bundle``.
 
 Verify that this new local copy of pydeck works by running ``make test``.
 
@@ -57,12 +52,14 @@ and start a local web server as follows:
 .. code-block:: bash
 
         cd deck.gl/modules/jupyter-widget
-        yarn run build
+        yarn build:dev
         # select any port you wish
         PYDECK_DEV_PORT=8000
         python -m http.server $PYDECK_DEV_PORT
 
-Note the ``PYDECK_DEV_PORT`` which will be referenced in the instructions below.
+With ``PYDECK_DEV_PORT`` set, pydeck loads ``dist/index.js`` for ``to_html()`` output and ``dist/widget.js``
+for the Jupyter widget from that server instead of the bundled copies. Note the ``PYDECK_DEV_PORT`` which
+will be referenced in the instructions below.
 
 Local development in Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,8 +105,9 @@ longer than the commit hook tests. Ideally, these tests will pass locally before
 tests will also run on CI. Generally the deck.gl team will review your PR within 2-3 days.
 
 Before submitting a PR, you should run ``make test`` to verify that your Python tests pass locally.
-It may be helpful to run ``uv pip install -e .`` to rebuild pydeck locally. If you need to rebuild @deck.gl/json or @deck.gl/jupyter-widget,
-you can run ``yarn bootstrap`` or the ``webpack`` commands within their individual directories.
+It may be helpful to run ``SKIP_JUPYTER_BUILDER=1 uv pip install -e ".[jupyter]"`` to reinstall pydeck locally.
+If you need to rebuild @deck.gl/json or @deck.gl/jupyter-widget, run ``yarn build`` in their directories
+followed by ``make copy-bundle``.
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

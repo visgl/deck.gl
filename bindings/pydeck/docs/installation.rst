@@ -6,7 +6,7 @@ There are two steps before using pydeck:
         1. Install the library via pip or conda
         2. Include an API key from Google Maps or Mapbox (Optional)
 
-pydeck requires Python 3.8 or above.
+pydeck requires Python 3.10 or above.
 
 Via pip
 ^^^^^^^
@@ -24,8 +24,8 @@ Via conda
 
         conda install -c conda-forge pydeck
 
-That's it — pydeck renders visualizations using the deck.gl JavaScript library loaded from a
-CDN, so no additional Jupyter extension setup is needed for ``.show()`` and ``.to_html()``.
+That's it for static visualizations: ``.to_html()`` renders using the deck.gl JavaScript library loaded from
+a CDN. For a live Jupyter widget, install the ``jupyter`` extra described below.
 
 
 Getting a Mapbox API key
@@ -59,32 +59,17 @@ and pydeck will pick it up automatically.
 Enabling pydeck for Jupyter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. NOTE::
-   The Jupyter widget integration (binary transport, data selection, event handlers, and
-   live ``.update()``) is not currently functional in pydeck v0.9+. See :doc:`jupyter` for
-   details. The extension setup instructions below are retained for when widget support is
-   restored.
+Install the Jupyter extra to get the live widget: data updates with ``.update()``, event handlers, data
+selection and binary transport.
 
-.. commenting out rather than removing — restore when widget support is re-enabled
+.. code-block:: bash
 
-..
-   To enable pydeck for Jupyter Notebook:
+        pip install "pydeck[jupyter]"
 
-   .. code-block:: bash
-
-           jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-           jupyter nbextension enable --sys-prefix --py pydeck
-
-   To enable pydeck for JupyterLab (on Mac/Unix-like systems):
-
-   .. code-block:: bash
-
-           jupyter labextension install @jupyter-widgets/jupyterlab-manager
-           DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
-           jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER
-
-
-pydeck also works in Google Colab. While you can install pydeck in Google Colab via pip, it is not yet enabled for server use.
+The widget is built on `anywidget <https://anywidget.dev>`__, so it works in JupyterLab 4, Jupyter Notebook 7,
+VS Code and Google Colab without any ``nbextension`` or ``labextension`` step. If you enabled the extension
+shipped with pydeck 0.8, remove it with ``jupyter nbextension uninstall --py pydeck``. See :doc:`jupyter` for
+the features this enables.
 
 Installing from source
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -106,14 +91,3 @@ If you want to install pydeck for development, see :doc:`contributing`.
 
 You can run the local tests to verify that the installation worked via ``make test``.
 
-..
-   Note on pre-releases
-   ^^^^^^^^^^^^^^^^^^^^
-
-   If you are installing a pydeck prerelease and using JupyterLab, you must install an exact version
-   of ``@deck.gl/jupyter-widget``. You can read this version from pydeck itself:
-
-   .. code-block:: bash
-
-           DECKGL_SEMVER=`python -c "import pydeck; print(pydeck.frontend_semver.DECKGL_SEMVER)"`
-           jupyter labextension install @deck.gl/jupyter-widget@$DECKGL_SEMVER

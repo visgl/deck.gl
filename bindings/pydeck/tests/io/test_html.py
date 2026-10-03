@@ -1,5 +1,9 @@
 import html
+import os
 import webbrowser
+
+import pytest
+
 import pydeck
 
 try:
@@ -16,6 +20,7 @@ from pydeck.io.html import (
     deck_to_html,
     CDN_URL,
     CDN_CSS_URL,
+    OFFLINE_BUNDLE_PATH,
     widget_css_picker,
 )
 from IPython.display import HTML
@@ -37,8 +42,19 @@ def test_display_html():
     webbrowser.open.assert_called_once_with("file://test.htm")
 
 
-def test_cdn_picker(monkeypatch):
+@pytest.mark.skipif(not os.path.exists(OFFLINE_BUNDLE_PATH), reason="Requires built bundles (make copy-bundle)")
+def test_offline_bundles():
     assert len(cdn_picker(offline=True)) > 1000
+    assert ".deck-widget" in widget_css_picker(offline=True)
+
+
+def test_offline_bundle_missing_is_a_clear_error(monkeypatch):
+    monkeypatch.setattr(pydeck.io.html, "OFFLINE_BUNDLE_PATH", "/nonexistent/standalone.js")
+    with pytest.raises(FileNotFoundError, match="offline bundle is missing"):
+        cdn_picker(offline=True)
+
+
+def test_cdn_picker(monkeypatch):
     PORT = 8080
     monkeypatch.setenv("PYDECK_DEV_PORT", PORT)
     assert "localhost:{}".format(PORT) in cdn_picker()

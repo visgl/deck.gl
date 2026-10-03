@@ -3,8 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 /* global document */
-// TODO - make sure this can be called multiple times without adding elements
 export function loadCSS(url) {
+  const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+  if (links.some(existing => existing.getAttribute('href') === url)) {
+    // Already loaded, e.g. by another view of the same widget
+    return;
+  }
   const link = document.createElement('link');
   link.type = 'text/css';
   link.rel = 'stylesheet';
