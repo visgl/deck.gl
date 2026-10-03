@@ -6,12 +6,12 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {_GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 
 import {points, choropleths, iconAtlas as iconMapping} from 'deck.gl-test/data';
+import {expandViewMatrix} from '../view-presets';
 
 const ELEVATION_DATA = '/test/data/terrain-tiles/{z}/{x}/{y}.png';
 const TEXTURE = '/test/data/raster-tiles/{z}/{x}/{y}.png';
@@ -64,70 +64,48 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/terrain-layer.png'
   },
-  {
-    name: 'terrain-extension-drape',
-    skip: ['webgpu'],
-    viewState: {
-      longitude: -122.45,
-      latitude: 37.75,
-      zoom: 11.5,
-      pitch: 60,
-      bearing: 0
+  // `terrain-extension-drape` (MapView, existing golden) and its GlobeView twin
+  // `terrain-extension-drape-globe`. Same viewState for both; zoom 11.5 stays below GlobeView's
+  // zoom-12 handoff to WebMercatorViewport. TerrainLayer switches its tile meshes to LNGLAT under
+  // GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
+  // globe -> Mercator inverse, so the draped fills and strokes follow the terrain on the globe.
+  // The stroke (a draped PathLayer) is the regression guard for the terrain cover pass: it must
+  // not re-activate its Mercator viewport on the layer, otherwise PathLayer re-tessellates on every
+  // frame and deck never settles (see TerrainPass.renderTerrainCover).
+  ...expandViewMatrix(
+    {
+      name: 'terrain-extension-drape',
+      skip: ['webgpu'],
+      viewState: {
+        longitude: -122.45,
+        latitude: 37.75,
+        zoom: 11.5,
+        pitch: 60,
+        bearing: 0
+      },
+      layers: [
+        new TerrainLayer({
+          elevationData: ELEVATION_DATA,
+          texture: TEXTURE,
+          elevationDecoder: DECODER,
+          operation: 'draw+terrain'
+        }),
+        new GeoJsonLayer({
+          data: choropleths,
+          getLineWidth: 50,
+          getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
+          extensions: [new TerrainExtension()]
+        })
+      ],
+      overrides: {
+        globe: {
+          onAfterRender: waitAfterDefaultCompletion(500),
+          imageDiffOptions: {threshold: 0.985}
+        }
+      }
     },
-    layers: [
-      new TerrainLayer({
-        elevationData: ELEVATION_DATA,
-        texture: TEXTURE,
-        elevationDecoder: DECODER,
-        operation: 'draw+terrain'
-      }),
-      new GeoJsonLayer({
-        data: choropleths,
-        getLineWidth: 50,
-        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
-        extensions: [new TerrainExtension()]
-      })
-    ],
-    goldenImage: './test/render/golden-images/terrain-extension-drape.png'
-  },
-  {
-    // GlobeView twin of the case above (same viewState; zoom 11.5 stays below GlobeView's zoom-12
-    // handoff to WebMercatorViewport), fills only. TerrainLayer switches its tile meshes to LNGLAT
-    // under GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
-    // globe -> Mercator inverse, so the draped fills follow the terrain on the globe.
-    // The stroke is left out on purpose: a draped PathLayer on GlobeView is re-tessellated twice
-    // per frame (Layer.activateViewport -> PathLayer.shouldUpdateState sees viewport.resolution /
-    // projectionMode flip between the Mercator terrain-cover pass and the globe screen pass),
-    // which flags needsRedraw every frame and starves the screenshot. Add `stroked` back once
-    // that is fixed.
-    name: 'terrain-extension-drape-fill-globe',
-    skip: ['webgpu'],
-    views: new GlobeView(),
-    viewState: {
-      longitude: -122.45,
-      latitude: 37.75,
-      zoom: 11.5,
-      pitch: 60,
-      bearing: 0
-    },
-    layers: [
-      new TerrainLayer({
-        elevationData: ELEVATION_DATA,
-        texture: TEXTURE,
-        elevationDecoder: DECODER,
-        operation: 'draw+terrain'
-      }),
-      new GeoJsonLayer({
-        data: choropleths,
-        stroked: false,
-        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
-        extensions: [new TerrainExtension()]
-      })
-    ],
-    onAfterRender: waitAfterDefaultCompletion(500),
-    imageDiffOptions: {threshold: 0.985},
-    goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
-  },
+    ['map', 'globe']
+  ),
   {
     name: 'terrain-extension-offset',
     // Re-enabled during the Vitest migration, but still produces a large,
