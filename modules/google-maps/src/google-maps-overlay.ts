@@ -160,7 +160,7 @@ export default class GoogleMapsOverlay {
     const interleaved = this.props.interleaved ?? defaultProps.interleaved;
     // Create positioning overlay for proper DOM placement
     const positioningOverlay = new google.maps.OverlayView();
-    positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this);
+    positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this, interleaved);
     positioningOverlay.draw = this._updateContainerSize.bind(this);
     positioningOverlay.onRemove = this._onRemove.bind(this);
     this._positioningOverlay = positioningOverlay;
@@ -192,7 +192,7 @@ export default class GoogleMapsOverlay {
     this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
   }
 
-  _onAddVectorOverlay() {
+  _onAddVectorOverlay(interleaved: boolean) {
     // For non-interleaved vector maps, create a positioning container
     // that Google Maps will place correctly in the DOM with proper z-index
     const overlay = this._positioningOverlay as google.maps.OverlayView;
@@ -205,7 +205,7 @@ export default class GoogleMapsOverlay {
     }
 
     // In interleaved mode, _onContextRestored creates Deck with Google's context.
-    if (this.props.interleaved === false) {
+    if (!interleaved) {
       // @ts-ignore (TS2345) map is defined at this stage
       // Pass the positioning overlay for deck canvas creation (not WebGL overlay)
       this._deck = createDeckInstance(this._map, overlay, this._deck, this.props);

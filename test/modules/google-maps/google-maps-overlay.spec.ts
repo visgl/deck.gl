@@ -243,6 +243,46 @@ test('GoogleMapsOverlay#non-interleaved context', async () => {
   }
 });
 
+for (const interleaved of [true, false]) {
+  test(`GoogleMapsOverlay#vector creation mode (interleaved:${interleaved})`, async () => {
+    const map = new mapsApi.Map({
+      width: 1,
+      height: 1,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType: mapsApi.RenderingType.VECTOR
+    });
+    const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
+      map._overlays.add(mapOverlay);
+    });
+    const overlay = new GoogleMapsOverlay({interleaved, layers: []});
+
+    try {
+      overlay.setMap(map);
+      // Both creation callbacks must use the mode selected when they were bound.
+      overlay.setProps({interleaved: !interleaved});
+      overlay._positioningOverlay.onAdd();
+      if (interleaved) {
+        expect(overlay._deck, 'Deck waits for the shared context').toBeNull();
+      } else {
+        expect(overlay._deck, 'Positioning still creates the standalone Deck').toBeTruthy();
+      }
+
+      overlay._overlay.onContextRestored({gl});
+      const deck = overlay._deck;
+      expect(deck.props.gl, 'Deck uses the context selected at binding').toBe(
+        interleaved ? gl : null
+      );
+      await expect.poll(() => deck.isInitialized).toBe(true);
+      expect(deck.getCanvas() === gl.canvas, 'Canvas matches the selected mode').toBe(interleaved);
+    } finally {
+      overlay.finalize();
+      addOverlaySpy.mockRestore();
+    }
+  });
+}
+
 test('GoogleMapsOverlay#style', () => {
   const map = new mapsApi.Map({
     width: 1,
