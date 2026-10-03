@@ -35,6 +35,15 @@ fn clip_isInBounds(coordinates: vec2<f32>) -> bool {
     coordinates.y < clipUniforms.bounds.w;
 }
 
+// Geometry-mode coordinates: flat (Mercator / cartesian) common space, matching the bounds set by
+// ClipExtension.draw() in every projection mode including globe, wrapped around the bounds centre
+// so geometry stays continuous across the antimeridian.
+fn clip_getCoordinates(commonPosition: vec4<f32>) -> vec2<f32> {
+  return project_common_position_to_flat_wrapped(
+    commonPosition.xyz, 0.5 * (clipUniforms.bounds.x + clipUniforms.bounds.z)
+  );
+}
+
 fn clip_filterPosition(position: ptr<function, vec4<f32>>, instanceCoordinates: vec2<f32>) {
   if (
     clipUniforms.enabled != 0 &&

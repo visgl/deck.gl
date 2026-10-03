@@ -121,7 +121,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
   }
 
-  varyings.clipCoordinates = geometry.position.xy;
+  varyings.clipCoordinates = clip_getCoordinates(geometry.position);
   clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   // Apply opacity to instance color, or return instance picking color
