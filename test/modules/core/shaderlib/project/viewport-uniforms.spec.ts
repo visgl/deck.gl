@@ -185,6 +185,28 @@ test('project#getUniforms CARTESIAN z scale is continuous across zoom 12', () =>
   }
 });
 
+test('project#getUniforms CARTESIAN z scale is continuous across zoom 12 with a position offset', () => {
+  // A north-south offset moves the viewport center away from the viewport latitude
+  const zScales = [11.99, 12].map(zoom => {
+    const viewport = new WebMercatorViewport({
+      width: 800,
+      height: 600,
+      latitude: 46.2,
+      longitude: -122.19,
+      zoom,
+      pitch: 60,
+      position: [0, 100000, 0]
+    });
+    const uniforms = project.getUniforms({
+      viewport,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    }) as ProjectUniforms;
+    return uniforms.commonUnitsPerWorldUnit[2];
+  });
+
+  expect(zScales[1] / zScales[0], 'z scale at zoom 12 relative to zoom 11.99').toBeCloseTo(1, 6);
+});
+
 test('project#getUniforms rejects legacy numeric coordinate systems', () => {
   expect(
     () => project.getUniforms({viewport: TEST_VIEWPORTS.map, coordinateSystem: -1 as never}),

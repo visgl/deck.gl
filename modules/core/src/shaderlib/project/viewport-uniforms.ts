@@ -75,9 +75,14 @@ export function getOffsetOrigin(
         geospatialOrigin = [0, 0, 0];
         offsetMode = false;
       } else if (coordinateSystem === 'cartesian') {
-        // Positions are already in common space and only z is in meters. Keep the viewport center
+        // Positions are already in common space and only z is in meters. Use the viewport center
         // as geospatial origin so that z is scaled the same as in WEB_MERCATOR_AUTO_OFFSET mode
         offsetMode = false;
+        geospatialOrigin = viewport.unprojectPosition([
+          Math.fround(viewport.center[0]),
+          Math.fround(viewport.center[1]),
+          0
+        ]);
       }
       break;
 
