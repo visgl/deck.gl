@@ -204,9 +204,12 @@ export default class GoogleMapsOverlay {
       panes.overlayLayer.appendChild(container);
     }
 
-    // @ts-ignore (TS2345) map is defined at this stage
-    // Pass the positioning overlay for deck canvas creation (not WebGL overlay)
-    this._deck = createDeckInstance(this._map, overlay, this._deck, this.props);
+    // In interleaved mode, _onContextRestored creates Deck with Google's context.
+    if (this.props.interleaved === false) {
+      // @ts-ignore (TS2345) map is defined at this stage
+      // Pass the positioning overlay for deck canvas creation (not WebGL overlay)
+      this._deck = createDeckInstance(this._map, overlay, this._deck, this.props);
+    }
   }
 
   _updateContainerSize() {
