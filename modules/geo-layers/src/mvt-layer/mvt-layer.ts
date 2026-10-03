@@ -22,14 +22,19 @@ import {binaryToGeojson} from '@loaders.gl/gis';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {BinaryFeatureCollection} from '@loaders.gl/schema';
-import type {Feature, Geometry} from 'geojson';
+import type {Feature, Geometry, GeometryCollection} from 'geojson';
 
 import {transform} from './coordinate-transform';
 import findIndexBinary from './find-index-binary';
 
 import TileLayer, {TileLayerPickingInfo, TileLayerProps} from '../tile-layer/tile-layer';
 
-import type {Tileset2DProps, TileLoadProps, GeoBoundingBox} from '../tileset-2d/index';
+import type {
+  Tileset2DProps,
+  TileLoadProps,
+  GeoBoundingBox,
+  NonGeoBoundingBox
+} from '../tileset-2d/index';
 import {
   urlType,
   Tileset2D,
@@ -266,8 +271,16 @@ export default class MVTLayer<
     props.autoHighlight = false;
 
     if (!this.context.viewport.resolution) {
-      props.modelMatrix = modelMatrix;
-      props.coordinateOrigin = [xOffset, yOffset, 0];
+      if (props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
+        const bbox = props.tile.bbox as NonGeoBoundingBox;
+        props.modelMatrix = new Matrix4()
+          .translate([bbox.left, bbox.top, 0])
+          .scale([bbox.right - bbox.left, bbox.bottom - bbox.top, 1])
+          .multiplyLeft(props.modelMatrix || Matrix4.IDENTITY);
+      } else {
+        props.modelMatrix = modelMatrix;
+        props.coordinateOrigin = [xOffset, yOffset, 0];
+      }
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
@@ -324,11 +337,11 @@ export default class MVTLayer<
       }) as Feature;
     }
     if (info.object && !this._isWGS84()) {
-      info.object = transformTileCoordsToWGS84(
-        info.object,
-        info.tile!.bbox as GeoBoundingBox, // eslint-disable-line
-        this.context.viewport
-      );
+      const {bbox} = info.tile!;
+
+      info.object = isGeoBoundingBox(bbox)
+        ? transformTileCoordsToWGS84(info.object, bbox, this.context.viewport)
+        : transformTileCoordsToCartesian(info.object, bbox);
     }
 
     return info;
@@ -486,6 +499,35 @@ function transformTileCoordsToWGS84(
       const wgs84Geom = transform(object.geometry, bbox, viewport);
       return wgs84Geom.coordinates;
     }
+  });
+
+  return feature as Feature;
+}
+
+function transformTileCoordsToCartesian(object: Feature, bbox: NonGeoBoundingBox): Feature {
+  const feature = {
+    ...object,
+    geometry: {
+      type: object.geometry.type
+    }
+  };
+
+  const xScale = bbox.right - bbox.left;
+  const yScale = bbox.bottom - bbox.top;
+
+  const transformCoordinates = coordinates =>
+    typeof coordinates[0] === 'number'
+      ? [
+          bbox.left + coordinates[0] * xScale,
+          bbox.top + coordinates[1] * yScale,
+          ...coordinates.slice(2)
+        ]
+      : coordinates.map(transformCoordinates);
+
+  // eslint-disable-next-line accessor-pairs
+  Object.defineProperty(feature.geometry, 'coordinates', {
+    get: () =>
+      transformCoordinates((object.geometry as Exclude<Geometry, GeometryCollection>).coordinates)
   });
 
   return feature as Feature;
