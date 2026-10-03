@@ -173,11 +173,13 @@ function dropUnconverted(props) {
  * `transformProps` adjusts the converted props before they are applied, e.g. to attach binary data.
  */
 function updateDeck(inputJson, deckgl, transformProps = identity) {
+  // The widget's binary messages carry the JSON as a string
+  const json = typeof inputJson === 'string' ? JSON.parse(inputJson) : inputJson;
   const entry = latestInput.get(deckgl) || {librariesLoading: false};
-  const props = convertJson(inputJson, entry.librariesLoading);
+  const props = convertJson(json, entry.librariesLoading);
   latestInput.set(deckgl, {
     ...entry,
-    inputJson,
+    inputJson: json,
     transformProps,
     hasMissing: hasUnconverted(props)
   });

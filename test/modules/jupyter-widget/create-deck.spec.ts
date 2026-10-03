@@ -161,9 +161,10 @@ describe('jupyter-widget: dynamic-registration', () => {
     });
 
     try {
-      // The Jupyter widget sends its first JSON message right after the deck is created
+      // The Jupyter widget sends its first JSON message right after the deck is created, as a
+      // string when it comes with a data buffer
       updateDeck(
-        {
+        JSON.stringify({
           ...jsonInput,
           layers: [
             {
@@ -174,7 +175,7 @@ describe('jupyter-widget: dynamic-registration', () => {
             },
             {'@@type': 'ScatterplotLayer', id: 'plain', data: []}
           ]
-        },
+        }),
         deck
       );
       expect(
