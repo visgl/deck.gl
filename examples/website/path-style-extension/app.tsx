@@ -38,6 +38,7 @@ type Asset = {
   source: {layerName: string; objectId: string | number; url: string}[];
   style?: {
     widthMeters: number;
+    widthPixels?: number;
     colorRole?: keyof typeof ROAD_STYLE;
     dashMeters?: DashPattern;
     dashPixels?: DashPattern;
@@ -54,7 +55,7 @@ const {assets} = ROAD_DIAGRAM_DATA as unknown as {
     backgroundPaths: PathAsset[];
     laneBands: StyledPathAsset[];
     bikePanels: PolygonAsset[];
-    crosswalks: StyledPathAsset[];
+    crossings: StyledPathAsset[];
     transversePolygons: PolygonAsset[];
     transversePaths: StyledPathAsset[];
     longitudinalMarkings: StyledPathAsset[];
@@ -75,8 +76,8 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
 
-const DASH_EXTENSION = new PathStyleExtension({dashMode: 'path'});
-const OFFSET_EXTENSION = new PathStyleExtension({offset: true});
+const MARKING_EXTENSION = new PathStyleExtension({dashMode: 'path', offset: true});
+const LANE_EXTENSION = new PathStyleExtension({offset: true});
 
 function getDashArray(asset: Asset, measurementMode: MeasurementMode, dashScale: number) {
   const pattern =
@@ -93,12 +94,18 @@ function getPopupHtml(asset: Asset, measurementMode: MeasurementMode, dashScale:
     lines.push(`Dash: ${+dash.toFixed(2)} ${unit}, gap: ${+gap.toFixed(2)} ${unit}`);
   }
   if (asset.style?.offset) {
-    lines.push(`Offset: ${asset.style.offset} × width`);
+    lines.push(`Offset: ${+asset.style.offset.toFixed(2)} × width`);
   }
+  // A dashed row can come from many source polygons, so list their links by source layer
+  const linksByLayer: Record<string, string[]> = {};
   for (const {url, layerName, objectId} of asset.source) {
-    lines.push(
-      `<a href="${url}" target="_blank" rel="noopener noreferrer">${layerName} ${objectId}</a>`
+    linksByLayer[layerName] ||= [];
+    linksByLayer[layerName].push(
+      `<a href="${url}" target="_blank" rel="noopener noreferrer">${objectId}</a>`
     );
+  }
+  for (const [layerName, links] of Object.entries(linksByLayer)) {
+    lines.push(`${layerName} ${links.join(', ')}`);
   }
   return `<strong>${asset.label}</strong><br>${lines.join('<br>')}`;
 }
@@ -147,7 +154,7 @@ export default function App({
 
       // Shift each lane sideways from the street centerline, in multiples of its width
       getOffset: asset => asset.style.offset!,
-      extensions: [OFFSET_EXTENSION]
+      extensions: [LANE_EXTENSION]
     }),
     new PolygonLayer<PolygonAsset>({
       id: 'bike-panels',
@@ -158,20 +165,23 @@ export default function App({
       pickable: true
     }),
     new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
-      id: 'crosswalks',
-      data: assets.crosswalks,
+      id: 'crossings',
+      data: assets.crossings,
       getPath: asset => asset.path,
-      getWidth: asset => (isPhysical ? asset.style.widthMeters : 18),
+      getWidth: asset => (isPhysical ? asset.style.widthMeters : asset.style.widthPixels!),
       widthUnits: markingUnits,
-      getColor: ROAD_STYLE.whiteMarking,
+      getColor: asset => ROAD_STYLE[asset.style.colorRole!],
       pickable: true,
 
-      // Draw the crosswalk bars as one dashed path, stretched to start and end on a bar
+      // Draw each row of crosswalk bars or bike crossing blocks as one dashed path. Rows
+      // measure a whole number of dashes in meters; in pixels, stretch them to end on a dash
       getDashArray: asset => getDashArray(asset, measurementMode, dashScale),
       dashUnits: markingUnits,
-      dashJustified: true,
+      dashJustified: !isPhysical,
       dashGapPickable: true,
-      extensions: [DASH_EXTENSION],
+      // Rows side by side share one path, shifted sideways in multiples of their width
+      getOffset: asset => asset.style.offset!,
+      extensions: [MARKING_EXTENSION],
       updateTriggers: {
         getWidth: measurementMode,
         getDashArray: [measurementMode, dashScale]
@@ -198,7 +208,7 @@ export default function App({
       id: 'longitudinal-markings',
       data: assets.longitudinalMarkings,
       getPath: asset => asset.path,
-      getWidth: asset => (isPhysical ? asset.style.widthMeters : 2),
+      getWidth: asset => (isPhysical ? asset.style.widthMeters : asset.style.widthPixels!),
       widthUnits: markingUnits,
       widthMinPixels: 1,
       getColor: asset => ROAD_STYLE[asset.style.colorRole!],
@@ -210,7 +220,9 @@ export default function App({
       getDashArray: asset => getDashArray(asset, measurementMode, dashScale),
       dashUnits: markingUnits,
       dashGapPickable: true,
-      extensions: [DASH_EXTENSION],
+      // Double yellow lines share one path, drawn twice with opposite offsets
+      getOffset: asset => asset.style.offset!,
+      extensions: [MARKING_EXTENSION],
       updateTriggers: {
         getWidth: measurementMode,
         getDashArray: [measurementMode, dashScale]
