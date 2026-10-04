@@ -30,7 +30,7 @@ Developer guide pages are organized around a task (e.g. "Loading data", "Using w
 
 * Say what something does, then when to use it. From [`PathLayer`](../docs/api-reference/layers/path-layer.md#billboard): "If `true`, extrude the path in screen space (width always faces the camera)."
 * One idea per sentence. If a sentence needs a semicolon and two qualifying clauses, split it or drop the clauses.
-* Use the words the reader already knows: "where the pattern starts over", not "phase domain"; "screen pixels", not "nominal zoom-stable projected pixels". Introduce a deck.gl term only when the reader needs it to read other pages, and link to where it is defined.
+* Use the words the reader already knows: "too small when zoomed out", not "below the minimum projected size"; "screen pixels", not "nominal zoom-stable projected pixels". Introduce a deck.gl term only when the reader needs it to read other pages, and link to where it is defined.
 * Use the present tense. Write "draws", not "will draw".
 * Give a concrete number when explaining units: "`[4, 5]` on a 10 pixel wide path draws 20 pixel dashes separated by 25 pixel gaps."
 * Pick one or two examples instead of listing every synonym. "Routes and GPS traces" reads better than "routes, GPS traces, railway alignments, and XYZ trajectories".
