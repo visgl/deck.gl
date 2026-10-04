@@ -22,19 +22,7 @@ JSON into deck.gl objects, resolving each ``@@type`` against a catalog of the cl
 
     import pydeck as pdk
 
-    # Packages that pydeck already loads. The CDN leaves them as imports, so the library
-    # uses pydeck's copies instead of bundling its own.
-    SHARED = ",".join([
-        "@deck.gl/core", "@deck.gl/layers", "@deck.gl/extensions", "@deck.gl/aggregation-layers",
-        "@deck.gl/geo-layers", "@deck.gl/mesh-layers", "@deck.gl/widgets",
-        "@luma.gl/core", "@luma.gl/engine", "@luma.gl/shadertools", "@luma.gl/webgl",
-        "@loaders.gl/core", "@math.gl/core",
-    ])
-
-    def community_module(package):
-        return f"https://esm.sh/@deck.gl-community/{package}@~9.4.1?external={SHARED}"
-
-    pdk.settings.register_library("DeckCommunityLayers", community_module("layers"), module=True)
+    pdk.settings.register_library(npm="@deck.gl-community/layers")
 
 The frontend imports the module and registers its exports:
 
@@ -47,20 +35,21 @@ Layers that reference a custom class are rendered once the library has loaded. T
 read when a :class:`pydeck.bindings.deck.Deck` is created in Jupyter, or when
 :meth:`pydeck.bindings.deck.Deck.to_html` is called, so register them first.
 
-`esm.sh <https://esm.sh>`__ builds the package as an ES module, bundles its other dependencies and,
-with ``?external=``, leaves imports of the shared packages for pydeck to resolve. A CDN that rewrites
-every import, such as jsDelivr's ``+esm``, loads a second copy of deck.gl, and the library does not
-work.
+pydeck loads the package from `esm.sh <https://esm.sh>`__, which builds it as an ES module and bundles
+its other dependencies. Imports of deck.gl, luma.gl, loaders.gl and math.gl are left for pydeck to
+resolve, so the library uses pydeck's copies. To load from a self-hosted esm.sh instead, set
+``pdk.settings.esm_cdn`` before registering.
 
 The same mechanism loads your own layers. See :doc:`custom_layers`.
 
 Version compatibility
 ^^^^^^^^^^^^^^^^^^^^^
 
-deck.gl-community packages follow the major and minor version of deck.gl. A library must be built
-for the same deck.gl version as the pydeck frontend. This version of pydeck uses deck.gl
-``~9.4``, so load ``@deck.gl-community/*@~9.4.1``. A module built for another version may fail to
-load, or its layers may render incorrectly.
+deck.gl-community packages follow the major and minor version of deck.gl, and a library must be
+built for the same deck.gl version as the pydeck frontend. Without a version, ``npm`` loads the
+latest release for pydeck's deck.gl version (``~9.4`` for this version of pydeck). To pin one, add it
+to the package name, for example ``npm="@deck.gl-community/layers@9.4.1"``. pydeck warns when the
+version is for another deck.gl version, which may fail to load or render incorrectly.
 
 Example: zoom-dependent opacity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,7 +83,8 @@ available once a ``@deck.gl-community/layers`` release includes it.
 Available packages
 ^^^^^^^^^^^^^^^^^^
 
-Each of these packages loads with ``community_module(...)`` above.
+Each of these packages loads with ``register_library(npm=...)``, for example
+``npm="@deck.gl-community/geo-layers"``.
 
 .. list-table::
    :header-rows: 1
