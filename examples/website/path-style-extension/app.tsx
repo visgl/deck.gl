@@ -63,6 +63,13 @@ const {assets} = ROAD_DIAGRAM_DATA as unknown as {
   };
 };
 
+// Solid lines that are not offset, such as hatching, do not need PathStyleExtension
+function isStyledMarking(asset: StyledPathAsset) {
+  return Boolean(asset.style.dashMeters?.[0] || asset.style.offset);
+}
+const styledMarkings = assets.longitudinalMarkings.filter(isStyledMarking);
+const solidMarkings = assets.longitudinalMarkings.filter(asset => !isStyledMarking(asset));
+
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -122.34237,
   latitude: 47.62089,
@@ -206,9 +213,22 @@ export default function App({
       getColor: ROAD_STYLE.whiteMarking,
       pickable: true
     }),
+    new PathLayer<StyledPathAsset>({
+      id: 'solid-markings',
+      data: solidMarkings,
+      getPath: asset => asset.path,
+      getWidth: asset => (isPhysical ? asset.style.widthMeters : asset.style.widthPixels!),
+      widthUnits: markingUnits,
+      widthMinPixels: 1,
+      getColor: asset => ROAD_STYLE[asset.style.colorRole!],
+      pickable: true,
+      autoHighlight: true,
+      highlightColor: [64, 211, 225, 110],
+      updateTriggers: {getWidth: measurementMode}
+    }),
     new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
       id: 'longitudinal-markings',
-      data: assets.longitudinalMarkings,
+      data: styledMarkings,
       getPath: asset => asset.path,
       getWidth: asset => (isPhysical ? asset.style.widthMeters : asset.style.widthPixels!),
       widthUnits: markingUnits,
