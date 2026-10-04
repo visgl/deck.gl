@@ -68,29 +68,30 @@ ES module libraries can also import these packages by name, and receive the copi
 
 Before it loads the first ``module=True`` library, pydeck adds an
 `import map <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap>`__ that
-resolves each name to pydeck's copy. A library built with these packages as externals needs no shims, and
-packages published to npm can be loaded through a CDN that keeps them external, such as
-`esm.sh <https://esm.sh>`__ with ``?external=``:
+resolves each name to pydeck's copy. A library built with these packages as externals needs no shims:
 
 .. code-block:: python
 
    import pydeck
 
-   SHARED = ",".join([
-       "@deck.gl/core", "@deck.gl/layers", "@deck.gl/extensions", "@deck.gl/aggregation-layers",
-       "@deck.gl/geo-layers", "@deck.gl/mesh-layers", "@deck.gl/widgets",
-       "@luma.gl/core", "@luma.gl/engine", "@luma.gl/shadertools", "@luma.gl/webgl",
-       "@loaders.gl/core", "@math.gl/core",
-   ])
-   pydeck.settings.register_library(
-       "DeckCommunityLayers",
-       f"https://esm.sh/@deck.gl-community/layers@9.4.1?external={SHARED}",
-       module=True,
-   )
+   # my-layers.js starts with: import {CompositeLayer} from '@deck.gl/core';
+   pydeck.settings.register_library("MyLayers", "https://example.com/my-layers.js", module=True)
+
+To load a package published to npm, pass ``npm`` instead of a URL. pydeck loads it from
+`esm.sh <https://esm.sh>`__, which bundles the package's other dependencies and leaves the packages above for
+pydeck to provide:
+
+.. code-block:: python
+
+   pydeck.settings.register_library(npm="@deck.gl-community/layers")
    layer = pydeck.Layer("PathOutlineLayer", data, get_path="path", get_color=[255, 0, 0], get_width=30)
 
-The CDN bundles the library's other dependencies. The library must target the same deck.gl minor version as
-pydeck (9.4 for pydeck 0.9.4). CDNs that rewrite every import, such as jsDelivr's ``+esm``, load a second
-copy of deck.gl and do not work.
+``npm`` takes an optional version range, such as ``"my-layers@^1.2"``. A ``@deck.gl-community`` package
+without one loads the release for pydeck's deck.gl version (9.4 for pydeck 0.9.4). A library must target the
+same deck.gl minor version as pydeck, and pydeck warns when a ``@deck.gl-community`` version does not match.
+
+To use another CDN, such as a self-hosted esm.sh, set ``pydeck.settings.esm_cdn`` before registering. It must
+support esm.sh's ``?external=`` parameter. CDNs that rewrite every import, such as jsDelivr's ``+esm``, load
+a second copy of deck.gl and do not work.
 
 This is experimental and may change in a later release.
