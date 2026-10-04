@@ -8,7 +8,7 @@ import {Map} from 'react-map-gl/maplibre';
 import {DeckGL, PopupWidget} from '@deck.gl/react';
 import {PathLayer, PolygonLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
-import 'deck.gl/stylesheet.css';
+import '@deck.gl/widgets/stylesheet.css';
 
 import type {Color, MapViewState, PickingInfo} from '@deck.gl/core';
 import type {DashUnits, PathStyleExtensionProps} from '@deck.gl/extensions';
