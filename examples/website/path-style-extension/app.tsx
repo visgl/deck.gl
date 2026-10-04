@@ -114,11 +114,13 @@ export default function App({
   device,
   measurementMode = 'physical',
   dashScale = 1,
+  extensionLayersOnly = false,
   mapStyle = MAP_STYLE
 }: {
   device?: Device;
   measurementMode?: MeasurementMode;
   dashScale?: number;
+  extensionLayersOnly?: boolean;
   mapStyle?: string;
 }) {
   const [selected, setSelected] = useState<{asset: Asset; position: number[]} | null>(null);
@@ -245,7 +247,8 @@ export default function App({
   return (
     <DeckGL
       device={device}
-      layers={layers}
+      // Optionally hide the layers that do not use PathStyleExtension
+      layers={extensionLayersOnly ? layers.filter(layer => layer.props.extensions.length) : layers}
       parameters={{depthCompare: 'always'}}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}

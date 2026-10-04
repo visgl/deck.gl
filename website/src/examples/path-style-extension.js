@@ -8,24 +8,20 @@ import App, {ROAD_STYLE} from 'website-examples/path-style-extension/app';
 
 import {makeExample} from '../components';
 
-function LegendItem({label, color, children}) {
-  return (
-    <div style={{display: 'flex', alignItems: 'center', gap: 10, margin: '7px 0'}}>
-      <span
-        style={{
-          width: 44,
-          height: 6,
-          flex: '0 0 auto',
-          borderRadius: 2,
-          background: color
-        }}
-      />
-      <span>
-        {label}
-        {children}
-      </span>
-    </div>
+const LEGEND = [
+  {label: 'White marking', color: ROAD_STYLE.whiteMarking},
+  {label: 'Yellow marking', color: ROAD_STYLE.yellowMarking},
+  {label: 'Bicycle crossing', color: ROAD_STYLE.bikePanel},
+  {label: 'Vehicle lane', color: ROAD_STYLE.vehicleLane}
+];
+
+// Blends a color over asphalt so that the swatch matches the map
+function getSwatchColor([r, g, b, a = 255]) {
+  const alpha = a / 255;
+  const channels = [r, g, b].map((value, i) =>
+    Math.round(value * alpha + ROAD_STYLE.asphalt[i] * (1 - alpha))
   );
+  return `rgb(${channels.join(',')})`;
 }
 
 class PathStyleExtensionDemo extends Component {
@@ -34,11 +30,11 @@ class PathStyleExtensionDemo extends Component {
   static code = `${GITHUB_TREE}/examples/website/path-style-extension`;
 
   static parameters = {
-    measurement: {
-      displayName: 'Measurement',
+    units: {
+      displayName: 'Units',
       type: 'select',
-      options: ['Physical', 'Screen'],
-      value: 'Physical'
+      options: ['Meters', 'Pixels'],
+      value: 'Meters'
     },
     dashScale: {
       displayName: 'Dash scale',
@@ -47,7 +43,8 @@ class PathStyleExtensionDemo extends Component {
       step: 0.25,
       min: 0.5,
       max: 2
-    }
+    },
+    extensionLayersOnly: {displayName: 'Extension layers only', type: 'checkbox', value: false}
   };
 
   static mapStyle = MAPBOX_STYLES.DARK;
@@ -55,20 +52,35 @@ class PathStyleExtensionDemo extends Component {
   static renderInfo() {
     return (
       <div>
+        <p>Seattle road-design data at Dexter Avenue N and Thomas Street.</p>
         <p>
-          Explore real Seattle road-design data at Dexter Avenue N and Thomas Street.
+          Crosswalks, bike crossings and lane lines are dashed paths. Lanes and double yellow lines
+          are offset copies of one path.
         </p>
-        <div style={{margin: '18px 0'}}>
-          <LegendItem label="White road marking" color={`rgb(${ROAD_STYLE.whiteMarking.slice(0, 3)})`} />
-          <LegendItem label="Yellow center marking" color={`rgb(${ROAD_STYLE.yellowMarking.slice(0, 3)})`} />
-          <LegendItem label="Bicycle panel" color={`rgb(${ROAD_STYLE.bikePanel.slice(0, 3)})`} />
-        </div>
-        <p>Click a road asset for details.</p>
+        {LEGEND.map(({label, color}) => (
+          <p key={label}>
+            <span
+              className="legend"
+              style={{
+                background: getSwatchColor(color),
+                boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.4)'
+              }}
+            />{' '}
+            {label}
+          </p>
+        ))}
+        <p>
+          <b>Units</b>
+          <br />
+          Meters keep the size painted on the road. Pixels keep dashes the same size on screen.
+        </p>
+        <p>Click a marking to see its dash settings and source records.</p>
         <p>
           Data source:{' '}
-          <a href="https://data-seattlecitygis.opendata.arcgis.com/">City of Seattle Department of Transportation</a>,
-          {' '}used under{' '}
-          <a href="https://opendatacommons.org/licenses/pddl/1-0/">PDDL 1.0</a>.
+          <a href="https://data-seattlecitygis.opendata.arcgis.com/">
+            City of Seattle Department of Transportation
+          </a>
+          , used under <a href="https://opendatacommons.org/licenses/pddl/1-0/">PDDL 1.0</a>.
         </p>
       </div>
     );
@@ -79,8 +91,9 @@ class PathStyleExtensionDemo extends Component {
     return (
       <App
         {...otherProps}
-        measurementMode={params.measurement.value === 'Physical' ? 'physical' : 'screen'}
+        measurementMode={params.units.value === 'Meters' ? 'physical' : 'screen'}
         dashScale={params.dashScale.value}
+        extensionLayersOnly={params.extensionLayersOnly.value}
       />
     );
   }
