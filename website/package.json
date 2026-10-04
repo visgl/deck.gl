@@ -1,6 +1,6 @@
 {
   "name": "project-website",
-  "version": "9.4.0-alpha.2",
+  "version": "9.4.0",
   "private": true,
   "description": "Website for vis.gl project",
   "scripts": {
@@ -16,11 +16,11 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
-    "@loaders.gl/core": "^4.4.3",
-    "@loaders.gl/i3s": "^4.4.3",
-    "@loaders.gl/las": "^4.4.3",
-    "@loaders.gl/obj": "^4.4.3",
-    "@loaders.gl/ply": "^4.4.3",
+    "@loaders.gl/core": "^5.0.0-alpha.7",
+    "@loaders.gl/i3s": "^5.0.0-alpha.7",
+    "@loaders.gl/las": "^5.0.0-alpha.7",
+    "@loaders.gl/obj": "^5.0.0-alpha.7",
+    "@loaders.gl/ply": "^5.0.0-alpha.7",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -53,6 +53,7 @@
     "@docusaurus/plugin-content-docs": "^3.10.0",
     "@docusaurus/preset-classic": "^3.10.0",
     "@mdx-js/react": "^3.1.0",
+    "@signalwire/docusaurus-plugin-llms-txt": "^1.2.2",
     "@swc/plugin-styled-components": "12.4.0",
     "algoliasearch": "^4.18.0",
     "algoliasearch-helper": "^3.13.3",

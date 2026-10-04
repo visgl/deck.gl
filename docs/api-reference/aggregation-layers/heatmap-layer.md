@@ -1,3 +1,7 @@
+---
+description: "HeatmapLayer renders a smooth density heatmap from weighted points."
+---
+
 # HeatmapLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

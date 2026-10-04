@@ -31,6 +31,13 @@ export type {
   FillStyleExtensionProps,
   FillStyleExtensionOptions
 } from './fill-style/fill-style-extension';
+export type {
+  HatchPatternConfig,
+  CrossHatchPatternConfig,
+  DotPatternConfig,
+  ProceduralPatternConfig,
+  ProceduralPatternMapping
+} from './fill-style/procedural-pattern';
 export type {ClipExtensionProps} from './clip/clip-extension';
 export type {CollisionFilterExtensionProps} from './collision-filter/collision-filter-extension';
 export type {MaskExtensionProps} from './mask/mask-extension';

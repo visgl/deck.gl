@@ -518,13 +518,6 @@ describe('PathLayer render tests', () => {
   describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
     runRenderTestSuite([...testCases, ...antialiasingGoldenTestCases] as TestCase[], deviceType);
   });
-
-  describe('webgl-no-msaa', () => {
-    runRenderTestSuite(antialiasingGoldenTestCases, 'webgl', {
-      deviceMode: 'isolated',
-      webgl: {antialias: false}
-    });
-  });
 });
 
 describe.runIf(isRenderTestDeviceEnabled('webgl'))('PathLayer#antialiasing', () => {

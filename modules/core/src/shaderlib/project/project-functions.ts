@@ -9,7 +9,8 @@
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
-import {vec3, vec4} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 
 import type {CoordinateSystem} from '../../lib/constants';

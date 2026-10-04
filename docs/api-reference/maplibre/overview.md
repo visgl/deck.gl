@@ -12,8 +12,6 @@ The module supports both [overlaid and interleaved](../../get-started/using-with
 npm install @deck.gl/maplibre maplibre-gl
 ```
 
-`MapLibreOverlay` is also available as `deck.MapLibreOverlay` in the standalone `deck.gl` bundle.
-
 Bundled applications must configure the MapLibre worker. The example below uses Vite. See the [MapLibre installation guide](https://maplibre.org/maplibre-gl-js/docs/#installation) for other bundlers. Direct browser ES module imports configure the worker automatically.
 
 ## Example

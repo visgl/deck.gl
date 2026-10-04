@@ -9,7 +9,7 @@ import {mod} from '../utils/math-utils';
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
-import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
+import {Vector3, SphericalCoordinates, clamp} from '@math.gl/core';
 
 const MOVEMENT_SPEED = 20;
 const PAN_SPEED = 500;
@@ -138,8 +138,8 @@ class FirstPersonState extends ViewState<
 
     const up = new SphericalCoordinates({bearing, pitch});
     const forward = new SphericalCoordinates({bearing, pitch: -90});
-    const yDirection = up.toVector3().normalize();
-    const xDirection = forward.toVector3().cross(yDirection).normalize();
+    const yDirection = new Vector3(up.toVector3()).normalize();
+    const xDirection = new Vector3(forward.toVector3()).cross(yDirection).normalize();
 
     return this._getUpdatedState({
       position: new Vector3(startPanPosition)
@@ -355,7 +355,7 @@ class FirstPersonState extends ViewState<
       bearing: this.getViewportProps().bearing,
       pitch: use2D ? 90 : 90 + this.getViewportProps().pitch
     });
-    const direction = spherical.toVector3().normalize();
+    const direction = new Vector3(spherical.toVector3()).normalize();
     return direction;
   }
 
