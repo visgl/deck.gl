@@ -79,6 +79,22 @@ def test_to_html_embeds_compact_json():
     assert serialize(r, compact=True) in html
 
 
+class _CustomDeck(Deck):
+    """Subclass that customizes the scene through to_json only."""
+
+    def to_json(self):
+        return json.dumps({"layers": [], "customMarker": True})
+
+
+def test_to_html_honors_to_json_overrides():
+    """Verify that to_html embeds what a subclass to_json returns, compacted"""
+    r = _CustomDeck(pydeck_examples.create_minimal_test_object().to_json())
+    html = r.to_html(as_string=True, notebook_display=False)
+    assert '"customMarker":true' in html
+    assert '"layers":[]' in html
+    assert "\n" not in html.split("const jsonInput = ")[1].split(";")[0]
+
+
 @pytest.mark.skip("Skipping widget test, see #7783")
 def test_update():
     """Verify that calling `update` changes the Deck object"""
