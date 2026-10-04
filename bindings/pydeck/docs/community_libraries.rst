@@ -51,35 +51,6 @@ latest release for pydeck's deck.gl version (``~9.4`` for this version of pydeck
 to the package name, for example ``npm="@deck.gl-community/layers@9.4.1"``. pydeck warns when the
 version is for another deck.gl version, which may fail to load or render incorrectly.
 
-Example: zoom-dependent opacity
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-pydeck output is static JSON, and pydeck does not run code when the view changes. Event handlers
-like ``on_view_state_change`` are not functional in pydeck v0.9+ (see :doc:`event_handling`), so
-layer props cannot depend on the zoom level from Python. Showing a layer only within a zoom range,
-like the ``minzoom``, ``maxzoom`` and ``["interpolate", ["linear"], ["zoom"], ...]`` expressions in
-MapLibre styles, needs a layer extension that reads the zoom level in the browser.
-
-``ZoomOpacityExtension`` from ``@deck.gl-community/layers`` scales a layer's ``opacity`` by
-``[zoom, opacity]`` stops, linearly interpolated and clamped at the ends. The stops are passed to
-the layer's ``zoom_opacity`` keyword argument:
-
-.. code-block:: python
-
-    layer = pdk.Layer(
-        "HexagonLayer",
-        data,
-        get_position=["lng", "lat"],
-        radius=1000,
-        # Fade in between zoom 8.5 and 9.5, fade out between zoom 10.5 and 11.5
-        zoom_opacity=[[8.5, 0], [9.5, 1], [10.5, 1], [11.5, 0]],
-        extensions=[pdk.Extension("ZoomOpacityExtension")],
-    )
-
-``ZoomOpacityExtension`` is added in
-`visgl/deck.gl-community#781 <https://github.com/visgl/deck.gl-community/pull/781>`__ and is
-available once a ``@deck.gl-community/layers`` release includes it.
-
 Available packages
 ^^^^^^^^^^^^^^^^^^
 
@@ -93,7 +64,7 @@ Each of these packages loads with ``register_library(npm=...)``, for example
    * - Package
      - Contents
    * - `@deck.gl-community/layers <https://visgl.github.io/deck.gl-community/docs/modules/layers>`__
-     - Add-on layers and ``ZoomOpacityExtension``
+     - Add-on layers
    * - `@deck.gl-community/geo-layers <https://visgl.github.io/deck.gl-community/docs/modules/geo-layers>`__
      - Geospatial layers
    * - `@deck.gl-community/infovis-layers <https://visgl.github.io/deck.gl-community/docs/modules/infovis-layers>`__
