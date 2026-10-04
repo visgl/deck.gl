@@ -45,6 +45,19 @@ subdirectories may add local guidance.
 - Do not make up an issue number. Ask the contributor for it if it is not known, and remove the
   line if there is none.
 
+## Documentation
+
+- Follow `dev-docs/documentation-guidelines.md`. Read two or three pages in the same `docs/`
+  folder first and match their outline and phrasing.
+- Write for readers who know the domain (MapLibre, SVG, Figma, cartography) but not deck.gl
+  internals. Say what a prop does, then when to use it, one idea per sentence.
+- Describe current behavior only. Version history goes in `docs/whats-new.md`, breaking changes in
+  `docs/upgrade-guide.md`, and design rationale or internals in `dev-docs/RFCs/`.
+- Do not copy text from RFCs, PR descriptions or code comments into the docs. Check every claim
+  about defaults, units and behavior against the source.
+- Host images in `visgl/deck.gl-data`. Prefer a demo in `website/src/doc-demos/` when the reader
+  would want to change a value.
+
 ## Ready For Merge
 
 When asked to "get ready for merge", do a full merge-readiness pass:
