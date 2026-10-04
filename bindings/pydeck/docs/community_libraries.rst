@@ -4,33 +4,39 @@ Using deck.gl-community libraries
 `deck.gl-community <https://github.com/visgl/deck.gl-community>`__ is a vis.gl repository of
 add-on layers, extensions and widgets for deck.gl, published on npm as ``@deck.gl-community/*``.
 These modules are maintained by the community and are not included in pydeck, but they can be
-loaded into a pydeck visualization as custom libraries.
+loaded into a pydeck visualization as ES module custom libraries.
 
 .. note::
-   Script (UMD) bundles for deck.gl-community packages are added in
-   `visgl/deck.gl-community#782 <https://github.com/visgl/deck.gl-community/pull/782>`__. The
-   bundle URLs on this page work once a release includes it.
+   Loading deck.gl-community modules is experimental. It relies on importing deck.gl by package
+   name (see :doc:`custom_layers`), which needs a ``@deck.gl/jupyter-widget`` 9.4.x release that
+   includes it, and has not been tested in VS Code or Google Colab yet.
 
 How custom libraries are loaded
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 pydeck serializes a visualization to JSON. The frontend (``@deck.gl/jupyter-widget``) converts the
 JSON into deck.gl objects, resolving each ``@@type`` against a catalog of the classes it bundles.
-``pydeck.settings.custom_libraries`` adds JavaScript bundles to that catalog:
+``pydeck.settings.register_library`` adds a JavaScript module to that catalog:
 
 .. code-block:: python
 
     import pydeck as pdk
 
-    pdk.settings.custom_libraries = [
-        {
-            "libraryName": "deckCommunityLayers",
-            "resourceUri": "https://unpkg.com/@deck.gl-community/layers@~9.4.0/dist/dist.min.js",
-        }
-    ]
+    # Packages that pydeck already loads. The CDN leaves them as imports, so the library
+    # uses pydeck's copies instead of bundling its own.
+    SHARED = ",".join([
+        "@deck.gl/core", "@deck.gl/layers", "@deck.gl/extensions", "@deck.gl/aggregation-layers",
+        "@deck.gl/geo-layers", "@deck.gl/mesh-layers", "@deck.gl/widgets",
+        "@luma.gl/core", "@luma.gl/engine", "@luma.gl/shadertools", "@luma.gl/webgl",
+        "@loaders.gl/core", "@math.gl/core",
+    ])
 
-For each entry, the frontend adds a ``<script>`` tag for ``resourceUri`` and waits for the bundle
-to assign the global variable ``window[libraryName]``. It then registers the library's exports:
+    def community_module(package):
+        return f"https://esm.sh/@deck.gl-community/{package}@~9.4.1?external={SHARED}"
+
+    pdk.settings.register_library("DeckCommunityLayers", community_module("layers"), module=True)
+
+The frontend imports the module and registers its exports:
 
 - Exports that start with a capital letter are registered as classes, and can be used as the
   ``type`` of a :class:`pydeck.bindings.layer.Layer`,
@@ -39,15 +45,12 @@ to assign the global variable ``window[libraryName]``. It then registers the lib
 
 Layers that reference a custom class are rendered once the library has loaded. The libraries are
 read when a :class:`pydeck.bindings.deck.Deck` is created in Jupyter, or when
-:meth:`pydeck.bindings.deck.Deck.to_html` is called, so set ``custom_libraries`` first.
+:meth:`pydeck.bindings.deck.Deck.to_html` is called, so register them first.
 
-A bundle can be loaded this way if:
-
-- It is a script bundle (UMD or IIFE) that assigns its exports to a global variable.
-  ``libraryName`` must be the name of that global.
-- It uses the deck.gl, luma.gl and loaders.gl classes provided by pydeck, instead of bundling its
-  own copy. The pydeck frontend exposes them as the ``deck``, ``luma`` and ``loaders`` globals,
-  the same globals used by the deck.gl script bundles (``deck.gl/dist.min.js``).
+`esm.sh <https://esm.sh>`__ builds the package as an ES module, bundles its other dependencies and,
+with ``?external=``, leaves imports of the shared packages for pydeck to resolve. A CDN that rewrites
+every import, such as jsDelivr's ``+esm``, loads a second copy of deck.gl, and the library does not
+work.
 
 The same mechanism loads your own layers. See :doc:`custom_layers`.
 
@@ -56,7 +59,7 @@ Version compatibility
 
 deck.gl-community packages follow the major and minor version of deck.gl. A library must be built
 for the same deck.gl version as the pydeck frontend. This version of pydeck uses deck.gl
-``~9.4``, so load ``@deck.gl-community/*@~9.4.0``. A bundle built for another version may fail to
+``~9.4``, so load ``@deck.gl-community/*@~9.4.1``. A module built for another version may fail to
 load, or its layers may render incorrectly.
 
 Example: zoom-dependent opacity
@@ -84,47 +87,43 @@ the layer's ``zoom_opacity`` keyword argument:
         extensions=[pdk.Extension("ZoomOpacityExtension")],
     )
 
+``ZoomOpacityExtension`` is added in
+`visgl/deck.gl-community#781 <https://github.com/visgl/deck.gl-community/pull/781>`__ and is
+available once a ``@deck.gl-community/layers`` release includes it.
+
 Available packages
 ^^^^^^^^^^^^^^^^^^
 
+Each of these packages loads with ``community_module(...)`` above.
+
 .. list-table::
    :header-rows: 1
-   :widths: 30 45 25
+   :widths: 35 65
 
    * - Package
      - Contents
-     - Script bundle global
    * - `@deck.gl-community/layers <https://visgl.github.io/deck.gl-community/docs/modules/layers>`__
      - Add-on layers and ``ZoomOpacityExtension``
-     - ``deckCommunityLayers``
    * - `@deck.gl-community/geo-layers <https://visgl.github.io/deck.gl-community/docs/modules/geo-layers>`__
      - Geospatial layers
-     - No script bundle
    * - `@deck.gl-community/infovis-layers <https://visgl.github.io/deck.gl-community/docs/modules/infovis-layers>`__
      - Non-geospatial layers
-     - ``deckCommunityInfovisLayers``
    * - `@deck.gl-community/graph-layers <https://visgl.github.io/deck.gl-community/docs/modules/graph-layers>`__
      - Graph visualization
-     - No script bundle
    * - `@deck.gl-community/timeline-layers <https://visgl.github.io/deck.gl-community/docs/modules/timeline-layers>`__
      - Timeline layers
-     - ``deckCommunityTimelineLayers``
    * - `@deck.gl-community/basemap-layers <https://visgl.github.io/deck.gl-community/docs/modules/basemap-layers>`__
      - Basemap layer and map style helpers
-     - No script bundle
    * - `@deck.gl-community/widgets <https://visgl.github.io/deck.gl-community/docs/modules/widgets>`__
      - UI widgets
-     - No script bundle
    * - `@deck.gl-community/editable-layers <https://visgl.github.io/deck.gl-community/docs/modules/editable-layers>`__
-     - Interactive editing of geometries
-     - ``deckCommunityEditableLayers``. Edits are not sent back to Python.
+     - Interactive editing of geometries. Edits are not sent back to Python.
    * - `@deck.gl-community/three <https://visgl.github.io/deck.gl-community/docs/modules/three>`__
-     - Layers rendered with three.js
-     - No script bundle
-   * - ``@deck.gl-community/leaflet``, ``bing-maps``, ``react``
-     - Integrations with other frameworks
-     - Not applicable
+     - Layers rendered with three.js, which esm.sh bundles into the module
 
-A package being loadable does not mean every layer in it works from Python. Layers that need
+``@deck.gl-community/leaflet``, ``bing-maps`` and ``react`` integrate deck.gl with other
+frameworks and do not apply to pydeck.
+
+A package loading does not mean every layer in it works from Python. Layers that need
 JavaScript callbacks, for example, are limited to what the JSON expression syntax supports. See
 `Understanding keyword arguments in pydeck layers <layer.html#understanding-keyword-arguments-in-pydeck-layers>`__.
