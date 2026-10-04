@@ -6,12 +6,17 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
-import {FlyToInterpolator} from '@deck.gl/core';
+import {FlyToInterpolator, WebMercatorViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 
 import TourControls from './tour-controls';
 
-import type {InteractionState, MapViewState, PickingInfo} from '@deck.gl/core';
+import type {
+  InteractionState,
+  MapViewState,
+  PickingInfo,
+  ViewStateChangeParameters
+} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
 export type OldMap = {
@@ -111,6 +116,24 @@ export const OLD_MAPS: OldMap[] = [
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/old-maps';
 // How long to linger at each map before flying to the next, in milliseconds
 const DWELL_TIME = 6000;
+// Maps smaller than this on screen, in pixels, are not worth keeping loaded
+const MIN_MAP_SIZE = 16;
+
+// The maps on screen and large enough to see, as a comma-separated list of ids
+function getVisibleMapIds(viewState: ViewStateChangeParameters['viewState']): string {
+  const viewport = new WebMercatorViewport(viewState);
+  const [minX, minY, maxX, maxY] = viewport.getBounds();
+  return OLD_MAPS.filter(({bounds: [west, south, east, north]}) => {
+    if (east < minX || west > maxX || north < minY || south > maxY) {
+      return false;
+    }
+    const [x0, y0] = viewport.project([west, south]);
+    const [x1, y1] = viewport.project([east, north]);
+    return Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) >= MIN_MAP_SIZE;
+  })
+    .map(m => m.id)
+    .join(',');
+}
 
 function getTooltip({layer}: PickingInfo) {
   const map = layer && OLD_MAPS.find(m => m.id === layer.id);
@@ -133,9 +156,8 @@ export default function App({
   onMapChange?: (map: OldMap) => void;
 }) {
   const [currentId, setCurrentId] = useState(mapId);
-  // Maps the camera has left since it last completed a flight. An interrupted flight can leave
-  // the camera anywhere along the way, so they stay on screen until a flight lands.
-  const [departedIds, setDepartedIds] = useState<string[]>([]);
+  // Kept as a string so that the app only re-renders when a map comes into or out of view
+  const [visibleIds, setVisibleIds] = useState('');
   // The map the camera last finished flying to. Starting a new flight interrupts the previous
   // one, so each transition reports its own target and stale callbacks are ignored.
   const [arrivedId, setArrivedId] = useState<string | null>(mapId);
@@ -148,7 +170,6 @@ export default function App({
 
   const goTo = (id: string) => {
     if (id !== currentId) {
-      setDepartedIds(ids => [...ids.filter(d => d !== id && d !== currentId), currentId]);
       setCurrentId(id);
       setArrivedId(null);
     }
@@ -194,18 +215,16 @@ export default function App({
       ...viewState,
       transitionDuration: 'auto' as const,
       transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
-      onTransitionEnd: () => {
-        setArrivedId(id);
-        setDepartedIds([]);
-      },
-      onTransitionInterrupt: () => setArrivedId(id)
+      onTransitionEnd: () => setArrivedId(id),
+      // A new flight interrupts the last one while DeckGL is rendering, when state can't be set
+      onTransitionInterrupt: () => queueMicrotask(() => setArrivedId(id))
     };
   }, [currentIndex]);
 
-  // Only keep the current, upcoming and departed images on the GPU. Removed layers release
+  // Only keep the current, upcoming and on-screen images on the GPU. Removed layers release
   // their textures, which matters for large scans on memory-constrained devices.
   const layers = OLD_MAPS.filter(
-    m => m.id === currentId || m === nextMap || departedIds.includes(m.id)
+    m => m.id === currentId || m === nextMap || visibleIds.split(',').includes(m.id)
   ).map(
     m =>
       new BitmapLayer({
@@ -225,6 +244,10 @@ export default function App({
         initialViewState={initialViewState}
         controller={true}
         getTooltip={getTooltip}
+        onViewStateChange={({viewState}) => {
+          // DeckGL reports the start of each flight while it is rendering, when state can't be set
+          queueMicrotask(() => setVisibleIds(getVisibleMapIds(viewState)));
+        }}
         onInteractionStateChange={onInteractionStateChange}
       >
         <Map reuseMaps mapStyle={mapStyle} />
