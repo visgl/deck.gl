@@ -109,6 +109,7 @@ export type {LayersList, LayerContext} from './lib/layer-manager';
 export type {ViewStateMap} from './lib/view-manager';
 export type {UpdateParameters} from './lib/layer';
 export type {DeckProps} from './lib/deck';
+export type {FrameTimings} from './lib/frame-timer';
 export type {
   LayerProps,
   CompositeLayerProps,

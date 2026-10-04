@@ -4,10 +4,11 @@
 
 import {test, expect, vi} from 'vitest';
 import {Deck, log, MapView} from '@deck.gl/core';
+import type {DeckProps, FrameTimings} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
-import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
+import type {CanvasContext, CanvasContextProps, QuerySet} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -1438,4 +1439,189 @@ test('Deck#props omitted are unchanged', async () => {
       }
     });
   });
+});
+
+function createTimedDeck(props: DeckProps<any>) {
+  return new Deck({
+    device,
+    width: 30,
+    height: 10,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [new ScatterplotLayer({data: [[0, 0]], getPosition: d => d})],
+    ...props
+  });
+}
+
+async function waitFor(predicate: () => boolean, description: string) {
+  for (let frame = 0; frame < 120 && !predicate(); frame++) {
+    await sleep(16);
+  }
+  expect(predicate(), description).toBe(true);
+}
+
+/**
+ * Makes the test device report `'timestamp-query'` with fake query sets.
+ * Records the timestamp props of each render pass, grouped by draw.
+ */
+function fakeTimestampQueries() {
+  const draws: [number, number][][] = [];
+  const readbacks: ReturnType<typeof createDeferred<void>>[] = [];
+  const has = device.features.has.bind(device.features);
+  const featuresSpy = vi
+    .spyOn(device.features, 'has')
+    .mockImplementation(feature => feature === 'timestamp-query' || has(feature));
+  const createQuerySetSpy = vi.spyOn(device, 'createQuerySet').mockImplementation((() => {
+    let readback: ReturnType<typeof createDeferred<void>> | null = null;
+    return {
+      destroy: () => {},
+      // Each pass takes (pass index + 1) ms
+      readTimestampDuration: async (beginIndex: number) => {
+        if (beginIndex === 0) {
+          readback = createDeferred<void>();
+          readbacks.push(readback);
+        }
+        await readback!.promise;
+        return beginIndex / 2 + 1;
+      }
+    } as unknown as QuerySet;
+  }) as unknown as typeof device.createQuerySet);
+  const beginRenderPass = device.beginRenderPass.bind(device);
+  const beginRenderPassSpy = vi.spyOn(device, 'beginRenderPass').mockImplementation(props => {
+    const {timestampQuerySet, beginTimestampIndex, endTimestampIndex, ...otherProps} = props || {};
+    if (timestampQuerySet) {
+      if (beginTimestampIndex === 0) {
+        draws.push([]);
+      }
+      draws[draws.length - 1].push([beginTimestampIndex!, endTimestampIndex!]);
+    }
+    return beginRenderPass(otherProps);
+  });
+  return {
+    draws,
+    readbacks,
+    restore: () => {
+      featuresSpy.mockRestore();
+      createQuerySetSpy.mockRestore();
+      beginRenderPassSpy.mockRestore();
+    }
+  };
+}
+
+test('Deck#_onFrameTimings reports CPU time', async () => {
+  const timings: FrameTimings[] = [];
+  const deck = createTimedDeck({_onFrameTimings: frameTimings => timings.push(frameTimings)});
+
+  await waitFor(() => timings.length > 0, '_onFrameTimings called');
+  expect(timings[0].cpuTime).toBeGreaterThanOrEqual(0);
+  if (!device.features.has('timestamp-query')) {
+    expect(timings[0].gpuTime, 'gpuTime omitted without timestamp-query').toBeUndefined();
+  }
+
+  deck.finalize();
+});
+
+test('Deck#_onFrameTimings sums one timestamp pair per view', async () => {
+  const queries = fakeTimestampQueries();
+  const timings: FrameTimings[] = [];
+  const deck = createTimedDeck({
+    views: ['left', 'center', 'right'].map(
+      (id, index) => new MapView({id, x: index * 10, width: 10})
+    ),
+    _onFrameTimings: frameTimings => timings.push(frameTimings)
+  });
+  try {
+    await waitFor(() => queries.readbacks.length > 0, 'GPU timed draw');
+    // WebGL draws each view in one render pass, WebGPU may split views into more passes
+    const expectedPasses = queries.draws[0].length;
+    expect(expectedPasses).toBeGreaterThanOrEqual(3);
+    expect(queries.draws[0]).toEqual(
+      Array.from({length: expectedPasses}, (_, index) => [index * 2, index * 2 + 1])
+    );
+
+    expect(timings, 'GPU timed sample is asynchronous').toEqual([]);
+    queries.readbacks[0].resolve();
+    await waitFor(() => timings.length > 0, 'GPU timed sample delivered');
+    // 1 + 2 + ... + passes
+    expect(timings[0].gpuTime).toBe((expectedPasses * (expectedPasses + 1)) / 2);
+  } finally {
+    deck.finalize();
+    queries.restore();
+  }
+});
+
+test('Deck#_onFrameTimings delivers samples to the current callback', async () => {
+  const queries = fakeTimestampQueries();
+  const firstCallback = vi.fn();
+  const secondCallback = vi.fn();
+  const deck = createTimedDeck({_onFrameTimings: firstCallback});
+  try {
+    await waitFor(() => queries.readbacks.length > 0, 'GPU timed draw');
+    deck.setProps({_onFrameTimings: secondCallback});
+    queries.readbacks[0].resolve();
+    await waitFor(() => secondCallback.mock.calls.length > 0, 'sample delivered');
+    expect(firstCallback).not.toHaveBeenCalled();
+    expect(secondCallback.mock.calls[0][0].gpuTime).toBe(1);
+
+    const pendingReadbackCount = queries.readbacks.length;
+    deck.redraw('test');
+    expect(queries.readbacks.length).toBe(pendingReadbackCount + 1);
+    deck.setProps({_onFrameTimings: null});
+    secondCallback.mockClear();
+    for (const readback of queries.readbacks) readback.resolve();
+    await sleep(50);
+    expect(secondCallback, 'removed callback is not called').not.toHaveBeenCalled();
+  } finally {
+    deck.finalize();
+    queries.restore();
+  }
+});
+
+test('Deck#_onFrameTimings removed during a draw', async () => {
+  const callback = vi.fn();
+  const deck = createTimedDeck({_onFrameTimings: callback});
+  await waitFor(() => callback.mock.calls.length > 0, '_onFrameTimings called');
+  callback.mockClear();
+
+  const layerManager = deck['layerManager']!;
+  const activateViewport = layerManager.activateViewport;
+  layerManager.activateViewport = viewport => {
+    layerManager.activateViewport = activateViewport;
+    deck.setProps({_onFrameTimings: null});
+    activateViewport(viewport);
+  };
+  try {
+    expect(() => deck._drawLayers('test')).not.toThrow();
+    expect(callback).not.toHaveBeenCalled();
+  } finally {
+    layerManager.activateViewport = activateViewport;
+    deck.finalize();
+  }
+});
+
+test('Deck#_onFrameTimings absent creates no QuerySet', async () => {
+  const createQuerySetSpy = vi.spyOn(device, 'createQuerySet');
+  let renderCount = 0;
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    viewState: {longitude: 0, latitude: 0, zoom: 0},
+    layers: [new ScatterplotLayer({data: [[0, 0]], getPosition: d => d})],
+    _animate: true,
+    onAfterRender: () => renderCount++
+  });
+
+  for (let frame = 0; frame < 120 && renderCount < 5; frame++) {
+    await sleep(16);
+  }
+
+  expect(renderCount, 'deck rendered').toBeGreaterThanOrEqual(5);
+  // luma.gl's own debug GPU timer may create a QuerySet on devices with timestamp-query
+  const deckQuerySetCalls = createQuerySetSpy.mock.calls.filter(
+    ([props]) => props.id === 'deck-frame-timer'
+  );
+  expect(deckQuerySetCalls).toEqual([]);
+
+  deck.finalize();
+  createQuerySetSpy.mockRestore();
 });

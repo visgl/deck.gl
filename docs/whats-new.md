@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v10.0 (in development)
+
+### Other Improvements
+
+- New experimental `Deck` prop [`_onFrameTimings`](./api-reference/core/deck.md#_onframetimings) reports CPU time and, with `'timestamp-query'`, summed GPU render pass time for each draw operation.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

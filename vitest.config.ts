@@ -53,6 +53,16 @@ const renderPlaywright = playwright({
     viewport: {width: 1024, height: 768}
   }
 });
+
+// Playwright provider for GPU hardware tests. The 'chromium' channel runs full Chromium in new
+// headless mode (not chrome-headless-shell), which exposes a real WebGPU adapter and the WebGL
+// timer query extension. Developer features disable timestamp-query quantization.
+const gpuHardwarePlaywright = playwright({
+  launchOptions: {
+    channel: 'chromium',
+    args: ['--enable-unsafe-webgpu', '--enable-webgpu-developer-features']
+  }
+});
 import {resolve} from 'path';
 import {browserCommands} from './test/setup/browser-commands';
 
@@ -224,7 +234,11 @@ const projects = [
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
           include: ['test/modules/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          exclude: [
+            ...excludedTests,
+            'test/modules/**/*.node.spec.ts',
+            'test/modules/**/*.gpu-hardware.spec.ts'
+          ],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -258,7 +272,11 @@ const projects = [
         test: {
           name: 'browser',
           include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          exclude: [
+            ...excludedTests,
+            'test/modules/**/*.node.spec.ts',
+            'test/modules/**/*.gpu-hardware.spec.ts'
+          ],
           globals: false,
           testTimeout: 30000,
           isolate: false,
@@ -313,6 +331,36 @@ const projects = [
           },
           // Unique sequence order for running multiple projects together
           sequence: {groupOrder: 4}
+        }
+      },
+
+      // GPU hardware project - tests that require a hardware WebGPU adapter or WebGL timer queries
+      // (*.gpu-hardware.spec.ts only). Not part of `test`/`test-ci` since CI machines have no GPU.
+      // Used by test-gpu-hardware
+      {
+        extends: true,
+        resolve: {alias: browserAliases},
+        optimizeDeps: optimizeDepsConfig,
+        assetsInclude: assetsIncludeConfig,
+        server: serverConfig,
+        test: {
+          name: 'gpu-hardware',
+          include: ['test/modules/**/*.gpu-hardware.spec.ts'],
+          globals: false,
+          testTimeout: 60000,
+          isolate: false,
+          fileParallelism: false,
+          setupFiles: ['./test/setup/vitest-browser-setup.ts'],
+          browser: {
+            enabled: true,
+            provider: gpuHardwarePlaywright,
+            instances: [{browser: 'chromium'}],
+            headless: true,
+            screenshotFailures: false,
+            commands: browserCommands
+          },
+          // Unique sequence order for running multiple projects together
+          sequence: {groupOrder: 5}
         }
       }
 ];
