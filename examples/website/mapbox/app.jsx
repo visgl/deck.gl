@@ -148,7 +148,7 @@ export function renderToDOM(container) {
   const root = createRoot(container);
   root.render(<App />);
 
-  load(DATA_URL, CSVLoader).then(data => {
+  load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}}).then(data => {
     root.render(<App data={data.data} />);
   });
 }
