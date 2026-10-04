@@ -8,8 +8,8 @@ loaded into a pydeck visualization as ES module custom libraries.
 
 .. note::
    Loading deck.gl-community modules is experimental. It relies on importing deck.gl by package
-   name (see :doc:`custom_layers`), which needs a ``@deck.gl/jupyter-widget`` 9.4.x release that
-   includes it, and has not been tested in VS Code or Google Colab yet.
+   name (see :doc:`custom_layers`), which may change in a later release, and has not been tested
+   in VS Code or Google Colab yet.
 
 How custom libraries are loaded
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
