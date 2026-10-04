@@ -23,6 +23,7 @@ import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
+import type {SpatialReference} from '@math.gl/crs';
 
 import {load} from '@loaders.gl/core';
 
@@ -74,6 +75,7 @@ function getPickingColorAttribute(attributes: Record<string, Attribute>): Attrib
 const defaultProps: DefaultProps<LayerProps> = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
+  spatialReference: {type: 'object', value: null, optional: true},
   dataComparator: {type: 'function', value: null, optional: true},
   _dataDiff: {
     type: 'function',
@@ -323,6 +325,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
     return this.internalState ? !this.internalState.isAsyncPropLoading() : false;
+  }
+
+  /**
+   * Returns declared source-coordinate metadata, or null when none was supplied.
+   * The descriptor describes input data, not the viewport or picked coordinates.
+   * @experimental
+   */
+  getSpatialReference(): SpatialReference | null {
+    return this.props.spatialReference || null;
   }
 
   /** Returns true if using shader-based WGS84 longitude wrapping */

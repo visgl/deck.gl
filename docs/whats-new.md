@@ -2,6 +2,13 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+Layers accept experimental `spatialReference` metadata using the `@math.gl/crs` descriptor.
+Composite layers preserve it in sublayers, and `getSpatialReference()` exposes it to applications.
+This metadata does not change rendering coordinate systems or reproject positions. See
+[Layer spatialReference](./api-reference/core/layer.md#spatialreference).
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

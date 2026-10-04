@@ -15,6 +15,7 @@ import type {Buffer, Parameters} from '@luma.gl/core';
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {LightingModuleSettings} from '../shaderlib/index';
 import type {Matrix4Like} from '@math.gl/core';
+import type {SpatialReference} from '@math.gl/crs';
 
 export type LayerData<T> =
   | Iterable<T>
@@ -105,6 +106,12 @@ export type LayerDataSource<DataType> =
  * Base Layer prop types
  */
 export type LayerProps = {
+  /**
+   * Source-coordinate metadata using the math.gl CRS descriptor.
+   * Does not convert positions or override coordinateSystem, coordinateOrigin, or modelMatrix.
+   * @experimental
+   */
+  spatialReference?: SpatialReference | null;
   /**
    * Unique identifier of the layer.
    */

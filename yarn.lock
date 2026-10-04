@@ -2093,7 +2093,7 @@
   dependencies:
     "@math.gl/types" "5.0.0-alpha.12"
 
-"@math.gl/crs@5.0.0-alpha.12":
+"@math.gl/crs@5.0.0-alpha.12", "@math.gl/crs@^5.0.0-alpha.12":
   version "5.0.0-alpha.12"
   resolved "https://registry.yarnpkg.com/@math.gl/crs/-/crs-5.0.0-alpha.12.tgz#d474cc06f64abcd27407362ad5396c6e2b1638eb"
   integrity sha512-C8b3d9cT+E5bD4opc9EX9fAbj5PN0HDjiAjr+LVSmu6SXpmFyqKFSN0+7okHqdO1jaC5JMm96QC5OXBS5sAQkA==

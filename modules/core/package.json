@@ -57,6 +57,7 @@
     "@luma.gl/shadertools": "^10.0.0-alpha.3",
     "@luma.gl/webgl": "^10.0.0-alpha.3",
     "@math.gl/core": "^5.0.0-alpha.12",
+    "@math.gl/crs": "^5.0.0-alpha.12",
     "@math.gl/sun": "^5.0.0-alpha.12",
     "@math.gl/types": "^5.0.0-alpha.12",
     "@math.gl/web-mercator": "^5.0.0-alpha.12",

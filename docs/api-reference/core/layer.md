@@ -235,6 +235,48 @@ Requires `pickable` to be true.
 
 ### Coordinate System Properties
 
+#### `spatialReference` (SpatialReference, optional, experimental) {#spatialreference}
+
+* Default: `null`
+
+Describes the source coordinates using the format-neutral `SpatialReference` type from
+[`@math.gl/crs`](https://math.gl/docs/modules/crs). Applications can pass a normalized descriptor
+from a loader or create one with `createSpatialReference`:
+
+```ts
+import {createSpatialReference} from '@math.gl/crs';
+
+const spatialReference = createSpatialReference({
+  crs: {
+    state: 'explicit',
+    definition: 'EPSG:4326',
+    representation: 'identifier',
+    provenance: 'caller-override'
+  },
+  coordinateFrame: 'geographic',
+  coordinateOrder: ['longitude', 'latitude', 'height'],
+  units: ['degree', 'degree', 'metre']
+});
+
+const layer = new ScatterplotLayer({
+  id: 'points',
+  data,
+  getPosition: d => d.position,
+  spatialReference
+});
+```
+
+This is source metadata only. Rendering continues to use `coordinateSystem`, `coordinateOrigin`
+and `modelMatrix`; declaring a CRS does not reproject geometry or change those properties.
+The descriptor preserves unknown and absent CRS states, axis order, units, vertical CRS and
+coordinate epoch without assuming WGS84. Use `createSpatialReference` to create an immutable
+descriptor before passing it to a layer; deck.gl retains the supplied descriptor unchanged.
+
+Composite layers forward this property to their sublayers. A sublayer can override it through
+`getSubLayerProps` or `_subLayerProps`, for example when its generated coordinates use a different
+reference. Loader-specific native fields such as an ArcGIS `{wkid}` object must first be normalized
+to the math.gl descriptor; deck.gl does not inspect or infer CRS from `data`.
+
 Normally only used when the application wants to work with coordinates that are not Web Mercator projected longitudes/latitudes.
 
 #### `coordinateSystem` (string, optional) {#coordinatesystem}
@@ -682,6 +724,13 @@ A `Layer` instance if this layer is rendered by a [CompositeLayer](./composite-l
 > Layer methods are designed to support the creation of new layers or layer sub-classing and are NOT intended to be called by applications.
 
 ### General Methods
+
+#### `getSpatialReference` {#getspatialreference}
+
+Returns the supplied source `SpatialReference` descriptor, or `null`. This method does not require
+layer initialization. Applications can also access it through `info.layer.getSpatialReference()`
+in a picking callback. The descriptor describes layer input positions; `info.coordinate` is
+produced by the viewport and is not automatically expressed in this source CRS.
 
 #### `clone` {#clone}
 
