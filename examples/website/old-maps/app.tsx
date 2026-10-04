@@ -2,21 +2,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Map} from 'react-map-gl/maplibre';
-import {DeckGL} from '@deck.gl/react';
-import {FlyToInterpolator, WebMercatorViewport} from '@deck.gl/core';
+import {Map, useControl} from 'react-map-gl/maplibre';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import {BitmapLayer} from '@deck.gl/layers';
 
 import TourControls from './tour-controls';
 
-import type {
-  InteractionState,
-  MapViewState,
-  PickingInfo,
-  ViewStateChangeParameters
-} from '@deck.gl/core';
+import type {MapRef, ViewStateChangeEvent} from 'react-map-gl/maplibre';
+import type {Map as MapLibreMap} from 'maplibre-gl';
+import type {MapLibreOverlayProps} from '@deck.gl/maplibre';
+import type {MapViewState, PickingInfo} from '@deck.gl/core';
 import type {Device} from '@luma.gl/core';
 
 export type OldMap = {
@@ -120,15 +117,19 @@ const DWELL_TIME = 6000;
 const MIN_MAP_SIZE = 16;
 
 // The maps on screen and large enough to see, as a comma-separated list of ids
-function getVisibleMapIds(viewState: ViewStateChangeParameters['viewState']): string {
-  const viewport = new WebMercatorViewport(viewState);
-  const [minX, minY, maxX, maxY] = viewport.getBounds();
+function getVisibleMapIds(map: MapLibreMap): string {
+  const bounds = map.getBounds();
   return OLD_MAPS.filter(({bounds: [west, south, east, north]}) => {
-    if (east < minX || west > maxX || north < minY || south > maxY) {
+    if (
+      east < bounds.getWest() ||
+      west > bounds.getEast() ||
+      north < bounds.getSouth() ||
+      south > bounds.getNorth()
+    ) {
       return false;
     }
-    const [x0, y0] = viewport.project([west, south]);
-    const [x1, y1] = viewport.project([east, north]);
+    const {x: x0, y: y0} = map.project([west, south]);
+    const {x: x1, y: y1} = map.project([east, north]);
     return Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) >= MIN_MAP_SIZE;
   })
     .map(m => m.id)
@@ -139,6 +140,15 @@ function getTooltip({layer}: PickingInfo) {
   const map = layer && OLD_MAPS.find(m => m.id === layer.id);
   return map ? `${map.title}\n${map.author}, ${map.date}` : null;
 }
+
+function DeckGLOverlay(props: MapLibreOverlayProps) {
+  const overlay = useControl(() => new DeckOverlay(props));
+  overlay.setProps(props);
+  return null;
+}
+
+// Flights are tagged with the map they fly to, which is passed on to their move events
+type TourMoveEvent = ViewStateChangeEvent & {tourId?: string};
 
 export default function App({
   device,
@@ -155,12 +165,13 @@ export default function App({
   mapStyle?: string;
   onMapChange?: (map: OldMap) => void;
 }) {
+  const mapRef = useRef<MapRef>(null);
   const [currentId, setCurrentId] = useState(mapId);
   // Kept as a string so that the app only re-renders when a map comes into or out of view.
-  // The initial view shows only the first map, and DeckGL doesn't report it.
+  // The initial view shows only the first map, and is not reported as a move.
   const [visibleIds, setVisibleIds] = useState(mapId);
   // The map the camera last finished flying to. Starting a new flight interrupts the previous
-  // one, so each transition reports its own target and stale callbacks are ignored.
+  // one, so each flight reports its own target and stale events are ignored.
   const [arrivedId, setArrivedId] = useState<string | null>(mapId);
   const [playing, setPlaying] = useState(autoplay);
 
@@ -173,6 +184,11 @@ export default function App({
     if (id !== currentId) {
       setCurrentId(id);
       setArrivedId(null);
+      const {longitude, latitude, zoom, bearing = 0} = OLD_MAPS.find(m => m.id === id)!.viewState;
+      mapRef.current?.flyTo(
+        {center: [longitude, latitude], zoom, bearing, pitch: 0, speed: 1.5},
+        {tourId: id}
+      );
     }
   };
 
@@ -201,27 +217,6 @@ export default function App({
     }
   };
 
-  // Exploring the map pauses the tour
-  const onInteractionStateChange = (state: InteractionState) => {
-    if (state.isDragging || state.isPanning || state.isRotating || state.isZooming) {
-      setPlaying(false);
-    }
-  };
-
-  const initialViewState = useMemo(() => {
-    const {id, viewState} = OLD_MAPS[currentIndex];
-    return {
-      pitch: 0,
-      bearing: 0,
-      ...viewState,
-      transitionDuration: 'auto' as const,
-      transitionInterpolator: new FlyToInterpolator({speed: 1.5}),
-      onTransitionEnd: () => setArrivedId(id),
-      // A new flight interrupts the last one while DeckGL is rendering, when state can't be set
-      onTransitionInterrupt: () => queueMicrotask(() => setArrivedId(id))
-    };
-  }, [currentIndex]);
-
   // Only keep the current, upcoming and on-screen images on the GPU. Removed layers release
   // their textures, which matters for large scans on memory-constrained devices.
   const layers = OLD_MAPS.filter(
@@ -238,28 +233,27 @@ export default function App({
   );
 
   return (
-    <>
-      <DeckGL
-        device={device}
-        layers={layers}
-        initialViewState={initialViewState}
-        controller={true}
-        getTooltip={getTooltip}
-        onViewStateChange={({viewState}) => {
-          // DeckGL reports the start of each flight while it is rendering, when state can't be set
-          queueMicrotask(() => setVisibleIds(getVisibleMapIds(viewState)));
-        }}
-        onInteractionStateChange={onInteractionStateChange}
+    <div style={{position: 'absolute', width: '100%', height: '100%', top: 0, left: 0}}>
+      <Map
+        ref={mapRef}
+        reuseMaps
+        initialViewState={OLD_MAPS[currentIndex].viewState}
+        mapStyle={mapStyle}
+        // Exploring the map pauses the tour. Only user input carries an original event.
+        onMoveStart={(e: TourMoveEvent) => e.originalEvent && setPlaying(false)}
+        onMove={(e: TourMoveEvent) => setVisibleIds(getVisibleMapIds(e.target))}
+        // Ends when a flight lands or is interrupted, by the user or by the next flight
+        onMoveEnd={(e: TourMoveEvent) => e.tourId && setArrivedId(e.tourId)}
       >
-        <Map reuseMaps mapStyle={mapStyle} />
-      </DeckGL>
+        <DeckGLOverlay device={device} layers={layers} getTooltip={getTooltip} />
+      </Map>
       <TourControls
         playing={playing}
         onPlayingChange={onPlayingChange}
         onPrevious={() => navigate(previousMap)}
         onNext={() => navigate(nextMap)}
       />
-    </>
+    </div>
   );
 }
 
