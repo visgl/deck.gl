@@ -47,14 +47,14 @@
   },
   "devDependencies": {
     "@floating-ui/dom": "^1.7.5",
-    "@loaders.gl/csv": "^5.0.0-alpha.7",
-    "@loaders.gl/geoarrow": "^5.0.0-alpha.7",
-    "@loaders.gl/polyfills": "^5.0.0-alpha.7",
-    "@luma.gl/core": "^10.0.0-alpha.2",
-    "@luma.gl/effects": "^10.0.0-alpha.2",
-    "@luma.gl/webgl": "^10.0.0-alpha.2",
-    "@luma.gl/webgpu": "^10.0.0-alpha.2",
-    "@math.gl/proj4": "^5.0.0-alpha.9",
+    "@loaders.gl/csv": "^5.0.0-alpha.9",
+    "@loaders.gl/geoarrow": "^5.0.0-alpha.9",
+    "@loaders.gl/polyfills": "^5.0.0-alpha.9",
+    "@luma.gl/core": "^10.0.0-alpha.3",
+    "@luma.gl/effects": "^10.0.0-alpha.3",
+    "@luma.gl/webgl": "^10.0.0-alpha.3",
+    "@luma.gl/webgpu": "^10.0.0-alpha.3",
+    "@math.gl/projection": "^5.0.0-alpha.12",
     "@probe.gl/bench": "^4.1.1",
     "@probe.gl/test-utils": "^4.1.1",
     "@types/jscodeshift": "^17.3.0",
@@ -88,8 +88,5 @@
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "yarn@1.22.19",
-  "resolutions": {
-    "@luma.gl/engine/@math.gl/core": "5.0.0-alpha.9"
-  }
+  "packageManager": "yarn@1.22.19"
 }
