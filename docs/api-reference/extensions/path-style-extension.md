@@ -1,44 +1,36 @@
 # PathStyleExtension
 
-The `PathStyleExtension` adds selected features to the [PathLayer](../layers/path-layer.md) and composite layers that render the `PathLayer`, e.g. [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md).
-
-It also supports dashed strokes on [ScatterplotLayer](../layers/scatterplot-layer.md) and [TextLayer](../layers/text-layer.md) backgrounds (via the `dash` option).
-
-> `PathStyleExtension` is WebGL-only in v9.4. Its dash and offset hooks inject GLSL and do not yet have a WGSL implementation. Base `PathLayer` rendering and `PathLayer.antialiasing` remain supported on WebGPU.
-
-> Note: In v8.0, the `getDashArray` and `dashJustified` props are removed from the `PathLayer` and moved into this extension.
+The `PathStyleExtension` adds dashes and offsets to the [PathLayer](../layers/path-layer.md) and composite layers that render paths, such as [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md). It can also dash [ScatterplotLayer](../layers/scatterplot-layer.md) outlines and [TextLayer](../layers/text-layer.md) backgrounds.
 
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
-  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl PathStyleExtension" src="https://codepen.io/vis-gl/embed/dyOMaoX?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">See the Pen <a href='https://codepen.io/vis-gl/pen/dyOMaoX'>deck.gl PathStyleExtension</a> by vis.gl (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.</iframe>
+  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl PathStyleExtension" src="https://codepen.io/vis-gl/embed/dyOMaoX?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href='https://codepen.io/vis-gl/pen/dyOMaoX'>deck.gl PathStyleExtension</a> by vis.gl
+    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
 </div>
 
 ```js
-import {PolygonLayer} from '@deck.gl/layers';
+import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 
-const layer = new PolygonLayer({
-  id: 'polygon-layer',
+const layer = new PathLayer({
+  id: 'routes',
   data,
-  // ...
-  getDashArray: [3, 2],
-  dashJustified: true,
-  dashGapPickable: true,
-  extensions: [new PathStyleExtension({dash: true})]
+  getPath: d => d.path,
+  getColor: [0, 120, 255],
+  getWidth: 4,
+  widthUnits: 'pixels',
+
+  // props added by PathStyleExtension
+  getDashArray: [6, 4],
+  dashUnits: 'pixels',
+
+  extensions: [new PathStyleExtension({dashMode: 'path'})]
 });
 ```
 
-## Common stroke recipes
-
-| Intent | Extension options | Layer properties |
-| --- | --- | --- |
-| Planned, uncertain, or hidden route | `{dashMode: 'path'}` | `dashUnits: 'pixels'` |
-| Physical lane marks, railway ties, or measured intervals | `{dashMode: 'path'}` | `dashUnits: 'meters'` |
-| Patterned edges whose vertices are dash boundaries | `{dashMode: 'segment'}` | `dashJustified: true` |
-| One pattern fitted across a complete route | `{dashMode: 'path'}` | `dashJustified: true` |
-| Parallel rails, lanes, shoulders, or casings | `{offset: true}` | `getOffset` |
-| Dense GPS, routing, or resampled paths | `{dashMode: 'path'}` | — |
-| Camera-facing elevated or 3D paths | `{dashMode: 'path'}` | `billboard: true` |
+> `PathStyleExtension` currently requires WebGL. Layers that use it do not render on WebGPU.
 
 ## Installation
 
@@ -72,191 +64,106 @@ new deck.PathStyleExtension({});
 ## Constructor
 
 ```js
-new PathStyleExtension({dash, dashMode, offset, highPrecisionDash});
+new PathStyleExtension({dash, dashMode, offset});
 ```
 
-- `dash` (boolean) - add capability to render dashed lines. Default `false`.
-- `dashMode` (string) - select the phase domain, one of `'segment'` and `'path'`. Supplying either value enables dashing. If omitted, the phase mode still defaults to `'segment'`, but dashing remains disabled unless `dash: true` or the deprecated `highPrecisionDash: true` is supplied.
-- `offset` (boolean) - add capability to offset lines. Default `false`.
-- `highPrecisionDash` (boolean) - **deprecated**, an alias for `dashMode: 'path'` when `dashMode` is omitted. Default `false`.
-
-All constructor fields are optional. If `dashMode` and `highPrecisionDash` are both supplied, the explicit `dashMode` wins. To change modes on a same-ID layer, replace the extension instance; its managed attributes and model layout are synchronized without recreating the layer ID.
+* `dash` (boolean) - add the ability to draw dashed lines. Default `false`.
+* `dashMode` (string) - where the dash pattern starts over. `'segment'` restarts it at every vertex; `'path'` runs it continuously along the whole path. Setting `dashMode` also enables `dash`. Default `'segment'`. See [Choosing a dash mode](#choosing-a-dash-mode).
+* `offset` (boolean) - add the ability to offset lines from their path. Default `false`.
+* `highPrecisionDash` (boolean) - **deprecated**, use `dashMode: 'path'` instead.
 
 ## Layer Properties
 
-When added to a layer via the `extensions` prop, `PathStyleExtension` adds the following properties to the layer.
+When added to a layer via the `extensions` prop, the `PathStyleExtension` adds the following properties to the layer:
 
 #### `getDashArray` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors)) {#getdasharray}
 
-Must be specified if the `dash` capability is enabled.
+The dash pattern to draw each path with: `[dashSize, gapSize]`, measured in [`dashUnits`](#dashunits). With the default units, `[4, 5]` on a 10 pixel wide path draws 20 pixel dashes separated by 25 pixel gaps.
 
-The dash array to draw each path with: `[dashSize, gapSize]` in the units selected by `dashUnits`. By default, one unit is half the path width. A `getDashArray` of `[4, 5]` on a 10-pixel path therefore draws 20-pixel dashes separated by 25-pixel gaps.
-
-- If an array is provided, it is used as the dash array for all paths.
-- If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw a solid line.
-- If this accessor is not specified, all paths are drawn as solid lines.
-
-#### `dashJustified` (boolean, optional) {#dashjustified}
-
-- Default: `false`
-
-Only effective if `getDashArray` is specified. If `true`, adjust the gap so a whole number of periods spans the active run, with a half-dash centered at each endpoint. Under `dashMode: 'segment'`, the active run is each rendered segment. Under `dashMode: 'path'`, it is the whole path. Because fitting changes gap length, do not use justification when exact measured spacing must be preserved. If a run is shorter than the requested pattern, the solid interval is clamped to the fitted period and the run renders fully solid.
-
-> Note: `dashJustified` and the selected `dashMode` phase behavior only apply to `PathLayer` and its composites. Supplying either `dashMode` value still enables dashing on supported signed-distance-field layers, but `'segment'` and `'path'` render identically there.
-
-#### `getOffset` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getoffset}
-
-Must be specified if the `offset` option is enabled.
-
-The offset at which to draw each path, expressed as a multiple of its effective width. Negative values shift left and positive values shift right relative to path direction. `0` centers the stroke on the source coordinates.
-
-- If a number is provided, it is used as the offset for all paths.
-- If a function is provided, it is called on each path to retrieve its offset.
+* If an array is provided, it is used as the dash pattern for all paths.
+* If a function is provided, it is called on each path to retrieve its dash pattern. Return `[0, 0]` to draw a solid line.
+* If not specified, all paths are drawn as solid lines.
 
 #### `dashUnits` (string, optional) {#dashunits}
 
-- Default: `'widths'`
+* Default: `'widths'`
 
-What `getDashArray` is measured in, one of `'widths'`, `'pixels'`, `'meters'`, and `'common'`:
+The units of `getDashArray`:
 
-- **`'widths'`: the dash is part of the stroke's visual style.** One unit is half the effective stroke width, so the pattern scales with the line.
-- **`'pixels'`: the dash is a screen-space symbol.** One unit is one nominal zoom-stable projected pixel. This is exact for flat or orthographic paths and approximate under pitch, perspective, or elevation.
-- **`'meters'`: the dash is a physical measurement.** One unit is one projection-local meter in the layer's geospatial coordinate system.
-- **`'common'`: the dash belongs to deck.gl common space.** One unit is one common-coordinate unit.
+* `'widths'` - multiples of *half* the stroke width. Dashes grow and shrink with the line.
+* `'pixels'` - screen pixels. Dashes keep their size on screen as you zoom. Approximate when the view is pitched.
+* `'meters'` - meters on the ground. Use for real-world spacing such as lane markings.
+* `'common'` - deck.gl [common space](../../developer-guide/coordinate-systems.md#supported-units) units.
 
-> Note: `dashUnits` applies to `PathLayer` and composite layers that render paths. `ScatterplotLayer` outlines and `TextLayer` backgrounds continue to interpret `getDashArray` relative to their stroke width.
+Only applies to `PathLayer` and its composites. `ScatterplotLayer` and `TextLayer` always use `'widths'`.
 
-```js
-// A nominal 20px dash and 25px gap, zoom-stable in this flat view
-new PathLayer({
-  // ...
-  widthUnits: 'meters',
-  getWidth: 60,
-  getDashArray: [20, 25],
-  dashUnits: 'pixels',
-  extensions: [new PathStyleExtension({dashMode: 'path'})]
-});
-```
+#### `dashJustified` (boolean, optional) {#dashjustified}
+
+* Default: `false`
+
+If `true`, stretch or shrink the gaps so the pattern starts and ends on half a dash. In `'segment'` mode this fits the pattern to every segment, so each corner lands on a dash. In `'path'` mode it fits the pattern to the path's two ends. Leave it off when gap spacing must be exact.
+
+Only applies to `PathLayer` and its composites.
 
 #### `dashGapPickable` (boolean, optional) {#dashgappickable}
 
-- Default: `false`
+* Default: `false`
 
-Only effective if `getDashArray` is specified. If `true`, gaps between solid strokes are pickable, making the complete patterned stroke one interactive object. If `false`, only solid parts are pickable.
+If `true`, the gaps between dashes are pickable. If `false`, only the dashes are pickable.
 
-## Stroke behavior
+#### `getOffset` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors)) {#getoffset}
 
-### Segment and path phase
+The distance to shift each path sideways, in multiples of the stroke width. Positive values shift to the right of the path's direction and negative values to the left. `0` centers the line on its path.
 
-`dashMode` selects the run over which the pattern's phase continues, while `dashJustified` selects whether the pattern is fitted to the endpoints of that run. They compose into four states.
+* If a number is provided, it is used as the offset for all paths.
+* If a function is provided, it is called on each path to retrieve its offset.
 
-![Comparison between dash modes](../../images/path-style/path-style-dash-modes.png)
+To offset by a fixed distance, divide it by the width: a 4 pixel wide line with `getOffset: 2` sits 8 pixels to the right.
 
-All four rows draw one path whose segments are deliberately unequal, with joints marked by ticks. From top to bottom: `'segment'` begins a new pattern at every joint; justified segment mode centers a half-dash on every joint; and the two `'path'` rows continue through the joints because their phase follows the complete path.
+## Remarks
 
-#### `dashMode: 'segment'` (default)
+### Choosing a dash mode
 
-Use segment mode when rendered segment boundaries are intentional pattern boundaries, such as independent polygon edges or structural panels. The pattern restarts at every rendered boundary, including boundaries introduced by normalization or generated tessellation, so each segment is styled as its own run.
+`dashMode` decides where the pattern starts over.
 
-This is also the cheaper mode: it needs no CPU distance accumulation or path-distance attribute. It is not suitable when vertices merely tessellate one conceptual stroke and may be dense, simplified, or resampled. A segment no longer than `dashSize` never reaches a gap and therefore appears solid.
+* `'path'` runs one pattern along the whole path, the same way MapLibre and SVG draw dashes. Adding or removing vertices does not change how it looks, so dense, simplified, or resampled data stays consistent. Use it for routes, GPS traces, and most other lines.
+* `'segment'` restarts the pattern at every vertex. Use it when each segment is a shape of its own, such as building outlines whose corners should each land on a dash (with `dashJustified`). A segment shorter than one dash has no room for a gap and draws solid.
 
-#### `dashMode: 'path'`
+`'path'` mode measures each path on the CPU and uses one more vertex attribute.
 
-Use path mode when the data describes one conceptual stroke. The pattern runs continuously from the start of the path, making rendered boundaries an implementation detail. Phase is derived from the normalized geometry that `PathLayer` actually draws, including Globe subdivisions, antimeridian cuts, and closed-path normalization. Routes, GPS traces, railway alignments, and XYZ trajectories therefore retain continuous phase when densified, simplified, or resampled.
+### Coming from MapLibre or SVG
 
-![dashMode and vertex density](../../images/path-style/path-style-dash-density.png)
+| To get | MapLibre | SVG | deck.gl |
+| --- | --- | --- | --- |
+| Dashes that scale with the line | `line-dasharray: [2, 1]` | — | `getDashArray: [4, 2]` |
+| Dashes with a fixed screen size | — | `stroke-dasharray="20 10"` | `getDashArray: [20, 10]`, `dashUnits: 'pixels'` |
+| A pattern that runs continuously | Always | Always | `dashMode: 'path'` |
+| A line shifted to one side | `line-offset: 8` (pixels) | — | `getOffset: 2` on a 4 pixel line |
 
-Both halves of this figure draw the same straight line six times, using 1, 2, 4, 12, 40, and 120 segments. Under `'segment'`, the last two rows contain no gaps and appear solid. Under `'path'`, all six rows are identical.
+Three differences cause most surprises:
 
-Path mode costs a CPU pass over the geometry to accumulate distance and one additional vertex attribute.
+* deck.gl defaults to `'segment'` mode, so dashes restart at every vertex. Set `dashMode: 'path'` to match other tools.
+* `'widths'` measures dashes in *half* stroke widths. MapLibre measures in full widths, so double MapLibre values.
+* `getOffset` is in stroke widths, not pixels.
 
-#### Endpoint fitting with `dashJustified`
+> deck.gl v10 plans breaking changes to this extension to match other tools more closely. See the [v10 tracker](https://github.com/visgl/deck.gl/issues/10712).
 
-Justification adjusts the gap so a whole number of periods spans the active run. Segment mode fits each segment independently, which gives intentional corners clean boundaries but can make gaps vary from segment to segment. Path mode fits once across the complete path, keeping one period across interior vertices. Fitting can lengthen or shorten gaps and is therefore distinct from exact physical spacing.
+### Troubleshooting
 
-### Choosing dash units
+* **A dashed line draws solid, or dashes only appear when zoomed in.** In `'segment'` mode each segment restarts the pattern, and a segment shorter than one dash never reaches a gap. Dense data such as GPS traces hits this often. Use `dashMode: 'path'`.
+* **The pattern changes when the data is simplified or resampled.** Same cause. Use `dashMode: 'path'`.
+* **Gaps are uneven with `dashJustified`.** In `'segment'` mode each segment is fitted separately. Use `dashMode: 'path'` to fit the whole path at once.
+* **Dashes grow and shrink as I zoom.** With `widthUnits: 'meters'`, the line and its `'widths'` dashes both scale with the map. Use `dashUnits: 'pixels'` to keep dashes the same size on screen.
 
-Choose units from the meaning the pattern should retain. Use `'widths'` when it is part of the line's visual style, `'pixels'` for screen-space symbology, `'meters'` for a physical interval, and `'common'` for application common-space measurements.
+## Limitations
 
-![dashUnits across zoom levels](../../images/path-style/path-style-dash-units.png)
-
-Every row in the figure uses `widthUnits: 'meters'`. The `'widths'` pairs grow on screen with the stroke, while the `'pixels'` pairs hold the same period at z12, z13, and z14. Red paths are flat, blue paths are billboarded, and each pair agrees.
-
-### Parallel strokes from one centerline
-
-`getOffset` shifts a rendered stroke to either side of its source path. Reusing one authoritative centerline lets an application construct parallel rails, lanes, shoulders, buffers, or casings without editing the source coordinates.
-
-Offsets are multiples of the effective stroke width. To express an absolute lateral distance, divide that distance by the effective stroke width. Use separate layer instances when center and offset strokes need different widths, colors, patterns, or extension attribute budgets.
-
-```js
-import {PathLayer} from '@deck.gl/layers';
-import {PathStyleExtension} from '@deck.gl/extensions';
-
-const centerline = [
-  [-122.45, 37.78],
-  [-122.44, 37.79]
-];
-const railWidthMeters = 0.12;
-const railGaugeMeters = 1; // Illustrative dimensions, not sourced measurements
-const rails = [-1, 1].map(side => ({side, path: centerline}));
-
-const railLayer = new PathLayer({
-  id: 'parallel-rails',
-  data: rails,
-  getPath: rail => rail.path,
-  widthUnits: 'meters',
-  getWidth: railWidthMeters,
-  getOffset: rail => (rail.side * railGaugeMeters) / (2 * railWidthMeters),
-  extensions: [new PathStyleExtension({offset: true})]
-});
-```
-
-### Composing with PathLayer
-
-`PathLayer` owns source positions and the stroke body: [width and units](../layers/path-layer.md#widthunits), [billboard extrusion](../layers/path-layer.md#billboard), [caps](../layers/path-layer.md#caprounded), [joints](../layers/path-layer.md#jointrounded), and [analytic side-edge antialiasing](../layers/path-layer.md#antialiasing). `PathStyleExtension` layers pattern and placement onto that body: repetition, phase, dash units, endpoint fitting, offsets, and gap interaction.
-
-The v9.4 fixes align those coordinate systems. Billboarded and flat dashes agree, elevated paths advance through 3D arclength without phase seams, offset copies retain the intended period and phase, and fine patterns are prefiltered before they alias.
-
-### Dash anti-aliasing
-
-Dash-end coverage is always prefiltered. Rather than testing only whether a fragment's center falls inside a dash, the extension integrates the pattern over the fragment. Subpixel square patterns converge on their solid-to-period duty cycle; rounded patterns preserve the geometric capsule coverage at each transverse scanline. Both avoid shimmering or becoming falsely solid. No dash-specific configuration is needed.
-
-This longitudinal filtering is separate from [`PathLayer.antialiasing`](../layers/path-layer.md#antialiasing), which smooths the lateral sides of a stroke. When that prop is enabled, offset paths use the same complete centered one-device-pixel coverage envelope as unoffset paths. With it disabled, offset sides retain the original hard edge.
-
-Picking remains a hard in-or-out test, so `dashGapPickable` keeps its exact meaning.
-
-## Performance and limitations
-
-- WebGL2 guarantees 16 vertex attributes. `PathLayer` currently uses 13; the dash array adds one, path-continuous phase adds one, and offset adds one. Enabling all three consumes the guaranteed budget and leaves no slot for another attribute-based extension. `dashUnits` is uniform-only and adds no attribute.
-- Prefer focused layer instances when different strokes do not need all capabilities. This keeps attribute use explicit and makes independent styling easier.
-- `ScatterplotLayer` outlines and `TextLayer` backgrounds support width-relative dash arrays and gap picking. They do not implement segment/path phase selection, justification, absolute dash units, or offsets.
-- `PathStyleExtension` is WebGL-only in v9.4. It injects GLSL and has no WGSL dash or offset implementation; WebGPU support and removal of the associated test skips are follow-up work.
-- `getDashArray` represents one repeating `[dash, gap]` pair. True multi-phase dash-dot patterns are not represented directly.
-
-## Migration and troubleshooting {#migration-and-troubleshooting}
-
-Dash behavior changed substantially in v9.4. Automatic rendering repairs need no code change; new phase and unit choices are opt-in. Use this table to identify the relevant behavior.
-
-| Symptom | Why | What resolves it |
-| --- | --- | --- |
-| A dashed path renders as a **solid line** | The pattern restarts at every rendered boundary, so segments no longer than `dashSize` never reach a gap | `dashMode: 'path'` |
-| Dashes only appear once you **zoom in** | Zooming grows rendered segments relative to a width-relative pattern | `dashMode: 'path'` |
-| The pattern **changes when the data is simplified** or resampled | The phase restarts at rendered segment boundaries rather than following the conceptual stroke | `dashMode: 'path'` |
-| Gaps look **uneven from segment to segment** under `dashJustified` | Each segment is fitted independently | `dashMode: 'path'` with `dashJustified` |
-| Dash length **changes as you zoom** with `widthUnits: 'meters'` | Width-relative dashes scale with the stroke | `dashUnits: 'pixels'` for a screen-space pattern |
-| Billboarded dashes **differ from flat ones** or render solid | The along-path coordinate used different units in the two extrusion branches | Fixed automatically in v9.4 |
-| Dashes **break at joints** on paths with elevation | CPU distance used 3D arclength while the shader advanced in 2D | Fixed automatically in v9.4 |
-| Fine dashes **shimmer or read as solid** when zoomed out | A binary per-fragment test aliases near or below one pixel | Fixed automatically in v9.4 |
-| The pattern **freezes mid-segment** on long paths at high zoom | Float32 cancellation hid the small local coordinate beside a large phase | Fixed automatically in v9.4 |
-| A dashed offset line drifts **out of phase** with an unoffset line | Offset widening was not applied consistently to continuous phase | Fixed automatically in v9.4 |
-| A very short justified run produced invalid period math | A period count rounded to zero | Fixed automatically in v9.4 |
-
-A segment shorter than `dashSize` has no room for a gap and can correctly render solid. Justification does not make densely tessellated paths continuous; use `dashMode: 'path'` for that behavior.
-
-![Fixed in v9.4 without opt-in](../../images/path-style/path-style-dash-fixes.png)
+* Requires WebGL. Layers that use `PathStyleExtension` do not render on WebGPU.
+* `getDashArray` takes a single dash and gap. Dash-dot patterns are not supported.
+* `ScatterplotLayer` and `TextLayer` support `getDashArray` and `dashGapPickable` only.
+* WebGL2 guarantees 16 vertex attributes and `PathLayer` already uses 13. A dash pattern, `'path'` mode, and an offset use one each, so enabling all three leaves no room for another extension that adds attributes.
 
 ## Source
 
 [modules/extensions/src/path-style](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/path-style)
 
-Design rationale for `dashMode` and `dashUnits` is in [dev-docs/RFCs/v9.4/path-dash-rfc.md](https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v9.4/path-dash-rfc.md).
+The design of `dashMode` and `dashUnits` is described in the [path dash RFC](https://github.com/visgl/deck.gl/blob/master/dev-docs/RFCs/v9.4/path-dash-rfc.md).

@@ -6,21 +6,6 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v9.4
 
-### PathStyleExtension dashes
-
-`highPrecisionDash` is deprecated in favour of `dashMode`. It still works and is now an alias for `dashMode: 'path'`, so no change is required:
-
-```ts
-// Before
-new PathStyleExtension({highPrecisionDash: true})
-// After
-new PathStyleExtension({dashMode: 'path'})
-```
-
-If both options are supplied, the explicit `dashMode` takes precedence over `highPrecisionDash`.
-
-See [PathStyleExtension migration and troubleshooting](./api-reference/extensions/path-style-extension.md#migration-and-troubleshooting) for symptom-specific guidance.
-
 ### pydeck lighting
 
 The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
@@ -74,6 +59,19 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 ### FillStyleExtension
 
 Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
+
+### PathStyleExtension
+
+`highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
+
+```js
+// Before
+new PathStyleExtension({highPrecisionDash: true});
+// After
+new PathStyleExtension({dashMode: 'path'});
+```
+
+See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
 
 ## Upgrading to v9.3
 
