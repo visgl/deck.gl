@@ -77,6 +77,8 @@ Remarks collects what a reader should know that does not fit under one prop. Com
 
 A short page can use a list of bullets instead of subsections.
 
+Do not use Remarks to announce new or changed support (e.g. "now supports X"); put that in `docs/whats-new.md`.
+
 Limitations lists what does not work: unsupported layers, devices or views, and hardware limits. Keep each entry to one or two sentences, and link to the issue or RFC if a fix is planned.
 
 ### Demos and figures
