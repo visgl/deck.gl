@@ -33,6 +33,7 @@
     "test-webgpu": "RENDER_TEST_DEVICE=webgpu ocular-test render",
     "test-ci": "RENDER_TEST_DEVICE=webgl ocular-test node headless render --coverage",
     "test-browser": "ocular-test browser",
+    "test-gpu-hardware": "ocular-test gpu-hardware",
     "test-tape-compat": "ocular-test tape-compat",
     "test-website": "cd website && yarn && yarn test-build && cd ..",
     "bench": "vite --config test/bench/vite.config.mjs --open /browser.html",
