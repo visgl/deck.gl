@@ -2,7 +2,7 @@
 
 An evolving set of guidelines for writing the deck.gl documentation in `docs/`.
 
-Most readers arrive at a page with a goal and some background: they have used MapLibre, drawn in Figma, made maps in QGIS, or written WebGL. A page should get them from that background to working code. It should describe how deck.gl behaves today, in the words they already use, and say each thing once.
+Most readers arrive at a page with a goal and some background. They write JavaScript, and many have already put data on a map with MapLibre, Mapbox or Google Maps. Some come from geospatial work, or from Python through pydeck. Fewer have written WebGL, which only custom layers need. A page should get them from that background to working code. It should describe how deck.gl behaves today, in the words they already use, and say each thing once.
 
 These guidelines apply to all documentation, whether it was typed by hand or drafted with the help of a tool. For which pages a change needs to update, see the vis.gl [developer process](https://github.com/visgl/tsc/tree/master/developer-process).
 

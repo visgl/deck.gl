@@ -49,8 +49,8 @@ subdirectories may add local guidance.
 
 - Follow `dev-docs/documentation-guidelines.md`. Read two or three pages in the same `docs/`
   folder first and match their outline and phrasing.
-- Write for readers who know the domain (MapLibre, SVG, Figma, cartography) but not deck.gl
-  internals. Say what a prop does, then when to use it, one idea per sentence.
+- Write for readers who know JavaScript and web maps (MapLibre, Mapbox, Google Maps) but not
+  WebGL or deck.gl internals. Say what a prop does, then when to use it, one idea per sentence.
 - Describe current behavior only. Version history goes in `docs/whats-new.md`, breaking changes in
   `docs/upgrade-guide.md`, and design rationale or internals in `dev-docs/RFCs/`.
 - Rewrite text from RFCs, PR descriptions or code comments to follow these guidelines before it
