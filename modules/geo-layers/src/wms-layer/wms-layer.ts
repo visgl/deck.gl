@@ -167,6 +167,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
 
     if (typeof props.data === 'string') {
       return createDataSource(props.data, [WMSSource], {
+        wms: {},
         core: {
           type: props.serviceType,
           loadOptions: props.loadOptions
