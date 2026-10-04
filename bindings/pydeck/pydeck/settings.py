@@ -120,6 +120,13 @@ class Settings:
                             f"but pydeck loads deck.gl {DECKGL_MINOR}",
                             stacklevel=2,
                         )
+                    elif not pinned:
+                        # For example "8.x", "^9" or "latest"
+                        warnings.warn(
+                            f"{package}@{version} does not pin a deck.gl minor version, "
+                            f"but pydeck loads deck.gl {DECKGL_MINOR}",
+                            stacklevel=2,
+                        )
             spec = package if version is None else f"{package}@{version}"
             external = ",".join(SHARED_PACKAGES)
             uri = f"{self.esm_cdn.rstrip('/')}/{quote(spec, safe='@/~^.*')}?external={external}"

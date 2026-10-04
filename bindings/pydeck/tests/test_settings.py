@@ -109,6 +109,13 @@ def test_register_npm_warns_on_other_deckgl_version():
     )
 
 
+@pytest.mark.parametrize("version", ["8.x", "^9", "latest"])
+def test_register_npm_warns_on_unpinned_minor(version):
+    pydeck.settings.custom_libraries = []
+    with pytest.warns(UserWarning, match="does not pin a deck.gl minor version"):
+        pydeck.settings.register_library(npm=f"@deck.gl-community/layers@{version}")
+
+
 def test_register_npm_uses_esm_cdn():
     pydeck.settings.custom_libraries = []
     pydeck.settings.esm_cdn = "https://esm.example.com/"
