@@ -140,24 +140,27 @@ function getRoadCode({dashMode, dashUnits, dashArray, edgeOffset}) {
   return `import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 
-const layer = new PathLayer({
-  id: 'road',
-  data: [
-    {path, dashArray: [${dashArray.join(', ')}], offset: 0}, // center line
-    {path, dashArray: [0, 0], offset: -${edgeOffset}}, // left edge
-    {path, dashArray: [0, 0], offset: ${edgeOffset}} // right edge
-  ],
-  getPath: d => d.path,
-  getColor: [60, 100, 160],
-  getWidth: 2,
+// \`path\` is the road's centerline, an array of [longitude, latitude] positions
+function getRoadLayer(path) {
+  return new PathLayer({
+    id: 'road',
+    data: [
+      {path, dashArray: [${dashArray.join(', ')}], offset: 0, color: [60, 100, 160]}, // center line
+      {path, dashArray: [0, 0], offset: -${edgeOffset}, color: [0, 0, 0]}, // left edge
+      {path, dashArray: [0, 0], offset: ${edgeOffset}, color: [0, 0, 0]} // right edge
+    ],
+    getPath: d => d.path,
+    getColor: d => d.color,
+    getWidth: 2,
 
-  // props added by PathStyleExtension
-  getDashArray: d => d.dashArray,
-  dashUnits: '${dashUnits}',
-  getOffset: d => d.offset,
+    // props added by PathStyleExtension
+    getDashArray: d => d.dashArray,
+    dashUnits: '${dashUnits}',
+    getOffset: d => d.offset,
 
-  extensions: [new PathStyleExtension({dashMode: '${dashMode}', offset: true})]
-});`;
+    extensions: [new PathStyleExtension({dashMode: '${dashMode}', offset: true})]
+  });
+}`;
 }
 
 export function PathStyleExtensionDemo() {
