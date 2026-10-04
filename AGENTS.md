@@ -53,8 +53,9 @@ subdirectories may add local guidance.
   internals. Say what a prop does, then when to use it, one idea per sentence.
 - Describe current behavior only. Version history goes in `docs/whats-new.md`, breaking changes in
   `docs/upgrade-guide.md`, and design rationale or internals in `dev-docs/RFCs/`.
-- Do not copy text from RFCs, PR descriptions or code comments into the docs. Check every claim
-  about defaults, units and behavior against the source.
+- Rewrite text from RFCs, PR descriptions or code comments to follow these guidelines before it
+  goes into the docs, and leave the implementation detail behind. Check every claim about
+  defaults, units and behavior against the source.
 - Host images in `visgl/deck.gl-data`. Prefer a demo in `website/src/doc-demos/` when the reader
   would want to change a value.
 

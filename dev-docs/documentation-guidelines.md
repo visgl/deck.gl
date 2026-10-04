@@ -4,7 +4,7 @@ An evolving set of guidelines for writing the deck.gl documentation in `docs/`.
 
 Most readers arrive at a page with a goal and some background: they have used MapLibre, drawn in Figma, made maps in QGIS, or written WebGL. A page should get them from that background to working code. It should describe how deck.gl behaves today, in the words they already use, and say each thing once.
 
-These guidelines apply to all documentation, whether it was typed by hand or drafted with the help of a tool.
+These guidelines apply to all documentation, whether it was typed by hand or drafted with the help of a tool. For which pages a change needs to update, see the vis.gl [developer process](https://github.com/visgl/tsc/tree/master/developer-process).
 
 
 ## Structure
@@ -147,7 +147,7 @@ After: removed from the reference page. `docs/whats-new.md` already says dashes 
 When writing or editing documentation, follow the guidelines above. In addition:
 
 * Read two or three other pages in the same folder before writing, and match their structure and phrasing.
-* Do not copy text from RFCs, PR descriptions or code comments into the docs. Rewrite it for someone who has not read them.
+* Rewrite text from RFCs, PR descriptions or code comments to follow these guidelines before it goes into the docs, even if it was written as documentation. Leave the implementation detail behind.
 * Check each claim about behavior, defaults and units against the source.
 * When comparing to another library or tool, check that library's documentation rather than relying on memory.
 * Keep `docs/whats-new.md` and `docs/upgrade-guide.md` entries to the length of their neighbors.
