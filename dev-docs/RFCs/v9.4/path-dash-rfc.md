@@ -327,6 +327,7 @@ Potential follow-up work, without commitment in this RFC:
 - WGSL support for `PathStyleExtension`, followed by enabling the WebGPU dash and offset tests;
 - absolute `offsetUnits` for rail gauges, shoulders, and corridor edges;
 - arbitrary repeating interval arrays for multi-phase patterns;
+- a dash offset prop, like SVG `stroke-dashoffset`, to shift where the pattern starts;
 - exact perspective-aware screen-space period integration;
 - absolute units for SDF-backed ScatterplotLayer and TextBackgroundLayer outlines;
 - reusable repeated-symbol strokes beyond rectangular dash fragments.
