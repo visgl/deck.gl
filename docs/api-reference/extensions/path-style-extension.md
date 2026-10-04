@@ -1,34 +1,10 @@
 # PathStyleExtension
 
+import {PathStyleExtensionDemo, PathStyleDashModeDemo} from '@site/src/doc-demos/extensions';
+
 The `PathStyleExtension` adds dashes and offsets to the [PathLayer](../layers/path-layer.md) and composite layers that render paths, such as [PolygonLayer](../layers/polygon-layer.md) and [GeoJsonLayer](../layers/geojson-layer.md). It can also dash [ScatterplotLayer](../layers/scatterplot-layer.md) outlines and [TextLayer](../layers/text-layer.md) backgrounds.
 
-<div style={{position:'relative',height:450}}></div>
-<div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
-  <iframe height="450" style={{width:'100%'}} scrolling="no" title="deck.gl PathStyleExtension" src="https://codepen.io/vis-gl/embed/dyOMaoX?height=450&theme-id=light&default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
-    See the Pen <a href='https://codepen.io/vis-gl/pen/dyOMaoX'>deck.gl PathStyleExtension</a> by vis.gl
-    (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
-  </iframe>
-</div>
-
-```js
-import {PathLayer} from '@deck.gl/layers';
-import {PathStyleExtension} from '@deck.gl/extensions';
-
-const layer = new PathLayer({
-  id: 'routes',
-  data,
-  getPath: d => d.path,
-  getColor: [0, 120, 255],
-  getWidth: 4,
-  widthUnits: 'pixels',
-
-  // props added by PathStyleExtension
-  getDashArray: [6, 4],
-  dashUnits: 'pixels',
-
-  extensions: [new PathStyleExtension({dashMode: 'path'})]
-});
-```
+<PathStyleExtensionDemo />
 
 > `PathStyleExtension` currently requires WebGL. Layers that use it do not render on WebGPU.
 
@@ -125,6 +101,8 @@ To offset by a fixed distance, divide it by the width: a 4 pixel wide line with 
 ### Choosing a dash mode
 
 `dashMode` decides where the pattern starts over.
+
+<PathStyleDashModeDemo />
 
 * `'path'` runs one pattern along the whole path, the same way MapLibre and SVG draw dashes. Adding or removing vertices does not change how it looks, so dense, simplified, or resampled data stays consistent. Use it for routes, GPS traces, and most other lines.
 * `'segment'` restarts the pattern at every vertex. Use it when each segment is a shape of its own, such as building outlines whose corners should each land on a dash (with `dashJustified`). A segment shorter than one dash has no room for a gap and draws solid.
