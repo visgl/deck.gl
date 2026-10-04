@@ -66,7 +66,12 @@ const JSON_CONVERTER_CONFIGURATION = {
   }
 };
 
-registerLoaders([CSVLoader]);
+registerLoaders([
+  {
+    ...CSVLoader,
+    options: {...CSVLoader.options, csv: {...CSVLoader.options.csv, shape: 'object-row-table'}}
+  }
+]);
 
 const jsonConverter = new JSONConverter({
   configuration: JSON_CONVERTER_CONFIGURATION
