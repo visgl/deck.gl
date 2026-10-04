@@ -93,4 +93,8 @@ The CDN bundles the library's other dependencies. The library must target the sa
 pydeck (9.4 for pydeck 0.9.4). CDNs that rewrite every import, such as jsDelivr's ``+esm``, load a second
 copy of deck.gl and do not work.
 
+Other subpaths of these packages are not mapped, so a library that imports one fails to load. The import map
+must also come before any other ES module on the page: in Firefox, and in Chrome before 133 and Safari before
+18.4, a library fails to load if the page has already loaded an ES module.
+
 This is experimental and may change in a later release.

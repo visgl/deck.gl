@@ -46,16 +46,14 @@ export const SHARED_MODULES = {
 const REGISTRY_NAME = '__deckJupyterSharedModules';
 const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
 
-let importMapInstalled = false;
-
-// Installs the import map once. A browser applies an import map only to specifiers that no module has
-// resolved yet, and before Chrome 133 / Safari 18.4 (Firefox: not yet) only if no module has loaded,
-// so this runs before the first ES module library loads.
+// Installs the import map once per page. A browser applies an import map only to specifiers that no
+// module has resolved yet, and before Chrome 133 / Safari 18.4 (Firefox: not yet) only if no module has
+// loaded, so this runs before the first ES module library loads. Another widget bundle on the same page
+// keeps the first map and registry, since the browser would ignore its remapped specifiers anyway.
 export function installSharedModuleImportMap() {
-  if (importMapInstalled) {
+  if (globalThis[REGISTRY_NAME]) {
     return;
   }
-  importMapInstalled = true;
   globalThis[REGISTRY_NAME] = SHARED_MODULES;
 
   const imports = {};
