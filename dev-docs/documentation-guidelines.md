@@ -9,15 +9,15 @@ These guidelines apply to all documentation, whether it was typed by hand or dra
 
 ## Structure
 
-API reference pages for layers and extensions share one outline. Keep the headings as they are and in this order, and leave out the ones that do not apply.
+API reference pages for layers and extensions share one outline. The intro, demo and usage example go directly under the page title, without their own headings. The sections after them are `##` headings: keep them as they are and in this order, and leave out the ones that do not apply.
 
 * **Title and intro** - One or two sentences on what the class does and which layers it works with.
 * **Demo** - An embedded demo (see [Demos and figures](#demos-and-figures)).
-* **Usage** - A short code example with the recommended settings.
+* **Usage example** - A short code example with the recommended settings.
 * **Installation** - The standard npm and script tag block.
 * **Constructor** - One bullet per option (extensions only).
 * **Properties** / **Layer Properties** - One `####` entry per prop.
-* **Remarks** - Anything that does not belong to a single prop. Use `###` subsections when there is more than one topic.
+* **Remarks** - Actionable guidance that does not belong to a single prop. Use `###` subsections when there is more than one topic.
 * **Limitations** - What does not work, as a list. If there is only one limitation, it can go in Remarks instead.
 * **Source** - A link to the source directory.
 
