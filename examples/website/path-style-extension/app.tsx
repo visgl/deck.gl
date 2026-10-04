@@ -129,7 +129,11 @@ export default function App({
   mapStyle?: string;
 }) {
   const [assets, setAssets] = useState<RoadDiagramAssets>();
-  const [selected, setSelected] = useState<{asset: Asset; position: number[]} | null>(null);
+  const [selected, setSelected] = useState<{
+    asset: Asset;
+    position: number[];
+    layerId: string;
+  } | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -274,22 +278,31 @@ export default function App({
       pickable: true
     })
   ];
+  // Optionally hide the layers that do not use PathStyleExtension
+  const visibleLayers = extensionLayersOnly
+    ? layers.filter(layer => layer.props.extensions.length)
+    : layers;
+  // Hide the popup of a feature whose layer is hidden
+  const isSelectedVisible = selected && visibleLayers.some(layer => layer.id === selected.layerId);
 
   return (
     <DeckGL
       device={device}
-      // Optionally hide the layers that do not use PathStyleExtension
-      layers={extensionLayersOnly ? layers.filter(layer => layer.props.extensions.length) : layers}
+      layers={visibleLayers}
       parameters={{depthCompare: 'always'}}
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       pickingRadius={5}
-      onClick={({object, coordinate}: PickingInfo<Asset>) =>
-        setSelected(object && coordinate ? {asset: object, position: coordinate} : null)
+      onClick={({object, coordinate, layer}: PickingInfo<Asset>) =>
+        setSelected(
+          object && coordinate && layer
+            ? {asset: object, position: coordinate, layerId: layer.id}
+            : null
+        )
       }
     >
       <Map reuseMaps mapStyle={mapStyle} />
-      {selected && (
+      {isSelectedVisible && (
         <PopupWidget
           id="road-asset-details"
           position={selected.position}
