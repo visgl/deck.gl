@@ -48,8 +48,8 @@ The ``type`` corresponds to a class from the deck.gl
 - `PathStyleExtension <https://deck.gl/docs/api-reference/extensions/path-style-extension>`__
 - `TerrainExtension <https://deck.gl/docs/api-reference/extensions/terrain-extension>`__
 
-Extensions from other libraries, such as ``ZoomOpacityExtension`` from deck.gl-community, can be
-loaded as custom libraries. See :doc:`community_libraries`.
+Extensions from other libraries, such as deck.gl-community, can be loaded as custom libraries. See
+:doc:`community_libraries`.
 
 Layer compatibility and limitations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
