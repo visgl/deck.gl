@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-from .json_tools import JSONMixin
+from .json_tools import JSONMixin, serialize
 from .layer import Layer
 from ..io.html import deck_to_html
 from ..settings import settings as pydeck_settings
@@ -261,19 +261,22 @@ class Deck(JSONMixin):
         Notes
         -----
         The deck JSON is embedded in the HTML in compact form, without
-        indentation or separator whitespace, to reduce file size. The JSON
-        comes from :meth:`to_json`, so subclasses that override it still shape
-        the HTML, and is then re-emitted with the module's key ordering
-        (``sort_keys``) and compact separators.
+        indentation or separator whitespace, to reduce file size. When
+        :meth:`to_json` is inherited, the payload is serialized compact in one
+        pass; a subclass that overrides it has its string compacted instead,
+        so overrides keep shaping the HTML.
 
         Returns
         -------
         str
             Returns absolute path of the file
         """
-        # Round-trip through to_json so overrides keep shaping the HTML, then
-        # re-emit compact with the same key ordering serialize() applies.
-        deck_json = json.dumps(json.loads(self.to_json()), sort_keys=True, separators=(",", ":"))
+        if type(self).to_json is JSONMixin.to_json:
+            deck_json = serialize(self, compact=True)
+        else:
+            # An override returns a string, so compact it without a second
+            # trip through the serializer.
+            deck_json = json.dumps(json.loads(self.to_json()), sort_keys=True, separators=(",", ":"))
         f = deck_to_html(
             deck_json,
             mapbox_key=self.mapbox_key,
