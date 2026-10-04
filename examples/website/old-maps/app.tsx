@@ -156,8 +156,9 @@ export default function App({
   onMapChange?: (map: OldMap) => void;
 }) {
   const [currentId, setCurrentId] = useState(mapId);
-  // Kept as a string so that the app only re-renders when a map comes into or out of view
-  const [visibleIds, setVisibleIds] = useState('');
+  // Kept as a string so that the app only re-renders when a map comes into or out of view.
+  // The initial view shows only the first map, and DeckGL doesn't report it.
+  const [visibleIds, setVisibleIds] = useState(mapId);
   // The map the camera last finished flying to. Starting a new flight interrupts the previous
   // one, so each transition reports its own target and stale callbacks are ignored.
   const [arrivedId, setArrivedId] = useState<string | null>(mapId);
