@@ -170,7 +170,7 @@ export default class GoogleMapsOverlay {
     const overlay = new google.maps.WebGLOverlayView();
     overlay.onAdd = noop;
     overlay.onContextRestored = interleaved ? this._onContextRestored.bind(this) : noop;
-    overlay.onDraw = this._onDrawVector.bind(this);
+    overlay.onDraw = this._onDrawVector.bind(this, interleaved);
     overlay.onContextLost = interleaved ? this._onContextLost.bind(this) : noop;
     overlay.onRemove = interleaved ? this._onRemove.bind(this) : noop;
     this._overlay = overlay;
@@ -308,13 +308,12 @@ export default class GoogleMapsOverlay {
     deck.redraw();
   }
 
-  _onDrawVector({gl, transformer}) {
+  _onDrawVector(interleaved: boolean, {gl, transformer}) {
     if (!this._deck || !this._map) {
       return;
     }
 
     const deck = this._deck;
-    const {interleaved} = this.props;
 
     deck.setProps({
       ...getViewPropsFromCoordinateTransformer(this._map, transformer),
