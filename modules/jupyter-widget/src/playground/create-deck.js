@@ -154,8 +154,9 @@ export function addCustomLibraries(customLibraries, onComplete) {
   });
 }
 
-// Latest JSON applied to each deck, reconverted once its custom libraries have loaded
-const latestInput = new WeakMap();
+// Decks whose custom libraries are still loading. Each holds the latest update that left out
+// layers or widgets, retried once the libraries have loaded, or null if nothing was left out.
+const pendingUpdates = new WeakMap();
 
 const identity = props => props;
 
@@ -183,14 +184,12 @@ function dropUnconverted(props) {
 function updateDeck(inputJson, deckgl, transformProps = identity) {
   // The widget's binary messages carry the JSON as a string
   const json = typeof inputJson === 'string' ? JSON.parse(inputJson) : inputJson;
-  const entry = latestInput.get(deckgl) || {librariesLoading: false};
-  const props = convertJson(json, entry.librariesLoading);
-  latestInput.set(deckgl, {
-    ...entry,
-    inputJson: json,
-    transformProps,
-    hasMissing: hasUnconverted(props)
-  });
+  const librariesLoading = pendingUpdates.has(deckgl);
+  const props = convertJson(json, librariesLoading);
+  if (librariesLoading) {
+    // A newer update replaces the one waiting to be retried
+    pendingUpdates.set(deckgl, hasUnconverted(props) ? {inputJson: json, transformProps} : null);
+  }
   deckgl.setProps(transformProps(dropUnconverted(props)));
 }
 
@@ -364,21 +363,20 @@ function createDeck({
 
     // Recorded before the libraries are requested: onComplete runs synchronously when a library
     // global already exists
-    latestInput.set(deckgl, {
-      inputJson: jsonInput,
-      transformProps: identity,
-      librariesLoading: Boolean(customLibraries && customLibraries.length),
-      hasMissing: hasUnconverted(props)
-    });
+    if (customLibraries && customLibraries.length) {
+      pendingUpdates.set(
+        deckgl,
+        hasUnconverted(props) ? {inputJson: jsonInput, transformProps: identity} : null
+      );
+    }
 
     const onComplete = () => {
-      const entry = latestInput.get(deckgl);
-      entry.librariesLoading = false;
-      if (entry.hasMissing) {
+      const pending = pendingUpdates.get(deckgl);
+      pendingUpdates.delete(deckgl);
+      if (pending) {
         // Layers and widgets that still cannot be converted are reported and left out
-        const newProps = dropUnconverted(convertLayersAndWidgets(entry.inputJson, onError));
-        entry.hasMissing = false;
-        deckgl.setProps(entry.transformProps(newProps));
+        const newProps = dropUnconverted(convertLayersAndWidgets(pending.inputJson, onError));
+        deckgl.setProps(pending.transformProps(newProps));
       }
     };
 

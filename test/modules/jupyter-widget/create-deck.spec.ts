@@ -206,6 +206,54 @@ describe('jupyter-widget: dynamic-registration', () => {
     }
   });
 
+  test('updateDeck does not retry an update that a newer one replaced', async () => {
+    class StaleTestExtension extends LayerExtension {}
+    window.StaleTestExtension = StaleTestExtension;
+    const script = 'window.staleTestLibrary = {StaleTestExtension: window.StaleTestExtension};';
+    const resourceUri = URL.createObjectURL(new Blob([script], {type: 'text/javascript'}));
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const jsonInput = {
+      device: '@@#TEST_DEVICE',
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        {
+          '@@type': 'ScatterplotLayer',
+          id: 'extended',
+          data: [],
+          extensions: [{'@@type': 'StaleTestExtension'}]
+        }
+      ]
+    };
+    const deck = createDeck({
+      container,
+      configuration: {constants: {TEST_DEVICE: device}},
+      jsonInput,
+      customLibraries: [{libraryName: 'staleTestLibrary', resourceUri}]
+    });
+
+    try {
+      updateDeck(
+        {...jsonInput, layers: [{'@@type': 'ScatterplotLayer', id: 'plain', data: []}]},
+        deck
+      );
+      await vi.waitFor(() => expect(window.staleTestLibrary).toBeTruthy(), {timeout: 5000});
+      // Let onComplete run after the script has loaded
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(
+        deck.props.layers.map(l => l.id),
+        'The newer update is kept'
+      ).toEqual(['plain']);
+    } finally {
+      deck.finalize();
+      container.remove();
+      URL.revokeObjectURL(resourceUri);
+      delete window.StaleTestExtension;
+      delete window.staleTestLibrary;
+    }
+  });
+
   test('createDeck adds the layers of the libraries that loaded when another fails', async () => {
     class LoadedTestExtension extends LayerExtension {}
     window.LoadedTestExtension = LoadedTestExtension;
