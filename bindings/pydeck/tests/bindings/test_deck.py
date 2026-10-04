@@ -10,6 +10,7 @@ except ImportError:
 
 from pydeck import Deck
 from pydeck import map_styles
+from pydeck.bindings.json_tools import serialize
 from pydeck.bindings.base_map_provider import BaseMapProvider
 from IPython.display import HTML
 
@@ -61,11 +62,11 @@ def test_json_output():
         assert json.loads(str(actual.to_json())) == json.loads(expected)
 
 
-def test_to_json_compact():
+def test_serialize_compact():
     """Verify that compact serialization drops whitespace and preserves the payload"""
     r = pydeck_examples.create_minimal_test_object()
-    pretty = r.to_json()
-    compact = r.to_json(compact=True)
+    pretty = serialize(r)
+    compact = serialize(r, compact=True)
     assert json.loads(compact) == json.loads(pretty)
     assert "\n" not in compact
     assert len(compact) < len(pretty)
@@ -75,7 +76,7 @@ def test_to_html_embeds_compact_json():
     """Verify that to_html embeds the deck JSON without indentation"""
     r = pydeck_examples.create_minimal_test_object()
     html = r.to_html(as_string=True, notebook_display=False)
-    assert r.to_json(compact=True) in html
+    assert serialize(r, compact=True) in html
 
 
 @pytest.mark.skip("Skipping widget test, see #7783")

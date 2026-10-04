@@ -113,11 +113,8 @@ class JSONMixin(object):
         """
         return serialize(self)
 
-    def to_json(self, compact=False):
+    def to_json(self):
         """
         Return a JSON-ified version of the Deck object.
-
-        Set ``compact=True`` to serialize without indentation or separator
-        whitespace, which reduces the size of large payloads.
         """
-        return serialize(self, compact=compact)
+        return serialize(self)
