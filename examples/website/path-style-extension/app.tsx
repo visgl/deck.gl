@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState} from 'react';
+/* global fetch */
+import React, {useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL, PopupWidget} from '@deck.gl/react';
@@ -14,7 +15,8 @@ import type {Color, MapViewState, PickingInfo} from '@deck.gl/core';
 import type {PathStyleExtensionProps} from '@deck.gl/extensions';
 import type {Device} from '@luma.gl/core';
 
-import ROAD_DIAGRAM_DATA from './data/seattle-road-diagram.json';
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/path-style-extension/data/seattle-road-diagram.json';
 
 type Position = [longitude: number, latitude: number];
 type DashPattern = [dash: number, gap: number];
@@ -49,26 +51,22 @@ type PathAsset = Asset & {path: Position[]};
 type StyledPathAsset = PathAsset & {style: NonNullable<Asset['style']>};
 type PolygonAsset = Asset & {polygon: Position[]};
 
-const {assets} = ROAD_DIAGRAM_DATA as unknown as {
-  assets: {
-    surfacePaths: StyledPathAsset[];
-    backgroundPaths: PathAsset[];
-    laneBands: StyledPathAsset[];
-    bikePanels: PolygonAsset[];
-    crossings: StyledPathAsset[];
-    transversePolygons: PolygonAsset[];
-    transversePaths: StyledPathAsset[];
-    longitudinalMarkings: StyledPathAsset[];
-    detailPaths: StyledPathAsset[];
-  };
+type RoadDiagramAssets = {
+  surfacePaths: StyledPathAsset[];
+  backgroundPaths: PathAsset[];
+  laneBands: StyledPathAsset[];
+  bikePanels: PolygonAsset[];
+  crossings: StyledPathAsset[];
+  transversePolygons: PolygonAsset[];
+  transversePaths: StyledPathAsset[];
+  longitudinalMarkings: StyledPathAsset[];
+  detailPaths: StyledPathAsset[];
 };
 
 // Solid lines that are not offset, such as hatching, do not need PathStyleExtension
 function isStyledMarking(asset: StyledPathAsset) {
   return Boolean(asset.style.dashMeters?.[0] || asset.style.offset);
 }
-const styledMarkings = assets.longitudinalMarkings.filter(isStyledMarking);
-const solidMarkings = assets.longitudinalMarkings.filter(asset => !isStyledMarking(asset));
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -122.34237,
@@ -130,14 +128,27 @@ export default function App({
   extensionLayersOnly?: boolean;
   mapStyle?: string;
 }) {
+  const [assets, setAssets] = useState<RoadDiagramAssets>();
   const [selected, setSelected] = useState<{asset: Asset; position: number[]} | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(json => setAssets(json.assets));
+  }, []);
+
+  const [styledMarkings, solidMarkings] = useMemo(() => {
+    const markings = assets?.longitudinalMarkings || [];
+    return [markings.filter(isStyledMarking), markings.filter(asset => !isStyledMarking(asset))];
+  }, [assets]);
   const isPhysical = measurementMode === 'physical';
   const markingUnits = isPhysical ? 'meters' : 'pixels';
 
   const layers = [
     new PathLayer<StyledPathAsset>({
       id: 'surfaces',
-      data: assets.surfacePaths,
+      data: assets?.surfacePaths,
       getPath: asset => asset.path,
       getWidth: asset => asset.style.widthMeters,
       getColor: asset => ROAD_STYLE[asset.style.colorRole!],
@@ -146,7 +157,7 @@ export default function App({
     }),
     new PathLayer<PathAsset>({
       id: 'drafting-lines',
-      data: assets.backgroundPaths,
+      data: assets?.backgroundPaths,
       getPath: asset => asset.path,
       getWidth: 1,
       widthUnits: 'pixels',
@@ -154,7 +165,7 @@ export default function App({
     }),
     new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
       id: 'lane-bands',
-      data: assets.laneBands,
+      data: assets?.laneBands,
       getPath: asset => asset.path,
       getWidth: asset => asset.style.widthMeters,
       getColor: ROAD_STYLE.vehicleLane,
@@ -167,7 +178,7 @@ export default function App({
     }),
     new PolygonLayer<PolygonAsset>({
       id: 'bike-panels',
-      data: assets.bikePanels,
+      data: assets?.bikePanels,
       getPolygon: asset => asset.polygon,
       getFillColor: ROAD_STYLE.bikePanel,
       stroked: false,
@@ -175,7 +186,7 @@ export default function App({
     }),
     new PathLayer<StyledPathAsset, PathStyleExtensionProps<StyledPathAsset>>({
       id: 'crossings',
-      data: assets.crossings,
+      data: assets?.crossings,
       getPath: asset => asset.path,
       getWidth: asset => (isPhysical ? asset.style.widthMeters : asset.style.widthPixels!),
       widthUnits: markingUnits,
@@ -198,7 +209,7 @@ export default function App({
     }),
     new PolygonLayer<PolygonAsset>({
       id: 'transverse-polygons',
-      data: assets.transversePolygons,
+      data: assets?.transversePolygons,
       getPolygon: asset => asset.polygon,
       getFillColor: ROAD_STYLE.whiteMarking,
       stroked: false,
@@ -206,7 +217,7 @@ export default function App({
     }),
     new PathLayer<StyledPathAsset>({
       id: 'transverse-paths',
-      data: assets.transversePaths,
+      data: assets?.transversePaths,
       getPath: asset => asset.path,
       getWidth: asset => asset.style.widthMeters,
       widthMinPixels: 1,
@@ -252,7 +263,7 @@ export default function App({
     }),
     new PathLayer<StyledPathAsset>({
       id: 'details',
-      data: assets.detailPaths,
+      data: assets?.detailPaths,
       getPath: asset => asset.path,
       getWidth: asset => asset.style.widthMeters,
       widthMinPixels: 0.75,

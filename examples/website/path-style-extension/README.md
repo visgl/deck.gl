@@ -30,7 +30,7 @@ Click a rendered feature to inspect the values used to draw it. See the [PathSty
 
 ### Data format
 
-The sample is a pinned street-design snapshot from the City of Seattle Department of Transportation. Replace it with any data that can supply paths and styling attributes to PathLayer.
+The sample is a pinned street-design snapshot from the City of Seattle Department of Transportation. It is hosted in [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/examples/path-style-extension), along with the scripts that extract it. Replace it with any data that can supply paths and styling attributes to PathLayer.
 
 ### Basemap
 
