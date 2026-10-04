@@ -50,7 +50,10 @@
     "@loaders.gl/csv": "^4.4.3",
     "@luma.gl/core": "^9.4.0",
     "@luma.gl/effects": "^9.4.0",
+    "@luma.gl/engine": "^9.4.0",
+    "@luma.gl/shadertools": "^9.4.0",
     "@luma.gl/webgl": "^9.4.0",
+    "@math.gl/core": "^4.1.0",
     "d3-dsv": "^1.0.8",
     "mapbox-gl": "^1.13.2",
     "maplibre-gl": "^5.14.0"

@@ -55,3 +55,42 @@ deck.gl. With esbuild, alias the deck.gl packages to small shims that re-export 
    export const {Layer, CompositeLayer, project32, picking} = globalThis.deck;
    // shims/deck-layers.js
    export const {ScatterplotLayer, PathLayer} = globalThis.deck;
+
+Importing deck.gl by package name (experimental)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+ES module libraries can also import these packages by name, and receive the copies already loaded by pydeck:
+
+``@deck.gl/core``, ``@deck.gl/layers``, ``@deck.gl/extensions``, ``@deck.gl/aggregation-layers``,
+``@deck.gl/geo-layers``, ``@deck.gl/mesh-layers``, ``@deck.gl/widgets``, ``@luma.gl/core``,
+``@luma.gl/engine``, ``@luma.gl/shadertools`` (and ``/wgsl``), ``@luma.gl/webgl`` (and ``/constants``),
+``@loaders.gl/core`` and ``@math.gl/core``.
+
+Before it loads the first ``module=True`` library, pydeck adds an
+`import map <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap>`__ that
+resolves each name to pydeck's copy. A library built with these packages as externals needs no shims, and
+packages published to npm can be loaded through a CDN that keeps them external, such as
+`esm.sh <https://esm.sh>`__ with ``?external=``:
+
+.. code-block:: python
+
+   import pydeck
+
+   SHARED = ",".join([
+       "@deck.gl/core", "@deck.gl/layers", "@deck.gl/extensions", "@deck.gl/aggregation-layers",
+       "@deck.gl/geo-layers", "@deck.gl/mesh-layers", "@deck.gl/widgets",
+       "@luma.gl/core", "@luma.gl/engine", "@luma.gl/shadertools", "@luma.gl/webgl",
+       "@loaders.gl/core", "@math.gl/core",
+   ])
+   pydeck.settings.register_library(
+       "DeckCommunityLayers",
+       f"https://esm.sh/@deck.gl-community/layers@9.4.1?external={SHARED}",
+       module=True,
+   )
+   layer = pydeck.Layer("PathOutlineLayer", data, get_path="path", get_color=[255, 0, 0], get_width=30)
+
+The CDN bundles the library's other dependencies. The library must target the same deck.gl minor version as
+pydeck (9.4 for pydeck 0.9.4). CDNs that rewrite every import, such as jsDelivr's ``+esm``, load a second
+copy of deck.gl and do not work.
+
+This is experimental and may change in a later release.
