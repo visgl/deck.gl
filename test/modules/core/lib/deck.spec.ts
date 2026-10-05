@@ -94,8 +94,7 @@ webglTest.each([
     expect(deck.device!.props.debug).toBe(expected);
   } finally {
     Device.defaultProps.debug = defaultDebug;
-    deck.finalize();
-    deck.device?.destroy();
+    finalizeOwnedDeck(deck);
   }
 });
 
@@ -115,8 +114,7 @@ webglTest('Deck#GPU debug forwards to attached context', async () => {
     expect(deck.device!.props.debug).toBe(false);
   } finally {
     Device.defaultProps.debug = defaultDebug;
-    deck.finalize();
-    deck.device?.destroy();
+    finalizeOwnedDeck(deck);
   }
 });
 
