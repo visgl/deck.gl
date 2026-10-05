@@ -4,7 +4,9 @@
 
 /* eslint-disable complexity, camelcase */
 
-import {mat4, Matrix4Like, vec4} from '@math.gl/core';
+import {Matrix4Like} from '@math.gl/core';
+import * as mat4 from '@math.gl/core/mat4';
+import * as vec4 from '@math.gl/core/vec4';
 
 import {PROJECTION_MODE} from '../../lib/constants';
 
