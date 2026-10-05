@@ -166,3 +166,61 @@ test('Tile2DHeader#reload', async () => {
   tile.loadData({...opts, getData: () => getTileData('d2', 0)});
   expect(await tile.data, 'loaded the result of the last request').toBe('d2');
 });
+
+test('Tile2DHeader#isFailed', async () => {
+  const requestScheduler = new RequestScheduler({throttleRequests: false});
+  const opts = {requestScheduler, getRequestPriority, onLoad: () => {}, onError: () => {}};
+  const tile = new Tile2DHeader({x: 0, y: 0, z: 0});
+  expect(tile.isFailed, 'not failed before loading').toBe(false);
+
+  await tile.loadData({...opts, getData: async () => null});
+  expect(tile.isLoaded, 'empty result settles the request').toBe(true);
+  expect(tile.isFailed, 'empty result is not a failure').toBe(false);
+
+  await tile.loadData({
+    ...opts,
+    getData: async () => {
+      throw new Error('404');
+    }
+  });
+  expect(tile.isLoaded, 'error settles the request').toBe(true);
+  expect(tile.isFailed, 'error is a failure').toBe(true);
+
+  tile.setNeedsReload();
+  expect(tile.isFailed, 'not failed while awaiting reload').toBe(false);
+
+  await tile.loadData({...opts, getData: async () => []});
+  expect(tile.isFailed, 'successful reload clears the failure').toBe(false);
+});
+
+test('Tile2DHeader#isFailed is false for requests aborted during fetch', async () => {
+  const requestScheduler = new RequestScheduler({throttleRequests: false});
+  let onErrorCalled = false;
+  let resolveStarted: () => void = () => {};
+  const started = new Promise<void>(resolve => {
+    resolveStarted = resolve;
+  });
+
+  const tile = new Tile2DHeader({x: 0, y: 0, z: 0});
+  const loader = tile.loadData({
+    requestScheduler,
+    getRequestPriority,
+    getData: ({signal}) =>
+      new Promise((_, reject) => {
+        signal!.addEventListener('abort', () =>
+          reject(new DOMException('The request was aborted', 'AbortError'))
+        );
+        resolveStarted();
+      }),
+    onLoad: () => {},
+    onError: () => (onErrorCalled = true)
+  });
+  await started;
+  tile.abort();
+  await loader;
+
+  expect(tile.isLoaded, 'aborted request is not settled').toBe(false);
+  expect(tile.isFailed, 'aborted request is not a failure').toBe(false);
+  expect(tile.needsReload, 'aborted request is reloaded when selected again').toBe(true);
+  expect(onErrorCalled, 'onError is not called for aborted requests').toBe(false);
+});
