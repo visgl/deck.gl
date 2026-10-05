@@ -329,6 +329,17 @@ test('TerrainEffect#external terrain', async () => {
   expect(externalTerrain.renderHeightMap, 'Height map follows the terrain').toHaveBeenCalledTimes(
     1
   );
+  await lifecycle.update({
+    viewport: new WebMercatorViewport({
+      width: 800,
+      height: 600,
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 12
+    })
+  });
+  expect(externalTerrain.renderHeightMap, 'Height map follows the camera').toHaveBeenCalledTimes(2);
+  await lifecycle.update({viewport: VIEWPORT});
 
   // Draped layers
   expect(getLayerUniforms(glacierLayer).mode, 'TERRAIN_MODE.SKIP').toBe(TERRAIN_MODE.SKIP);
