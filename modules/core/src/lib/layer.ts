@@ -23,7 +23,7 @@ import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
-import {vec3} from '@math.gl/core';
+import {transformMat4} from '@math.gl/core/vec3';
 
 import {load} from '@loaders.gl/core';
 
@@ -385,7 +385,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
-      this.context?.viewport?.projectionMode === PROJECTION_MODE.EXTERNAL ||
+      this.context?.viewport?.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL ||
       coordinateSystem === 'default' ||
       coordinateSystem === 'lnglat' ||
       coordinateSystem === 'cartesian'
@@ -1568,7 +1568,7 @@ function transformPosition(this: Layer, input: number[]): [number, number, numbe
   const position: [number, number, number] = [input[0], input[1], input[2] ?? 0];
   if (this.props.modelMatrix) {
     // Transform the local copy in place without allocating a matrix for each vertex.
-    vec3.transformMat4(position, position, this.props.modelMatrix);
+    transformMat4(position, position, this.props.modelMatrix);
   }
   return this.context.viewport.preproject!(position);
 }

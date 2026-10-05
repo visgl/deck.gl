@@ -60,7 +60,10 @@ export function getOffsetOrigin(
 
   let shaderCoordinateOrigin = coordinateOrigin;
   let commonOrigin: Vec3 | undefined;
-  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
+  if (
+    viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL &&
+    coordinateSystem !== 'cartesian'
+  ) {
     coordinateSystem = 'cartesian';
     coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
   }
@@ -109,7 +112,7 @@ export function getOffsetOrigin(
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
       break;
 
-    case PROJECTION_MODE.EXTERNAL: {
+    case PROJECTION_MODE.CUSTOM_GEOSPATIAL: {
       geospatialOrigin = null;
       const scale = viewport.distanceScales.unitsPerWorldUnit;
       // Round in the units stored in position attributes, so the GPU receives
@@ -260,7 +263,10 @@ export function getUniformsFromViewport({
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   autoWrapLongitude = false
 }: ProjectProps): ProjectUniforms {
-  if (viewport.projectionMode === PROJECTION_MODE.EXTERNAL && coordinateSystem !== 'cartesian') {
+  if (
+    viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL &&
+    coordinateSystem !== 'cartesian'
+  ) {
     coordinateSystem = 'cartesian';
     coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
     modelMatrix = null;

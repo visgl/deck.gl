@@ -9,7 +9,7 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
-// External projection must not acquire a geospatial Cartesian scale override.
+// Custom geospatial projection must not acquire a geospatial Cartesian scale override.
 const normalizationScale = 512 / 40075016.6855;
 class MeterAltitudeViewport extends Viewport {
   longitude = 0;
@@ -31,7 +31,7 @@ class MeterAltitudeViewport extends Viewport {
   }
 
   get projectionMode() {
-    return PROJECTION_MODE.EXTERNAL;
+    return PROJECTION_MODE.CUSTOM_GEOSPATIAL;
   }
 
   projectPosition(position: number[]): [number, number, number] {

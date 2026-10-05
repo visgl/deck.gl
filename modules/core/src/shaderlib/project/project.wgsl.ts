@@ -301,7 +301,7 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
-      project.projectionMode == PROJECTION_MODE_EXTERNAL ||
+      project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL ||
       (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
        (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
         project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {

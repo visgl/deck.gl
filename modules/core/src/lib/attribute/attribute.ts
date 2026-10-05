@@ -58,6 +58,7 @@ export type AttributeOptions = DataColumnOptions<{
   bufferGroup?: string;
   update?: Updater;
   accessor?: Accessor<any, any> | string | string[];
+  /** Callback to map `accessor`'s return value to the attribute value. */
   transform?: ((value: any) => any) | null;
   /** Identifies the transform dependency; `projection` enables automatic position invalidation. */
   transformSource?: string;

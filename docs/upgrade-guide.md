@@ -4,7 +4,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 # Upgrade Guide
 
-## Upgrading to v9.4
+## Upgrading to v10
 
 ### Viewport distance scales
 
@@ -14,6 +14,8 @@ For applications and custom viewport subclasses using `distanceScales` or `getDi
 - `degreesPerUnit` is removed. Divide by the corresponding component of `unitsPerWorldUnit` instead.
 - `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
 - `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
+
+## Upgrading to v9.4
 
 ### pydeck lighting
 

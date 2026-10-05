@@ -295,7 +295,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
-    project.projectionMode == PROJECTION_MODE_EXTERNAL ||
+    project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL ||
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {

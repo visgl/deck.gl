@@ -29,7 +29,7 @@ class ProjectionViewport extends Viewport {
     return this.signature;
   }
   get projectionMode() {
-    return this.preproject ? PROJECTION_MODE.EXTERNAL : PROJECTION_MODE.IDENTITY;
+    return this.preproject ? PROJECTION_MODE.CUSTOM_GEOSPATIAL : PROJECTION_MODE.IDENTITY;
   }
   projectPosition(position: number[]): [number, number, number] {
     return this.preproject ? this.preproject(position) : super.projectPosition(position);
