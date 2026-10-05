@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {equals, config, Vector3} from '@math.gl/core';
-import {WebMercatorViewport} from 'deck.gl';
+import {MapView, WebMercatorViewport} from 'deck.gl';
 import {Matrix4} from '@math.gl/core';
 
 // Adjust sensitivity of math.gl's equals
@@ -308,3 +308,87 @@ function getCulling(p, planes) {
   }
   return outDir;
 }
+
+// Regression for visgl/loaders.gl#2508. Heights are relative to the WGS84 ellipsoid.
+test('WebMercatorViewport#minimumElevation fixes top-down clipping without moving the camera', () => {
+  const options = {longitude: -122.4, latitude: 37.8, width: 1000, height: 800, zoom: 15};
+  const ground = [-122.4, 37.8, -30];
+  const topDown = new WebMercatorViewport({...options, pitch: 0});
+  const tilted = new WebMercatorViewport({...options, pitch: 1});
+  const extended = new MapView({minimumElevation: -500}).makeViewport({
+    width: options.width,
+    height: options.height,
+    viewState: {...options, pitch: 0}
+  })!;
+
+  expect(topDown.project(ground)[2]).toBeGreaterThan(1);
+  expect(tilted.project(ground)[2]).toBeLessThan(1);
+  expect(extended.project(ground)[2]).toBeLessThan(1);
+  expect(getCulling(topDown.projectPosition(ground), topDown.getFrustumPlanes())).toBe('far');
+  expect(getCulling(extended.projectPosition(ground), extended.getFrustumPlanes())).toBeNull();
+  expect(extended.project(ground).slice(0, 2)).toEqual(topDown.project(ground).slice(0, 2));
+  expect(extended.cameraPosition).toEqual(topDown.cameraPosition);
+  expect(extended.viewMatrix).toEqual(topDown.viewMatrix);
+  expect(extended.getFrustumPlanes().near).toEqual(topDown.getFrustumPlanes().near);
+});
+
+test.each([
+  {zoom: 12, pitch: 0, elevation: 0, orthographic: false},
+  {zoom: 18, pitch: 0, elevation: 0, orthographic: false},
+  {zoom: 21, pitch: 0, elevation: -30, orthographic: false},
+  {zoom: 15, pitch: 1, elevation: -30, orthographic: false},
+  {zoom: 18, pitch: 45, elevation: 400, orthographic: false},
+  {zoom: 18, pitch: 0, elevation: -30, orthographic: true},
+  {zoom: 18, pitch: 45, elevation: 0, orthographic: true}
+])(
+  'WebMercatorViewport#minimumElevation includes the floor at $zoom/$pitch/$elevation/$orthographic',
+  options => {
+    const viewport = new WebMercatorViewport({
+      ...options,
+      longitude: -122.4,
+      latitude: 37.8,
+      width: 1000,
+      height: 800,
+      bearing: 35,
+      padding: {top: 120, left: 80},
+      position: [0, 0, options.elevation],
+      minimumElevation: -500
+    });
+    for (const pixel of [
+      [100, 160],
+      [900, 160],
+      [100, 640],
+      [900, 640]
+    ]) {
+      const ground = viewport.unproject(pixel, {targetZ: -500});
+      const projected = viewport.project(ground);
+      expect(projected[0]).toBeGreaterThan(0);
+      expect(projected[0]).toBeLessThan(viewport.width);
+      expect(projected[1]).toBeGreaterThan(0);
+      expect(projected[1]).toBeLessThan(viewport.height);
+      expect(projected[2]).toBeGreaterThan(0);
+      expect(projected[2]).toBeLessThan(1);
+    }
+  }
+);
+
+test('WebMercatorViewport#minimumElevation preserves defaults and explicit projection overrides', () => {
+  const options = {longitude: -122.4, latitude: 37.8, width: 1000, height: 800, zoom: 15};
+  const baseline = new WebMercatorViewport(options);
+  expect(new WebMercatorViewport({...options, minimumElevation: 0}).projectionMatrix).toEqual(
+    baseline.projectionMatrix
+  );
+  expect(new WebMercatorViewport({...options, minimumElevation: 100}).projectionMatrix).toEqual(
+    baseline.projectionMatrix
+  );
+  expect(
+    new WebMercatorViewport({...options, farZ: 4, minimumElevation: -500}).projectionMatrix
+  ).toEqual(new WebMercatorViewport({...options, farZ: 4}).projectionMatrix);
+  expect(
+    new WebMercatorViewport({
+      ...options,
+      projectionMatrix: baseline.projectionMatrix,
+      minimumElevation: -500
+    }).projectionMatrix
+  ).toEqual(baseline.projectionMatrix);
+});

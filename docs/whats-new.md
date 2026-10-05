@@ -2,6 +2,10 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+- [`MapView`](./api-reference/core/map-view.md#minimumelevation) and `WebMercatorViewport` accept `minimumElevation` to include below-ellipsoid terrain in the automatic far clipping range. The Google 3D Tiles example uses this option to keep negative-height terrain visible in top-down views.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

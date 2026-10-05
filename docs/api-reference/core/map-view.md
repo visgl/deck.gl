@@ -34,6 +34,14 @@ Scaler for the near plane, 1 unit equals to the height of the viewport. Default 
 
 Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter.
 
+#### `minimumElevation` (number, optional) {#minimumelevation}
+
+Lowest elevation, in meters, used to extend the automatic far clipping plane below elevation zero. Default `0`. Positive values retain the default sea-level clipping range.
+
+Use a negative value when rendering terrain or 3D Tiles below the WGS84 ellipsoid, for example `new MapView({minimumElevation: -500})`. The range adapts to zoom, pitch, viewport size, and camera target elevation. This changes the clipping range without moving the camera or geometry. Choose the shallowest floor that covers your data to retain depth precision; this is not a terrain-height estimate or automatic terrain following.
+
+`farZMultiplier` still applies to the calculated range. An explicit `farZ` in the view state or a custom `projectionMatrix` takes precedence. This setting controls standalone `MapView` projections; a host map controls clipping when using an interleaved map overlay.
+
 #### `projectionMatrix` (number[16], optional) {#projectionmatrix}
 
 Projection matrix.
