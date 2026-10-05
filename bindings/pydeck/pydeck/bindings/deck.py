@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 
@@ -271,12 +270,7 @@ class Deck(JSONMixin):
         str
             Returns absolute path of the file
         """
-        if type(self).to_json is JSONMixin.to_json:
-            deck_json = serialize(self, compact=True)
-        else:
-            # An override returns a string, so compact it without a second
-            # trip through the serializer.
-            deck_json = json.dumps(json.loads(self.to_json()), sort_keys=True, separators=(",", ":"))
+        deck_json = serialize(self, compact=True)
         f = deck_to_html(
             deck_json,
             mapbox_key=self.mapbox_key,
