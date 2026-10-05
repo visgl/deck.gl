@@ -182,7 +182,7 @@ for (const metersPerZUnit of [1, 0.3048]) {
         getDistanceScale: () => [0.25, 1]
       });
       const input = [200, 300, 50];
-      expect(viewport.projectionMode).toBe(PROJECTION_MODE.EXTERNAL);
+      expect(viewport.projectionMode).toBe(PROJECTION_MODE.CUSTOM_GEOSPATIAL);
       expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual(
         viewport.distanceScales.unitsPerWorldUnit
       );

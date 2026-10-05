@@ -120,7 +120,7 @@ test('Layer position precision follows projection mode, not preproject availabil
   for (const external of [false, true]) {
     const viewport = new ProjectionViewport('precision', !external);
     vi.spyOn(viewport, 'projectionMode', 'get').mockReturnValue(
-      external ? PROJECTION_MODE.EXTERNAL : PROJECTION_MODE.IDENTITY
+      external ? PROJECTION_MODE.CUSTOM_GEOSPATIAL : PROJECTION_MODE.IDENTITY
     );
     const manager = createManager(viewport);
     const layer = new PositionLayer({coordinateSystem: 'meter-offsets'});

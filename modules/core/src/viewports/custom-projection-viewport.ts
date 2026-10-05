@@ -180,7 +180,7 @@ export default class CustomProjectionViewport extends Viewport {
     return this.signature;
   }
   get projectionMode(): number {
-    return PROJECTION_MODE.EXTERNAL;
+    return PROJECTION_MODE.CUSTOM_GEOSPATIAL;
   }
 
   /** Converts XY in map meters (toCrs) to common-space XY by applying the fixed scale.
