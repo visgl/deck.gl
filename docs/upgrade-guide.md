@@ -60,6 +60,19 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 
 Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
 
+### PathStyleExtension
+
+`highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
+
+```js
+// Before
+new PathStyleExtension({highPrecisionDash: true});
+// After
+new PathStyleExtension({dashMode: 'path'});
+```
+
+See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
+
 ## Upgrading to v9.3
 
 Upgraded dependencies to [luma.gl v9.3](https://luma.gl/docs/upgrade-guide) and [loaders.gl v4.4](https://loaders.gl/docs/upgrade-guide). Your app may be affected if it contains custom layers.
