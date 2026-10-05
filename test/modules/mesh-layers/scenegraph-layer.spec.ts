@@ -133,6 +133,34 @@ test('ScenegraphLayer#tests', () => {
   testLayer({Layer: ScenegraphLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
+test('ScenegraphLayer completes empty scenes without completing unloaded scenes', () => {
+  const onFirstDraw = vi.fn();
+  testLayer({
+    Layer: ScenegraphLayer,
+    testCases: [
+      {
+        props: {data: [{position: [0, 0, 0]}], scenegraph: null, onFirstDraw},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.isLoaded).toBe(false);
+          expect(onFirstDraw).not.toHaveBeenCalled();
+        }
+      },
+      {
+        updateProps: {scenegraph: new GroupNode([])},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.isLoaded).toBe(true);
+          expect(layer.getModels()).toHaveLength(0);
+          expect(layer.state.firstDrawSignaled).toBe(true);
+          expect(onFirstDraw).toHaveBeenCalledOnce();
+          layer.draw({context: layer.context});
+          expect(onFirstDraw).toHaveBeenCalledOnce();
+        }
+      }
+    ],
+    onError: error => expect(error).toBeFalsy()
+  });
+});
+
 test('ScenegraphLayer keeps fallback coverage until every model draws', () => {
   const onFirstDraw = vi.fn();
   testLayer({
