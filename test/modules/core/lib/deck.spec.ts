@@ -75,48 +75,55 @@ function finalizeOwnedDeck(deck: Deck): void {
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
-webglTest.each([
+const gpuDebugTestCases = [
   {name: 'default', props: {}, expected: false},
   {name: 'enabled', props: {debug: true}, expected: true},
   {name: 'device override off', props: {debug: true, deviceProps: {debug: false}}, expected: false},
   {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true}
-])('Deck#GPU debug $name', async ({props, expected}) => {
+];
+
+webglTest.each(gpuDebugTestCases)('Deck#GPU debug $name', async ({props, expected}) => {
   const defaultDebug = Device.defaultProps.debug;
-  Device.defaultProps.debug = !expected;
-  const deck = new Deck({
-    width: 1,
-    height: 1,
-    viewState: {longitude: 0, latitude: 0, zoom: 0},
-    ...props
-  });
+  let deck: Deck | undefined;
   try {
+    Device.defaultProps.debug = !expected;
+    deck = new Deck({
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      ...props
+    });
     await waitForRender(deck);
     expect(deck.device!.props.debug).toBe(expected);
   } finally {
     Device.defaultProps.debug = defaultDebug;
-    finalizeOwnedDeck(deck);
+    if (deck) finalizeOwnedDeck(deck);
   }
 });
 
-webglTest('Deck#GPU debug forwards to attached context', async () => {
-  const defaultDebug = Device.defaultProps.debug;
-  Device.defaultProps.debug = true;
-  const canvas = document.createElement('canvas');
-  const deck = new Deck({
-    gl: canvas.getContext('webgl2'),
-    debug: false,
-    width: 1,
-    height: 1,
-    viewState: {longitude: 0, latitude: 0, zoom: 0}
-  });
-  try {
-    await waitForRender(deck);
-    expect(deck.device!.props.debug).toBe(false);
-  } finally {
-    Device.defaultProps.debug = defaultDebug;
-    finalizeOwnedDeck(deck);
+webglTest.each(gpuDebugTestCases)(
+  'Deck#GPU debug $name forwards to attached context',
+  async ({props, expected}) => {
+    const defaultDebug = Device.defaultProps.debug;
+    let deck: Deck | undefined;
+    try {
+      Device.defaultProps.debug = !expected;
+      const canvas = document.createElement('canvas');
+      deck = new Deck({
+        gl: canvas.getContext('webgl2'),
+        width: 1,
+        height: 1,
+        viewState: {longitude: 0, latitude: 0, zoom: 0},
+        ...props
+      });
+      await waitForRender(deck);
+      expect(deck.device!.props.debug).toBe(expected);
+    } finally {
+      Device.defaultProps.debug = defaultDebug;
+      if (deck) finalizeOwnedDeck(deck);
+    }
   }
-});
+);
 
 test('Deck#constructor', async () => {
   const callbacks = {
