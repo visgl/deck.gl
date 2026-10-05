@@ -252,6 +252,13 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   drawPickingColors?: boolean;
 };
 
+/** A pending `Deck.waitForFrameReady` call */
+type FrameReadyWaiter = {
+  /** Called after renders, resolves the call if the scene is settled */
+  onRender: () => void;
+  reject: (error: Error) => void;
+};
+
 const defaultProps: DeckProps = {
   id: '',
   width: '100%',
@@ -369,6 +376,9 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     gpuMemory: 0
   };
   private _metricsCounter: number = 0;
+  /** Pending `waitForFrameReady` calls */
+  private _frameReadyWaiters = new Set<FrameReadyWaiter>();
+  private _isFrameReadyCheckScheduled = false;
   private _hoverPickSequence: number = 0;
   private _pointerDownPickSequence: number = 0;
 
@@ -460,6 +470,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Stop rendering and dispose all resources */
   finalize() {
     this._restoreDeviceResizeHandler();
+
+    for (const waiter of this._frameReadyWaiters) {
+      waiter.reject(new Error('Deck is finalized'));
+    }
 
     this.animationLoop?.stop();
     this.animationLoop?.destroy();
@@ -641,6 +655,25 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   }
 
   /**
+   * Returns `true` while any view state, layer prop or attribute transition is in progress.
+   * Transitions advance once per animation frame, so this can be checked after each render.
+   */
+  hasActiveTransitions(): boolean {
+    if (!this.layerManager || !this.viewManager) {
+      return false;
+    }
+    const controllers = Object.values(this.viewManager.controllers);
+    return (
+      controllers.some(controller => controller?.isTransitioning()) ||
+      this.layerManager
+        .getLayers()
+        .some(
+          layer => layer.hasUniformTransition() || layer.getAttributeManager()?.isTransitioning()
+        )
+    );
+  }
+
+  /**
    * Redraw the GL context
    * @param reason If not provided, only redraw if deemed necessary. Otherwise redraw regardless of internal states.
    * @returns
@@ -665,6 +698,48 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     } else {
       this._drawLayers(redrawReason);
     }
+  }
+
+  /**
+   * Returns a Promise that resolves once a frame has been rendered with the scene settled:
+   * all layers are loaded, no layer update, transition or redraw is pending.
+   * With `_animate`, the pending redraw check is skipped.
+   * Rejects when the timeout elapses or the Deck is finalized.
+   */
+  waitForFrameReady({timeout = 5000}: {timeout?: number} = {}): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.animationLoop) {
+        reject(new Error('Deck is finalized'));
+        return;
+      }
+      // A non-animated Deck has drawn every change once no redraw is pending
+      if (!this.props._animate && this._isSceneSettled()) {
+        resolve();
+        return;
+      }
+
+      const waiter: FrameReadyWaiter = {
+        onRender: () => {
+          if (this._isSceneSettled()) {
+            removeWaiter();
+            resolve();
+          }
+        },
+        reject: error => {
+          removeWaiter();
+          reject(error);
+        }
+      };
+      const timer = setTimeout(
+        () => waiter.reject(new Error('waitForFrameReady timed out')),
+        timeout
+      );
+      const removeWaiter = () => {
+        clearTimeout(timer);
+        this._frameReadyWaiters.delete(waiter);
+      };
+      this._frameReadyWaiters.add(waiter);
+    });
   }
 
   /** Flag indicating that the Deck instance has initialized its resources and it's safe to call public methods. */
@@ -1793,6 +1868,35 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this.props.onAfterRender({device, gl});
+    this._scheduleFrameReadyCheck();
+  }
+
+  /** Returns `true` if the last render reflects all loaded data, updates and transitions */
+  private _isSceneSettled(): boolean {
+    return Boolean(
+      this.layerManager &&
+        this.layerManager.getLayers().every(layer => layer.isLoaded) &&
+        !this.layerManager.needsUpdate() &&
+        !this.hasActiveTransitions() &&
+        (this.props._animate || !this.needsRedraw({clearRedrawFlags: false}))
+    );
+  }
+
+  /**
+   * Checks pending `waitForFrameReady` calls once the current task's renders are done.
+   * Interleaved basemap integrations draw several layer groups per frame.
+   */
+  private _scheduleFrameReadyCheck(): void {
+    if (this._frameReadyWaiters.size === 0 || this._isFrameReadyCheckScheduled) {
+      return;
+    }
+    this._isFrameReadyCheckScheduled = true;
+    queueMicrotask(() => {
+      this._isFrameReadyCheckScheduled = false;
+      for (const waiter of this._frameReadyWaiters) {
+        waiter.onRender();
+      }
+    });
   }
 
   // Callbacks
