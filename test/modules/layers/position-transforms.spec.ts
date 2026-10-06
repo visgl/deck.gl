@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
   Viewport,
@@ -149,8 +149,42 @@ test('BitmapLayer transforms tessellated vertices without mutating the input mes
 });
 
 test('Instanced meshes retain meter-sized geometry around preprojected anchors', () => {
-  for (const coordinateSystem of ['default', 'cartesian', 'meter-offsets', 'lnglat']) {
+  for (const coordinateSystem of ['default', 'meter-offsets', 'lnglat']) {
     expect(shouldComposeModelMatrix(createViewport('custom', true), coordinateSystem)).toBe(false);
   }
+  expect(shouldComposeModelMatrix(createViewport('custom', true), 'cartesian')).toBe(true);
   expect(shouldComposeModelMatrix(new Viewport(), 'cartesian')).toBe(true);
+});
+
+test('Cartesian instanced meshes compose model matrices in custom projections', () => {
+  const manager = new LayerManager(device, {viewport: createViewport('custom', true)});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const layer = new SimpleMeshLayer({
+    id: 'cartesian-mesh',
+    data: [[10, 20, 0]],
+    getPosition: p => p,
+    coordinateSystem: 'cartesian',
+    modelMatrix: new Matrix4().rotateZ(Math.PI / 2).scale([2, 3, 1]),
+    mesh: {attributes: {POSITION: {value: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]), size: 3}}}
+  });
+  try {
+    manager.setLayers([layer]);
+    expect(
+      Array.from(layer.getAttributeManager()!.attributes.instancePositions.value!.slice(0, 3))
+    ).toEqual([10, 20, 0]);
+    const model = layer.state.model!;
+    vi.spyOn(model, 'draw').mockReturnValue(true);
+    const setProps = vi.spyOn(model.shaderInputs, 'setProps');
+    layer.draw({uniforms: {}});
+    expect(setProps).toHaveBeenCalledWith({
+      simpleMesh: expect.objectContaining({composeModelMatrix: true})
+    });
+  } finally {
+    vi.restoreAllMocks();
+    manager.finalize();
+  }
 });

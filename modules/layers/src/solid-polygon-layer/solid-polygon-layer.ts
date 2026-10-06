@@ -349,8 +349,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   protected updateGeometry({props, oldProps, changeFlags}: UpdateParameters<this>) {
+    const {viewport} = this.context;
     const projectionChanged =
       changeFlags.projectionChanged ||
+      props.coordinateSystem !== oldProps.coordinateSystem ||
       (this.context.viewport.preproject && props.modelMatrix !== oldProps.modelMatrix);
     const geometryConfigChanged =
       changeFlags.dataChanged ||
@@ -371,7 +373,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         getGeometry: props.getPolygon,
         transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
-        wrapLongitude: props.wrapLongitude,
+        // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
+        wrapLongitude: props.wrapLongitude && !viewport.preproject,
         // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
         fp64: this.use64bitPositions(),

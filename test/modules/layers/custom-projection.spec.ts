@@ -180,7 +180,7 @@ test('generated paths and polygon fills project without mutating input geometry'
   }
 });
 
-test('WebGPU generated positions use preprojection before packing high/low neighbors', async ({
+test('WebGPU generated positions use preprojection for current and next vertices', async ({
   skip
 }) => {
   const webgpuDevice = await getWebGPUTestDevice();
@@ -212,8 +212,10 @@ test('WebGPU generated positions use preprojection before packing high/low neigh
     expect(pathPositions[4]).toBeGreaterThanOrEqual(60 - 1e-5);
     const attributes = polygon.getAttributeManager()!.attributes;
     expect(attributes.vertexPositions.value![0]).toBeGreaterThanOrEqual(110 - 1e-5);
-    expect(attributes.nextVertexPositions.value![0]).toBeGreaterThanOrEqual(110 - 1e-5);
-    expect(attributes.nextVertexPositions.value![0]).toBeLessThanOrEqual(120 + 1e-5);
+    expect(attributes.vertexPositions.value![3]).toBeGreaterThanOrEqual(110 - 1e-5);
+    expect(attributes.vertexPositions.value![3]).toBeLessThanOrEqual(120 + 1e-5);
+    const positionBuffers = attributes.vertexPositions.getValue();
+    expect(positionBuffers.nextVertexPositions).toBe(positionBuffers.vertexPositions);
   } finally {
     manager.finalize();
   }
@@ -278,6 +280,184 @@ test('geometry layers retessellate all rows on projection and model matrix chang
         expect(values[offset]).toBeCloseTo(sources[j][offset] + 150, 6);
       }
     }
+  } finally {
+    manager.finalize();
+  }
+});
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} disables longitude wrapping with preprojection`, () => {
+    for (const fromCrs of [
+      'WGS84',
+      'EPSG:4326',
+      '+proj=longlat +datum=WGS84',
+      '+proj=utm +zone=10 +units=m',
+      'EPSG:32610',
+      'unknown'
+    ]) {
+      const spherical = ['WGS84', 'EPSG:4326', '+proj=longlat +datum=WGS84'].includes(fromCrs);
+      const viewport = new CustomProjectionViewport({
+        ...options,
+        fromCrs,
+        projection: {
+          forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
+          inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
+        }
+      });
+      const manager = new LayerManager(device, {viewport});
+      manager.setProps({
+        onError: error => {
+          throw error;
+        }
+      });
+      const data = spherical
+        ? [
+            [
+              [170, 0],
+              [-170, 0],
+              [-170, 10],
+              [170, 10],
+              [170, 0]
+            ]
+          ]
+        : [
+            [
+              [500000, 4000000],
+              [500100, 4000000],
+              [500100, 4000100],
+              [500000, 4000100],
+              [500000, 4000000]
+            ]
+          ];
+      try {
+        for (const coordinateSystem of ['default', 'cartesian'] as const) {
+          const layers = [false, true].map(
+            wrapLongitude =>
+              new LayerType({
+                id: `${LayerType.layerName}-${wrapLongitude}-${coordinateSystem}`,
+                data,
+                getPath: p => p,
+                getPolygon: p => p,
+                coordinateSystem,
+                wrapLongitude
+              })
+          );
+          manager.setLayers(layers);
+          const positions = layers.map(layer =>
+            Array.from(
+              layer
+                .getAttributeManager()!
+                .attributes.vertexPositions.value!.slice(0, layer.state.numInstances * 3)
+            )
+          );
+          expect(positions[1]).toEqual(positions[0]);
+        }
+      } finally {
+        manager.finalize();
+      }
+    }
+  });
+
+  test(`${LayerType.layerName} rebuilds all rows when coordinateSystem changes`, () => {
+    const manager = new LayerManager(device, {
+      viewport: new CustomProjectionViewport({
+        ...options,
+        projection: {
+          forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
+          inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]
+        }
+      })
+    });
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const data = [
+      [
+        [10, 10],
+        [20, 10],
+        [20, 20],
+        [10, 10]
+      ],
+      [
+        [30, 30],
+        [40, 30],
+        [40, 40],
+        [30, 30]
+      ]
+    ];
+    let layer = new LayerType({
+      id: 'switch-coordinate-system',
+      data,
+      getPath: p => p,
+      getPolygon: p => p
+    });
+    try {
+      manager.setLayers([layer]);
+      const original = Array.from(layer.getAttributeManager()!.attributes.vertexPositions.value!);
+      for (const coordinateSystem of ['cartesian', 'default'] as const) {
+        // A coordinate-system switch must rebuild even rows outside a simultaneous data diff.
+        layer = layer.clone({
+          coordinateSystem,
+          data: data.slice(),
+          _dataDiff: () => [{startRow: 0, endRow: 1}]
+        });
+        manager.setLayers([layer]);
+        const positions = layer.getAttributeManager()!.attributes.vertexPositions.value!;
+        for (let row = 0; row < data.length; row++) {
+          const offset = layer.state.startIndices[row] * 3;
+          expect(positions[offset]).toBeCloseTo(
+            original[offset] - (coordinateSystem === 'cartesian' ? 100 : 0),
+            6
+          );
+          expect(positions[offset + 1]).toBeCloseTo(
+            original[offset + 1] - (coordinateSystem === 'cartesian' ? 50 : 0),
+            6
+          );
+        }
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+test('WebGPU binary polygons project every subdivided vertex', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) return skip();
+  const viewport = new CustomProjectionViewport({
+    ...options,
+    resolution: 5,
+    projection: {
+      forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
+      inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]
+    }
+  });
+  const manager = new LayerManager(webgpuDevice, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const source = new Float64Array([10, 10, 20, 10, 20, 20, 10, 10]);
+  const layer = new SolidPolygonLayer({
+    id: 'subdivided-binary-polygon',
+    data: {length: 1, startIndices: [0, 4], attributes: {getPolygon: {value: source, size: 2}}},
+    positionFormat: 'XY',
+    _normalize: true
+  });
+  try {
+    manager.setLayers([layer]);
+    expect(layer.state.numInstances).toBeGreaterThan(source.length / 2);
+    const positions = layer.getAttributeManager()!.attributes.vertexPositions.value!;
+    for (let i = 0; i < layer.state.numInstances * 3; i += 3) {
+      expect(positions[i]).toBeGreaterThanOrEqual(110 - 1e-5);
+      expect(positions[i]).toBeLessThanOrEqual(120 + 1e-5);
+      expect(positions[i + 1]).toBeGreaterThanOrEqual(60 - 1e-5);
+      expect(positions[i + 1]).toBeLessThanOrEqual(70 + 1e-5);
+    }
+    expect(Array.from(source)).toEqual([10, 10, 20, 10, 20, 20, 10, 10]);
   } finally {
     manager.finalize();
   }

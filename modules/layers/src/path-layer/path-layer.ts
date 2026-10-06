@@ -374,6 +374,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath);
     const geometryConfigurationChanged =
       changeFlags.projectionChanged ||
+      props.coordinateSystem !== oldProps.coordinateSystem ||
       (viewport.preproject && props.modelMatrix !== oldProps.modelMatrix) ||
       getPathChanged ||
       props._pathType !== oldProps._pathType ||
@@ -395,7 +396,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         getGeometry: props.getPath,
         transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
-        wrapLongitude: props.wrapLongitude,
+        // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
+        wrapLongitude: props.wrapLongitude && !viewport.preproject,
         // TODO - move the flag out of the viewport
         resolution: viewport.resolution,
         // A partial data diff is only valid while normalization inputs remain unchanged.
