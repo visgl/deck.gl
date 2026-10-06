@@ -435,6 +435,11 @@ test('TerrainEffect#external terrain', async () => {
   expect(getLayerUniforms(summitLayer).mode, 'TERRAIN_MODE.USE_HEIGHT_MAP').toBe(
     TERRAIN_MODE.USE_HEIGHT_MAP
   );
+  expect(terrainEffect.terrainCovers.size, 'Terrain cover of the ground').toBe(1);
+
+  // External terrain again, which has no use for the terrain covers
+  await lifecycle.update({layers: [externalTerrainLayer, summitLayer, glacierLayer]});
+  expect(terrainEffect.terrainCovers.size, 'Terrain covers are released').toBe(0);
 
   // Without terrain, layers draw as usual
   await lifecycle.update({layers: [summitLayer, glacierLayer]});

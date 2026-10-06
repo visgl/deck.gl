@@ -119,6 +119,8 @@ export class TerrainEffect implements Effect {
       } else {
         this._updateExternalHeightMap(this.externalTerrain, opts.layers, viewport);
         this._updateExternalDrape(this.externalTerrain, opts, viewport);
+        // Covers of terrain layers that deck.gl drew before
+        this._pruneTerrainCovers();
       }
       return;
     }
