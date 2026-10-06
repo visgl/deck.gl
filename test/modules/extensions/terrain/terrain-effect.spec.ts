@@ -295,7 +295,7 @@ test('TerrainEffect#external terrain', async () => {
   const summitLayer = createSummitLayer();
   const glacierLayer = createGlacierLayer();
 
-  const externalTerrainLayer = new ExternalTerrainLayer({id: 'external-terrain', externalTerrain});
+  let externalTerrainLayer = new ExternalTerrainLayer({id: 'external-terrain', externalTerrain});
 
   const lifecycle = new LifecycleTester();
   await lifecycle.update({
@@ -379,6 +379,37 @@ test('TerrainEffect#external terrain', async () => {
     externalTerrain.renderHeightMap,
     'Height map covers the layers of every group'
   ).not.toHaveBeenCalled();
+
+  // A host that passes a new object for the same terrain when it updates the terrain layer
+  externalTerrain.renderHeightMap.mockClear();
+  externalTerrain.setDrapeRenderer.mockClear();
+  externalTerrain.onDrapeChange.mockClear();
+  await lifecycle.update({
+    layers: [
+      new ExternalTerrainLayer({id: 'external-terrain', externalTerrain: {...externalTerrain}}),
+      summitLayer,
+      hutLayer,
+      glacierLayer
+    ]
+  });
+  expect(externalTerrain.setDrapeRenderer, 'Draped layers stay').not.toHaveBeenCalledWith(null);
+  expect(externalTerrain.setDrapeRenderer).toHaveBeenLastCalledWith(renderDrape);
+  expect(externalTerrain.onDrapeChange).not.toHaveBeenCalled();
+  expect(externalTerrain.renderHeightMap, 'Height map is up to date').not.toHaveBeenCalled();
+
+  // Another terrain layer stands for other terrain
+  await lifecycle.update({
+    layers: [
+      new ExternalTerrainLayer({id: 'other-terrain', externalTerrain: {...externalTerrain}}),
+      summitLayer,
+      hutLayer,
+      glacierLayer
+    ]
+  });
+  expect(externalTerrain.setDrapeRenderer, 'Draped layers move').toHaveBeenCalledWith(null);
+  expect(externalTerrain.onDrapeChange).toHaveBeenCalledTimes(1);
+  externalTerrainLayer = new ExternalTerrainLayer({id: 'external-terrain', externalTerrain});
+  await lifecycle.update({layers: [externalTerrainLayer, summitLayer, hutLayer, glacierLayer]});
 
   // Terrain layers take precedence
   externalTerrain.renderHeightMap.mockClear();

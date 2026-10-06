@@ -106,10 +106,7 @@ export class TerrainEffect implements Effect {
       const externalTerrainLayer = allTerrainLayers.every(getExternalTerrain)
         ? allTerrainLayers[0]
         : undefined;
-      this._setExternalTerrain(
-        externalTerrainLayer ? getExternalTerrain(externalTerrainLayer) : null
-      );
-      this.externalTerrainLayerId = externalTerrainLayer?.id ?? null;
+      this._setExternalTerrainLayer(externalTerrainLayer);
       this.hasTerrain = allTerrainLayers.length > 0;
     }
 
@@ -191,7 +188,7 @@ export class TerrainEffect implements Effect {
   }
 
   cleanup({deck}: EffectContext): void {
-    this._setExternalTerrain(null);
+    this._setExternalTerrainLayer();
 
     this.pickingSurface?.delete();
     this.pickingSurface = undefined;
@@ -241,15 +238,26 @@ export class TerrainEffect implements Effect {
     });
   }
 
-  /** Hands the draped layers to new external terrain, and takes them back from the previous one */
-  private _setExternalTerrain(externalTerrain: ExternalTerrain | null) {
-    if (externalTerrain === this.externalTerrain) {
+  /**
+   * Hands the draped layers to the external terrain of a new terrain layer, and takes them back from
+   * the previous one. A layer that is updated stands for the same terrain, also when it gets a new
+   * `externalTerrain` object.
+   */
+  private _setExternalTerrainLayer(layer?: Layer) {
+    const externalTerrain = layer ? getExternalTerrain(layer) : null;
+    const previous = this.externalTerrain;
+    const isSameTerrain =
+      previous !== null && externalTerrain !== null && layer?.id === this.externalTerrainLayerId;
+    this.externalTerrainLayerId = layer?.id ?? null;
+    if (externalTerrain === previous) {
       return;
     }
-    this.externalTerrain?.setDrapeRenderer?.(null);
     this.externalTerrain = externalTerrain;
-    this.externalHeightMapId = null;
-    this.externalDrape = null;
+    if (!isSameTerrain) {
+      previous?.setDrapeRenderer?.(null);
+      this.externalHeightMapId = null;
+      this.externalDrape = null;
+    }
     externalTerrain?.setDrapeRenderer?.(this._renderExternalDrape);
   }
 
