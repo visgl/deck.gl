@@ -215,31 +215,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
-        ...(isWebGPU
-          ? {}
-          : {
-              shaderAttributes: {
-                nextVertexPositions: {
-                  vertexOffset: 1
-                }
-              }
-            })
-      },
-      ...(isWebGPU
-        ? {
-            // WebGPU cannot express WebGL's one-vertex offset view in a buffer layout.
-            nextVertexPositions: {
-              size: 3,
-              type: 'float64',
-              stepMode: 'dynamic',
-              fp64: this.use64bitPositions(),
-              transition: false,
-              // eslint-disable-next-line @typescript-eslint/unbound-method
-              update: this.calculateNextPositions,
-              noAlloc
-            }
+        shaderAttributes: {
+          // luma.gl binds the same buffer at a shifted offset on WebGPU.
+          nextVertexPositions: {
+            vertexOffset: 1
           }
-        : {}),
+        }
+      },
       [isWebGPU ? 'vertexValid' : 'instanceVertexValid']: {
         size: 1,
         type: isWebGPU ? 'float32' : 'uint16',
@@ -519,34 +501,5 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       this.context.device.type === 'webgpu' && vertexValid
         ? Float32Array.from(vertexValid)
         : vertexValid;
-  }
-
-  protected calculateNextPositions(attribute) {
-    const {polygonTesselator} = this.state;
-    const attributes = this.getAttributeManager()!.getAttributes();
-    const positions = attributes.vertexPositions.value;
-    const vertexValid =
-      (this.props.data as any).attributes?.instanceVertexValid?.value ||
-      attributes.vertexValid?.value ||
-      polygonTesselator.get('vertexValid');
-    attribute.startIndices = polygonTesselator.vertexStarts;
-
-    if (!positions) {
-      attribute.value = positions;
-      return;
-    }
-
-    const vertexCount = positions.length / 3;
-    const nextPositions = new (positions.constructor as typeof Float32Array)(positions.length);
-    for (let vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
-      const sourceIndex = vertexIndex * 3;
-      const nextSourceIndex =
-        vertexValid?.[vertexIndex] && vertexIndex + 1 < vertexCount ? sourceIndex + 3 : sourceIndex;
-      for (let componentIndex = 0; componentIndex < 3; componentIndex++) {
-        nextPositions[sourceIndex + componentIndex] = positions[nextSourceIndex + componentIndex];
-      }
-    }
-
-    attribute.value = nextPositions;
   }
 }
