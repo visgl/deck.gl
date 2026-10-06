@@ -397,17 +397,21 @@ test('TerrainEffect#external terrain', async () => {
   expect(externalTerrain.onDrapeChange).not.toHaveBeenCalled();
   expect(externalTerrain.renderHeightMap, 'Height map is up to date').not.toHaveBeenCalled();
 
-  // Another terrain layer stands for other terrain
+  // Other terrain in the same layer
+  const otherTerrain = {...createExternalTerrain(), id: 'other-terrain'};
   await lifecycle.update({
     layers: [
-      new ExternalTerrainLayer({id: 'other-terrain', externalTerrain: {...externalTerrain}}),
+      new ExternalTerrainLayer({id: 'external-terrain', externalTerrain: otherTerrain}),
       summitLayer,
       hutLayer,
       glacierLayer
     ]
   });
-  expect(externalTerrain.setDrapeRenderer, 'Draped layers move').toHaveBeenCalledWith(null);
-  expect(externalTerrain.onDrapeChange).toHaveBeenCalledTimes(1);
+  expect(externalTerrain.setDrapeRenderer, 'Previous terrain lets go').toHaveBeenLastCalledWith(
+    null
+  );
+  expect(otherTerrain.setDrapeRenderer).toHaveBeenLastCalledWith(renderDrape);
+  expect(otherTerrain.onDrapeChange).toHaveBeenLastCalledWith([glacierLayer]);
   externalTerrainLayer = new ExternalTerrainLayer({id: 'external-terrain', externalTerrain});
   await lifecycle.update({layers: [externalTerrainLayer, summitLayer, hutLayer, glacierLayer]});
 

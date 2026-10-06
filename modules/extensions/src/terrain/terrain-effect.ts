@@ -106,7 +106,10 @@ export class TerrainEffect implements Effect {
       const externalTerrainLayer = allTerrainLayers.every(getExternalTerrain)
         ? allTerrainLayers[0]
         : undefined;
-      this._setExternalTerrainLayer(externalTerrainLayer);
+      this._setExternalTerrain(
+        externalTerrainLayer ? getExternalTerrain(externalTerrainLayer) : null
+      );
+      this.externalTerrainLayerId = externalTerrainLayer?.id ?? null;
       this.hasTerrain = allTerrainLayers.length > 0;
     }
 
@@ -188,7 +191,7 @@ export class TerrainEffect implements Effect {
   }
 
   cleanup({deck}: EffectContext): void {
-    this._setExternalTerrainLayer();
+    this._setExternalTerrain(null);
 
     this.pickingSurface?.delete();
     this.pickingSurface = undefined;
@@ -239,21 +242,16 @@ export class TerrainEffect implements Effect {
   }
 
   /**
-   * Hands the draped layers to the external terrain of a new terrain layer, and takes them back from
-   * the previous one. A layer that is updated stands for the same terrain, also when it gets a new
-   * `externalTerrain` object.
+   * Hands the draped layers to new external terrain, and takes them back from the previous one.
+   * A new object with the same `id` is the same terrain, so it only receives the renderer.
    */
-  private _setExternalTerrainLayer(layer?: Layer) {
-    const externalTerrain = layer ? getExternalTerrain(layer) : null;
+  private _setExternalTerrain(externalTerrain: ExternalTerrain | null) {
     const previous = this.externalTerrain;
-    const isSameTerrain =
-      previous !== null && externalTerrain !== null && layer?.id === this.externalTerrainLayerId;
-    this.externalTerrainLayerId = layer?.id ?? null;
     if (externalTerrain === previous) {
       return;
     }
     this.externalTerrain = externalTerrain;
-    if (!isSameTerrain) {
+    if (externalTerrain?.id !== previous?.id) {
       previous?.setDrapeRenderer?.(null);
       this.externalHeightMapId = null;
       this.externalDrape = null;
