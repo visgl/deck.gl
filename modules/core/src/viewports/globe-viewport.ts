@@ -6,7 +6,7 @@ import {Matrix4} from '@math.gl/core';
 import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
-import Viewport from './viewport';
+import Viewport, {type DistanceScales} from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {mod} from '../utils/math-utils';
 
@@ -22,17 +22,13 @@ const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
 const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
 const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
 
-function getDistanceScales() {
+function getDistanceScales(): Partial<DistanceScales> {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
   const unitsPerDegree = (Math.PI / 180) * GLOBE_RADIUS;
 
   return {
     unitsPerMeter: [unitsPerMeter, unitsPerMeter, unitsPerMeter],
-    unitsPerMeter2: [0, 0, 0],
-    metersPerUnit: [1 / unitsPerMeter, 1 / unitsPerMeter, 1 / unitsPerMeter],
-    unitsPerDegree: [unitsPerDegree, unitsPerDegree, unitsPerMeter],
-    unitsPerDegree2: [0, 0, 0],
-    degreesPerUnit: [1 / unitsPerDegree, 1 / unitsPerDegree, 1 / unitsPerMeter]
+    unitsPerWorldUnit: [unitsPerDegree, unitsPerDegree, unitsPerMeter]
   };
 }
 
