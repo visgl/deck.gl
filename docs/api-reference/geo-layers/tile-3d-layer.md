@@ -236,6 +236,16 @@ Experimental CPU time budget, in milliseconds per animation frame, for creating 
 
 This is a soft limit: creation of one tile cannot be interrupted and may exceed the budget. Smaller values can improve frame pacing while delaying full refinement. Parent coverage remains until replacement models have successfully drawn. Point cloud and mesh tiles are not scheduled by this option.
 
+#### `_refinementStencil` (number, optional) {#_refinementstencil}
+
+- Default: `0` (disabled)
+
+Experimental WebGL stencil bit mask for opaque scenegraph tiles. Selected descendants draw before their replacement ancestors and mask the pixels they cover. This prevents a coarse parent surface from hiding finished detail when its geometry sits above the child. Parents continue filling pixels where descendants have not drawn, including while GPU assets are being prepared. Additive refinement keeps ordinary depth testing.
+
+For a standalone Deck canvas, create the device with `deviceProps: {webgl: {stencil: true}}` and set `_refinementStencil: 255` to reserve all eight stencil bits. Shared contexts must reserve bits that are unused by other renderers or layer extensions; for example, `240` reserves the upper four bits. Single-child replacement chains share a bit; nested branching scopes require additional bits. Sibling branches reuse bits, and unrelated branches still obey ordinary depth testing.
+
+The option falls back to ordinary depth testing on WebGPU, render targets without stencil, blended tiles, non-opaque layers, custom sublayer types, or selections that exceed the reserved bits. It does not change request scheduling or the requested level of detail. Post-processing targets must also provide stencil attachments to use coverage masking.
+
 #### `pointSize` (number, Optional) {#pointsize}
 
 - Default `1.0`
