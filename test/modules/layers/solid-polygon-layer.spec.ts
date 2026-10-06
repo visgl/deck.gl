@@ -57,8 +57,8 @@ test('SolidPolygonLayer#WebGPU binary extruded polygons', async ({skip}) => {
   expect(attributes?.vertexValid.value, 'preserves binary polygon ring boundaries').toEqual(
     Float32Array.from((solidPolygonLayer?.props.data as any).attributes.instanceVertexValid.value)
   );
-  expect(attributes?.vertexPositions.value, 'widens binary XY positions').toBeInstanceOf(
-    Float64Array
+  expect(attributes?.vertexPositions.value, 'preserves binary float32 positions').toBeInstanceOf(
+    Float32Array
   );
   expect(
     attributes?.nextVertexPositions.value,
