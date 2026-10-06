@@ -1,6 +1,6 @@
 # deck.gl Examples
 
-All deck.gl examples are set up to be "stand-alone", which means that
+Most deck.gl examples are set up to be "stand-alone", which means that
 you can copy the example folder to your own environment, run `yarn` or `npm install`
 and `npm start` and within minutes have a running, minimal app that you can
 start modifying and experimenting with.
