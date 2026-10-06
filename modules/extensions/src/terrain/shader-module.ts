@@ -17,6 +17,8 @@ export type TerrainModuleProps = {
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
+  /** Elevation interval used to order WebGPU height-map depth writes. */
+  heightMapRange?: [number, number];
   dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;

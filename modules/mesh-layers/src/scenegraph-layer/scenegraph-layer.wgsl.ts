@@ -91,6 +91,7 @@ fn vertexMain(
   }
 
   outputs.position = project_common_position_to_clipspace(geometry.position);
+  deckgl_filter_position(&outputs.position);
   outputs.vColor = inputs.instanceColors;
   outputs.vTexCoord = texCoord;
   outputs.pbrPosition = geometry.position.xyz;

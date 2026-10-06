@@ -9,13 +9,6 @@ export const shaderWGSL = /* wgsl */ `\
 fn deckgl_filter_size(offset: vec3<f32>, geometry: Geometry) -> vec3<f32> {
   return offset;
 }
-fn deckgl_filter_gl_position(p: vec4<f32>, geometry: Geometry) -> vec4<f32> {
-  if (picking.isAttribute > 0.5) {
-    // For depth picking, write normalized depth into the picking payload.
-    // This mirrors the legacy DECKGL_FILTER_GL_POSITION hook on WebGL.
-  }
-  return p;
-}
 
 // Compute an extrusion offset given a line direction (in clipspace),
 // an offset direction (-1 or 1), and a width in pixels.
@@ -148,7 +141,8 @@ fn vertexMain(
 #else
   let filteredOffset = deckgl_filter_size(offset, geometry);
 #endif
-  let filteredP = deckgl_filter_gl_position(p, geometry);
+  var filteredP = p;
+  deckgl_filter_position(&filteredP);
 
   let clipOffset: vec2<f32> = project_pixel_size_to_clipspace(filteredOffset.xy);
   let finalPosition: vec4<f32> = filteredP + vec4<f32>(clipOffset, 0.0, 0.0);
@@ -166,11 +160,10 @@ fn vertexMain(
 }
 
 @fragment
-fn fragmentMain(
-  @location(0) vColor: vec4<f32>,
-  @location(1) uv: vec2<f32>,
-  @location(2) pickingColor: vec3<f32>
-) -> @location(0) vec4<f32> {
+fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
+  let vColor = input.vColor;
+  let uv = input.uv;
+  let pickingColor = input.pickingColor;
   // Create and initialize geometry with the provided uv.
   var geometry: Geometry;
   geometry.uv = uv;

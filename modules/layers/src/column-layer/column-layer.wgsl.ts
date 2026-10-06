@@ -12,7 +12,7 @@ struct Attributes {
   @location(4) instanceElevations: f32,
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instanceStrokeWidths: f32
+  @location(7) instanceStrokeWidths: f32,
 };
 
 fn getRotationMatrix(angle: f32) -> mat2x2<f32> {
@@ -45,7 +45,7 @@ ${sharedSource}
 
 struct Varyings {
   @builtin(position) position: vec4<f32>,
-  @location(0) color: vec4<f32>
+  @location(0) color: vec4<f32>,
 };
 
 @vertex
@@ -111,6 +111,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     baseColor.a * layer.opacity
   );
 
+  deckgl_filter_position(&varyings.position);
   return varyings;
 }
 
@@ -128,7 +129,7 @@ struct Varyings {
   @builtin(position) position: vec4<f32>,
   @location(0) color: vec4<f32>,
   @location(1) cameraPosition: vec3<f32>,
-  @location(2) positionCommonspace: vec4<f32>
+  @location(2) positionCommonspace: vec4<f32>,
 };
 
 @vertex
@@ -186,6 +187,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.cameraPosition = project.cameraPosition;
   varyings.positionCommonspace = projected.commonPosition;
 
+  deckgl_filter_position(&varyings.position);
   return varyings;
 }
 
