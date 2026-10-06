@@ -4,7 +4,7 @@
 
 import Viewport from '../viewports/viewport';
 import {getMeterZoom} from '@math.gl/web-mercator';
-import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from '@math.gl/core';
+import {Matrix4, Vector3, SphericalCoordinates} from '@math.gl/core';
 
 export type FirstPersonViewportOptions = {
   /** Name of the viewport */
@@ -62,7 +62,7 @@ export default class FirstPersonViewport extends Viewport {
       // Avoid "pixel project matrix not invertible" error
       pitch: pitch === -90 ? 0.0001 : 90 + pitch
     });
-    const dir = spherical.toVector3().normalize();
+    const dir = new Vector3(spherical.toVector3()).normalize();
 
     // Direction is relative to model coordinates, of course
     const center = modelMatrix ? new Matrix4(modelMatrix).transformAsVector(dir) : dir;
