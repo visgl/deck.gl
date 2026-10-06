@@ -22,8 +22,9 @@ import {
   LayerContext
 } from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
+import Tile3DScenegraphLayer, {Tile3DRefinementCoverage} from './tile-3d-scenegraph-layer';
+import TileProcessingScheduler from './tile-processing-scheduler';
 
 import {coreApi} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/schema';
@@ -35,6 +36,8 @@ const SINGLE_DATA = [0];
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
   pointSize: 1.0,
+  _maxTileProcessingTime: {type: 'number', value: 0, min: 0},
+  _refinementStencil: {type: 'number', value: 0, min: 0, max: 255},
 
   // Disable async data loading (handling it in _loadTileSet)
   data: '',
@@ -58,6 +61,23 @@ type _Tile3DLayerProps<DataT> = {
 
   /** Global radius of all points in pixels. **/
   pointSize?: number;
+
+  /**
+   * (Experimental) Soft CPU budget in milliseconds per animation frame for creating
+   * scenegraph GPU assets. Zero disables scheduling. Individual tiles are indivisible
+   * and may exceed the budget. Custom scenegraph sublayers manage their own scheduling.
+   * @default 0
+   */
+  _maxTileProcessingTime?: number;
+
+  /**
+   * (Experimental) WebGL stencil bits reserved for opaque scenegraph refinement.
+   * Finished descendants mask their replacement ancestors without hiding unfinished
+   * regions. Requires a stencil attachment and bits unused by other renderers.
+   * Zero disables masking. Unsupported content or insufficient bits use normal depth testing.
+   * @default 0
+   */
+  _refinementStencil?: number;
 
   /** A loader which is used to decode the fetched tiles.
    * @deprecated Use `loaders` instead
@@ -89,6 +109,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
 
   state!: {
     activeViewports: {};
+    tileProcessingScheduler: TileProcessingScheduler;
+    refinementCoverage: Tile3DRefinementCoverage;
     frameNumber?: number;
     lastUpdatedViewports: {[viewportId: string]: Viewport} | null;
     layerMap: {[layerId: string]: any};
@@ -101,6 +123,8 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
     // prop verification
     this.state = {
+      tileProcessingScheduler: new TileProcessingScheduler(this.props._maxTileProcessingTime),
+      refinementCoverage: new Tile3DRefinementCoverage(),
       layerMap: {},
       tileset3d: null,
       activeViewports: {},
@@ -117,6 +141,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    this.state.tileProcessingScheduler.timeBudget = props._maxTileProcessingTime;
     if (props.data && props.data !== oldProps.data) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._loadTileset(props.data);
@@ -140,6 +165,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   finalizeState(context: LayerContext): void {
+    this.state.tileProcessingScheduler.destroy();
     this.state.tileset3d?.destroy();
     this.state.tileset3d = null;
     this.state.layerMap = {};
@@ -276,10 +302,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     });
   }
 
-  private _getSubLayer(
-    tileHeader: Tile3D,
-    oldLayer?: Layer
-  ): MeshLayer<DataT> | PointCloudLayer<DataT> | ScenegraphLayer<DataT> | null {
+  private _getSubLayer(tileHeader: Tile3D, oldLayer?: Layer): Layer | null {
     if (!tileHeader.content) {
       return null;
     }
@@ -340,14 +363,16 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     );
   }
 
-  private _make3DModelLayer(tileHeader: Tile3D): ScenegraphLayer<DataT> {
+  private _make3DModelLayer(tileHeader: Tile3D): Layer {
     const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
 
-    const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
+    const SubLayerClass = this.getSubLayerClass('scenegraph', Tile3DScenegraphLayer);
 
     return new SubLayerClass(
       {
-        _lighting: 'pbr'
+        _lighting: 'pbr',
+        tileProcessingScheduler: this.state.tileProcessingScheduler,
+        refinementCoverage: this.state.refinementCoverage
       },
       this.getSubLayerProps({
         id: 'scenegraph'
@@ -421,10 +446,20 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     }
 
     // loaders.gl doesn't provide a type for tileset3d.tiles
-    return (tileset3d.tiles as Tile3D[])
+    const layers = (tileset3d.tiles as Tile3D[])
       .map(tile => {
         const layerCache = (layerMap[tile.id] = layerMap[tile.id] || {tile});
         let {layer} = layerCache;
+        const currentLayer = layer?.getCurrentLayer();
+        if (
+          !tile.selected &&
+          currentLayer instanceof Tile3DScenegraphLayer &&
+          currentLayer.state.scenegraphPending
+        ) {
+          // Drop unfinished work that no longer serves the current selection.
+          // A later selection recreates the layer from the retained tile content.
+          layer = null;
+        }
         if (tile.selected) {
           // render selected tiles
           if (!layer) {
@@ -440,6 +475,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         return layer;
       })
       .filter(Boolean);
+    return this.state.refinementCoverage.updateLayers(layers, this.props._refinementStencil);
   }
 }
 

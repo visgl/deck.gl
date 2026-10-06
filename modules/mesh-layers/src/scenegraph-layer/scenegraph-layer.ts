@@ -113,7 +113,8 @@ type _ScenegraphLayerProps<DataT> = {
    */
   getTransformMatrix?: Accessor<DataT, number[]>;
   /**
-   * Called after the layer has rendered for the first time.
+   * Called once after every model in the loaded scenegraph has successfully submitted a draw.
+   * Empty scenegraphs complete on their first draw without submitting any models.
    * Used by Tile3DLayer to signal that a tile's sublayer is visible,
    * allowing parent tiles to be safely deselected during transitions.
    */
@@ -258,7 +259,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return Boolean(this.state?.scenegraph && super.isLoaded);
   }
 
-  private _updateScenegraph(): void {
+  /** Create GPU assets for the current scenegraph during the layer update lifecycle. */
+  protected _updateScenegraph(): void {
     const props = this.props;
     const {device} = this.context;
     let scenegraphData: any = null;
@@ -412,6 +414,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     };
 
     const numInstances = this.getNumInstances();
+    let allModelsDrawn = true;
     this.state.scenegraph.traverse((node, {worldMatrix}) => {
       if (node instanceof ModelNode) {
         const {model} = node;
@@ -429,11 +432,12 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           pbrProjection: pbrProjectionProps,
           scenegraph: scenegraphProps
         });
-        model.draw(renderPass);
+        allModelsDrawn = model.draw(renderPass) && allModelsDrawn;
       }
     });
 
-    if (!this.state.firstDrawSignaled) {
+    // A loaded empty scenegraph is complete and can release held parent tiles.
+    if (allModelsDrawn && !this.state.firstDrawSignaled) {
       this.state.firstDrawSignaled = true;
       this.props.onFirstDraw?.();
     }
