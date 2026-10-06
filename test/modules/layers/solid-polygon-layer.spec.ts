@@ -95,28 +95,26 @@ test('SolidPolygonLayer#WebGPU binary extruded polygons', async ({skip}) => {
   expect(attributes?.vertexValid.value, 'preserves binary polygon ring boundaries').toEqual(
     Float32Array.from((solidPolygonLayer?.props.data as any).attributes.instanceVertexValid.value)
   );
-  expect(attributes?.vertexPositions.value, 'widens binary XY positions').toBeInstanceOf(
-    Float64Array
+  expect(attributes?.vertexPositions.value, 'preserves binary float32 positions').toBeInstanceOf(
+    Float32Array
   );
-  expect(
-    attributes?.nextVertexPositions.value,
-    'materializes adjacent polygon vertices instead of rebinding their current positions'
-  ).not.toBe(attributes?.vertexPositions.value);
-  expect(
-    Array.from(attributes?.nextVertexPositions.value?.slice(0, 3) || []),
-    'the first side connects to the next polygon vertex'
-  ).toEqual(Array.from(attributes?.vertexPositions.value?.slice(3, 6) || []));
-
-  const vertexValidity = attributes?.vertexValid.value;
-  for (let vertexIndex = 0; vertexIndex < (vertexValidity?.length || 0); vertexIndex++) {
-    if (vertexValidity?.[vertexIndex] === 0) {
-      const offset = vertexIndex * 3;
-      expect(
-        Array.from(attributes?.nextVertexPositions.value?.slice(offset, offset + 3) || []),
-        'does not create side segments between polygon rings'
-      ).toEqual(Array.from(attributes?.vertexPositions.value?.slice(offset, offset + 3) || []));
-    }
-  }
+  const positionBuffers = attributes!.vertexPositions.getValue();
+  expect(positionBuffers.nextVertexPositions, 'shares the current-position buffer').toBe(
+    positionBuffers.vertexPositions
+  );
+  const positionLayout = solidPolygonLayer!
+    .getAttributeManager()!
+    .getBufferLayouts({isInstanced: true})
+    .find(layout => layout.name === 'vertexPositions')!;
+  const currentPosition = positionLayout.attributes!.find(
+    attribute => attribute.attribute === 'vertexPositions'
+  )!;
+  const nextPosition = positionLayout.attributes!.find(
+    attribute => attribute.attribute === 'nextVertexPositions'
+  )!;
+  expect(nextPosition.byteOffset, 'reads the next vertex using the source stride').toBe(
+    currentPosition.byteOffset + positionLayout.byteStride!
+  );
 
   await webgpuDevice.handle.queue.onSubmittedWorkDone();
   expect(

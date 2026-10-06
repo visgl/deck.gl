@@ -215,31 +215,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
-        ...(isWebGPU
-          ? {}
-          : {
-              shaderAttributes: {
-                nextVertexPositions: {
-                  vertexOffset: 1
-                }
-              }
-            })
-      },
-      ...(isWebGPU
-        ? {
-            // WebGPU cannot express WebGL's one-vertex offset view in a buffer layout.
-            nextVertexPositions: {
-              size: 3,
-              type: 'float64',
-              stepMode: 'dynamic',
-              fp64: this.use64bitPositions(),
-              transition: false,
-              // eslint-disable-next-line @typescript-eslint/unbound-method
-              update: this.calculateNextPositions,
-              noAlloc
-            }
+        shaderAttributes: {
+          // luma.gl binds the same buffer at a shifted offset on WebGPU.
+          nextVertexPositions: {
+            vertexOffset: 1
           }
-        : {}),
+        }
+      },
       [isWebGPU ? 'vertexValid' : 'instanceVertexValid']: {
         size: 1,
         type: isWebGPU ? 'float32' : 'uint16',
@@ -380,8 +362,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         data: props.data,
         normalize: props._normalize,
         geometryBuffer: buffers.getPolygon,
-        // Keep derived WebGPU attributes independent of external binary accessor buffers.
-        buffers: this.context.device.type === 'webgpu' ? {...buffers} : buffers,
+        buffers,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
         wrapLongitude: props.wrapLongitude,
@@ -507,26 +488,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   protected calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
     attribute.startIndices = polygonTesselator.vertexStarts;
-
-    const binaryPositions = (this.props.data as any).attributes?.getPolygon;
-    if (this.context.device.type === 'webgpu' && ArrayBuffer.isView(binaryPositions?.value)) {
-      const {value, size = 3, offset = 0, stride} = binaryPositions;
-      const elementOffset = offset / value.BYTES_PER_ELEMENT;
-      const elementStride = stride ? stride / value.BYTES_PER_ELEMENT : size;
-      const positions = new Float64Array(polygonTesselator.instanceCount * 3);
-
-      for (let vertexIndex = 0; vertexIndex < polygonTesselator.instanceCount; vertexIndex++) {
-        const sourceIndex = elementOffset + vertexIndex * elementStride;
-        const targetIndex = vertexIndex * 3;
-        positions[targetIndex] = value[sourceIndex];
-        positions[targetIndex + 1] = value[sourceIndex + 1];
-        positions[targetIndex + 2] = size > 2 ? value[sourceIndex + 2] : 0;
-      }
-
-      attribute.value = positions;
-      return;
-    }
-
     attribute.value = polygonTesselator.get('positions');
   }
 
@@ -540,34 +501,5 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       this.context.device.type === 'webgpu' && vertexValid
         ? Float32Array.from(vertexValid)
         : vertexValid;
-  }
-
-  protected calculateNextPositions(attribute) {
-    const {polygonTesselator} = this.state;
-    const attributes = this.getAttributeManager()!.getAttributes();
-    const positions = attributes.vertexPositions.value;
-    const vertexValid =
-      (this.props.data as any).attributes?.instanceVertexValid?.value ||
-      attributes.vertexValid?.value ||
-      polygonTesselator.get('vertexValid');
-    attribute.startIndices = polygonTesselator.vertexStarts;
-
-    if (!positions) {
-      attribute.value = positions;
-      return;
-    }
-
-    const vertexCount = positions.length / 3;
-    const nextPositions = new (positions.constructor as typeof Float32Array)(positions.length);
-    for (let vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
-      const sourceIndex = vertexIndex * 3;
-      const nextSourceIndex =
-        vertexValid?.[vertexIndex] && vertexIndex + 1 < vertexCount ? sourceIndex + 3 : sourceIndex;
-      for (let componentIndex = 0; componentIndex < 3; componentIndex++) {
-        nextPositions[sourceIndex + componentIndex] = positions[nextSourceIndex + componentIndex];
-      }
-    }
-
-    attribute.value = nextPositions;
   }
 }
