@@ -7,7 +7,7 @@ import {_CustomProjectionView as CustomProjectionView, WebMercatorViewport} from
 import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection-controller';
 import {MapState} from '@deck.gl/core/controllers/map-controller';
 import testController, {createTestController} from './test-controller';
-import {Proj4Projection} from '@math.gl/proj4';
+import {Projection} from '@math.gl/projection';
 import {lngLatToWorld, worldToLngLat, pixelsToWorld, worldToPixels} from '@math.gl/web-mercator';
 
 const view = new CustomProjectionView({
@@ -17,7 +17,7 @@ const makeViewport = props => view.makeViewport({width: 800, height: 600, viewSt
 const options = {width: 800, height: 600, makeViewport};
 
 test('CustomProjectionState projects world maxBounds without changing stored bounds', () => {
-  const converter = new Proj4Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
   const mapView = new CustomProjectionView({
     projection: {forward: converter.project, inverse: converter.unproject}
   });
