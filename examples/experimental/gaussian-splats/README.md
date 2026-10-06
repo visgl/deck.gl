@@ -1,8 +1,23 @@
 # Experimental SplatLayer: Coit Tower
 
 The default application is now a deck.gl layer prototype. `SplatLayer` owns the RAD source,
-decoder worker, page admission, hierarchy, and renderer, and uses deck's WebGPU device, OrbitView, redraw loop,
+decoder worker, page admission, hierarchy, and renderer, and uses deck's WebGPU device, FirstPersonView, redraw loop,
 and render pass. A normal `LineLayer` draws the reference axes on that same canvas.
+
+### Camera navigation
+
+The example uses a fixed 75-degree lens with world-space clipping planes. Drag to look,
+shift-drag to pan, and scroll (or use +/-) to move along the camera's full forward axis.
+This follows [Spark's pointer-control model](https://github.com/sparkjsdev/spark/blob/main/src/controls.ts)
+without adding a second camera or render loop. It is not a port of Spark's inertia or touch controls.
+The authored eye and target are scaled by the same factor as the scene; the layer still passes
+source-local camera coordinates and projection to both the selector and GPU renderer.
+
+Physical movement has no orbit-pivot limit or zoom-dependent clipping range. The near and far
+planes remain 2 and 100,000 navigation units (0.002 and 100 source units). The paged renderer
+sorts full-precision linear camera depths so nearby overlapping surfaces do not collapse into
+the same coarse projected-depth bucket. This does not eliminate every LOD or blend artifact;
+global center-depth sorting is still an approximation for intersecting Gaussians.
 
 ```ts
 import SplatLayer from './splat-layer/splat-layer';
@@ -115,9 +130,6 @@ RAD selector off-thread rather than adapting a second whole-tile selector.
 The newer `PointCloudTileset` is also tile-based: its projected-size queue adds parents and
 children to the point budget together. That additive point-cloud policy is not a replacement
 for RAD's mutually exclusive parent/descendant selection.
-
-
-
 The earlier proof flattened every selected page into one Arrow table before handing it to a
 tile-local renderer. That bridge discarded non-DC spherical harmonics, clamped HDR color to eight
 bits, and replaced global ordering with per-tile sorting. Increasing the page count could not
@@ -125,7 +137,9 @@ restore the missing renderer invariants, so this reference deliberately keeps pa
 
 ## Run
 
-Install dependencies in both the deck.gl root and this example directory. Until the retained-camera
+Install dependencies in both the deck.gl root and this example directory. Build deck.gl at the
+repository root to provide the workspace declarations used by the example type-check.
+Until the retained-camera
 retargeting and shared-pass prerequisites are released by luma.gl, `LUMA_GL_ROOT` must point to a local luma.gl
 checkout containing those changes plus the CPU-only hierarchy types. Build luma with `yarn build`
 before building this example. `LOADERS_GL_ROOT` remains an optional override for the published
@@ -133,6 +147,7 @@ loaders.gl dependency:
 
 ```bash
 yarn
+yarn build
 cd examples/experimental/gaussian-splats
 yarn
 LUMA_GL_ROOT=/path/to/luma.gl yarn start-local

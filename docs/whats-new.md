@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+An [experimental Gaussian splat example](https://github.com/visgl/deck.gl/tree/master/examples/experimental/gaussian-splats)
+prototypes an example-local `SplatLayer` with worker-backed RAD refinement and shared-pass WebGPU rendering.
+It requires the unreleased luma.gl prerequisites documented in the example; it is not yet a published deck.gl layer.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

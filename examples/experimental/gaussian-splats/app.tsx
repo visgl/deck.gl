@@ -4,17 +4,21 @@
 
 import {useEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {Deck, OrbitView, type OrbitViewState} from '@deck.gl/core';
+import {Deck, FirstPersonView} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
 import {webgpuAdapter} from '@luma.gl/webgpu';
-import {Matrix4} from '@math.gl/core';
 import SplatLayer, {type SplatLayerStatus} from './splat-layer/splat-layer';
+import {
+  SplatCameraController,
+  CAMERA_PROPS,
+  MODEL_MATRIX,
+  TARGET,
+  getInitialViewState
+} from './camera';
 import './styles.css';
 
 const COIT_URL =
   'https://storage.googleapis.com/download/storage/v1/b/forge-dev-public/o/asundqui%2Frad%2F260217%2Fcoit-40m-sh1-lod.rad?alt=media';
-const MODEL_MATRIX = new Matrix4().rotateX(-Math.PI / 2);
-const TARGET: [number, number, number] = [0.0226670563, 0.0141479052, 0.1886351632];
 const DIAGNOSTIC = new URLSearchParams(location.search).has('diagnostic');
 const INITIAL_STATUS: SplatLayerStatus = {
   phase: 'loading',
@@ -25,22 +29,9 @@ const INITIAL_STATUS: SplatLayerStatus = {
   sourceSplats: 0
 };
 
-function getInitialViewState(height: number): OrbitViewState {
-  const offset = [-0.0858 - TARGET[0], 0.1128 - TARGET[1], 0.2203 - TARGET[2]];
-  const distance = Math.hypot(...offset);
-  return {
-    target: TARGET,
-    rotationOrbit: (Math.atan2(-offset[0], -offset[1]) * 180) / Math.PI,
-    rotationX: (Math.asin(offset[2] / distance) * 180) / Math.PI,
-    zoom: Math.log2(height / (2 * Math.tan((75 * Math.PI) / 360)) / distance),
-    minZoom: 7,
-    maxZoom: 20
-  };
-}
-
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const deckRef = useRef<Deck<OrbitView>>();
+  const deckRef = useRef<Deck<FirstPersonView>>();
   const [status, setStatus] = useState(INITIAL_STATUS);
   const [showAxes, setShowAxes] = useState(true);
   const [showSplats, setShowSplats] = useState(true);
@@ -73,13 +64,16 @@ export default function App() {
 
   useEffect(() => {
     const container = containerRef.current!;
-    const deck: Deck<OrbitView> = new Deck<OrbitView>({
+    const deck: Deck<FirstPersonView> = new Deck<FirstPersonView>({
       parent: container,
       deviceProps: {type: 'webgpu', adapters: [webgpuAdapter]},
-      views: new OrbitView({id: 'coit', orbitAxis: 'Z', fovy: 75, near: 0.01, far: 1000}),
-      initialViewState: getInitialViewState(container.clientHeight),
-      controller: true,
-      onViewStateChange: ({viewState}) => deck.setProps({viewState}),
+      views: new FirstPersonView({id: 'coit', ...CAMERA_PROPS}),
+      initialViewState: getInitialViewState(),
+      controller: {type: SplatCameraController},
+      onViewStateChange: ({viewState}) => {
+        deck.setProps({viewState});
+        if (DIAGNOSTIC) console.debug('COIT_CAMERA', JSON.stringify(viewState));
+      },
       onAfterRender: () => {
         if (animationRef.current) frameTimesRef.current.push(performance.now());
       },
@@ -110,9 +104,9 @@ export default function App() {
           visible: showAxes,
           coordinateSystem: 'cartesian',
           data: [
-            {end: [TARGET[0] + 0.035, TARGET[1], TARGET[2]], color: [255, 65, 90]},
-            {end: [TARGET[0], TARGET[1] + 0.035, TARGET[2]], color: [50, 210, 100]},
-            {end: [TARGET[0], TARGET[1], TARGET[2] + 0.035], color: [50, 130, 255]}
+            {end: [TARGET[0] + 35, TARGET[1], TARGET[2]], color: [255, 65, 90]},
+            {end: [TARGET[0], TARGET[1] + 35, TARGET[2]], color: [50, 210, 100]},
+            {end: [TARGET[0], TARGET[1], TARGET[2] + 35], color: [50, 130, 255]}
           ],
           getSourcePosition: TARGET,
           getTargetPosition: datum => datum.end,
@@ -125,20 +119,22 @@ export default function App() {
 
   function runCameraTest(returnToStart = true) {
     cancelAnimationFrame(animationRef.current);
-    const initial = getInitialViewState(containerRef.current!.clientHeight);
+    const initial = getInitialViewState();
     const started = performance.now();
     frameTimesRef.current = [];
-    setCameraTest('Running 8-second orbit, pan and zoom…');
+    setCameraTest('Running 8-second look, pan and dolly…');
     const animate = (now: number) => {
       const progress = Math.min((now - started) / 8000, 1);
       const wave = Math.sin(progress * Math.PI * (returnToStart ? 2 : 0.5));
       deckRef.current?.setProps({
         viewState: {
           ...initial,
-          rotationOrbit: initial.rotationOrbit! + 110 * wave,
-          zoom:
-            Number(initial.zoom) + 0.8 * Math.sin(progress * Math.PI * (returnToStart ? 1 : 0.5)),
-          target: [TARGET[0] + 0.025 * wave, TARGET[1], TARGET[2]]
+          bearing: initial.bearing! + 45 * wave,
+          position: [
+            initial.position![0] + 40 * wave,
+            initial.position![1] - 25 * wave,
+            initial.position![2]
+          ]
         }
       });
       if (progress < 1) {
@@ -165,8 +161,8 @@ export default function App() {
         <p className="eyebrow">deck.gl · experimental SplatLayer</p>
         <h1>Coit, inside deck.gl</h1>
         <p className="description">
-          One canvas, one camera. RAD streaming and refinement live inside the layer. Drag to orbit,
-          shift-drag to pan, scroll to zoom.
+          One canvas, one world-space camera. Drag to look, shift-drag to pan, scroll to move
+          forward/backward. Fixed lens and clipping range, with no orbit-pivot zoom limit.
         </p>
         <dl className="metrics">
           <div className="metric">
@@ -219,7 +215,7 @@ export default function App() {
             cancelAnimationFrame(animationRef.current);
             animationRef.current = 0;
             deckRef.current?.setProps({
-              viewState: getInitialViewState(containerRef.current!.clientHeight)
+              viewState: getInitialViewState()
             });
           }}
         >
