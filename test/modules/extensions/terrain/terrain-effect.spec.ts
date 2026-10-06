@@ -242,7 +242,7 @@ const GLACIER = [
 /** External terrain that records what the TerrainEffect asks of it */
 function createExternalTerrain() {
   return {
-    revision: 0,
+    id: 'terrain',
     renderHeightMap: vi.fn(),
     setDrapeRenderer: vi.fn(),
     onDrapeChange: vi.fn()
@@ -309,7 +309,7 @@ test('TerrainEffect#external terrain', async () => {
     externalTerrain.renderHeightMap,
     'External terrain draws the height map'
   ).toHaveBeenCalled();
-  const [heightMap, bounds] = externalTerrain.renderHeightMap.mock.lastCall!;
+  const [{target: heightMap, bounds}] = externalTerrain.renderHeightMap.mock.lastCall!;
   const [x, y] = VIEWPORT.projectFlat(SUMMIT);
   expect(
     bounds[0] < x && x < bounds[2] && bounds[1] < y && y < bounds[3],
@@ -324,7 +324,7 @@ test('TerrainEffect#external terrain', async () => {
   externalTerrain.renderHeightMap.mockClear();
   lifecycle.render();
   expect(externalTerrain.renderHeightMap, 'Height map is up to date').not.toHaveBeenCalled();
-  externalTerrain.revision++;
+  externalTerrain.id = 'terrain-with-more-tiles';
   lifecycle.render();
   expect(externalTerrain.renderHeightMap, 'Height map follows the terrain').toHaveBeenCalledTimes(
     1
@@ -350,12 +350,16 @@ test('TerrainEffect#external terrain', async () => {
   // A tile inside the glacier
   const tileBounds = [x - 0.05, y - 0.05, x + 0.05, y + 0.05];
   const tile = device.createFramebuffer({width: 4, height: 4, colorAttachments: ['rgba8unorm']});
-  renderDrape(tile, tileBounds);
+  renderDrape({target: tile, bounds: tileBounds});
   expect(Array.from(device.readPixelsToArrayWebGL(tile)), 'Draped layer is drawn').toEqual(
     Array.from({length: 16}, () => [255, 0, 0, 255]).flat()
   );
   device.beginRenderPass({framebuffer: tile, clearColor: [0, 0, 0, 0]}).end();
-  renderDrape(tile, tileBounds, {layerFilter: ({layer}) => layer.id !== 'glacier'});
+  renderDrape({
+    target: tile,
+    bounds: tileBounds,
+    layerFilter: ({layer}) => layer.id !== 'glacier'
+  });
   expect(Array.from(device.readPixelsToArrayWebGL(tile)), 'Layer filter').toEqual(
     new Array(64).fill(0)
   );
@@ -419,8 +423,8 @@ webglTest('TerrainEffect#picks layers draped over external terrain', async () =>
   canvas.height = 300;
   const webglContext = canvas.getContext('webgl2', {preserveDrawingBuffer: true});
   const externalTerrain = {
-    revision: 0,
-    renderHeightMap: (target: Framebuffer) => {
+    id: 'terrain',
+    renderHeightMap: ({target}: {target: Framebuffer}) => {
       target.device.beginRenderPass({framebuffer: target, clearColor: [2000, 0, 0, 1]}).end();
     }
   };

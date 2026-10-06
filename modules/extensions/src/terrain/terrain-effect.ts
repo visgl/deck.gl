@@ -45,8 +45,8 @@ export class TerrainEffect implements Effect {
   private externalTerrain: ExternalTerrain | null = null;
   /** The layer that stands for the external terrain, which draws it in the picking pass */
   private externalTerrainLayerId: string | null = null;
-  /** Revision of the external terrain that the height map holds */
-  private externalTerrainRevision: number = -1;
+  /** The `id` of the external terrain that the height map holds */
+  private externalHeightMapId: string | null = null;
   /** Layers draped over the external terrain, with the options to draw them */
   private externalDrape: {layers: Layer[]; opts: PreRenderOptions; viewport: Viewport} | null =
     null;
@@ -248,7 +248,7 @@ export class TerrainEffect implements Effect {
     }
     this.externalTerrain?.setDrapeRenderer?.(null);
     this.externalTerrain = externalTerrain;
-    this.externalTerrainRevision = -1;
+    this.externalHeightMapId = null;
     this.externalDrape = null;
     externalTerrain?.setDrapeRenderer?.(this._renderExternalDrape);
   }
@@ -279,7 +279,7 @@ export class TerrainEffect implements Effect {
       viewport,
       padding: EXTERNAL_HEIGHT_MAP_PADDING
     });
-    if (!shouldUpdate && externalTerrain.revision === this.externalTerrainRevision) {
+    if (!shouldUpdate && externalTerrain.id === this.externalHeightMapId) {
       return;
     }
     const target = this.heightMap.getRenderFramebuffer();
@@ -291,8 +291,8 @@ export class TerrainEffect implements Effect {
       width: Math.ceil(renderViewport.width),
       height: Math.ceil(renderViewport.height)
     });
-    externalTerrain.renderHeightMap(target, bounds);
-    this.externalTerrainRevision = externalTerrain.revision;
+    externalTerrain.renderHeightMap({target, bounds});
+    this.externalHeightMapId = externalTerrain.id;
   }
 
   /**
@@ -380,7 +380,12 @@ export class TerrainEffect implements Effect {
   }
 
   /** Draws the draped layers into a framebuffer of the external terrain's renderer */
-  private _renderExternalDrape: ExternalTerrainDrapeRenderer = (target, bounds, options = {}) => {
+  private _renderExternalDrape: ExternalTerrainDrapeRenderer = ({
+    target,
+    bounds,
+    layerFilter,
+    devicePixelRatio = 1
+  }) => {
     const drape = this.externalDrape;
     // The host may draw before the next preRender, after layers were updated or removed
     const layers = drape?.layers
@@ -389,7 +394,6 @@ export class TerrainEffect implements Effect {
     if (!drape || !layers?.length) {
       return;
     }
-    const devicePixelRatio = options.devicePixelRatio ?? 1;
     const width = target.width / devicePixelRatio;
     const height = target.height / devicePixelRatio;
     const viewport = makeViewport({
@@ -407,7 +411,7 @@ export class TerrainEffect implements Effect {
       ...drape.opts,
       views: undefined,
       layers,
-      layerFilter: options.layerFilter,
+      layerFilter,
       shaderModuleProps: {
         terrain: {
           dummyHeightMap: this.dummyHeightMap,

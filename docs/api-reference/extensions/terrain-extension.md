@@ -11,9 +11,9 @@ A base map integration can also add a layer with `operation: 'terrain'` and an `
 
 The `externalTerrain` object is experimental, and has the following fields:
 
-- `revision` (number): changes whenever the surface changes other than by camera movement.
-- `renderHeightMap` (Function): `renderHeightMap(target, bounds)` draws the ground elevation in meters into the red channel of the framebuffer `target`, and 1 into its alpha where the elevation is known. `bounds` is `[minX, minY, maxX, maxY]` in Web Mercator common space, with `minY` in the first row.
-- `setDrapeRenderer` (Function, optional): receives the function that draws the draped layers, or `null` when they stop following this terrain. The base map calls `render(target, bounds, {layerFilter, devicePixelRatio})` to draw them into its own framebuffer, over what it holds.
+- `id` (string): identifies the surface, and changes whenever it changes other than by camera movement.
+- `renderHeightMap` (Function): `renderHeightMap({target, bounds})` draws the ground elevation in meters into the red channel of the framebuffer `target`, and 1 into its alpha where the elevation is known. `bounds` is `[minX, minY, maxX, maxY]` in Web Mercator common space, with `minY` in the first row.
+- `setDrapeRenderer` (Function, optional): receives the function that draws the draped layers, or `null` when they stop following this terrain. The base map calls `render({target, bounds, layerFilter, devicePixelRatio})` to draw them into its own framebuffer, over what it holds.
 - `onDrapeChange` (Function, optional): called with the draped layers when they, or what they draw, change.
 
 For draped layers to be picked, the layer's `draw` calls `shaderModuleProps.terrain.drawPickingSurface({renderPass, parameters, shaderModuleProps})` when the terrain module passes that function.
