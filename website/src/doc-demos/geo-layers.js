@@ -199,9 +199,7 @@ export const MVTLayerDemo = makeLayerDemo({
   mapStyle: null,
   getTooltip: '({object}) => object && (object.properties.name || object.properties.layerName)',
   props: `{
-    data: [
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
 
     minZoom: 0,
     maxZoom: 14,

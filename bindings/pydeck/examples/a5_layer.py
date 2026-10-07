@@ -33,5 +33,11 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=37.74, longitude=-122.4, zoom=11, bearing=0, pitch=40)
 
 # Render
-r = pdk.Deck(layers=[layer], initial_view_state=view_state, tooltip={"text": "{pentagon} count: {count}"})
+r = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    tooltip={"text": "{pentagon} count: {count}"},
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("a5_layer.html")

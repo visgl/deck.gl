@@ -61,5 +61,11 @@ view_state = pdk.ViewState(
 
 
 TOOLTIP_TEXT = {"html": "{S000} jobs <br /> Home of commuter in red; work location in green"}
-r = pdk.Deck(arc_layer, initial_view_state=view_state, tooltip=TOOLTIP_TEXT)
+r = pdk.Deck(
+    arc_layer,
+    initial_view_state=view_state,
+    tooltip=TOOLTIP_TEXT,
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("arc_layer.html")

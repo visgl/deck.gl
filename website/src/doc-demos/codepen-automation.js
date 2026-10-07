@@ -237,7 +237,7 @@ const layer = new ${layerName}({
 });
 
 new DeckGL({
-  ${mapStyle ? `mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',` : ''}
+  ${mapStyle ? `mapStyle: 'https://tiles.openfreemap.org/styles/positron',` : ''}
   initialViewState: ${initialViewStateSerialized},
   controller: true,
   ${getTooltip ? `getTooltip: ${getTooltip},` : ''}

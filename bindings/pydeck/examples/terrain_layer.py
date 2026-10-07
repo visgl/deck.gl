@@ -25,6 +25,11 @@ terrain_layer = pdk.Layer(
 
 view_state = pdk.ViewState(latitude=46.24, longitude=-122.18, zoom=11.5, bearing=140, pitch=60)
 
-r = pdk.Deck(terrain_layer, initial_view_state=view_state)
+r = pdk.Deck(
+    terrain_layer,
+    initial_view_state=view_state,
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 
 r.to_html("terrain_layer.html")

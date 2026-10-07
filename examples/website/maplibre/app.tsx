@@ -93,7 +93,7 @@ export default function App({
           getSourceColor: [63, 81, 181],
           getTargetColor: [63, 181, 173],
           parameters: {cullMode: 'none'},
-          ...(interleaveLabels ? {beforeId: 'watername_ocean'} : {})
+          ...(interleaveLabels ? {beforeId: 'water_name'} : {})
         })
     );
 
@@ -113,7 +113,7 @@ export default function App({
         projection="globe"
         id="map"
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        mapStyle="https://tiles.openfreemap.org/styles/dark"
         dragRotate={false}
         maxPitch={0}
       >

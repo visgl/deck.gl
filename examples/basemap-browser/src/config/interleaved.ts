@@ -16,7 +16,7 @@ export function getInterleavedProps(basemap: Basemap, interleaved: boolean): Rec
     case 'mapbox':
       return {slot: 'middle'};
     case 'maplibre':
-      return {beforeId: 'watername_ocean'};
+      return {beforeId: 'waterway_line_label'};
     case 'google-maps':
       // Google Maps doesn't support slot/beforeId
       return {};

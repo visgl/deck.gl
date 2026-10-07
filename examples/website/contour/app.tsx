@@ -57,7 +57,7 @@ export default function App({
   week = 35,
   contours = BANDS,
   cellSize = 60000,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+  mapStyle = 'https://tiles.openfreemap.org/styles/dark'
 }: {
   device?: Device;
   data?: string | CaseReport[];

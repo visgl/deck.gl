@@ -36,7 +36,7 @@ export default function App({
   radius = 30,
   maleColor = MALE_COLOR,
   femaleColor = FEMALE_COLOR,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  mapStyle = 'https://tiles.openfreemap.org/styles/positron',
   widgets
 }: {
   device?: Device;

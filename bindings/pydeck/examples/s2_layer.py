@@ -33,6 +33,8 @@ view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=11,
 
 # Render
 r = pdk.Deck(
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/dark",
     layers=[layer],
     initial_view_state=view_state,
     tooltip={"text": "{token} value: {value}"},

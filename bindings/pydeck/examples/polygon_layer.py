@@ -102,7 +102,8 @@ r = pdk.Deck(
     polygon_layer,
     initial_view_state=view_state,
     effects=[lighting_effect],
-    map_style=pdk.map_styles.LIGHT,
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/positron",
     tooltip=tooltip,
 )
 r.to_html("polygon_layer.html")

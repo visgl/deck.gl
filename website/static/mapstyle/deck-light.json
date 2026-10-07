@@ -1,5970 +1,1832 @@
 {
   "version": 8,
-  "name": "Deck-Light ",
-  "metadata": {},
-  "center": [
-    -117.28377606442282,
-    34.720558526243906
-  ],
-  "zoom": 5.0,
-  "bearing": 0,
-  "pitch": 0,
   "sources": {
-    "carto": {
+    "ne2_shaded": {
+      "maxzoom": 6,
+      "tileSize": 256,
+      "tiles": [
+        "https://tiles.openfreemap.org/natural_earth/ne2sr/{z}/{x}/{y}.png"
+      ],
+      "type": "raster"
+    },
+    "openmaptiles": {
       "type": "vector",
-      "url": "https://tiles.basemaps.cartocdn.com/vector/carto.streets/v1/tiles.json"
+      "url": "https://tiles.openfreemap.org/planet"
     }
   },
-  "sprite": "https://tiles.basemaps.cartocdn.com/gl/dark-matter-gl-style/sprite",
-  "glyphs": "https://tiles.basemaps.cartocdn.com/fonts/{fontstack}/{range}.pbf",
+  "sprite": "https://tiles.openfreemap.org/sprites/ofm_f384/ofm",
+  "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
       "type": "background",
-      "interactive": true,
-      "layout": {},
       "paint": {
-        "background-color": "#EBF0F0"
+        "background-color": "rgb(242,243,240)"
       }
     },
     {
-      "interactive": true,
-      "layout": {},
-      "metadata": {
-      },
-      "maxzoom": 14,
-      "filter": [
-        "==",
-        "class",
-        "wood"
-      ],
+      "id": "park",
       "type": "fill",
-      "source": "carto",
-      "id": "landcover_wood",
-      "paint": {
-        "fill-color": "hsl(0, 0%, 89%)",
-        "fill-opacity": 0,
-        "fill-antialias": false
-      },
-      "source-layer": "landcover"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "metadata": {
-      },
-      "maxzoom": 14,
+      "source": "openmaptiles",
+      "source-layer": "park",
       "filter": [
-        "==",
-        "class",
-        "scrub"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "landcover_scrub",
-      "paint": {
-        "fill-color": "hsl(0, 0%, 89%)",
-        "fill-opacity": 0.1,
-        "fill-antialias": false
-      },
-      "source-layer": "landcover"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "metadata": {
-      },
-      "minzoom": 11,
-      "filter": [
-        "==",
-        "class",
-        "grass"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "landcover_grass",
-      "paint": {
-        "fill-color": "hsl(160, 10%, 91%)",
-        "fill-opacity": 1
-      },
-      "source-layer": "landcover"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "metadata": {
-      },
-      "maxzoom": 14,
-      "filter": [
-        "==",
-        "class",
-        "crop"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "landcover_crop",
-      "paint": {
-        "fill-color": "#F0F5F5",
-        "fill-opacity": 0,
-        "fill-antialias": false
-      },
-      "source-layer": "landcover"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "filter": [
-        "==",
-        "class",
-        "national_park"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "national_park",
-      "paint": {
-        "fill-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              5,
-              0
-            ],
-            [
-              6,
-              0.5
-            ]
-          ]
-        },
-        "fill-color": "#F0F5F5"
-      },
-      "source-layer": "park"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {},
-      "filter": [
-        "==",
-        "class",
-        "nature_reserve"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "parks",
-      "paint": {
-        "fill-color": "hsl(160, 10%, 91%)",
-        "fill-opacity": 1
-      },
-      "source-layer": "park"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "filter": [
-        "==",
-        "class",
-        "pitch"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "pitch",
-      "paint": {
-        "fill-color": "#e4e4e4",
-        "fill-opacity": 0
-      },
-      "source-layer": "landuse"
-    },
-    {
-      "interactive": true,
-      "layout": {},
-      "filter": [
-        "==",
-        "class",
-        "sand"
-      ],
-      "type": "fill",
-      "source": "carto",
-      "id": "sand",
-      "paint": {
-        "fill-color": "#f0f0f0",
-        "fill-opacity": 0
-      },
-      "source-layer": "landcover"
-    },
-    {
-      "interactive": true,
-      "minzoom": 8,
-      "layout": {
-        "line-cap": {
-          "base": 1,
-          "stops": [
-            [
-              0,
-              "butt"
-            ],
-            [
-              11,
-              "round"
-            ]
-          ]
-        },
-        "line-join": "round"
-      },
-      "filter": [
-        "any",
+        "match",
         [
-          "==",
-          "class",
-          "canal"
+          "geometry-type"
         ],
         [
-          "==",
-          "class",
-          "river"
-        ]
+          "MultiPolygon",
+          "Polygon"
+        ],
+        true,
+        false
       ],
-      "type": "line",
-      "source": "carto",
-      "id": "waterway-river-canal",
       "paint": {
-        "line-color": "#cbd3d4",
-        "line-width": {
-          "base": 1.3,
-          "stops": [
-            [
-              8.5,
-              0.1
-            ],
-            [
-              20,
-              8
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "waterway"
-    },
-    {
-      "id": "water shadow",
-      "type": "fill",
-      "source": "carto",
-      "source-layer": "water",
-      "interactive": true,
-      "layout": {
-        "visibility": "none"
-      },
-      "paint": {
-        "fill-color": "hsla(185, 1%, 72%, 0)",
-        "fill-outline-color": "hsl(0, 98%, 51%)",
-        "fill-translate-anchor": "viewport",
-        "fill-opacity": 1,
-        "fill-antialias": true,
-        "fill-translate": [
-          0,
-          0
-        ]
+        "fill-color": "rgb(230, 233, 229)"
       }
     },
     {
       "id": "water",
       "type": "fill",
-      "source": "carto",
+      "source": "openmaptiles",
       "source-layer": "water",
-      "interactive": true,
-      "layout": {},
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
       "paint": {
-        "fill-color": "#DBE2E6"
+        "fill-antialias": true,
+        "fill-color": "rgb(194, 200, 202)"
       }
     },
     {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {},
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "apron"
-        ],
-        [
-          "==",
-          "$type",
-          "Polygon"
-        ]
-      ],
+      "id": "landcover_ice_shelf",
       "type": "fill",
-      "source": "carto",
-      "id": "aeroway-polygon",
-      "paint": {
-        "fill-color": "#D9DEDE",
-        "fill-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              11,
-              0
-            ],
-            [
-              11.5,
-              1
-            ]
-          ]
-        }
-      },
-      "source-layer": "aeroway"
-    },
-    {
-      "interactive": true,
-      "minzoom": 9,
-      "layout": {},
-      "metadata": {
-      },
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "maxzoom": 8,
       "filter": [
         "all",
         [
-          "==",
-          "$type",
-          "LineString"
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
         ],
         [
           "==",
-          "class",
-          "runway"
+          [
+            "get",
+            "subclass"
+          ],
+          "ice_shelf"
         ]
       ],
-      "type": "line",
-      "source": "carto",
-      "id": "aeroway-runway",
       "paint": {
-        "line-color": "hsl(0, 0%, 95%)",
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              9,
-              1
-            ],
-            [
-              18,
-              80
-            ]
-          ]
-        }
-      },
-      "source-layer": "aeroway"
+        "fill-color": "hsl(0,0%,98%)",
+        "fill-opacity": 0.7
+      }
     },
     {
-      "interactive": true,
-      "minzoom": 9,
-      "layout": {},
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "==",
-          "class",
-          "taxiway"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "aeroway-taxiway",
-      "paint": {
-        "line-color": "hsl(0, 0%, 95%)",
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              10,
-              0.5
-            ],
-            [
-              18,
-              20
-            ]
-          ]
-        }
-      },
-      "source-layer": "aeroway"
-    },
-    {
-      "interactive": true,
-      "minzoom": 15,
-      "layout": {},
+      "id": "landcover_glacier",
       "type": "fill",
-      "source": "carto",
-      "id": "building",
-      "paint": {
-        "fill-color": "#DDE3E5",
-        "fill-opacity": {
-          "base": 1,
-          "stops": [[15.5, 0], [16, 1]]
-        },
-        "fill-outline-color": "hsl(55, 3%, 87%)",
-        "fill-antialias": true
-      },
-      "source-layer": "building"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "maxzoom": 8,
       "filter": [
         "all",
         [
-          "==",
-          "class",
-          "street"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-street-low",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "street_limited"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-street_limited-low",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "trunk_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ],
-        [
-          "in",
-          "class",
-          "link",
-          "service",
-          "track"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-service-link-track-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ]
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-street_limited-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ],
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              13.99,
-              0
-            ],
-            [
-              14,
-              1
-            ]
-          ]
-        }
-      },
-      "ref": "tunnel-street_limited-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-street-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ],
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              13.99,
-              0
-            ],
-            [
-              14,
-              1
-            ]
-          ]
-        }
-      },
-      "ref": "tunnel-street-low"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ],
-        [
-          "in",
-          "class",
-          "secondary",
-          "tertiary"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-secondary-tertiary-case",
-      "paint": {
-        "line-width": {
-          "base": 1.2,
-          "stops": [
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              2
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ],
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              8.5,
-              0.5
-            ],
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              26
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)"
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "primary"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-primary-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ],
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)"
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ],
-        [
-          "==",
-          "type",
-          "trunk_link"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-trunk_link-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ]
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-motorway_link-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ]
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ],
-        [
-          "==",
-          "type",
-          "trunk"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-trunk-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": 1,
-        "line-dasharray": [
-          3,
-          3
-        ]
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-motorway-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "hsl(185, 12%, 89%)",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-dasharray": [
-          3,
-          3
-        ],
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-join": "miter"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "construction"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-construction",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              13.99,
-              0
-            ],
-            [
-              14,
-              1
-            ]
-          ]
-        },
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                0.4,
-                0.8
-              ]
-            ],
-            [
-              15,
-              [
-                0.3,
-                0.6
-              ]
-            ],
-            [
-              16,
-              [
-                0.2,
-                0.3
-              ]
-            ],
-            [
-              17,
-              [
-                0.2,
-                0.25
-              ]
-            ],
-            [
-              18,
-              [
-                0.15,
-                0.15
-              ]
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "steps"
-        ],
-        [
-          "==",
-          "class",
-          "path"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-path",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              15,
-              1
-            ],
-            [
-              18,
-              4
-            ]
-          ]
-        },
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                1,
-                0.5
-              ]
-            ]
-          ]
-        },
-        "line-color": "hsl(0, 0%, 85%)",
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              0
-            ],
-            [
-              14.25,
-              1
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "all",
+          "match",
           [
-            "==",
-            "structure",
-            "tunnel"
+            "geometry-type"
           ],
           [
-            "==",
-            "type",
-            "steps"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-steps",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              15,
-              1
-            ],
-            [
-              18,
-              4
-            ]
-          ]
-        },
-        "line-color": "hsl(0, 0%, 85%)",
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                0.3,
-                0.3
-              ]
-            ]
-          ]
-        },
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              0
-            ],
-            [
-              14.25,
-              1
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-trunk_link",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": 1,
-        "line-dasharray": [
-          1,
-          0
-        ]
-      },
-      "ref": "tunnel-trunk_link-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-motorway_link",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": 1,
-        "line-dasharray": [
-          1,
-          0
-        ]
-      },
-      "ref": "tunnel-motorway_link-case"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
         ],
         [
-          "all",
+          "==",
           [
-            "==",
-            "class",
-            "pedestrian"
+            "get",
+            "subclass"
+          ],
+          "glacier"
+        ]
+      ],
+      "paint": {
+        "fill-color": "hsl(0,0%,98%)",
+        "fill-opacity": [
+          "interpolate",
+          [
+            "linear"
           ],
           [
-            "==",
-            "structure",
-            "tunnel"
-          ]
+            "zoom"
+          ],
+          0,
+          1,
+          8,
+          0.5
         ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-pedestrian",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": 1,
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.5,
-                0.4
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.2
-              ]
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
+      }
     },
     {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-service-link-track",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-dasharray": [
-          1,
-          0
-        ]
-      },
-      "ref": "tunnel-service-link-track-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-street_limited",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              13.99,
-              0
-            ],
-            [
-              14,
-              1
-            ]
-          ]
-        }
-      },
-      "ref": "tunnel-street_limited-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-street",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              13.99,
-              0
-            ],
-            [
-              14,
-              1
-            ]
-          ]
-        }
-      },
-      "ref": "tunnel-street-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-secondary-tertiary",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              8.5,
-              0.5
-            ],
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              26
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": 1,
-        "line-dasharray": [
-          1,
-          0
-        ],
-        "line-blur": 0
-      },
-      "ref": "tunnel-secondary-tertiary-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-primary",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)",
-        "line-opacity": 1,
-        "line-dasharray": [
-          1,
-          0
-        ],
-        "line-blur": 0
-      },
-      "ref": "tunnel-primary-case"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
+      "id": "landuse_residential",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "maxzoom": 16,
       "filter": [
         "all",
         [
-          "==",
-          "class",
-          "trunk"
-        ],
-        [
-          "==",
-          "brunnel",
-          "tunnel"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "tunnel-trunk",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "hsl(187, 7%, 88%)"
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "tunnel-motorway",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-dasharray": [
-          1,
-          0
-        ],
-        "line-opacity": 0.45,
-        "line-color": "#F5FAFA",
-        "line-blur": 0
-      },
-      "ref": "tunnel-motorway-case"
-    },
-    {
-      "interactive": true,
-      "minzoom": 12,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "all",
+          "match",
           [
-            "==",
-            "class",
-            "pedestrian"
+            "geometry-type"
           ],
           [
-            "==",
-            "structure",
-            "none"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-pedestrian-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              14.5
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": 0,
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {},
-      "filter": [
-        "all",
-        ["==", "$type", "LineString"],
-        [
-          "all",
-          ["==", "class", "minor"],
-          ["!has", "brunnel"]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-street-low",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [12.5, 0.5],
-            [14, 2],
-            [18, 18]
-          ]
-        },
-        "line-opacity": {
-          "base": 1,
-          "stops": [[15.5, 0], [16, 1]]
-        },
-        "line-color": "#F6FBFB"
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
         ],
         [
-          "all",
+          "==",
           [
-            "==",
-            "class",
-            "street_limited"
+            "get",
+            "class"
+          ],
+          "residential"
+        ]
+      ],
+      "paint": {
+        "fill-color": "rgb(234, 234, 230)",
+        "fill-opacity": [
+          "interpolate",
+          [
+            "exponential",
+            0.6
           ],
           [
-            "==",
-            "structure",
-            "none"
-          ]
+            "zoom"
+          ],
+          8,
+          0.8,
+          9,
+          0.6
         ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-street_limited-low",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
+      }
     },
     {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "trunk_link"
-        ],
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "in",
-          "class",
-          "link",
-          "service",
-          "track"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-service-link-track-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-street_limited-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "ref": "road-street_limited-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-street-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "ref": "road-street-low"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "in",
-          "class",
-          "secondary",
-          "tertiary"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-main-case",
-      "paint": {
-        "line-width": {
-          "base": 1.2,
-          "stops": [
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              8.5,
-              0.5
-            ],
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              26
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "==",
-          "class",
-          "primary"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-primary-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
+      "id": "landcover_wood",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landcover",
       "minzoom": 10,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
       "filter": [
         "all",
         [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "==",
-          "class",
-          "motorway_link"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-motorway_link-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "==",
-          "type",
-          "trunk_link"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-trunk_link-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 5,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "==",
-          "class",
-          "trunk"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-trunk-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              7,
-              0.5
-            ],
-            [
-              10,
-              1
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.5
-            ],
-            [
-              9,
-              1.4
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "==",
-          "class",
-          "motorway"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "minzoom": 5,
-      "id": "road-motorway-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              7,
-              0.5
-            ],
-            [
-              10,
-              1
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-join": "miter"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "all",
+          "match",
           [
-            "==",
-            "class",
-            "construction"
+            "geometry-type"
           ],
           [
-            "==",
-            "structure",
-            "none"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-construction",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-opacity": 0,
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                0.4,
-                0.8
-              ]
-            ],
-            [
-              15,
-              [
-                0.3,
-                0.6
-              ]
-            ],
-            [
-              16,
-              [
-                0.2,
-                0.3
-              ]
-            ],
-            [
-              17,
-              [
-                0.2,
-                0.25
-              ]
-            ],
-            [
-              18,
-              [
-                0.15,
-                0.15
-              ]
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 16,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
         ],
         [
-          "all",
+          "==",
           [
-            "!in",
-            "structure",
-            "bridge",
-            "tunnel"
+            "get",
+            "class"
+          ],
+          "wood"
+        ]
+      ],
+      "paint": {
+        "fill-color": "rgb(220,224,220)",
+        "fill-opacity": [
+          "interpolate",
+          [
+            "linear"
           ],
           [
-            "in",
-            "type",
-            "crossing",
-            "sidewalk"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-sidewalks",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              15,
-              1
-            ],
-            [
-              18,
-              4
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                1,
-                0.5
-              ]
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "all",
-          [
-            "!in",
-            "structure",
-            "bridge",
-            "tunnel"
+            "zoom"
           ],
-          [
-            "!in",
-            "type",
-            "crossing",
-            "sidewalk",
-            "steps"
-          ],
-          [
-            "==",
-            "class",
-            "path"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-path",
-      "paint": {
-        "line-width": 1,
-        "line-color": "#F4F8F8",
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                1,
-                0.5
-              ]
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "all",
-          [
-            "!in",
-            "structure",
-            "bridge",
-            "tunnel"
-          ],
-          [
-            "==",
-            "type",
-            "steps"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-steps",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              15,
-              1
-            ],
-            [
-              18,
-              4
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                0.3,
-                0.3
-              ]
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-trunk_link",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-opacity": 1
-      },
-      "ref": "road-trunk_link-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-motorway_link",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#F5FAFA",
-        "line-opacity": 1
-      },
-      "ref": "road-motorway_link-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-pedestrian",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-opacity": 0,
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.5,
-                0.4
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.2
-              ]
-            ]
-          ]
-        }
-      },
-      "ref": "road-pedestrian-case"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "trunk_link"
-        ],
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "in",
-          "class",
-          "link",
-          "service",
-          "track"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-service-link-track",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-street_limited",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#dcdcdc",
-        "line-opacity": 0
-      },
-      "ref": "road-street_limited-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-street",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": {
-          "base": 1,
-          "stops": [
-            [
-              15.5,
-              0
-            ],
-            [
-              16,
-              1
-            ]
-          ]
-        },
-        "line-color": "#F6FBFB"
-      },
-      "ref": "road-street-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-secondary-tertiary",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              8.5,
-              0.5
-            ],
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              26
-            ]
-          ]
-        },
-        "line-opacity": {
-          "base": 1.5,
-          "stops": [
-            [
-              7,
-              0
-            ],
-            [
-              15,
-              1
-            ]
-          ]
-        },
-        "line-color": "#F4F8F8"
-      },
-      "ref": "road-main-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-primary",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#F4F8F8",
-        "line-opacity": {
-          "base": 1.5,
-          "stops": [
-            [
-              8,
-              0
-            ],
-            [
-              14,
-              1
-            ]
-          ]
-        }
-      },
-      "ref": "road-primary-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "road-trunk",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.5
-            ],
-            [
-              9,
-              1.4
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": 1,
-        "line-color": "#F4F8F8"
-      },
-      "ref": "road-trunk-case"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "minzoom": 5,
-      "id": "road-motorway",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#F5FAFA",
-        "line-opacity": 1
-      },
-      "ref": "road-motorway-case"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "structure",
-          "bridge",
-          "tunnel"
-        ],
-        [
-          "in",
-          "class",
-          "major_rail",
-          "minor_rail"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "road-rail",
-      "paint": {
-        "line-color": "#F4F8F8",
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              0.75
-            ],
-            [
-              20,
-              1
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
-        ],
-        [
-          "all",
-          [
-            "==",
-            "class",
-            "pedestrian"
-          ],
-          [
-            "==",
-            "structure",
-            "bridge"
-          ]
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-pedestrian-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              14.5
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": 0,
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "street"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-street-low",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "street_limited"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-street_limited-low",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "trunk_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "in",
-          "class",
-          "link",
-          "service",
-          "track"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-service-link-track-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "street_limited"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-street_limited-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 11,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "street"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-street-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        },
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              13,
-              0
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "in",
-          "class",
-          "secondary",
-          "tertiary"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-secondary-tertiary-case",
-      "paint": {
-        "line-width": {
-          "base": 1.2,
-          "stops": [
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              8.5,
-              0.5
-            ],
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              26
-            ]
-          ]
-        },
-        "line-translate": [
+          8,
           0,
-          0
-        ],
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "primary"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-primary-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-translate": [
-          0,
-          0
-        ],
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "==",
-          "type",
-          "trunk_link"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk_link-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "<=",
-          "layer",
+          12,
           1
-        ],
-        [
-          "==",
-          "class",
-          "motorway_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
         ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway_link-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
+      }
     },
     {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
+      "id": "waterway",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "waterway",
+      "filter": [
+        "match",
+        [
+          "geometry-type"
+        ],
+        [
+          "LineString",
+          "MultiLineString"
+        ],
+        true,
+        false
+      ],
+      "paint": {
+        "line-color": "hsl(195,17%,78%)"
+      }
+    },
+    {
+      "id": "building",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "minzoom": 12,
+      "paint": {
+        "fill-antialias": true,
+        "fill-color": "rgb(234, 234, 229)",
+        "fill-outline-color": "rgb(219, 219, 218)"
+      }
+    },
+    {
+      "id": "tunnel_motorway_casing",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 6,
       "filter": [
         "all",
         [
-          "==",
-          "class",
-          "trunk"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              10,
-              1
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              7,
-              0.5
-            ],
-            [
-              10,
-              1
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": 0
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-join": "miter"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "construction"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-construction",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        },
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                0.4,
-                0.8
-              ]
-            ],
-            [
-              15,
-              [
-                0.3,
-                0.6
-              ]
-            ],
-            [
-              16,
-              [
-                0.2,
-                0.3
-              ]
-            ],
-            [
-              17,
-              [
-                0.2,
-                0.25
-              ]
-            ],
-            [
-              18,
-              [
-                0.15,
-                0.15
-              ]
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "steps"
-        ],
-        [
-          "==",
-          "class",
-          "path"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-path",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              15,
-              1
-            ],
-            [
-              18,
-              4
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                1,
-                0.5
-              ]
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "LineString"
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
         ],
         [
           "all",
           [
             "==",
-            "structure",
+            [
+              "get",
+              "brunnel"
+            ],
+            "tunnel"
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "motorway"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "butt",
+        "line-join": "miter"
+      },
+      "paint": {
+        "line-color": "rgb(213, 213, 213)",
+        "line-opacity": 1,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          5.8,
+          0,
+          6,
+          3,
+          20,
+          40
+        ]
+      }
+    },
+    {
+      "id": "tunnel_motorway_inner",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 6,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "==",
+            [
+              "get",
+              "brunnel"
+            ],
+            "tunnel"
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "motorway"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "rgb(234,234,234)",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          2,
+          6,
+          1.3,
+          20,
+          30
+        ]
+      }
+    },
+    {
+      "id": "aeroway-taxiway",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 12,
+      "filter": [
+        "match",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "taxiway"
+        ],
+        true,
+        false
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsl(0,0%,88%)",
+        "line-opacity": 1,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.55
+          ],
+          [
+            "zoom"
+          ],
+          13,
+          1.8,
+          20,
+          20
+        ]
+      }
+    },
+    {
+      "id": "aeroway-runway-casing",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 11,
+      "filter": [
+        "match",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "runway"
+        ],
+        true,
+        false
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsl(0,0%,88%)",
+        "line-opacity": 1,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          6,
+          17,
+          55
+        ]
+      }
+    },
+    {
+      "id": "aeroway-area",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 4,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "runway",
+            "taxiway"
+          ],
+          true,
+          false
+        ]
+      ],
+      "paint": {
+        "fill-color": "rgba(255, 255, 255, 1)",
+        "fill-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          13,
+          0,
+          14,
+          1
+        ]
+      }
+    },
+    {
+      "id": "aeroway-runway",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "minzoom": 11,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "runway"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "rgba(255, 255, 255, 1)",
+        "line-opacity": 1,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          4,
+          17,
+          50
+        ]
+      }
+    },
+    {
+      "id": "road_area_pier",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "MultiPolygon",
+            "Polygon"
+          ],
+          true,
+          false
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "pier"
+        ]
+      ],
+      "paint": {
+        "fill-antialias": true,
+        "fill-color": "rgb(242,243,240)"
+      }
+    },
+    {
+      "id": "road_pier",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "pier"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "rgb(242,243,240)",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.2
+          ],
+          [
+            "zoom"
+          ],
+          15,
+          1,
+          17,
+          4
+        ]
+      }
+    },
+    {
+      "id": "highway_path",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "path"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "rgb(234, 234, 234)",
+        "line-opacity": 0.9,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.2
+          ],
+          [
+            "zoom"
+          ],
+          13,
+          1,
+          20,
+          10
+        ]
+      }
+    },
+    {
+      "id": "highway_minor",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 8,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "minor",
+            "service",
+            "track"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsl(0,0%,88%)",
+        "line-opacity": 0.9,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.55
+          ],
+          [
+            "zoom"
+          ],
+          13,
+          1.8,
+          20,
+          20
+        ]
+      }
+    },
+    {
+      "id": "highway_major_casing",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 11,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "primary",
+            "secondary",
+            "tertiary",
+            "trunk"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": "butt",
+        "line-join": "miter"
+      },
+      "paint": {
+        "line-color": "rgb(213, 213, 213)",
+        "line-dasharray": [
+          12,
+          0
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.3
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          3,
+          20,
+          23
+        ]
+      }
+    },
+    {
+      "id": "highway_major_inner",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 11,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "primary",
+            "secondary",
+            "tertiary",
+            "trunk"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#fff",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.3
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          2,
+          20,
+          20
+        ]
+      }
+    },
+    {
+      "id": "highway_major_subtle",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "maxzoom": 11,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "primary",
+            "secondary",
+            "tertiary",
+            "trunk"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsla(0,0%,85%,0.69)",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "highway_motorway_casing",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 6,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "match",
+            [
+              "get",
+              "brunnel"
+            ],
+            [
+              "bridge",
+              "tunnel"
+            ],
+            false,
+            true
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "motorway"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "butt",
+        "line-join": "miter"
+      },
+      "paint": {
+        "line-color": "rgb(213, 213, 213)",
+        "line-dasharray": [
+          2,
+          0
+        ],
+        "line-opacity": 1,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          5.8,
+          0,
+          6,
+          3,
+          20,
+          40
+        ]
+      }
+    },
+    {
+      "id": "highway_motorway_inner",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 6,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "match",
+            [
+              "get",
+              "brunnel"
+            ],
+            [
+              "bridge",
+              "tunnel"
+            ],
+            false,
+            true
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "motorway"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          5.8,
+          "hsla(0,0%,85%,0.53)",
+          6,
+          "#fff"
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          2,
+          6,
+          1.3,
+          20,
+          30
+        ]
+      }
+    },
+    {
+      "id": "highway_motorway_subtle",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "maxzoom": 6,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "motorway"
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "hsla(0,0%,85%,0.53)",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          2,
+          6,
+          1.3
+        ]
+      }
+    },
+    {
+      "id": "railway_transit",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 16,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "transit"
+          ],
+          [
+            "match",
+            [
+              "get",
+              "brunnel"
+            ],
+            [
+              "tunnel"
+            ],
+            false,
+            true
+          ]
+        ]
+      ],
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#dddddd",
+        "line-width": 3
+      }
+    },
+    {
+      "id": "railway_transit_dashline",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 16,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "transit"
+          ],
+          [
+            "match",
+            [
+              "get",
+              "brunnel"
+            ],
+            [
+              "tunnel"
+            ],
+            false,
+            true
+          ]
+        ]
+      ],
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#fafafa",
+        "line-dasharray": [
+          3,
+          3
+        ],
+        "line-width": 2
+      }
+    },
+    {
+      "id": "railway_service",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 16,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "rail"
+          ],
+          [
+            "has",
+            "service"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#dddddd",
+        "line-width": 3
+      }
+    },
+    {
+      "id": "railway_service_dashline",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 16,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "rail"
+        ],
+        [
+          "has",
+          "service"
+        ]
+      ],
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#fafafa",
+        "line-dasharray": [
+          3,
+          3
+        ],
+        "line-width": 2
+      }
+    },
+    {
+      "id": "railway",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 13,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "!",
+            [
+              "has",
+              "service"
+            ]
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "rail"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#dddddd",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.3
+          ],
+          [
+            "zoom"
+          ],
+          16,
+          3,
+          20,
+          7
+        ]
+      }
+    },
+    {
+      "id": "railway_dashline",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 13,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "!",
+            [
+              "has",
+              "service"
+            ]
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "rail"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#fafafa",
+        "line-dasharray": [
+          3,
+          3
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.3
+          ],
+          [
+            "zoom"
+          ],
+          16,
+          2,
+          20,
+          6
+        ]
+      }
+    },
+    {
+      "id": "highway_motorway_bridge_casing",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 6,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "==",
+            [
+              "get",
+              "brunnel"
+            ],
             "bridge"
           ],
           [
             "==",
-            "type",
-            "steps"
+            [
+              "get",
+              "class"
+            ],
+            "motorway"
           ]
         ]
       ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-steps",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              15,
-              1
-            ],
-            [
-              18,
-              4
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.75,
-                1
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.75
-              ]
-            ],
-            [
-              17,
-              [
-                0.3,
-                0.3
-              ]
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
       "layout": {
-        "line-cap": "round",
-        "line-join": "round"
+        "line-cap": "butt",
+        "line-join": "miter"
       },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "layer",
+      "paint": {
+        "line-color": "rgb(213, 213, 213)",
+        "line-dasharray": [
           2,
-          3,
-          4,
-          5
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "==",
-          "type",
-          "trunk_link"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk_link",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "layer",
-          2,
-          3,
-          4,
-          5
-        ],
-        [
-          "==",
-          "class",
-          "motorway_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway_link",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "bridge-pedestrian",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        },
-        "line-dasharray": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              [
-                1,
-                0
-              ]
-            ],
-            [
-              15,
-              [
-                1.5,
-                0.4
-              ]
-            ],
-            [
-              16,
-              [
-                1,
-                0.2
-              ]
-            ]
-          ]
-        }
-      },
-      "ref": "bridge-pedestrian-case"
-    },
-    {
-      "interactive": true,
-      "minzoom": 14,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!=",
-          "type",
-          "trunk_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "in",
-          "class",
-          "link",
-          "service",
-          "track"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-service-link-track",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              14,
-              0.5
-            ],
-            [
-              18,
-              12
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "bridge-street_limited",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "ref": "bridge-street_limited-low"
-    },
-    {
-      "interactive": true,
-      "metadata": {
-      },
-      "id": "bridge-street",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12.5,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "ref": "bridge-street-low"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "in",
-          "type",
-          "secondary",
-          "tertiary"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-secondary-tertiary",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              8.5,
-              0.5
-            ],
-            [
-              10,
-              0.75
-            ],
-            [
-              18,
-              26
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "==",
-          "type",
-          "primary"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-primary",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "layer",
-          2,
-          3,
-          4,
-          5
-        ],
-        [
-          "==",
-          "class",
-          "trunk"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "!in",
-          "layer",
-          2,
-          3,
-          4,
-          5
-        ],
-        [
-          "==",
-          "class",
-          "motorway"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#F5FAFA",
-        "line-opacity": 1
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "in",
-          "class",
-          "major_rail",
-          "minor_rail"
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-rail",
-      "paint": {
-        "line-color": "#f7f7f9",
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              14,
-              0.75
-            ],
-            [
-              20,
-              1
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "==",
-          "type",
-          "trunk_link"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk_link-2-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway_link-2-case copy",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.75
-            ],
-            [
-              20,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "trunk"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk-2-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              10,
-              1
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway-2-case",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              7,
-              0.5
-            ],
-            [
-              10,
-              1
-            ],
-            [
-              16,
-              2
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-gap-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          "==",
-          "type",
-          "trunk_link"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk_link-2",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "minzoom": 13,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway_link"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway_link-2",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              12,
-              0.5
-            ],
-            [
-              14,
-              2
-            ],
-            [
-              18,
-              18
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "trunk"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-trunk-2",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "class",
-          "motorway"
-        ],
-        [
-          "==",
-          "brunnel",
-          "bridge"
-        ],
-        [
-          ">=",
-          "layer",
-          2
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "bridge-motorway-2",
-      "paint": {
-        "line-width": {
-          "base": 1.5,
-          "stops": [
-            [
-              5,
-              0.75
-            ],
-            [
-              18,
-              32
-            ]
-          ]
-        },
-        "line-color": "#f7f7f9",
-        "line-opacity": {
-          "stops": [
-            [
-              11.5,
-              0
-            ],
-            [
-              12,
-              1
-            ],
-            [
-              14,
-              1
-            ],
-            [
-              14.01,
-              0
-            ]
-          ]
-        }
-      },
-      "source-layer": "transportation"
-    },
-    {
-      "interactive": true,
-      "layout": {
-        "line-join": "bevel",
-        "visibility": "none"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "maritime",
           0
         ],
+        "line-opacity": 1,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          5.8,
+          0,
+          6,
+          5,
+          20,
+          45
+        ]
+      }
+    },
+    {
+      "id": "highway_motorway_bridge_inner",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "minzoom": 6,
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "geometry-type"
+          ],
+          [
+            "LineString",
+            "MultiLineString"
+          ],
+          true,
+          false
+        ],
+        [
+          "all",
+          [
+            "==",
+            [
+              "get",
+              "brunnel"
+            ],
+            "bridge"
+          ],
+          [
+            "==",
+            [
+              "get",
+              "class"
+            ],
+            "motorway"
+          ]
+        ]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          5.8,
+          "hsla(0,0%,85%,0.53)",
+          6,
+          "#fff"
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.4
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          2,
+          6,
+          1.3,
+          20,
+          30
+        ]
+      }
+    },
+    {
+      "id": "boundary_3",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "boundary",
+      "minzoom": 8,
+      "filter": [
+        "all",
         [
           ">=",
-          "admin_level",
+          [
+            "get",
+            "admin_level"
+          ],
           3
         ],
         [
           "<=",
-          "admin_level",
-          4
+          [
+            "get",
+            "admin_level"
+          ],
+          6
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
+          1
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "disputed"
+          ],
+          1
+        ],
+        [
+          "!",
+          [
+            "has",
+            "claimed_by"
+          ]
         ]
       ],
-      "type": "line",
-      "source": "carto",
-      "id": "admin-3-4-boundaries-bg",
       "paint": {
-        "line-color": "hsl(0, 0%, 84%)",
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              3.5
-            ],
-            [
-              10,
-              8
-            ]
-          ]
-        },
-        "line-opacity": 1,
+        "line-color": "hsl(0,0%,70%)",
         "line-dasharray": [
           1,
-          0
+          1
         ],
-        "line-translate": [
-          0,
-          0
-        ],
-        "line-blur": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              0
-            ],
-            [
-              8,
-              3
-            ]
-          ]
-        }
-      },
-      "source-layer": "boundary"
+        "line-width": [
+          "interpolate",
+          [
+            "linear",
+            1
+          ],
+          [
+            "zoom"
+          ],
+          7,
+          1,
+          11,
+          2
+        ]
+      }
     },
     {
-      "interactive": true,
-      "minzoom": 1,
-      "layout": {
-        "line-join": "miter",
-        "visibility": "none"
-      },
-      "metadata": {
-      },
+      "id": "boundary_2",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "boundary",
       "filter": [
         "all",
         [
           "==",
-          "admin_level",
+          [
+            "get",
+            "admin_level"
+          ],
           2
         ],
         [
-          "==",
-          "maritime",
-          0
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
+          1
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "disputed"
+          ],
+          1
+        ],
+        [
+          "!",
+          [
+            "has",
+            "claimed_by"
+          ]
         ]
       ],
-      "type": "line",
-      "source": "carto",
-      "id": "admin-2-boundaries-bg",
-      "paint": {
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              3.5
-            ],
-            [
-              10,
-              10
-            ]
-          ]
-        },
-        "line-color": "hsl(0, 0%, 84%)",
-        "line-opacity": 1,
-        "line-translate": [
-          0,
-          0
-        ],
-        "line-blur": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              0
-            ],
-            [
-              10,
-              2
-            ]
-          ]
-        }
-      },
-      "source-layer": "boundary"
-    },
-    {
-      "interactive": true,
       "layout": {
-        "line-join": "round",
         "line-cap": "round",
-        "visibility": "visible"
+        "line-join": "round"
       },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "maritime",
-          0
-        ],
-        [
-          ">=",
-          "admin_level",
-          3
-        ],
-        [
-          "<=",
-          "admin_level",
-          4
-        ]
-      ],
-      "type": "line",
-      "source": "carto",
-      "id": "admin-3-4-boundaries",
       "paint": {
-        "line-dasharray": [
-          2,
-          3
+        "line-color": "hsl(0,0%,70%)",
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          0,
+          0.4,
+          4,
+          1
         ],
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              7,
-              0.75
-            ],
-            [
-              12,
-              1.5
-            ]
-          ]
-        },
-        "line-opacity": 1,
-        "line-color": "#B5BDC1"
-      },
-      "source-layer": "boundary"
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          1,
+          5,
+          1.2,
+          12,
+          3
+        ]
+      }
     },
     {
-      "interactive": true,
-      "minzoom": 1,
-      "layout": {
-        "line-join": "round",
-        "line-cap": "round",
-        "visibility": "visible"
-      },
-      "metadata": {
-      },
-      "filter": [
-        "all",
-        [
-          "==",
-          "admin_level",
-          2
-        ],
-        [
-          "==",
-          "disputed",
-          0
-        ],
-        [
-          "==",
-          "maritime",
-          0
-        ]
-      ],
+      "id": "boundary_disputed",
       "type": "line",
-      "source": "carto",
-      "id": "admin-2-boundaries",
-      "paint": {
-        "line-color": "#B5BDC1",
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              0.5
-            ],
-            [
-              10,
-              2
-            ]
-          ]
-        },
-        "line-opacity": 1
-      },
-      "source-layer": "boundary"
-    },
-    {
-      "interactive": true,
-      "minzoom": 1,
-      "layout": {
-        "line-join": "round",
-        "visibility": "none"
-      },
-      "metadata": {
-      },
+      "source": "openmaptiles",
+      "source-layer": "boundary",
       "filter": [
         "all",
         [
-          "==",
-          "admin_level",
-          2
-        ],
-        [
-          "==",
-          "disputed",
+          "!=",
+          [
+            "get",
+            "maritime"
+          ],
           1
         ],
         [
           "==",
-          "maritime",
-          0
+          [
+            "get",
+            "disputed"
+          ],
+          1
         ]
       ],
-      "type": "line",
-      "source": "carto",
-      "id": "admin-2-boundaries-dispute",
       "paint": {
+        "line-color": "hsl(0,0%,70%)",
         "line-dasharray": [
-          1.5,
-          1.5
+          1,
+          2
         ],
-        "line-color": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              "hsl(0, 0%, 70%)"
-            ],
-            [
-              4,
-              "hsl(0, 0%, 62%)"
-            ]
-          ]
-        },
-        "line-width": {
-          "base": 1,
-          "stops": [
-            [
-              3,
-              0.5
-            ],
-            [
-              10,
-              2
-            ]
-          ]
-        },
-        "line-opacity": 1
-      },
-      "source-layer": "boundary"
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          1,
+          5,
+          1.2,
+          12,
+          3
+        ]
+      }
     }
   ],
-  "id": "cive48w2e001a2imn5mcu2vrs",
-  "owner": "deck"
+  "name": "Deck-Light"
 }

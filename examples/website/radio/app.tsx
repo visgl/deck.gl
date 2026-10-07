@@ -136,7 +136,7 @@ function getTooltipText(
 export default function App({
   device,
   data,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  mapStyle = 'https://tiles.openfreemap.org/styles/positron',
   showMinimap = true
 }: {
   device?: Device;
