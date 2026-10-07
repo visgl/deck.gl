@@ -7,7 +7,7 @@ import {initializeResources, render, finalizeResources, RenderResources} from '.
 
 import SceneView from '@arcgis/core/views/SceneView';
 import type {DeckProps} from '@deck.gl/core';
-import MapView from '../../core/src/views/map-view';
+import {MapView} from '@deck.gl/core';
 
 // Web Mercator scale at zoom 0 for 256 px tiles; deck.gl uses 512 px tiles,
 // so the final zoom is shifted by -1.
