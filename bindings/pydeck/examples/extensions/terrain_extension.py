@@ -49,5 +49,7 @@ r = pdk.Deck(
         '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a> | '
         '<a href="https://versatiles.org/sources/">VersaTiles sources</a>'
     ),
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("terrain_extension.html")

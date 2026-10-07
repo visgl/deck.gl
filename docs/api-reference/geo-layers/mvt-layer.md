@@ -25,9 +25,7 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 
 const layer = new MVTLayer({
   id: 'MVTLayer',
-  data: [
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
   minZoom: 0,
   maxZoom: 14,
   getFillColor: f => {
@@ -88,9 +86,7 @@ type PropertiesType = {
 
 const layer = new MVTLayer<PropertiesType>({
   id: 'MVTLayer',
-  data: [
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
   minZoom: 0,
   maxZoom: 14,
   getFillColor: (f: Feature<Geometry, PropertiesType>) => {
@@ -154,9 +150,7 @@ type PropertiesType = {
 function App() {
   const layer = new MVTLayer<PropertiesType>({
     id: 'MVTLayer',
-    data: [
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
     minZoom: 0,
     maxZoom: 14,
     getFillColor: (f: Feature<Geometry, PropertiesType>) => {

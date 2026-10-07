@@ -70,6 +70,8 @@ widgets = [
 ]
 
 deck = pdk.Deck(
+    map_provider="maplibre",
+    map_style="https://tiles.openfreemap.org/styles/dark",
     layers=[countries_layer, airports_layer],
     initial_view_state=view_state,
     widgets=widgets,
