@@ -13,7 +13,7 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -781,4 +781,45 @@ test('MVTLayer#GeoJsonLayer.defaultProps', () => {
   ];
 
   testLayer({Layer: TestMVTLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('MVTLayer#binary follows the current viewport and props', () => {
+  const mercatorViewport = new WebMercatorViewport({width: 400, height: 300, zoom: 2});
+  const globeViewport = new GlobeViewport({width: 400, height: 300, zoom: 2});
+  const binaryStates: boolean[] = [];
+  let reloadCount = 0;
+  const recordBinary = ({layer}) => binaryStates.push(layer.state.binary);
+  // Tiles loaded in one format must be requested again in the other
+  const countReloads = ({layer}) => {
+    const {tileset} = layer.state;
+    const reloadAll = tileset.reloadAll.bind(tileset);
+    tileset.reloadAll = () => {
+      reloadCount++;
+      reloadAll();
+    };
+  };
+
+  testLayer({
+    Layer: MVTLayer,
+    viewport: mercatorViewport,
+    testCases: [
+      {
+        props: {data: ['https://tiles/{z}/{x}/{y}.mvt'], binary: true},
+        onAfterUpdate: args => {
+          recordBinary(args);
+          countReloads(args);
+        }
+      },
+      // GlobeView does not support binary tiles, even when the layer was created in a MapView
+      {updateProps: {}, viewport: globeViewport, onAfterUpdate: recordBinary},
+      {updateProps: {}, viewport: mercatorViewport, onAfterUpdate: recordBinary},
+      {updateProps: {binary: false}, onAfterUpdate: recordBinary},
+      // No change in format, no reload
+      {updateProps: {opacity: 0.5}, onAfterUpdate: recordBinary}
+    ],
+    onError: error => expect(error).toBeFalsy()
+  });
+
+  expect(binaryStates).toEqual([true, false, true, false, false]);
+  expect(reloadCount).toBe(3);
 });

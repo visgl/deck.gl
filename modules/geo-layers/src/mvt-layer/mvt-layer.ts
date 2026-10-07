@@ -127,10 +127,8 @@ export default class MVTLayer<
 
   initializeState(): void {
     super.initializeState();
-    // GlobeView doesn't work well with binary data
-    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
     this.setState({
-      binary,
+      binary: this._getBinary(this.props, this.context.viewport),
       data: null,
       tileJSON: null,
       hoveredFeatureId: null,
@@ -138,11 +136,24 @@ export default class MVTLayer<
     });
   }
 
+  /** Whether to request binary tiles. GlobeView doesn't work well with binary data. */
+  private _getBinary(props: this['props'], viewport: Viewport): boolean {
+    return viewport.resolution !== undefined ? false : props.binary;
+  }
+
   get isLoaded(): boolean {
     return Boolean(this.state?.data && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
+    // The viewport can change type (e.g. MapView to GlobeView) and `binary` can change after init
+    const binary = this._getBinary(props, context.viewport);
+    if (binary !== this.state.binary) {
+      this.setState({binary});
+      // Loaded tiles were decoded in the other format
+      this.state.tileset?.reloadAll();
+    }
+
     if (changeFlags.dataChanged) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateTileData();
