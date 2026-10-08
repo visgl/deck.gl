@@ -9,6 +9,7 @@ import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resourc
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
+import {Ellipsoid} from '@math.gl/geospatial';
 
 const normalizationScale = 512 / 40075016.6855;
 const projection = {forward: p => p.slice(), inverse: p => p.slice()};
@@ -177,12 +178,9 @@ test('external scale field estimates latitude-dependent scale for XY and meter a
   });
   const data = viewport.getSizeScaleData(8);
   const offset = (5 * 8 + 4) * 4;
-  const latitude = 33.75;
-  const metersPerDegree = 40075016.6855 / 360;
-  expect(data[offset]).toBeCloseTo(
-    1 / metersPerDegree / Math.sqrt(Math.cos((latitude * Math.PI) / 180)),
-    9
-  );
+  // WGS84 surface distances at 33.75 degrees: 92654.5483 m east and
+  // 110917.8786 m north per degree, independently evaluated in Earth-fixed space.
+  expect(data[offset]).toBeCloseTo(1 / Math.sqrt(92654.5483 * 110917.8786), 12);
   expect(data[offset + 1]).toBeCloseTo(0, 9);
   expect(data[offset + 2]).toBeGreaterThan(0);
   expect(data[offset + 3]).toBe(data[offset]);
@@ -212,13 +210,18 @@ test('64x64 nearest-slope Mercator sizing stays within 0.14 percent including bo
     toBounds: [0, 0, 512, 512]
   });
   const data = viewport.getSizeScaleData();
+  const a = Ellipsoid.WGS84.radii[0];
+  const b = Ellipsoid.WGS84.radii[2];
   let maxError = 0;
   for (let i = 0; i <= 20000; i++) {
     const y = (i * 512) / 20000;
     const row = Math.min(63, Math.floor(y / 8));
     const offset = (row * 64 + 32) * 4;
     const scale = data[offset] + data[offset + 1] * -4 + data[offset + 2] * (y - (row + 0.5) * 8);
-    const exact = (Math.cosh((y / 512 - 0.5) * 2 * Math.PI) * 512) / 40075016.6855;
+    const latitude = (worldToLngLat([256, y])[1] * Math.PI) / 180;
+    const w = 1 - (1 - (b / a) ** 2) * Math.sin(latitude) ** 2;
+    // Analytic area scale of spherical Mercator relative to WGS84 ground area.
+    const exact = ((512 / 40075016.6855) * (a * w)) / (b * Math.cos(latitude));
     maxError = Math.max(maxError, Math.abs(scale / exact - 1));
   }
   expect(maxError).toBeLessThan(0.0014);

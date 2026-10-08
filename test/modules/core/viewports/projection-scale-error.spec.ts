@@ -4,11 +4,13 @@
 
 import {test, expect, vi} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
+import {Ellipsoid} from '@math.gl/geospatial';
+import {Vector3} from '@math.gl/core';
 import {estimateProjectionScaleError} from './projection-scale-error';
 
 function createProjection(to: string) {
-  const converter = new Projection({from: 'EPSG:4326', to});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to});
   return {forward: converter.project, inverse: converter.unproject};
 }
 
@@ -25,6 +27,11 @@ const stereographic = createProjection(
 const stereographicExtent = Math.abs(stereographic.forward([0, -60])[1]);
 const albers = createProjection(
   '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
+);
+const utm18 = createProjection('+proj=utm +zone=18 +datum=WGS84 +units=m');
+// EPSG:5070 uses NAD83/GRS80 and the two standard parallels of the contiguous US.
+const albersNad83 = createProjection(
+  '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 );
 const cases = [
   {
@@ -70,7 +77,30 @@ const cases = [
         stereographicExtent
       ] as [number, number, number, number]
     },
-    getReferenceScale: ([, latitude]: number[]) => 2 / (1 + Math.sin((latitude * Math.PI) / 180))
+    getReferenceScale: ([, latitude]: number[]) => {
+      // Spherical projection formulas still map physical WGS84 ground distances.
+      const a = Ellipsoid.WGS84.radii[0];
+      const b = Ellipsoid.WGS84.radii[2];
+      const sinLatitude = Math.sin((latitude * Math.PI) / 180);
+      const w = 1 - (1 - (b / a) ** 2) * sinLatitude ** 2;
+      return (2 * 6371008.8 * w) / ((1 + sinLatitude) * b);
+    }
+  },
+  {
+    name: 'utm-18n',
+    options: {
+      projection: utm18,
+      fromBounds: [-78, 0, -72, 84] as [number, number, number, number],
+      toBounds: [100000, 0, 900000, 9400000] as [number, number, number, number]
+    }
+  },
+  {
+    name: 'albers-nad83',
+    options: {
+      projection: albersNad83,
+      fromBounds: [-125, 24, -66, 50] as [number, number, number, number],
+      toBounds: [-3000000, 0, 3000000, 3500000] as [number, number, number, number]
+    }
   },
   {
     name: 'albers-conic',
@@ -81,6 +111,62 @@ const cases = [
     }
   }
 ];
+
+test('UTM central-meridian scales match the independent 0.9996 ground-scale reference', () => {
+  const projection = utm18;
+  const viewport = new CustomProjectionViewport({projection});
+  const normalizationScale = 512 / 40075016.6855;
+  for (const latitude of [0, 42, 75]) {
+    const mapPosition = projection.forward([-75, latitude]);
+    for (const scale of viewport.getDistanceScales(mapPosition).unitsPerMeter) {
+      expect(scale / normalizationScale, `UTM scale at latitude ${latitude}`).toBeCloseTo(
+        0.9996,
+        6
+      );
+    }
+  }
+});
+
+test.each([
+  {name: 'UTM 18N', projection: utm18, position: [-75, 0]},
+  {name: 'UTM 18N', projection: utm18, position: [-75, 42]},
+  {name: 'UTM 18N', projection: utm18, position: [-75, 75]},
+  {name: 'UTM 18N', projection: utm18, position: [-78, 10]},
+  {name: 'Albers NAD83', projection: albersNad83, position: [-96, 29.5]},
+  {name: 'Albers NAD83', projection: albersNad83, position: [-80, 42]}
+])('$name scales at $position match independent ground displacements', ({projection, position}) => {
+  // Review regression locations: compare each axis and area against surface
+  // displacements, independently of the estimator's ellipsoidal curvature formula.
+  const step = 0.00001;
+  const [longitude, latitude] = position;
+  const mapOrigin = projection.forward(position);
+  const mapEast = new Vector3(projection.forward([longitude + step, latitude, 0])).subtract([
+    ...mapOrigin.slice(0, 2),
+    0
+  ]);
+  const mapNorth = new Vector3(projection.forward([longitude, latitude + step, 0])).subtract([
+    ...mapOrigin.slice(0, 2),
+    0
+  ]);
+  const groundOrigin = Ellipsoid.WGS84.cartographicToCartesian([longitude, latitude, 0]);
+  const groundEast = new Vector3(
+    Ellipsoid.WGS84.cartographicToCartesian([longitude + step, latitude, 0])
+  ).subtract(groundOrigin);
+  const groundNorth = new Vector3(
+    Ellipsoid.WGS84.cartographicToCartesian([longitude, latitude + step, 0])
+  ).subtract(groundOrigin);
+  const reference = [
+    mapEast.len() / groundEast.len(),
+    mapNorth.len() / groundNorth.len(),
+    Math.sqrt(mapEast.cross(mapNorth).len() / groundEast.cross(groundNorth).len())
+  ];
+  const viewport = new CustomProjectionViewport({projection});
+  const scales = viewport.getDistanceScales(mapOrigin).unitsPerMeter;
+  const normalizationScale = 512 / 40075016.6855;
+  for (let axis = 0; axis < 3; axis++) {
+    expect(scales[axis] / normalizationScale, `axis ${axis}`).toBeCloseTo(reference[axis], 6);
+  }
+});
 
 test.each(cases)(
   'CustomProjectionViewport scale accuracy: $name',

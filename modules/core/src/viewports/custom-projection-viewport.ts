@@ -14,6 +14,12 @@ import {PROJECTION_MODE} from '../lib/constants';
 
 const EC = 40075016.6855;
 const NORMALIZATION_SCALE = 512 / EC;
+// WGS84 axes in meters. The polar axis is derived from NGA's a and inverse flattening:
+// b = a * (1 - 1 / 298.257223563).
+// https://earth-info.nga.mil/index.php?action=wgs84&dir=wgs84
+const WGS84_SEMI_MAJOR_AXIS = 6378137;
+const WGS84_SEMI_MINOR_AXIS = 6356752.314245179;
+const WGS84_ECCENTRICITY_SQUARED = 1 - (WGS84_SEMI_MINOR_AXIS / WGS84_SEMI_MAJOR_AXIS) ** 2;
 
 /** A planar map converter, compatible with proj4js converters targeting a meter-based CRS. */
 export type ProjectionConverter = {
@@ -48,7 +54,7 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   resolution?: number;
   /** Ground meters per map meter along the X/Y axes, evaluated at [x, y] in toCrs.
    * Describes horizontal projection distortion; converted altitude is always in meters.
-   * Without this callback, estimates distance from fromCrs: spherical for degrees, planar
+   * Without this callback, estimates distance from fromCrs: WGS84 ellipsoidal for degrees, planar
    * for recognized linear units, or no distortion correction for an unknown CRS.
    */
   getDistanceScale?: (position: [number, number]) => [number, number];
@@ -403,14 +409,14 @@ function getCustomProjectionUnitsPerMeter(
     localScale = [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
   } else {
     const position = worldPosition || projection.inverse(mapPosition!);
-    const spherical = isSphericalCrs(fromCrs);
+    const geographic = isGeographicCrs(fromCrs);
     localScale =
-      spherical === undefined || !position
+      geographic === undefined || !position
         ? [1, 1, 1]
         : estimateUnitsPerMeter(
             projection,
             clampInput(position, fromBounds),
-            spherical,
+            geographic,
             fromBounds
           );
   }
@@ -420,7 +426,7 @@ function getCustomProjectionUnitsPerMeter(
 }
 
 /** Classify world coordinates without resolving or interpreting the full CRS definition. */
-function isSphericalCrs(crs: string): boolean | undefined {
+function isGeographicCrs(crs: string): boolean | undefined {
   const s = crs.trim().toLowerCase();
   // Explicit unit declarations take precedence over the projection name.
   if (/\+units=(?:degree|degrees|deg)\b/.test(s)) return true;
@@ -431,21 +437,25 @@ function isSphericalCrs(crs: string): boolean | undefined {
   return undefined;
 }
 
-/** Estimate local distortion relative to spherical or planar world-coordinate distances. */
+/** Estimate local distortion relative to WGS84 ellipsoidal or planar input distances. */
 function estimateUnitsPerMeter(
   projection: ProjectionConverter,
   center: number[],
-  spherical: boolean,
+  geographic: boolean,
   fromBounds?: CustomProjectionViewportOptions['fromBounds']
 ): [number, number, number] {
-  const metersPerDegree = EC / 360;
-  const metersPerUnit = spherical
-    ? [
-        metersPerDegree * Math.max(1e-6, Math.abs(Math.cos((center[1] * Math.PI) / 180))),
-        metersPerDegree,
-        1
-      ]
-    : [1, 1, 1];
+  const metersPerUnit = [1, 1, 1];
+  if (geographic) {
+    // Ground distance belongs to the input locations, independently of the
+    // target projection's spherical or ellipsoidal coordinate formulas.
+    const latitude = (center[1] * Math.PI) / 180;
+    const w = 1 - WGS84_ECCENTRICITY_SQUARED * Math.sin(latitude) ** 2;
+    const primeVerticalRadius = WGS84_SEMI_MAJOR_AXIS / Math.sqrt(w);
+    const meridionalRadius = (primeVerticalRadius * (1 - WGS84_ECCENTRICITY_SQUARED)) / w;
+    metersPerUnit[0] =
+      primeVerticalRadius * Math.max(1e-6, Math.abs(Math.cos(latitude))) * (Math.PI / 180);
+    metersPerUnit[1] = meridionalRadius * (Math.PI / 180);
+  }
   // Sample a one-meter displacement in each input direction.
   const stepX = 1 / metersPerUnit[0];
   const stepY = 1 / metersPerUnit[1];

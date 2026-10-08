@@ -4,6 +4,8 @@
 
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {CustomProjectionViewportOptions} from '@deck.gl/core';
+import {Ellipsoid} from '@math.gl/geospatial';
+import {Vector3} from '@math.gl/core';
 
 type ProjectionOptions = Required<
   Pick<CustomProjectionViewportOptions, 'projection' | 'fromBounds' | 'toBounds'>
@@ -83,15 +85,23 @@ export function estimateProjectionScaleError(
     const origin = projection.forward(input.slice());
     const east = projection.forward([input[0] + dx, input[1]]);
     const north = projection.forward([input[0], input[1] + dy]);
-    const meters = (step * 40075016.6855) / 360;
+    // Independent ground reference: tiny WGS84 surface displacements, without
+    // reusing the production estimator's meters-per-degree formula.
+    const groundOrigin = Ellipsoid.WGS84.cartographicToCartesian([input[0], input[1], 0]);
+    const groundEast = new Vector3(
+      Ellipsoid.WGS84.cartographicToCartesian([input[0] + dx, input[1], 0])
+    ).subtract(groundOrigin);
+    const groundNorth = new Vector3(
+      Ellipsoid.WGS84.cartographicToCartesian([input[0], input[1] + dy, 0])
+    ).subtract(groundOrigin);
+    const groundArea = groundEast.cross(groundNorth).len();
     return (
       normalization *
       Math.sqrt(
         Math.abs(
           (east[0] - origin[0]) * (north[1] - origin[1]) -
             (east[1] - origin[1]) * (north[0] - origin[0])
-        ) /
-          (meters * meters * Math.abs(Math.cos((input[1] * Math.PI) / 180)))
+        ) / groundArea
       )
     );
   }
