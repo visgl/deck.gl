@@ -257,14 +257,6 @@ class Deck(JSONMixin):
         css_background_color : str, default None
             Background color for visualization, specified as a string in any format accepted for CSS colors.
 
-        Notes
-        -----
-        The deck JSON is embedded in the HTML in compact form, without
-        indentation or separator whitespace, to reduce file size. When
-        :meth:`to_json` is inherited, the payload is serialized compact in one
-        pass; a subclass that overrides it has its string compacted instead,
-        so overrides keep shaping the HTML.
-
         Returns
         -------
         str
