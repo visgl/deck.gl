@@ -35,7 +35,8 @@ import {
   DefaultProps,
   ProjectUniforms,
   project,
-  project32
+  project32,
+  _deepEqual as deepEqual
 } from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import AggregationLayer, {AggregationLayerProps} from './aggregation-layer';
@@ -353,9 +354,10 @@ export default class HeatmapLayer<
     const {dimensions} = this.state;
     changeFlags.dataChanged =
       (opts.changeFlags.projectionChanged && 'projection changed') ||
-      (opts.context.viewport.preproject &&
-        opts.props.modelMatrix !== opts.oldProps.modelMatrix &&
-        'model matrix changed') ||
+      // Uniform transforms must regenerate the weight texture even when packed positions stay unchanged.
+      ((!deepEqual(opts.props.modelMatrix, opts.oldProps.modelMatrix, 1) ||
+        !deepEqual(opts.props.coordinateOrigin, opts.oldProps.coordinateOrigin, 1)) &&
+        'position transform changed') ||
       (this.isAttributeChanged() && 'attribute changed') || // if any attribute is changed
       (this.isAggregationDirty(opts, {
         compareAll: true,

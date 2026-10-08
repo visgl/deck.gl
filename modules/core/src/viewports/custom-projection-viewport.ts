@@ -205,12 +205,26 @@ export default class CustomProjectionViewport extends Viewport {
 
   /** Returns ground-meter scales at a map-meter anchor in toCrs, or the camera center.
    * The fixed map-meter-to-common scale is independent of the anchor.
+   * Falls back to camera-center scales when the anchor cannot be inverse-projected.
    */
   getDistanceScales(coordinateOrigin?: number[]): DistanceScales {
     if (!coordinateOrigin) return this.distanceScales;
+    let worldPosition: number[] | undefined;
+    if (!this.projectionOptions.getDistanceScale) {
+      // Cartesian data can lie outside the inverse domain; retain camera sizing in that case.
+      try {
+        const position = this.projectionOptions.projection.inverse(coordinateOrigin);
+        if (!position || position.length < 2 || !position.every(Number.isFinite))
+          return this.distanceScales;
+        worldPosition = position;
+      } catch {
+        return this.distanceScales;
+      }
+    }
     const unitsPerMeter = getCustomProjectionUnitsPerMeter(
       this.projectionOptions,
-      coordinateOrigin
+      coordinateOrigin,
+      worldPosition
     );
     return {
       ...this.distanceScales,

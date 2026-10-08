@@ -869,3 +869,20 @@ test('CustomProjectionViewport evaluates distance scales at a fixed toCrs anchor
   expect(first.distanceScales.unitsPerMeter).toEqual(Array(3).fill(normalizationScale));
   expect(moved.distanceScales.unitsPerMeter).not.toEqual(first.distanceScales.unitsPerMeter);
 });
+
+test('CustomProjectionViewport retains camera distance scales when an anchor cannot be inverted', () => {
+  for (const failure of ['throw', 'null', 'nonfinite']) {
+    const inverse = vi.fn(() => {
+      if (failure === 'throw') throw new Error('Outside inverse domain');
+      return failure === 'null' ? null : [NaN, NaN];
+    });
+    const viewport = new CustomProjectionViewport({
+      fromCrs: '+proj=cart +units=m',
+      projection: {forward: ([x, y]) => [x * 2, y * 3], inverse}
+    });
+    // Use non-unit distortion to distinguish cached sizing from a generic fallback.
+    expect(viewport.distanceScales.unitsPerMeter).not.toEqual(Array(3).fill(normalizationScale));
+    expect(viewport.getDistanceScales([100, 200])).toBe(viewport.distanceScales);
+    expect(inverse).toHaveBeenCalledExactlyOnceWith([100, 200]);
+  }
+});

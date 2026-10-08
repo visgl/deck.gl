@@ -588,6 +588,60 @@ test('HeatmapLayer uses the same bounds and texture coordinates as a non-geo vie
   }
 });
 
+for (const deviceType of ['webgl', 'webgpu']) {
+  test(`HeatmapLayer refreshes Cartesian transforms by value: ${deviceType}`, async ({skip}) => {
+    const targetDevice = deviceType === 'webgpu' ? await getWebGPUTestDevice() : device;
+    if (!targetDevice) return skip();
+    for (const viewport of [
+      createViewport(),
+      new WebMercatorViewport({width: 400, height: 300, zoom: 4})
+    ]) {
+      const manager = createManager(viewport, targetDevice);
+      const getPosition = vi.fn(p => p);
+      let layer = new HeatmapLayer({
+        data,
+        getPosition,
+        coordinateSystem: 'cartesian',
+        modelMatrix,
+        coordinateOrigin: [10, 20, 30],
+        weightsTextureSize: 32
+      });
+      try {
+        manager.setLayers([layer]);
+        const positions =
+          layer.getAttributeManager()!.attributes[layer.state.positionAttributeName];
+        const packedPositions = positions.value;
+        const update = vi.spyOn(HeatmapLayer.prototype, '_updateWeightmap');
+        layer = layer.clone({
+          modelMatrix: new Matrix4(modelMatrix),
+          coordinateOrigin: [10, 20, 30],
+          // Exercise updateState while the transform values remain equal.
+          opacity: 0.5
+        });
+        manager.setLayers([layer]);
+        expect(update).not.toHaveBeenCalled();
+
+        layer = layer.clone({coordinateOrigin: [40, 50, 60]});
+        manager.setLayers([layer]);
+        expect(update).toHaveBeenCalledTimes(1);
+
+        layer = layer.clone({modelMatrix: new Matrix4().translate([40, 50, 60])});
+        manager.setLayers([layer]);
+        expect(update).toHaveBeenCalledTimes(2);
+        expect(
+          layer.getAttributeManager()!.attributes[layer.state.positionAttributeName].value
+        ).toBe(packedPositions);
+        expect(Array.from(packedPositions!.slice(0, data.length * 3))).toEqual(data.flat());
+        expect(getPosition).toHaveBeenCalledTimes(data.length);
+        update.mockRestore();
+      } finally {
+        manager.finalize();
+        vi.restoreAllMocks();
+      }
+    }
+  });
+}
+
 test('Cartesian aggregation bounds apply layer transforms before any viewport projection', () => {
   const viewport = new Viewport({
     width: 400,
