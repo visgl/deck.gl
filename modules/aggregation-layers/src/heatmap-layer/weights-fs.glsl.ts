@@ -15,6 +15,7 @@ float gaussianKDE(float u){
 }
 void main()
 {
+  geometry.uv = vec2(0.);
   float dist = length(gl_PointCoord - vec2(0.5, 0.5));
   if (dist > 0.5) {
     discard;
