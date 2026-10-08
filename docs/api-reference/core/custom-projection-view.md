@@ -86,7 +86,7 @@ Enable interaction with `controller: true`. The default [CustomProjectionControl
 
 ## Meter Size
 
-Layers using `sizeUnits: 'meters'`, `radiusUnits: 'meters'` or `widthUnits: 'meters'` adjust their sizes at each object's location. Altitude receives the same local correction.
+Layers using `sizeUnits: 'meters'`, `radiusUnits: 'meters'` or `widthUnits: 'meters'` adjust their sizes at each object's location. Position altitude retains the fixed map-meter-to-common scale.
 
 The correction is area-equivalent: a small geographic circle can become an ellipse under projection, as illustrated by [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix). Instead of stretching a marker into that ellipse, deck.gl preserves its shape and approximates the same projected area. Equally sized markers grow toward the poles in Web Mercator and remain approximately uniform in Equal Earth.
 

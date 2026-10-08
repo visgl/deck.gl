@@ -36,7 +36,7 @@ for (const geospatial of [false, true]) {
     expect(viewport.projectPosition([10, 20, 50])).toEqual([
       30 * normalizationScale,
       80 * normalizationScale,
-      100 * normalizationScale
+      50 * normalizationScale
     ]);
     expect(
       getWorldPosition([10, 20, 50], {
@@ -44,7 +44,7 @@ for (const geospatial of [false, true]) {
         coordinateSystem: 'default',
         coordinateOrigin: [0, 0, 0]
       })
-    ).toEqual([30 * normalizationScale, 80 * normalizationScale, 100 * normalizationScale]);
+    ).toEqual([30 * normalizationScale, 80 * normalizationScale, 50 * normalizationScale]);
     expect(project.getUniforms({viewport}).commonUnitsPerWorldUnit).toEqual(
       viewport.distanceScales.unitsPerWorldUnit
     );
@@ -67,8 +67,8 @@ for (const geospatial of [false, true]) {
         varying: 'result',
         shaderInputProps: {project: {viewport}, test: {uPos: position, uPos64Low: [0, 0, 0]}}
       });
-      [30, 80, 100].forEach((value, i) =>
-        expect(result[i] / normalizationScale).toBeCloseTo(value, 4)
+      [30 * normalizationScale, 80 * normalizationScale, 50 * normalizationScale].forEach(
+        (value, i) => expect(result[i]).toBeCloseTo(value)
       );
     }
   );

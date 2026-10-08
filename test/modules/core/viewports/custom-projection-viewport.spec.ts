@@ -184,14 +184,7 @@ test('CustomProjectionViewport separates map-meter positions from ground-meter s
         getDistanceScale: () => scale
       });
       expect(viewport.preproject!(position)).toEqual(position);
-      viewport
-        .projectPosition(position)
-        .forEach((value, i) =>
-          expect(value).toBeCloseTo(
-            i === 2 ? common[i] / Math.sqrt(scale[0] * scale[1]) : common[i],
-            12
-          )
-        );
+      expect(viewport.projectPosition(position)).toEqual(common);
       const uniforms = project.getUniforms({viewport});
       expect(uniforms.commonUnitsPerWorldUnit).toEqual(Array(3).fill(normalizationScale));
       [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])].forEach((value, i) => {
@@ -263,10 +256,7 @@ test('CustomProjectionViewport normalization, inverse and camera independence', 
   expect(viewport.preproject!([0, 0])).toEqual([0, 0, 0]);
   expect(viewport.preproject!([-180, -90])).toEqual([-180, -90, 0]);
   expect(viewport.postUnproject!(viewport.preproject!([32, 48, 10]))![0]).toBeCloseTo(32);
-  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo(
-    10 * viewport.getDistanceScales([32, 48]).unitsPerMeter[2],
-    12
-  );
+  expect(viewport.projectPosition([32, 48, 10])[2]).toBeCloseTo(10 * normalizationScale, 10);
   viewport
     .unprojectPosition(viewport.projectPosition([32, 48, 10]))
     .forEach((value, i) => expect(value).toBeCloseTo([32, 48, 10][i], 8));
@@ -434,7 +424,7 @@ test('External projection uniforms do not inspect the layer position conversion 
   }
 });
 
-test('CustomProjectionViewport applies local distortion after converter altitude conversion', () => {
+test('CustomProjectionViewport preserves converter altitude without distortion correction', () => {
   const viewport = new CustomProjectionViewport({
     ...options,
     pitch: 30,
@@ -446,7 +436,7 @@ test('CustomProjectionViewport applies local distortion after converter altitude
   });
   const projected = viewport.preproject!([10, 20, 30]);
   expect(projected[2]).toBe(40);
-  expect(viewport.projectPosition([10, 20, 30])[2]).toBeCloseTo(40 * 7 * normalizationScale, 10);
+  expect(viewport.projectPosition([10, 20, 30])[2]).toBeCloseTo(40 * normalizationScale, 10);
   expect(viewport.postUnproject!(projected)![2]).toBeCloseTo(30);
 });
 
@@ -459,20 +449,13 @@ test('CustomProjectionViewport inherits targetZ unprojection for altitude-preser
     bearing: 20,
     projection: {forward: converter.project, inverse: converter.unproject}
   });
-  expect(CustomProjectionViewport.prototype.unproject).toBe(Viewport.prototype.unproject);
   for (const altitude of [0, 1000]) {
     const world = [10, 20, altitude];
     for (const topLeft of [true, false]) {
       const pixel = viewport.project(world, {topLeft});
-      const common = pixelsToWorld(
-        [pixel[0], topLeft ? pixel[1] : viewport.height - pixel[1]],
-        viewport.pixelUnprojectionMatrix,
-        altitude * viewport.distanceScales.unitsPerWorldUnit[2]
-      );
-      const expected = [...viewport.unprojectPosition(common).slice(0, 2), altitude];
       viewport
         .unproject(pixel.slice(0, 2), {topLeft, targetZ: altitude})
-        .forEach((value, i) => expect(value).toBeCloseTo(expected[i], 6));
+        .forEach((value, i) => expect(value).toBeCloseTo(world[i], 6));
     }
   }
 });
@@ -594,10 +577,7 @@ test('CustomProjectionViewport evaluates center scales without changing position
   );
   expect(inverse).toHaveBeenCalledTimes(1);
   expect(getDistanceScale).not.toHaveBeenCalled();
-  expect(viewport.projectPosition([20, 30, 40])[2] / normalizationScale).toBeCloseTo(
-    400 / Math.sqrt(8)
-  );
-  expect(getDistanceScale).toHaveBeenCalledExactlyOnceWith([1020, 60]);
+  expect(viewport.projectPosition([20, 30, 40])[2] / normalizationScale).toBeCloseTo(400);
   expect(
     project.getUniforms({viewport}).commonUnitsPerWorldUnit[2] / normalizationScale
   ).toBeCloseTo(1);
@@ -715,7 +695,7 @@ test('CustomProjectionViewport estimates planar distance for recognized linear u
       expect(value / normalizationScale).toBeCloseTo(0.5, 10)
     );
     expect(override.preproject!([0, 0, 10])[2]).toBe(10);
-    expect(override.projectPosition([0, 0, 10])[2]).toBeCloseTo(5 * normalizationScale, 12);
+    expect(override.projectPosition([0, 0, 10])[2]).toBeCloseTo(10 * normalizationScale, 12);
   }
 });
 

@@ -14,7 +14,7 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
 import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 
-test('WebGPU local scale matches CPU altitude with rectangular bounds, matrix and origin', async ({
+test('WebGPU local meter scale preserves CPU altitude with rectangular bounds, matrix and origin', async ({
   skip
 }) => {
   const gpu = await getWebGPUTestDevice();
@@ -208,7 +208,7 @@ gpuTest.each(
       );
       const units = new Float32Array((await unitOutput.readAsync()).buffer);
       expect(Array.from(units.slice(0, 2))).toEqual([10, 10]);
-      expect(units[2] / normalizationScale).toBeCloseTo(expected[2] * 1.2, 4);
+      expect(units[2] / normalizationScale).toBeCloseTo(12, 4);
     } finally {
       transform.destroy();
       output.destroy();

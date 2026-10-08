@@ -64,6 +64,10 @@ export default class CustomProjectionViewport extends Viewport {
   /** Map bearing in degrees. */
   bearing: number;
   private signature: string;
+  /** Identity of the local scale field, independent of camera and tessellation. */
+  readonly sizeScaleSignature: string;
+  /** Map-meter XY to sampler XY: scale followed by translation. */
+  readonly sizeScaleTransform: [number, number, number, number];
   private projectionOptions: CustomProjectionViewportOptions;
 
   constructor(opts: CustomProjectionViewportOptions) {
@@ -89,6 +93,13 @@ export default class CustomProjectionViewport extends Viewport {
         fromBounds[3] <= fromBounds[1])
     ) {
       throw new Error('CustomProjectionViewport requires finite, increasing fromBounds');
+    }
+    if (
+      !toBounds.every(Number.isFinite) ||
+      toBounds[2] <= toBounds[0] ||
+      toBounds[3] <= toBounds[1]
+    ) {
+      throw new Error('CustomProjectionViewport requires finite, increasing toBounds');
     }
     const height = opts.height || 1;
     const width = opts.width || 1;
@@ -157,7 +168,11 @@ export default class CustomProjectionViewport extends Viewport {
         farZMultiplier: 1.01
       })
     });
-    this.projectionOptions = opts;
+    this.projectionOptions = {...opts, toBounds};
+    this.sizeScaleSignature = JSON.stringify([fromCrs, toCrs, fromBounds, toBounds]);
+    const scaleX = 512 / (toBounds[2] - toBounds[0]);
+    const scaleY = 512 / (toBounds[3] - toBounds[1]);
+    this.sizeScaleTransform = [scaleX, scaleY, -toBounds[0] * scaleX, -toBounds[1] * scaleY];
     this.pitch = pitch;
     this.isGeospatial = true;
     this.bearing = bearing;
@@ -177,8 +192,8 @@ export default class CustomProjectionViewport extends Viewport {
    * Internal: generated on demand by the device resource owner, not on camera updates.
    */
   getSizeScaleData(size = 64): Float32Array {
-    const {projection, fromBounds} = this.scaleOptions;
-    const toBounds = this.scaleOptions.toBounds!;
+    const {projection, fromBounds} = this.projectionOptions;
+    const toBounds = this.projectionOptions.toBounds!;
     const [minX, minY, maxX, maxY] = toBounds;
     const normalization = NORMALIZATION_SCALE;
     const data = new Float32Array(size * size * 4);
@@ -209,7 +224,9 @@ export default class CustomProjectionViewport extends Viewport {
             Math.hypot(roundTrip[0] - output[0], roundTrip[1] - output[1]) * normalization > 1e-5
           )
             continue;
-          const scale = this.localUnitsPerMeter!(output, input);
+          const scale = getCustomProjectionUnitsPerMeter(this.projectionOptions, output, input).map(
+            value => value / NORMALIZATION_SCALE
+          );
           const commonScale = scale.map(value => Math.fround(value));
           if (!commonScale.every(value => Number.isFinite(value) && value > 0)) continue;
           const offset = (y * size + x) * 4;
@@ -305,28 +322,25 @@ export default class CustomProjectionViewport extends Viewport {
     return [position[0] / NORMALIZATION_SCALE, position[1] / NORMALIZATION_SCALE];
   }
 
-  /** Converts world XYZ, or preprojected map-meter XYZ, to common XYZ with local altitude scale. */
-  projectPosition(position: number[], preprojected = false): [number, number, number] {
-    const projected = preprojected ? position : this.preproject!(position);
+  /** Converts world XYZ to common XYZ, including the converter's altitude conversion. */
+  projectPosition(position: number[]): [number, number, number] {
+    const projected = this.preproject!(position);
     return [
       projected[0] * NORMALIZATION_SCALE,
       projected[1] * NORMALIZATION_SCALE,
-      (projected[2] || 0) * this.getDistanceScales(projected).unitsPerMeter[2]
+      projected[2] * NORMALIZATION_SCALE
     ];
   }
 
-  /** Converts common XYZ to world XYZ or preprojected map-meter XYZ; invalid inverses return NaN. */
-  unprojectPosition(position: number[], preprojected = false): [number, number, number] {
-    const projected: [number, number, number] = [
-      position[0] / NORMALIZATION_SCALE,
-      position[1] / NORMALIZATION_SCALE,
-      (position[2] || 0) /
-        this.getDistanceScales([
-          position[0] / NORMALIZATION_SCALE,
-          position[1] / NORMALIZATION_SCALE
-        ]).unitsPerMeter[2]
-    ];
-    return preprojected ? projected : this.postUnproject!(projected) || [NaN, NaN, NaN];
+  /** Converts common XYZ to world XYZ; invalid inverses return NaN. */
+  unprojectPosition(position: number[]): [number, number, number] {
+    return (
+      this.postUnproject!([
+        position[0] / NORMALIZATION_SCALE,
+        position[1] / NORMALIZATION_SCALE,
+        (position[2] || 0) / NORMALIZATION_SCALE
+      ]) || [NaN, NaN, NaN]
+    );
   }
 
   /** Returns ground-meter scales at a map-meter anchor in toCrs, or the camera center.

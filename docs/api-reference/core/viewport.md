@@ -82,7 +82,6 @@ Parameters:
 * `coordinates` (number[]) - `[X, Y, Z]` in world units. `Z` is default to `0` if not supplied.
 * `opts` (object)
   + `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
-  + `preprojected` (boolean, optional) - Accept positions already converted by the viewport's `preproject` function. Default `false`. Normalization and altitude scaling still apply. Has no effect for viewports without preprojection.
 
 Returns:
 
@@ -100,8 +99,7 @@ Parameters:
 * `pixels` (number[]) - `[x, y, z]` in pixel coordinates. Passing a `z` is optional.
 * `opts` (object)
   + `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
-  + `preprojected` (boolean, optional) - Return coordinates before the viewport's `postUnproject` conversion. Default `false`. Has no effect for viewports without preprojection.
-  + `targetZ` (number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`. `preprojected` does not change the plane calculation.
+  + `targetZ` (number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`.
 
 Returns:
 
@@ -118,7 +116,6 @@ Projects latitude, longitude (and altitude) to coordinates in the [common space]
 Parameters:
 
 * `coordinates` (number[]) - `[lng, lat, altitude]` Passing an altitude is optional.
-* `preprojected` (boolean, optional) - Skip `preproject` and accept preprojected world coordinates. Default `false`.
 
 Returns:
 
@@ -132,7 +129,6 @@ Projects a coordinate from the [common space](./project.md) to latitude, longitu
 Parameters:
 
 * `coordinates` (number[]) - `[x, y, z]` in the WebMercator world. `z` is optional.
-* `preprojected` (boolean, optional) - Skip `postUnproject` and return preprojected world coordinates. Default `false`.
 
 Returns:
 

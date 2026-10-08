@@ -4,23 +4,26 @@
 
 import {test, expect, vi} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import proj4 from 'proj4';
+import {Projection} from '@math.gl/projection';
 import {estimateProjectionScaleError} from './projection-scale-error';
 
-const mercator = proj4('EPSG:4326', 'EPSG:3857');
+function createProjection(to: string) {
+  const converter = new Projection({from: 'EPSG:4326', to});
+  return {forward: converter.project, inverse: converter.unproject};
+}
+
+const mercator = createProjection('EPSG:3857');
 const mercatorLatitude = 85.0511287798066;
 const mercatorEast = mercator.forward([180, 0])[0];
 const mercatorNorth = mercator.forward([0, mercatorLatitude])[1];
-const equalEarth = proj4('EPSG:4326', '+proj=eqearth +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m');
+const equalEarth = createProjection('+proj=eqearth +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m');
 const equalEarthEast = equalEarth.forward([180, 0])[0];
 const equalEarthNorth = equalEarth.forward([0, 90])[1];
-const stereographic = proj4(
-  'EPSG:4326',
+const stereographic = createProjection(
   '+proj=stere +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +k=1 +R=6371008.8 +units=m'
 );
 const stereographicExtent = Math.abs(stereographic.forward([0, -60])[1]);
-const albers = proj4(
-  'EPSG:4326',
+const albers = createProjection(
   '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
 );
 const cases = [

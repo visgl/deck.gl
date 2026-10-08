@@ -493,7 +493,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     shaders = mergeShaders(
       {
         defines: {
-          USE_EXTERNAL_PROJECTION: this.context.viewport.projectionMode === PROJECTION_MODE.EXTERNAL
+          USE_EXTERNAL_PROJECTION:
+            this.context.viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
         }
       },
       shaders

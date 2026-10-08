@@ -130,28 +130,28 @@ float project_size_at_latitude(float meters, float lat) {
 float project_size(float meters) {
   // For scatter relevant
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return meters * project_external_size_scale().z;
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale().z;
 #endif
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return meters * project_external_size_scale().xy;
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale().xy;
 #endif
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return meters * project_external_size_scale();
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale();
 #endif
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) return vec4(meters.xyz * project_external_size_scale(), meters.w);
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return vec4(meters.xyz * project_external_size_scale(), meters.w);
 #endif
   return vec4(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
@@ -288,17 +288,6 @@ vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float refer
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project.modelMatrix * position;
 
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
-    vec3 low = (project.modelMatrix * vec4(position64Low, 0.0)).xyz;
-    vec2 mapPosition = position_world.xy + low.xy + project.commonOrigin.xy / project.commonUnitsPerWorldUnit.xy - project.coordinateOrigin.xy;
-    float altitudeScale = project.commonUnitsPerMeter.z;
-#ifdef USE_EXTERNAL_PROJECTION
-    altitudeScale = project_external_size_scale_at(mapPosition).z;
-#endif
-    return vec4((position_world.xy - project.coordinateOrigin.xy + low.xy) * project.commonUnitsPerWorldUnit.xy,
-      (position_world.z + low.z + project.commonOrigin.z / project.commonUnitsPerWorldUnit.z - project.coordinateOrigin.z) * altitudeScale - project.commonOrigin.z, position_world.w);
-  }
-
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
@@ -398,7 +387,7 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 
 float project_size_to_pixel(float meters) {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
     return meters * project_external_size_scale().x * project.scale;
   }
 #endif

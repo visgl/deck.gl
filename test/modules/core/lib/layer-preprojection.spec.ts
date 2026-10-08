@@ -92,7 +92,7 @@ test('Cartesian sublayers bypass preprojection and use map-meter XYZ', () => {
     expect(getPositions(layer)).toEqual([1, 2, 3]);
     expect(layer.getAttributeManager()!.attributes.positions.settings.transform).toBeNull();
     const scale = 512 / 40075016.6855;
-    const commonZ = 19 * 2 * scale;
+    const commonZ = 19 * scale;
     expect(layer.projectPosition([1, 2, 3], {autoOffset: false})).toEqual([
       263 * scale,
       268 * scale,

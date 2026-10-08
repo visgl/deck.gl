@@ -19,7 +19,7 @@ export default class ProjectionScaleResources {
   }
 
   get(viewport: Viewport): Buffer | Texture | undefined {
-    if (viewport.projectionMode !== PROJECTION_MODE.EXTERNAL) {
+    if (viewport.projectionMode !== PROJECTION_MODE.CUSTOM_GEOSPATIAL) {
       return undefined;
     }
     const customViewport = viewport as CustomProjectionViewport;
@@ -31,7 +31,7 @@ export default class ProjectionScaleResources {
     const resource = this.create(data, 64);
     const createdTime = performance.now();
     log.log(
-      0,
+      3,
       `Size scale sampler [${viewport.id}] 64×64: ` +
         `generation ${(generatedTime - startTime).toFixed(2)} ms, ` +
         `${this.device.type === 'webgpu' ? 'buffer' : 'texture'} creation/upload submission ${(createdTime - generatedTime).toFixed(2)} ms, ` +

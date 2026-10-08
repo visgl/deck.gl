@@ -48,7 +48,7 @@ test('sampler bounds are independent of common-space normalization', () => {
   }
 });
 
-test('local altitude and picking are independent of camera center', () => {
+test('local meter sizing preserves altitude and picking across camera changes', () => {
   for (const centerX of [1200, 1800]) {
     const viewport = new CustomProjectionViewport({
       ...options,
@@ -67,7 +67,7 @@ test('local altitude and picking are independent of camera center', () => {
     });
     const world = [1500, -1000, 100];
     expect(viewport.preproject!(world)[2]).toBe(30.48);
-    expect(viewport.projectPosition(world)[2] / normalizationScale).toBeCloseTo(30.48 * 1.5, 9);
+    expect(viewport.projectPosition(world)[2] / normalizationScale).toBeCloseTo(30.48, 9);
     const pixel = viewport.project(world);
     viewport.unproject(pixel).forEach((value, i) => expect(value).toBeCloseTo(world[i], 5));
   }

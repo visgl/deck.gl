@@ -156,28 +156,28 @@ fn project_external_size_scale() -> vec3<f32> {
 // Overloads to scale offsets (meters to world units)
 fn project_size_float(meters: f32) -> f32 {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) { return meters * project_external_size_scale().z; }
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) { return meters * project_external_size_scale().z; }
 #endif
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 fn project_size_vec2(meters: vec2<f32>) -> vec2<f32> {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) { return meters * project_external_size_scale().xy; }
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) { return meters * project_external_size_scale().xy; }
 #endif
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 fn project_size_vec3(meters: vec3<f32>) -> vec3<f32> {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) { return meters * project_external_size_scale(); }
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) { return meters * project_external_size_scale(); }
 #endif
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
 fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
     return vec4<f32>(meters.xyz * project_external_size_scale(), meters.w);
   }
 #endif
@@ -305,17 +305,6 @@ fn project_common_position_to_flat_continuous(commonPosition: vec3<f32>, referen
 fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> vec4<f32> {
   var position_world = project.modelMatrix * position;
 
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
-    let low = (project.modelMatrix * vec4<f32>(position64Low, 0.0)).xyz;
-    let mapPosition = position_world.xy + low.xy + project.commonOrigin.xy / project.commonUnitsPerWorldUnit.xy - project.coordinateOrigin.xy;
-    var altitudeScale = project.commonUnitsPerMeter.z;
-#ifdef USE_EXTERNAL_PROJECTION
-    altitudeScale = project_external_size_scale_at(mapPosition).z;
-#endif
-    return vec4<f32>((position_world.xy - project.coordinateOrigin.xy + low.xy) * project.commonUnitsPerWorldUnit.xy,
-      (position_world.z + low.z + project.commonOrigin.z / project.commonUnitsPerWorldUnit.z - project.coordinateOrigin.z) * altitudeScale - project.commonOrigin.z, position_world.w);
-  }
-
   // Work around for a Mac+NVIDIA bug:
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
@@ -414,7 +403,7 @@ fn project_pixel_size_to_clipspace(pixels: vec2<f32>) -> vec2<f32> {
 
 fn project_meter_size_to_pixel(meters: f32) -> f32 {
 #ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_EXTERNAL) {
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
     return meters * project_external_size_scale().x * project.scale;
   }
 #endif

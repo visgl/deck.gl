@@ -512,10 +512,7 @@ test('ContourLayer supports ordinary application-provided Cartesian sublayers', 
       expect(child.projectPosition(position, {autoOffset: false})).toEqual(
         new Matrix4(child.props.modelMatrix!)
           .transformAsPoint(position)
-          .map(
-            (value, axis) =>
-              value * (axis === 2 ? viewport.distanceScales.unitsPerMeter[2] : normalizationScale)
-          )
+          .map(value => value * normalizationScale)
       );
     }
     expect(viewport.preproject).toHaveBeenCalledTimes(data.length);

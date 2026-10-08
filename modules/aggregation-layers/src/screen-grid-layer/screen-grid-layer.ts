@@ -20,6 +20,7 @@ import AggregationLayer from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},

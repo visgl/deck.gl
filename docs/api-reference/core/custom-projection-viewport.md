@@ -47,7 +47,9 @@ If `fromBounds` is supplied, X and Y are clamped by the given range before proje
 
 deck.gl layers allow an app to specify [size units](../../developer-guide/coordinate-systems.md#dimensions) in meters. One map meter may not represent one meter on the ground. All projections that flatten the Earth's spherical surface onto a 2D plane end up distorting distances and/or angles somehow. This **projection distortion** can vary by location and direction: for example, Web Mercator stretches distances more strongly toward the poles. See [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for how projections distort local shapes and sizes.
 
-This viewport projects meter sizes (width, radius, elevation, etc.) so that they are true to ground distance.
+This viewport approximates ground-meter geometry sizes (width, radius, elevation, etc.) at each object's location. Position altitude keeps the fixed map-meter-to-common scale.
+
+Local sizing uses an area-equivalent scalar to preserve marker shape. Set `toBounds` to cover the map-meter extent you display; it controls scale sampling without changing coordinate normalization. Outside that extent, or where scale cannot be evaluated, sizing falls back to the viewport-center scale.
 
 By default, it makes a best effort to estimate the real-world distance between two coordinates in `fromCrs`. If `fromCrs` is detected as lng-lat in degrees, distance is calculated along the spherical surface of the earth. If `fromCrs` units is detected as meters (e.g. UTM) distance is calculated using their planar difference. Otherwise, no distortion correction is applied.
 
@@ -78,19 +80,13 @@ Converts XYZ in map meters in `toCrs` back to world coordinates. Returns `null` 
 
 Projects world coordinates in `fromCrs` to screen pixels. The inherited `topLeft` option defaults to `true`. Three-component positions return pixel depth as their third component.
 
-With `preprojected: true`, accepts XYZ in map meters in `toCrs` instead. Local altitude scaling still applies.
-
 ### `unproject(pixels, options)`
 
-Returns world coordinates in `fromCrs`. If pixel depth is absent, `targetZ` specifies world-coordinate altitude, defaulting to zero. `topLeft` defaults to `true`. Coordinates are non-finite when the converter cannot invert the position.
-
-With `preprojected: true`, skips the conversion back to `fromCrs` and returns map-meter coordinates in `toCrs`. The inherited `targetZ` plane calculation is unchanged.
+Returns world coordinates in `fromCrs`. If pixel depth is absent, `targetZ` specifies altitude, defaulting to zero; this assumes the converter leaves altitude unchanged. `topLeft` defaults to `true`. Coordinates are non-finite when the converter cannot invert the position.
 
 ### `projectPosition`, `unprojectPosition`
 
-`projectPosition` converts world XYZ in `fromCrs` to common XYZ, including the converter's altitude conversion and local altitude scale. `unprojectPosition` reverses it.
-
-Pass `true` as the second argument to accept or return preprojected XYZ in map meters in `toCrs`. Only the world-coordinate conversion is skipped; common-space normalization and local altitude scaling still apply.
+`projectPosition` converts world XYZ in `fromCrs` to common XYZ, including the converter's altitude conversion and the rendering scale. `unprojectPosition` reverses it.
 
 ### `projectFlat`, `unprojectFlat`
 
