@@ -6,8 +6,10 @@
     "allowJs": false,
     "paths": {
       "@deck.gl/core": ["../../../modules/core/dist/index.d.ts"],
-      "@deck.gl/layers": ["../../../modules/layers/dist/index.d.ts"]
+      "@deck.gl/layers": ["../../../modules/layers/dist/index.d.ts"],
+      "@deck.gl/widgets": ["../../../modules/widgets/dist/index.d.ts"]
     }
   },
+  "files": ["../../../node_modules/vite/client.d.ts"],
   "include": ["./*.ts", "./projections/**/*.ts"]
 }

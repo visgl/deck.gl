@@ -3,9 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
+import {ResetViewWidget} from '@deck.gl/widgets';
+import '@deck.gl/widgets/stylesheet.css';
 import type {FeatureCollection, LineString} from 'geojson';
 import type {ProjectionName} from './projections';
-import {GeoJsonLayer, LineLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {projections} from './projections';
 
 // The same Natural Earth datasets as examples/get-started/pure-js/basic.
@@ -60,9 +62,24 @@ function createView(name: ProjectionName): CustomProjectionView {
   });
 }
 
+// Equal physical radii at regularly spaced input coordinates expose local scale
+// variation without relying on the remote datasets.
+const scaleProbes: [number, number][] = [];
+for (let longitude = -165; longitude <= 165; longitude += 30) {
+  for (let latitude = -75; latitude <= 75; latitude += 15) {
+    scaleProbes.push([longitude, latitude]);
+  }
+}
+
+function getInitialViewState(name: ProjectionName) {
+  // Frame the polar map around its pole rather than retaining an equatorial camera.
+  return {center: [0, name === 'stereographic' ? 90 : 0, 0] as [number, number, number], zoom: 1};
+}
+
 const deck = new Deck({
   views: createView('equalEarth'),
-  initialViewState: {center: [0, 0, 0], zoom: 1},
+  initialViewState: getInitialViewState('equalEarth'),
+  widgets: [new ResetViewWidget({placement: 'top-right'})],
   layers: [
     new GeoJsonLayer({
       id: 'countries',
@@ -88,39 +105,20 @@ const deck = new Deck({
       id: 'airports',
       transitions: {geometry: GEOMETRY_TRANSITION},
       data: AIRPORTS,
-      pointRadiusUnits: 'meters',
-      getPointRadius: 25000,
+      pointRadiusUnits: 'pixels',
+      getPointRadius: 1,
       getFillColor: [255, 170, 80],
       pickable: true
     }),
-    new LineLayer({
-      id: 'altitude-probes',
-      data: [
-        [-90, 0],
-        [0, 0],
-        [90, 0],
-        [0, 60],
-        [0, -60]
-      ],
-      getSourcePosition: ([x, y]) => [x, y, 0],
-      getTargetPosition: ([x, y]) => [x, y, 500000],
-      getColor: [255, 100, 180],
-      widthUnits: 'pixels',
-      getWidth: 2
-    }),
     new ScatterplotLayer({
-      id: 'altitude-probe-circles',
-      data: [
-        [-90, 0, 500000],
-        [0, 0, 500000],
-        [90, 0, 500000],
-        [0, 60, 500000],
-        [0, -60, 500000]
-      ],
+      id: 'meter-scale-probes',
+      transitions: {getPosition: GEOMETRY_TRANSITION},
+      data: scaleProbes,
       getPosition: position => position,
       radiusUnits: 'meters',
-      getRadius: 100000,
-      getFillColor: [255, 100, 180]
+      getRadius: 80000,
+      getFillColor: [255, 80, 150, 180],
+      pickable: true
     })
   ],
   onHover: ({coordinate}) => {
@@ -136,6 +134,9 @@ const projectionSelect = document.getElementById('projection') as HTMLSelectElem
 projectionSelect.addEventListener('change', () => {
   const name = projectionSelect.value;
   if (Object.hasOwn(projections, name)) {
-    deck.setProps({views: createView(name as ProjectionName)});
+    deck.setProps({
+      views: createView(name as ProjectionName),
+      initialViewState: getInitialViewState(name as ProjectionName)
+    });
   }
 });

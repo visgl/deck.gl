@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import proj4 from 'proj4';
+import {Projection} from '@math.gl/projection';
 import type {ProjectionConfig} from './projection-config';
 
 const RADIUS = 6371008.8;
-// proj4js eqc wraps exact ±90° to the opposite pole.
+// Keep input coordinates just inside the poles.
 const MAX_LATITUDE = 89.999999;
 const fromCrs = 'EPSG:4326';
 const toCrs = `+proj=eqc +R=${RADIUS} +units=m`;
-const projection = proj4(fromCrs, toCrs);
+const converter = new Projection({from: fromCrs, to: toCrs});
+const projection = {forward: converter.project, inverse: converter.unproject};
 
 export default {
   fromCrs,
