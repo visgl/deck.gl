@@ -72,8 +72,13 @@ for (let longitude = -165; longitude <= 165; longitude += 30) {
 }
 
 function getInitialViewState(name: ProjectionName) {
-  // Frame the polar map around its pole rather than retaining an equatorial camera.
-  return {center: [0, name === 'stereographic' ? 90 : 0, 0] as [number, number, number], zoom: 1};
+  // Deck compares initial view states by value. Identity resets the camera even
+  // when two projections share the same initial framing.
+  return {
+    id: name,
+    center: [0, name === 'stereographic' ? 90 : 0, 0] as [number, number, number],
+    zoom: 1
+  };
 }
 
 const deck = new Deck({
