@@ -55,6 +55,8 @@ function createViewport(
     height: 300,
     toCrs: signature,
     fromCrs: '+units=m',
+    // Isolate preprocessing from distortion while evaluating each requested data anchor.
+    getDistanceScale: () => [normalizationScale, normalizationScale],
     projection: {
       forward: p => project(p).map((v, i) => v * scale * (i < 2 ? projectedUnit : 1)),
       inverse: ([x, y, z = 0]) => [
@@ -64,13 +66,6 @@ function createViewport(
       ]
     }
   });
-  // Keep cell sizes identical to the Cartesian reference: these tests isolate
-  // position preprocessing, not the converter's meter-scale distortion.
-  viewport.distanceScales = {
-    ...viewport.distanceScales,
-    unitsPerMeter: [1, 1, 1],
-    metersPerUnit: [1, 1, 1]
-  };
   // Count data preprojection, not constructor inverse validation.
   vi.spyOn(viewport, 'preproject');
   return viewport;
@@ -592,3 +587,232 @@ test('HeatmapLayer uses the same bounds and texture coordinates as a non-geo vie
     vi.restoreAllMocks();
   }
 });
+
+test('Cartesian aggregation bounds apply layer transforms before any viewport projection', () => {
+  const viewport = new Viewport({
+    width: 400,
+    height: 300,
+    preproject: position => position.map(value => value * 10),
+    distanceScales: {unitsPerWorldUnit: [2, 3, 4]}
+  });
+  const manager = createManager(viewport);
+  const layer = new ScreenGridLayer({
+    data: [
+      [1, 2, 3],
+      [4, 6, 8]
+    ],
+    getPosition: p => p,
+    coordinateSystem: 'cartesian',
+    modelMatrix: new Matrix4().translate([10, 20, 30]).scale([2, 3, 4]),
+    coordinateOrigin: [100, 200, 300],
+    gpuAggregation: false
+  });
+  try {
+    manager.setLayers([layer]);
+    const projectPosition = vi.spyOn(layer, 'projectPosition');
+    expect(layer.getBounds()).toEqual([
+      [112, 226, 342],
+      [118, 238, 362]
+    ]);
+    expect(projectPosition).not.toHaveBeenCalled();
+    projectPosition.mockRestore();
+  } finally {
+    manager.finalize();
+  }
+});
+
+for (const LayerType of [ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer]) {
+  for (const gpuAggregation of [false, true]) {
+    test(`${LayerType.layerName} preserves Cartesian transforms in bins and bounds: gpu=${gpuAggregation}`, ({
+      skip
+    }) => {
+      if (gpuAggregation && !WebGLAggregator.isSupported(device)) return skip();
+      const viewport = new CustomProjectionViewport({
+        width: 400,
+        height: 300,
+        zoom: 3,
+        fromCrs: 'map-meters',
+        projection: {forward: p => p, inverse: p => p},
+        getDistanceScale: () => [1, 1]
+      });
+      const manager = createManager(viewport);
+      const referenceManager = createManager(viewport);
+      const points = [
+        [-500000, 0, 0],
+        [0, 100000, 0],
+        [500000, 200000, 0]
+      ];
+      const matrix = new Matrix4().rotateZ(0.3).scale([2, 3, 1]);
+      const preproject = vi.spyOn(viewport, 'preproject');
+      let packedPositions;
+      const getPosition = vi.fn(p => p);
+      const snapshots = new Map<
+        string,
+        {bounds: ReturnType<typeof layer.getBounds>; bins: unknown}
+      >();
+      const props = {
+        getPosition,
+        coordinateSystem: 'cartesian',
+        gpuAggregation,
+        cellSize: 100000,
+        radius: 100000,
+        cellSizePixels: 10
+      };
+      let layer = new LayerType({
+        ...props,
+        data: points,
+        modelMatrix: matrix,
+        coordinateOrigin: [200000, 300000, 0]
+      } as any);
+      const bins = current =>
+        Array.from({length: current.state.aggregator.binCount}, (_, i) =>
+          current.state.aggregator.getBin(i)
+        )
+          .filter(bin => bin && bin.count > 0)
+          .sort((a, b) => a.id[1] - b.id[1] || a.id[0] - b.id[0]);
+      try {
+        const origins = [
+          [200000, 300000, 0],
+          [700000, 800000, 0]
+        ];
+        for (const [origin, transform, useGPU] of [
+          [origins[0], matrix, gpuAggregation],
+          [origins[1], matrix, gpuAggregation],
+          [
+            origins[1],
+            new Matrix4().translate([200000, 300000, 0]).multiplyRight(matrix),
+            gpuAggregation
+          ],
+          // Switching backends must preserve packed positions and derive identical bounds and bins.
+          ...(WebGLAggregator.isSupported(device)
+            ? [
+                [origins[1], matrix, !gpuAggregation],
+                [origins[1], matrix, gpuAggregation]
+              ]
+            : [])
+        ] as [number[], Matrix4, boolean][]) {
+          layer = layer.clone({
+            coordinateOrigin: origin,
+            modelMatrix: transform,
+            gpuAggregation: useGPU
+          });
+          const transformed = points.map(point =>
+            transform.transformAsPoint(point).map((value, axis) => value + origin[axis])
+          );
+          const reference = new LayerType({
+            ...props,
+            data: transformed,
+            getPosition: p => p,
+            gpuAggregation: useGPU
+          } as any);
+          manager.setLayers([layer]);
+          referenceManager.setLayers([reference]);
+          const positions = layer.getAttributeManager()!.attributes.positions;
+          expect(positions.settings.transform).toBeNull();
+          expect(Array.from(positions.value!.slice(0, points.length * 3))).toEqual(points.flat());
+          if (packedPositions) expect(positions.value).toBe(packedPositions);
+          packedPositions = positions.value;
+          expect(preproject).not.toHaveBeenCalled();
+          expect(getPosition).toHaveBeenCalledTimes(points.length);
+          const setProps = vi.spyOn(layer.state.aggregator, 'setProps');
+          for (const current of [layer, reference]) {
+            current.draw({
+              shaderModuleProps: {
+                project: {
+                  viewport,
+                  modelMatrix: current.props.modelMatrix,
+                  coordinateOrigin: current.props.coordinateOrigin,
+                  coordinateSystem: current.props.coordinateSystem
+                }
+              }
+            } as any);
+          }
+          const received = (setProps.mock.calls.at(-1)![0] as any).shaderModuleProps.project;
+          expect(received.modelMatrix).toBe(transform);
+          expect(received.coordinateOrigin).toBe(origin);
+          expect(received.coordinateSystem).toBe('cartesian');
+          setProps.mockRestore();
+          const snapshot = {
+            bounds: layer.getBounds(),
+            // CPU-only point indices are not part of GPU aggregation output.
+            bins: bins(layer).map(({id, count, value}) => ({id, count, value}))
+          };
+          const key = JSON.stringify([origin, transform]);
+          if (snapshots.has(key)) expect(snapshot).toEqual(snapshots.get(key));
+          snapshots.set(key, snapshot);
+          expect(bins(layer)).toEqual(bins(reference));
+          expect(bins(layer).some(bin => bin?.count > 0)).toBe(true);
+          const onAttributeChange = vi.spyOn(LayerType.prototype, 'onAttributeChange');
+          layer = layer.clone({
+            modelMatrix: new Matrix4(transform),
+            coordinateOrigin: origin.slice(),
+            // Force a props update while the transform values remain equal.
+            opacity: layer.props.opacity === 1 ? 0.5 : 1
+          });
+          manager.setLayers([layer]);
+          expect(onAttributeChange).not.toHaveBeenCalledWith('positions');
+          onAttributeChange.mockRestore();
+        }
+        expect(points).toEqual([
+          [-500000, 0, 0],
+          [0, 100000, 0],
+          [500000, 200000, 0]
+        ]);
+      } finally {
+        manager.finalize();
+        referenceManager.finalize();
+        vi.restoreAllMocks();
+      }
+    });
+  }
+}
+
+for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
+  test(`${LayerType.layerName} keeps ground-meter bins stable after panning and data refresh`, () => {
+    const options = {
+      width: 400,
+      height: 300,
+      fromCrs: 'map-meters',
+      projection: {forward: p => p, inverse: p => p},
+      getDistanceScale: ([x, y]) => [1 + x / 1000000, 1 + y / 1000000] as [number, number]
+    };
+    const manager = createManager(new CustomProjectionViewport({...options, center: [0, 0, 0]}));
+    const points = [
+      [100000, 200000, 0],
+      [300000, 400000, 0]
+    ];
+    let layer = new LayerType({
+      data: points,
+      getPosition: p => p,
+      cellSize: 100000,
+      radius: 100000,
+      gpuAggregation: false
+    } as any);
+    try {
+      manager.setLayers([layer]);
+      const size =
+        layer instanceof HexagonLayer ? layer.state.radiusCommon : layer.state.cellSizeCommon;
+      const origin =
+        layer instanceof HexagonLayer ? layer.state.hexOriginCommon : layer.state.cellOriginCommon;
+      const expectedSizeX = (normalizationScale * 100000) / 1.2;
+      if (layer instanceof HexagonLayer) {
+        expect(size).toBeCloseTo(expectedSizeX, 10);
+      } else {
+        expect(size[0]).toBeCloseTo(expectedSizeX, 10);
+        expect(size[1]).toBeCloseTo((normalizationScale * 100000) / 1.3, 10);
+      }
+      const viewport = new CustomProjectionViewport({...options, center: [800000, 900000, 0]});
+      manager.activateViewport(viewport);
+      layer = layer.clone({data: points.slice()});
+      manager.setLayers([layer]);
+      expect(
+        layer instanceof HexagonLayer ? layer.state.radiusCommon : layer.state.cellSizeCommon
+      ).toEqual(size);
+      expect(
+        layer instanceof HexagonLayer ? layer.state.hexOriginCommon : layer.state.cellOriginCommon
+      ).toEqual(origin);
+    } finally {
+      manager.finalize();
+    }
+  });
+}

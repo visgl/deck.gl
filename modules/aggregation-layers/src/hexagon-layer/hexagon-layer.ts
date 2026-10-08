@@ -78,6 +78,7 @@ export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> & Com
 type _HexagonLayerProps<DataT> = {
   /**
    * Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
+   * Custom projections approximate ground meters at the center of the projected data bounds.
    * @default 1000
    */
   radius?: number;
@@ -318,8 +319,7 @@ export default class HexagonLayer<
               return hexagonAggregator(positions, radius);
             }
             const viewport = this.state.aggregatorViewport;
-            // project to common space
-            const p = viewport.projectPosition(positions);
+            const p = this.projectPositionFromAttribute(positions, viewport);
             const {radiusCommon, hexOriginCommon} = opts;
             return pointToHexbin(
               [p[0] - hexOriginCommon[0], p[1] - hexOriginCommon[1]],

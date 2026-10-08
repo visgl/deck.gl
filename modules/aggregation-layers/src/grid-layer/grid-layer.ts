@@ -84,6 +84,7 @@ type _GridLayerProps<DataT> = {
 
   /**
    * Size of each cell in meters.
+   * Custom projections approximate ground meters at the center of the projected data bounds.
    * @default 1000
    */
   cellSize?: number;
@@ -314,8 +315,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               return gridAggregator(positions, cellSize);
             }
             const viewport = this.state.aggregatorViewport;
-            // project to common space
-            const p = viewport.projectPosition(positions);
+            const p = this.projectPositionFromAttribute(positions, viewport);
             const {cellSizeCommon, cellOriginCommon} = opts;
             return [
               Math.floor((p[0] - cellOriginCommon[0]) / cellSizeCommon[0]),

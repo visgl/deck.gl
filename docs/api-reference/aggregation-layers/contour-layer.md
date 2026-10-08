@@ -184,6 +184,8 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 Size of each cell in meters
 
+In a `CustomProjectionView`, this size represents locally approximated ground meters. The distance scale is evaluated at the center of the projected data bounds, in `toCrs`, and applied uniformly to all bins. Projection distortion may vary across the dataset, so ground dimensions away from that anchor are approximate. Panning does not change the bin definitions. To size bins in map meters, set the view's `getDistanceScale` to `() => [1, 1]`.
+
 #### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
 * Default: true

@@ -138,17 +138,10 @@ export default class ScreenGridLayer<
         getBin: {
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
-            const viewport = this.context.viewport;
-            // Position attributes have already applied the converter and model matrix.
-            const p =
-              viewport.preproject && this.props.coordinateSystem !== 'cartesian'
-                ? worldToPixels(
-                    positions.map(
-                      (value, axis) => value * viewport.distanceScales.unitsPerWorldUnit[axis]
-                    ),
-                    viewport.pixelProjectionMatrix
-                  )
-                : this.project(positions);
+            const layer = this.getCurrentLayer()!;
+            const viewport = layer.context.viewport;
+            const commonPosition = this.projectPositionFromAttribute(positions, viewport);
+            const p = worldToPixels(commonPosition, viewport.pixelProjectionMatrix);
             const cellSizePixels: number = opts.cellSizePixels;
             if (p[0] < 0 || p[0] >= viewport.width || p[1] < 0 || p[1] >= viewport.height) {
               // Not on screen
