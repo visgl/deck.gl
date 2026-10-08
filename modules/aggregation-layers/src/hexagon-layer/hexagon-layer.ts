@@ -78,7 +78,7 @@ export type HexagonLayerProps<DataT = unknown> = _HexagonLayerProps<DataT> & Com
 type _HexagonLayerProps<DataT> = {
   /**
    * Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).
-   * Custom projections approximate ground meters at the center of the projected data bounds.
+   * Geospatial views approximate ground meters at the center of the data bounds.
    * @default 1000
    */
   radius?: number;

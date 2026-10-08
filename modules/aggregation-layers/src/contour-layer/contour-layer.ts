@@ -58,7 +58,7 @@ export type ContourLayerProps<DataT = unknown> = _ContourLayerProps<DataT> &
 type _ContourLayerProps<DataT> = {
   /**
    * Size of each cell in meters.
-   * Custom projections approximate ground meters at the center of the projected data bounds.
+   * Geospatial views approximate ground meters at the center of the data bounds.
    * @default 1000
    */
   cellSize?: number;

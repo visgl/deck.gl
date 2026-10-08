@@ -84,7 +84,7 @@ type _GridLayerProps<DataT> = {
 
   /**
    * Size of each cell in meters.
-   * Custom projections approximate ground meters at the center of the projected data bounds.
+   * Geospatial views approximate ground meters at the center of the data bounds.
    * @default 1000
    */
   cellSize?: number;
