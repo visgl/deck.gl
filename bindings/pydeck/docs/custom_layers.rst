@@ -99,3 +99,5 @@ must also come before any other ES module on the page: in Firefox, and in Chrome
 18.4, a library fails to load if the page has already loaded an ES module.
 
 This is experimental and may change in a later release.
+
+To use layers and extensions from deck.gl-community, see :doc:`community_libraries`.
