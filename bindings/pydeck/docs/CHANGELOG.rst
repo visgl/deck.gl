@@ -8,8 +8,22 @@ Releases and associated GitHub PRs for pydeck are documented here.
 
 0.9.4 - TBD
 ^^^^^^^^^^^
-- Add typed lighting and post-processing effects through ``pydeck.Effect``
-- Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop
+- Update to deck.gl v9.4
+- Add typed layer extensions through ``pydeck.Extension`` (#10447)
+- Register the canonical ``GlobeView`` type name in the Jupyter widget (#10451)
+- Add typed lighting and post-processing effects through ``pydeck.Effect`` (#10455)
+- Remove ``LightSettings``, which targeted the unsupported deck.gl ``lightSettings`` layer prop (#10455)
+- Add MapLibre basemap provider with globe projection via ``map_provider="maplibre"`` (#10566)
+- Add multi-view layout and ``SplitterWidget`` documentation and gallery examples
+- ``Deck`` no longer serializes a default ``MapView``; the new ``controller`` argument (default ``True``) is sent instead, so deck.gl supplies the view and widgets such as ``SplitterWidget`` can manage views
+- Fix ``register_library`` writing a ``uri`` key instead of ``resourceUri``, which left the library
+  unloaded (#10759)
+- Add non-geospatial chart gallery examples (scatter plot, bar chart, surface plot) and document
+  ``OrthographicView`` and ``OrbitView`` view states (#10454)
+- Load ES module custom libraries with ``pydeck.settings.register_library(name, uri, module=True)``
+  (#10454)
+- Experimental: ES module custom libraries can import deck.gl, luma.gl, loaders.gl and math.gl by
+  package name and share pydeck's copies (#10794)
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^

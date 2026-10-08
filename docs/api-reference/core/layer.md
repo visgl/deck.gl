@@ -525,7 +525,8 @@ import {CSVLoader} from '@loaders.gl/csv';
 
 const layer = new HexagonLayer({
   data: './data.csv',
-  loaders: [CSVLoader]
+  loaders: [CSVLoader],
+  loadOptions: {csv: {shape: 'object-row-table'}},
   ...
 });
 ```

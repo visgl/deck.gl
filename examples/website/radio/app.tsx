@@ -244,7 +244,8 @@ export default function App({
       extruded: false,
       getFillColor: d => coverageColorScale(d.count),
 
-      loaders: [CSVLoader]
+      loaders: [CSVLoader],
+      loadOptions: {csv: {shape: 'object-row-table'}}
     }),
 
     new PathLayer({
@@ -287,7 +288,7 @@ export async function renderToDOM(container: HTMLDivElement) {
 
   const stations = (
     await load(DATA_URL.STATIONS, CSVLoader, {
-      csv: {delimitersToGuess: '\t', skipEmptyLines: true}
+      csv: {shape: 'object-row-table', delimitersToGuess: '\t', skipEmptyLines: true}
     })
   ).data;
 
