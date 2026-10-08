@@ -12,6 +12,9 @@ import {
 } from '@math.gl/web-mercator';
 import {PROJECTION_MODE} from '../lib/constants';
 
+const EC = 40075016.6855;
+const NORMALIZATION_SCALE = 512 / EC;
+
 /** A planar map converter, compatible with proj4js converters targeting a meter-based CRS. */
 export type ProjectionConverter = {
   /** Converts world XYZ to map meters: planar X/Y and altitude Z in meters. */
@@ -47,9 +50,6 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   getDistanceScale?: (position: [number, number]) => [number, number];
 };
 
-const EC = 40075016.6855; // Earth circumference in meters.
-const NORMALIZATION_SCALE = 512 / EC;
-
 /** A planar camera over CPU-preprojected coordinates. Projection libraries stay outside core.
  * @experimental Exported as `_CustomProjectionViewport`; this API may change.
  */
@@ -60,6 +60,7 @@ export default class CustomProjectionViewport extends Viewport {
   /** Map bearing in degrees. */
   bearing: number;
   private signature: string;
+  private projectionOptions: CustomProjectionViewportOptions;
 
   constructor(opts: CustomProjectionViewportOptions) {
     const {
@@ -122,25 +123,7 @@ export default class CustomProjectionViewport extends Viewport {
       }
     };
     const position = [center[0], center[1], 0];
-    const worldCenter = clampInput(position, fromBounds);
-    let localScale: number[];
-    if (opts.getDistanceScale) {
-      const [x, y] = projection.forward(worldCenter);
-      const scale = opts.getDistanceScale([x, y]);
-      if (scale.length !== 2 || !scale.every(value => Number.isFinite(value) && value > 0)) {
-        throw new Error('getDistanceScale must return two finite, positive scales');
-      }
-      localScale = [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
-    } else {
-      const spherical = isSphericalCrs(fromCrs);
-      localScale =
-        spherical === undefined
-          ? [1, 1, 1]
-          : estimateUnitsPerMeter(projection, worldCenter, spherical, fromBounds);
-    }
-    const unitsPerMeter = localScale.map(
-      value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
-    ) as [number, number, number];
+    const unitsPerMeter = getCustomProjectionUnitsPerMeter(opts, undefined, position);
     super({
       ...opts,
       width,
@@ -169,6 +152,7 @@ export default class CustomProjectionViewport extends Viewport {
         farZMultiplier: 1.01
       })
     });
+    this.projectionOptions = opts;
     this.pitch = pitch;
     this.isGeospatial = true;
     this.bearing = bearing;
@@ -219,8 +203,34 @@ export default class CustomProjectionViewport extends Viewport {
     );
   }
 
-  getDistanceScales(): DistanceScales {
-    return this.distanceScales;
+  /** Returns ground-meter scales at a map-meter anchor in toCrs, or the camera center.
+   * The fixed map-meter-to-common scale is independent of the anchor.
+   * Falls back to camera-center scales when the anchor cannot be inverse-projected.
+   */
+  getDistanceScales(coordinateOrigin?: number[]): DistanceScales {
+    if (!coordinateOrigin) return this.distanceScales;
+    let worldPosition: number[] | undefined;
+    if (!this.projectionOptions.getDistanceScale) {
+      // Cartesian data can lie outside the inverse domain; retain camera sizing in that case.
+      try {
+        const position = this.projectionOptions.projection.inverse(coordinateOrigin);
+        if (!position || position.length < 2 || !position.every(Number.isFinite))
+          return this.distanceScales;
+        worldPosition = position;
+      } catch {
+        return this.distanceScales;
+      }
+    }
+    const unitsPerMeter = getCustomProjectionUnitsPerMeter(
+      this.projectionOptions,
+      coordinateOrigin,
+      worldPosition
+    );
+    return {
+      ...this.distanceScales,
+      unitsPerMeter,
+      metersPerUnit: unitsPerMeter.map(value => 1 / value) as [number, number, number]
+    };
   }
 
   panByPosition(position: number[], pixel: number[]): {center: [number, number, number]} {
@@ -234,6 +244,39 @@ export default class CustomProjectionViewport extends Viewport {
     const center = nextCenter.every(Number.isFinite) ? nextCenter : this.position;
     return {center: [center[0], center[1], 0]};
   }
+}
+
+/** Evaluate ground-meter sizing at a map-meter anchor, independently of the camera. */
+function getCustomProjectionUnitsPerMeter(
+  options: CustomProjectionViewportOptions,
+  mapPosition?: number[],
+  worldPosition?: number[]
+): [number, number, number] {
+  const {projection, getDistanceScale, fromBounds, fromCrs = 'WGS84'} = options;
+  let localScale: number[];
+  if (getDistanceScale) {
+    const [x, y] = mapPosition || projection.forward(clampInput(worldPosition!, fromBounds));
+    const scale = getDistanceScale([x, y]);
+    if (scale.length !== 2 || !scale.every(value => Number.isFinite(value) && value > 0)) {
+      throw new Error('getDistanceScale must return two finite, positive scales');
+    }
+    localScale = [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
+  } else {
+    const position = worldPosition || projection.inverse(mapPosition!);
+    const spherical = isSphericalCrs(fromCrs);
+    localScale =
+      spherical === undefined || !position
+        ? [1, 1, 1]
+        : estimateUnitsPerMeter(
+            projection,
+            clampInput(position, fromBounds),
+            spherical,
+            fromBounds
+          );
+  }
+  return localScale.map(
+    value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
+  ) as [number, number, number];
 }
 
 /** Classify world coordinates without resolving or interpreting the full CRS definition. */
