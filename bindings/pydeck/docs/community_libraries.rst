@@ -51,6 +51,34 @@ latest release for pydeck's deck.gl version (``~9.4`` for this version of pydeck
 to the package name, for example ``npm="@deck.gl-community/layers@9.4.1"``. pydeck warns when the
 version is for another deck.gl version, which may fail to load or render incorrectly.
 
+Example: 3D trees
+^^^^^^^^^^^^^^^^^
+
+``TreeLayer`` from ``@deck.gl-community/three`` draws 3D trees, building each trunk and canopy with
+three.js. Its accessors read DataFrame columns, like the layers in deck.gl:
+
+.. code-block:: python
+
+    pdk.settings.register_library(npm="@deck.gl-community/three")
+
+    layer = pdk.Layer(
+        "TreeLayer",
+        df,
+        get_position=["lng", "lat"],
+        # "pine", "oak", "palm", "birch" or "cherry"
+        get_tree_type="tree_type",
+        # Meters
+        get_height="height",
+        get_canopy_radius="canopy_radius",
+        get_canopy_color="canopy_color",
+        pickable=True,
+    )
+
+``TreeLayer`` calls its accessors as functions, so pass each one a column, not a constant value.
+
+See the `Paris Trees gallery example <gallery/paris_trees.html>`__ for a complete script, which
+draws the street trees around the Arc de Triomphe in autumn colors.
+
 Available packages
 ^^^^^^^^^^^^^^^^^^
 
@@ -80,7 +108,7 @@ Each of these packages loads with ``register_library(npm=...)``, for example
    * - `@deck.gl-community/editable-layers <https://visgl.github.io/deck.gl-community/docs/modules/editable-layers>`__
      - Interactive editing of geometries. Edits are not sent back to Python.
    * - `@deck.gl-community/three <https://visgl.github.io/deck.gl-community/docs/modules/three>`__
-     - Layers rendered with three.js, which esm.sh bundles into the module
+     - Layers rendered with three.js, such as ``TreeLayer``. esm.sh bundles three.js into the module
 
 ``@deck.gl-community/leaflet``, ``bing-maps`` and ``react`` integrate deck.gl with other
 frameworks and do not apply to pydeck.
