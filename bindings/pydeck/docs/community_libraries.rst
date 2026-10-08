@@ -79,6 +79,38 @@ three.js. Its accessors read DataFrame columns, like the layers in deck.gl:
 See the `Paris Trees gallery example <gallery/paris_trees.html>`__ for a complete script, which
 draws the street trees around the Arc de Triomphe in autumn colors.
 
+Example: zoom-dependent opacity
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+pydeck output is static JSON, and pydeck does not run code when the view changes. Event handlers
+like ``on_view_state_change`` are not functional in pydeck v0.9+ (see :doc:`event_handling`), so
+layer props cannot depend on the zoom level from Python. Showing a layer only within a zoom range,
+like the ``minzoom``, ``maxzoom`` and ``["interpolate", ["linear"], ["zoom"], ...]`` expressions in
+MapLibre styles, needs a layer extension that reads the zoom level in the browser.
+
+``ZoomOpacityExtension`` from ``@deck.gl-community/layers`` scales a layer's ``opacity`` by
+``[zoom, opacity]`` stops, linearly interpolated and clamped at the ends. The stops are passed to
+the layer's ``zoom_opacity`` keyword argument:
+
+.. code-block:: python
+
+    layer = pdk.Layer(
+        "HexagonLayer",
+        data,
+        get_position=["lng", "lat"],
+        radius=1000,
+        # Fade in between zoom 8.5 and 9.5, fade out between zoom 10.5 and 11.5
+        zoom_opacity=[[8.5, 0], [9.5, 1], [10.5, 1], [11.5, 0]],
+        extensions=[pdk.Extension("ZoomOpacityExtension")],
+    )
+
+``ZoomOpacityExtension`` is added in
+`visgl/deck.gl-community#781 <https://github.com/visgl/deck.gl-community/pull/781>`__ and is
+available once a ``@deck.gl-community/layers`` release includes it.
+
+See the `ZoomOpacityExtension gallery example <gallery/zoom_opacity_extension.html>`__ for a
+complete script, which shows hexagons of decreasing size in consecutive zoom bands.
+
 Available packages
 ^^^^^^^^^^^^^^^^^^
 
@@ -92,7 +124,7 @@ Each of these packages loads with ``register_library(npm=...)``, for example
    * - Package
      - Contents
    * - `@deck.gl-community/layers <https://visgl.github.io/deck.gl-community/docs/modules/layers>`__
-     - Add-on layers
+     - Add-on layers and ``ZoomOpacityExtension``
    * - `@deck.gl-community/geo-layers <https://visgl.github.io/deck.gl-community/docs/modules/geo-layers>`__
      - Geospatial layers
    * - `@deck.gl-community/infovis-layers <https://visgl.github.io/deck.gl-community/docs/modules/infovis-layers>`__
