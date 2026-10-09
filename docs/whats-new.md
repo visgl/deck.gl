@@ -152,6 +152,8 @@ pdk.settings.register_library("MyLayers", "https://example.com/my-layers.mjs", m
 layer = pdk.Layer("MyLayer", data=df)  # MyLayers exports MyLayer
 ```
 
+HTML exports get lighter: `Deck.to_html()` embeds the deck.gl JSON compactly, without indentation, while `to_json()` keeps the pretty-printed form for notebooks and diffs.
+
 ## deck.gl v9.3
 
 Release date: April 13, 2026
