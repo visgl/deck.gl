@@ -130,10 +130,7 @@ const testCases = [
   },
   {
     name: 'terrain-extension-offset',
-    // Re-enabled during the Vitest migration, but still produces a large,
-    // deterministic render mismatch under the current Chromium render project.
-    // Keep this skipped until the offset path matches the historical golden.
-    skip: true,
+    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
