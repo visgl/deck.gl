@@ -11,7 +11,7 @@ import {
   projectionGridBounds,
   type ProjectionGridPoint
 } from 'deck.gl-test/data/projection-grid';
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 import type {FeatureCollection, Polygon, MultiPolygon} from 'geojson';
 import states from 'deck.gl-test/data/us-states.geo.json';
 import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
@@ -21,7 +21,7 @@ import type {TestCase} from '../deck-test-utils';
 import {WIDTH, HEIGHT} from '../constants';
 
 // EPSG:5070 (NAD83 / Conus Albers). Keep Alaska at its projected location, not an inset.
-const converter = new Projection({
+const converter = projectionEngine.createProjection({
   from: 'EPSG:4326',
   to: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 });
@@ -128,7 +128,7 @@ const testCases: TestCase[] = [
 ];
 
 // Albers equal-area conic, with standard parallels bracketing the test grid.
-const aggregationConverter = new Projection({
+const aggregationConverter = projectionEngine.createProjection({
   from: 'EPSG:4326',
   to: '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
 });

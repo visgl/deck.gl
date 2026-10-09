@@ -8,7 +8,8 @@ import {build} from 'esbuild';
 // loaders.gl alpha.11 only exports this synchronous decoder to ESM consumers.
 // Bundle it into CARTO's CommonJS output until loaders.gl provides a require export.
 await build({
-  entryPoints: ['src/index.ts'],
+  // Preserve TypeScript transforms, including the package version used in worker URLs.
+  entryPoints: ['dist/index.js'],
   outfile: 'dist/index.cjs',
   bundle: true,
   format: 'cjs',

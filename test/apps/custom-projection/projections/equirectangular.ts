@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 import type {ProjectionConfig} from './projection-config';
 
 const RADIUS = 6371008.8;
@@ -10,7 +10,7 @@ const RADIUS = 6371008.8;
 const MAX_LATITUDE = 89.999999;
 const fromCrs = 'EPSG:4326';
 const toCrs = `+proj=eqc +R=${RADIUS} +units=m`;
-const converter = new Projection({from: fromCrs, to: toCrs});
+const converter = projectionEngine.createProjection({from: fromCrs, to: toCrs});
 const projection = {forward: converter.project, inverse: converter.unproject};
 
 export default {
