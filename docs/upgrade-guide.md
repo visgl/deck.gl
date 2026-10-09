@@ -15,6 +15,10 @@ For applications and custom viewport subclasses using `distanceScales` or `getDi
 - `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
 - `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
 
+### GlobeView `position`
+
+`GlobeView` applies `viewState.position` as meter offsets to the east, north and up at every zoom, as `MapView` does. Up to zoom 12 it used to add them along the globe's axes, so the camera target moved by an amount that depended on the location, and the view jumped at zoom 12. Applications that set `position` on a `GlobeView` now get the target where `position` says.
+
 ## Upgrading to v9.4
 
 ### pydeck lighting
