@@ -18,6 +18,8 @@ type ExternalBuffer = TypedArray | Buffer | BinaryAttribute;
 type TesselatorOptions<GeometryT, ExtraOptionsT> = ExtraOptionsT & {
   attributes?: Record<string, any>;
   getGeometry?: AccessorFunction<any, GeometryT>;
+  /** Transforms each position after input-space subdivision, before tessellation. */
+  transform?: ((position: number[]) => number[]) | null;
   data?: any;
   buffers?: Record<string, ExternalBuffer>;
   geometryBuffer?: ExternalBuffer;
@@ -44,7 +46,8 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
 
   protected _attributeDefs: any;
   protected data: any;
-  protected getGeometry?: AccessorFunction<any, GeometryT> | null;
+  protected geometryAccessor?: AccessorFunction<any, GeometryT> | null;
+  protected inputPositionSize!: number;
   protected geometryBuffer?: ExternalBuffer;
   protected buffers!: Record<string, ExternalBuffer>;
   protected positionSize!: number;
@@ -74,20 +77,21 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
       normalize = true
     } = this.opts;
     this.data = data;
-    this.getGeometry = getGeometry;
-    this.positionSize =
+    this.geometryAccessor = getGeometry;
+    this.inputPositionSize =
       // @ts-ignore (2339) when geometryBuffer is a luma Buffer, size falls back to positionFormat
       (geometryBuffer && geometryBuffer.size) || (positionFormat === 'XY' ? 2 : 3);
+    this.positionSize = this.opts.transform ? 3 : this.inputPositionSize;
     this.buffers = buffers;
     this.normalize = normalize;
 
     // Handle external logical value
     if (geometryBuffer) {
       assert(data.startIndices); // binary data missing startIndices
-      this.getGeometry = this.getGeometryFromBuffer(geometryBuffer);
+      this.geometryAccessor = this.getGeometryFromBuffer(geometryBuffer);
 
-      if (!normalize) {
-        // skip packing and set attribute value directly
+      if (!normalize && !this.opts.transform) {
+        // Only untransformed geometry can use the input buffer directly.
         // TODO - avoid mutating user-provided object
         buffers.vertexPositions = geometryBuffer;
       }
@@ -106,6 +110,19 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
 
   updatePartialGeometry({startRow, endRow}: {startRow: number; endRow: number}): void {
     this._rebuildGeometry({startRow, endRow});
+  }
+
+  /** Retrieve and transform geometry without modifying accessor-owned coordinates. */
+  protected getGeometry(...args: Parameters<AccessorFunction<any, GeometryT>>): GeometryT | null {
+    const geometry = this.geometryAccessor?.(...args);
+    if (!geometry || !this.opts.transform) return geometry ?? null;
+    const prepared = this.prepareGeometry(geometry);
+    return transformGeometry(prepared, this.inputPositionSize, this.opts.transform) as GeometryT;
+  }
+
+  /** Subdivide in input coordinates before applying a nonlinear position transform. */
+  protected prepareGeometry(geometry: GeometryT): GeometryT {
+    return geometry;
   }
 
   // Subclass interface
@@ -133,7 +150,8 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
 
     // @ts-ignore (2322) NumericArray not assignable to GeometryT
     return getAccessorFromBuffer(value, {
-      size: this.positionSize,
+      // The buffer still contains input coordinates; transforms produce XYZ afterwards.
+      size: this.inputPositionSize,
       offset: (geometryBuffer as BinaryAttribute).offset,
       stride: (geometryBuffer as BinaryAttribute).stride,
       startIndices: this.data.startIndices
@@ -170,11 +188,11 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
     startRow: number,
     endRow: number
   ): void {
-    const {data, getGeometry} = this;
+    const {data} = this;
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const geometry = getGeometry ? getGeometry(object, objectInfo) : null;
+      const geometry = this.getGeometry(object, objectInfo);
       visitor(geometry, objectInfo.index);
     }
   }
@@ -242,22 +260,60 @@ export default abstract class Tesselator<GeometryT, NormalizedGeometryT, ExtraOp
     // @ts-ignore (2739) context will be populated in the loop
     const context: GeometryUpdateContext = {};
 
-    this._forEachGeometry(
-      (geometry: GeometryT | null, dataIndex: number) => {
-        const normalizedGeometry =
-          normalizedData[dataIndex] || (geometry as unknown as NormalizedGeometryT);
-        context.vertexStart = vertexStarts[dataIndex];
-        context.indexStart = indexStarts[dataIndex];
-        const vertexEnd =
-          dataIndex < vertexStarts.length - 1 ? vertexStarts[dataIndex + 1] : instanceCount;
-        context.geometrySize = vertexEnd - vertexStarts[dataIndex];
-        context.geometryIndex = dataIndex;
-        this.updateGeometryAttributes(normalizedGeometry, context);
-      },
-      startRow,
-      endRow
-    );
+    const updateGeometry = (geometry: NormalizedGeometryT | null, dataIndex: number) => {
+      context.vertexStart = vertexStarts[dataIndex];
+      context.indexStart = indexStarts[dataIndex];
+      const vertexEnd = vertexStarts[dataIndex + 1] ?? instanceCount;
+      context.geometrySize = vertexEnd - vertexStarts[dataIndex];
+      context.geometryIndex = dataIndex;
+      this.updateGeometryAttributes(geometry, context);
+    };
+    if (this.normalize || !geometryBuffer) {
+      for (
+        let dataIndex = startRow;
+        dataIndex < Math.min(endRow, vertexStarts.length - 1);
+        dataIndex++
+      ) {
+        updateGeometry(normalizedData[dataIndex], dataIndex);
+      }
+    } else {
+      this._forEachGeometry(
+        (geometry, dataIndex) => {
+          updateGeometry(geometry as unknown as NormalizedGeometryT, dataIndex);
+        },
+        startRow,
+        endRow
+      );
+    }
 
     this.vertexCount = indexStarts[indexStarts.length - 1];
   }
+}
+
+// Geometry containers retain topology metadata; only position arrays are transformed.
+function transformGeometry(geometry: any, size: number, transform: (p: number[]) => number[]): any {
+  if ('positions' in geometry) {
+    return {
+      ...geometry,
+      positions: transformGeometry(geometry.positions, size, transform),
+      ...(geometry.holeIndices && {
+        holeIndices: Array.from(
+          geometry.holeIndices as ArrayLike<number>,
+          index => (index / size) * 3
+        )
+      })
+    };
+  }
+  if (!geometry.length) return [];
+  if (typeof geometry[0] !== 'number') {
+    return Array.from(geometry as ArrayLike<unknown>, part =>
+      transformGeometry(part, size, transform)
+    );
+  }
+  const result: number[] = [];
+  for (let i = 0; i < geometry.length; i += size) {
+    const position = transform([geometry[i], geometry[i + 1], size === 3 ? geometry[i + 2] : 0]);
+    result.push(position[0], position[1], position[2] ?? 0);
+  }
+  return result;
 }

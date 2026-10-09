@@ -132,6 +132,7 @@ Index
 
    tooltip
    custom_layers
+   community_libraries
 
 .. toctree::
    :maxdepth: 1

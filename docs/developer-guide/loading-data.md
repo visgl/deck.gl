@@ -100,6 +100,7 @@ new HexagonLayer({
   loaders: [CSVLoader],
   loadOptions: {
     csv: {
+      shape: 'object-row-table',
       delimiter: '\t',
       dynamicTyping: true,
       skipEmptyLines: true

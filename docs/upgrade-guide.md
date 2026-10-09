@@ -4,6 +4,17 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 # Upgrade Guide
 
+## Upgrading to v10
+
+### Viewport distance scales
+
+For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+
+- `unitsPerDegree` and `unitsPerDegree2` are renamed to `unitsPerWorldUnit` and `unitsPerWorldUnit2`.
+- `degreesPerUnit` is removed. Divide by the corresponding component of `unitsPerWorldUnit` instead.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
+
 ## Upgrading to v9.4
 
 ### pydeck lighting
@@ -59,6 +70,19 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 ### FillStyleExtension
 
 Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
+
+### PathStyleExtension
+
+`highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
+
+```js
+// Before
+new PathStyleExtension({highPrecisionDash: true});
+// After
+new PathStyleExtension({dashMode: 'path'});
+```
+
+See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
 
 ## Upgrading to v9.3
 
