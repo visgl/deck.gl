@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import {_GlobeView as GlobeView} from '@deck.gl/core';
 import GlobeViewport from '@deck.gl/core/viewports/globe-viewport';
 import {equals, config} from '@math.gl/core';
 
@@ -138,6 +139,35 @@ test('GlobeViewport#position', () => {
     Math.hypot(x - viewport.width / 2, y - viewport.height / 2),
     'point at the meter offsets of position is projected to screen center'
   ).toBeLessThan(0.1);
+});
+
+test('GlobeView#position is continuous across zoom 12', () => {
+  // GlobeView switches from GlobeViewport to WebMercatorViewport above zoom 12, where position
+  // holds meter offsets to the east, north and up
+  const view = new GlobeView({id: 'globe'});
+  const {width, height, longitude, latitude} = TEST_VIEWPORTS[0];
+  for (const pitch of [0, 60]) {
+    for (const position of [
+      [0, 0, 2000],
+      [500, 0, 0],
+      [0, 500, 0]
+    ]) {
+      const [below, above] = [11.999, 12.001].map(zoom =>
+        view.makeViewport({width, height, viewState: {longitude, latitude, zoom, pitch, position}})
+      );
+      for (const point of [
+        [longitude, latitude, 0],
+        [longitude, latitude, 2000]
+      ]) {
+        const [x0, y0] = below.project(point);
+        const [x1, y1] = above.project(point);
+        expect(
+          Math.hypot(x1 - x0, y1 - y0),
+          `${JSON.stringify(point)} with position ${JSON.stringify(position)} at pitch ${pitch}`
+        ).toBeLessThan(0.5);
+      }
+    }
+  }
 });
 
 test('GlobeViewport#project, unproject', () => {
