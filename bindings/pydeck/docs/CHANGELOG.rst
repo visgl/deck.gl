@@ -24,6 +24,9 @@ Releases and associated GitHub PRs for pydeck are documented here.
   (#10454)
 - Experimental: ES module custom libraries can import deck.gl, luma.gl, loaders.gl and math.gl by
   package name and share pydeck's copies (#10794)
+- Experimental: ``settings.register_library(npm=...)`` loads an npm package as an ES module from esm.sh,
+  matching ``@deck.gl-community`` packages to pydeck's deck.gl version (#10797)
+- Add a Paris Trees gallery example, drawn with ``TreeLayer`` from ``@deck.gl-community/three``
 
 0.9.3 - Jul 2026
 ^^^^^^^^^^^^^^^^^^^

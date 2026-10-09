@@ -184,6 +184,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getSourcePosition'
       },
@@ -191,6 +192,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getTargetPosition'
       },
@@ -258,7 +260,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMinPixels,
       widthMaxPixels,
       greatCircle,
-      useShortestPath: wrapLongitude
+      useShortestPath: wrapLongitude && !this.context.viewport.preproject
     };
 
     const model = this.state.model!;

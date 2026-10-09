@@ -93,9 +93,11 @@ When displaying multiple views with different projections, create a separate lay
 
 ## Limitations
 
-- Supported layers are `ScatterplotLayer`, `PathLayer` and `SolidPolygonLayer`, including their use by `PolygonLayer` and the corresponding `GeoJsonLayer` sublayers. Other layers are not yet supported.
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
+- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in `fromCrs` and projects every grid vertex; smaller values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. If the image is generated in a different coordinate system than `fromCrs`, subdivision cannot correct its pixel-to-coordinate mapping.
+- Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
 - Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
+- `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the viewport uses preprojection. Split geometry at the desired longitude boundary before passing it to these layers.
 - With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in `fromCrs`. `modelMatrix` is applied before conversion,  and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in map meters in `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in `fromCrs`. They may be unavailable where `projection.inverse` cannot return a valid position.

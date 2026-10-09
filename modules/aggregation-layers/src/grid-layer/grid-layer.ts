@@ -25,6 +25,7 @@ import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
 import {getBinIdRange} from '../common/utils/bounds-utils';
+import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
@@ -76,12 +77,14 @@ export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & Composite
 type _GridLayerProps<DataT> = {
   /**
    * Custom accessor to retrieve a grid bin index from each data object.
+   * With CustomProjectionView, position is in map meters in toCrs.
    * Not supported by GPU aggregation.
    */
   gridAggregator?: ((position: number[], cellSize: number) => [number, number]) | null;
 
   /**
    * Size of each cell in meters.
+   * Geospatial views approximate ground meters at the center of the data bounds.
    * @default 1000
    */
   cellSize?: number;
@@ -312,8 +315,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               return gridAggregator(positions, cellSize);
             }
             const viewport = this.state.aggregatorViewport;
-            // project to common space
-            const p = viewport.projectPosition(positions);
+            const p = this.projectPositionFromAttribute(positions, viewport);
             const {cellSizeCommon, cellOriginCommon} = opts;
             return [
               Math.floor((p[0] - cellOriginCommon[0]) / cellSizeCommon[0]),
@@ -361,7 +363,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       colorWeights: {size: 1, accessor: 'getColorWeight'},
       elevationWeights: {size: 1, accessor: 'getElevationWeight'}
@@ -460,15 +463,18 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
         Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1]
       ];
-      centroid = viewport.unprojectFlat(cellOriginCommon);
+      centroid = viewport.preproject ? cellOriginCommon : viewport.unprojectFlat(cellOriginCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
-      viewport = viewport.isGeospatial
-        ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-        : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
+      viewport =
+        viewport.isGeospatial && !viewport.preproject
+          ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
+          : viewport.preproject
+            ? createAggregationViewport(viewport, centroid)
+            : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
       // Round to the nearest 32-bit float to match CPU and GPU results
       cellOriginCommon = [Math.fround(viewport.center[0]), Math.fround(viewport.center[1])];
