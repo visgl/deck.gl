@@ -289,6 +289,12 @@ export default class LayerManager {
         needsUpdate = `Uniform transition in ${layer}`;
         break;
       }
+      // A layer can be marked after its own update in this cycle, e.g. a composite layer whose state
+      // is set from a sublayer callback (TerrainLayer's onViewportLoad). Update it in the next cycle.
+      if (layer.internalState?.needsUpdate) {
+        needsUpdate = `${layer} marked during update`;
+        break;
+      }
     }
 
     this._needsUpdate = needsUpdate;
