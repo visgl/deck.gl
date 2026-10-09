@@ -1,7 +1,7 @@
 import os
 import sys
 
-from .json_tools import JSONMixin
+from .json_tools import JSONMixin, serialize
 from .layer import Layer
 from ..io.html import deck_to_html
 from ..settings import settings as pydeck_settings
@@ -262,7 +262,7 @@ class Deck(JSONMixin):
         str
             Returns absolute path of the file
         """
-        deck_json = self.to_json()
+        deck_json = serialize(self, compact=True)
         f = deck_to_html(
             deck_json,
             mapbox_key=self.mapbox_key,
