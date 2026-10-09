@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+### Custom projections (Experimental)
+
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
@@ -151,6 +157,8 @@ import pydeck as pdk
 pdk.settings.register_library("MyLayers", "https://example.com/my-layers.mjs", module=True)
 layer = pdk.Layer("MyLayer", data=df)  # MyLayers exports MyLayer
 ```
+
+HTML exports get lighter: `Deck.to_html()` embeds the deck.gl JSON compactly, without indentation, while `to_json()` keeps the pretty-printed form for notebooks and diffs.
 
 ## deck.gl v9.3
 
