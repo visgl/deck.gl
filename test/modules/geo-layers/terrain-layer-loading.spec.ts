@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, _GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, _GlobeView as GlobeView, LayerManager, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
-import {testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
+import {device, testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
 import {expect, test} from 'vitest';
 
@@ -32,7 +32,7 @@ const TEST_GLOBE_VIEWPORT = new GlobeView().makeViewport({
   viewState: {longitude: 0, latitude: 0, zoom: 0}
 });
 
-function createTestMesh() {
+function createTestMesh(zRange = [0, 1]) {
   const mesh = new TruncatedConeGeometry({
     topRadius: 1,
     bottomRadius: 1,
@@ -44,8 +44,8 @@ function createTestMesh() {
   });
   (mesh as any).header = {
     boundingBox: [
-      [0, 0, 0],
-      [1, 1, 1]
+      [0, 0, zRange[0]],
+      [1, 1, zRange[1]]
     ]
   };
   return mesh;
@@ -213,4 +213,29 @@ test('TerrainLayer renders tiled Martini meshes in lng/lat coordinates on GlobeV
     COORDINATE_SYSTEM.LNGLAT
   );
   handle?.finalize();
+});
+
+test('TerrainLayer passes the elevation range of loaded tiles to its TileLayer', async () => {
+  const layer = new TerrainLayer({
+    id: 'terrain-tiled-zrange',
+    elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
+    minZoom: 0,
+    maxZoom: 0,
+    fetch: () => Promise.resolve(createTestMesh([100, 2000]))
+  });
+  const layerManager = new LayerManager(device, {viewport: TEST_VIEWPORT});
+  layerManager.setLayers([layer]);
+  // Like Deck's animation loop: update the layers while they ask for it
+  while (!layer.isLoaded || layerManager.needsUpdate()) {
+    await sleep();
+    layerManager.updateLayers();
+  }
+
+  const tileLayer = layerManager.getLayers().find(l => l.id === 'terrain-tiled-zrange-tiles');
+  expect(layer.state.zRange, 'TerrainLayer stores the range of the loaded tiles').toEqual([
+    100, 2000
+  ]);
+  // TileLayer culls tiles (for picking, too) at this elevation range
+  expect(tileLayer?.props.zRange, 'TileLayer receives the range').toEqual([100, 2000]);
+  layerManager.finalize();
 });
