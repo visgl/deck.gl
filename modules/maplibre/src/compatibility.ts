@@ -36,6 +36,30 @@ export function getMapLibreProjection(map: CompatibleMapLibreMap): 'mercator' | 
   return 'mercator';
 }
 
+/** Zoom range in which MapLibre's `globe` projection transitions to Web Mercator */
+const MAPLIBRE_GLOBE_TRANSITION_ZOOMS = [11, 12] as const;
+
+/**
+ * Returns the elevation of the map center that the MapLibre camera targets, if any.
+ * MapLibre's globe camera targets sea level and its Web Mercator camera the terrain. During the
+ * globe projection's transition, MapLibre blends the two, which a target in between approximates.
+ */
+export function getMapLibreCameraElevation(
+  map: CompatibleMapLibreMap,
+  zoom: number
+): number | undefined {
+  const elevation = getMapLibreElevation(map);
+  if (typeof elevation !== 'number' || !Number.isFinite(elevation)) {
+    return undefined;
+  }
+  if (getMapLibreProjection(map) === 'globe') {
+    const [startZoom, endZoom] = MAPLIBRE_GLOBE_TRANSITION_ZOOMS;
+    const mercatorWeight = Math.min(Math.max((zoom - startZoom) / (endZoom - startZoom), 0), 1);
+    return elevation * mercatorWeight;
+  }
+  return elevation;
+}
+
 export function getMapLibreRenderParameters(
   parametersOrMatrix: unknown,
   legacyParameters?: unknown

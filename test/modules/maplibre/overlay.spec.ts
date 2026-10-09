@@ -11,6 +11,7 @@ import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
 import {test, expect} from 'vitest';
 
 import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
+import {getMapLibreViewState} from '../../../modules/maplibre/src/deck-utils';
 
 import type {Map as MapLibreMap} from 'maplibre-gl-v6';
 
@@ -117,6 +118,32 @@ test('MapLibreOverlay overlaid uses only public MapLibre APIs', () => {
 
   overlay.onRemove(map);
   expect(overlay._deck).toBeFalsy();
+});
+
+test('MapLibreOverlay targets the terrain elevation like the MapLibre camera', () => {
+  const TEST_CASES = [
+    {projection: 'mercator', zoom: 10, position: [0, 0, 125]},
+    // MapLibre's globe camera targets sea level, it transitions to Web Mercator from zoom 11 to 12
+    {projection: 'globe', zoom: 10, position: [0, 0, 0]},
+    {projection: 'globe', zoom: 11.5, position: [0, 0, 62.5]},
+    {projection: 'globe', zoom: 12, position: [0, 0, 125]},
+    {projection: 'globe', zoom: 13, position: [0, 0, 125]}
+  ];
+
+  for (const {projection, zoom, position} of TEST_CASES) {
+    const map = {
+      getCenter: () => ({lng: 13.47, lat: 48.57}),
+      getZoom: () => zoom,
+      getBearing: () => 0,
+      getPitch: () => 60,
+      getPadding: () => ({left: 0, right: 0, top: 0, bottom: 0}),
+      getRenderWorldCopies: () => true,
+      getCenterElevation: () => 125,
+      getProjection: () => ({type: projection})
+    } as unknown as Parameters<typeof getMapLibreViewState>[0];
+
+    expect(getMapLibreViewState(map).position, `${projection} at zoom ${zoom}`).toEqual(position);
+  }
 });
 
 for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
@@ -251,6 +278,68 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
       expect(elevation).toBeCloseTo(1000);
       expect(overlay._deck!.props.viewState.position).toEqual([0, 0, elevation]);
       expect(overlay.pickObject({x: 200, y: 150})?.layer?.id).toBe('summit');
+    } finally {
+      map.remove();
+      container.remove();
+      URL.revokeObjectURL(demTileURL);
+    }
+  });
+}
+
+// MapLibre has a globe from 5.0. Its globe blends into Web Mercator from zoom 11 to 12, where
+// map.project() does not follow the rendered camera, so this compares below and above the blend
+for (const {version, MapClass} of MAPLIBRE_VERSIONS.slice(1)) {
+  webglTest(`MapLibreOverlay matches the globe with terrain of MapLibre ${version}`, async () => {
+    const container = document.createElement('div');
+    Object.assign(container.style, {width: '400px', height: '300px'});
+    document.body.append(container);
+    const demTileURL = await createDemTileURL(1000);
+
+    const center: [number, number] = [8.5, 47.3];
+    const map = new MapClass({
+      container,
+      style: {
+        version: 8,
+        projection: {type: 'globe'},
+        sources: {dem: {type: 'raster-dem', tiles: [demTileURL], tileSize: 256, maxzoom: 12}},
+        layers: []
+      },
+      center,
+      zoom: 10,
+      pitch: 60,
+      attributionControl: false
+    }) as unknown as MapLibreMap;
+
+    try {
+      await new Promise<void>(resolve => map.once('load', () => resolve()));
+
+      // Interleaved: an overlaid Deck keeps its own WebGL context after removal, and the tests share a
+      // page with a limit on live contexts
+      const overlay = new MapLibreOverlay({interleaved: true, layers: []});
+      map.addControl(overlay);
+      await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+      map.setTerrain({source: 'dem'});
+      await new Promise<void>(resolve => map.once('idle', () => resolve()));
+
+      for (const zoom of [10, 11, 12]) {
+        map.jumpTo({zoom});
+        // map.project() follows the new zoom only after MapLibre has rendered it
+        await new Promise<void>(resolve => map.once('idle', () => resolve()));
+        const viewport = overlay._deck!.getViewports()[0];
+        for (const [dx, dy] of [
+          [0, 0],
+          [0.01, 0.005],
+          [-0.01, -0.005]
+        ]) {
+          const lngLat: [number, number] = [center[0] + dx, center[1] + dy];
+          const expected = map.project(lngLat);
+          const [x, y] = viewport.project([lngLat[0], lngLat[1], 1000]);
+          expect(
+            Math.hypot(x - expected.x, y - expected.y),
+            `[${lngLat}] at zoom ${zoom}`
+          ).toBeLessThan(1);
+        }
+      }
     } finally {
       map.remove();
       container.remove();

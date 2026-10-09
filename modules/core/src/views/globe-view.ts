@@ -23,6 +23,8 @@ export type GlobeViewState = {
   minZoom?: number;
   /** Max zoom, default `20` */
   maxZoom?: number;
+  /** Viewport center offsets from lng, lat in meters */
+  position?: number[];
   /** The near plane position */
   nearZ?: number;
   /** The far plane position */
