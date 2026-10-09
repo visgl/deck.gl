@@ -70,7 +70,7 @@ new Deck({
 
 ## Crossfading between zoom bands
 
-Hard cutoffs make layers pop in and out. To fade instead, compute each layer's `opacity` from the zoom and let neighboring bands overlap. The example below draws a sequence of [GridLayer](../api-reference/aggregation-layers/grid-layer.md)s whose cells get smaller as you zoom in, and switches to the raw points at street level. The [GridLayer example](https://deck.gl/examples/grid-layer) applies the same approach to Paris street trees:
+Hard cutoffs make layers pop in and out. To fade instead, compute each layer's `opacity` from the zoom and let neighboring bands overlap. The example below draws a sequence of [GridLayer](../api-reference/aggregation-layers/grid-layer.md)s whose cells get smaller as you zoom in, and switches to the raw points at street level:
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -83,8 +83,11 @@ import {Deck, MapViewState} from '@deck.gl/core';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
-type Point = {position: [number, number]};
+type Point = [longitude: number, latitude: number, gender: number];
 type ZoomStops = [zoom: number, value: number][];
+
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json';
 
 function interpolateZoom(zoom: number, stops: ZoomStops): number {
   if (zoom <= stops[0][0]) {
@@ -113,7 +116,7 @@ function getLayers(data: Point[], zoom: number) {
     return new GridLayer<Point>({
       id: `grid-${cellSize}`,
       data,
-      getPosition: d => d.position,
+      getPosition: d => [d[0], d[1]],
       cellSize,
       gpuAggregation: true,
       opacity,
@@ -125,7 +128,7 @@ function getLayers(data: Point[], zoom: number) {
   const pointLayer = new ScatterplotLayer<Point>({
     id: 'points',
     data,
-    getPosition: d => d.position,
+    getPosition: d => [d[0], d[1]],
     radiusUnits: 'pixels',
     getRadius: 2,
     opacity: pointOpacity,
@@ -135,9 +138,9 @@ function getLayers(data: Point[], zoom: number) {
   return [...gridLayers, pointLayer];
 }
 
-const INITIAL_VIEW_STATE: MapViewState = {longitude: -74, latitude: 40.7, zoom: 6};
+const INITIAL_VIEW_STATE: MapViewState = {longitude: -73.98, latitude: 40.75, zoom: 11};
 
-const data: Point[] = await fetch('/path/to/points.json').then(resp => resp.json());
+const data: Point[] = await fetch(DATA_URL).then(resp => resp.json());
 
 const deckInstance = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
@@ -153,14 +156,17 @@ const deckInstance = new Deck({
   <TabItem value="react" label="React">
 
 ```tsx
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {DeckGL} from '@deck.gl/react';
 import {MapViewState} from '@deck.gl/core';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
-type Point = {position: [number, number]};
+type Point = [longitude: number, latitude: number, gender: number];
 type ZoomStops = [zoom: number, value: number][];
+
+const DATA_URL =
+  'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/scatterplot/manhattan.json';
 
 function interpolateZoom(zoom: number, stops: ZoomStops): number {
   if (zoom <= stops[0][0]) {
@@ -189,7 +195,7 @@ function getLayers(data: Point[], zoom: number) {
     return new GridLayer<Point>({
       id: `grid-${cellSize}`,
       data,
-      getPosition: d => d.position,
+      getPosition: d => [d[0], d[1]],
       cellSize,
       gpuAggregation: true,
       opacity,
@@ -201,7 +207,7 @@ function getLayers(data: Point[], zoom: number) {
   const pointLayer = new ScatterplotLayer<Point>({
     id: 'points',
     data,
-    getPosition: d => d.position,
+    getPosition: d => [d[0], d[1]],
     radiusUnits: 'pixels',
     getRadius: 2,
     opacity: pointOpacity,
@@ -211,10 +217,16 @@ function getLayers(data: Point[], zoom: number) {
   return [...gridLayers, pointLayer];
 }
 
-const INITIAL_VIEW_STATE: MapViewState = {longitude: -74, latitude: 40.7, zoom: 6};
+const INITIAL_VIEW_STATE: MapViewState = {longitude: -73.98, latitude: 40.75, zoom: 11};
 
-function App({data}: {data: Point[]}) {
+function App() {
+  const [data, setData] = useState<Point[]>([]);
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
+  useEffect(() => {
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(setData);
+  }, []);
   const onViewStateChange = useCallback(({viewState}) => setZoom(viewState.zoom), []);
   const layers = useMemo(() => getLayers(data, zoom), [data, zoom]);
 
@@ -231,6 +243,8 @@ function App({data}: {data: Point[]}) {
 
   </TabItem>
 </Tabs>
+
+The [GridLayer example](https://deck.gl/examples/grid-layer) ([source](https://github.com/visgl/deck.gl/tree/master/examples/website/zoom-bands)) applies the same approach to Paris street trees, with eight bands whose handover zooms are derived from an on-screen cell size.
 
 Things to keep in mind:
 
