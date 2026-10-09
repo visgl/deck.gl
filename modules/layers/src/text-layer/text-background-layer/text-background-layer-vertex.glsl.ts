@@ -34,10 +34,13 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 }
 
 void main(void) {
+  // Natural bounds flip Y below; content-box bounds instead increase Y with uv.
+  // Reverse the natural bounds' winding so both paths remain front-facing.
+  vec2 corner = vec2(positions.x, instanceClipRect.w < 0.0 ? 1.0 - positions.y : positions.y);
   geometry.worldPosition = instancePositions;
-  geometry.uv = positions;
+  geometry.uv = corner;
   geometry.pickingColor = picking_getPickingColorFromInstanceID();
-  uv = positions;
+  uv = corner;
   vLineWidth = instanceLineWidths;
 
   // convert size in meters to pixels, then scaled and clamp
@@ -51,7 +54,7 @@ void main(void) {
 
   dimensions = instanceRects.zw * instanceScale + textBackground.padding.xy + textBackground.padding.zw;
 
-  vec2 pixelOffset = (positions * instanceRects.zw + instanceRects.xy) * instanceScale + mix(-textBackground.padding.xy, textBackground.padding.zw, positions);
+  vec2 pixelOffset = (corner * instanceRects.zw + instanceRects.xy) * instanceScale + mix(-textBackground.padding.xy, textBackground.padding.zw, corner);
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles);
   pixelOffset += instancePixelOffsets;
   pixelOffset.y *= -1.0;

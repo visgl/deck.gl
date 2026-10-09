@@ -50,12 +50,18 @@ struct Varyings {
 
 @vertex
 fn vertexMain(attributes: Attributes) -> Varyings {
+  // Natural bounds flip Y below; content-box bounds instead increase Y with uv.
+  // Reverse the natural bounds' winding so both paths remain front-facing.
+  let corner = vec2<f32>(
+    attributes.positions.x,
+    select(attributes.positions.y, 1.0 - attributes.positions.y, attributes.instanceClipRect.w < 0.0)
+  );
   geometry.worldPosition = attributes.instancePositions;
-  geometry.uv = attributes.positions;
+  geometry.uv = corner;
   geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
 
   var varyings: Varyings;
-  varyings.uv = attributes.positions;
+  varyings.uv = corner;
   varyings.vLineWidth = attributes.instanceLineWidths;
 
   let sizePixels = clamp(
@@ -72,9 +78,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     textBackground.padding.xy + textBackground.padding.zw;
 
   var pixelOffset =
-    (attributes.positions * attributes.instanceRects.zw + attributes.instanceRects.xy) *
+    (corner * attributes.instanceRects.zw + attributes.instanceRects.xy) *
       instanceScale +
-    mix(-textBackground.padding.xy, textBackground.padding.zw, attributes.positions);
+    mix(-textBackground.padding.xy, textBackground.padding.zw, corner);
   pixelOffset = rotate_by_angle(pixelOffset, attributes.instanceAngles);
   pixelOffset = pixelOffset + attributes.instancePixelOffsets;
   pixelOffset.y = pixelOffset.y * -1.0;
