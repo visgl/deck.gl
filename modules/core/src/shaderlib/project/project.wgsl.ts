@@ -142,7 +142,9 @@ fn project_external_size_scale_at(mapPosition: vec2<f32>) -> vec3<f32> {
   let record = project_sizeScaleBuffer[u32(index.y * project.sizeScaleSize + index.x)];
   if (record.x <= 0.0) { return project.commonUnitsPerMeter; }
   let center = (vec2<f32>(index) + 0.5) * 512.0 / vec2<f32>(dimensions);
-  let scale = max(0.0, record.x + dot(record.yz, samplePosition - center));
+  var scale = record.x + dot(record.yz, samplePosition - center);
+  // This bound rejects non-finite reconstructions without WGSL classification builtins.
+  if (!(scale > 0.0 && scale <= 3.4028234663852886e38)) { scale = record.x; }
   return vec3<f32>(scale, scale, record.w * scale / record.x) * project.commonUnitsPerWorldUnit;
 }
 

@@ -145,7 +145,11 @@ export default class CustomProjectionViewport extends Viewport {
       }
     };
     const position = [center[0], center[1], 0];
-    const unitsPerMeter = getCustomProjectionUnitsPerMeter(opts, undefined, position);
+    const unitsPerMeter = getCustomProjectionUnitsPerMeter(opts, undefined, position) || [
+      NORMALIZATION_SCALE,
+      NORMALIZATION_SCALE,
+      NORMALIZATION_SCALE
+    ];
     super({
       ...opts,
       width,
@@ -230,9 +234,13 @@ export default class CustomProjectionViewport extends Viewport {
             Math.hypot(roundTrip[0] - output[0], roundTrip[1] - output[1]) * normalization > 1e-5
           )
             continue;
-          const scale = getCustomProjectionUnitsPerMeter(this.projectionOptions, output, input).map(
-            value => value / NORMALIZATION_SCALE
+          const unitsPerMeter = getCustomProjectionUnitsPerMeter(
+            this.projectionOptions,
+            output,
+            input
           );
+          if (!unitsPerMeter) continue;
+          const scale = unitsPerMeter.map(value => value / NORMALIZATION_SCALE);
           const commonScale = scale.map(value => Math.fround(value));
           if (!commonScale.every(value => Number.isFinite(value) && value > 0)) continue;
           const offset = (y * size + x) * 4;
@@ -351,32 +359,33 @@ export default class CustomProjectionViewport extends Viewport {
 
   /** Returns ground-meter scales at a map-meter anchor in toCrs, or the camera center.
    * The fixed map-meter-to-common scale is independent of the anchor.
-   * Falls back to camera-center scales when the anchor cannot be inverse-projected.
+   * Falls back to camera-center scales when the anchor or its local scale cannot be evaluated.
    */
   getDistanceScales(coordinateOrigin?: number[]): DistanceScales {
     if (!coordinateOrigin) return this.distanceScales;
-    let worldPosition: number[] | undefined;
-    if (!this.projectionOptions.getDistanceScale) {
-      // Cartesian data can lie outside the inverse domain; retain camera sizing in that case.
-      try {
+    try {
+      let worldPosition: number[] | undefined;
+      if (!this.projectionOptions.getDistanceScale) {
         const position = this.projectionOptions.projection.inverse(coordinateOrigin);
         if (!position || position.length < 2 || !position.every(Number.isFinite))
           return this.distanceScales;
         worldPosition = position;
-      } catch {
-        return this.distanceScales;
       }
+      const unitsPerMeter = getCustomProjectionUnitsPerMeter(
+        this.projectionOptions,
+        coordinateOrigin,
+        worldPosition
+      );
+      // Fallback belongs to a sizing request, never to the sampled distortion field.
+      if (!unitsPerMeter) return this.distanceScales;
+      return {
+        ...this.distanceScales,
+        unitsPerMeter,
+        metersPerUnit: unitsPerMeter.map(value => 1 / value) as [number, number, number]
+      };
+    } catch {
+      return this.distanceScales;
     }
-    const unitsPerMeter = getCustomProjectionUnitsPerMeter(
-      this.projectionOptions,
-      coordinateOrigin,
-      worldPosition
-    );
-    return {
-      ...this.distanceScales,
-      unitsPerMeter,
-      metersPerUnit: unitsPerMeter.map(value => 1 / value) as [number, number, number]
-    };
   }
 
   panByPosition(position: number[], pixel: number[]): {center: [number, number, number]} {
@@ -397,9 +406,9 @@ function getCustomProjectionUnitsPerMeter(
   options: CustomProjectionViewportOptions,
   mapPosition?: number[],
   worldPosition?: number[]
-): [number, number, number] {
+): [number, number, number] | null {
   const {projection, getDistanceScale, fromBounds, fromCrs = 'WGS84'} = options;
-  let localScale: number[];
+  let localScale: number[] | null;
   if (getDistanceScale) {
     const [x, y] = mapPosition || projection.forward(clampInput(worldPosition!, fromBounds));
     const scale = getDistanceScale([x, y]);
@@ -411,18 +420,18 @@ function getCustomProjectionUnitsPerMeter(
     const position = worldPosition || projection.inverse(mapPosition!);
     const geographic = isGeographicCrs(fromCrs);
     localScale =
-      geographic === undefined || !position
+      geographic === undefined
         ? [1, 1, 1]
-        : estimateUnitsPerMeter(
+        : position &&
+          estimateUnitsPerMeter(
             projection,
             clampInput(position, fromBounds),
             geographic,
             fromBounds
           );
   }
-  return localScale.map(
-    value => (Number.isFinite(value) && value > 0 ? value : 1) * NORMALIZATION_SCALE
-  ) as [number, number, number];
+  if (!localScale?.every(value => Number.isFinite(value) && value > 0)) return null;
+  return localScale.map(value => value * NORMALIZATION_SCALE) as [number, number, number];
 }
 
 /** Classify world coordinates without resolving or interpreting the full CRS definition. */
@@ -443,7 +452,7 @@ function estimateUnitsPerMeter(
   center: number[],
   geographic: boolean,
   fromBounds?: CustomProjectionViewportOptions['fromBounds']
-): [number, number, number] {
+): [number, number, number] | null {
   const metersPerUnit = [1, 1, 1];
   if (geographic) {
     // Ground distance belongs to the input locations, independently of the
@@ -479,8 +488,7 @@ function estimateUnitsPerMeter(
     );
     return [scaleX, scaleY, Math.sqrt(areaScale / (metersX * metersY))];
   } catch {
-    // Converters may reject samples outside their domain; retain a finite fallback scale.
-    return [1, 1, 1];
+    return null;
   }
 }
 

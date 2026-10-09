@@ -92,6 +92,8 @@ The correction is area-equivalent: a small geographic circle can become an ellip
 
 Local sizing is approximate. Set `toBounds` to cover the area you display. Outside that extent, or where local scale cannot be evaluated, rendering falls back to the viewport-center scale. Changing `toBounds` updates meter sizing without changing position normalization.
 
+If the local linear approximation produces a nonpositive or nonfinite scale on a steep curve, rendering uses the positive sample at the cell center.
+
 ## Changing Projections
 
 `CustomProjectionView` supports swapping the custom projection at runtime. To avoid unnecessary updates, a new `projection` object alone does not trigger layer updates. To refresh projected positions, change one or more of: `fromCrs`, `toCrs`, or `resolution` alongside the updated converter.

@@ -100,6 +100,8 @@ Returns `{center}` that keeps a world-coordinate ground point under the requeste
 
 Returns local `unitsPerMeter` and `metersPerUnit` estimates at `coordinateOrigin`, an XY position in map meters (`toCrs`). Without an argument, returns the estimates at the camera center. A supplied anchor is passed to `getDistanceScale` when available; otherwise its scale is estimated using `fromCrs` and the converter. Queries do not change the camera-center scales. X and Y describe independent axis scales. Z describes a uniform scale based on horizontal projection distortion, used for aspect-ratio-preserving meter sizes. `unitsPerWorldUnit` is the constant map-meter-to-common scale, equal on all three axes.
 
+If the anchor cannot be inverse-projected or its local scale cannot be evaluated, returns the camera-center scales. Failed measurements are excluded from the local size sampling field.
+
 ### `projectionSignature`
 
 An opaque signature based only on `fromCrs`, `toCrs` and `resolution`. Bounds, callback identities and navigation do not affect it. Layers use it to invalidate projected positions.

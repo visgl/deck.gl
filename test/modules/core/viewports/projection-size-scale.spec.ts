@@ -4,8 +4,13 @@
 
 import {test, expect, vi} from 'vitest';
 import {Buffer} from '@luma.gl/core';
-import {_CustomProjectionViewport as CustomProjectionViewport, Viewport} from '@deck.gl/core';
+import {
+  _CustomProjectionViewport as CustomProjectionViewport,
+  Viewport,
+  MapView
+} from '@deck.gl/core';
 import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
+import ViewManager from '@deck.gl/core/lib/view-manager';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {lngLatToWorld, worldToLngLat} from '@math.gl/web-mercator';
@@ -18,6 +23,66 @@ const options = {
   fromCrs: '+units=m',
   toBounds: [0, 0, 512, 512] as [number, number, number, number]
 };
+
+test.each(['throw', 'nonfinite', 'degenerate'])(
+  'failed %s derivative samples stay invalid while viewport sizing falls back',
+  failure => {
+    let fail = false;
+    const viewport = new CustomProjectionViewport({
+      ...options,
+      projection: {
+        inverse: p => p.slice(),
+        forward: p => {
+          // Texel centers round-trip, but their one-meter derivative probes fail.
+          if (fail && (p[0] % 128 !== 0 || p[1] % 128 !== 0)) {
+            if (failure === 'throw') throw new Error('Unavailable derivative');
+            return failure === 'nonfinite' ? [NaN, NaN] : [128, 128];
+          }
+          return p.slice();
+        }
+      }
+    });
+    fail = true;
+    expect(viewport.getDistanceScales([128, 128])).toBe(viewport.distanceScales);
+    expect(Array.from(viewport.getSizeScaleData(2))).toEqual(new Array(16).fill(0));
+  }
+);
+
+test('unavailable callback scales use camera sizing without entering the sampled field', () => {
+  const viewport = new CustomProjectionViewport({
+    ...options,
+    getDistanceScale: ([x, y]) => {
+      if (x === 0 && y === 0) return [2, 2];
+      throw new Error('Unavailable scale');
+    }
+  });
+  expect(viewport.getDistanceScales([128, 128])).toBe(viewport.distanceScales);
+  expect(Array.from(viewport.getSizeScaleData(2))).toEqual(new Array(16).fill(0));
+});
+
+test('ViewManager releases removed views scale resources while retaining active views', () => {
+  const resources = new ProjectionScaleResources(device);
+  const first = resources.get(new CustomProjectionViewport({...options, id: 'first'}))!;
+  const second = resources.get(new CustomProjectionViewport({...options, id: 'second'}))!;
+  const viewManager = new ViewManager({
+    views: [new MapView({id: 'first'}), new MapView({id: 'second'})],
+    viewState: {longitude: 0, latitude: 0, zoom: 1},
+    onViewRemoved: viewId => resources.delete(viewId)
+  });
+  try {
+    viewManager.setProps({views: [new MapView({id: 'second'})]});
+    expect(first.destroyed).toBe(true);
+    expect(second.destroyed).toBe(false);
+    viewManager.setProps({views: []});
+    expect(second.destroyed).toBe(true);
+    const recreated = resources.get(new CustomProjectionViewport({...options, id: 'first'}))!;
+    expect(recreated).not.toBe(first);
+    expect(recreated.destroyed).toBe(false);
+  } finally {
+    viewManager.finalize();
+    resources.destroy();
+  }
+});
 
 test('sampler bounds are independent of common-space normalization', () => {
   const defaultViewport = new CustomProjectionViewport({projection, fromCrs: '+units=m'});

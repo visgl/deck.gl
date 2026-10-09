@@ -92,6 +92,8 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
+  /** Release view-scoped resources when a descriptor leaves the active view set. */
+  onViewRemoved?: (viewId: string) => void;
   pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
@@ -121,6 +123,7 @@ export default class ViewManager<ViewsT extends View[]> {
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
+    onViewRemoved?: (viewId: string) => void;
   };
   private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   /** Context lookup supplied by Deck; context dimensions remain owned and observed by luma. */
@@ -156,7 +159,8 @@ export default class ViewManager<ViewsT extends View[]> {
     this._viewEventManagers = {};
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
-      onInteractionStateChange: props.onInteractionStateChange
+      onInteractionStateChange: props.onInteractionStateChange,
+      onViewRemoved: props.onViewRemoved
     };
     this._pickPosition = props.pickPosition;
     this._getCanvasContext = props.getCanvasContext;
@@ -387,6 +391,10 @@ export default class ViewManager<ViewsT extends View[]> {
 
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
+      const viewIds = new Set(views.map(view => view.id));
+      for (const view of this.views) {
+        if (!viewIds.has(view.id)) this._eventCallbacks.onViewRemoved?.(view.id);
+      }
       this.setNeedsUpdate('views changed');
     }
 

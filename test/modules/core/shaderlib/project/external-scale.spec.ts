@@ -69,6 +69,56 @@ test('WebGPU local meter scale preserves CPU altitude with rectangular bounds, m
   }
 });
 
+for (const slope of [-1, Infinity, NaN]) {
+  test(`WebGPU reconstruction with slope ${slope} retains positive center scale`, async ({
+    skip
+  }) => {
+    const gpu = await getWebGPUTestDevice();
+    if (!gpu) return skip();
+    const viewport = new CustomProjectionViewport({
+      projection: {forward: p => p.slice(), inverse: p => p.slice()},
+      fromCrs: '+units=m',
+      toBounds: [0, 0, 512, 512]
+    });
+    const records = gpu.createBuffer({
+      data: new Float32Array([1, slope, 0, 3]),
+      usage: Buffer.STORAGE
+    });
+    const output = gpu.createBuffer({byteLength: 16, usage: Buffer.STORAGE | Buffer.COPY_SRC});
+    const computation = new Computation(gpu, {
+      modules: [project],
+      defines: {USE_EXTERNAL_PROJECTION: true},
+      source: `
+      @group(0) @binding(0) var<storage, read_write> output: array<vec4<f32>>;
+      @compute @workgroup_size(1)
+      fn main() {
+        output[0] = vec4<f32>(project_external_size_scale_at(vec2<f32>(272.0, 256.0)), 1.0);
+      }`,
+      bindings: {output}
+    });
+    try {
+      computation.shaderInputs.setProps({
+        project: {viewport, sizeScale: records}
+      });
+      computation.setBindings(computation.shaderInputs.getBindingValues());
+      computation.predraw(gpu.commandEncoder);
+      const pass = gpu.beginComputePass();
+      computation.dispatch(pass, 1);
+      pass.end();
+      gpu.submit();
+      const bytes = await output.readAsync();
+      const actual = new Float32Array(bytes.buffer, bytes.byteOffset, 4);
+      [1, 1, 3].forEach((value, axis) =>
+        expect(actual[axis] / normalizationScale).toBeCloseTo(value, 5)
+      );
+    } finally {
+      computation.destroy();
+      records.destroy();
+      output.destroy();
+    }
+  });
+}
+
 test('WGSL external scale binding is present only in the opted-in shader variant', () => {
   const assembler = new WGSLShaderAssembler();
   for (const enabled of [undefined, true, false, true, undefined]) {
@@ -147,11 +197,18 @@ gpuTest.each(
       expected: [80, 80, 30, 80]
     },
     {
-      name: 'negative correction clamped',
+      name: 'negative correction uses positive center',
       data: [1, -1, 0, 3],
       size: 1,
       position: [272, 256],
-      expected: [0, 0, 0, 0]
+      expected: [10, 10, 30, 10]
+    },
+    {
+      name: 'nonfinite correction uses positive center',
+      data: [1, Infinity, 0, 3],
+      size: 1,
+      position: [272, 256],
+      expected: [10, 10, 30, 10]
     }
   ].flatMap(testCase =>
     [false, true].flatMap(relative =>

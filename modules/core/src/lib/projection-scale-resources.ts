@@ -42,6 +42,12 @@ export default class ProjectionScaleResources {
     return resource;
   }
 
+  /** Releases a removed view's resource without affecting retained views. */
+  delete(viewId: string): void {
+    this.resources.get(viewId)?.resource.destroy();
+    this.resources.delete(viewId);
+  }
+
   destroy(): void {
     for (const {resource} of this.resources.values()) resource.destroy();
     this.resources.clear();

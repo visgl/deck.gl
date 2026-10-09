@@ -108,7 +108,9 @@ vec3 project_external_size_scale_at(vec2 mapPosition) {
   vec4 texel = uintBitsToFloat(texelFetch(project_sizeScaleTexture, index, 0));
   if (texel.r <= 0.0) return project.commonUnitsPerMeter;
   vec2 center = (vec2(index) + 0.5) * 512.0 / vec2(dimensions);
-  float scale = max(0.0, texel.r + dot(texel.gb, samplePosition - center));
+  float scale = texel.r + dot(texel.gb, samplePosition - center);
+  // Steep local curves can overshoot; retain the measured positive center scale.
+  if (!(scale > 0.0) || isinf(scale) || isnan(scale)) scale = texel.r;
   return vec3(scale, scale, texel.a * scale / texel.r) * project.commonUnitsPerWorldUnit;
 }
 

@@ -108,14 +108,12 @@ export function estimateProjectionScaleError(
 
   function sample(x: number, y: number, column: number, row: number): number {
     const offset = (row * size + column) * 4;
-    return data[offset] > 0
-      ? Math.max(
-          0,
-          data[offset] +
-            data[offset + 1] * (x - (column + 0.5) * spacing) +
-            data[offset + 2] * (y - (row + 0.5) * spacing)
-        )
-      : 0;
+    if (!(data[offset] > 0)) return 0;
+    const scale =
+      data[offset] +
+      data[offset + 1] * (x - (column + 0.5) * spacing) +
+      data[offset + 2] * (y - (row + 0.5) * spacing);
+    return scale > 0 && Number.isFinite(scale) ? scale : data[offset];
   }
 
   function measure(x: number, y: number, input: number[], boundaryAxis?: number): void {
