@@ -224,18 +224,23 @@ test('TerrainLayer passes the elevation range of loaded tiles to its TileLayer',
     fetch: () => Promise.resolve(createTestMesh([100, 2000]))
   });
   const layerManager = new LayerManager(device, {viewport: TEST_VIEWPORT});
-  layerManager.setLayers([layer]);
-  // Like Deck's animation loop: update the layers while they ask for it
-  while (!layer.isLoaded || layerManager.needsUpdate()) {
-    await sleep();
-    layerManager.updateLayers();
-  }
+  try {
+    layerManager.setLayers([layer]);
+    // Like Deck's animation loop: update the layers while they ask for it
+    for (let i = 0; i < 100 && (!layer.isLoaded || layerManager.needsUpdate()); i++) {
+      await sleep();
+      layerManager.updateLayers();
+    }
+    expect(layer.isLoaded, 'TerrainLayer loads').toBe(true);
+    expect(layerManager.needsUpdate(), 'Layer updates settle').toBeFalsy();
 
-  const tileLayer = layerManager.getLayers().find(l => l.id === 'terrain-tiled-zrange-tiles');
-  expect(layer.state.zRange, 'TerrainLayer stores the range of the loaded tiles').toEqual([
-    100, 2000
-  ]);
-  // TileLayer culls tiles (for picking, too) at this elevation range
-  expect(tileLayer?.props.zRange, 'TileLayer receives the range').toEqual([100, 2000]);
-  layerManager.finalize();
+    const tileLayer = layerManager.getLayers().find(l => l.id === 'terrain-tiled-zrange-tiles');
+    expect(layer.state.zRange, 'TerrainLayer stores the range of the loaded tiles').toEqual([
+      100, 2000
+    ]);
+    // TileLayer culls tiles (for picking, too) at this elevation range
+    expect(tileLayer?.props.zRange, 'TileLayer receives the range').toEqual([100, 2000]);
+  } finally {
+    layerManager.finalize();
+  }
 });
