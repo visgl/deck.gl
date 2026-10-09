@@ -7,7 +7,7 @@
 import {test, expect} from 'vitest';
 import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {_WMSLayer as WMSLayer} from '@deck.gl/geo-layers';
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 import {WGS84ToPseudoMercator} from '@deck.gl/geo-layers/wms-layer/utils';
 import {equals} from '@math.gl/core';
 
@@ -26,7 +26,7 @@ test.skip('WMSLayer', async () => {
 });
 
 test('EPSG:4326 -> EPSG:3857', () => {
-  const projConverter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const projConverter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
 
   const testCases = [
     [-180, -85.06], // bound min

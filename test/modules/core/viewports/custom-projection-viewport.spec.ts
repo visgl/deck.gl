@@ -13,7 +13,7 @@ import {
 import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection-controller';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {lngLatToWorld, worldToLngLat, getDistanceScales} from '@math.gl/web-mercator';
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 
 const projection = {forward: p => p.slice(), inverse: p => p.slice()};
 const normalizationScale = 512 / 40075016.6855;
@@ -54,7 +54,7 @@ test('Viewport installs the projection pair before invoking overridden projectPo
 });
 
 test('CustomProjectionViewport centers the camera on world coordinates, defaulting to zero', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   for (const center of [undefined, [-122, 38, 0] as [number, number, number]]) {
     const viewport = new CustomProjectionViewport({
       ...options,
@@ -195,7 +195,7 @@ test('CustomProjectionViewport separates map-meter positions from ground-meter s
 });
 
 test('CustomProjectionViewport fixed scale aligns projected Web Mercator with MapView', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   for (const [pitch, bearing] of [
     [0, 0],
     [45, 30]
@@ -441,7 +441,7 @@ test('CustomProjectionViewport preserves converter altitude without distortion c
 });
 
 test('CustomProjectionViewport inherits targetZ unprojection for altitude-preserving converters', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   const viewport = new CustomProjectionViewport({
     width: 800,
     height: 600,
@@ -532,7 +532,7 @@ test('CustomProjectionViewport altitude unit conversion does not change meter si
 });
 
 test('CustomProjectionViewport supports UTM world coordinates and Web Mercator map meters', () => {
-  const converter = new Projection({
+  const converter = projectionEngine.createProjection({
     from: '+proj=utm +zone=10 +datum=WGS84 +units=m',
     to: 'EPSG:3857'
   });
