@@ -45,31 +45,13 @@ test('GlobeViewport#distanceScale', () => {
   for (const testCase of TEST_VIEWPORTS) {
     const viewport = new GlobeViewport(testCase);
 
-    const {unitsPerMeter, metersPerUnit, unitsPerDegree, degreesPerUnit} =
-      viewport.getDistanceScales();
-    expect(
-      equals(
-        [
-          unitsPerMeter[0] * metersPerUnit[0],
-          unitsPerMeter[1] * metersPerUnit[1],
-          unitsPerMeter[2] * metersPerUnit[2]
-        ],
-        [1, 1, 1]
-      ),
-      'metersPerUnit x unitsPerMeter'
-    ).toBeTruthy();
-
-    expect(
-      equals(
-        [
-          unitsPerDegree[0] * degreesPerUnit[0],
-          unitsPerDegree[1] * degreesPerUnit[1],
-          unitsPerDegree[2] * degreesPerUnit[2]
-        ],
-        [1, 1, 1]
-      ),
-      'degreesPerUnit x unitsPerDegree'
-    ).toBeTruthy();
+    const scales = viewport.getDistanceScales();
+    const meterScale = 256 / 6370972;
+    const degreeScale = (Math.PI / 180) * 256;
+    expect(scales.unitsPerMeter).toEqual([meterScale, meterScale, meterScale]);
+    expect(scales.unitsPerWorldUnit).toEqual([degreeScale, degreeScale, meterScale]);
+    expect(scales.unitsPerMeter2).toEqual([0, 0, 0]);
+    expect(scales.unitsPerWorldUnit2).toEqual([0, 0, 0]);
   }
 });
 

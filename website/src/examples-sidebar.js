@@ -66,6 +66,7 @@ const sidebars = {
         'collision-filter-extension',
         'data-filter-extension',
         'mask-extension',
+        'path-style-extension',
         'terrain-extension'
       ]
     },
