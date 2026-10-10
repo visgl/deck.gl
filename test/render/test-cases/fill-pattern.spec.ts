@@ -4,9 +4,10 @@
 
 import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
+import {expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {Unit} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {
@@ -80,72 +81,79 @@ function createPatternLayer({
   });
 }
 
+/** viewState of the raster pattern goldens; kept explicit so the map goldens stay unchanged */
+const RASTER_PATTERN_VIEW_STATE = {
+  latitude: 37.75,
+  longitude: -122.43,
+  zoom: 11.5
+};
+
+/** The globe surface is tessellated, so globe goldens never match the map ones pixel-for-pixel */
+const GLOBE_OVERRIDES = {globe: {imageDiffOptions: {threshold: 0.985}}};
+
 const rasterPatternTestCases: TestCase[] = [
-  {
-    name: 'polygon-pattern-mask',
-    skip: ['webgpu'],
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.43,
-      zoom: 11.5
+  // Rendered under MapView and GlobeView: the pattern must tile the same Mercator plane in both
+  ...expandViewMatrix(
+    {
+      name: 'polygon-pattern-mask',
+      skip: ['webgpu'],
+      viewState: RASTER_PATTERN_VIEW_STATE,
+      layers: [
+        new PolygonLayer({
+          id: 'polygon-pattern',
+          data: polygons,
+          getPolygon: f => f,
+          filled: true,
+          stroked: true,
+          getFillColor: [60, 180, 240],
+
+          fillPatternMask: true,
+          fillPatternAtlas: '/test/data/pattern.png',
+          fillPatternMapping: '/test/data/pattern.json',
+          getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
+          getFillPatternScale: 5,
+          getFillPatternOffset: [0, 0],
+
+          extensions: [new FillStyleExtension({pattern: true})]
+        })
+      ],
+      goldenImage: './test/render/golden-images/polygon-pattern-mask.png',
+      overrides: GLOBE_OVERRIDES
     },
-    layers: [
-      new PolygonLayer({
-        id: 'polygon-pattern',
-        data: polygons,
-        getPolygon: f => f,
-        filled: true,
-        stroked: true,
-        getFillColor: [60, 180, 240],
+    ['map', 'globe']
+  ),
+  ...expandViewMatrix(
+    {
+      name: 'polygon-pattern',
+      skip: ['webgpu'],
+      viewState: RASTER_PATTERN_VIEW_STATE,
+      layers: [
+        new PolygonLayer({
+          id: 'polygon-pattern',
+          data: polygons,
+          getPolygon: f => f,
+          filled: true,
+          stroked: true,
 
-        fillPatternMask: true,
-        fillPatternAtlas: '/test/data/pattern.png',
-        fillPatternMapping: '/test/data/pattern.json',
-        getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
-        getFillPatternScale: 5,
-        getFillPatternOffset: [0, 0],
+          fillPatternMask: false,
+          fillPatternAtlas: '/test/data/pattern.png',
+          fillPatternMapping: '/test/data/pattern.json',
+          getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
+          getFillPatternScale: 5,
+          getFillPatternOffset: [0, 0],
 
-        extensions: [new FillStyleExtension({pattern: true})]
-      })
-    ],
-    goldenImage: './test/render/golden-images/polygon-pattern-mask.png'
-  },
-  {
-    name: 'polygon-pattern',
-    skip: ['webgpu'],
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.43,
-      zoom: 11.5
+          extensions: [new FillStyleExtension({pattern: true})]
+        })
+      ],
+      goldenImage: './test/render/golden-images/polygon-pattern.png',
+      overrides: GLOBE_OVERRIDES
     },
-    layers: [
-      new PolygonLayer({
-        id: 'polygon-pattern',
-        data: polygons,
-        getPolygon: f => f,
-        filled: true,
-        stroked: true,
-
-        fillPatternMask: false,
-        fillPatternAtlas: '/test/data/pattern.png',
-        fillPatternMapping: '/test/data/pattern.json',
-        getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
-        getFillPatternScale: 5,
-        getFillPatternOffset: [0, 0],
-
-        extensions: [new FillStyleExtension({pattern: true})]
-      })
-    ],
-    goldenImage: './test/render/golden-images/polygon-pattern.png'
-  },
+    ['map', 'globe']
+  ),
   {
     name: 'polygon-pattern-background',
     skip: ['webgpu'],
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.43,
-      zoom: 11.5
-    },
+    viewState: RASTER_PATTERN_VIEW_STATE,
     layers: [
       new PolygonLayer({
         id: 'polygon-pattern-background',
@@ -188,21 +196,26 @@ const explicitUnitTestCases: TestCase[] = (
     mapping: ProceduralPatternMapping;
   }>
 ).flatMap(({sizeUnits, mapping}) =>
-  [8, 12].map(zoom => ({
-    name: `fill-pattern-size-units-${sizeUnits}-zoom-${zoom}`,
-    views: new MapView(),
-    viewState: {longitude: 0, latitude: 0, zoom},
-    layers: [
-      createPatternLayer({
-        id: `${sizeUnits}-zoom-${zoom}`,
-        data: MAP_POLYGON,
-        mapping,
-        sizeUnits
-      })
-    ],
-    goldenImage: `./test/render/golden-images/fill-pattern-size-units-${sizeUnits}-zoom-${zoom}.png`,
-    skip: ['webgpu']
-  }))
+  [8, 12].flatMap(zoom => {
+    const testCase = {
+      name: `fill-pattern-size-units-${sizeUnits}-zoom-${zoom}`,
+      viewState: {longitude: 0, latitude: 0, zoom},
+      layers: [
+        createPatternLayer({
+          id: `${sizeUnits}-zoom-${zoom}`,
+          data: MAP_POLYGON,
+          mapping,
+          sizeUnits
+        })
+      ],
+      goldenImage: `./test/render/golden-images/fill-pattern-size-units-${sizeUnits}-zoom-${zoom}.png`,
+      skip: ['webgpu']
+    };
+    // One procedural case also renders under GlobeView (pixel-sized dots on the flattened sphere)
+    return sizeUnits === 'pixels' && zoom === 8
+      ? expandViewMatrix({...testCase, overrides: GLOBE_OVERRIDES}, ['map', 'globe'])
+      : [{...testCase, views: new MapView()}];
+  })
 );
 
 const orientationTestCases: TestCase[] = [false, true].map(flipY => ({
@@ -284,11 +297,53 @@ const customPatternTestCase: TestCase = {
   skip: ['webgpu']
 };
 
+/** A rectangle from 150°E across the antimeridian to 150°W (written as 210°), 30°S to 30°N */
+const ANTIMERIDIAN_POLYGON: PatternDatum[] = [
+  {
+    polygon: [
+      [150, -30],
+      [150, 30],
+      [210, 30],
+      [210, -30]
+    ],
+    pattern: 'pattern'
+  }
+];
+
+const ANTIMERIDIAN_VIEW_STATE = {longitude: 180, latitude: 0, zoom: 1.6};
+
+/**
+ * MapView (left half) and GlobeView (right half), both centred on the antimeridian, showing the
+ * same hatched rectangle. Expected: evenly spaced diagonal hatching across the whole rectangle in
+ * both halves. On the globe the pattern is laid out in Mercator, whose seam at 180° would otherwise
+ * squeeze the whole world's worth of hatching into the middle of the rectangle.
+ */
+const antimeridianTestCase: TestCase = {
+  name: 'fill-pattern-antimeridian-map-vs-globe',
+  views: [
+    new MapView({id: 'map', width: '50%'}),
+    new GlobeView({id: 'globe', x: '50%', width: '50%'})
+  ],
+  viewState: {map: ANTIMERIDIAN_VIEW_STATE, globe: ANTIMERIDIAN_VIEW_STATE},
+  layers: [
+    createPatternLayer({
+      id: 'antimeridian',
+      data: ANTIMERIDIAN_POLYGON,
+      mapping: {pattern: {type: 'hatch', angle: 45, strokeWidth: 3, gap: 10}},
+      sizeUnits: 'pixels'
+    })
+  ],
+  imageDiffOptions: {threshold: 0.985},
+  goldenImage: './test/render/golden-images/fill-pattern-antimeridian-map-vs-globe.png',
+  skip: ['webgpu']
+};
+
 const testCases = [
   ...rasterPatternTestCases,
   ...explicitUnitTestCases,
   ...orientationTestCases,
-  customPatternTestCase
+  customPatternTestCase,
+  antimeridianTestCase
 ];
 
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
