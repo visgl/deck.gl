@@ -80,6 +80,8 @@ Each value in `data.attributes` may be one of the following formats:
   + `offset` (number) - offset of the first vertex attribute into the buffer, in bytes
   + `stride` (number) - the offset between the beginning of consecutive vertex attributes, in bytes
   + `normalized` (boolean) - whether data values should be normalized. Note that all color attributes in deck.gl layers are normalized by default.
+  + `version` (number) - content version. Changing it re-uploads the data and resets bounds, even if the object and the `data` container are the same, e.g. after rewriting `value` in place from compute output. A new object is still applied if its `value`, `buffer`, `type`, `size`, `offset` or `stride` differ, so swapping in a different array never needs a version bump. A new object that matches the previous one in all of these and in `version` is not re-uploaded.
+  + `dataRange` (`{startRow?: number, endRow?: number}`) - rows `[startRow, endRow)` that changed with the latest `version`, in the same form as [`attributeManager.invalidate`](./attribute-manager.md#invalidate). When `value` is the same tightly packed array as before, only these rows are uploaded; otherwise the full `value` is uploaded. Ignored without `version`.
 
 **Remarks**
 
@@ -661,7 +663,7 @@ The context object stores information that are shared by all layers.
 
 The state object allows a layer to store persistent information cross rendering cycles.
 
-* `attributeManager` ([AttributeManager](./attribute-manager.md)) - The attribute manager of this layer.
+* `attributeManager` ([AttributeManager](./attribute-manager.md#invalidate)) - The attribute manager of this layer.
 
 #### `props` (object) {#props}
 

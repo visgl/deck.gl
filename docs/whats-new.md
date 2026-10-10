@@ -8,6 +8,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
+### Core
+
+- Binary attributes in `data.attributes` accept an optional `version` and `dataRange`, so buffers rewritten in place are re-uploaded, fully or by row range, without creating new objects. See [data.attributes](./api-reference/core/layer.md#dataattributes).
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
