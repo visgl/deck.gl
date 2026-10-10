@@ -47,6 +47,8 @@ layout(std140) uniform projectUniforms {
   vec3 coordinateOrigin;
   vec3 commonOrigin;
   bool pseudoMeters;
+  int sizeScaleSize;
+  vec4 sizeScaleTransform;
 } project;
 
 
@@ -90,28 +92,69 @@ float project_size() {
   return 1.0;
 }
 
+#ifdef USE_EXTERNAL_PROJECTION
+// Nearest-texel Taylor reconstruction: R=scalar XY scale, GB=slopes per sampler
+// unit, A=Z scale. R=0 marks invalid samples. One fetch preserves instance aspect ratio.
+// Alternatives if discontinuities/accuracy become visible: blend four local Taylor
+// estimates for continuity, or use four-fetch bicubic Hermite with a mixed derivative
+// for higher accuracy (which would require moving Z scale out of A).
+uniform highp usampler2D project_sizeScaleTexture;
+vec3 project_external_size_scale_at(vec2 mapPosition) {
+  if (project.sizeScaleSize <= 0) return project.commonUnitsPerMeter;
+  vec2 samplePosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
+  if (any(lessThan(samplePosition, vec2(0.0))) || any(greaterThan(samplePosition, vec2(512.0)))) return project.commonUnitsPerMeter;
+  ivec2 dimensions = textureSize(project_sizeScaleTexture, 0);
+  ivec2 index = clamp(ivec2(floor(samplePosition / 512.0 * vec2(dimensions))), ivec2(0), dimensions - 1);
+  vec4 texel = uintBitsToFloat(texelFetch(project_sizeScaleTexture, index, 0));
+  if (texel.r <= 0.0) return project.commonUnitsPerMeter;
+  vec2 center = (vec2(index) + 0.5) * 512.0 / vec2(dimensions);
+  float scale = texel.r + dot(texel.gb, samplePosition - center);
+  // Steep local curves can overshoot; retain the measured positive center scale.
+  if (!(scale > 0.0) || isinf(scale) || isnan(scale)) scale = texel.r;
+  return vec3(scale, scale, texel.a * scale / texel.r) * project.commonUnitsPerWorldUnit;
+}
+
+vec3 project_external_size_scale() {
+  return project_external_size_scale_at(geometry.position.w == 0.0
+    ? (project.modelMatrix * vec4(geometry.worldPosition, 1.0)).xy + project.commonOrigin.xy / project.commonUnitsPerWorldUnit.xy - project.coordinateOrigin.xy : (geometry.position.xy + project.commonOrigin.xy) / project.commonUnitsPerWorldUnit.xy);
+}
+
+#endif
+
 float project_size_at_latitude(float meters, float lat) {
   return meters * project.commonUnitsPerMeter.z * project_size_at_latitude(lat);
 }
 
 //
 // Scaling offsets - scales meters to "world distance"
-// Note the scalar version of project_size is for scaling the z component only
+// The scalar overload preserves aspect ratio; vector overloads support per-axis scales.
 //
 float project_size(float meters) {
   // For scatter relevant
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale().z;
+#endif
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale().xy;
+#endif
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale();
+#endif
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return vec4(meters.xyz * project_external_size_scale(), meters.w);
+#endif
   return vec4(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
@@ -345,6 +388,11 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
+    return meters * project_external_size_scale().x * project.scale;
+  }
+#endif
   return project_size(meters) * project.scale;
 }
 vec2 project_size_to_pixel(vec2 meters) {

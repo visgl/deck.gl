@@ -489,6 +489,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    // Preprojection capability is stable for the lifetime of a layer instance.
+    shaders = mergeShaders(
+      {
+        defines: {
+          USE_EXTERNAL_PROJECTION:
+            this.context.viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+        }
+      },
+      shaders
+    );
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
       modules: this.context.defaultShaderModules

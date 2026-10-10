@@ -47,9 +47,11 @@ If `fromBounds` is supplied, X and Y are clamped by the given range before proje
 
 deck.gl layers allow an app to specify [size units](../../developer-guide/coordinate-systems.md#dimensions) in meters. One map meter may not represent one meter on the ground. All projections that flatten the Earth's spherical surface onto a 2D plane end up distorting distances and/or angles somehow. This **projection distortion** can vary by location and direction: for example, Web Mercator stretches distances more strongly toward the poles. See [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix) for how projections distort local shapes and sizes.
 
-This viewport projects meter sizes (width, radius, elevation, etc.) so that they are true to ground distance.
+This viewport approximates ground-meter geometry sizes (width, radius, elevation, etc.) at each object's location. Position altitude keeps the fixed map-meter-to-common scale.
 
-By default, it makes a best effort to estimate the real-world distance between two coordinates in `fromCrs`. If `fromCrs` is detected as lng-lat in degrees, distance is calculated along the spherical surface of the earth. If `fromCrs` units is detected as meters (e.g. UTM) distance is calculated using their planar difference. Otherwise, no distortion correction is applied.
+Local sizing uses an area-equivalent scalar to preserve marker shape. Set `toBounds` to cover the map-meter extent you display; it controls scale sampling without changing coordinate normalization. Outside that extent, or where scale cannot be evaluated, sizing falls back to the viewport-center scale.
+
+By default, it makes a best effort to estimate the real-world distance between two coordinates in `fromCrs`. If `fromCrs` is detected as lng-lat in degrees, local ground distance uses the WGS84 ellipsoid, independently of the target projection. If `fromCrs` units is detected as meters (e.g. UTM) distance is calculated using their planar difference. Otherwise, no distortion correction is applied. Supply `getDistanceScale` when another Earth model or distance metric is required.
 
 The user may override the default meter size mapping by supplying a `getDistanceScale` callback:
 
@@ -97,6 +99,8 @@ Returns `{center}` that keeps a world-coordinate ground point under the requeste
 ### `getDistanceScales(coordinateOrigin?)`
 
 Returns local `unitsPerMeter` and `metersPerUnit` estimates at `coordinateOrigin`, an XY position in map meters (`toCrs`). Without an argument, returns the estimates at the camera center. A supplied anchor is passed to `getDistanceScale` when available; otherwise its scale is estimated using `fromCrs` and the converter. Queries do not change the camera-center scales. X and Y describe independent axis scales. Z describes a uniform scale based on horizontal projection distortion, used for aspect-ratio-preserving meter sizes. `unitsPerWorldUnit` is the constant map-meter-to-common scale, equal on all three axes.
+
+If the anchor cannot be inverse-projected or its local scale cannot be evaluated, returns the camera-center scales. Failed measurements are excluded from the local size sampling field.
 
 ### `projectionSignature`
 

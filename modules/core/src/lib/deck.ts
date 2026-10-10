@@ -1668,6 +1668,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       getCanvasContext: this._isMultiCanvasMode() ? this.getCanvasContext.bind(this) : undefined,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
+      onViewRemoved: viewId => this.layerManager?.projectionScaleResources.delete(viewId),
       pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),

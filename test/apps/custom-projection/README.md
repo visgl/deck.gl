@@ -16,9 +16,12 @@ Map meters in `toCrs` are normalized to common space by the fixed scale
 than fitting each to its extent.
 `resolution` is in world-coordinate units (degrees here). View state uses `center` in `fromCrs`,
 `pitch`, and `bearing`; navigation locks center Z to zero. Meter scale is estimated
-at the viewport center. The optional `getDistanceScale(positionInToCrs)` returns
+locally. The optional `getDistanceScale(positionInToCrs)` returns
 real-world meters per unit along the axes of `toCrs`, including local distortion.
 The converter's Z is preserved by preprojection and scaled during rendering.
+
+The stereographic definition supplies
+`toBounds` to cover its larger map-meter extent for local size sampling.
 
 The controller has an independent planar view state. Rotation gestures and keyboard
 navigation follow MapController: dragging upward increases pitch. Pan and zoom
