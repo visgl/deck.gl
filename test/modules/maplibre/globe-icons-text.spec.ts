@@ -10,38 +10,52 @@ import {afterAll, beforeAll, describe, expect, test} from 'vitest';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
+// One map and one overlay per mode serve every case, and their WebGL contexts are released as
+// soon as they are done. The headless suite runs close to the browser's limit of 16 live
+// contexts, beyond which the browser evicts the oldest one, the shared test device.
+let container: HTMLDivElement;
+let map: MapLibreMap;
+
+beforeAll(async () => {
+  if (device.type !== 'webgl') {
+    return;
+  }
+  container = document.createElement('div');
+  Object.assign(container.style, {width: '400px', height: '300px'});
+  document.body.append(container);
+  map = new MapLibreMap({
+    container,
+    style: {version: 8, sources: {}, layers: []},
+    center: [0, 0],
+    zoom: 1,
+    attributionControl: false
+  });
+  await new Promise<void>(resolve => map.once('load', () => resolve()));
+});
+
+afterAll(() => {
+  // MapLibre releases its context in remove()
+  map?.remove();
+  container?.remove();
+});
+
 for (const interleaved of [false, true]) {
   describe(`interleaved=${interleaved}`, () => {
-    let container: HTMLDivElement;
-    let map: MapLibreMap;
     let overlay: MapLibreOverlay;
 
-    // One map and one overlay serve every case. A Deck or map holds its WebGL context until
-    // garbage collection, and the browser evicts the oldest context, the shared test device,
-    // once 16 are alive.
-    beforeAll(async () => {
+    beforeAll(() => {
       if (device.type !== 'webgl') {
         return;
       }
-      container = document.createElement('div');
-      Object.assign(container.style, {width: '400px', height: '300px'});
-      document.body.append(container);
-      map = new MapLibreMap({
-        container,
-        style: {version: 8, sources: {}, layers: []},
-        center: [0, 0],
-        zoom: 1,
-        attributionControl: false
-      });
-      await new Promise<void>(resolve => map.once('load', () => resolve()));
       overlay = new MapLibreOverlay({interleaved, layers: []});
       map.addControl(overlay);
     });
 
     afterAll(() => {
+      const gl = interleaved ? null : overlay?._deck?.getCanvas()?.getContext('webgl2');
       map?.removeControl(overlay);
-      map?.remove();
-      container?.remove();
+      // Finalizing Deck does not release its own context until garbage collection
+      gl?.getExtension('WEBGL_lose_context')?.loseContext();
     });
 
     webglTest.each([
