@@ -33,6 +33,11 @@
       },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./projection": {
+      "types": "./dist/projection.d.ts",
+      "import": "./dist/projection.js",
+      "require": "./dist/projection.cjs"
     }
   },
   "files": [
@@ -67,5 +72,13 @@
     "gl-matrix": "^3.0.0",
     "mjolnir.js": "^3.1.1"
   },
-  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4",
+  "peerDependencies": {
+    "@math.gl/projection": "^5.0.0-alpha.15"
+  },
+  "peerDependenciesMeta": {
+    "@math.gl/projection": {
+      "optional": true
+    }
+  }
 }
