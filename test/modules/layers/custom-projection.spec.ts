@@ -5,6 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
+  OrthographicViewport,
   _CustomProjectionViewport as CustomProjectionViewport,
   WebMercatorViewport
 } from '@deck.gl/core';
@@ -658,6 +659,87 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
         const colors = attributes[name].value!;
         for (let i = 0; i < layer.state.numInstances; i++) {
           expect(Array.from(colors.slice(i * 3, i * 3 + 3))).toEqual([12, 34, 56]);
+        }
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} disabled refinement preserves binary float colors`, () => {
+    const manager = new LayerManager(device, {
+      viewport: new OrthographicViewport({width: 800, height: 600})
+    });
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const coordinates = new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0]);
+    const colors = new Float32Array([0.7, 0.2, 0, 0.3, 0.5, 0, 0, 0.8, 0.6]);
+    const attributeName = LayerType === PathLayer ? 'instanceColors' : 'fillColors';
+    const geometryName = LayerType === PathLayer ? 'getPath' : 'getPolygon';
+    const colorName = LayerType === PathLayer ? 'getColor' : 'getFillColor';
+    try {
+      const layer = new LayerType({
+        id: 'unrefined-binary-colors',
+        _normalize: false,
+        _pathType: 'open',
+        data: {
+          length: 1,
+          startIndices: [0, 3],
+          attributes: {
+            [geometryName]: coordinates,
+            [colorName]: {value: colors, size: 3, normalized: false},
+            ...(LayerType === SolidPolygonLayer ? {indices: new Uint16Array([0, 1, 2])} : {})
+          }
+        }
+      });
+      manager.setLayers([layer]);
+      const attribute = layer.getAttributeManager()!.attributes[attributeName];
+      expect(attribute.settings.transform).toBeNull();
+      expect(attribute.value).toBe(colors);
+      expect(attribute.value![0]).toBeCloseTo(0.7, 6);
+    } finally {
+      manager.finalize();
+    }
+  });
+
+  test(`${LayerType.layerName} removes styling transforms when refinement is disabled`, () => {
+    const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    let layer = new LayerType({
+      id: 'refinement-styling-toggle',
+      data: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1]
+        ]
+      ],
+      getPath: p => p,
+      getPolygon: p => p,
+      _projectionTolerance: 0
+    });
+    const names =
+      LayerType === PathLayer
+        ? ['instanceColors', 'instanceStrokeWidths']
+        : ['fillColors', 'lineColors', 'elevations'];
+    try {
+      manager.setLayers([layer]);
+      for (const tolerance of [0.1, 0]) {
+        layer = layer.clone({_projectionTolerance: tolerance});
+        manager.setLayers([layer]);
+        for (const name of names) {
+          const transform = layer.getAttributeManager()!.attributes[name].settings.transform;
+          if (tolerance) expect(transform).toBeTypeOf('function');
+          else expect(transform).toBeNull();
         }
       }
     } finally {

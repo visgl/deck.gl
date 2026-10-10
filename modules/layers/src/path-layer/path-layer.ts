@@ -329,36 +329,18 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         noAlloc
       },
       instanceStrokeWidths: {
+        transform: null,
         size: 1,
         accessor: 'getWidth',
-        transform: function (this: PathLayer, value) {
-          if (this.props._projectionTolerance && typeof value !== 'number') {
-            throw new Error('Projection refinement requires per-object widths');
-          }
-          return value;
-        },
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: 1,
         bufferGroup: 'path-instance-data'
       },
       instanceColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
-        transform: function (this: PathLayer, value) {
-          if (
-            this.props._projectionTolerance &&
-            (typeof value?.[0] === 'object' || value?.length > 4)
-          ) {
-            throw new Error('Projection refinement requires per-object colors');
-          }
-          // RGB attributes must not treat a single RGBA color as packed vertex data.
-          return this.props._projectionTolerance &&
-            this.props.colorFormat === 'RGB' &&
-            value?.length === 4
-            ? value.slice(0, 3)
-            : value;
-        },
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'path-instance-data'
@@ -389,6 +371,15 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {props, oldProps, changeFlags} = params;
 
     const attributeManager = this.getAttributeManager();
+    // An inactive transform still forces CPU conversion of binary attributes.
+    // Attach refinement validators only while refinement is enabled.
+    const attributes = attributeManager!.getAttributes();
+    attributes.instanceStrokeWidths.settings.transform = props._projectionTolerance
+      ? transformRefinedWidth
+      : null;
+    attributes.instanceColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
     const {viewport} = this.context;
     const tessellationResolutionChanged = this.state.tessellationResolution !== viewport.resolution;
     const pathProjectionScale = this.getPathProjectionScale(viewport);
@@ -634,4 +625,21 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     attribute.startIndices = pathTesselator.vertexStarts;
     attribute.value = result;
   }
+}
+
+function transformRefinedWidth(this: PathLayer, value) {
+  if (this.props._projectionTolerance && typeof value !== 'number') {
+    throw new Error('Projection refinement requires per-object widths');
+  }
+  return value;
+}
+
+function transformRefinedColor(this: PathLayer, value) {
+  if (this.props._projectionTolerance && (typeof value?.[0] === 'object' || value?.length > 4)) {
+    throw new Error('Projection refinement requires per-object colors');
+  }
+  // RGB attributes must not treat a single RGBA color as packed vertex data.
+  return this.props._projectionTolerance && this.props.colorFormat === 'RGB' && value?.length === 4
+    ? value.slice(0, 3)
+    : value;
 }

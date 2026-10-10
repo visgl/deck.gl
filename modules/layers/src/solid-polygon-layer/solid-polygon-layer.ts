@@ -240,61 +240,30 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         noAlloc
       },
       elevations: {
+        transform: null,
         size: 1,
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
-        transform: function (this: SolidPolygonLayer, value) {
-          if (this.props._projectionTolerance && typeof value !== 'number') {
-            throw new Error('Projection refinement requires per-object elevations');
-          }
-          return value;
-        },
         bufferGroup: 'solid-polygon-instance-data'
       },
       fillColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        transform: function (this: SolidPolygonLayer, value) {
-          if (
-            this.props._projectionTolerance &&
-            (typeof value?.[0] === 'object' || value?.length > 4)
-          ) {
-            throw new Error('Projection refinement requires per-object colors');
-          }
-          // RGB attributes must not treat a single RGBA color as packed vertex data.
-          return this.props._projectionTolerance &&
-            this.props.colorFormat === 'RGB' &&
-            value?.length === 4
-            ? value.slice(0, 3)
-            : value;
-        },
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
       lineColors: {
+        transform: null,
         size: this.props.colorFormat.length,
         type: 'unorm8',
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        transform: function (this: SolidPolygonLayer, value) {
-          if (
-            this.props._projectionTolerance &&
-            (typeof value?.[0] === 'object' || value?.length > 4)
-          ) {
-            throw new Error('Projection refinement requires per-object colors');
-          }
-          // RGB attributes must not treat a single RGBA color as packed vertex data.
-          return this.props._projectionTolerance &&
-            this.props.colorFormat === 'RGB' &&
-            value?.length === 4
-            ? value.slice(0, 3)
-            : value;
-        },
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
@@ -376,6 +345,18 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
 
     const {props, oldProps, changeFlags} = updateParams;
     const attributeManager = this.getAttributeManager();
+    // An inactive transform still forces CPU conversion of binary attributes.
+    // Attach refinement validators only while refinement is enabled.
+    const attributes = attributeManager!.getAttributes();
+    attributes.elevations.settings.transform = props._projectionTolerance
+      ? transformRefinedElevation
+      : null;
+    attributes.fillColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
+    attributes.lineColors.settings.transform = props._projectionTolerance
+      ? transformRefinedColor
+      : null;
 
     const regenerateModels =
       changeFlags.extensionsChanged ||
@@ -571,4 +552,21 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         ? Float32Array.from(vertexValid)
         : vertexValid;
   }
+}
+
+function transformRefinedElevation(this: SolidPolygonLayer, value) {
+  if (this.props._projectionTolerance && typeof value !== 'number') {
+    throw new Error('Projection refinement requires per-object elevations');
+  }
+  return value;
+}
+
+function transformRefinedColor(this: SolidPolygonLayer, value) {
+  if (this.props._projectionTolerance && (typeof value?.[0] === 'object' || value?.length > 4)) {
+    throw new Error('Projection refinement requires per-object colors');
+  }
+  // RGB attributes must not treat a single RGBA color as packed vertex data.
+  return this.props._projectionTolerance && this.props.colorFormat === 'RGB' && value?.length === 4
+    ? value.slice(0, 3)
+    : value;
 }
