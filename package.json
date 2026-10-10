@@ -52,6 +52,7 @@
     "@loaders.gl/polyfills": "^5.0.0-alpha.11",
     "@luma.gl/core": "^10.0.0-alpha.4",
     "@luma.gl/effects": "^10.0.0-alpha.4",
+    "@luma.gl/test-utils": "^10.0.0-alpha.4",
     "@luma.gl/webgl": "^10.0.0-alpha.4",
     "@luma.gl/webgpu": "^10.0.0-alpha.4",
     "@math.gl/projection": "^5.0.0-alpha.15",
