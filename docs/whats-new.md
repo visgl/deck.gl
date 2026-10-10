@@ -49,6 +49,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 [`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
+- [`MaskExtension`](./api-reference/extensions/mask-extension.md) works in `GlobeView`; masks are evaluated in Web Mercator space, so the mask shape follows the same latitude stretch as the layers it masks.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
