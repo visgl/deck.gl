@@ -52,6 +52,8 @@ The fixed-width primitives are `GPUArcLayer`, `GPUColumnLayer`, `GPUGridCellLaye
 `GPUVector` objects. Each layer owns one `GPUVectorModel`, which preserves every physical chunk as
 a separate draw call without creating a model or deck child layer per chunk. `GPUBitmapLayer`
 accepts an already loaded `Texture`; a bitmap has no tabular column to convert.
+`GPUIconLayer.getSize` is the icon height in pixels, matching the standard IconLayer
+default. Atlas frame dimensions and anchor offsets scale relative to that height.
 
 ```ts
 import {GPUScatterplotLayer} from '@deck.gl-community/gpu-layers';

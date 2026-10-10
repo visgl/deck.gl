@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPUScatterplotLayer, type GPUScatterplotLayerProps} from '@deck.gl-community/gpu-layers';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {DataType, Table, Vector, type FixedSizeList, type Float32, type Uint8} from 'apache-arrow';
 import {
+  createLayerGPUVectors,
   destroyLayerGPUVectors,
   makeLayerGPUVectorFromArrow,
   type ArrowGPUVectorColumnSelector,
@@ -51,8 +52,9 @@ export class ArrowScatterplotLayer extends CompositeLayer<ArrowScatterplotLayerP
       props.getFillColor !== oldProps.getFillColor ||
       !(this.state as ArrowScatterplotLayerState).positions
     ) {
+      const vectors = this.makeVectors(props);
       this.destroyVectors();
-      this.setState(this.makeVectors(props));
+      this.setState(vectors);
     }
   }
 
@@ -69,27 +71,24 @@ export class ArrowScatterplotLayer extends CompositeLayer<ArrowScatterplotLayerP
     });
   }
 
-  override finalizeState(): void {
+  override finalizeState(context: LayerContext): void {
     this.destroyVectors();
+    super.finalizeState(context);
   }
 
   private makeVectors(props: ArrowScatterplotLayerProps): ArrowScatterplotLayerState {
     const positionFormat = getPositionFormat(props.data, props.getPosition, 'getPosition');
-    return {
-      positions: makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getPosition, {
-        name: 'positions',
-        id: `${this.id}-positions`,
-        format: positionFormat
-      }),
-      radii: makeOptionalVector(this, props.data, props.getRadius, 'radii', 'float32'),
-      fillColors: makeOptionalVector(
-        this,
-        props.data,
-        props.getFillColor,
-        'fill-colors',
-        'unorm8x4'
-      )
-    };
+    return createLayerGPUVectors({
+      positions: () =>
+        makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getPosition, {
+          name: 'positions',
+          id: `${this.id}-positions`,
+          format: positionFormat
+        }),
+      radii: () => makeOptionalVector(this, props.data, props.getRadius, 'radii', 'float32'),
+      fillColors: () =>
+        makeOptionalVector(this, props.data, props.getFillColor, 'fill-colors', 'unorm8x4')
+    });
   }
 
   private destroyVectors(): void {

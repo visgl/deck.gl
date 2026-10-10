@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPULineLayer, type GPULineLayerProps} from '@deck.gl-community/gpu-layers';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {DataType, Table, Vector, type FixedSizeList, type Float32, type Uint8} from 'apache-arrow';
 import {
+  createLayerGPUVectors,
   destroyLayerGPUVectors,
   makeLayerGPUVectorFromArrow,
   type ArrowGPUVectorColumnSelector,
@@ -52,40 +53,43 @@ export class ArrowLineLayer extends CompositeLayer<ArrowLineLayerProps> {
       props.getWidth !== oldProps.getWidth ||
       !(this.state as ArrowLineLayerState).sourcePositions
     ) {
-      this.destroyVectors();
       const sourceFormat = getPositionFormat(props.data, props.getSourcePosition);
       const targetFormat = getPositionFormat(props.data, props.getTargetPosition);
       if (sourceFormat !== targetFormat) {
         throw new Error('ArrowLineLayer source and target position dimensions must match');
       }
-      this.setState({
-        sourcePositions: makeLayerGPUVectorFromArrow(
-          this.context.device,
-          props.data,
-          props.getSourcePosition,
-          {name: 'sourcePositions', id: `${this.id}-source`, format: sourceFormat}
-        ),
-        targetPositions: makeLayerGPUVectorFromArrow(
-          this.context.device,
-          props.data,
-          props.getTargetPosition,
-          {name: 'targetPositions', id: `${this.id}-target`, format: targetFormat}
-        ),
-        colors: isSelector(props.getColor)
-          ? makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getColor, {
-              name: 'colors',
-              id: `${this.id}-colors`,
-              format: 'unorm8x4'
-            })
-          : undefined,
-        widths: isSelector(props.getWidth)
-          ? makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getWidth, {
-              name: 'widths',
-              id: `${this.id}-widths`,
-              format: 'float32'
-            })
-          : undefined
-      } satisfies ArrowLineLayerState);
+      const vectors = createLayerGPUVectors({
+        sourcePositions: () =>
+          makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getSourcePosition, {
+            name: 'sourcePositions',
+            id: `${this.id}-source`,
+            format: sourceFormat
+          }),
+        targetPositions: () =>
+          makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getTargetPosition, {
+            name: 'targetPositions',
+            id: `${this.id}-target`,
+            format: targetFormat
+          }),
+        colors: () =>
+          isSelector(props.getColor)
+            ? makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getColor, {
+                name: 'colors',
+                id: `${this.id}-colors`,
+                format: 'unorm8x4'
+              })
+            : undefined,
+        widths: () =>
+          isSelector(props.getWidth)
+            ? makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getWidth, {
+                name: 'widths',
+                id: `${this.id}-widths`,
+                format: 'float32'
+              })
+            : undefined
+      }) satisfies ArrowLineLayerState;
+      this.destroyVectors();
+      this.setState(vectors);
     }
   }
 
@@ -103,8 +107,9 @@ export class ArrowLineLayer extends CompositeLayer<ArrowLineLayerProps> {
     });
   }
 
-  override finalizeState(): void {
+  override finalizeState(context: LayerContext): void {
     this.destroyVectors();
+    super.finalizeState(context);
   }
 
   private destroyVectors(): void {

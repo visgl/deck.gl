@@ -86,7 +86,7 @@ fn getCorner(vertexIndex: u32) -> vec2<f32> {
   geometry.worldPosition = vec3<f32>(positions, 0.0);
   geometry.pickingColor = pickingColor;
   var clipPosition = project_position_to_clipspace(vec3<f32>(positions, 0.0), vec3<f32>(0.0), vec3<f32>(0.0));
-  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(corner * radius) * clipPosition.w, clipPosition.z, clipPosition.w);
+  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(corner * radius), clipPosition.z, clipPosition.w);
   var output: VertexOutput;
   output.position = clipPosition;
   output.corner = corner;

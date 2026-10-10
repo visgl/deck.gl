@@ -92,3 +92,22 @@ test('observer defaults follow the camera, while explicit observers remain fixed
   const observer = createSkyObserver({longitude: 20, latitude: 20});
   expect(getSkyObserver(viewport, observer)).toBe(observer);
 });
+
+test('SkyLayer uses separate cloud identities when switching map and globe views', async () => {
+  const {SkyLayer, CloudLayer, GlobeCloudLayer} = await import('@deck.gl-community/gpu-layers');
+  const layer = new SkyLayer({
+    id: 'sky',
+    sun: false,
+    moon: false,
+    stars: false,
+    atmosphere: false,
+    clouds: true
+  });
+  layer.context = {viewport: getViewport()} as any;
+  const mapCloud = layer.renderLayers().find(child => child instanceof CloudLayer)!;
+  layer.context = {viewport: new _GlobeViewport({width: 800, height: 600})} as any;
+  const globeCloud = layer.renderLayers().find(child => child instanceof GlobeCloudLayer)!;
+  expect(mapCloud).toBeInstanceOf(CloudLayer);
+  expect(globeCloud).toBeInstanceOf(GlobeCloudLayer);
+  expect(mapCloud.id).not.toBe(globeCloud.id);
+});

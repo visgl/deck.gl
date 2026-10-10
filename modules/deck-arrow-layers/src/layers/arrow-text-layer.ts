@@ -182,7 +182,7 @@ void main() {
   );
   glyphPixelOffset += contentOffset;
   vec4 clipPosition = anchorPosition;
-  clipPosition.xy += project_pixel_size_to_clipspace(glyphPixelOffset) * clipPosition.w;
+  clipPosition.xy += project_pixel_size_to_clipspace(glyphPixelOffset);
   vec2 atlasSize = vec2(textureSize(fontAtlasTexture, 0).xy);
   vec2 atlasPixel = glyphFrame.xy + corner * glyphSize;
 

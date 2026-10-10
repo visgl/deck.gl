@@ -89,3 +89,19 @@ function getFloat32ListSize(format: GPUVectorFormat): 2 | 3 | 4 | null {
 export function destroyLayerGPUVectors(vectors: Array<GPUVector | undefined>): void {
   for (const vector of vectors) vector?.destroy();
 }
+
+/** Builds an owned vector set, releasing partial uploads if any column fails. */
+export function createLayerGPUVectors<T extends Record<string, GPUVector | undefined>>(
+  factories: {[K in keyof T]: () => T[K]}
+): T {
+  const vectors = {} as T;
+  try {
+    for (const key of Object.keys(factories) as Array<keyof T>) {
+      vectors[key] = factories[key]();
+    }
+    return vectors;
+  } catch (error) {
+    destroyLayerGPUVectors(Object.values(vectors));
+    throw error;
+  }
+}

@@ -77,7 +77,6 @@ struct EdgeVertexOutput {
     vec3<f32>(0.0)
   );
   // Deck's OpenGL-style projection depth must be converted for WebGPU clipping.
-  clipPosition.z = (clipPosition.z + clipPosition.w) * 0.5;
   output.position = clipPosition;
   output.color = select(
     vec4<f32>(0.32, 0.51, 0.70, 0.20),

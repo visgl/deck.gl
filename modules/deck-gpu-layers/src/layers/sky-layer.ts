@@ -100,7 +100,7 @@ export class SkyLayer extends CompositeLayer<SkyLayerProps> {
       clouds
         ? globe
           ? new GlobeCloudLayer(
-              this.getSubLayerProps({id: 'clouds'}),
+              this.getSubLayerProps({id: 'globe-clouds'}),
               typeof clouds === 'object' ? clouds : {},
               {time, sunDirection}
             )

@@ -85,7 +85,7 @@ fn getCorner(vertexIndex: u32) -> vec2<f32> {
     lineStyle.widthMaxPixels
   );
   var clipPosition = mix(sourceClip, targetClip, corner.x);
-  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5) * clipPosition.w, clipPosition.z, clipPosition.w);
+  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5), clipPosition.z, clipPosition.w);
   let pickingColor = encodePickingColor(instanceIndex + lineStyle.rowIndexOffset);
   geometry.worldPosition = vec3<f32>(mix(sourcePositions, targetPositions, corner.x), 0.0); geometry.pickingColor = pickingColor;
   var output: VertexOutput;

@@ -112,7 +112,7 @@ fn getArcPosition(sourcePosition: vec2<f32>, targetPosition: vec2<f32>, progress
   let normal = vec2<f32>(-direction.y, direction.x);
   let width = clamp(select(arcStyle.width, widths, arcStyle.useWidths != 0u) * arcStyle.widthScale, arcStyle.widthMinPixels, arcStyle.widthMaxPixels);
   var clipPosition = mix(startClip, endClip, corner.x);
-  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5) * clipPosition.w, clipPosition.z, clipPosition.w);
+  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5), clipPosition.z, clipPosition.w);
   let progress = mix(startProgress, endProgress, corner.x);
   let pickingColor = encodePickingColor(instanceIndex + arcStyle.rowIndexOffset);
   geometry.worldPosition = mix(startWorld, endWorld, corner.x);

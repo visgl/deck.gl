@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPUArcLayer, type GPUArcLayerProps} from '@deck.gl-community/gpu-layers';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {DataType, Table, Vector, type FixedSizeList, type Float32, type Uint8} from 'apache-arrow';
 import {
+  createLayerGPUVectors,
   destroyLayerGPUVectors,
   makeLayerGPUVectorFromArrow,
   type ArrowGPUVectorColumnSelector,
@@ -63,41 +64,22 @@ export class ArrowArcLayer extends CompositeLayer<ArrowArcLayerProps> {
       props.getHeight !== oldProps.getHeight ||
       !(this.state as ArrowArcLayerState).sourcePositions
     ) {
-      this.destroyVectors();
       assertPositionColumn(props.data, props.getSourcePosition, 'getSourcePosition');
       assertPositionColumn(props.data, props.getTargetPosition, 'getTargetPosition');
-      this.setState({
-        sourcePositions: makeVector(
-          this,
-          props.data,
-          props.getSourcePosition,
-          'source-positions',
-          'float32x2'
-        ),
-        targetPositions: makeVector(
-          this,
-          props.data,
-          props.getTargetPosition,
-          'target-positions',
-          'float32x2'
-        ),
-        sourceColors: makeOptionalVector(
-          this,
-          props.data,
-          props.getSourceColor,
-          'source-colors',
-          'unorm8x4'
-        ),
-        targetColors: makeOptionalVector(
-          this,
-          props.data,
-          props.getTargetColor,
-          'target-colors',
-          'unorm8x4'
-        ),
-        widths: makeOptionalVector(this, props.data, props.getWidth, 'widths', 'float32'),
-        heights: makeOptionalVector(this, props.data, props.getHeight, 'heights', 'float32')
-      } satisfies ArrowArcLayerState);
+      const vectors = createLayerGPUVectors({
+        sourcePositions: () =>
+          makeVector(this, props.data, props.getSourcePosition, 'source-positions', 'float32x2'),
+        targetPositions: () =>
+          makeVector(this, props.data, props.getTargetPosition, 'target-positions', 'float32x2'),
+        sourceColors: () =>
+          makeOptionalVector(this, props.data, props.getSourceColor, 'source-colors', 'unorm8x4'),
+        targetColors: () =>
+          makeOptionalVector(this, props.data, props.getTargetColor, 'target-colors', 'unorm8x4'),
+        widths: () => makeOptionalVector(this, props.data, props.getWidth, 'widths', 'float32'),
+        heights: () => makeOptionalVector(this, props.data, props.getHeight, 'heights', 'float32')
+      }) satisfies ArrowArcLayerState;
+      this.destroyVectors();
+      this.setState(vectors);
     }
   }
 
@@ -126,8 +108,9 @@ export class ArrowArcLayer extends CompositeLayer<ArrowArcLayerProps> {
     });
   }
 
-  override finalizeState(): void {
+  override finalizeState(context: LayerContext): void {
     this.destroyVectors();
+    super.finalizeState(context);
   }
 
   private destroyVectors(): void {

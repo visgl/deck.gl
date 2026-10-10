@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPUIconLayer, type GPUIconLayerProps} from '@deck.gl-community/gpu-layers';
 import {makeArrowFixedSizeListVector} from '@luma.gl/arrow';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
@@ -18,6 +18,7 @@ import {
   type Uint8
 } from 'apache-arrow';
 import {
+  createLayerGPUVectors,
   destroyLayerGPUVectors,
   makeLayerGPUVectorFromArrow,
   type ArrowGPUVectorColumnSelector,
@@ -95,8 +96,9 @@ export class ArrowIconLayer extends CompositeLayer<ArrowIconLayerProps> {
       props.getPixelOffset !== oldProps.getPixelOffset ||
       !(this.state as ArrowIconLayerState).positions
     ) {
+      const vectors = this.makeVectors(props);
       this.destroyVectors();
-      this.setState(this.makeVectors(props));
+      this.setState(vectors);
     }
   }
 
@@ -121,8 +123,9 @@ export class ArrowIconLayer extends CompositeLayer<ArrowIconLayerProps> {
     });
   }
 
-  override finalizeState(): void {
+  override finalizeState(context: LayerContext): void {
     this.destroyVectors();
+    super.finalizeState(context);
   }
 
   private makeVectors(props: ArrowIconLayerProps): ArrowIconLayerState {
@@ -148,43 +151,43 @@ export class ArrowIconLayer extends CompositeLayer<ArrowIconLayerProps> {
     const offsetVector = makeChunkedFixedSizeListVector(iconSource, iconOffsets, 2);
     const frameVector = makeChunkedFixedSizeListVector(iconSource, iconFrames, 4);
     const colorModeVector = makeChunkedScalarVector(iconSource, iconColorModes);
-    return {
-      positions: makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getPosition, {
-        name: 'positions',
-        id: `${this.id}-positions`,
-        format: positionFormat
-      }),
-      iconOffsets: makeLayerGPUVectorFromArrow(this.context.device, props.data, offsetVector, {
-        name: 'iconOffsets',
-        id: `${this.id}-icon-offsets`,
-        format: 'float32x2'
-      }),
-      iconFrames: makeLayerGPUVectorFromArrow(this.context.device, props.data, frameVector, {
-        name: 'iconFrames',
-        id: `${this.id}-icon-frames`,
-        format: 'float32x4'
-      }),
-      iconColorModes: makeLayerGPUVectorFromArrow(
-        this.context.device,
-        props.data,
-        colorModeVector,
-        {
+    return createLayerGPUVectors({
+      positions: () =>
+        makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getPosition, {
+          name: 'positions',
+          id: `${this.id}-positions`,
+          format: positionFormat
+        }),
+      iconOffsets: () =>
+        makeLayerGPUVectorFromArrow(this.context.device, props.data, offsetVector, {
+          name: 'iconOffsets',
+          id: `${this.id}-icon-offsets`,
+          format: 'float32x2'
+        }),
+      iconFrames: () =>
+        makeLayerGPUVectorFromArrow(this.context.device, props.data, frameVector, {
+          name: 'iconFrames',
+          id: `${this.id}-icon-frames`,
+          format: 'float32x4'
+        }),
+      iconColorModes: () =>
+        makeLayerGPUVectorFromArrow(this.context.device, props.data, colorModeVector, {
           name: 'iconColorModes',
           id: `${this.id}-icon-color-modes`,
           format: 'float32'
-        }
-      ),
-      colors: makeOptionalVector(this, props.data, props.getColor, 'colors', 'unorm8x4'),
-      sizes: makeOptionalVector(this, props.data, props.getSize, 'sizes', 'float32'),
-      angles: makeOptionalVector(this, props.data, props.getAngle, 'angles', 'float32'),
-      pixelOffsets: props.getPixelOffset
-        ? makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getPixelOffset, {
-            name: 'pixelOffsets',
-            id: `${this.id}-pixel-offsets`,
-            format: 'float32x2'
-          })
-        : undefined
-    };
+        }),
+      colors: () => makeOptionalVector(this, props.data, props.getColor, 'colors', 'unorm8x4'),
+      sizes: () => makeOptionalVector(this, props.data, props.getSize, 'sizes', 'float32'),
+      angles: () => makeOptionalVector(this, props.data, props.getAngle, 'angles', 'float32'),
+      pixelOffsets: () =>
+        props.getPixelOffset
+          ? makeLayerGPUVectorFromArrow(this.context.device, props.data, props.getPixelOffset, {
+              name: 'pixelOffsets',
+              id: `${this.id}-pixel-offsets`,
+              format: 'float32x2'
+            })
+          : undefined
+    });
   }
 
   private destroyVectors(): void {

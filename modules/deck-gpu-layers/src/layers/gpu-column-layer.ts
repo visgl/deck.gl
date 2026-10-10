@@ -117,7 +117,7 @@ fn sideHeightSelector(vertexIndex: u32) -> f32 {
   let elevation = select(columnStyle.elevation, elevations, columnStyle.useElevations != 0u) * columnStyle.elevationScale;
   let worldPosition = vec3<f32>(positions, elevation * heightProgress);
   var clipPosition = project_position_to_clipspace(worldPosition, vec3<f32>(0.0), vec3<f32>(0.0));
-  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(radialOffset * radius) * clipPosition.w, clipPosition.z, clipPosition.w);
+  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(radialOffset * radius), clipPosition.z, clipPosition.w);
   let pickingColor = encodePickingColor(instanceIndex + columnStyle.rowIndexOffset);
   geometry.worldPosition = worldPosition;
   geometry.pickingColor = pickingColor;

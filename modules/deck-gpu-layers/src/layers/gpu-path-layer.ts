@@ -146,7 +146,7 @@ fn getCorner(vertexIndex: u32) -> vec2<f32> {
   let corner = getCorner(vertexIndex);
   let width = select(pathStorageStyleConfig.constantWidth, pathRowWidths[localRowIndex], pathStorageStyleConfig.useRowWidths != 0u);
   var clipPosition = mix(startClip, endClip, corner.x);
-  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5) * clipPosition.w, clipPosition.z, clipPosition.w);
+  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5), clipPosition.z, clipPosition.w);
   var color = pathStorageStyleConfig.constantColor;
   if (pathStorageStyleConfig.useVertexColors != 0u) {
     color = mix(unpackPathColor(pathVertexColors[inputs.segmentStartPointIndex]), unpackPathColor(pathVertexColors[endPointIndex]), corner.x);

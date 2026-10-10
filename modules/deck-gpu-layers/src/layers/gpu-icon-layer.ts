@@ -34,6 +34,7 @@ export type GPUIconLayerProps = Omit<LayerProps, 'data'> & {
   iconFrames: GPUVector<'float32x4'>;
   iconColorModes: GPUVector<'float32'>;
   getColor?: Color | GPUVector<'unorm8x4'>;
+  /** Icon height in pixels, matching IconLayer's default size basis. */
   getSize?: number | GPUVector<'float32'>;
   getAngle?: number | GPUVector<'float32'>;
   getPixelOffset?: GPUVector<'float32x2'>;
@@ -58,9 +59,10 @@ fn getCorner(vertexIndex: u32) -> vec2<f32> { let corners = array<vec2<f32>, 6>(
 @vertex fn vertexMain(@location(0) positions: vec2<f32>, @location(1) offsets: vec2<f32>, @location(2) frames: vec4<f32>, @location(3) colorModes: f32, @location(4) colors: vec4<f32>, @location(5) sizes: f32, @location(6) angles: f32, @location(7) pixelOffsets: vec2<f32>, @builtin(vertex_index) vertexIndex: u32, @builtin(instance_index) instanceIndex: u32) -> VertexOutput {
   let corner = getCorner(vertexIndex); let size = select(iconStyle.size, sizes, iconStyle.useSizes != 0u) * iconStyle.sizeScale;
   let angle = select(iconStyle.angle, angles, iconStyle.useAngles != 0u); let radians = angle * 0.01745329252; let rotation = mat2x2<f32>(cos(radians), sin(radians), -sin(radians), cos(radians));
-  let pixel = rotation * ((corner * frames.zw * 0.5 + offsets) * size) + pixelOffsets;
+  let frameSize = frames.w;
+  let pixel = rotation * ((corner * frames.zw * 0.5 + offsets) * size / max(frameSize, 1.0)) + pixelOffsets;
   let pickingColor = encodePickingColor(instanceIndex + iconStyle.rowIndexOffset); geometry.worldPosition = vec3<f32>(positions, 0.0); geometry.pickingColor = pickingColor;
-  var clip = project_position_to_clipspace(vec3<f32>(positions,0.0),vec3<f32>(0.0),vec3<f32>(0.0)); clip = vec4<f32>(clip.xy + project_pixel_size_to_clipspace(pixel) * clip.w, clip.z, clip.w);
+  var clip = project_position_to_clipspace(vec3<f32>(positions,0.0),vec3<f32>(0.0),vec3<f32>(0.0)); clip = vec4<f32>(clip.xy + project_pixel_size_to_clipspace(pixel), clip.z, clip.w);
   var output: VertexOutput; output.position = clip; output.uv = (frames.xy + (corner * 0.5 + 0.5) * frames.zw) / iconStyle.textureSize; output.color = select(iconStyle.color, colors, iconStyle.useColors != 0u); output.colorMode = colorModes; output.pickingColor = pickingColor; return output;
 }
 @fragment fn fragmentMain(input: VertexOutput) -> @location(0) vec4<f32> { let sample = textureSample(iconTexture, iconTextureSampler, input.uv); if (sample.a < iconStyle.alphaCutoff) { discard; } if (picking.isActive > 0.5) { return vec4<f32>(input.pickingColor,1.0); } let rgb = select(sample.rgb, input.color.rgb, input.colorMode > 0.5); return vec4<f32>(rgb, sample.a * input.color.a * layer.opacity); }
@@ -155,8 +157,7 @@ export class GPUIconLayer extends Layer<GPUIconLayerProps> {
       bufferLayout: layouts,
       bindings: {
         iconStyle: getGPUVectorStyleBufferBinding(styleBuffer, 64),
-        iconTexture: this.props.iconAtlas,
-        iconTextureSampler: this.props.iconAtlas.sampler
+        iconTexture: this.props.iconAtlas
       }
     });
     model.userData['boundInputs'] = [

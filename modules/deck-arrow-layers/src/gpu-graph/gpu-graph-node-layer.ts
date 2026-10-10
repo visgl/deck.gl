@@ -168,8 +168,6 @@ fn encodeNodePickingColor(vertex: u32) -> vec3<f32> {
     vec3<f32>(0.0),
     vec3<f32>(0.0)
   );
-  // Deck's project32 matrices use OpenGL depth; WebGPU clip space requires [0, w].
-  clipPosition.z = (clipPosition.z + clipPosition.w) * 0.5;
   clipPosition = vec4<f32>(
     clipPosition.xy + project_pixel_size_to_clipspace(corner * radius),
     clipPosition.z,

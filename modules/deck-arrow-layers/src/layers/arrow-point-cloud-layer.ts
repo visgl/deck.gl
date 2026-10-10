@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPUPointCloudLayer, type GPUPointCloudLayerProps} from '@deck.gl-community/gpu-layers';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {DataType, Table, Vector, type FixedSizeList, type Float32, type Uint8} from 'apache-arrow';
 import {
+  createLayerGPUVectors,
   destroyLayerGPUVectors,
   makeLayerGPUVectorFromArrow,
   type ArrowGPUVectorColumnSelector,
@@ -49,18 +50,21 @@ export class ArrowPointCloudLayer extends CompositeLayer<ArrowPointCloudLayerPro
       props.getColor !== oldProps.getColor ||
       !(this.state as ArrowPointCloudLayerState).positions
     ) {
-      this.destroyVectors();
       assertVector3(props.data, props.getPosition, 'getPosition');
       if (props.getNormal) assertVector3(props.data, props.getNormal, 'getNormal');
-      this.setState({
-        positions: makeVector(this, props.data, props.getPosition, 'positions', 'float32x3'),
-        normals: props.getNormal
-          ? makeVector(this, props.data, props.getNormal, 'normals', 'float32x3')
-          : undefined,
-        colors: isSelector(props.getColor)
-          ? makeVector(this, props.data, props.getColor, 'colors', 'unorm8x4')
-          : undefined
-      } satisfies ArrowPointCloudLayerState);
+      const vectors = createLayerGPUVectors({
+        positions: () => makeVector(this, props.data, props.getPosition, 'positions', 'float32x3'),
+        normals: () =>
+          props.getNormal
+            ? makeVector(this, props.data, props.getNormal, 'normals', 'float32x3')
+            : undefined,
+        colors: () =>
+          isSelector(props.getColor)
+            ? makeVector(this, props.data, props.getColor, 'colors', 'unorm8x4')
+            : undefined
+      }) satisfies ArrowPointCloudLayerState;
+      this.destroyVectors();
+      this.setState(vectors);
     }
   }
 
@@ -77,8 +81,9 @@ export class ArrowPointCloudLayer extends CompositeLayer<ArrowPointCloudLayerPro
     });
   }
 
-  override finalizeState(): void {
+  override finalizeState(context: LayerContext): void {
     this.destroyVectors();
+    super.finalizeState(context);
   }
 
   private destroyVectors(): void {

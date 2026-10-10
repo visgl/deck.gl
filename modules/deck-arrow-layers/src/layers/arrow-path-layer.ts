@@ -499,6 +499,7 @@ export type ArrowPathLayerProps = Omit<LayerProps, 'data'> &
 type ArrowPathLayerState = {
   batches: ArrowPathLayerBatch[];
   loadVersion: number;
+  cancelLoad?: () => void;
   sourceInitialized: boolean;
   gpuVectorSourceCache: Map<GPUVector, Promise<Vector>>;
 };
@@ -591,6 +592,7 @@ export class ArrowPathLayer extends Layer<ArrowPathLayerProps> {
 
   override finalizeState(context: LayerContext): void {
     const state = this.getLayerState();
+    state.cancelLoad?.();
     state.loadVersion++;
     destroyPathBatches(state.batches);
     this.setState({
@@ -604,6 +606,7 @@ export class ArrowPathLayer extends Layer<ArrowPathLayerProps> {
 
   private async loadSource(props: ArrowPathLayerProps): Promise<void> {
     const state = this.getLayerState();
+    state.cancelLoad?.();
     const loadVersion = state.loadVersion + 1;
     state.loadVersion = loadVersion;
     const previousBatches = state.batches;
@@ -637,16 +640,39 @@ export class ArrowPathLayer extends Layer<ArrowPathLayerProps> {
     data: ArrowRecordBatchSource,
     loadVersion: number
   ): Promise<void> {
+    if (!this.isActiveLoad(loadVersion)) return;
     const iterator = getArrowRecordBatchAsyncIterator(data);
+    let closePromise: Promise<void> | undefined;
+    const close = () => {
+      closePromise ??= (async () => {
+        await iterator.return?.();
+      })();
+      return closePromise;
+    };
+    let cancelRead!: () => void;
+    const cancelled = new Promise<IteratorResult<RecordBatch>>(resolve => {
+      cancelRead = () => resolve({done: true, value: undefined});
+    });
+    const cancelLoad = () => {
+      cancelRead();
+      // Request producer cleanup immediately, even while next() is pending.
+      void close().catch(() => {});
+    };
+    const state = this.getLayerState();
+    state.cancelLoad = cancelLoad;
     let batchIndex = 0;
     let rowIndexOffset = 0;
-    for (let result = await iterator.next(); !result.done; result = await iterator.next()) {
-      if (!this.isActiveLoad(loadVersion)) {
-        return;
+    try {
+      while (this.isActiveLoad(loadVersion)) {
+        const result = await Promise.race([iterator.next(), cancelled]);
+        if (result.done || !this.isActiveLoad(loadVersion)) return;
+        await this.appendSourceBatch(props, result.value, batchIndex, rowIndexOffset, loadVersion);
+        rowIndexOffset += result.value.numRows;
+        batchIndex++;
       }
-      await this.appendSourceBatch(props, result.value, batchIndex, rowIndexOffset, loadVersion);
-      rowIndexOffset += result.value.numRows;
-      batchIndex++;
+    } finally {
+      if (state.cancelLoad === cancelLoad) state.cancelLoad = undefined;
+      await close();
     }
   }
 

@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPUColumnLayer, type GPUColumnLayerProps} from '@deck.gl-community/gpu-layers';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {DataType, Table, Vector, type FixedSizeList, type Float32, type Uint8} from 'apache-arrow';
 import {
+  createLayerGPUVectors,
   destroyLayerGPUVectors,
   makeLayerGPUVectorFromArrow,
   type ArrowGPUVectorColumnSelector,
@@ -52,20 +53,17 @@ export class ArrowColumnLayer extends CompositeLayer<ArrowColumnLayerProps> {
       props.getElevation !== oldProps.getElevation ||
       !(this.state as ArrowColumnLayerState).positions
     ) {
-      this.destroyVectors();
       assertPositionColumn(props.data, props.getPosition);
-      this.setState({
-        positions: makeVector(this, props.data, props.getPosition, 'positions', 'float32x2'),
-        colors: makeOptionalVector(this, props.data, props.getFillColor, 'colors', 'unorm8x4'),
-        radii: makeOptionalVector(this, props.data, props.getRadius, 'radii', 'float32'),
-        elevations: makeOptionalVector(
-          this,
-          props.data,
-          props.getElevation,
-          'elevations',
-          'float32'
-        )
-      } satisfies ArrowColumnLayerState);
+      const vectors = createLayerGPUVectors({
+        positions: () => makeVector(this, props.data, props.getPosition, 'positions', 'float32x2'),
+        colors: () =>
+          makeOptionalVector(this, props.data, props.getFillColor, 'colors', 'unorm8x4'),
+        radii: () => makeOptionalVector(this, props.data, props.getRadius, 'radii', 'float32'),
+        elevations: () =>
+          makeOptionalVector(this, props.data, props.getElevation, 'elevations', 'float32')
+      }) satisfies ArrowColumnLayerState;
+      this.destroyVectors();
+      this.setState(vectors);
     }
   }
 
@@ -84,8 +82,9 @@ export class ArrowColumnLayer extends CompositeLayer<ArrowColumnLayerProps> {
     });
   }
 
-  override finalizeState(): void {
+  override finalizeState(context: LayerContext): void {
     this.destroyVectors();
+    super.finalizeState(context);
   }
 
   private destroyVectors(): void {

@@ -31,7 +31,10 @@ const layer = new ArrowScatterplotLayer({
 
 The adapter preserves Arrow record-batch boundaries. Constants remain constants, null-containing
 columns are rejected until the caller selects an explicit replacement policy, and the GPU layer
-never observes an Arrow type. `ArrowTripsLayer` similarly converts aligned timestamp lists before
+never observes an Arrow type. Fixed-width adapters build replacement vectors before
+releasing the current set; a rejected column releases partial uploads and retains the
+previous vectors. Path streams close their iterators when replaced, finalized, or
+when batch preparation fails. `ArrowTripsLayer` similarly converts aligned timestamp lists before
 delegating to the existing GPUVector path-storage model. `GeoArrowLayer` selects point,
 linestring, polygon, or multipolygon children from field extension metadata without converting to
 GeoJSON.
