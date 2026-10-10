@@ -179,7 +179,16 @@ export default class PolygonTesselator extends Tesselator<
       let start = 0;
       for (const end of [...(holes || []), input.length]) {
         if (start) holeIndices.push(positions.length);
-        const refined = subdividePolyline(input.slice(start, end), {
+        // Grid clipping may return an implicitly closed ring. Include its closing
+        // edge in refinement before projected-space winding and triangulation.
+        const ring = Array.from(input.slice(start, end));
+        if (
+          ring.length &&
+          ring.slice(0, size).some((value, i) => value !== ring[ring.length - size + i])
+        ) {
+          ring.push(...ring.slice(0, size));
+        }
+        const refined = subdividePolyline(ring, {
           size: size as 2 | 3,
           targetSize: 3,
           transform: position => transform(Array.from(position)),

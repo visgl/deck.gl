@@ -421,8 +421,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         props._projectionTolerance &&
         (!this.usePositionTransforms().transform ||
           props._pathType ||
-          (buffers.getPath &&
-            !ArrayBuffer.isView(buffers.getPath.value ?? buffers.getPath)) ||
+          (buffers.getPath && !ArrayBuffer.isView(buffers.getPath.value ?? buffers.getPath)) ||
           Object.keys(buffers).some(key => key !== 'getPath'))
       ) {
         throw new Error(
