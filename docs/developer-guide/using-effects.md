@@ -126,7 +126,7 @@ A material is a plain JavaScript object with the following fiields:
 - `shininess` (number) Larger than 0. Default `32`.
 - `specularColor` (number[3]). RGB color, each channel in 0-1 range. Default `[0.15, 0.15, 0.15]`.
 
-Setting a material property to the value `true` will set all properties to their defaults.
+Setting a material property to the value `true` will set all properties to their defaults. Setting it to `false` or `null` turns off lighting for the layer, which is then drawn with its unshaded colors.
 
 ```ts
 new GeoJsonLayer({

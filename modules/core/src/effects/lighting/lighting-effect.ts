@@ -145,7 +145,9 @@ export default class LightingEffect implements Effect {
       lights: this._getLights(layer)
     };
     // @ts-expect-error material is not a Layer prop
-    const materialProps = layer.props.material;
+    const material = layer.props.material;
+    // `material: false` or `material: null` opts the layer out of lighting
+    const materialProps = material === false || material === null ? {unlit: true} : material;
 
     return {
       shadow: shadowProps,
