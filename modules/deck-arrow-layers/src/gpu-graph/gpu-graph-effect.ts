@@ -115,6 +115,8 @@ export class GPUGraphDeckEffect implements Effect {
   readonly analysisGraph: CompiledGPUCommandGraph<void>;
   readonly searchGraph?: CompiledGPUCommandGraph<void>;
   readonly frameGraph: CompiledGPUCommandGraph<void>;
+  /** Freezes force-layout computation while preserving rendering and selection. */
+  layoutPaused = false;
 
   private readonly buffers: Buffer[] = [];
   private readonly vectors: GPUVector[] = [];
@@ -372,6 +374,10 @@ export class GPUGraphDeckEffect implements Effect {
     if (this.searchGraph && this.searchPending && this.completedAnalysisStages > 0) {
       this.searchGraph.encode(this.device.commandEncoder, {parameters: undefined});
       this.searchPending = false;
+    }
+    if (this.layoutPaused) {
+      if (advancedAnalysis) this.publishStats(0);
+      return;
     }
     const encoding = this.frameGraph.encode(this.device.commandEncoder, {parameters: undefined});
     this.frameCount++;
