@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {lerp} from '@math.gl/core';
+import {subdivideTriangleMesh} from '@math.gl/polygon';
 
 const DEFAULT_INDICES = new Uint32Array([0, 2, 1, 0, 3, 2]);
 const DEFAULT_TEX_COORDS = new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]);
@@ -14,7 +15,12 @@ const DEFAULT_TEX_COORDS = new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]);
   0 ---- 3
 */
 /* eslint-disable max-statements */
-export default function createMesh(bounds, resolution) {
+export default function createMesh(
+  bounds,
+  resolution,
+  projection?: {transform: (position: number[]) => number[]; tolerance: number}
+) {
+  if (projection) return createProjectedMesh(bounds, resolution, projection);
   if (!resolution) {
     return createQuad(bounds);
   }
@@ -89,4 +95,44 @@ function createQuad(bounds) {
 
 function interpolateQuad(quad, ut, vt) {
   return lerp(lerp(quad[0], quad[1], vt), lerp(quad[3], quad[2], vt), ut);
+}
+
+/** Refine in UV space so arbitrary quads retain their bilinear position mapping. */
+function createProjectedMesh(
+  bounds,
+  resolution,
+  {transform, tolerance}: {transform: (position: number[]) => number[]; tolerance: number}
+) {
+  const seed = createMesh(bounds, resolution);
+  const uv = Float64Array.from(seed.texCoords);
+  for (let i = 1; i < uv.length; i += 2) uv[i] = 1 - uv[i];
+  const refined = subdivideTriangleMesh(
+    {positions: uv, indices: seed.indices},
+    {
+      size: 2,
+      targetSize: 3,
+      tolerance,
+      transform: position => {
+        const point = interpolateQuad(bounds, position[0], position[1]);
+        return transform([point[0], point[1], point[2] ?? 0]);
+      }
+    }
+  );
+  const vertexCount = refined.sourcePositions.length / 2;
+  const positions = new Float64Array(vertexCount * 3);
+  const texCoords = new Float32Array(vertexCount * 2);
+  for (let i = 0; i < vertexCount; i++) {
+    const u = refined.sourcePositions[i * 2];
+    const v = refined.sourcePositions[i * 2 + 1];
+    const point = interpolateQuad(bounds, u, v);
+    positions.set([point[0], point[1], point[2] ?? 0], i * 3);
+    texCoords.set([u, 1 - v], i * 2);
+  }
+  return {
+    vertexCount: refined.indices.length,
+    positions,
+    projectedPositions: refined.positions,
+    indices: refined.indices,
+    texCoords
+  };
 }
