@@ -1,0 +1,16 @@
+/* luma.gl
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
+ */
+@import '../../example-infobox.css';
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #030610; }
+#scene { position: absolute; inset: 0 0 0 280px; }
+.luma-example-infobox .control-card select { justify-self: start; }
+@media (max-width: 700px) {
+  #scene { inset: 0 0 310px; }
+  .luma-example-infobox--overlay { top: auto; bottom: 8px; left: 8px; width: calc(100% - 16px); max-height: 290px; }
+  .luma-example-infobox .control-card label { grid-template-columns: minmax(0, 1fr) 112px; }
+}
+
+.sky-actions { display: flex; gap: 6px; }
+.sky-actions button { flex: 1; }

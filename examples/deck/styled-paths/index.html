@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- luma-example-support -->
+  <meta name="luma-example-id" content="deck/styled-paths" />
+  <meta name="luma-example-backends" content="webgpu,webgl2" />
+  <meta name="luma-example-mobile" content="full" />
+  <meta name="luma-example-mobile-profile" content="standard" />
+  <script type="module" data-luma-example-support-bootstrap>
+    import {installStandaloneExampleSupport} from '../../example-support.ts';
+    const exampleSupport = await installStandaloneExampleSupport();
+    if (!exampleSupport.supported) {
+      document.querySelectorAll('script[type="module"]:not([data-luma-example-support-bootstrap])').forEach(script => script.remove());
+    }
+  </script>
+  <!-- /luma-example-support -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./style.css" />
+  <title>Riverfront routes · luma.gl</title>
+</head>
+<body>
+  <div id="scene" aria-label="Interactive riverfront routes"></div>
+  <aside class="luma-example-infobox luma-example-infobox--overlay">
+    <p class="eyebrow">luma.gl + deck.gl</p><h1>Riverfront routes</h1>
+    <section class="control-card"><h2>Scene</h2>
+      <label>Renderer<select id="backend"><option value="webgpu">WebGPU</option><option value="webgl">WebGL2</option></select></label>
+      <label>Style<select id="appearance"><option value="plain">Plain</option><option value="sketch">Pencil</option><option value="glow">Glow</option></select></label>
+      <label>Grain<input id="grain" type="range" min="0" max="1" step="0.05" value="0.6" disabled /></label>
+      <label>Glow<input id="glowIntensity" type="range" min="0" max="2" step="0.05" value="0.8" disabled /></label>
+      <label class="toggle"><input id="enabled" type="checkbox" checked /> Dashed routes</label>
+    </section>
+    <section class="control-card"><h2>Stroke geometry</h2>
+      <label>Width (m)<input id="width" type="range" min="2" max="22" step="1" value="9" /></label>
+      <label>End cap<select id="cap"><option value="butt">Butt</option><option value="square">Square</option><option value="round" selected>Round</option></select></label>
+      <label>Join<select id="join"><option value="miter">Miter</option><option value="bevel">Bevel</option><option value="round" selected>Round</option></select></label>
+      <label>Miter limit<input id="miterLimit" type="range" min="1" max="8" step="0.25" value="3" /></label>
+    </section>
+    <section class="control-card"><h2>Dashes</h2>
+      <label>Length (m)<input id="dashLength" type="range" min="1" max="60" step="1" value="25" /></label>
+      <label>Gap (m)<input id="gapLength" type="range" min="0" max="40" step="1" value="14" /></label>
+      <label>Phase (m)<input id="offset" type="range" min="-60" max="60" step="1" value="10" /></label>
+    </section>
+    <output id="selection" class="selection" aria-live="polite">Click a route to inspect</output>
+    <p class="hint" id="status">Caps shape the path ends. Dashes follow its length.<br />Drag to move · Scroll to zoom<br />Shift + drag to orbit</p>
+  </aside>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
