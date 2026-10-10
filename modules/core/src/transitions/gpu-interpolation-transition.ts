@@ -24,6 +24,7 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
   type = 'interpolation';
 
   private transform: BufferTransform;
+  private hasUpdated: boolean = false;
 
   constructor({
     device,
@@ -50,10 +51,12 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     }
 
     const {buffers, attribute} = this;
-    // Alternate between two buffers when new transitions start.
-    // Last destination buffer is used as an attribute (from state),
-    // And the other buffer is now the current buffer.
-    cycleBuffers(buffers);
+    // A transition may restart before its first render. Only promote the destination
+    // after the GPU has written it; otherwise preserve the initialized source.
+    if (this.hasUpdated) {
+      cycleBuffers(buffers);
+    }
+    this.hasUpdated = false;
 
     buffers[0] = padBuffer({
       device: this.device,
@@ -103,6 +106,7 @@ export default class GPUInterpolationTransition extends GPUTransitionBase<Interp
     model.shaderInputs.setProps({interpolation: interpolationProps});
 
     this.transform.run({discard: true});
+    this.hasUpdated = true;
   }
 
   override delete() {
@@ -167,7 +171,7 @@ void main(void) {
 `;
 
 function useFp64(attribute: Attribute): boolean {
-  return attribute.doublePrecision && attribute.value instanceof Float64Array;
+  return attribute.isDoublePrecisionBuffer;
 }
 
 function getTransform(device: Device, attribute: Attribute): BufferTransform {

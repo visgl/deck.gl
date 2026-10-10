@@ -94,7 +94,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   var normal = varyings.normal;
   if (simpleMesh.flatShading > 0.5) {
-    normal = normalize(cross(dpdx(varyings.positionCommon), dpdy(varyings.positionCommon)));
+    // WebGPU's screen-space Y axis reverses the derivative orientation used by GLSL flat shading.
+    normal = normalize(cross(dpdy(varyings.positionCommon), dpdx(varyings.positionCommon)));
   }
 
   color = vec4<f32>(

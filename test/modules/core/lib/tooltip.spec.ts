@@ -143,12 +143,17 @@ test('TooltipWidget#onViewportChange', () => {
 test('TooltipWidget#onHover accounts for canvas offset', () => {
   const container = document.createElement('div');
   const deck = {
-    props: {getTooltip: () => 'Test tooltip'}
+    props: {getTooltip: () => 'Test tooltip'},
+    getCanvasContext: () => ({
+      getCSSSize: () => [0, 0],
+      getPosition: () => [100, 200],
+      updatePosition() {}
+    })
   };
+  container.getBoundingClientRect = () => ({left: 0, top: 0}) as DOMRect;
   const widgetManager = new WidgetManager({
     deck,
-    parentElement: container,
-    getCanvasBounds: () => ({x: 100, y: 200, width: 0, height: 0})
+    parentElement: container
   });
   const tooltip = new TooltipWidget();
   widgetManager.addDefault(tooltip);

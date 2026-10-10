@@ -84,11 +84,14 @@ export abstract class GPUTransitionBase<SettingsT extends TransitionSettings>
   abstract onUpdate(): void;
 
   protected setBuffer(buffer: Buffer) {
+    const {stride} = this.attributeInTransition.getAccessor();
     this.attributeInTransition.setData({
       buffer,
       normalized: this.attribute.settings.normalized,
       // Retain placeholder value to generate correct shader layout
-      value: this.attributeInTransition.value as NumericArray
+      value: this.attributeInTransition.value as NumericArray,
+      // A WebGPU Float32-backed fp64 transition still stores interleaved high/low tuples.
+      stride
     });
   }
 

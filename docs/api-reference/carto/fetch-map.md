@@ -26,7 +26,7 @@ fetchMap({cartoMapId}).then(map => new Deck(map));
 
 ```js
 import { fetchMap } from '@deck.gl/carto';
-import { MapboxOverlay } from '@deck.gl/mapbox';
+import { MapLibreOverlay } from '@deck.gl/maplibre';
 import maplibregl from 'maplibre-gl';
 
 fetchMap({ cartoMapId }).then(({ basemap, layers }) => {
@@ -35,7 +35,7 @@ fetchMap({ cartoMapId }).then(({ basemap, layers }) => {
     ...basemap?.props, // basemap.props contain all props required to setup basemap
     interactive: true
   })
-  const overlay = new MapboxOverlay({layers: result.layers});
+  const overlay = new MapLibreOverlay({layers: result.layers});
   map.addControl(overlay);
 })
 ```

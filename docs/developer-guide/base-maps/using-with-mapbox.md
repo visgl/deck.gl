@@ -1,3 +1,7 @@
+---
+description: "Render deck.gl layers over Mapbox GL JS with MapboxOverlay from @deck.gl/mapbox, overlaid or interleaved."
+---
+
 # Using with Mapbox
 
 | Pure JS | React | Overlaid | Interleaved |
@@ -222,6 +226,10 @@ function App() {
 
 
 ## Additional Information
+
+### Styling layers by zoom
+
+To fade, resize or filter deck.gl layers by zoom the way Mapbox's `minzoom`, `maxzoom` and `["zoom"]` expressions do, see [Zoom-Dependent Layers](../zoom-dependent-layers.md).
 
 ### react-map-gl
 

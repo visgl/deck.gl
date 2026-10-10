@@ -3,7 +3,7 @@
   "description": "Plug-and-play functionalities for deck.gl layers",
   "license": "MIT",
   "type": "module",
-  "version": "9.4.0-alpha.2",
+  "version": "9.4.0-beta.4",
   "publishConfig": {
     "access": "public"
   },
@@ -42,14 +42,14 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@luma.gl/shadertools": "^9.4.0-alpha.4",
-    "@luma.gl/webgl": "^9.4.0-alpha.4",
-    "@math.gl/core": "^4.1.0"
+    "@luma.gl/shadertools": "^10.0.0-alpha.4",
+    "@luma.gl/webgl": "^10.0.0-alpha.4",
+    "@math.gl/core": "^5.0.0-alpha.15"
   },
   "peerDependencies": {
-    "@deck.gl/core": "~9.3.0-beta.2",
-    "@luma.gl/core": "~9.4.0-alpha.4",
-    "@luma.gl/engine": "~9.4.0-alpha.4"
+    "@deck.gl/core": "~9.4.0",
+    "@luma.gl/core": "~10.0.0-alpha.4",
+    "@luma.gl/engine": "~10.0.0-alpha.4"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

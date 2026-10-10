@@ -101,6 +101,9 @@ const testCases = [
   },
   {
     name: 'heatmap-lnglat-offset',
+    // TODO: Re-enable when WebGPU produces consistent results for equivalent
+    // LNGLAT and LNGLAT_OFFSETS positions.
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.75,
       longitude: -122.44,
@@ -125,9 +128,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

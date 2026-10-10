@@ -1,4 +1,9 @@
+---
+description: "ScenegraphLayer renders glTF scenegraph models at given coordinates."
+---
+
 # ScenegraphLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {ScenegraphLayerDemo} from '@site/src/doc-demos/mesh-layers';
 

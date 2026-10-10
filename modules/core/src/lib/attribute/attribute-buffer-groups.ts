@@ -192,11 +192,14 @@ export default class AttributeBufferGroups {
     const layouts = attributes.map(attribute => attribute.getBufferLayout(modelInfo));
     const stepMode = layouts[0].stepMode;
     const rowCount = Math.max(1, attributes[0].numInstances);
+    const allConstant = requireValues && attributes.every(attribute => attribute.isConstant);
 
     for (let index = 0; index < attributes.length; index++) {
       const attribute = attributes[index];
       const accessor = attribute.getAccessor();
-      const naturalStride = attribute.size * accessor.bytesPerElement;
+      // Binary attributes may override the declared size and type. Eligibility must follow the
+      // resolved accessor because that is the row shape published in the buffer layout.
+      const naturalStride = accessor.size * accessor.bytesPerElement;
 
       if (
         excludeAttributes[attribute.id] ||
@@ -210,8 +213,11 @@ export default class AttributeBufferGroups {
         (accessor.vertexOffset || 0) !== 0 ||
         getStride(accessor) !== naturalStride ||
         (requireValues &&
-          (!ArrayBuffer.isView(attribute.value) ||
-            attribute.value.byteLength < rowCount * naturalStride))
+          (attribute.isConstant
+            ? !attribute.getConstantValue() ||
+              attribute.getConstantValue()!.byteLength < naturalStride
+            : !ArrayBuffer.isView(attribute.value) ||
+              attribute.value.byteLength < rowCount * naturalStride))
       ) {
         return null;
       }
@@ -243,7 +249,9 @@ export default class AttributeBufferGroups {
       rowCount,
       layout: {
         name: id,
-        byteStride,
+        // Interleave emits one row when every input is constant. A zero stride broadcasts that
+        // row without allocating one copy per vertex or instance.
+        byteStride: allConstant ? 0 : byteStride,
         stepMode,
         attributes: layoutAttributes
       }
@@ -321,16 +329,40 @@ export default class AttributeBufferGroups {
   }
 
   private _getInterleaveInput(group: PackedGroup, attribute: Attribute): GPUDataEvaluator {
-    const buffer = attribute.getBuffer();
     const rowByteLength = getStride(attribute.getAccessor());
+    const groupByteOffset = group.byteOffsets[attribute.id];
+
+    assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
+    assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
+
+    if (attribute.isConstant) {
+      const constantValue = attribute.getConstantValue();
+      if (!constantValue) {
+        throw new Error(`Attribute group ${group.id} is missing constant value ${attribute.id}`);
+      }
+      assertU32Aligned(`${group.id}.${attribute.id} constant byteOffset`, constantValue.byteOffset);
+
+      // The packed output is a byte-for-byte vertex buffer. Reinterpret the source row as u32
+      // so normalized integers retain their original bits when embedded as WGSL literals.
+      return new GPUDataEvaluator({
+        id: attribute.id,
+        type: 'uint32',
+        size: rowByteLength / 4,
+        isConstant: true,
+        value: new Uint32Array(
+          constantValue.buffer,
+          constantValue.byteOffset,
+          rowByteLength / Uint32Array.BYTES_PER_ELEMENT
+        )
+      });
+    }
+
+    const buffer = attribute.getBuffer();
     const byteOffset = attribute.byteOffset;
     const stride = attribute.getAccessor().stride || rowByteLength;
-    const groupByteOffset = group.byteOffsets[attribute.id];
 
     assertU32Aligned(`${group.id}.${attribute.id} byteOffset`, byteOffset);
     assertU32Aligned(`${group.id}.${attribute.id} stride`, stride);
-    assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
-    assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
 
     if (!buffer) {
       throw new Error(

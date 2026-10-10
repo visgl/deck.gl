@@ -195,7 +195,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   var fragColor = varyings.color;
   if (column.extruded > 0.5 && column.isStroke < 0.5) {
-    let normal = normalize(cross(dpdx(varyings.positionCommonspace.xyz), dpdy(varyings.positionCommonspace.xyz)));
+    // WebGPU's screen-space Y axis reverses the derivative orientation used by GLSL flat shading.
+    let normal = normalize(cross(dpdy(varyings.positionCommonspace.xyz), dpdx(varyings.positionCommonspace.xyz)));
     fragColor = vec4<f32>(
       lighting_getLightColor2(
         varyings.color.rgb,

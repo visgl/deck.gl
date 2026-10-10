@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -365,7 +365,8 @@ webglTest('MapboxOverlay#interleaved', async () => {
 
     expect(overlay._props.useDevicePixels, 'useDevicePixels is not forwarded').toBe(undefined);
 
-    await sleep(100);
+    // Assert the first completed draw before a later animation frame can redraw the same layer.
+    await vi.waitUntil(() => drawLog.length > 0);
     expect(map.getLayer('deck-layer-group-last'), 'Layer group is added').toBeTruthy();
     expect(drawLog, 'layers correctly filtered').toEqual(['poi']);
     drawLog = [];
@@ -375,7 +376,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
       layerFilter: undefined
     });
 
-    await sleep(100);
+    await vi.waitUntil(() => drawLog.length > 0);
     expect(map.getLayer('deck-layer-group-last'), 'Layer group exists').toBeTruthy();
     expect(drawLog, 'layers correctly filtered').toEqual(['cities']);
 

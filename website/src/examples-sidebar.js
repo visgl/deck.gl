@@ -37,7 +37,7 @@ const sidebars = {
         'scatterplot-layer',
         'scenegraph-layer',
         'screen-grid-layer',
-        'simple-mesh-layer',
+        // 'simple-mesh-layer',
         'terrain-layer',
         'text-layer',
         'text-layer-clipping',
@@ -66,6 +66,7 @@ const sidebars = {
         'collision-filter-extension',
         'data-filter-extension',
         'mask-extension',
+        'path-style-extension',
         'terrain-extension'
       ]
     },

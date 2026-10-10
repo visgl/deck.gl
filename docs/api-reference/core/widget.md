@@ -47,6 +47,8 @@ Experimental. Selects the DOM container used for this widget. Defaults to `viewI
 - If set to a valid view id, the widget is placed relative to that view.
 - If set to an HTMLElement, `placement` is ignored and the widget is appended into the given element.
 
+Deck-managed containers remain under one shared widget root. In multi-canvas mode, a view-specific container is positioned using the bounds of the presentation canvas assigned to that view; the widget is not appended to the canvas element.
+
 
 ### Additional `WidgetProps` on UI Widgets
 
@@ -55,6 +57,8 @@ Experimental. Selects the DOM container used for this widget. Defaults to `viewI
 * Default: `null`
 
 The `viewId` prop controls both positioning and event scope. If defined, the widget is positioned relative to the matching view and only responds to events inside that view. If `null`, the widget is positioned in the shared root widget container and receives events from all views.
+
+In multi-canvas mode, the matching view's `canvasId` determines which presentation-canvas bounds are used to position the widget. The widget DOM remains under the shared widget root rather than being reparented into that canvas.
 
 #### `placement` (string, optional) {#placement}
 

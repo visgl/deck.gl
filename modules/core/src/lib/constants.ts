@@ -75,6 +75,9 @@ export const PROJECTION_MODE = {
    */
   GLOBE: 2,
 
+  /** CPU-preprojected XY in common space; Z uses the viewport's distance scale. */
+  CUSTOM_GEOSPATIAL: 3,
+
   /**
    * (Internal use only) Web Mercator projection at high zoom
    */

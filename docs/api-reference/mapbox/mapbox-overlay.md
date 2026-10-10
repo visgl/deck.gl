@@ -165,6 +165,10 @@ See [Deck.getCanvas](../core/deck.md#getcanvas). When using `interleaved: true`,
 
 ## Remarks
 
+### Antialiasing
+
+Base maps create their WebGL context with `antialias: false`, so in interleaved mode deck.gl layers receive no multisampling. Layers that rely on it — including [PathLayer](../layers/path-layer.md), [LineLayer](../layers/line-layer.md), [ArcLayer](../layers/arc-layer.md), and [PointCloudLayer](../layers/point-cloud-layer.md) — will look aliased against the base map. Set `antialiasing: true` on those layers, or enable MSAA on the base map itself.
+
 ### Multi-view usage
 
 When using `MapboxOverlay` with multiple views passed to the `views` prop, only one of the views can match the base map and receive interaction.

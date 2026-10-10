@@ -21,6 +21,87 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v9.4 Prereleases
 
+#### deck.gl [v9.4.0-beta.4] - Sep 3 2026
+
+- chore: fix cjs build (#10651)
+- fix(layers): ScatterplotLayer antialiasing on webgpu (#10642)
+- fix(layers): sdf text outline in webgpu (#10640)
+- fix: export MapLibre integration and update peer ranges (#10645)
+
+#### deck.gl [v9.4.0-beta.3] - Sep 2 2026
+
+- feat(extensions): procedural fill patterns (#10632)
+- fix(extensions): reduce pattern origin in fp64 to stop drift at high zoom (#10633)
+- feat(extensions): fillPatternSizeUnits (#10634)
+- fix(extensions): follow up FillStyleExtension flipY fix (#10629)
+- fix(fill-style): textureGrad for better mip selection (#10628)
+- feat(extensions): add dashUnits (#10583)
+- feat(extensions): add dashMode and whole-path justification (#10582)
+- fix(fill-style): correct pattern orientation by flipping texture y-axis (#10550)
+- feat: FillStyleExtension.getFillPatternBackgroundColor (#10618)
+- chore(deps): bump a5-js from 0.7.2 to 0.10.0 (#10620)
+- feat(extensions): prefilter dash coverage (#10581)
+- fix(extensions): align billboard, 3D, justified, and offset dashes (#10580)
+- fix(extensions): make PathStyle options optional (#10616)
+- CARTO: Remove dead code (moved to api-client) (#10617)
+- fix(core): rotate GlobeView like a ball through poles (#10598)
+- feat(core): support pointer-anchored zoom in GlobeView (#10385)
+- fix(core): compare viewport projection state in equals (#10611)
+- fix(extensions): omit dash uniforms for offset-only path styles (#10607)
+- fix(core): make attribute buffer cleanup idempotent (#10609)
+- feat(core): configure zoom anchors across controllers (#10595)
+
+#### deck.gl [v9.4.0-beta.2] - Sep 2 2026
+
+- Intentionally skipped; no npm distribution was published.
+
+#### deck.gl [v9.4.0-beta.1] - Aug 28 2026
+
+- feat(widgets): custom tooltip system for widget buttons (#10435)
+- feat(widgets): Replace custom SVG icons with Google Material Symbols (#10513)
+- fix(layers): type column geometry attributes (#10508)
+- fix(mapbox): ignore useDevicePixels in interleaved mode (#10510)
+- feat(aggregation-layers): port GridLayer to WebGPU (#10482)
+- feat(geo-layers): port TripsLayer to WebGPU (#10484)
+- feat(layers): port TextLayer glyph rendering to WebGPU (#10473)
+- fix(react): stabilize WebGPU device switching (#10506)
+- feat(mesh-layers): port SimpleMeshLayer to WebGPU (#10485)
+- feat(core): bump luma.gl to latest (#10521)
+- chore: upgrade luma.gl (#10525)
+- feat(core): interleave attribute buffer group on GPU (#10518)
+- feat: add webgl-only endpoints (#10504)
+- chore(widgets): Add PostCSS build pipeline for icon management (#10514)
+- fix(mapbox,google-maps): use css-dpr pixel sizing in overlaid mode to prevent basemap misalignment (#10370)
+- feat(core): override size zoom in OrthographicView (#10532)
+- fix(layers): ColumnLayer flat mode in webgpu (#10535)
+- fix(core): render repeated map viewports correctly with WebGPU (#10536)
+- feat(core): Controller rubberBand option (#10481)
+- fix(core): OrthographicViewport distance scale (#10540)
+- fix(core): use correct stat for updateLayersCount metric (#10469)
+- feat(core): add maxBoundsPadding to controller options (#10541)
+- feat(widgets): support contentBoundsPadding in ScrollbarWidget (#10542)
+- fix(mesh-layers): SimpleMeshLayer matrix constant (#10543)
+- fix(layers): restore SDF text outlines (#10545)
+- fix(core): clipspace depth in wgsl (#10544)
+- fix(layers): derivative-based normal calculation (#10547)
+- Add @deck.gl/maplibre for MapLibre GL JS v4/5/6 (#10566)
+- fix(layers): Remove unused struct definitions (#10568)
+- feat(core): Handle webgpu constant attributes efficiently (#10567)
+- feat(layers): port TextBackgroundLayer to WebGPU (#10569)
+- fix(core): Fp32 array provided to a 64-bit attribute (#10570)
+- feat(mesh-layers): ScenegraphLayer to WebGPU (#10476)
+- feat(layers): add PathLayer analytic antialiasing (#10520)
+- feat(layers): add LineLayer analytic antialiasing (#10558)
+- feat(layers): add ArcLayer analytic antialiasing (#10559)
+- feat(layers): add PointCloudLayer analytic antialiasing (#10560)
+- feat(layers): forward path antialiasing through composite layers (#10561)
+- feat(core): Upgrade luma.gl (#10577)
+- feat(core): MapController rubberBand option (#10572)
+- chore(deps): bump luma and mjolnir (#10594)
+- feat(geo-layers): support Tile3DLayer on WebGPU (#10600)
+- feat(geo-layers): support MVTLayer on WebGPU (#10601)
+- feat(core): Extend View system to support multi-canvas rendering (#10229)
+
 #### deck.gl [v9.4.0-alpha.2] - Jul 29 2026
 
 - fix: add npm metadata to all modules (#10358)

@@ -20,6 +20,7 @@ import type {
   MjolnirKeyEvent
 } from 'mjolnir.js';
 import type {Timeline} from '@luma.gl/engine';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
@@ -88,6 +89,8 @@ export type ControllerOptions = {
       };
   /** Drag behavior without pressing function keys, one of `pan` and `rotate`. */
   dragMode?: 'pan' | 'rotate';
+  /** Screen position that remains fixed while zooming. Default `'pointer'`. */
+  zoomAround?: 'center' | 'pointer';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
   /** Bounding box of content that the controller is constrained in */
@@ -191,6 +194,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected touchRotate: boolean = false;
   protected multiTouchDrag: 'pan' | 'rotate' | null = null;
   protected trackpadGesture: boolean = false;
+  protected zoomAround: 'center' | 'pointer' = 'pointer';
   protected keyboard:
     | boolean
     | {
@@ -316,6 +320,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return [offsetCenter.x - x, offsetCenter.y - y];
   }
 
+  /** Resolves the zoom anchor for pointer-based controls. */
+  protected getZoomPosition(position: [number, number]): [number, number] {
+    if (this.zoomAround === 'pointer') {
+      return position;
+    }
+
+    const viewport = this.makeViewport(this.controllerState.getViewportProps());
+    const [centerX, centerY] = worldToPixels(viewport.center, viewport.pixelProjectionMatrix);
+    return [centerX, centerY];
+  }
+
   isPointInBounds(pos: [number, number], event: MjolnirEvent): boolean {
     const {width, height} = this.props;
     if (event && event.handled) {
@@ -389,6 +404,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       touchRotate = false,
       multiTouchDrag = touchRotate ? 'rotate' : null,
       trackpadGesture = false,
+      zoomAround = 'pointer',
       keyboard = true
     } = props;
 
@@ -416,6 +432,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.touchRotate = multiTouchDrag === 'rotate';
     this.multiTouchDrag = multiTouchDrag;
     this.trackpadGesture = trackpadGesture;
+    this.zoomAround = zoomAround;
     this.keyboard = keyboard;
 
     // Normalize view state if maxBounds is defined
@@ -710,11 +727,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       scale = 1 / scale;
     }
 
+    const zoomPosition = this.getZoomPosition(pos);
     const transitionProps = smooth
-      ? {...this._getTransitionProps({around: pos}), transitionDuration: 250}
+      ? {...this._getTransitionProps({around: zoomPosition}), transitionDuration: 250}
       : NO_TRANSITION_PROPS;
 
-    const newControllerState = this.controllerState.zoom({pos, scale});
+    const newControllerState = this.controllerState.zoom({pos: zoomPosition, scale});
     this.updateViewport(newControllerState, transitionProps, {
       isZooming: true,
       isPanning: true
@@ -824,7 +842,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     const newControllerState = this.controllerState
-      .zoomStart({pos}, this._getConstraintContext('zoom', 'start'))
+      .zoomStart({pos: this.getZoomPosition(pos)}, this._getConstraintContext('zoom', 'start'))
       .rotateStart({pos}, this._getConstraintContext('rotate', 'start'));
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     pinchEventWorkaround._startPinchRotation = event.rotation;
@@ -847,7 +865,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       const {scale} = event;
       const pos = this.getCenter(event);
       newControllerState = newControllerState.zoom(
-        {pos, scale},
+        {pos: this.getZoomPosition(pos), scale},
         this._getConstraintContext('zoom', 'update')
       );
     }
@@ -877,17 +895,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     const {_lastPinchEvent} = pinchEventWorkaround;
     if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
       const pos = this.getCenter(event);
+      const zoomPosition = this.getZoomPosition(pos);
       let newControllerState = this.controllerState.rotateEnd();
       const z = Math.log2(event.scale);
       const velocityZ =
         (z - Math.log2(_lastPinchEvent.scale)) / (event.deltaTime - _lastPinchEvent.deltaTime);
       const endScale = Math.pow(2, z + (velocityZ * inertia) / 2);
-      newControllerState = newControllerState.zoom({pos, scale: endScale}).zoomEnd();
+      newControllerState = newControllerState.zoom({pos: zoomPosition, scale: endScale}).zoomEnd();
 
       this.updateViewport(
         newControllerState,
         {
-          ...this._getTransitionProps({around: pos}),
+          ...this._getTransitionProps({around: zoomPosition}),
           transitionDuration: inertia,
           transitionEasing: INERTIA_EASING
         },
@@ -936,9 +955,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     const isZoomOut = this.isFunctionKeyPressed(event);
+    const zoomPosition = this.getZoomPosition(pos);
 
-    const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    this.updateViewport(newControllerState, this._getTransitionProps({around: pos}), {
+    const newControllerState = this.controllerState.zoom({
+      pos: zoomPosition,
+      scale: isZoomOut ? 0.5 : 2
+    });
+    this.updateViewport(newControllerState, this._getTransitionProps({around: zoomPosition}), {
       isZooming: true,
       isPanning: true
     });
@@ -958,14 +981,14 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
 
-    this._doubleClickDragAnchor = pos;
+    this._doubleClickDragAnchor = this.getZoomPosition(pos);
     let newControllerState = this.controllerState.zoomStart(
-      {pos},
+      {pos: this._doubleClickDragAnchor},
       this._getConstraintContext('zoom', 'start')
     );
     if (event.scale !== 1) {
       newControllerState = newControllerState.zoom(
-        {pos, scale: event.scale},
+        {pos: this._doubleClickDragAnchor, scale: event.scale},
         this._getConstraintContext('zoom', 'update')
       );
     }

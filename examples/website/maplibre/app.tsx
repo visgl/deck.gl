@@ -7,7 +7,7 @@ import {useState, useCallback, useEffect} from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {Map, useControl, useMap} from 'react-map-gl/maplibre';
 import type {ViewState} from 'react-map-gl/maplibre';
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 
 import {createRoot} from 'react-dom/client';
 import {load} from '@loaders.gl/core';
@@ -162,8 +162,9 @@ export async function renderToDOM(container: HTMLDivElement) {
   const data: DailyFlights[] = [];
   for (const date of dates) {
     const url = `${DATA_URL}/${date}.csv`;
-    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}}))
-      .data as Flight[];
+    const flights: Flight[] = (
+      await load(url, CSVLoader, {csv: {shape: 'object-row-table', skipEmptyLines: true}})
+    ).data as Flight[];
 
     // Join flight data from multiple dates into one continuous animation
     const offset = SEC_PER_DAY * data.length;

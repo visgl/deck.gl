@@ -36,6 +36,7 @@
       "@deck.gl/layers": ["./modules/layers/src"],
       "deck.gl": ["./modules/main/src"],
       "@deck.gl/mapbox": ["./modules/mapbox/src"],
+      "@deck.gl/maplibre": ["./modules/maplibre/src"],
       "@deck.gl/mesh-layers": ["./modules/mesh-layers/src"],
       "@deck.gl/react": ["./modules/react/src"],
       "@deck.gl/test-utils": ["./modules/test-utils/src"],

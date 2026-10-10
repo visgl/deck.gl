@@ -41,6 +41,7 @@ Supports all [Controller options](./controller.md#options) with the following de
 - `normalize` - normalize viewport props to fit map height into viewport. Default `true`
 - `maxBounds` - constrains the viewport to the specified geographic bounding box `[[minLng, minLat], [maxLng, maxLat]]`
 - `maxBoundsPadding` - padding inside the viewport when fitting `maxBounds`, using the same `{left, right, top, bottom}` format as view padding. Numeric values are pixels; strings may be percentages or layout expressions such as `calc(10% - 4px)`. Each side is measured from the projected map center. Default `0`.
+- `rubberBand` (boolean) - allows continuous pan and zoom interactions to temporarily overshoot `maxBounds`, `minZoom`, and `maxZoom` with increasing resistance. On release, the view returns within constraints using a 300 ms exponential ease-out independently of `inertia`. Default `false`.
 - `rotationPivot` (string, optional) - Determines the pivot point used when rotating the map. Default `'center'`. Supported values:
   - `'center'` - Rotate around the center of the viewport.
   - `'2d'` - Rotate around the pointer position projected onto the ground plane (z=0).

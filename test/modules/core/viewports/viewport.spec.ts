@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {vecNormalized} from '../../../utils/utils';
-import {Viewport} from 'deck.gl';
+import {
+  OrthographicViewport,
+  Viewport,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from 'deck.gl';
 import {Matrix4, Vector3} from '@math.gl/core';
 
 /* eslint-disable */
@@ -87,6 +92,55 @@ test('Viewport#equals', () => {
   expect(viewport1a.equals(viewport1b), 'Viewport equality correct').toBeTruthy();
   expect(viewport2a.equals(viewport2b), 'Viewport equality correct').toBeTruthy();
   expect(viewport1a.equals(viewport2a), 'Viewport equality correct').toBeFalsy();
+
+  const globeOptions = {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 1};
+  const globeResolution10a = new GlobeViewport({...globeOptions, resolution: 10});
+  const globeResolution10b = new GlobeViewport({...globeOptions, resolution: 10});
+  const globeResolution5 = new GlobeViewport({...globeOptions, resolution: 5});
+  expect(
+    globeResolution10a.equals(globeResolution10b),
+    'matching globe tessellation resolutions are equal'
+  ).toBeTruthy();
+  expect(
+    globeResolution10a.equals(globeResolution5),
+    'different globe tessellation resolutions are not equal'
+  ).toBeFalsy();
+
+  const orthographicOptions = {width: 800, height: 600, zoomY: 0};
+  const orthographicZoom1a = new OrthographicViewport({...orthographicOptions, zoomX: 1});
+  const orthographicZoom1b = new OrthographicViewport({...orthographicOptions, zoomX: 1});
+  const orthographicZoom2 = new OrthographicViewport({...orthographicOptions, zoomX: 2});
+  expect(
+    orthographicZoom1a.equals(orthographicZoom1b),
+    'matching anisotropic common-space scales are equal'
+  ).toBeTruthy();
+  expect(
+    orthographicZoom1a.equals(orthographicZoom2),
+    'different anisotropic common-space scales are not equal'
+  ).toBeFalsy();
+
+  const webMercatorOptions = {width: 800, height: 600, longitude: 0, latitude: 20, zoom: 10};
+  const currentMeterSizes = new WebMercatorViewport(webMercatorOptions);
+  const legacyMeterSizes = new WebMercatorViewport({
+    ...webMercatorOptions,
+    legacyMeterSizes: true
+  });
+  const matchingLegacyMeterSizes = new WebMercatorViewport({
+    ...webMercatorOptions,
+    legacyMeterSizes: true
+  });
+  expect(
+    currentMeterSizes.equals(legacyMeterSizes),
+    'different meter projection modes are not equal'
+  ).toBeFalsy();
+  expect(
+    legacyMeterSizes.equals(currentMeterSizes),
+    'meter projection equality is symmetric'
+  ).toBeFalsy();
+  expect(
+    legacyMeterSizes.equals(matchingLegacyMeterSizes),
+    'matching legacy meter projection modes are equal'
+  ).toBeTruthy();
 });
 
 test('Viewport.getScales', () => {
@@ -94,10 +148,69 @@ test('Viewport.getScales', () => {
     const viewport = new Viewport(vc.mapState);
     const distanceScales = viewport.getDistanceScales();
     expect(
-      distanceScales.metersPerUnit && distanceScales.unitsPerMeter,
+      distanceScales.unitsPerWorldUnit && distanceScales.unitsPerMeter,
       'distanceScales defined'
     ).toBeTruthy();
+    expect(distanceScales.unitsPerWorldUnit2).toEqual([0, 0, 0]);
+    expect(distanceScales.unitsPerMeter2).toEqual([0, 0, 0]);
   }
+});
+
+test('Viewport normalizes partial distance scales', () => {
+  for (const geospatial of [false, true]) {
+    const options = geospatial ? {longitude: -122, latitude: 38} : {};
+    const defaults = new Viewport({...options, distanceScales: {}}).distanceScales;
+    expect(defaults).toEqual({
+      unitsPerWorldUnit: [1, 1, 1],
+      unitsPerMeter: [1, 1, 1],
+      metersPerUnit: [1, 1, 1],
+      unitsPerWorldUnit2: [0, 0, 0],
+      unitsPerMeter2: [0, 0, 0]
+    });
+    const worldOnly = new Viewport({
+      ...options,
+      distanceScales: {unitsPerWorldUnit: [2, 4, 8]}
+    }).distanceScales;
+    expect(worldOnly.unitsPerMeter).toEqual([2, 4, 8]);
+    expect(worldOnly.metersPerUnit).toEqual([0.5, 0.25, 0.125]);
+    const metersOnly = new Viewport({
+      ...options,
+      distanceScales: {unitsPerMeter: [4, 8, 16]}
+    }).distanceScales;
+    expect(metersOnly.unitsPerWorldUnit).toEqual([1, 1, 1]);
+    expect(metersOnly.metersPerUnit).toEqual([0.25, 0.125, 0.0625]);
+    const supplied = Object.freeze({
+      unitsPerWorldUnit: [2, 4, 8] as [number, number, number],
+      unitsPerMeter: [4, 8, 16] as [number, number, number],
+      metersPerUnit: [99, 99, 99] as [number, number, number],
+      unitsPerWorldUnit2: [1, 2, 3] as [number, number, number],
+      unitsPerMeter2: [4, 5, 6] as [number, number, number]
+    });
+    const scales = new Viewport({...options, distanceScales: supplied}).distanceScales;
+    expect(scales).toEqual({...supplied, metersPerUnit: [0.25, 0.125, 0.0625]});
+    expect(supplied.metersPerUnit).toEqual([99, 99, 99]);
+  }
+  expect(new Viewport().distanceScales.metersPerUnit).toEqual([1, 1, 1]);
+});
+
+test('Viewport uses position scales independently of ground-meter scales', () => {
+  const viewport = new Viewport({
+    width: 800,
+    height: 600,
+    zoom: 2,
+    distanceScales: {
+      unitsPerWorldUnit: [1, 1, 3],
+      unitsPerMeter: [2, 2, 6],
+      unitsPerWorldUnit2: [0, 0, 0],
+      unitsPerMeter2: [0, 0, 0]
+    }
+  });
+  expect(viewport.projectPosition([4, 5, 7])).toEqual([4, 5, 21]);
+  expect(viewport.unprojectPosition([4, 5, 21])).toEqual([4, 5, 7]);
+  expect(viewport.metersPerPixel).toBeCloseTo(1 / 24);
+  const pixel = viewport.project([4, 5, 7]);
+  const world = viewport.unproject(pixel.slice(0, 2), {targetZ: 7});
+  world.forEach((value, i) => expect(value).toBeCloseTo([4, 5, 7][i]));
 });
 
 test('Viewport.containsPixel', () => {

@@ -10,9 +10,11 @@ import App from 'website-examples/scenegraph/app';
 import {makeExample} from '../components';
 
 class ScenegraphDemo extends Component {
-  static title = 'Realtime Flight Tracker';
+  static title = 'Flight Tracker';
 
   static code = `${GITHUB_TREE}/examples/website/scenegraph`;
+
+  static hasDeviceTabs = true;
 
   static parameters = {
     sizeScale: {displayName: 'Size', type: 'range', value: 25, step: 5, min: 5, max: 500}
@@ -24,7 +26,7 @@ class ScenegraphDemo extends Component {
     return (
       <div>
         <p>
-          Data source:
+          Flight data:
           <a href="https://opensky-network.org">The OpenSky Network</a>
         </p>
         <div className="layout">
@@ -42,6 +44,7 @@ class ScenegraphDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
         sizeScale={params.sizeScale.value}
         onDataLoad={count => this.props.onStateChange({count})}
       />

@@ -77,8 +77,19 @@ function getGeometry(data: Mesh): Geometry {
     data.attributes = normalizeGeometryAttributes(data.attributes);
     return data;
   } else if ((data as any).attributes) {
+    const {indices} = data as {indices?: MeshAttribute};
+    // loaders.gl's Arrow mesh format uses signed indices; GPU index buffers require unsigned.
+    const indexValues = indices?.value;
+    const normalizedIndices =
+      indexValues instanceof Int32Array
+        ? {
+            ...indices,
+            value: new Uint32Array(indexValues.buffer, indexValues.byteOffset, indexValues.length)
+          }
+        : indices;
     return new Geometry({
       ...data,
+      indices: normalizedIndices,
       topology: 'triangle-list',
       attributes: normalizeGeometryAttributes((data as any).attributes)
     });
@@ -256,6 +267,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         size: 3,
         accessor: 'getPosition'
       },
