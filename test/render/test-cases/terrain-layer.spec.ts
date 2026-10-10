@@ -6,6 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
+import {_GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -88,6 +89,44 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
+  },
+  {
+    // GlobeView twin of the case above (same viewState; zoom 11.5 stays below GlobeView's zoom-12
+    // handoff to WebMercatorViewport), fills only. TerrainLayer switches its tile meshes to LNGLAT
+    // under GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
+    // globe -> Mercator inverse, so the draped fills follow the terrain on the globe.
+    // The stroke is left out on purpose: a draped PathLayer on GlobeView is re-tessellated twice
+    // per frame (Layer.activateViewport -> PathLayer.shouldUpdateState sees viewport.resolution /
+    // projectionMode flip between the Mercator terrain-cover pass and the globe screen pass),
+    // which flags needsRedraw every frame and starves the screenshot. Add `stroked` back once
+    // that is fixed.
+    name: 'terrain-extension-drape-fill-globe',
+    skip: ['webgpu'],
+    views: new GlobeView(),
+    viewState: {
+      longitude: -122.45,
+      latitude: 37.75,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new TerrainLayer({
+        elevationData: ELEVATION_DATA,
+        texture: TEXTURE,
+        elevationDecoder: DECODER,
+        operation: 'draw+terrain'
+      }),
+      new GeoJsonLayer({
+        data: choropleths,
+        stroked: false,
+        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
+        extensions: [new TerrainExtension()]
+      })
+    ],
+    onAfterRender: waitAfterDefaultCompletion(500),
+    imageDiffOptions: {threshold: 0.985},
+    goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
   },
   {
     name: 'terrain-extension-offset',

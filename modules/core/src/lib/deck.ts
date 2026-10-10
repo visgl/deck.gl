@@ -246,7 +246,7 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Callback that takes a hovered-over point and renders a tooltip. */
   getTooltip?: ((info: PickingInfo) => TooltipContent) | null;
 
-  /** (Debug) Flag to enable WebGL debug mode. Requires importing `@luma.gl/debug`. */
+  /** (Debug) Flag to enable WebGL debug mode. Requires importing `@luma.gl/webgl/debug`. */
   debug?: boolean;
   /** (Debug) Render the picking buffer to screen. */
   drawPickingColors?: boolean;
@@ -1668,6 +1668,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       getCanvasContext: this._isMultiCanvasMode() ? this.getCanvasContext.bind(this) : undefined,
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
+      onViewRemoved: viewId => this.layerManager?.projectionScaleResources.delete(viewId),
       pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
