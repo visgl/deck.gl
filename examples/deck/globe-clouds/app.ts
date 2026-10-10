@@ -169,6 +169,8 @@ export function createGlobeCloudScene(
     },
     setAnimate(value: boolean) {
       settings.animate = value;
+      lastTimestamp = 0;
+      deck.setProps({_animate: value});
     },
     setCover(value: number) {
       settings.cover = value;

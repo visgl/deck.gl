@@ -361,6 +361,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
       time = value;
       fogTime = value * fogSpeed;
       previousTime = 0;
+      updateLayers();
       deck.redraw('weather time changed');
     },
     setPlaying(value: boolean) {
@@ -374,6 +375,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
       time = 0;
       fogTime = 0;
       previousTime = 0;
+      updateLayers();
       deck.redraw('reset weather');
     },
     finalize() {

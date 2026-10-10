@@ -195,7 +195,7 @@ export function createRiverfrontSoftShadowScene(
         cloudSettings.time += Math.min(now - lastFrameTime, 1000) / 1000;
       }
       lastFrameTime = now;
-      deck.setProps({layers: getLayers()});
+      if (shouldAnimate()) deck.setProps({layers: getLayers()});
     },
     onAfterRender: () => {
       diagnostics.frames++;
@@ -236,6 +236,7 @@ export function createRiverfrontSoftShadowScene(
     },
     setCloudShadows(enabled: boolean): void {
       cloudSettings.shadows = enabled;
+      deck.setProps({layers: getLayers()});
       deck.redraw('cloud shadows');
     },
     setAtmosphere(enabled: boolean): void {
@@ -256,14 +257,17 @@ export function createRiverfrontSoftShadowScene(
     },
     setCloudCover(value: number): void {
       cloudSettings.cover = value;
+      deck.setProps({layers: getLayers()});
       deck.redraw('cloud cover');
     },
     setWindSpeed(value: number): void {
       cloudSettings.windSpeed = value;
+      deck.setProps({layers: getLayers()});
       deck.redraw('cloud wind');
     },
     setWindDirection(value: number): void {
       cloudSettings.windDirection = value;
+      deck.setProps({layers: getLayers()});
       deck.redraw('cloud wind direction');
     },
     setSkyBody(body: 'sun' | 'moon', visible: boolean): void {
@@ -308,6 +312,7 @@ export function createRiverfrontSoftShadowScene(
     },
     setHour(hour: number): void {
       settings.hour = Math.max(FIRST_HOUR, Math.min(LAST_HOUR, hour));
+      deck.setProps({layers: getLayers()});
       deck.redraw('sun time');
     },
     setAnimated(enabled: boolean): void {
@@ -318,10 +323,12 @@ export function createRiverfrontSoftShadowScene(
     },
     setShadows(enabled: boolean): void {
       settings.enabled = enabled;
+      deck.setProps({layers: getLayers()});
       deck.redraw('shadow toggle');
     },
     setSoftness(value: number): void {
       settings.softness = value;
+      deck.setProps({layers: getLayers()});
       deck.redraw('shadow softness');
     },
     setSpeed(value: number): void {
@@ -329,6 +336,7 @@ export function createRiverfrontSoftShadowScene(
     },
     setQuality(value: ShadowSettings['quality']): void {
       settings.quality = value;
+      deck.setProps({layers: getLayers()});
       deck.redraw('shadow quality');
     },
     finalize(): void {
