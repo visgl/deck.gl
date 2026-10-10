@@ -32,10 +32,16 @@ const cartoData = vectorTableSource({
 /* eslint-disable react/no-deprecated */
 export default function App() {
   const [collisionEnabled, setCollisionEnabled] = useState(true);
+  const [collisionGreedy, setCollisionGreedy] = useState(false);
   const [maskEnabled, setMaskEnabled] = useState(false);
   const [showCarto, setShowCarto] = useState(false);
   const [showPoints, setShowPoints] = useState(true);
   const [showLabels, setShowLabels] = useState(false);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [textAnchor, setTextAnchor] = useState('middle');
+  const [alignmentBaseline, setAlignmentBaseline] = useState('center');
+  const [textCollisionScale, setTextCollisionScale] = useState(1);
   const [selectedCounty, selectCounty] = useState(null);
 
   const props = {
@@ -151,14 +157,18 @@ export default function App() {
         getColor: [0, 155, 0],
         getSize: 24,
         getPosition: f => f.geometry.coordinates,
+        getTextAnchor: textAnchor,
+        getAlignmentBaseline: alignmentBaseline,
+        getPixelOffset: [offsetX, offsetY],
         ...props,
 
         extensions: [new CollisionFilterExtension(), new MaskExtension()],
         getCollisionPriority: d => -d.properties.scalerank,
         collisionEnabled,
+        collisionGreedy,
         collisionGroup: 'labels',
         collisionTestProps: {
-          sizeScale: 2 // Enlarge text to increase hit area
+          sizeScale: textCollisionScale
         },
         ...maskProps
       })
@@ -198,6 +208,81 @@ export default function App() {
           <input type="checkbox" checked={showLabels} onChange={() => setShowLabels(!showLabels)} />
           Show labels
         </label>
+        {showLabels && (
+          <>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={collisionGreedy}
+                  onChange={event => setCollisionGreedy(event.target.checked)}
+                />
+                Greedy placement
+              </label>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <label htmlFor="text-collision-scale" style={{whiteSpace: 'nowrap'}}>
+                Collision scale
+              </label>
+              <input
+                id="text-collision-scale"
+                style={{width: 180}}
+                type="range"
+                min="1"
+                max="3"
+                step="0.1"
+                value={textCollisionScale}
+                onChange={event => setTextCollisionScale(Number(event.target.value))}
+              />
+              <span style={{width: 40, textAlign: 'right'}}>{textCollisionScale.toFixed(1)}×</span>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{width: 72, whiteSpace: 'nowrap'}}>Anchor</span>
+              <select value={textAnchor} onChange={event => setTextAnchor(event.target.value)}>
+                <option value="start">start</option>
+                <option value="middle">middle</option>
+                <option value="end">end</option>
+              </select>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{width: 72, whiteSpace: 'nowrap'}}>Baseline</span>
+              <select
+                value={alignmentBaseline}
+                onChange={event => setAlignmentBaseline(event.target.value)}
+              >
+                <option value="top">top</option>
+                <option value="center">center</option>
+                <option value="bottom">bottom</option>
+              </select>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{width: 72, whiteSpace: 'nowrap'}}>Offset X</span>
+              <input
+                style={{width: 180}}
+                type="range"
+                min="-200"
+                max="200"
+                step="1"
+                value={offsetX}
+                onChange={event => setOffsetX(Number(event.target.value))}
+              />
+              <span style={{width: 40, textAlign: 'right'}}>{offsetX}</span>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <span style={{width: 72, whiteSpace: 'nowrap'}}>Offset Y</span>
+              <input
+                style={{width: 180}}
+                type="range"
+                min="-200"
+                max="200"
+                step="1"
+                value={offsetY}
+                onChange={event => setOffsetY(Number(event.target.value))}
+              />
+              <span style={{width: 40, textAlign: 'right'}}>{offsetY}</span>
+            </div>
+          </>
+        )}
       </div>
     </>
   );
