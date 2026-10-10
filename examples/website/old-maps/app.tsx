@@ -155,7 +155,7 @@ export default function App({
   mapId = OLD_MAPS[0].id,
   autoplay = true,
   opacity = 1,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+  mapStyle = `${DATA_URL}/style.json`,
   onMapChange
 }: {
   device?: Device;

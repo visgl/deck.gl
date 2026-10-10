@@ -23,4 +23,4 @@ the [documentation of BitmapLayer](../../../docs/api-reference/layers/bitmap-lay
 
 ### Basemap
 
-The basemap in this example is provided by [CARTO free basemap service](https://carto.com/basemaps). To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)
+The basemap in this example is a sepia recolouring of [OpenFreeMap](https://openfreemap.org)'s Positron style, hosted in [deck.gl-data](https://github.com/visgl/deck.gl-data/tree/master/examples/old-maps). Its tiles are served by OpenFreeMap, which needs no API key. To use an alternative base map solution, visit [this guide](https://deck.gl/docs/get-started/using-with-map#using-other-basemap-services)
