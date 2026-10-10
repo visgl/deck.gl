@@ -11,7 +11,7 @@ import type {MapViewState} from '@deck.gl/core';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
 
-// Set your mapbox token here
+// Set your Mapbox token for satellite imagery here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -23,16 +23,15 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxPitch: 89
 };
 
-const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
+const TERRAIN_IMAGE = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp';
 const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
 
-// https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
-// Note - the elevation rendered by this example is greatly exagerated!
+// Mapterhorn uses Terrarium encoding: https://mapterhorn.com/data-access/
 const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
-  rScaler: 6553.6,
-  gScaler: 25.6,
-  bScaler: 0.1,
-  offset: -10000
+  rScaler: 256,
+  gScaler: 1,
+  bScaler: 1 / 256,
+  offset: -32768
 };
 
 export default function App({
@@ -78,6 +77,7 @@ export default function App({
     refinementStrategy: 'best-available',
     elevationDecoder: ELEVATION_DECODER,
     elevationData: TERRAIN_IMAGE,
+    tileSize: 512,
     texture,
     wireframe,
     zoomOffset,
@@ -101,7 +101,15 @@ export default function App({
         }
         return null;
       }}
-    />
+    >
+      <div
+        style={{position: 'absolute', bottom: 0, right: 0, background: 'white', padding: '2px 6px'}}
+      >
+        <a href="https://mapterhorn.com/attribution" target="_blank" rel="noreferrer">
+          © Mapterhorn
+        </a>
+      </div>
+    </DeckGL>
   );
 }
 

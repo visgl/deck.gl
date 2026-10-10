@@ -5,7 +5,7 @@ on [deck.gl](http://deck.gl) website.
 
 Copy the content of this folder to your project. 
 
-To load the terrain tiles, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:	
+Elevation tiles from Mapterhorn require no access token. To load the satellite imagery, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
 
 ```bash	
 export MapboxAccessToken=<mapbox_access_token>	
@@ -24,7 +24,7 @@ npm start
 
 ### Data format
 
-Mapbox's [terrain API](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb) encodes elevation data in raster tiles.
+[Mapterhorn](https://mapterhorn.com/data-access/) supplies 512-pixel WebP elevation tiles in Terrarium encoding. The decoder converts RGB values to meters as `R * 256 + G + B / 256 - 32768`. Credit [Mapterhorn and its data sources](https://mapterhorn.com/attribution/) when using these tiles.
 
 To use other data sources, check out
 the [documentation of TerrainLayer](../../../docs/api-reference/geo-layers/terrain-layer.md).

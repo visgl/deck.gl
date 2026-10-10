@@ -29,15 +29,16 @@ const layers = [
   new TerrainLayer({
       id: 'terrain',
       minZoom: 0,
-      maxZoom: 23,
+      maxZoom: 17,
       strategy: 'no-overlap',
       elevationDecoder: {
-        rScaler: 6553.6,
-        gScaler: 25.6,
-        bScaler: 0.1,
-        offset: -10000
+        rScaler: 256,
+        gScaler: 1,
+        bScaler: 1 / 256,
+        offset: -32768
       },
-      elevationData: `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`,
+      elevationData: 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',
+      tileSize: 512,
       texture: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
       operation: 'terrain+draw'
     }),
@@ -51,6 +52,8 @@ const layers = [
     })
 ];
 ```
+
+Elevation uses token-free [Mapterhorn](https://mapterhorn.com/data-access/) tiles. Display [Mapterhorn attribution](https://mapterhorn.com/attribution/) in your application. The satellite texture still requires a Mapbox access token.
 
 ## Installation
 

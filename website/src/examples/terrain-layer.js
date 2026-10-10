@@ -129,15 +129,12 @@ class TerrainDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <p>Reconstructed 3D terrain from mapbox's Elevation service.</p>
+        <p>Reconstructed 3D terrain from Mapterhorn elevation tiles.</p>
         <p>
           Data sources:
           <div>
-            Mapbox{' '}
-            <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/">
-              Terrain-RGB
-            </a>{' '}
-            and <a href="https://www.mapbox.com/maps/satellite/">Satellite</a>
+            <a href="https://mapterhorn.com/attribution">Mapterhorn</a> and{' '}
+            <a href="https://www.mapbox.com/maps/satellite/">Mapbox Satellite</a>
           </div>
           <div>
             <a href="http://www.chartbundle.com/charts/">Chartbundle US Sectional</a>
