@@ -3,12 +3,19 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView} from '@deck.gl/core';
-import {ArrowPathLayer} from '@deck.gl-community/arrow-layers';
+import {ArrowPathLayer, type ArrowPathLayerProps} from '@deck.gl-community/arrow-layers';
 import {ArrowDeck} from '../arrow-deck';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {getArrowLayerTooltip} from '../arrow-layer-tooltip';
 import {ArrowPathDataSource, type ArrowPathDataSourceUpdate} from './arrow-path-data-source';
 import {MEASURE_SWEEP_DURATION} from '../../arrow/arrow-lines/arrow-line-data';
+
+const PATH_COLOR: ArrowPathLayerProps['color'] = [199, 219, 245, 235];
+const PATH_COLOR_COLUMN: ArrowPathLayerProps['color'] = {
+  source: 'colors',
+  nullValue: [199, 219, 245, 235]
+};
+const PATH_WIDTH_COLUMN: ArrowPathLayerProps['width'] = {source: 'widths', nullValue: 0.0035};
 
 /** Creates the standalone or website-hosted Deck path-layer example. */
 export function createArrowPathLayerDeck(
@@ -65,10 +72,8 @@ function setPathLayer(
         model: dataSource.model ?? 'auto',
         data: dataSource.asyncIterator,
         paths: 'paths',
-        color: dataSource.colorColumn
-          ? {source: 'colors', nullValue: [199, 219, 245, 235]}
-          : [199, 219, 245, 235],
-        width: dataSource.widthColumn ? {source: 'widths', nullValue: 0.0035} : 0.0035,
+        color: dataSource.colorColumn ? PATH_COLOR_COLUMN : PATH_COLOR,
+        width: dataSource.widthColumn ? PATH_WIDTH_COLUMN : 0.0035,
         currentTime,
         trailLength: dataSource.trailLength,
         temporalEnabled: dataSource.temporalEnabled,

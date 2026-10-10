@@ -332,6 +332,7 @@ export class ArrowLineRenderer extends GPURenderable<
     });
   }
 
+  /** Updates timing and fallback styling without replacing prepared path data. */
   setProps(props: Partial<ArrowLineRendererProps>): ArrowLineRendererSetPropsResult {
     const nextProps = {...this.props, ...props};
     const nextModel = this.resolveModel(nextProps.model ?? 'auto', nextProps.timeColumn ?? 'xyzm');
@@ -345,16 +346,25 @@ export class ArrowLineRenderer extends GPURenderable<
       nextModel !== this.resolvedModel;
     this.props = nextProps;
 
-    if (props.currentTime !== undefined && this.model instanceof PathTripsStorageModel) {
-      this.model.setProps({currentTime: props.currentTime});
+    if (dataDependentChanged) {
+      this.replaceData(nextProps, hasDataProp);
+      return {modelChanged: true};
     }
 
-    if (!dataDependentChanged) {
-      return {modelChanged: false};
+    if (this.model instanceof PathTripsStorageModel) {
+      this.model.setProps({
+        ...(props.currentTime !== undefined ? {currentTime: props.currentTime} : {}),
+        ...(props.trailLength !== undefined ? {trailLength: props.trailLength} : {}),
+        ...(props.color !== undefined ? {color: props.color} : {}),
+        ...(props.width !== undefined ? {width: props.width} : {})
+      });
+    } else if (this.model instanceof PathStorageModel) {
+      this.model.setProps({
+        ...(props.color !== undefined ? {color: props.color} : {}),
+        ...(props.width !== undefined ? {width: props.width} : {})
+      });
     }
-
-    this.replaceData(nextProps, hasDataProp);
-    return {modelChanged: true};
+    return {modelChanged: false};
   }
 
   override needsRedraw(): false | string {
@@ -622,33 +632,38 @@ export async function convertArrowLineColumnsToGPUVectors(
         id: `${id}-timestamps`
       })
     : null;
-  const prepared = await convertArrowPathsToAttribute(
-    device,
-    {
-      paths: sourceVectors.paths,
-      ...(sourceVectors.colors ? {colors: sourceVectors.colors} : {}),
-      ...(sourceVectors.widths ? {widths: sourceVectors.widths} : {})
-    },
-    {
-      id,
-      rowIndexBase: options.rowIndexOffset
-    }
-  );
+  try {
+    const prepared = await convertArrowPathsToAttribute(
+      device,
+      {
+        paths: sourceVectors.paths,
+        ...(sourceVectors.colors ? {colors: sourceVectors.colors} : {}),
+        ...(sourceVectors.widths ? {widths: sourceVectors.widths} : {})
+      },
+      {
+        id,
+        rowIndexBase: options.rowIndexOffset
+      }
+    );
 
-  return {
-    model: 'attribute',
-    paths: prepared.paths,
-    ...(prepared.colors ? {colors: prepared.colors} : {}),
-    ...(prepared.widths ? {widths: prepared.widths} : {}),
-    ...(preparedTimestamps ? {timestamps: preparedTimestamps.temporal} : {}),
-    ...(prepared.viewOrigins ? {viewOrigins: prepared.viewOrigins} : {}),
-    pathState: prepared.pathState,
-    rowIndexOffset: options.rowIndexOffset ?? 0,
-    destroy: () => {
-      prepared.destroy();
-      preparedTimestamps?.destroy();
-    }
-  };
+    return {
+      model: 'attribute',
+      paths: prepared.paths,
+      ...(prepared.colors ? {colors: prepared.colors} : {}),
+      ...(prepared.widths ? {widths: prepared.widths} : {}),
+      ...(preparedTimestamps ? {timestamps: preparedTimestamps.temporal} : {}),
+      ...(prepared.viewOrigins ? {viewOrigins: prepared.viewOrigins} : {}),
+      pathState: prepared.pathState,
+      rowIndexOffset: options.rowIndexOffset ?? 0,
+      destroy: () => {
+        prepared.destroy();
+        preparedTimestamps?.destroy();
+      }
+    };
+  } catch (error) {
+    preparedTimestamps?.destroy();
+    throw error;
+  }
 }
 
 /** Prepares generated Arrow path source data into the renderer input used by the example. */
