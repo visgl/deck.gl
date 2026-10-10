@@ -1,7 +1,11 @@
 <!doctype html>
 <script type="module">
   import {createArrowTextLayerDeck} from './app.ts';
+  import {resolveDeckExampleDeviceType} from '../deck-example-device.ts';
   const deviceSelect = document.querySelector('#deck-device');
+  deviceSelect.value = await resolveDeckExampleDeviceType(
+    new URLSearchParams(location.search).get('backend')
+  );
   let example = createArrowTextLayerDeck(undefined, {deviceType: deviceSelect.value});
   deviceSelect.addEventListener('change', () => {
     example.finalize();
