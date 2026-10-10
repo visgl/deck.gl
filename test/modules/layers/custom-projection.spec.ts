@@ -19,6 +19,7 @@ import {
 } from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
+import {Timeline} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 const projection = {forward: p => p, inverse: p => p};
@@ -741,6 +742,79 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
           if (tolerance) expect(transform).toBeTypeOf('function');
           else expect(transform).toBeNull();
         }
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} toggles refinement on source attributes during transitions`, () => {
+    const timeline = new Timeline();
+    const manager = new LayerManager(device, {
+      viewport: new CustomProjectionViewport(options),
+      timeline
+    });
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    let layer = new LayerType({
+      id: 'refinement-during-transition',
+      data: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1]
+        ]
+      ],
+      getPath: p => p,
+      getPolygon: p => p,
+      getColor: () => [12, 34, 56, 255],
+      getFillColor: () => [12, 34, 56, 255],
+      getLineColor: () => [12, 34, 56, 255],
+      getWidth: () => 2,
+      getElevation: () => 3,
+      transitions: {
+        getColor: 1000,
+        getFillColor: 1000,
+        getLineColor: 1000,
+        getWidth: 1000,
+        getElevation: 1000
+      },
+      _projectionTolerance: 0
+    });
+    const names =
+      LayerType === PathLayer
+        ? ['instanceColors', 'instanceStrokeWidths']
+        : ['fillColors', 'lineColors', 'elevations'];
+    try {
+      timeline.setTime(0);
+      manager.setLayers([layer]);
+      for (const tolerance of [0.1, 0]) {
+        const attributeManager = layer.getAttributeManager()!;
+        for (const name of names) {
+          expect(attributeManager.getAttributes()[name]).not.toBe(
+            attributeManager.attributes[name]
+          );
+        }
+        layer = layer.clone({_projectionTolerance: tolerance});
+        manager.setLayers([layer]);
+        for (const name of names) {
+          const transform = layer.getAttributeManager()!.attributes[name].settings.transform;
+          if (tolerance) expect(transform).toBeTypeOf('function');
+          else expect(transform).toBeNull();
+        }
+      }
+      const attributeManager = layer.getAttributeManager()!;
+      attributeManager.updateTransition();
+      timeline.setTime(2000);
+      attributeManager.updateTransition();
+      for (const name of names) {
+        expect(attributeManager.getAttributes()[name]).toBe(attributeManager.attributes[name]);
+        expect(attributeManager.attributes[name].settings.transform).toBeNull();
       }
     } finally {
       manager.finalize();

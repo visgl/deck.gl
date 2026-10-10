@@ -373,7 +373,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const attributeManager = this.getAttributeManager();
     // An inactive transform still forces CPU conversion of binary attributes.
     // Attach refinement validators only while refinement is enabled.
-    const attributes = attributeManager!.getAttributes();
+    // Transition attributes have separate settings; update the source descriptors.
+    const attributes = attributeManager!.attributes;
     attributes.instanceStrokeWidths.settings.transform = props._projectionTolerance
       ? transformRefinedWidth
       : null;

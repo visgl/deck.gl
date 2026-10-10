@@ -347,7 +347,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const attributeManager = this.getAttributeManager();
     // An inactive transform still forces CPU conversion of binary attributes.
     // Attach refinement validators only while refinement is enabled.
-    const attributes = attributeManager!.getAttributes();
+    // Transition attributes have separate settings; update the source descriptors.
+    const attributes = attributeManager!.attributes;
     attributes.elevations.settings.transform = props._projectionTolerance
       ? transformRefinedElevation
       : null;
