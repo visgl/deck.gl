@@ -208,6 +208,7 @@ export type {
   TextureSource,
   PickingInfo,
   GetPickingInfoParams,
+  TooltipContent,
   BinaryAttribute,
   Effect
 } from '@deck.gl/core';
