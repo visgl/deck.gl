@@ -105,8 +105,13 @@ try {
       ]) {
         await page.evaluate(
           ({longitude, latitude}) =>
-            window.globeCloudScene.deck.setProps({
-              initialViewState: {longitude, latitude, zoom: 1.4}
+            window.globeCloudScene.deck.props.onViewStateChange({
+              viewState: {
+                ...window.globeCloudScene.deck.props.viewState,
+                longitude,
+                latitude,
+                zoom: 1.4
+              }
             }),
           {longitude, latitude}
         );

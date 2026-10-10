@@ -410,8 +410,8 @@ try {
           );
           const longitude = scene.deck.getViewports()[0].longitude + 0.000005;
           const before = {frames: effect.frameCount, budget: effect.settlingFrameCount, longitude};
-          scene.deck.setProps({
-            initialViewState: {...scene.deck.props.initialViewState, longitude}
+          scene.deck.props.onViewStateChange({
+            viewState: {...scene.deck.props.viewState, longitude}
           });
           return before;
         });
