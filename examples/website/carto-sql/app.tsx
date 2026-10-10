@@ -7,10 +7,10 @@ import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
-import {LinearInterpolator, PickingInfo} from '@deck.gl/core';
+import {LinearInterpolator} from '@deck.gl/core';
+import type {PickingInfo, TooltipContent} from '@deck.gl/core';
 import {colorBins, H3TileLayer} from '@deck.gl/carto';
 import {h3QuerySource} from '@carto/api-client';
-import {TooltipContent} from '@deck.gl/core/dist/lib/tooltip';
 
 const INITIAL_VIEW_STATE = {
   latitude: 35.7368521,
