@@ -64,8 +64,9 @@ try {
         for (let frame = 0; frame < 3; frame++) {
           const frames = await page.evaluate(() => {
             const scene = window.globeCloudScene;
+            const previousFrames = scene.diagnostics.frames;
             scene.deck.redraw('visual screenshot');
-            return scene.diagnostics.frames;
+            return previousFrames;
           });
           await page.waitForFunction(
             previous => window.globeCloudScene.diagnostics.frames > previous,
