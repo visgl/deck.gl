@@ -165,9 +165,11 @@ Inherits from all [Base Layer](../core/layer.md), [CompositeLayer](../core/compo
 
 ### Data Accessors
 
-#### `getHexagons` ([Accessor&lt;string[]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagons}
+#### `getHexagons` ([Accessor&lt;string[] | [number, number][]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagons}
 
 Method called to retrieve the hexagon cluster from each object, as an array of [H3](https://h3geo.org/) hexagon indices. These hexagons are joined into polygons that represent the geospatial outline of the cluster.
+
+Each index can be a hexadecimal string or a split long, see [`H3HexagonLayer`](./h3-hexagon-layer.md#gethexagon).
 
 
 ## Sub Layers

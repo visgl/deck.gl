@@ -191,11 +191,13 @@ Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is render
 
 ### Data Accessors
 
-#### `getHexagon` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagon}
+#### `getHexagon` ([Accessor&lt;string | [number, number]&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gethexagon}
 
 * Default: `object => object.hexagon`
 
 Method called to retrieve the [H3](https://h3geo.org/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://h3geo.org/docs/core-library/restable).
+
+The index can be a hexadecimal string, e.g. `'882830829bfffff'`, or a split long: an array of the lower and upper 32 bits of the 64-bit index, e.g. `[0x29bfffff, 0x8828308]`. See [`H3IndexInput`](https://github.com/uber/h3-js#h3h3indexinput--string--arraynumber) in h3-js. Split longs avoid creating a string for every cell, for example when the indices come from two `Uint32Array` columns of an Apache Arrow table.
 
 
 ## Sub Layers

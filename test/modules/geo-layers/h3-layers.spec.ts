@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
+import {cellToBoundary, cellToLatLng, gridDisk, compactCells, h3IndexToSplitLong} from 'h3-js';
 import {
   _count as count,
   WebMercatorViewport,
@@ -242,6 +242,40 @@ test('H3HexagonLayer#_shouldUseHighPrecision', () => {
       }
     ]
   });
+});
+
+test('H3HexagonLayer#split long indices', () => {
+  const hexagons = gridDisk('882830829bfffff', 2);
+  const splitLongs = hexagons.map(hexagon => h3IndexToSplitLong(hexagon));
+
+  for (const highPrecision of [false, true]) {
+    const [fromStrings, fromSplitLongs] = [hexagons, splitLongs].map(data => {
+      let result;
+      testLayer({
+        Layer: H3HexagonLayer,
+        onError: err => expect(err).toBeFalsy(),
+        testCases: [
+          {
+            props: {data, getHexagon: d => d, highPrecision},
+            onAfterUpdate({layer, subLayer}) {
+              const getGeometry = highPrecision
+                ? subLayer.props.getPolygon
+                : subLayer.props.getPosition;
+              result = {
+                subLayer: subLayer.constructor.layerName,
+                resolution: layer.state.resolution,
+                vertices: layer.state.vertices,
+                geometry: data.map((d, index) => getGeometry(d, {index, data, target: []}))
+              };
+            }
+          }
+        ]
+      });
+      return result;
+    });
+
+    expect(fromSplitLongs, `highPrecision: ${highPrecision}`).toEqual(fromStrings);
+  }
 });
 
 test('H3HexagonLayer#viewportUpdate', () => {

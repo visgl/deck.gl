@@ -9,7 +9,8 @@ import {
   isPentagon,
   gridDistance,
   getHexagonEdgeLengthAvg,
-  H3Index
+  H3Index,
+  H3IndexInput
 } from 'h3-js';
 import {
   AccessorFunction,
@@ -71,11 +72,12 @@ type _H3HexagonLayerProps<DataT> = {
    */
   centerHexagon?: H3Index | null;
   /**
-   * Called for each data object to retrieve the quadkey string identifier.
+   * Called for each data object to retrieve the H3 index, either as a hexadecimal string or as a
+   * split long (`[lower, upper]` 32-bit halves).
    *
    * By default, it reads `hexagon` property of data object.
    */
-  getHexagon?: AccessorFunction<DataT, string>;
+  getHexagon?: AccessorFunction<DataT, H3IndexInput>;
   /**
    * Whether to extrude polygons.
    * @default true
