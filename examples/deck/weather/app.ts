@@ -78,6 +78,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
     parent.clientWidth,
     parent.clientHeight
   );
+  let viewState: MapViewState = initialViewState;
   const deck = new Deck<MapView | _GlobeView>({
     parent,
     ...deviceProps,
@@ -87,9 +88,15 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
       webgl: {alpha: true}
     },
     views: new MapView({controller: true, fovy: SKY_FIELD_OF_VIEW}),
-    initialViewState,
-    onViewStateChange: ({viewState}) =>
-      getSkyCameraState(viewState, parent.clientWidth, parent.clientHeight),
+    viewState,
+    onViewStateChange: ({viewState: nextViewState}) => {
+      viewState = getSkyCameraState(nextViewState, parent.clientWidth, parent.clientHeight);
+      deck.setProps({viewState});
+    },
+    onResize: ({width, height}) => {
+      viewState = getSkyCameraState(viewState, width, height);
+      deck.setProps({viewState});
+    },
     layers: [],
     _animate: isWeatherAnimating(),
     onDeviceInitialized: device => {
@@ -263,7 +270,8 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
       updateLayers();
     },
     centerView() {
-      deck.setProps({initialViewState: {...initialViewState}});
+      viewState = getSkyCameraState(initialViewState, parent.clientWidth, parent.clientHeight);
+      deck.setProps({viewState});
     },
     lookAtBody(body: 'sun' | 'moon') {
       const getDirection = (value: number) => {
@@ -281,7 +289,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
             value => getDirection(value)[2] > 0.08
           ) ?? DEFAULT_HOUR;
       const direction = getDirection(hour);
-      const viewState = getSkyCameraState(
+      viewState = getSkyCameraState(
         {
           ...initialViewState,
           pitch: 90 + (Math.asin(direction[2]) * 180) / Math.PI,
@@ -290,7 +298,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
         parent.clientWidth,
         parent.clientHeight
       );
-      deck.setProps({initialViewState: viewState});
+      deck.setProps({viewState});
       updateLayers();
     },
     setSurfaceEnabled(value: boolean) {

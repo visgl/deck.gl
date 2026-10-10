@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, Deck, MapView, type MapViewState} from '@deck.gl/core';
 import {Buffer} from '@luma.gl/core';
 import {WebGPUDevice} from '@luma.gl/webgpu';
 import {
@@ -154,6 +154,7 @@ export function createRiverfrontLightingScene(
     kind === 'light-shafts'
       ? getSkyCameraState(initialCamera, parent.clientWidth, parent.clientHeight)
       : initialCamera;
+  let viewState: MapViewState = initialViewState;
   const capture = new SceneBufferEffect({
     id: `${kind}-capture`,
     motionVectors: true,
@@ -222,7 +223,7 @@ export function createRiverfrontLightingScene(
       controller: true,
       ...(kind === 'light-shafts' ? {fovy: SKY_FIELD_OF_VIEW} : {})
     }),
-    initialViewState,
+    viewState,
     layers: [],
     effects: [],
     _animate: true,
@@ -297,8 +298,20 @@ export function createRiverfrontLightingScene(
       settlingFrames = Math.max(0, settlingFrames - 1);
       deck.setProps({_animate: settings.animate || settlingFrames > 0});
     },
-    onViewStateChange: () => {
+    onViewStateChange: ({viewState: nextViewState}) => {
+      viewState =
+        kind === 'light-shafts'
+          ? getSkyCameraState(nextViewState, parent.clientWidth, parent.clientHeight)
+          : nextViewState;
+      deck.setProps({viewState});
       requestFrames();
+    },
+    onResize: ({width, height}) => {
+      if (kind === 'light-shafts') {
+        viewState = getSkyCameraState(viewState, width, height);
+        deck.setProps({viewState});
+        requestFrames();
+      }
     },
     onError: error => {
       diagnostics.error ||= error.message;
@@ -608,7 +621,11 @@ export function createRiverfrontLightingScene(
     center(): void {
       capture.resetHistory();
       effect.resetHistory();
-      deck.setProps({initialViewState: {...initialViewState}});
+      viewState =
+        kind === 'light-shafts'
+          ? getSkyCameraState(initialViewState, parent.clientWidth, parent.clientHeight)
+          : {...initialViewState};
+      deck.setProps({viewState});
       requestFrames();
     },
     setTime(time: number): void {
