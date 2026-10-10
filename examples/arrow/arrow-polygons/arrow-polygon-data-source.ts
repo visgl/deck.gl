@@ -173,6 +173,8 @@ export class ArrowPolygonDataSource {
       }
     };
     if (inputMode === 'vectors') {
+      tableStream.setLoadedBatchCount(sourceData.batchCount);
+      this.controlPanel.setStreamingBatchStatus(sourceData.batchCount, sourceData.batchCount);
       this.onDataUpdated({
         ...commonUpdate,
         polygons: polygonVector,
