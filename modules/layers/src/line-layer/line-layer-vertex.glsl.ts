@@ -22,8 +22,8 @@ out vec2 uv;
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
   vec2 dir_screenspace = normalize(line_clipspace * project.viewportSize);
-  // rotate by 90 degrees
-  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+  // rotate by 90 degrees clockwise so the strip (-1 side first) winds counter-clockwise
+  dir_screenspace = vec2(dir_screenspace.y, -dir_screenspace.x);
 
   return dir_screenspace * offset_direction * width / 2.0;
 }
