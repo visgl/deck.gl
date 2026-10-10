@@ -32,15 +32,34 @@ These standalone examples are not registered in the public deck.gl website galle
 
 ## Examples
 
+- [ambient-occlusion](./ambient-occlusion/)
 - [arrow-path-layer](./arrow-path-layer/)
+- [arrow-polygon-layer](./arrow-polygon-layer/)
+- [arrow-text-layer](./arrow-text-layer/)
+- [city-scene](./city-scene/)
+- [depth-of-field](./depth-of-field/)
+- [fireflies](./fireflies/)
+- [flow-particles](./flow-particles/)
+- [global-illumination](./global-illumination/)
+- [globe-clouds](./globe-clouds/)
 - [gpu-culled-trace](./gpu-culled-trace/)
 - [gpu-graph-explorer](./gpu-graph-explorer/)
+- [hdr-night-lighting](./hdr-night-lighting/)
+- [light-shafts](./light-shafts/)
 - [luspatial-taxi](./luspatial-taxi/)
+- [pattern-fills](./pattern-fills/)
+- [point-glow](./point-glow/)
+- [scene-buffers](./scene-buffers/)
+- [sketch-edges](./sketch-edges/)
+- [soft-shadows](./soft-shadows/)
+- [styled-paths](./styled-paths/)
+- [weather](./weather/)
 
 ## Current validation limits
 
-All four standalone examples build and pass the shared TypeScript check. The opt-in browser
+All 22 examples build and pass the shared TypeScript check. The opt-in browser
 suite currently has five failures: two scene-capture cases, firefly picking,
 meter-offset projection, and the restored graph rendering pipeline timeout.
+The styled-paths visual smoke script also fails its WebGPU route-picking assertion.
 These tests remain enabled in the private suite; the public CI suite excludes
 private prototypes until their unpublished peers and integration issues are resolved.
