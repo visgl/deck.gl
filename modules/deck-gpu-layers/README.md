@@ -632,8 +632,8 @@ This private package was copied from luma.gl's `modules/deck-gpu-layers`. Its pa
 is unchanged. It uses the local deck.gl core workspace and luma.gl 10 prereleases.
 Run `yarn build-private` and `yarn lint` from the repository root. Run
 `yarn test-private` for the module node and headless suites. The regular build and
-tests exclude these prototypes because their upstream peers are unpublished. Tests coupled to examples and website infrastructure
-remain in luma.gl. Example paths in this README refer to the source luma.gl repository.
+tests exclude these prototypes because their upstream peers are unpublished. The copied examples and integration tests live in this repository.
+Gallery-specific assertions were adapted to the standalone example metadata.
 
 The upstream `@luma.gl/arrow`, `@luma.gl/experimental`, and `@luma.gl/text` packages
 are private and unavailable on npm. They are peer dependencies here. To build or run
@@ -641,3 +641,10 @@ these packages, build a compatible luma.gl checkout and link the required privat
 packages into deck.gl (for example, run `yarn link` in each luma.gl package, then
 `yarn link @luma.gl/experimental @luma.gl/text @luma.gl/arrow` in deck.gl).
 These modules require those peers at runtime; a regular install alone is insufficient.
+
+## Examples and integration tests
+
+The original standalone examples and their shared fixtures are available in
+[`examples/deck`](../../examples/deck/README.md). Run `yarn build-private-examples`
+after linking the unpublished peers. `yarn test-private` includes the copied
+example integration tests alongside the module tests.

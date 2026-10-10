@@ -42,12 +42,14 @@
     "update-release-branch": "scripts/update-release-branch.sh",
     "bindings-precommit-tests": "scripts/bindings-precommit-hook.sh",
     "build-private": "ocular-build core,deck-gpu-layers,deck-arrow-layers",
-    "test-private": "DECK_GL_PRIVATE_MODULES=true ocular-test node headless"
+    "test-private": "DECK_GL_PRIVATE_MODULES=true ocular-test node headless",
+    "build-private-examples": "node scripts/build-private-examples.mjs"
   },
   "browser": {
     "jsdom": false
   },
   "devDependencies": {
+    "@deck.gl-community/panels": "^9.4.2",
     "@floating-ui/dom": "^1.7.5",
     "@loaders.gl/csv": "^5.0.0-alpha.11",
     "@loaders.gl/geoarrow": "^5.0.0-alpha.11",
