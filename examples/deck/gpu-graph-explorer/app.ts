@@ -73,6 +73,7 @@ export function createGPUGraphExplorerDeck(
   let rebuildGeneration = 0;
   let rebuildFrame: number | null = null;
   let draggedVertex: number | null = null;
+  let layoutPaused = false;
   let deck: ArrowDeck<OrthographicView>;
   const controls = createExplorerControls(container, {
     getEffect: () => effect,
@@ -98,6 +99,8 @@ export function createGPUGraphExplorerDeck(
       updateLayers('GPU Graph source-chunk edge visibility changed');
     },
     setPaused: paused => {
+      layoutPaused = paused;
+      if (effect) effect.layoutPaused = paused;
       deck?.setProps({_animate: !paused});
       if (!paused) deck?.redraw('GPU Graph progressive GPU layout resumed');
     },
@@ -218,7 +221,7 @@ export function createGPUGraphExplorerDeck(
   ): void {
     if (!activeDevice) return;
     const previousDepth = effect?.currentNeighborhoodDepth ?? DEFAULT_NEIGHBORHOOD_DEPTH;
-    const previousSelection = effect?.currentSelection ?? 0;
+    const previousSelection = effect ? effect.currentSelection : 0;
     latestStats = null;
     draggedVertex = null;
     if (nextDataset.vertexCount >= GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT) {
@@ -234,6 +237,7 @@ export function createGPUGraphExplorerDeck(
         controls.update();
       }
     });
+    nextEffect.layoutPaused = layoutPaused;
     nextEffect.setNeighborhoodDepth(previousDepth);
     nextEffect.setSelectedVertex(
       previousSelection !== null && previousSelection < nextDataset.vertexCount

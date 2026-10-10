@@ -10,7 +10,10 @@ import {
   ArrowLineRenderer,
   convertArrowLineColumnsToGPUVectors
 } from '../../../../examples/arrow/arrow-lines/arrow-line-renderer';
-import {makeArrowLineSourceData} from '../../../../examples/arrow/arrow-lines/arrow-line-data';
+import {
+  makeArrowLineRecordBatches,
+  makeArrowLineSourceData
+} from '../../../../examples/arrow/arrow-lines/arrow-line-data';
 
 for (const ModelClass of [PathTripsStorageModel, PathStorageModel]) {
   test(`${ModelClass.name} receives live styling without replacing path data`, () => {
@@ -56,5 +59,40 @@ test('failed path preparation releases uploaded timestamp buffers', async () => 
   ).rejects.toThrow();
   expect(createBuffer.mock.results.length).toBeGreaterThan(0);
   for (const result of createBuffer.mock.results) expect(result.value.destroyed).toBe(true);
+  device.destroy();
+});
+
+test('delayed batches use the latest animation and style settings', async () => {
+  const device = new NullDevice({});
+  const renderer = new ArrowLineRenderer(device, {model: 'attribute'});
+  const prepared = vi.spyOn(renderer as any, 'setPreparedProps').mockImplementation(() => {});
+  const batch = makeArrowLineRecordBatches(
+    makeArrowLineSourceData(
+      {pathCount: 1, pointCount: 2, label: 'test'},
+      'lines',
+      'float32',
+      'none',
+      'timestamps'
+    )
+  )[0];
+  const gate = Promise.withResolvers<void>();
+  async function* stream() {
+    yield batch;
+    await gate.promise;
+    yield batch;
+  }
+  renderer.setProps({data: stream(), currentTime: 1, trailLength: 2, width: 1});
+  await vi.waitFor(() => expect(prepared).toHaveBeenCalledTimes(1));
+  const color: [number, number, number, number] = [30, 50, 70, 255];
+  renderer.setProps({currentTime: 80, trailLength: 12, width: 4, color});
+  gate.resolve();
+  await vi.waitFor(() => expect(prepared).toHaveBeenCalledTimes(2));
+  expect(prepared.mock.calls[1][0]).toMatchObject({
+    currentTime: 80,
+    trailLength: 12,
+    width: 4,
+    color
+  });
+  renderer.destroy();
   device.destroy();
 });

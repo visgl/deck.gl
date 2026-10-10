@@ -198,7 +198,7 @@ function makeStreamingArrowTextSource(
 ): StreamingArrowTextSource {
   const resolvedStyleColumns = resolveArrowTextStyleColumnOptions(styleColumns);
   const arrowVectorBuildStartTime = getNow();
-  const recordBatches = new Array<arrow.RecordBatch>(STREAMING_TEXT_BATCH_COUNT);
+  const recordBatches = [] as arrow.RecordBatch[];
   const labelRowCount = dataset.labelCount / LABEL_COLUMN_COUNT;
   const centerColumn = (LABEL_COLUMN_COUNT - 1) / 2;
   const centerRow = (labelRowCount - 1) / 2;
@@ -270,11 +270,10 @@ function makeStreamingArrowTextSource(
       ...(angles ? {angles: makeFloat32ArrowVector(angles)} : {}),
       ...(sizes ? {sizes: makeFloat32ArrowVector(sizes)} : {})
     });
-    const recordBatch = table.batches[0];
-    if (!recordBatch) {
+    if (table.batches.length === 0) {
       throw new Error('Streaming Arrow text source requires non-empty record batches');
     }
-    recordBatches[batchIndex] = recordBatch;
+    recordBatches.push(...table.batches);
   }
 
   return {

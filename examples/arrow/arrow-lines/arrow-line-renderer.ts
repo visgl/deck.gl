@@ -455,7 +455,7 @@ export class ArrowLineRenderer extends GPURenderable<
           id: `${props.id ?? 'arrow-lines'}-${context.batchIndex}`
         }),
       appendBatch: pathInput => {
-        setPropsResult = this.appendPreparedPathInput(pathInput, props);
+        setPropsResult = this.appendPreparedPathInput(pathInput, this.props);
       },
       destroyBatch: pathInput => pathInput.destroy(),
       getRowCount: pathInput => pathInput.paths.length,
