@@ -265,7 +265,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           ) {
             throw new Error('Projection refinement requires per-object colors');
           }
-          return value;
+          // RGB attributes must not treat a single RGBA color as packed vertex data.
+          return this.props._projectionTolerance &&
+            this.props.colorFormat === 'RGB' &&
+            value?.length === 4
+            ? value.slice(0, 3)
+            : value;
         },
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
@@ -283,7 +288,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           ) {
             throw new Error('Projection refinement requires per-object colors');
           }
-          return value;
+          // RGB attributes must not treat a single RGBA color as packed vertex data.
+          return this.props._projectionTolerance &&
+            this.props.colorFormat === 'RGB' &&
+            value?.length === 4
+            ? value.slice(0, 3)
+            : value;
         },
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'

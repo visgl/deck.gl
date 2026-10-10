@@ -352,7 +352,12 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           ) {
             throw new Error('Projection refinement requires per-object colors');
           }
-          return value;
+          // RGB attributes must not treat a single RGBA color as packed vertex data.
+          return this.props._projectionTolerance &&
+            this.props.colorFormat === 'RGB' &&
+            value?.length === 4
+            ? value.slice(0, 3)
+            : value;
         },
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR,

@@ -566,6 +566,13 @@ test('adaptive RGB paths accept the default RGBA color', () => {
     });
     manager.setLayers([layer]);
     expect(layer.state.numInstances).toBeGreaterThan(0);
+    expect(
+      Array.from(
+        layer
+          .getAttributeManager()!
+          .attributes.instanceColors.value!.slice(0, layer.state.numInstances * 3)
+      )
+    ).toEqual([0, 0, 0]);
   } finally {
     manager.finalize();
   }
@@ -603,6 +610,56 @@ for (const accessor of ['getFillColor', 'getLineColor', 'getElevation']) {
               ]
       });
       expect(() => manager.setLayers([layer])).toThrow('per-object');
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} adaptive RGB attributes repeat a single accessor RGBA color`, () => {
+    const viewport = new CustomProjectionViewport({
+      projection: {
+        forward: ([x, y, z = 0]) => [x, y + x * x, z],
+        inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+      }
+    });
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    try {
+      const layer = new LayerType({
+        id: 'adaptive-rgb-accessor',
+        data: [
+          [
+            [0, 0],
+            [4, 0],
+            [4, 2],
+            [0, 0]
+          ]
+        ],
+        getPath: p => p,
+        getPolygon: p => p,
+        getColor: () => [12, 34, 56, 255],
+        getFillColor: () => [12, 34, 56, 255],
+        getLineColor: () => [12, 34, 56, 255],
+        colorFormat: 'RGB',
+        _projectionTolerance: 0.01,
+        extruded: true,
+        wireframe: true
+      });
+      manager.setLayers([layer]);
+      const attributes = layer.getAttributeManager()!.attributes;
+      const names = LayerType === PathLayer ? ['instanceColors'] : ['fillColors', 'lineColors'];
+      for (const name of names) {
+        const colors = attributes[name].value!;
+        for (let i = 0; i < layer.state.numInstances; i++) {
+          expect(Array.from(colors.slice(i * 3, i * 3 + 3))).toEqual([12, 34, 56]);
+        }
+      }
     } finally {
       manager.finalize();
     }
