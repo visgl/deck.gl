@@ -61,11 +61,17 @@ try {
       );
       await page.getByLabel('Animate', {exact: true}).uncheck();
       const screenshot = async () => {
-        const frames = await page.evaluate(() => window.globeCloudScene.diagnostics.frames);
-        await page.waitForFunction(
-          previous => window.globeCloudScene.diagnostics.frames > previous + 2,
-          frames
-        );
+        for (let frame = 0; frame < 3; frame++) {
+          const frames = await page.evaluate(() => {
+            const scene = window.globeCloudScene;
+            scene.deck.redraw('visual screenshot');
+            return scene.diagnostics.frames;
+          });
+          await page.waitForFunction(
+            previous => window.globeCloudScene.diagnostics.frames > previous,
+            frames
+          );
+        }
         return PNG.sync.read(await captureVisualTestScreenshot(page.locator('#scene')));
       };
       const clouds = await screenshot();
