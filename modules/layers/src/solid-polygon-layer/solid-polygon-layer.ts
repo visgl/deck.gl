@@ -244,6 +244,12 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
+        transform: function (this: SolidPolygonLayer, value) {
+          if (this.props._projectionTolerance && typeof value !== 'number') {
+            throw new Error('Projection refinement requires per-object elevations');
+          }
+          return value;
+        },
         bufferGroup: 'solid-polygon-instance-data'
       },
       fillColors: {
@@ -252,6 +258,15 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
+        transform: function (this: SolidPolygonLayer, value) {
+          if (
+            this.props._projectionTolerance &&
+            (typeof value?.[0] === 'object' || value?.length > 4)
+          ) {
+            throw new Error('Projection refinement requires per-object colors');
+          }
+          return value;
+        },
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
@@ -261,6 +276,15 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         stepMode: 'dynamic',
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
+        transform: function (this: SolidPolygonLayer, value) {
+          if (
+            this.props._projectionTolerance &&
+            (typeof value?.[0] === 'object' || value?.length > 4)
+          ) {
+            throw new Error('Projection refinement requires per-object colors');
+          }
+          return value;
+        },
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'solid-polygon-instance-data'
       },
@@ -381,6 +405,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         props._projectionTolerance &&
         (!this.usePositionTransforms().transform ||
           !props._normalize ||
+          (buffers.getPolygon &&
+            !ArrayBuffer.isView(buffers.getPolygon.value ?? buffers.getPolygon)) ||
           Object.keys(buffers).some(key => key !== 'getPolygon'))
       ) {
         throw new Error(
