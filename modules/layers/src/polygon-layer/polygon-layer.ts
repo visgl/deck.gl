@@ -188,6 +188,13 @@ type _PolygonLayerProps<DataT = unknown> = {
    */
   _normalize?: boolean;
 
+  /** Sampled projection edge error in map meters, forwarded to fill and outline layers.
+   * Requires normalized source geometry. Zero disables adaptive refinement.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
+
   /**
    * Specifies the winding order of rings in the polygon data.
    *
@@ -216,6 +223,7 @@ const defaultProps: DefaultProps<PolygonLayerProps> = {
   elevationScale: 1,
   wireframe: false,
   _normalize: true,
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
   _windingOrder: 'CW',
 
   lineWidthUnits: 'meters',
@@ -382,6 +390,7 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           filled,
           wireframe,
           _normalize,
+          _projectionTolerance: this.props._projectionTolerance,
           _windingOrder,
 
           getElevation,
@@ -428,7 +437,8 @@ export default class PolygonLayer<DataT = any, ExtraProps extends {} = {}> exten
           dashJustified: lineDashJustified,
 
           // Already normalized
-          _pathType: 'loop',
+          _pathType: this.props._projectionTolerance ? null : 'loop',
+          _projectionTolerance: this.props._projectionTolerance,
 
           transitions: transitions && {
             getWidth: transitions.getLineWidth,
