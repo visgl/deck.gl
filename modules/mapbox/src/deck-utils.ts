@@ -162,11 +162,7 @@ export function getProjection(map: Map): 'mercator' | 'globe' {
   try {
     projection = map.getProjection?.();
   } catch {
-    // map.getProjection() can throw if the map's style is not yet assigned
-    // (e.g. maplibre-gl's Map.prototype.getProjection() calls
-    // this.style.getProjection() without a guard on this.style).
-    // Return 'mercator' as the safe default — callers expect this when
-    // the map is not ready yet.
+    // maplibre's getProjection() throws before the style is set
     return 'mercator';
   }
   const type =
