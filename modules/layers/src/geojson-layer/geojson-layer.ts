@@ -4,6 +4,7 @@
 
 import {
   Accessor,
+  AccessorFunction,
   Color,
   CompositeLayer,
   CompositeLayerProps,
@@ -269,7 +270,7 @@ type _GeojsonLayerIconPointProps<FeaturePropertiesT> = {
 
 /** GeoJsonLayer properties forwarded to `TextLayer` if `pointType` is `'text'` */
 type _GeojsonLayerTextPointProps<FeaturePropertiesT> = {
-  getText?: Accessor<Feature<Geometry, FeaturePropertiesT>, any>;
+  getText?: AccessorFunction<Feature<Geometry, FeaturePropertiesT>, string>;
   getTextColor?: Accessor<Feature<Geometry, FeaturePropertiesT>, Color>;
   getTextAngle?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
   getTextSize?: Accessor<Feature<Geometry, FeaturePropertiesT>, number>;
@@ -315,7 +316,7 @@ const defaultProps: DefaultProps<GeoJsonLayerProps> = {
   iconAtlas: {type: 'object', value: null},
   iconMapping: {type: 'object', value: {}},
   getIcon: {type: 'accessor', value: f => f.properties.icon},
-  getText: {type: 'accessor', value: f => f.properties.text},
+  getText: {type: 'accessor', value: (f: Feature<Geometry, any>) => f.properties.text},
 
   // Self props
   pointType: 'circle',
