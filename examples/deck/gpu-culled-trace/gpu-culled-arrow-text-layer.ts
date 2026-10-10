@@ -64,8 +64,9 @@ export class GPUCulledArrowTextLayer extends ArrowTextLayer {
     const model = renderer.model;
     model.setAttributes({compactGlyphVertexData: this.culledDraw.selectedGlyphRecords});
     model.setInstanceCount(0);
-    Model.prototype.draw.call(model, renderPass);
-    this.culledDraw.drawCommands.draw(renderPass, 0);
+    if (Model.prototype.draw.call(model, renderPass)) {
+      this.culledDraw.drawCommands.draw(renderPass, 0);
+    }
   }
 }
 
