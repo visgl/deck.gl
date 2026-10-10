@@ -354,7 +354,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transform: function (this: PathLayer, value) {
           if (
             this.props._projectionTolerance &&
-            (typeof value?.[0] === 'object' || value?.length > this.props.colorFormat.length)
+            (typeof value?.[0] === 'object' || value?.length > 4)
           ) {
             throw new Error('Projection refinement requires per-object colors');
           }
@@ -421,6 +421,8 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         props._projectionTolerance &&
         (!this.usePositionTransforms().transform ||
           props._pathType ||
+          (buffers.getPath &&
+            !ArrayBuffer.isView(buffers.getPath.value ?? buffers.getPath)) ||
           Object.keys(buffers).some(key => key !== 'getPath'))
       ) {
         throw new Error(
