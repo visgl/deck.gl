@@ -246,7 +246,10 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Callback that takes a hovered-over point and renders a tooltip. */
   getTooltip?: ((info: PickingInfo) => TooltipContent) | null;
 
-  /** (Debug) Flag to enable WebGL debug mode. Requires importing `@luma.gl/webgl/debug`. */
+  /**
+   * Enables GPU debug mode when initializing a device. Overridden by `deviceProps.debug`.
+   * Requires importing `@luma.gl/webgl/debug` for WebGL debugging tools.
+   */
   debug?: boolean;
   /** (Debug) Render the picking buffer to screen. */
   drawPickingColors?: boolean;
@@ -432,6 +435,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         log.error('WebGL1 context not supported.')();
       }
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
+        debug: props.debug,
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
@@ -1452,6 +1456,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
     const deviceProps = {
       adapters: [],
+      debug: props.debug,
       _cacheShaders: true,
       _cachePipelines: true,
       ...props.deviceProps

@@ -97,7 +97,7 @@ The container to append the auto-created canvas to.
 
 * Default: `false`
 
-Flag to enable GPU debug mode. Import the luma.gl WebGL debug subpath to register the optional debugging tools. The tools are loaded on demand when debug mode is enabled:
+Flag to enable GPU debug mode when initializing a device. Import the luma.gl WebGL debug subpath to register the optional debugging tools. The tools are loaded on demand when debug mode is enabled:
 
 ```js
 import '@luma.gl/webgl/debug';
@@ -112,6 +112,8 @@ new Deck({
 Notes:
 
 - Debug mode is slower as it will use synchronous operations to keep track of GPU state.
+- This option applies when Deck creates a device or attaches to a supplied `gl` context. It does not change an externally supplied `device` or an already initialized device.
+- `deviceProps.debug`, if supplied, overrides this option.
 
 #### `_typedArrayManagerProps` (object) {#_typedarraymanagerprops}
 
