@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {
+  OPENFREEMAP_ATTRIBUTION_HTML,
+  OPENFREEMAP_ATTRIBUTION_STYLE
+} from '../components/openfreemap-attribution';
+
 const PROP_BLACK_LIST = ['dataComparator', 'fetch'];
 const BASE_LAYER_PROP_WHITE_LIST = [
   'autoHighlight',
@@ -196,6 +201,7 @@ export function gotoLayerSource(config, layer) {
     getTooltip,
     props,
     mapStyle = true,
+    attribution = false,
     dependencies = [],
     imports,
     initialViewState
@@ -243,6 +249,12 @@ new DeckGL({
   ${getTooltip ? `getTooltip: ${getTooltip},` : ''}
   layers: [layer]
 });
+${attribution ? `
+const attributionElement = document.createElement('div');
+attributionElement.innerHTML = ${JSON.stringify(OPENFREEMAP_ATTRIBUTION_HTML)};
+Object.assign(attributionElement.style, ${JSON.stringify(OPENFREEMAP_ATTRIBUTION_STYLE)});
+document.body.appendChild(attributionElement);
+` : ''}
   `;
 
   gotoSource({

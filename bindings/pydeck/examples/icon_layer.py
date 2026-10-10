@@ -42,7 +42,6 @@ r = pdk.Deck(
     layers=[icon_layer],
     initial_view_state=view_state,
     tooltip={"text": "{tags}"},
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("icon_layer.html")

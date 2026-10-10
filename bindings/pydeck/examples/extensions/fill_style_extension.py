@@ -42,7 +42,6 @@ view_state = pdk.ViewState(latitude=49.253, longitude=-123.13, zoom=11.3)
 r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("fill_style_extension.html")

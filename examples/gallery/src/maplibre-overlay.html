@@ -28,10 +28,9 @@
       const firstLabelLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
 
       map.removeLayer('building')
-      map.removeLayer('building-top')
       map.addLayer({
         'id': '3d-buildings',
-        'source': 'carto',
+        'source': 'openmaptiles',
         'source-layer': 'building',
         'type': 'fill-extrusion',
         'minzoom': 15,

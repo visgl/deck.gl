@@ -36,7 +36,6 @@ r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     tooltip={"text": "{name}\n{address}"},
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/positron",
 )
 r.to_html("text_layer.html")
