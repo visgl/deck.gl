@@ -123,6 +123,9 @@ const optimizeDepsConfig = {
     'preact/jsx-runtime',
     // Vitest browser dependencies
     'vitest/browser',
+    '@math.gl/crs',
+    '@math.gl/projection/core',
+    '@math.gl/projection/projections/merc',
     // luma.gl WebGL dependencies
     '@luma.gl/core',
     '@luma.gl/engine',
