@@ -340,9 +340,9 @@ export class ArrowLineRenderer extends GPURenderable<
     const dataChanged = hasDataProp && props.data !== this.props.data;
     const dataDependentChanged =
       dataChanged ||
-      props.model !== undefined ||
-      props.timeColumn !== undefined ||
-      props.mode !== undefined ||
+      (nextProps.model ?? 'auto') !== (this.props.model ?? 'auto') ||
+      (nextProps.timeColumn ?? 'xyzm') !== (this.props.timeColumn ?? 'xyzm') ||
+      (nextProps.mode ?? 'lines') !== (this.props.mode ?? 'lines') ||
       nextModel !== this.resolvedModel;
     this.props = nextProps;
 

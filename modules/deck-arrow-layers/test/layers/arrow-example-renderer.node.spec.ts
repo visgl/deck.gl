@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {NullDevice} from '@luma.gl/test-utils';
-import {PathTripsStorageModel, PathStorageModel} from '@luma.gl/experimental/models';
+import {
+  PathTripsStorageModel,
+  PathStorageModel,
+  PathAttributeModel
+} from '@luma.gl/experimental/models';
+import {Model} from '@luma.gl/engine';
 import * as arrow from 'apache-arrow';
 import {expect, test, vi} from 'vitest';
 import {
@@ -18,12 +23,26 @@ import {
 for (const ModelClass of [PathTripsStorageModel, PathStorageModel]) {
   test(`${ModelClass.name} receives live styling without replacing path data`, () => {
     const device = new NullDevice({});
-    const renderer = new ArrowLineRenderer(device, {model: 'storage'});
+    const renderer = new ArrowLineRenderer(device, {
+      model: 'storage',
+      timeColumn: 'timestamps',
+      mode: 'lines'
+    });
     const model = Object.create(ModelClass.prototype);
     model.setProps = vi.fn();
     renderer.model = model;
     const color: [number, number, number, number] = [20, 40, 60, 255];
-    expect(renderer.setProps({color, width: 0.5, currentTime: 75, trailLength: 12})).toEqual({
+    expect(
+      renderer.setProps({
+        color,
+        width: 0.5,
+        currentTime: 75,
+        trailLength: 12,
+        model: 'storage',
+        timeColumn: 'timestamps',
+        mode: 'lines'
+      })
+    ).toEqual({
       modelChanged: false
     });
     expect(renderer.model).toBe(model);
@@ -93,6 +112,31 @@ test('delayed batches use the latest animation and style settings', async () => 
     width: 4,
     color
   });
+  const pathState = (prepared.mock.calls[1][0] as any).data.pathState;
+  expect(pathState.renderBatches).toHaveLength(2);
+  const attributeModel = Object.create(PathAttributeModel.prototype);
+  Object.assign(attributeModel, {
+    table: null,
+    pathShaderLayout: {attributes: [{name: 'pathViewOrigins'}]},
+    renderBatches: pathState.renderBatches,
+    segmentLayout: pathState.segmentLayout,
+    expandedPathVertexData: pathState.expandedPathVertexData,
+    pathViewOriginData: pathState.pathViewOriginData,
+    setAttributes: vi.fn(),
+    setInstanceCount: vi.fn()
+  });
+  const draw = vi.spyOn(Model.prototype, 'draw').mockReturnValue(true);
+  try {
+    attributeModel.draw({} as any);
+    expect(draw).toHaveBeenCalledTimes(2);
+    for (let index = 0; index < 2; index++) {
+      expect(attributeModel.setAttributes.mock.calls[index][0].expandedPathVertexData).toBe(
+        pathState.renderBatches[index].expandedPathVertexData
+      );
+    }
+  } finally {
+    draw.mockRestore();
+  }
   renderer.destroy();
   device.destroy();
 });
