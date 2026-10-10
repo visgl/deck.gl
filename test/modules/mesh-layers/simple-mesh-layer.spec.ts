@@ -93,3 +93,49 @@ test('SimpleMeshLayer#tests', () => {
 
   testLayer({Layer: SimpleMeshLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+test('SimpleMeshLayer#mesh with typed array attributes', () => {
+  // A right triangle in the xy plane
+  const positions = new Float32Array([0, 0, 0, 2, 0, 0, 0, 1, 0]);
+  const normals = new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1]);
+  const texCoords = new Float32Array([0, 0, 1, 0, 0, 1]);
+
+  const testCases = [
+    {
+      title: 'Attributes object',
+      props: {
+        data: FIXTURES.points,
+        getPosition: d => (d as any).COORDINATES,
+        mesh: {positions, normals, texCoords},
+        // Report the bounds of the mesh instead of the instance positions
+        _instanced: false
+      },
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.model, 'Layer has a model').toBeTruthy();
+        expect(layer.state.model.vertexCount, 'Model draws every vertex').toBe(3);
+        expect(layer.state.hasNormals, 'Layer uses mesh normals').toBe(true);
+        expect(layer.getBounds(), 'Layer calculates mesh bounds').toEqual([
+          [0, 0, 0],
+          [2, 1, 0]
+        ]);
+      }
+    },
+    {
+      title: 'Mesh with attributes',
+      updateProps: {
+        mesh: {attributes: {POSITION: positions}}
+      },
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.model, 'Layer has a model').toBeTruthy();
+        expect(layer.state.model.vertexCount, 'Model draws every vertex').toBe(3);
+        expect(layer.state.hasNormals, 'Layer has no mesh normals').toBe(false);
+        expect(layer.getBounds(), 'Layer calculates mesh bounds').toEqual([
+          [0, 0, 0],
+          [2, 1, 0]
+        ]);
+      }
+    }
+  ];
+
+  testLayer({Layer: SimpleMeshLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
