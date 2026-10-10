@@ -241,6 +241,11 @@ export default class ComponentState<ComponentT extends Component> {
             // This component state has been finalized
             return;
           }
+          if (loadCount < asyncProp.resolvedLoadCount) {
+            // A more recent load has already completed. Discard this result before
+            // post processing, which would release the current value.
+            return;
+          }
           data = this._postProcessValue(asyncProp, data);
           this._setAsyncPropValue(propName, data, loadCount);
           this._onResolve(propName, data);
