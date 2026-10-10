@@ -22,7 +22,8 @@ import type {
   Unit,
   UpdateParameters,
   LayerContext,
-  DefaultProps
+  DefaultProps,
+  TextureSource
 } from '@deck.gl/core';
 
 import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manager';
@@ -30,7 +31,7 @@ import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manag
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
   /** A prepacked image that contains all icons. */
-  iconAtlas?: string | Texture;
+  iconAtlas?: string | TextureSource;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
   iconMapping?: string | IconMapping;
 
@@ -249,7 +250,8 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     iconManager.setProps({
       loadOptions: props.loadOptions,
       autoPacking: !prePacked,
-      iconAtlas,
+      // The `image` prop type resolves any texture source to a Texture
+      iconAtlas: iconAtlas as Texture | undefined,
       iconMapping: prePacked ? (iconMapping as IconMapping) : null,
       textureParameters
     });
