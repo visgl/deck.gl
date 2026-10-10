@@ -31,6 +31,13 @@ import type {PathGeometry} from './path';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Sampled edge error in map meters for a preprojecting viewport. Zero disables refinement.
+   * Requires normalized geometry, finite samples and pre-split projection seams.
+   * Throws when math.gl refinement limits are exhausted.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
   /** The units of the line width, one of `'meters'`, `'common'`, and `'pixels'`
    * @default 'meters'
    */
@@ -120,6 +127,7 @@ const defaultProps: DefaultProps<PathLayerProps> = {
   antialiasing: false,
   billboard: false,
   _pathType: null,
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
 
   getPath: {type: 'accessor', value: (object: any) => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -323,6 +331,12 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
+        transform: function (this: PathLayer, value) {
+          if (this.props._projectionTolerance && typeof value !== 'number') {
+            throw new Error('Projection refinement requires per-object widths');
+          }
+          return value;
+        },
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: 1,
         bufferGroup: 'path-instance-data'
@@ -331,6 +345,15 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         size: this.props.colorFormat.length,
         type: 'unorm8',
         accessor: 'getColor',
+        transform: function (this: PathLayer, value) {
+          if (
+            this.props._projectionTolerance &&
+            (Array.isArray(value?.[0]) || value?.length > this.props.colorFormat.length)
+          ) {
+            throw new Error('Projection refinement requires per-object colors');
+          }
+          return value;
+        },
         transition: isWebGPU ? false : ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR,
         bufferGroup: 'path-instance-data'
@@ -377,6 +400,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       props.coordinateSystem !== oldProps.coordinateSystem ||
       (viewport.preproject && props.modelMatrix !== oldProps.modelMatrix) ||
       getPathChanged ||
+      props._projectionTolerance !== oldProps._projectionTolerance ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
       props.wrapLongitude !== oldProps.wrapLongitude ||
@@ -386,6 +410,16 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (geometryChanged) {
       const {pathTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      if (
+        props._projectionTolerance &&
+        (!this.usePositionTransforms().transform ||
+          props._pathType ||
+          Object.keys(buffers).some(key => key !== 'getPath'))
+      ) {
+        throw new Error(
+          'Projection refinement requires normalized paths with per-object attributes'
+        );
+      }
 
       pathTesselator.updateGeometry({
         data: props.data,
@@ -400,6 +434,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         wrapLongitude: props.wrapLongitude && !viewport.preproject,
         // TODO - move the flag out of the viewport
         resolution: viewport.resolution,
+        projectionTolerance: props._projectionTolerance,
         // A partial data diff is only valid while normalization inputs remain unchanged.
         dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });

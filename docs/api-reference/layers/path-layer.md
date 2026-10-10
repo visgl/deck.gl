@@ -351,6 +351,29 @@ new PathLayer({
 });
 ```
 
+### `_projectionTolerance` (number, optional, experimental)
+
+* Default: `0`
+
+With a preprojecting viewport such as `CustomProjectionView`, a positive value adaptively
+densifies source edges to a sampled error tolerance in **map meters**. Zero retains existing
+behavior. Existing `resolution` grid cutting happens first; its source-unit meaning is unchanged.
+The model matrix and converter participate in error sampling. Camera movement does not
+retessellate geometry. Changes to the tolerance or projection regenerate all geometry even
+when the same update includes a partial data diff.
+
+Source edges interpolate linearly, including altitude. This does not generate great-circle
+edges or clip geometry. Split seams and invalid domains before supplying geometry.
+The criterion samples quarter, midpoint and three-quarter points; it is not a certified bound.
+Invalid samples or exhausted math.gl limits (16 bisection levels, 65536 vertices per ring/path)
+throw.
+
+Use normalized geometry and per-object styling. Pre-tessellated external attribute/index buffers
+are unsupported because inserted vertices change their layout. CPU-backed binary position
+arrays are accepted. Per-vertex color/width arrays are unsupported by adaptive path refinement.
+
+This option requires `_pathType: null`.
+
 ## Source
 
 [modules/layers/src/path-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/path-layer)

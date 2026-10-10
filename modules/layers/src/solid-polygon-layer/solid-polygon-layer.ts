@@ -31,6 +31,13 @@ import type {PolygonGeometry} from './polygon';
 
 type _SolidPolygonLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Sampled edge error in map meters for a preprojecting viewport. Zero disables refinement.
+   * Requires normalized geometry, finite samples and pre-split projection seams.
+   * Throws when math.gl refinement limits are exhausted.
+   * @experimental
+   * @default 0
+   */
+  _projectionTolerance?: number;
   /** Whether to fill the polygons
    * @default true
    */
@@ -102,6 +109,7 @@ const defaultProps: DefaultProps<SolidPolygonLayerProps> = {
   _normalize: true,
   _windingOrder: 'CW',
   _full3d: false,
+  _projectionTolerance: {type: 'number', value: 0, min: 0},
 
   elevationScale: {type: 'number', min: 0, value: 1},
 
@@ -354,7 +362,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       changeFlags.projectionChanged ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
       (this.context.viewport.preproject && props.modelMatrix !== oldProps.modelMatrix);
+    const refinementChanged = props._projectionTolerance !== oldProps._projectionTolerance;
     const geometryConfigChanged =
+      refinementChanged ||
       changeFlags.dataChanged ||
       projectionChanged ||
       (changeFlags.updateTriggersChanged &&
@@ -365,6 +375,16 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     if (geometryConfigChanged) {
       const {polygonTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      if (
+        props._projectionTolerance &&
+        (!this.usePositionTransforms().transform ||
+          !props._normalize ||
+          Object.keys(buffers).some(key => key !== 'getPolygon'))
+      ) {
+        throw new Error(
+          'Projection refinement requires normalized polygons with per-object attributes'
+        );
+      }
       polygonTesselator.updateGeometry({
         data: props.data,
         normalize: props._normalize,
@@ -377,8 +397,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         wrapLongitude: props.wrapLongitude && !viewport.preproject,
         // TODO - move the flag out of the viewport
         resolution: this.context.viewport.resolution,
+        projectionTolerance: props._projectionTolerance,
         fp64: this.use64bitPositions(),
-        dataChanged: projectionChanged ? undefined : changeFlags.dataChanged,
+        dataChanged: projectionChanged || refinementChanged ? undefined : changeFlags.dataChanged,
         full3d: props._full3d
       });
 
@@ -387,7 +408,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         startIndices: polygonTesselator.vertexStarts
       });
 
-      if (!changeFlags.dataChanged || projectionChanged) {
+      if (!changeFlags.dataChanged || projectionChanged || refinementChanged) {
         // Projection changes affect all triangles, even alongside a partial data update.
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
