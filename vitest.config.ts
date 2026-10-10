@@ -81,7 +81,6 @@ const excludedTests = [
 // Match aliases from .ocularrc.js
 // Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
-  '@deck.gl-community/gpu-layers/query': resolve(rootDir, 'modules/deck-gpu-layers/src/query'),
   '@deck.gl-community/gpu-layers': resolve(rootDir, 'modules/deck-gpu-layers/src'),
   '@deck.gl-community/arrow-layers': resolve(rootDir, 'modules/deck-arrow-layers/src'),
   // Explicit vitest entry point (must come before @deck.gl/test-utils)

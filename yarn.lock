@@ -468,15 +468,6 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@deck.gl-community/panels@^9.4.2":
-  version "9.4.2"
-  resolved "https://registry.yarnpkg.com/@deck.gl-community/panels/-/panels-9.4.2.tgz#08291652f0fd29e8466db3976a0908f2b7b6da4f"
-  integrity sha512-3idGnjX1AdlGkVorewqf9H7f5psPEeb19ap3r+7mDq7NJl8bN8CkX5d3MqfIgj+6H4eoSv/qtUaw4MeiB57bKw==
-  dependencies:
-    "@probe.gl/stats" "^4.1.1"
-    monaco-editor "^0.53.0"
-    preact "^10.17.0"
-
 "@emnapi/core@1.4.5":
   version "1.4.5"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.4.5.tgz#bfbb0cbbbb9f96ec4e2c4fd917b7bbe5495ceccb"
@@ -3200,11 +3191,6 @@
   integrity sha512-Z0pOY34GDFl3Q6hUFYf3HkTwKEE02e7QgtJppBt+beEAxnyOpJua+voGFvxINBHa06GwLFFym7gRPY2SiKIfIA==
   dependencies:
     "@types/geojson" "*"
-
-"@types/trusted-types@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-1.0.6.tgz#569b8a08121d3203398290d602d84d73c8dcf5da"
-  integrity sha512-230RC8sFeHoT6sSUlRO6a8cAnclO06eeiq1QDfiv2FGCLWFvvERWgwIQD4FWqD9A69BN7Lzee4OXwoMVnnsWDw==
 
 "@types/trusted-types@^2.0.2":
   version "2.0.7"
@@ -7433,13 +7419,6 @@ moment@^2.24.0, moment@^2.29.4:
   version "2.30.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
   integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
-
-monaco-editor@^0.53.0:
-  version "0.53.0"
-  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.53.0.tgz#2f485492e0ee822be13b1b45e3092922963737ae"
-  integrity sha512-0WNThgC6CMWNXXBxTbaYYcunj08iB5rnx4/G56UOPeL9UVIUGGHA1GR0EWIh9Ebabj7NpCRawQ5b0hfN1jQmYQ==
-  dependencies:
-    "@types/trusted-types" "^1.0.6"
 
 mrmime@^2.0.0:
   version "2.0.1"
