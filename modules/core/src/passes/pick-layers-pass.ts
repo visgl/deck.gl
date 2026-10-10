@@ -76,7 +76,8 @@ export default class PickLayersPass extends LayersPass {
     pickZ,
     canvasContext,
     shaderModuleProps,
-    clearColor
+    clearColor,
+    activateViewport
   }: PickLayersPassRenderOptions): {
     decodePickingColor: PickingColorDecoder | null;
     stats: RenderStats[];
@@ -105,7 +106,8 @@ export default class PickLayersPass extends LayersPass {
       shaderModuleProps,
       clearColor: clearColor ?? [0, 0, 0, 0],
       colorMask: 0xf,
-      scissorRect
+      scissorRect,
+      activateViewport
     });
 
     // Clear the temp field

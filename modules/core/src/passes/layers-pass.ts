@@ -58,6 +58,15 @@ export type LayersPassRenderOptions = {
   shaderModuleProps?: any;
   /** Stores returned results from Effect.preRender, for use downstream in the render pipeline */
   preRenderStats?: Record<string, any>;
+  /**
+   * Whether to call `layer.activateViewport()` for each drawn layer. Default `true`.
+   *
+   * Off-screen passes that render layers with a viewport other than the one they are drawn to
+   * screen with (e.g. a terrain cover or mask texture in Web Mercator while the screen uses
+   * GlobeView) should pass `false`; otherwise projection-dependent layer state such as PathLayer
+   * tessellation is recomputed on every viewport change and can redraw forever.
+   */
+  activateViewport?: boolean;
 };
 
 export type DrawLayerParameters = {
@@ -206,7 +215,8 @@ export default class LayersPass extends Pass {
       views,
       effects,
       canvasContext = this.device.canvasContext!,
-      shaderModuleProps
+      shaderModuleProps,
+      activateViewport = true
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
     evaluateShouldDrawOnly: boolean = false
@@ -228,7 +238,8 @@ export default class LayersPass extends Pass {
         layer,
         drawContext,
         layerFilter,
-        layerFilterCache
+        layerFilterCache,
+        activateViewport
       );
 
       const layerParam = {shouldDrawLayer} as DrawLayerParameters;
@@ -417,7 +428,8 @@ export default class LayersPass extends Pass {
     layer: Layer,
     drawContext: FilterContext,
     layerFilter: ((params: FilterContext) => boolean) | undefined | null,
-    layerFilterCache: Record<string, boolean>
+    layerFilterCache: Record<string, boolean>,
+    activateViewport: boolean = true
   ) {
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
@@ -447,8 +459,12 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // If a layer is drawn, update its viewportChanged flag
-    layer.activateViewport(drawContext.viewport);
+    // If a layer is drawn, update its viewportChanged flag.
+    // Off-screen passes may opt out (see LayersPassRenderOptions.activateViewport) so that a
+    // layer's viewport-dependent state stays bound to the viewport it is drawn to screen with.
+    if (activateViewport) {
+      layer.activateViewport(drawContext.viewport);
+    }
 
     return true;
   }
