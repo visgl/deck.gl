@@ -64,3 +64,31 @@ test('polygon scrolling retains user camera offset and zoom', () => {
   (deck.props.onBeforeRender as any)({deck});
   expect(deck.props.viewState).toEqual(camera);
 });
+
+test('text data updates reset motion baseline without jumping the user camera', () => {
+  const deck = createArrowTextLayerDeck();
+  const update = {
+    animate: true,
+    labelFieldHeight: 1000,
+    clipRects: null,
+    angles: null,
+    sizes: null,
+    layerProps: {}
+  };
+  const now = vi.spyOn(performance, 'now').mockReturnValue(0);
+  try {
+    sources.text.onDataUpdated(update);
+    const camera = {target: [50, 60, 0], zoom: 2};
+    (deck.props.onViewStateChange as any)({viewState: camera});
+    (deck.props.onBeforeRender as any)({deck});
+    expect(deck.props.viewState).toEqual(camera);
+    now.mockReturnValue(1000);
+    (deck.props.onBeforeRender as any)({deck});
+    const movedCamera = deck.props.viewState;
+    sources.text.onDataUpdated({...update, labelFieldHeight: 2000});
+    (deck.props.onBeforeRender as any)({deck});
+    expect(deck.props.viewState).toEqual(movedCamera);
+  } finally {
+    now.mockRestore();
+  }
+});

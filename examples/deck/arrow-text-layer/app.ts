@@ -62,8 +62,8 @@ export function createArrowTextLayerDeck(
         camera = {
           ...camera,
           target: [
-            camera.target![0] + target[0] - previousTarget[0],
-            camera.target![1] + target[1] - previousTarget[1],
+            camera.target![0] + (target[0] - previousTarget[0]),
+            camera.target![1] + (target[1] - previousTarget[1]),
             camera.target![2] ?? 0
           ]
         };
@@ -78,6 +78,7 @@ export function createArrowTextLayerDeck(
     onDataUpdated: (update: ArrowTextDataSourceUpdate) => {
       activeUpdate = update;
       animationSeconds = 0;
+      previousTarget = getTextCameraTarget(update.labelFieldHeight, 0);
       lastAnimationMilliseconds = null;
       setTextLayer(deck, update);
     }

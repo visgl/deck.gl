@@ -46,8 +46,8 @@ export function createArrowPolygonLayerDeck(
         camera = {
           ...camera,
           target: [
-            camera.target![0] + target[0] - previousTarget[0],
-            camera.target![1] + target[1] - previousTarget[1],
+            camera.target![0] + (target[0] - previousTarget[0]),
+            camera.target![1] + (target[1] - previousTarget[1]),
             camera.target![2] ?? 0
           ]
         };
