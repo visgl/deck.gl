@@ -70,6 +70,7 @@ export class GPUTraceCullingEffect implements Effect {
   private encodeTimeMilliseconds = 0;
   private frameIndex = 0;
   private statsReadPending = false;
+  private isFinalized = false;
 
   constructor(
     device: Device,
@@ -175,6 +176,8 @@ export class GPUTraceCullingEffect implements Effect {
   }
 
   cleanup(_context: EffectContext): void {
+    if (this.isFinalized) return;
+    this.isFinalized = true;
     this.compiled?.destroy();
     this.destroyTextSelection();
     this.resources.blockDrawCommands.destroy();
@@ -304,7 +307,7 @@ export class GPUTraceCullingEffect implements Effect {
   }
 
   private async sampleStats(): Promise<void> {
-    if (this.statsReadPending) return;
+    if (this.statsReadPending || this.isFinalized) return;
     this.statsReadPending = true;
     const textSelection = this.textSelection;
     try {
@@ -312,11 +315,13 @@ export class GPUTraceCullingEffect implements Effect {
         this.resources.blockDrawCommands.getInstanceCountByteOffset(0),
         UINT32_BYTE_LENGTH
       );
+      if (this.isFinalized) return;
       this.visibleBlocks = new Uint32Array(blockBytes.buffer, blockBytes.byteOffset, 1)[0]!;
       const cullingCountBytes = await this.resources.cullingCounts.readAsync(
         0,
         UINT32_BYTE_LENGTH * 2
       );
+      if (this.isFinalized) return;
       const cullingCounts = new Uint32Array(
         cullingCountBytes.buffer,
         cullingCountBytes.byteOffset,
@@ -333,7 +338,9 @@ export class GPUTraceCullingEffect implements Effect {
           this.visibleGlyphs = new Uint32Array(glyphBytes.buffer, glyphBytes.byteOffset, 1)[0]!;
         }
       }
-      this.publishStats();
+      if (!this.isFinalized) this.publishStats();
+    } catch {
+      // Optional diagnostics can become unavailable after device loss or resource teardown.
     } finally {
       this.statsReadPending = false;
     }
