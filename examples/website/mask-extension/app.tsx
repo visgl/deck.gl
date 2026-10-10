@@ -166,6 +166,6 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const flights = (await load(DATA_URL, CSVLoader)).data;
+  const flights = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
   root.render(<App data={flights} showFlights />);
 }
