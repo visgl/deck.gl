@@ -10,7 +10,8 @@ import {
   typedArrayFromDataType,
   getBufferAttributeLayout,
   getStride,
-  dataTypeFromTypedArray
+  dataTypeFromTypedArray,
+  ZERO_LOW_BUFFER_NAME
 } from './gl-utils';
 import typedArrayManager from '../../utils/typed-array-manager';
 import {toDoublePrecisionArray} from '../../utils/math-utils';
@@ -117,6 +118,8 @@ export type DataColumnSettings<Options> = DataColumnOptions<Options> & {
 
 type DataColumnInternalState<Options, State> = State & {
   externalBuffer: Buffer | null;
+  /** Whether `externalBuffer` holds interleaved [high, low] rows, e.g. GPU transition output */
+  isExternalDoublePrecisionBuffer: boolean;
   bufferAccessor: DataColumnSettings<Options>;
   allocatedValue: TypedArray | null;
   numInstances: number;
@@ -133,6 +136,8 @@ export default class DataColumn<Options, State> {
   doublePrecision: boolean;
 
   protected _buffer: Buffer | null = null;
+  /** One zero row that supplies the low part of external Buffers on WebGPU */
+  protected _zeroLowBuffer: Buffer | null = null;
   protected state: DataColumnInternalState<Options, State>;
 
   /* eslint-disable max-statements */
@@ -186,6 +191,7 @@ export default class DataColumn<Options, State> {
     this.state = {
       ...state,
       externalBuffer: null,
+      isExternalDoublePrecisionBuffer: false,
       bufferAccessor: this.settings,
       allocatedValue: null,
       numInstances: 0,
@@ -221,13 +227,36 @@ export default class DataColumn<Options, State> {
 
   /** @internal Whether this column's GPU buffer contains interleaved high and low components. */
   get isDoublePrecisionBuffer(): boolean {
+    if (this.state.externalBuffer) {
+      // External Buffers hold high parts only, regardless of the type of an accompanying `value`.
+      // Only deck.gl-produced buffers, e.g. transitions, opt into interleaved rows explicitly.
+      return this.doublePrecision && this.state.isExternalDoublePrecisionBuffer;
+    }
     return this._shouldSplitDoublePrecisionValue(this.value);
+  }
+
+  /**
+   * @internal Whether the low part of this double-precision column is read from a zero buffer.
+   * An external Buffer only supplies the high part, as on WebGL, where the low part is a constant.
+   * WebGPU has no constant attributes, so the low part is bound to a one-row zero buffer instead.
+   */
+  get hasZeroLowBuffer(): boolean {
+    return (
+      this.doublePrecision &&
+      this.device.type === 'webgpu' &&
+      Boolean(this.state.externalBuffer) &&
+      !this.isDoublePrecisionBuffer
+    );
   }
 
   delete(): void {
     if (this._buffer) {
       this._buffer.delete();
       this._buffer = null;
+    }
+    if (this._zeroLowBuffer) {
+      this._zeroLowBuffer.delete();
+      this._zeroLowBuffer = null;
     }
     typedArrayManager.release(this.state.allocatedValue);
     this.state.allocatedValue = null;
@@ -265,6 +294,9 @@ export default class DataColumn<Options, State> {
         // WebGPU cannot override the low part with a constant. Float32 sources are therefore
         // uploaded as interleaved high/zero-low rows and share this buffer with the low attribute.
         result[`${attributeName}64Low`] = result[attributeName];
+      } else if (this.hasZeroLowBuffer) {
+        // Every zero row is interchangeable. Model layouts combine these bindings into one slot.
+        result[ZERO_LOW_BUFFER_NAME] = this._getZeroLowBuffer();
       } else {
         // Disable fp64 low part
         result[`${attributeName}64Low`] = new Float32Array(this.size);
@@ -286,6 +318,8 @@ export default class DataColumn<Options, State> {
       byteStride: this.device.type === 'webgpu' && this.state.constant ? 0 : getStride(accessor)
     };
 
+    // With a zero low buffer, the low part is declared in a separate layout, see
+    // _getZeroLowBufferLayout
     if (this.doublePrecision) {
       const doubleShaderAttributeDefs = resolveDoublePrecisionShaderAttributes(
         accessor,
@@ -296,16 +330,17 @@ export default class DataColumn<Options, State> {
           attributeName,
           {...accessor, ...doubleShaderAttributeDefs.high},
           this.device.type
-        ),
-        getBufferAttributeLayout(
-          `${attributeName}64Low`,
-          {
-            ...accessor,
-            ...doubleShaderAttributeDefs.low
-          },
-          this.device.type
         )
       );
+      if (!this.hasZeroLowBuffer) {
+        attributes.push(
+          getBufferAttributeLayout(
+            `${attributeName}64Low`,
+            {...accessor, ...doubleShaderAttributeDefs.low},
+            this.device.type
+          )
+        );
+      }
     } else if (options) {
       const shaderAttributeDef = resolveShaderAttribute(accessor, options);
       attributes.push(
@@ -320,6 +355,28 @@ export default class DataColumn<Options, State> {
     }
     result.attributes = attributes.filter(Boolean) as BufferAttributeLayout[];
     return result;
+  }
+
+  /** Declares the low parts of `hasZeroLowBuffer` attributes, all reading the same zero row */
+  protected _getZeroLowBufferLayout(
+    shaderAttributes: Record<string, Partial<ShaderAttributeOptions> | null> = {[this.id]: null}
+  ): BufferLayout {
+    const accessor = this.getAccessor();
+    const attributes: (BufferAttributeLayout | null)[] = [];
+    for (const attributeName in shaderAttributes) {
+      attributes.push(
+        getBufferAttributeLayout(
+          `${attributeName}64Low`,
+          {...accessor, ...shaderAttributes[attributeName], offset: 0},
+          this.device.type
+        )
+      );
+    }
+    return {
+      name: ZERO_LOW_BUFFER_NAME,
+      byteStride: 0,
+      attributes: attributes.filter(Boolean) as BufferAttributeLayout[]
+    };
   }
 
   setAccessor(accessor: DataColumnSettings<Options>) {
@@ -372,6 +429,11 @@ export default class DataColumn<Options, State> {
           buffer?: Buffer;
           /** Set to `true` if supplying float values to a unorm attribute */
           normalized?: boolean;
+          /**
+           * @internal Set to `true` if `buffer` holds interleaved [high, low] rows of a
+           * double-precision attribute. Otherwise an external buffer supplies the high part only.
+           */
+          isDoublePrecisionBuffer?: boolean;
         } & Partial<BufferAccessor>)
   ): boolean {
     const {state} = this;
@@ -380,6 +442,7 @@ export default class DataColumn<Options, State> {
       constant?: boolean;
       value?: NumericArray;
       buffer?: Buffer;
+      isDoublePrecisionBuffer?: boolean;
     } & Partial<BufferAccessor>;
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
@@ -428,6 +491,7 @@ export default class DataColumn<Options, State> {
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;
+      state.isExternalDoublePrecisionBuffer = Boolean(opts.isDoublePrecisionBuffer);
       state.constant = false;
       this.value = opts.value || null;
     } else if (opts.value) {
@@ -502,6 +566,9 @@ export default class DataColumn<Options, State> {
     });
 
     this.value = value;
+    // Clear the previous source first: setAccessor derives layout state from it
+    state.constant = false;
+    state.externalBuffer = null;
 
     const splitDoublePrecisionValue = this._shouldSplitDoublePrecisionValue(value);
     const accessor =
@@ -531,8 +598,6 @@ export default class DataColumn<Options, State> {
     }
 
     state.allocatedValue = value;
-    state.constant = false;
-    state.externalBuffer = null;
     return true;
   }
 
@@ -645,6 +710,17 @@ export default class DataColumn<Options, State> {
       }
     }
     return true;
+  }
+
+  protected _getZeroLowBuffer(): Buffer {
+    this._zeroLowBuffer ||= this.device.createBuffer({
+      id: `${this.id}64Low`,
+      usage: Buffer.VERTEX,
+      // Binary accessors and shader attributes may override the declared size. Four
+      // components cover every supported vertex format, including later size changes.
+      data: new Float32Array(4)
+    });
+    return this._zeroLowBuffer;
   }
 
   protected _createBuffer(byteLength: number): Buffer {
