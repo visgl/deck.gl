@@ -8,6 +8,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
+The optional `@deck.gl/core/projection` entry prepares math.gl CRS converters for custom projection views. Source coordinate units and ellipsoids guide meter sizing, including radians and projected feet. CRS identifiers use deck.gl longitude/latitude or easting/northing order; explicit stored-order metadata must match.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

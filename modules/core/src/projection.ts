@@ -28,7 +28,7 @@ export async function createProjectionConverter(
   if (target.kind !== 'projected' || target.toMeter !== 1 || target.verticalUnit !== 1) {
     throw new Error('Projection target must be planar XYZ in meters');
   }
-  const transform = await ProjectionTransform.create({...options, enforceAxis: true});
+  const transform = await ProjectionTransform.create({...options, enforceAxis: false});
   if (transform.lossy) throw new Error('Projection converter requires a lossless transform');
   return {
     sourceCoordinates: {
@@ -52,7 +52,7 @@ export async function createProjectionConverter(
 function validateCoordinates(crs: NormalizedCRS): void {
   if (
     (crs.kind !== 'geographic' && crs.kind !== 'projected') ||
-    (crs.storedAxis ?? crs.axis) !== 'enu'
+    (crs.storedAxis ?? 'enu') !== 'enu'
   ) {
     throw new Error('Projection converter requires longitude/latitude or east/north/up order');
   }
