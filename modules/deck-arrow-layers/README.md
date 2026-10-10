@@ -128,3 +128,10 @@ These modules require those peers at runtime; a regular install alone is insuffi
 Apache Arrow is also a peer dependency (`>=17.0.0`), so applications and the luma.gl
 adapter share the same Arrow types. Supply it in the consuming workspace. The deck.gl
 workspace already receives Arrow through its loaders.gl dependencies.
+
+## Examples and integration tests
+
+The original standalone examples and their shared fixtures are available in
+[`examples/deck`](../../examples/deck/README.md). Run `yarn build-private-examples`
+after linking the unpublished peers. `yarn test-private` includes the copied
+example integration tests alongside the module tests.

@@ -641,3 +641,10 @@ these packages, build a compatible luma.gl checkout and link the required privat
 packages into deck.gl (for example, run `yarn link` in each luma.gl package, then
 `yarn link @luma.gl/experimental @luma.gl/text @luma.gl/arrow` in deck.gl).
 These modules require those peers at runtime; a regular install alone is insufficient.
+
+## Examples and integration tests
+
+The original standalone examples and their shared fixtures are available in
+[`examples/deck`](../../examples/deck/README.md). Run `yarn build-private-examples`
+after linking the unpublished peers. `yarn test-private` includes the copied
+example integration tests alongside the module tests.
