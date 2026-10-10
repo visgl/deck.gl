@@ -77,6 +77,23 @@ test('LightingEffect#getShaderModuleProps', () => {
   layerManager.finalize();
 });
 
+test('LightingEffect#getShaderModuleProps material', () => {
+  const lightingEffect = new LightingEffect();
+  const getMaterialProps = material => {
+    const layer = new PolygonLayer({data: [], material});
+    layer.context = {viewport: testViewport};
+    const {phongMaterial, gouraudMaterial} = lightingEffect.getShaderModuleProps(layer, {});
+    expect(gouraudMaterial, 'gouraud and phong material props match').toEqual(phongMaterial);
+    return phongMaterial;
+  };
+
+  const material = {ambient: 0.5, diffuse: 0.5, shininess: 16, specularColor: [10, 20, 30]};
+  expect(getMaterialProps(material), 'material object is forwarded').toBe(material);
+  expect(getMaterialProps(true), 'material: true uses default material').toBe(true);
+  expect(getMaterialProps(false), 'material: false disables lighting').toEqual({unlit: true});
+  expect(getMaterialProps(null), 'material: null disables lighting').toEqual({unlit: true});
+});
+
 test('LightingEffect#preRender, cleanup', () => {
   const dirLight0 = new DirectionalLight({
     color: [255, 255, 255],
