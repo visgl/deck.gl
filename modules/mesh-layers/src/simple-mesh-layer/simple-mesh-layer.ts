@@ -37,24 +37,37 @@ import type {
   Color,
   TextureSource
 } from '@deck.gl/core';
-import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {MeshAttribute, MeshAttributes, TypedArray} from '@loaders.gl/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {getMeshBoundingBox} from '@loaders.gl/schema';
 
-function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
-  const positionAttribute = attributes.positions || attributes.POSITION;
+/** A mesh attribute, or a typed array whose size is implied by the attribute name */
+type MeshAttributeInput = MeshAttribute | TypedArray;
+type MeshAttributesInput = Record<string, MeshAttributeInput>;
+
+function getMeshAttribute(attribute: MeshAttributeInput, size: number): MeshAttribute {
+  return ArrayBuffer.isView(attribute) ? {size, value: attribute} : attribute;
+}
+
+function normalizeGeometryAttributes(attributes: MeshAttributesInput): MeshAttributes {
+  const positionAttribute = getMeshAttribute(attributes.positions || attributes.POSITION, 3);
   log.assert(positionAttribute, 'no "postions" or "POSITION" attribute in mesh');
 
   const vertexCount = positionAttribute.value.length / positionAttribute.size;
-  let colorAttribute = attributes.COLOR_0 || attributes.colors;
+  const colors = attributes.COLOR_0 || attributes.colors;
+  // Vertex colors may be RGB or RGBA
+  let colorAttribute = getMeshAttribute(
+    colors,
+    ArrayBuffer.isView(colors) ? colors.length / vertexCount : 0
+  );
   if (!colorAttribute) {
     colorAttribute = {size: 3, value: new Float32Array(vertexCount * 3).fill(1)};
   }
-  let normalAttribute = attributes.NORMAL || attributes.normals;
+  let normalAttribute = getMeshAttribute(attributes.NORMAL || attributes.normals, 3);
   if (!normalAttribute) {
     normalAttribute = {size: 3, value: new Float32Array(vertexCount * 3).fill(0)};
   }
-  let texCoordAttribute = attributes.TEXCOORD_0 || attributes.texCoords;
+  let texCoordAttribute = getMeshAttribute(attributes.TEXCOORD_0 || attributes.texCoords, 2);
   if (!texCoordAttribute) {
     texCoordAttribute = {size: 2, value: new Float32Array(vertexCount * 2).fill(0)};
   }
@@ -96,7 +109,7 @@ function getGeometry(data: Mesh): Geometry {
   } else {
     return new Geometry({
       topology: 'triangle-list',
-      attributes: normalizeGeometryAttributes(data as MeshAttributes)
+      attributes: normalizeGeometryAttributes(data as MeshAttributesInput)
     });
   }
 }
@@ -106,10 +119,10 @@ const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 type Mesh =
   | GeometryType
   | {
-      attributes: MeshAttributes;
+      attributes: MeshAttributesInput;
       indices?: MeshAttribute;
     }
-  | MeshAttributes;
+  | MeshAttributesInput;
 
 type _SimpleMeshLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
