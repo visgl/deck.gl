@@ -206,8 +206,8 @@ try {
         initialZoom
       );
       await page.evaluate(() =>
-        window.weatherScene.deck.setProps({
-          initialViewState: {
+        window.weatherScene.deck.props.onViewStateChange({
+          viewState: {
             longitude: -74.006,
             latitude: 40.7128,
             zoom: 15.6,
