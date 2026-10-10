@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- luma-example-support -->
+    <meta name="luma-example-id" content="deck/city-scene" />
+    <meta name="luma-example-backends" content="webgpu,webgl2" />
+    <meta name="luma-example-mobile" content="full" />
+    <meta name="luma-example-mobile-profile" content="standard" />
+    <script type="module" data-luma-example-support-bootstrap>
+      import {installStandaloneExampleSupport} from '../../example-support.ts';
+      const exampleSupport = await installStandaloneExampleSupport();
+      if (!exampleSupport.supported) {
+        document.querySelectorAll('script[type="module"]:not([data-luma-example-support-bootstrap])').forEach(script => script.remove());
+      }
+    </script>
+    <!-- /luma-example-support -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Riverfront Water · luma.gl</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="city" aria-label="Interactive three-dimensional river district"></div>
+    <aside class="luma-example-infobox luma-example-infobox--overlay">
+      <p class="eyebrow">luma.gl + deck.gl</p>
+      <h1>Riverfront Water</h1>
+      <section class="control-card">
+        <h2>Scene</h2>
+        <label>View <select id="camera"><option value="district">District</option><option value="overhead">Overhead</option><option value="waterfront">Waterfront</option></select></label>
+        <label>Renderer <select id="backend"><option value="webgpu">WebGPU</option><option value="webgl">WebGL2</option></select></label>
+        <label class="toggle"><input id="buildings" type="checkbox" checked /> Show buildings</label>
+        <label>Building edges <select id="edge-style"><option value="none">None</option><option value="solid">Solid</option><option value="pencil">Pencil</option></select></label>
+        <label>Edge width <input id="edge-width" type="range" min="0.5" max="5" step="0.1" value="2.2" disabled /></label>
+      </section>
+      <section class="control-card">
+        <h2>Water</h2>
+        <label class="toggle"><input id="water" type="checkbox" checked /> Animated water</label>
+        <label class="toggle"><input id="reflections" type="checkbox" checked /> Scene reflections</label>
+        <label>Reflections <select id="reflection-quality"><option value="fast">Fast</option><option value="balanced" selected>Balanced</option><option value="detailed">Detailed</option></select></label>
+        <label>Reflection view <select id="reflection-view" title="Coverage: blue marks material fallback; gold marks stronger scene reflection confidence."><option value="0">Final image</option><option value="1">Scene reflections</option><option value="2">Reflection coverage</option><option value="3">Material fallback</option></select></label>
+        <label>Style <select id="water-style"><option value="river">River</option><option value="classic">Classic</option></select></label>
+        <label>Water tint <select id="water-preset"><option value="teal">River teal</option><option value="slate">Slate grey</option><option value="deep-blue">Deep blue</option><option value="custom">Custom color</option></select></label>
+        <label>Custom tint <input id="water-color" type="color" value="#0b4252" /></label>
+        <label>Ripples <input id="strength" type="range" min="0" max="1" step="0.05" value="0.55" /></label>
+        <button id="playback" type="button">Pause waves</button>
+      </section>
+      <output id="status" aria-live="polite">Preparing the district…</output>
+      <output class="selection" id="selection" aria-live="polite">Click a building or the river</output>
+      <p class="hint">Drag to move · Scroll to zoom<br />Shift + drag to orbit</p>
+    </aside>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
