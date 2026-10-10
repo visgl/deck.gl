@@ -362,7 +362,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       changeFlags.projectionChanged ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
       (this.context.viewport.preproject && props.modelMatrix !== oldProps.modelMatrix);
-    const refinementChanged = props._projectionTolerance !== oldProps._projectionTolerance;
+    const refinementChanged =
+      props._projectionTolerance !== oldProps._projectionTolerance ||
+      (props._projectionTolerance > 0 && props._normalize !== oldProps._normalize);
     const geometryConfigChanged =
       refinementChanged ||
       changeFlags.dataChanged ||
