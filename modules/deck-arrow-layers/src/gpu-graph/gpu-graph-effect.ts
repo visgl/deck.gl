@@ -306,13 +306,12 @@ export class GPUGraphDeckEffect implements Effect {
     }
 
     const frame = new GPUCommandGraph<void>(device, {id: 'gpu-graph-deck-frame'});
+    const search = new GPUCommandGraph<void>(device, {id: 'gpu-graph-deck-selection'});
+    this.search.addToGraph(search);
+    this.searchGraph = search.compile();
     if (this.activeLayoutMode === 'sampled') {
-      const search = new GPUCommandGraph<void>(device, {id: 'gpu-graph-deck-selection'});
-      this.search.addToGraph(search);
-      this.searchGraph = search.compile();
       options.addSampledLayoutToGraph!(frame, this.layout);
     } else {
-      this.search.addToGraph(frame);
       if (this.spatialLayout) this.spatialLayout.addToGraph(frame);
       else this.layout.addToGraph(frame);
     }
