@@ -57,6 +57,10 @@ import {resolve} from 'path';
 import {browserCommands} from './test/setup/browser-commands';
 
 const rootDir = import.meta.dirname;
+// These prototypes require locally linked, unpublished luma.gl peers.
+const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
+const privateNodeTests = includePrivateModules ? ['modules/deck-*/test/**/*.node.spec.ts'] : [];
+const privateBrowserTests = includePrivateModules ? ['modules/deck-*/test/**/*.spec.ts'] : [];
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
@@ -77,6 +81,8 @@ const excludedTests = [
 // Match aliases from .ocularrc.js
 // Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
+  '@deck.gl-community/gpu-layers': resolve(rootDir, 'modules/deck-gpu-layers/src'),
+  '@deck.gl-community/arrow-layers': resolve(rootDir, 'modules/deck-arrow-layers/src'),
   // Explicit vitest entry point (must come before @deck.gl/test-utils)
   '@deck.gl/test-utils/vitest': resolve(rootDir, 'modules/test-utils/src/vitest.ts'),
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
@@ -99,6 +105,9 @@ const aliases = {
   'deck.gl-test': resolve(rootDir, 'test')
 };
 
+// Linked private luma.gl peers must share resource classes and Arrow types with deck.gl.
+const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/gpgpu', '@luma.gl/shadertools', 'apache-arrow'];
+
 // Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
 // until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly
 const browserAliases = {
@@ -111,7 +120,7 @@ const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
-  exclude: ['modules/test-utils/**', '**/node_modules/**']
+  exclude: ['modules/test-utils/**', '**/node_modules/**', ...(includePrivateModules ? [] : ['modules/deck-*/**'])]
 };
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
@@ -166,11 +175,11 @@ const projects = [
       // Used by test-fast for quick validation
       {
         extends: true,
-        resolve: {alias: aliases},
+        resolve: {alias: aliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/modules/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.node.spec.ts', ...privateNodeTests],
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
@@ -213,7 +222,7 @@ const projects = [
       // Used by test-headless and test-ci
       {
         extends: true,
-        resolve: {alias: browserAliases},
+        resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
         server: serverConfig,
@@ -223,8 +232,8 @@ const projects = [
           // automated runs. These browser-input tests have become flaky across
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
-          include: ['test/modules/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -251,14 +260,14 @@ const projects = [
       // Used by test-browser
       {
         extends: true,
-        resolve: {alias: browserAliases},
+        resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
         server: serverConfig,
         test: {
           name: 'browser',
-          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,
