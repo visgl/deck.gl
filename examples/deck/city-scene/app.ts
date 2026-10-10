@@ -85,11 +85,16 @@ export function createCityScene(parent: HTMLDivElement, options: DeckExampleDevi
   ) {
     waterVertices.set(waterMesh.subarray(sourceIndex, sourceIndex + 3), targetIndex);
   }
-  const deck = new Deck({
+  let viewState: MapViewState = {...RIVERFRONT_VIEW_LIMITS, ...CAMERA_PRESETS.district};
+  const deck = new Deck<MapView>({
     parent,
     ...getDeckExampleProps(options),
     views: new MapView({id: 'city', controller: true}),
-    initialViewState: {...RIVERFRONT_VIEW_LIMITS, ...CAMERA_PRESETS.district},
+    viewState,
+    onViewStateChange: ({viewState: nextViewState}) => {
+      viewState = nextViewState;
+      deck.setProps({viewState});
+    },
     layers: [],
     _animate: true,
     onLoad: () => {
@@ -243,8 +248,9 @@ export function createCityScene(parent: HTMLDivElement, options: DeckExampleDevi
     features,
     setCamera(preset: keyof typeof CAMERA_PRESETS) {
       riverReflectionEffect?.resetHistory();
+      viewState = {...RIVERFRONT_VIEW_LIMITS, ...CAMERA_PRESETS[preset]};
       deck.setProps({
-        initialViewState: {...RIVERFRONT_VIEW_LIMITS, ...CAMERA_PRESETS[preset]},
+        viewState,
         _animate: shouldAnimate()
       });
     },

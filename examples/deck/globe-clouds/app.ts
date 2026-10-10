@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Deck, _GlobeView} from '@deck.gl/core';
+import {Deck, _GlobeView, type MapViewState} from '@deck.gl/core';
 import {SkyLayer} from '@deck.gl-community/gpu-layers';
 import {DynamicTexture, loadImageBitmap} from '@luma.gl/engine';
 import {
@@ -55,7 +55,8 @@ export function createGlobeCloudScene(
   const highDynamicRange =
     (options.device?.type ?? options.deviceType ?? 'webgpu') === 'webgpu' &&
     window.matchMedia('(dynamic-range: high)').matches;
-  const deck = new Deck({
+  let viewState: MapViewState = initialViewState;
+  const deck = new Deck<_GlobeView>({
     parent,
     ...deviceProps,
     deviceProps: {
@@ -70,7 +71,11 @@ export function createGlobeCloudScene(
         : {alphaMode: 'opaque'}
     },
     views: new _GlobeView({id: 'globe', controller: true}),
-    initialViewState,
+    viewState,
+    onViewStateChange: ({viewState: nextViewState}) => {
+      viewState = nextViewState;
+      deck.setProps({viewState});
+    },
     layers: [],
     _animate: true,
     onDeviceInitialized: device => {
@@ -212,17 +217,17 @@ export function createGlobeCloudScene(
       const longitude = (Math.atan2(direction[0], -direction[1]) * 180) / Math.PI;
       const latitude = (Math.asin(direction[2]) * 180) / Math.PI;
       // Keep the planet small and offset the body from its silhouette instead of hiding it behind Earth.
-      deck.setProps({
-        initialViewState: {
-          ...initialViewState,
-          longitude: longitude + 198,
-          latitude: -latitude,
-          zoom: -1.2
-        }
-      });
+      viewState = {
+        ...initialViewState,
+        longitude: longitude + 198,
+        latitude: -latitude,
+        zoom: -1.2
+      };
+      deck.setProps({viewState});
     },
     centerView() {
-      deck.setProps({initialViewState: {...initialViewState}});
+      viewState = {...initialViewState};
+      deck.setProps({viewState});
     },
     finalize() {
       if (diagnostics.finalized) return;
