@@ -462,3 +462,149 @@ test('WebGPU binary polygons project every subdivided vertex', async ({skip}) =>
     manager.finalize();
   }
 });
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} adaptive tolerance rebuilds every row alongside a partial data diff`, () => {
+    const viewport = new CustomProjectionViewport({
+      projection: {
+        forward: ([x, y, z = 0]) => [x, y + x * x, z],
+        inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+      }
+    });
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const data = [
+      [
+        [0, 0],
+        [8, 0],
+        [8, 2],
+        [0, 0]
+      ],
+      [
+        [10, 0],
+        [18, 0],
+        [18, 2],
+        [10, 0]
+      ]
+    ];
+    let layer = new LayerType({
+      id: 'adaptive-partial',
+      data,
+      getPath: p => p,
+      getPolygon: p => p,
+      _projectionTolerance: 1
+    });
+    try {
+      manager.setLayers([layer]);
+      const oldCount = layer.state.startIndices[2] - layer.state.startIndices[1];
+      layer = layer.clone({
+        data: data.slice(),
+        _dataDiff: () => [{startRow: 0, endRow: 1}],
+        _projectionTolerance: 0.01
+      });
+      manager.setLayers([layer]);
+      const newCount = layer.state.startIndices[2] - layer.state.startIndices[1];
+      expect(newCount).toBeGreaterThan(oldCount);
+      layer = layer.clone({_projectionTolerance: 0});
+      manager.setLayers([layer]);
+      expect(layer.state.startIndices[2] - layer.state.startIndices[1]).toBeLessThan(oldCount);
+    } finally {
+      manager.finalize();
+    }
+  });
+
+  test(`${LayerType.layerName} adaptive refinement rejects GPU-only coordinates`, () => {
+    const viewport = new CustomProjectionViewport(options);
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const buffer = device.createBuffer({data: new Float32Array([0, 0, 0, 1, 1, 0, 0, 0, 0])});
+    const geometry = LayerType === PathLayer ? 'getPath' : 'getPolygon';
+    try {
+      expect(() =>
+        manager.setLayers([
+          new LayerType({
+            id: 'adaptive-gpu',
+            _projectionTolerance: 1,
+            data: {length: 1, startIndices: [0, 3], attributes: {[geometry]: buffer}}
+          })
+        ])
+      ).toThrow('Projection refinement');
+    } finally {
+      manager.finalize();
+      buffer.destroy();
+    }
+  });
+}
+
+test('adaptive RGB paths accept the default RGBA color', () => {
+  const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  try {
+    const layer = new PathLayer({
+      id: 'adaptive-rgb',
+      data: [
+        [
+          [0, 0],
+          [1, 1]
+        ]
+      ],
+      getPath: p => p,
+      colorFormat: 'RGB',
+      _projectionTolerance: 1
+    });
+    manager.setLayers([layer]);
+    expect(layer.state.numInstances).toBeGreaterThan(0);
+  } finally {
+    manager.finalize();
+  }
+});
+
+for (const accessor of ['getFillColor', 'getLineColor', 'getElevation']) {
+  test(`adaptive polygons reject per-vertex ${accessor}`, () => {
+    const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    try {
+      const layer = new SolidPolygonLayer({
+        id: 'adaptive-style',
+        data: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ]
+        ],
+        getPolygon: p => p,
+        wireframe: true,
+        extruded: true,
+        _projectionTolerance: 1,
+        [accessor]: () =>
+          accessor === 'getElevation'
+            ? [1, 2, 3]
+            : [
+                [1, 2, 3, 255],
+                [4, 5, 6, 255],
+                [7, 8, 9, 255]
+              ]
+      });
+      expect(() => manager.setLayers([layer])).toThrow('per-object');
+    } finally {
+      manager.finalize();
+    }
+  });
+}
