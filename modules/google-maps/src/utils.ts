@@ -155,19 +155,17 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   // google maps places overlays in a container anchored at the map center.
   // the container CSS is manipulated during dragging.
   // We need to update left/top of the deck canvas to match the base map.
-  const centerLngLat = pixelToLngLat(projection, width / 2, height / 2);
-  const centerH = new google.maps.LatLng(0, centerLngLat[0]);
-  const centerContainerPx = projection.fromLatLngToContainerPixel(centerH);
-  const centerDivPx = projection.fromLatLngToDivPixel(centerH);
+  const divOrigin = getDivOrigin(map, projection);
 
-  if (!topRight || !bottomLeft || !centerDivPx || !centerContainerPx) {
+  if (!topRight || !bottomLeft || !divOrigin) {
     return {width, height, left: 0, top: 0};
   }
-  const leftOffset = Math.round(centerDivPx.x - centerContainerPx.x);
-  let topOffset = centerDivPx.y - centerContainerPx.y;
+  const leftOffset = Math.round(-divOrigin.x);
+  let topOffset = -divOrigin.y;
 
-  const topLngLat = pixelToLngLat(projection, width / 2, 0);
-  const bottomLngLat = pixelToLngLat(projection, width / 2, height);
+  const centerLngLat = pixelToLngLat(projection, divOrigin, width / 2, height / 2);
+  const topLngLat = pixelToLngLat(projection, divOrigin, width / 2, 0);
+  const bottomLngLat = pixelToLngLat(projection, divOrigin, width / 2, height);
 
   // Compute fractional center.
   let latitude = centerLngLat[1];
@@ -177,9 +175,9 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   if (Math.abs(latitude) > MAX_LATITUDE) {
     latitude = latitude > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
     const center = new google.maps.LatLng(latitude, longitude);
-    const centerPx = projection.fromLatLngToContainerPixel(center);
+    const centerDivPx = projection.fromLatLngToDivPixel(center);
     // @ts-ignore (TS2531) Object is possibly 'null'
-    topOffset += centerPx.y - height / 2;
+    topOffset += centerDivPx.y + divOrigin.y - height / 2;
   }
   topOffset = Math.round(topOffset);
 
@@ -284,20 +282,66 @@ function getMapSize(map: google.maps.Map): {width: number; height: number} {
   };
 }
 
+/**
+ * Google Maps reports container pixels (mouse event pixels, and the div-to-container offset
+ * in MapCanvasProjection) in rendered units, which differ from CSS layout units when the map
+ * or an ancestor has a CSS transform. Returns the rendered / layout size ratio of the map.
+ */
+function getContainerPixelScale(map: google.maps.Map): {x: number; y: number} {
+  const container = map.getDiv().firstChild as HTMLElement | null;
+  if (!container?.offsetWidth || !container.offsetHeight) {
+    return {x: 1, y: 1};
+  }
+  const {width, height} = container.getBoundingClientRect();
+  return {
+    x: width / container.offsetWidth || 1,
+    y: height / container.offsetHeight || 1
+  };
+}
+
+/**
+ * Position of the overlay pane origin (div pixel 0,0) relative to the map container, in CSS
+ * layout pixels. Div pixels are always in layout units, but container pixels add this offset
+ * in rendered units, so it is measured from a single point and scaled back.
+ */
+function getDivOrigin(
+  map: google.maps.Map,
+  projection: google.maps.MapCanvasProjection
+): {x: number; y: number} | null {
+  const center = map.getCenter();
+  if (!center) {
+    return null;
+  }
+  const latLng = new google.maps.LatLng(0, center.lng());
+  const containerPx = projection.fromLatLngToContainerPixel(latLng);
+  const divPx = projection.fromLatLngToDivPixel(latLng);
+  if (!containerPx || !divPx) {
+    return null;
+  }
+  const pixelScale = getContainerPixelScale(map);
+  return {
+    x: (containerPx.x - divPx.x) / pixelScale.x,
+    y: (containerPx.y - divPx.y) / pixelScale.y
+  };
+}
+
+/** Get the coordinates at a container position given in CSS layout pixels */
 function pixelToLngLat(
   projection: google.maps.MapCanvasProjection,
+  divOrigin: {x: number; y: number},
   x: number,
   y: number
 ): [longitude: number, latitude: number] {
-  const point = new google.maps.Point(x, y);
-  const latLng = projection.fromContainerPixelToLatLng(point);
+  const point = new google.maps.Point(x - divOrigin.x, y - divOrigin.y);
+  const latLng = projection.fromDivPixelToLatLng(point);
   // @ts-ignore (TS2531) Object is possibly 'null'
   return [latLng.lng(), latLng.lat()];
 }
 
 function getEventPixel(event, deck: Deck): {x: number; y: number} {
   if (event.pixel) {
-    return event.pixel;
+    const pixelScale = getContainerPixelScale(deck.userData._googleMap);
+    return {x: event.pixel.x / pixelScale.x, y: event.pixel.y / pixelScale.y};
   }
   // event.pixel may not exist when clicking on a POI
   // https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
