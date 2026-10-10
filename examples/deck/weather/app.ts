@@ -319,7 +319,9 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
     setProjection(value: 'map' | 'globe') {
       deck.setProps({
         views:
-          value === 'globe' ? new _GlobeView({controller: true}) : new MapView({controller: true})
+          value === 'globe'
+            ? new _GlobeView({controller: true})
+            : new MapView({controller: true, fovy: SKY_FIELD_OF_VIEW})
       });
     },
     setPreset(value: WeatherPreset) {
