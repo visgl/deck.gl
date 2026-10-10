@@ -31,7 +31,7 @@ const INITIAL_VIEW_STATE = {
 export default function App({
   device,
   data = TILESET_URL,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+  mapStyle = 'https://tiles.openfreemap.org/styles/dark'
 }) {
   const layers = [
     new Tile3DLayer({

@@ -39,7 +39,7 @@ const App = (data) => (
     controller={true}
     layers={[new ScatterplotLayer({data})]}
   >
-    <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
+    <Map mapStyle="https://tiles.openfreemap.org/styles/positron" />
   </DeckGL>
 );
 
@@ -101,7 +101,7 @@ It is possible to use JSX syntax to create deck.gl views as React children of th
 ```jsx
   <DeckGL initialViewState={...viewState} layers={layers} >
     <MapView id="map" width="50%" controller={true} >
-      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
+      <Map mapStyle="https://tiles.openfreemap.org/styles/positron" />
     </MapView>
     <FirstPersonView width="50%" x="50%" fovy={50} />
   <DeckGL />
@@ -117,7 +117,7 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
 
   <DeckGL initialViewState={...viewState} layers={layers} views={views} >
     <View id="map">
-      <Map mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json" />
+      <Map mapStyle="https://tiles.openfreemap.org/styles/positron" />
     </View>
   <DeckGL />
 ```

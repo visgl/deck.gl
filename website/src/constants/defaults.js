@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import lightStyle from '../../static/mapstyle/deck-light.json';
+import darkStyle from '../../static/mapstyle/deck-dark.json';
+
 export const MAPBOX_STYLES = {
-  LIGHT: 'https://deck.gl/mapstyle/deck-light.json',
-  LIGHT_LABEL: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  DARK: 'https://deck.gl/mapstyle/deck-dark.json',
-  DARK_LABEL: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  LIGHT: lightStyle,
+  LIGHT_LABEL: 'https://tiles.openfreemap.org/styles/positron',
+  DARK: darkStyle,
+  DARK_LABEL: 'https://tiles.openfreemap.org/styles/dark',
   BLANK: {
     version: 8,
     sources: {},

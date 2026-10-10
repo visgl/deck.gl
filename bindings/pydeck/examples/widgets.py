@@ -69,7 +69,9 @@ widgets = [
     pdk.Widget("InfoWidget", mode="hover", getTooltip="@@=object && object.properties && object.properties.name"),
 ]
 
+# Keep the standalone renderer so configured widgets remain available.
 deck = pdk.Deck(
+    map_style="https://tiles.openfreemap.org/styles/dark",
     layers=[countries_layer, airports_layer],
     initial_view_state=view_state,
     widgets=widgets,

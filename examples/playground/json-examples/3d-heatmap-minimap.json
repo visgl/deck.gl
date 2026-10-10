@@ -15,13 +15,13 @@
     {
       "@@type": "MapView",
       "id": "main",
-      "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json",
+      "mapStyle": "https://tiles.openfreemap.org/styles/dark",
       "controller": true
     },
     {
       "@@type": "MapView",
       "id": "minimap",
-      "mapStyle": "https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json",
+      "mapStyle": "https://tiles.openfreemap.org/styles/positron",
       "width": "40%",
       "height": "40%",
       "x": "55%",

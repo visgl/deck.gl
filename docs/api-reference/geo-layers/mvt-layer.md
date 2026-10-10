@@ -25,9 +25,7 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 
 const layer = new MVTLayer({
   id: 'MVTLayer',
-  data: [
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
   minZoom: 0,
   maxZoom: 14,
   getFillColor: f => {
@@ -69,6 +67,14 @@ new Deck({
   getTooltip: ({object}) => object && (object.properties.name || object.properties.layerName),
   layers: [layer]
 });
+
+const attribution = document.createElement('div');
+attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+Object.assign(attribution.style, {
+  position: 'absolute', right: '0', bottom: '0',
+  background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'
+});
+document.body.appendChild(attribution);
 ```
 
   </TabItem>
@@ -88,9 +94,7 @@ type PropertiesType = {
 
 const layer = new MVTLayer<PropertiesType>({
   id: 'MVTLayer',
-  data: [
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
   minZoom: 0,
   maxZoom: 14,
   getFillColor: (f: Feature<Geometry, PropertiesType>) => {
@@ -132,6 +136,14 @@ new Deck({
   getTooltip: ({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName),
   layers: [layer]
 });
+
+const attribution = document.createElement('div');
+attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+Object.assign(attribution.style, {
+  position: 'absolute', right: '0', bottom: '0',
+  background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'
+});
+document.body.appendChild(attribution);
 ```
 
   </TabItem>
@@ -154,9 +166,7 @@ type PropertiesType = {
 function App() {
   const layer = new MVTLayer<PropertiesType>({
     id: 'MVTLayer',
-    data: [
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
     minZoom: 0,
     maxZoom: 14,
     getFillColor: (f: Feature<Geometry, PropertiesType>) => {
@@ -188,16 +198,23 @@ function App() {
     picking: true
   });
 
-  return <DeckGL
-    initialViewState={{
-      longitude: -122.4,
-      latitude: 37.74,
-      zoom: 11
-    }}
-    controller
-    getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
-    layers={[layer]}
-  />;
+  return <>
+    <DeckGL
+      initialViewState={{
+        longitude: -122.4,
+        latitude: 37.74,
+        zoom: 11
+      }}
+      controller
+      getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
+      layers={[layer]}
+    />
+    <div style={{position: 'absolute', right: 0, bottom: 0, background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'}}>
+      <a href="https://openfreemap.org/">OpenFreeMap</a>{' '}
+      <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from{' '}
+      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+    </div>
+  </>;
 }
 ```
 
@@ -205,6 +222,8 @@ function App() {
 </Tabs>
 
 
+
+When rendering OpenFreeMap tiles directly with `MVTLayer`, include visible attribution as above. MapLibre basemaps display their TileJSON attribution automatically.
 
 ## Installation
 
