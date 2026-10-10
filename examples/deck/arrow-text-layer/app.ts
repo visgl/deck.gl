@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Deck, OrthographicView} from '@deck.gl/core';
+import {Deck, OrthographicView, type OrthographicViewState} from '@deck.gl/core';
 import {ArrowTextLayer} from '@deck.gl-community/arrow-layers';
 import {buildSdfFontAtlas, type FontAtlas} from '@luma.gl/text';
 import {ArrowDeck} from '../arrow-deck';
@@ -34,14 +34,20 @@ export function createArrowTextLayerDeck(
 ) {
   let activeUpdate: ArrowTextDataSourceUpdate | null = null;
   let animationSeconds = 0;
+  let camera: OrthographicViewState = {target: [0, 0, 0], zoom: 0};
+  let previousTarget: [number, number] = [0, 0];
   let lastAnimationMilliseconds: number | null = null;
 
-  const deck = new ArrowDeck({
+  const deck = new ArrowDeck<OrthographicView>({
     parent,
     ...getDeckExampleProps(options),
     views: new OrthographicView({id: 'main'}),
     initialViewState: {target: [0, 0], zoom: 0},
     controller: true,
+    onViewStateChange: ({viewState}) => {
+      camera = viewState;
+      deck.setProps({viewState: camera});
+    },
     getTooltip: getArrowLayerTooltip,
     layers: [],
     onLoad: ({device}) => dataSource.initialize(device),
@@ -51,13 +57,18 @@ export function createArrowTextLayerDeck(
         animationSeconds += Math.max(timeMilliseconds - lastAnimationMilliseconds, 0) / 1000;
       }
       lastAnimationMilliseconds = timeMilliseconds;
-      if (activeUpdate) {
-        deck?.setProps({
-          viewState: {
-            target: getTextCameraTarget(activeUpdate.labelFieldHeight, animationSeconds),
-            zoom: 0
-          }
-        });
+      if (activeUpdate?.animate) {
+        const target = getTextCameraTarget(activeUpdate.labelFieldHeight, animationSeconds);
+        camera = {
+          ...camera,
+          target: [
+            camera.target![0] + target[0] - previousTarget[0],
+            camera.target![1] + target[1] - previousTarget[1],
+            camera.target![2] ?? 0
+          ]
+        };
+        previousTarget = target;
+        deck.setProps({viewState: camera});
       }
     },
     onFinalize: () => dataSource.finalize()

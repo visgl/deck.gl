@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {OrthographicView} from '@deck.gl/core';
+import {OrthographicView, type OrthographicViewState} from '@deck.gl/core';
 import {ArrowPolygonLayer, type ArrowLayerPickingInfo} from '@deck.gl-community/arrow-layers';
 import {
   ArrowPolygonDataSource,
@@ -19,13 +19,19 @@ export function createArrowPolygonLayerDeck(
 ) {
   let activeUpdate: ArrowPolygonDataSourceUpdate | null = null;
   let animationSeconds = 0;
+  let camera: OrthographicViewState = {target: [0, 0, 0], zoom: 9};
+  let previousTarget: [number, number] = [0, 0];
   let lastAnimationMilliseconds: number | null = null;
 
-  const deck = new ArrowDeck({
+  const deck = new ArrowDeck<OrthographicView>({
     parent,
     ...getDeckExampleProps(options),
     views: new OrthographicView({id: 'main', controller: true}),
-    initialViewState: {target: [0, 0], zoom: 9},
+    initialViewState: camera,
+    onViewStateChange: ({viewState}) => {
+      camera = viewState;
+      deck.setProps({viewState: camera});
+    },
     getTooltip: getArrowLayerTooltip,
     layers: [],
     onLoad: ({device}) => dataSource.initialize(device),
@@ -36,9 +42,17 @@ export function createArrowPolygonLayerDeck(
       }
       lastAnimationMilliseconds = timeMilliseconds;
       if (activeUpdate) {
-        deck.setProps({
-          viewState: {target: getPolygonScrollCenter(activeUpdate, animationSeconds), zoom: 9}
-        });
+        const target = getPolygonScrollCenter(activeUpdate, animationSeconds);
+        camera = {
+          ...camera,
+          target: [
+            camera.target![0] + target[0] - previousTarget[0],
+            camera.target![1] + target[1] - previousTarget[1],
+            camera.target![2] ?? 0
+          ]
+        };
+        previousTarget = target;
+        deck.setProps({viewState: camera});
       }
     },
     onFinalize: () => dataSource.finalize()
@@ -48,8 +62,10 @@ export function createArrowPolygonLayerDeck(
       activeUpdate = update;
       animationSeconds = 0;
       lastAnimationMilliseconds = null;
+      previousTarget = update.viewState.startCenter;
+      camera = {target: [...previousTarget, 0], zoom: 9};
       deck.setProps({
-        viewState: {target: update.viewState.startCenter, zoom: 9},
+        viewState: camera,
         layers: [makeArrowPolygonLayer(update, dataSource)]
       });
     },

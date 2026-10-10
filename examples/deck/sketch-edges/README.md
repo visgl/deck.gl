@@ -30,6 +30,6 @@ and readback orientation; no city or water example files are needed here.
 changes, stable replacement, hidden-edge occlusion, picking, resize, grazing views, and cleanup.
 Screenshots are written to the system temporary folder. These checks are not hardware benchmarks.
 
-To exercise a production build with the same visual checks, run `yarn serve` and set
+To exercise a production build with the same visual checks, run `yarn vite preview` and set
 `SKETCH_EXAMPLE_URL=http://localhost:4173/` when invoking
 `yarn test:visual`. See the parent README for setup and standalone build commands.
