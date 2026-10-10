@@ -628,8 +628,9 @@ Source snapshot: `visgl/luma.gl@23eb0f713e1f66dc8cf6c9b73aefbd740309de92`.
 
 This private package was copied from luma.gl's `modules/deck-gpu-layers`. Its package name
 is unchanged. It uses the local deck.gl core workspace and luma.gl 10 prereleases.
-Run `yarn build` and `yarn lint` from the repository root. Module unit tests are included
-in the node and headless suites. Tests coupled to examples and website infrastructure
+Run `yarn build-private` and `yarn lint` from the repository root. Run
+`yarn test-private` for the module node and headless suites. The regular build and
+tests exclude these prototypes because their upstream peers are unpublished. Tests coupled to examples and website infrastructure
 remain in luma.gl. Example paths in this README refer to the source luma.gl repository.
 
 The upstream `@luma.gl/arrow`, `@luma.gl/experimental`, and `@luma.gl/text` packages
