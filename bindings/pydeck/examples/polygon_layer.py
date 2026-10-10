@@ -98,11 +98,11 @@ polygon_layer = pdk.Layer(
 
 tooltip = {"html": "<b>Value per Square Meter:</b> {valuePerSqm} <br /><b>Growth rate:</b> {growth}"}
 
+# Keep the standalone renderer so custom lighting remains available.
 r = pdk.Deck(
     polygon_layer,
     initial_view_state=view_state,
     effects=[lighting_effect],
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/positron",
     tooltip=tooltip,
 )

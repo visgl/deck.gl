@@ -46,7 +46,6 @@ r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     tooltip={"text": "{name}\n{address}"},
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("data_filter_extension.html")

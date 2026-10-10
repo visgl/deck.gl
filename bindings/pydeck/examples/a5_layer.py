@@ -37,7 +37,6 @@ r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     tooltip={"text": "{pentagon} count: {count}"},
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("a5_layer.html")

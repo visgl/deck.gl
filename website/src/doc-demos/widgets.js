@@ -1,3 +1,4 @@
+import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import {
@@ -72,6 +73,9 @@ function GeoDemoBase(deckProps) {
     }),
   ];
 
+  const showAttribution = !deckProps.map && [deckProps.layers || layers]
+    .flat(Infinity)
+    .some(layer => layer instanceof MVTLayer);
   const style = {...(isDarkMode ? DarkGlassTheme : LightGlassTheme), ...deckProps.style};
 
   return (
@@ -93,6 +97,7 @@ function GeoDemoBase(deckProps) {
           ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
           : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT)} />}
       </DeckGL>
+      {showAttribution && <OpenFreeMapAttribution />}
     </div>
   )
 }

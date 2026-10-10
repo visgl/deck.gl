@@ -37,7 +37,6 @@ geojson = pdk.Layer(
 r = pdk.Deck(
     layers=[polygon, geojson],
     initial_view_state=INITIAL_VIEW_STATE,
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 

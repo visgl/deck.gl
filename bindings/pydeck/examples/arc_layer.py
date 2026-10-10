@@ -65,7 +65,6 @@ r = pdk.Deck(
     arc_layer,
     initial_view_state=view_state,
     tooltip=TOOLTIP_TEXT,
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("arc_layer.html")

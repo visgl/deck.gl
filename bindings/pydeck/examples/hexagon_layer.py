@@ -43,7 +43,6 @@ view_state = pdk.ViewState(
 r = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
 )
 r.to_html("hexagon_layer.html")

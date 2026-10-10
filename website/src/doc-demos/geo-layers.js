@@ -197,6 +197,7 @@ export const TerrainLayerDemo = makeLayerDemo({
 export const MVTLayerDemo = makeLayerDemo({
   Layer: MVTLayer,
   mapStyle: null,
+  attribution: true,
   getTooltip: '({object}) => object && (object.properties.name || object.properties.layerName)',
   props: `{
     data: 'https://tiles.openfreemap.org/planet',

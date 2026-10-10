@@ -38,7 +38,6 @@ view_state = pdk.ViewState(latitude=50, longitude=-40, zoom=1, bearing=0, pitch=
 
 # Render
 r = pdk.Deck(
-    map_provider="maplibre",
     map_style="https://tiles.openfreemap.org/styles/dark",
     layers=[layer],
     initial_view_state=view_state,
