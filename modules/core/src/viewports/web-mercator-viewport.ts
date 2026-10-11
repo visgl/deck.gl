@@ -19,7 +19,8 @@ import {
 } from '@math.gl/web-mercator';
 import {Padding} from './viewport';
 
-import {Matrix4, clamp, vec2} from '@math.gl/core';
+import {Matrix4, clamp} from '@math.gl/core';
+import * as vec2 from '@math.gl/core/vec2';
 
 export type WebMercatorViewportOptions = {
   /** Name of the viewport */
@@ -234,6 +235,15 @@ export default class WebMercatorViewport extends Viewport {
       }
     }
     return this._subViewports;
+  }
+
+  /** Returns whether two Web Mercator viewports use the same projection settings. */
+  equals(viewport: Viewport): boolean {
+    return (
+      viewport instanceof WebMercatorViewport &&
+      viewport._pseudoMeters === this._pseudoMeters &&
+      super.equals(viewport)
+    );
   }
 
   projectPosition(xyz: number[]): [number, number, number] {

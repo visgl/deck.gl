@@ -1,0 +1,13 @@
+<!doctype html>
+<script type="module">
+  import {createGPUCulledTraceDeck} from './app.ts';
+  createGPUCulledTraceDeck(undefined, {deviceType: 'webgpu'});
+</script>
+<body style="margin:0;background:#030712">
+  <div style="position:fixed;top:12px;left:12px;z-index:10;padding:8px 10px;border-radius:6px;background:#fffffff0;font:13px sans-serif">
+    WebGPU · 25K spans · drag/scroll to inspect
+  </div>
+  <div style="position:fixed;right:12px;top:12px;z-index:10;width:min(420px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto">
+    <div id="arrow-example-panel-host" data-example-panel-host=""></div>
+  </div>
+</body>

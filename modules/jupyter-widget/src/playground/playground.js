@@ -10,7 +10,7 @@ import {createContainer} from './utils/css-utils';
 
 import {loadMapboxCSS} from './utils/mapbox-utils';
 
-import {jsonConverter, createDeck} from './create-deck';
+import {createDeck, updateDeck} from './create-deck';
 
 export function initPlayground() {
   Transport.setCallbacks({
@@ -48,22 +48,18 @@ export function initPlayground() {
 
     onMessage({transport, type, json, binary}) {
       const {deck} = transport.userData;
-      let convertedJson;
       switch (type) {
         case 'json':
-          convertedJson = jsonConverter.convert(json);
-          deck.setProps(convertedJson);
+          updateDeck(json, deck);
           break;
 
-        case 'json-with-binary':
-          convertedJson = jsonConverter.convert(json);
+        case 'json-with-binary': {
           const binaryData = transport.jupyterModel.get('data_buffer');
-          const propsWithBinary = processDataBuffer({
-            binary: binaryData,
-            convertedJson
-          });
-          deck.setProps(propsWithBinary);
+          updateDeck(json, deck, convertedJson =>
+            processDataBuffer({binary: binaryData, convertedJson})
+          );
           break;
+        }
 
         default:
         // console.warn(type)

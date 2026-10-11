@@ -4,7 +4,11 @@
 
 import {test, expect} from 'vitest';
 import {cellToBoundary, cellToLatLng, gridDisk, compactCells} from 'h3-js';
-import {_count as count, WebMercatorViewport} from '@deck.gl/core';
+import {
+  _count as count,
+  WebMercatorViewport,
+  _CustomProjectionViewport as CustomProjectionViewport
+} from '@deck.gl/core';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-utils';
@@ -154,6 +158,42 @@ test('H3HexagonLayer', () => {
   });
 
   testLayer({Layer: H3HexagonLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('H3HexagonLayer projects world-coordinate vertices with CustomProjectionViewport', () => {
+  const hex = '882830829bfffff';
+  const [latitude, longitude] = cellToLatLng(hex);
+  const viewport = new CustomProjectionViewport({
+    width: 800,
+    height: 600,
+    center: [longitude, latitude, 0],
+    projection: {
+      forward: ([x, y, z = 0]) => [x * 1000, y * 2000, z],
+      inverse: ([x, y, z = 0]) => [x / 1000, y / 2000, z]
+    },
+    getDistanceScale: () => [1, 1]
+  });
+  testLayer({
+    Layer: H3HexagonLayer,
+    viewport,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        viewport,
+        props: {data: [hex], getHexagon: d => d, highPrecision: false, centerHexagon: hex},
+        onAfterUpdate({layer}) {
+          const expected = cellToBoundary(hex, true).map(([x, y]) => [
+            (x - longitude) * 1000,
+            (y - latitude) * 2000
+          ]);
+          expect(layer.state.vertices).toHaveLength(expected.length);
+          layer.state.vertices.forEach((p, i) =>
+            p.forEach((value, j) => expect(value).toBeCloseTo(expected[i][j], 8))
+          );
+        }
+      }
+    ]
+  });
 });
 
 test('H3HexagonLayer#_shouldUseHighPrecision', () => {

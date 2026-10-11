@@ -34,6 +34,23 @@ test('S2Layer', () => {
   testLayer({Layer: S2Layer, testCases, onError: err => expect(err).toBeFalsy()});
 });
 
+test('S2Layer#lineAntialiasing forwards to the cell PolygonLayer', () => {
+  testLayer({
+    Layer: S2Layer,
+    props: {
+      data: data.slice(0, 1),
+      getS2Token: d => d.token,
+      stroked: true,
+      lineAntialiasing: true
+    },
+    onError: error => expect(error, error?.message).toBeFalsy(),
+    onAfterUpdate: ({subLayer}) => {
+      expect(subLayer, 'a PolygonLayer sub layer was rendered').toBeTruthy();
+      expect(subLayer.props.lineAntialiasing, 'the prop reaches the PolygonLayer').toBe(true);
+    }
+  });
+});
+
 test('S2Layer#getS2QuadKey', () => {
   const TEST_COORDINATES = [
     {lat: 0, lng: 0},

@@ -1,3 +1,7 @@
+---
+description: "Controlling the camera and view state, picking, and handling hover and click events in deck.gl."
+---
+
 # Interactivity
 
 ## Controlling the Camera

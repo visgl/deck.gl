@@ -60,6 +60,7 @@ export function getEmptyPickingInfo({
       point[2] = z;
     }
     coordinate = pickedViewport.unproject(point);
+    if (!coordinate.every(Number.isFinite)) coordinate = undefined;
   }
 
   return {

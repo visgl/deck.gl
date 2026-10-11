@@ -1,3 +1,7 @@
+---
+description: "ColumnLayer renders extruded cylinders or regular polygons at given coordinates."
+---
+
 # ColumnLayer
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 

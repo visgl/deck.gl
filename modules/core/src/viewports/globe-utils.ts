@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp, vec3, Quaternion} from '@math.gl/core';
+import {clamp, Quaternion} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import {zoomAdjust} from './globe-viewport';
 
