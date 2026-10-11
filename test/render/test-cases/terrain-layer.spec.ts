@@ -65,6 +65,8 @@ const testCases = [
     goldenImage: './test/render/golden-images/terrain-layer.png'
   },
   {
+    // Fills only: draping strokes costs several hundred ms of GPU time per terrain tile under
+    // SwiftShader, which made this the slowest render test.
     name: 'terrain-extension-drape',
     skip: ['webgpu'],
     viewState: {
@@ -83,7 +85,7 @@ const testCases = [
       }),
       new GeoJsonLayer({
         data: choropleths,
-        getLineWidth: 50,
+        stroked: false,
         getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
         extensions: [new TerrainExtension()]
       })
