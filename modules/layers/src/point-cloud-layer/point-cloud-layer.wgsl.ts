@@ -70,11 +70,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   }
 #endif
 
-  varyings.position = centerResult.clipPosition;
+  varyings.position = project_globe_billboard_clipspace(centerResult.clipPosition, geometry.position.xyz);
   // DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   let clipPixels = project_pixel_size_to_clipspace(offset.xy);
   varyings.position.x += clipPixels.x;
   varyings.position.y += clipPixels.y;
+  // Points always face the camera, so culling cannot hide the ones behind the globe
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
 
   // Apply lighting
   let lightColor = lighting_getLightColor2(attributes.instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);

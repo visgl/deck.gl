@@ -40,8 +40,13 @@ void main(void) {
 #endif
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.), geometry.position);
+  gl_Position = project_globe_billboard_clipspace(gl_Position, geometry.position.xyz);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
   gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+  // Points always face the camera, so culling cannot hide the ones behind the globe
+  if (project_globe_is_occluded(geometry.position.xyz)) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
 
   // Apply lighting
   vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project.cameraPosition, geometry.position.xyz, geometry.normal);
