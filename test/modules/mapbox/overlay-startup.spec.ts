@@ -34,30 +34,32 @@ webglTest('MapboxOverlay synchronizes camera changes before interleaved Deck loa
   });
 
   map.addControl(overlay);
-  expect(overlay._deck!.isInitialized).toBe(false);
+  try {
+    expect(overlay._deck!.isInitialized).toBe(false);
 
-  map.setCenter({lng: 9, lat: 48});
-  map.setZoom(8);
-  map.setBearing(25);
-  map.setPitch(30);
-  await loaded;
+    map.setCenter({lng: 9, lat: 48});
+    map.setZoom(8);
+    map.setBearing(25);
+    map.setPitch(30);
+    await loaded;
 
-  expect(viewStateAtLoad).toMatchObject({
-    longitude: 9,
-    latitude: 48,
-    zoom: 8,
-    bearing: 25,
-    pitch: 30
-  });
-  // The move triggered from within onLoad should be picked up synchronously once watching starts
-  expect(zoomAfterMoveAtLoad).toBe(9);
-  expect(overlay._deck!.props.viewState).toMatchObject({
-    longitude: map.getCenter().lng,
-    latitude: map.getCenter().lat,
-    zoom: map.getZoom(),
-    bearing: map.getBearing(),
-    pitch: map.getPitch()
-  });
-
-  map.removeControl(overlay);
+    expect(viewStateAtLoad).toMatchObject({
+      longitude: 9,
+      latitude: 48,
+      zoom: 8,
+      bearing: 25,
+      pitch: 30
+    });
+    // The move triggered from within onLoad should be picked up synchronously once watching starts
+    expect(zoomAfterMoveAtLoad).toBe(9);
+    expect(overlay._deck!.props.viewState).toMatchObject({
+      longitude: map.getCenter().lng,
+      latitude: map.getCenter().lat,
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch()
+    });
+  } finally {
+    map.removeControl(overlay);
+  }
 });
