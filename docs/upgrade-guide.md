@@ -6,6 +6,10 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### `COORDINATE_SYSTEM.IDENTITY` removed
+
+The `COORDINATE_SYSTEM.IDENTITY` alias, deprecated since v8.0, has been removed. Use `COORDINATE_SYSTEM.CARTESIAN` instead; it has always been the same coordinate system.
+
 ### Viewport distance scales
 
 For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
