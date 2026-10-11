@@ -470,13 +470,17 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   expect(
     geographic.distanceScales.unitsPerMeter[0] / (normalizationScale / metersPerDegree)
   ).toBeCloseTo(1, 6);
-  expect(moved.distanceScales.unitsPerMeter[0]).toBeCloseTo(
-    2 * geographic.distanceScales.unitsPerMeter[0],
-    16
+  // Independent WGS84 surface-distance references, in meters per degree.
+  expect(
+    (geographic.distanceScales.unitsPerMeter[1] / normalizationScale) * 110574.2758
+  ).toBeCloseTo(1, 6);
+  expect((moved.distanceScales.unitsPerMeter[0] / normalizationScale) * 55800.0016).toBeCloseTo(
+    1,
+    6
   );
-  expect(moved.distanceScales.unitsPerMeter[1]).toBeCloseTo(
-    geographic.distanceScales.unitsPerMeter[1],
-    16
+  expect((moved.distanceScales.unitsPerMeter[1] / normalizationScale) * 111412.2877).toBeCloseTo(
+    1,
+    6
   );
   expect(moved.projectionSignature).toBe(geographic.projectionSignature);
   const metric = new CustomProjectionViewport({
