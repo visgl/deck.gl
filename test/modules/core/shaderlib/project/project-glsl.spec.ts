@@ -292,6 +292,36 @@ const TEST_CASES: TestCase[] = [
     ]
   },
   {
+    title: 'CARTESIAN mode',
+    projectProps: {
+      viewport: TEST_VIEWPORT,
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    },
+    tests: [
+      {
+        name: 'project_position',
+        vs: TRANSFORM_VS.project_position,
+        testProps: {
+          // common space position with z in meters
+          uPos: [...TEST_VIEWPORT.projectFlat([-122, 38]), 1000] as NumberArray3,
+          uPos64Low: [0, 0, 0]
+        },
+        // z is scaled at the viewport latitude, same as in WEB_MERCATOR_AUTO_OFFSET mode
+        output: TEST_VIEWPORT.projectPosition([-122, 38, 1000]).concat([1]),
+        precision: PIXEL_TOLERANCE
+      },
+      {
+        name: 'project_common_position_to_clipspace(vec4)',
+        vs: TRANSFORM_VS.project_common_position_to_clipspace,
+        testProps: {
+          uPos: [...TEST_VIEWPORT.projectFlat([-122, 38]), 1000] as NumberArray3
+        },
+        output: TEST_VIEWPORT.project([-122, 38, 1000]),
+        precision: PIXEL_TOLERANCE
+      }
+    ]
+  },
+  {
     title: 'IDENTITY mode with modelMatrix',
     projectProps: {
       viewport: TEST_VIEWPORT_ORTHO,
