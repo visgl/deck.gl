@@ -158,7 +158,13 @@ export function drawLayerGroup(
 }
 
 export function getProjection(map: Map): 'mercator' | 'globe' {
-  const projection = map.getProjection?.();
+  let projection;
+  try {
+    projection = map.getProjection?.();
+  } catch {
+    // maplibre's getProjection() throws before the style is set
+    return 'mercator';
+  }
   const type =
     // maplibre projection spec
     projection?.type ||
