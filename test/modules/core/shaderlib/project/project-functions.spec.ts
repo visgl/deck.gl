@@ -5,7 +5,6 @@
 import {test, expect} from 'vitest';
 
 import {
-  COORDINATE_SYSTEM,
   WebMercatorViewport,
   OrthographicViewport,
   project,
