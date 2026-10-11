@@ -228,6 +228,10 @@ function App() {
 
 ## Additional Information
 
+### Styling layers by zoom
+
+To fade, resize or filter deck.gl layers by zoom the way MapLibre's `minzoom`, `maxzoom` and `["zoom"]` expressions do, see [Zoom-Dependent Layers](../zoom-dependent-layers.md).
+
 ### react-map-gl
 
 [react-map-gl](https://github.com/visgl/react-map-gl) is a React wrapper around maplibre-gl maintained by the vis.gl community. If you'd like to use deck.gl together with maplibre-gl and React, this library is the recommended companion.

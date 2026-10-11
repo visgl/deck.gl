@@ -23,8 +23,12 @@ import {
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {preprocess} from '@luma.gl/shadertools';
-import {dashShaders, offsetShaders} from '../../../modules/extensions/src/path-style/shaders.glsl';
-import {vec3} from '@math.gl/core';
+import {
+  dashShaders,
+  offsetShaders,
+  pathStylePipelineShaders
+} from '../../../modules/extensions/src/path-style/shaders.glsl';
+import * as vec3 from '@math.gl/core/vec3';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
@@ -553,8 +557,7 @@ test('PathStyleExtension#shader defines', () => {
       },
       onAfterUpdate: ({layer}) => {
         const {defines} = layer.getShaders();
-        // The offset shaders rescale vDashOffset, which only exists when the dash shaders
-        // are injected too, so they are guarded on this define.
+        // The shared coordinate stage guards dash-only varyings and calculations on this define.
         expect(defines.DASH_ENABLED, 'DASH_ENABLED is set when dash is enabled').toBe(true);
         expect(
           defines.HIGH_PRECISION_DASH,
@@ -626,12 +629,87 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   );
 });
 
-test('PathStyleExtension#offset keeps dash coordinates in the same units', () => {
-  const offsetVertexShader = offsetShaders.inject['vs:#main-end'];
-  expect(offsetVertexShader).toContain('vPathPosition.y *= offsetWidth');
-  expect(offsetVertexShader).toContain('vPathLength *= offsetWidth');
-  expect(offsetVertexShader).toContain('vPathBounds *= offsetWidth');
-  expect(offsetVertexShader).toContain('vDashOffset *= offsetWidth');
+test('PathStyleExtension#orders offset remapping before dash conversion', () => {
+  const vertexInjection = pathStylePipelineShaders.inject['vs:#main-end'];
+  const offsetVertexShader = preprocess(vertexInjection, {
+    defines: {PATH_STYLE_OFFSET: 1}
+  });
+  const dashVertexShader = preprocess(vertexInjection, {
+    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1}
+  });
+  const combinedVertexShader = preprocess(vertexInjection, {
+    defines: {DASH_ENABLED: 1, HIGH_PRECISION_DASH: 1, PATH_STYLE_OFFSET: 1}
+  });
+  const remapIndex = combinedVertexShader.indexOf('vPathPosition.y *= offsetWidth');
+  const widthRestoreIndex = combinedVertexShader.indexOf('strokeHalfWidth /= offsetWidth');
+  const dashArrayIndex = combinedVertexShader.indexOf('vDashArray = instanceDashArrays');
+  const dashOffsetIndex = combinedVertexShader.indexOf('vDashOffset = dashPeriod');
+
+  expect(remapIndex, 'restores the along-path coordinate').toBeGreaterThanOrEqual(0);
+  expect(combinedVertexShader, 'restores segment length in the same stage').toContain(
+    'vPathLength *= offsetWidth'
+  );
+  expect(combinedVertexShader, 'restores clipped path bounds in the same stage').toContain(
+    'vPathBounds *= offsetWidth'
+  );
+  expect(widthRestoreIndex, 'recovers the pre-offset stroke width after remapping').toBeGreaterThan(
+    remapIndex
+  );
+  expect(dashArrayIndex, 'converts the dash array after restoring width').toBeGreaterThan(
+    widthRestoreIndex
+  );
+  expect(dashOffsetIndex, 'reduces phase once after restoring width').toBeGreaterThan(
+    dashArrayIndex
+  );
+  expect(combinedVertexShader, 'does not need a second repaired dash period').not.toContain(
+    'restoredDashPeriod'
+  );
+  expect(
+    combinedVertexShader.match(/vDashOffset = dashPeriod/g),
+    'combined path mode reduces phase exactly once'
+  ).toHaveLength(1);
+
+  expect(offsetVertexShader, 'offset-only keeps the coordinate remap').toContain(
+    'vPathPosition.y *= offsetWidth'
+  );
+  expect(offsetVertexShader, 'offset-only does not compile dash calculations').not.toContain(
+    'vDashArray'
+  );
+  expect(offsetVertexShader, 'offset-only does not access dash path bounds').not.toContain(
+    'vPathBounds'
+  );
+
+  expect(dashVertexShader, 'dash-only keeps dash conversion').toContain(
+    'vDashArray = instanceDashArrays'
+  );
+  expect(dashVertexShader, 'dash-only does not compile offset remapping').not.toContain(
+    'offsetWidth'
+  );
+  expect(
+    dashShaders.inject,
+    'dash capability has no competing vertex-end injection'
+  ).not.toHaveProperty('vs:#main-end');
+  expect(
+    offsetShaders.inject,
+    'offset capability has no competing vertex-end injection'
+  ).not.toHaveProperty('vs:#main-end');
+
+  const fragmentInjection = pathStylePipelineShaders.inject['fs:#main-end'];
+  const antialiasedFragmentShader = preprocess(fragmentInjection, {
+    defines: {ANTIALIASING: 1, DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
+  });
+  const nonAntialiasedFragmentShader = preprocess(fragmentInjection, {
+    defines: {DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
+  });
+  expect(antialiasedFragmentShader, 'AA keeps deferred dash coverage').toContain(
+    'min(pathCoverage, roundedDashResolvedCoverage)'
+  );
+  expect(antialiasedFragmentShader, 'AA uses PathLayer coverage for the offset edge').not.toContain(
+    'abs(vPathPosition.x) > 1.0'
+  );
+  expect(nonAntialiasedFragmentShader, 'non-AA rejects dash gaps before the offset edge').toMatch(
+    /if \(shouldDiscardDash\)[\s\S]*if \(abs\(vPathPosition\.x\) > 1\.0\)/
+  );
 });
 
 test('PathStyleExtension#getDashOffsets measures 3D distance', () => {
@@ -938,6 +1016,90 @@ test('PathStyleExtension#dash phase follows normalized path geometry', () => {
             'closed phase is anchored at the first source point'
           ).toEqual([0, 3, 7, 0, 0, 0]);
           expect(offsets[1], 'closed path total includes every rendered segment').toBe(12);
+        }
+      }
+    ],
+    onError: error => expect(error, error?.message).toBeFalsy()
+  });
+});
+
+test('PathStyleExtension#getDashOffsets measures globe common space', () => {
+  // City-scale path along a parallel near San Francisco, the same layout the path-dash render
+  // matrix uses. Below GlobeView's zoom-12 handoff the layer projects into a GlobeViewport, whose
+  // common space is sphere XYZ (GLOBE_RADIUS = 256) rather than Web Mercator.
+  const viewport = new GlobeViewport({
+    width: 800,
+    height: 450,
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  });
+  const mercatorViewport = new WebMercatorViewport({
+    width: 800,
+    height: 450,
+    longitude: -122.4,
+    latitude: 37.78,
+    zoom: 10
+  });
+  const path = [
+    [-122.7, 37.78],
+    [-122.5, 37.78],
+    [-122.3, 37.78],
+    [-122.1, 37.78]
+  ];
+  const cumulativeDistance = (project: (position: number[]) => number[]): number[] => {
+    const result = [0];
+    for (let i = 1; i < path.length - 1; i++) {
+      result[i] = result[i - 1] + vec3.dist(project(path[i - 1]), project(path[i]));
+    }
+    result[path.length - 1] = 0;
+    return result;
+  };
+  const expected = cumulativeDistance(p => viewport.projectPosition(p));
+  const mercatorExpected = cumulativeDistance(p => mercatorViewport.projectPosition(p));
+
+  testLayer({
+    Layer: PathLayer,
+    viewport,
+    testCases: [
+      {
+        props: {
+          id: 'globe-dash-offsets',
+          data: [path],
+          getPath: pathData => pathData,
+          extensions: [new PathStyleExtension({dashMode: 'path'})]
+        },
+        onAfterUpdate: ({layer}) => {
+          const extension = layer.props.extensions[0] as PathStyleExtension;
+          const offsets = extension.getDashOffsets.call(layer, path);
+
+          expect(offsets.length, 'one offset per vertex').toBe(path.length);
+          expect(offsets[1], 'offsets are non-zero on the globe').toBeGreaterThan(0);
+          expect(offsets[2], 'offsets accumulate along the path').toBeGreaterThan(offsets[1]);
+          offsets.forEach((offset, index) => {
+            expect(
+              offset,
+              `offset ${index} is the cumulative chord distance in sphere common space`
+            ).toBeCloseTo(expected[index], 6);
+          });
+          expect(
+            Math.abs(offsets[1] - mercatorExpected[1]) / mercatorExpected[1],
+            'globe offsets are not Web Mercator distances'
+          ).toBeGreaterThan(0.1);
+
+          // The managed attribute that actually drives the shader agrees with the public helper
+          // for the rendered path: its total length is the same chord sum.
+          const metrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
+          const total =
+            expected[path.length - 2] +
+            vec3.dist(
+              viewport.projectPosition(path[path.length - 2]),
+              viewport.projectPosition(path[path.length - 1])
+            );
+          expect(
+            metrics[1],
+            'instanceDashOffsets total length is in sphere common space'
+          ).toBeCloseTo(total, 4);
         }
       }
     ],

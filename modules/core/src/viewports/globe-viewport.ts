@@ -2,39 +2,33 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4, vec3, vec4} from '@math.gl/core';
+import {Matrix4} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
-import Viewport from './viewport';
+import Viewport, {type DistanceScales} from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {mod} from '../utils/math-utils';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
-const NORTH_UP_BEARING_THRESHOLD = 1;
 const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
-// Pointer correction depends on distance from the screen-space limb, not latitude.
-// Smoothly release edge and off-globe anchors so they converge to center without a snap.
+// Where along the screen-pixel-to-globe-center distance ratio the anchored
+// zoom starts losing strength. Below this ratio the anchor uses full correction; from
+// here to the limb (ratio = 1) the anchor blends toward MIN_STRENGTH so a
+// near-edge pixel doesn't snap the camera across the globe.
 const GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO = 0.75;
+const GLOBE_ZOOM_ANCHOR_MIN_STRENGTH = 0.35;
 const GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO = 1.15;
 
-/** Returns whether a globe bearing uses the default north-up constraints. @internal */
-export function isGlobeNorthUp(bearing: number): boolean {
-  const normalizedBearing = mod(bearing + 180, 360) - 180;
-  return Math.abs(normalizedBearing) < NORTH_UP_BEARING_THRESHOLD;
-}
-
-function getDistanceScales() {
+function getDistanceScales(): Partial<DistanceScales> {
   const unitsPerMeter = GLOBE_RADIUS / EARTH_RADIUS;
   const unitsPerDegree = (Math.PI / 180) * GLOBE_RADIUS;
 
   return {
     unitsPerMeter: [unitsPerMeter, unitsPerMeter, unitsPerMeter],
-    unitsPerMeter2: [0, 0, 0],
-    metersPerUnit: [1 / unitsPerMeter, 1 / unitsPerMeter, 1 / unitsPerMeter],
-    unitsPerDegree: [unitsPerDegree, unitsPerDegree, unitsPerMeter],
-    unitsPerDegree2: [0, 0, 0],
-    degreesPerUnit: [1 / unitsPerDegree, 1 / unitsPerDegree, 1 / unitsPerMeter]
+    unitsPerWorldUnit: [unitsPerDegree, unitsPerDegree, unitsPerMeter]
   };
 }
 
@@ -270,7 +264,7 @@ export default class GlobeViewport extends Viewport {
    */
   getZoomAnchorStrength(screenPosition: number[]): number {
     const distanceRatio = this._getRayDistanceToGlobeCenterRatio(screenPosition);
-    if (distanceRatio >= GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
+    if (distanceRatio > GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO) {
       return 0;
     }
 
@@ -279,11 +273,10 @@ export default class GlobeViewport extends Viewport {
       Math.min(
         1,
         (distanceRatio - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO) /
-          (GLOBE_ZOOM_ANCHOR_MAX_DISTANCE_RATIO - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
+          (1 - GLOBE_ZOOM_ANCHOR_DAMPING_START_RATIO)
       )
     );
-    const smoothProgress = edgeProgress * edgeProgress * (3 - 2 * edgeProgress);
-    return 1 - smoothProgress;
+    return 1 - edgeProgress * (1 - GLOBE_ZOOM_ANCHOR_MIN_STRENGTH);
   }
 
   unproject(
@@ -373,32 +366,18 @@ export default class GlobeViewport extends Viewport {
     dragStartPosition?: number[]
   ): GlobeViewportOptions {
     if (!dragStartPosition) {
-      let anchorStrength = this.getZoomAnchorStrength(screenPosition);
+      const anchorStrength = this.getZoomAnchorStrength(screenPosition);
       if (anchorStrength === 0) {
         return {longitude: this.longitude, latitude: this.latitude};
       }
 
       const currentCoordinates = this.unproject(screenPosition);
       const longitudeDelta = mod(coordinates[0] - currentCoordinates[0] + 180, 360) - 180;
-      const latitudeDelta = coordinates[1] - currentCoordinates[1];
-      const crossesPole =
-        Math.abs(currentCoordinates[1]) > MAX_LATITUDE || Math.abs(longitudeDelta) > 90;
-      if (isGlobeNorthUp(this.bearing) && crossesPole) {
-        // A zoom gesture keeps its original geographic anchor. Once the
-        // pointer crosses a pole it can reappear in the opposite hemisphere,
-        // reversing longitude. Continue zooming around center in either case.
-        return {longitude: this.longitude, latitude: this.latitude};
-      }
-      if (isGlobeNorthUp(this.bearing) && latitudeDelta !== 0) {
-        // Longitude and latitude are one coupled correction. If north-up runs
-        // out of latitude headroom, scale both axes together instead of
-        // clipping latitude while applying the full sideways rotation.
-        const latitudeLimit = latitudeDelta > 0 ? MAX_LATITUDE : -MAX_LATITUDE;
-        const latitudeConstraintStrength = (latitudeLimit - this.latitude) / latitudeDelta;
-        anchorStrength = Math.min(anchorStrength, Math.max(0, latitudeConstraintStrength));
-      }
       const longitude = this.longitude + longitudeDelta * anchorStrength;
-      const latitude = Math.max(Math.min(this.latitude + latitudeDelta * anchorStrength, 90), -90);
+      const latitude = Math.max(
+        Math.min(this.latitude + (coordinates[1] - currentCoordinates[1]) * anchorStrength, 90),
+        -90
+      );
 
       return {longitude, latitude};
     }

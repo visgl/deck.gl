@@ -2,6 +2,12 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+### Custom projections (Experimental)
+
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
@@ -45,7 +51,8 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
-- Pointer-anchored zoom now rotates the camera frame like a physical ball, keeping steering smooth and consistent around the poles while allowing bearing to evolve naturally.
+- The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
+- [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes render the same in `GlobeView` as in `MapView`.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**
@@ -123,6 +130,8 @@ deck.gl's Python bindings gain first-class support for [layer extensions](./api-
 
 The Jupyter integration now recognizes the canonical `GlobeView` type name while retaining `_GlobeView` as a backwards-compatible alias.
 
+pydeck documents [multi-view layouts](https://deckgl.readthedocs.io/en/latest/view.html) and the [`SplitterWidget`](https://deckgl.readthedocs.io/en/latest/widget.html), with gallery examples for both. `Deck` sends a top-level `controller` (new argument, default `True`) and leaves `views` to deck.gl, so widgets such as `SplitterWidget` can manage them.
+
 ```python
 import pydeck as pdk
 
@@ -137,6 +146,19 @@ layer = pdk.Layer(
 ```
 
 Experiment with these features via the new [pydeck playground](https://deck.gl/pydeck).
+
+pydeck draws [charts](https://deckgl.readthedocs.io/en/latest/view.html#non-geospatial-charts) on `OrthographicView` and `OrbitView` without a basemap. The gallery gains a [scatter plot](https://deckgl.readthedocs.io/en/latest/gallery/scatter_plot.html), a [bar chart](https://deckgl.readthedocs.io/en/latest/gallery/bar_chart.html) and a [surface plot](https://deckgl.readthedocs.io/en/latest/gallery/surface_plot.html).
+
+[Custom layer libraries](https://deckgl.readthedocs.io/en/latest/custom_layers.html#es-module-bundles) published as ES modules load with `module=True`:
+
+```python
+import pydeck as pdk
+
+pdk.settings.register_library("MyLayers", "https://example.com/my-layers.mjs", module=True)
+layer = pdk.Layer("MyLayer", data=df)  # MyLayers exports MyLayer
+```
+
+HTML exports get lighter: `Deck.to_html()` embeds the deck.gl JSON compactly, without indentation, while `to_json()` keeps the pretty-printed form for notebooks and diffs.
 
 ## deck.gl v9.3
 
