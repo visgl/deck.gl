@@ -12,7 +12,9 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "write-heading-ids": "node ../scripts/write-heading-ids.mjs"
+    "write-heading-ids": "node ../scripts/write-heading-ids.mjs",
+    "build-v10-examples": "node scripts/build-v10-examples.mjs",
+    "prestart": "yarn build-v10-examples"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
