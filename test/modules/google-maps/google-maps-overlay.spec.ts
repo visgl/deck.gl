@@ -168,6 +168,16 @@ for (const interleaved of [true, false]) {
   });
 }
 
+/** Release Deck-owned WebGL contexts before Chromium evicts the shared test device. */
+function finalizeOverlay(overlay: GoogleMapsOverlay): void {
+  const deckDevice = overlay._deck?.device;
+  overlay.finalize();
+  if (deckDevice && deckDevice !== device) {
+    deckDevice.loseDevice();
+    deckDevice.destroy();
+  }
+}
+
 for (const positioningFirst of [true, false]) {
   test(`GoogleMapsOverlay#interleaved context (positioning first:${positioningFirst})`, async () => {
     const map = new mapsApi.Map({
@@ -205,7 +215,7 @@ for (const positioningFirst of [true, false]) {
       expect(deck.getCanvas(), 'Deck uses the supplied context canvas').toBe(gl.canvas);
       expect(deck.props._customRender, 'Map owns redraws').toBeTypeOf('function');
     } finally {
-      overlay.finalize();
+      finalizeOverlay(overlay);
       addOverlaySpy.mockRestore();
     }
   });
@@ -238,7 +248,7 @@ test('GoogleMapsOverlay#non-interleaved context', async () => {
     expect(deck.getCanvas(), 'Deck keeps its own canvas').not.toBe(gl.canvas);
     expect(deck.getCanvas().parentElement.parentElement.id).toBe('deck-gl-google-maps-container');
   } finally {
-    overlay.finalize();
+    finalizeOverlay(overlay);
     addOverlaySpy.mockRestore();
   }
 });
@@ -314,7 +324,7 @@ for (const interleaved of [true, false]) {
           }
         } finally {
           spies.forEach(spy => spy.mockRestore());
-          overlay.finalize();
+          finalizeOverlay(overlay);
         }
       });
     }
