@@ -28,7 +28,7 @@ import {
   offsetShaders,
   pathStylePipelineShaders
 } from '../../../modules/extensions/src/path-style/shaders.glsl';
-import {vec3} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

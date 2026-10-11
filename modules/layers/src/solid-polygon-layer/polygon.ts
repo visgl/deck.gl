@@ -6,6 +6,7 @@
 import earcut from 'earcut';
 import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
 
+import type {PolygonWinding} from '@math.gl/polygon';
 import type {Position} from '@deck.gl/core';
 import type {NumericArray} from '@math.gl/core';
 
@@ -132,7 +133,7 @@ function copyNestedRing(
   /** size of a position, 2 (xy) or 3 (xyz) */
   size: number,
   /** modify polygon to be of the specified winding direction */
-  windingDirection: number
+  windingDirection: PolygonWinding
 ): number {
   let targetIndex = targetStartIndex;
   const len = simplePolygon.length;
@@ -173,7 +174,7 @@ function copyFlatRing(
   srcStartIndex: number = 0,
   /** end index of the path in the positions array */
   srcEndIndex: number,
-  windingDirection: number
+  windingDirection: PolygonWinding
 ): number {
   srcEndIndex = srcEndIndex || positions.length;
   const srcLength = srcEndIndex - srcStartIndex;

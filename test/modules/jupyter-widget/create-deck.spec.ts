@@ -28,7 +28,8 @@ import {
   addCustomLibraries,
   convertInitialJson,
   createDeck,
-  jsonConverter
+  jsonConverter,
+  updateDeck
 } from '@deck.gl/jupyter-widget/playground/create-deck';
 import {loadModule} from '@deck.gl/jupyter-widget/playground/utils/script-utils';
 
@@ -126,7 +127,7 @@ describe('jupyter-widget: dynamic-registration', () => {
     });
 
     try {
-      expect(deck.props.layers, 'Layer is deferred').toEqual([null]);
+      expect(deck.props.layers, 'Layer is deferred').toEqual([]);
       await vi.waitFor(() => expect(deck.props.layers[0]).toBeInstanceOf(ScatterplotLayer), {
         timeout: 5000
       });
@@ -136,6 +137,120 @@ describe('jupyter-widget: dynamic-registration', () => {
       container.remove();
       URL.revokeObjectURL(resourceUri);
       delete window.DeferredTestExtension;
+    }
+  });
+
+  test('updateDeck defers layers until custom libraries load', async () => {
+    class UpdateTestExtension extends LayerExtension {}
+    window.UpdateTestExtension = UpdateTestExtension;
+    const script = 'window.updateTestLibrary = {UpdateTestExtension: window.UpdateTestExtension};';
+    const resourceUri = URL.createObjectURL(new Blob([script], {type: 'text/javascript'}));
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const jsonInput = {
+      device: '@@#TEST_DEVICE',
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: []
+    };
+    const deck = createDeck({
+      container,
+      configuration: {constants: {TEST_DEVICE: device}},
+      jsonInput,
+      customLibraries: [{libraryName: 'updateTestLibrary', resourceUri}]
+    });
+
+    try {
+      // The Jupyter widget sends its first JSON message right after the deck is created, as a
+      // string when it comes with a data buffer
+      updateDeck(
+        JSON.stringify({
+          ...jsonInput,
+          layers: [
+            {
+              '@@type': 'ScatterplotLayer',
+              id: 'extended',
+              data: [],
+              extensions: [{'@@type': 'UpdateTestExtension'}]
+            },
+            {'@@type': 'ScatterplotLayer', id: 'plain', data: []}
+          ]
+        }),
+        deck
+      );
+      expect(
+        deck.props.layers.map(l => l.id),
+        'Layer is deferred, the other renders'
+      ).toEqual(['plain']);
+
+      await vi.waitFor(() => expect(deck.props.layers).toHaveLength(2), {timeout: 5000});
+      expect(deck.props.layers[0].id).toBe('extended');
+      expect(deck.props.layers[0].props.extensions[0]).toBeInstanceOf(UpdateTestExtension);
+
+      expect(
+        () =>
+          updateDeck(
+            {
+              ...jsonInput,
+              layers: [{'@@type': 'ScatterplotLayer', extensions: [{'@@type': 'NoSuchExtension'}]}]
+            },
+            deck
+          ),
+        'Errors are rethrown once the libraries have loaded'
+      ).toThrow();
+    } finally {
+      deck.finalize();
+      container.remove();
+      URL.revokeObjectURL(resourceUri);
+      delete window.UpdateTestExtension;
+    }
+  });
+
+  test('updateDeck does not retry an update that a newer one replaced', async () => {
+    class StaleTestExtension extends LayerExtension {}
+    window.StaleTestExtension = StaleTestExtension;
+    const script = 'window.staleTestLibrary = {StaleTestExtension: window.StaleTestExtension};';
+    const resourceUri = URL.createObjectURL(new Blob([script], {type: 'text/javascript'}));
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const jsonInput = {
+      device: '@@#TEST_DEVICE',
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [
+        {
+          '@@type': 'ScatterplotLayer',
+          id: 'extended',
+          data: [],
+          extensions: [{'@@type': 'StaleTestExtension'}]
+        }
+      ]
+    };
+    const deck = createDeck({
+      container,
+      configuration: {constants: {TEST_DEVICE: device}},
+      jsonInput,
+      customLibraries: [{libraryName: 'staleTestLibrary', resourceUri}]
+    });
+
+    try {
+      updateDeck(
+        {...jsonInput, layers: [{'@@type': 'ScatterplotLayer', id: 'plain', data: []}]},
+        deck
+      );
+      await vi.waitFor(() => expect(window.staleTestLibrary).toBeTruthy(), {timeout: 5000});
+      // Let onComplete run after the script has loaded
+      await new Promise(resolve => setTimeout(resolve, 50));
+      expect(
+        deck.props.layers.map(l => l.id),
+        'The newer update is kept'
+      ).toEqual(['plain']);
+    } finally {
+      deck.finalize();
+      container.remove();
+      URL.revokeObjectURL(resourceUri);
+      delete window.StaleTestExtension;
+      delete window.staleTestLibrary;
     }
   });
 

@@ -96,6 +96,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getPosition'
       },

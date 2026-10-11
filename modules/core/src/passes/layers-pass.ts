@@ -470,6 +470,7 @@ export default class LayersPass extends Pass {
       } satisfies PickingProps,
       project: {
         viewport: layer.context.viewport,
+        sizeScale: layer.context.layerManager.projectionScaleResources.get(layer.context.viewport),
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
