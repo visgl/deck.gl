@@ -302,9 +302,10 @@ export default class GlobeController extends Controller<MapState> {
 
   protected getZoomPosition(position: [number, number]): [number, number] {
     const zoomPosition = super.getZoomPosition(position);
-    const viewport = this.makeViewport(this.controllerState.getViewportProps()) as GlobeViewport;
+    const viewport = this.makeViewport(this.controllerState.getViewportProps());
 
-    if (viewport.getZoomAnchorStrength(zoomPosition) > 0) {
+    // Above zoom 12 GlobeView renders with a WebMercatorViewport, whose map covers the screen.
+    if (!(viewport instanceof GlobeViewport) || viewport.getZoomAnchorStrength(zoomPosition) > 0) {
       return zoomPosition;
     }
 
