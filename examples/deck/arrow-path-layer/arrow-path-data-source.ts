@@ -65,6 +65,7 @@ export class ArrowPathDataSource {
   private panel: DeckArrowSourcePanel<ArrowPathDataSourceState> | null = null;
   private readonly onDataUpdated: ArrowPathDataSourceProps['onDataUpdated'];
   private isFinalized = false;
+  private activeUpdate: ArrowPathDataSourceUpdate | null = null;
 
   constructor({onDataUpdated}: ArrowPathDataSourceProps) {
     this.onDataUpdated = onDataUpdated;
@@ -80,8 +81,16 @@ export class ArrowPathDataSource {
       schema: makeArrowPathDataSourceSchema(supportsStorage),
       initialState: this.state,
       onSettingsChange: state => {
+        const animationOnly = Object.keys(state).every(
+          key => key === 'animate' || state[key] === this.state[key]
+        );
         this.state = state;
-        this.emitDataSource();
+        if (animationOnly && this.activeUpdate) {
+          this.activeUpdate = {...this.activeUpdate, animate: state.animate};
+          this.onDataUpdated(this.activeUpdate);
+        } else {
+          this.emitDataSource();
+        }
       }
     });
     this.panel.initialize();
@@ -111,10 +120,10 @@ export class ArrowPathDataSource {
       STREAMING_PATH_BATCH_COUNT
     );
     const tableStream = panel.beginTableStream(recordBatches);
-    this.onDataUpdated({
+    this.activeUpdate = {
       asyncIterator: createStreamingPathRecordBatchIterator(recordBatches),
       model: this.state.modelKind,
-      currentTime: MEASURE_SWEEP_DURATION,
+      currentTime: this.state.animate ? MEASURE_SWEEP_DURATION * 0.25 : MEASURE_SWEEP_DURATION,
       trailLength: TEMPORAL_TRAIL_LENGTH_MILLISECONDS / TEMPORAL_MILLISECONDS_PER_MEASURE_UNIT,
       temporalEnabled: this.state.timeKind === 'xyzm',
       animate: this.state.animate,
@@ -127,7 +136,8 @@ export class ArrowPathDataSource {
           }
         }
       }
-    });
+    };
+    this.onDataUpdated(this.activeUpdate);
   }
 }
 

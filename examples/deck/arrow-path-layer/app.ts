@@ -23,7 +23,8 @@ export function createArrowPathLayerDeck(
   options: DeckExampleDeviceOptions = {}
 ) {
   let activeUpdate: ArrowPathDataSourceUpdate | null = null;
-  let animationStartMilliseconds: number | null = null;
+  let previousFrameMilliseconds: number | null = null;
+  let currentTime = 0;
 
   const deck = new ArrowDeck({
     parent,
@@ -38,10 +39,10 @@ export function createArrowPathLayerDeck(
       const update = activeUpdate;
       if (update?.animate && update.temporalEnabled) {
         const timeMilliseconds = performance.now();
-        animationStartMilliseconds ??= timeMilliseconds;
-        const elapsedSeconds = (timeMilliseconds - animationStartMilliseconds) / 1000;
-        const currentTime =
-          (MEASURE_SWEEP_DURATION * 0.25 + elapsedSeconds * 0.24) % MEASURE_SWEEP_DURATION;
+        const elapsedSeconds =
+          (timeMilliseconds - (previousFrameMilliseconds ?? timeMilliseconds)) / 1000;
+        previousFrameMilliseconds = timeMilliseconds;
+        currentTime = (currentTime + elapsedSeconds * 0.24) % MEASURE_SWEEP_DURATION;
         setPathLayer(deck, update, currentTime);
       }
     },
@@ -50,9 +51,12 @@ export function createArrowPathLayerDeck(
 
   const dataSource = new ArrowPathDataSource({
     onDataUpdated: (update: ArrowPathDataSourceUpdate) => {
+      if (update.asyncIterator !== activeUpdate?.asyncIterator) {
+        currentTime = update.currentTime;
+      }
       activeUpdate = update;
-      animationStartMilliseconds = null;
-      setPathLayer(deck, update, update.currentTime);
+      previousFrameMilliseconds = null;
+      setPathLayer(deck, update, currentTime);
     }
   });
 

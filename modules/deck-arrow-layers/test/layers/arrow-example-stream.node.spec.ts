@@ -5,6 +5,7 @@
 import {expect, test, vi} from 'vitest';
 import type {ArrowPathLayer} from '@deck.gl-community/arrow-layers';
 import type {ArrowPathDataSourceProps} from '../../../../examples/deck/arrow-path-layer/arrow-path-data-source';
+import {MEASURE_SWEEP_DURATION} from '../../../../examples/arrow/arrow-lines/arrow-line-data';
 import {createArrowPathLayerDeck} from '../../../../examples/deck/arrow-path-layer/app';
 
 const callbacks = vi.hoisted(() => ({
@@ -63,3 +64,40 @@ for (const useColumns of [false, true]) {
     expect(loadSource).not.toHaveBeenCalled();
   });
 }
+
+test('pausing and resuming preserves the path stream and elapsed trail time', () => {
+  const clock = vi.spyOn(performance, 'now');
+  const deck = createArrowPathLayerDeck();
+  const update = {
+    asyncIterator: (async function* () {})(),
+    model: 'storage' as const,
+    colorColumn: true,
+    widthColumn: true,
+    currentTime: 1,
+    trailLength: 10,
+    temporalEnabled: true,
+    animate: true,
+    layerProps: {}
+  };
+  callbacks.onDataUpdated!(update);
+  clock.mockReturnValue(1000);
+  deck.props.onBeforeRender!({deck} as never);
+  clock.mockReturnValue(2000);
+  deck.props.onBeforeRender!({deck} as never);
+  const time = deck.props.layers[0].props.currentTime;
+  expect(time).toBeCloseTo(1.24);
+  callbacks.onDataUpdated!({...update, animate: false});
+  expect(deck.props.layers[0].props.currentTime).toBe(time);
+  clock.mockReturnValue(10000);
+  deck.props.onBeforeRender!({deck} as never);
+  callbacks.onDataUpdated!({...update, animate: true});
+  deck.props.onBeforeRender!({deck} as never);
+  expect(deck.props.layers[0].props.currentTime).toBe(time);
+  clock.mockReturnValue(11000);
+  deck.props.onBeforeRender!({deck} as never);
+  expect(deck.props.layers[0].props.currentTime).toBeCloseTo(
+    (time + 0.24) % MEASURE_SWEEP_DURATION
+  );
+  expect(deck.props.layers[0].props.data).toBe(update.asyncIterator);
+  clock.mockRestore();
+});
