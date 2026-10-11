@@ -327,7 +327,11 @@ const projects = [
       }
 ];
 
-export default getVitestConfig({
+const config = getVitestConfig({
   coverage: coverageConfig,
   projects: Object.fromEntries(projects.map(project => [project.test.name, project]))
 });
+// TEMP: per-file timing in CI logs
+config.test!.reporters = ['default', './test/setup/timing-reporter.ts'];
+
+export default config;
