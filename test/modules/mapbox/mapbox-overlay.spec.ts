@@ -7,7 +7,7 @@ import {test, expect, vi} from 'vitest';
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
+import {getDeckInstance, getProjection} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -1037,4 +1037,18 @@ test('MapboxLayerGroup#afterRender fires onBeforeRender/onAfterRender without no
       getDeckInstance({map, deck});
     });
   });
+});
+
+test('MapboxOverlay#getProjection falls back to mercator before the style is set', () => {
+  const map = new MockMapboxMap({center: {lng: 0, lat: 0}, zoom: 1});
+
+  map.getProjection = () => {
+    throw new TypeError("Cannot read properties of undefined (reading 'projection')");
+  };
+  expect(getProjection(map as any), 'falls back to mercator when getProjection throws').toBe(
+    'mercator'
+  );
+
+  map.getProjection = () => ({type: 'globe'});
+  expect(getProjection(map as any), 'detects globe once the style is set').toBe('globe');
 });
