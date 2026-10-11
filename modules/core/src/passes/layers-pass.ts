@@ -45,6 +45,12 @@ export type LayersPassRenderOptions = {
   layers: Layer[];
   viewports: Viewport[];
   onViewportActive?: (viewport: Viewport) => void;
+  /**
+   * If true, this pass draws into an auxiliary target with a viewport of its own making.
+   * Layers keep the update state they have for the primary viewport instead of re-updating for
+   * this one, which would be undone as soon as the primary viewport is activated again.
+   */
+  isAuxiliaryPass?: boolean;
   cullRect?: Rect;
   views?: Record<string, View>;
   effects?: Effect[];
@@ -201,6 +207,7 @@ export default class LayersPass extends Pass {
       layers,
       pass,
       isPicking = false,
+      isAuxiliaryPass = false,
       layerFilter,
       cullRect,
       views,
@@ -228,7 +235,8 @@ export default class LayersPass extends Pass {
         layer,
         drawContext,
         layerFilter,
-        layerFilterCache
+        layerFilterCache,
+        isAuxiliaryPass
       );
 
       const layerParam = {shouldDrawLayer} as DrawLayerParameters;
@@ -417,7 +425,8 @@ export default class LayersPass extends Pass {
     layer: Layer,
     drawContext: FilterContext,
     layerFilter: ((params: FilterContext) => boolean) | undefined | null,
-    layerFilterCache: Record<string, boolean>
+    layerFilterCache: Record<string, boolean>,
+    isAuxiliaryPass: boolean = false
   ) {
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
@@ -447,8 +456,12 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // If a layer is drawn, update its viewportChanged flag
-    layer.activateViewport(drawContext.viewport);
+    // If a layer is drawn, update its viewportChanged flag. Auxiliary passes are exempt: their
+    // viewport is transient, and adopting it would make the layer re-update on every pass boundary.
+    // Projection uniforms come from the pass viewport, so drawing stays correct either way.
+    if (!isAuxiliaryPass) {
+      layer.activateViewport(drawContext.viewport);
+    }
 
     return true;
   }
