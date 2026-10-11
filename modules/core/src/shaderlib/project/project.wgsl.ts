@@ -398,8 +398,10 @@ const GLOBE_BILLBOARD_FOOTPRINT_PIXELS: f32 = 64.0;
 
 // Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
 // moved toward the camera by the amount the globe surface rises within its footprint, so the
-// curve of the globe does not clip a sprite whose anchor is visible, while depth ordering
-// against other geometry is kept. Pair with project_globe_is_occluded. Identity for flat projections.
+// curve of the globe does not clip a sprite whose anchor is visible. The shift is zero where the
+// surface faces the camera and grows with the grazing angle, about 1.8 km at zoom 12 with pitch
+// 60, so other 3D geometry that is in front of the anchor by less than the shift no longer hides
+// the sprite. Pair with project_globe_is_occluded. Identity for flat projections.
 fn project_globe_billboard_clipspace(clipPosition: vec4<f32>, commonPosition: vec3<f32>) -> vec4<f32> {
   if (project.projectionMode != PROJECTION_MODE_GLOBE) {
     return clipPosition;

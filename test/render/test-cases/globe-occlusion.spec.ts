@@ -18,8 +18,8 @@ import fontMapping from '../../data/font-atlas.json';
  * toward the camera with `project_globe_billboard_clipspace` so the curve of the globe does not
  * clip a visible sprite. Non-billboard marks lie on the surface and are handled by culling.
  *
- * Every case looks at the globe from above lng 0, lat 10 at zoom 0.9. Blue objects are on the near
- * side and must be visible; red objects are on the far side and must be hidden.
+ * The far-side cases look at the globe from above lng 0, lat 10 at zoom 0.9. Blue objects are on
+ * the near side and must be visible; red objects are on the far side and must be hidden.
  *
  * - `globe-occlusion-icons`: markers every 30° of longitude at four latitudes. Expected: 20 blue
  *   markers, no red ones.
@@ -38,6 +38,15 @@ import fontMapping from '../../data/font-atlas.json';
  * - `globe-occlusion-marks-surface`: non-billboard ScatterplotLayer and IconLayer at the grid and
  *   along the horizon. Expected: near-side marks foreshortened on the surface, whole up to the
  *   limb, no far-side marks and no marks torn across the viewport.
+ *
+ * The last case looks at a pitched view from close up instead, and records the cost of the depth
+ * shift that keeps the globe from clipping a sprite:
+ *
+ * - `globe-occlusion-billboard-depth`: an opaque wall 4 km tall standing 1 km in front of three
+ *   columns of icons, at zoom 12 with pitch 60°, where the shift is about 1.8 km toward the
+ *   camera. Expected: the flanking columns beside the wall show all three icons; behind the wall
+ *   only the orange icon 1 km behind it draws through, because the wall is nearer its anchor than
+ *   the shift is long, while the blue icons 3 km and 10 km behind it stay hidden.
  */
 
 const ICON_ATLAS = '/test/data/icon-atlas.png';
@@ -74,6 +83,39 @@ const EARTH = [
 const NEAR_COLOR = [30, 90, 200];
 const FAR_COLOR = [220, 40, 40];
 const getSideColor = (d: Marker) => (d.farSide ? FAR_COLOR : NEAR_COLOR);
+
+const DEPTH_VIEW_STATE = {longitude: 0, latitude: 0, zoom: 12, pitch: 60, bearing: 0};
+
+/** Ground under the pitched view. Small enough that the globe's tessellation stays flat here */
+const GROUND = [
+  [-0.4, -0.1],
+  [0.4, -0.1],
+  [0.4, 0.5],
+  [-0.4, 0.5]
+];
+
+/** An east-west wall 1 km in front of the view center, tall enough to cover the icons behind it */
+const WALL = [
+  [-0.02, -0.0095],
+  [0.02, -0.0095],
+  [0.02, -0.0085],
+  [-0.02, -0.0085]
+];
+
+/**
+ * Icons 1 km, 3 km and 10 km behind the wall, in a column hidden by it and two columns beside it.
+ * 1 km is within the depth shift the globe helper applies, the other two are beyond it.
+ */
+const BEHIND_WALL: {position: number[]; metersBehind: number}[] = [];
+for (const [lat, metersBehind] of [
+  [0, 1000],
+  [0.018, 3000],
+  [0.081, 10000]
+]) {
+  for (const lng of [-0.05, 0, 0.05]) {
+    BEHIND_WALL.push({position: [lng, lat, 0], metersBehind});
+  }
+}
 
 function createIconLayer(
   id: string,
@@ -234,6 +276,32 @@ const testCases: TestCase[] = [
       createIconLayer('icons', GRID, getSideColor, false)
     ],
     goldenImage: './test/render/golden-images/globe-occlusion-marks-surface.png'
+  },
+  {
+    name: 'globe-occlusion-billboard-depth',
+    views: new GlobeView(),
+    viewState: DEPTH_VIEW_STATE,
+    layers: [
+      new SolidPolygonLayer({
+        id: 'ground',
+        data: [GROUND],
+        getPolygon: d => d,
+        getFillColor: [225, 225, 225]
+      }),
+      new SolidPolygonLayer({
+        id: 'wall',
+        data: [WALL],
+        extruded: true,
+        material: false,
+        getPolygon: d => d,
+        getElevation: 4000,
+        getFillColor: [120, 120, 130]
+      }),
+      createIconLayer('icons', BEHIND_WALL, d =>
+        d.metersBehind > 1000 ? NEAR_COLOR : [230, 140, 0]
+      )
+    ],
+    goldenImage: './test/render/golden-images/globe-occlusion-billboard-depth.png'
   }
 ];
 

@@ -391,9 +391,12 @@ float project_globe_ray_distance_(vec3 eye, vec3 direction, float fallback) {
 // Clip-space position for a billboard anchored at commonPosition. Under GLOBE the billboard is
 // moved toward the camera by the amount the globe surface rises within its footprint, so the
 // curve of the globe does not clip a sprite whose anchor is visible. The shift is the same at
-// every altitude for a given anchor direction and vanishes where the surface is flat on screen,
-// so depth ordering against other geometry is kept. Pair with project_globe_is_occluded, which
-// hides the sprite once the anchor itself is behind the globe. Identity for flat projections.
+// every altitude for a given anchor direction, so sprites keep their order against each other,
+// and it is zero where the surface faces the camera. It is not zero where the surface is
+// foreshortened: it grows with the grazing angle, about 1.8 km at zoom 12 with pitch 60, so other
+// 3D geometry that is in front of the anchor by less than the shift no longer hides the sprite.
+// Pair with project_globe_is_occluded, which hides the sprite once the anchor itself is behind
+// the globe. Identity for flat projections.
 vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
   if (project.projectionMode != PROJECTION_MODE_GLOBE) {
     return clipPosition;
