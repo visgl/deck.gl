@@ -41,17 +41,20 @@ export type ViewStateObject<ViewsT extends ViewOrViews> =
 /** Canvas id used by views that do not declare a presentation canvas. */
 export const DEFAULT_CANVAS_ID = 'default-canvas';
 
+/** Event manager assigned to a view's current presentation canvas. */
 type ViewEventManager = {
+  /** Presentation canvas receiving the view's controller events. */
   canvasId: string;
-  eventManager: EventManager;
+  /** Event manager for that canvas, or null when no presentation target exists. */
+  eventManager: EventManager | null;
 };
 
 /**
  * Looks up an existing canvas context without duplicating its resize or pixel-size bookkeeping.
- * @param canvasId - Presentation canvas to resolve, or undefined to select the default canvas.
+ * @param viewId - View to resolve, or undefined to select the default canvas.
  * @returns The existing render or presentation context, or null when no canvas matches.
  */
-type CanvasContextResolver = (canvasId?: string) => CanvasContext | PresentationContext | null;
+type CanvasContextResolver = (viewId?: string) => CanvasContext | PresentationContext | null;
 
 /**
  * Restricts viewport selection to one presentation canvas, optionally at a CSS-pixel location.
@@ -89,7 +92,9 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   viewState: ViewStateObject<ViewsT> | null;
   onViewStateChange?: (params: ViewStateChangeParameters<AnyViewStateOf<ViewsT>>) => void;
   onInteractionStateChange?: (state: InteractionState) => void;
-  pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  /** Release view-scoped resources when a descriptor leaves the active view set. */
+  onViewRemoved?: (viewId: string) => void;
+  pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
   /** Resolve existing luma contexts, which own all canvas resize and pixel-size tracking. */
@@ -112,14 +117,15 @@ export default class ViewManager<ViewsT extends View[]> {
   private _isUpdating: boolean;
   private _needsRedraw: string | false;
   private _needsUpdate: string | false;
-  private _eventManager: EventManager;
+  private _eventManager: EventManager | null;
   private _eventManagers: Record<string, EventManager>;
   private _viewEventManagers: {[viewId: string]: ViewEventManager};
   private _eventCallbacks: {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
+    onViewRemoved?: (viewId: string) => void;
   };
-  private _pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   /** Context lookup supplied by Deck; context dimensions remain owned and observed by luma. */
   private _getCanvasContext?: CanvasContextResolver;
 
@@ -131,7 +137,7 @@ export default class ViewManager<ViewsT extends View[]> {
     props: ViewManagerProps<ViewsT> & {
       // Initial options
       timeline: Timeline;
-      eventManager: EventManager;
+      eventManager: EventManager | null;
     }
   ) {
     // List of view descriptors, gets re-evaluated when width/height changes
@@ -153,7 +159,8 @@ export default class ViewManager<ViewsT extends View[]> {
     this._viewEventManagers = {};
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
-      onInteractionStateChange: props.onInteractionStateChange
+      onInteractionStateChange: props.onInteractionStateChange,
+      onViewRemoved: props.onViewRemoved
     };
     this._pickPosition = props.pickPosition;
     this._getCanvasContext = props.getCanvasContext;
@@ -329,20 +336,44 @@ export default class ViewManager<ViewsT extends View[]> {
   private _update(): void {
     this._isUpdating = true;
 
-    // Only rebuild viewports if the update flag is set
-    if (this._needsUpdate) {
-      this._needsUpdate = false;
-      this._rebuildViewports();
-    }
+    try {
+      // Only rebuild viewports if the update flag is set
+      if (this._needsUpdate) {
+        this._needsUpdate = false;
+        this._rebuildViewports();
+      }
 
-    // If viewport transition(s) are triggered during viewports update, controller(s)
-    // will immediately call `onViewStateChange` which calls `viewManager.setProps` again.
-    if (this._needsUpdate) {
-      this._needsUpdate = false;
-      this._rebuildViewports();
+      // If viewport transition(s) are triggered during viewports update, controller(s)
+      // will immediately call `onViewStateChange` which calls `viewManager.setProps` again.
+      if (this._needsUpdate) {
+        this._needsUpdate = false;
+        this._rebuildViewports();
+      }
+    } finally {
+      // An error while rebuilding must not leave the manager unable to update ever again
+      this._isUpdating = false;
     }
+  }
 
-    this._isUpdating = false;
+  /**
+   * Whether `getViewState(view)` resolves to a view state this view can use.
+   * The root `viewState` is a valid fallback for a single view, but not when it is a map of
+   * view states keyed by view id (every value a plain object, no view state fields of its own).
+   */
+  private _hasViewState(view: View): boolean {
+    const ownViewState = view.props.viewState;
+    if (ownViewState && typeof ownViewState === 'object' && !ownViewState.id) {
+      // The view completely defines its own view state, see View.filterViewState
+      return true;
+    }
+    if (this.viewState[view.getViewStateId()]) {
+      return true;
+    }
+    const values = Object.values(this.viewState);
+    return (
+      values.length === 0 ||
+      values.some(value => !value || typeof value !== 'object' || Array.isArray(value))
+    );
   }
 
   private _setSize(width: number, height: number): void {
@@ -360,6 +391,10 @@ export default class ViewManager<ViewsT extends View[]> {
 
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
+      const viewIds = new Set(views.map(view => view.id));
+      for (const view of this.views) {
+        if (!viewIds.has(view.id)) this._eventCallbacks.onViewRemoved?.(view.id);
+      }
       this.setNeedsUpdate('views changed');
     }
 
@@ -394,7 +429,7 @@ export default class ViewManager<ViewsT extends View[]> {
    * @returns The explicit, default-context, or legacy default canvas id.
    */
   private _getCanvasIdFromView(view: View): string {
-    return view.props.canvasId || this._getCanvasContext?.()?.id || DEFAULT_CANVAS_ID;
+    return view.props.canvasId || this._getCanvasContext?.(view.id)?.id || DEFAULT_CANVAS_ID;
   }
 
   /**
@@ -405,7 +440,7 @@ export default class ViewManager<ViewsT extends View[]> {
   private _getCanvasDimensions(view: View): CanvasDimensions {
     // Viewport layout uses CSS pixels, not framebuffer pixels. Read them directly from the
     // observed luma context instead of maintaining a second per-canvas size snapshot.
-    const canvasContext = this._getCanvasContext?.(this._getCanvasIdFromView(view));
+    const canvasContext = this._getCanvasContext?.(view.id);
     const [width, height] = canvasContext?.getCSSSize() || [this.width, this.height];
     return {width, height};
   }
@@ -469,7 +504,7 @@ export default class ViewManager<ViewsT extends View[]> {
           viewState,
           ...this._getCanvasDimensions(view)
         }),
-      pickPosition: this._pickPosition
+      pickPosition: (x, y) => this._pickPosition?.(x, y, view.id)
     });
 
     return controller;
@@ -527,7 +562,13 @@ export default class ViewManager<ViewsT extends View[]> {
         oldViewEventManagers[view.id],
         viewEventManager
       );
-      const hasController = Boolean(view.controller);
+      let hasController = Boolean(view.controller);
+      if (hasController && !this._hasViewState(view)) {
+        // View has a controller but no view state, controller disabled
+        // e.g. the default view created before an application provides views, while the
+        // view state is keyed by the ids of the views it will provide
+        hasController = false;
+      }
       if (hasController && !oldController) {
         // When a new controller is added, invalidate all controllers below it so that
         // events are registered in the correct order
@@ -540,7 +581,9 @@ export default class ViewManager<ViewsT extends View[]> {
       }
 
       // Update the controller
-      this.controllers[view.id] = this._updateController(view, viewState, viewport, oldController);
+      this.controllers[view.id] = hasController
+        ? this._updateController(view, viewState, viewport, oldController)
+        : null;
 
       if (viewport) {
         this._viewports.unshift(viewport);

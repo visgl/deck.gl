@@ -56,6 +56,9 @@ new Fp64Extension();
 
 When added to a layer via the `extensions` prop, the `Fp64Extension` requires the `coordinateSystem` prop of the layer to be `'lnglat'`.
 
+## Limitations
+
+- Only `MapView` (and other Web Mercator based viewports) are supported. `GlobeView` and Non-geospatial views such as `OrthographicView` and `OrbitView` are not supported.
 
 ## Source
 

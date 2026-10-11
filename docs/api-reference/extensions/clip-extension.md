@@ -3,6 +3,8 @@
 
 The `ClipExtension` adds support for clipping rendered layers by rectangular bounds.
 
+On WebGPU, clipping is currently supported on `ScatterplotLayer`, `PathLayer`, and `SolidPolygonLayer`. Other layer types continue to require WebGL.
+
 ```js
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';

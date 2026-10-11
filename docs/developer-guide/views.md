@@ -32,6 +32,7 @@ View classes enable applications to specify one or more rectangular viewports an
 A [View](../api-reference/core/view.md) instance defines the following information:
 
 * A unique `id`.
+* An optional `canvasId` that selects the presentation canvas in multi-canvas mode.
 * The position and extent of the view on the canvas: `x`, `y`, `width`, and `height`.
   These properties (and padding) accept CSS-style expressions that combine numbers, percentages, `px` units, parentheses, and `calc()` addition/subtraction so you can mix relative and absolute measurements like `calc(50% - 10px)`.
 * Certain camera parameters specifying how your data should be projected into this view, e.g. field of view, near/far planes, perspective vs. orthographic, etc.
@@ -67,6 +68,7 @@ Note that the set of view state parameters that will be used varies between View
 | [`View`](../api-reference/core/view.md)                          |    |    | The base view has to be supplied with raw view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the [WebVR API](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API). |
 | [`MapView`](../api-reference/core/map-view.md) (default)         | geospatial | full support | This view renders data using the [Web Mercator projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) and is designed to match an external base map library such as Mapbox or Google Maps.
 | [`GlobeView`](../api-reference/core/globe-view.md)               | geospatial | experimental | This view renders data as a 3D globe.
+| [`CustomProjectionView`](../api-reference/core/custom-projection-view.md) | planar maps | experimental | This view converts positions on the CPU using application-supplied projection functions. |
 | [`FirstPersonView`](../api-reference/core/first-person-view.md)  | geospatial | full support | The camera is positioned in a provided geolocation and looks in a provided direction, similar to that of a [first-person game](https://en.wikipedia.org/wiki/First-person_(gaming)). |
 | [`OrthographicView`](../api-reference/core/orthographic-view.md) | info-vis (2D)     | full support | The camera looks at a target point from top-down. Does not rotate. |
 | [`OrbitView`](../api-reference/core/orbit-view.md)         | info-vis (3D)     | full support | The camera looks at a target point from a provided direction. Rotates around the target. |
@@ -297,6 +299,14 @@ deck.gl also supports multiple views by taking a `views` prop that is a list of 
 
 Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen) with `x` (left), `y` (top), `width` and `height`. These can be specified in either numbers or CSS-like percentage strings (e.g. `width: '50%'`), which is evaluated at runtime when the canvas resizes.
 
+If [`Deck._canvases`](../api-reference/core/deck.md#_canvases) is supplied, each view may also specify a `canvasId`. In that mode:
+
+* each canvas gets its own presentation target and event manager
+* view layout is resolved relative to the assigned canvas, not a global deck rectangle
+* controllers and picking are scoped to the assigned canvas
+
+View-specific widgets are positioned relative to the presentation canvas assigned to their `viewId`, while their DOM remains under a shared widget root. See [Using with Multiple Canvases](../api-reference/widgets/overview.md#using-with-multiple-canvases).
+
 Common examples in 3D applications that render a 3D scene multiple times with different "cameras":
 
 * To show views from multiple viewpoints (cameras), e.g. in a split screen setup.
@@ -379,6 +389,33 @@ function App() {
   </TabItem>
 </Tabs>
 
+#### Rendering into Multiple Canvases
+
+Multi-canvas mode is useful when a page layout needs several independent map surfaces embedded alongside other content, while still sharing one `Deck` instance.
+
+Create the presentation canvases in the page layout first:
+
+```html
+<canvas id="canvas-london"></canvas>
+<canvas id="canvas-tokyo"></canvas>
+```
+
+Pass those existing element ids to `Deck._canvases` and assign each view to its matching canvas:
+
+```js
+import {Deck, MapView} from '@deck.gl/core';
+
+const views = [
+  new MapView({id: 'london', canvasId: 'canvas-london', controller: true}),
+  new MapView({id: 'tokyo', canvasId: 'canvas-tokyo', controller: true})
+];
+
+new Deck({
+  _canvases: ['canvas-london', 'canvas-tokyo'],
+  views,
+  layers
+});
+```
 
 ### Using Multiple Views with View States
 

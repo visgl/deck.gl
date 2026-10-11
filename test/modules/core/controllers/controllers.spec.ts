@@ -264,6 +264,90 @@ test('MapController disables double-click drag zoom', () => {
   expect(controller.props.zoom, 'double-click drag zoom stays disabled').toBe(10);
 });
 
+const MAP_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [-10, -10],
+  [10, 10]
+];
+
+function createMapRubberBandController({
+  controller: controllerOptions,
+  initialViewState,
+  ...options
+}: RubberBandControllerOptions = {}) {
+  return createTestController({
+    ...options,
+    view: new MapView({
+      controller: {maxBounds: MAP_MAX_BOUNDS, rubberBand: true, ...controllerOptions}
+    }),
+    initialViewState: {longitude: 0, latitude: 0, zoom: 4, ...initialViewState}
+  });
+}
+
+test('MapState constrains and releases elastic panning', () => {
+  const controller = createMapRubberBandController();
+  const startedState = controller.controllerState.panStart({pos: [50, 50]}, {mode: 'hard'});
+  const hardLongitude = startedState
+    .pan({pos: [400, 50]}, {mode: 'hard'})
+    .getViewportProps().longitude;
+  const elasticState = startedState.pan({pos: [400, 50]}, {mode: 'elastic'});
+  const elasticLongitude = elasticState.getViewportProps().longitude;
+  const rawLongitude = startedState
+    .pan({pos: [400, 50]}, {mode: 'preserve'})
+    .getViewportProps().longitude;
+
+  expect(elasticLongitude, 'elastic panning temporarily exceeds the edge').toBeLessThan(
+    hardLongitude
+  );
+  expect(elasticLongitude, 'elastic panning resists the raw displacement').toBeGreaterThan(
+    rawLongitude
+  );
+  expect(
+    elasticState.panEnd({mode: 'rebound'}).getViewportProps().longitude,
+    'panEnd returns to the nearest valid edge'
+  ).toBeCloseTo(hardLongitude);
+  controller.finalize();
+});
+
+test('MapController springs overscroll back within maxBounds', () => {
+  const interactionStates: any[] = [];
+  const controller = createMapRubberBandController({
+    onStateChange: state => interactionStates.push({...state})
+  });
+  const settledLongitude = controller.controllerState
+    .panStart({pos: [50, 50]}, {mode: 'hard'})
+    .pan({pos: [400, 50]}, {mode: 'hard'})
+    .getViewportProps().longitude;
+
+  panRubberBand(controller, {x: 400});
+  expect(controller.props.longitude, 'panning temporarily exceeds maxBounds').toBeLessThan(
+    settledLongitude
+  );
+  controller.handleEvent(makeGestureEvent('panend', {x: 400}) as any);
+
+  expect(controller.transitionManager.transition.inProgress, 'release starts a rebound').toBe(true);
+  advanceRubberBandTransition(controller, 300);
+  expect(controller.props.longitude, 'the view settles at the constrained edge').toBeCloseTo(
+    settledLongitude
+  );
+  expectRubberBandInteractionEnded(interactionStates);
+  controller.finalize();
+});
+
+test('MapController rubber-bands continuous zoom limits', () => {
+  const controller = createMapRubberBandController({
+    controller: {maxBounds: null},
+    initialViewState: {zoom: 0.5, minZoom: 0, maxZoom: 1}
+  });
+  const endEvent = pinchRubberBand(controller, 4);
+
+  expect(controller.props.zoom, 'pinch zoom temporarily exceeds maxZoom').toBeGreaterThan(1);
+  expect(controller.props.zoom, 'elastic zoom resists the raw zoom').toBeLessThan(2.5);
+  controller.handleEvent(endEvent as any);
+  advanceRubberBandTransition(controller, 300);
+  expect(controller.props.zoom, 'zoom settles at maxZoom').toBeCloseTo(1);
+  controller.finalize();
+});
+
 test('GlobeController', async () => {
   await testController(
     GlobeView,
@@ -275,6 +359,141 @@ test('GlobeController', async () => {
     // GlobeView cannot be rotated
     ['pan#function key', 'pinch', 'multipan']
   );
+});
+
+const ZOOM_AROUND_CASES = [
+  {
+    title: 'MapController',
+    ViewClass: MapView,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    getPosition: props => [props.longitude, props.latitude]
+  },
+  {
+    title: 'GlobeController',
+    ViewClass: GlobeView,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    getPosition: props => [props.longitude, props.latitude]
+  },
+  {
+    title: 'OrbitController',
+    ViewClass: OrbitView,
+    initialViewState: {target: [0, 0, 0], rotationX: 0, rotationOrbit: 0, zoom: 1},
+    getPosition: props => props.target
+  },
+  {
+    title: 'OrthographicController',
+    ViewClass: OrthographicView,
+    initialViewState: {target: [0, 0, 0], zoom: 1},
+    getPosition: props => props.target
+  },
+  {
+    title: 'FirstPersonController',
+    ViewClass: FirstPersonView,
+    initialViewState: {position: [0, 0, 1], bearing: 0, pitch: 0},
+    getPosition: props => props.position
+  }
+];
+
+const makeWheelEvent = () => ({
+  type: 'wheel',
+  pointerType: 'mouse',
+  offsetCenter: {x: 75, y: 25},
+  delta: -10,
+  srcEvent: {preventDefault() {}},
+  stopPropagation() {}
+});
+
+test.each(ZOOM_AROUND_CASES)('$title applies shared zoomAround option', testCase => {
+  const makeController = (zoomAround: 'center' | 'pointer') =>
+    createTestController({
+      view: new testCase.ViewClass({controller: {zoomAround}}),
+      initialViewState: testCase.initialViewState
+    });
+
+  const centerZoomController = makeController('center');
+  const pointerZoomController = makeController('pointer');
+
+  centerZoomController.handleEvent(makeWheelEvent() as any);
+  pointerZoomController.handleEvent(makeWheelEvent() as any);
+
+  expect(
+    testCase.getPosition(pointerZoomController.props),
+    'pointer and center anchors produce different camera positions'
+  ).not.toEqual(testCase.getPosition(centerZoomController.props));
+});
+
+test('Controller defaults zoomAround to pointer', () => {
+  const makeController = controller =>
+    createTestController({
+      view: new MapView({controller}),
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1}
+    });
+  const defaultController = makeController(true);
+  const pointerController = makeController({zoomAround: 'pointer'});
+
+  defaultController.handleEvent(makeWheelEvent() as any);
+  pointerController.handleEvent(makeWheelEvent() as any);
+
+  expect(defaultController.props.longitude, 'default longitude matches pointer mode').toBeCloseTo(
+    pointerController.props.longitude
+  );
+  expect(defaultController.props.latitude, 'default latitude matches pointer mode').toBeCloseTo(
+    pointerController.props.latitude
+  );
+});
+
+test('Controller center zoom preserves the padded viewport center', () => {
+  const view = new MapView({
+    controller: {zoomAround: 'center'},
+    padding: {left: 40, right: 0, top: 10, bottom: 30}
+  });
+  const controller = createTestController({
+    view,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const viewport = view.makeViewport({
+    width: controller.props.width,
+    height: controller.props.height,
+    viewState: controller.props
+  })!;
+
+  const paddedCenter = viewport.project([0, 0]);
+  expect(paddedCenter[0], 'padding offsets the semantic center horizontally').toBeCloseTo(70);
+  expect(paddedCenter[1], 'padding offsets the semantic center vertically').toBeCloseTo(40);
+
+  controller.handleEvent(makeWheelEvent() as any);
+
+  expect(controller.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+  expect(controller.props.latitude, 'center zoom preserves latitude').toBeCloseTo(0);
+});
+
+test('Controller applies updated zoomAround option without recreating the view', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {zoomAround: 'center'}}),
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+
+  controller.handleEvent(makeWheelEvent() as any);
+  expect(controller.props.longitude, 'center zoom preserves longitude').toBeCloseTo(0);
+
+  controller.setProps({...controller.props, zoomAround: 'pointer'});
+  controller.handleEvent(makeWheelEvent() as any);
+  expect(controller.props.longitude, 'pointer zoom adjusts longitude').not.toBeCloseTo(0);
+});
+
+test('GlobeController falls back to center zoom when the pointer is off the globe', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {width: 800, height: 600, longitude: 0, latitude: 0, zoom: 1}
+  });
+  const wheelEvent = makeWheelEvent();
+  wheelEvent.offsetCenter = {x: 0, y: 0};
+
+  controller.handleEvent(wheelEvent as any);
+
+  expect(controller.props.longitude, 'off-globe zoom preserves longitude').toBeCloseTo(0);
+  expect(controller.props.latitude, 'off-globe zoom preserves latitude').toBeCloseTo(0);
+  expect(controller.props.zoom, 'off-globe zoom still changes scale').not.toBeCloseTo(1);
 });
 
 test('GlobeController initializes multipan like pointer pan', () => {

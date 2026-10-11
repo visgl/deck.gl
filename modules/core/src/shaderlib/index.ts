@@ -25,7 +25,7 @@ const SHADER_HOOKS_WGSL = [
 ];
 
 export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
-  const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler();
+  const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler(language);
 
   for (const shaderModule of DEFAULT_MODULES) {
     shaderAssembler.addDefaultModule(shaderModule);

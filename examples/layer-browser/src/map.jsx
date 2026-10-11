@@ -6,7 +6,7 @@
 
 import React, {PureComponent} from 'react';
 import {Map, useControl} from 'react-map-gl/maplibre';
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import autobind from 'react-autobind';
 
 import {DeckGL} from '@deck.gl/react';
@@ -48,7 +48,7 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 
 function DeckGLOverlay(props) {
-  const overlay = useControl(() => new MapboxOverlay(props));
+  const overlay = useControl(() => new MapLibreOverlay(props));
   overlay.setProps(props);
   return null;
 }

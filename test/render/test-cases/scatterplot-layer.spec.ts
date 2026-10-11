@@ -7,7 +7,6 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 /* eslint-disable callback-return */
-import {GL} from '@luma.gl/webgl/constants';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -139,10 +138,11 @@ const testCases = [
         getRadius: d => 1000,
         radiusUnits: 'pixels'
       }),
-      ...[true, false].map(
-        antialiasing =>
+      // Composite the antialiased pass twice to make partial edge coverage easier to inspect.
+      ...[true, true, false].map(
+        (antialiasing, drawIndex) =>
           new ScatterplotLayer({
-            id: `circles-${antialiasing}`,
+            id: `circles-${drawIndex}`,
             data: Array(399)
               .fill()
               .map((x, i) => i),
@@ -151,8 +151,8 @@ const testCases = [
             getRadius: d => 4 + 8 * (d % 2),
             antialiasing,
             parameters: {
-              blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
-              blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
+              depthCompare: 'always',
+              depthWriteEnabled: false
             },
             radiusUnits: 'pixels'
           })

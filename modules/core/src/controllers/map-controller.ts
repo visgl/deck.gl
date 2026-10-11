@@ -4,8 +4,12 @@
 
 import {clamp} from '@math.gl/core';
 import Controller, {ControllerProps, InteractionState} from './controller';
-import ViewState from './view-state';
-import {getMaxBoundsExtents, getMaxBoundsRect} from './utils';
+import ViewState, {
+  CONSTRAINT_AROUND,
+  type ConstraintAround,
+  type ConstraintContext
+} from './view-state';
+import {applyRubberBand, getMaxBoundsExtents, getMaxBoundsRect} from './utils';
 import {worldToLngLat, lngLatToWorld as _lngLatToWorld} from '@math.gl/web-mercator';
 import assert from '../utils/assert';
 import {mod} from '../utils/math-utils';
@@ -20,6 +24,7 @@ const WEB_MERCATOR_MAX_BOUNDS = [
   [-Infinity, -90],
   [Infinity, 90]
 ] satisfies ControllerProps['maxBounds'];
+const ZOOM_RUBBER_BAND_RANGE = 1;
 
 /** The web mercator utility `lngLatToWorld` throws if invalid coordinates are provided.
  * This wrapper clamps user input to calculate common positions safely. */
@@ -71,6 +76,8 @@ export type MapStateProps = {
 
   maxBounds?: ControllerProps['maxBounds'];
   maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
+  /** Enables elastic bounds and zoom constraints during interaction. Defaults to `false`. */
+  rubberBand?: boolean;
 };
 
 export type MapStateInternal = {
@@ -106,6 +113,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       MapStateInternal & {
         makeViewport: (props: Record<string, any>) => Viewport;
         getAltitude?: (pos: [number, number]) => number | undefined;
+        constraintContext?: ConstraintContext;
       }
   ) {
     const {
@@ -156,8 +164,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       startZoom,
 
       /** Normalize viewport props to fit map height into viewport */
-      normalize = true
+      normalize = true,
+      rubberBand = false
     } = options;
+    const {[CONSTRAINT_AROUND]: constraintAround} = options as typeof options & ConstraintAround;
 
     assert(Number.isFinite(longitude)); // `longitude` must be supplied
     assert(Number.isFinite(latitude)); // `latitude` must be supplied
@@ -183,7 +193,9 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         normalize,
         position,
         maxBounds,
-        maxBoundsPadding
+        maxBoundsPadding,
+        rubberBand,
+        ...{[CONSTRAINT_AROUND]: constraintAround}
       },
       {
         startPanLngLat,
@@ -194,7 +206,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         startPitch,
         startZoom
       },
-      options.makeViewport
+      options.makeViewport,
+      options.constraintContext
     );
 
     this.getAltitude = options.getAltitude;
@@ -204,10 +217,13 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * Start panning
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
-  panStart({pos}: {pos: [number, number]}): MapState {
-    return this._getUpdatedState({
-      startPanLngLat: this._unproject(pos)
-    });
+  panStart({pos}: {pos: [number, number]}, constraintContext?: ConstraintContext): MapState {
+    return this._getUpdatedState(
+      {
+        startPanLngLat: this._unproject(pos)
+      },
+      constraintContext
+    );
   }
 
   /**
@@ -216,7 +232,10 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * @param {[Number, Number], optional} startPos - where the pointer grabbed at
    *   the start of the operation. Must be supplied of `panStart()` was not called
    */
-  pan({pos, startPos}: {pos: [number, number]; startPos?: [number, number]}): MapState {
+  pan(
+    {pos, startPos}: {pos: [number, number]; startPos?: [number, number]},
+    constraintContext?: ConstraintContext
+  ): MapState {
     const startPanLngLat = this.getState().startPanLngLat || this._unproject(startPos);
 
     if (!startPanLngLat) {
@@ -226,17 +245,20 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     const viewport = this.makeViewport(this.getViewportProps());
     const newProps = viewport.panByPosition(startPanLngLat, pos);
 
-    return this._getUpdatedState(newProps);
+    return this._getUpdatedState(newProps, constraintContext);
   }
 
   /**
    * End panning
    * Must call if `panStart()` was called
    */
-  panEnd(): MapState {
-    return this._getUpdatedState({
-      startPanLngLat: null
-    });
+  panEnd(constraintContext?: ConstraintContext): MapState {
+    return this._getUpdatedState(
+      {
+        startPanLngLat: null
+      },
+      constraintContext
+    );
   }
 
   /**
@@ -316,11 +338,14 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * Start zooming
    * @param {[Number, Number]} pos - position on screen where the center is
    */
-  zoomStart({pos}: {pos: [number, number]}): MapState {
-    return this._getUpdatedState({
-      startZoomLngLat: this._unproject(pos),
-      startZoom: this.getViewportProps().zoom
-    });
+  zoomStart({pos}: {pos: [number, number]}, constraintContext?: ConstraintContext): MapState {
+    return this._getUpdatedState(
+      {
+        startZoomLngLat: this._unproject(pos),
+        startZoom: this.getViewportProps().zoom
+      },
+      constraintContext
+    );
   }
 
   /**
@@ -331,15 +356,18 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
-  zoom({
-    pos,
-    startPos,
-    scale
-  }: {
-    pos: [number, number];
-    startPos?: [number, number];
-    scale: number;
-  }): MapState {
+  zoom(
+    {
+      pos,
+      startPos,
+      scale
+    }: {
+      pos: [number, number];
+      startPos?: [number, number];
+      scale: number;
+    },
+    constraintContext?: ConstraintContext
+  ): MapState {
     // Make sure we zoom around the current mouse position rather than map center
     let {startZoom, startZoomLngLat} = this.getState();
 
@@ -357,48 +385,51 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       return this;
     }
 
-    const zoom = this._constrainZoom((startZoom as number) + Math.log2(scale));
-    const zoomedViewport = this.makeViewport({...this.getViewportProps(), zoom});
-
-    return this._getUpdatedState({
-      zoom,
-      ...zoomedViewport.panByPosition(startZoomLngLat, pos)
-    });
+    return this._getUpdatedState(
+      {
+        zoom: (startZoom as number) + Math.log2(scale),
+        [CONSTRAINT_AROUND]: {position: startZoomLngLat, screenPosition: pos}
+      },
+      constraintContext
+    );
   }
 
   /**
    * End zooming
    * Must call if `zoomStart()` was called
    */
-  zoomEnd(): MapState {
-    return this._getUpdatedState({
-      startZoomLngLat: null,
-      startZoom: null
-    });
+  zoomEnd(constraintContext?: ConstraintContext): MapState {
+    return this._getUpdatedState(
+      {
+        startZoomLngLat: null,
+        startZoom: null
+      },
+      constraintContext
+    );
   }
 
-  zoomIn(speed: number = 2): MapState {
-    return this._zoomFromCenter(speed);
+  zoomIn(speed: number = 2, constraintContext?: ConstraintContext): MapState {
+    return this._zoomFromCenter(speed, constraintContext);
   }
 
-  zoomOut(speed: number = 2): MapState {
-    return this._zoomFromCenter(1 / speed);
+  zoomOut(speed: number = 2, constraintContext?: ConstraintContext): MapState {
+    return this._zoomFromCenter(1 / speed, constraintContext);
   }
 
-  moveLeft(speed: number = 100): MapState {
-    return this._panFromCenter([speed, 0]);
+  moveLeft(speed: number = 100, constraintContext?: ConstraintContext): MapState {
+    return this._panFromCenter([speed, 0], constraintContext);
   }
 
-  moveRight(speed: number = 100): MapState {
-    return this._panFromCenter([-speed, 0]);
+  moveRight(speed: number = 100, constraintContext?: ConstraintContext): MapState {
+    return this._panFromCenter([-speed, 0], constraintContext);
   }
 
-  moveUp(speed: number = 100): MapState {
-    return this._panFromCenter([0, speed]);
+  moveUp(speed: number = 100, constraintContext?: ConstraintContext): MapState {
+    return this._panFromCenter([0, speed], constraintContext);
   }
 
-  moveDown(speed: number = 100): MapState {
-    return this._panFromCenter([0, -speed]);
+  moveDown(speed: number = 100, constraintContext?: ConstraintContext): MapState {
+    return this._panFromCenter([0, -speed], constraintContext);
   }
 
   rotateLeft(speed: number = 15): MapState {
@@ -441,21 +472,45 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
   }
 
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
-  applyConstraints(props: Required<MapStateProps>): Required<MapStateProps> {
+  applyConstraints(
+    props: Required<MapStateProps>,
+    constraintContext?: ConstraintContext
+  ): Required<MapStateProps> {
+    const internalProps = props as typeof props & ConstraintAround;
+    const constraintAround = internalProps[CONSTRAINT_AROUND];
+    delete internalProps[CONSTRAINT_AROUND];
+
     // Ensure pitch is within specified range
-    const {maxPitch, minPitch, pitch, longitude, bearing, normalize, maxBounds} = props;
+    const {maxPitch, minPitch, pitch, bearing, normalize, maxBounds, rubberBand} = props;
 
     if (normalize) {
-      if (longitude < -180 || longitude > 180) {
-        props.longitude = mod(longitude + 180, 360) - 180;
-      }
       if (bearing < -180 || bearing > 180) {
         props.bearing = mod(bearing + 180, 360) - 180;
       }
     }
     props.pitch = clamp(pitch, minPitch, maxPitch);
 
-    props.zoom = this._constrainZoom(props.zoom, props);
+    const constrainedZoom = this._constrainZoom(props.zoom, props);
+    const shouldRubberBand = rubberBand && constraintContext?.mode === 'elastic';
+    props.zoom =
+      constraintContext?.mode === 'preserve'
+        ? props.zoom
+        : shouldRubberBand
+          ? applyRubberBand(props.zoom, constrainedZoom, ZOOM_RUBBER_BAND_RANGE)
+          : constrainedZoom;
+
+    // Resolve the geographic zoom anchor only after selecting the displayed zoom.
+    if (constraintAround) {
+      const viewport = this.makeViewport(props);
+      Object.assign(
+        props,
+        viewport.panByPosition(constraintAround.position, constraintAround.screenPosition)
+      );
+    }
+
+    if (normalize && (props.longitude < -180 || props.longitude > 180)) {
+      props.longitude = mod(props.longitude + 180, 360) - 180;
+    }
 
     if (maxBounds) {
       const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
@@ -472,20 +527,45 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       // calculate center and zoom ranges at pitch=0 and bearing=0
       // to maintain visual stability when rotating
       const scale = 2 ** props.zoom;
-      const [minLng, minLat] = worldToLngLat([
+      const minimumCenter = [
         bl[0] + screenExtents.left / scale,
         bl[1] + screenExtents.bottom / scale
-      ]);
-      const [maxLng, maxLat] = worldToLngLat([
+      ];
+      const maximumCenter = [
         tr[0] - screenExtents.right / scale,
         tr[1] - screenExtents.top / scale
-      ]);
+      ];
+      const center = lngLatToWorld([props.longitude, props.latitude]);
+      const constrainedCenter = [
+        clamp(center[0], minimumCenter[0], maximumCenter[0]),
+        clamp(center[1], minimumCenter[1], maximumCenter[1])
+      ];
+      const displayedCenter = center.slice();
       // A negative target dimension is inverted and therefore has no legal interval.
       if (maxBoundsRect.width >= 0) {
-        props.longitude = clamp(props.longitude, minLng, maxLng);
+        displayedCenter[0] =
+          constraintContext?.mode === 'preserve'
+            ? center[0]
+            : shouldRubberBand
+              ? applyRubberBand(center[0], constrainedCenter[0], maxBoundsRect.width / 2 / scale)
+              : constrainedCenter[0];
       }
       if (maxBoundsRect.height >= 0) {
-        props.latitude = clamp(props.latitude, minLat, maxLat);
+        displayedCenter[1] =
+          constraintContext?.mode === 'preserve'
+            ? center[1]
+            : shouldRubberBand
+              ? applyRubberBand(center[1], constrainedCenter[1], maxBoundsRect.height / 2 / scale)
+              : constrainedCenter[1];
+      }
+      if (displayedCenter[0] !== center[0] || displayedCenter[1] !== center[1]) {
+        const [displayedLongitude, displayedLatitude] = worldToLngLat(displayedCenter);
+        if (displayedCenter[0] !== center[0]) {
+          props.longitude = displayedLongitude;
+        }
+        if (displayedCenter[1] !== center[1]) {
+          props.latitude = displayedLatitude;
+        }
       }
     }
 
@@ -519,29 +599,36 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
     return clamp(zoom, minZoom, maxZoom);
   }
 
-  _zoomFromCenter(scale) {
+  _zoomFromCenter(scale, constraintContext?: ConstraintContext) {
     const {width, height} = this.getViewportProps();
-    return this.zoom({
-      pos: [width / 2, height / 2],
-      scale
-    });
+    return this.zoom(
+      {
+        pos: [width / 2, height / 2],
+        scale
+      },
+      constraintContext
+    );
   }
 
-  _panFromCenter(offset) {
+  _panFromCenter(offset, constraintContext?: ConstraintContext) {
     const {width, height} = this.getViewportProps();
-    return this.pan({
-      startPos: [width / 2, height / 2],
-      pos: [width / 2 + offset[0], height / 2 + offset[1]]
-    });
+    return this.pan(
+      {
+        startPos: [width / 2, height / 2],
+        pos: [width / 2 + offset[0], height / 2 + offset[1]]
+      },
+      constraintContext
+    );
   }
 
-  _getUpdatedState(newProps): MapState {
+  _getUpdatedState(newProps, constraintContext?: ConstraintContext): MapState {
     // @ts-ignore
     return new this.constructor({
       makeViewport: this.makeViewport,
       ...this.getViewportProps(),
       ...this.getState(),
-      ...newProps
+      ...newProps,
+      constraintContext
     });
   }
 

@@ -4,14 +4,14 @@
 
 import React from 'react';
 import {Map as MapLibreMap, useControl as useMapLibreControl} from 'react-map-gl/maplibre';
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 function MapLibreDeckOverlay(props: any) {
-  const overlay = useMapLibreControl(() => new MapboxOverlay(props));
+  const overlay = useMapLibreControl(() => new MapLibreOverlay(props));
   overlay.setProps(props);
   return null;
 }

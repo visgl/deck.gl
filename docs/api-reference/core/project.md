@@ -140,6 +140,36 @@ vec4 project_common_position_to_clipspace(vec4 position)
 Converts the coordinates of a point from the common space to the clip space, which can be assigned to `gl_Position` as the "return value" from the vertex shader.
 
 
+### project_common_position_to_flat
+
+```glsl
+vec2 project_common_position_to_flat(vec3 commonPosition)
+vec2 project_common_position_to_flat(vec4 commonPosition)
+```
+
+Converts a position in the common space of the current projection mode into flat common space: Web Mercator for geospatial views, cartesian otherwise. Returns `commonPosition.xy` unchanged for flat projections; in `GlobeView` the sphere position is inverted back to absolute Mercator. Use it when looking up textures or bounds that were computed in a flat viewport, such as an effect's framebuffer.
+
+
+### project_common_position_to_flat_wrapped
+
+```glsl
+vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX)
+vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX)
+```
+
+Same as `project_common_position_to_flat`, with x moved to the world copy nearest to `referenceX` (within half a world width) in every geospatial projection mode. No-op for identity. Use it when comparing a position against geospatial bounds or sampling a texture of a geospatial region, passing the flat x of the bounds centre: bounds that cross the antimeridian are unwrapped past one world width by the CPU helper `projectBoundsToFlatCommon` in `@deck.gl/extensions`, and this brings positions on either side of 180° into their frame.
+
+
+### project_common_position_to_flat_continuous
+
+```glsl
+vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX)
+vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float referenceX)
+```
+
+Same as `project_common_position_to_flat`, made continuous across the antimeridian for non-flat projections. A sphere has no seam, but its flat inverse does: at 180° longitude x jumps by one world width, so a triangle that spans the antimeridian in `GlobeView` would interpolate across the whole world. Every vertex is moved to the world copy nearest to `referenceX`, which moves the seam to the antipode of the reference; pass `project_common_position_to_flat(project.cameraPosition).x` so it is never visible. Identity for flat projection modes, where positions are already continuous. Use it for periodic patterns, which must not jump at world boundaries on a flat map.
+
+
 ### project_get_orientation_matrix
 
 ```glsl

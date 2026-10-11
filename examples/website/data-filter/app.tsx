@@ -163,7 +163,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const data = (await load(DATA_URL, CSVLoader)).data;
+  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
 
   const earthquakes = data.map(row => ({
     timestamp: new Date(`${row.DateTime} UTC`).getTime(),
