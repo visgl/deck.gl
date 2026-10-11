@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-export default /* wgsl */ `\
+export const shaderWGSL = /* wgsl */ `\
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 
 struct Attributes {
@@ -286,11 +286,25 @@ fn vertexMain(
     arc.widthMinPixels,
     arc.widthMaxPixels
   );
+#ifdef ANTIALIASING
+  var offset = getExtrusionOffset(
+#else
   let offset = getExtrusionOffset(
+#endif
     (nextClip.xy - currentClip.xy) * indexDirection,
     segmentSide,
     widthPixels
   );
+#ifdef ANTIALIASING
+  let halfWidthPixels = length(offset);
+  if (halfWidthPixels > 0.0) {
+    // Keep the declared edge at abs(uv.y) == 1 while rasterizing the outer half of the centered
+    // one-device-pixel coverage ramp.
+    let coverageScale = 1.0 + 0.5 / project.devicePixelRatio / halfWidthPixels;
+    offset *= coverageScale;
+    geometry.uv.y *= coverageScale;
+  }
+#endif
 
   var output: Varyings;
   output.position = currentClip + vec4<f32>(project_pixel_size_to_clipspace(offset), 0.0, 0.0);
@@ -304,11 +318,27 @@ fn vertexMain(
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
+#ifdef ANTIALIASING
+  let edgeCoord = abs(varyings.uv.y);
+  let edgePixels = (1.0 - edgeCoord) / max(fwidth(edgeCoord), 1e-6);
+#endif
+
   if (varyings.isValid == 0.0) {
     discard;
   }
 
+#ifdef ANTIALIASING
+  // Fragments outside the coverage ramp must not write depth or picking colors.
+  if (edgePixels <= -SMOOTH_EDGE_RADIUS) {
+    discard;
+  }
+#endif
   var color = varyings.color;
+#ifdef ANTIALIASING
+  // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
+  // two outer edges of the strip.
+  color.a *= smoothedge(0.0, edgePixels);
+#endif
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;

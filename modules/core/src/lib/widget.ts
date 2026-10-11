@@ -20,8 +20,9 @@ export type WidgetProps = {
   className?: string;
   /**
    * Selects the DOM container used for this widget. Defaults to `viewId`.
-   * If set to `'root'`, the widget is placed relative to the shared widget root.
-   * If set to a valid view id, the widget is placed relative to that view.
+   * Deck-managed containers stay under one shared widget root. If set to `'root'`, the
+   * widget is placed relative to that root. If set to a valid view id, the widget is placed
+   * relative to that view, including its presentation-canvas offset in multi-canvas mode.
    * If set to an HTMLElement, `placement` is ignored and the widget is appended into the
    * given element.
    */
@@ -45,7 +46,9 @@ export abstract class Widget<
   props: Required<PropsT>;
   /**
    * The view id that this widget controls and is positioned relative to. Default `null`.
-   * If assigned, this widget only responds to events inside the matching view.
+   * If assigned, this widget only responds to events inside the matching view. In multi-canvas
+   * mode, the view's `canvasId` determines the positioning offset, but the widget DOM remains
+   * under the shared widget root.
    */
   viewId?: string | null = null;
 

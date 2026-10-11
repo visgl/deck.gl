@@ -5,6 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {
   Layer,
+  _CustomProjectionViewport as CustomProjectionViewport,
   LayerExtension,
   AttributeManager,
   COORDINATE_SYSTEM,
@@ -352,6 +353,43 @@ test('Layer#project', () => {
     ),
     'returns correct value'
   ).toBeTruthy();
+});
+
+test('Layer#projectPosition overrides projection props without mutating them', () => {
+  const modelMatrix = new Matrix4().translate([10, 20, 30]);
+  const coordinateOrigin: [number, number, number] = [100, 200, 300];
+  const layer = new SubLayer({modelMatrix, coordinateOrigin});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+  const viewport = new CustomProjectionViewport({
+    fromCrs: 'map-meters',
+    projection: {
+      forward: ([x, y, z = 0]) => [x * 2, y * 3, z],
+      inverse: ([x, y, z = 0]) => [x / 2, y / 3, z]
+    },
+    getDistanceScale: () => [1, 1]
+  });
+  const position = [1, 2, 3];
+  expect(layer.projectPosition(position, {viewport, autoOffset: false})).toEqual(
+    viewport.projectPosition(modelMatrix.transformAsPoint(position))
+  );
+  const projectParams = {
+    viewport,
+    autoOffset: false,
+    coordinateSystem: 'cartesian' as const,
+    coordinateOrigin: [4, 5, 6] as [number, number, number],
+    modelMatrix: null
+  };
+  const scale = viewport.distanceScales.unitsPerWorldUnit;
+  expect(layer.projectPosition(position, projectParams)).toEqual(
+    [5, 7, 9].map((value, axis) => value * scale[axis])
+  );
+  expect(
+    layer.projectPosition(position, {...projectParams, modelMatrix: new Matrix4().scale([2, 3, 4])})
+  ).toEqual([6, 11, 18].map((value, axis) => value * scale[axis]));
+  expect(layer.props.modelMatrix).toBe(modelMatrix);
+  expect(layer.props.coordinateOrigin).toBe(coordinateOrigin);
+  expect(layer.props.coordinateSystem).toBe('default');
+  expect(position).toEqual([1, 2, 3]);
 });
 
 test('Layer#Async Iterable Data', async () => {

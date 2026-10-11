@@ -17,6 +17,8 @@ export type ChangeFlags = {
   updateTriggersChanged: Record<string, true> | false;
   extensionsChanged: boolean;
   viewportChanged: boolean;
+  /** The viewport input-to-common conversion or its tessellation configuration changed. */
+  projectionChanged: boolean;
   stateChanged: boolean;
 
   // Derived changeFlags

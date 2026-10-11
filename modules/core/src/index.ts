@@ -12,6 +12,7 @@ export {getShaderAssembler} from './shaderlib/index';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
+export {PROJECTION_MODE as _PROJECTION_MODE} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';
@@ -95,6 +96,7 @@ export {default as _memoize} from './utils/memoize';
 export {mergeShaders as _mergeShaders} from './utils/shader';
 export {compareProps as _compareProps} from './lifecycle/props';
 export {applyStyles as _applyStyles, removeStyles as _removeStyles} from './utils/apply-styles';
+export {getMaxBoundsRect as _getMaxBoundsRect} from './controllers/utils';
 
 // Types
 export type {CoordinateSystem} from './lib/constants';
@@ -150,3 +152,15 @@ export type {
 export {default as _Component} from './lifecycle/component';
 // @deprecated internal do not use
 export {default as _ComponentState} from './lifecycle/component-state';
+
+export {default as _CustomProjectionView} from './views/custom-projection-view';
+export {default as _CustomProjectionViewport} from './viewports/custom-projection-viewport';
+export {default as _CustomProjectionController} from './controllers/custom-projection-controller';
+export type {
+  CustomProjectionViewProps,
+  CustomProjectionViewState
+} from './views/custom-projection-view';
+export type {
+  ProjectionConverter,
+  CustomProjectionViewportOptions
+} from './viewports/custom-projection-viewport';

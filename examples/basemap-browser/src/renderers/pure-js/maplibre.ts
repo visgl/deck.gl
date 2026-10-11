@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
@@ -53,7 +53,7 @@ export function mount(container: HTMLElement, config: Config): () => void {
     overlayConfig.layerFilter = layerFilter;
   }
 
-  const deckOverlay = new MapboxOverlay(overlayConfig);
+  const deckOverlay = new MapLibreOverlay(overlayConfig);
 
   let cancelled = false;
 

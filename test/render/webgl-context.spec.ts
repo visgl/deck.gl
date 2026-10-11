@@ -4,9 +4,10 @@
 
 import {describe, test, expect} from 'vitest';
 import type {TestDeviceType} from './deck-test-utils';
+import {isRenderTestDeviceEnabled} from './render-test-suite';
 
 describe.each(['webgl', 'webgpu'] as TestDeviceType[])('%s', deviceType => {
-  test(`render browser provides ${deviceType}`, () => {
+  test.runIf(isRenderTestDeviceEnabled(deviceType))(`render browser provides ${deviceType}`, () => {
     if (deviceType === 'webgpu') {
       expect('gpu' in navigator, 'Expected render browser to provide WebGPU').toBe(true);
       return;

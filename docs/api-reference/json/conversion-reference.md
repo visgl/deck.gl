@@ -1,3 +1,7 @@
+---
+description: "Reference for the @deck.gl/json prefixes: @@type, @@function, @@# constants and enumerations, and @@= accessor expressions."
+---
+
 # Conversion Reference
 
 | Prefix | Description | Example usage |

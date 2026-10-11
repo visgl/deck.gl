@@ -97,9 +97,9 @@ export default class LayersPass extends Pass {
 
     // Explicitly specify clearColor and clearDepth, overriding render pass defaults.
     const clearCanvas = options.clearCanvas ?? true;
-    const clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
-    const clearDepth = clearCanvas ? 1 : false;
-    const clearStencil = clearCanvas ? 0 : false;
+    let clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
+    let clearDepth = clearCanvas ? 1 : false;
+    let clearStencil = clearCanvas ? 0 : false;
     const colorMask = options.colorMask ?? 0xf;
 
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
@@ -110,35 +110,9 @@ export default class LayersPass extends Pass {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
 
-    const renderPass = this.device.beginRenderPass({
-      framebuffer,
-      parameters,
-      clearColor: clearColor as NumberArray4,
-      clearDepth,
-      clearStencil
-    });
-
-    try {
-      return this._drawLayers(renderPass, {...options, target: framebuffer});
-    } finally {
-      renderPass.end();
-      // TODO(ibgreen): WebGPU - submit may not be needed here but initial port had issues with out of render loop rendering
-      this.device.submit();
-    }
-  }
-
-  /** Draw a list of layers in a list of viewports */
-  private _drawLayers(renderPass: RenderPass, options: LayersPassRenderOptions) {
-    const {
-      canvasContext = this.device.canvasContext!,
-      target,
-      shaderModuleProps,
-      viewports,
-      views,
-      onViewportActive,
-      clearStack = true
-    } = options;
-    options.pass = options.pass || 'unknown';
+    const {shaderModuleProps, viewports, views, onViewportActive, clearStack = true} = options;
+    const pass = options.pass || 'unknown';
+    const submitEachRenderPass = this.device.type === 'webgpu';
 
     if (clearStack) {
       this._lastRenderIndex = -1;
@@ -146,35 +120,76 @@ export default class LayersPass extends Pass {
 
     const renderStats: RenderStats[] = [];
 
-    for (const viewport of viewports) {
-      const view = views && views[viewport.id];
+    if (!viewports.length) {
+      const renderPass = this.device.beginRenderPass({
+        framebuffer,
+        parameters,
+        clearColor: clearColor as NumberArray4,
+        clearDepth,
+        clearStencil
+      });
+      renderPass.end();
+      this.device.submit();
+      return renderStats;
+    }
 
-      // Update context to point to this viewport
-      onViewportActive?.(viewport);
+    try {
+      for (const viewport of viewports) {
+        onViewportActive?.(viewport);
 
-      const drawLayerParams = this._getDrawLayerParams(viewport, options);
+        const drawLayerParams = this._getDrawLayerParams(viewport, options);
+        const view = views && views[viewport.id];
+        const subViewports = viewport.subViewports || [viewport];
+        // WebGL renders one logical viewport per pass. WebGPU must submit each physical
+        // viewport before shared model uniforms are updated for the next one.
+        const renderGroups = submitEachRenderPass
+          ? subViewports.map(subViewport => [subViewport])
+          : [subViewports];
 
-      // render this viewport
-      const subViewports = viewport.subViewports || [viewport];
-      for (const subViewport of subViewports) {
-        const stats = this._drawLayersInViewport(
-          renderPass,
-          {
-            target,
-            canvasContext,
-            shaderModuleProps,
-            viewport: subViewport,
-            view,
-            pass: options.pass,
-            layers: options.layers,
-            isPicking: options.isPicking
-          },
-          drawLayerParams
-        );
-        renderStats.push(stats);
+        for (const renderGroup of renderGroups) {
+          const renderPass = this.device.beginRenderPass({
+            framebuffer,
+            parameters,
+            clearColor: clearColor as NumberArray4,
+            clearDepth,
+            clearStencil
+          });
+
+          try {
+            for (const subViewport of renderGroup) {
+              const stats = this._drawLayersInViewport(
+                renderPass,
+                {
+                  target: framebuffer,
+                  canvasContext,
+                  shaderModuleProps,
+                  viewport: subViewport,
+                  view,
+                  pass,
+                  layers: options.layers,
+                  isPicking: options.isPicking
+                },
+                drawLayerParams
+              );
+              renderStats.push(stats);
+            }
+          } finally {
+            renderPass.end();
+            if (submitEachRenderPass) {
+              this.device.submit();
+            }
+          }
+          clearColor = false;
+          clearDepth = false;
+          clearStencil = false;
+        }
+      }
+      return renderStats;
+    } finally {
+      if (!submitEachRenderPass) {
+        this.device.submit();
       }
     }
-    return renderStats;
   }
 
   // When a viewport contains multiple subviewports (e.g. repeated web mercator map),
@@ -455,6 +470,7 @@ export default class LayersPass extends Pass {
       } satisfies PickingProps,
       project: {
         viewport: layer.context.viewport,
+        sizeScale: layer.context.layerManager.projectionScaleResources.get(layer.context.viewport),
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,

@@ -156,8 +156,11 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
       const {pbr_baseColorSampler} = parsedPBRMaterial.bindings;
       const {emptyTexture} = this.state;
+      const meshTexture = pbr_baseColorSampler || emptyTexture;
       const simpleMeshProps = {
-        sampler: pbr_baseColorSampler || emptyTexture,
+        ...(this.context.device.type === 'webgpu'
+          ? {simpleMeshTexture: meshTexture}
+          : {sampler: meshTexture}),
         hasTexture: Boolean(pbr_baseColorSampler)
       };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

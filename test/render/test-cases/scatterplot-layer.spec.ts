@@ -7,7 +7,6 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 /* eslint-disable callback-return */
-import {GL} from '@luma.gl/webgl/constants';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
@@ -52,6 +51,7 @@ const testCases = [
   },
   {
     name: 'scatterplot-lnglat-64',
+    skip: ['webgpu'],
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -138,10 +138,11 @@ const testCases = [
         getRadius: d => 1000,
         radiusUnits: 'pixels'
       }),
-      ...[true, false].map(
-        antialiasing =>
+      // Composite the antialiased pass twice to make partial edge coverage easier to inspect.
+      ...[true, true, false].map(
+        (antialiasing, drawIndex) =>
           new ScatterplotLayer({
-            id: `circles-${antialiasing}`,
+            id: `circles-${drawIndex}`,
             data: Array(399)
               .fill()
               .map((x, i) => i),
@@ -150,8 +151,8 @@ const testCases = [
             getRadius: d => 4 + 8 * (d % 2),
             antialiasing,
             parameters: {
-              blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
-              blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
+              depthCompare: 'always',
+              depthWriteEnabled: false
             },
             radiusUnits: 'pixels'
           })
@@ -161,6 +162,7 @@ const testCases = [
   },
   {
     name: 'scatterplot-dash',
+    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0
@@ -238,9 +240,6 @@ const testCases = [
   }
 ];
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

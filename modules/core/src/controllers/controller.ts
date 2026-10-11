@@ -5,7 +5,8 @@
 /* eslint-disable max-statements, complexity */
 import TransitionManager, {TransitionProps} from './transition-manager';
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {IViewState} from './view-state';
+import {IViewState, type ConstraintContext} from './view-state';
+import type {MaxBoundsPadding} from './utils';
 import {ConstructorOf} from '../types/types';
 import {deepEqual} from '../utils/deep-equal';
 
@@ -19,13 +20,16 @@ import type {
   MjolnirKeyEvent
 } from 'mjolnir.js';
 import type {Timeline} from '@luma.gl/engine';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
 } as const;
 
 const DEFAULT_INERTIA = 300;
-const INERTIA_EASING = t => 1 - (1 - t) * (1 - t);
+const REBOUND_DURATION = 300;
+const INERTIA_EASING = (t: number): number => 1 - (1 - t) * (1 - t);
+const EASE_OUT_EXPONENTIAL = (t: number): number => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const EVENT_TYPES = {
   WHEEL: ['wheel'],
   PAN: ['panstart', 'panmove', 'panend'],
@@ -85,6 +89,8 @@ export type ControllerOptions = {
       };
   /** Drag behavior without pressing function keys, one of `pan` and `rotate`. */
   dragMode?: 'pan' | 'rotate';
+  /** Screen position that remains fixed while zooming. Default `'pointer'`. */
+  zoomAround?: 'center' | 'pointer';
   /** Enable inertia after panning/pinching. If a number is provided, indicates the duration of time over which the velocity reduces to zero, in milliseconds. Default `false`. */
   inertia?: boolean | number;
   /** Bounding box of content that the controller is constrained in */
@@ -92,6 +98,17 @@ export type ControllerOptions = {
     | [min: [number, number], max: [number, number]]
     | [min: [number, number, number], max: [number, number, number]]
     | null;
+  /**
+   * Padding inside the viewport when fitting `maxBounds`, in the shape of
+   * `{left, right, top, bottom}` where each value is either a relative (e.g. `'50%'`)
+   * or absolute pixels. These values support the same CSS-style expressions
+   * (numbers/percentages/`px` with parentheses and `calc()` addition/subtraction)
+   * as view `x`, `y`, `width`, `height`, and `padding`. This can be used to move
+   * the target rectangle away from the center of the viewport. Default `0`.
+   */
+  maxBoundsPadding?: MaxBoundsPadding;
+  /** Enables elastic constraints during continuous interaction. Default `false`. */
+  rubberBand?: boolean;
 };
 
 export type ControllerProps = {
@@ -177,6 +194,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected touchRotate: boolean = false;
   protected multiTouchDrag: 'pan' | 'rotate' | null = null;
   protected trackpadGesture: boolean = false;
+  protected zoomAround: 'center' | 'pointer' = 'pointer';
   protected keyboard:
     | boolean
     | {
@@ -196,7 +214,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,
-      getControllerState: props => new this.ControllerState(props),
+      getControllerState: (props, constraintContext) =>
+        new this.ControllerState({
+          ...props,
+          constraintContext,
+          makeViewport: opts.makeViewport
+        }),
       onViewStateChange: this._onTransition.bind(this),
       onStateChange: this._setInteractionState.bind(this)
     });
@@ -297,6 +320,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     return [offsetCenter.x - x, offsetCenter.y - y];
   }
 
+  /** Resolves the zoom anchor for pointer-based controls. */
+  protected getZoomPosition(position: [number, number]): [number, number] {
+    if (this.zoomAround === 'pointer') {
+      return position;
+    }
+
+    const viewport = this.makeViewport(this.controllerState.getViewportProps());
+    const [centerX, centerY] = worldToPixels(viewport.center, viewport.pixelProjectionMatrix);
+    return [centerX, centerY];
+  }
+
   isPointInBounds(pos: [number, number], event: MjolnirEvent): boolean {
     const {width, height} = this.props;
     if (event && event.handled) {
@@ -336,6 +370,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
    * Extract interactivity options
    */
   setProps(props: ControllerProps) {
+    if (props.maxBoundsPadding === undefined) {
+      props.maxBoundsPadding = null;
+    }
     if (props.dragMode) {
       this.dragMode = props.dragMode;
     }
@@ -367,6 +404,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       touchRotate = false,
       multiTouchDrag = touchRotate ? 'rotate' : null,
       trackpadGesture = false,
+      zoomAround = 'pointer',
       keyboard = true
     } = props;
 
@@ -394,16 +432,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.touchRotate = multiTouchDrag === 'rotate';
     this.multiTouchDrag = multiTouchDrag;
     this.trackpadGesture = trackpadGesture;
+    this.zoomAround = zoomAround;
     this.keyboard = keyboard;
 
     // Normalize view state if maxBounds is defined
-    const dimensionChanged =
+    const constraintChanged =
       !oldProps ||
       oldProps.height !== props.height ||
       oldProps.width !== props.width ||
-      oldProps.maxBounds !== props.maxBounds;
-    if (dimensionChanged && props.maxBounds) {
-      // Dimensions changed, try re-normalize the props
+      oldProps.maxBounds !== props.maxBounds ||
+      oldProps.maxBoundsPadding !== props.maxBoundsPadding;
+    if (constraintChanged && props.maxBounds) {
+      // Constraint inputs changed, try re-normalize the props
       const controllerState = new this.ControllerState({...props, makeViewport: this.makeViewport});
       const normalizedProps = controllerState.getViewportProps();
       const changed = Object.keys(normalizedProps).some(
@@ -485,6 +525,41 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     this.onStateChange(this._interactionState);
   }
 
+  /** Maps a semantic input lifecycle to the constraint policy seen by controller state. */
+  protected _getConstraintContext(
+    _action: 'pan' | 'rotate' | 'zoom',
+    phase: 'start' | 'update' | 'end'
+  ): ConstraintContext {
+    if (!this.props.rubberBand) {
+      return {mode: 'hard'};
+    }
+    return {mode: phase === 'update' ? 'elastic' : phase === 'end' ? 'rebound' : 'hard'};
+  }
+
+  /** Returns a rebound transition when hard resolution changed the displayed viewport props. */
+  private _getReboundTransition(
+    constraintContext: ConstraintContext,
+    nextControllerState: ControllerState
+  ): TransitionProps | null {
+    if (constraintContext.mode !== 'rebound') {
+      return null;
+    }
+
+    const nextViewportProps = nextControllerState.getViewportProps();
+    // At interaction end controllerState is reconstructed without the preceding elastic context.
+    // Compare the hard-resolved destination with the displayed props to detect visible overshoot.
+    const shouldRebound = Object.keys(nextViewportProps).some(
+      key => !deepEqual(this.props[key], nextViewportProps[key], 1)
+    );
+    return shouldRebound
+      ? {
+          ...this._getTransitionProps(),
+          transitionDuration: REBOUND_DURATION,
+          transitionEasing: EASE_OUT_EXPONENTIAL
+        }
+      : null;
+  }
+
   /* Event handlers */
   // Default handler for the `panstart` event.
   protected _onPanStart(event: MjolnirGestureEvent): boolean {
@@ -498,9 +573,11 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       alternateMode = !alternateMode;
     }
 
-    const newControllerState = this.controllerState[alternateMode ? 'panStart' : 'rotateStart']({
-      pos
-    });
+    const action = alternateMode ? 'pan' : 'rotate';
+    const constraintContext = this._getConstraintContext(action, 'start');
+    const newControllerState = alternateMode
+      ? this.controllerState.panStart({pos}, constraintContext)
+      : this.controllerState.rotateStart({pos}, constraintContext);
     this._panMove = alternateMode;
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
     return true;
@@ -528,7 +605,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
     const pos = this.getCenter(event);
-    const newControllerState = this.controllerState.pan({pos});
+    const newControllerState = this.controllerState.pan(
+      {pos},
+      this._getConstraintContext('pan', 'update')
+    );
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isPanning: true
@@ -558,10 +638,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         }
       );
     } else {
-      const newControllerState = this.controllerState.panEnd();
-      this.updateViewport(newControllerState, null, {
+      const currentControllerState = this.controllerState;
+      const constraintContext = this._getConstraintContext('pan', 'end');
+      const newControllerState = currentControllerState.panEnd(constraintContext);
+      const reboundTransition = this._getReboundTransition(constraintContext, newControllerState);
+      this.updateViewport(newControllerState, reboundTransition, {
         isDragging: false,
-        isPanning: false
+        isPanning: Boolean(reboundTransition)
       });
     }
     return true;
@@ -575,7 +658,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     const pos = this.getCenter(event);
-    const newControllerState = this.controllerState.rotate({pos});
+    const newControllerState = this.controllerState.rotate(
+      {pos},
+      this._getConstraintContext('rotate', 'update')
+    );
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isRotating: true
@@ -605,10 +691,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
         }
       );
     } else {
-      const newControllerState = this.controllerState.rotateEnd();
-      this.updateViewport(newControllerState, null, {
+      const currentControllerState = this.controllerState;
+      const constraintContext = this._getConstraintContext('rotate', 'end');
+      const newControllerState = currentControllerState.rotateEnd(constraintContext);
+      const reboundTransition = this._getReboundTransition(constraintContext, newControllerState);
+      this.updateViewport(newControllerState, reboundTransition, {
         isDragging: false,
-        isRotating: false
+        isRotating: Boolean(reboundTransition)
       });
     }
     return true;
@@ -638,11 +727,12 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       scale = 1 / scale;
     }
 
+    const zoomPosition = this.getZoomPosition(pos);
     const transitionProps = smooth
-      ? {...this._getTransitionProps({around: pos}), transitionDuration: 250}
+      ? {...this._getTransitionProps({around: zoomPosition}), transitionDuration: 250}
       : NO_TRANSITION_PROPS;
 
-    const newControllerState = this.controllerState.zoom({pos, scale});
+    const newControllerState = this.controllerState.zoom({pos: zoomPosition, scale});
     this.updateViewport(newControllerState, transitionProps, {
       isZooming: true,
       isPanning: true
@@ -676,8 +766,8 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     const pos = this.getCenter(startEvent);
     const newControllerState =
       multiTouchDrag === 'pan'
-        ? this.controllerState.panStart({pos})
-        : this.controllerState.rotateStart({pos});
+        ? this.controllerState.panStart({pos}, this._getConstraintContext('pan', 'start'))
+        : this.controllerState.rotateStart({pos}, this._getConstraintContext('rotate', 'start'));
 
     this._multiPanMode = multiTouchDrag;
     this._multiPanStartCenter = startCenter;
@@ -751,7 +841,9 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
 
-    const newControllerState = this.controllerState.zoomStart({pos}).rotateStart({pos});
+    const newControllerState = this.controllerState
+      .zoomStart({pos: this.getZoomPosition(pos)}, this._getConstraintContext('zoom', 'start'))
+      .rotateStart({pos}, this._getConstraintContext('rotate', 'start'));
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     pinchEventWorkaround._startPinchRotation = event.rotation;
     pinchEventWorkaround._lastPinchEvent = event;
@@ -772,13 +864,17 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     if (this.touchZoom) {
       const {scale} = event;
       const pos = this.getCenter(event);
-      newControllerState = newControllerState.zoom({pos, scale});
+      newControllerState = newControllerState.zoom(
+        {pos: this.getZoomPosition(pos), scale},
+        this._getConstraintContext('zoom', 'update')
+      );
     }
     if (this.touchRotate) {
       const {rotation} = event;
-      newControllerState = newControllerState.rotate({
-        deltaAngleX: pinchEventWorkaround._startPinchRotation - rotation
-      });
+      newControllerState = newControllerState.rotate(
+        {deltaAngleX: pinchEventWorkaround._startPinchRotation - rotation},
+        this._getConstraintContext('rotate', 'update')
+      );
     }
 
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
@@ -799,17 +895,18 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     const {_lastPinchEvent} = pinchEventWorkaround;
     if (this.touchZoom && inertia && _lastPinchEvent && event.scale !== _lastPinchEvent.scale) {
       const pos = this.getCenter(event);
+      const zoomPosition = this.getZoomPosition(pos);
       let newControllerState = this.controllerState.rotateEnd();
       const z = Math.log2(event.scale);
       const velocityZ =
         (z - Math.log2(_lastPinchEvent.scale)) / (event.deltaTime - _lastPinchEvent.deltaTime);
       const endScale = Math.pow(2, z + (velocityZ * inertia) / 2);
-      newControllerState = newControllerState.zoom({pos, scale: endScale}).zoomEnd();
+      newControllerState = newControllerState.zoom({pos: zoomPosition, scale: endScale}).zoomEnd();
 
       this.updateViewport(
         newControllerState,
         {
-          ...this._getTransitionProps({around: pos}),
+          ...this._getTransitionProps({around: zoomPosition}),
           transitionDuration: inertia,
           transitionEasing: INERTIA_EASING
         },
@@ -822,12 +919,21 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       );
       this.blockEvents(inertia);
     } else {
-      const newControllerState = this.controllerState.zoomEnd().rotateEnd();
-      this.updateViewport(newControllerState, null, {
+      const currentControllerState = this.controllerState;
+      const zoomConstraintContext = this._getConstraintContext('zoom', 'end');
+      const rotateConstraintContext = this._getConstraintContext('rotate', 'end');
+      const newControllerState = currentControllerState
+        .zoomEnd(zoomConstraintContext)
+        .rotateEnd(rotateConstraintContext);
+      const reboundTransition = this._getReboundTransition(
+        this.touchZoom ? zoomConstraintContext : rotateConstraintContext,
+        newControllerState
+      );
+      this.updateViewport(newControllerState, reboundTransition, {
         isDragging: false,
-        isPanning: false,
-        isZooming: false,
-        isRotating: false
+        isPanning: Boolean(reboundTransition) && this.touchZoom,
+        isZooming: Boolean(reboundTransition) && this.touchZoom,
+        isRotating: Boolean(reboundTransition) && this.touchRotate
       });
     }
     pinchEventWorkaround._startPinchRotation = null;
@@ -849,9 +955,13 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     }
 
     const isZoomOut = this.isFunctionKeyPressed(event);
+    const zoomPosition = this.getZoomPosition(pos);
 
-    const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    this.updateViewport(newControllerState, this._getTransitionProps({around: pos}), {
+    const newControllerState = this.controllerState.zoom({
+      pos: zoomPosition,
+      scale: isZoomOut ? 0.5 : 2
+    });
+    this.updateViewport(newControllerState, this._getTransitionProps({around: zoomPosition}), {
       isZooming: true,
       isPanning: true
     });
@@ -871,10 +981,16 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
 
-    this._doubleClickDragAnchor = pos;
-    let newControllerState = this.controllerState.zoomStart({pos});
+    this._doubleClickDragAnchor = this.getZoomPosition(pos);
+    let newControllerState = this.controllerState.zoomStart(
+      {pos: this._doubleClickDragAnchor},
+      this._getConstraintContext('zoom', 'start')
+    );
     if (event.scale !== 1) {
-      newControllerState = newControllerState.zoom({pos, scale: event.scale});
+      newControllerState = newControllerState.zoom(
+        {pos: this._doubleClickDragAnchor, scale: event.scale},
+        this._getConstraintContext('zoom', 'update')
+      );
     }
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
@@ -890,7 +1006,10 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
       return false;
     }
 
-    const newControllerState = this.controllerState.zoom({pos, scale: event.scale});
+    const newControllerState = this.controllerState.zoom(
+      {pos, scale: event.scale},
+      this._getConstraintContext('zoom', 'update')
+    );
     this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
       isDragging: true,
       isPanning: true,
@@ -900,16 +1019,20 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   }
 
   protected _onDoubleClickDragEnd(_event: MjolnirGestureEvent): boolean {
-    if (!this._doubleClickDragAnchor) {
+    const pos = this._doubleClickDragAnchor;
+    if (!pos) {
       return false;
     }
 
     this._doubleClickDragAnchor = null;
-    const newControllerState = this.controllerState.zoomEnd();
-    this.updateViewport(newControllerState, null, {
+    const currentControllerState = this.controllerState;
+    const constraintContext = this._getConstraintContext('zoom', 'end');
+    const newControllerState = currentControllerState.zoomEnd(constraintContext);
+    const reboundTransition = this._getReboundTransition(constraintContext, newControllerState);
+    this.updateViewport(newControllerState, reboundTransition, {
       isDragging: false,
-      isPanning: false,
-      isZooming: false
+      isPanning: Boolean(reboundTransition),
+      isZooming: Boolean(reboundTransition)
     });
     this._suppressDoubleClickUntil = Date.now() + 100;
     this.blockEvents(100);

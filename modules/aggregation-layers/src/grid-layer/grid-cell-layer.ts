@@ -99,7 +99,6 @@ export class GridCellLayer<ExtraPropsT extends {} = {}> extends ColumnLayer<
   protected _updateGeometry() {
     const geometry = new CubeGeometry();
     this._setFillGeometry(geometry);
-    this._setWireframeGeometry(geometry);
   }
 
   draw({uniforms}) {

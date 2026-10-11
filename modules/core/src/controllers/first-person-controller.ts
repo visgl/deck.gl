@@ -4,11 +4,12 @@
 
 import Controller, {ControllerProps} from './controller';
 import ViewState from './view-state';
+import {getMaxBoundsRect} from './utils';
 import {mod} from '../utils/math-utils';
 import type Viewport from '../viewports/viewport';
 import LinearInterpolator from '../transitions/linear-interpolator';
 
-import {Vector3, _SphericalCoordinates as SphericalCoordinates, clamp} from '@math.gl/core';
+import {Vector3, SphericalCoordinates, clamp} from '@math.gl/core';
 
 const MOVEMENT_SPEED = 20;
 const PAN_SPEED = 500;
@@ -29,6 +30,7 @@ type FirstPersonStateProps = {
   minPitch?: number;
 
   maxBounds?: ControllerProps['maxBounds'];
+  maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };
 
 type FirstPersonStateInternal = {
@@ -70,6 +72,7 @@ class FirstPersonState extends ViewState<
       minPitch = -90,
 
       maxBounds = null,
+      maxBoundsPadding = null,
 
       // Model state when the rotate operation first started
       startRotatePos,
@@ -91,7 +94,8 @@ class FirstPersonState extends ViewState<
         latitude,
         maxPitch,
         minPitch,
-        maxBounds
+        maxBounds,
+        maxBoundsPadding
       },
       {
         startRotatePos,
@@ -134,8 +138,8 @@ class FirstPersonState extends ViewState<
 
     const up = new SphericalCoordinates({bearing, pitch});
     const forward = new SphericalCoordinates({bearing, pitch: -90});
-    const yDirection = up.toVector3().normalize();
-    const xDirection = forward.toVector3().cross(yDirection).normalize();
+    const yDirection = new Vector3(up.toVector3()).normalize();
+    const xDirection = new Vector3(forward.toVector3()).cross(yDirection).normalize();
 
     return this._getUpdatedState({
       position: new Vector3(startPanPosition)
@@ -351,7 +355,7 @@ class FirstPersonState extends ViewState<
       bearing: this.getViewportProps().bearing,
       pitch: use2D ? 90 : 90 + this.getViewportProps().pitch
     });
-    const direction = spherical.toVector3().normalize();
+    const direction = new Vector3(spherical.toVector3()).normalize();
     return direction;
   }
 
@@ -379,11 +383,14 @@ class FirstPersonState extends ViewState<
       props.bearing = mod(bearing + 180, 360) - 180;
     }
     if (maxBounds) {
-      const x = clamp(position[0], maxBounds[0][0], maxBounds[1][0]);
-      const y = clamp(position[1], maxBounds[0][1], maxBounds[1][1]);
-      const z = clamp(position[2] ?? 0, maxBounds[0][2] ?? 0, maxBounds[1][2] ?? 0);
-      if (x !== position[0] || y !== position[1] || z !== position[2]) {
-        props.position = [x, y, z];
+      const maxBoundsRect = getMaxBoundsRect(props.width, props.height, props.maxBoundsPadding);
+      if (maxBoundsRect.width >= 0 && maxBoundsRect.height >= 0) {
+        const x = clamp(position[0], maxBounds[0][0], maxBounds[1][0]);
+        const y = clamp(position[1], maxBounds[0][1], maxBounds[1][1]);
+        const z = clamp(position[2] ?? 0, maxBounds[0][2] ?? 0, maxBounds[1][2] ?? 0);
+        if (x !== position[0] || y !== position[1] || z !== position[2]) {
+          props.position = [x, y, z];
+        }
       }
     }
 

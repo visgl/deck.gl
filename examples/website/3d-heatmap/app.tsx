@@ -134,7 +134,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const data = (await load(DATA_URL, CSVLoader)).data;
+  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
   const points: DataPoint[] = data
     .map(d => (Number.isFinite(d.lng) ? [d.lng, d.lat] : null))
     .filter(Boolean);

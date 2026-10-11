@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {Deck, OrthographicView} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
@@ -17,23 +17,15 @@ const TEST_MATERIAL = {
   }
 };
 
-test('Tile3DLayer mesh sublayer initializes with a WebGPU device', async ({skip}) => {
+test('Tile3DLayer mesh sublayer draws with a WebGPU device', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
     return;
   }
 
-  const viewport = new MapView({}).makeViewport({
-    width: 100,
-    height: 100,
-    viewState: {longitude: 0, latitude: 0, zoom: 1}
-  });
-
   for (const featureIds of [null, new Uint32Array([0, 1, 1])]) {
     const errors: Error[] = [];
-    const layerManager = new LayerManager(webgpuDevice, {viewport});
-    layerManager.setProps({onError: error => errors.push(error)});
     const layer = new MeshLayer({
       id: featureIds ? 'webgpu-tile3d-feature-mesh' : 'webgpu-tile3d-mesh',
       data: [0],
@@ -72,14 +64,50 @@ test('Tile3DLayer mesh sublayer initializes with a WebGPU device', async ({skip}
       getPosition: [0, 0, 0],
       getColor: [255, 255, 255, 255]
     });
+    let deck: Deck | null = null;
 
-    webgpuDevice.handle.pushErrorScope('validation');
-    layerManager.setLayers([layer]);
+    try {
+      const renderedLayer = await new Promise<MeshLayer>((resolve, reject) => {
+        const timeout = setTimeout(
+          () => reject(new Error('Timed out drawing Tile3DLayer mesh sublayer')),
+          30000
+        );
 
-    expect(errors).toEqual([]);
-    expect(layer.state.model).toBeDefined();
-    expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+        deck = new Deck({
+          id: `${layer.id}-deck`,
+          device: webgpuDevice,
+          width: 100,
+          height: 100,
+          views: new OrthographicView(),
+          initialViewState: {target: [0, 0, 0], zoom: 0},
+          controller: false,
+          layers: [layer],
+          onError: error => {
+            errors.push(error);
+            clearTimeout(timeout);
+            reject(error);
+          },
+          onAfterRender: () => {
+            // @ts-expect-error Accessing the layer manager for test-only validation.
+            const renderedMeshLayer = deck?.layerManager
+              ?.getLayers()
+              .find(candidate => candidate instanceof MeshLayer) as MeshLayer | undefined;
 
-    layerManager.finalize();
+            if (renderedMeshLayer?.state.model) {
+              clearTimeout(timeout);
+              resolve(renderedMeshLayer);
+            }
+          }
+        });
+      });
+
+      const bindings = renderedLayer.state.model!.shaderInputs.getBindingValues();
+      expect(bindings.simpleMeshTexture, 'binds a WebGPU texture').toBeDefined();
+      expect(bindings.sampler, 'does not use the WebGL sampler binding').toBeUndefined();
+      await webgpuDevice.handle.queue.onSubmittedWorkDone();
+      expect(errors).toEqual([]);
+    } finally {
+      deck?.finalize();
+    }
   }
-});
+}, 70000);

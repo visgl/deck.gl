@@ -117,12 +117,11 @@ export default function App({
   const contentBounds = useMemo(() => {
     if (!plots.length) return null;
 
-    const padding = CHART_WIDTH;
     return [
-      [-padding, -padding],
+      [0, 0],
       [
-        Math.min(plots.length, ROW_SIZE) * (CHART_WIDTH + SPACING) + padding,
-        Math.ceil(plots.length / ROW_SIZE) * (CHART_HEIGHT + SPACING) + padding
+        Math.min(plots.length, ROW_SIZE) * (CHART_WIDTH + SPACING),
+        Math.ceil(plots.length / ROW_SIZE) * (CHART_HEIGHT + SPACING)
       ]
     ];
   }, [plots.length]);
@@ -227,7 +226,9 @@ export default function App({
       views={new OrthographicView()}
       initialViewState={initialViewState}
       controller={{
-        maxBounds: contentBounds
+        maxBounds: contentBounds,
+        maxBoundsPadding: {left: '10%', top: '10%', right: '10%', bottom: '10%'},
+        rubberBand: true
       }}
       layers={layers}
       layerFilter={layerFilter}
@@ -236,14 +237,12 @@ export default function App({
         new ScrollbarWidget({
           id: 'horizontal',
           placement: 'bottom-right',
-          orientation: 'horizontal',
-          contentBounds
+          orientation: 'horizontal'
         }),
         new ScrollbarWidget({
           id: 'vertical',
           placement: 'bottom-right',
-          orientation: 'vertical',
-          contentBounds
+          orientation: 'vertical'
         })
       ]}
     />
