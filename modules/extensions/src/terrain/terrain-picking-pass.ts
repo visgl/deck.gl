@@ -70,6 +70,7 @@ export class TerrainPickingPass extends PickLayersPass {
       pass: `terrain-cover-picking-${terrainCover.id}`,
       layers,
       viewports: [viewport],
+      isAuxiliaryPass: true,
       // Disable the default culling because TileLayer would cull sublayers based on the screen viewport,
       // not the viewport of the terrain cover. Culling is already done by `terrainCover.filterLayers`
       cullRect: undefined,

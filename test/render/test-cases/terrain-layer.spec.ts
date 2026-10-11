@@ -93,8 +93,6 @@ const testCases = [
   {
     // terrain-extension-drape in GlobeView, without outlines.
     // Golden: the same choropleth fills draped over the terrain, on the globe.
-    // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
-    // never settles.
     name: 'terrain-extension-drape-fill-globe',
     skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),
