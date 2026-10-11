@@ -9,7 +9,7 @@ import type {TestCase} from '../deck-test-utils';
 import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
 import {PointLabelLayer} from '@deck.gl/carto';
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {CollisionFilterExtension, PathStyleExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
 
@@ -492,6 +492,47 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/point-label-layer-background.png'
+  },
+  {
+    name: 'point-label-layer-collision',
+    // CollisionFilterExtension render tests are WebGL only, see collision-filter-extension.spec.ts
+    skip: ['webgpu'],
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new PointLabelLayer({
+        id: 'point-label-collision',
+        data: [
+          {position: [-60, 0], text: 'KEPT', priority: 1},
+          {position: [60, 0], text: 'HIDDEN', priority: 0}
+        ],
+        getPosition: d => d.position,
+        getText: d => d.text,
+        getCollisionPriority: d => d.priority,
+        getRadius: 0,
+        sizeScale: 32,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        getColor: [255, 255, 255],
+        background: true,
+        // Opaque fill and a wide contrasting border, so a missing visual
+        // background is a large enough diff to fail the image comparison
+        getBackgroundColor: [0, 90, 170],
+        getBorderWidth: 5,
+        getBorderColor: [255, 200, 0],
+        backgroundPadding: [16, 10],
+        backgroundBorderRadius: 8,
+        extensions: [new CollisionFilterExtension()],
+        updateTriggers: {getText: 'point-label-collision'},
+        _subLayerProps: {
+          'point-label-collision-primary': {_getFontRenderer: () => fontRenderer}
+        }
+      })
+    ],
+    goldenImage: './test/render/golden-images/point-label-layer-collision.png'
   },
   {
     name: 'text-layer-auto-wrapping',
