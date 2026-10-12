@@ -52,12 +52,9 @@ const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 const DEFAULT_LINE_HEIGHT = 1.0;
 
-/**
- * Update trigger of a layout accessor for the sublayers. A function accessor's layout is
- * recomputed when its update trigger changes, a constant accessor's when its value changes.
- */
-function getLayoutTrigger(accessor: unknown, updateTrigger: unknown): unknown {
-  return typeof accessor === 'function' ? updateTrigger : accessor;
+/** The value of a constant accessor, or `undefined` for a function accessor */
+function getConstantValue(accessor: unknown): unknown {
+  return typeof accessor === 'function' ? undefined : accessor;
 }
 
 type _TextLayerProps<DataT> = {
@@ -588,6 +585,19 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
     const {fontSize} = this.state.fontAtlasManager.props;
+    // The text is laid out again when a layout accessor's update trigger changes,
+    // or when the value of a constant layout accessor changes
+    const layoutTriggers = {
+      getTextAnchor: updateTriggers.getTextAnchor,
+      getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+      getTextAlign: updateTriggers.getTextAlign,
+      getLetterSpacing: updateTriggers.getLetterSpacing,
+      textAnchor: getConstantValue(getTextAnchor),
+      alignmentBaseline: getConstantValue(getAlignmentBaseline),
+      textAlign: getConstantValue(getTextAlign),
+      letterSpacing: getConstantValue(getLetterSpacing),
+      styleVersion
+    };
 
     return [
       background &&
@@ -635,16 +645,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getPixelOffset: updateTriggers.getPixelOffset,
               getBoundingRect: {
                 getText: updateTriggers.getText,
-                getTextAnchor: getLayoutTrigger(getTextAnchor, updateTriggers.getTextAnchor),
-                getAlignmentBaseline: getLayoutTrigger(
-                  getAlignmentBaseline,
-                  updateTriggers.getAlignmentBaseline
-                ),
-                getLetterSpacing: getLayoutTrigger(
-                  getLetterSpacing,
-                  updateTriggers.getLetterSpacing
-                ),
-                styleVersion
+                ...layoutTriggers
               }
             }
           }),
@@ -708,16 +709,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getContentBox: updateTriggers.getContentBox,
-            getIconOffsets: {
-              getTextAnchor: getLayoutTrigger(getTextAnchor, updateTriggers.getTextAnchor),
-              getAlignmentBaseline: getLayoutTrigger(
-                getAlignmentBaseline,
-                updateTriggers.getAlignmentBaseline
-              ),
-              getTextAlign: getLayoutTrigger(getTextAlign, updateTriggers.getTextAlign),
-              getLetterSpacing: getLayoutTrigger(getLetterSpacing, updateTriggers.getLetterSpacing),
-              styleVersion
-            }
+            getIconOffsets: layoutTriggers
           }
         }),
         {

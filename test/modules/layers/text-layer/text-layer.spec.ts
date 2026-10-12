@@ -384,6 +384,23 @@ test('TextLayer - constant getLetterSpacing and getTextAlign update the layout',
         const state = getState(layer);
         expect(state.iconDefs, 'characters are anchored').not.toEqual(previous.iconDefs);
         expect(state.rects, 'background is anchored').not.toEqual(previous.rects);
+        previous = state;
+      }
+    },
+    {
+      updateProps: {getLetterSpacing: () => 0, updateTriggers: {getLetterSpacing: 0.5}},
+      onAfterUpdate: ({layer}) => {
+        const state = getState(layer);
+        expect(state.iconDefs, 'function accessor').not.toEqual(previous.iconDefs);
+        previous = state;
+      }
+    },
+    {
+      // The update trigger of the function accessor equals the new constant value
+      updateProps: {getLetterSpacing: 0.5, updateTriggers: {getLetterSpacing: 1}},
+      onAfterUpdate: ({layer}) => {
+        const state = getState(layer);
+        expect(state.iconDefs, 'function to constant accessor').not.toEqual(previous.iconDefs);
       }
     }
   ];
