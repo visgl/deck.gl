@@ -8,6 +8,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
+### TextLayer
+
+[`TextLayer`](./api-reference/layers/text-layer.md) adds [`getLetterSpacing`](./api-reference/layers/text-layer.md#getletterspacing), which spaces the characters of each row, and [`getTextAlign`](./api-reference/layers/text-layer.md#gettextalign), which aligns the rows of a multi-line text block independently of its anchor.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

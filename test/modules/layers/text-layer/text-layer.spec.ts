@@ -261,3 +261,132 @@ test('TextLayer - fontAtlasCacheLimit', () => {
   });
   testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
 });
+
+test('TextLayer - getLetterSpacing and getTextAlign', () => {
+  const data = [{text: 'ab\nc', position: [0, 0]}];
+  const getLayout = layer => {
+    const objectInfo = {index: 0, data, target: []};
+    // Layout in font atlas pixels, without anchor or alignment
+    const {x, rowWidth, size} = layer.transformParagraph(data[0], objectInfo);
+    const offsets = layer.getIconOffsets(data[0], objectInfo);
+    return {x, rowWidth, width: size[0], offsets: offsets.filter((_, i) => i % 2 === 0)};
+  };
+  let baseline;
+
+  const testCases = [
+    {
+      props: {data, getTextAnchor: 'middle'},
+      onAfterUpdate: ({layer}) => {
+        baseline = getLayout(layer);
+        // 'auto' centers each row on the anchor
+        baseline.offsets.forEach((offset, i) => {
+          if (i !== 2) {
+            expect(offset).toBeCloseTo(baseline.x[i] - baseline.rowWidth[i] / 2);
+          }
+        });
+      }
+    },
+    {
+      updateProps: {getLetterSpacing: 0.25},
+      onAfterUpdate: ({layer}) => {
+        const {fontSize} = layer.state.fontAtlasManager.props;
+        const spacing = 0.25 * fontSize;
+        const {x, rowWidth, width} = getLayout(layer);
+        // Spacing follows each character of a row but the last
+        expect(x[0]).toBeCloseTo(baseline.x[0]);
+        expect(x[1]).toBeCloseTo(baseline.x[1] + spacing);
+        expect(x[3]).toBeCloseTo(baseline.x[3]);
+        expect(rowWidth[0]).toBeCloseTo(baseline.rowWidth[0] + spacing);
+        expect(rowWidth[3]).toBeCloseTo(baseline.rowWidth[3]);
+        expect(width).toBeCloseTo(Math.max(rowWidth[0], rowWidth[3]));
+      }
+    },
+    {
+      updateProps: {getLetterSpacing: 0, getTextAnchor: 'start', getTextAlign: 'right'},
+      onAfterUpdate: ({layer}) => {
+        const {x, rowWidth, width, offsets} = getLayout(layer);
+        // The block starts at the anchor and each row ends at its right edge
+        offsets.forEach((offset, i) => {
+          if (i !== 2) {
+            expect(offset).toBeCloseTo(width - rowWidth[i] + x[i]);
+          }
+        });
+      }
+    },
+    {
+      updateProps: {getTextAnchor: 'end', getTextAlign: 'left'},
+      onAfterUpdate: ({layer}) => {
+        const {x, width, offsets} = getLayout(layer);
+        // The block ends at the anchor and each row starts at its left edge
+        offsets.forEach((offset, i) => {
+          if (i !== 2) {
+            expect(offset).toBeCloseTo(x[i] - width);
+          }
+        });
+      }
+    },
+    {
+      updateProps: {getTextAnchor: 'start', getTextAlign: 'center'},
+      onAfterUpdate: ({layer}) => {
+        const {x, rowWidth, width, offsets} = getLayout(layer);
+        offsets.forEach((offset, i) => {
+          if (i !== 2) {
+            expect(offset).toBeCloseTo((width - rowWidth[i]) / 2 + x[i]);
+          }
+        });
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('TextLayer - constant getLetterSpacing and getTextAlign update the layout', () => {
+  const data = [{text: 'ab\nc', position: [0, 0]}];
+  let previous;
+  const getAttribute = (layer, subLayerId, name) => {
+    const subLayer = layer.getSubLayers().find(l => l.id.endsWith(subLayerId));
+    return Array.from(subLayer.getAttributeManager().getAttributes()[name].value);
+  };
+  const getState = layer => ({
+    iconDefs: getAttribute(layer, 'characters', 'instanceIconDefs'),
+    rects: getAttribute(layer, 'background', 'instanceRects')
+  });
+
+  const testCases = [
+    {
+      props: {data, background: true},
+      onAfterUpdate: ({layer}) => {
+        previous = getState(layer);
+      }
+    },
+    {
+      updateProps: {getLetterSpacing: 0.5},
+      onAfterUpdate: ({layer}) => {
+        const state = getState(layer);
+        expect(state.iconDefs, 'characters are spaced').not.toEqual(previous.iconDefs);
+        expect(state.rects, 'background is widened').not.toEqual(previous.rects);
+        previous = state;
+      }
+    },
+    {
+      updateProps: {getTextAlign: 'left'},
+      onAfterUpdate: ({layer}) => {
+        const state = getState(layer);
+        expect(state.iconDefs, 'rows are aligned').not.toEqual(previous.iconDefs);
+        expect(state.rects, 'background is unchanged').toEqual(previous.rects);
+        previous = state;
+      }
+    },
+    {
+      updateProps: {getTextAnchor: 'start', getAlignmentBaseline: 'top'},
+      onAfterUpdate: ({layer}) => {
+        const state = getState(layer);
+        expect(state.iconDefs, 'characters are anchored').not.toEqual(previous.iconDefs);
+        expect(state.rects, 'background is anchored').not.toEqual(previous.rects);
+      }
+    }
+  ];
+
+  testLayer({Layer: TextLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
