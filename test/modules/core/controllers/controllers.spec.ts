@@ -523,8 +523,10 @@ test('GlobeController zooms around the pointer past zoom 12, where GlobeView swi
 
   expect(controller.props.zoom, 'the wheel zooms in').toBeGreaterThan(12.5);
   const underPointer = new WebMercatorViewport(controller.props).unproject(pointer);
-  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 4);
-  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 4);
+  // GlobeController anchors to ~1e-6 degrees here, not exactly like MapController, so 5 digits.
+  // A center-anchored zoom would be off by ~5e-3.
+  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 5);
+  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 5);
 });
 
 test('GlobeController zooms through the zoom 12 viewport handoff', () => {
@@ -566,8 +568,8 @@ test('GlobeController zooms through the zoom 12 viewport handoff', () => {
   const after = makeViewport();
   expect(after, 'the gesture ends on a web mercator viewport').toBeInstanceOf(WebMercatorViewport);
   const underPointer = after.unproject(pointer);
-  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 1);
-  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 1);
+  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 5);
+  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 5);
 });
 
 test('GlobeController initializes multipan like pointer pan', () => {
