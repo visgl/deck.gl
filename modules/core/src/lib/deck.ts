@@ -652,6 +652,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // Not yet initialized
       return;
     }
+    if (this._ownedCanvasNeedsSize && this.canvas === this._ownedCanvas) {
+      // Drawing now would stretch a 300x150 frame over the canvas. Redraw flags are kept, and the
+      // resize that reports the size requests a redraw.
+      return;
+    }
     // Check if we need to redraw
     let redrawReason = this.needsRedraw({clearRedrawFlags: true});
     // User-supplied should take precedent, however the redraw flags get cleared regardless
@@ -1630,6 +1635,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._setDeviceCanvasContext(device, {
       syncDrawingBuffer: Boolean(this.props.gl && this.props.device !== device)
     });
+    if (this._canvasContext?.isInitialized) {
+      // luma measured the canvas before the resize handler was installed, do not wait for it
+      this._ownedCanvasNeedsSize = false;
+    }
 
     if (this._isMultiCanvasMode()) {
       this._syncCanvasTargets();
@@ -1810,11 +1819,6 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   // Callbacks
 
   private _onRenderFrame() {
-    // Drawing before the canvas is measured stretches a 300x150 frame over its real size
-    if (this._ownedCanvasNeedsSize && this.canvas === this._ownedCanvas) {
-      return;
-    }
-
     this._getFrameStats();
 
     // Log perf stats every second

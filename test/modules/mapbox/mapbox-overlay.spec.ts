@@ -84,10 +84,13 @@ test('MapboxOverlay#overlaid first frame is drawn at the map size', async () => 
   const overlay = new MapboxOverlay({
     // Does not need a GL context
     deviceProps: {type: 'null', adapters: [nullAdapter]},
+    useDevicePixels: false,
     layers: [],
+    // The map redraws the overlay from its own render event, as soon as Deck is ready
+    onLoad: () => map.fire({type: 'render'}),
     onAfterRender: () => {
-      const deck = overlay._deck;
-      frameSizes.push([deck.width, deck.height]);
+      const canvasContext = overlay._deck.device.getDefaultCanvasContext();
+      frameSizes.push(canvasContext.getDrawingBufferSize());
     }
   });
 
