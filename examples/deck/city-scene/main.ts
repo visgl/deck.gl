@@ -84,7 +84,66 @@ function parseColor(color: string): [number, number, number] {
   ];
 }
 
-async function startScene() {
+function captureSceneSettings() {
+  return {
+    camera: cameraControl.value,
+    buildings: buildingsControl.checked,
+    edgeStyle: edgeStyleControl.value,
+    edgeWidth: edgeWidthControl.value,
+    water: waterControl.checked,
+    reflections: reflectionsControl.checked,
+    reflectionQuality: reflectionQualityControl.value,
+    reflectionView: reflectionViewControl.value,
+    waterStyle: waterStyleControl.value,
+    waterPreset: waterPresetControl.value,
+    waterColor: waterColorControl.value,
+    strength: strengthControl.value,
+    playing: scene.diagnostics.playing
+  };
+}
+
+function restoreSceneSettings(settings: ReturnType<typeof captureSceneSettings>) {
+  cameraControl.value = settings.camera;
+  buildingsControl.checked = settings.buildings;
+  edgeStyleControl.value = settings.edgeStyle;
+  edgeWidthControl.value = settings.edgeWidth;
+  waterControl.checked = settings.water;
+  reflectionsControl.checked = settings.reflections && !reflectionsControl.disabled;
+  reflectionQualityControl.value = settings.reflectionQuality;
+  reflectionViewControl.value = settings.reflectionView;
+  waterStyleControl.value = settings.waterStyle;
+  waterPresetControl.value = settings.waterPreset;
+  waterColorControl.value = settings.waterColor;
+  strengthControl.value = settings.strength;
+  playbackControl.textContent = settings.playing ? 'Pause waves' : 'Play waves';
+  edgeWidthControl.disabled = settings.edgeStyle === 'none';
+  reflectionQualityControl.disabled = !reflectionsControl.checked;
+  reflectionViewControl.disabled = !reflectionsControl.checked;
+  scene.setCamera(
+    settings.camera === 'overhead' || settings.camera === 'waterfront'
+      ? settings.camera
+      : 'district'
+  );
+  scene.setBuildingsVisible(settings.buildings);
+  scene.setEdgeStyle(
+    settings.edgeStyle === 'solid' || settings.edgeStyle === 'pencil' ? settings.edgeStyle : 'none'
+  );
+  scene.setEdgeWidth(Number(settings.edgeWidth));
+  scene.setWaterEnabled(settings.water);
+  scene.setReflectionsEnabled(reflectionsControl.checked);
+  scene.setReflectionQuality(
+    settings.reflectionQuality === 'fast' || settings.reflectionQuality === 'detailed'
+      ? settings.reflectionQuality
+      : 'balanced'
+  );
+  scene.setReflectionDebugMode(Number(settings.reflectionView));
+  scene.setWaterStyle(settings.waterStyle === 'classic' ? 'classic' : 'river');
+  scene.setWaterColor(parseColor(settings.waterColor));
+  scene.setWaveStrength(Number(settings.strength));
+  scene.setPlaying(settings.playing);
+}
+
+async function startScene(settings: ReturnType<typeof captureSceneSettings> | null = null) {
   if (pageHidden) return;
   scene?.finalize();
   document.body.dataset['ready'] = 'false';
@@ -117,6 +176,7 @@ async function startScene() {
     waterColorControl.value = '#0b4252';
     strengthControl.value = '0.55';
     playbackControl.textContent = 'Pause waves';
+    if (settings) restoreSceneSettings(settings);
     cityStatus.value = `${scene.features.filter(feature => feature.kind === 'building').length} buildings · local fixture`;
     document.body.dataset['ready'] = 'true';
   } catch (error) {
@@ -126,25 +186,28 @@ async function startScene() {
   }
 }
 let pageHidden = false;
+let savedSettings: ReturnType<typeof captureSceneSettings> | null = null;
 window.addEventListener('pagehide', () => {
+  if (document.body.dataset['ready'] === 'true') savedSettings = captureSceneSettings();
   pageHidden = true;
   scene?.finalize();
 });
 window.addEventListener('pageshow', () => {
   if (!pageHidden) return;
   pageHidden = false;
-  if (backendResolved) void startScene();
+  if (backendResolved) void startScene(savedSettings);
 });
 backend.value = await resolveDeckExampleDeviceType(
   new URLSearchParams(location.search).get('backend')
 );
 backendResolved = true;
-if (!pageHidden) void startScene();
+if (!pageHidden) void startScene(savedSettings);
 
 function initializeControls() {
   if (controlsInitialized) return;
   controlsInitialized = true;
   backendControl.addEventListener('change', () => {
+    savedSettings = null;
     void startScene();
   });
   cameraControl.addEventListener('change', () => {
