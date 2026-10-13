@@ -89,7 +89,7 @@ jobs:
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
           branch: gh-pages
-          folder: ${{ runner.temp }}/website-pages-marker
+          folder: ~${{ runner.temp }}/website-pages-marker
           clean: false
 
       - name: Deploy
