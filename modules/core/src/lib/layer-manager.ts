@@ -14,7 +14,7 @@ import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 import ProjectionScaleResources from './projection-scale-resources';
 
-import Viewport from '../viewports/viewport';
+import type Viewport from '../viewports/viewport';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
@@ -46,12 +46,13 @@ export type LayersList = (Layer | undefined | false | null | LayersList)[];
 export type LayerManagerProps = {
   deck?: Deck<any>;
   stats?: Stats;
-  viewport?: Viewport;
+  viewport?: Viewport | null;
   timeline?: Timeline;
 };
 export default class LayerManager {
   layers: Layer[];
-  context: LayerContext;
+  // Layer lifecycle callbacks receive a viewport; the manager may wait without one.
+  context: Omit<LayerContext, 'viewport'> & {viewport: Viewport | null};
   resourceManager: ResourceManager;
 
   private _lastRenderedLayers: LayersList = [];
@@ -96,8 +97,7 @@ export default class LayerManager {
       defaultShaderModules: [layerUniforms],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
-      // Make sure context.viewport is not empty on the first layer initialization
-      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
+      viewport: viewport || null,
       timeline: timeline || new Timeline(),
       resourceManager: this.resourceManager,
       onError: undefined
@@ -191,16 +191,24 @@ export default class LayerManager {
     }
   }
 
-  /** Supply a new layer list, initiating sublayer generation and layer matching */
+  /** Supply a new layer list, deferring matching and sublayer generation until a viewport exists. */
   setLayers(newLayers: LayersList, reason?: string): void {
     debug(TRACE_SET_LAYERS, this, reason, newLayers);
 
+    if (!this.context.viewport) {
+      // Keep the latest input and dirty flags until projection context is available.
+      this._nextLayers = newLayers;
+      this.setNeedsUpdate(reason || 'viewport pending');
+      return;
+    }
+
+    this._nextLayers = null;
     this._lastRenderedLayers = newLayers;
 
     const flatLayers = flatten(newLayers, Boolean) as Layer[];
 
     for (const layer of flatLayers) {
-      layer.context = this.context;
+      layer.context = this.context as LayerContext;
     }
 
     this._updateLayers(this.layers, flatLayers);
@@ -208,6 +216,8 @@ export default class LayerManager {
 
   /** Update layers from last cycle if `setNeedsUpdate()` has been called */
   updateLayers(): void {
+    if (!this.context.viewport) return;
+
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
@@ -225,11 +235,27 @@ export default class LayerManager {
   // INTERNAL METHODS
   //
 
-  /** Make a viewport "current" in layer context, updating viewportChanged flags */
-  activateViewport = (viewport: Viewport) => {
+  /** Set the current viewport, or suspend layer updates when none is available. */
+  activateViewport = (viewport?: Viewport | null) => {
     debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
-    if (viewport) {
-      this.context.viewport = viewport;
+    const wasPending = !this.context.viewport;
+    this.context.viewport = viewport || null;
+    if (viewport && wasPending) {
+      // A retained layer viewport belongs to the previous view. Resume against the
+      // materialized viewport before any attribute or sublayer update can run.
+      for (const layer of this.layers) {
+        const internalState = layer.internalState;
+        if (internalState) {
+          const oldViewport = internalState.viewport;
+          internalState.viewport = viewport;
+          layer.setChangeFlags({
+            viewportChanged: true,
+            projectionChanged:
+              (oldViewport?.projectionSignature ?? null) !== (viewport.projectionSignature ?? null)
+          });
+        }
+      }
+      this.setNeedsUpdate('viewport available');
     }
   };
 
@@ -307,7 +333,7 @@ export default class LayerManager {
     generatedLayers: Layer[]
   ) {
     for (const newLayer of newLayers) {
-      newLayer.context = this.context;
+      newLayer.context = this.context as LayerContext;
 
       // Given a new coming layer, find its matching old layer (if any)
       const oldLayer = oldLayerMap[newLayer.id];

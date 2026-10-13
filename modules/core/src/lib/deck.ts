@@ -1669,6 +1669,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
       onViewRemoved: viewId => this.layerManager?.projectionScaleResources.delete(viewId),
+      onError: error => this.props.onError?.(error),
       pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
@@ -1814,6 +1815,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this._updateCursor();
+
+    // Resolve newly initialized views before layers consume their projection context.
+    if (this.viewManager!.updateViewports()) {
+      this.layerManager!.activateViewport(this.getViewports()[0]);
+    }
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw

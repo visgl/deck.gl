@@ -94,6 +94,7 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   onInteractionStateChange?: (state: InteractionState) => void;
   /** Release view-scoped resources when a descriptor leaves the active view set. */
   onViewRemoved?: (viewId: string) => void;
+  onError?: (error: Error) => void;
   pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   width?: number;
   height?: number;
@@ -124,6 +125,7 @@ export default class ViewManager<ViewsT extends View[]> {
     onViewStateChange?: (params: ViewStateChangeParameters) => void;
     onInteractionStateChange?: (state: InteractionState) => void;
     onViewRemoved?: (viewId: string) => void;
+    onError?: (error: Error) => void;
   };
   private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
   /** Context lookup supplied by Deck; context dimensions remain owned and observed by luma. */
@@ -160,7 +162,8 @@ export default class ViewManager<ViewsT extends View[]> {
     this._eventCallbacks = {
       onViewStateChange: props.onViewStateChange,
       onInteractionStateChange: props.onInteractionStateChange,
-      onViewRemoved: props.onViewRemoved
+      onViewRemoved: props.onViewRemoved,
+      onError: props.onError
     };
     this._pickPosition = props.pickPosition;
     this._getCanvasContext = props.getCanvasContext;
@@ -180,6 +183,7 @@ export default class ViewManager<ViewsT extends View[]> {
       }
     }
     this.controllers = {};
+    this.views = [];
   }
 
   /** Check if a redraw is needed */
@@ -324,9 +328,16 @@ export default class ViewManager<ViewsT extends View[]> {
     // Important: avoid invoking _update() inside itself
     // Nested updates result in unexpected side effects inside _rebuildViewports()
     // when using auto control in pure-js
-    if (!this._isUpdating) {
-      this._update();
-    }
+    this.updateViewports();
+  }
+
+  /** Rebuild pending viewports, including views whose asynchronous initialization completed.
+   * Returns whether viewports were rebuilt so the layer context can be refreshed.
+   */
+  updateViewports(): boolean {
+    if (this._isUpdating || !this._needsUpdate) return false;
+    this._update();
+    return true;
   }
 
   //
@@ -389,7 +400,13 @@ export default class ViewManager<ViewsT extends View[]> {
   private _setViews(views: View[]): void {
     views = flatten(views, Boolean);
 
-    const viewsChanged = this._diffViews(views, this.views);
+    const previousViews = this.views;
+    // Equal descriptors retain their loading state when applications recreate views.
+    views = views.map(view => {
+      const previous = previousViews.find(candidate => candidate.id === view.id);
+      return previous?.equals(view) ? previous : view;
+    });
+    const viewsChanged = this._diffViews(views, previousViews);
     if (viewsChanged) {
       const viewIds = new Set(views.map(view => view.id));
       for (const view of this.views) {
@@ -399,6 +416,22 @@ export default class ViewManager<ViewsT extends View[]> {
     }
 
     this.views = views;
+    for (const view of views) {
+      if (previousViews.includes(view)) continue;
+      const initialization = view.initialize();
+      if (initialization) {
+        initialization
+          .then(() => {
+            // Removed or replaced views cannot invalidate their successors.
+            if (this.views.includes(view)) this.setNeedsUpdate('view initialized');
+          })
+          .catch(error => {
+            if (!this.views.includes(view)) return;
+            if (this._eventCallbacks.onError) this._eventCallbacks.onError(error);
+            else log.error(error)();
+          });
+      }
+    }
   }
 
   private _setViewState(viewState: ViewStateObject<ViewsT>): void {
@@ -562,7 +595,7 @@ export default class ViewManager<ViewsT extends View[]> {
         oldViewEventManagers[view.id],
         viewEventManager
       );
-      let hasController = Boolean(view.controller);
+      let hasController = Boolean(view.controller) && Boolean(viewport);
       if (hasController && !this._hasViewState(view)) {
         // View has a controller but no view state, controller disabled
         // e.g. the default view created before an application provides views, while the
