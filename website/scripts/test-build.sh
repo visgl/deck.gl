@@ -12,6 +12,9 @@ export MapboxAccessToken="dummy-mapbox-access-token"
   yarn build
 )
 
+# Build the embedded v10 examples and their unpublished luma.gl peers.
+yarn build-v10-examples
+
 # clean up cache
 docusaurus clear
 docusaurus build
