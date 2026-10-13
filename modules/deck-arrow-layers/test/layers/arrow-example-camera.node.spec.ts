@@ -93,19 +93,32 @@ test('text data updates reset motion baseline without jumping the user camera', 
   }
 });
 
-test('polygon color updates preserve the camera and reset only the scroll baseline', () => {
+test('polygon color updates preserve the camera and scroll phase after scrolling', () => {
   const deck = createArrowPolygonLayerDeck();
   const update = {
-    viewState: {startCenter: [10, 20], endCenter: [100, 200], scrollDurationSeconds: 10},
+    viewState: {startCenter: [0, 0], endCenter: [100, 0], scrollDurationSeconds: 10},
     colors: null,
     layerProps: {}
   };
-  sources.polygon.onDataUpdated(update);
-  expect(deck.props.viewState).toEqual({target: [10, 20, 0], zoom: 9});
-  const camera = {target: [50, 60, 3], zoom: 11};
-  (deck.props.onViewStateChange as any)({viewState: camera});
-  sources.polygon.onDataUpdated({...update, colors: 'colors'});
-  expect(deck.props.viewState).toEqual(camera);
-  (deck.props.onBeforeRender as any)({deck});
-  expect(deck.props.viewState).toEqual(camera);
+  const now = vi.spyOn(performance, 'now').mockReturnValue(0);
+  try {
+    sources.polygon.onDataUpdated(update);
+    const camera = {target: [50, 60, 3], zoom: 11};
+    (deck.props.onViewStateChange as any)({viewState: camera});
+    (deck.props.onBeforeRender as any)({deck});
+    now.mockReturnValue(5000);
+    (deck.props.onBeforeRender as any)({deck});
+    expect(deck.props.viewState).toEqual({...camera, target: [100, 60, 3]});
+    sources.polygon.onDataUpdated({...update, colors: 'colors'});
+    (deck.props.onBeforeRender as any)({deck});
+    expect(deck.props.viewState).toEqual({...camera, target: [100, 60, 3]});
+    now.mockReturnValue(10000);
+    (deck.props.onBeforeRender as any)({deck});
+    expect(deck.props.viewState).toEqual({...camera, target: [150, 60, 3]});
+    now.mockReturnValue(20000);
+    (deck.props.onBeforeRender as any)({deck});
+    expect(deck.props.viewState).toEqual(camera);
+  } finally {
+    now.mockRestore();
+  }
 });

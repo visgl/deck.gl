@@ -82,6 +82,7 @@ function parseColor(color: string): [number, number, number] {
 }
 
 async function startScene() {
+  if (pageHidden) return;
   scene?.finalize();
   document.body.dataset['ready'] = 'false';
   cityStatus.value = 'Preparing the district…';
@@ -91,7 +92,7 @@ async function startScene() {
   window.cityScene = scene;
   try {
     await startingScene.ready;
-    if (scene !== startingScene) return;
+    if (pageHidden || scene !== startingScene) return;
     cameraControl.value = 'district';
     buildingsControl.checked = true;
     edgeStyleControl.value = 'none';
@@ -115,11 +116,21 @@ async function startScene() {
     cityStatus.value = `${scene.features.filter(feature => feature.kind === 'building').length} buildings · local fixture`;
     document.body.dataset['ready'] = 'true';
   } catch (error) {
-    if (scene !== startingScene) return;
+    if (pageHidden || scene !== startingScene) return;
     cityStatus.value = error instanceof Error ? error.message : String(error);
     document.body.dataset['ready'] = 'error';
   }
 }
+let pageHidden = false;
+window.addEventListener('pagehide', () => {
+  pageHidden = true;
+  scene?.finalize();
+});
+backend.value = await resolveDeckExampleDeviceType(
+  new URLSearchParams(location.search).get('backend')
+);
+if (!pageHidden) void startScene();
+
 backend.addEventListener('change', () => {
   void startScene();
 });
@@ -172,8 +183,3 @@ parent.addEventListener('city-error', () => {
   cityStatus.value = scene.diagnostics.error;
   document.body.dataset['ready'] = 'error';
 });
-window.addEventListener('pagehide', () => scene.finalize());
-backend.value = await resolveDeckExampleDeviceType(
-  new URLSearchParams(location.search).get('backend')
-);
-void startScene();
