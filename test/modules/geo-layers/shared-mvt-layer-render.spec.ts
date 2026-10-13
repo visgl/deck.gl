@@ -81,7 +81,7 @@ test('shared MVT consumers draw in map, globe and map again', async () => {
       width: 128,
       height: 128,
       useDevicePixels: false,
-      deviceProps: {adapters: [webgl2Adapter]},
+      deviceProps: {adapters: [webgl2Adapter], _reuseDevices: false},
       views: new MapView({id: 'view'}),
       initialViewState: {longitude: 0, latitude: 0, zoom: 0},
       layers: getLayers(),
@@ -123,7 +123,14 @@ test('shared MVT consumers draw in map, globe and map again', async () => {
     }
     expect(requests).toBe(1);
   } finally {
+    const device = deck?.device;
     deck?.finalize();
+    device?.destroy();
+    // Deck.finalize removes its canvas but does not release the browser context.
+    // Leave room for other tests in the shared headless browser.
+    (device?.handle as WebGL2RenderingContext | undefined)
+      ?.getExtension('WEBGL_lose_context')
+      ?.loseContext();
     tileset.finalize();
     parent.remove();
   }
