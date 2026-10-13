@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createPatternScene} from './app';
+import {resolveDeckExampleDeviceType} from '../deck-example-device';
 import type {PatternFillProps} from '@luma.gl/shadertools';
 
 declare global {
@@ -12,10 +13,12 @@ declare global {
 }
 const parent = document.querySelector<HTMLDivElement>('#scene')!;
 const backend = document.querySelector<HTMLSelectElement>('#backend')!;
-backend.value =
-  new URLSearchParams(location.search).get('backend') === 'webgl' ? 'webgl' : 'webgpu';
+const deviceType = await resolveDeckExampleDeviceType(
+  new URLSearchParams(location.search).get('backend')
+);
+backend.value = deviceType;
 const scene = createPatternScene(parent, {
-  deviceType: backend.value === 'webgl' ? 'webgl' : 'webgpu'
+  deviceType
 });
 window.patternScene = scene;
 backend.addEventListener('change', () => {

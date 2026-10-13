@@ -6,6 +6,7 @@ import {
   createRiverfrontLightingScene,
   type RiverfrontLightingKind
 } from './riverfront-lighting-scene';
+import {resolveDeckExampleDeviceType} from './deck-example-device';
 import {FIREFLY_SPECIES} from './fireflies/firefly-species';
 
 declare global {
@@ -13,17 +14,21 @@ declare global {
     riverfrontLighting: ReturnType<typeof createRiverfrontLightingScene>;
   }
 }
-export function startRiverfrontLightingExample(kind: RiverfrontLightingKind): void {
+/** Starts lighting examples, detecting the backend for portable scenes. */
+export async function startRiverfrontLightingExample(kind: RiverfrontLightingKind): Promise<void> {
   const backend = document.querySelector<HTMLSelectElement>('#backend')!;
-  backend.value =
-    new URLSearchParams(location.search).get('backend') === 'webgl' ? 'webgl' : 'webgpu';
+  const deviceType =
+    kind === 'fireflies'
+      ? await resolveDeckExampleDeviceType(new URLSearchParams(location.search).get('backend'))
+      : 'webgpu';
+  backend.value = deviceType;
   backend.addEventListener('change', () => {
     location.search = `?backend=${backend.value}`;
   });
   const scene = createRiverfrontLightingScene(
     document.querySelector<HTMLDivElement>('#scene')!,
     kind,
-    {deviceType: backend.value === 'webgl' ? 'webgl' : 'webgpu'}
+    {deviceType}
   );
   window.riverfrontLighting = scene;
   const status = document.querySelector<HTMLOutputElement>('#status')!;

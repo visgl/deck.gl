@@ -7,8 +7,7 @@ import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {build, mergeConfig} from 'vite';
-import exampleConfig from '../../examples/deck/vite.config.ts';
+import {build, loadConfigFromFile, mergeConfig} from 'vite';
 
 // These private packages are not published. Pin their sources so clean CI and
 // deployment builds use the same peers, rather than a developer's local links.
@@ -17,6 +16,12 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const examplesRoot = resolve(root, 'examples/deck');
 const sections = JSON.parse(readFileSync(resolve(root, 'website/src/examples/v10/examples.json')));
 const websiteBasePath = `/${(process.env.WEBSITE_BASE_URL || '').split('/').filter(Boolean).join('/')}`;
+const loadedConfig = await loadConfigFromFile(
+  {command: 'build', mode: 'production'},
+  resolve(examplesRoot, 'vite.config.ts'),
+  examplesRoot
+);
+if (!loadedConfig) throw new Error('Unable to load the deck.gl example Vite config');
 const sourceRoot = mkdtempSync(resolve(tmpdir(), 'deck-website-luma-'));
 
 try {
@@ -47,7 +52,7 @@ try {
       section.examples.map(({id}) => [id, resolve(examplesRoot, id, 'index.html')])
     )
   );
-  await build(mergeConfig(exampleConfig, {
+  await build(mergeConfig(loadedConfig.config, {
     configFile: false,
     root: examplesRoot,
     // Docusaurus may redirect index.html to a URL without a trailing slash.

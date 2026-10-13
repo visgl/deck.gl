@@ -59,11 +59,12 @@ export function createArrowPolygonLayerDeck(
   });
   const dataSource = new ArrowPolygonDataSource({
     onDataUpdated: update => {
+      const isFirstUpdate = activeUpdate === null;
       activeUpdate = update;
       animationSeconds = 0;
       lastAnimationMilliseconds = null;
       previousTarget = update.viewState.startCenter;
-      camera = {target: [...previousTarget, 0], zoom: 9};
+      if (isFirstUpdate) camera = {target: [...previousTarget, 0], zoom: 9};
       deck.setProps({
         viewState: camera,
         layers: [makeArrowPolygonLayer(update, dataSource)]

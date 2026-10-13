@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 import {createStrokeScene} from './app';
+import {resolveDeckExampleDeviceType} from '../deck-example-device';
 declare global {
   interface Window {
     strokeScene: ReturnType<typeof createStrokeScene>;
@@ -9,10 +10,12 @@ declare global {
 }
 const parent = document.querySelector<HTMLDivElement>('#scene')!;
 const backend = document.querySelector<HTMLSelectElement>('#backend')!;
-backend.value =
-  new URLSearchParams(location.search).get('backend') === 'webgl' ? 'webgl' : 'webgpu';
+const deviceType = await resolveDeckExampleDeviceType(
+  new URLSearchParams(location.search).get('backend')
+);
+backend.value = deviceType;
 const scene = createStrokeScene(parent, {
-  deviceType: backend.value === 'webgl' ? 'webgl' : 'webgpu'
+  deviceType
 });
 window.strokeScene = scene;
 backend.addEventListener('change', () => {

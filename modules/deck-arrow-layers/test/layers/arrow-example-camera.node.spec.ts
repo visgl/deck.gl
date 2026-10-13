@@ -92,3 +92,20 @@ test('text data updates reset motion baseline without jumping the user camera', 
     now.mockRestore();
   }
 });
+
+test('polygon color updates preserve the camera and reset only the scroll baseline', () => {
+  const deck = createArrowPolygonLayerDeck();
+  const update = {
+    viewState: {startCenter: [10, 20], endCenter: [100, 200], scrollDurationSeconds: 10},
+    colors: null,
+    layerProps: {}
+  };
+  sources.polygon.onDataUpdated(update);
+  expect(deck.props.viewState).toEqual({target: [10, 20, 0], zoom: 9});
+  const camera = {target: [50, 60, 3], zoom: 11};
+  (deck.props.onViewStateChange as any)({viewState: camera});
+  sources.polygon.onDataUpdated({...update, colors: 'colors'});
+  expect(deck.props.viewState).toEqual(camera);
+  (deck.props.onBeforeRender as any)({deck});
+  expect(deck.props.viewState).toEqual(camera);
+});

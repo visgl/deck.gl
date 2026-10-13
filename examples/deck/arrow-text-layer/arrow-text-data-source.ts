@@ -66,6 +66,7 @@ export class ArrowTextDataSource {
   private readonly onDataUpdated: ArrowTextDataSourceProps['onDataUpdated'];
   private sourceVersion = 0;
   private isFinalized = false;
+  private activeUpdate: ArrowTextDataSourceUpdate | null = null;
 
   constructor({onDataUpdated}: ArrowTextDataSourceProps) {
     this.onDataUpdated = onDataUpdated;
@@ -85,12 +86,22 @@ export class ArrowTextDataSource {
         if (state.colorKind === 'character-colors' && state.modelKind === 'storage') {
           state = {...state, modelKind: 'attribute'};
         }
+        const animationOnly = Object.keys(state).every(
+          key => key === 'animate' || state[key] === this.state[key]
+        );
         this.state = state;
         this.panel?.setSettings(
           makeArrowTextDataSourceSchema(this.supportsStorage, state.colorKind),
           state
         );
-        void this.emitDataSource();
+        if (animationOnly) {
+          if (this.activeUpdate) {
+            this.activeUpdate = {...this.activeUpdate, animate: state.animate};
+            this.onDataUpdated(this.activeUpdate);
+          }
+        } else {
+          void this.emitDataSource();
+        }
       }
     });
     this.panel.initialize();
@@ -125,7 +136,7 @@ export class ArrowTextDataSource {
     }
 
     const tableStream = panel.beginTableStream(recordBatches);
-    this.onDataUpdated({
+    this.activeUpdate = {
       asyncIterator: createStreamingRecordBatchIterator(recordBatches),
       model: this.state.modelKind,
       colorColumn: this.state.colorKind !== 'constant',
@@ -141,7 +152,8 @@ export class ArrowTextDataSource {
           }
         }
       }
-    });
+    };
+    this.onDataUpdated(this.activeUpdate);
   }
 }
 

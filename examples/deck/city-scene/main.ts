@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {createCityScene, type CityScene} from './app';
+import {resolveDeckExampleDeviceType} from '../deck-example-device';
 
 declare global {
   interface Window {
@@ -172,6 +173,7 @@ parent.addEventListener('city-error', () => {
   document.body.dataset['ready'] = 'error';
 });
 window.addEventListener('pagehide', () => scene.finalize());
-const requestedBackend = new URLSearchParams(location.search).get('backend');
-if (requestedBackend === 'webgl' || requestedBackend === 'webgpu') backend.value = requestedBackend;
+backend.value = await resolveDeckExampleDeviceType(
+  new URLSearchParams(location.search).get('backend')
+);
 void startScene();
