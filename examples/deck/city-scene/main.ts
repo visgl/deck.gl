@@ -51,6 +51,7 @@ if (
 }
 const cityParent = parent;
 const cityStatus = status;
+const citySelection = selection;
 const cameraControl = camera;
 const buildingsControl = buildings;
 const backendControl = backend;
@@ -66,6 +67,8 @@ const waterColorControl = waterColor;
 const strengthControl = strength;
 const playbackControl = playback;
 let scene: CityScene;
+let controlsInitialized = false;
+let backendResolved = false;
 
 const WATER_COLOR_PRESETS = {
   teal: '#0b4252',
@@ -90,6 +93,7 @@ async function startScene() {
   scene = createCityScene(cityParent, {deviceType});
   const startingScene = scene;
   window.cityScene = scene;
+  initializeControls();
   try {
     await startingScene.ready;
     if (pageHidden || scene !== startingScene) return;
@@ -126,60 +130,76 @@ window.addEventListener('pagehide', () => {
   pageHidden = true;
   scene?.finalize();
 });
+window.addEventListener('pageshow', () => {
+  if (!pageHidden) return;
+  pageHidden = false;
+  if (backendResolved) void startScene();
+});
 backend.value = await resolveDeckExampleDeviceType(
   new URLSearchParams(location.search).get('backend')
 );
+backendResolved = true;
 if (!pageHidden) void startScene();
 
-backend.addEventListener('change', () => {
-  void startScene();
-});
-camera.addEventListener('change', () => {
-  const value = cameraControl.value;
-  scene.setCamera(value === 'overhead' || value === 'waterfront' ? value : 'district');
-});
-buildings.addEventListener('change', () => scene.setBuildingsVisible(buildingsControl.checked));
-edgeStyle.addEventListener('change', () => {
-  const style = edgeStyleControl.value;
-  scene.setEdgeStyle(style === 'solid' || style === 'pencil' ? style : 'none');
-  edgeWidthControl.disabled = style === 'none';
-});
-edgeWidth.addEventListener('input', () => scene.setEdgeWidth(Number(edgeWidthControl.value)));
-water.addEventListener('change', () => scene.setWaterEnabled(waterControl.checked));
-reflections.addEventListener('change', () => {
-  scene.setReflectionsEnabled(reflectionsControl.checked);
-  reflectionQualityControl.disabled = !reflectionsControl.checked;
-  reflectionViewControl.disabled = !reflectionsControl.checked;
-});
-reflectionView.addEventListener('change', () =>
-  scene.setReflectionDebugMode(Number(reflectionViewControl.value))
-);
-reflectionQuality.addEventListener('change', () => {
-  const quality = reflectionQualityControl.value;
-  scene.setReflectionQuality(quality === 'fast' || quality === 'detailed' ? quality : 'balanced');
-});
-waterStyle.addEventListener('change', () =>
-  scene.setWaterStyle(waterStyleControl.value === 'classic' ? 'classic' : 'river')
-);
-waterPreset.addEventListener('change', () => {
-  const preset = waterPresetControl.value as keyof typeof WATER_COLOR_PRESETS;
-  if (!(preset in WATER_COLOR_PRESETS)) return;
-  waterColorControl.value = WATER_COLOR_PRESETS[preset];
-  scene.setWaterColor(parseColor(waterColorControl.value));
-});
-waterColor.addEventListener('input', () => {
-  waterPresetControl.value = 'custom';
-  scene.setWaterColor(parseColor(waterColorControl.value));
-});
-strength.addEventListener('input', () => scene.setWaveStrength(Number(strengthControl.value)));
-playback.addEventListener('click', () => {
-  scene.setPlaying(!scene.diagnostics.playing);
-  playbackControl.textContent = scene.diagnostics.playing ? 'Pause waves' : 'Play waves';
-});
-parent.addEventListener('city-selection', () => {
-  selection.value = scene.diagnostics.selected || 'Click a building or the river';
-});
-parent.addEventListener('city-error', () => {
-  cityStatus.value = scene.diagnostics.error;
-  document.body.dataset['ready'] = 'error';
-});
+function initializeControls() {
+  if (controlsInitialized) return;
+  controlsInitialized = true;
+  backendControl.addEventListener('change', () => {
+    void startScene();
+  });
+  cameraControl.addEventListener('change', () => {
+    const value = cameraControl.value;
+    scene.setCamera(value === 'overhead' || value === 'waterfront' ? value : 'district');
+  });
+  buildingsControl.addEventListener('change', () =>
+    scene.setBuildingsVisible(buildingsControl.checked)
+  );
+  edgeStyleControl.addEventListener('change', () => {
+    const style = edgeStyleControl.value;
+    scene.setEdgeStyle(style === 'solid' || style === 'pencil' ? style : 'none');
+    edgeWidthControl.disabled = style === 'none';
+  });
+  edgeWidthControl.addEventListener('input', () =>
+    scene.setEdgeWidth(Number(edgeWidthControl.value))
+  );
+  waterControl.addEventListener('change', () => scene.setWaterEnabled(waterControl.checked));
+  reflectionsControl.addEventListener('change', () => {
+    scene.setReflectionsEnabled(reflectionsControl.checked);
+    reflectionQualityControl.disabled = !reflectionsControl.checked;
+    reflectionViewControl.disabled = !reflectionsControl.checked;
+  });
+  reflectionViewControl.addEventListener('change', () =>
+    scene.setReflectionDebugMode(Number(reflectionViewControl.value))
+  );
+  reflectionQualityControl.addEventListener('change', () => {
+    const quality = reflectionQualityControl.value;
+    scene.setReflectionQuality(quality === 'fast' || quality === 'detailed' ? quality : 'balanced');
+  });
+  waterStyleControl.addEventListener('change', () =>
+    scene.setWaterStyle(waterStyleControl.value === 'classic' ? 'classic' : 'river')
+  );
+  waterPresetControl.addEventListener('change', () => {
+    const preset = waterPresetControl.value as keyof typeof WATER_COLOR_PRESETS;
+    if (!(preset in WATER_COLOR_PRESETS)) return;
+    waterColorControl.value = WATER_COLOR_PRESETS[preset];
+    scene.setWaterColor(parseColor(waterColorControl.value));
+  });
+  waterColorControl.addEventListener('input', () => {
+    waterPresetControl.value = 'custom';
+    scene.setWaterColor(parseColor(waterColorControl.value));
+  });
+  strengthControl.addEventListener('input', () =>
+    scene.setWaveStrength(Number(strengthControl.value))
+  );
+  playbackControl.addEventListener('click', () => {
+    scene.setPlaying(!scene.diagnostics.playing);
+    playbackControl.textContent = scene.diagnostics.playing ? 'Pause waves' : 'Play waves';
+  });
+  cityParent.addEventListener('city-selection', () => {
+    citySelection.value = scene.diagnostics.selected || 'Click a building or the river';
+  });
+  cityParent.addEventListener('city-error', () => {
+    cityStatus.value = scene.diagnostics.error;
+    document.body.dataset['ready'] = 'error';
+  });
+}

@@ -10,8 +10,19 @@ vi.mock('../../../examples/deck/deck-example-device', () => ({
 }));
 vi.mock('../../../examples/deck/city-scene/app', () => ({createCityScene: startup.createScene}));
 
-test('city controls wait for backend detection and pagehide cancels pending startup', async () => {
+test('city startup handles pending navigation and back-forward cache restoration', async () => {
   vi.resetModules();
+  startup.resolveDevice = null;
+  startup.createScene.mockReset();
+  const finalize = vi.fn();
+  const setCamera = vi.fn();
+  startup.createScene.mockImplementation(() => ({
+    finalize,
+    setCamera,
+    ready: Promise.resolve(),
+    diagnostics: {backend: 'webgl'},
+    features: []
+  }));
   const controls = new Map<string, EventTarget>();
   const window = new EventTarget();
   vi.stubGlobal('window', window);
@@ -35,6 +46,18 @@ test('city controls wait for backend detection and pagehide cancels pending star
     expect(startup.createScene).not.toHaveBeenCalled();
     controls.get('#backend')!.dispatchEvent(new Event('change'));
     expect(startup.createScene).not.toHaveBeenCalled();
+    window.dispatchEvent(new Event('pageshow'));
+    await Promise.resolve();
+    expect(startup.createScene).toHaveBeenCalledTimes(1);
+    controls.get('#camera')!.dispatchEvent(new Event('change'));
+    expect(setCamera).toHaveBeenCalledTimes(1);
+    window.dispatchEvent(new Event('pagehide'));
+    expect(finalize).toHaveBeenCalledTimes(1);
+    window.dispatchEvent(new Event('pageshow'));
+    await Promise.resolve();
+    expect(startup.createScene).toHaveBeenCalledTimes(2);
+    controls.get('#backend')!.dispatchEvent(new Event('change'));
+    expect(startup.createScene).toHaveBeenCalledTimes(3);
   } finally {
     vi.unstubAllGlobals();
   }
