@@ -113,6 +113,9 @@ export default abstract class View<
     Object.seal(this);
   }
 
+  /** Prepare asynchronous resources before this view can create a viewport. */
+  initialize(): void | Promise<void> {}
+
   equals(view: this): boolean {
     if (this === view) {
       return true;
