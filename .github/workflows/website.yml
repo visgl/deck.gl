@@ -81,15 +81,15 @@ jobs:
       # Pages checks the branch root, even when the site lives under /next/.
       - name: Prepare Pages marker
         run: |
-          mkdir -p "${RUNNER_TEMP}/website-pages-marker"
-          touch "${RUNNER_TEMP}/website-pages-marker/.nojekyll"
+          mkdir -p "website-pages-marker"
+          touch "website-pages-marker/.nojekyll"
 
       - name: Disable Jekyll at the Pages branch root
         uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # 4.9.0
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
           branch: gh-pages
-          folder: ~${{ runner.temp }}/website-pages-marker
+          folder: website-pages-marker
           clean: false
 
       - name: Deploy
