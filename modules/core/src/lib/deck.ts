@@ -1275,7 +1275,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (this._isMultiCanvasMode()) {
         this._updateMultiCanvasDimensions();
       } else if (canvasContext === this._canvasContext && this._canvasContext) {
-        this._ownedCanvasNeedsSize = false;
+        this._updateOwnedCanvasNeedsSize();
         // Deck owns resize handling for the active render CanvasContext. Applications should use
         // DeckProps.onResize instead of the lower-level luma device callback while Deck is active.
         this._onCanvasContextResize(this._canvasContext, {
@@ -1294,6 +1294,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       resizeHandler.device.props.onResize = noop;
     }
     this._deviceResizeHandler = null;
+  }
+
+  /** Stops holding redraws once luma reports a size for a canvas that has a layout. */
+  private _updateOwnedCanvasNeedsSize(): void {
+    const canvas = this._ownedCanvas;
+    // Without a layout (detached or hidden) luma can only report the default canvas size
+    if (canvas && canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+      this._ownedCanvasNeedsSize = false;
+    }
   }
 
   /** Updates canvas width and/or height, if provided as props. */
@@ -1637,7 +1646,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     });
     if (this._canvasContext?.isInitialized) {
       // luma measured the canvas before the resize handler was installed, do not wait for it
-      this._ownedCanvasNeedsSize = false;
+      this._updateOwnedCanvasNeedsSize();
     }
 
     if (this._isMultiCanvasMode()) {
