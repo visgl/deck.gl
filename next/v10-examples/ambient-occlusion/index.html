@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- luma-example-support -->
+  <meta name="luma-example-id" content="deck/ambient-occlusion" />
+  <meta name="luma-example-backends" content="webgpu" />
+  <meta name="luma-example-mobile" content="full" />
+  <meta name="luma-example-mobile-profile" content="standard" />
+  <!-- /luma-example-support -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>Riverfront ambient occlusion · luma.gl</title>
+  <script type="module" crossorigin src="/next/v10-examples/assets/ambient-occlusion-OCxcJ1c4.js"></script>
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/deck-example-device-TQPRJnZ6.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/example-support-KHcxfZf7.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/project32-Byi-VnKS.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/meter-offset-position-CMR-ehQ5.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/river-district-data-C9FvyLLC.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/lambert-material-DjV_YOPi.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/river-district-layer-DuhH2l43.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/water-surface-layer-S-hj9Srh.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/dynamic-texture-NQQfRyls.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/scene-buffer-effect-Bq4_aRU0.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/riverfront-view-CB3JCqMN.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/screen-space-shader-helpers-Cds7e6ZO.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/river-reflection-effect-b_awrPOC.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/tone-mapping-dFslqTmk.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/outlines-Db2nktbL.js">
+  <link rel="modulepreload" crossorigin href="/next/v10-examples/assets/depth-aware-blur-C8MXPRPo.js">
+  <link rel="stylesheet" crossorigin href="/next/v10-examples/assets/ambient-occlusion-Cc7960ib.css">
+</head>
+<body>
+  <div id="scene" aria-label="Riverfront rendered with luma.gl screen-space effects"></div>
+  <aside class="luma-example-infobox luma-example-infobox--overlay">
+    <p class="eyebrow">luma.gl + deck.gl</p>
+    <h1>Riverfront ambient occlusion</h1>
+    <section class="control-card"><h2>Scene</h2>
+      <label>Renderer<select id="backend" aria-label="Renderer"><option value="webgpu">WebGPU</option></select></label>
+      <label class="toggle"><input id="ambientOcclusion" type="checkbox" checked /> Ambient occlusion</label>
+      <label class="toggle"><input id="reflections" type="checkbox" checked /> Reflections</label>
+      <label class="toggle"><input id="outlines" type="checkbox" /> Surface outlines</label>
+    </section>
+    <output id="status" class="selection" aria-live="polite">Preparing the riverfront…</output>
+    <p class="hint">Drag to move · Scroll to zoom<br />Shift + drag to orbit</p>
+  </aside>
+</body>
+</html>

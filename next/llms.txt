@@ -1,0 +1,401 @@
+# deck.gl
+
+> GPU-powered, highly performant large-scale data visualization. Layers, views, base map integrations (MapLibre, Mapbox, Google Maps, ArcGIS), the @deck.gl/json declarative format, and the developer guide.
+
+
+## docs
+
+deck.gl maps large datasets to GPU-rendered layers, drawn through views over optional base maps.
+
+- [Introduction](https://deck.gl/next/docs.md): deck.gl maps large datasets to GPU-rendered layers, drawn through views over optional base maps.
+
+### get-started
+
+
+#### getting-started
+
+Install deck.gl with npm or from a CDN, run the examples, and pick a base map integration.
+
+- [Installing and Running Examples](https://deck.gl/next/docs/get-started/getting-started.md): Install deck.gl with npm or from a CDN, run the examples, and pick a base map integration.
+
+#### learning-resources
+
+Where to learn deck.gl: API reference, developer guide, examples, tutorials and community channels.
+
+- [Learning Resources](https://deck.gl/next/docs/get-started/learning-resources.md): Where to learn deck.gl: API reference, developer guide, examples, tutorials and community channels.
+
+#### using-standalone
+
+The deck.gl core library and layers have no dependencies on React, Mapbox GL, or MapLibre GL and can be used by any JavaScript application.
+
+- [Using deck.gl Standalone](https://deck.gl/next/docs/get-started/using-standalone.md): The deck.gl core library and layers have no dependencies on React, Mapbox GL, or MapLibre GL and can be used by any JavaScript application.
+
+#### using-with-map
+
+While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer invaluable context for understanding the overlay layers.
+
+- [Base Maps](https://deck.gl/next/docs/get-started/using-with-map.md): While deck.gl works independently without any map component, when visualizing geospatial datasets, a base map can offer invaluable context for understanding the overlay layers.
+
+#### using-with-react
+
+While not directly based on React, deck.gl is designed from ground up to work with React based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based applications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+
+- [Using deck.gl with React](https://deck.gl/next/docs/get-started/using-with-react.md): While not directly based on React, deck.gl is designed from ground up to work with React based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based applications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
+
+#### using-with-typescript
+
+Using deck.gl with TypeScript: typed layer props, generic data types and type-checked accessors.
+
+- [Using deck.gl with TypeScript](https://deck.gl/next/docs/get-started/using-with-typescript.md): Using deck.gl with TypeScript: typed layer props, generic data types and type-checked accessors.
+
+### whats-new
+
+This page contains highlights of each deck.gl release. Also check our vis.gl blog for news about new releases and features in deck.gl.
+
+- [What's New](https://deck.gl/next/docs/whats-new.md): This page contains highlights of each deck.gl release. Also check our vis.gl blog for news about new releases and features in deck.gl.
+
+### upgrade-guide
+
+Breaking changes, removals and deprecations for each deck.gl release, with migration notes.
+
+- [Upgrade Guide](https://deck.gl/next/docs/upgrade-guide.md): Breaking changes, removals and deprecations for each deck.gl release, with migration notes.
+
+### developer-guide
+
+
+#### animations-and-transitions
+
+deck.gl provides several built-in animation/transition features.
+
+- [Animations and Transitions](https://deck.gl/next/docs/developer-guide/animations-and-transitions.md): deck.gl provides several built-in animation/transition features.
+
+#### base-maps
+
+- [Using with 3D Tiles](https://deck.gl/next/docs/developer-guide/base-maps/using-with-3d-tiles.md): deck.gl has excellent support for visualizing 3D Tiles tilesets, such as photogrammetric city models from Google Maps or Cesium ion. This guide explains how to set up an application with Tile3DLayer, use the TerrainController for terrain-aware navigation, and overlay your own data layers on top of the 3D surface.
+- [Using with ArcGIS](https://deck.gl/next/docs/developer-guide/base-maps/using-with-arcgis.md): Render deck.gl layers in ArcGIS Maps SDK for JavaScript maps and scenes with @deck.gl/arcgis.
+- [Using with Google Maps Platform](https://deck.gl/next/docs/developer-guide/base-maps/using-with-google-maps.md): Render deck.gl layers over Google Maps with GoogleMapsOverlay from @deck.gl/google-maps, overlaid or interleaved.
+- [Using with Mapbox](https://deck.gl/next/docs/developer-guide/base-maps/using-with-mapbox.md): Render deck.gl layers over Mapbox GL JS with MapboxOverlay from @deck.gl/mapbox, overlaid or interleaved.
+- [Using with MapLibre](https://deck.gl/next/docs/developer-guide/base-maps/using-with-maplibre.md): Render deck.gl layers over MapLibre GL JS with MapLibreOverlay from @deck.gl/maplibre, overlaid or interleaved.
+
+#### building-apps
+
+This article discusses considerations in building and deploying applications that contain deck.gl.
+
+- [Building Apps](https://deck.gl/next/docs/developer-guide/building-apps.md): This article discusses considerations in building and deploying applications that contain deck.gl.
+
+#### coordinate-systems
+
+In most deck.gl layers, every data object is expected to contain one or more positions (e.g. the center of a point, or the start and end of an arc, the vertices of a polygon, etc). Positions are expected to be supplied as two or three element arrays ([x, y] or [x, y, z]). Objects can also have dimensions (e.g. the radius of a circle, the width of a path, etc), most of which are specified as a single number. Positions and dimensions are used to construct a 3D world with your data.
+
+- [Coordinate Systems](https://deck.gl/next/docs/developer-guide/coordinate-systems.md): In most deck.gl layers, every data object is expected to contain one or more positions (e.g. the center of a point, or the start and end of an arc, the vertices of a polygon, etc). Positions are expected to be supplied as two or three element arrays ([x, y] or [x, y, z]). Objects can also have dimensions (e.g. the radius of a circle, the width of a path, etc), most of which are specified as a single number. Positions and dimensions are used to construct a 3D world with your data.
+
+#### custom-layers
+
+How to write your own deck.gl layer: subclassing, composite layers and the layer lifecycle.
+
+- [Writing Your Own Layer](https://deck.gl/next/docs/developer-guide/custom-layers.md): How to write your own deck.gl layer: subclassing, composite layers and the layer lifecycle.
+- [Attribute Management](https://deck.gl/next/docs/developer-guide/custom-layers/attribute-management.md): How layers manage GPU attributes: the AttributeManager, accessors, update triggers and instanced attributes.
+- [Composite Layers](https://deck.gl/next/docs/developer-guide/custom-layers/composite-layers.md): A composite layer is a special kind of layer that creates other layers. It enables the creation of new layers by careful composition of existing layers (a primary example being the GeoJsonLayer). In addition, it is often convenient to change the interface and behavior of an existing layer using a composite "adaptor" layer instead of modifying the layer itself (the sample S2Layer is a simple adaptor on top of the PolygonLayer).
+- [Layer Attributes](https://deck.gl/next/docs/developer-guide/custom-layers/layer-attributes.md): This section explains how the data in deck.gl layers are mapped to and accessed by the GPU during rendering.
+- [Creating Layer Extensions](https://deck.gl/next/docs/developer-guide/custom-layers/layer-extensions.md): It's recommended that you read subclassing layers before proceeding
+- [Layer Lifecycle](https://deck.gl/next/docs/developer-guide/custom-layers/layer-lifecycle.md): Every deck.gl layer subclass can define certain methods that get called
+- [Picking](https://deck.gl/next/docs/developer-guide/custom-layers/picking.md): Make sure you have read Interactivity before reading this section.
+- [Primitive Layers](https://deck.gl/next/docs/developer-guide/custom-layers/primitive-layers.md): If you want to draw something completely different and you are comfortable around WebGL2/WebGPU shaders, you may consider implementing a new layer by directly extending the Layer class.
+- [Property Types](https://deck.gl/next/docs/developer-guide/custom-layers/prop-types.md): This article documents the system that deck.gl offers to provide extra type annotations for layer properties.
+- [Subclassed Layers](https://deck.gl/next/docs/developer-guide/custom-layers/subclassed-layers.md): deck.gl layers are designed to be easy to extend in order to add features.
+- [Writing Shaders](https://deck.gl/next/docs/developer-guide/custom-layers/writing-shaders.md): A shader library facilitates creating shaders that work seamlessly with deck.gl. The modules parameter passed to the Model class can dynamically include parts from this library into your own GLSL code:
+
+#### custom-widgets
+
+Widgets are UI components that are deeply integrated with deck.gl's views and layers. A widget can be positioned relative to a view, react to viewport and layer changes, respond to picking events, and drive the view state. The @deck.gl/widgets module ships many ready-made widgets, and this guide covers how to write your own when none of them fit.
+
+- [Writing Your Own Widget](https://deck.gl/next/docs/developer-guide/custom-widgets.md): Widgets are UI components that are deeply integrated with deck.gl's views and layers. A widget can be positioned relative to a view, react to viewport and layer changes, respond to picking events, and drive the view state. The @deck.gl/widgets module ships many ready-made widgets, and this guide covers how to write your own when none of them fit.
+- [Preact Widgets](https://deck.gl/next/docs/developer-guide/custom-widgets/preact-widgets.md): To create a reusable, universal widget that works with any JavaScript UI framework, you would normally implement it using the "raw" HTML DOM APIs. While this is the canonical approach, these APIs are quite verbose.
+- [React Widgets](https://deck.gl/next/docs/developer-guide/custom-widgets/react-widgets.md): Rendering widget UI with React lets you build deck.gl widgets with the same components, hooks and state management as the rest of a React application. This guide walks through rendering widget UI with React using the useWidget hook and a portal.
+- [Universal Widgets](https://deck.gl/next/docs/developer-guide/custom-widgets/universal-widgets.md): This guide covers the steps to implement widgets that are "universal", or framework agnostic, ensuring compatibility across any deck.gl application. A universal widget extends the Widget base class and renders its own UI using DOM APIs (or Preact).
+
+#### debugging
+
+deck.gl provides support for debugging applications and layers, which includes:
+
+- [Debugging](https://deck.gl/next/docs/developer-guide/debugging.md): deck.gl provides support for debugging applications and layers, which includes:
+
+#### fp64
+
+deck.gl can leverage high precision GPU floating point using emulated 64-bit floating point. For supported layers (look for the 64-bit icon in the docs), 64-bit shaders are used when the fp64 prop is set to true.
+
+- [About 64-bit Layers](https://deck.gl/next/docs/developer-guide/fp64.md): deck.gl can leverage high precision GPU floating point using emulated 64-bit floating point. For supported layers (look for the 64-bit icon in the docs), 64-bit shaders are used when the fp64 prop is set to true.
+
+#### interactivity
+
+Controlling the camera and view state, picking, and handling hover and click events in deck.gl.
+
+- [Interactivity](https://deck.gl/next/docs/developer-guide/interactivity.md): Controlling the camera and view state, picking, and handling hover and click events in deck.gl.
+
+#### loading-data
+
+deck.gl uses loaders.gl, a framework-agnostic library to read data and resources.
+
+- [Loading Data](https://deck.gl/next/docs/developer-guide/loading-data.md): deck.gl uses loaders.gl, a framework-agnostic library to read data and resources.
+
+#### performance
+
+General Performance Expectations
+
+- [Performance Optimization](https://deck.gl/next/docs/developer-guide/performance.md): General Performance Expectations
+
+#### testing
+
+Testing WebGL2/WebGPU code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
+
+- [Testing](https://deck.gl/next/docs/developer-guide/testing.md): Testing WebGL2/WebGPU code is much harder than testing regular JavaScript. GPU and browser dependent commands may not run under Node. Rendering behavior differs cross platforms and hardware. Since it draws into a canvas, there is also no precisely verifiable output.
+
+#### tips-and-tricks
+
+Rendering, data handling and performance tips for building deck.gl applications.
+
+- [Tips and Tricks](https://deck.gl/next/docs/developer-guide/tips-and-tricks.md): Rendering, data handling and performance tips for building deck.gl applications.
+
+#### using-effects
+
+Effects are part of the render pipeline that affect the visuall of all layers. Deck.gl by default uses a LightingEffect to render its 3D geometries. Other effects can be found in core and extensions modules. Applications may also implement the Effect interface to create custom effects.
+
+- [Using Effects](https://deck.gl/next/docs/developer-guide/using-effects.md): Effects are part of the render pipeline that affect the visuall of all layers. Deck.gl by default uses a LightingEffect to render its 3D geometries. Other effects can be found in core and extensions modules. Applications may also implement the Effect interface to create custom effects.
+
+#### using-layers
+
+The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, shapes, extrusions, etc., and renders them on a map.
+
+- [Using Layers](https://deck.gl/next/docs/developer-guide/using-layers.md): The "Layer" is a core concept of deck.gl. A deck.gl layer is a packaged visualization type that takes a collection of datums, associate each with positions, colors, shapes, extrusions, etc., and renders them on a map.
+
+#### views
+
+The same data can be drawn differently to screen based on what projection method is used. deck.gl's view system defines how one or more cameras should be set up to look at your data objects. The default view used in deck.gl is the MapView, which implements the Web Mercator projection.
+
+- [Views and Projections](https://deck.gl/next/docs/developer-guide/views.md): The same data can be drawn differently to screen based on what projection method is used. deck.gl's view system defines how one or more cameras should be set up to look at your data objects. The default view used in deck.gl is the MapView, which implements the Web Mercator projection.
+
+#### webgpu
+
+WebGPU support in deck.gl v9 is still a work in progress and is not production ready.
+
+- [WebGPU](https://deck.gl/next/docs/developer-guide/webgpu.md): WebGPU support in deck.gl v9 is still a work in progress and is not production ready.
+
+#### zoom-dependent-layers
+
+Map styles often change what is drawn as the camera zooms: coarse summaries at low zoom give way to finer ones, labels thin out, lines keep a readable width. The MapLibre and Mapbox style specs express this declaratively with layer minzoom/maxzoom and ["zoom"] expressions. The two specs share the syntax used on this page.
+
+- [Zoom-Dependent Layers](https://deck.gl/next/docs/developer-guide/zoom-dependent-layers.md): Map styles often change what is drawn as the camera zooms: coarse summaries at low zoom give way to finer ones, labels thin out, lines keep a readable width. The MapLibre and Mapbox style specs express this declaratively with layer minzoom/maxzoom and ["zoom"] expressions. The two specs share the syntax used on this page.
+
+### api-reference
+
+
+#### aggregation-layers
+
+- [AggregationLayer (Experimental)](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregation-layer.md): AggregationLayer is the base class for all layers in @deck.gl/aggregation-layers module. It implements the most common tasks for aggregation with flexibility of customizations.
+- [Aggregator Interface](https://deck.gl/next/docs/api-reference/aggregation-layers/aggregator.md): The Aggregator interface describes a type of class that performs aggregation.
+- [ContourLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/contour-layer.md): ContourLayer aggregates points into a grid and renders iso-lines or iso-bands at given thresholds.
+- [CPUAggregator](https://deck.gl/next/docs/api-reference/aggregation-layers/cpu-aggregator.md): The CPUAggregator implements the Aggregator interface by performing aggregation on the CPU.
+- [GridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/grid-layer.md): The GridLayer aggregates data into a grid-based heatmap. The color and height of a grid cell are determined based on the objects it contains.
+- [HeatmapLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/heatmap-layer.md): HeatmapLayer renders a smooth density heatmap from weighted points.
+- [HexagonLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/hexagon-layer.md): HexagonLayer aggregates points into hexagonal bins and encodes counts or weights as color and elevation.
+- [Aggregation Layers](https://deck.gl/next/docs/api-reference/aggregation-layers/overview.md): Layers that aggregate the input data and visualize them in alternative representations, such as grid and hexagon binning, contour, and heatmap.
+- [ScreenGridLayer](https://deck.gl/next/docs/api-reference/aggregation-layers/screen-grid-layer.md): ScreenGridLayer aggregates points into screen-space grid cells colored by count or weight.
+- [WebGLAggregator](https://deck.gl/next/docs/api-reference/aggregation-layers/webgl-aggregator.md): The WebGLAggregator implements the Aggregator interface by performing aggregation on the GPU.
+
+#### arcgis
+
+- [DeckLayer](https://deck.gl/next/docs/api-reference/arcgis/deck-layer.md): This class inherits from the ArcGIS Layer class and can be added to maps created with the ArcGIS API for JavaScript.
+- [DeckRenderer](https://deck.gl/next/docs/api-reference/arcgis/deck-renderer.md): This class is an experimental implementation of the ArcGIS RenderNode interface and can be added to 3D views of maps created with the ArcGIS
+- [loadArcGISModules](https://deck.gl/next/docs/api-reference/arcgis/load-arcgis-modules.md): This utility function initializes the classes in this module by loading ArcGIS dependencies. Optionally, it can also load additional dependencies from the esri namespace.
+- [@deck.gl/arcgis](https://deck.gl/next/docs/api-reference/arcgis/overview.md): Use deck.gl layers with the ArcGIS API for JavaScript.
+
+#### carto
+
+- [BASEMAP](https://deck.gl/next/docs/api-reference/carto/basemap.md): CARTO basemaps are available and they can be used without a token.
+- [ClusterTileLayer](https://deck.gl/next/docs/api-reference/carto/cluster-tile-layer.md): ClusterTileLayer is a layer for visualizing point data aggregated using spatial indexes like Quadbin or H3 with dynamic clustering. It provides efficient visualization of large point datasets with automatic clustering based on zoom level and customizable aggregation strategies. The layer automatically detects the spatial index type and renders cells accordingly.
+- [Data Sources](https://deck.gl/next/docs/api-reference/carto/data-sources.md): To ease interacting with the CARTO platform, the CARTO deck.gl module includes a number of functions, which simplify the use of fetching your data from CARTO. At a high level these can be thought of as wrappers around the browsers fetch function, except that rather than passing a URL, options that specify the data in the CARTO are used.
+- [fetchMap](https://deck.gl/next/docs/api-reference/carto/fetch-map.md): CARTO Builder is a powerful tool for designing map visualizations. With the fetchMap function, you can easily instantiate layers configured in Builder for use with deck.gl. It is available starting with CARTO Maps API version v3 and deck.gl 8.7.
+- [H3TileLayer](https://deck.gl/next/docs/api-reference/carto/h3-tile-layer.md): H3TileLayer is a layer for visualizing tiled data described using the H3 Spatial Index.
+- [HeatmapTileLayer](https://deck.gl/next/docs/api-reference/carto/heatmap-tile-layer.md): HeatmapTileLayer is a layer for visualizing point data aggregated using spatial indexes like Quadbin or H3 using a heatmap. The layer automatically detects the spatial index type and renders cells accordingly.
+- [@deck.gl/carto](https://deck.gl/next/docs/api-reference/carto/overview.md): Deck.gl is the preferred and official solution for creating modern geospatial web applications using CARTO Location Intelligence platform.
+- [PointLabelLayer](https://deck.gl/next/docs/api-reference/carto/point-label-layer.md): PointLabelLayer is a layer for rendering text labels with optional secondary labels around points. It extends the capabilities of deck.gl's TextLayer with features like automatic label positioning, collision detection, and support for dual-label layouts.
+- [QuadbinTileLayer](https://deck.gl/next/docs/api-reference/carto/quadbin-tile-layer.md): QuadbinTileLayer is a layer for visualizing tiled data described using the Quadbin Spatial Index.
+- [RasterTileLayer](https://deck.gl/next/docs/api-reference/carto/raster-tile-layer.md): RasterTileLayer is a layer for visualizing tiled raster data.
+- [Styles](https://deck.gl/next/docs/api-reference/carto/styles.md): Helper functions to create data-driven map visualizations.
+- [VectorTileLayer](https://deck.gl/next/docs/api-reference/carto/vector-tile-layer.md): VectorTileLayer is a layer for visualizing tiled vector data. It extends the MVTLayer with CARTO-specific optimizations for efficient vector tile rendering, including binary data format support and separate geometry/attribute loading.
+
+#### core
+
+- [AmbientLight](https://deck.gl/next/docs/api-reference/core/ambient-light.md): Create an ambient light source which illuminates all the objects equally. Ambient light comes from all directions, adding ambient light ensures that object colors are rendered but does not show structure in 3D objects like directional and point lights do. Only one ambient light is supported.
+- [Attribute (Internal)](https://deck.gl/next/docs/api-reference/core/attribute.md): This class helps deck.gl manage attributes. It integrates into the luma.gl Model.setAttributes() method by implementing the Attribute.getValue() method. luma.gl checks for the presence of this method on any attribute passed in.
+- [AttributeManager](https://deck.gl/next/docs/api-reference/core/attribute-manager.md): The AttributeManager is used internally by deck.gl layers. Unless you are writing custom deck.gl layers, or you are working with some very narrow advanced performance optimization use cases, you do not need to use this class.
+- [CameraLight (Experimental)](https://deck.gl/next/docs/api-reference/core/camera-light.md): CameraLight is a special point light source which always emits from the camera position.
+- [CompositeLayer Class](https://deck.gl/next/docs/api-reference/core/composite-layer.md): The CompositeLayer class is a subclass of the Layer Class, that customizes various layer lifecycle methods to help create sublayers and handle events from those layers.
+- [Controller](https://deck.gl/next/docs/api-reference/core/controller.md): The base class for all viewport controllers.
+- [CustomProjectionController (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-controller.md): CustomProjectionController is the default controller for CustomProjectionView. It extends Controller, using map-style gestures over a common-space ground plane.
+- [CustomProjectionView (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-view.md): CustomProjectionView renders a planar map using application-supplied coordinate conversion functions. It supports 2D map projections, not globe projections or arbitrary 3D coordinate transformations. Layers can still display altitude and extruded geometry. It uses CustomProjectionViewport and CustomProjectionController.
+- [CustomProjectionViewport (Experimental)](https://deck.gl/next/docs/api-reference/core/custom-projection-viewport.md): CustomProjectionViewport combines a planar map camera with application-supplied forward and inverse coordinate conversions. It is created by CustomProjectionView.
+- [Deck](https://deck.gl/next/docs/api-reference/core/deck.md): Deck is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events.
+- [DeckGL (Scripting Interface)](https://deck.gl/next/docs/api-reference/core/deckgl.md): DeckGL extends the core Deck class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as Codepen, JSFiddle and Observable.
+- [DirectionalLight](https://deck.gl/next/docs/api-reference/core/directional-light.md): Create a directional light source which emits from a specific direction.A directional light can be considered "infinitely" far away (like the Sun) and does not attenuate with distance. At most 5 directional lights can be supported.
+- [FirstPersonController](https://deck.gl/next/docs/api-reference/core/first-person-controller.md): Inherits from Base Controller.
+- [FirstPersonView](https://deck.gl/next/docs/api-reference/core/first-person-view.md): The FirstPersonView class is a subclass of View that describes a camera placed at a provided location, looking towards the direction and orientation specified by viewState. The behavior is similar to that of a first-person game).
+- [FlyToInterpolator](https://deck.gl/next/docs/api-reference/core/fly-to-interpolator.md): Performs "fly to" style interpolation between two geospatial view states. Implements TransitionInterpolator.
+- [GlobeController (Experimental)](https://deck.gl/next/docs/api-reference/core/globe-controller.md): Inherits from Base Controller.
+- [GlobeView (Experimental)](https://deck.gl/next/docs/api-reference/core/globe-view.md): This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other View classes. Use with caution and report any issues that you find on GitHub.
+- [GlobeViewport (Experimental)](https://deck.gl/next/docs/api-reference/core/globe-viewport.md): The GlobeViewport class takes globe view states (latitude, longitude, zoom, bearing, and pitch), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
+- [Layer Class](https://deck.gl/next/docs/api-reference/core/layer.md): The Layer class is the base class of all deck.gl layers, and it provides a number of base properties available in all layers.
+- [LayerManager Class (Internal)](https://deck.gl/next/docs/api-reference/core/layer-manager.md): The LayerManager class is gradually being refactor into a ComponentManager class and will be made part of the lifecycle directory. It is now an internal class, use the Deck class (or the DeckGL React Component) which creates a LayerManager under the hood.
+- [LightingEffect](https://deck.gl/next/docs/api-reference/core/lighting-effect.md): The LightingEffect applies ambient, point and directional lighting to layers which support material property.
+- [LinearInterpolator](https://deck.gl/next/docs/api-reference/core/linear-interpolator.md): Performs simple linear interpolation between two view states. Implements TransitionInterpolator.
+- [MapController](https://deck.gl/next/docs/api-reference/core/map-controller.md): Inherits from Base Controller.
+- [MapView](https://deck.gl/next/docs/api-reference/core/map-view.md): The MapView class is a subclass of View. This viewport creates a camera that looks at a geospatial location on a map from a certain direction. The behavior of MapView is generally modeled after that of Mapbox GL JS.
+- [OrbitController](https://deck.gl/next/docs/api-reference/core/orbit-controller.md): Inherits from Base Controller.
+- [OrbitView](https://deck.gl/next/docs/api-reference/core/orbit-view.md): The OrbitView class is a subclass of View that creates a 3D camera that rotates around a target position. It is usually used for the examination of a 3D scene in non-geospatial use cases.
+- [OrthographicController](https://deck.gl/next/docs/api-reference/core/orthographic-controller.md): Inherits from Base Controller.
+- [OrthographicView](https://deck.gl/next/docs/api-reference/core/orthographic-view.md): The OrthographicView class is a subclass of View that creates a top-down view of the XY plane. It is usually used for rendering 2D charts in non-geospatial use cases.
+- [PointLight](https://deck.gl/next/docs/api-reference/core/point-light.md): Create a point light source which emits from a point in all directions. At most 5 directional lights can be supported.
+- [PostProcessEffect](https://deck.gl/next/docs/api-reference/core/post-process-effect.md): The PostProcessEffect applies screen space pixel manipulation effects to deck.gl layers.
+- [project (Shader Module)](https://deck.gl/next/docs/api-reference/core/project.md): The project shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
+- [project32 (Shader Module)](https://deck.gl/next/docs/api-reference/core/project32.md): The project32 shader module is an extension of the project shader module that adds some projection utilities.
+- [project64 (Shader Module)](https://deck.gl/next/docs/api-reference/core/project64.md): The project64 shader module is an extension of the project shader module that does projection using 64 bit floating point. It provides an increase in precision, at the cost of performance. Note that starting with deck.gl v6.1, the improved default 32 bit projection mode provides sufficient precision for most use cases.
+- [SunLight (Experimental)](https://deck.gl/next/docs/api-reference/core/sun-light.md): SunLight is a directional light source simulating the sun. Sun position calculations are based on article and inspired by SunCalc.
+- [TerrainController](https://deck.gl/next/docs/api-reference/core/terrain-controller.md): Inherits from MapController.
+- [TransitionInterpolator](https://deck.gl/next/docs/api-reference/core/transition-interpolator.md): Base interpolator class that provides common functionality required to interpolate between two View States. This class is not intended to be used directly. See View State Transitions for backgrounds.
+- [View Class](https://deck.gl/next/docs/api-reference/core/view.md): For detailed explanations and code examples about deck.gl's views system, visit the Views and Projections article.
+- [Viewport](https://deck.gl/next/docs/api-reference/core/viewport.md): Read the article detailing deck.gl's Views and Projections system.
+- [WebMercatorViewport](https://deck.gl/next/docs/api-reference/core/web-mercator-viewport.md): The WebMercatorViewport class takes map view states (latitude, longitude, zoom, pitch, bearing etc.), and performs projections between world and screen coordinates. It is tuned to work in synchronization with mapbox-gl's projection matrix.
+- [Widget](https://deck.gl/next/docs/api-reference/core/widget.md): A widget is a UI component that can interact with deck.gl's layers and views.
+
+#### extensions
+
+- [BrushingExtension](https://deck.gl/next/docs/api-reference/extensions/brushing-extension.md): The BrushingExtension adds GPU-based data brushing functionalities to layers. It allows the layer to show/hide objects based on the current pointer position.
+- [ClipExtension](https://deck.gl/next/docs/api-reference/extensions/clip-extension.md): The ClipExtension adds support for clipping rendered layers by rectangular bounds.
+- [CollisionFilterExtension](https://deck.gl/next/docs/api-reference/extensions/collision-filter-extension.md): The CollisionFilterExtension allows layers to hide features which overlap with other features. An example is a dense ScatterplotLayer with many points which overlap: by using this extension points that collide with others are hidden such that only one of the colliding points is shown. The collisions are computed on the GPU in realtime, allowing the collisions to be updated smoothly on every frame.
+- [DataFilterExtension](https://deck.gl/next/docs/api-reference/extensions/data-filter-extension.md): The DataFilterExtension adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
+- [FillStyleExtension](https://deck.gl/next/docs/api-reference/extensions/fill-style-extension.md): The FillStyleExtension adds selected features to layers that render a "fill", such as the PolygonLayer and ScatterplotLayer.
+- [Fp64Extension](https://deck.gl/next/docs/api-reference/extensions/fp64-extension.md): The Fp64Extension adds 64-bit precision to geospatial layers.
+- [MaskExtension](https://deck.gl/next/docs/api-reference/extensions/mask-extension.md): The MaskExtension allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area. This extension provides a significantly more performant alternative to testing the data array against a bounding geometry on the CPU.
+- [@deck.gl/extensions](https://deck.gl/next/docs/api-reference/extensions/overview.md): Layer extensions are bonus features that you can optionally add to the core deck.gl layers. These features are not included in the layers by default because one or more of the following reasons:
+- [PathStyleExtension](https://deck.gl/next/docs/api-reference/extensions/path-style-extension.md): The PathStyleExtension adds dashes and offsets to the PathLayer and composite layers that render paths, such as PolygonLayer and GeoJsonLayer. It can also dash ScatterplotLayer outlines and TextLayer backgrounds.
+- [TerrainExtension (Experimental)](https://deck.gl/next/docs/api-reference/extensions/terrain-extension.md): This extension is experimental, which means it does not provide the compatibility and stability that one would typically expect from other features. Use with caution and report any issues that you find on GitHub.
+
+#### geo-layers
+
+- [A5Layer](https://deck.gl/next/docs/api-reference/geo-layers/a5-layer.md): The A5Layer renders filled and/or stroked polygons based on the A5 geospatial indexing system.
+- [GeohashLayer](https://deck.gl/next/docs/api-reference/geo-layers/geohash-layer.md): The GeohashLayer renders filled and/or stroked polygons based on the Geohash geospatial indexing system.
+- [GreatCircleLayer](https://deck.gl/next/docs/api-reference/geo-layers/great-circle-layer.md): The GreatCircleLayer is a variation of the ArcLayer. It renders flat arcs along the great circle joining pairs of source and target points,
+- [H3ClusterLayer](https://deck.gl/next/docs/api-reference/geo-layers/h3-cluster-layer.md): The H3ClusterLayer renders regions represented by hexagon sets from the H3 geospatial indexing system.
+- [H3HexagonLayer](https://deck.gl/next/docs/api-reference/geo-layers/h3-hexagon-layer.md): The H3HexagonLayer renders hexagons from the H3 geospatial indexing system.
+- [MVTLayer](https://deck.gl/next/docs/api-reference/geo-layers/mvt-layer.md): The MVTLayer is a derived TileLayer that makes it possible to visualize very large datasets through MVTs (Mapbox Vector Tiles). Behaving like TileLayer, it will only load, decode and render MVTs containing features that are visible within the current viewport.
+- [QuadkeyLayer](https://deck.gl/next/docs/api-reference/geo-layers/quadkey-layer.md): The QuadkeyLayer renders filled and/or stroked polygons based on the Quadkey geospatial indexing system.
+- [S2Layer](https://deck.gl/next/docs/api-reference/geo-layers/s2-layer.md): The S2Layer renders filled and/or stroked polygons based on the S2 geospatial indexing system.
+- [TerrainLayer](https://deck.gl/next/docs/api-reference/geo-layers/terrain-layer.md): The TerrainLayer reconstructs mesh surfaces from height map images, e.g. Mapzen Terrain Tiles, which encodes elevation into R,G,B values.
+- [Tile3DLayer](https://deck.gl/next/docs/api-reference/geo-layers/tile-3d-layer.md): The Tile3DLayer renders 3d tiles data formatted according to the 3D Tiles Specification and ESRI I3S, supported by the Tiles3DLoader.
+- [TileLayer](https://deck.gl/next/docs/api-reference/geo-layers/tile-layer.md): TileLayer loads tiled data for the current viewport and renders it through sub-layers.
+- [TripsLayer](https://deck.gl/next/docs/api-reference/geo-layers/trips-layer.md): The TripsLayer renders animated paths that represent vehicle trips.
+- [WMSLayer (Experimental)](https://deck.gl/next/docs/api-reference/geo-layers/wms-layer.md): This class is experimental, which means it does not provide the compatibility and stability that one would typically expect from other layers, detailed in the limitations section. Use with caution and report any issues that you find on GitHub.
+
+#### google-maps
+
+- [GoogleMapsOverlay](https://deck.gl/next/docs/api-reference/google-maps/google-maps-overlay.md): This class implements the OverlayView/WebGLOverlayView (depending on map rendering type) interface and can be used as any other Google Maps overlay.
+- [@deck.gl/google-maps](https://deck.gl/next/docs/api-reference/google-maps/overview.md): Use deck.gl layers as a custom Google Maps overlay.
+
+#### json
+
+- [Conversion Reference](https://deck.gl/next/docs/api-reference/json/conversion-reference.md): Reference for the @deck.gl/json prefixes: @@type, @@function, @@# constants and enumerations, and @@= accessor expressions.
+- [JSONConfiguration](https://deck.gl/next/docs/api-reference/json/json-configuration.md): A JSONConfiguration is created from a single plain object. The same object shape is also accepted by JSONConfiguration.merge() and JSONConverter's configuration and mergeConfiguration() props.
+- [JSONConverter](https://deck.gl/next/docs/api-reference/json/json-converter.md): NOTE: This component is only intended to support official deck.gl API props via JSON. In particular, it is not intended to evolve an implementation of alternate JSON schemas. Support for such schemas should be developed independently, perhaps using the source code of this component as a base. See the JSON Layers RFC for more on this.
+- [@deck.gl/json](https://deck.gl/next/docs/api-reference/json/overview.md): The deck.gl JSON module provides a JSONConverter class that converts textual JSON specifications into JavaScript objects, and functions.
+
+#### layers
+
+For first-time deck.gl developers, it is helpful to read the following pages before jumping into the layer catalog:
+
+- [Layer Catalog Overview](https://deck.gl/next/docs/api-reference/layers.md): For first-time deck.gl developers, it is helpful to read the following pages before jumping into the layer catalog:
+- [ArcLayer](https://deck.gl/next/docs/api-reference/layers/arc-layer.md): ArcLayer renders arcs between pairs of source and target coordinates.
+- [BitmapLayer](https://deck.gl/next/docs/api-reference/layers/bitmap-layer.md): The BitmapLayer renders a bitmap at specified boundaries.
+- [ColumnLayer](https://deck.gl/next/docs/api-reference/layers/column-layer.md): ColumnLayer renders extruded cylinders or regular polygons at given coordinates.
+- [GeoJsonLayer](https://deck.gl/next/docs/api-reference/layers/geojson-layer.md): The GeoJsonLayer renders GeoJSON formatted data as polygons, lines and points (circles, icons and/or texts).
+- [GridCellLayer](https://deck.gl/next/docs/api-reference/layers/grid-cell-layer.md): GridCellLayer renders extruded square grid cells at given coordinates.
+- [IconLayer](https://deck.gl/next/docs/api-reference/layers/icon-layer.md): IconLayer renders raster icons from an atlas or auto-packed images at given coordinates.
+- [LineLayer](https://deck.gl/next/docs/api-reference/layers/line-layer.md): LineLayer renders straight lines between pairs of source and target coordinates.
+- [PathLayer](https://deck.gl/next/docs/api-reference/layers/path-layer.md): PathLayer renders polylines with configurable width, joints and caps.
+- [PointCloudLayer](https://deck.gl/next/docs/api-reference/layers/point-cloud-layer.md): PointCloudLayer renders 3D point clouds with optional normals and per-point colors.
+- [PolygonLayer](https://deck.gl/next/docs/api-reference/layers/polygon-layer.md): PolygonLayer renders filled, stroked and optionally extruded polygons.
+- [ScatterplotLayer](https://deck.gl/next/docs/api-reference/layers/scatterplot-layer.md): ScatterplotLayer renders circles at given coordinates with data-driven radius, fill and stroke.
+- [SolidPolygonLayer](https://deck.gl/next/docs/api-reference/layers/solid-polygon-layer.md): SolidPolygonLayer renders filled and optionally extruded polygons without strokes.
+- [TextLayer](https://deck.gl/next/docs/api-reference/layers/text-layer.md): The TextLayer renders text labels at given coordinates.
+
+#### mapbox
+
+- [MapboxOverlay](https://deck.gl/next/docs/api-reference/mapbox/mapbox-overlay.md): MapboxOverlay is an implementation of Mapbox GL JS's IControl API. When adding a MapboxOverlay control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both overlaid and interleaved rendering modes.
+- [@deck.gl/mapbox](https://deck.gl/next/docs/api-reference/mapbox/overview.md): This module integrates deck.gl into the Mapbox GL JS API-compatible ecosystem.
+
+#### maplibre
+
+- [MapLibreOverlay](https://deck.gl/next/docs/api-reference/maplibre/overview.md): @deck.gl/maplibre is the recommended deck.gl integration for MapLibre GL JS v4.5.1, v5, and v6. Its MapLibreOverlay renders deck.gl layers using MapLibre's public APIs.
+
+#### mesh-layers
+
+- [ScenegraphLayer](https://deck.gl/next/docs/api-reference/mesh-layers/scenegraph-layer.md): ScenegraphLayer renders glTF scenegraph models at given coordinates.
+- [SimpleMeshLayer](https://deck.gl/next/docs/api-reference/mesh-layers/simple-mesh-layer.md): The SimpleMeshLayer renders a number of instances of an arbitrary 3D geometry. For example, it can be used to visualize a fleet of 3d cars each with a position and an orientation over the map.
+
+#### react
+
+- [DeckGL (React Component)](https://deck.gl/next/docs/api-reference/react/deckgl.md): DeckGL is the main interface to deck.gl for React applications. DeckGL is a React component that takes a list of deck.gl layer instances and a view state, and renders those layers on a transparent canvas that can be used as an overlay over other components like maps.
+- [@deck.gl/react](https://deck.gl/next/docs/api-reference/react/overview.md): This module integrates deck.gl with React. First-time deck.gl developers may find it helpful to read Using deck.gl with React before getting started.
+- [useWidget](https://deck.gl/next/docs/api-reference/react/use-widget.md): The useWidget hook is used to create React wrappers for normal (non-React) deck.gl widgets, or to create custom widgets with UI rendered by React.
+
+#### test-utils
+
+- [generateLayerTests](https://deck.gl/next/docs/api-reference/test-utils/generate-layer-tests.md): This utility generates a series of test cases to be used with testLayer that checks the conformance of a layer class.
+- [InteractionTestRunner](https://deck.gl/next/docs/api-reference/test-utils/interaction-test-runner.md): Client-side utility for browser-based deck.gl interaction tests.
+- [@deck.gl/test-utils](https://deck.gl/next/docs/api-reference/test-utils/overview.md): A set of utilities to facilitate testing deck.gl layers. Tests can be run:
+- [SnapshotTestRunner](https://deck.gl/next/docs/api-reference/test-utils/snapshot-test-runner.md): Client-side utility for browser-based deck.gl render tests.
+- [testLayer](https://deck.gl/next/docs/api-reference/test-utils/test-layer.md): The testLayer utility initializes a layer, test layer updates and draw calls on a series of new props, and allow test suites to inspect the result.
+
+#### widgets
+
+- [CompassWidget](https://deck.gl/next/docs/api-reference/widgets/compass-widget.md): This widget visualizes bearing and pitch. Click it once to reset bearing to 0, click it a second time to reset pitch to 0. Supports MapView and GlobeView.
+- [ContextMenuWidget](https://deck.gl/next/docs/api-reference/widgets/context-menu-widget.md): Displays a context menu on right-click events with customizable menu items based on picked objects.
+- [FullscreenWidget](https://deck.gl/next/docs/api-reference/widgets/fullscreen-widget.md): This widget enlarges deck.gl to fill the full screen. Click the widget to enter or exit full screen.
+- [GeocoderWidget (Experimental)](https://deck.gl/next/docs/api-reference/widgets/geocoder-widget.md): The GeocoderWidget helps the user find positions on the map.
+- [GimbalWidget](https://deck.gl/next/docs/api-reference/widgets/gimbal-widget.md): Visualizes the orientation of an OrbitView using nested circles. Clicking resets rotationOrbit and rotationX to 0.
+- [IconWidget](https://deck.gl/next/docs/api-reference/widgets/icon-widget.md): This widget renders a single icon button. Use it for simple actions that should live alongside the other built-in deck.gl widgets.
+- [InfoWidget](https://deck.gl/next/docs/api-reference/widgets/info-widget.md): This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
+- [LoadingWidget](https://deck.gl/next/docs/api-reference/widgets/loading-widget.md): This widget shows a spinning indicator while any deck.gl layers are loading data.
+- [@deck.gl/widgets](https://deck.gl/next/docs/api-reference/widgets/overview.md): Widgets are UI components around the WebGL2/WebGPU canvas to offer controls and information for a better user experience.
+- [PopupWidget](https://deck.gl/next/docs/api-reference/widgets/popup-widget.md): This widget shows a popup at a fixed position, or when an item in a deck.gl layer has been clicked or hovered.
+- [ResetViewWidget](https://deck.gl/next/docs/api-reference/widgets/reset-view-widget.md): This widget resets the view state of a deck.gl viewport to its initial state. The user clicks the widget to return to the initial view.
+- [ScaleWidget (Experimental)](https://deck.gl/next/docs/api-reference/widgets/scale-widget.md): This widget displays a dynamic cartographic scale bar that updates as the map view changes. It shows a horizontal line with end tick marks and a distance label, reflecting the current map scale based on zoom level and latitude.
+- [ScreenshotWidget](https://deck.gl/next/docs/api-reference/widgets/screenshot-widget.md): This widget captures and downloads the deck.gl screen (canvas). Click the widget to capture an image of the screen. The image will be downloaded by the browser into the user's "download" folder.
+- [ScrollbarWidget](https://deck.gl/next/docs/api-reference/widgets/scrollbar-widget.md): This widget renders a scrollbar UI that mimics the native HTML scrolling behavior. It works with the OrthographicView to create a "scrollable" canvas of arbitrary size.
+- [SelectorWidget](https://deck.gl/next/docs/api-reference/widgets/selector-widget.md): This widget renders an icon button that opens a popover menu of selectable options. Each option provides an icon and an optional label, and the button updates to reflect the current selection.
+- [SplitterWidget (Experimental)](https://deck.gl/next/docs/api-reference/widgets/splitter-widget.md): This widget lets the user to stack multiple views across the deck.gl canvas, and resize them by draggable splitter handles. This widget will only work if the views prop of Deck is unset.
+- [StatsWidget (Experimental)](https://deck.gl/next/docs/api-reference/widgets/stats-widget.md): Displays performance and debugging statistics from deck.gl, luma.gl, or custom probe.gl stats objects in a collapsible widget. When collapsed, it shows the current FPS in a compact button UI.
+- [Styling Widgets](https://deck.gl/next/docs/api-reference/widgets/styling.md): Styling deck.gl widgets with CSS variables, themes and custom class names.
+- [ThemeWidget](https://deck.gl/next/docs/api-reference/widgets/theme-widget.md): This widget changes the theme of deck.gl between light mode and dark mode. Click the widget to toggle the theme.
+- [TimelineWidget (Experimental)](https://deck.gl/next/docs/api-reference/widgets/timeline-widget.md): This widget provides a time slider with play/pause controls. Configure a time range, step interval, and play speed to animate data over time.
+- [ToggleWidget](https://deck.gl/next/docs/api-reference/widgets/toggle-widget.md): This widget renders an icon button with internal on/off state. It is useful for lightweight toggles such as layer visibility, mode switches, or filter controls.
+- [Widget Tooltips](https://deck.gl/next/docs/api-reference/widgets/tooltips.md): Built-in button widgets ship with styled tooltips that appear on hover and keyboard focus. These replace the slow native browser title tooltips with themed, customizable alternatives.
+- [View Layout](https://deck.gl/next/docs/api-reference/widgets/view-layout.md): The view layout helpers build stable deck.gl view arrays from a declarative layout tree. They are generic utilities for applications that need multiple coordinated views without hand-computing every view rectangle in render code.
+- [ZoomWidget](https://deck.gl/next/docs/api-reference/widgets/zoom-widget.md): This widget controls the zoom level of a deck.gl view. Click '+' to zoom in or '-' to zoom out by the configured zoomStep. Supports controlling Map and Globe views.
+
+### contributing
+
+Thanks for taking the time to contribute!
+
+- [Contributing to deck.gl](https://deck.gl/next/docs/contributing.md): Thanks for taking the time to contribute!
+
+### faq
+
+deck.gl is designed to be easy to use, however it is built on top of a complex technology (WebGL2/WebGPU) and supports a functional/reactive programming paradigm which many users are initially unfamiliar with.
+
+- [Frequently Asked Questions](https://deck.gl/next/docs/faq.md): deck.gl is designed to be easy to use, however it is built on top of a complex technology (WebGL2/WebGPU) and supports a functional/reactive programming paradigm which many users are initially unfamiliar with.
+
+### roadmap
+
+Interested in what is coming down the road? We are trying to make the deck.gl roadmap as public as possible.
+
+- [Roadmap](https://deck.gl/next/docs/roadmap.md): Interested in what is coming down the road? We are trying to make the deck.gl roadmap as public as possible.

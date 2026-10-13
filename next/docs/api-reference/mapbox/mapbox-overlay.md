@@ -1,0 +1,343 @@
+# MapboxOverlay
+
+`MapboxOverlay` is an implementation of [Mapbox GL JS](https://www.npmjs.com/package/mapbox-gl)'s [IControl](https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol) API. When adding a `MapboxOverlay` control to an mapbox map, deck.gl layers are rendered in synchronization with the base map layers. This control supports both [overlaid and interleaved](https://deck.gl/next/docs/get-started/using-with-map.md) rendering modes.
+
+## Example[​](#example "Direct link to Example")
+
+<!-- -->
+
+* TypeScript
+* React
+
+```
+import {MapboxOverlay} from '@deck.gl/mapbox';
+
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+import mapboxgl from 'mapbox-gl';
+
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+
+
+const map = new mapboxgl.Map({
+
+  container: 'map',
+
+  style: 'mapbox://styles/mapbox/light-v9',
+
+  accessToken: '<mapbox_access_token>',
+
+  center: [0.45, 51.47],
+
+  zoom: 11
+
+});
+
+
+
+map.once('load', () => {
+
+  const deckOverlay = new MapboxOverlay({
+
+    interleaved: true,
+
+    layers: [
+
+      new ScatterplotLayer({
+
+        id: 'deckgl-circle',
+
+        data: [
+
+          {position: [0.45, 51.47]}
+
+        ],
+
+        getPosition: d => d.position,
+
+        getFillColor: [255, 0, 0, 100],
+
+        getRadius: 1000,
+
+        beforeId: 'waterway-label' // In interleaved mode render the layer under map labels. Replace with `slot: 'bottom'` if using Mapbox v3 Standard Style.
+
+      })
+
+    ]
+
+  });
+
+
+
+  map.addControl(deckOverlay);
+
+});
+```
+
+```
+import React from 'react';
+
+import {Map, useControl} from 'react-map-gl/mapbox';
+
+import {MapboxOverlay} from '@deck.gl/mapbox';
+
+import {DeckProps} from '@deck.gl/core';
+
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+
+
+function DeckGLOverlay(props: DeckProps) {
+
+  const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
+
+  overlay.setProps(props);
+
+  return null;
+
+}
+
+
+
+function App() {
+
+  const layers: [
+
+    new ScatterplotLayer({
+
+      id: 'deckgl-circle',
+
+      data: [
+
+        {position: [0.45, 51.47]}
+
+      ],
+
+      getPosition: d => d.position,
+
+      getFillColor: [255, 0, 0, 100],
+
+      getRadius: 1000,
+
+      beforeId: 'waterway-label' // In interleaved mode render the layer under map labels. Replace with `slot: 'bottom'` if using Mapbox v3 Standard Style.
+
+    })
+
+  ];
+
+
+
+  return (
+
+    <Map
+
+      initialViewState={{
+
+        longitude: 0.45,
+
+        latitude: 51.47,
+
+        zoom: 11
+
+      }}
+
+      mapStyle="mapbox://styles/mapbox/light-v9"
+
+      mapboxAccessToken="<mapbox_access_token>"
+
+    >
+
+      <DeckGLOverlay layers={layers} interleaved />
+
+    </Map>
+
+  );
+
+}
+```
+
+See react-map-gl's [useControl](https://visgl.github.io/react-map-gl/docs/api-reference/use-control) hook.
+
+## Constructor[​](#constructor "Direct link to Constructor")
+
+```
+import {MapboxOverlay} from '@deck.gl/mapbox';
+
+import type {MapboxOverlayProps} from '@deck.gl/mapbox';
+
+
+
+new MapboxOverlay(props: MapboxOverlayProps);
+```
+
+`MapboxOverlay` accepts the same props as the [Deck](https://deck.gl/next/docs/api-reference/core/deck.md) class, with the following exceptions:
+
+* `views` - multi-view support is limited. There is only one `MapView` that can synchronize with the base map. See the [using with multi-views](#multi-view-usage) section for details.
+* `parent` / `canvas` / `device` - context creation is managed internally.
+* `viewState` / `initialViewState` - camera state is managed internally.
+* `controller` - always disabled (to use Mapbox's interaction handlers).
+* `useDevicePixels` - ignored in interleaved mode, where the base map owns the WebGL context and the canvas drawing buffer size. To control pixel ratio in interleaved mode, use MapLibre's [`pixelRatio`](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/#pixelratio) constructor option on the Map instance. Mapbox GL JS does not expose an equivalent option.
+
+The constructor additionally accepts the following options:
+
+* `interleaved` (boolean) - If `false`, a dedicated deck.gl canvas is added on top of the base map. If `true`, deck.gl layers are inserted into mapbox-gl's layer stack, and share the same `WebGL2RenderingContext` as the base map. Default is `false`. Note that interleaving with basemaps such as mapbox-gl-js v1 that only support WebGL 1 is not supported, see [compatibility](https://deck.gl/next/docs/api-reference/mapbox/overview.md#interleaved-renderer-compatibility).
+
+When using `interleaved: true`, deck.gl layers are grouped by their `beforeId` or `slot` prop and rendered in batches. You may control the ordering of layers in the Mapbox/MapLibre stack by optionally adding a `beforeId` prop to a layer. If multiple deck.gl layers have the same `beforeId`, they are rendered together in the order that is passed into the `layers` array, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension). If used with Mapbox v3 Standard Style, supply a [slot](https://docs.mapbox.com/mapbox-gl-js/guides/migrate/#layer-slots) prop to layers instead.
+
+Note that extensions which require layers to share a rendering context (such as MaskExtension and CollisionFilterExtension) only work between layers within the same group. Ensure that layers using these extensions share the same `beforeId` or `slot` value.
+
+## Methods[​](#methods "Direct link to Methods")
+
+##### setProps[​](#setprops "Direct link to setProps")
+
+```
+const overlay = new MapboxOverlay({
+
+  interleaved: true,
+
+  layers: []
+
+});
+
+
+
+map.addControl(overlay);
+
+
+
+// Update layers
+
+overlay.setProps({
+
+  layers: [new ScatterplotLayer({...})]
+
+})
+```
+
+Updates (partial) props of the underlying `Deck` instance. See [Deck.setProps](https://deck.gl/next/docs/api-reference/core/deck.md#setprops).
+
+##### pickObject[​](#pickobject "Direct link to pickObject")
+
+See [Deck.pickObject](https://deck.gl/next/docs/api-reference/core/deck.md#pickobject).
+
+##### pickObjects[​](#pickobjects "Direct link to pickObjects")
+
+See [Deck.pickObjects](https://deck.gl/next/docs/api-reference/core/deck.md#pickobjects).
+
+##### pickMultipleObjects[​](#pickmultipleobjects "Direct link to pickMultipleObjects")
+
+See [Deck.pickMultipleObjects](https://deck.gl/next/docs/api-reference/core/deck.md#pickmultipleobjects).
+
+##### finalize[​](#finalize "Direct link to finalize")
+
+Removes the control and deletes all resources.
+
+##### getCanvas[​](#getcanvas "Direct link to getCanvas")
+
+See [Deck.getCanvas](https://deck.gl/next/docs/api-reference/core/deck.md#getcanvas). When using `interleaved: true`, returns the base map's `canvas`.
+
+## Remarks[​](#remarks "Direct link to Remarks")
+
+### Antialiasing[​](#antialiasing "Direct link to Antialiasing")
+
+Base maps create their WebGL context with `antialias: false`, so in interleaved mode deck.gl layers receive no multisampling. Layers that rely on it — including [PathLayer](https://deck.gl/next/docs/api-reference/layers/path-layer.md), [LineLayer](https://deck.gl/next/docs/api-reference/layers/line-layer.md), [ArcLayer](https://deck.gl/next/docs/api-reference/layers/arc-layer.md), and [PointCloudLayer](https://deck.gl/next/docs/api-reference/layers/point-cloud-layer.md) — will look aliased against the base map. Set `antialiasing: true` on those layers, or enable MSAA on the base map itself.
+
+### Multi-view usage[​](#multi-view-usage "Direct link to Multi-view usage")
+
+When using `MapboxOverlay` with multiple views passed to the `views` prop, only one of the views can match the base map and receive interaction.
+
+With that said, it is still possible to take advantage of deck's multi-view system and render a mapbox base map onto any one `MapView` of your choice by setting the `views` array and a `layerFilter` callback.
+
+**View ID Conventions:**
+
+* `MapboxOverlay` internally uses a `MapView` with the id `"mapbox"` to synchronize with the base map's camera.
+* You can reference this view id in your `layerFilter` to control which layers render on the main map.
+* When providing custom views, you do **not** need to explicitly include a view with id `"mapbox"` - it will be automatically injected if not present.
+* If you want to customize the mapbox-synchronized view (e.g., to control draw order with other custom views), you can explicitly define a `MapView({id: 'mapbox'})` in your views array.
+
+```
+import {MapboxOverlay} from '@deck.gl/mapbox';
+
+import {Deck, MapView, OrthographicView} from '@deck.gl/core';
+
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+
+
+const map = new mapboxgl.Map({...});
+
+
+
+const overlay = new MapboxOverlay({
+
+  views: [
+
+    // This view will be synchronized with the base map
+
+    new MapView({id: 'mapbox'}),
+
+    // This view will not be interactive
+
+    new OrthographicView({id: 'widget'})
+
+  ],
+
+  layerFilter: ({layer, viewport}) => {
+
+    const shouldDrawInWidget = layer.id.startsWith('widget');
+
+    if (viewport.id === 'widget') return shouldDrawInWidget;
+
+    return !shouldDrawInWidget;
+
+  },
+
+  layers: [
+
+    new ScatterplotLayer({
+
+      id: 'my-scatterplot',
+
+      data: [
+
+        {position: [-74.5, 40], size: 100}
+
+      ],
+
+      getPosition: d => d.position,
+
+      getRadius: d => d.size,
+
+      getFillColor: [255, 0, 0]
+
+    }),
+
+    new ScatterplotLayer({
+
+      id: 'widget-scatterplot',
+
+      data: [
+
+        {position: [0, 0], size: 100}
+
+      ],
+
+      getPosition: d => d.position,
+
+      getRadius: d => d.size,
+
+      getFillColor: [255, 0, 0]
+
+    })
+
+  ]
+
+});
+
+
+
+map.addControl(overlay);
+```

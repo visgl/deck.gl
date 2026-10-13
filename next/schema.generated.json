@@ -6431,7 +6431,7 @@
               },
               "radius": {
                 "type": "number",
-                "description": "Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped).",
+                "description": "Radius of hexagon bin in meters. The hexagons are pointy-topped (rather than flat-topped). Geospatial views approximate ground meters at the center of the data bounds.",
                 "default": 1000
               },
               "colorDomain": {
@@ -6734,7 +6734,7 @@
               },
               "cellSize": {
                 "type": "number",
-                "description": "Size of each cell in meters.",
+                "description": "Size of each cell in meters. Geospatial views approximate ground meters at the center of the data bounds.",
                 "default": 1000
               },
               "gridOrigin": {
@@ -6966,7 +6966,7 @@
               },
               "cellSize": {
                 "type": "number",
-                "description": "Size of each cell in meters.",
+                "description": "Size of each cell in meters. Geospatial views approximate ground meters at the center of the data bounds.",
                 "default": 1000
               },
               "colorDomain": {
@@ -11910,7 +11910,7 @@
                 "const": "_SplitterWidget"
               },
               "viewLayout": {
-                "$ref": "#/definitions/ViewLayout",
+                "$ref": "#/definitions/SplitterWidgetViewLayout",
                 "description": "Stacking views descriptor"
               },
               "id": {
@@ -12329,6 +12329,43 @@
                 "type": "boolean",
                 "description": "If `true`, mouse wheel events over the canvas will be intercepted by this scrollbar. Useful when simulating the native scrollbar's behavior.",
                 "default": false
+              },
+              "contentBoundsPadding": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "left": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      },
+                      "right": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      },
+                      "top": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      },
+                      "bottom": {
+                        "type": [
+                          "number",
+                          "string"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Padding inside the viewport used to display `contentBounds`. If not supplied, falls back to the target view controller's `maxBoundsPadding`."
               },
               "style": {
                 "type": "object",
@@ -13517,365 +13554,11 @@
       "type": "object"
     },
     "NumericArray": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/TypedArray"
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
-        }
-      ],
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
       "description": "Type covering classic arrays consisting of numbers as well as typed arrays"
-    },
-    "TypedArray": {
-      "anyOf": [
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        }
-      ],
-      "description": "Type covering all non-big typed arrays"
     },
     "Unit": {
       "type": "string",
@@ -13997,82 +13680,6 @@
           },
           "minItems": 4,
           "maxItems": 4
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
         }
       ],
       "description": "A color in the format of `[r, g, b, a?]`"
@@ -14103,82 +13710,6 @@
           },
           "minItems": 3,
           "maxItems": 3
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
-        },
-        {
-          "type": "object",
-          "properties": {
-            "BYTES_PER_ELEMENT": {
-              "type": "number"
-            },
-            "buffer": {
-              "type": "object",
-              "properties": {
-                "byteLength": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "byteLength"
-              ]
-            },
-            "byteLength": {
-              "type": "number"
-            },
-            "byteOffset": {
-              "type": "number"
-            },
-            "length": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "BYTES_PER_ELEMENT",
-            "buffer",
-            "byteLength",
-            "byteOffset",
-            "length"
-          ],
-          "additionalProperties": {
-            "type": "number"
-          }
         }
       ],
       "description": "A position in the format of `[lng, lat, alt?]` or `[x, y, z?]` depending on the coordinate system. See https://deck.gl/docs/developer-guide/coordinate-systems#positions"
@@ -14295,7 +13826,7 @@
         "fill"
       ]
     },
-    "ViewLayout": {
+    "SplitterWidgetViewLayout": {
       "type": "object",
       "properties": {
         "orientation": {
@@ -14311,11 +13842,11 @@
           "minItems": 2,
           "items": [
             {
-              "$ref": "#/definitions/ViewLayout",
+              "$ref": "#/definitions/SplitterWidgetViewLayout",
               "title": "view1"
             },
             {
-              "$ref": "#/definitions/ViewLayout",
+              "$ref": "#/definitions/SplitterWidgetViewLayout",
               "title": "view2"
             }
           ],

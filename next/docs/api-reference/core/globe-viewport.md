@@ -1,0 +1,120 @@
+# GlobeViewport (Experimental)
+
+The `GlobeViewport` class takes globe view states (`latitude`, `longitude`, `zoom`, `bearing`, and `pitch`), and performs projections between world and screen coordinates. It is a helper class for visualizing the earth as a 3D globe.
+
+## Usage[​](#usage "Direct link to Usage")
+
+A `GlobeViewport` instance is created under the hood by a [GlobeView](https://deck.gl/next/docs/api-reference/core/globe-view.md).
+
+```
+import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
+
+
+
+const viewport = new GlobeViewport({
+
+  width: 600,
+
+  height: 400,
+
+  longitude: -122.45,
+
+  latitude: 37.78,
+
+  zoom: 12
+
+});
+
+
+
+viewport.project([-122.45, 37.78]);
+
+// [300,200]
+```
+
+## Constructor[​](#constructor "Direct link to Constructor")
+
+```
+new GlobeViewport({width, height, longitude, latitude, zoom, bearing, pitch});
+```
+
+Parameters:
+
+* `opts` (object) - Globe viewport options
+
+  * `width` (number) - Width of the viewport.
+  * `height` (number) - Height of the viewport.
+
+  geospatial arguments:
+
+  * `latitude` (number, optional) - Latitude of the viewport center on map. Default to `0`.
+  * `longitude` (number, optional) - Longitude of the viewport center on map. Default to `0`.
+  * `zoom` (number, optional) - Map zoom (scale is calculated as `2^zoom`). Default to `11`.
+  * `bearing` (number, optional) - Bearing angle in degrees. Default to `0`.
+  * `pitch` (number, optional) - Pitch angle in degrees. Default to `0`.
+  * `altitude` (number, optional) - Altitude of camera, 1 unit equals to the height of the viewport. Default to `1.5`.
+
+  projection matrix arguments:
+
+  * `nearZMultiplier` (number, optional) - Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.01`.
+  * `farZMultiplier` (number, optional) - Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1`.
+
+Remarks:
+
+* `width` and `height` are forced to 1 if supplied as 0, to avoid division by zero. This is intended to reduce the burden of apps to check values before instantiating a `Viewport`.
+* Per cartographic tradition, longitudes and latitudes are specified as degrees.
+
+Inherits all [Viewport methods](https://deck.gl/next/docs/api-reference/core/viewport.md#methods).
+
+## Methods[​](#methods "Direct link to Methods")
+
+Inherits all methods from [Viewport](https://deck.gl/next/docs/api-reference/core/viewport.md).
+
+#### `project`[​](#project "Direct link to project")
+
+Projects world coordinates to pixel coordinates on screen.
+
+Parameters:
+
+* `coordinates` (number\[]) - `[longitude, latitude, altitude]`. `altitude` is in meters and default to `0` if not supplied.
+* `opts` (object)
+  <!-- -->
+  * `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
+
+Returns:
+
+* `[x, y]` or `[x, y, z]` in pixels coordinates. `z` is pixel depth.
+
+  <!-- -->
+
+  * If input is `[longitude, latitude]`: returns `[x, y]`.
+  * If input is `[longitude, latitude: altitude]`: returns `[x, y, z]`.
+
+#### `unproject`[​](#unproject "Direct link to unproject")
+
+Unproject pixel coordinates on screen into world coordinates.
+
+Parameters:
+
+* `pixels` (number\[]) - `[x, y, z]` in pixel coordinates. Passing a `z` is optional.
+
+* `opts` (object)
+
+  <!-- -->
+
+  * `topLeft` (boolean, optional) - Whether projected coords are top left. Default to `true`.
+  * `targetZ` (number, optional) - If pixel depth `z` is not specified in `pixels`, this is used as the elevation plane to unproject onto. Default `0`.
+
+Returns:
+
+* `[longitude, latitude]` or `[longitude, latitude, altitude]` in world coordinates. `altitude` is in meters.
+
+  <!-- -->
+
+  * If input is `[x, y]` without specifying `opts.targetZ`: returns `[longitude, latitude]`.
+  * If input is `[x, y]` with `opts.targetZ`: returns `[longitude, latitude, targetZ]`.
+  * If input is `[x, y, z]`: returns `[longitude, latitude, altitude]`.
+
+## Source[​](#source "Direct link to Source")
+
+[modules/core/src/viewports/globe-viewport.ts](https://github.com/visgl/deck.gl/blob/master/modules/core/src/viewports/globe-viewport.ts)
