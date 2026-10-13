@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import View from './view';
+import {projectionEngine} from '@math.gl/projection';
+import type {CRSDescriptor} from '@math.gl/projection/types';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
@@ -10,7 +12,7 @@ import CustomProjectionController from '../controllers/custom-projection-control
 
 /** World-coordinate center and zoom with MapView-style pitch and bearing. */
 export type CustomProjectionViewState = {
-  /** Center in fromCrs world coordinates. Navigation fixes its Z component at zero. */
+  /** Center in WGS84 longitude/latitude coordinates. Navigation fixes its Z component at zero. */
   center: [number, number, number];
   /** Zoom level; one increment doubles the scale. */
   zoom: number;
@@ -29,19 +31,12 @@ export type CustomProjectionViewState = {
 } & CommonViewState;
 /** Configuration for a custom planar projection. */
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
-  Pick<
-    CustomProjectionViewportOptions,
-    | 'projection'
-    | 'fromBounds'
-    | 'toBounds'
-    | 'fromCrs'
-    | 'toCrs'
-    | 'resolution'
-    | 'getDistanceScale'
-    | 'orthographic'
-  >;
+  Pick<CustomProjectionViewportOptions, 'resolution' | 'orthographic'> & {
+    /** Target CRS identifier or PROJ string to resolve through math.gl. */
+    toCrs: string;
+  };
 
-/** A planar view for pluggable input/output coordinate conversion.
+/** A planar WGS84 view with a target CRS resolved by math.gl.
  * @experimental Exported as `_CustomProjectionView`; this API may change.
  */
 export default class CustomProjectionView extends View<
@@ -49,8 +44,21 @@ export default class CustomProjectionView extends View<
   CustomProjectionViewProps
 > {
   static displayName = 'CustomProjectionView';
+  // Private slots can hold async state even though View seals its public properties.
+  #crs?: CRSDescriptor;
+  #initialization?: Promise<void>;
   constructor(props: CustomProjectionViewProps) {
     super(props);
+  }
+  /** Resolve the target CRS once for this view before creating its synchronous viewport. */
+  initialize(): Promise<void> {
+    this.#initialization ||= projectionEngine.getCRS(this.props.toCrs).then(crs => {
+      if (crs.coordinateFrame !== 'projected') {
+        throw new Error('CustomProjectionView requires a projected CRS');
+      }
+      this.#crs = crs;
+    });
+    return this.#initialization;
   }
   getViewportType() {
     return CustomProjectionViewport;
@@ -61,11 +69,13 @@ export default class CustomProjectionView extends View<
   makeViewport(options: {width: number; height: number; viewState: CustomProjectionViewState}) {
     const viewState = this.filterViewState(options.viewState);
     const dimensions = this.getDimensions(options);
-    if (!dimensions.width || !dimensions.height) return null;
+    if (!dimensions.width || !dimensions.height || !this.#crs) return null;
+    const {toCrs, ...viewportProps} = this.props;
     return new CustomProjectionViewport({
       ...viewState,
-      ...this.props,
+      ...viewportProps,
       ...dimensions,
+      crs: this.#crs,
       padding: dimensions.padding
     });
   }

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 import {
   Layer,
-  _CustomProjectionViewport as CustomProjectionViewport,
   LayerExtension,
   AttributeManager,
   COORDINATE_SYSTEM,
@@ -360,13 +360,12 @@ test('Layer#projectPosition overrides projection props without mutating them', (
   const coordinateOrigin: [number, number, number] = [100, 200, 300];
   const layer = new SubLayer({modelMatrix, coordinateOrigin});
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
-  const viewport = new CustomProjectionViewport({
-    fromCrs: 'map-meters',
-    projection: {
+  const viewport = createTestViewport({
+    converter: {
       forward: ([x, y, z = 0]) => [x * 2, y * 3, z],
       inverse: ([x, y, z = 0]) => [x / 2, y / 3, z]
     },
-    getDistanceScale: () => [1, 1]
+    distanceScale: () => [1, 1, 1]
   });
   const position = [1, 2, 3];
   expect(layer.projectPosition(position, {viewport, autoOffset: false})).toEqual(

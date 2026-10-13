@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect} from 'vitest';
 
-import {
-  COORDINATE_SYSTEM,
-  _GlobeViewport as GlobeViewport,
-  _CustomProjectionViewport as CustomProjectionViewport
-} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
@@ -67,10 +64,10 @@ test('BitmapLayer#constructor', () => {
 });
 
 test('BitmapLayer#imageCoordinateSystem with preprojection', () => {
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     width: 800,
     height: 600,
-    projection: {
+    converter: {
       forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
       inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
     }

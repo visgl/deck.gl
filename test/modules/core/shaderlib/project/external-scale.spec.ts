@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../../viewports/test-crs';
 import {test, expect} from 'vitest';
-import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
+import {runOnGPU} from './project-glsl-test-utils';
+import {project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {BufferTransform} from '@luma.gl/engine';
 import {WGSLShaderAssembler} from '@luma.gl/shadertools';
@@ -19,12 +21,12 @@ test('WebGPU local meter scale preserves CPU altitude with rectangular bounds, m
 }) => {
   const gpu = await getWebGPUTestDevice();
   if (!gpu) return skip();
-  const viewport = new CustomProjectionViewport({
-    projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    fromCrs: '+units=m',
-    toBounds: [1000, -3000, 2024, 1096],
+  const viewport = createTestViewport({
+    converter: {forward: p => p.slice(), inverse: p => p.slice()},
+
+    bounds: [1000, -3000, 2024, 1096],
     center: [1600, -1000, 0],
-    getDistanceScale: ([x]) => [1000 / x, 1000 / x]
+    distanceScale: ([x]) => [1000 / x, 1000 / x, 1]
   });
   const resources = new ProjectionScaleResources(gpu);
   const output = gpu.createBuffer({byteLength: 16, usage: Buffer.STORAGE | Buffer.COPY_SRC});
@@ -75,10 +77,10 @@ for (const slope of [-1, Infinity, NaN]) {
   }) => {
     const gpu = await getWebGPUTestDevice();
     if (!gpu) return skip();
-    const viewport = new CustomProjectionViewport({
-      projection: {forward: p => p.slice(), inverse: p => p.slice()},
-      fromCrs: '+units=m',
-      toBounds: [0, 0, 512, 512]
+    const viewport = createTestViewport({
+      converter: {forward: p => p.slice(), inverse: p => p.slice()},
+
+      bounds: [0, 0, 512, 512]
     });
     const records = gpu.createBuffer({
       data: new Float32Array([1, slope, 0, 3]),
@@ -152,7 +154,7 @@ gpuTest.each(
       data: [4, 0, 0, 3],
       size: 1,
       position: [256, 256],
-      expected: [40, 40, 30, 40]
+      expected: [40, 40, 30, 30]
     },
     {
       name: 'identity fallback',
@@ -166,14 +168,14 @@ gpuTest.each(
       data: [4, 0.125, -0.0625, 3],
       size: 1,
       position: [272, 240],
-      expected: [70, 70, 52.5, 70]
+      expected: [70, 70, 52.5, 52.5]
     },
     {
       name: 'edge extrapolation',
       data: [4, 0.0078125, 0, 3],
       size: 1,
       position: [512, 256],
-      expected: [60, 60, 45, 60]
+      expected: [60, 60, 45, 45]
     },
     {
       name: 'invalid region',
@@ -194,21 +196,21 @@ gpuTest.each(
       data: [1, 0, 0, 3, 2, 0, 0, 3, 4, 0, 0, 3, 8, 0, 0, 3],
       size: 2,
       position: [256, 256],
-      expected: [80, 80, 30, 80]
+      expected: [80, 80, 30, 30]
     },
     {
       name: 'negative correction uses positive center',
       data: [1, -1, 0, 3],
       size: 1,
       position: [272, 256],
-      expected: [10, 10, 30, 10]
+      expected: [10, 10, 30, 30]
     },
     {
       name: 'nonfinite correction uses positive center',
       data: [1, Infinity, 0, 3],
       size: 1,
       position: [272, 256],
-      expected: [10, 10, 30, 10]
+      expected: [10, 10, 30, 30]
     }
   ].flatMap(testCase =>
     [false, true].flatMap(relative =>
@@ -221,10 +223,10 @@ gpuTest.each(
     const position = rectangular
       ? [1000 + samplePosition[0] * 2, -3000 + samplePosition[1] * 8]
       : samplePosition;
-    const viewport = new CustomProjectionViewport({
-      projection: {forward: p => p.slice(), inverse: p => p.slice()},
-      toBounds: rectangular ? [1000, -3000, 2024, 1096] : [0, 0, 512, 512],
-      fromCrs: '+units=m',
+    const viewport = createTestViewport({
+      converter: {forward: p => p.slice(), inverse: p => p.slice()},
+      bounds: rectangular ? [1000, -3000, 2024, 1096] : [0, 0, 512, 512],
+
       center: [300, 280, 0]
     });
     const texture = device.createTexture({
@@ -234,19 +236,20 @@ gpuTest.each(
       data: new Uint32Array(new Float32Array(data).buffer)
     });
     const output = device.createBuffer({byteLength: 32});
-    const unitOutput = device.createBuffer({byteLength: 12});
+    const unitOutput = device.createBuffer({byteLength: 16});
     const transform = new BufferTransform(device, {
       vs: `#version 300 es
       out vec4 result;
-      out vec3 unitsResult;
+      out vec4 unitsResult;
       void main() {
         geometry.worldPosition = vec3(${position[0]}.0, ${position[1]}.0, 0.0);
         ${relative ? 'geometry.position = vec4(geometry.worldPosition * project.commonUnitsPerWorldUnit - project.commonOrigin, 1.0);' : ''}
         result = vec4(project_size(vec2(10.0)), project_size(10.0), project_size_to_pixel(10.0));
         // Position projection must sample its own XY, not stale geometry state.
+        float verticalSize = project_size(vec3(10.0)).z;
         geometry.position = vec4(0.0, 0.0, 0.0, 1.0);
         float altitude = project_position(vec3(${position[0]}.0, ${position[1]}.0, 10.0), vec3(0.0, 0.0, 2.0)).z;
-        unitsResult = vec3(project_size_to_pixel(10.0, UNIT_COMMON), project_size_to_pixel(10.0, UNIT_PIXELS), altitude);
+        unitsResult = vec4(project_size_to_pixel(10.0, UNIT_COMMON), project_size_to_pixel(10.0, UNIT_PIXELS), altitude, verticalSize);
       }`,
       modules: [project],
       defines: {USE_EXTERNAL_PROJECTION: true},
@@ -264,6 +267,7 @@ gpuTest.each(
         expect(value / normalizationScale).toBeCloseTo(expected[i], 4)
       );
       const units = new Float32Array((await unitOutput.readAsync()).buffer);
+      expect(units[3] / normalizationScale).toBeCloseTo(expected[2], 4);
       expect(Array.from(units.slice(0, 2))).toEqual([10, 10]);
       expect(units[2] / normalizationScale).toBeCloseTo(12, 4);
     } finally {
@@ -274,3 +278,32 @@ gpuTest.each(
     }
   }
 );
+
+gpuTest('scalar size and pixel size use the supplied Jacobian scalar fallback', async () => {
+  const viewport = createTestViewport({distanceScale: () => [0.25, 1, 0.25]});
+  const sizeScale = device.createTexture({
+    width: 1,
+    height: 1,
+    format: 'rgba32uint',
+    data: new Uint32Array(4)
+  });
+  try {
+    const result = await runOnGPU({
+      vs: `#version 300 es
+        out vec3 result;
+        void main() {
+          result = vec3(project_size(1.0), project_size_to_pixel(1.0), project_size(vec3(1.0)).z);
+        }`,
+      modules: [project],
+      defines: {USE_EXTERNAL_PROJECTION: true},
+      vertexCount: 1,
+      varying: 'result',
+      shaderInputProps: {project: {viewport, sizeScale}, test: {}}
+    });
+    [4, 4, 4].forEach((value, axis) =>
+      expect(result[axis] / normalizationScale).toBeCloseTo(value, 5)
+    );
+  } finally {
+    sizeScale.destroy();
+  }
+});

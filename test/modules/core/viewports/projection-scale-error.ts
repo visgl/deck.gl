@@ -3,13 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import type {CustomProjectionViewportOptions} from '@deck.gl/core';
+import type {CRSDescriptor} from '@math.gl/projection/types';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
 
-type ProjectionOptions = Required<
-  Pick<CustomProjectionViewportOptions, 'projection' | 'fromBounds' | 'toBounds'>
->;
+type ProjectionOptions = {
+  crs: CRSDescriptor;
+  fromBounds: [number, number, number, number];
+};
 
 type RegionEstimate = {
   /** Percent relative to the directly evaluated scalar XY scale. */
@@ -23,7 +24,7 @@ type RegionEstimate = {
 /** Estimate (not prove) nearest-record sizing error over geographic input bounds.
  * Samples both input and common-space grids, plus both one-sided limits at every
  * internal texel boundary. Invalid scale records are included, not filtered out.
- * The reference is sqrt(abs(det(J))), not anisotropic projection error.
+ * The reference uses the area of independent Earth-fixed displacements.
  */
 export function estimateProjectionScaleError(
   options: ProjectionOptions,
@@ -33,7 +34,11 @@ export function estimateProjectionScaleError(
     getReferenceScale
   }: {divisions?: number; getReferenceScale?: (input: number[]) => number} = {}
 ): {center: RegionEstimate; whole: RegionEstimate; singularPositions: number} {
-  const {projection, fromBounds, toBounds} = options;
+  const {crs, fromBounds} = options;
+  const projection = {forward: crs.converter.WGS84.from, inverse: crs.converter.WGS84.to};
+  const toBounds = [...crs.bounds[0], ...crs.bounds[1]];
+  const {semiMajorAxis, semiMinorAxis} = crs.ellipsoid;
+  const ellipsoid = new Ellipsoid(semiMajorAxis, semiMajorAxis, semiMinorAxis);
   const viewport = new CustomProjectionViewport(options);
   const data = viewport.getSizeScaleData();
   const size = Math.sqrt(data.length / 4);
@@ -79,31 +84,19 @@ export function estimateProjectionScaleError(
     // Longitude is singular at a geographic pole. Callers can supply an analytic
     // limit where one exists; otherwise report these samples separately.
     if (Math.abs(input[1]) >= 90) return NaN;
-    const step = 0.00001;
-    const dx = input[0] > (fromBounds[0] + fromBounds[2]) / 2 ? -step : step;
-    const dy = input[1] > (fromBounds[1] + fromBounds[3]) / 2 ? -step : step;
-    const origin = projection.forward(input.slice());
-    const east = projection.forward([input[0] + dx, input[1]]);
-    const north = projection.forward([input[0], input[1] + dy]);
-    // Independent ground reference: tiny WGS84 surface displacements, without
-    // reusing the production estimator's meters-per-degree formula.
-    const groundOrigin = Ellipsoid.WGS84.cartographicToCartesian([input[0], input[1], 0]);
-    const groundEast = new Vector3(
-      Ellipsoid.WGS84.cartographicToCartesian([input[0] + dx, input[1], 0])
-    ).subtract(groundOrigin);
-    const groundNorth = new Vector3(
-      Ellipsoid.WGS84.cartographicToCartesian([input[0], input[1] + dy, 0])
-    ).subtract(groundOrigin);
-    const groundArea = groundEast.cross(groundNorth).len();
-    return (
-      normalization *
-      Math.sqrt(
-        Math.abs(
-          (east[0] - origin[0]) * (north[1] - origin[1]) -
-            (east[1] - origin[1]) * (north[0] - origin[0])
-        ) / groundArea
-      )
-    );
+    const origin = projection.forward(input);
+    const delta = 1;
+    const ground = ellipsoid.cartographicToCartesian([...input.slice(0, 2), 0]);
+    const displacements = [0, 1].map(axis => {
+      const shifted = origin.slice();
+      shifted[axis] += delta;
+      const coordinate = projection.inverse(shifted);
+      return new Vector3(
+        ellipsoid.cartographicToCartesian([...coordinate.slice(0, 2), 0])
+      ).subtract(ground);
+    });
+    // The surface area of the two displacement vectors retains their angle.
+    return 1 / Math.sqrt(displacements[0].cross(displacements[1]).len());
   }
 
   function sample(x: number, y: number, column: number, row: number): number {
