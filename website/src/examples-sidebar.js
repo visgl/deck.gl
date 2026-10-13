@@ -28,6 +28,7 @@ const sidebars = {
         'geojson-layer-polygons',
         'geojson-layer-paths',
         'global-grids',
+        'grid-layer',
         'heatmap-layer',
         'hexagon-layer',
         'icon-layer',
@@ -37,6 +38,7 @@ const sidebars = {
         'scenegraph-layer',
         'screen-grid-layer',
         'shared-tile-2d-layer',
+        // 'simple-mesh-layer',
         'terrain-layer',
         'text-layer',
         'text-layer-clipping',
@@ -65,6 +67,7 @@ const sidebars = {
         'collision-filter-extension',
         'data-filter-extension',
         'mask-extension',
+        'path-style-extension',
         'terrain-extension'
       ]
     },
@@ -76,6 +79,11 @@ const sidebars = {
           type: 'link',
           label: 'Playground',
           href: `/playground`
+        },
+        {
+          type: 'link',
+          label: 'pydeck',
+          href: `/pydeck`
         }
       ]
     }

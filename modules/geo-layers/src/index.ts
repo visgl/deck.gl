@@ -61,3 +61,6 @@ export {Tile2DHeader as _Tile2DHeader} from './tileset-2d/index';
 export {SharedTileset2D as _SharedTileset2D} from './shared-tileset-2d/index';
 export {SharedTile2DHeader as _SharedTile2DHeader} from './shared-tileset-2d/index';
 export {sharedTile2DDeckAdapter} from './shared-tile-2d-layer/index';
+
+export {SharedMVTLayer as _SharedMVTLayer} from './shared-mvt-layer/shared-mvt-layer';
+export type {SharedMVTLayerProps, SharedMVTData} from './shared-mvt-layer/shared-mvt-layer';

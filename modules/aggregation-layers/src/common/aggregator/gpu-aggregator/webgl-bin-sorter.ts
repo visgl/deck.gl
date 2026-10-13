@@ -248,7 +248,6 @@ void main() {
   const model = new Model(device, {
     bufferLayout: props.bufferLayout,
     modules: [...(props.modules || []), binSorterUniforms],
-    // @ts-expect-error TODO fix luma type
     defines: {...props.defines, NON_INSTANCED_MODEL: 1, NUM_CHANNELS: props.channelCount},
     isInstanced: false,
     vs,

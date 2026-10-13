@@ -23,11 +23,13 @@ import Component from '../lifecycle/component';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
+import {transformMat4} from '@math.gl/core/vec3';
 
 import {load} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
+import {PROJECTION_MODE} from './constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
@@ -36,7 +38,7 @@ import type {NumericArray} from '../types/types';
 import type {DefaultProps} from '../lifecycle/prop-types';
 import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
-import type {BinaryAttribute} from './attribute/attribute';
+import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
 import {PickingProps} from '@luma.gl/shadertools';
 
@@ -256,12 +258,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return viewport.unproject(xy);
   }
 
-  /** Projects a point with current view state from the current layer's coordinate system to the world space */
+  /** Projects a point from the layer's coordinate system to common space, with optional parameter overrides. */
   projectPosition(
     xyz: number[],
     params?: {
       /** The viewport to use */
       viewport?: Viewport;
+      /** The model matrix to apply. Defaults to the layer prop; null disables it. */
+      modelMatrix?: NumericArray | null;
+      /** The reference coordinate system. Defaults to the layer prop. */
+      coordinateSystem?: CoordinateSystem;
+      /** The reference coordinate origin. Defaults to the layer prop. */
+      coordinateOrigin?: [number, number, number];
       /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
       fromCoordinateSystem?: CoordinateSystem;
       /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
@@ -367,9 +375,23 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.props.loadOptions;
   }
 
+  /** Opt an attribute into viewport projection and automatic position invalidation.
+   * A layer must retain the same preprojection capability throughout its lifetime.
+   */
+  usePositionTransforms(): Pick<AttributeOptions, 'transformSource' | 'transform'> {
+    return {
+      transformSource: 'projection',
+      transform:
+        this.context.viewport.preproject && this.props.coordinateSystem !== 'cartesian'
+          ? transformPosition
+          : null
+    };
+  }
+
   use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
+      this.context?.viewport?.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL ||
       coordinateSystem === 'default' ||
       coordinateSystem === 'lnglat' ||
       coordinateSystem === 'cartesian'
@@ -467,6 +489,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    // Preprojection capability is stable for the lifetime of a layer instance.
+    shaders = mergeShaders(
+      {
+        defines: {
+          USE_EXTERNAL_PROJECTION:
+            this.context.viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+        }
+      },
+      shaders
+    );
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
       modules: this.context.defaultShaderModules
@@ -602,6 +634,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     // Call subclass lifecycle method
     return (
       this.internalState.needsUpdate ||
+      this.internalState.changeFlags.projectionChanged ||
       this.hasUniformTransition() ||
       this.shouldUpdateState(this._getUpdateParams())
     );
@@ -623,7 +656,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this.internalState.viewport = viewport;
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
-      this.setChangeFlags({viewportChanged: true});
+      this.setChangeFlags({
+        viewportChanged: true,
+        projectionChanged:
+          (oldViewport?.projectionSignature ?? null) !== (viewport.projectionSignature ?? null)
+      });
 
       if (this.isComposite) {
         if (this.needsUpdate()) {
@@ -766,6 +803,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Apply changed attributes to model */
+  // eslint-disable-next-line max-statements
   protected _setModelAttributes(
     model: Model,
     changedAttributes: {
@@ -777,12 +815,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
+    const attributeManager = this.getAttributeManager();
+    if (attributeManager?.hasBufferGroups()) {
+      this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
+      return;
+    }
+
     if (bufferLayoutChanged) {
       // AttributeManager is always defined when this method is called
-      const attributeManager = this.getAttributeManager()!;
-      model.setBufferLayout(attributeManager.getBufferLayouts(model));
+      const manager = this.getAttributeManager()!;
+      model.setBufferLayout(manager.getBufferLayouts(model));
       // All attributes must be reset after buffer layout change
-      changedAttributes = attributeManager.getAttributes();
+      changedAttributes = manager.getAttributes();
     }
 
     // @ts-ignore luma.gl type issue
@@ -809,6 +853,52 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
     }
     // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
+  }
+
+  /** Apply explicit WebGPU buffer groups while preserving legacy bindings for fallbacks. */
+  private _setGroupedModelAttributes(
+    model: Model,
+    attributeManager: AttributeManager,
+    changedAttributes: {[id: string]: Attribute}
+  ) {
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const bindings = attributeManager.getBufferGroupBindings(
+      changedAttributes,
+      model,
+      excludeAttributes
+    );
+
+    // Runtime state can make a declared group temporarily ineligible, e.g. during transitions.
+    // Refreshing the layout here lets the group safely fall back to standalone bindings.
+    model.setBufferLayout(bindings.bufferLayouts);
+
+    const attributeBuffers: Record<string, Buffer> = {...bindings.buffers};
+    const constantAttributes: Record<string, TypedArray> = {};
+    const attributes = attributeManager.getAttributes();
+
+    for (const name in attributes) {
+      if (excludeAttributes[name] || bindings.groupedAttributeIds.has(name)) {
+        continue;
+      }
+      const attribute = attributes[name];
+      const values = attribute.getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (attribute.settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
+          constantAttributes[attributeName] = value;
+        }
+      }
+    }
+
     model.setAttributes(attributeBuffers);
     model.setConstantAttributes(constantAttributes);
   }
@@ -1019,6 +1109,25 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       const updateParams = this._getUpdateParams();
       const oldModels = this.getModels();
+      const coordinateSystemChanged =
+        updateParams.props.coordinateSystem !== updateParams.oldProps.coordinateSystem;
+      if (
+        updateParams.changeFlags.projectionChanged ||
+        (context.viewport.preproject &&
+          (coordinateSystemChanged ||
+            (this.usePositionTransforms().transform &&
+              updateParams.props.modelMatrix !== updateParams.oldProps.modelMatrix)))
+      ) {
+        const attributeManager = this.getAttributeManager();
+        for (const [name, attribute] of Object.entries(attributeManager?.attributes || {})) {
+          if (attribute.settings.transformSource === 'projection') {
+            if (coordinateSystemChanged && 'transform' in attribute.settings) {
+              attribute.settings.transform = this.usePositionTransforms().transform;
+            }
+            attributeManager!.invalidate(name);
+          }
+        }
+      }
 
       // Safely call subclass lifecycle methods
       if (context.device) {
@@ -1192,7 +1301,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     );
     changeFlags.propsOrDataChanged = propsOrDataChanged;
     changeFlags.somethingChanged =
-      propsOrDataChanged || changeFlags.viewportChanged || changeFlags.stateChanged;
+      propsOrDataChanged ||
+      changeFlags.viewportChanged ||
+      changeFlags.projectionChanged ||
+      changeFlags.stateChanged;
   }
   /* eslint-enable complexity */
 
@@ -1204,6 +1316,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       propsChanged: false,
       updateTriggersChanged: false,
       viewportChanged: false,
+      projectionChanged: false,
       stateChanged: false,
       extensionsChanged: false,
       propsOrDataChanged: false,
@@ -1464,4 +1577,14 @@ function equalAttachmentFormats(left?: (string | null)[], right?: (string | null
     }
   }
   return true;
+}
+
+// Resolve the current layer at invocation: layer instances are replaced while attributes survive.
+function transformPosition(this: Layer, input: number[]): [number, number, number] {
+  const position: [number, number, number] = [input[0], input[1], input[2] ?? 0];
+  if (this.props.modelMatrix) {
+    // Transform the local copy in place without allocating a matrix for each vertex.
+    transformMat4(position, position, this.props.modelMatrix);
+  }
+  return this.context.viewport.preproject!(position);
 }

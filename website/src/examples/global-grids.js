@@ -14,6 +14,8 @@ const GRID_SYSTEMS = ['a5', 'geohash', 'h3', 's2', 'quadkey'];
 class GlobalGridsDemo extends React.Component {
   static title = 'Global Grid Layers';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/global-grids`;
 
   static parameters = {
@@ -34,15 +36,26 @@ class GlobalGridsDemo extends React.Component {
   static renderInfo() {
     return (
       <div>
-        <p><a href="https://neo.gsfc.nasa.gov/view.php?datasetId=MCD12C1_T1">NASA Land Cover data</a>, aggregated using <a href="https://github.com/manaakiwhenua/raster2dggs">raster2dggs</a> to various global grid systems.</p>
+        <p>
+          <a href="https://neo.gsfc.nasa.gov/view.php?datasetId=MCD12C1_T1">NASA Land Cover data</a>
+          , aggregated using <a href="https://github.com/manaakiwhenua/raster2dggs">raster2dggs</a>{' '}
+          to various global grid systems.
+        </p>
       </div>
     );
   }
 
   render() {
     const {params} = this.props;
-    return <App {...this.props} gridSystem={params.gridSystem.value} landcoverLegend={params.landcoverLegend.value} />;
+    return (
+      <App
+        key={this.props.device?.type}
+        {...this.props}
+        gridSystem={params.gridSystem.value}
+        landcoverLegend={params.landcoverLegend.value}
+      />
+    );
   }
 }
 
-export default makeExample(GlobalGridsDemo); 
+export default makeExample(GlobalGridsDemo);

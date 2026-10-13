@@ -1,6 +1,62 @@
+---
+description: "Breaking changes, removals and deprecations for each deck.gl release, with migration notes."
+---
+
 # Upgrade Guide
 
+## Upgrading to v10
+
+### Viewport distance scales
+
+For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+
+- `unitsPerDegree` and `unitsPerDegree2` are renamed to `unitsPerWorldUnit` and `unitsPerWorldUnit2`.
+- `degreesPerUnit` is removed. Divide by the corresponding component of `unitsPerWorldUnit` instead.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
+
+### GlobeView `position`
+
+`GlobeView` applies `viewState.position` as meter offsets to the east, north and up at every zoom, as `MapView` does. Up to zoom 12 it used to add them along the globe's axes, so the camera target moved by an amount that depended on the location, and the view jumped at zoom 12. Applications that set `position` on a `GlobeView` now get the target where `position` says.
+
 ## Upgrading to v9.4
+
+### pydeck lighting
+
+The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
+`lightSettings` layer prop, which deck.gl has not supported since v7. Use deck-level
+lighting effects instead:
+
+```python
+import pydeck as pdk
+
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+pdk.Deck(layers=[layer], effects=[lighting])
+```
+
+### Controller touch gestures
+
+The `touchRotate` controller option is deprecated. Historically, `touchRotate: true` enabled two touchscreen gestures: a two-finger twist changed bearing, and a two-finger vertical drag changed pitch.
+
+`touchRotate: true` is now treated as an alias for `multiTouchDrag: 'rotate'`. This preserves the existing twist and vertical-drag behaviors, and also allows a horizontal two-finger drag to change bearing. If both options are supplied, `multiTouchDrag` takes precedence. Trackpad gestures still require the separate `trackpadGesture: true` opt-in.
+
+Use `multiTouchDrag: 'rotate'` instead:
+
+```ts
+// Before
+controller: {
+  touchRotate: true
+}
+
+// After
+controller: {
+  multiTouchDrag: 'rotate'
+}
+```
 
 #### `pickMultipleObjects()` pick depth limits
 
@@ -14,6 +70,23 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 
 - In such cases, use the new picking shader helper functions to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL.
 - However, if the logical picking id is different from the rendered instance id, layers can register and populate an explicit `rowIndexes` attribute.
+
+### FillStyleExtension
+
+Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
+
+### PathStyleExtension
+
+`highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
+
+```js
+// Before
+new PathStyleExtension({highPrecisionDash: true});
+// After
+new PathStyleExtension({dashMode: 'path'});
+```
+
+See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
 
 ## Upgrading to v9.3
 
@@ -51,6 +124,53 @@ new Deck({
 - The experimental `_renderLayersInGroups` prop has been removed from `MapboxOverlay`. In interleaved mode, layers are now always rendered in groups by `beforeId` or `slot`, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default. If you were using `_renderLayersInGroups: true`, simply remove the prop.
 - Note: extensions that require shared rendering context (MaskExtension, CollisionFilterExtension) only work between layers in the same group. Ensure affected layers share the same `beforeId` or `slot` value.
 
+### @deck.gl/arcgis
+
+`DeckRenderer` now integrates with ArcGIS `SceneView` through `RenderNode` instead of `externalRenderers`.
+
+If your app uses 3D ArcGIS integration, migrate as follows:
+
+- Load `esri/views/3d/webgl/RenderNode` instead of `esri/views/3d/externalRenderers`.
+- If you pass a custom `esri` object to `loadArcGISModules`, make sure it exposes `esri.views['3d'].webgl.RenderNode`.
+- Remove `externalRenderers.add(sceneView, renderer)`. `DeckRenderer` now self-registers as a `RenderNode`.
+- `SceneView` integration still requires `viewingMode: 'local'`.
+- If you are loading ArcGIS via `esri-loader`, consider pinning the ArcGIS JS API script with `loadScriptOptions` (for example, `{url: 'https://js.arcgis.com/4.32/'}`) to avoid unintentional version drift.
+
+```js
+// Before
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/externalRenderers'
+]).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView, externalRenderers] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  const renderer = new DeckRenderer(sceneView, {layers});
+  externalRenderers.add(sceneView, renderer);
+});
+
+// After
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/webgl/RenderNode'
+], {
+  url: 'https://js.arcgis.com/4.32/'
+}).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  new DeckRenderer(sceneView, {layers});
+});
+```
+
 ### Widgets
 
 The following widgets have breaking changes in v9.3:
@@ -62,7 +182,6 @@ The following widgets have breaking changes in v9.3:
 - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) - no longer experimental (removed underscore in export)
 - [ThemeWidget](./api-reference/widgets/theme-widget.md) - no longer experimental (removed underscore in export)
 - [LoadingWidget](./api-reference/widgets/loading-widget.md) - no longer experimental (removed underscore in export)
-
 
 ## Upgrading to v9.1
 

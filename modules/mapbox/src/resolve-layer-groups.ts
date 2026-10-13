@@ -79,6 +79,10 @@ export function resolveLayerGroups(map?: Map, oldLayers?: LayersList, newLayers?
     const expectedGroupIndex =
       beforeId === UNDEFINED_BEFORE_ID ? mapLayers.length : mapLayers.indexOf(beforeId);
 
+    if (expectedGroupIndex === -1) {
+      continue;
+    }
+
     const currentGropupIndex = mapLayers.indexOf(groupId);
     if (currentGropupIndex !== expectedGroupIndex - 1) {
       const moveBeforeId = beforeId === UNDEFINED_BEFORE_ID ? undefined : beforeId;

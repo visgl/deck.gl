@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  color as colorModule,
   project32,
   picking,
   CoordinateSystem,
@@ -23,6 +24,7 @@ import {lngLatToWorld} from '@math.gl/web-mercator';
 import createMesh from './create-mesh';
 
 import {bitmapUniforms, BitmapProps} from './bitmap-layer-uniforms';
+import source from './bitmap-layer.wgsl';
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
@@ -129,7 +131,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, bitmapUniforms]});
+    return super.getShaders({
+      vs,
+      fs,
+      source,
+      modules: [colorModule, project32, picking, bitmapUniforms]
+    });
   }
 
   initializeState() {
@@ -148,7 +155,22 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
-        update: attribute => (attribute.value = this.state.mesh.positions),
+        ...this.usePositionTransforms(),
+        update: function (this: BitmapLayer, attribute) {
+          const {positions} = this.state.mesh;
+          const {transform} = attribute.settings;
+          if (!transform) {
+            attribute.value = positions;
+            return;
+          }
+          // Custom updaters do not run Attribute's accessor transform. Keep the source
+          // mesh untouched so projection/modelMatrix changes always start from input space.
+          const projected = new Float64Array(positions.length);
+          for (let i = 0; i < positions.length; i += 3) {
+            projected.set(transform.call(this, positions.subarray(i, i + 3)), i);
+          }
+          attribute.value = projected;
+        },
         noAlloc
       },
       texCoords: {
@@ -169,7 +191,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       attributeManager.invalidateAll();
     }
 
-    if (props.bounds !== oldProps.bounds) {
+    if (props.bounds !== oldProps.bounds || changeFlags.projectionChanged) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
       this.state.model!.setVertexCount(mesh.vertexCount);
@@ -256,10 +278,18 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
        |       |
       0,1 --- 1,1
     */
+    const bufferLayout =
+      this.context.device.type === 'webgpu'
+        ? this.getAttributeManager()!
+            .getBufferLayouts({isInstanced: false})
+            // WebGPU index buffers are bound separately from vertex buffer layouts.
+            .filter(layout => layout.name !== 'indices')
+        : this.getAttributeManager()!.getBufferLayouts();
+
     return new Model(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout,
       topology: 'triangle-list',
       isInstanced: false
     });
@@ -292,7 +322,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
   _getCoordinateUniforms() {
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== 'default') {
+    // Preprojection has already converted the mesh positions to common space.
+    // Geographic/Mercator fragment conversions cannot use these coordinates.
+    if (!this.context.viewport.preproject && imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
       if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');

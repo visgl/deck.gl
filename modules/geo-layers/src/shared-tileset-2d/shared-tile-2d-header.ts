@@ -4,11 +4,10 @@
 
 /* eslint-env browser */
 import {RequestScheduler} from '@loaders.gl/loader-utils';
-
-import type {TileBoundingBox, TileIndex, TileLoadProps} from '../tileset-2d/types';
+import type {TileBoundingBox, TileIndex, TileLoadProps} from './types';
 
 /** Parameters used by {@link SharedTile2DHeader.loadData}. */
-export type SharedTile2DLoadDataProps<DataT = any> = {
+export type Tile2DLoadDataProps<DataT = any> = {
   /** Shared request scheduler for throttling tile fetches. */
   requestScheduler: RequestScheduler;
   /** Application-provided tile data loader. */
@@ -36,15 +35,22 @@ export class SharedTile2DHeader<DataT = any> {
   zoom!: number;
   /** Optional application data associated with the tile. */
   userData?: Record<string, any>;
-  /** Bounds represented as `[[minX, minY], [maxX, maxY]]`. */
+  /** Bounds represented as `[[minX, minY], [maxX, maxY]]` for loaders.gl compatibility. */
   boundingBox!: [min: number[], max: number[]];
 
+  /** Abort controller for the current request, if one exists. */
   private _abortController: AbortController | null;
+  /** Promise tracking the in-flight tile load, if any. */
   private _loader: Promise<void> | undefined;
+  /** Monotonic request id used to ignore stale responses. */
   private _loaderId: number;
+  /** Indicates whether the last request completed successfully. */
   private _isLoaded: boolean;
+  /** Indicates whether the current request was cancelled. */
   private _isCancelled: boolean;
+  /** Indicates whether the tile should be refreshed. */
   private _needsReload: boolean;
+  /** Structured bounds assigned when the tile is created. */
   private _bbox!: TileBoundingBox;
 
   /** Creates a tile header for a specific tile index. */
@@ -85,7 +91,7 @@ export class SharedTile2DHeader<DataT = any> {
     }
   }
 
-  /** Resolves to loaded content while a request is in flight. */
+  /** Resolves to loaded content while a request is in flight, otherwise returns the cached content. */
   get data(): Promise<DataT | null> | DataT | null {
     const loader = this._loader;
     if (!this._isCancelled && loader !== undefined) {
@@ -115,12 +121,13 @@ export class SharedTile2DHeader<DataT = any> {
     return Number.isFinite(result) ? result : 0;
   }
 
+  /** Internal request pipeline used by {@link loadData}. */
   private async _loadData({
     getData,
     requestScheduler,
     onLoad,
     onError
-  }: SharedTile2DLoadDataProps<DataT>): Promise<void> {
+  }: Tile2DLoadDataProps<DataT>): Promise<void> {
     const completeLoad = (tileData: DataT | null, error: unknown, loaderId: number): void => {
       if (loaderId !== this._loaderId) {
         return;
@@ -174,7 +181,7 @@ export class SharedTile2DHeader<DataT = any> {
   }
 
   /** Loads tile data through the shared scheduler. */
-  loadData(opts: SharedTile2DLoadDataProps<DataT>): Promise<void> {
+  loadData(opts: Tile2DLoadDataProps): Promise<void> {
     this._isLoaded = false;
     this._isCancelled = false;
     this._needsReload = false;
@@ -201,3 +208,5 @@ export class SharedTile2DHeader<DataT = any> {
     this._abortController?.abort();
   }
 }
+
+export type SharedTile2DLoadDataProps<DataT = any> = Tile2DLoadDataProps<DataT>;

@@ -2,6 +2,8 @@
 
 `_SharedTileset2D` is the experimental shared tile-content cache used by [`_SharedTile2DLayer`](./shared-tile-2d-layer.md). It owns tile headers, tile payloads, request scheduling, cache eviction, loaders.gl `TileSource` metadata, live stats, and lifecycle subscriptions. Per-viewport selection and visibility are intentionally owned by the layer's internal views instead of the tileset.
 
+An adapter maps a viewport to the tile indices and geographic bounds it covers. The cache itself stays independent of deck.gl views. Use `sharedTile2DDeckAdapter` for standard deck.gl viewports; custom adapters can traverse a different tile scheme or view representation. Shared layers install the standard adapter automatically.
+
 ```ts
 import {
   _SharedTileset2D as SharedTileset2D,
@@ -59,4 +61,4 @@ An external `_SharedTileset2D` can be passed to one or more `_SharedTile2DLayer`
 
 ## Refinement
 
-`SharedRefinementStrategy` supports `'best-available'`, `'no-overlap'`, and `'never'`. Unlike `TileLayer`, `_SharedTileset2D` does not accept a custom refinement callback because one tile header may be selected or visible in one viewport and hidden in another.
+`SharedRefinementStrategy` supports `'best-available'`, `'no-overlap'`, and `'never'`. Custom refinement callbacks run against view-local tile facades so one viewport's visibility changes do not affect another viewport.

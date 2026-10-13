@@ -25,7 +25,7 @@ The goal of `GlobeView` is to provide a generic solution to rendering and naviga
 - Support for `TileLayer` and `MVTLayer` is experimental.
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
-  + `TerrainLayer`
+- Support for `TerrainLayer` and [TerrainExtension](../extensions/terrain-extension.md) is experimental.
 - [MaskExtension](../extensions/mask-extension.md) is not supported in this view.
 
 When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](../geo-layers/great-circle-layer.md).
@@ -76,6 +76,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `minZoom` (number, optional) - min zoom level. Default `0`.
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
+- `position` (number[3], optional) - Viewport center offsets from lng, lat in meters. Default: `[0,0,0]`.
 
 When `bearing` is `0` (the default), north is always kept pointing up and the globe behaves like a traditional desk globe — horizontal drag changes longitude, vertical drag changes latitude, and the polar axis stays fixed. When the user changes the bearing (via shift+drag or right-click drag), the globe enters free rotation mode where bearing evolves naturally to avoid orientation discontinuities near the poles.
 

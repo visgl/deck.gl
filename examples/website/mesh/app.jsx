@@ -64,7 +64,9 @@ const background = [
   ]
 ];
 
-export default function App() {
+/** @param {{device?: import('@luma.gl/core').Device}} props */
+export default function App({device}) {
+  const isWebGPU = device?.type === 'webgpu';
   const layers = [
     new SimpleMeshLayer({
       id: 'mini-coopers',
@@ -88,6 +90,7 @@ export default function App() {
 
   return (
     <DeckGL
+      device={device}
       views={
         new OrbitView({
           near: 0.1,
@@ -97,7 +100,7 @@ export default function App() {
       initialViewState={INITIAL_VIEW_STATE}
       controller={true}
       layers={layers}
-      effects={[lightingEffect]}
+      effects={isWebGPU ? [] : [lightingEffect]}
     />
   );
 }

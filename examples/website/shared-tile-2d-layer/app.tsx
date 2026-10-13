@@ -40,7 +40,7 @@ const INITIAL_VIEW_STATE: {main: MapViewState; minimap: MapViewState} = {
   minimap: {
     longitude: -122.42,
     latitude: 37.78,
-    zoom: 7
+    zoom: 11
   }
 };
 
@@ -94,8 +94,11 @@ function getTooltip({tile}: SharedTile2DLayerPickingInfo<ImageBitmap>) {
 
 export default function App({onTilesLoad}: {onTilesLoad?: (tileCount: number) => void}) {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const tileset = useMemo(
-    () =>
+  const [shared, setShared] = useState(true);
+  const [stats, setStats] = useState({requests: 0, cached: 0});
+  const pool = useMemo(() => {
+    const result = {requests: 0, tilesets: [] as SharedTileset2D<ImageBitmap>[]};
+    const create = () =>
       new SharedTileset2D<ImageBitmap>({
         adapter: sharedTile2DDeckAdapter,
         tileSize: 256,
@@ -103,17 +106,29 @@ export default function App({onTilesLoad}: {onTilesLoad?: (tileCount: number) =>
         maxZoom: 19,
         maxRequests: 20,
         getTileData: async ({index, signal}) => {
+          result.requests++;
           const response = await fetch(getTileUrl(index), {signal});
-          if (!response.ok) {
-            throw new Error(`Tile request failed: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`Tile request failed: ${response.status}`);
           return createImageBitmap(await response.blob());
         }
-      }),
-    []
-  );
+      });
+    result.tilesets = shared ? [create()] : [create(), create()];
+    return result;
+  }, [shared]);
 
-  useEffect(() => () => tileset.finalize(), [tileset]);
+  useEffect(() => {
+    const update = () =>
+      setStats({
+        requests: pool.requests,
+        cached: pool.tilesets.reduce((sum, tileset) => sum + tileset.tiles.length, 0)
+      });
+    update();
+    const timer = setInterval(update, 250);
+    return () => {
+      clearInterval(timer);
+      pool.tilesets.forEach(tileset => tileset.finalize());
+    };
+  }, [pool]);
 
   const onViewStateChange = useCallback(
     ({viewId, viewState: nextViewState}: ViewStateChangeParameters<MapViewState>) => {
@@ -132,36 +147,55 @@ export default function App({onTilesLoad}: {onTilesLoad?: (tileCount: number) =>
     []
   );
 
-  const tileLayer = useMemo(
+  const tileLayers = useMemo(
     () =>
-      new SharedTile2DLayer<ImageBitmap>({
-        id: 'shared-raster-tiles',
-        data: tileset,
-        pickable: true,
-        onViewportLoad: tiles => onTilesLoad?.(tiles.length),
-        renderSubLayers: props => {
-          const [[west, south], [east, north]] = props.tile.boundingBox;
-          const {data, ...otherProps} = props;
-          return new BitmapLayer(otherProps, {
-            data: null,
-            image: data,
-            bounds: [west, south, east, north]
-          });
-        }
-      }),
-    [onTilesLoad, tileset]
+      ['main', 'minimap'].map(
+        (viewId, index) =>
+          new SharedTile2DLayer<ImageBitmap>({
+            id: `raster-${viewId}`,
+            data: pool.tilesets[shared ? 0 : index],
+            pickable: true,
+            onViewportLoad: tiles => onTilesLoad?.(tiles.length),
+            renderSubLayers: props => {
+              const [[west, south], [east, north]] = props.tile.boundingBox;
+              const {data, ...otherProps} = props;
+              return new BitmapLayer(otherProps, {
+                data: null,
+                image: data,
+                bounds: [west, south, east, north]
+              });
+            }
+          })
+      ),
+    [onTilesLoad, pool, shared]
   );
 
   return (
     <DeckGL
-      layers={[tileLayer]}
+      layers={tileLayers}
+      layerFilter={({layer, viewport}) => layer.id === `raster-${viewport.id}`}
       views={[mainView, minimapView]}
       viewState={viewState}
       onViewStateChange={onViewStateChange}
       getTooltip={getTooltip}
     >
       <div style={MINIMAP_FRAME_STYLE} />
-      <div style={LABEL_STYLE}>one shared tileset</div>
+      <div style={{...LABEL_STYLE, pointerEvents: 'auto'}}>
+        <label>
+          <input
+            type="checkbox"
+            checked={shared}
+            onChange={event => setShared(event.target.checked)}
+          />{' '}
+          Share tile cache
+        </label>
+        <div>
+          {stats.requests} requests · {stats.cached} cached tiles
+        </div>
+        <div>
+          {shared ? 'One cache for two consumers' : 'Independent caches'}; counts reset on toggle
+        </div>
+      </div>
       <div style={COPYRIGHT_LICENSE_STYLE}>
         {'© '}
         <a style={LINK_STYLE} href="https://www.openstreetmap.org/copyright" target="blank">

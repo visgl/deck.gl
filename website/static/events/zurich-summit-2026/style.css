@@ -2489,7 +2489,7 @@ a {
 }
 
 .paragraph-1 {
-    padding: 0 40px 60px 0
+    padding: 12px 40px 60px 0
 }
 
 @media (max-width:800px) {
@@ -2577,6 +2577,29 @@ a {
     padding: 90px 80px
 }
 
+@media (max-width:431px) {
+    #agenda {
+        padding: unset
+    }
+    #agenda > h3 {
+        padding: 24px 24px;
+    }
+    #pending-announcement {
+        max-width: 95vw;
+        padding: 24px 0 0 24px;
+    }
+    #pending-announcement .button-gl {
+        width: 75vw;
+    }
+    .card-bg {
+        max-width: 99.5vw;
+    }
+    .title-day {
+        padding-left: 24px;
+    }
+
+}
+
 @media (min-width:1632px) {
     #agenda {
         padding: 120px 100px
@@ -2587,9 +2610,42 @@ a {
     padding: 0 40px 0 0
 }
 
+#agenda .card-logo-cell {
+    padding-left: 0px;
+    flex: 0 0 75%;
+    max-width: 75%
+}
+
+#agenda .card-info {
+    padding-left: 56px;
+    flex: 0 0 16.6666666667%;
+    max-width: 16.6666666667%;
+}
+
+#agenda .card-info > a:link {
+    color: #2e3c43;
+    text-decoration: none;
+}
+
+#agenda .card-info > a:visited {
+    color: #2e3c43;
+    text-decoration: none;
+}
+
+#agenda .card-info > a:hover {
+    text-decoration: none;
+}
+
+#agenda .card-info >  a:active {
+    text-decoration: none;
+}
+
 @media (max-width:800px) {
     #agenda .card-agenda {
         padding: 0 20px 0 0
+    }
+    #agenda .card-info {
+        padding-left: 24px;
     }
 }
 
@@ -2608,13 +2664,30 @@ a {
 #agenda .card-agenda .card-bg {
     background-color: #f4f4f4;
     padding: 30px 50px;
-    min-height: 450px
+    min-height: 500px
+}
+
+#agenda .card-agenda-open {
+    border: 1px solid #e4e4e4;
+    padding: 30px 50px;
+    min-height: 500px
+}
+
+#agenda .card-eod {
+    background-color: #f4f4f4;
+    padding: 30px 50px;
+    min-height: 200px
 }
 
 @media (min-width:1632px) {
     #agenda .card-agenda .card-bg {
         padding: 50px 40px;
         min-height: 500px
+    }
+
+    #agenda .card-eod {
+        padding: 50px 40px;
+        min-height: 200px
     }
 }
 
@@ -2643,7 +2716,30 @@ header {
     background-color: #202020;
 }
 
-.header {
+.dropshadow8 {
+    filter: drop-shadow(0 0 8px #000);
+}
+
+.dropshadow12 {
+    filter: drop-shadow(0 0 12px #000);
+}
+
+.header_container {
+    color: white;
+    width: fit-content;
+    h1 > * {
+        filter: drop-shadow(0 0 12px #000);
+    }
+    h1 > b {
+        filter: drop-shadow(0 0 8px #333);
+    }
+}
+
+.header_container img {
+    filter: drop-shadow(0 0 12px #333);
+}
+
+.header .header_ribbon {
     display: flex;
     flex-direction: column;
     color: #fff;
@@ -2654,11 +2750,22 @@ header {
     height: 100%;
 }
 
-.header .container {
+.header_text {
+    color: #fff;
+    margin-top: 9px;
+}
+
+.header > .container {
+    margin-top: 100px;
     display: flex;
     flex-direction: column;
     align-items: start;
-    filter: drop-shadow(0 0 8px #000);
+    /*filter: drop-shadow(0 0 8px #000);*/
+}
+
+.header_ribbon img {
+    max-width: 32px;
+    max-height: 32px;
 }
 
 .header img {
@@ -2668,40 +2775,46 @@ header {
     margin: 1em 5% 5% 0;
 }
 
-.header_ribbon {
-    display: flex;
-    position: fixed;
-    top: 0px;
-    z-index: 999;
-    height: fit-content;
-    width: 100%;
-    color: white;
-    font-family: UberMove, Helvetica, Arial, sans-serif;
-    height: 3vh;
-    width: 100%;
-    padding: 0.4vh 0.4vh 0.4vh 0.4vh;
-    background-color: rgba(0,0,0, 0.8);
-    align-content: center;
+
+.header_bg_img {
+    object-fit: cover;
+    background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_orig.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
 }
-.header_ribbon img {
-    width: 32px;
-    height: 32px;
+
+@media (max-width:800px) {
+    .header > .container {
+        margin-top: 12px;
+    }
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_800.jpg);
+    }
 }
-.header_ribbon a {
-    color: white;
-    font-weight: normal;
-    cursor: pointer;
-    text-decoration: none !important;
+
+@media (max-width:1200px) {
+    .header > .container {
+        margin-top: 24px;
+    }
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_1200.jpg);
+    }
 }
-.header_text {
-    padding-left: 1vh;
-    height:100%;
-    width: 100%;
-    vertical-align: middle;
-    align-content: center;
-    font-size: 1em;
-    font-weight: 400;
+
+@media (max-width:2400px) {
+    .header > .container {
+        margin-top: 80px;
+    }
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_2400.jpg);
+    }
 }
+
+/*@media (max-width:3134px) {
+    .header_bg_img {
+        background-image: url(https://raw.githubusercontent.com/visgl/deck.gl-data/master/events/zurich-summit-2026/header_bg_orig.jpg);
+    }
+}*/
 
 h1 {
     font-size: 4em;

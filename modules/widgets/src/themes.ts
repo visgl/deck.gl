@@ -10,6 +10,7 @@ export type DeckWidgetTheme = {
   '--widget-margin'?: string;
   // button and button group
   '--button-size'?: string;
+  '--icon-size'?: string;
   '--button-corner-radius'?: string;
   '--button-background'?: string;
   '--button-stroke'?: string;
@@ -42,6 +43,7 @@ export type DeckWidgetTheme = {
 export const LightTheme = {
   '--widget-margin': '12px',
   '--button-size': '28px',
+  '--icon-size': '75%',
   '--button-corner-radius': '8px',
   '--button-background': '#fff',
   '--button-stroke': 'rgba(255, 255, 255, 0.3)',
@@ -71,6 +73,7 @@ export const LightTheme = {
 export const DarkTheme = {
   '--widget-margin': '12px',
   '--button-size': '28px',
+  '--icon-size': '75%',
   '--button-corner-radius': '8px',
   '--button-background': 'rgba(18, 18, 20, 1)',
   '--button-stroke': 'rgba(18, 18, 20, 0.30)',
@@ -100,6 +103,7 @@ export const DarkTheme = {
 export const LightGlassTheme = {
   '--widget-margin': '12px',
   '--button-size': '28px',
+  '--icon-size': '75%',
   '--button-corner-radius': '8px',
   '--button-background': 'rgba(255, 255, 255, 0.6)',
   '--button-stroke': 'rgba(255, 255, 255, 0.3)',
@@ -130,6 +134,7 @@ export const LightGlassTheme = {
 export const DarkGlassTheme = {
   '--widget-margin': '12px',
   '--button-size': '28px',
+  '--icon-size': '75%',
   '--button-corner-radius': '8px',
   '--button-background': 'rgba(18, 18, 20, 0.75)',
   '--button-stroke': 'rgba(18, 18, 20, 0.30)',

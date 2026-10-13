@@ -165,6 +165,10 @@ The widget relies on this value to calculate the position and size of the slider
 If not supplied, falls back to [maxBounds](../core/controller.md#options) of the controller.
 If no bounds definition is found, the scrollbar will always be hidden.
 
+#### contentBoundsPadding (object, optional)
+
+Padding inside the viewport used to display `contentBounds`, in the shape of `{left, right, top, bottom}`. Values use the same pixel, percentage, and CSS-style expression syntax as [`maxBoundsPadding`](../core/controller.md#options). If not supplied, falls back to `maxBoundsPadding` of the target view's controller.
+
 #### orientation (string, optional)
 
 Direction of the scrollbar. `'horizontal'` scrolls the camera along the X axis, and `'vertical'` scrolls the camera along the Y axis.

@@ -48,7 +48,22 @@ function getTooltip({object}) {
   );
 }
 
-export default function App({data = TILESET_URL, distance = 0, opacity = 0.2, globeView = false}) {
+/**
+ * @param {{
+ *   device?: import('@luma.gl/core').Device,
+ *   data?: string,
+ *   distance?: number,
+ *   opacity?: number,
+ *   globeView?: boolean
+ * }} props
+ */
+export default function App({
+  device,
+  data = TILESET_URL,
+  distance = 0,
+  opacity = 0.2,
+  globeView = false
+}) {
   const [credits, setCredits] = useState('');
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
@@ -107,6 +122,7 @@ export default function App({data = TILESET_URL, distance = 0, opacity = 0.2, gl
   return (
     <div>
       <DeckGL
+        device={device}
         key={globeView ? 'globe' : 'map'}
         style={{backgroundColor: '#061714'}}
         views={view}

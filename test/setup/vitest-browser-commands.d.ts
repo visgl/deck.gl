@@ -30,11 +30,6 @@ interface DiffResult {
   error: string | null;
 }
 
-interface BrowserDiagnostic {
-  level: string;
-  text: string;
-}
-
 interface InputEvent {
   type: 'click' | 'dblclick' | 'drag' | 'mousemove' | 'keypress';
   x?: number;
@@ -54,6 +49,14 @@ interface InputEvent {
 declare module 'vitest/browser' {
   interface BrowserCommands {
     /**
+     * Returns the first candidate path containing the requested golden image.
+     */
+    findGoldenImage(options: {
+      goldenImage: string;
+      candidateDirectories: string[];
+    }): Promise<string | null>;
+
+    /**
      * Captures a screenshot and compares it with a golden image.
      * Replaces browserTestDriver_captureAndDiffScreen from @probe.gl/test-utils
      */
@@ -70,16 +73,6 @@ declare module 'vitest/browser' {
      * Replaces browserTestDriver_isHeadless from @probe.gl/test-utils
      */
     isHeadless(): Promise<boolean>;
-
-    /**
-     * Clears buffered browser diagnostics for the current page.
-     */
-    resetBrowserDiagnostics(): Promise<void>;
-
-    /**
-     * Returns buffered browser diagnostics for the current page and clears them.
-     */
-    consumeBrowserDiagnostics(): Promise<BrowserDiagnostic[]>;
   }
 }
 

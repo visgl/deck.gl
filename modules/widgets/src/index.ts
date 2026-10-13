@@ -66,6 +66,7 @@ export type {DeckWidgetTheme} from './themes';
 // Experimental preact components
 export {ButtonGroup as _ButtonGroup, type ButtonGroupProps} from './lib/components/button-group';
 export {IconButton as _IconButton, type IconButtonProps} from './lib/components/icon-button';
+export {Tooltip as _Tooltip, type TooltipProps} from './lib/components/tooltip';
 export {
   DropdownMenu as _DropdownMenu,
   type DropdownMenuProps,

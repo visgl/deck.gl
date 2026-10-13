@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import log from '../utils/log';
-import {Pan, InputDirection, Pinch, Tap} from 'mjolnir.js';
+import {Pan, DoubleClickDrag, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
@@ -75,6 +75,9 @@ export const PROJECTION_MODE = {
    */
   GLOBE: 2,
 
+  /** CPU-preprojected XY in common space; Z uses the viewport's distance scale. */
+  CUSTOM_GEOSPATIAL: 3,
+
   /**
    * (Internal use only) Web Mercator projection at high zoom
    */
@@ -100,12 +103,15 @@ export const EVENT_HANDLERS = {
   panend: 'onDragEnd'
 } as const satisfies {[eventName: string]: string};
 
+// Order matters: recognizeWith/requireFailure resolve by name, so a recognizer
+// must be registered before any later entry can reference it.
 export const RECOGNIZERS = {
-  multipan: [Pan, {threshold: 10, direction: InputDirection.Vertical, pointers: 2}],
-  pinch: [Pinch, {}, null, ['multipan']],
+  multipan: [Pan, {threshold: 10, pointers: 2, trackpad: true}],
+  pinch: [Pinch, {trackpad: true}, null, ['multipan']],
   pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
-  dblclick: [Tap, {event: 'dblclick', taps: 2}],
-  click: [Tap, {event: 'click'}, null, ['dblclick']]
+  dblclick: [Tap, {event: 'dblclick', taps: 2, enable: false}],
+  dblclickdrag: [DoubleClickDrag, {event: 'dblclickdrag', enable: false}, ['dblclick'], null],
+  click: [Tap, {event: 'click'}, ['dblclickdrag'], ['dblclick', 'dblclickdrag']]
 } as const;
 
 export type RecognizerOptions = {

@@ -14,6 +14,8 @@ import {
   S2Layer,
   _SharedTile2DHeader as SharedTile2DHeader,
   _SharedTile2DLayer as SharedTile2DLayer,
+  _SharedMVTLayer as SharedMVTLayer,
+  sharedTile2DDeckAdapter,
   _SharedTileset2D as SharedTileset2D,
   TileLayer,
   TripsLayer,
@@ -30,6 +32,8 @@ test('Top-level imports', () => {
   expect(H3ClusterLayer, 'H3ClusterLayer symbol imported').toBeTruthy();
   expect(TileLayer, 'TileLayer symbol imported').toBeTruthy();
   expect(SharedTile2DLayer, 'SharedTile2DLayer symbol imported').toBeTruthy();
+  expect(SharedMVTLayer, 'SharedMVTLayer symbol imported').toBeTruthy();
+  expect(sharedTile2DDeckAdapter, 'Shared tile adapter exported').toBeTruthy();
   expect(SharedTileset2D, 'SharedTileset2D symbol imported').toBeTruthy();
   expect(SharedTile2DHeader, 'SharedTile2DHeader symbol imported').toBeTruthy();
   expect(WMSLayer, 'WMSLayer symbol imported').toBeTruthy();

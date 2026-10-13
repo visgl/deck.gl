@@ -5,33 +5,35 @@
 import {
   CompositeLayer,
   type CompositeLayerProps,
+  Layer,
+  type LayersList,
+  type LayerProps,
+  type UpdateParameters,
+  type PickingInfo,
+  type GetPickingInfoParams,
   type DefaultProps,
   type FilterContext,
-  type GetPickingInfoParams,
-  type Layer,
-  type LayerProps,
-  type LayersList,
-  type PickingInfo,
-  type UpdateParameters,
   type Viewport,
   _flatten as flatten
 } from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import type {TileSource} from '@loaders.gl/loader-utils';
 import {Matrix4} from '@math.gl/core';
+import type {TileSource} from '@loaders.gl/loader-utils';
 
 import {
-  SharedTile2DHeader,
   SharedTileset2D,
-  STRATEGY_DEFAULT,
-  type SharedRefinementStrategy,
-  type SharedTileset2DProps
+  SharedTile2DHeader,
+  type TileLoadProps,
+  type ZRange,
+  type RefinementStrategy,
+  STRATEGY_DEFAULT
 } from '../shared-tileset-2d/index';
-import type {TileLoadProps, ZRange} from '../tileset-2d/index';
-import {getURLFromTemplate, type URLTemplate, urlType} from '../tileset-2d/index';
-import {sharedTile2DDeckAdapter} from './deck-tileset-adapter';
 import {SharedTile2DView} from './shared-tile-2d-view';
+import {sharedTile2DDeckAdapter} from './deck-tileset-adapter';
+import {type URLTemplate, getURLFromTemplate} from './url-template';
+import {urlType} from '../tileset-2d/index';
 
+/** Tests whether a value looks like a loaders.gl {@link TileSource}. */
 function isTileSource(value: unknown): value is TileSource {
   return Boolean(
     value &&
@@ -43,6 +45,7 @@ function isTileSource(value: unknown): value is TileSource {
   );
 }
 
+/** Tests whether a value is a supported URL-template input for tiled requests. */
 function isURLTemplate(value: unknown): value is URLTemplate {
   return (
     value === null ||
@@ -51,6 +54,7 @@ function isURLTemplate(value: unknown): value is URLTemplate {
   );
 }
 
+/** Prop-type validator for `data` inputs accepted by {@link SharedTile2DLayer}. */
 const tile2DDataType = {
   type: 'object' as const,
   value: null as URLTemplate | SharedTileset2D | TileSource,
@@ -65,6 +69,7 @@ const tile2DDataType = {
       : value1 === value2
 };
 
+/** Default prop values for {@link SharedTile2DLayer}. */
 const defaultProps: DefaultProps<SharedTile2DLayerProps> = {
   TilesetClass: SharedTileset2D,
   data: tile2DDataType,
@@ -90,20 +95,21 @@ const defaultProps: DefaultProps<SharedTile2DLayerProps> = {
   visibleMaxZoom: null
 };
 
-const TILESET_OPTION_KEYS = [
-  'maxCacheSize',
-  'maxCacheByteSize',
-  'maxZoom',
-  'minZoom',
-  'tileSize',
-  'refinementStrategy',
-  'extent',
-  'maxRequests',
-  'debounceTime',
-  'zoomOffset',
-  'visibleMinZoom',
-  'visibleMaxZoom'
-] as const;
+/** Internal defaults used to detect whether layer props were explicitly overridden. */
+const TILE2D_LAYER_DEFAULT_OPTION_VALUES = {
+  maxCacheSize: null,
+  maxCacheByteSize: null,
+  maxZoom: null,
+  minZoom: 0,
+  tileSize: 512,
+  refinementStrategy: STRATEGY_DEFAULT,
+  extent: null,
+  maxRequests: 6,
+  debounceTime: 0,
+  zoomOffset: 0,
+  visibleMinZoom: null,
+  visibleMaxZoom: null
+} as const;
 
 /** Props for {@link SharedTile2DLayer}. */
 export type SharedTile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
@@ -142,8 +148,8 @@ export type SharedTile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   maxCacheSize?: number | null;
   /** Maximum byte size kept in cache. */
   maxCacheByteSize?: number | null;
-  /** Shared-safe placeholder refinement strategy. */
-  refinementStrategy?: SharedRefinementStrategy;
+  /** Placeholder refinement strategy. */
+  refinementStrategy?: RefinementStrategy;
   /** Elevation bounds used during geospatial tile selection. */
   zRange?: ZRange | null;
   /** Maximum concurrent requests. */
@@ -152,9 +158,9 @@ export type SharedTile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   debounceTime?: number;
   /** Integer zoom offset applied during tile selection. */
   zoomOffset?: number;
-  /** The minimum zoom level at which tiles are visible. */
+  /** Lower bound for rendering a viewport. */
   visibleMinZoom?: number | null;
-  /** The maximum zoom level at which tiles are visible. */
+  /** Upper bound for rendering a viewport. */
   visibleMaxZoom?: number | null;
 };
 
@@ -171,28 +177,37 @@ export type SharedTile2DLayerPickingInfo<
   sourceTileSubLayer: Layer;
 };
 
+/** Internal mutable state owned by {@link SharedTile2DLayer}. */
 type SharedTile2DLayerState<DataT> = {
-  tileset: SharedTileset2D<DataT, Viewport> | null;
+  /** Shared or owned tileset used by the layer. */
+  tileset: SharedTileset2D<DataT, any> | null;
+  /** Per-viewport traversal state. */
   tilesetViews: Map<string, SharedTile2DView<DataT>>;
+  /** Whether the layer owns and should finalize the tileset. */
   ownsTileset: boolean;
+  /** Cached aggregate load state. */
   isLoaded: boolean;
+  /** Last frame number observed for each viewport. */
   frameNumbers: Map<string, number>;
+  /** Cached sub-layers per tile id. */
   tileLayers: Map<string, Layer[]>;
+  /** Subscription disposer for tileset events. */
   unsubscribeTilesetEvents: (() => void) | null;
 };
 
-/** Composite layer that can reuse a shared tileset across layers and views. */
-export default class SharedTile2DLayer<
-  DataT = any,
-  ExtraPropsT extends {} = {}
-> extends CompositeLayer<ExtraPropsT & Required<SharedTile2DLayerProps<DataT>>> {
+/** Composite layer that can reuse a shared {@link SharedTileset2D} across layers and views. */
+export class SharedTile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
+  ExtraPropsT & Required<SharedTile2DLayerProps<DataT>>
+> {
   /** Layer default props consumed by deck.gl prop management. */
   static defaultProps: DefaultProps = defaultProps;
   /** Stable layer name used in logs and devtools. */
   static layerName = 'SharedTile2DLayer';
 
+  /** Viewports currently known to this layer during multi-view rendering. */
   private _knownViewports: Map<string, Viewport> = new Map();
 
+  /** Internal layer state shared across render passes. */
   state = null as unknown as SharedTile2DLayerState<DataT>;
 
   /** Initializes layer-owned tileset state. */
@@ -267,6 +282,7 @@ export default class SharedTile2DLayer<
     }
     const nextOwnsTileset = !nextExternalTileset;
     const nextTileset = this._resolveTileset(tileset, ownsTileset, nextExternalTileset);
+
     const tilesetChanged = nextTileset !== tileset || nextOwnsTileset !== ownsTileset;
 
     if (tilesetChanged) {
@@ -294,126 +310,12 @@ export default class SharedTile2DLayer<
     this._updateTileset();
   }
 
-  /** Registers additional viewports in multi-view rendering scenarios. */
-  activateViewport(viewport: Viewport): void {
-    const viewportKey = viewport.id || 'default';
-    const previousViewport = this._knownViewports.get(viewportKey);
-    this._knownViewports.set(viewportKey, viewport);
-    if (!previousViewport || !viewport.equals(previousViewport)) {
-      this.setNeedsUpdate();
-    }
-    super.activateViewport(viewport);
-  }
-
-  /** Calls the URL-template loader path for a tile when the layer owns the tileset. */
-  getTileData(tile: TileLoadProps): Promise<DataT> | DataT | null {
-    const {data, getTileData, fetch} = this.props;
-    const {signal} = tile;
-    if (!isURLTemplate(data)) {
-      return null;
-    }
-    tile.url = getURLFromTemplate(data, tile);
-    if (getTileData) {
-      return getTileData(tile);
-    }
-    if (fetch && tile.url) {
-      return fetch(tile.url, {propName: 'data', layer: this, signal});
-    }
-    return null;
-  }
-
-  /** Default tile sub-layer renderer, delegating to `renderSubLayers`. */
-  renderSubLayers(
-    props: SharedTile2DLayer['props'] & {
-      id: string;
-      data: DataT;
-      _offset: number;
-      tile: SharedTile2DHeader<DataT>;
-    }
-  ): Layer | null | LayersList {
-    return this.props.renderSubLayers(props);
-  }
-
-  /** Hook for subclasses to provide extra sub-layer props per tile. */
-  getSubLayerPropsByTile(_tile: SharedTile2DHeader<DataT>): Partial<LayerProps> | null {
-    return null;
-  }
-
-  /** Adds tile references to picking info returned from sub-layers. */
-  getPickingInfo(params: GetPickingInfoParams): SharedTile2DLayerPickingInfo<DataT> {
-    const sourceLayer = params.sourceLayer!;
-    const sourceTile: SharedTile2DHeader<DataT> = (sourceLayer.props as any).tile;
-    const info = params.info as SharedTile2DLayerPickingInfo<DataT>;
-    if (info.picked) {
-      info.tile = sourceTile;
-    }
-    info.sourceTile = sourceTile;
-    info.sourceTileSubLayer = sourceLayer;
-    return info;
-  }
-
-  /** Forwards auto-highlight updates to the picked sub-layer. */
-  protected _updateAutoHighlight(info: SharedTile2DLayerPickingInfo<DataT>): void {
-    info.sourceTileSubLayer.updateAutoHighlight(info);
-  }
-
-  /** Renders cached or newly generated sub-layers for each loaded tile. */
-  renderLayers(): Layer | null | LayersList {
-    const {tileset, tileLayers} = this.state;
-    if (!tileset) {
-      return null;
-    }
-    return tileset.tiles.map(tile => {
-      const subLayerProps = this.getSubLayerPropsByTile(tile);
-      let layers = tileLayers.get(tile.id);
-      if (!tile.isLoaded && !tile.content) {
-        return layers;
-      }
-      if (!layers) {
-        const rendered = this.renderSubLayers({
-          ...this.props,
-          ...this.getSubLayerProps({
-            id: tile.id,
-            updateTriggers: this.props.updateTriggers
-          }),
-          data: tile.content as DataT,
-          _offset: 0,
-          tile
-        });
-        layers = this._flattenTileLayers(rendered).map(layer =>
-          layer.clone({tile, ...subLayerProps})
-        );
-        tileLayers.set(tile.id, layers);
-      } else if (
-        subLayerProps &&
-        layers[0] &&
-        Object.keys(subLayerProps).some(
-          propName => layers![0].props[propName] !== subLayerProps[propName]
-        )
-      ) {
-        layers = layers.map(layer => layer.clone(subLayerProps));
-        tileLayers.set(tile.id, layers);
-      }
-      return layers;
-    });
-  }
-
-  /** Filters tile sub-layers based on the active view-specific visibility state. */
-  filterSubLayer({layer, cullRect}: FilterContext) {
-    const {tile} = (layer as Layer<{tile: SharedTile2DHeader<DataT>}>).props;
-    const tilesetView = this._getOrCreateTilesetView(this._getViewportKey());
-    return tilesetView.isTileVisible(
-      tile,
-      cullRect,
-      this.props.modelMatrix ? new Matrix4(this.props.modelMatrix) : null
-    );
-  }
-
+  /** Resolves whether to reuse a shared tileset, reuse an owned tileset, or create a new one. */
   private _resolveTileset(
-    currentTileset: SharedTileset2D<DataT, Viewport> | null,
+    currentTileset: SharedTileset2D<DataT, any> | null,
     ownsCurrentTileset: boolean,
-    nextExternalTileset: SharedTileset2D<DataT, Viewport> | null
-  ): SharedTileset2D<DataT, Viewport> {
+    nextExternalTileset: SharedTileset2D<DataT, any> | null
+  ): SharedTileset2D<DataT, any> {
     if (nextExternalTileset) {
       return nextExternalTileset;
     }
@@ -423,10 +325,8 @@ export default class SharedTile2DLayer<
     return new this.props.TilesetClass(this._getTilesetOptions());
   }
 
-  private _releaseTileset(
-    tileset: SharedTileset2D<DataT, Viewport> | null,
-    ownsTileset: boolean
-  ): void {
+  /** Tears down subscriptions and per-view state for the outgoing tileset. */
+  private _releaseTileset(tileset: SharedTileset2D<DataT, any> | null, ownsTileset: boolean): void {
     this.state.unsubscribeTilesetEvents?.();
     for (const tilesetView of this.state.tilesetViews.values()) {
       tilesetView.finalize();
@@ -436,11 +336,12 @@ export default class SharedTile2DLayer<
     }
   }
 
+  /** Applies prop updates to an existing tileset without replacing it. */
   private _updateExistingTileset(
     propsChanged: boolean,
     ownsTileset: boolean,
     dataChanged: boolean,
-    tileset: SharedTileset2D<DataT, Viewport>
+    tileset: SharedTileset2D<DataT, any>
   ): void {
     if (!propsChanged) {
       return;
@@ -455,28 +356,100 @@ export default class SharedTile2DLayer<
     this.state.tileLayers.clear();
   }
 
-  _getTilesetOptions(): SharedTileset2DProps<DataT, Viewport> {
+  /** Resolves the current tileset configuration from layer props. */
+  _getTilesetOptions(): Record<string, unknown> {
+    const {
+      tileSize,
+      maxCacheSize,
+      maxCacheByteSize,
+      refinementStrategy,
+      extent,
+      maxZoom,
+      minZoom,
+      maxRequests,
+      debounceTime,
+      zoomOffset,
+      visibleMinZoom,
+      visibleMaxZoom
+    } = this.props;
+
     const tileSource = isTileSource(this.props.data) ? this.props.data : undefined;
-    const options: SharedTileset2DProps<DataT, Viewport> = {
+    const options = {
+      tileSource,
       adapter: sharedTile2DDeckAdapter,
       getTileData: tileSource ? undefined : this.getTileData.bind(this),
       onTileLoad: () => {},
       onTileError: () => {},
       onTileUnload: () => {}
-    };
+    } as Record<string, unknown>;
 
-    if (tileSource) {
-      options.tileSource = tileSource;
-    }
-    for (const key of TILESET_OPTION_KEYS) {
-      if (Object.hasOwn(this.props, key)) {
-        options[key] = this.props[key] as never;
-      }
-    }
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'maxCacheSize',
+      maxCacheSize,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.maxCacheSize
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'maxCacheByteSize',
+      maxCacheByteSize,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.maxCacheByteSize
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'maxZoom',
+      maxZoom,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.maxZoom
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'minZoom',
+      minZoom,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.minZoom
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'tileSize',
+      tileSize,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.tileSize
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'refinementStrategy',
+      refinementStrategy,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.refinementStrategy
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'extent',
+      extent,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.extent
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'maxRequests',
+      maxRequests,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.maxRequests
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'debounceTime',
+      debounceTime,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.debounceTime
+    );
+    this._assignTilesetOptionIfExplicit(
+      options,
+      'zoomOffset',
+      zoomOffset,
+      TILE2D_LAYER_DEFAULT_OPTION_VALUES.zoomOffset
+    );
 
+    this._assignTilesetOptionIfExplicit(options, 'visibleMinZoom', visibleMinZoom, null);
+    this._assignTilesetOptionIfExplicit(options, 'visibleMaxZoom', visibleMaxZoom, null);
     return options;
   }
 
+  /** Updates per-view traversal state for all known viewports. */
   private _updateTileset(): void {
     const {zRange, modelMatrix} = this.props;
     let anyTilesetChanged = false;
@@ -513,33 +486,172 @@ export default class SharedTile2DLayer<
     this.state.isLoaded = nextIsLoaded;
   }
 
+  /** Emits the viewport-load callback for one view. */
   _onViewportLoad(tilesetView: SharedTile2DView<DataT>): void {
     if (tilesetView.selectedTiles) {
       this.props.onViewportLoad?.(tilesetView.selectedTiles);
     }
   }
 
+  /** Clears cached sub-layers when a tile loads. */
   _onTileLoad(tile: SharedTile2DHeader<DataT>): void {
     this.state.tileLayers.delete(tile.id);
     this.props.onTileLoad(tile);
     this.setNeedsUpdate();
   }
 
+  /** Clears cached sub-layers when a tile errors. */
   _onTileError(error: any, tile: SharedTile2DHeader<DataT>): void {
     this.state.tileLayers.delete(tile.id);
     this.props.onTileError(error, tile);
     this.setNeedsUpdate();
   }
 
+  /** Removes cached sub-layers when a tile is evicted. */
   _onTileUnload(tile: SharedTile2DHeader<DataT>): void {
     this.state.tileLayers.delete(tile.id);
     this.props.onTileUnload(tile);
   }
 
+  /** Calls the URL-template loader path for a tile when the layer owns the tileset. */
+  getTileData(tile: TileLoadProps): Promise<DataT> | DataT | null {
+    const {data, getTileData, fetch} = this.props;
+    const {signal} = tile;
+    if (!isURLTemplate(data)) {
+      return null;
+    }
+    tile.url = getURLFromTemplate(data, tile);
+    if (getTileData) {
+      return getTileData(tile);
+    }
+    if (fetch && tile.url) {
+      return fetch(tile.url, {propName: 'data', layer: this, signal});
+    }
+    return null;
+  }
+
+  /** Default tile sub-layer renderer, delegating to `renderSubLayers`. */
+  renderSubLayers(
+    props: SharedTile2DLayer['props'] & {
+      id: string;
+      data: DataT;
+      _offset: number;
+      tile: SharedTile2DHeader<DataT>;
+    }
+  ): Layer | null | LayersList {
+    return this.props.renderSubLayers(props);
+  }
+
+  /** Hook for subclasses to provide extra sub-layer props per tile. */
+  getSubLayerPropsByTile(
+    _tile: SharedTile2DHeader<DataT>,
+    _layer?: Layer
+  ): Partial<LayerProps> | null {
+    return null;
+  }
+
+  /** Adds tile references to picking info returned from sub-layers. */
+  getPickingInfo(params: GetPickingInfoParams): SharedTile2DLayerPickingInfo<DataT> {
+    const {sourceLayer} = params;
+    if (!sourceLayer) {
+      throw new Error('SharedTile2DLayer picking info requires a source layer.');
+    }
+    const sourceTile: SharedTile2DHeader<DataT> = (sourceLayer.props as any).tile;
+    const info = params.info as SharedTile2DLayerPickingInfo<DataT>;
+    if (info.picked) {
+      info.tile = sourceTile;
+    }
+    info.sourceTile = sourceTile;
+    info.sourceTileSubLayer = sourceLayer;
+    return info;
+  }
+
+  /** Forwards auto-highlight updates to the picked sub-layer. */
+  protected _updateAutoHighlight(info: SharedTile2DLayerPickingInfo<DataT>): void {
+    info.sourceTileSubLayer.updateAutoHighlight(info);
+  }
+
+  /** Renders cached or newly generated sub-layers for each loaded tile. */
+  renderLayers(): Layer | null | LayersList {
+    const {tileset, tileLayers} = this.state;
+    if (!tileset) {
+      return null;
+    }
+    return tileset.tiles.map(tile => {
+      let layers = tileLayers.get(tile.id);
+      if (!tile.isLoaded && !tile.content) {
+        return layers;
+      }
+      if (!layers) {
+        const rendered = this.renderSubLayers({
+          ...this.props,
+          ...this.getSubLayerProps({
+            id: tile.id,
+            updateTriggers: this.props.updateTriggers
+          }),
+          data: tile.content,
+          _offset: 0,
+          tile
+        });
+        layers = this._flattenTileLayers(rendered).map(layer =>
+          layer.clone({tile, ...this.getSubLayerPropsByTile(tile, layer)})
+        );
+        tileLayers.set(tile.id, layers);
+      } else {
+        layers = layers.map(layer => {
+          const props = this.getSubLayerPropsByTile(tile, layer);
+          return props && Object.keys(props).some(key => layer.props[key] !== props[key])
+            ? layer.clone(props)
+            : layer;
+        });
+        tileLayers.set(tile.id, layers);
+      }
+      return layers;
+    });
+  }
+
+  /** Filters tile sub-layers based on the active view-specific visibility state. */
+  filterSubLayer({layer, cullRect}: FilterContext) {
+    const {tile} = (layer as Layer<{tile: SharedTile2DHeader<DataT>}>).props;
+    const tilesetView = this._getOrCreateTilesetView(this._getViewportKey());
+    return tilesetView.isTileVisible(
+      tile,
+      cullRect,
+      this.props.modelMatrix ? new Matrix4(this.props.modelMatrix) : null
+    );
+  }
+
+  /** Returns the active viewport key used to isolate per-view traversal state. */
   private _getViewportKey(): string {
     return this.context.viewport?.id || 'default';
   }
 
+  /** Copies a tileset option only when the layer prop was explicitly set. */
+  private _assignTilesetOptionIfExplicit(
+    options: Record<string, unknown>,
+    key: string,
+    value: unknown,
+    defaultValue: unknown
+  ): void {
+    if (!this._isDefaultOptionValue(value, defaultValue)) {
+      options[key] = value;
+    }
+  }
+
+  /** Tests whether a layer prop still has its default value. */
+  private _isDefaultOptionValue(value: unknown, defaultValue: unknown): boolean {
+    if (Array.isArray(value) || Array.isArray(defaultValue)) {
+      return (
+        Array.isArray(value) &&
+        Array.isArray(defaultValue) &&
+        value.length === defaultValue.length &&
+        value.every((entry, index) => entry === defaultValue[index])
+      );
+    }
+    return value === defaultValue;
+  }
+
+  /** Drops the bootstrap placeholder viewport after a real viewport is known. */
   private _prunePlaceholderViewportView(viewportKey: string): void {
     const placeholderViewportKey = 'DEFAULT-INITIAL-VIEWPORT';
     if (viewportKey !== placeholderViewportKey) {
@@ -552,6 +664,7 @@ export default class SharedTile2DLayer<
     }
   }
 
+  /** Returns the per-viewport traversal state, creating it on demand. */
   private _getOrCreateTilesetView(viewportKey: string): SharedTile2DView<DataT> {
     let tilesetView = this.state.tilesetViews.get(viewportKey);
     if (!tilesetView) {
@@ -565,9 +678,23 @@ export default class SharedTile2DLayer<
     return tilesetView;
   }
 
+  /** Registers additional viewports in multi-view rendering scenarios. */
+  activateViewport(viewport: Viewport): void {
+    const viewportKey = viewport.id || 'default';
+    const previousViewport = this._knownViewports.get(viewportKey);
+    this._knownViewports.set(viewportKey, viewport);
+    if (!previousViewport || !viewport.equals(previousViewport)) {
+      this.setNeedsUpdate();
+    }
+    super.activateViewport(viewport);
+  }
+
+  /** Normalizes nested render output into a flat tile sub-layer array. */
   private _flattenTileLayers(
     rendered: Layer | null | LayersList
   ): Layer<{tile?: SharedTile2DHeader<DataT>}>[] {
     return flatten(rendered as any, Boolean) as Layer<{tile?: SharedTile2DHeader<DataT>}>[];
   }
 }
+
+export default SharedTile2DLayer;

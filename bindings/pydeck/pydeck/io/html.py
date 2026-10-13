@@ -1,4 +1,5 @@
 import html
+import json
 import os
 from os.path import realpath, join, dirname
 import sys
@@ -42,10 +43,9 @@ def cdn_picker(offline=False):
     dev_port = os.getenv("PYDECK_DEV_PORT")
     if dev_port:
         print("pydeck running in development mode, expecting @deck.gl/jupyter-widget served at {}".format(dev_port))
-        return (
-            "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>\n"
-            "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js.map'></script>\n"
-        ).format(dev_port=dev_port)
+        return "<script type='text/javascript' src='http://localhost:{dev_port}/dist/index.js'></script>".format(
+            dev_port=dev_port
+        )
     if offline:
         RELPATH_TO_BUNDLE = "../nbextension/static/index.js"
         with open(join(dirname(__file__), RELPATH_TO_BUNDLE), "r", encoding="utf-8") as file:
@@ -53,6 +53,25 @@ def cdn_picker(offline=False):
         return "<script type='text/javascript'>{}</script>".format(js)
 
     return "<script src='{}'></script>".format(CDN_URL)
+
+
+def widget_css_picker():
+    if os.getenv("PYDECK_DEV_PORT"):
+        stylesheet_path = realpath(join(dirname(__file__), "../../../../modules/widgets/dist/stylesheet.css"))
+        if os.path.exists(stylesheet_path):
+            with open(stylesheet_path, "r", encoding="utf-8") as file:
+                return "<style>\n{}\n</style>".format(file.read())
+    return "<link rel='stylesheet' href='{}' />".format(CDN_CSS_URL)
+
+
+def _script_safe_json(value):
+    """Serialize a value as JSON that is safe to inline inside an HTML script element
+
+    Python's repr is not valid JavaScript (True vs true), and JSON leaves "<" as is, so a string
+    containing "</script>" could close the surrounding script element. Escaping "<" keeps the
+    output valid JSON while making that impossible.
+    """
+    return json.dumps(value).replace("<", "\\u003c")
 
 
 def render_json_to_html(
@@ -74,10 +93,10 @@ def render_json_to_html(
         google_maps_key=google_maps_key,
         json_input=json_input,
         deckgl_jupyter_widget_bundle=cdn_picker(offline=offline),
-        deckgl_widget_css_url=CDN_CSS_URL,
+        deckgl_widget_css=widget_css_picker(),
         tooltip=convert_js_bool(tooltip),
         css_text=css_text,
-        custom_libraries=custom_libraries,
+        custom_libraries=_script_safe_json(custom_libraries) if custom_libraries else None,
         configuration=configuration,
         show_error=show_error,
     )

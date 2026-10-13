@@ -14,7 +14,8 @@ export const DEFAULT_DIMENSIONS: Dimensions = {
   globe: false,
   multiView: false,
   maskDemo: false,
-  stressTest: 'none'
+  stressTest: 'none',
+  useDevicePixels: true
 };
 
 /**

@@ -18,6 +18,13 @@ export type CommonViewState = TransitionProps;
 export type CommonViewProps<ViewState> = {
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
+  /**
+   * The id of the presentation canvas this view should render into when `Deck` is using
+   * multi-canvas presentation.
+   *
+   * When not supplied, the view renders into the first configured canvas.
+   */
+  canvasId?: string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
   x?: number | string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */

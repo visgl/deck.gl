@@ -1,5 +1,6 @@
-This is a standalone experimental SharedTile2DLayer example using one SharedTileset2D to feed
-tiled BitmapLayer sublayers in a main view and minimap on the [deck.gl](http://deck.gl) website.
+This experimental SharedTile2DLayer example feeds tiled BitmapLayer sublayers in overlapping
+main and minimap views. Toggle "Share tile cache" to compare one SharedTileset2D with independent
+caches. The displayed request and cached-tile counts reset on each toggle.
 
 ### Usage
 

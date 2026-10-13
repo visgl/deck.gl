@@ -5,22 +5,25 @@
 import {RequestScheduler, type TileSource, type TileSourceMetadata} from '@loaders.gl/loader-utils';
 import type {Matrix4} from '@math.gl/core';
 import {Stats} from '@probe.gl/stats';
-
-import {STRATEGY_DEFAULT, STRATEGY_NEVER, STRATEGY_REPLACE} from '../tileset-2d/tileset-2d';
-import type {TileIndex, TileLoadProps, ZRange} from '../tileset-2d/types';
-import type {SharedTileset2DAdapter, SharedTileset2DTileContext} from './adapter';
 import {SharedTile2DHeader} from './shared-tile-2d-header';
+import type {SharedTileset2DAdapter, SharedTileset2DTileContext} from './adapter';
+import type {TileIndex, TileLoadProps, ZRange} from './types';
 
-export {STRATEGY_DEFAULT, STRATEGY_NEVER, STRATEGY_REPLACE};
+export const STRATEGY_NEVER = 'never';
+export const STRATEGY_REPLACE = 'no-overlap';
+export const STRATEGY_DEFAULT = 'best-available';
 
-/** Shared-safe placeholder refinement strategies. */
-export type SharedRefinementStrategy =
+/** Function form of a refinement strategy. */
+export type RefinementStrategyFunction = (tiles: SharedTile2DHeader[]) => void;
+/** Strategy controlling how parent and child placeholder tiles are displayed while content loads. */
+export type RefinementStrategy =
   | typeof STRATEGY_NEVER
   | typeof STRATEGY_REPLACE
-  | typeof STRATEGY_DEFAULT;
+  | typeof STRATEGY_DEFAULT
+  | RefinementStrategyFunction;
 
 /** Core configuration shared by all {@link SharedTileset2D} instances. */
-export type SharedTileset2DBaseProps<DataT = any, ViewStateT = unknown> = {
+export type Tileset2DProps<DataT = any, ViewStateT = unknown> = {
   /** Callback used to load tile payloads. */
   getTileData: (props: TileLoadProps) => Promise<DataT | null> | DataT | null;
   /** Adapter used to compute tile traversal and tile metadata. */
@@ -38,7 +41,7 @@ export type SharedTileset2DBaseProps<DataT = any, ViewStateT = unknown> = {
   /** Maximum bytes kept in cache. */
   maxCacheByteSize?: number | null;
   /** Placeholder refinement strategy. */
-  refinementStrategy?: SharedRefinementStrategy;
+  refinementStrategy?: RefinementStrategy;
   /** Elevation range used by geospatial tile selection. */
   zRange?: ZRange | null;
   /** Maximum concurrent tile requests. */
@@ -47,9 +50,9 @@ export type SharedTileset2DBaseProps<DataT = any, ViewStateT = unknown> = {
   debounceTime?: number;
   /** Integer zoom offset applied when choosing tile levels. */
   zoomOffset?: number;
-  /** The minimum zoom level at which tiles are visible. */
+  /** Lower bound for rendering a viewport. */
   visibleMinZoom?: number | null;
-  /** The maximum zoom level at which tiles are visible. */
+  /** Upper bound for rendering a viewport. */
   visibleMaxZoom?: number | null;
   /** Callback fired when a tile loads successfully. */
   onTileLoad?: (tile: SharedTile2DHeader<DataT>) => void;
@@ -59,15 +62,24 @@ export type SharedTileset2DBaseProps<DataT = any, ViewStateT = unknown> = {
   onTileError?: (err: any, tile: SharedTile2DHeader<DataT>) => void;
 };
 
-/** Options for creating a shared tile cache that can be reused by multiple layers and views. */
-export type SharedTileset2DProps<DataT = any, ViewStateT = unknown> = Omit<
-  SharedTileset2DBaseProps<DataT, ViewStateT>,
-  'getTileData'
-> & {
-  /** Optional tile loader used when not sourcing data from a loaders.gl TileSource. */
-  getTileData?: (props: TileLoadProps) => Promise<DataT | null> | DataT | null;
-  /** Optional loaders.gl TileSource backing this shared tileset. */
-  tileSource?: TileSource;
+export const DEFAULT_TILESET2D_PROPS: Omit<Required<Tileset2DProps>, 'getTileData'> = {
+  adapter: null,
+  extent: null,
+  tileSize: 512,
+  maxZoom: null,
+  minZoom: null,
+  maxCacheSize: 100,
+  maxCacheByteSize: null,
+  refinementStrategy: 'best-available',
+  zRange: null,
+  maxRequests: 6,
+  debounceTime: 0,
+  zoomOffset: 0,
+  visibleMinZoom: null,
+  visibleMaxZoom: null,
+  onTileLoad: () => {},
+  onTileUnload: () => {},
+  onTileError: () => {}
 };
 
 /** Subscription callbacks emitted by {@link SharedTileset2D}. */
@@ -86,69 +98,65 @@ export type SharedTileset2DListener<DataT = any> = {
   onStatsChange?: (stats: Stats) => void;
 };
 
-type ResolvedSharedTileset2DProps<DataT, ViewStateT> = Required<
-  SharedTileset2DProps<DataT, ViewStateT>
->;
-
+/** Per-consumer tile sets retained by the shared cache. */
 type ConsumerState<DataT = any> = {
+  /** Tiles selected for this consumer's most recent traversal. */
   selectedTiles: Set<SharedTile2DHeader<DataT>>;
+  /** Tiles currently marked render-visible for this consumer. */
   visibleTiles: Set<SharedTile2DHeader<DataT>>;
 };
 
-const DEFAULT_SHARED_TILESET2D_PROPS: Omit<
-  ResolvedSharedTileset2DProps<any, any>,
-  'getTileData' | 'tileSource'
-> = {
-  adapter: null,
-  extent: null,
-  tileSize: 512,
-  maxZoom: null,
-  minZoom: null,
-  maxCacheSize: 100,
-  maxCacheByteSize: null,
-  refinementStrategy: STRATEGY_DEFAULT,
-  zRange: null,
-  maxRequests: 6,
-  debounceTime: 0,
-  zoomOffset: 0,
-  visibleMinZoom: null,
-  visibleMaxZoom: null,
-  onTileLoad: () => {},
-  onTileUnload: () => {},
-  onTileError: () => {}
+/** Options for creating a shared tile cache that can be reused by multiple layers and views. */
+export type SharedTileset2DProps<DataT = any, ViewStateT = unknown> = Omit<
+  Tileset2DProps<DataT, ViewStateT>,
+  'getTileData'
+> & {
+  /** Optional tile loader used when not sourcing data from a loaders.gl TileSource. */
+  getTileData?: (props: TileLoadProps) => Promise<DataT | null> | DataT | null;
+  /** Optional loaders.gl TileSource backing this shared tileset. */
+  tileSource?: TileSource;
 };
 
-/** Shared tile cache and loading engine for one or more shared tile layer instances. */
+/** Shared tile cache and loading engine for one or more {@link SharedTile2DLayer} instances. */
 export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
   /** Live counters describing shared tileset state. */
   readonly stats: Stats;
   /** Effective runtime options after defaults and metadata overrides have been applied. */
-  protected opts: ResolvedSharedTileset2DProps<DataT, ViewStateT>;
+  protected opts: Required<SharedTileset2DProps<DataT, ViewStateT>>;
   /** Cached metadata returned by the backing TileSource, if any. */
   protected sourceMetadata: TileSourceMetadata | null = null;
-
+  /** Scheduler shared across all tile requests for this tileset. */
   private _requestScheduler: RequestScheduler;
+  /** Shared tile cache keyed by tile id. */
   private _cache: Map<string, SharedTile2DHeader<DataT>>;
+  /** Tracks whether parent/child links need rebuilding. */
   private _dirty: boolean;
+  /** Cached tiles sorted by zoom for traversal and rendering. */
   private _tiles: SharedTile2DHeader<DataT>[];
+  /** Running total of cached payload byte size. */
   private _cacheByteSize: number;
+  /** Cumulative number of tiles evicted from the shared cache. */
   private _unloadedTileCount: number;
+  /** Subscribers watching tileset lifecycle events. */
   private _listeners = new Set<SharedTileset2DListener<DataT>>();
+  /** Selected and visible tiles tracked per consumer. */
   private _consumers = new Map<symbol, ConsumerState<DataT>>();
-  private _explicitOptionKeys = new Set<string>();
-  private _baseOpts: Partial<SharedTileset2DProps<DataT, ViewStateT>> = {};
-  private _sourceMetadataOverrides: Partial<SharedTileset2DProps<DataT, ViewStateT>> = {};
+  /** Option names explicitly set by the caller. */
   private _sourceMetadataGeneration = 0;
+  private _explicitOptionKeys = new Set<string>();
+  /** Caller-provided options before metadata-derived overrides are applied. */
+  private _baseOpts: Partial<SharedTileset2DProps<DataT, ViewStateT>> = {};
+  /** Derived overrides sourced from TileSource metadata. */
+  private _sourceMetadataOverrides: Partial<SharedTileset2DProps<DataT, ViewStateT>> = {};
+  /** Resolved maximum zoom level used by traversal. */
   private _maxZoom?: number;
+  /** Resolved minimum zoom level used by traversal. */
   private _minZoom?: number;
+  /** Most recent traversal context used to derive tile metadata. */
   private _lastTileContext: SharedTileset2DTileContext<ViewStateT> | null = null;
 
   /** Creates a tileset from either `getTileData` or a loaders.gl `TileSource`. */
   constructor(opts: SharedTileset2DProps<DataT, ViewStateT>) {
-    if (!opts.tileSource && !opts.getTileData) {
-      throw new Error('SharedTileset2D requires either `getTileData` or `tileSource`.');
-    }
-
     this.stats = new Stats({
       id: 'SharedTileset2D',
       stats: [
@@ -161,13 +169,28 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
         {name: 'Consumers'}
       ]
     });
-    this.opts = this._resolveOptions();
-    this._requestScheduler = this._createRequestScheduler();
+    this.opts = {
+      ...DEFAULT_TILESET2D_PROPS,
+      ...opts,
+      getTileData: opts.getTileData || (() => null),
+      tileSource: opts.tileSource
+    } as Required<SharedTileset2DProps<DataT, ViewStateT>>;
+
+    this._requestScheduler = new RequestScheduler({
+      throttleRequests: this.opts.maxRequests > 0 || this.opts.debounceTime > 0,
+      maxRequests: this.opts.maxRequests,
+      debounceTime: this.opts.debounceTime
+    });
+
     this._cache = new Map();
     this._tiles = [];
     this._dirty = false;
     this._cacheByteSize = 0;
     this._unloadedTileCount = 0;
+
+    if (!this.opts.tileSource && !opts.getTileData) {
+      throw new Error('SharedTileset2D requires either `getTileData` or `tileSource`.');
+    }
 
     this.setOptions(opts);
     this._updateStats();
@@ -196,7 +219,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return Array.from(this._getSelectedTilesUnion());
   }
 
-  /** Union of tiles contributing to the visible result across all consumers and views. */
+  /** Union of tiles contributing to the visible result across all consumers and views, including unloaded selected tiles. */
   get visibleTiles(): SharedTile2DHeader<DataT>[] {
     const union = this._getVisibleTilesUnion();
     for (const tile of this._getSelectedTilesUnion()) {
@@ -210,6 +233,11 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return Array.from(this._cache.values()).filter(tile => tile.isLoading);
   }
 
+  /** Tiles retained in cache that do not currently have loaded content. */
+  get unloadedTiles(): SharedTile2DHeader<DataT>[] {
+    return Array.from(this._cache.values()).filter(tile => !tile.isLoaded);
+  }
+
   /** Maximum resolved zoom level after applying metadata and explicit options. */
   get maxZoom(): number | undefined {
     return this._maxZoom;
@@ -221,7 +249,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
   }
 
   /** Active refinement strategy for placeholder handling. */
-  get refinementStrategy(): SharedRefinementStrategy {
+  get refinementStrategy(): RefinementStrategy {
     return this.opts.refinementStrategy || STRATEGY_DEFAULT;
   }
 
@@ -255,49 +283,45 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     opts: Partial<SharedTileset2DProps<DataT, ViewStateT>>,
     {replace = false}: {replace?: boolean} = {}
   ): void {
-    const previousTileSource = this._baseOpts.tileSource;
+    const previousSource = this._baseOpts.tileSource;
     const previousMaxRequests = this.opts.maxRequests;
     const previousDebounceTime = this.opts.debounceTime;
-
     if (replace) {
       this._baseOpts = {};
       this._explicitOptionKeys.clear();
     }
-
     this._rememberExplicitOptions(opts);
     this._baseOpts = {...this._baseOpts, ...opts};
-
-    const nextTileSource = this._baseOpts.tileSource;
-    const tileSourceChanged = nextTileSource !== previousTileSource;
-    if (tileSourceChanged) {
+    const nextSource = this._baseOpts.tileSource;
+    const sourceChanged = previousSource !== nextSource;
+    if (sourceChanged) {
       this.sourceMetadata = null;
       this._sourceMetadataOverrides = {};
       this._sourceMetadataGeneration++;
     } else {
       this._sourceMetadataOverrides = this._getMetadataOverrides(this.sourceMetadata);
     }
-
-    this.opts = this._resolveOptions();
+    this._applyResolvedOptions();
     if (
       previousMaxRequests !== this.opts.maxRequests ||
       previousDebounceTime !== this.opts.debounceTime
     ) {
-      this._requestScheduler = this._createRequestScheduler();
+      this._requestScheduler = new RequestScheduler({
+        throttleRequests: this.opts.maxRequests > 0 || this.opts.debounceTime > 0,
+        maxRequests: this.opts.maxRequests,
+        debounceTime: this.opts.debounceTime
+      });
     }
-
-    if (nextTileSource && tileSourceChanged) {
-      const generation = this._sourceMetadataGeneration;
-      this._initializeTileSource(nextTileSource, generation).catch(() => {});
+    if (nextSource && sourceChanged) {
+      this._initializeTileSource(nextSource, this._sourceMetadataGeneration).catch(() => {});
     }
-    if (tileSourceChanged && this._cache.size > 0) {
-      this.reloadAll();
-    }
-
+    if (sourceChanged && this._cache.size > 0) this.reloadAll();
     this._notifyUpdate();
   }
 
   /** Aborts in-flight requests and clears the shared cache. */
   finalize(): void {
+    this._sourceMetadataGeneration++;
     for (const tile of this._cache.values()) {
       if (tile.isLoading) {
         tile.abort();
@@ -314,16 +338,15 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
   /** Marks all retained tiles stale and drops unused cached tiles. */
   reloadAll(): void {
     const selectedTiles = this._getSelectedTilesUnion();
-    for (const [id, tile] of this._cache) {
-      if (!selectedTiles.has(tile)) {
+    for (const id of this._cache.keys()) {
+      const tile = this._cache.get(id);
+      if (tile && !selectedTiles.has(tile)) {
         this._cache.delete(id);
-        this._handleTileUnload(tile);
-      } else {
+      } else if (tile) {
         tile.setNeedsReload();
       }
     }
     this._cacheByteSize = this._getCacheByteSize();
-    this._dirty = true;
     this.prepareTiles();
     this._updateStats();
   }
@@ -453,54 +476,39 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return tile;
   }
 
-  private _createRequestScheduler(): RequestScheduler {
-    return new RequestScheduler({
-      throttleRequests: this.opts.maxRequests > 0 || this.opts.debounceTime > 0,
-      maxRequests: this.opts.maxRequests,
-      debounceTime: this.opts.debounceTime
-    });
-  }
-
+  /** Loads metadata from a TileSource and reapplies derived option overrides. */
   private async _initializeTileSource(tileSource: TileSource, generation: number): Promise<void> {
     try {
-      const sourceMetadata = await tileSource.getMetadata();
-      if (
-        generation !== this._sourceMetadataGeneration ||
-        tileSource !== this._baseOpts.tileSource
-      ) {
+      const metadata = await tileSource.getMetadata();
+      if (generation !== this._sourceMetadataGeneration || tileSource !== this._baseOpts.tileSource)
         return;
-      }
-      this.sourceMetadata = sourceMetadata;
-      this._sourceMetadataOverrides = this._getMetadataOverrides(sourceMetadata);
-      this.opts = this._resolveOptions();
+      this.sourceMetadata = metadata;
+      this._sourceMetadataOverrides = this._getMetadataOverrides(this.sourceMetadata);
+      this._applyResolvedOptions();
       this._notifyUpdate();
     } catch (error: any) {
-      if (
-        generation !== this._sourceMetadataGeneration ||
-        tileSource !== this._baseOpts.tileSource
-      ) {
+      if (generation !== this._sourceMetadataGeneration || tileSource !== this._baseOpts.tileSource)
         return;
-      }
       const normalizedError =
         error instanceof Error ? error : new Error(`TileSource metadata error: ${String(error)}`);
       this._notifyError(normalizedError);
     }
   }
 
+  /** Tracks which options were explicitly set by the caller. */
   private _rememberExplicitOptions(opts: Partial<SharedTileset2DProps<DataT, ViewStateT>>): void {
     for (const key of Object.keys(opts)) {
       this._explicitOptionKeys.add(key);
     }
   }
 
-  private _resolveOptions(): ResolvedSharedTileset2DProps<DataT, ViewStateT> {
+  /** Resolves defaults, metadata overrides, and caller options into runtime settings. */
+  private _applyResolvedOptions(): void {
     const resolvedOpts = {
-      ...DEFAULT_SHARED_TILESET2D_PROPS,
-      getTileData: () => null,
-      tileSource: undefined,
+      ...DEFAULT_TILESET2D_PROPS,
       ...this._sourceMetadataOverrides,
       ...this._baseOpts
-    } as ResolvedSharedTileset2DProps<DataT, ViewStateT>;
+    } as Required<SharedTileset2DProps<DataT, ViewStateT>>;
 
     if (resolvedOpts.tileSource) {
       const tileSource = resolvedOpts.tileSource;
@@ -508,18 +516,18 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
         tileSource.getTileData(loadProps) as Promise<DataT | null> | DataT | null;
     }
 
+    this.opts = resolvedOpts;
     this._maxZoom =
-      typeof resolvedOpts.maxZoom === 'number' && Number.isFinite(resolvedOpts.maxZoom)
-        ? Math.floor(resolvedOpts.maxZoom)
+      typeof this.opts.maxZoom === 'number' && Number.isFinite(this.opts.maxZoom)
+        ? Math.floor(this.opts.maxZoom)
         : undefined;
     this._minZoom =
-      typeof resolvedOpts.minZoom === 'number' && Number.isFinite(resolvedOpts.minZoom)
-        ? Math.ceil(resolvedOpts.minZoom)
+      typeof this.opts.minZoom === 'number' && Number.isFinite(this.opts.minZoom)
+        ? Math.ceil(this.opts.minZoom)
         : undefined;
-
-    return resolvedOpts;
   }
 
+  /** Maps TileSource metadata into supported tileset options. */
   private _getMetadataOverrides(
     metadata: TileSourceMetadata | null
   ): Partial<SharedTileset2DProps<DataT, ViewStateT>> {
@@ -544,6 +552,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return overrides;
   }
 
+  /** Handles successful tile loads. */
   private _handleTileLoad(tile: SharedTile2DHeader<DataT>): void {
     this.opts.onTileLoad?.(tile);
     this._cacheByteSize = this._getCacheByteSize();
@@ -554,6 +563,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     this._updateStats();
   }
 
+  /** Handles tile load failures. */
   private _handleTileError(error: any, tile: SharedTile2DHeader<DataT>): void {
     this.opts.onTileError?.(error, tile);
     for (const listener of this._listeners) {
@@ -562,6 +572,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     this._updateStats();
   }
 
+  /** Handles tile eviction from cache. */
   private _handleTileUnload(tile: SharedTile2DHeader<DataT>): void {
     this._unloadedTileCount++;
     this.opts.onTileUnload?.(tile);
@@ -571,18 +582,21 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     this._updateStats();
   }
 
+  /** Notifies listeners that metadata or effective options changed. */
   private _notifyUpdate(): void {
     for (const listener of this._listeners) {
       listener.onUpdate?.();
     }
   }
 
+  /** Notifies listeners about asynchronous metadata errors. */
   private _notifyError(error: Error): void {
     for (const listener of this._listeners) {
       listener.onError?.(error);
     }
   }
 
+  /** Recomputes absolute counter stats and notifies listeners. */
   private _updateStats(): void {
     this._setStatCount('Tiles In Cache', this._cache.size);
     this._setStatCount('Cache Size', this.cacheByteSize);
@@ -597,10 +611,12 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     }
   }
 
+  /** Writes an absolute count into a probe.gl stat. */
   private _setStatCount(name: string, value: number): void {
     this.stats.get(name).reset().addCount(value);
   }
 
+  /** Returns the union of selected tiles across all consumers. */
   private _getSelectedTilesUnion(): Set<SharedTile2DHeader<DataT>> {
     const union = new Set<SharedTile2DHeader<DataT>>();
     for (const consumer of this._consumers.values()) {
@@ -611,6 +627,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return union;
   }
 
+  /** Returns the union of visible tiles across all consumers. */
   private _getVisibleTilesUnion(): Set<SharedTile2DHeader<DataT>> {
     const union = new Set<SharedTile2DHeader<DataT>>();
     for (const consumer of this._consumers.values()) {
@@ -621,11 +638,13 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return union;
   }
 
+  /** Moves a touched tile to the back of the cache map for LRU eviction ordering. */
   private _touchTile(id: string, tile: SharedTile2DHeader<DataT>): void {
     this._cache.delete(id);
     this._cache.set(id, tile);
   }
 
+  /** Computes the total byte size of all cached tile content. */
   private _getCacheByteSize(): number {
     let byteLength = 0;
     for (const tile of this._cache.values()) {
@@ -634,6 +653,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     return byteLength;
   }
 
+  /** Cancels low-priority requests when consumers no longer need them. */
   private _pruneRequests(): void {
     const {maxRequests = 0} = this.opts;
     const selectedTiles = this._getSelectedTilesUnion();
@@ -659,6 +679,7 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     }
   }
 
+  /** Rebuilds parent and child links for all cached tiles. */
   private _rebuildTree(): void {
     for (const tile of this._cache.values()) {
       tile.parent = null;
@@ -675,10 +696,12 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     }
   }
 
+  /** Updates the sorted tile list used by traversal and rendering. */
   private _syncTiles(): void {
     this._tiles = Array.from(this._cache.values()).sort((t1, t2) => t1.zoom - t2.zoom);
   }
 
+  /** Evicts unused cached tiles when configured cache limits are exceeded. */
   private _resizeCache(): void {
     const maxCacheSize = this.opts.maxCacheSize ?? 100;
     const maxCacheByteSize = this.opts.maxCacheByteSize ?? Infinity;
@@ -707,12 +730,13 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
     }
   }
 
+  /** Finds the nearest cached ancestor tile for placeholder rendering. */
   private _getNearestAncestor(tile: SharedTile2DHeader<DataT>): SharedTile2DHeader<DataT> | null {
     const {_minZoom = 0} = this;
     let index = tile.index;
     while (this.getTileZoom(index) > _minZoom) {
       index = this.getParentIndex(index);
-      const parent = this._cache.get(this.getTileId(index));
+      const parent = this.getTile(index);
       if (parent) {
         return parent;
       }
@@ -724,3 +748,9 @@ export class SharedTileset2D<DataT = any, ViewStateT = unknown> {
 function normalizeBounds(extent: number[] | null | undefined) {
   return extent && extent.length === 4 ? (extent as [number, number, number, number]) : undefined;
 }
+
+export type SharedRefinementStrategy = RefinementStrategy;
+export type SharedTileset2DBaseProps<DataT = any, ViewStateT = unknown> = Tileset2DProps<
+  DataT,
+  ViewStateT
+>;

@@ -8,8 +8,10 @@
  */
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
+import {PROJECTION_MODE} from '../../lib/constants';
 
-import {vec3, vec4} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 
 import type {CoordinateSystem} from '../../lib/constants';
@@ -37,6 +39,19 @@ function lngLatZToWorldPosition(
   return p;
 }
 
+function resolveCoordinateSystem(
+  coordinateSystem: CoordinateSystem,
+  viewport: Viewport
+): CoordinateSystem {
+  if (viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL) {
+    return coordinateSystem;
+  }
+  if (coordinateSystem === 'default') {
+    return viewport.isGeospatial ? 'lnglat' : 'cartesian';
+  }
+  return coordinateSystem;
+}
+
 function normalizeParameters(opts: {
   viewport: Viewport;
   coordinateSystem: CoordinateSystem;
@@ -52,28 +67,21 @@ function normalizeParameters(opts: {
   fromCoordinateSystem: CoordinateSystem;
   fromCoordinateOrigin: [number, number, number];
 } {
-  const {viewport, modelMatrix, coordinateOrigin} = opts;
-  let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
-
-  if (coordinateSystem === 'default') {
-    coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
-  }
-
-  if (fromCoordinateSystem === undefined) {
-    fromCoordinateSystem = coordinateSystem;
-  } else if (fromCoordinateSystem === 'default') {
-    fromCoordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
-  }
-  if (fromCoordinateOrigin === undefined) {
-    fromCoordinateOrigin = coordinateOrigin;
-  }
+  const {
+    viewport,
+    modelMatrix,
+    coordinateSystem,
+    coordinateOrigin,
+    fromCoordinateSystem = coordinateSystem,
+    fromCoordinateOrigin = coordinateOrigin
+  } = opts;
 
   return {
     viewport,
-    coordinateSystem,
+    coordinateSystem: resolveCoordinateSystem(coordinateSystem, viewport),
     coordinateOrigin,
     modelMatrix,
-    fromCoordinateSystem,
+    fromCoordinateSystem: resolveCoordinateSystem(fromCoordinateSystem, viewport),
     fromCoordinateOrigin
   };
 }
@@ -99,6 +107,19 @@ export function getWorldPosition(
 
   if (modelMatrix) {
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
+  }
+
+  switch (viewport.projectionMode) {
+    case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
+      if (coordinateSystem === 'cartesian') {
+        const scale = viewport.distanceScales.unitsPerWorldUnit;
+        return [
+          (x + coordinateOrigin[0]) * scale[0],
+          (y + coordinateOrigin[1]) * scale[1],
+          (z + coordinateOrigin[2]) * scale[2]
+        ];
+      }
+      return viewport.projectPosition([x, y, z]);
   }
 
   switch (coordinateSystem) {
@@ -179,6 +200,7 @@ export function projectPosition(
   const {
     geospatialOrigin = DEFAULT_COORDINATE_ORIGIN,
     shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+    commonOrigin,
     offsetMode = false
   } = autoOffset ? getOffsetOrigin(viewport, coordinateSystem, coordinateOrigin) : {};
 
@@ -191,9 +213,8 @@ export function projectPosition(
   });
 
   if (offsetMode) {
-    const positionCommonSpace = viewport.projectPosition(
-      geospatialOrigin || shaderCoordinateOrigin
-    );
+    const positionCommonSpace =
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
     vec3.sub(worldPosition, worldPosition, positionCommonSpace);
   }
 

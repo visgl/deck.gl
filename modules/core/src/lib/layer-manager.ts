@@ -12,6 +12,7 @@ import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
+import ProjectionScaleResources from './projection-scale-resources';
 
 import Viewport from '../viewports/viewport';
 
@@ -54,6 +55,7 @@ export default class LayerManager {
   resourceManager: ResourceManager;
 
   private _lastRenderedLayers: LayersList = [];
+  readonly projectionScaleResources: ProjectionScaleResources;
   private _needsRedraw: string | false = false;
   private _needsUpdate: string | false = false;
   private _nextLayers: LayersList | null = null;
@@ -80,6 +82,7 @@ export default class LayerManager {
     // will be skipped.
     this.layers = [];
     this.resourceManager = new ResourceManager({device, protocol: 'deck://'});
+    this.projectionScaleResources = new ProjectionScaleResources(device);
 
     this.context = {
       mousePosition: null,
@@ -105,6 +108,7 @@ export default class LayerManager {
 
   /** Method to call when the layer manager is not needed anymore. */
   finalize() {
+    this.projectionScaleResources.destroy();
     this.resourceManager.finalize();
     // Finalize all layers
     for (const layer of this.layers) {

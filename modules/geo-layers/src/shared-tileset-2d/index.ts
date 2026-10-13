@@ -22,3 +22,6 @@ export {
   STRATEGY_REPLACE
 } from './shared-tileset-2d';
 export {SharedTile2DHeader} from './shared-tile-2d-header';
+
+export type {TileLoadProps, ZRange, Bounds, TileBoundingBox, TileIndex} from './types';
+export type {RefinementStrategy} from './shared-tileset-2d';

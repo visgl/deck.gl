@@ -8,6 +8,7 @@
 
 import {
   Layer,
+  color,
   project32,
   picking,
   DefaultProps,
@@ -25,6 +26,7 @@ import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 import {simpleMeshUniforms, SimpleMeshProps} from './simple-mesh-layer-uniforms';
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
+import source from './simple-mesh-layer.wgsl';
 
 import type {
   LayerProps,
@@ -75,8 +77,19 @@ function getGeometry(data: Mesh): Geometry {
     data.attributes = normalizeGeometryAttributes(data.attributes);
     return data;
   } else if ((data as any).attributes) {
+    const {indices} = data as {indices?: MeshAttribute};
+    // loaders.gl's Arrow mesh format uses signed indices; GPU index buffers require unsigned.
+    const indexValues = indices?.value;
+    const normalizedIndices =
+      indexValues instanceof Int32Array
+        ? {
+            ...indices,
+            value: new Uint32Array(indexValues.buffer, indexValues.byteOffset, indexValues.length)
+          }
+        : indices;
     return new Geometry({
       ...data,
+      indices: normalizedIndices,
       topology: 'triangle-list',
       attributes: normalizeGeometryAttributes((data as any).attributes)
     });
@@ -213,7 +226,8 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, phongMaterial, picking, simpleMeshUniforms]
+      source,
+      modules: [project32, color, phongMaterial, picking, simpleMeshUniforms]
     });
   }
 
@@ -253,6 +267,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         size: 3,
         accessor: 'getPosition'
       },
@@ -342,27 +357,29 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       isInstanced: true
     });
 
-    const {texture} = this.props;
-    const {emptyTexture} = this.state;
-    const simpleMeshProps: SimpleMeshProps = {
-      sampler: (texture as Texture) || emptyTexture,
-      hasTexture: Boolean(texture)
-    };
-    model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
+    model.shaderInputs.setProps({
+      simpleMesh: this.getTextureProps(this.props.texture as Texture)
+    });
     return model;
   }
 
   private setTexture(texture: Texture): void {
-    const {emptyTexture, model} = this.state;
+    const {model} = this.state;
 
     // props.mesh may not be ready at this time.
     // The sampler will be set when `getModel` is called
     if (model) {
-      const simpleMeshProps: SimpleMeshProps = {
-        sampler: texture || emptyTexture,
-        hasTexture: Boolean(texture)
-      };
-      model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
+      model.shaderInputs.setProps({simpleMesh: this.getTextureProps(texture)});
     }
+  }
+
+  private getTextureProps(texture?: Texture | null): SimpleMeshProps {
+    const meshTexture = texture || this.state.emptyTexture;
+    return {
+      ...(this.context.device.type === 'webgpu'
+        ? {simpleMeshTexture: meshTexture}
+        : {sampler: meshTexture}),
+      hasTexture: Boolean(texture)
+    };
   }
 }

@@ -1,3 +1,7 @@
+---
+description: "Install deck.gl with npm or from a CDN, run the examples, and pick a base map integration."
+---
+
 # Installing and Running Examples
 
 ## Installation
@@ -83,6 +87,7 @@ A family of NPM modules are published as part of the deck.gl framework. The foll
     * `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
   + `@deck.gl/json` - Declarative interface that supports specifying deck.gl layers and views using a JSON format.
   + `@deck.gl/mapbox` - An integration with the [Mapbox custom layer](../api-reference/mapbox/overview.md) API.
+  + `@deck.gl/maplibre` - An integration with the [MapLibre GL JS custom layer](../api-reference/maplibre/overview.md) API.
   + `@deck.gl/react` - React wrapper of deck.gl.
   + `@deck.gl/widgets` - Useful UI components.
   + `@deck.gl/test-utils` - Testing utilities.

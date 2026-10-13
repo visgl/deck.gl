@@ -4,6 +4,7 @@
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
+import AttributeBufferGroups, {type AttributeBufferGroupBindings} from './attribute-buffer-groups';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
@@ -56,6 +57,7 @@ export default class AttributeManager {
 
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
+  private attributeBufferGroups: AttributeBufferGroups | null;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
@@ -85,12 +87,21 @@ export default class AttributeManager {
       id: `${id}-transitions`,
       timeline
     });
+    this.attributeBufferGroups =
+      device.type === 'webgpu'
+        ? new AttributeBufferGroups(device, {
+            id,
+            isTransitionAttribute: attributeName =>
+              this.attributeTransitionManager.hasAttribute(attributeName)
+          })
+        : null;
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
   }
 
   finalize() {
+    this.attributeBufferGroups?.finalize();
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].delete();
     }
@@ -301,8 +312,39 @@ export default class AttributeManager {
       isInstanced?: boolean;
     }
   ): BufferLayout[] {
+    if (this.hasBufferGroups()) {
+      return this.attributeBufferGroups!.getBufferLayouts(this.getAttributes(), modelInfo);
+    }
     return Object.values(this.getAttributes()).map(attribute =>
       attribute.getBufferLayout(modelInfo)
+    );
+  }
+
+  /** @internal Returns whether this WebGPU manager has explicitly grouped attributes. */
+  hasBufferGroups(): boolean {
+    return Boolean(this.attributeBufferGroups?.hasGroups(this.attributes));
+  }
+
+  /**
+   * @internal Resolves runtime layouts and additional shared buffers for a grouped WebGPU model.
+   */
+  getBufferGroupBindings(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: {isInstanced?: boolean},
+    excludeAttributes: Record<string, boolean> = {}
+  ): AttributeBufferGroupBindings {
+    if (!this.attributeBufferGroups) {
+      return {
+        bufferLayouts: this.getBufferLayouts(modelInfo),
+        buffers: {},
+        groupedAttributeIds: new Set<string>()
+      };
+    }
+    return this.attributeBufferGroups.getBindings(
+      this.getAttributes(),
+      changedAttributes,
+      modelInfo,
+      excludeAttributes
     );
   }
 
