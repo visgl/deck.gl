@@ -55,6 +55,7 @@ Inherits [View options](./view.md#constructor), including layout, padding, contr
 | `fromCrs` | `'WGS84'` | CRS name or PROJ string describing world coordinates. |
 | `toCrs` | None | Planar, meter-based map CRS name or PROJ string. |
 | `fromBounds` | None | The projection's valid domain, expressed as `[minX, minY, maxX, maxY]` in world coordinates (`fromCrs`). |
+| `toBounds` | `[-EC/2, -EC/2, EC/2, EC/2]`, where `EC = 40075016.6855` | Extent for local meter sizing, as `[minX, minY, maxX, maxY]` in map meters in `toCrs`. Defaults to the Web Mercator extent. Set this to cover your map; it does not clip geometry or change the map's coordinate scale. |
 | `resolution` | `0` | Set a positive value in world-coordinate units (`fromCrs`) to subdivide paths and polygon edges so they follow the projection. Smaller positive values produce smoother curves but take longer to process. `0` disables subdivision. |
 | `getDistanceScale` | None | `([x, y]) => [xScale, yScale]`, with `[x, y]` in `toCrs`: real-world ground meters per map meter along X/Y, to adjust for horizontal projection distortion. Altitude does not affect scale. See [meter size](./custom-projection-viewport.md#meter-size). |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
@@ -83,6 +84,16 @@ TypeScript configuration types are exported as `CustomProjectionViewProps`, `Cus
 
 Enable interaction with `controller: true`. The default [CustomProjectionController](./custom-projection-controller.md) pans and zooms in common space, with map-style pitch and bearing controls. Panning is unrestricted unless you supply `controller.maxBounds` in world coordinates (`fromCrs`).
 
+## Meter Size
+
+Layers using `sizeUnits: 'meters'`, `radiusUnits: 'meters'` or `widthUnits: 'meters'` adjust their sizes at each object's location. Position altitude retains the fixed map-meter-to-common scale.
+
+The correction is area-equivalent: a small geographic circle can become an ellipse under projection, as illustrated by [Tissot's indicatrix](https://en.wikipedia.org/wiki/Tissot%27s_indicatrix). Instead of stretching a marker into that ellipse, deck.gl preserves its shape and approximates the same projected area. Equally sized markers grow toward the poles in Web Mercator and remain approximately uniform in Equal Earth.
+
+Local sizing is approximate. Set `toBounds` to cover the area you display. Outside that extent, or where local scale cannot be evaluated, rendering falls back to the viewport-center scale. Changing `toBounds` updates meter sizing without changing position normalization.
+
+If the local linear approximation produces a nonpositive or nonfinite scale on a steep curve, rendering uses the positive sample at the cell center.
+
 ## Changing Projections
 
 `CustomProjectionView` supports swapping the custom projection at runtime. To avoid unnecessary updates, a new `projection` object alone does not trigger layer updates. To refresh projected positions, change one or more of: `fromCrs`, `toCrs`, or `resolution` alongside the updated converter.
@@ -93,9 +104,11 @@ When displaying multiple views with different projections, create a separate lay
 
 ## Limitations
 
-- Supported layers are `ScatterplotLayer`, `PathLayer` and `SolidPolygonLayer`, including their use by `PolygonLayer` and the corresponding `GeoJsonLayer` sublayers. Other layers are not yet supported.
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
+- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in `fromCrs` and projects every grid vertex; smaller values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. If the image is generated in a different coordinate system than `fromCrs`, subdivision cannot correct its pixel-to-coordinate mapping.
+- Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
 - Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
+- `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the viewport uses preprojection. Split geometry at the desired longitude boundary before passing it to these layers.
 - With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in `fromCrs`. `modelMatrix` is applied before conversion,  and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in map meters in `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in `fromCrs`. They may be unavailable where `projection.inverse` cannot return a valid position.

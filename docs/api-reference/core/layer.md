@@ -846,14 +846,14 @@ Returns:
 
 #### `projectPosition` {#projectposition}
 
-Projects a map coordinate to world coordinate using the current viewport settings and the current coordinate system. Can be useful to calculate world space angle and distances.
+Projects a coordinate to common space using the current viewport and layer coordinate system. Can be useful to calculate common-space angles and distances.
 
 Parameters:
 
 * `coordinates` (number[]) - `[x, y, z]` in this layer's coordinate system.
 * `params` (object, optional) - Projection parameters override. It accepts the following fields:
   - `viewport` (Viewport) - defaults to `this.context.viewport`.
-  - `modelMatrix` (Matrix4) - defaults to `this.props.modelMatrix`.
+  - `modelMatrix` (Matrix4 | null) - defaults to `this.props.modelMatrix`. Pass `null` to skip the layer matrix.
   - `coordinateOrigin` (number[3]) - defaults to `this.props.coordinateOrigin`.
   - `coordinateSystem` (string) - defaults to `this.props.coordinateSystem`.
   - `fromCoordinateOrigin` (number[3]) - defaults to passed `coordinateOrigin`.
@@ -861,7 +861,7 @@ Parameters:
 
 Returns:
 
-* World coordinates in `[x, y]`.
+* Common-space coordinates in `[x, y, z]`.
 
 ### Layer Picking Methods
 

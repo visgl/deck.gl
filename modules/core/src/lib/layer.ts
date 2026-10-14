@@ -258,12 +258,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return viewport.unproject(xy);
   }
 
-  /** Projects a point with current view state from the current layer's coordinate system to the world space */
+  /** Projects a point from the layer's coordinate system to common space, with optional parameter overrides. */
   projectPosition(
     xyz: number[],
     params?: {
       /** The viewport to use */
       viewport?: Viewport;
+      /** The model matrix to apply. Defaults to the layer prop; null disables it. */
+      modelMatrix?: NumericArray | null;
+      /** The reference coordinate system. Defaults to the layer prop. */
+      coordinateSystem?: CoordinateSystem;
+      /** The reference coordinate origin. Defaults to the layer prop. */
+      coordinateOrigin?: [number, number, number];
       /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
       fromCoordinateSystem?: CoordinateSystem;
       /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
@@ -483,6 +489,16 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   abstract initializeState(context: LayerContext): void;
 
   getShaders(shaders: any): any {
+    // Preprojection capability is stable for the lifetime of a layer instance.
+    shaders = mergeShaders(
+      {
+        defines: {
+          USE_EXTERNAL_PROJECTION:
+            this.context.viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+        }
+      },
+      shaders
+    );
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
       modules: this.context.defaultShaderModules

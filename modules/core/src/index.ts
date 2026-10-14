@@ -12,6 +12,7 @@ export {getShaderAssembler} from './shaderlib/index';
 
 // Core Library
 export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
+export {PROJECTION_MODE as _PROJECTION_MODE} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';

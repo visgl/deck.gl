@@ -210,7 +210,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
-        accessor: 'getPosition'
+        accessor: 'getPosition',
+        ...this.usePositionTransforms()
       },
       instanceRadius: {
         size: 1,

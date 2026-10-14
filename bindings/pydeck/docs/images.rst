@@ -27,6 +27,9 @@
 .. image:: gallery/images/column_layer.png
    :width: 0
 
+.. image:: gallery/images/paris_trees.png
+   :width: 0
+
 .. image:: gallery/images/contour_layer.png
    :width: 0
 
@@ -225,6 +228,8 @@
    gallery/surface_plot
 
    gallery/column_layer
+
+   gallery/paris_trees
 
    gallery/contour_layer
 

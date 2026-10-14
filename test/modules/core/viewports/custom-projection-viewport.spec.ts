@@ -13,7 +13,7 @@ import {
 import {CustomProjectionState} from '@deck.gl/core/controllers/custom-projection-controller';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
 import {lngLatToWorld, worldToLngLat, getDistanceScales} from '@math.gl/web-mercator';
-import {Projection} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/projection';
 
 const projection = {forward: p => p.slice(), inverse: p => p.slice()};
 const normalizationScale = 512 / 40075016.6855;
@@ -54,7 +54,7 @@ test('Viewport installs the projection pair before invoking overridden projectPo
 });
 
 test('CustomProjectionViewport centers the camera on world coordinates, defaulting to zero', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   for (const center of [undefined, [-122, 38, 0] as [number, number, number]]) {
     const viewport = new CustomProjectionViewport({
       ...options,
@@ -195,7 +195,7 @@ test('CustomProjectionViewport separates map-meter positions from ground-meter s
 });
 
 test('CustomProjectionViewport fixed scale aligns projected Web Mercator with MapView', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   for (const [pitch, bearing] of [
     [0, 0],
     [45, 30]
@@ -441,7 +441,7 @@ test('CustomProjectionViewport preserves converter altitude without distortion c
 });
 
 test('CustomProjectionViewport inherits targetZ unprojection for altitude-preserving converters', () => {
-  const converter = new Projection({from: 'EPSG:4326', to: 'EPSG:3857'});
+  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to: 'EPSG:3857'});
   const viewport = new CustomProjectionViewport({
     width: 800,
     height: 600,
@@ -470,13 +470,17 @@ test('CustomProjectionViewport defaults to geographic scale estimation and suppo
   expect(
     geographic.distanceScales.unitsPerMeter[0] / (normalizationScale / metersPerDegree)
   ).toBeCloseTo(1, 6);
-  expect(moved.distanceScales.unitsPerMeter[0]).toBeCloseTo(
-    2 * geographic.distanceScales.unitsPerMeter[0],
-    16
+  // Independent WGS84 surface-distance references, in meters per degree.
+  expect(
+    (geographic.distanceScales.unitsPerMeter[1] / normalizationScale) * 110574.2758
+  ).toBeCloseTo(1, 6);
+  expect((moved.distanceScales.unitsPerMeter[0] / normalizationScale) * 55800.0016).toBeCloseTo(
+    1,
+    6
   );
-  expect(moved.distanceScales.unitsPerMeter[1]).toBeCloseTo(
-    geographic.distanceScales.unitsPerMeter[1],
-    16
+  expect((moved.distanceScales.unitsPerMeter[1] / normalizationScale) * 111412.2877).toBeCloseTo(
+    1,
+    6
   );
   expect(moved.projectionSignature).toBe(geographic.projectionSignature);
   const metric = new CustomProjectionViewport({
@@ -532,7 +536,7 @@ test('CustomProjectionViewport altitude unit conversion does not change meter si
 });
 
 test('CustomProjectionViewport supports UTM world coordinates and Web Mercator map meters', () => {
-  const converter = new Projection({
+  const converter = projectionEngine.createProjection({
     from: '+proj=utm +zone=10 +datum=WGS84 +units=m',
     to: 'EPSG:3857'
   });
@@ -557,7 +561,7 @@ test('CustomProjectionViewport supports UTM world coordinates and Web Mercator m
   );
 });
 
-test('CustomProjectionViewport only evaluates distance scale at the toCrs center', () => {
+test('CustomProjectionViewport evaluates center scales without changing position projection', () => {
   const getDistanceScale = vi.fn((_position: [number, number]): [number, number] => [2, 4]);
   const forward = vi.fn(([x, y, z = 0]) => [x + 1000, y * 2, z * 10]);
   const inverse = vi.fn(([x, y, z = 0]) => [x - 1000, y / 2, z / 10]);
@@ -841,4 +845,48 @@ test('CustomProjectionViewport clamps input bounds in both directions without ch
   expect(() => new CustomProjectionViewport({...options, fromBounds: [10, 0, 0, 10]})).toThrow(
     'fromBounds'
   );
+});
+
+test('CustomProjectionViewport evaluates distance scales at a fixed toCrs anchor', () => {
+  const callback = vi.fn(([x, y]: [number, number]): [number, number] => [
+    1 + x / 1000,
+    1 + y / 1000
+  ]);
+  const options = {
+    projection: {forward: ([x, y]) => [x * 2, y * 3], inverse: ([x, y]) => [x / 2, y / 3]},
+    getDistanceScale: callback
+  };
+  const first = new CustomProjectionViewport({...options, center: [0, 0, 0]});
+  const moved = new CustomProjectionViewport({...options, center: [100, 200, 0]});
+  const anchor = [1000, 3000];
+  callback.mockClear();
+  const scales = first.getDistanceScales(anchor);
+  expect(callback).toHaveBeenCalledExactlyOnceWith(anchor);
+  expect(scales.unitsPerMeter).toEqual([
+    normalizationScale / 2,
+    normalizationScale / 4,
+    normalizationScale / Math.sqrt(8)
+  ]);
+  expect(scales.metersPerUnit).toEqual(scales.unitsPerMeter.map(value => 1 / value));
+  expect(moved.getDistanceScales(anchor)).toEqual(scales);
+  expect(first.getDistanceScales()).toBe(first.distanceScales);
+  expect(first.distanceScales.unitsPerMeter).toEqual(Array(3).fill(normalizationScale));
+  expect(moved.distanceScales.unitsPerMeter).not.toEqual(first.distanceScales.unitsPerMeter);
+});
+
+test('CustomProjectionViewport retains camera distance scales when an anchor cannot be inverted', () => {
+  for (const failure of ['throw', 'null', 'nonfinite']) {
+    const inverse = vi.fn(() => {
+      if (failure === 'throw') throw new Error('Outside inverse domain');
+      return failure === 'null' ? null : [NaN, NaN];
+    });
+    const viewport = new CustomProjectionViewport({
+      fromCrs: '+proj=cart +units=m',
+      projection: {forward: ([x, y]) => [x * 2, y * 3], inverse}
+    });
+    // Use non-unit distortion to distinguish cached sizing from a generic fallback.
+    expect(viewport.distanceScales.unitsPerMeter).not.toEqual(Array(3).fill(normalizationScale));
+    expect(viewport.getDistanceScales([100, 200])).toBe(viewport.distanceScales);
+    expect(inverse).toHaveBeenCalledExactlyOnceWith([100, 200]);
+  }
 });

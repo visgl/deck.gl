@@ -13,6 +13,7 @@ import {PROJECTION_MODE} from '../../lib/constants';
 import memoize from '../../utils/memoize';
 
 import type Viewport from '../../viewports/viewport';
+import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';
 
 type Vec3 = [number, number, number];
@@ -81,9 +82,18 @@ export function getOffsetOrigin(
 
   switch (viewport.projectionMode) {
     case PROJECTION_MODE.WEB_MERCATOR:
-      if (coordinateSystem === 'lnglat' || coordinateSystem === 'cartesian') {
+      if (coordinateSystem === 'lnglat') {
         geospatialOrigin = [0, 0, 0];
         offsetMode = false;
+      } else if (coordinateSystem === 'cartesian') {
+        // Positions are already in common space and only z is in meters. Use the viewport center
+        // as geospatial origin so that z is scaled the same as in WEB_MERCATOR_AUTO_OFFSET mode
+        offsetMode = false;
+        geospatialOrigin = viewport.unprojectPosition([
+          Math.fround(viewport.center[0]),
+          Math.fround(viewport.center[1]),
+          0
+        ]);
       }
       break;
 
@@ -216,6 +226,10 @@ export type ProjectUniforms = {
   // Backward compatibility
   // TODO: remove in v9
   pseudoMeters: boolean;
+  /** Width and height of the square local size-scale field. */
+  sizeScaleSize: number;
+  /** Map-meter XY to sampler-space XY scale and translation. */
+  sizeScaleTransform: [number, number, number, number];
 
   // Screen size
   viewportSize: [number, number];
@@ -238,6 +252,13 @@ export type ProjectUniforms = {
 
 export type ProjectProps = {
   viewport: Viewport;
+  /** Scalar XY scale, X/Y slopes and Z scale: float32 storage buffer on WebGPU,
+   * RGBA32Uint float-bit texture on WebGL. Required when USE_EXTERNAL_PROJECTION
+   * is enabled; ordinary projection shader variants do not use this binding.
+   */
+  sizeScale?: Buffer | Texture;
+  /** Mapping associated with the bound scale field, when using a separate aggregation viewport. */
+  sizeScaleTransform?: [number, number, number, number];
   devicePixelRatio?: number;
   modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
@@ -336,6 +357,8 @@ function calculateViewportUniforms({
     // TODO: remove in v9
     // @ts-expect-error _pseudoMeters is only defined on WebMercator viewport
     pseudoMeters: Boolean(viewport._pseudoMeters),
+    sizeScaleSize: 1,
+    sizeScaleTransform: [1, 1, 0, 0],
 
     // Screen size
     viewportSize,
