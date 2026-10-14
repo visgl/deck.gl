@@ -89,6 +89,8 @@ export class MVT2DLayer extends Tile2DLayer<
   declare state: Tile2DLayer<MVT2DData>['state'] & {
     /** Whether sublayers currently use WGS84 coordinates. */
     geographic?: boolean;
+    /** Whether the current view uses globe rendering without planar clipping. */
+    globe?: boolean;
     /** Feature ID highlighted by this layer hover interaction. */
     hoveredFeatureId?: string | number | null;
     /** MVT source-layer name associated with the hovered feature. */
@@ -146,9 +148,11 @@ export class MVT2DLayer extends Tile2DLayer<
   /** View changes invalidate render geometry, never the shared decoded cache. */
   updateState(params: UpdateParameters<this>): void {
     const geographic = this._usesGeographicCoordinates();
-    if (this.state.geographic !== geographic) {
+    const globe = Boolean(this.context.viewport.resolution);
+    if (this.state.geographic !== geographic || this.state.globe !== globe) {
       this.state.tileLayers.clear();
       this.state.geographic = geographic;
+      this.state.globe = globe;
     }
     super.updateState(params);
   }

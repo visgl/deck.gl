@@ -8,7 +8,7 @@ import {
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
-import {MVT2DLayer, Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
+import {MVT2DLayer, Tile2DLayer, Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
 import {Tile2DView} from '../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
 import {getMVTDataInWGS84} from '../../../modules/geo-layers/src/mvt-2d-layer/mvt-2d-layer';
 
@@ -221,4 +221,27 @@ it('decodes a real MVT feature into the canonical tile-local array', async () =>
   expect(data).toHaveLength(1);
   expect(data[0].geometry.coordinates).toEqual([0.5, 0.5]);
   expect(data[0].properties.name).toBe('test');
+});
+
+it('invalidates planar clipping when a geographic extrusion switches to a globe', () => {
+  const baseUpdate = vi.spyOn(Tile2DLayer.prototype, 'updateState').mockImplementation(() => {});
+  const layer = new MVT2DLayer({data: null, extruded: true});
+  layer.context = {viewport} as any;
+  layer.initializeState();
+  layer.state.geographic = true;
+  layer.state.globe = false;
+  try {
+    layer.state.tileLayers.set('sentinel', []);
+    layer.context = {viewport: new GlobeViewport({width: 128, height: 128, zoom: 0})} as any;
+    layer.updateState({changeFlags: {viewportChanged: true}} as any);
+    expect(layer.state.tileLayers.size).toBe(0);
+    expect(layer.state.globe).toBe(true);
+    layer.state.tileLayers.set('sentinel', []);
+    layer.context = {viewport} as any;
+    layer.updateState({changeFlags: {viewportChanged: true}} as any);
+    expect(layer.state.tileLayers.size).toBe(0);
+    expect(layer.state.globe).toBe(false);
+  } finally {
+    baseUpdate.mockRestore();
+  }
 });
