@@ -12,6 +12,18 @@ export MapboxAccessToken="dummy-mapbox-access-token"
   yarn build
 )
 
+# Exercise the same playground schema generation as the deployment build.
+(
+  cd ../examples/playground
+  yarn
+  yarn generate-schema
+  node --test generate-schema.test.cjs
+)
+cp ../examples/playground/schema.generated.json ./static/schema.generated.json
+
+# Build the embedded v10 examples and their unpublished luma.gl peers.
+yarn build-v10-examples
+
 # clean up cache
 docusaurus clear
 docusaurus build

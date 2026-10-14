@@ -28,19 +28,45 @@ The examples prefer WebGPU where available. Individual examples declare backend
 requirements in `mobile-support.ts`; `gpu-graph-explorer` requires WebGPU.
 Private examples and tests remain opt-in because their luma.gl peers are unpublished.
 Visual smoke scripts beside the examples use Playwright and can be run with Node.
-These standalone examples are not registered in the public deck.gl website gallery.
+The website embeds these examples under **Arrow Layers - deck.gl v10**,
+**Visual Effects - deck.gl v10**, and **GPU Graph Layers - deck.gl v10**.
+`yarn test-website` builds their assets using a pinned luma.gl source revision,
+without requiring local peer links. `yarn --cwd website start` also builds the
+embedded demos before starting the website. Their controls and device selectors
+remain available inside each example page.
 
 ## Examples
 
+- [ambient-occlusion](./ambient-occlusion/)
 - [arrow-path-layer](./arrow-path-layer/)
+- [arrow-polygon-layer](./arrow-polygon-layer/)
+- [arrow-text-layer](./arrow-text-layer/)
+- [city-scene](./city-scene/)
+- [depth-of-field](./depth-of-field/)
+- [fireflies](./fireflies/)
+- [flow-particles](./flow-particles/)
+- [global-illumination](./global-illumination/)
+- [globe-clouds](./globe-clouds/)
 - [gpu-culled-trace](./gpu-culled-trace/)
 - [gpu-graph-explorer](./gpu-graph-explorer/)
+- [hdr-night-lighting](./hdr-night-lighting/)
+- [light-shafts](./light-shafts/)
 - [luspatial-taxi](./luspatial-taxi/)
+- [pattern-fills](./pattern-fills/)
+- [point-glow](./point-glow/)
+- [scene-buffers](./scene-buffers/)
+- [sketch-edges](./sketch-edges/)
+- [soft-shadows](./soft-shadows/)
+- [styled-paths](./styled-paths/)
+- [weather](./weather/)
 
 ## Current validation limits
 
-All four standalone examples build and pass the shared TypeScript check. The opt-in browser
+All 22 examples build and pass the shared TypeScript check. The opt-in browser
 suite currently has five failures: two scene-capture cases, firefly picking,
 meter-offset projection, and the restored graph rendering pipeline timeout.
-These tests remain enabled in the private suite; the public CI suite excludes
-private prototypes until their unpublished peers and integration issues are resolved.
+The styled-paths and city-scene visual smoke scripts also fail their WebGPU
+route-picking and roof-picking assertions, respectively.
+These tests remain enabled in the opt-in private suite; public test jobs exclude
+them. The website build bundles the demos using pinned sources for the unpublished
+peers.
