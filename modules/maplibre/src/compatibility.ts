@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {clamp} from '@math.gl/core';
+
 export type MapLibreRenderParameters = {
   farZ: number;
   nearZ: number;
@@ -54,7 +56,7 @@ export function getMapLibreCameraElevation(
   }
   if (getMapLibreProjection(map) === 'globe') {
     const [startZoom, endZoom] = MAPLIBRE_GLOBE_TRANSITION_ZOOMS;
-    const mercatorWeight = Math.min(Math.max((zoom - startZoom) / (endZoom - startZoom), 0), 1);
+    const mercatorWeight = clamp((zoom - startZoom) / (endZoom - startZoom), 0, 1);
     return elevation * mercatorWeight;
   }
   return elevation;

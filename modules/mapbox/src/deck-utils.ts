@@ -9,6 +9,7 @@ import type MapboxLayerGroup from './mapbox-layer-group';
 import type {LayerOverlayProps, Map} from './types';
 import {getLayerGroupId} from './resolve-layer-groups';
 
+import {clamp} from '@math.gl/core';
 import {lngLatToWorld, unitsPerMeter} from '@math.gl/web-mercator';
 
 export const MAPBOX_VIEW_ID = 'mapbox';
@@ -274,7 +275,7 @@ function centerCameraOnTerrain(map: Map, viewState: MapViewState) {
       // The globe camera targets sea level and the Web Mercator camera the terrain.
       // During the transition, maplibre-gl blends the two, which a target in between approximates
       const [startZoom, endZoom] = MAPLIBRE_GLOBE_TRANSITION_ZOOMS;
-      elevation *= Math.min(Math.max((viewState.zoom! - startZoom) / (endZoom - startZoom), 0), 1);
+      elevation *= clamp((viewState.zoom! - startZoom) / (endZoom - startZoom), 0, 1);
     }
     viewState.position = [0, 0, elevation];
   }
