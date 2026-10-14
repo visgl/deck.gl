@@ -131,7 +131,10 @@ export default abstract class View<
     return new ViewConstructor({...this.props, ...newProps});
   }
 
-  /** Make viewport from canvas dimensions and view state */
+  /** Create a viewport from canvas dimensions and view state.
+   * To wait for resources prepared by initialize(), override this method to return null
+   * until they are ready. This method may be called while initialize() is still pending.
+   */
   makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
 

@@ -418,18 +418,24 @@ export default class ViewManager<ViewsT extends View[]> {
     this.views = views;
     for (const view of views) {
       if (previousViews.includes(view)) continue;
-      const initialization = view.initialize();
-      if (initialization) {
-        initialization
-          .then(() => {
-            // Removed or replaced views cannot invalidate their successors.
-            if (this.views.includes(view)) this.setNeedsUpdate('view initialized');
-          })
-          .catch(error => {
-            if (!this.views.includes(view)) return;
-            if (this._eventCallbacks.onError) this._eventCallbacks.onError(error);
-            else log.error(error)();
-          });
+      const onError = (error: Error) => {
+        if (!this.views.includes(view)) return;
+        if (this._eventCallbacks.onError) this._eventCallbacks.onError(error);
+        else log.error(String(error))();
+      };
+      try {
+        const initialization = view.initialize();
+        if (initialization) {
+          initialization
+            .then(() => {
+              // Removed or replaced views cannot invalidate their successors.
+              if (this.views.includes(view)) this.setNeedsUpdate('view initialized');
+            })
+            .catch(onError);
+        }
+      } catch (error) {
+        // Resource setup may fail before a promise is returned; keep other views initializing.
+        onError(error as Error);
       }
     }
   }
