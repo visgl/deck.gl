@@ -38,6 +38,7 @@ export {default as DeckRenderer} from './lib/deck-renderer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
+export type {ProjectPositionOptions} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 export {default as _GlobeViewport} from './viewports/globe-viewport';
 export {default as OrbitViewport} from './viewports/orbit-viewport';

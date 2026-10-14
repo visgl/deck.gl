@@ -247,3 +247,16 @@ test('A layer in the custom viewport target CRS retains native attributes and GP
     manager.finalize();
   }
 });
+
+test('Viewport projects a declared source CRS independently of attribute packing', () => {
+  for (const viewport of [new WebMercatorViewport(), new GlobeViewport(), createTestViewport()]) {
+    const geographic = [10, 20, 30];
+    const sourcePosition = source.converter.WGS84.from(geographic);
+    const expected = viewport.projectPosition(geographic);
+    expect(viewport.projectPosition(sourcePosition, {sourceCrs: source})).toEqual(expected);
+    expect(viewport.projectPosition(geographic, {sourceCrs: WGS84_CRS})).toEqual(expected);
+    const targetPosition = viewport.crs!.converter.WGS84.from(geographic);
+    const actual = viewport.projectPosition(targetPosition, {sourceCrs: viewport.crs!});
+    for (let axis = 0; axis < 3; axis++) expect(actual[axis]).toBeCloseTo(expected[axis], 7);
+  }
+});
