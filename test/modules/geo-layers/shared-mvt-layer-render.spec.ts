@@ -5,10 +5,7 @@
 import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {expect, test} from 'vitest';
-import {
-  _SharedMVTLayer as SharedMVTLayer,
-  _SharedTileset2D as SharedTileset2D
-} from '@deck.gl/geo-layers';
+import {MVT2DLayer, Tileset2D} from '@deck.gl/geo-layers';
 
 /** A real deck.gl view switch must redraw geographic content without decoding it again. */
 test('shared MVT consumers draw in map, globe and map again', async () => {
@@ -38,10 +35,10 @@ test('shared MVT consumers draw in map, globe and map again', async () => {
       }
     ];
   };
-  const loader = new SharedMVTLayer({data: 'https://example.com/{z}/{x}/{y}.pbf', fetch});
-  const tileset = new SharedTileset2D({...loader._getTilesetOptions(), maxZoom: 0});
+  const loader = new MVT2DLayer({data: 'https://example.com/{z}/{x}/{y}.pbf', fetch});
+  const tileset = new Tileset2D({...loader._getTilesetOptions(), maxZoom: 0});
   const getLayers = () => [
-    new SharedMVTLayer({
+    new MVT2DLayer({
       id: 'fills',
       data: tileset,
       filled: true,
@@ -49,7 +46,7 @@ test('shared MVT consumers draw in map, globe and map again', async () => {
       getFillColor: [255, 0, 0],
       parameters: {cullMode: 'none'}
     }),
-    new SharedMVTLayer({
+    new MVT2DLayer({
       id: 'outlines',
       data: tileset,
       filled: false,

@@ -1,5 +1,5 @@
-This experimental SharedTile2DLayer example feeds tiled BitmapLayer sublayers in overlapping
-main and minimap views. Toggle "Share tile cache" to compare one SharedTileset2D with independent
+This Tile2DLayer example feeds tiled BitmapLayer sublayers in overlapping
+main and minimap views. Toggle "Share tile cache" to compare one Tileset2D with independent
 caches. The displayed request and cached-tile counts reset on each toggle.
 
 ### Usage
@@ -20,4 +20,4 @@ npm start
 OpenStreetMap raster tiles from [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
 For more information, check out the
-[documentation of SharedTile2DLayer](../../../docs/api-reference/geo-layers/shared-tile-2d-layer.md).
+[documentation of Tile2DLayer](../../../docs/api-reference/geo-layers/tile-2d-layer.md).

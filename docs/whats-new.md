@@ -4,6 +4,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### Tile layers
+
+[`Tile2DLayer`](./api-reference/geo-layers/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/geo-layers/mvt-2d-layer.md) are the new tile layers for applications sharing content across styles and views. One [`Tileset2D`](./api-reference/geo-layers/tileset-2d.md) owns loading and caching while each layer maintains independent per-view selection, picking, and highlighting. `Tileset2D` retains the legacy default-view API, and `TileLayer` and `MVTLayer` remain available for compatibility.
+
 ### Custom projections (Experimental)
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
@@ -227,8 +231,6 @@ Class-specific improvements:
 
 - [TextLayer](./api-reference/layers/text-layer.md) now supports per-object clipping box; and making text "sticky" when its container is partially off-screen. See a demo with this [new example](https://deck.gl/examples/text-layer-clipping).
 - [TileLayer](./api-reference/geo-layers/tile-layer.md) adds new `visibleMinZoom` and `visibleMaxZoom` props to control the zoom range at which tiles are drawn, independent of the zoom range at which data is loaded.
-- Experimental [`_SharedTile2DLayer`](./api-reference/geo-layers/shared-tile-2d-layer.md) and [`_SharedTileset2D`](./api-reference/geo-layers/shared-tileset-2d.md) let 2D tiled layers reuse one tile-content cache across multiple views.
-- Experimental [`_SharedMVTLayer`](./api-reference/geo-layers/shared-mvt-layer.md) shares canonical decoded MVT tiles across style consumers and map/globe views, with consumer-local picking and highlighting.
 - Improvements to [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) including better performance and tile tracking.
 - WebGPU now materializes constant layer attributes into full buffers through `AttributeManager`, improving compatibility for layers that rely on constant accessors.
 
@@ -476,7 +478,7 @@ You can also create your own widget by implementing the [`Widget`](./api-referen
 
 - New CARTO module architecture: Sources and Layers replace the CartoLayer. Read more in the [Upgrade Guide](./upgrade-guide.md#deckglcarto).
 
-- Public preview for Boundary Sources (experimental): easily aggregate large data volumes aggregated into common or custom geographic boundaries, such as postal codes. Learn more about Boundaries in the CARTO [documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+- Public preview for Boundary Sources: easily aggregate large data volumes aggregated into common or custom geographic boundaries, such as postal codes. Learn more about Boundaries in the CARTO [documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
 
 
 ### Known Limitations
@@ -1603,7 +1605,7 @@ Release Date: Jan 29, 2019
 See each layer's documentation for full API changes.
 
 
-### Composite Layer Customization (experimental)
+### Composite Layer Customization
 
 It is now possible to fine-tune sublayer appearances by passing a new experimental prop `_subLayerProps` to a composite layer. For example, in a `GeoJsonLayer`, one may wish to make only the point features interactive, or replace the circles with icons.
 
@@ -2026,7 +2028,7 @@ The new `useDevicePixels` prop on the `DeckGL` React component can be used to di
 
 #### DeckGL: Layer Filtering
 
-A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport (experimental) or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports (experimental).
+A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports.
 
 #### DeckGL: Allow overriding canvas component style
 
@@ -2404,7 +2406,7 @@ Release date: May 2016
 * Linux fixes - deck.gl and luma.gl now work on Linux.
 * Adopts [luma.gl](https://github.com/visgl/luma.gl) as default WebGL framework.
 * Retina display support
-* Support for disabling mercator project (experimental)
+* Support for disabling mercator project
 
 ### React Integration
 

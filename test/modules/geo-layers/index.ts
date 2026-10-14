@@ -12,11 +12,11 @@ import {
   _WMSLayer as WMSLayer,
   QuadkeyLayer,
   S2Layer,
-  _SharedTile2DHeader as SharedTile2DHeader,
-  _SharedTile2DLayer as SharedTile2DLayer,
-  _SharedMVTLayer as SharedMVTLayer,
-  sharedTile2DDeckAdapter,
-  _SharedTileset2D as SharedTileset2D,
+  Tile2DHeader,
+  Tile2DLayer,
+  MVT2DLayer,
+  tile2DDeckAdapter,
+  Tileset2D,
   TileLayer,
   TripsLayer,
   TerrainLayer,
@@ -31,11 +31,11 @@ test('Top-level imports', () => {
   expect(H3HexagonLayer, 'H3HexagonLayer symbol imported').toBeTruthy();
   expect(H3ClusterLayer, 'H3ClusterLayer symbol imported').toBeTruthy();
   expect(TileLayer, 'TileLayer symbol imported').toBeTruthy();
-  expect(SharedTile2DLayer, 'SharedTile2DLayer symbol imported').toBeTruthy();
-  expect(SharedMVTLayer, 'SharedMVTLayer symbol imported').toBeTruthy();
-  expect(sharedTile2DDeckAdapter, 'Shared tile adapter exported').toBeTruthy();
-  expect(SharedTileset2D, 'SharedTileset2D symbol imported').toBeTruthy();
-  expect(SharedTile2DHeader, 'SharedTile2DHeader symbol imported').toBeTruthy();
+  expect(Tile2DLayer, 'Tile2DLayer symbol imported').toBeTruthy();
+  expect(MVT2DLayer, 'MVT2DLayer symbol imported').toBeTruthy();
+  expect(tile2DDeckAdapter, 'Shared tile adapter exported').toBeTruthy();
+  expect(Tileset2D, 'Tileset2D symbol imported').toBeTruthy();
+  expect(Tile2DHeader, 'Tile2DHeader symbol imported').toBeTruthy();
   expect(WMSLayer, 'WMSLayer symbol imported').toBeTruthy();
   expect(TripsLayer, 'TripsLayer symbol imported').toBeTruthy();
   expect(TerrainLayer, 'TerrainLayer symbol imported').toBeTruthy();

@@ -15,29 +15,38 @@ import {Matrix4} from '@math.gl/core';
 import {worldToLngLat} from '@math.gl/web-mercator';
 import {load} from '@loaders.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/mvt';
-import {SharedTile2DLayer, type SharedTile2DLayerProps} from '../shared-tile-2d-layer/index';
-import type {SharedTile2DHeader, TileLoadProps} from '../shared-tileset-2d/index';
-import {getURLFromTemplate} from '../shared-tile-2d-layer/url-template';
+import {Tile2DLayer, type Tile2DLayerProps} from '../tile-2d-layer/index';
+import type {Tile2DHeader, TileLoadProps} from '../tileset-2d/index';
+import {getURLFromTemplate} from '../tileset-2d/utils';
 
 /** GeoJSON features decoded in normalized tile-local coordinates. */
-export type SharedMVTData = Array<any>;
+export type MVT2DData = Array<any>;
 /** MVT rendering props; external tilesets must contain tile-local GeoJSON. */
-export type SharedMVTLayerProps = SharedTile2DLayerProps<SharedMVTData> &
+export type MVT2DLayerProps = Tile2DLayerProps<MVT2DData> &
   Omit<GeoJsonLayerProps, 'data'> & {
+    /** Feature property used to match highlights across tile boundaries. */
     uniqueIdProperty?: string;
+    /** Explicit feature ID to highlight for this layer. */
     highlightedFeatureId?: string | number | null;
   };
 
 const WORLD_SIZE = 512;
 const CLIP_BOUNDS = [0, 0, 1, 1] as const;
 
-const geographicTiles = new WeakMap<SharedMVTData, Map<string, SharedMVTData>>();
+const geographicTiles = new WeakMap<MVT2DData, Map<string, MVT2DData>>();
 
 /** Converts local tile geometry without mutating shared decoded content. */
 export function getMVTDataInWGS84(
-  data: SharedMVTData,
-  index: {x: number; y: number; z: number}
-): SharedMVTData {
+  data: MVT2DData,
+  index: {
+    /** Horizontal tile index or screen-space position in the enclosing coordinate system. */
+    x: number;
+    /** Vertical tile index. */
+    y: number;
+    /** Tile pyramid zoom level. */
+    z: number;
+  }
+): MVT2DData {
   const key = `${index.x}/${index.y}/${index.z}`;
   let cache = geographicTiles.get(data);
   if (!cache) {
@@ -72,21 +81,28 @@ export function getMVTDataInWGS84(
 }
 
 /** MVT adapter with view-independent decoded data and shared cache ownership. */
-export class SharedMVTLayer extends SharedTile2DLayer<
-  SharedMVTData,
-  Omit<SharedMVTLayerProps, keyof SharedTile2DLayerProps>
+export class MVT2DLayer extends Tile2DLayer<
+  MVT2DData,
+  Omit<MVT2DLayerProps, keyof Tile2DLayerProps>
 > {
-  declare state: SharedTile2DLayer<SharedMVTData>['state'] & {
+  /** Layer-local render mode and feature highlighting state. */
+  declare state: Tile2DLayer<MVT2DData>['state'] & {
+    /** Whether sublayers currently use WGS84 coordinates. */
     geographic?: boolean;
+    /** Feature ID highlighted by this layer hover interaction. */
     hoveredFeatureId?: string | number | null;
+    /** MVT source-layer name associated with the hovered feature. */
     hoveredFeatureLayerName?: string | null;
+    /** Color used for this layer highlight. */
     highlightColor?: number[];
   };
 
-  static layerName = 'SharedMVTLayer';
-  static defaultProps: typeof SharedTile2DLayer.defaultProps = {
+  /** Public layer name used by logging and default IDs. */
+  static layerName = 'MVT2DLayer';
+  /** Default layer property descriptors. */
+  static defaultProps: typeof Tile2DLayer.defaultProps = {
     ...GeoJsonLayer.defaultProps,
-    ...SharedTile2DLayer.defaultProps,
+    ...Tile2DLayer.defaultProps,
     loaders: [MVTWorkerLoader],
     // External cache owners can load tiles before any consumer is initialized.
     fetch: (url, {layer, loadOptions, signal}) =>
@@ -99,10 +115,10 @@ export class SharedMVTLayer extends SharedTile2DLayer<
   };
 
   /** Always decode locally so the same cache can serve map and globe consumers. */
-  async getTileData(tile: TileLoadProps): Promise<SharedMVTData> {
+  async getTileData(tile: TileLoadProps): Promise<MVT2DData> {
     const {data, fetch, getTileData} = this.props;
     if (getTileData) {
-      return Promise.resolve(getTileData(tile) as SharedMVTData);
+      return Promise.resolve(getTileData(tile) as MVT2DData);
     }
     const url = getURLFromTemplate(data as string | string[] | null, tile);
     if (!url) {
@@ -129,7 +145,7 @@ export class SharedMVTLayer extends SharedTile2DLayer<
 
   /** View changes invalidate render geometry, never the shared decoded cache. */
   updateState(params: UpdateParameters<this>): void {
-    const geographic = Boolean(this.context.viewport.resolution);
+    const geographic = this._usesGeographicCoordinates();
     if (this.state.geographic !== geographic) {
       this.state.tileLayers.clear();
       this.state.geographic = geographic;
@@ -137,12 +153,18 @@ export class SharedMVTLayer extends SharedTile2DLayer<
     super.updateState(params);
   }
 
+  /** Uses per-vertex latitude scaling for low-zoom extrusions and globe rendering. */
+  private _usesGeographicCoordinates(): boolean {
+    const viewport = this.context.viewport;
+    return Boolean(viewport.resolution) || Boolean(this.props.extruded && viewport.zoom < 12);
+  }
+
   /** Supplies local transforms/clipping on maps and geographic geometry on globes. */
-  renderSubLayers(props: Parameters<SharedTile2DLayer<SharedMVTData>['renderSubLayers']>[0]) {
+  renderSubLayers(props: Parameters<Tile2DLayer<MVT2DData>['renderSubLayers']>[0]) {
     if (!props.data) return null;
     const {x, y, z} = props.tile.index;
     const scale = WORLD_SIZE / 2 ** z;
-    const geographic = Boolean(this.context.viewport.resolution);
+    const geographic = this._usesGeographicCoordinates();
     return super.renderSubLayers({
       ...props,
       autoHighlight: false,
@@ -150,15 +172,15 @@ export class SharedMVTLayer extends SharedTile2DLayer<
       modelMatrix: geographic ? new Matrix4() : new Matrix4().scale([scale, -scale, 1]),
       coordinateOrigin: geographic ? [0, 0, 0] : [scale * x, WORLD_SIZE - scale * y, 0],
       coordinateSystem: geographic ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN,
-      extensions: geographic ? props.extensions : [...(props.extensions || []), new ClipExtension()]
+      extensions:
+        geographic && this.context.viewport.resolution
+          ? props.extensions
+          : [...(props.extensions || []), new ClipExtension()]
     });
   }
 
   /** Highlight matching feature IDs across every tile of this consumer. */
-  getSubLayerPropsByTile(
-    tile: SharedTile2DHeader<SharedMVTData>,
-    layer?: Layer
-  ): Record<string, any> {
+  getSubLayerPropsByTile(tile: Tile2DHeader<MVT2DData>, layer?: Layer): Record<string, any> {
     const {uniqueIdProperty, highlightedFeatureId} = this.props;
     const state = this.state;
     const explicit = highlightedFeatureId !== null && highlightedFeatureId !== undefined;
@@ -174,7 +196,10 @@ export class SharedMVTLayer extends SharedTile2DLayer<
               (explicit || feature.properties?.layerName === state.hoveredFeatureLayerName)
           );
     return {
-      clipBounds: CLIP_BOUNDS,
+      clipBounds:
+        layer?.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT && 'west' in tile.bbox
+          ? [tile.bbox.west, tile.bbox.south, tile.bbox.east, tile.bbox.north]
+          : CLIP_BOUNDS,
       highlightedObjectIndex,
       highlightColor: state.highlightColor || this.props.highlightColor
     };
@@ -202,7 +227,7 @@ export class SharedMVTLayer extends SharedTile2DLayer<
   /** Return geographic picked geometry without changing the cached local feature. */
   getPickingInfo(params: GetPickingInfoParams) {
     const info = super.getPickingInfo(params);
-    if (info.object && !this.context.viewport.resolution) {
+    if (info.object && params.sourceLayer?.props.coordinateSystem === COORDINATE_SYSTEM.CARTESIAN) {
       info.object = getMVTDataInWGS84([info.object], info.sourceTile.index)[0];
     }
     return info;

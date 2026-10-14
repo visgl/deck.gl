@@ -130,4 +130,4 @@ If you want to contribute to deck.gl WebGPU development, or just follow along, w
 
 You can also check release tracker tasks and ongoing implementation work on GitHub.
 
-The experimental `_SharedTile2DLayer` and `_SharedMVTLayer` own shared CPU tile content and delegate rendering to their sublayers. Choose sublayers supported by the active backend; sharing does not add backend support to a sublayer.
+The `Tile2DLayer` and `MVT2DLayer` own shared CPU tile content and delegate rendering to their sublayers. Choose sublayers supported by the active backend; sharing does not add backend support to a sublayer.

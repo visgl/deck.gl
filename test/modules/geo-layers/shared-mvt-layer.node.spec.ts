@@ -8,13 +8,9 @@ import {
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
-import {
-  _SharedMVTLayer as SharedMVTLayer,
-  _SharedTileset2D as SharedTileset2D,
-  sharedTile2DDeckAdapter
-} from '@deck.gl/geo-layers';
-import {SharedTile2DView} from '../../../modules/geo-layers/src/shared-tile-2d-layer/shared-tile-2d-view';
-import {getMVTDataInWGS84} from '../../../modules/geo-layers/src/shared-mvt-layer/shared-mvt-layer';
+import {MVT2DLayer, Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
+import {Tile2DView} from '../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
+import {getMVTDataInWGS84} from '../../../modules/geo-layers/src/mvt-2d-layer/mvt-2d-layer';
 
 const DATA = [
   {
@@ -31,18 +27,18 @@ const viewport = new WebMercatorViewport({
   latitude: 0,
   zoom: 0
 });
-async function waitLoaded(view: SharedTile2DView) {
+async function waitLoaded(view: Tile2DView) {
   await vi.waitFor(() => expect(view.isLoaded).toBe(true));
 }
 
-describe('SharedMVTLayer', () => {
+describe('MVT2DLayer', () => {
   it('retains decoded tiles for a staggered consumer and detaches independently', async () => {
     const fetch = vi.fn(async () => DATA);
-    const loader = new SharedMVTLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});
-    expect(loader._getTilesetOptions().adapter).toBe(sharedTile2DDeckAdapter);
-    const tileset = new SharedTileset2D({...loader._getTilesetOptions(), maxZoom: 0});
-    const first = new SharedTile2DView(tileset);
-    const second = new SharedTile2DView(tileset);
+    const loader = new MVT2DLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});
+    expect(loader._getTilesetOptions().adapter).toBe(tile2DDeckAdapter);
+    const tileset = new Tileset2D({...loader._getTilesetOptions(), maxZoom: 0});
+    const first = new Tile2DView(tileset);
+    const second = new Tile2DView(tileset);
     try {
       first.update(viewport);
       await waitLoaded(first);
@@ -67,10 +63,10 @@ describe('SharedMVTLayer', () => {
 
   it('uses the same cache when switching map to globe and back', async () => {
     const fetch = vi.fn(async () => DATA);
-    const loader = new SharedMVTLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});
-    const tileset = new SharedTileset2D({...loader._getTilesetOptions(), maxZoom: 0});
-    const view = new SharedTile2DView(tileset);
-    const consumer = new SharedMVTLayer({
+    const loader = new MVT2DLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});
+    const tileset = new Tileset2D({...loader._getTilesetOptions(), maxZoom: 0});
+    const view = new Tile2DView(tileset);
+    const consumer = new MVT2DLayer({
       data: tileset,
       renderSubLayers: props => {
         captured = props;
@@ -128,10 +124,10 @@ it('keeps an in-flight load alive when one consumer detaches', async () => {
       finish = resolve;
     });
   });
-  const loader = new SharedMVTLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});
-  const tileset = new SharedTileset2D({...loader._getTilesetOptions(), maxZoom: 0});
-  const a = new SharedTile2DView(tileset);
-  const b = new SharedTile2DView(tileset);
+  const loader = new MVT2DLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});
+  const tileset = new Tileset2D({...loader._getTilesetOptions(), maxZoom: 0});
+  const a = new Tile2DView(tileset);
+  const b = new Tile2DView(tileset);
   try {
     a.update(viewport);
     b.update(viewport);
@@ -149,7 +145,7 @@ it('keeps an in-flight load alive when one consumer detaches', async () => {
 });
 
 it('converts picked geometry and highlights IDs without modifying shared data', () => {
-  const layer = new SharedMVTLayer({data: null, uniqueIdProperty: 'key', highlightedFeatureId: 9});
+  const layer = new MVT2DLayer({data: null, uniqueIdProperty: 'key', highlightedFeatureId: 9});
   const feature = {...DATA[0], properties: {...DATA[0].properties, key: 9}};
   const tile: any = {index: {x: 0, y: 0, z: 0}, content: [feature]};
   layer.context = {viewport} as any;
@@ -159,7 +155,7 @@ it('converts picked geometry and highlights IDs without modifying shared data', 
   expect(props.clipBounds).toEqual([0, 0, 1, 1]);
   const picked = layer.getPickingInfo({
     info: {picked: true, object: feature, index: 0},
-    sourceLayer: {props: {tile}}
+    sourceLayer: {props: {tile, coordinateSystem: COORDINATE_SYSTEM.CARTESIAN}}
   } as any);
   expect(picked.object.geometry.coordinates).toEqual([0, 0]);
   expect(feature.geometry.coordinates).toEqual([0.5, 0.5]);
@@ -170,14 +166,14 @@ it('decodes an MVT before the cache owner has a deck.gl context', async () => {
   // A valid protobuf tile containing an empty layer named "test", version 2.
   const bytes = Uint8Array.from([0x1a, 8, 0x0a, 4, 116, 101, 115, 116, 0x78, 2]);
   const url = `data:application/x-protobuf;base64,${Buffer.from(bytes).toString('base64')}`;
-  const layer = new SharedMVTLayer({data: url, loaders: [MVTLoader], loadOptions: {worker: false}});
+  const layer = new MVT2DLayer({data: url, loaders: [MVTLoader], loadOptions: {worker: false}});
   const tile: any = {id: '0-0-0', index: {x: 0, y: 0, z: 0}};
   expect(await layer.getTileData(tile)).toEqual([]);
 });
 
 it('skips failed tiles on a globe and maps highlights to filtered sublayer data', async () => {
   const {GeoJsonLayer} = await import('@deck.gl/layers');
-  const layer = new SharedMVTLayer({data: null, highlightedFeatureId: 9});
+  const layer = new MVT2DLayer({data: null, highlightedFeatureId: 9});
   layer.context = {viewport: new GlobeViewport({width: 128, height: 128, zoom: 0})} as any;
   layer.initializeState();
   const feature = {...DATA[0], id: 9};

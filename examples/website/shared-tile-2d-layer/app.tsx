@@ -7,16 +7,12 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {MapView} from '@deck.gl/core';
-import {
-  _SharedTile2DLayer as SharedTile2DLayer,
-  _SharedTileset2D as SharedTileset2D,
-  sharedTile2DDeckAdapter
-} from '@deck.gl/geo-layers';
+import {Tile2DLayer, Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 
 import type {MapViewState, ViewStateChangeParameters} from '@deck.gl/core';
-import type {SharedTile2DLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {Tile2DLayerPickingInfo} from '@deck.gl/geo-layers';
 
 const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mainView = new MapView({id: 'main', controller: true, repeat: true});
@@ -84,7 +80,7 @@ function getTileUrl({x, y, z}: {x: number; y: number; z: number}): string {
   return TILE_URL.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y));
 }
 
-function getTooltip({tile}: SharedTile2DLayerPickingInfo<ImageBitmap>) {
+function getTooltip({tile}: Tile2DLayerPickingInfo<ImageBitmap>) {
   if (!tile) {
     return null;
   }
@@ -97,10 +93,10 @@ export default function App({onTilesLoad}: {onTilesLoad?: (tileCount: number) =>
   const [shared, setShared] = useState(true);
   const [stats, setStats] = useState({requests: 0, cached: 0});
   const pool = useMemo(() => {
-    const result = {requests: 0, tilesets: [] as SharedTileset2D<ImageBitmap>[]};
+    const result = {requests: 0, tilesets: [] as Tileset2D<ImageBitmap>[]};
     const create = () =>
-      new SharedTileset2D<ImageBitmap>({
-        adapter: sharedTile2DDeckAdapter,
+      new Tileset2D<ImageBitmap>({
+        adapter: tile2DDeckAdapter,
         tileSize: 256,
         minZoom: 0,
         maxZoom: 19,
@@ -151,7 +147,7 @@ export default function App({onTilesLoad}: {onTilesLoad?: (tileCount: number) =>
     () =>
       ['main', 'minimap'].map(
         (viewId, index) =>
-          new SharedTile2DLayer<ImageBitmap>({
+          new Tile2DLayer<ImageBitmap>({
             id: `raster-${viewId}`,
             data: pool.tilesets[shared ? 0 : index],
             pickable: true,

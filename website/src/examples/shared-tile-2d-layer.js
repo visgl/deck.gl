@@ -8,7 +8,7 @@ import App from 'website-examples/shared-tile-2d-layer/app';
 
 import {makeExample} from '../components';
 
-class SharedTile2DLayerDemo extends Component {
+class Tile2DLayerDemo extends Component {
   static title = 'Shared Raster Tiles';
 
   static code = `${GITHUB_TREE}/examples/website/shared-tile-2d-layer`;
@@ -19,7 +19,7 @@ class SharedTile2DLayerDemo extends Component {
     return (
       <div>
         <p>
-          One experimental SharedTileset2D feeds tiled BitmapLayers in the main view and minimap.
+          One Tileset2D feeds tiled BitmapLayers in the main view and minimap.
         </p>
         <p>
           OpenStreetMap data source:
@@ -41,4 +41,4 @@ class SharedTile2DLayerDemo extends Component {
   }
 }
 
-export default makeExample(SharedTile2DLayerDemo);
+export default makeExample(Tile2DLayerDemo);

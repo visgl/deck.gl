@@ -5,19 +5,19 @@
 import {OrthographicViewport, WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {
-  _SharedTile2DHeader as SharedTile2DHeader,
-  _SharedTile2DLayer as SharedTile2DLayer,
-  _SharedTileset2D as SharedTileset2D,
-  sharedTile2DDeckAdapter,
-  type SharedTileset2DAdapter
+  Tile2DHeader,
+  Tile2DLayer,
+  Tileset2D,
+  tile2DDeckAdapter,
+  type Tileset2DAdapter
 } from '@deck.gl/geo-layers';
 import {RequestScheduler, type TileSource} from '@loaders.gl/loader-utils';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {describe, expect, it} from 'vitest';
 
-import {SharedTile2DView} from '../../../modules/geo-layers/src/shared-tile-2d-layer/shared-tile-2d-view';
+import {Tile2DView} from '../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
 
-const mockTilesetAdapter: SharedTileset2DAdapter<string> = {
+const mockTilesetAdapter: Tileset2DAdapter<string> = {
   getTileIndices: () => [],
   getTileBoundingBox: (_context, index) => ({
     left: index.x,
@@ -75,16 +75,16 @@ async function waitFor(condition: () => boolean, message: string): Promise<void>
   throw new Error(message);
 }
 
-describe('SharedTile2DLayer', () => {
+describe('Tile2DLayer', () => {
   it('exports from the package surface', () => {
-    expect(SharedTile2DLayer).toBeDefined();
-    expect(SharedTileset2D).toBeDefined();
-    expect(sharedTile2DDeckAdapter).toBeDefined();
+    expect(Tile2DLayer).toBeDefined();
+    expect(Tileset2D).toBeDefined();
+    expect(tile2DDeckAdapter).toBeDefined();
   });
 
   it('builds URL-template requests through the layer path', () => {
     let requestedUrl: string | undefined | null;
-    const layer = new SharedTile2DLayer({
+    const layer = new Tile2DLayer({
       id: 'shared-tile-url-template',
       data: 'https://example.com/{z}/{x}/{y}.json',
       getTileData: tile => {
@@ -125,7 +125,7 @@ describe('SharedTile2DLayer', () => {
       });
 
     await testLayerAsync({
-      Layer: SharedTile2DLayer,
+      Layer: Tile2DLayer,
       viewport,
       testCases: [
         {
@@ -213,7 +213,7 @@ describe('SharedTile2DLayer', () => {
   });
 
   it('adopts TileSource metadata with explicit overrides winning', async () => {
-    const tileset = SharedTileset2D.fromTileSource(createMockTileSource(), {minZoom: 2});
+    const tileset = Tileset2D.fromTileSource(createMockTileSource(), {minZoom: 2});
     await waitFor(() => tileset.maxZoom === 4, 'expected TileSource metadata to resolve');
     expect(tileset.minZoom).toBe(2);
     expect(tileset.maxZoom).toBe(4);
@@ -226,7 +226,7 @@ describe('SharedTile2DLayer', () => {
     const secondMetadata = createDeferred<any>();
     const firstSource = createMockTileSource({getMetadata: () => firstMetadata.promise});
     const secondSource = createMockTileSource({getMetadata: () => secondMetadata.promise});
-    const tileset = SharedTileset2D.fromTileSource(firstSource);
+    const tileset = Tileset2D.fromTileSource(firstSource);
 
     tileset.setOptions({tileSource: secondSource});
     secondMetadata.resolve({
@@ -257,7 +257,7 @@ describe('SharedTile2DLayer', () => {
 
   it('normalizes TileSource metadata errors for subscribers', async () => {
     let metadataError: Error | null = null;
-    const tileset = SharedTileset2D.fromTileSource(
+    const tileset = Tileset2D.fromTileSource(
       createMockTileSource({getMetadata: () => Promise.reject('metadata failure')})
     );
     const unsubscribe = tileset.subscribe({
@@ -274,9 +274,9 @@ describe('SharedTile2DLayer', () => {
     tileset.finalize();
   });
 
-  it('accepts TileSource data in SharedTile2DLayer options', () => {
+  it('accepts TileSource data in Tile2DLayer options', () => {
     const source = createMockTileSource();
-    const layer = new SharedTile2DLayer({
+    const layer = new Tile2DLayer({
       id: 'shared-tile-source',
       data: source
     });
@@ -288,10 +288,12 @@ describe('SharedTile2DLayer', () => {
     expect(tilesetOptions).not.toHaveProperty('maxZoom');
   });
 
-  it('shares one SharedTileset2D across multiple consumers and views', async () => {
-    const sharedTileset = SharedTileset2D.fromTileSource<TestTileData>(createMockTileSource());
-    const leftView = new SharedTile2DView(sharedTileset);
-    const rightView = new SharedTile2DView(sharedTileset);
+  it('shares one Tileset2D across multiple consumers and views', async () => {
+    const sharedTileset = Tileset2D.fromTileSource<TestTileData>(createMockTileSource(), {
+      extent: null
+    });
+    const leftView = new Tile2DView(sharedTileset);
+    const rightView = new Tile2DView(sharedTileset);
     let statsChangeCount = 0;
     const unsubscribe = sharedTileset.subscribe({
       onStatsChange: () => {
@@ -355,7 +357,7 @@ describe('SharedTile2DLayer', () => {
   });
 
   it('evicts least recently used non-visible tiles once the cache exceeds the high-water mark', () => {
-    const tileset = new SharedTileset2D({
+    const tileset = new Tileset2D({
       getTileData: () => null,
       maxCacheSize: 2,
       adapter: mockTilesetAdapter
@@ -384,8 +386,8 @@ describe('SharedTile2DLayer', () => {
     tileset.finalize();
   });
 
-  it('throws if traversal is requested without an adapter', () => {
-    const tileset = new SharedTileset2D({
+  it('requires an adapter for a non-viewport traversal context', () => {
+    const tileset = new Tileset2D({
       getTileData: () => null
     });
 
@@ -394,13 +396,13 @@ describe('SharedTile2DLayer', () => {
         viewState: 'missing-adapter',
         zRange: null
       })
-    ).toThrow('SharedTileset2D requires an adapter before tile traversal can be used.');
+    ).toThrow('Tileset2D requires an adapter for non-viewport traversal.');
 
     tileset.finalize();
   });
 
   it('covers shared tile header loading, reload, and abort branches', async () => {
-    const tile = new SharedTile2DHeader<TestTileData>({x: 0, y: 0, z: 0});
+    const tile = new Tile2DHeader<TestTileData>({x: 0, y: 0, z: 0});
     tile.id = '0-0-0';
     tile.zoom = 0;
     tile.bbox = {left: 0, top: 1, right: 2, bottom: 3};
@@ -438,7 +440,7 @@ describe('SharedTile2DLayer', () => {
     tile.abort();
     expect(tile.isLoaded).toBe(true);
 
-    const geoTile = new SharedTile2DHeader<TestTileData>({x: 1, y: 1, z: 1});
+    const geoTile = new Tile2DHeader<TestTileData>({x: 1, y: 1, z: 1});
     geoTile.bbox = {west: -1, south: -2, east: 3, north: 4};
     expect(geoTile.boundingBox).toEqual([
       [-1, -2],
@@ -447,12 +449,12 @@ describe('SharedTile2DLayer', () => {
   });
 
   it('does not finalize an external shared tileset when the layer finalizes', async () => {
-    const sharedTileset = SharedTileset2D.fromTileSource<TestTileData>(createMockTileSource());
-    const layer = new SharedTile2DLayer({
+    const sharedTileset = Tileset2D.fromTileSource<TestTileData>(createMockTileSource());
+    const layer = new Tile2DLayer({
       id: 'shared-tile-external-tileset',
       data: sharedTileset
     });
-    const externalView = new SharedTile2DView(sharedTileset);
+    const externalView = new Tile2DView(sharedTileset);
     const viewport = new WebMercatorViewport({
       width: 256,
       height: 256,
@@ -487,7 +489,7 @@ describe('SharedTile2DLayer', () => {
   });
 
   it('requests an update when a new viewport is activated', () => {
-    const layer = new SharedTile2DLayer({
+    const layer = new Tile2DLayer({
       id: 'shared-tile-activate-viewport',
       data: createMockTileSource()
     });
@@ -514,8 +516,8 @@ describe('SharedTile2DLayer', () => {
 
   it('settles errored tile loads so the view can finish loading', async () => {
     let errors = 0;
-    const tileset = new SharedTileset2D({
-      adapter: sharedTile2DDeckAdapter,
+    const tileset = new Tileset2D({
+      adapter: tile2DDeckAdapter,
       getTileData: async () => {
         throw new Error('expected tile error');
       },
@@ -523,7 +525,7 @@ describe('SharedTile2DLayer', () => {
         errors++;
       }
     });
-    const view = new SharedTile2DView(tileset);
+    const view = new Tile2DView(tileset);
     const viewport = new WebMercatorViewport({
       width: 256,
       height: 256,
@@ -543,12 +545,12 @@ describe('SharedTile2DLayer', () => {
   });
 
   it('honors visible zoom bounds during shared traversal', () => {
-    const tileset = new SharedTileset2D({
-      adapter: sharedTile2DDeckAdapter,
+    const tileset = new Tileset2D({
+      adapter: tile2DDeckAdapter,
       getTileData: () => null,
       visibleMinZoom: 2
     });
-    const view = new SharedTile2DView(tileset);
+    const view = new Tile2DView(tileset);
     const viewport = new WebMercatorViewport({
       width: 256,
       height: 256,

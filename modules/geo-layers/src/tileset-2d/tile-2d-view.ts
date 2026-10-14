@@ -10,10 +10,10 @@ import {
   STRATEGY_DEFAULT,
   STRATEGY_NEVER,
   STRATEGY_REPLACE,
-  SharedTile2DHeader,
-  type SharedTileset2D
-} from '../shared-tileset-2d/index';
-import {getCullBounds, sharedTile2DDeckAdapter, transformBox} from './deck-tileset-adapter';
+  Tile2DHeader,
+  type Tileset2D
+} from '../tileset-2d/index';
+import {getCullBounds, tile2DDeckAdapter, transformBox} from '../tileset-2d/deck-tileset-adapter';
 
 /** Bit flag marking a tile as visited during refinement traversal. */
 const TILE_STATE_VISITED = 1;
@@ -38,14 +38,14 @@ type TileViewState = {
 };
 
 /** Per-viewport traversal state for the deck-facing shared tile layer. */
-export class SharedTile2DView<DataT = any> {
+export class Tile2DView<DataT = any> {
   /** Unique consumer identifier used by the shared tileset cache. */
   readonly id = Symbol('tile-2d-view');
 
   /** Shared tileset queried by this view. */
-  private _tileset: SharedTileset2D<DataT, Viewport>;
+  private _tileset: Tileset2D<DataT, Viewport>;
   /** Tiles selected during the latest traversal. */
-  private _selectedTiles: SharedTile2DHeader<DataT>[] | null = null;
+  private _selectedTiles: Tile2DHeader<DataT>[] | null = null;
   /** Incremented whenever this view's visible tile set changes. */
   private _frameNumber = 0;
   /** Last viewport used to compute tile selection. */
@@ -57,13 +57,15 @@ export class SharedTile2DView<DataT = any> {
   /** Inverse of the current model matrix. */
   private _modelMatrixInverse = new Matrix4();
   /** Per-tile visibility and selection flags for this view. */
-  private _state = new Map<SharedTile2DHeader<DataT>, TileViewState>();
+  private _state = new Map<Tile2DHeader<DataT>, TileViewState>();
+  /** Last observed traversal configuration revision. */
+  private _traversalRevision = -1;
 
   /** Creates a viewport-specific view of a shared tileset. */
-  constructor(tileset: SharedTileset2D<DataT, Viewport>) {
+  constructor(tileset: Tileset2D<DataT, Viewport>) {
     this._tileset = tileset;
     if (!this._tileset.adapter) {
-      this._tileset.setOptions({adapter: sharedTile2DDeckAdapter});
+      this._tileset.setOptions({adapter: tile2DDeckAdapter});
     }
     this._tileset.attachConsumer(this.id);
   }
@@ -76,7 +78,7 @@ export class SharedTile2DView<DataT = any> {
   }
 
   /** Tiles selected for the last viewport update. */
-  get selectedTiles(): SharedTile2DHeader<DataT>[] | null {
+  get selectedTiles(): Tile2DHeader<DataT>[] | null {
     return this._selectedTiles;
   }
 
@@ -106,6 +108,7 @@ export class SharedTile2DView<DataT = any> {
 
     if (
       !this._viewport ||
+      this._traversalRevision !== this._tileset.traversalRevision ||
       !viewport.equals(this._viewport) ||
       !equals(this._zRange, zRange) ||
       isModelMatrixNew
@@ -115,6 +118,7 @@ export class SharedTile2DView<DataT = any> {
         this._modelMatrix = modelMatrixAsMatrix4;
       }
       this._viewport = viewport;
+      this._traversalRevision = this._tileset.traversalRevision;
       this._zRange = zRange;
       const tileIndices = this._tileset.getTileIndices({
         viewState: viewport,
@@ -144,7 +148,7 @@ export class SharedTile2DView<DataT = any> {
 
   /** Tests whether a tile should render in the current viewport and culling rectangle. */
   isTileVisible(
-    tile: SharedTile2DHeader<DataT>,
+    tile: Tile2DHeader<DataT>,
     cullRect?: {x: number; y: number; width: number; height: number},
     modelMatrix?: Matrix4 | null
   ): boolean {
@@ -165,8 +169,8 @@ export class SharedTile2DView<DataT = any> {
   }
 
   /** Collects tiles currently marked visible for this view. */
-  private _getVisibleTiles(): SharedTile2DHeader<DataT>[] {
-    const result: SharedTile2DHeader<DataT>[] = [];
+  private _getVisibleTiles(): Tile2DHeader<DataT>[] {
+    const result: Tile2DHeader<DataT>[] = [];
     for (const tile of this._tileset.tiles) {
       if (this._state.get(tile)?.isVisible) {
         result.push(tile);
@@ -182,7 +186,11 @@ export class SharedTile2DView<DataT = any> {
   private _updateTileStates(): boolean {
     const refinementStrategy = this._tileset.refinementStrategy || STRATEGY_DEFAULT;
     const allTiles = this._tileset.tiles;
-    const previousVisibility = new Map<SharedTile2DHeader<DataT>, boolean>();
+    const previousVisibility = new Map<Tile2DHeader<DataT>, boolean>();
+    const retainedTiles = new Set(allTiles);
+    for (const tile of this._state.keys()) {
+      if (!retainedTiles.has(tile)) this._state.delete(tile);
+    }
 
     for (const tile of allTiles) {
       const existing = this._state.get(tile);
@@ -198,7 +206,22 @@ export class SharedTile2DView<DataT = any> {
     }
 
     if (typeof refinementStrategy === 'function') {
-      refinementStrategy(allTiles);
+      const facades = new Map<Tile2DHeader, Tile2DHeader>();
+      for (const tile of allTiles) {
+        const facade = Object.create(tile) as Tile2DHeader;
+        Object.assign(facade, getTileState(this._state, tile));
+        facades.set(tile, facade);
+      }
+      for (const tile of allTiles) {
+        const facade = facades.get(tile)!;
+        facade.parent = tile.parent ? facades.get(tile.parent) || null : null;
+        facade.children = (tile.children || []).map(child => facades.get(child)!).filter(Boolean);
+      }
+      refinementStrategy(Array.from(facades.values()));
+      for (const tile of allTiles) {
+        const facade = facades.get(tile)!;
+        getTileState(this._state, tile).isVisible = facade.isVisible;
+      }
     } else {
       STRATEGIES[refinementStrategy](allTiles, this._state);
     }
@@ -215,7 +238,7 @@ export class SharedTile2DView<DataT = any> {
 
   /** Tests one tile against one culling bounds rectangle. */
   private _tileOverlapsBounds(
-    tile: SharedTile2DHeader<DataT>,
+    tile: Tile2DHeader<DataT>,
     [minX, minY, maxX, maxY]: [number, number, number, number],
     modelMatrix?: Matrix4 | null
   ): boolean {
@@ -229,7 +252,7 @@ export class SharedTile2DView<DataT = any> {
   }
 
   /** Applies model-matrix transforms to non-geospatial tile bounds when needed. */
-  private _getTileBoundingBox(tile: SharedTile2DHeader<DataT>, modelMatrix?: Matrix4 | null) {
+  private _getTileBoundingBox(tile: Tile2DHeader<DataT>, modelMatrix?: Matrix4 | null) {
     const {bbox} = tile;
     if ('west' in bbox || !modelMatrix || Matrix4.IDENTITY.equals(modelMatrix)) {
       return bbox;
@@ -244,8 +267,8 @@ export class SharedTile2DView<DataT = any> {
 
 /** Default refinement strategy that prefers best available loaded descendants. */
 function updateTileStateDefault(
-  allTiles: SharedTile2DHeader[],
-  stateMap: Map<SharedTile2DHeader, TileViewState>
+  allTiles: Tile2DHeader[],
+  stateMap: Map<Tile2DHeader, TileViewState>
 ) {
   for (const tile of allTiles) {
     getTileState(stateMap, tile).state = 0;
@@ -263,8 +286,8 @@ function updateTileStateDefault(
 
 /** Replacement refinement strategy that avoids visible overlap between ancestors and descendants. */
 function updateTileStateReplace(
-  allTiles: SharedTile2DHeader[],
-  stateMap: Map<SharedTile2DHeader, TileViewState>
+  allTiles: Tile2DHeader[],
+  stateMap: Map<Tile2DHeader, TileViewState>
 ) {
   for (const tile of allTiles) {
     getTileState(stateMap, tile).state = 0;
@@ -291,14 +314,13 @@ function updateTileStateReplace(
 
 /** Searches upward for a loaded ancestor that can stand in for an unavailable selected tile. */
 function getPlaceholderInAncestors(
-  startTile: SharedTile2DHeader,
-  stateMap: Map<SharedTile2DHeader, TileViewState>
+  startTile: Tile2DHeader,
+  stateMap: Map<Tile2DHeader, TileViewState>
 ): boolean {
-  let tile: SharedTile2DHeader | null = startTile.parent;
+  let tile: Tile2DHeader | null = startTile;
   while (tile) {
-    const state = getTileState(stateMap, tile);
-    state.state |= TILE_STATE_VISIBLE | TILE_STATE_VISITED;
     if (tile.isLoaded || tile.content) {
+      getTileState(stateMap, tile).state |= TILE_STATE_VISIBLE;
       return true;
     }
     tile = tile.parent;
@@ -308,19 +330,13 @@ function getPlaceholderInAncestors(
 
 /** Searches downward for loaded descendants that can stand in for an unavailable selected tile. */
 function getPlaceholderInChildren(
-  tile: SharedTile2DHeader,
-  stateMap: Map<SharedTile2DHeader, TileViewState>
+  tile: Tile2DHeader,
+  stateMap: Map<Tile2DHeader, TileViewState>
 ): void {
-  const state = getTileState(stateMap, tile);
-  state.state |= TILE_STATE_VISIBLE | TILE_STATE_VISITED;
-
-  if (!tile.children || !tile.children.length || tile.isLoaded || tile.content) {
-    return;
-  }
-
-  for (const child of tile.children) {
-    const childState = getTileState(stateMap, child);
-    if (!(childState.state & TILE_STATE_VISITED)) {
+  for (const child of tile.children || []) {
+    if (child.isLoaded || child.content) {
+      getTileState(stateMap, child).state |= TILE_STATE_VISIBLE;
+    } else {
       getPlaceholderInChildren(child, stateMap);
     }
   }
@@ -328,8 +344,8 @@ function getPlaceholderInChildren(
 
 /** Returns view state for a tile, creating a default record when needed. */
 function getTileState(
-  stateMap: Map<SharedTile2DHeader, TileViewState>,
-  tile: SharedTile2DHeader
+  stateMap: Map<Tile2DHeader, TileViewState>,
+  tile: Tile2DHeader
 ): TileViewState {
   let tileState = stateMap.get(tile);
   if (!tileState) {

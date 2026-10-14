@@ -390,8 +390,10 @@ test('MVTLayer#TileJSON', async () => {
     if (layer.isLoaded) {
       expect(subLayers.length, 'Rendered sublayers').toBe(2);
       expect(layer.state.data.length, 'Data is loaded').toBe(3);
-      expect(layer.state.tileset.minZoom, 'Min zoom layer is correct').toBe(tileJSON.minZoom);
-      expect(layer.state.tileset.minZoom, 'Max zoom layer is correct').toBe(tileJSON.maxZoom);
+      if (!Array.isArray(layer.props.data)) {
+        expect(layer.state.tileset.minZoom, 'Min zoom layer is correct').toBe(tileJSON.minzoom);
+        expect(layer.state.tileset.maxZoom, 'Max zoom layer is correct').toBe(tileJSON.maxzoom);
+      }
     }
   };
 
@@ -411,15 +413,16 @@ test('MVTLayer#TileJSON', async () => {
       onAfterUpdate
     }
   ];
-  await testLayerAsync({
-    Layer: TestMVTLayer,
-    viewport: testViewport,
-    testCases,
-    onError: err => expect(err).toBeFalsy()
-  });
-
-  // restore fetcch
-  globalThis.fetch = fetch;
+  try {
+    await testLayerAsync({
+      Layer: TestMVTLayer,
+      viewport: testViewport,
+      testCases,
+      onError: err => expect(err).toBeFalsy()
+    });
+  } finally {
+    globalThis.fetch = fetch;
+  }
 });
 
 test('MVTLayer#core.worker false disables workers', async () => {

@@ -1,4 +1,5 @@
 # MVTLayer
+Use [MVT2DLayer](./mvt-2d-layer.md) for new applications. `MVTLayer` is retained for compatibility, including binary data, TileJSON resolution, and rendered-feature querying while these features are brought to the new layer.
 
 import {MVTLayerDemo} from '@site/src/doc-demos/geo-layers';
 
