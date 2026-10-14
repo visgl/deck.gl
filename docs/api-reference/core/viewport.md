@@ -8,6 +8,15 @@ A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines 
 
 While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices, you typically do not directly create `Viewport` instances. Instead, `Viewport` classes are created using the [View](./view.md) class descriptors and the current `viewState`.
 
+The base class uses an optional, already-resolved `crs` descriptor for its default
+WGS84-to-target conversion and target-coordinate distance scales. Linear target axes default to metre-based common units using the descriptor’s unit factors.
+Without a descriptor, positions remain in local coordinates; supplying longitude and latitude does not select
+a projection. CRS resolution belongs to the View, not the viewport constructor.
+
+Specialized viewports retain their projection conventions. In particular,
+`WebMercatorViewport` and geospatial `FirstPersonViewport` use `@math.gl/web-mercator`
+for their Mercator projection, altitude scaling, and high-precision distance scales.
+
 ## Overview of Viewport Classes
 
 | Viewport Class        | Description |
@@ -38,12 +47,13 @@ View Matrix Parameters
 
 * `viewMatrix` (number[16], optional) - 4x4 view matrix. Defaults to the identity matrix.
 
-Position and Geospatial Anchor Options (Optional)
+Position and CRS Options (Optional)
 
-* `latitude` (number, optional) - Center of viewport on map (alternative to center). Must be provided if constructing a geospatial viewport.
-* `longitude` (number, optional) - Center of viewport on map (alternative to center). Must be provided if constructing a geospatial viewport.
+* `crs` (CRSDescriptor, optional) - Prepared target CRS. Default conversions accept WGS84 positions and produce target coordinates scaled into common space.
+* `targetToCommonMatrix` (number[16], optional) - Affine transform from target CRS coordinates to common space, replacing default `unitsPerWorldUnit` scaling. Use it to align target axes with common space. Screen unprojection onto an elevation plane requires the transform to preserve horizontal planes.
+* `distanceScales` (object or function, optional) - Partial distance scales, or a function that samples them at a world-coordinate anchor. The function receives no anchor when initializing camera scales. Default scale sampling uses the CRS descriptor.
 * `zoom` (number, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) .
-* `focalDistance` (number, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
+* `focalDistance` (number, optional) - Modifier of the projection scale. Default `1`.
 
 * `position` (number[3], optional) - Position of viewport camera. Default `[0, 0, 0]`.
 * `modelMatrix` (number[16], optional) - Optional 4x4 model matrix applied to position.

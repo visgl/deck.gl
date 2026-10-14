@@ -70,16 +70,16 @@ test.each([
   }
 );
 
-test.each(['utm', 'albers'])(
-  'unbounded %s uses camera sizing instead of a global texture domain',
-  name => {
-    const viewport = new CustomProjectionViewport({
-      crs: descriptors[name]
-    });
-    expect(viewport.sizeScaleTransform).toEqual([0, 0, -1, -1]);
-    expect(Array.from(viewport.getSizeScaleData(4))).toEqual(new Array(64).fill(0));
-  }
-);
+test.each(['utm', 'albers'])('finite %s rendering bounds enable local size sampling', name => {
+  const viewport = new CustomProjectionViewport({
+    crs: descriptors[name]
+  });
+  expect(viewport.sizeScaleTransform[0]).toBeGreaterThan(0);
+  expect(viewport.sizeScaleTransform[1]).toBeGreaterThan(0);
+  const data = viewport.getSizeScaleData(4);
+  expect(data.every(Number.isFinite)).toBe(true);
+  expect(data.some((value, index) => index % 4 === 3 && value > 0)).toBe(true);
+});
 
 test('polar rendering bounds enable local size sampling', () => {
   const viewport = new CustomProjectionViewport({crs: descriptors.polar});

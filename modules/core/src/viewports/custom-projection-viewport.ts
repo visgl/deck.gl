@@ -36,7 +36,7 @@ export default class CustomProjectionViewport extends Viewport {
   pitch: number;
   bearing: number;
   private signature: string;
-  private crs: CRSDescriptor;
+  declare crs: CRSDescriptor;
   readonly sizeScaleSignature: string;
   /** Target-coordinate XY to sampler XY: scale followed by translation. */
   readonly sizeScaleTransform: [number, number, number, number];
@@ -85,10 +85,9 @@ export default class CustomProjectionViewport extends Viewport {
     ];
     super({
       ...opts,
+      crs,
       width,
       height,
-      longitude: undefined,
-      latitude: undefined,
       modelMatrix: null,
       position,
       distanceScales: {unitsPerWorldUnit, unitsPerMeter},

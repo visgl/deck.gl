@@ -26,7 +26,7 @@ test('WebGPU local meter scale preserves CPU altitude with rectangular bounds, m
 
     bounds: [1000, -3000, 2024, 1096],
     center: [1600, -1000, 0],
-    distanceScale: ([x]) => [1000 / x, 1000 / x, 1]
+    distanceScale: ([x]) => [1000 / x, 1000 / x, 1000 / x]
   });
   const resources = new ProjectionScaleResources(gpu);
   const output = gpu.createBuffer({byteLength: 16, usage: Buffer.STORAGE | Buffer.COPY_SRC});

@@ -2,17 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core';
 import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport, {type DistanceScales} from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {mod} from '../utils/math-utils';
+import {GLOBE_CRS, GLOBE_EARTH_RADIUS as EARTH_RADIUS, zoomAdjust} from './globe-util';
+
+export {zoomAdjust} from './globe-util';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
-const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
 // Where along the screen-pixel-to-globe-center distance ratio the anchored
 // zoom starts losing strength. Below this ratio the anchor uses full correction; from
@@ -156,8 +158,9 @@ export default class GlobeViewport extends Viewport {
       .rotateZ(-longitude * DEGREES_TO_RADIANS)
       .scale(scale / height);
 
-    super({
+    const viewportOptions = {
       ...opts,
+      crs: GLOBE_CRS,
       // x, y, width,
       height,
 
@@ -176,7 +179,8 @@ export default class GlobeViewport extends Viewport {
       focalDistance: altitude,
       near: nearZ,
       far: farZ
-    });
+    };
+    super(viewportOptions);
 
     this.scale = scale;
     this.latitude = latitude;
@@ -185,6 +189,12 @@ export default class GlobeViewport extends Viewport {
     this.pitch = pitch;
     this.fovy = fovy;
     this.resolution = resolution;
+  }
+
+  protected _getCenter(options: GlobeViewportOptions, position: number[]): number[] {
+    return new Vector3(position)
+      .scale(this.distanceScales.unitsPerMeter)
+      .add(this.projectPosition([options.longitude ?? 0, options.latitude ?? 0, 0]));
   }
 
   get projectionMode() {
@@ -414,14 +424,6 @@ export default class GlobeViewport extends Viewport {
     nextViewState.zoom += zoomAdjust(nextViewState.latitude);
     return nextViewState;
   }
-}
-
-export function zoomAdjust(latitude: number, clampToPoles?: boolean): number {
-  if (clampToPoles) {
-    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
-  }
-  const scaleAdjust = Math.PI * Math.cos((latitude * Math.PI) / 180);
-  return Math.log2(scaleAdjust);
 }
 
 function transformVector(matrix: number[], vector: number[]): number[] {
