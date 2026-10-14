@@ -8,6 +8,7 @@ import {Map} from 'react-map-gl/maplibre';
 import styled from 'styled-components';
 import {useColorMode} from '@docusaurus/theme-common';
 import {MAPBOX_STYLES} from '../constants/defaults';
+import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import {gotoLayerSource} from './codepen-automation';
 
 const INITIAL_VIEW_STATE = {
@@ -95,6 +96,7 @@ export function makeLayerDemo(config) {
     getTooltip,
     props,
     mapStyle = true,
+    attribution = false,
     initialViewState = INITIAL_VIEW_STATE,
     imports
   } = config;
@@ -137,6 +139,7 @@ export function makeLayerDemo(config) {
               />
             )}
           </DeckGL>
+          {attribution && <OpenFreeMapAttribution />}
         </DemoContainer>
         <DemoSourceLink onClick={() => gotoLayerSource(config, layer)}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
