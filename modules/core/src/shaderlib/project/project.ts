@@ -8,6 +8,8 @@ import geometry from '../misc/geometry';
 import {getUniformsFromViewport} from './viewport-uniforms';
 import {projectWGSL} from './project.wgsl';
 import {projectGLSL} from './project.glsl';
+import {PROJECTION_MODE} from './constants';
+import type Viewport from '../../viewports/viewport';
 
 import type {ProjectProps, ProjectUniforms} from './viewport-uniforms';
 import type CustomProjectionViewport from '../../viewports/custom-projection-viewport';
@@ -39,9 +41,12 @@ export default {
   source: projectWGSL,
   vs: projectGLSL,
   getUniforms,
+  /** @internal Whether aggregation uses the viewport's linear target-CRS space. */
+  isCustomProjection: (viewport: Viewport): boolean =>
+    viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL,
   uniformTypes: {
     wrapLongitude: 'f32',
-    coordinateSystem: 'i32',
+    coordinateFrame: 'i32',
     commonUnitsPerMeter: 'vec3<f32>',
     projectionMode: 'i32',
     scale: 'f32',
@@ -61,4 +66,6 @@ export default {
     sizeScaleTransform: 'vec4<f32>'
   }
   // @ts-ignore TODO v9.1
-} as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}>;
+} as const satisfies ShaderModule<ProjectProps, ProjectUniforms, {}> & {
+  isCustomProjection: (viewport: Viewport) => boolean;
+};

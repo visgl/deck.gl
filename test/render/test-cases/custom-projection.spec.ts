@@ -28,7 +28,7 @@ const converter = projectionEngine.createProjection({
 // Frame all 50 states, including Hawaii and the Aleutian Islands.
 const view = new CustomProjectionView({
   crs: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs',
-  resolution: 1
+  resolution: 360
 });
 await view.initialize();
 const data = states as FeatureCollection<
@@ -133,7 +133,7 @@ const aggregationConverter = projectionEngine.createProjection({
 });
 const aggregationView = new CustomProjectionView({
   crs: '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
-  resolution: 1
+  resolution: 360
 });
 await aggregationView.initialize();
 const colorRange: [number, number, number][] = [

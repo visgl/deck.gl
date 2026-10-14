@@ -12,7 +12,7 @@ import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core
 new Deck({
   views: new CustomProjectionView({
     crs: '+proj=eqearth +lon_0=0 +datum=WGS84 +units=m',
-    resolution: 5,
+    resolution: 72,
     controller: true
   }),
   initialViewState: {center: [0, 0, 0], zoom: 1}
@@ -28,7 +28,7 @@ Inherits [View options](./view.md#constructor), including layout, padding and co
 | Option | Default | Description |
 | --- | --- | --- |
 | `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Linear axis units are read from the descriptor. |
-| `resolution` | `0` | Maximum subdivision cell size in WGS84 degrees for paths, polygons and bitmaps. Smaller positive values smooth projected curves at higher processing cost. Zero disables subdivision. |
+| `resolution` | `0` | Subdivision intervals around the earth for paths, polygons and bitmaps. The step is `EarthCircumference / resolution`, converted to source CRS units. Higher values generate more detailed geometry. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
 The descriptor supplies conversion functions, WGS84 normalization, target-coordinate bounds and ground distance scales. For example, Web Mercator normalizes longitude and clamps latitude to its supported range. Bounds describe the size-sampling rectangle; they do not clip geometry.
@@ -73,10 +73,10 @@ When displaying multiple views with different projections, create a separate lay
 ## Limitations
 
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
-- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in WGS84 and projects every grid vertex; smaller values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. If the image is generated in a different coordinate system than WGS84, subdivision cannot correct its pixel-to-coordinate mapping.
+- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
 - Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
-- `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the viewport uses preprojection. Split geometry at the desired longitude boundary before passing it to these layers.
-- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` is applied before conversion, and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in target CRS units in `crs`, and `modelMatrix` and `coordinateOrigin` both apply.
+- `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the layer uses CPU preprojection or its source coordinates are not WGS84. Split geometry at the desired longitude boundary before passing it to these layers.
+- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` and then `coordinateOrigin` are applied in the source CRS before conversion. Use a CRS identifier or PROJ string to declare another source CRS. Positions whose CRS signature matches the view's descriptor bypass CPU conversion. Legacy `coordinateSystem: 'cartesian'` also bypasses conversion. Cartesian positions are in target CRS units in `crs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in WGS84. They may be unavailable where the descriptor’s inverse converter cannot return a valid position.
 

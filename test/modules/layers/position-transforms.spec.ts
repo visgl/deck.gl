@@ -21,7 +21,7 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 
-function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
+function createViewport(signature: string, projected: boolean, scale = 2, resolution = 360) {
   return projected
     ? createTestViewport({
         width: 400,
@@ -136,7 +136,7 @@ test('BitmapLayer transforms tessellated vertices without mutating the input mes
     manager.activateViewport(changed);
     layer.activateViewport(changed);
     check(3, 10);
-    const finer = createViewport('finer', true, 3, 0.5);
+    const finer = createViewport('finer', true, 3, 720);
     manager.activateViewport(finer);
     layer.activateViewport(finer);
     expect(layer.state.mesh.positions.length).toBeGreaterThan(source.length);
@@ -146,8 +146,10 @@ test('BitmapLayer transforms tessellated vertices without mutating the input mes
 });
 
 test('Instanced meshes retain meter-sized geometry around preprojected anchors', () => {
-  for (const coordinateSystem of ['default', 'meter-offsets', 'lnglat']) {
-    expect(shouldComposeModelMatrix(createViewport('custom', true), coordinateSystem)).toBe(false);
+  for (const coordinateSystem of ['default', 'WGS84', 'lnglat']) {
+    expect(shouldComposeModelMatrix(createViewport('custom', true), coordinateSystem, true)).toBe(
+      false
+    );
   }
   expect(shouldComposeModelMatrix(createViewport('custom', true), 'cartesian')).toBe(true);
   expect(shouldComposeModelMatrix(new Viewport(), 'cartesian')).toBe(true);

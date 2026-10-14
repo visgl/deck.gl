@@ -31,6 +31,7 @@ const MVT_BBOX: GeoBoundingBox = {west: 0, east: 1, south: 0, north: 1};
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
+  coordinateSystem: 'lnglat',
   autoLabels: false,
   data: TilejsonPropType,
   dataComparator: TilejsonPropType.equal,

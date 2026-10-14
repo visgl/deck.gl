@@ -150,7 +150,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   state!: {
     model?: Model;
-  };
+  } & Layer['state'];
 
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
@@ -260,7 +260,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMinPixels,
       widthMaxPixels,
       greatCircle,
-      useShortestPath: wrapLongitude && !this.context.viewport.preproject
+      useShortestPath:
+        wrapLongitude && !this.state.preproject && this.state.sourceCrs?.signature === 'WGS84'
     };
 
     const model = this.state.model!;

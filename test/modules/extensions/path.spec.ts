@@ -4,7 +4,6 @@
 
 import {test, expect} from 'vitest';
 import {
-  COORDINATE_SYSTEM,
   Deck,
   OrthographicView,
   OrthographicViewport,
@@ -91,7 +90,7 @@ webglTest('PathStyleExtension#rounded dash picking', async () => {
             [80, 0]
           ]
         ],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPath: path => path,
         widthUnits: 'pixels',
         getWidth: 20,
@@ -142,7 +141,7 @@ webglTest('PathStyleExtension#rounded dash shoulders use one coverage ramp', asy
             [80.5, -19.5]
           ]
         ],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPath: path => path,
         getColor: [255, 255, 255, 255],
         getWidth: 20,
@@ -160,7 +159,7 @@ webglTest('PathStyleExtension#rounded dash shoulders use one coverage ramp', asy
             [-39.5, 20.5]
           ]
         ],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPath: path => path,
         getColor: [255, 255, 255, 255],
         getWidth: 20,
@@ -863,7 +862,7 @@ test('PathStyleExtension#synchronizes live dash mode changes', () => {
           data: [path],
           getPath: value => value,
           getDashArray: [2, 1],
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           positionFormat: 'XY',
           getOffset: 0,
           extensions: [new PathStyleExtension({dashMode: 'segment', offset: true})]
@@ -1005,7 +1004,7 @@ test('PathStyleExtension#dash phase follows normalized path geometry', () => {
             ]
           ],
           getPath: path => path,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           positionFormat: 'XY',
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         },
@@ -1028,6 +1027,7 @@ test('PathStyleExtension#getDashOffsets measures globe common space', () => {
   // matrix uses. Below GlobeView's zoom-12 handoff the layer projects into a GlobeViewport, whose
   // common space is sphere XYZ (GLOBE_RADIUS = 256) rather than Web Mercator.
   const viewport = new GlobeViewport({
+    resolution: 36,
     width: 800,
     height: 450,
     longitude: -122.4,
@@ -1114,7 +1114,7 @@ test('PathStyleExtension#dash phase covers globe subdivisions', () => {
     longitude: 0,
     latitude: 0,
     zoom: 1,
-    resolution: 30
+    resolution: 12
   });
 
   testLayer({
@@ -1157,39 +1157,39 @@ test('PathStyleExtension#dash phase covers globe subdivisions', () => {
 });
 
 test('PathStyleExtension#dash phase tracks tessellation viewport inputs', () => {
-  const globeResolution30 = new GlobeViewport({
+  const globeStep30 = new GlobeViewport({
     width: 800,
     height: 600,
     longitude: 0,
     latitude: 0,
     zoom: 1,
-    resolution: 30
+    resolution: 12
   });
-  const globeResolution10 = new GlobeViewport({
+  const globeStep10 = new GlobeViewport({
+    resolution: 36,
     width: 800,
     height: 600,
     longitude: 0,
     latitude: 0,
-    zoom: 1,
-    resolution: 10
+    zoom: 1
   });
   const globePanned = new GlobeViewport({
+    resolution: 36,
     width: 800,
     height: 600,
     longitude: 20,
     latitude: 10,
-    zoom: 2,
-    resolution: 10
+    zoom: 2
   });
-  let resolution30InstanceCount = 0;
+  let step30InstanceCount = 0;
   let stableMetrics: Float32Array | null = null;
 
   testLayer({
     Layer: PathLayer,
-    viewport: globeResolution30,
+    viewport: globeStep30,
     testCases: [
       {
-        viewport: globeResolution30,
+        viewport: globeStep30,
         props: {
           id: 'globe-viewport-dash-metrics',
           data: [
@@ -1202,17 +1202,17 @@ test('PathStyleExtension#dash phase tracks tessellation viewport inputs', () => 
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         },
         onAfterUpdate: ({layer}) => {
-          resolution30InstanceCount = layer.state.pathTesselator.instanceCount;
+          step30InstanceCount = layer.state.pathTesselator.instanceCount;
         }
       },
       {
-        viewport: globeResolution10,
+        viewport: globeStep10,
         onAfterUpdate: ({layer}) => {
           expect(
             layer.state.pathTesselator.instanceCount,
             'resolution changes rebuild normalized geometry'
-          ).not.toBe(resolution30InstanceCount);
-          expect(layer.state.tessellationResolution, 'new resolution is recorded').toBe(10);
+          ).not.toBe(step30InstanceCount);
+          expect(layer.state.subdivisionStep, 'new resolution is recorded').toBe(10);
           stableMetrics = layer.getAttributeManager().getAttributes().instanceDashOffsets.value;
         }
       },
@@ -1223,7 +1223,7 @@ test('PathStyleExtension#dash phase tracks tessellation viewport inputs', () => 
           expect(metrics, 'ordinary pan and zoom preserve viewport-independent dash metrics').toBe(
             stableMetrics
           );
-          expect(layer.state.tessellationResolution, 'tessellation remains current').toBe(10);
+          expect(layer.state.subdivisionStep, 'tessellation remains current').toBe(10);
         }
       }
     ],
@@ -1271,7 +1271,7 @@ test('PathStyleExtension#dash phase tracks identity projection scale', () => {
             ]
           ],
           getPath: path => path,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           positionFormat: 'XY',
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         },
@@ -1408,7 +1408,7 @@ test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () =
   const getExpectedSegmentLength = (viewport: WebMercatorViewport): number => {
     const uniforms = project.getUniforms({
       viewport,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: 'lnglat'
     }) as ProjectUniforms;
     const projectPosition = (position: number[]): [number, number, number] => {
       const offset = vec3.sub([], position, uniforms.coordinateOrigin);
@@ -1439,7 +1439,7 @@ test('PathStyleExtension#dash phase tracks Web Mercator auto-offset scale', () =
           id: 'web-mercator-projection-dash-metrics',
           data: [path],
           getPath: pathData => pathData,
-          coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+          coordinateSystem: 'lnglat',
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         },
         onAfterUpdate: ({layer}) => {
@@ -1522,7 +1522,7 @@ test('PathStyleExtension#dash phase updates with projection inputs', () => {
             ]
           ],
           getPath: path => path,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           positionFormat: 'XY',
           modelMatrix: identity,
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
@@ -1566,7 +1566,7 @@ test('PathStyleExtension#dash phase reads strided binary paths', () => {
           data,
           _pathType: 'open',
           positionFormat: 'XY',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         },
         onAfterUpdate: ({layer}) => {
@@ -1612,7 +1612,7 @@ test('PathStyleExtension#dash phase supports partial path updates', () => {
           id: 'partial-path-dash-metrics',
           data: initialData,
           getPath: path => path,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           positionFormat: 'XY',
           extensions: [new PathStyleExtension({highPrecisionDash: true})]
         },
@@ -1666,7 +1666,7 @@ test('PathStyleExtension#dash phase validates GPU-only paths', () => {
             data: createData(),
             _pathType: 'open',
             positionFormat: 'XY',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             extensions: [new PathStyleExtension({highPrecisionDash: true})]
           }
         }
@@ -1688,7 +1688,7 @@ test('PathStyleExtension#dash phase validates GPU-only paths', () => {
             data: createData(new Float32Array([0, 6, 3, 6, 0, 6])),
             _pathType: 'open',
             positionFormat: 'XY',
-            coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+            coordinateSystem: 'cartesian',
             extensions: [new PathStyleExtension({highPrecisionDash: true})]
           }
         }

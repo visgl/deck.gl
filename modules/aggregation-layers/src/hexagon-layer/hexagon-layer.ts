@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {project} from '@deck.gl/core';
+
 import {
   log,
   Accessor,
@@ -286,7 +288,7 @@ export default class HexagonLayer<
 
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
-    };
+    } & AggregationLayer<any>['state'];
 
   getAggregatorType(): string {
     const {gpuAggregation, hexagonAggregator, getColorValue, getElevationValue} = this.props;
@@ -468,16 +470,18 @@ export default class HexagonLayer<
       const centroidCommon = viewport.projectFlat(centroid);
       const centerHex = pointToHexbin([centroidCommon[0], centroidCommon[1]], radiusCommon);
       const centerCommon = getHexbinCentroid(centerHex, radiusCommon);
-      centroid = viewport.preproject ? centerCommon : viewport.unprojectFlat(centerCommon);
+      centroid = project.isCustomProjection(viewport)
+        ? centerCommon
+        : viewport.unprojectFlat(centerCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
       viewport =
-        viewport.isGeospatial && !viewport.preproject
+        viewport.isGeospatial && !project.isCustomProjection(viewport)
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : viewport.preproject
+          : project.isCustomProjection(viewport)
             ? createAggregationViewport(viewport, centroid)
             : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
@@ -648,14 +652,15 @@ export default class HexagonLayer<
           bin.id as [number, number],
           this.state.radiusCommon
         );
-        if (this.context.viewport.preproject) {
+        if (project.isCustomProjection(this.context.viewport)) {
           centroidCommon[0] += this.state.hexOriginCommon[0];
           centroidCommon[1] += this.state.hexOriginCommon[1];
         }
         const viewport = this.context.viewport;
-        const centroid = viewport.preproject
-          ? viewport.unprojectPosition(centroidCommon)
-          : viewport.unprojectFlat(centroidCommon);
+        const packedCentroid = viewport.unprojectFlat(centroidCommon);
+        const centroid = this.state.unpreproject
+          ? this.state.unpreproject([...packedCentroid, 0])
+          : packedCentroid;
 
         object = {
           col: bin.id[0],

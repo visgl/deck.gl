@@ -17,7 +17,6 @@ test('SolidPolygonLayer#binary positions without preprojection remain in world c
     height: 100,
     viewState: {longitude: 0, latitude: 0, zoom: 1}
   });
-  expect(viewport.preproject).toBeFalsy();
   const manager = new LayerManager(device, {viewport});
   manager.setProps({
     onError: error => {
@@ -38,6 +37,7 @@ test('SolidPolygonLayer#binary positions without preprojection remain in world c
   });
   try {
     manager.setLayers([layer]);
+    expect(layer.state.preproject).toBeFalsy();
     const attribute = layer.getAttributeManager()!.getAttributes().vertexPositions;
     expect(attribute.value).toBe(positions.value);
     expect(attribute.settings.transform).toBeFalsy();

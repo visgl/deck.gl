@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 // deck.gl, MIT license
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import ComponentState from '../lifecycle/component-state';
 
 import type Layer from './layer';
@@ -52,6 +53,17 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
    * Dirty flags of the layer's props and state
    */
   changeFlags!: ChangeFlags;
+
+  /** CRS of the input positions after modelMatrix and coordinateOrigin. */
+  sourceCrs: CRSDescriptor | null = null;
+  /** CRS of packed attributes, after any CPU conversion. */
+  packedCrs: CRSDescriptor | null = null;
+  /** Source-CRS positions to the packed attribute CRS, excluding layer transforms. */
+  preproject: ((position: number[]) => [number, number, number]) | null = null;
+  /** Packed attribute positions back to the source CRS. */
+  unpreproject: ((position: number[]) => [number, number, number]) | null = null;
+  /** Input/target identity used to retain a conversion pair across camera changes. */
+  preprojectionSignature: string | null = null;
 
   /** The last viewport rendered by this layer */
   viewport?: Viewport;

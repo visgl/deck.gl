@@ -3,7 +3,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  COORDINATE_SYSTEM,
   Layer,
   project32,
   type LayerContext,
@@ -67,7 +66,7 @@ export class WeatherParticleLayer extends Layer<WeatherParticleLayerProps> {
     color: [0.75, 0.85, 0.95, 0.7],
     surfaceTexture: null,
     surfaceBounds: [-1, -1, 1, 1],
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     getPolygonOffset: () => [0, 0],
     parameters: PARAMETERS
   };
@@ -128,7 +127,7 @@ export class WeatherParticleLayer extends Layer<WeatherParticleLayerProps> {
   }
   override updateState({props}: UpdateParameters<this>): void {
     // This adapter's fog and precipitation coordinates are local east/north/up metres.
-    assert(props.coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS);
+    assert(props.coordinateSystem === 'meter-offsets');
     assert(
       Number.isInteger(props.particleCount) &&
         props.particleCount! >= 0 &&

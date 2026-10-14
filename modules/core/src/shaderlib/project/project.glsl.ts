@@ -2,21 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {PROJECTION_MODE, UNIT} from '../../lib/constants';
-import {getShaderCoordinateSystem} from './viewport-uniforms';
+import {UNIT} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from './constants';
 
-const SHADER_COORDINATE_SYSTEMS = [
-  'default',
-  'lnglat',
-  'meter-offsets',
-  'lnglat-offsets',
-  'cartesian'
-] as const;
-
-const COORDINATE_SYSTEM_GLSL_CONSTANTS = SHADER_COORDINATE_SYSTEMS.map(
-  coordinateSystem =>
-    `const int COORDINATE_SYSTEM_${coordinateSystem.toUpperCase().replaceAll('-', '_')} = ${getShaderCoordinateSystem(coordinateSystem)};`
-).join('');
+const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.entries(COORDINATE_SYSTEM)
+  .map(([name, value]) => `const int COORDINATE_SYSTEM_${name} = ${value};`)
+  .join('');
 const PROJECTION_MODE_GLSL_CONSTANTS = Object.keys(PROJECTION_MODE)
   .map(key => `const int PROJECTION_MODE_${key} = ${PROJECTION_MODE[key]};`)
   .join('');
@@ -31,7 +22,7 @@ ${UNIT_GLSL_CONSTANTS}
 
 layout(std140) uniform projectUniforms {
   bool wrapLongitude;
-  int coordinateSystem;
+  int coordinateFrame;
   vec3 commonUnitsPerMeter;
   int projectionMode;
   float scale;
@@ -67,7 +58,7 @@ float project_size_at_latitude(float lat) {
 
 float project_size() {
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
-    project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+    project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC &&
     project.pseudoMeters == false) {
 
     // uCommonUnitsPerMeter in low-zoom Web Mercator is non-linear
@@ -169,7 +160,7 @@ mat3 project_get_orientation_matrix(vec3 up) {
 }
 
 bool project_needs_rotation(vec3 commonPosition, out mat3 transform) {
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     transform = project_get_orientation_matrix(commonPosition);
     return true;
   }
@@ -242,7 +233,7 @@ vec2 project_globe_to_mercator_(vec3 spherePos) {
 // For sampling textures or testing bounds produced by a flat viewport. Do not add
 // project.commonOrigin to a GLOBE result. Adding a non-flat projection mode: invert it here.
 vec2 project_common_position_to_flat(vec3 commonPosition) {
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return project_globe_to_mercator_(commonPosition);
   }
   return commonPosition.xy;
@@ -274,7 +265,7 @@ vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenc
 // e.g. the camera); identity for flat modes. For periodic patterns.
 vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX) {
   vec2 flatPosition = project_common_position_to_flat(commonPosition);
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
   }
   return flatPosition;
@@ -285,26 +276,26 @@ vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float refer
 }
 
 //
-// Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
+// Projects positions (defined by project.coordinateFrame) to common space (defined by project.projectionMode)
 //
 vec4 project_position(vec4 position, vec3 position64Low) {
   vec4 position_world = project.modelMatrix * position;
 
   // Work around for a Mac+NVIDIA bug https://github.com/visgl/deck.gl/issues/4145
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       return vec4(
         project_mercator_(position_world.xy),
         project_size_at_latitude(position_world.z, position_world.y),
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_PROJECTED) {
       position_world.xyz += project.coordinateOrigin;
     }
   }
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEOCENTRIC) {
       // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
       vec4 position_low = project.modelMatrix * vec4(position64Low, 0.0);
       return vec4(
@@ -312,20 +303,20 @@ vec4 project_position(vec4 position, vec3 position64Low) {
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       return vec4(
         project_globe_(position_world.xyz),
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
+    if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
       vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * project.commonUnitsPerMeter;
       return vec4(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       if (abs(position_world.y - project.coordinateOrigin.y) > 0.25) {
         // Too far from the projection center for offset mode to be accurate
         // Only use high parts
@@ -340,8 +331,8 @@ vec4 project_position(vec4 position, vec3 position64Low) {
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
     project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL ||
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
-    (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-     project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
+    (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC ||
+     project.coordinateFrame == COORDINATE_SYSTEM_PROJECTED))) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     position_world.xyz -= project.coordinateOrigin;
   }
