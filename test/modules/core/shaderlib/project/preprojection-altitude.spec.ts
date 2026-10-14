@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {createTestCRS} from '../../viewports/test-crs';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -34,7 +35,7 @@ class MeterAltitudeViewport extends CustomProjectionViewport {
 for (const geospatial of [false, true]) {
   test(`preprojection preserves meter altitude on CPU, geospatial=${geospatial}`, () => {
     const viewport = new MeterAltitudeViewport(geospatial);
-    const position = viewport.preproject!([10, 20, 50]);
+    const position = viewport.getPreprojection(WGS84_CRS).preproject!([10, 20, 50]);
     expect(position).toEqual([30, 80, 50]);
     expect(viewport.projectPosition([10, 20, 50])).toEqual([
       30 * normalizationScale,
@@ -60,7 +61,7 @@ for (const geospatial of [false, true]) {
     `preprojection scales GPU altitude exactly once, geospatial=${geospatial}`,
     async () => {
       const viewport = new MeterAltitudeViewport(geospatial);
-      const position = viewport.preproject!([10, 20, 50]);
+      const position = viewport.getPreprojection(WGS84_CRS).preproject!([10, 20, 50]);
       const result = await runOnGPU({
         vs: `#version 300 es
         out vec3 result;

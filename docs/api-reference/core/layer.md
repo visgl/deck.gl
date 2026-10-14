@@ -241,7 +241,7 @@ Normally only used when the application wants to work with coordinates that are 
 
 * Default: `'default'`
 
-Specifies how layer positions and offsets should be geographically interpreted. One of:
+Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` are applied. Built-in coordinate systems include:
 
 - `'default'`
 - `'cartesian'`
@@ -249,7 +249,9 @@ Specifies how layer positions and offsets should be geographically interpreted. 
 - `'meter-offsets'`
 - `'lnglat-offsets'`
 
-The default is to interpret positions as latitude and longitude, however it is also possible to interpret positions as meter offsets added to projection center specified by the `coordinateOrigin` prop.
+`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
+
+`'default'` uses WGS84 in geospatial views and Cartesian coordinates in non-geospatial views. Shader-supported source CRSs retain their attribute coordinates. Other source CRSs are converted on the CPU to WGS84, or to the target CRS of a custom projection.
 
 See the article on [Coordinate Systems](../../developer-guide/coordinate-systems.md) for details.
 
@@ -257,7 +259,7 @@ See the article on [Coordinate Systems](../../developer-guide/coordinate-systems
 
 * Default: `[0, 0, 0]`
 
-Specifies a reference point for coordinates that are expressed as offsets. Used when the `coordinateSystem` is set to one of the following modes:
+For an absolute CRS, this value is added in source CRS units after `modelMatrix`, before projection. For offset modes, it specifies the geographic reference point:
 
 - `'cartesian'` (optional)
 - `'meter-offsets'` (required)
@@ -856,7 +858,7 @@ Parameters:
   - `modelMatrix` (Matrix4 | null) - defaults to `this.props.modelMatrix`. Pass `null` to skip the layer matrix.
   - `coordinateOrigin` (number[3]) - defaults to `this.props.coordinateOrigin`.
   - `coordinateSystem` (string) - defaults to `this.props.coordinateSystem`.
-  - `fromCoordinateOrigin` (number[3]) - defaults to passed `coordinateOrigin`.
+  - `fromCoordinateOrigin` (number[3]) - defaults to passed `coordinateOrigin` for the same source system, or `[0, 0, 0]` for a different system.
   - `fromCoordinateSystem` (string) - defaults to passed `coordinateSystem`.
 
 Returns:

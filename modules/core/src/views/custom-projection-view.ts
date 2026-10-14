@@ -31,7 +31,7 @@ export type CustomProjectionViewState = {
 } & CommonViewState;
 /** Configuration for a custom planar projection. */
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
-  Pick<CustomProjectionViewportOptions, 'resolution' | 'orthographic'> & {
+  Pick<CustomProjectionViewportOptions, 'orthographic'> & {
     /** Target CRS identifier or PROJ string to resolve through math.gl. */
     crs: string;
   };

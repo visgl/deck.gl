@@ -14,12 +14,16 @@ import log from '../utils/log';
 import debug from '../debug/index';
 import assert from '../utils/assert';
 import memoize from '../utils/memoize';
+import {deepEqual} from '../utils/deep-equal';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
 import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
+import type {CRSDescriptor} from '@math.gl/projection/core';
+import {resolveCRS} from '../utils/crs';
+import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
@@ -29,7 +33,7 @@ import {load} from '@loaders.gl/core';
 
 import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
-import {PROJECTION_MODE} from './constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import type Attribute from './attribute/attribute';
 import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
@@ -195,6 +199,11 @@ type DrawOptions = {
 };
 
 type SharedLayerState = {
+  /** CRS of source positions and their CPU conversion into packed attributes. */
+  sourceCrs?: CRSDescriptor | null;
+  packedCrs?: CRSDescriptor | null;
+  preproject?: ((position: number[]) => [number, number, number]) | null;
+  unpreproject?: ((position: number[]) => [number, number, number]) | null;
   [key: string]: unknown;
 };
 
@@ -215,6 +224,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   // However, they are most extensively accessed in a layer's lifecycle methods, where they are always defined.
   // Checking for null state constantly in layer implementation is unnecessarily verbose.
   context!: LayerContext; // Will reference layer manager's context, contains state shared by layers
+  private _sourceCrs?: CRSDescriptor | null;
+  private _coordinateSystemLoading = false;
   state!: SharedLayerState; // Will be set to the shared layer state object during layer matching
 
   parent: Layer | null = null;
@@ -272,7 +283,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       coordinateOrigin?: [number, number, number];
       /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
       fromCoordinateSystem?: CoordinateSystem;
-      /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
+      /** The source coordinate origin. Defaults to `coordinateOrigin` for the same source system, or zero for a different system. */
       fromCoordinateOrigin?: [number, number, number];
       /** Whether to apply offset mode automatically as does the project shader module.
        * Offset mode places the origin of the common space at the given viewport's center. It is used in some use cases
@@ -330,7 +341,55 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Returns true if all async resources are loaded */
   get isLoaded(): boolean {
-    return this.internalState ? !this.internalState.isAsyncPropLoading() : false;
+    return this.internalState
+      ? !this._coordinateSystemLoading && !this.internalState.isAsyncPropLoading()
+      : false;
+  }
+
+  /** Whether the source CRS is available for lifecycle and draw operations. */
+  get isCoordinateSystemLoaded(): boolean {
+    return !this._coordinateSystemLoading;
+  }
+
+  /** (Internal) Install a resolved source CRS, or block the layer while it loads. */
+  _setSourceCrs(sourceCrs: CRSDescriptor | null | undefined): void {
+    this._coordinateSystemLoading = sourceCrs === undefined;
+    if (sourceCrs === undefined) return;
+    this._sourceCrs = sourceCrs;
+    if (this.internalState) {
+      this.internalState.sourceCrs = sourceCrs;
+      this._updatePreprojection(this.context.viewport);
+    }
+  }
+
+  private _updatePreprojection(viewport: Viewport): boolean {
+    const internalState = this.internalState!;
+    const signature = JSON.stringify([
+      internalState.sourceCrs?.signature,
+      viewport.crs?.signature,
+      // Shader-only precision mode changes retain the same packed coordinates.
+      supportsSourceCRS(viewport.projectionMode, internalState.sourceCrs, viewport.crs)
+        ? null
+        : viewport.projectionMode,
+      viewport.projectionSignature
+    ]);
+    const changed = internalState.preprojectionSignature !== signature;
+    if (changed) {
+      Object.assign(internalState, viewport.getPreprojection(internalState.sourceCrs));
+      internalState.preprojectionSignature = signature;
+    }
+    // Subclasses can replace state during initializeState; publish the retained pair
+    // again before updates without allocating new conversion functions each frame.
+    Object.assign(this.state, {
+      sourceCrs: internalState.sourceCrs,
+      packedCrs: internalState.packedCrs,
+      preproject: internalState.preproject,
+      unpreproject: internalState.unpreproject
+    });
+    if (changed && internalState.changeFlags) {
+      this.setChangeFlags({projectionChanged: true});
+    }
+    return changed;
   }
 
   /** Returns true if using shader-based WGS84 longitude wrapping */
@@ -375,22 +434,38 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.props.loadOptions;
   }
 
-  /** Opt an attribute into viewport projection and automatic position invalidation.
-   * A layer must retain the same preprojection capability throughout its lifetime.
+  /** Opt an attribute into source-CRS conversion and automatic position invalidation.
+   * The transform is refreshed when the source CRS or viewport changes.
    */
   usePositionTransforms(): Pick<AttributeOptions, 'transformSource' | 'transform'> {
     return {
       transformSource: 'projection',
-      transform:
-        this.context.viewport.preproject && this.props.coordinateSystem !== 'cartesian'
-          ? transformPosition
-          : null
+      transform: this.internalState?.preproject ? transformPosition : null
     };
+  }
+
+  /** Subdivision step in accessor coordinates, accounting for the layer model matrix.
+   * @internal Tessellators subdivide before model-matrix and CRS conversion.
+   */
+  getSubdivisionStep(): number {
+    const sourceCrs = this.internalState?.sourceCrs;
+    if (!sourceCrs) return 0;
+    const step = this.context.viewport.getSubdivisionStep(sourceCrs);
+    const {modelMatrix} = this.props;
+    if (!step || !modelMatrix) return step;
+    // A tile's matrix scales normalized local positions into CRS world units.
+    // Translation does not change the interval; use the larger horizontal axis scale.
+    const scale = Math.max(
+      Math.hypot(modelMatrix[0], modelMatrix[1], modelMatrix[2]),
+      Math.hypot(modelMatrix[4], modelMatrix[5], modelMatrix[6])
+    );
+    return scale > 0 ? step / scale : 0;
   }
 
   use64bitPositions(): boolean {
     const {coordinateSystem} = this.props;
     return (
+      Boolean(this.internalState?.sourceCrs) ||
       this.context?.viewport?.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL ||
       coordinateSystem === 'default' ||
       coordinateSystem === 'lnglat' ||
@@ -652,14 +727,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
+    if (this._coordinateSystemLoading) return;
     const oldViewport = this.internalState.viewport;
+    const projectionChanged = this._updatePreprojection(viewport);
     this.internalState.viewport = viewport;
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
       this.setChangeFlags({
         viewportChanged: true,
-        projectionChanged:
-          (oldViewport?.projectionSignature ?? null) !== (viewport.projectionSignature ?? null)
+        projectionChanged
       });
 
       if (this.isComposite) {
@@ -1019,6 +1095,18 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this._clearChangeFlags(); // populate this.internalState.changeFlags
 
     this.state = {};
+    const coordinateSystem =
+      (this.props.coordinateSystem ?? 'default') === 'default'
+        ? this.context.viewport.isGeospatial
+          ? 'WGS84'
+          : 'cartesian'
+        : this.props.coordinateSystem;
+    const sourceCrs =
+      this._sourceCrs === undefined ? resolveCRS(coordinateSystem) : this._sourceCrs;
+    // LayerManager resolves asynchronous descriptors before initialization.
+    assert(!(sourceCrs instanceof Promise));
+    this.internalState.sourceCrs = sourceCrs;
+    this._updatePreprojection(this.context.viewport);
     // for backwards compatibility with older layers
     // TODO - remove in next release
     /* eslint-disable accessor-pairs */
@@ -1082,6 +1170,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
   _update(): void {
+    if (!this.internalState || this._coordinateSystemLoading) return;
+    this._updatePreprojection(this.internalState?.viewport || this.context.viewport);
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
@@ -1113,15 +1203,24 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         updateParams.props.coordinateSystem !== updateParams.oldProps.coordinateSystem;
       if (
         updateParams.changeFlags.projectionChanged ||
-        (context.viewport.preproject &&
+        (this.internalState.preproject &&
           (coordinateSystemChanged ||
-            (this.usePositionTransforms().transform &&
-              updateParams.props.modelMatrix !== updateParams.oldProps.modelMatrix)))
+            !deepEqual(updateParams.props.modelMatrix, updateParams.oldProps.modelMatrix, 1) ||
+            !deepEqual(
+              updateParams.props.coordinateOrigin,
+              updateParams.oldProps.coordinateOrigin,
+              1
+            )))
       ) {
         const attributeManager = this.getAttributeManager();
         for (const [name, attribute] of Object.entries(attributeManager?.attributes || {})) {
           if (attribute.settings.transformSource === 'projection') {
-            if (coordinateSystemChanged && 'transform' in attribute.settings) {
+            // Layout-specific wrappers compose projection themselves; retain them
+            // while refreshing only the transform installed by usePositionTransforms.
+            if (
+              'transform' in attribute.settings &&
+              (!attribute.settings.transform || attribute.settings.transform === transformPosition)
+            ) {
               attribute.settings.transform = this.usePositionTransforms().transform;
             }
             attributeManager!.invalidate(name);
@@ -1586,5 +1685,6 @@ function transformPosition(this: Layer, input: number[]): [number, number, numbe
     // Transform the local copy in place without allocating a matrix for each vertex.
     transformMat4(position, position, this.props.modelMatrix);
   }
-  return this.context.viewport.preproject!(position);
+  for (let axis = 0; axis < 3; axis++) position[axis] += this.props.coordinateOrigin[axis];
+  return this.internalState!.preproject!(position);
 }

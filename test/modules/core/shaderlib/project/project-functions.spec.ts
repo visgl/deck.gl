@@ -5,7 +5,6 @@
 import {test, expect} from 'vitest';
 
 import {
-  COORDINATE_SYSTEM,
   WebMercatorViewport,
   FirstPersonViewport,
   OrthographicViewport,
@@ -40,6 +39,16 @@ export type TestCase = {
   result: NumberArray3;
 };
 const TEST_CASES: TestCase[] = [
+  {
+    title: 'WGS84 alias applies source origin before GPU projection',
+    position: [-0.01, 0.02, 1000],
+    projectProps: {
+      viewport: TEST_VIEWPORT,
+      coordinateSystem: 'EPSG:4326',
+      coordinateOrigin: TEST_COORDINATE_ORIGIN
+    },
+    result: [-0.014226562499999318, 0.03599588695612965, 0.016187212628251565]
+  },
   {
     title: 'LNGLAT:WEB_MERCATOR',
     position: [-70, 41, 1000],
@@ -160,9 +169,11 @@ for (const coordinateSystem of [
       ? ([...TEST_COORDINATE_ORIGIN.slice(0, 2), 100] as NumberArray3)
       : [0, 0, coordinateSystem === 'cartesian' ? 0 : 100];
   const coordinateOrigin: NumberArray3 =
-    coordinateSystem === 'cartesian'
-      ? [...firstPersonViewport.projectFlat(TEST_COORDINATE_ORIGIN), 0]
-      : TEST_COORDINATE_ORIGIN;
+    coordinateSystem === 'default'
+      ? [0, 0, 0]
+      : coordinateSystem === 'cartesian'
+        ? [...firstPersonViewport.projectFlat(TEST_COORDINATE_ORIGIN), 0]
+        : TEST_COORDINATE_ORIGIN;
   TEST_CASES.push({
     title: `FirstPersonViewport:${coordinateSystem}`,
     position,
@@ -203,7 +214,7 @@ test('project#projectPosition rejects legacy numeric coordinate systems', () => 
 
   const identityResult = projectPosition([0, 0, 0], {
     viewport: TEST_VIEWPORT,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+    coordinateSystem: 'cartesian',
     coordinateOrigin: [256, 256, 0]
   });
 

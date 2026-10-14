@@ -23,7 +23,7 @@ import {JSONPostProcessEffect} from './post-process-effect';
 
 /* eslint-disable import/namespace */
 import * as deckExports from '../deck-bundle';
-import {COORDINATE_SYSTEM, log, WebMercatorViewport} from '@deck.gl/core';
+import {log, WebMercatorViewport} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
 import DeckGL from '@deck.gl/core/scripting/deckgl';
 
@@ -62,7 +62,6 @@ const JSON_CONVERTER_CONFIGURATION = {
   },
   // Will be resolved as `<enum-name>.<enum-value>`
   enumerations: {
-    COORDINATE_SYSTEM,
     GL: GLConstants
   }
 };

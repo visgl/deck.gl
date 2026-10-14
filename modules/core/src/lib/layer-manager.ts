@@ -14,6 +14,8 @@ import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
 import ProjectionScaleResources from './projection-scale-resources';
 
+import {resolveCRS} from '../utils/crs';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import type Viewport from '../viewports/viewport';
 
 import type Layer from './layer';
@@ -55,6 +57,16 @@ export default class LayerManager {
   context: Omit<LayerContext, 'viewport'> & {viewport: Viewport | null};
   resourceManager: ResourceManager;
 
+  private _coordinateSystems = new Map<
+    string,
+    {
+      coordinateSystem: string;
+      layer: Layer;
+      sourceCrs?: CRSDescriptor | null;
+      pending?: Promise<CRSDescriptor>;
+      error?: Error;
+    }
+  >();
   private _lastRenderedLayers: LayersList = [];
   readonly projectionScaleResources: ProjectionScaleResources;
   private _needsRedraw: string | false = false;
@@ -114,6 +126,7 @@ export default class LayerManager {
     for (const layer of this.layers) {
       this._finalizeLayer(layer);
     }
+    this._coordinateSystems.clear();
   }
 
   /** Check if a redraw is needed */
@@ -352,16 +365,19 @@ export default class LayerManager {
           newLayer.validateProps();
         }
 
-        if (!oldLayer) {
-          this._initializeLayer(newLayer);
-        } else {
-          this._transferLayerState(oldLayer, newLayer);
-          this._updateLayer(newLayer);
+        if (oldLayer?.internalState) this._transferLayerState(oldLayer, newLayer);
+        const ready = this._resolveLayerCrs(newLayer);
+        if (ready) {
+          if (!newLayer.internalState) this._initializeLayer(newLayer);
+          else this._updateLayer(newLayer);
         }
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        sublayers = newLayer.isComposite ? (newLayer as CompositeLayer).getSubLayers() : null;
+        sublayers =
+          newLayer.internalState && newLayer.isComposite
+            ? (newLayer as CompositeLayer).getSubLayers()
+            : null;
         // End layer lifecycle method: render sublayers
       } catch (err) {
         this._handleError('matching', err as Error, newLayer); // Record first exception
@@ -373,6 +389,47 @@ export default class LayerManager {
     }
   }
   /* eslint-enable complexity,max-statements */
+
+  private _resolveLayerCrs(layer: Layer): boolean {
+    const coordinateSystem =
+      (layer.props.coordinateSystem ?? 'default') === 'default'
+        ? this.context.viewport!.isGeospatial
+          ? 'WGS84'
+          : 'cartesian'
+        : layer.props.coordinateSystem;
+    let entry = this._coordinateSystems.get(layer.id);
+    if (!entry || entry.coordinateSystem !== coordinateSystem) {
+      entry = {coordinateSystem, layer};
+      this._coordinateSystems.set(layer.id, entry);
+      const resolved =
+        coordinateSystem === this.context.viewport!.crs?.signature
+          ? this.context.viewport!.crs!
+          : resolveCRS(coordinateSystem);
+      if (resolved instanceof Promise) {
+        entry.pending = resolved;
+        const request = entry;
+        resolved.then(
+          sourceCrs => {
+            if (this._coordinateSystems.get(layer.id) !== request) return;
+            request.sourceCrs = sourceCrs;
+            request.pending = undefined;
+            this.setNeedsUpdate('source CRS loaded');
+          },
+          error => {
+            if (this._coordinateSystems.get(layer.id) !== request) return;
+            request.error = error;
+            request.pending = undefined;
+            request.layer.raiseError(error, 'loading coordinateSystem');
+          }
+        );
+      } else {
+        entry.sourceCrs = resolved;
+      }
+    }
+    entry.layer = layer;
+    layer._setSourceCrs(entry.pending || entry.error ? undefined : entry.sourceCrs);
+    return !entry.pending && !entry.error;
+  }
 
   // Finalize any old layers that were not matched
   private _finalizeOldLayers(oldLayerMap: {[layerId: string]: Layer | null}): void {
@@ -418,6 +475,11 @@ export default class LayerManager {
 
   /** Safely finalizes a single layer, removing all resources */
   private _finalizeLayer(layer: Layer): void {
+    this._coordinateSystems.delete(layer.id);
+    if (!layer.internalState) {
+      layer.lifecycle = LIFECYCLE.FINALIZED;
+      return;
+    }
     this._needsRedraw = this._needsRedraw || `finalized ${layer}`;
 
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;

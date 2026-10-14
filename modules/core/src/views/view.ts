@@ -16,6 +16,8 @@ import type {Parameters} from '@luma.gl/core';
 export type CommonViewState = TransitionProps;
 
 export type CommonViewProps<ViewState> = {
+  /** Subdivision intervals around the earth. Default 0 disables subdivision. */
+  resolution?: number;
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
   /**

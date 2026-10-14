@@ -11,7 +11,7 @@ import {
   altitudeToFovy,
   pixelsToWorld
 } from '@math.gl/web-mercator';
-import {PROJECTION_MODE} from '../lib/constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 
 const NORMALIZATION_SCALE = 512 / 40075016.6855;
 
@@ -24,8 +24,6 @@ export type CustomProjectionViewportOptions = Omit<ViewportOptions, 'position'> 
   pitch?: number;
   /** Map bearing in degrees. */
   bearing?: number;
-  /** Maximum subdivision cell size in WGS84 degrees. Default 0 disables subdivision. */
-  resolution?: number;
 };
 
 /** A planar camera over WGS84 positions converted to a resolved target CRS.
@@ -42,10 +40,7 @@ export default class CustomProjectionViewport extends Viewport {
   readonly sizeScaleTransform: [number, number, number, number];
 
   constructor(opts: CustomProjectionViewportOptions) {
-    const {crs, resolution = 0, center = [0, 0, 0], pitch = 0, bearing = 0, zoom = 0} = opts;
-    if (!Number.isFinite(resolution) || resolution < 0) {
-      throw new Error('CustomProjectionViewport requires finite, non-negative resolution');
-    }
+    const {crs, center = [0, 0, 0], pitch = 0, bearing = 0, zoom = 0} = opts;
     const factors = [crs.xUnit, crs.yUnit, crs.zUnit].map(unit => unit.metersPerUnit);
     if (!factors.every(value => typeof value === 'number' && Number.isFinite(value) && value > 0)) {
       throw new Error('CustomProjectionViewport requires linear CRS axes');
@@ -59,14 +54,6 @@ export default class CustomProjectionViewport extends Viewport {
     const preproject = (position: number[]): [number, number, number] => {
       const projected = converter.from(converter.normalize(position));
       return [projected[0], projected[1], projected[2] ?? 0];
-    };
-    const postUnproject = (position: number[]): [number, number, number] | null => {
-      try {
-        const source = converter.to(position);
-        return [source[0], source[1], source[2] ?? 0];
-      } catch {
-        return null;
-      }
     };
     const position = [center[0], center[1], 0];
     const unitsPerMeter = getUnitsPerMeter(crs, preproject(position), unitsPerWorldUnit) || [
@@ -91,8 +78,6 @@ export default class CustomProjectionViewport extends Viewport {
       modelMatrix: null,
       position,
       distanceScales: {unitsPerWorldUnit, unitsPerMeter},
-      preproject,
-      postUnproject,
       zoom,
       fovy,
       viewMatrix: getViewMatrix({height, pitch, bearing, scale: 2 ** zoom, altitude}),
@@ -111,8 +96,7 @@ export default class CustomProjectionViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.isGeospatial = true;
-    this.resolution = resolution;
-    this.signature = JSON.stringify([crs.signature, resolution]);
+    this.signature = JSON.stringify([crs.signature, this.resolution]);
     this.sizeScaleSignature = JSON.stringify([crs.signature, crs.renderingBounds]);
     const [[minX, minY], [maxX, maxY]] = crs.renderingBounds;
     const finiteBounds =
@@ -257,22 +241,23 @@ export default class CustomProjectionViewport extends Viewport {
     options: ProjectPositionOptions = {}
   ): [number, number, number] {
     if (options.sourceCrs) return this._projectPositionFromCRS(position, options.sourceCrs);
-    const projected = this.preproject!(position);
-    return projected.map((value, axis) => value * this.distanceScales.unitsPerWorldUnit[axis]) as [
-      number,
-      number,
-      number
-    ];
+    const converter = this.crs.converter.WGS84;
+    const projected = converter.from(converter.normalize(position));
+    const scale = this.distanceScales.unitsPerWorldUnit;
+    return [projected[0] * scale[0], projected[1] * scale[1], (projected[2] ?? 0) * scale[2]];
   }
   /** Convert common XYZ to WGS84; invalid inverses return NaN. */
   unprojectPosition(position: number[]): [number, number, number] {
-    return (
-      this.postUnproject!(
+    try {
+      const result = this.crs.converter.WGS84.to(
         position
           .slice(0, 3)
           .map((value, axis) => value / this.distanceScales.unitsPerWorldUnit[axis])
-      ) || [NaN, NaN, NaN]
-    );
+      );
+      return [result[0], result[1], result[2] ?? 0];
+    } catch {
+      return [NaN, NaN, NaN];
+    }
   }
   /** Ground-meter scales at a target-coordinate anchor; failed samples use camera scales. */
   getDistanceScales(coordinateOrigin?: number[]): DistanceScales {

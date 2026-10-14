@@ -48,13 +48,9 @@ The local scale field samples the descriptor's finite target-coordinate `renderi
 
 Inherits [Viewport](./viewport.md) methods with these coordinate semantics:
 
-### `preproject(position)`
+### `getPreprojection(sourceCrs)`
 
-Normalizes WGS84 coordinates and converts them to target XYZ. Independent of camera state.
-
-### `postUnproject(position)`
-
-Delegates target XYZ conversion to `crs.converter.WGS84.to`. Returns `null` if math.gl reports a conversion failure.
+Returns `{preproject, unpreproject, packedCrs}` for the resolved source descriptor. When its signature matches the viewport's descriptor, both functions are `null` and attributes remain in target CRS units. Otherwise, conversion goes through WGS84 and the target descriptor's normalization. `unpreproject` reverses the conversion. These functions are independent of camera state and exclude layer transforms; layers retain them in internal state.
 
 ### `project(position, options)`
 

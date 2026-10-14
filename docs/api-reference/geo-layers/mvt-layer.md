@@ -325,6 +325,8 @@ Remarks:
 
 ## Tile
 
+Tiles are loaded in tile-local coordinates. Sublayers declare `coordinateSystem: 'OSMTile512'`, with a tile-specific model matrix and origin mapping positions to a 512-unit Mercator world (X eastward, Y southward, Z in meters). Each sublayer converts these positions for the active viewport.
+
 Aside from all members of the [Tile](./tile-layer.md#tile) class, tile instances from the `MVTLayer` also include the following fields:
 
 #### `dataInWGS84` (Feature[]) {#datainwgs84}

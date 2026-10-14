@@ -4,7 +4,6 @@
 
 import {test, expect} from 'vitest';
 import {
-  COORDINATE_SYSTEM,
   OrthographicViewport,
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport,
@@ -43,7 +42,7 @@ test('projection-utils#getFlatCommonOrigin', () => {
   // meter-offsets on the globe holds a sphere-space position
   const globeUniforms = project.getUniforms({
     viewport: globeViewport,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: [-122.43, 37.75, 0]
   }) as ProjectUniforms;
   expect(getFlatCommonOrigin(globeUniforms, globeViewport)).toEqual([0, 0]);
@@ -51,7 +50,7 @@ test('projection-utils#getFlatCommonOrigin', () => {
   // Under WEB_MERCATOR_AUTO_OFFSET the flat space is offset-relative, like geometry.position
   const mercatorUniforms = project.getUniforms({
     viewport: mercatorHighZoomViewport,
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+    coordinateSystem: 'lnglat',
     coordinateOrigin: [0, 0, 0]
   }) as ProjectUniforms;
   expect(mercatorUniforms.commonOrigin[0]).not.toBe(0);
@@ -94,7 +93,7 @@ test('projection-utils#projectToFlatCommon pairs with project_common_position_to
       {
         title: 'OrthographicViewport: cartesian identity',
         viewport: orthographicViewport,
-        updateProps: {coordinateSystem: COORDINATE_SYSTEM.CARTESIAN, data: [[10, -20, 0]]},
+        updateProps: {coordinateSystem: 'cartesian', data: [[10, -20, 0]]},
         onAfterUpdate: ({layer}) => {
           expect(projectToFlatCommon(layer, [10, -20, 0])).toEqual([10, -20, 0]);
           // corners are re-ordered into min/max bounds
@@ -121,14 +120,14 @@ test('projection-utils#projectToFlatCommon mirrors the globe METER_OFFSETS shade
         props: {
           data: [offset],
           getPosition: d => d,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin
         },
         onAfterUpdate: ({layer}) => {
           // Emulate project_position() under PROJECTION_MODE_GLOBE + COORDINATE_SYSTEM_METER_OFFSETS
           const uniforms = project.getUniforms({
             viewport: globeViewport,
-            coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+            coordinateSystem: 'meter-offsets',
             coordinateOrigin
           }) as ProjectUniforms;
           const origin = Array.from(uniforms.commonOrigin);
