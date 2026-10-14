@@ -3,17 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable guard-for-in */
-import Attribute, {AttributeOptions} from './attribute';
+import Attribute, {AttributeOptions, BinaryAttribute} from './attribute';
 import AttributeBufferGroups, {type AttributeBufferGroupBindings} from './attribute-buffer-groups';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
 import debug from '../../debug/index';
-import {NumericArray} from '../../types/types';
+import {NumericArray, TypedArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Device, BufferLayout} from '@luma.gl/core';
+import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -168,6 +168,21 @@ export default class AttributeManager {
     }
     // For performance tuning
     debug(TRACE_INVALIDATE, this, 'all');
+  }
+
+  /** Returns `true` if any attribute has a versioned binary input in `buffers` that has not been applied */
+  hasVersionedBinaryChanged(
+    buffers: Record<string, TypedArray | Buffer | BinaryAttribute> | undefined
+  ): boolean {
+    if (!buffers) {
+      return false;
+    }
+    for (const attributeName in this.attributes) {
+      if (this.attributes[attributeName].hasVersionedBinaryChanged(buffers)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Ensure all attribute buffers are updated from props or data.
