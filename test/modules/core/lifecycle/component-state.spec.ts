@@ -191,6 +191,53 @@ test('ComponentState#asynchronous async props', async () => {
   ]);
 });
 
+test('ComponentState#stale async load does not release the current value', async () => {
+  const released: unknown[] = [];
+  const transformed: unknown[] = [];
+
+  class ResourceComponent extends Component<{resource?: any}> {
+    static componentName = 'ResourceComponent';
+    static defaultProps = {
+      resource: {
+        type: 'object',
+        value: null,
+        async: true,
+        transform: value => {
+          transformed.push(value);
+          return {resource: value};
+        },
+        release: value => {
+          released.push(value);
+        }
+      }
+    };
+  }
+
+  const component = new ResourceComponent({});
+  // @ts-expect-error
+  component.internalState = new ComponentState(component);
+  // @ts-expect-error
+  const state = component.internalState;
+
+  const olderLoad = makePromise();
+  const newerLoad = makePromise();
+  state.setAsyncProps({resource: olderLoad});
+  state.setAsyncProps({resource: newerLoad});
+
+  // The newer load resolves first
+  newerLoad.resolve('newer');
+  await delay(0);
+  const current = state.getAsyncProp('resource');
+  expect(current, 'Newer load is the current value').toEqual({resource: 'newer'});
+
+  // The older load resolves afterwards and must be ignored
+  olderLoad.resolve('older');
+  await delay(0);
+  expect(state.getAsyncProp('resource'), 'Stale load is discarded').toBe(current);
+  expect(released, 'Current value is not released by the stale load').not.toContain(current);
+  expect(transformed, 'Stale load is not transformed').toEqual(['newer']);
+});
+
 webglTest('ComponentState#async props with transform', async () => {
   const testContext = {device};
 
