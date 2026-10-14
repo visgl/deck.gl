@@ -172,25 +172,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   initializeState() {
-    const {viewport} = this.context;
-    const {_full3d} = this.props;
-
-    let preproject: ((xy: number[]) => number[]) | undefined;
-
-    if (this.state.packedCrs?.signature === 'WGS84') {
-      if (_full3d) {
-        preproject = viewport.projectPosition.bind(viewport);
-      } else {
-        preproject = viewport.projectFlat.bind(viewport);
-      }
-    }
-
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
-        // Lnglat coordinates are usually projected non-linearly, which affects tesselation results
-        // Provide a preproject function if the coordinates are in lnglat
-        preproject,
         fp64: this.use64bitPositions(),
         IndexType: Uint32Array
       })
@@ -355,6 +339,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   protected updateGeometry({props, oldProps, changeFlags}: UpdateParameters<this>) {
     const {viewport} = this.context;
     const subdivisionStep = this.getSubdivisionStep();
+    const geocentric = Boolean(
+      this.state.packedCrs && viewport.crs?.coordinateFrame === 'geocentric'
+    );
     const projectionChanged =
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
@@ -380,13 +367,10 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         buffers,
         getGeometry: props.getPolygon,
         transform: this.usePositionTransforms().transform?.bind(this),
-        // Triangulate in the target projection even when CPU conversion packs WGS84.
-        preproject:
-          this.state.packedCrs?.signature === 'WGS84'
-            ? props._full3d
-              ? viewport.projectPosition.bind(viewport)
-              : viewport.projectFlat.bind(viewport)
-            : undefined,
+        // Tessellation uses a temporary target-space copy; attributes retain their shader-supported CRS.
+        preproject: this.state.packedCrs
+          ? position => viewport.projectPosition(position, {sourceCrs: this.state.packedCrs!})
+          : undefined,
         positionFormat: props.positionFormat,
         // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
         wrapLongitude:
@@ -396,7 +380,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         resolution: subdivisionStep,
         fp64: this.use64bitPositions(),
         dataChanged: projectionChanged ? undefined : changeFlags.dataChanged,
-        full3d: props._full3d
+        // A geocentric target needs a polygon plane selected from XYZ, even for flat source data.
+        full3d: props._full3d || geocentric,
+        geocentric
       });
 
       this.setState({

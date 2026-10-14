@@ -309,7 +309,8 @@ export function getSurfaceIndices(
   polygon: NormalizedPolygonGeometry,
   positionSize: number,
   preproject?: (xy: number[]) => number[],
-  full3d?: boolean
+  full3d?: boolean,
+  geocentric?: boolean
 ): number[] {
   let holeIndices = getHoleIndices(polygon);
   if (holeIndices) {
@@ -318,7 +319,15 @@ export function getSurfaceIndices(
 
   let positions = getPositions(polygon);
 
-  const is3d = full3d && positionSize === 3;
+  const is3d = full3d && (positionSize === 3 || geocentric);
+  let triangulationSize = positionSize;
+  if (is3d && positionSize === 2) {
+    // Geocentric tessellation needs XYZ even when the packed attribute is XY.
+    const xyz: number[] = [];
+    for (let i = 0; i < positions.length; i += 2) xyz.push(positions[i], positions[i + 1], 0);
+    positions = xyz;
+    triangulationSize = 3;
+  }
 
   if (preproject) {
     // When tesselating lnglat coordinates, project them to the common space for accuracy
@@ -328,12 +337,12 @@ export function getSurfaceIndices(
     positions = positions.slice();
 
     const p: number[] = [];
-    for (let i = 0; i < n; i += positionSize) {
+    for (let i = 0; i < n; i += triangulationSize) {
       p[0] = positions[i];
       p[1] = positions[i + 1];
 
       if (is3d) {
-        p[2] = positions[i + 2];
+        p[2] = positions[i + 2] ?? 0;
       }
 
       const xy = preproject(p);
@@ -346,6 +355,8 @@ export function getSurfaceIndices(
       }
     }
   }
+
+  const geocentricPositions = geocentric ? positions.slice() : null;
 
   if (is3d) {
     // calculate plane with largest area
@@ -375,6 +386,23 @@ export function getSurfaceIndices(
     }
   }
 
-  // Let earcut triangulate the polygon
-  return earcut(positions, holeIndices, positionSize);
+  const indices = earcut(positions, holeIndices, triangulationSize);
+  if (geocentricPositions) {
+    // Globe views cull inward-facing triangles. A planar earcut winding can face inward
+    // on either hemisphere; orient each triangle away from the geocentric origin.
+    for (let i = 0; i < indices.length; i += 3) {
+      const a = indices[i] * triangulationSize;
+      const b = indices[i + 1] * triangulationSize;
+      const c = indices[i + 2] * triangulationSize;
+      const p = geocentricPositions;
+      const orientation =
+        p[a] * (p[b + 1] * p[c + 2] - p[b + 2] * p[c + 1]) +
+        p[a + 1] * (p[b + 2] * p[c] - p[b] * p[c + 2]) +
+        p[a + 2] * (p[b] * p[c + 1] - p[b + 1] * p[c]);
+      if (orientation < 0) {
+        [indices[i + 1], indices[i + 2]] = [indices[i + 2], indices[i + 1]];
+      }
+    }
+  }
+  return indices;
 }

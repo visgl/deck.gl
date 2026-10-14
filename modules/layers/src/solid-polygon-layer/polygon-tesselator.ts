@@ -46,6 +46,7 @@ export default class PolygonTesselator extends Tesselator<
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
+    geocentric?: boolean;
   }
 > {
   constructor(opts) {
@@ -215,7 +216,8 @@ export default class PolygonTesselator extends Tesselator<
       polygon,
       this.positionSize,
       this.opts.preproject,
-      this.opts.full3d
+      this.opts.full3d,
+      this.opts.geocentric
     );
 
     // make sure the buffer is large enough

@@ -4,7 +4,7 @@
 
 import {expect, test} from 'vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {LayerManager, MapView, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -124,3 +124,53 @@ test('SolidPolygonLayer#WebGPU binary extruded polygons', async ({skip}) => {
 
   layerManager.finalize();
 });
+
+test.each(['XY', 'XYZ'] as const)(
+  'SolidPolygonLayer#tessellates a polar %s polygon without preprojecting attributes',
+  positionFormat => {
+    const viewport = new GlobeViewport({latitude: -90});
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const ring = [
+      [-135, -80],
+      [-45, -80],
+      [45, -80],
+      [135, -80],
+      [-135, -80]
+    ];
+    const layer = new SolidPolygonLayer({
+      data: [ring],
+      getPolygon: polygon => polygon,
+      positionFormat
+    });
+    try {
+      manager.setLayers([layer]);
+      expect(layer.state.preproject).toBeNull();
+      const tessellator = layer.state.polygonTesselator;
+      const indices = tessellator.get('indices');
+      expect(indices).toHaveLength(6);
+      const packed = tessellator.get('positions');
+      for (let i = 0; i < tessellator.instanceCount; i++) {
+        expect(
+          ring.some(point => point[0] === packed[i * 3] && point[1] === packed[i * 3 + 1])
+        ).toBe(true);
+      }
+      for (let i = 0; i < indices.length; i += 3) {
+        const [a, b, c] = Array.from(indices.slice(i, i + 3), index =>
+          viewport.projectPosition(Array.from(packed.slice(index * 3, index * 3 + 3)))
+        );
+        const orientation =
+          a[0] * (b[1] * c[2] - b[2] * c[1]) +
+          a[1] * (b[2] * c[0] - b[0] * c[2]) +
+          a[2] * (b[0] * c[1] - b[1] * c[0]);
+        expect(orientation).toBeGreaterThan(0);
+      }
+    } finally {
+      manager.finalize();
+    }
+  }
+);

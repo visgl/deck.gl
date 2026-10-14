@@ -210,6 +210,14 @@ if (outDir) {
 
 ### Geometry Approximation
 
+![subdivision](https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/images/docs/viewport-resolution.png)
+
+<small>Left to right: same polygons in resolution 0, 10, 60, rendering 487, 501, 591 outline vertices respectively.
+Notice the shape of the 49th-parallel.
+<br/><i>Natural Earth 1:110 country boundaries of continental Canada and United States. Albers projection, central metidian -96°, standard parallels 29.5° / 45.5°</i>
+</small>
+
+
 When a geometry is displayed in a different CRS from its definition, long segments are still rendered as straight lines, instead of warping along the surface of the new CRS.
 
 Use `resolution` to divide long straight lines into smaller segments to better follow the shape of the target CRS. Subdivision adds vertices before projection so paths, polygon edges and bitmap meshes can follow projected curves more closely. Higher values produce finer detail, with more processing and memory overhead. Subdivision is by default disabled.
