@@ -187,6 +187,66 @@ test('LayerManager#setLayers', () => {
   });
 });
 
+test('LayerManager#update requested by a sublayer during an update', () => {
+  // The sublayer reports a value from its update, as TileLayer calls onViewportLoad,
+  // and the composite layer stores it in its state and passes it back to the sublayer
+  class ReportingLayer extends Layer {
+    initializeState() {}
+
+    updateState() {
+      this.props.onUpdate(this.props.value);
+    }
+  }
+  ReportingLayer.layerName = 'ReportingLayer';
+
+  class StoringLayer extends CompositeLayer {
+    initializeState() {
+      this.setState({reported: null});
+    }
+
+    renderLayers() {
+      return new ReportingLayer(this.getSubLayerProps({id: 'reporter'}), {
+        value: this.props.value,
+        reported: this.state.reported,
+        onUpdate: value => {
+          if (value !== this.state.reported) {
+            this.setState({reported: value});
+          }
+        }
+      });
+    }
+  }
+  StoringLayer.layerName = 'StoringLayer';
+
+  const layerManager = new LayerManager(device);
+  layerManager.setLayers([new StoringLayer({id: 'storing', value: 1})]);
+  expect(layerManager.needsUpdate(), 'update requested during the update is kept').toBeTruthy();
+
+  layerManager.updateLayers();
+  const reporter = layerManager.getLayers().find(layer => layer.id === 'storing-reporter');
+  expect(reporter.props.reported, 'sublayer rendered with the stored value').toBe(1);
+  expect(layerManager.needsUpdate(), 'no further update').toBeFalsy();
+  layerManager.finalize();
+});
+
+test("LayerManager#setState in a layer's own update", () => {
+  class SelfUpdatingLayer extends CompositeLayer {
+    updateState({props}) {
+      this.setState({value: props.value});
+    }
+
+    renderLayers() {
+      return new TestLayer(this.getSubLayerProps({id: 'child'}));
+    }
+  }
+  SelfUpdatingLayer.layerName = 'SelfUpdatingLayer';
+
+  const layerManager = new LayerManager(device);
+  layerManager.setLayers([new SelfUpdatingLayer({id: 'self', value: 1})]);
+  expect(layerManager.needsUpdate(), 'no further update').toBeFalsy();
+  layerManager.finalize();
+});
+
 test('LayerManager#error handling', () => {
   const errorArgs = [];
   const onError = (error, layer) => errorArgs.push({error, layer});
