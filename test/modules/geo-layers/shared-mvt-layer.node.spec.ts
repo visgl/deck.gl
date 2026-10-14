@@ -185,3 +185,40 @@ it('skips failed tiles on a globe and maps highlights to filtered sublayer data'
     layer.getSubLayerPropsByTile(tile, new GeoJsonLayer({data: [DATA[0]]})).highlightedObjectIndex
   ).toBe(-1);
 });
+
+it('retains independent hover highlights for consumers of the same data', () => {
+  const a = new MVT2DLayer({data: null, highlightColor: [255, 0, 0, 255]});
+  const b = new MVT2DLayer({data: null, highlightColor: [0, 255, 0, 255]});
+  for (const layer of [a, b]) {
+    layer.context = {viewport} as any;
+    layer.initializeState();
+    layer.setState = updates => Object.assign(layer.state, updates);
+  }
+  const tile: any = {content: DATA};
+  (a as any)._updateAutoHighlight({object: DATA[0]});
+  expect(a.getSubLayerPropsByTile(tile).highlightedObjectIndex).toBe(0);
+  expect(b.getSubLayerPropsByTile(tile).highlightedObjectIndex).toBe(-1);
+  expect(a.getSubLayerPropsByTile(tile).highlightColor).toEqual([255, 0, 0, 255]);
+  expect(DATA[0].geometry.coordinates).toEqual([0.5, 0.5]);
+});
+
+it('decodes a real MVT feature into the canonical tile-local array', async () => {
+  const {encodeSync} = await import('@loaders.gl/core');
+  const {MVTLoader, MVTWriter} = await import('@loaders.gl/mvt');
+  const feature = {
+    type: 'Feature',
+    id: 7,
+    properties: {name: 'test'},
+    geometry: {type: 'Point', coordinates: [0.5, 0.5]}
+  };
+  const bytes = encodeSync({type: 'FeatureCollection', features: [feature]}, MVTWriter, {
+    mvt: {tileIndex: {x: 0, y: 0, z: 0}}
+  });
+  const url = `data:application/x-protobuf;base64,${Buffer.from(bytes).toString('base64')}`;
+  const loader = new MVT2DLayer({data: url, loaders: [MVTLoader], loadOptions: {worker: false}});
+  const data = await loader.getTileData({index: {x: 0, y: 0, z: 0}, id: 'tile'} as any);
+  expect(Array.isArray(data)).toBe(true);
+  expect(data).toHaveLength(1);
+  expect(data[0].geometry.coordinates).toEqual([0.5, 0.5]);
+  expect(data[0].properties.name).toBe('test');
+});

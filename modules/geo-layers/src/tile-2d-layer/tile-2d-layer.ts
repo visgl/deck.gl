@@ -74,6 +74,7 @@ const defaultProps: DefaultProps<Tile2DLayerProps> = {
   TilesetClass: Tileset2D,
   data: tile2DDataType,
   dataComparator: tile2DDataType.equal,
+  viewIds: {type: 'array', optional: true, value: null, compare: true},
   renderSubLayers: {type: 'function', value: (props: any) => new GeoJsonLayer(props)},
   getTileData: {type: 'function', optional: true, value: null},
   onViewportLoad: {type: 'function', optional: true, value: null},
@@ -115,6 +116,8 @@ const TILE2D_LAYER_DEFAULT_OPTION_VALUES = {
 export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   /** URL template, shared tileset, or loaders.gl TileSource backing the layer. */
   data: URLTemplate | Tileset2D<DataT, any> | TileSource;
+  /** View IDs that select and render tiles; null includes every active view. */
+  viewIds?: string[] | null;
   /** Tileset class used when the layer creates its own internal tileset. */
   TilesetClass?: typeof Tileset2D;
   /** Sub-layer factory invoked for each loaded tile. */
@@ -132,8 +135,8 @@ export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   ) => Layer | null | LayersList;
   /** Optional tile loader used with URL-template data. */
   getTileData?: ((props: TileLoadProps) => Promise<DataT> | DataT) | null;
-  /** Callback fired when the current viewport's selected tiles are loaded. */
-  onViewportLoad?: ((tiles: Tile2DHeader<DataT>[]) => void) | null;
+  /** Reports settled selected tiles and the viewport independently for each enabled view. */
+  onViewportLoad?: ((tiles: Tile2DHeader<DataT>[], viewport: Viewport) => void) | null;
   /** Callback fired when any tile loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
   /** Callback fired when any tile is evicted. */
@@ -148,7 +151,7 @@ export type Tile2DLayerProps<DataT = unknown> = CompositeLayerProps & {
   maxZoom?: number | null;
   /** Minimum zoom level to request. */
   minZoom?: number | null;
-  /** Maximum tile count kept in cache. */
+  /** Cache high-water mark; selected and visible tiles are never evicted to meet it. */
   maxCacheSize?: number | null;
   /** Maximum byte size kept in cache. */
   maxCacheByteSize?: number | null;
@@ -193,6 +196,8 @@ type Tile2DLayerState<DataT> = {
   isLoaded: boolean;
   /** Last frame number observed for each viewport. */
   frameNumbers: Map<string, number>;
+  /** Views whose selection was loaded at their previous traversal update. */
+  loadedViewIds: Set<string>;
   /** Cached sub-layers per tile id. */
   tileLayers: Map<string, Layer[]>;
   /** Subscription disposer for tileset events. */
@@ -226,6 +231,7 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
       ownsTileset: false,
       isLoaded: false,
       frameNumbers: new Map(),
+      loadedViewIds: new Set(),
       tileLayers: new Map(),
       unsubscribeTilesetEvents: null
     };
@@ -299,12 +305,14 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
         ownsTileset,
         tileLayers: new Map(),
         frameNumbers: new Map(),
+        loadedViewIds: new Set(),
         unsubscribeTilesetEvents: nextTileset.subscribe({
-          onTileLoad: this._onTileLoad.bind(this),
-          onTileError: this._onTileError.bind(this),
-          onTileUnload: this._onTileUnload.bind(this),
-          onUpdate: () => this.setNeedsUpdate(),
-          onError: error => this.raiseError(error, 'loading TileSource metadata')
+          onTileLoad: tile => this._getCurrentTilesetLayer()._onTileLoad(tile),
+          onTileError: (error, tile) => this._getCurrentTilesetLayer()._onTileError(error, tile),
+          onTileUnload: tile => this._getCurrentTilesetLayer()._onTileUnload(tile),
+          onUpdate: () => this._getCurrentTilesetLayer().setNeedsUpdate(),
+          onError: error =>
+            this._getCurrentTilesetLayer().raiseError(error, 'loading TileSource metadata')
         })
       });
     } else {
@@ -312,6 +320,11 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     }
 
     this._updateTileset();
+  }
+
+  /** Routes asynchronous cache events to the matched layer after state transfers. */
+  private _getCurrentTilesetLayer(): this {
+    return (this.getCurrentLayer() || this) as this;
   }
 
   /** Resolves whether to reuse a shared tileset, reuse an owned tileset, or create a new one. */
@@ -453,24 +466,23 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
     return options;
   }
 
-  /** Updates per-view traversal state for all known viewports. */
+  /** Updates traversal and releases consumers outside the layer's active view IDs. */
   private _updateTileset(): void {
     const {zRange, modelMatrix} = this.props;
     let anyTilesetChanged = false;
-    const notifiedViews = new Set<Tile2DView<DataT>>();
-    const activeViewports = this.context.layerManager?.getViewports();
-    if (activeViewports) {
-      const activeIds = new Set(activeViewports.map(viewport => viewport.id));
-      for (const [id, view] of this.state.tilesetViews) {
-        if (!activeIds.has(id)) {
-          view.finalize();
-          this.state.tilesetViews.delete(id);
-          this.state.frameNumbers.delete(id);
-          this._knownViewports.delete(id);
-        }
+    const activeViewports = (
+      this.context.layerManager?.getViewports() || Array.from(this._knownViewports.values())
+    ).filter(viewport => this._isViewEnabled(viewport.id));
+    const activeIds = new Set(activeViewports.map(viewport => viewport.id));
+    for (const [id, view] of this.state.tilesetViews) {
+      if (!activeIds.has(id)) {
+        view.finalize();
+        this.state.tilesetViews.delete(id);
+        this.state.frameNumbers.delete(id);
+        this.state.loadedViewIds.delete(id);
       }
-      this._knownViewports = new Map(activeViewports.map(viewport => [viewport.id, viewport]));
     }
+    this._knownViewports = new Map(activeViewports.map(viewport => [viewport.id, viewport]));
 
     for (const [viewportKey, viewport] of this._knownViewports) {
       this._prunePlaceholderViewportView(viewportKey);
@@ -480,35 +492,32 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
       const tilesetChanged = previousFrameNumber !== frameNumber;
       anyTilesetChanged ||= tilesetChanged;
 
-      if (tilesetView.isLoaded && tilesetChanged) {
-        this._onViewportLoad(tilesetView);
-        notifiedViews.add(tilesetView);
+      if (tilesetView.isLoaded) {
+        if (tilesetChanged || !this.state.loadedViewIds.has(viewportKey)) {
+          this._onViewportLoad(tilesetView, viewport);
+        }
+        this.state.loadedViewIds.add(viewportKey);
+      } else {
+        this.state.loadedViewIds.delete(viewportKey);
       }
       if (tilesetChanged) {
         this.state.frameNumbers.set(viewportKey, frameNumber);
       }
     }
 
-    const nextIsLoaded = this.isLoaded;
-    const loadingStateChanged = this.state.isLoaded !== nextIsLoaded;
-    if (loadingStateChanged) {
-      for (const tilesetView of this.state.tilesetViews.values()) {
-        if (tilesetView.isLoaded && !notifiedViews.has(tilesetView)) {
-          this._onViewportLoad(tilesetView);
-        }
-      }
-    }
-
     if (anyTilesetChanged) {
       this.setState({frameNumbers: new Map(this.state.frameNumbers)});
     }
-    this.state.isLoaded = nextIsLoaded;
+    this.state.isLoaded = this.isLoaded;
   }
 
   /** Emits the viewport-load callback for one view. */
-  _onViewportLoad(tilesetView: Tile2DView<DataT>): void {
+  _onViewportLoad(
+    tilesetView: Tile2DView<DataT>,
+    viewport: Viewport = this.context.viewport
+  ): void {
     if (tilesetView.selectedTiles) {
-      this.props.onViewportLoad?.(tilesetView.selectedTiles);
+      this.props.onViewportLoad?.(tilesetView.selectedTiles, viewport);
     }
   }
 
@@ -631,13 +640,16 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
   }
 
   /** Filters tile sub-layers based on the active view-specific visibility state. */
-  filterSubLayer({layer, cullRect}: FilterContext) {
+  filterSubLayer({layer, cullRect, viewport}: FilterContext) {
+    const viewportKey = viewport?.id || this._getViewportKey();
+    if (!this._isViewEnabled(viewportKey)) return false;
     const {tile} = (
       layer as Layer<{
         /** Tile cache entry associated with these sublayer props. */ tile: Tile2DHeader<DataT>;
       }>
     ).props;
-    const tilesetView = this._getOrCreateTilesetView(this._getViewportKey());
+    const tilesetView = this.state.tilesetViews.get(viewportKey);
+    if (!tilesetView) return false;
     return tilesetView.isTileVisible(
       tile,
       cullRect,
@@ -648,6 +660,11 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
   /** Returns the active viewport key used to isolate per-view traversal state. */
   private _getViewportKey(): string {
     return this.context.viewport?.id || 'default';
+  }
+
+  /** Tests whether traversal and drawing are enabled for a view ID. */
+  private _isViewEnabled(viewId: string): boolean {
+    return !this.props.viewIds || this.props.viewIds.includes(viewId);
   }
 
   /** Copies a tileset option only when the layer prop was explicitly set. */
@@ -684,6 +701,7 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
         placeholderView.finalize();
         this.state.tilesetViews.delete(placeholderViewportKey);
         this.state.frameNumbers.delete(placeholderViewportKey);
+        this.state.loadedViewIds.delete(placeholderViewportKey);
       }
     }
   }
@@ -705,10 +723,12 @@ export class Tile2DLayer<DataT = any, ExtraPropsT extends {} = {}> extends Compo
   /** Registers additional viewports in multi-view rendering scenarios. */
   activateViewport(viewport: Viewport): void {
     const viewportKey = viewport.id || 'default';
-    const previousViewport = this._knownViewports.get(viewportKey);
-    this._knownViewports.set(viewportKey, viewport);
-    if (!previousViewport || !viewport.equals(previousViewport)) {
-      this.setNeedsUpdate();
+    if (this._isViewEnabled(viewportKey)) {
+      const previousViewport = this._knownViewports.get(viewportKey);
+      this._knownViewports.set(viewportKey, viewport);
+      if (!previousViewport || !viewport.equals(previousViewport)) {
+        this.setNeedsUpdate();
+      }
     }
     super.activateViewport(viewport);
   }

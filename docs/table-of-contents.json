@@ -134,6 +134,7 @@
           "api-reference/geo-layers/tile-2d-layer",
           "api-reference/geo-layers/mvt-2d-layer",
           "api-reference/geo-layers/tileset-2d",
+          "api-reference/geo-layers/tile-2d-header",
           "api-reference/mesh-layers/simple-mesh-layer",
           "api-reference/layers/solid-polygon-layer",
           "api-reference/geo-layers/terrain-layer",

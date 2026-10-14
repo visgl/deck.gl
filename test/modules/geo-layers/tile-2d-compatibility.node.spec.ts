@@ -254,4 +254,136 @@ describe('Tileset2D compatibility and independent consumers', () => {
     expect(picked.object.geometry.coordinates).toEqual([0, 0]);
     expect(feature.geometry.coordinates).toEqual([0.5, 0.5]);
   });
+
+  it('restricts requests and rendering to viewIds and releases changed scopes', async () => {
+    const getTileData = vi.fn(async () => []);
+    const tileset = new Tileset2D({getTileData});
+    const main = viewport(4);
+    const mini = new WebMercatorViewport({id: 'mini', width: 256, height: 256, zoom: 2});
+    const layer = new Tile2DLayer({data: tileset, viewIds: ['main']});
+    layer.context = {viewport: main, layerManager: {getViewports: () => [main, mini]}} as any;
+    layer.initializeState();
+    layer.setState = updates => Object.assign(layer.state, updates);
+    layer.setNeedsUpdate = vi.fn();
+    let replacement: Tile2DLayer | undefined;
+    try {
+      layer.updateState({changeFlags: {dataChanged: true}} as any);
+      await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+      expect(layer.state.tilesetViews.size).toBe(1);
+      expect(getTileData.mock.calls.every(([props]) => props.index.z === 4)).toBe(true);
+      expect(tileset.stats.get('Consumers').count).toBe(1);
+      const tile = tileset.selectedTiles![0];
+      expect(layer.filterSubLayer({viewport: mini, layer: {props: {tile}}} as any)).toBe(false);
+      expect(layer.state.tilesetViews.size).toBe(1);
+
+      replacement = layer.clone({viewIds: ['mini']});
+      replacement.context = layer.context;
+      replacement.state = layer.state;
+      replacement.setState = updates => Object.assign(replacement!.state, updates);
+      replacement.setNeedsUpdate = vi.fn();
+      replacement.updateState({changeFlags: {propsOrDataChanged: true}} as any);
+      await vi.waitFor(() => expect(replacement!.isLoaded).toBe(true));
+      expect([...replacement.state.tilesetViews.keys()]).toEqual(['mini']);
+      expect(tileset.selectedTiles!.every(t => t.zoom === 2)).toBe(true);
+      expect(tileset.stats.get('Consumers').count).toBe(1);
+    } finally {
+      (replacement || layer).finalizeState();
+      tileset.finalize();
+    }
+  });
+
+  it('notifies an independently loaded view even when another view is pending', async () => {
+    const pending = new Map<string, {zoom: number; resolve: (data: null) => void}>();
+    const tileset = new Tileset2D({
+      refinementStrategy: 'never',
+      maxRequests: 0,
+      getTileData: ({id, index}) =>
+        new Promise<null>(resolve => pending.set(id, {zoom: index.z, resolve}))
+    });
+    const main = viewport(4);
+    const mini = new WebMercatorViewport({id: 'mini', width: 256, height: 256, zoom: 2});
+    const onViewportLoad = vi.fn();
+    const layer = new Tile2DLayer({data: tileset, onViewportLoad});
+    layer.context = {viewport: main, layerManager: {getViewports: () => [main, mini]}} as any;
+    layer.initializeState();
+    layer.setState = updates => Object.assign(layer.state, updates);
+    layer.setNeedsUpdate = vi.fn();
+    try {
+      layer.updateState({changeFlags: {dataChanged: true}} as any);
+      await vi.waitFor(() => expect(pending.size).toBe(tileset.tiles.length));
+      for (const request of pending.values()) if (request.zoom === 2) request.resolve(null);
+      await vi.waitFor(() => expect(layer.state.tilesetViews.get('mini')!.isLoaded).toBe(true));
+      layer.updateState({changeFlags: {}} as any);
+      expect(layer.isLoaded).toBe(false);
+      expect(onViewportLoad).toHaveBeenCalledTimes(1);
+      expect(onViewportLoad.mock.calls[0][0].every(tile => tile.zoom === 2)).toBe(true);
+      expect(onViewportLoad.mock.calls[0][1].id).toBe('mini');
+      layer.updateState({changeFlags: {}} as any);
+      expect(onViewportLoad).toHaveBeenCalledTimes(1);
+      for (const request of pending.values()) if (request.zoom === 4) request.resolve(null);
+      await vi.waitFor(() => expect(layer.isLoaded).toBe(true));
+      layer.updateState({changeFlags: {}} as any);
+      expect(onViewportLoad).toHaveBeenCalledTimes(2);
+      expect(onViewportLoad.mock.calls[1][1].id).toBe('main');
+    } finally {
+      layer.finalizeState();
+      tileset.finalize();
+    }
+  });
+
+  it('passes the compatibility viewport field to subclass traversal hooks', () => {
+    const fixedViewport = viewport();
+    class CustomTileset extends Tileset2D {
+      getTileIndices(options: Parameters<Tileset2D['getTileIndices']>[0]) {
+        expect(options.viewport).toBe(fixedViewport);
+        return super.getTileIndices(options);
+      }
+    }
+    const tileset = new CustomTileset({getTileData: async () => []});
+    const view = new Tile2DView(tileset);
+    try {
+      view.update(fixedViewport);
+      expect(view.selectedTiles!.length).toBeGreaterThan(0);
+    } finally {
+      view.finalize();
+      tileset.finalize();
+    }
+  });
+
+  it('routes asynchronous shared-cache events to the current matched layer', async () => {
+    let finish!: (data: any[]) => void;
+    const tileset = new Tileset2D({
+      maxZoom: 0,
+      getTileData: () =>
+        new Promise<any[]>(resolve => {
+          finish = resolve;
+        })
+    });
+    const originalCallback = vi.fn();
+    const currentCallback = vi.fn();
+    const original = new Tile2DLayer({data: tileset, onTileLoad: originalCallback});
+    original.context = {viewport: viewport()} as any;
+    original.initializeState();
+    original.setState = updates => Object.assign(original.state, updates);
+    original.setNeedsUpdate = vi.fn();
+    let current = original;
+    original.getCurrentLayer = () => current;
+    try {
+      original.updateState({changeFlags: {dataChanged: true}} as any);
+      await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
+      current = original.clone({onTileLoad: currentCallback});
+      current.context = original.context;
+      current.state = original.state;
+      current.setState = updates => Object.assign(current.state, updates);
+      current.setNeedsUpdate = vi.fn();
+      current.updateState({changeFlags: {propsOrDataChanged: true}} as any);
+      finish([]);
+      await vi.waitFor(() => expect(currentCallback).toHaveBeenCalledTimes(1));
+      expect(originalCallback).not.toHaveBeenCalled();
+      expect(current.setNeedsUpdate).toHaveBeenCalled();
+    } finally {
+      current.finalizeState();
+      tileset.finalize();
+    }
+  });
 });

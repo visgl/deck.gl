@@ -44,7 +44,9 @@ export type {GeohashLayerProps} from './geohash-layer/geohash-layer';
 // Tileset2D
 
 export type {GeoBoundingBox, NonGeoBoundingBox} from './tileset-2d/index';
+/** @deprecated Use TileLoadProps. */
 export type {TileLoadProps as _TileLoadProps} from './tileset-2d/index';
+export type {TileLoadProps} from './tileset-2d/index';
 /** @deprecated Use Tileset2DProps. */
 export type {Tileset2DProps as _Tileset2DProps} from './tileset-2d/index';
 export type {

@@ -475,6 +475,7 @@ describe('Tile2DLayer', () => {
       ownsTileset: false,
       isLoaded: false,
       frameNumbers: new Map(),
+      loadedViewIds: new Set(),
       tileLayers: new Map(),
       unsubscribeTilesetEvents: null
     };

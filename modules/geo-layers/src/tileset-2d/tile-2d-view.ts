@@ -6,26 +6,10 @@ import {type Viewport} from '@deck.gl/core';
 import {Matrix4, equals, type NumericArray} from '@math.gl/core';
 
 import {memoize} from '../tileset-2d/memoize';
-import {
-  STRATEGY_DEFAULT,
-  STRATEGY_NEVER,
-  STRATEGY_REPLACE,
-  Tile2DHeader,
-  type Tileset2D
-} from '../tileset-2d/index';
+import {STRATEGY_DEFAULT, Tile2DHeader, type Tileset2D} from '../tileset-2d/index';
 import {getCullBounds, tile2DDeckAdapter, transformBox} from '../tileset-2d/deck-tileset-adapter';
 
-/** Bit flag marking a tile as visited during refinement traversal. */
-const TILE_STATE_VISITED = 1;
-/** Bit flag marking a tile as visible during refinement traversal. */
-const TILE_STATE_VISIBLE = 2;
-
-/** Built-in placeholder refinement handlers keyed by strategy name. */
-const STRATEGIES = {
-  [STRATEGY_DEFAULT]: updateTileStateDefault,
-  [STRATEGY_REPLACE]: updateTileStateReplace,
-  [STRATEGY_NEVER]: () => {}
-};
+import {refineTileStates} from './refinement';
 
 /** View-specific visibility state cached per tile. */
 type TileViewState = {
@@ -99,7 +83,9 @@ export class Tile2DView<DataT = any> {
       zRange,
       modelMatrix
     }: {
+      /** Minimum and maximum elevations considered during this view's traversal. */
       zRange: [number, number] | null;
+      /** Layer-to-world transform applied only to this consumer. */
       modelMatrix: NumericArray | null;
     } = {zRange: null, modelMatrix: null}
   ): number {
@@ -121,6 +107,7 @@ export class Tile2DView<DataT = any> {
       this._traversalRevision = this._tileset.traversalRevision;
       this._zRange = zRange;
       const tileIndices = this._tileset.getTileIndices({
+        viewport,
         viewState: viewport,
         maxZoom: this._tileset.maxZoom,
         minZoom: this._tileset.minZoom,
@@ -149,7 +136,16 @@ export class Tile2DView<DataT = any> {
   /** Tests whether a tile should render in the current viewport and culling rectangle. */
   isTileVisible(
     tile: Tile2DHeader<DataT>,
-    cullRect?: {x: number; y: number; width: number; height: number},
+    cullRect?: {
+      /** Horizontal screen-space origin. */
+      x: number;
+      /** Vertical screen-space origin. */
+      y: number;
+      /** Screen-space width in pixels. */
+      width: number;
+      /** Screen-space height in pixels. */
+      height: number;
+    },
     modelMatrix?: Matrix4 | null
   ): boolean {
     const state = this._state.get(tile);
@@ -223,7 +219,7 @@ export class Tile2DView<DataT = any> {
         getTileState(this._state, tile).isVisible = facade.isVisible;
       }
     } else {
-      STRATEGIES[refinementStrategy](allTiles, this._state);
+      refineTileStates(allTiles, refinementStrategy, tile => getTileState(this._state, tile));
     }
 
     let changed = false;
@@ -262,83 +258,6 @@ export class Tile2DView<DataT = any> {
       modelMatrix
     );
     return {left, top, right, bottom};
-  }
-}
-
-/** Default refinement strategy that prefers best available loaded descendants. */
-function updateTileStateDefault(
-  allTiles: Tile2DHeader[],
-  stateMap: Map<Tile2DHeader, TileViewState>
-) {
-  for (const tile of allTiles) {
-    getTileState(stateMap, tile).state = 0;
-  }
-  for (const tile of allTiles) {
-    if (getTileState(stateMap, tile).isSelected && !getPlaceholderInAncestors(tile, stateMap)) {
-      getPlaceholderInChildren(tile, stateMap);
-    }
-  }
-  for (const tile of allTiles) {
-    const state = getTileState(stateMap, tile);
-    state.isVisible = Boolean(state.state & TILE_STATE_VISIBLE);
-  }
-}
-
-/** Replacement refinement strategy that avoids visible overlap between ancestors and descendants. */
-function updateTileStateReplace(
-  allTiles: Tile2DHeader[],
-  stateMap: Map<Tile2DHeader, TileViewState>
-) {
-  for (const tile of allTiles) {
-    getTileState(stateMap, tile).state = 0;
-  }
-  for (const tile of allTiles) {
-    if (getTileState(stateMap, tile).isSelected) {
-      getPlaceholderInAncestors(tile, stateMap);
-    }
-  }
-  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.zoom - t2.zoom);
-  for (const tile of sortedTiles) {
-    const tileState = getTileState(stateMap, tile);
-    tileState.isVisible = Boolean(tileState.state & TILE_STATE_VISIBLE);
-
-    if (tile.children && (tileState.isVisible || tileState.state & TILE_STATE_VISITED)) {
-      for (const child of tile.children) {
-        getTileState(stateMap, child).state = TILE_STATE_VISITED;
-      }
-    } else if (tileState.isSelected) {
-      getPlaceholderInChildren(tile, stateMap);
-    }
-  }
-}
-
-/** Searches upward for a loaded ancestor that can stand in for an unavailable selected tile. */
-function getPlaceholderInAncestors(
-  startTile: Tile2DHeader,
-  stateMap: Map<Tile2DHeader, TileViewState>
-): boolean {
-  let tile: Tile2DHeader | null = startTile;
-  while (tile) {
-    if (tile.isLoaded || tile.content) {
-      getTileState(stateMap, tile).state |= TILE_STATE_VISIBLE;
-      return true;
-    }
-    tile = tile.parent;
-  }
-  return false;
-}
-
-/** Searches downward for loaded descendants that can stand in for an unavailable selected tile. */
-function getPlaceholderInChildren(
-  tile: Tile2DHeader,
-  stateMap: Map<Tile2DHeader, TileViewState>
-): void {
-  for (const child of tile.children || []) {
-    if (child.isLoaded || child.content) {
-      getTileState(stateMap, child).state |= TILE_STATE_VISIBLE;
-    } else {
-      getPlaceholderInChildren(child, stateMap);
-    }
   }
 }
 

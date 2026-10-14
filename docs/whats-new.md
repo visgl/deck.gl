@@ -4,13 +4,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
-### Tile layers
-
-[`Tile2DLayer`](./api-reference/geo-layers/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/geo-layers/mvt-2d-layer.md) are the new tile layers for applications sharing content across styles and views. One [`Tileset2D`](./api-reference/geo-layers/tileset-2d.md) owns loading and caching while each layer maintains independent per-view selection, picking, and highlighting. `Tileset2D` retains the legacy default-view API, and `TileLayer` and `MVTLayer` remain available for compatibility.
-
 ### Custom projections (Experimental)
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps with application-supplied forward/inverse converters. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+
+### Tile layers
+
+[`Tile2DLayer`](./api-reference/geo-layers/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/geo-layers/mvt-2d-layer.md) are the new tile layers for applications sharing content across styles and views. One [`Tileset2D`](./api-reference/geo-layers/tileset-2d.md) owns loading and caching while each layer maintains independent per-view selection, picking, and highlighting. `viewIds` scopes consumers to their intended views without loading tiles for unrelated views. The [shared-tileset example](/examples/shared-tile-2d-layer) compares shared and independent caches in synchronized split-screen views and a minimap. `Tileset2D` retains the legacy default-view API, and `TileLayer` and `MVTLayer` remain available for compatibility.
 
 ## deck.gl v9.4
 

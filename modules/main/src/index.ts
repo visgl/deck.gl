@@ -248,6 +248,7 @@ export type {
   QuadkeyLayerProps,
   RefinementStrategy,
   Tile2DLayerPickingInfo,
+  TileLoadProps,
   Tile2DLayerProps,
   MVT2DLayerProps,
   MVT2DData,

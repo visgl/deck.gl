@@ -4,9 +4,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "vite --open",
-    "start-local": "vite --config ../../vite.config.local.mjs",
-    "build": "vite build"
+    "start": "../../../node_modules/.bin/vite --config ../../vite.config.local.mjs --open",
+    "start-local": "../../../node_modules/.bin/vite --config ../../vite.config.local.mjs",
+    "build": "../../../node_modules/.bin/vite build --config ../../vite.config.local.mjs"
   },
   "dependencies": {
     "@types/react": "^18.0.0",

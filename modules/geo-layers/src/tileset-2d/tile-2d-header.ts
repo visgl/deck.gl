@@ -64,7 +64,7 @@ export class Tile2DHeader<DataT = any> {
   /** Structured tile bounds assigned at creation. */
   private _bbox!: TileBoundingBox;
 
-  /** Creates an instance with the supplied tile configuration. */
+  /** Creates an empty cache header for a source tile index. */
   constructor(index: TileIndex) {
     this.index = index;
     this.isVisible = false;
@@ -82,7 +82,7 @@ export class Tile2DHeader<DataT = any> {
     this._needsReload = false;
   }
 
-  /** @deprecated use `boundingBox` instead */
+  /** @deprecated Use boundingBox instead. */
   get bbox(): TileBoundingBox {
     return this._bbox;
   }
@@ -112,7 +112,7 @@ export class Tile2DHeader<DataT = any> {
     return this.isLoading && this._loader ? this._loader.then(() => this.data) : this.content;
   }
 
-  /** Whether all tiles selected by this consumer have settled. */
+  /** Whether this tile's latest request has settled without a pending reload. */
   get isLoaded(): boolean {
     return this._isLoaded && !this._needsReload;
   }
@@ -122,7 +122,7 @@ export class Tile2DHeader<DataT = any> {
     return Boolean(this._loader) && !this._isCancelled;
   }
 
-  /** Whether selected content has been invalidated or cancelled. */
+  /** Whether this tile's content was invalidated or its request cancelled. */
   get needsReload(): boolean {
     return this._needsReload || this._isCancelled;
   }

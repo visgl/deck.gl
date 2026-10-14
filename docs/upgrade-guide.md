@@ -12,6 +12,8 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 `Tileset2D` supports both generations of layers. `_Tileset2D` remains an alias for that same class, and existing custom `TilesetClass` subclasses retain their indexing and metadata hooks. New layers keep render caches and selection state per consumer rather than storing them on tile headers.
 
+The `_Tile2DHeader`, `_Tileset2DProps`, and `_TileLoadProps` aliases are also deprecated. Use `Tile2DHeader`, `Tileset2DProps`, and `TileLoadProps` without underscores; the aliases remain available for existing imports.
+
 ### Viewport distance scales
 
 For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:

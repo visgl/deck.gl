@@ -15,10 +15,8 @@ import {getTileIndices, tileToBoundingBox, getCullBounds, transformBox} from './
 import {Bounds, TileBoundingBox, TileIndex, ZRange} from './types';
 import {TileLoadProps} from './types';
 import {memoize} from './memoize';
+import {refineTileStates} from './refinement';
 
-// bit masks
-const TILE_STATE_VISITED = 1;
-const TILE_STATE_VISIBLE = 2;
 /*
    show cached parent tile if children are loading
    +-----------+       +-----+            +-----+-----+
@@ -38,8 +36,11 @@ const TILE_STATE_VISIBLE = 2;
    |       |           |
  */
 
+/** Shows directly selected tiles without fallback refinement. */
 export const STRATEGY_NEVER = 'never';
+/** Suppresses overlap between visible ancestors and descendants. */
 export const STRATEGY_REPLACE = 'no-overlap';
+/** Chooses the closest available loaded content while requests are pending. */
 export const STRATEGY_DEFAULT = 'best-available';
 
 /** Refines selection and visibility for one consumer using mutable view-local tile flags. */
@@ -56,12 +57,6 @@ const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
 const MAX_TILE_DISTANCE_PRIORITY = VISIBLE_TILE_PRIORITY - SELECTED_TILE_PRIORITY - 1;
 
-const STRATEGIES = {
-  [STRATEGY_DEFAULT]: updateTileStateDefault,
-  [STRATEGY_REPLACE]: updateTileStateReplace,
-  [STRATEGY_NEVER]: () => {}
-};
-
 /** Loading, traversal, and cache options shared by the default view and registered consumers. */
 export type Tileset2DProps<DataT = any, ViewStateT = Viewport> = {
   /** Optional traversal adapter for custom tile pyramids. */
@@ -77,9 +72,9 @@ export type Tileset2DProps<DataT = any, ViewStateT = Viewport> = {
   tileSize?: number;
   /** The max zoom level of the layer's data. @default null */
   maxZoom?: number | null;
-  /** The min zoom level of the layer's data. @default 0 */
+  /** The min zoom level of the source data. @default null */
   minZoom?: number | null;
-  /** The maximum number of tiles that can be cached. */
+  /** Tile-count high-water mark; required entries can exceed it. Defaults to 100 for independent consumers. */
   maxCacheSize?: number | null;
   /** The maximum memory used for caching tiles. @default null */
   maxCacheByteSize?: number | null;
@@ -636,9 +631,9 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     }
 
     // Strategy-specific state logic
-    (typeof refinementStrategy === 'function'
-      ? refinementStrategy
-      : STRATEGIES[refinementStrategy])(Array.from(this._cache.values()));
+    const tiles = Array.from(this._cache.values());
+    if (typeof refinementStrategy === 'function') refinementStrategy(tiles);
+    else refineTileStates(tiles, refinementStrategy, tile => tile);
 
     i = 0;
     // Check if any visibility has changed
@@ -919,7 +914,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     return Array.from(this._cache.values()).filter(tile => tile.isLoading);
   }
 
-  /** Tiles retained in cache that do not currently have loaded content. */
+  /** Cached tiles whose latest request has not settled; distinct from the cumulative unload stat. */
   get unloadedTiles(): Tile2DHeader<DataT>[] {
     return Array.from(this._cache.values()).filter(tile => !tile.isLoaded);
   }
@@ -1176,79 +1171,5 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
         : 0;
     }
     return byteLength;
-  }
-}
-
-/* -- Refinement strategies --*/
-/* eslint-disable max-depth */
-
-// For all the selected && pending tiles:
-// - pick the closest ancestor as placeholder
-// - if no ancestor is visible, pick the closest children as placeholder
-/** Selects the closest available fallback when requested content is unavailable. */
-function updateTileStateDefault(allTiles: Tile2DHeader[]) {
-  for (const tile of allTiles) {
-    tile.state = 0;
-  }
-  for (const tile of allTiles) {
-    if (tile.isSelected && !getPlaceholderInAncestors(tile)) {
-      getPlaceholderInChildren(tile);
-    }
-  }
-  for (const tile of allTiles) {
-    tile.isVisible = Boolean(tile.state! & TILE_STATE_VISIBLE);
-  }
-}
-
-// Until a selected tile and all its selected siblings are loaded, use the closest ancestor as placeholder
-/** Uses loaded ancestors until requested siblings can render without overlap. */
-function updateTileStateReplace(allTiles: Tile2DHeader[]) {
-  for (const tile of allTiles) {
-    tile.state = 0;
-  }
-  for (const tile of allTiles) {
-    if (tile.isSelected) {
-      getPlaceholderInAncestors(tile);
-    }
-  }
-  // Always process parents first
-  const sortedTiles = Array.from(allTiles).sort((t1, t2) => t1.zoom - t2.zoom);
-  for (const tile of sortedTiles) {
-    tile.isVisible = Boolean(tile.state! & TILE_STATE_VISIBLE);
-
-    if (tile.children && (tile.isVisible || tile.state! & TILE_STATE_VISITED)) {
-      // If the tile is rendered, or if the tile has been explicitly hidden, hide all of its children
-      for (const child of tile.children) {
-        child.state = TILE_STATE_VISITED;
-      }
-    } else if (tile.isSelected) {
-      getPlaceholderInChildren(tile);
-    }
-  }
-}
-
-// Walk up the tree until we find one ancestor that is loaded. Returns true if successful.
-/** Marks the first loaded tile or ancestor as the fallback. */
-function getPlaceholderInAncestors(startTile: Tile2DHeader) {
-  let tile: Tile2DHeader | null = startTile;
-  while (tile) {
-    if (tile.isLoaded || tile.content) {
-      tile.state! |= TILE_STATE_VISIBLE;
-      return true;
-    }
-    tile = tile.parent;
-  }
-  return false;
-}
-
-// Recursively set children as placeholder
-/** Marks loaded descendants as fallbacks without hiding available grandchildren. */
-function getPlaceholderInChildren(tile) {
-  for (const child of tile.children) {
-    if (child.isLoaded || child.content) {
-      child.state |= TILE_STATE_VISIBLE;
-    } else {
-      getPlaceholderInChildren(child);
-    }
   }
 }

@@ -45,6 +45,7 @@ test('Top-level imports', () => {
 import './a5-layer.spec';
 import './tile-layer';
 import './shared-tile-2d-layer.spec';
+import './tile-2d-example.spec';
 import './wms-layer.spec';
 import './quadkey-layer.spec';
 import './s2-layer.spec';
