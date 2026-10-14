@@ -156,6 +156,8 @@ Parameters:
 * `modelInfo` (object) - a luma.gl `Model` or a similarly shaped object
   + `isInstanced` (boolean) - used to resolve `stepMode: 'dynamic'`
 
+On WebGPU, the result may contain more layouts than there are attributes: the `64Low` parts of `float64` attributes bound to external buffers read from one shared zero buffer, declared as an additional layout. Pass this result to the `Model` as is, rather than assembling layouts from individual attributes.
+
 
 ## Remarks
 
