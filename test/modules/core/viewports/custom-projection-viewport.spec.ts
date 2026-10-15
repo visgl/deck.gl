@@ -80,8 +80,8 @@ test('CustomProjectionViewport flat methods scale target coordinates without con
 });
 
 test('target feet and independent altitude units normalize to the same common space as meters', async () => {
-  const toCrs = '+proj=merc +a=6378137 +b=6378137 +units=ft +vunits=ft';
-  const feet = await projectionEngine.getCRS(toCrs);
+  const crs = '+proj=merc +a=6378137 +b=6378137 +units=ft +vunits=ft';
+  const feet = await projectionEngine.getCRS(crs);
   const viewport = new CustomProjectionViewport({...options, crs: feet});
   const meterViewport = new CustomProjectionViewport(options);
   expect(viewport.distanceScales.unitsPerWorldUnit).toEqual(

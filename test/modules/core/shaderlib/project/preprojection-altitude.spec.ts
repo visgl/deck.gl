@@ -19,7 +19,6 @@ class MeterAltitudeViewport extends CustomProjectionViewport {
     super({
       width: 800,
       height: 600,
-      toCrs: 'test',
       crs: createTestCRS({
         converter: {
           forward: ([x, y, z = 0]) => [x * 3, y * 4, z],

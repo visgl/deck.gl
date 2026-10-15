@@ -272,8 +272,8 @@ for (const metersPerZUnit of [1, 0.3048]) {
 gpuTest(
   'target feet convert packed XYZ to the same common lengths as meters on the GPU',
   async () => {
-    const toCrs = '+proj=merc +a=6378137 +b=6378137 +units=ft +vunits=ft';
-    const crs = await projectionEngine.getCRS(toCrs);
+    const crsDefinition = '+proj=merc +a=6378137 +b=6378137 +units=ft +vunits=ft';
+    const crs = await projectionEngine.getCRS(crsDefinition);
     const viewport = new CustomProjectionViewport({crs, center: [0, 0, 0]});
     const source = [0.1, 0.1, 100];
     const position = viewport.preproject!(source);

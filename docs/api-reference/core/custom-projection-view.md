@@ -11,7 +11,7 @@ import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core
 
 new Deck({
   views: new CustomProjectionView({
-    toCrs: '+proj=eqearth +lon_0=0 +datum=WGS84 +units=m',
+    crs: '+proj=eqearth +lon_0=0 +datum=WGS84 +units=m',
     resolution: 5,
     controller: true
   }),
@@ -19,7 +19,7 @@ new Deck({
 });
 ```
 
-The view resolves its CRS descriptor asynchronously using `projectionEngine.getCRS(toCrs)`. Deck waits for the descriptor before creating its viewport and controller. Resolution errors reach Deck's `onError` callback. For standalone viewport creation, see [CustomProjectionViewport](./custom-projection-viewport.md#usage).
+The view resolves its CRS descriptor asynchronously using `projectionEngine.getCRS(crs)`. Deck waits for the descriptor before creating its viewport and controller. Resolution errors reach Deck's `onError` callback. For standalone viewport creation, see [CustomProjectionViewport](./custom-projection-viewport.md#usage).
 
 ## Constructor
 
@@ -27,7 +27,7 @@ Inherits [View options](./view.md#constructor), including layout, padding and co
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `toCrs` | Required | A supported planar CRS identifier, such as `EPSG:3857`, or PROJ string. Linear axis units are read from the descriptor. |
+| `crs` | Required | A supported planar CRS identifier, such as `EPSG:3857`, or PROJ string. Linear axis units are read from the descriptor. |
 | `resolution` | `0` | Maximum subdivision cell size in WGS84 degrees for paths, polygons and bitmaps. Smaller positive values smooth projected curves at higher processing cost. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
@@ -64,7 +64,7 @@ Local sizing uses a texture over the descriptor's finite bounds. Outside those b
 
 ## Changing Projections
 
-`CustomProjectionView` supports swapping the custom projection at runtime. Change `toCrs` to load a new descriptor and refresh projected positions. Changing `resolution` also rebuilds subdivided geometry.
+`CustomProjectionView` supports swapping the custom projection at runtime. Change `crs` to load a new descriptor and refresh projected positions. Changing `resolution` also rebuilds subdivided geometry.
 
 Use a new layer ID when switching a layer between `MapView` and `CustomProjectionView`.
 
@@ -76,7 +76,7 @@ When displaying multiple views with different projections, create a separate lay
 - `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in WGS84 and projects every grid vertex; smaller values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. If the image is generated in a different coordinate system than WGS84, subdivision cannot correct its pixel-to-coordinate mapping.
 - Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
 - `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the viewport uses preprojection. Split geometry at the desired longitude boundary before passing it to these layers.
-- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` is applied before conversion, and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in target CRS units in `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
+- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` is applied before conversion, and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in target CRS units in `crs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
 - Picked coordinates are returned as world coordinates in WGS84. They may be unavailable where the descriptor’s inverse converter cannot return a valid position.
 

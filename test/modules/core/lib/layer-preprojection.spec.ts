@@ -244,20 +244,20 @@ test('Layer refreshes custom projection attributes only when CRS metadata change
       forward: ([x, y, z]) => [x * 2, y, z],
       inverse: ([x, y, z]) => [x / 2, y, z]
     };
-    for (const [toCrs, changed] of [
+    for (const [crs, changed] of [
       ['test', false],
       ['first', true],
       ['first', false],
       ['second', true]
     ] as const) {
-      const viewport = createTestViewport({signature: toCrs, converter: changedProjection});
+      const viewport = createTestViewport({signature: crs, converter: changedProjection});
       manager.activateViewport(viewport);
       layer.activateViewport(viewport);
       expect(accessor).toHaveBeenCalledTimes(changed ? 1 : 0);
-      expect(getPositions(layer)).toEqual(toCrs === 'test' ? [2, 3, 4] : [4, 3, 4]);
+      expect(getPositions(layer)).toEqual(crs === 'test' ? [2, 3, 4] : [4, 3, 4]);
       accessor.mockClear();
       const replacement = createTestViewport({
-        signature: toCrs,
+        signature: crs,
         converter: {...changedProjection}
       });
       manager.activateViewport(replacement);

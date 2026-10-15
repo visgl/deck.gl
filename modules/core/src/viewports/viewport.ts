@@ -272,7 +272,8 @@ export default class Viewport {
   }
 
   get projectionMode(): number {
-    return this.crs ? PROJECTION_MODE.CUSTOM_GEOSPATIAL : PROJECTION_MODE.IDENTITY;
+    // A CRS enables CPU conversion; subclasses opt into specialized shader projection.
+    return PROJECTION_MODE.IDENTITY;
   }
 
   // Two viewports are equal if their dimensions, common-space scale, and

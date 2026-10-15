@@ -14,7 +14,8 @@ import ViewManager from '@deck.gl/core/lib/view-manager';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {projectionEngine} from '@math.gl/projection';
-import {createTestViewport} from './test-crs';
+import {createTestCRS, createTestViewport} from './test-crs';
+import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
 
 const normalizationScale = 512 / 40075016.6855;
 const options = {bounds: [0, 0, 512, 512]};
@@ -231,6 +232,32 @@ test('WebGPU external scale uses float storage records and no resource for ordin
     expect(createTexture).not.toHaveBeenCalled();
     resources.destroy();
     expect(resource.destroyed).toBe(true);
+  } finally {
+    resources.destroy();
+    createBuffer.mockRestore();
+    createTexture.mockRestore();
+  }
+});
+
+test('base CRS viewport uses identity shaders without allocating scale resources', () => {
+  const viewport = new Viewport({
+    crs: createTestCRS({
+      converter: {
+        forward: ([x, y, z = 0]) => [x * 2, y * 3, z],
+        inverse: ([x, y, z = 0]) => [x / 2, y / 3, z]
+      }
+    })
+  });
+  expect(viewport.projectionMode).toBe(PROJECTION_MODE.IDENTITY);
+  expect(viewport.projectPosition([10, 20, 30])).toEqual([20, 60, 30]);
+  expect(viewport.unprojectPosition([20, 60, 30])).toEqual([10, 20, 30]);
+  const createBuffer = vi.spyOn(device, 'createBuffer');
+  const createTexture = vi.spyOn(device, 'createTexture');
+  const resources = new ProjectionScaleResources(device);
+  try {
+    expect(resources.get(viewport)).toBeUndefined();
+    expect(createBuffer).not.toHaveBeenCalled();
+    expect(createTexture).not.toHaveBeenCalled();
   } finally {
     resources.destroy();
     createBuffer.mockRestore();

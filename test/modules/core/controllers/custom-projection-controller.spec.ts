@@ -13,7 +13,7 @@ import {lngLatToWorld, worldToLngLat, pixelsToWorld, worldToPixels} from '@math.
 // Synthetic converters keep controller edge cases independent of CRS resolution.
 class TestProjectionView extends CustomProjectionView {
   constructor(props = {}) {
-    super({toCrs: 'test', ...props});
+    super({crs: 'test', ...props});
   }
   initialize() {
     return Promise.resolve();
@@ -35,7 +35,7 @@ const options = {width: 800, height: 600, makeViewport};
 
 test('CustomProjectionState projects world maxBounds without changing stored bounds', async () => {
   const mapView = new CustomProjectionView({
-    toCrs: 'EPSG:3857'
+    crs: 'EPSG:3857'
   });
   await mapView.initialize();
   const maxBounds: [[number, number], [number, number]] = [

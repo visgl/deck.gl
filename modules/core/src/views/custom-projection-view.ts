@@ -33,7 +33,7 @@ export type CustomProjectionViewState = {
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
   Pick<CustomProjectionViewportOptions, 'resolution' | 'orthographic'> & {
     /** Target CRS identifier or PROJ string to resolve through math.gl. */
-    toCrs: string;
+    crs: string;
   };
 
 /** A planar WGS84 view with a target CRS resolved by math.gl.
@@ -54,7 +54,7 @@ export default class CustomProjectionView extends View<
   initialize(): void | Promise<void> {
     if (this.#crs) return;
     if (this.#initialization) return this.#initialization;
-    const resolved = resolveCRS(this.props.toCrs);
+    const resolved = resolveCRS(this.props.crs);
     const setCrs = (crs: CRSDescriptor | null) => {
       if (!crs || crs.coordinateFrame !== 'projected') {
         throw new Error('CustomProjectionView requires a projected CRS');
@@ -77,7 +77,7 @@ export default class CustomProjectionView extends View<
     const viewState = this.filterViewState(options.viewState);
     const dimensions = this.getDimensions(options);
     if (!dimensions.width || !dimensions.height || !this.#crs) return null;
-    const {toCrs, ...viewportProps} = this.props;
+    const {crs, ...viewportProps} = this.props;
     return new CustomProjectionViewport({
       ...viewState,
       ...viewportProps,

@@ -10,8 +10,7 @@ Import it as `_CustomProjectionViewport` from `@deck.gl/core` or `deck.gl`. This
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
 
-const toCrs = 'EPSG:3857';
-const crs = await projectionEngine.getCRS(toCrs);
+const crs = await projectionEngine.getCRS('EPSG:3857');
 const viewport = new CustomProjectionViewport({
   crs,
   width: 800,

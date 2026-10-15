@@ -13,7 +13,7 @@ import {
 } from '@deck.gl/core';
 
 const view = new CustomProjectionView({
-  toCrs: 'EPSG:3857',
+  crs: 'EPSG:3857',
   controller: {
     type: CustomProjectionController, // Also selected by controller: true
     inertia: true

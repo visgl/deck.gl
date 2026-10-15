@@ -12,7 +12,7 @@ import {
   _CustomProjectionController as CustomProjectionController
 } from '@deck.gl/core';
 
-const options = {toCrs: 'EPSG:3857'};
+const options = {crs: 'EPSG:3857'};
 const viewState = {center: [0, 0, 0] as [number, number, number], zoom: 2};
 
 test('CustomProjectionView uses the fixed Earth-circumference scale', async () => {
@@ -46,7 +46,7 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
     height: '75%',
     padding: {left: '10%', bottom: 20},
     resolution: 2,
-    toCrs: options.toCrs
+    crs: options.crs
   });
   await view.initialize();
   const viewport = view.makeViewport({
@@ -76,7 +76,7 @@ test('CustomProjectionView clone, equality, state overrides and zero dimensions'
   const view = new CustomProjectionView({...options, viewState: {zoom: 4}});
   await view.initialize();
   expect(view.clone({}).equals(view)).toBe(true);
-  expect(view.clone({toCrs: 'changed'}).equals(view)).toBe(false);
+  expect(view.clone({crs: 'changed'}).equals(view)).toBe(false);
   expect(view.makeViewport({width: 800, height: 600, viewState})!.zoom).toBe(4);
   expect(view.makeViewport({width: 800, height: 600, viewState})!.pitch).toBe(0);
   expect(view.makeViewport({width: 0, height: 600, viewState})).toBeNull();
@@ -125,7 +125,7 @@ test('removed custom views cannot rebuild the manager after CRS loading complete
 });
 
 test('invalid target CRS errors reach ViewManager onError', async () => {
-  const view = new CustomProjectionView({toCrs: '+proj=not-a-projection'});
+  const view = new CustomProjectionView({crs: '+proj=not-a-projection'});
   const onError = vi.fn();
   const manager = new ViewManager({views: [view], viewState, onError});
   try {
@@ -139,13 +139,13 @@ test('invalid target CRS errors reach ViewManager onError', async () => {
 });
 
 test('CustomProjectionView shares pending CRS resolution and initializes loaded CRS synchronously', async () => {
-  const toCrs = '+proj=eqearth +lon_0=17 +datum=WGS84 +units=m';
-  const first = new CustomProjectionView({toCrs});
+  const crs = '+proj=eqearth +lon_0=17 +datum=WGS84 +units=m';
+  const first = new CustomProjectionView({crs});
   const pending = first.initialize();
   expect(pending).toBeInstanceOf(Promise);
   expect(first.initialize()).toBe(pending);
   expect(first.makeViewport({width: 800, height: 600, viewState})).toBeNull();
-  const second = new CustomProjectionView({toCrs});
+  const second = new CustomProjectionView({crs});
   await Promise.all([pending, second.initialize()]);
   expect(first.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
     CustomProjectionViewport
@@ -153,7 +153,7 @@ test('CustomProjectionView shares pending CRS resolution and initializes loaded 
   expect(second.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
     CustomProjectionViewport
   );
-  const loaded = new CustomProjectionView({toCrs});
+  const loaded = new CustomProjectionView({crs});
   expect(loaded.initialize()).toBeUndefined();
   expect(loaded.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
     CustomProjectionViewport
