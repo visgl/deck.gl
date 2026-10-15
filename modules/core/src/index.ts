@@ -11,8 +11,7 @@ export {VERSION} from './lib/init';
 export {getShaderAssembler} from './shaderlib/index';
 
 // Core Library
-export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
-export {PROJECTION_MODE as _PROJECTION_MODE} from './lib/constants';
+export {OPERATION, UNIT} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';
@@ -39,6 +38,7 @@ export {default as DeckRenderer} from './lib/deck-renderer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
+export type {ProjectPositionOptions} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 export {default as _GlobeViewport} from './viewports/globe-viewport';
 export {default as OrbitViewport} from './viewports/orbit-viewport';

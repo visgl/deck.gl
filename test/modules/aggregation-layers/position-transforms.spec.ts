@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {createTestViewport} from '../core/viewports/test-crs';
+import LayerState from '@deck.gl/core/lib/layer-state';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect, vi} from 'vitest';
 import {LayerManager, Viewport, AttributeManager} from '@deck.gl/core';
 import {
@@ -96,6 +98,9 @@ test('HeatmapLayer packed position layout composes projection with XY normalizat
       viewport: createViewport('packed', projected),
       device: {type: 'webgpu'}
     } as any;
+    layer.state = {} as any;
+    layer.internalState = new LayerState({layer, attributeManager: attributes});
+    layer._setSourceCrs(projected ? WGS84_CRS : null);
     vi.spyOn(layer, 'getAttributeManager').mockReturnValue(attributes);
     vi.spyOn(layer, 'setState').mockImplementation(() => {});
     try {

@@ -53,7 +53,7 @@ function createView(name: ProjectionName): CustomProjectionView {
   document.getElementById('projection-note')!.textContent = note;
   return new CustomProjectionView({
     crs,
-    resolution: 5,
+    resolution: 72,
     controller: true
   });
 }

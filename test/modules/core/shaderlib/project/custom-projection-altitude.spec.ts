@@ -3,9 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import {createTestViewport} from '../../viewports/test-crs';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
-import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
+import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
 import {device} from '@deck.gl/test-utils/vitest';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
@@ -190,7 +191,7 @@ for (const metersPerZUnit of [1, 0.3048]) {
         viewport.distanceScales.unitsPerWorldUnit
       );
       const normalizationScale = 512 / 40075016.6855;
-      const position = viewport.preproject!(input);
+      const position = viewport.getPreprojection(WGS84_CRS).preproject!(input);
       expect(position).toEqual([200, 300, 50 * metersPerZUnit]);
       const common = viewport.projectPosition(input);
       [
@@ -276,7 +277,7 @@ gpuTest(
     const crs = await projectionEngine.getCRS(crsDefinition);
     const viewport = new CustomProjectionViewport({crs, center: [0, 0, 0]});
     const source = [0.1, 0.1, 100];
-    const position = viewport.preproject!(source);
+    const position = viewport.getPreprojection(WGS84_CRS).preproject!(source);
     const result = await runOnGPU({
       vs: `#version 300 es
       out vec3 result;

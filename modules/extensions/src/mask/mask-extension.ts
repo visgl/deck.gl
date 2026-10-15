@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
+import {Layer, LayerExtension, log} from '@deck.gl/core';
 import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
 
@@ -66,10 +66,8 @@ export default class MaskExtension extends LayerExtension {
       maskProps.channel = index;
       maskProps.inverted = maskInverted;
 
-      if (fromCoordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-        fromCoordinateSystem = viewport.isGeospatial
-          ? COORDINATE_SYSTEM.LNGLAT
-          : COORDINATE_SYSTEM.CARTESIAN;
+      if (fromCoordinateSystem === 'default') {
+        fromCoordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
       }
       const opts = {modelMatrix: null, fromCoordinateOrigin, fromCoordinateSystem};
       const bl = this.projectPosition([bounds[0], bounds[1], 0], opts);

@@ -7,7 +7,7 @@ import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
 import Viewport, {type DistanceScales, type ProjectPositionOptions} from './viewport';
-import {PROJECTION_MODE} from '../lib/constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {mod} from '../utils/math-utils';
 import {GLOBE_CRS, GLOBE_EARTH_RADIUS as EARTH_RADIUS, zoomAdjust} from './globe-util';
 
@@ -88,7 +88,7 @@ export type GlobeViewportOptions = {
   nearZ?: number;
   /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
   farZ?: number;
-  /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
+  /** Subdivision intervals around the earth. Default 0 disables subdivision. */
   resolution?: number;
 };
 
@@ -100,7 +100,6 @@ export default class GlobeViewport extends Viewport {
   bearing: number;
   pitch: number;
   fovy: number;
-  resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
@@ -111,8 +110,7 @@ export default class GlobeViewport extends Viewport {
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
       nearZMultiplier = 0.5,
-      farZMultiplier = 1,
-      resolution = 10
+      farZMultiplier = 1
     } = opts;
 
     let {latitude = 0, height, altitude = 1.5, fovy} = opts;
@@ -188,7 +186,6 @@ export default class GlobeViewport extends Viewport {
     this.bearing = bearing;
     this.pitch = pitch;
     this.fovy = fovy;
-    this.resolution = resolution;
   }
 
   protected _getCenter(options: GlobeViewportOptions, position: number[]): number[] {

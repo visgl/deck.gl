@@ -7,24 +7,22 @@ import {test, expect} from 'vitest';
 import {LayerTestCase, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-3d-layer';
-import {COORDINATE_SYSTEM, Deck, WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {TILE_TYPE} from '@loaders.gl/tiles';
 
 test('Tile3DLayer#normalizeCoordinateSystem', () => {
   // Loaders that predate the v9.3 string constants report numeric values, see issue #10368
-  expect(normalizeCoordinateSystem(-1)).toBe(COORDINATE_SYSTEM.DEFAULT);
-  expect(normalizeCoordinateSystem(0)).toBe(COORDINATE_SYSTEM.CARTESIAN);
-  expect(normalizeCoordinateSystem(1)).toBe(COORDINATE_SYSTEM.LNGLAT);
-  expect(normalizeCoordinateSystem(2)).toBe(COORDINATE_SYSTEM.METER_OFFSETS);
-  expect(normalizeCoordinateSystem(3)).toBe(COORDINATE_SYSTEM.LNGLAT_OFFSETS);
+  expect(normalizeCoordinateSystem(-1)).toBe('default');
+  expect(normalizeCoordinateSystem(0)).toBe('cartesian');
+  expect(normalizeCoordinateSystem(1)).toBe('lnglat');
+  expect(normalizeCoordinateSystem(2)).toBe('meter-offsets');
+  expect(normalizeCoordinateSystem(3)).toBe('lnglat-offsets');
 
   // String constants pass through untouched
-  expect(normalizeCoordinateSystem(COORDINATE_SYSTEM.METER_OFFSETS)).toBe(
-    COORDINATE_SYSTEM.METER_OFFSETS
-  );
-  expect(normalizeCoordinateSystem(COORDINATE_SYSTEM.LNGLAT)).toBe(COORDINATE_SYSTEM.LNGLAT);
+  expect(normalizeCoordinateSystem('meter-offsets')).toBe('meter-offsets');
+  expect(normalizeCoordinateSystem('lnglat')).toBe('lnglat');
 
   // Unknown numeric values are passed through so that the core validation reports them
   expect(normalizeCoordinateSystem(42)).toBe(42);
@@ -47,9 +45,7 @@ test('Tile3DLayer#mesh sub layer normalizes legacy numeric coordinateSystem', ()
   // @ts-expect-error Calling the private sub layer factory for test-only validation.
   const meshLayer = layer._makeSimpleMeshLayer(tileHeader);
 
-  expect(meshLayer.props.coordinateSystem, 'Normalizes to a string constant').toBe(
-    COORDINATE_SYSTEM.METER_OFFSETS
-  );
+  expect(meshLayer.props.coordinateSystem, 'Normalizes to a string constant').toBe('meter-offsets');
 });
 
 test('Tile3DLayer', async () => {

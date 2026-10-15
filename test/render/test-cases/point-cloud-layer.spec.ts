@@ -9,7 +9,7 @@ import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suit
 import type {TestCase} from '../deck-test-utils';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
-import {OrbitView, COORDINATE_SYSTEM, Deck, OrthographicView} from '@deck.gl/core';
+import {OrbitView, Deck, OrthographicView} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {getPointCloud, positionOrigin} from 'deck.gl-test/data';
 
@@ -33,7 +33,7 @@ const testCases = [
         id: 'pointcloud-identity',
         data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
         opacity: 0.8,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
         getColor: d => [255, 255, 0, 128],
@@ -55,7 +55,7 @@ const testCases = [
       new PointCloudLayer({
         id: 'pointcloud-lnglat',
         data: POINTCLOUD,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         coordinateOrigin: positionOrigin,
         getPosition: d => [d.position[0] * 1e-5, d.position[1] * 1e-5, d.position[2]],
         getNormal: d => d.normal,
@@ -89,7 +89,7 @@ const testCases = [
             }
           }
         },
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: positionOrigin,
         pointSize: 1.333333,
         pickable: true
@@ -112,7 +112,7 @@ function createAntialiasingGoldenVariant(antialiasing: boolean): PointCloudLayer
     data: ANTIALIASING_GOLDEN_POINTS.map(({position}) => ({
       position: [position[0] + xOffset, position[1], 0]
     })),
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     getPosition: data => data.position,
     getColor: (_, {index}) => (index % 2 ? [20, 20, 20] : [0, 90, 200]),
     pointSize: 7,

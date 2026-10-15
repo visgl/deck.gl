@@ -3,7 +3,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  COORDINATE_SYSTEM,
   Layer,
   picking,
   project32,
@@ -40,7 +39,7 @@ export type WaterSurfaceLayerProps = LayerProps & {
 export class WaterSurfaceLayer extends Layer<WaterSurfaceLayerProps> {
   static override layerName = 'WaterSurfaceLayer';
   static override defaultProps = {
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     // Deck's index-based WebGL bias can otherwise pull water in front of nearby bridges.
     getPolygonOffset: () => [0, 0],
     time: 0,

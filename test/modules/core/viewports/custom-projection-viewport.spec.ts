@@ -10,40 +10,43 @@ import {
   project
 } from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {createTestCRS} from './test-crs';
 
 const normalizationScale = 512 / 40075016.6855;
 const crs = await projectionEngine.getCRS('EPSG:3857');
 const options = {crs, width: 800, height: 600};
 
-test('Viewport installs the projection pair before invoking overridden projectPosition', () => {
+test('Viewport installs the CRS before invoking overridden projectPosition', () => {
   class ProjectedViewport extends Viewport {
     projectPosition(position: number[]): [number, number, number] {
-      expect(this.postUnproject).toBeTypeOf('function');
-      const projected = this.preproject!(position);
+      expect(this.crs).toBeDefined();
+      const projected = this.crs!.converter.WGS84.from(position);
       return [projected[0], projected[1], projected[2] * this.distanceScales.unitsPerMeter[2]];
     }
   }
-  const preproject = vi.fn(([x, y, z = 0]): [number, number, number] => [x * 2, y * 3, z]);
-  const postUnproject = ([x, y, z = 0]): [number, number, number] => [x / 2, y / 3, z];
-  const viewport = new ProjectedViewport({preproject, postUnproject, position: [10, 20, 0]});
-  expect(preproject).toHaveBeenCalledExactlyOnceWith([10, 20, 0]);
+  const from = vi.fn(([x, y, z = 0]) => [x * 2, y * 3, z]);
+  const to = ([x, y, z = 0]) => [x / 2, y / 3, z];
+  const descriptor = createTestCRS({converter: {forward: from, inverse: to}});
+  const viewport = new ProjectedViewport({
+    crs: descriptor,
+    distanceScales: {},
+    position: [10, 20, 0]
+  });
+  expect(from).toHaveBeenCalledExactlyOnceWith([10, 20, 0]);
   expect(viewport.center).toEqual([20, 60, 0]);
-  expect(viewport.postUnproject!(viewport.center)).toEqual([10, 20, 0]);
-  preproject.mockClear();
+  expect(viewport.unprojectPosition(viewport.center)).toEqual([10, 20, 0]);
+  from.mockClear();
   const scaled = new ProjectedViewport({
-    preproject,
-    postUnproject,
+    crs: descriptor,
     position: [10, 20, 5],
     distanceScales: {
       unitsPerMeter: [2, 2, 2],
-      unitsPerWorldUnit: [2, 2, 2],
-      unitsPerMeter2: [0, 0, 0],
-      unitsPerWorldUnit2: [0, 0, 0]
+      unitsPerWorldUnit: [2, 2, 2]
     }
   });
   expect(scaled.center).toEqual([20, 60, 10]);
-  expect(preproject).toHaveBeenCalledExactlyOnceWith([10, 20, 5]);
+  expect(from).toHaveBeenCalledExactlyOnceWith([10, 20, 5]);
 });
 
 test('CustomProjectionViewport projects WGS84 XYZ through its descriptor exactly once', () => {
@@ -70,7 +73,7 @@ test('CustomProjectionViewport projects WGS84 XYZ through its descriptor exactly
 
 test('CustomProjectionViewport flat methods scale target coordinates without conversion', () => {
   const viewport = new CustomProjectionViewport(options);
-  const convert = vi.spyOn(viewport, 'preproject');
+  const convert = vi.spyOn(viewport.crs.converter.WGS84, 'from');
   const input = [1000, -2000];
   expect(viewport.projectFlat(input)).toEqual(input.map(value => value * normalizationScale));
   viewport
@@ -88,7 +91,7 @@ test('target feet and independent altitude units normalize to the same common sp
     new Array(3).fill(0.3048 * normalizationScale)
   );
   const input = [-122, 38, 100];
-  expect(viewport.preproject!(input)[2]).toBeCloseTo(100 / 0.3048, 8);
+  expect(viewport.getPreprojection(WGS84_CRS).preproject!(input)[2]).toBeCloseTo(100 / 0.3048, 8);
   viewport
     .projectPosition(input)
     .forEach((value, axis) =>
@@ -105,10 +108,10 @@ test('target feet and independent altitude units normalize to the same common sp
 test('WGS84 normalization uses the target descriptor latitude and longitude interval', () => {
   const viewport = new CustomProjectionViewport(options);
   const input = [450, 100, 123];
-  expect(viewport.preproject!(input)).toEqual(
+  expect(viewport.getPreprojection(WGS84_CRS).preproject!(input)).toEqual(
     crs.converter.WGS84.from(crs.converter.WGS84.normalize(input))
   );
-  expect(viewport.preproject!(input)[2]).toBe(123);
+  expect(viewport.getPreprojection(WGS84_CRS).preproject!(input)[2]).toBe(123);
   expect(input).toEqual([450, 100, 123]);
 });
 
@@ -225,7 +228,7 @@ test('inverse conversion delegates to math.gl without forward validation or norm
   });
   forward.mockClear();
   normalize.mockClear();
-  expect(viewport.postUnproject!([1, 2, 3])).toEqual([12, 34, 56]);
+  expect(viewport.getPreprojection(WGS84_CRS).unpreproject!([1, 2, 3])).toEqual([12, 34, 56]);
   expect(inverse).toHaveBeenCalledExactlyOnceWith([1, 2, 3]);
   expect(forward).not.toHaveBeenCalled();
   expect(normalize).not.toHaveBeenCalled();
