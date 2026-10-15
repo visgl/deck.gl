@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- luma-example-support -->
+  <meta name="luma-example-id" content="deck/depth-of-field" />
+  <meta name="luma-example-backends" content="webgpu" />
+  <meta name="luma-example-mobile" content="full" />
+  <meta name="luma-example-mobile-profile" content="standard" />
+  <script type="module" data-luma-example-support-bootstrap>
+    import {installStandaloneExampleSupport} from '../../example-support.ts';
+    const exampleSupport = await installStandaloneExampleSupport();
+    if (!exampleSupport.supported) {
+      document.querySelectorAll('script[type="module"]:not([data-luma-example-support-bootstrap])').forEach(script => script.remove());
+    }
+  </script>
+  <!-- /luma-example-support -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./style.css" />
+  <title>Riverfront depth of field · luma.gl</title>
+</head>
+<body>
+  <div id="scene" aria-label="Riverfront rendered with luma.gl screen-space effects"></div>
+  <aside class="luma-example-infobox luma-example-infobox--overlay">
+    <p class="eyebrow">luma.gl + deck.gl</p>
+    <h1>Riverfront depth of field</h1>
+    <section class="control-card"><h2>Scene</h2>
+      <label>Renderer<select id="backend" aria-label="Renderer"><option value="webgpu">WebGPU</option></select></label>
+      <label class="toggle"><input id="enabled" type="checkbox" checked /> Depth of field</label>
+      <label class="toggle"><input id="automatic" type="checkbox" checked /> Automatic focus</label>
+      <label>Lens blur<input id="blur" type="range" min="0" max="60" step="1" value="24" /></label>
+    </section>
+    <output id="status" class="selection" aria-live="polite">Preparing the riverfront…</output>
+    <p class="hint">Click a building to focus<br />Drag to move · Scroll to zoom<br />Shift + drag to orbit</p>
+  </aside>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

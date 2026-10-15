@@ -47,6 +47,8 @@ layout(std140) uniform projectUniforms {
   vec3 coordinateOrigin;
   vec3 commonOrigin;
   bool pseudoMeters;
+  int sizeScaleSize;
+  vec4 sizeScaleTransform;
 } project;
 
 
@@ -90,28 +92,69 @@ float project_size() {
   return 1.0;
 }
 
+#ifdef USE_EXTERNAL_PROJECTION
+// Nearest-texel Taylor reconstruction: R=scalar XY scale, GB=slopes per sampler
+// unit, A=Z scale. R=0 marks invalid samples. One fetch preserves instance aspect ratio.
+// Alternatives if discontinuities/accuracy become visible: blend four local Taylor
+// estimates for continuity, or use four-fetch bicubic Hermite with a mixed derivative
+// for higher accuracy (which would require moving Z scale out of A).
+uniform highp usampler2D project_sizeScaleTexture;
+vec3 project_external_size_scale_at(vec2 mapPosition) {
+  if (project.sizeScaleSize <= 0) return project.commonUnitsPerMeter;
+  vec2 samplePosition = mapPosition * project.sizeScaleTransform.xy + project.sizeScaleTransform.zw;
+  if (any(lessThan(samplePosition, vec2(0.0))) || any(greaterThan(samplePosition, vec2(512.0)))) return project.commonUnitsPerMeter;
+  ivec2 dimensions = textureSize(project_sizeScaleTexture, 0);
+  ivec2 index = clamp(ivec2(floor(samplePosition / 512.0 * vec2(dimensions))), ivec2(0), dimensions - 1);
+  vec4 texel = uintBitsToFloat(texelFetch(project_sizeScaleTexture, index, 0));
+  if (texel.r <= 0.0) return project.commonUnitsPerMeter;
+  vec2 center = (vec2(index) + 0.5) * 512.0 / vec2(dimensions);
+  float scale = texel.r + dot(texel.gb, samplePosition - center);
+  // Steep local curves can overshoot; retain the measured positive center scale.
+  if (!(scale > 0.0) || isinf(scale) || isnan(scale)) scale = texel.r;
+  return vec3(scale, scale, texel.a * scale / texel.r) * project.commonUnitsPerWorldUnit;
+}
+
+vec3 project_external_size_scale() {
+  return project_external_size_scale_at(geometry.position.w == 0.0
+    ? (project.modelMatrix * vec4(geometry.worldPosition, 1.0)).xy + project.commonOrigin.xy / project.commonUnitsPerWorldUnit.xy - project.coordinateOrigin.xy : (geometry.position.xy + project.commonOrigin.xy) / project.commonUnitsPerWorldUnit.xy);
+}
+
+#endif
+
 float project_size_at_latitude(float meters, float lat) {
   return meters * project.commonUnitsPerMeter.z * project_size_at_latitude(lat);
 }
 
 //
 // Scaling offsets - scales meters to "world distance"
-// Note the scalar version of project_size is for scaling the z component only
+// The scalar overload preserves aspect ratio; vector overloads support per-axis scales.
 //
 float project_size(float meters) {
   // For scatter relevant
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale().z;
+#endif
   return meters * project.commonUnitsPerMeter.z * project_size();
 }
 
 vec2 project_size(vec2 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale().xy;
+#endif
   return meters * project.commonUnitsPerMeter.xy * project_size();
 }
 
 vec3 project_size(vec3 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return meters * project_external_size_scale();
+#endif
   return meters * project.commonUnitsPerMeter * project_size();
 }
 
 vec4 project_size(vec4 meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) return vec4(meters.xyz * project_external_size_scale(), meters.w);
+#endif
   return vec4(meters.xyz * project.commonUnitsPerMeter, meters.w);
 }
 
@@ -182,6 +225,65 @@ vec3 project_globe_(vec3 lnglatz) {
   ) * D;
 }
 
+// Mercator y of project_mercator_'s latitude clamp: log(tan(PI / 4 + radians(89.9) / 2))
+const float MAX_MERCATOR_Y = 7.0439589847;
+
+// Inverse of project_globe_ followed by project_mercator_, without forming lat/lng:
+// Mercator y = atanh(sin(lat)) = log((D + |z|) / |xy|), which stays accurate near the poles
+vec2 project_globe_to_mercator_(vec3 spherePos) {
+  float D = length(spherePos);
+  float h = max(length(spherePos.xy), 1e-20);
+  float y = sign(spherePos.z) * min(log((D + abs(spherePos.z)) / h), MAX_MERCATOR_Y);
+  float x = atan(spherePos.x, -spherePos.y);
+  return (vec2(x, y) + PI) * WORLD_SCALE;
+}
+
+// Flat common space (Mercator or cartesian) of a common position; identity except under GLOBE.
+// For sampling textures or testing bounds produced by a flat viewport. Do not add
+// project.commonOrigin to a GLOBE result. Adding a non-flat projection mode: invert it here.
+vec2 project_common_position_to_flat(vec3 commonPosition) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    return project_globe_to_mercator_(commonPosition);
+  }
+  return commonPosition.xy;
+}
+
+vec2 project_common_position_to_flat(vec4 commonPosition) {
+  return project_common_position_to_flat(commonPosition.xyz);
+}
+
+// World copy of a flat x nearest to referenceX
+float project_wrap_flat_x_(float x, float referenceX) {
+  return x - TILE_SIZE * floor((x - referenceX) / TILE_SIZE + 0.5);
+}
+
+// Flat position in the world copy nearest to referenceX (e.g. a bounds centre); geospatial only
+vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX) {
+  vec2 flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode != PROJECTION_MODE_IDENTITY) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX) {
+  return project_common_position_to_flat_wrapped(commonPosition.xyz, referenceX);
+}
+
+// Flat position continuous across the antimeridian under GLOBE (seam moved opposite referenceX,
+// e.g. the camera); identity for flat modes. For periodic patterns.
+vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX) {
+  vec2 flatPosition = project_common_position_to_flat(commonPosition);
+  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
+  }
+  return flatPosition;
+}
+
+vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float referenceX) {
+  return project_common_position_to_flat_continuous(commonPosition.xyz, referenceX);
+}
+
 //
 // Projects positions (defined by project.coordinateSystem) to common space (defined by project.projectionMode)
 //
@@ -202,6 +304,14 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+      // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
+      vec4 position_low = project.modelMatrix * vec4(position64Low, 0.0);
+      return vec4(
+        position_world.xyz * project.commonUnitsPerMeter + position_low.xyz * project.commonUnitsPerMeter,
+        position_world.w
+      );
+    }
     if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
       return vec4(
         project_globe_(position_world.xyz),
@@ -210,8 +320,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
     if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      float metersToCommon = GLOBE_RADIUS / EARTH_RADIUS;
-      vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * metersToCommon;
+      vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * project.commonUnitsPerMeter;
       return vec4(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
@@ -229,6 +338,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
   }
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
+    project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL ||
     (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
     (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
      project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
@@ -278,6 +388,11 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
+#ifdef USE_EXTERNAL_PROJECTION
+  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
+    return meters * project_external_size_scale().x * project.scale;
+  }
+#endif
   return project_size(meters) * project.scale;
 }
 vec2 project_size_to_pixel(vec2 meters) {

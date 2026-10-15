@@ -10,6 +10,7 @@ import {
   CompositeLayer,
   CompositeLayerProps,
   COORDINATE_SYSTEM,
+  CoordinateSystem,
   FilterContext,
   GetPickingInfoParams,
   Layer,
@@ -25,12 +26,36 @@ import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
-import {load} from '@loaders.gl/core';
+import {coreApi} from '@loaders.gl/core';
 import {MeshAttributes} from '@loaders.gl/schema';
-import {Tileset3D, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
+import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
+
+/**
+ * Numeric `COORDINATE_SYSTEM` values used by deck.gl before v9.3, still emitted on tile content by
+ * released versions of loaders such as `@loaders.gl/i3s`. Mapped back to the string constants that
+ * the layers understand.
+ */
+const LEGACY_COORDINATE_SYSTEMS: Record<number, CoordinateSystem> = {
+  [-1]: COORDINATE_SYSTEM.DEFAULT,
+  0: COORDINATE_SYSTEM.CARTESIAN,
+  1: COORDINATE_SYSTEM.LNGLAT,
+  2: COORDINATE_SYSTEM.METER_OFFSETS,
+  3: COORDINATE_SYSTEM.LNGLAT_OFFSETS
+};
+
+/** @internal Exported for testing. */
+export function normalizeCoordinateSystem(
+  coordinateSystem: CoordinateSystem | number
+): CoordinateSystem | number {
+  if (typeof coordinateSystem === 'number') {
+    // Unrecognized values are passed through so that the core reports `Invalid coordinateSystem`
+    return LEGACY_COORDINATE_SYSTEMS[coordinateSystem] ?? coordinateSystem;
+  }
+  return coordinateSystem;
+}
 
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
@@ -215,33 +240,21 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
     const {tileset: tilesetOptions, ...remainingLoadOptions} = loadOptions;
 
     const options = {loadOptions: {...remainingLoadOptions}, ...tilesetOptions};
-    let actualTilesetUrl = tilesetUrl;
-    if ('preload' in loader && typeof loader.preload === 'function') {
-      const preloadOptions = await loader.preload(tilesetUrl, loadOptions);
-      if (preloadOptions.url) {
-        actualTilesetUrl = preloadOptions.url;
-      }
+    const sourceInput = {url: tilesetUrl, loader, coreApi};
+    const source =
+      loader.id === 'i3s'
+        ? new I3SSource(sourceInput, options.loadOptions)
+        : new Tiles3DSource(sourceInput, options.loadOptions);
 
-      if (preloadOptions.headers) {
-        options.loadOptions.core = {
-          ...options.loadOptions.core,
-          fetch: {
-            ...options.loadOptions.core?.fetch,
-            headers: preloadOptions.headers
-          }
-        };
-      }
-      Object.assign(options, preloadOptions);
-    }
-    const tilesetJson = await load(actualTilesetUrl, loader, options.loadOptions);
-
-    const tileset3d = new Tileset3D(tilesetJson, {
+    const tileset3d = new Tileset3D(source, {
       onTileLoad: this._onTileLoad.bind(this),
       onTileUnload: this._onTileUnload.bind(this),
       onTileError: this.props.onTileError,
       onUpdate: () => this.setNeedsUpdate(),
       ...options
     });
+
+    await tileset3d.tilesetInitializationPromise;
 
     this.setState({
       tileset3d,
@@ -419,7 +432,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem,
+        coordinateSystem: normalizeCoordinateSystem(coordinateSystem),
         featureIds,
         _offset: 0
       }

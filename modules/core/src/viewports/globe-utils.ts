@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {clamp, vec3, Quaternion} from '@math.gl/core';
+import {clamp, Quaternion} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import {zoomAdjust} from './globe-viewport';
 
@@ -150,49 +151,6 @@ export class Globe {
       longitude,
       latitude,
       bearing: b
-    };
-  }
-
-  /**
-   * Rotate a camera frame so one globe position moves toward another.
-   * The position and camera up vector share one rigid-body rotation, allowing
-   * bearing to evolve continuously as the camera moves around the sphere.
-   */
-  static rotateFrameToMatch(
-    frame: CameraFrame,
-    currentCoordinates: [number, number],
-    targetCoordinates: [number, number],
-    strength: number = 1
-  ): CameraFrame {
-    const currentPosition = Globe.toPosition(...currentCoordinates);
-    const targetPosition = Globe.toPosition(...targetCoordinates);
-    let rotationAxis = vec3.cross([], currentPosition, targetPosition);
-    const axisLength = vec3.len(rotationAxis);
-    const cosine = clamp(vec3.dot(currentPosition, targetPosition), -1, 1);
-
-    if (axisLength < 1e-12) {
-      if (cosine > 0) {
-        return frame;
-      }
-      rotationAxis = vec3.cross([], currentPosition, frame.up);
-      if (vec3.len(rotationAxis) < 1e-12) {
-        rotationAxis = vec3.cross([], currentPosition, frame.axisVertical);
-      }
-    }
-
-    vec3.normalize(rotationAxis, rotationAxis);
-    const angle = Math.atan2(axisLength, cosine) * clamp(strength, 0, 1);
-    const position = Globe.rotate(frame.position, rotationAxis, angle);
-    const up = Globe.rotate(frame.up, rotationAxis, angle);
-    const [longitude, latitude] = Globe.toLngLat(position);
-
-    return {
-      ...frame,
-      position,
-      up,
-      longitude,
-      latitude,
-      bearing: Globe.bearing(up, longitude, latitude)
     };
   }
 }

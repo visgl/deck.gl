@@ -1,3 +1,7 @@
+---
+description: "Render deck.gl layers over MapLibre GL JS with MapLibreOverlay from @deck.gl/maplibre, overlaid or interleaved."
+---
+
 # Using with MapLibre
 
 | Pure JS | React | Overlaid | Interleaved |
@@ -223,6 +227,10 @@ function App() {
 
 
 ## Additional Information
+
+### Styling layers by zoom
+
+To fade, resize or filter deck.gl layers by zoom the way MapLibre's `minzoom`, `maxzoom` and `["zoom"]` expressions do, see [Zoom-Dependent Layers](../zoom-dependent-layers.md).
 
 ### react-map-gl
 
