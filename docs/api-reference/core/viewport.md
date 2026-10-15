@@ -121,15 +121,16 @@ Returns:
 
 #### `projectPosition` {#projectposition}
 
-Projects latitude, longitude (and altitude) to coordinates in the [common space](./project.md).
+Converts a position to the viewport's [common space](./project.md). To project coordinates from a different CRS, pass its resolved math.gl CRS descriptor as `options.sourceCrs`.
 
 Parameters:
 
-* `coordinates` (number[]) - `[lng, lat, altitude]` Passing an altitude is optional.
+* `coordinates` (number[]) - `[x, y, z]`, with optional altitude. Defaults to longitude/latitude/altitude for geospatial viewports and local coordinates otherwise.
+* `options.sourceCrs` (CRSDescriptor, optional) - The CRS of `coordinates`.
 
 Returns:
 
-* `[x, y, z]` in WebMercator coordinates.
+* `[x, y, z]` in the viewport's common space.
 
 
 #### `unprojectPosition` {#unprojectposition}

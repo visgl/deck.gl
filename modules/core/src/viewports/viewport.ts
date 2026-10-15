@@ -4,6 +4,7 @@
 
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import log from '../utils/log';
+import {WGS84_CRS} from '../utils/crs';
 import {
   createMat4,
   getCameraPosition,
@@ -17,6 +18,11 @@ import {Matrix4, Vector3, equals, clamp} from '@math.gl/core';
 import * as mat4 from '@math.gl/core/mat4';
 
 import {PROJECTION_MODE} from '../lib/constants';
+
+export type ProjectPositionOptions = {
+  /** CRS of the input coordinates. Defaults to WGS84 for geospatial viewports. */
+  sourceCrs?: CRSDescriptor;
+};
 
 export type DistanceScales = {
   /** Local scale from position units to common units (after preprojection, if applicable). */
@@ -344,10 +350,14 @@ export default class Viewport {
     return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  /** Convert WGS84 XYZ through the target CRS, then scale to common space.
-   * Without a CRS, positions follow the viewport's local projection hooks.
+  /** Convert XYZ from the supplied CRS to common space, for CPU geometry operations.
+   * Omitting sourceCrs retains WGS84 input for geospatial viewports and local input otherwise.
    */
-  projectPosition(position: number[]): [number, number, number] {
+  projectPosition(
+    position: number[],
+    options: ProjectPositionOptions = {}
+  ): [number, number, number] {
+    if (options.sourceCrs) return this._projectPositionFromCRS(position, options.sourceCrs);
     const scale = this.distanceScales.unitsPerWorldUnit;
     if (this.crs) {
       const projected = this.crs.converter.WGS84.from(position);
@@ -482,6 +492,19 @@ export default class Viewport {
   }
 
   // INTERNAL METHODS
+
+  /** Convert source coordinates through the viewport's projection hooks, preserving its conventions. */
+  protected _projectPositionFromCRS(
+    position: number[],
+    sourceCrs: CRSDescriptor
+  ): [number, number, number] {
+    // Dispatch back through projectPosition so built-in altitude and globe orientation remain intact.
+    const geographic =
+      sourceCrs.signature === WGS84_CRS.signature
+        ? position
+        : sourceCrs.converter.WGS84.to(position);
+    return this.projectPosition(geographic);
+  }
 
   private _projectTarget(position: number[]): [number, number, number] {
     // A target CRS need not share common-space orientation (e.g. southward tile Y).

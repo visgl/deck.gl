@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import View from './view';
-import {projectionEngine} from '@math.gl/projection';
+import {resolveCRS} from '../utils/crs';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
@@ -51,14 +51,21 @@ export default class CustomProjectionView extends View<
     super(props);
   }
   /** Resolve the target CRS once for this view before creating its synchronous viewport. */
-  initialize(): Promise<void> {
-    this.#initialization ||= projectionEngine.getCRS(this.props.toCrs).then(crs => {
-      if (crs.coordinateFrame !== 'projected') {
+  initialize(): void | Promise<void> {
+    if (this.#crs) return;
+    if (this.#initialization) return this.#initialization;
+    const resolved = resolveCRS(this.props.toCrs);
+    const setCrs = (crs: CRSDescriptor | null) => {
+      if (!crs || crs.coordinateFrame !== 'projected') {
         throw new Error('CustomProjectionView requires a projected CRS');
       }
       this.#crs = crs;
-    });
-    return this.#initialization;
+    };
+    if (resolved instanceof Promise) {
+      this.#initialization = resolved.then(setCrs);
+      return this.#initialization;
+    }
+    setCrs(resolved);
   }
   getViewportType() {
     return CustomProjectionViewport;

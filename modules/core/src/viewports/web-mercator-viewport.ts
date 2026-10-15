@@ -4,7 +4,11 @@
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-import Viewport, {type ViewportOptions, type DistanceScales} from './viewport';
+import Viewport, {
+  type ViewportOptions,
+  type DistanceScales,
+  type ProjectPositionOptions
+} from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {OSM_TILE_CRS, getMercatorScales} from './web-mercator-util';
 
@@ -293,7 +297,8 @@ export default class WebMercatorViewport extends Viewport {
     );
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: number[], options: ProjectPositionOptions = {}): [number, number, number] {
+    if (options.sourceCrs) return this._projectPositionFromCRS(xyz, options.sourceCrs);
     if (this._pseudoMeters) {
       const [x, y] = this.projectFlat(xyz);
       return [x, y, (xyz[2] || 0) * this.distanceScales.unitsPerWorldUnit[2]];

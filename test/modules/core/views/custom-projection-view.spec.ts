@@ -98,14 +98,14 @@ test('CustomProjectionView configures its default and custom controllers', () =>
   ).toBe(CustomController);
 });
 
-test('ViewManager rebuilds a prepared custom view and retains it across equal descriptors', async () => {
+test('ViewManager immediately uses a loaded CRS and retains it across equal descriptors', async () => {
   const view = new CustomProjectionView({...options, id: 'custom'});
   const manager = new ViewManager({views: [view], viewState, width: 800, height: 600});
   try {
-    expect(manager.getViewports()).toHaveLength(0);
+    expect(manager.getViewports()).toHaveLength(1);
     manager.setProps({views: [new CustomProjectionView({...options, id: 'custom'})]});
     await view.initialize();
-    expect(manager.updateViewports()).toBe(true);
+    expect(manager.updateViewports()).toBe(false);
     expect(manager.getViewports()).toHaveLength(1);
     expect(manager.getViewports()[0]).toBeInstanceOf(CustomProjectionViewport);
   } finally {
@@ -136,4 +136,26 @@ test('invalid target CRS errors reach ViewManager onError', async () => {
   } finally {
     manager.finalize();
   }
+});
+
+test('CustomProjectionView shares pending CRS resolution and initializes loaded CRS synchronously', async () => {
+  const toCrs = '+proj=eqearth +lon_0=17 +datum=WGS84 +units=m';
+  const first = new CustomProjectionView({toCrs});
+  const pending = first.initialize();
+  expect(pending).toBeInstanceOf(Promise);
+  expect(first.initialize()).toBe(pending);
+  expect(first.makeViewport({width: 800, height: 600, viewState})).toBeNull();
+  const second = new CustomProjectionView({toCrs});
+  await Promise.all([pending, second.initialize()]);
+  expect(first.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
+    CustomProjectionViewport
+  );
+  expect(second.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
+    CustomProjectionViewport
+  );
+  const loaded = new CustomProjectionView({toCrs});
+  expect(loaded.initialize()).toBeUndefined();
+  expect(loaded.makeViewport({width: 800, height: 600, viewState})).toBeInstanceOf(
+    CustomProjectionViewport
+  );
 });

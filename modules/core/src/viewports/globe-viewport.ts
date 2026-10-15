@@ -6,7 +6,7 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
-import Viewport, {type DistanceScales} from './viewport';
+import Viewport, {type DistanceScales, type ProjectPositionOptions} from './viewport';
 import {PROJECTION_MODE} from '../lib/constants';
 import {mod} from '../utils/math-utils';
 import {GLOBE_CRS, GLOBE_EARTH_RADIUS as EARTH_RADIUS, zoomAdjust} from './globe-util';
@@ -352,7 +352,8 @@ export default class GlobeViewport extends Viewport {
     return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: number[], options: ProjectPositionOptions = {}): [number, number, number] {
+    if (options.sourceCrs) return this._projectPositionFromCRS(xyz, options.sourceCrs);
     const [lng, lat, Z = 0] = xyz;
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;

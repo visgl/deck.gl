@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import Viewport from './viewport';
-import type {ViewportOptions, DistanceScales} from './viewport';
+import type {ViewportOptions, DistanceScales, ProjectPositionOptions} from './viewport';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import {
   getViewMatrix,
@@ -252,7 +252,11 @@ export default class CustomProjectionViewport extends Viewport {
     return result;
   }
   /** Convert WGS84 XYZ to common space. */
-  projectPosition(position: number[]): [number, number, number] {
+  projectPosition(
+    position: number[],
+    options: ProjectPositionOptions = {}
+  ): [number, number, number] {
+    if (options.sourceCrs) return this._projectPositionFromCRS(position, options.sourceCrs);
     const projected = this.preproject!(position);
     return projected.map((value, axis) => value * this.distanceScales.unitsPerWorldUnit[axis]) as [
       number,
