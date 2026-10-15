@@ -61,9 +61,9 @@ try {
     resolve: {
       alias: aliases,
       // Also resolve imports made by the temporary luma.gl source checkout.
+      // Let projection resolve its own CRS dependency; the root may use an older API.
       dedupe: [
         '@math.gl/core',
-        '@math.gl/crs',
         '@math.gl/geoarrow',
         '@math.gl/polygon',
         '@math.gl/projection',
