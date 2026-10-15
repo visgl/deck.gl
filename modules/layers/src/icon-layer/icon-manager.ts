@@ -348,6 +348,8 @@ export default class IconManager {
 
   finalize(): void {
     this._texture?.delete();
+    // Icons still loading resolve after this point; without a texture they skip the write
+    this._texture = null;
   }
 
   getTexture(): Texture | null {
