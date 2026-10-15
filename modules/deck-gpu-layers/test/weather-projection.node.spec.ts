@@ -4,12 +4,15 @@
 
 import {expect, test, vi} from 'vitest';
 import {MapView, _GlobeView} from '@deck.gl/core';
-import {createWeatherScene} from '../../../examples/deck/weather/app';
-import {createRiverfrontSoftShadowScene} from '../../../examples/deck/soft-shadows/app';
-import {createGlobeCloudScene} from '../../../examples/deck/globe-clouds/app';
-import {createCityScene} from '../../../examples/deck/city-scene/app';
-import {createRiverfrontLightingScene} from '../../../examples/deck/riverfront-lighting-scene';
-import {getSkyCameraState, SKY_FIELD_OF_VIEW} from '../../../examples/deck/soft-shadows/sky-camera';
+import {createWeatherScene} from '../../../examples/v10-experimental/weather/app';
+import {createRiverfrontSoftShadowScene} from '../../../examples/v10-experimental/soft-shadows/app';
+import {createGlobeCloudScene} from '../../../examples/v10-experimental/globe-clouds/app';
+import {createCityScene} from '../../../examples/v10-experimental/city-scene/app';
+import {createRiverfrontLightingScene} from '../../../examples/v10-experimental/riverfront-lighting-scene';
+import {
+  getSkyCameraState,
+  SKY_FIELD_OF_VIEW
+} from '../../../examples/v10-experimental/soft-shadows/sky-camera';
 
 vi.mock('@deck.gl/core', async importOriginal => ({
   ...(await importOriginal<object>()),

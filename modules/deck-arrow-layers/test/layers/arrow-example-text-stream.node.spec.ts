@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {
   makeStreamingArrowTextSourceAsync,
   TEXT_DATASETS
-} from '../../../../examples/arrow/arrow-text-2d/arrow-text-data';
+} from '../../../../examples/v10-experimental/shared/arrow/arrow-text-2d/arrow-text-data';
 
 test('dictionary streaming retains every generated label and aligned position', async () => {
   const dataset = TEXT_DATASETS['1m-dict'];
