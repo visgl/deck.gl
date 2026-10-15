@@ -73,13 +73,8 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     imageSource: ImageSource;
     image: ImageType;
     bounds: [number, number, number, number];
-    lastRequestParameters: {
-      bbox: [number, number, number, number];
-      layers: string[];
-      srs: 'EPSG:4326' | 'EPSG:3857';
-      width: number;
-      height: number;
-    };
+    /** The parameters of the request that produced `image`. */
+    lastRequestParameters: GetImageParameters;
     lastRequestId: number;
     _nextRequestId: number;
     /** TODO: Change any => setTimeout return type. Different between Node and browser... */
@@ -135,7 +130,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       new BitmapLayer({
         ...this.getSubLayerProps({id: 'bitmap'}),
         _imageCoordinateSystem:
-          lastRequestParameters.srs === 'EPSG:4326'
+          lastRequestParameters.crs === 'EPSG:4326'
             ? COORDINATE_SYSTEM.LNGLAT
             : COORDINATE_SYSTEM.CARTESIAN,
         bounds,
