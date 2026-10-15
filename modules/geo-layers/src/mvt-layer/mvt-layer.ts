@@ -272,6 +272,8 @@ export default class MVTLayer<
       props.coordinateOrigin = [xOffset, yOffset, 0];
       props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
       props.extensions = [...(props.extensions || []), new ClipExtension()];
+      // The y-flipped modelMatrix reverses the winding; GlobeView above zoom 12 culls back faces
+      props.parameters = {cullMode: 'none', ...props.parameters};
     }
 
     const subLayers = super.renderSubLayers(props);
