@@ -16,7 +16,7 @@ import {expect, it} from 'vitest';
 import {vi} from 'vitest';
 import {userEvent} from 'vitest/browser';
 
-import {createGPUGraphExplorerDeck} from '../../../examples/deck/gpu-graph-explorer/app';
+import {createGPUGraphExplorerDeck} from '../../../examples/v10-experimental/gpu-graph-explorer/app';
 import {
   getGraphExplorerGridSize,
   GRAPH_EXPLORER_VERTEX_COUNTS,

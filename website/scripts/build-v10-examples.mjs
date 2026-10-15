@@ -13,7 +13,7 @@ import {build, loadConfigFromFile, mergeConfig} from 'vite';
 // deployment builds use the same peers, rather than a developer's local links.
 const lumaRevision = '23eb0f713e1f66dc8cf6c9b73aefbd740309de92';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const examplesRoot = resolve(root, 'examples/deck');
+const examplesRoot = resolve(root, 'examples/v10-experimental');
 const sections = JSON.parse(readFileSync(resolve(root, 'website/src/examples/v10/examples.json')));
 const websiteBasePath = `/${(process.env.WEBSITE_BASE_URL || '').split('/').filter(Boolean).join('/')}`;
 const loadedConfig = await loadConfigFromFile(

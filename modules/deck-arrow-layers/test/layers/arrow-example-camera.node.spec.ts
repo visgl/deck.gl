@@ -3,11 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {createArrowTextLayerDeck} from '../../../../examples/deck/arrow-text-layer/app';
-import {createArrowPolygonLayerDeck} from '../../../../examples/deck/arrow-polygon-layer/app';
+import {createArrowTextLayerDeck} from '../../../../examples/v10-experimental/arrow-text-layer/app';
+import {createArrowPolygonLayerDeck} from '../../../../examples/v10-experimental/arrow-polygon-layer/app';
 
 const sources = vi.hoisted(() => ({text: null as any, polygon: null as any}));
-vi.mock('../../../../examples/deck/arrow-deck', () => ({
+vi.mock('../../../../examples/v10-experimental/arrow-deck', () => ({
   ArrowDeck: class {
     props: any;
     constructor(props: any) {
@@ -19,20 +19,23 @@ vi.mock('../../../../examples/deck/arrow-deck', () => ({
   }
 }));
 vi.mock('@luma.gl/text', () => ({buildSdfFontAtlas: () => ({})}));
-vi.mock('../../../../examples/deck/arrow-text-layer/arrow-text-data-source', () => ({
+vi.mock('../../../../examples/v10-experimental/arrow-text-layer/arrow-text-data-source', () => ({
   ArrowTextDataSource: class {
     constructor(props: any) {
       sources.text = props;
     }
   }
 }));
-vi.mock('../../../../examples/arrow/arrow-polygons/arrow-polygon-data-source', () => ({
-  ArrowPolygonDataSource: class {
-    constructor(props: any) {
-      sources.polygon = props;
+vi.mock(
+  '../../../../examples/v10-experimental/shared/arrow/arrow-polygons/arrow-polygon-data-source',
+  () => ({
+    ArrowPolygonDataSource: class {
+      constructor(props: any) {
+        sources.polygon = props;
+      }
     }
-  }
-}));
+  })
+);
 
 test('paused text camera retains controller pan and zoom on subsequent draws', () => {
   const deck = createArrowTextLayerDeck();
