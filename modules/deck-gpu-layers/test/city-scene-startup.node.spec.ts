@@ -5,10 +5,12 @@
 import {expect, test, vi} from 'vitest';
 
 const startup = vi.hoisted(() => ({resolveDevice: null as any, createScene: vi.fn()}));
-vi.mock('../../../examples/deck/deck-example-device', () => ({
+vi.mock('../../../examples/v10-experimental/deck-example-device', () => ({
   resolveDeckExampleDeviceType: () => new Promise(resolve => (startup.resolveDevice = resolve))
 }));
-vi.mock('../../../examples/deck/city-scene/app', () => ({createCityScene: startup.createScene}));
+vi.mock('../../../examples/v10-experimental/city-scene/app', () => ({
+  createCityScene: startup.createScene
+}));
 
 test('city startup handles pending navigation and back-forward cache restoration', async () => {
   vi.resetModules();
@@ -50,7 +52,7 @@ test('city startup handles pending navigation and back-forward cache restoration
     }
   });
   try {
-    const loading = import('../../../examples/deck/city-scene/main');
+    const loading = import('../../../examples/v10-experimental/city-scene/main');
     await vi.waitFor(() => expect(startup.resolveDevice).toBeTypeOf('function'));
     controls.get('#camera')!.dispatchEvent(new Event('change'));
     controls.get('#playback')!.dispatchEvent(new Event('click'));

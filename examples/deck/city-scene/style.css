@@ -1,9 +1,0 @@
-/* luma.gl
- * SPDX-License-Identifier: MIT
- * SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
- */
-@import '../../example-infobox.css';
-
-:root { color-scheme: dark; background: #11181f; }
-body { margin: 0; }
-#city { position: absolute; inset: 0; }

@@ -132,6 +132,6 @@ workspace already receives Arrow through its loaders.gl dependencies.
 ## Examples and integration tests
 
 The original standalone examples and their shared fixtures are available in
-[`examples/deck`](../../examples/deck/README.md). Run `yarn build-private-examples`
+[`examples/v10-experimental`](../../examples/v10-experimental/README.md). Run `yarn build-private-examples`
 after linking the unpublished peers. `yarn test-private` includes the copied
 example integration tests alongside the module tests.
