@@ -106,16 +106,18 @@ export function buildMapping({
   };
 }
 
+/** Sum of the advances of the characters, each followed by `letterSpacing` */
 function getTextWidth(
   text: string[],
   startIndex: number,
   endIndex: number,
-  mapping: CharacterMapping
+  mapping: CharacterMapping,
+  letterSpacing: number
 ): number {
   let width = 0;
   for (let i = startIndex; i < endIndex; i++) {
     const character = text[i];
-    width += mapping[character]?.advance || 0;
+    width += (mapping[character]?.advance || 0) + letterSpacing;
   }
 
   return width;
@@ -127,14 +129,15 @@ function breakAll(
   endIndex: number,
   maxWidth: number,
   iconMapping: CharacterMapping,
-  target: number[]
+  target: number[],
+  letterSpacing: number
 ): number {
   let rowStartCharIndex = startIndex;
   let rowOffsetLeft = 0;
 
   for (let i = startIndex; i < endIndex; i++) {
     // 2. figure out where to break lines
-    const textWidth = getTextWidth(text, i, i + 1, iconMapping);
+    const textWidth = getTextWidth(text, i, i + 1, iconMapping, letterSpacing);
     if (rowOffsetLeft + textWidth > maxWidth) {
       if (rowStartCharIndex < i) {
         target.push(i);
@@ -154,7 +157,8 @@ function breakWord(
   endIndex: number,
   maxWidth: number,
   iconMapping: CharacterMapping,
-  target: number[]
+  target: number[],
+  letterSpacing: number
 ): number {
   let rowStartCharIndex = startIndex;
   let groupStartCharIndex = startIndex;
@@ -174,7 +178,13 @@ function breakWord(
 
     if (groupEndCharIndex > groupStartCharIndex) {
       // 2. break text into next row at maxWidth
-      let groupWidth = getTextWidth(text, groupStartCharIndex, groupEndCharIndex, iconMapping);
+      let groupWidth = getTextWidth(
+        text,
+        groupStartCharIndex,
+        groupEndCharIndex,
+        iconMapping,
+        letterSpacing
+      );
       if (rowOffsetLeft + groupWidth > maxWidth) {
         if (rowStartCharIndex < groupStartCharIndex) {
           target.push(groupStartCharIndex);
@@ -190,7 +200,8 @@ function breakWord(
             groupEndCharIndex,
             maxWidth,
             iconMapping,
-            target
+            target,
+            letterSpacing
           );
           // move reference to last row
           rowStartCharIndex = target[target.length - 1];
@@ -214,16 +225,21 @@ export function autoWrapping(
   maxWidth: number,
   iconMapping: CharacterMapping,
   startIndex: number = 0,
-  endIndex: number
+  endIndex: number,
+  /** extra space after each character of a row but the last */
+  letterSpacing: number = 0
 ): number[] {
   if (endIndex === undefined) {
     endIndex = text.length;
   }
   const result = [];
+  // Each character is measured with the spacing that follows it. A row's last character
+  // is not followed by spacing, so the limit is extended by one spacing to compensate.
+  const rowMaxWidth = maxWidth + letterSpacing;
   if (wordBreak === 'break-all') {
-    breakAll(text, startIndex, endIndex, maxWidth, iconMapping, result);
+    breakAll(text, startIndex, endIndex, rowMaxWidth, iconMapping, result, letterSpacing);
   } else {
-    breakWord(text, startIndex, endIndex, maxWidth, iconMapping, result);
+    breakWord(text, startIndex, endIndex, rowMaxWidth, iconMapping, result, letterSpacing);
   }
   return result;
 }
@@ -234,7 +250,8 @@ function transformRow(
   endIndex: number,
   iconMapping: CharacterMapping,
   leftOffsets: number[],
-  rowSize: [number, number]
+  rowSize: [number, number],
+  letterSpacing: number
 ) {
   let x = 0;
   let rowHeight = 0;
@@ -258,6 +275,9 @@ function transformRow(
       leftOffsets[i] = x;
       x += MISSING_CHAR_WIDTH;
     }
+    if (i < endIndex - 1) {
+      x += letterSpacing;
+    }
   }
 
   rowSize[0] = x;
@@ -278,7 +298,9 @@ export function transformParagraph(
   /** CSS max-width */
   maxWidth: number,
   /** character mapping table for retrieving a character from font atlas */
-  iconMapping: CharacterMapping
+  iconMapping: CharacterMapping,
+  /** extra space after each character of a row but the last, in pixels */
+  letterSpacing: number = 0
 ): {
   /** x position of each character */
   x: number[];
@@ -315,14 +337,22 @@ export function transformParagraph(
 
     if (lineEndIndex > lineStartIndex) {
       const rows = autoWrappingEnabled
-        ? autoWrapping(characters, wordBreak, maxWidth, iconMapping, lineStartIndex, lineEndIndex)
+        ? autoWrapping(
+            characters,
+            wordBreak,
+            maxWidth,
+            iconMapping,
+            lineStartIndex,
+            lineEndIndex,
+            letterSpacing
+          )
         : SINGLE_LINE;
 
       for (let rowIndex = 0; rowIndex <= rows.length; rowIndex++) {
         const rowStart = rowIndex === 0 ? lineStartIndex : rows[rowIndex - 1];
         const rowEnd = rowIndex < rows.length ? rows[rowIndex] : lineEndIndex;
 
-        transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize);
+        transformRow(characters, rowStart, rowEnd, iconMapping, x, rowSize, letterSpacing);
         for (let j = rowStart; j < rowEnd; j++) {
           y[j] = rowOffsetTop;
           rowWidth[j] = rowSize[0];
