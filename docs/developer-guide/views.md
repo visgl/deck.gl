@@ -803,7 +803,34 @@ function App({carPose}: {
 </Tabs>
 
 
-Some layers, including `TileLayer`, `MVTLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching and/or aggregation) on viewport change. Therefore, it is generally *NOT* recommended to render them into multiple views. If you do need to show e.g. tiled base map in multiple views, create one layer instance for each view and limit their rendering with `layerFilter`:
+Some layers, including `TileLayer`, `MVTLayer`, `HeatmapLayer` and `ScreenGridLayer`, perform expensive operations (data fetching and/or aggregation) on viewport change. Therefore, it is generally *NOT* recommended to render them into multiple views.
+
+For 2D tiled content that can share one payload cache, the [`Tile2DLayer`](../api-reference/geo-layers/tile-2d-layer.md) and [`Tileset2D`](../api-reference/geo-layers/tileset-2d.md) support one shared tileset feeding multiple viewports:
+
+```ts
+import {
+  Tile2DLayer,
+  Tileset2D,
+  tile2DDeckAdapter
+} from '@deck.gl/geo-layers';
+
+const tileset = new Tileset2D({
+  adapter: tile2DDeckAdapter,
+  getTileData: ({index, signal}) => fetchTile(index, signal)
+});
+
+const layer = new Tile2DLayer({
+  id: 'shared-tiles',
+  data: tileset,
+  renderSubLayers
+});
+```
+
+For MVT data, [`MVT2DLayer`](../api-reference/geo-layers/mvt-2d-layer.md) lets separately styled map and globe consumers reuse one decoded tile cache.
+
+For `Tile2DLayer` and `MVT2DLayer`, use `viewIds: ['main']` to restrict a layer's tile loading, cache retention, and loading status to that view. `layerFilter` only controls rendering and picking; it does not restrict traversal by these layers. When migrating a per-view `TileLayer` or `MVTLayer`, add matching `viewIds` to the new layer rather than relying on the existing `layerFilter`. Leave `viewIds` unset to share the layer across all views.
+
+For tiled layers that do not use that shared path, including `MVTLayer`, create one layer instance for each view and limit their rendering with `layerFilter`:
 
 <Tabs groupId="language">
   <TabItem value="js" label="JavaScript">

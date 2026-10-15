@@ -122,6 +122,12 @@ export {
   H3ClusterLayer,
   H3HexagonLayer,
   TileLayer,
+  Tile2DLayer,
+  MVT2DLayer,
+  Tileset2D,
+  Tile2DHeader,
+  tile2DDeckAdapter,
+  /** @deprecated Use Tileset2D. */
   _Tileset2D,
   TripsLayer,
   Tile3DLayer,
@@ -238,7 +244,22 @@ export type {
   ScreenGridLayerProps
 } from '@deck.gl/aggregation-layers';
 
-export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
+export type {
+  MVTLayerProps,
+  QuadkeyLayerProps,
+  RefinementStrategy,
+  Tile2DLayerPickingInfo,
+  TileLoadProps,
+  Tile2DLayerProps,
+  MVT2DLayerProps,
+  MVT2DData,
+  Tileset2DAdapter,
+  Tileset2DListener,
+  Tileset2DProps,
+  Tileset2DTileContext,
+  Tileset2DTraversalContext,
+  TileLayerProps
+} from '@deck.gl/geo-layers';
 
 export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
 
