@@ -81,7 +81,7 @@ class TerrainDemo extends Component {
       value: 0,
       step: 1,
       min: 0,
-      max: 19,
+      max: 12,
       accentColor: '#0275ff'
     },
     maxZoom: {

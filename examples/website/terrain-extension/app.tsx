@@ -174,7 +174,19 @@ export default function App({
       layers={layers}
       pickingRadius={5}
       getTooltip={getTooltip}
-    />
+    >
+      <div
+        style={{position: 'absolute', bottom: 0, right: 0, background: 'white', padding: '2px 6px'}}
+      >
+        <a href="https://mapterhorn.com/attribution" target="_blank" rel="noreferrer">
+          © Mapterhorn
+        </a>
+        {' | '}
+        <a href="https://versatiles.org/sources/" target="_blank" rel="noreferrer">
+          VersaTiles sources
+        </a>
+      </div>
+    </DeckGL>
   );
 }
 

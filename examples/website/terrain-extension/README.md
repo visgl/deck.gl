@@ -25,6 +25,12 @@ for the underlying terrain data sources.
 The surface texture uses [VersaTiles satellite imagery](https://versatiles.org/sources/), which has
 global coverage through zoom level 12.
 
+These examples cap source requests at zoom 12 for consistent global coverage. Mapterhorn
+provides higher-resolution terrain in selected regions, so there is no single global maximum
+above 12. Zooming the camera further reuses the available tiles (overzooming); it does not add
+terrain or imagery detail. Terrain and texture currently share the source zoom limit in
+`TerrainLayer`; independent texture zoom is outside this example migration.
+
 To use other data sources, check out
 the [documentation of TerrainLayer](../../../docs/api-reference/geo-layers/terrain-layer.md).
 

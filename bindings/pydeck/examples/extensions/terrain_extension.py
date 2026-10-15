@@ -42,5 +42,12 @@ route = pdk.Layer(
 )
 
 view_state = pdk.ViewState(latitude=37.878, longitude=-122.448, zoom=12, pitch=55, bearing=15)
-r = pdk.Deck(layers=[terrain, route], initial_view_state=view_state)
+r = pdk.Deck(
+    layers=[terrain, route],
+    initial_view_state=view_state,
+    description=(
+        '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a> | '
+        '<a href="https://versatiles.org/sources/">VersaTiles sources</a>'
+    ),
+)
 r.to_html("terrain_extension.html")
