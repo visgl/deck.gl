@@ -5,6 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
+  OrthographicViewport,
   _CustomProjectionViewport as CustomProjectionViewport,
   WebMercatorViewport
 } from '@deck.gl/core';
@@ -18,6 +19,7 @@ import {
 } from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
+import {Timeline} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 const projection = {forward: p => p, inverse: p => p};
@@ -462,3 +464,360 @@ test('WebGPU binary polygons project every subdivided vertex', async ({skip}) =>
     manager.finalize();
   }
 });
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} adaptive tolerance rebuilds every row alongside a partial data diff`, () => {
+    const viewport = new CustomProjectionViewport({
+      projection: {
+        forward: ([x, y, z = 0]) => [x, y + x * x, z],
+        inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+      }
+    });
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const data = [
+      [
+        [0, 0],
+        [8, 0],
+        [8, 2],
+        [0, 0]
+      ],
+      [
+        [10, 0],
+        [18, 0],
+        [18, 2],
+        [10, 0]
+      ]
+    ];
+    let layer = new LayerType({
+      id: 'adaptive-partial',
+      data,
+      getPath: p => p,
+      getPolygon: p => p,
+      _projectionTolerance: 1
+    });
+    try {
+      manager.setLayers([layer]);
+      const oldCount = layer.state.startIndices[2] - layer.state.startIndices[1];
+      layer = layer.clone({
+        data: data.slice(),
+        _dataDiff: () => [{startRow: 0, endRow: 1}],
+        _projectionTolerance: 0.01
+      });
+      manager.setLayers([layer]);
+      const newCount = layer.state.startIndices[2] - layer.state.startIndices[1];
+      expect(newCount).toBeGreaterThan(oldCount);
+      layer = layer.clone({_projectionTolerance: 0});
+      manager.setLayers([layer]);
+      expect(layer.state.startIndices[2] - layer.state.startIndices[1]).toBeLessThan(oldCount);
+    } finally {
+      manager.finalize();
+    }
+  });
+
+  test(`${LayerType.layerName} adaptive refinement rejects GPU-only coordinates`, () => {
+    const viewport = new CustomProjectionViewport(options);
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const buffer = device.createBuffer({data: new Float32Array([0, 0, 0, 1, 1, 0, 0, 0, 0])});
+    const geometry = LayerType === PathLayer ? 'getPath' : 'getPolygon';
+    try {
+      expect(() =>
+        manager.setLayers([
+          new LayerType({
+            id: 'adaptive-gpu',
+            _projectionTolerance: 1,
+            data: {length: 1, startIndices: [0, 3], attributes: {[geometry]: buffer}}
+          })
+        ])
+      ).toThrow('Projection refinement');
+    } finally {
+      manager.finalize();
+      buffer.destroy();
+    }
+  });
+}
+
+test('adaptive RGB paths accept the default RGBA color', () => {
+  const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  try {
+    const layer = new PathLayer({
+      id: 'adaptive-rgb',
+      data: [
+        [
+          [0, 0],
+          [1, 1]
+        ]
+      ],
+      getPath: p => p,
+      colorFormat: 'RGB',
+      _projectionTolerance: 1
+    });
+    manager.setLayers([layer]);
+    expect(layer.state.numInstances).toBeGreaterThan(0);
+    expect(
+      Array.from(
+        layer
+          .getAttributeManager()!
+          .attributes.instanceColors.value!.slice(0, layer.state.numInstances * 3)
+      )
+    ).toEqual([0, 0, 0]);
+  } finally {
+    manager.finalize();
+  }
+});
+
+for (const accessor of ['getFillColor', 'getLineColor', 'getElevation']) {
+  test(`adaptive polygons reject per-vertex ${accessor}`, () => {
+    const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    try {
+      const layer = new SolidPolygonLayer({
+        id: 'adaptive-style',
+        data: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1]
+          ]
+        ],
+        getPolygon: p => p,
+        wireframe: true,
+        extruded: true,
+        _projectionTolerance: 1,
+        [accessor]: () =>
+          accessor === 'getElevation'
+            ? [1, 2, 3]
+            : [
+                [1, 2, 3, 255],
+                [4, 5, 6, 255],
+                [7, 8, 9, 255]
+              ]
+      });
+      expect(() => manager.setLayers([layer])).toThrow('per-object');
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} adaptive RGB attributes repeat a single accessor RGBA color`, () => {
+    const viewport = new CustomProjectionViewport({
+      projection: {
+        forward: ([x, y, z = 0]) => [x, y + x * x, z],
+        inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+      }
+    });
+    const manager = new LayerManager(device, {viewport});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    try {
+      const layer = new LayerType({
+        id: 'adaptive-rgb-accessor',
+        data: [
+          [
+            [0, 0],
+            [4, 0],
+            [4, 2],
+            [0, 0]
+          ]
+        ],
+        getPath: p => p,
+        getPolygon: p => p,
+        getColor: () => [12, 34, 56, 255],
+        getFillColor: () => [12, 34, 56, 255],
+        getLineColor: () => [12, 34, 56, 255],
+        colorFormat: 'RGB',
+        _projectionTolerance: 0.01,
+        extruded: true,
+        wireframe: true
+      });
+      manager.setLayers([layer]);
+      const attributes = layer.getAttributeManager()!.attributes;
+      const names = LayerType === PathLayer ? ['instanceColors'] : ['fillColors', 'lineColors'];
+      for (const name of names) {
+        const colors = attributes[name].value!;
+        for (let i = 0; i < layer.state.numInstances; i++) {
+          expect(Array.from(colors.slice(i * 3, i * 3 + 3))).toEqual([12, 34, 56]);
+        }
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} disabled refinement preserves binary float colors`, () => {
+    const manager = new LayerManager(device, {
+      viewport: new OrthographicViewport({width: 800, height: 600})
+    });
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    const coordinates = new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0]);
+    const colors = new Float32Array([0.7, 0.2, 0, 0.3, 0.5, 0, 0, 0.8, 0.6]);
+    const attributeName = LayerType === PathLayer ? 'instanceColors' : 'fillColors';
+    const geometryName = LayerType === PathLayer ? 'getPath' : 'getPolygon';
+    const colorName = LayerType === PathLayer ? 'getColor' : 'getFillColor';
+    try {
+      const layer = new LayerType({
+        id: 'unrefined-binary-colors',
+        _normalize: false,
+        _pathType: 'open',
+        data: {
+          length: 1,
+          startIndices: [0, 3],
+          attributes: {
+            [geometryName]: coordinates,
+            [colorName]: {value: colors, size: 3, normalized: false},
+            ...(LayerType === SolidPolygonLayer ? {indices: new Uint16Array([0, 1, 2])} : {})
+          }
+        }
+      });
+      manager.setLayers([layer]);
+      const attribute = layer.getAttributeManager()!.attributes[attributeName];
+      expect(attribute.settings.transform).toBeNull();
+      expect(attribute.value).toBe(colors);
+      expect(attribute.value![0]).toBeCloseTo(0.7, 6);
+    } finally {
+      manager.finalize();
+    }
+  });
+
+  test(`${LayerType.layerName} removes styling transforms when refinement is disabled`, () => {
+    const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    let layer = new LayerType({
+      id: 'refinement-styling-toggle',
+      data: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1]
+        ]
+      ],
+      getPath: p => p,
+      getPolygon: p => p,
+      _projectionTolerance: 0
+    });
+    const names =
+      LayerType === PathLayer
+        ? ['instanceColors', 'instanceStrokeWidths']
+        : ['fillColors', 'lineColors', 'elevations'];
+    try {
+      manager.setLayers([layer]);
+      for (const tolerance of [0.1, 0]) {
+        layer = layer.clone({_projectionTolerance: tolerance});
+        manager.setLayers([layer]);
+        for (const name of names) {
+          const transform = layer.getAttributeManager()!.attributes[name].settings.transform;
+          if (tolerance) expect(transform).toBeTypeOf('function');
+          else expect(transform).toBeNull();
+        }
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}
+
+for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} toggles refinement on source attributes during transitions`, () => {
+    const timeline = new Timeline();
+    const manager = new LayerManager(device, {
+      viewport: new CustomProjectionViewport(options),
+      timeline
+    });
+    manager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    let layer = new LayerType({
+      id: 'refinement-during-transition',
+      data: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1]
+        ]
+      ],
+      getPath: p => p,
+      getPolygon: p => p,
+      getColor: () => [12, 34, 56, 255],
+      getFillColor: () => [12, 34, 56, 255],
+      getLineColor: () => [12, 34, 56, 255],
+      getWidth: () => 2,
+      getElevation: () => 3,
+      transitions: {
+        getColor: 1000,
+        getFillColor: 1000,
+        getLineColor: 1000,
+        getWidth: 1000,
+        getElevation: 1000
+      },
+      _projectionTolerance: 0
+    });
+    const names =
+      LayerType === PathLayer
+        ? ['instanceColors', 'instanceStrokeWidths']
+        : ['fillColors', 'lineColors', 'elevations'];
+    try {
+      timeline.setTime(0);
+      manager.setLayers([layer]);
+      for (const tolerance of [0.1, 0]) {
+        const attributeManager = layer.getAttributeManager()!;
+        for (const name of names) {
+          expect(attributeManager.getAttributes()[name]).not.toBe(
+            attributeManager.attributes[name]
+          );
+        }
+        layer = layer.clone({_projectionTolerance: tolerance});
+        manager.setLayers([layer]);
+        for (const name of names) {
+          const transform = layer.getAttributeManager()!.attributes[name].settings.transform;
+          if (tolerance) expect(transform).toBeTypeOf('function');
+          else expect(transform).toBeNull();
+        }
+      }
+      const attributeManager = layer.getAttributeManager()!;
+      attributeManager.updateTransition();
+      timeline.setTime(2000);
+      attributeManager.updateTransition();
+      for (const name of names) {
+        expect(attributeManager.getAttributes()[name]).toBe(attributeManager.attributes[name]);
+        expect(attributeManager.attributes[name].settings.transform).toBeNull();
+      }
+    } finally {
+      manager.finalize();
+    }
+  });
+}

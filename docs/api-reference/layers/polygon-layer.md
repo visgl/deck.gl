@@ -391,6 +391,17 @@ The PolygonLayer renders the following sublayers:
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
 
+### `_projectionTolerance` (number, optional, experimental)
+
+* Default: `0`
+
+Forward a positive sampled edge-error tolerance in map meters to the fill and outline layers
+when using a preprojecting viewport such as `CustomProjectionView`. Requires `_normalize: true`.
+Existing `resolution` grid cutting is retained. Holes remain separate rings and artificial
+cut edges remain hidden. This refines polygon boundaries, not polygon interiors or extruded
+surfaces. See [SolidPolygonLayer](./solid-polygon-layer.md#_projectiontolerance-number-optional-experimental)
+for domains, budgets, and supported attributes.
+
 ## Source
 
 [modules/layers/src/polygon-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/polygon-layer)
