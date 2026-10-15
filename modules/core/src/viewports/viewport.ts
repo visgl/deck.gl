@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {CRSDescriptor} from '@math.gl/projection/types';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import log from '../utils/log';
 import {
   createMat4,
@@ -414,7 +414,7 @@ export default class Viewport {
       return normalizeDistanceScales(this._distanceScaleSampler(coordinateOrigin));
     }
     if (!this.crs) return this.distanceScales;
-    const scale = this.crs.getDistanceScale(coordinateOrigin);
+    const scale = this.crs.getRenderingScale(coordinateOrigin);
     if (!scale) return this.distanceScales;
     const matrix = this.targetToCommonMatrix;
     const unitsPerMeter = scale.map((value, axis) => {

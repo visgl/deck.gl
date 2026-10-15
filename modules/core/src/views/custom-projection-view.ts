@@ -4,7 +4,7 @@
 
 import View from './view';
 import {projectionEngine} from '@math.gl/projection';
-import type {CRSDescriptor} from '@math.gl/projection/types';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';

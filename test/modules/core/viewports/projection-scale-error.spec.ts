@@ -5,7 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
-import type {CRSDescriptor} from '@math.gl/projection/types';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
 import {createTestCRS} from './test-crs';
@@ -51,8 +51,8 @@ test.each([
   ({name, position}) => {
     const crs = descriptors[name];
     const viewport = new CustomProjectionViewport({crs});
-    const {semiMajorAxis: a, semiMinorAxis: b} = crs.ellipsoid;
-    const ellipsoid = new Ellipsoid(a, a, b);
+    // Descriptor rendering scales measure ground distances in the WGS84 reference frame.
+    const ellipsoid = Ellipsoid.WGS84;
     const target = crs.converter.WGS84.from([...position, 0]);
     const ground = ellipsoid.cartographicToCartesian([...position, 0]);
     for (const axis of [0, 1]) {

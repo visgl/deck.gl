@@ -7,14 +7,14 @@ import * as vec3 from '@math.gl/core/vec3';
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
 import {geocentric} from '@math.gl/projection/projections/geocent';
-import type {CRSConversion, CRSDescriptor, CRSDistanceScale} from '@math.gl/projection/types';
+import type {CRSConversion, CRSDescriptor, CRSRenderingScale} from '@math.gl/projection/core';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
 
 // Retain the existing globe radius during the CRS transition.
 export const GLOBE_EARTH_RADIUS = 6370972;
-const DISTANCE_SCALE: CRSDistanceScale = [1, 1, 1];
+const DISTANCE_SCALE: CRSRenderingScale = [1, 1, 1];
 const parameters = {proj: 'geocent', R: String(GLOBE_EARTH_RADIUS), datum: 'none'};
 const projection = geocentric.create({
   semiMajorAxis: GLOBE_EARTH_RADIUS,
@@ -46,12 +46,12 @@ export const GLOBE_CRS: CRSDescriptor = {
   yUnit: {name: 'meters', metersPerUnit: 1},
   zUnit: {name: 'meters', metersPerUnit: 1},
   lossy: false,
-  bounds: [
-    [-GLOBE_EARTH_RADIUS, -GLOBE_EARTH_RADIUS],
-    [GLOBE_EARTH_RADIUS, GLOBE_EARTH_RADIUS]
+  renderingBounds: [
+    [-GLOBE_EARTH_RADIUS, -GLOBE_EARTH_RADIUS, -GLOBE_EARTH_RADIUS],
+    [GLOBE_EARTH_RADIUS, GLOBE_EARTH_RADIUS, GLOBE_EARTH_RADIUS]
   ],
-  distanceScale: DISTANCE_SCALE,
-  getDistanceScale: () => DISTANCE_SCALE,
+  renderingScale: DISTANCE_SCALE,
+  getRenderingScale: () => DISTANCE_SCALE,
   converter: {
     WGS84: {
       from: convert(coordinate => {

@@ -303,9 +303,9 @@ test('WebMercatorViewport describes OSMTile512 without changing common-space pro
     const crs = viewport.crs!;
     expect(crs.signature).toBe('OSMTile512');
     expect(crs.axis).toBe('esu');
-    expect(crs.bounds).toEqual([
-      [0, 0],
-      [512, 512]
+    expect(crs.renderingBounds).toEqual([
+      [0, 0, 0],
+      [512, 512, 0]
     ]);
     const source = [12, latitude, 100, 7];
     const tile = crs.converter.WGS84.from(source);
@@ -324,7 +324,7 @@ test('WebMercatorViewport describes OSMTile512 without changing common-space pro
     expect(crs.converter.WGS84.to(output, output)).toBe(output);
     expect(output[2]).toBe(100);
     expect(source).toEqual([12, latitude, 100, 7]);
-    const scale = crs.getDistanceScale(tile)!;
+    const scale = crs.getRenderingScale(tile)!;
     expect(scale[0]).toBeCloseTo(viewport.distanceScales.metersPerUnit[0], 6);
     expect(scale[1]).toBeCloseTo(viewport.distanceScales.metersPerUnit[1], 6);
     expect(scale[2]).toBe(1);

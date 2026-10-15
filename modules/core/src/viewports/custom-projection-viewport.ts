@@ -4,7 +4,7 @@
 
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales} from './viewport';
-import type {CRSDescriptor} from '@math.gl/projection/types';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import {
   getViewMatrix,
   getProjectionParameters,
@@ -113,8 +113,8 @@ export default class CustomProjectionViewport extends Viewport {
     this.isGeospatial = true;
     this.resolution = resolution;
     this.signature = JSON.stringify([crs.signature, resolution]);
-    this.sizeScaleSignature = JSON.stringify([crs.signature, crs.bounds]);
-    const [[minX, minY], [maxX, maxY]] = crs.bounds;
+    this.sizeScaleSignature = JSON.stringify([crs.signature, crs.renderingBounds]);
+    const [[minX, minY], [maxX, maxY]] = crs.renderingBounds;
     const finiteBounds =
       [minX, minY, maxX, maxY].every(Number.isFinite) && maxX > minX && maxY > minY;
     const scaleX = 512 / (maxX - minX),
@@ -133,7 +133,7 @@ export default class CustomProjectionViewport extends Viewport {
 
   /** Sample the Jacobian scalar, XY slopes, and Z-unit encoding over the CRS bounds. */
   getSizeScaleData(size = 64): Float32Array {
-    const [[minX, minY], [maxX, maxY]] = this.crs.bounds;
+    const [[minX, minY], [maxX, maxY]] = this.crs.renderingBounds;
     const data = new Float32Array(size * size * 4);
     if (![minX, minY, maxX, maxY].every(Number.isFinite)) return data;
     for (let y = 0; y < size; y++) {
@@ -304,7 +304,7 @@ function getUnitsPerMeter(
   position: number[],
   unitsPerWorldUnit: number[]
 ): [number, number, number] | null {
-  const scale = crs.getDistanceScale(position);
+  const scale = crs.getRenderingScale(position);
   return scale
     ? (scale.map((value, axis) => unitsPerWorldUnit[axis] / value) as [number, number, number])
     : null;

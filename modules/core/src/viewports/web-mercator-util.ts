@@ -4,7 +4,7 @@
 
 import {getDistanceScales, lngLatToWorld, worldToLngLat, MAX_LATITUDE} from '@math.gl/web-mercator';
 import type {DistanceScales} from './viewport';
-import type {CRSConversion, CRSDescriptor, CRSDistanceScale} from '@math.gl/projection/types';
+import type {CRSConversion, CRSDescriptor, CRSRenderingScale} from '@math.gl/projection/core';
 
 const TILE_SIZE = 512;
 const METERS_PER_WORLD_UNIT = getDistanceScales({longitude: 0, latitude: 0}).metersPerUnit[0];
@@ -35,7 +35,7 @@ function convert(transform: (coordinate: number[]) => number[]): CRSConversion {
   }) as CRSConversion;
 }
 
-const distanceScale = (coordinate: ArrayLike<number>): CRSDistanceScale => {
+const distanceScale = (coordinate: ArrayLike<number>): CRSRenderingScale => {
   const [longitude, latitude] = worldToLngLat([coordinate[0], TILE_SIZE - coordinate[1]]);
   const {metersPerUnit} = getDistanceScales({longitude, latitude});
   return [metersPerUnit[0], metersPerUnit[1], 1];
@@ -57,12 +57,12 @@ export const OSM_TILE_CRS: CRSDescriptor = {
   zUnit: {name: 'meters', metersPerUnit: 1},
   lossy: false,
   // One zoom-zero tile is an appropriate rendering target, not a validity limit.
-  bounds: [
-    [0, 0],
-    [TILE_SIZE, TILE_SIZE]
+  renderingBounds: [
+    [0, 0, 0],
+    [TILE_SIZE, TILE_SIZE, 0]
   ],
-  distanceScale,
-  getDistanceScale: distanceScale,
+  renderingScale: distanceScale,
+  getRenderingScale: distanceScale,
   converter: {
     WGS84: {
       from: convert(coordinate => {

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import type {CRSDescriptor} from '@math.gl/projection/types';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
 
@@ -36,9 +36,9 @@ export function estimateProjectionScaleError(
 ): {center: RegionEstimate; whole: RegionEstimate; singularPositions: number} {
   const {crs, fromBounds} = options;
   const projection = {forward: crs.converter.WGS84.from, inverse: crs.converter.WGS84.to};
-  const toBounds = [...crs.bounds[0], ...crs.bounds[1]];
-  const {semiMajorAxis, semiMinorAxis} = crs.ellipsoid;
-  const ellipsoid = new Ellipsoid(semiMajorAxis, semiMajorAxis, semiMinorAxis);
+  const toBounds = [...crs.renderingBounds[0].slice(0, 2), ...crs.renderingBounds[1].slice(0, 2)];
+  // Inverse-converted samples are WGS84 coordinates, independent of the target ellipsoid.
+  const ellipsoid = Ellipsoid.WGS84;
   const viewport = new CustomProjectionViewport(options);
   const data = viewport.getSizeScaleData();
   const size = Math.sqrt(data.length / 4);

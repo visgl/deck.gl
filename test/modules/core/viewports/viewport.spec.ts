@@ -364,7 +364,7 @@ test('Viewport derives initial scales from its CRS and retains camera fallback',
   const viewport = new Viewport({crs, position: [10, 20, 30]});
   expect(getDistanceScale).toHaveBeenCalledWith([10, 20, 30]);
   expect(viewport.distanceScales.unitsPerMeter).toEqual([0.5, 0.25, 0.125]);
-  crs.getDistanceScale = () => null;
+  crs.getRenderingScale = () => null;
   expect(viewport.getDistanceScales([99, 99, 99])).toBe(viewport.distanceScales);
 });
 

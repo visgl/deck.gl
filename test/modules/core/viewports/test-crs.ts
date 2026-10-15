@@ -4,7 +4,7 @@
 
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {CustomProjectionViewportOptions} from '@deck.gl/core';
-import type {CRSDescriptor, CRSDistanceScale} from '@math.gl/projection/types';
+import type {CRSDescriptor, CRSRenderingScale} from '@math.gl/projection/core';
 
 /** Synthetic descriptors isolate layer and shader plumbing from projection algorithms. */
 export function createTestCRS({
@@ -16,7 +16,7 @@ export function createTestCRS({
 }: {
   converter?: {forward: (p: number[]) => number[]; inverse: (p: number[]) => number[] | null};
   bounds?: number[];
-  distanceScale?: (p: number[]) => CRSDistanceScale | null;
+  distanceScale?: (p: number[]) => CRSRenderingScale | null;
   metersPerUnit?: number[];
   signature?: string;
 } = {}): CRSDescriptor {
@@ -31,12 +31,12 @@ export function createTestCRS({
     xUnit: {name: 'test units', metersPerUnit: metersPerUnit[0]},
     yUnit: {name: 'test units', metersPerUnit: metersPerUnit[1]},
     zUnit: {name: 'test units', metersPerUnit: metersPerUnit[2]},
-    bounds: [
-      [bounds[0], bounds[1]],
-      [bounds[2], bounds[3]]
+    renderingBounds: [
+      [bounds[0], bounds[1], 0],
+      [bounds[2], bounds[3], 0]
     ],
-    distanceScale,
-    getDistanceScale: distanceScale,
+    renderingScale: distanceScale,
+    getRenderingScale: distanceScale,
     converter: {
       WGS84: {
         from: converter.forward,

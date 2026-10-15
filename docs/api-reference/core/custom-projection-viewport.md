@@ -41,9 +41,9 @@ Common space is a fixed linear scaling of target coordinates. For axis `i`, `uni
 
 ### Meter Size
 
-`crs.getDistanceScale(targetPosition)` supplies ground meters per target coordinate unit along X, Y and Z. Common units per ground meter are `unitsPerWorldUnit[i] / distanceScale[i]`. The descriptor’s vertical factor encodes the horizontal Jacobian scalar in the target vertical unit. `unitsPerMeter[2]` therefore supplies the isotropic scalar for marker sizes and elevations; it is not recomputed from the X/Y factors.
+`crs.getRenderingScale(targetPosition)` supplies ground meters per target coordinate unit along X, Y and Z. Common units per ground meter are `unitsPerWorldUnit[i] / renderingScale[i]`. The descriptor’s vertical factor encodes the horizontal Jacobian scalar in the target vertical unit. `unitsPerMeter[2]` therefore supplies the isotropic scalar for marker sizes and elevations; it is not recomputed from the X/Y factors.
 
-The local scale field samples the descriptor's finite target-coordinate `bounds`, including XY slopes for Taylor reconstruction. Failed samples stay invalid. Unbounded projections and unavailable local measurements use camera-center scales when rendering. See [view meter sizing](./custom-projection-view.md#meter-size).
+The local scale field samples the descriptor's finite target-coordinate `renderingBounds`, including XY slopes for Taylor reconstruction. Failed samples stay invalid. Unbounded projections and unavailable local measurements use camera-center scales when rendering. See [view meter sizing](./custom-projection-view.md#meter-size).
 
 ## Methods and Properties
 

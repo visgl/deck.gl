@@ -172,7 +172,7 @@ test('panByPosition retains its WGS84 anchor on the common ground plane', () => 
 
 test('distance scales come from the target descriptor and fallback belongs to the viewport', () => {
   const getDistanceScale = vi.fn(p => (p[0] === 0 ? ([0.25, 1, 2] as const) : null));
-  const descriptor = {...createTestCRS(), getDistanceScale};
+  const descriptor = {...createTestCRS(), getRenderingScale: getDistanceScale};
   const viewport = new CustomProjectionViewport({...options, crs: descriptor});
   expect(viewport.distanceScales.unitsPerMeter).toEqual(
     [4, 1, 0.5].map(value => value * normalizationScale)
@@ -244,9 +244,9 @@ test('viewport signatures consume CRS identity independently of converters and r
     ...options,
     crs: {
       ...crs,
-      bounds: [
-        [0, 0],
-        [100, 100]
+      renderingBounds: [
+        [0, 0, 0],
+        [100, 100, 0]
       ]
     }
   });
