@@ -478,7 +478,7 @@ You can also create your own widget by implementing the [`Widget`](./api-referen
 
 - New CARTO module architecture: Sources and Layers replace the CartoLayer. Read more in the [Upgrade Guide](./upgrade-guide.md#deckglcarto).
 
-- Public preview for Boundary Sources: easily aggregate large data volumes aggregated into common or custom geographic boundaries, such as postal codes. Learn more about Boundaries in the CARTO [documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
+- Public preview for Boundary Sources (experimental): easily aggregate large data volumes aggregated into common or custom geographic boundaries, such as postal codes. Learn more about Boundaries in the CARTO [documentation](https://docs.carto.com/carto-for-developers/guides/use-boundaries-in-your-application).
 
 
 ### Known Limitations
@@ -1605,7 +1605,7 @@ Release Date: Jan 29, 2019
 See each layer's documentation for full API changes.
 
 
-### Composite Layer Customization
+### Composite Layer Customization (experimental)
 
 It is now possible to fine-tune sublayer appearances by passing a new experimental prop `_subLayerProps` to a composite layer. For example, in a `GeoJsonLayer`, one may wish to make only the point features interactive, or replace the circles with icons.
 
@@ -2028,7 +2028,7 @@ The new `useDevicePixels` prop on the `DeckGL` React component can be used to di
 
 #### DeckGL: Layer Filtering
 
-A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports.
+A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport (experimental) or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports (experimental).
 
 #### DeckGL: Allow overriding canvas component style
 
@@ -2406,7 +2406,7 @@ Release date: May 2016
 * Linux fixes - deck.gl and luma.gl now work on Linux.
 * Adopts [luma.gl](https://github.com/visgl/luma.gl) as default WebGL framework.
 * Retina display support
-* Support for disabling mercator project
+* Support for disabling mercator project (experimental)
 
 ### React Integration
 

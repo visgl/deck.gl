@@ -828,6 +828,8 @@ const layer = new Tile2DLayer({
 
 For MVT data, [`MVT2DLayer`](../api-reference/geo-layers/mvt-2d-layer.md) lets separately styled map and globe consumers reuse one decoded tile cache.
 
+For `Tile2DLayer` and `MVT2DLayer`, use `viewIds: ['main']` to restrict a layer's tile loading, cache retention, and loading status to that view. `layerFilter` only controls rendering and picking; it does not restrict traversal by these layers. When migrating a per-view `TileLayer` or `MVTLayer`, add matching `viewIds` to the new layer rather than relying on the existing `layerFilter`. Leave `viewIds` unset to share the layer across all views.
+
 For tiled layers that do not use that shared path, including `MVTLayer`, create one layer instance for each view and limit their rendering with `layerFilter`:
 
 <Tabs groupId="language">

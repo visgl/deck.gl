@@ -24,6 +24,54 @@ const viewport = (zoom = 4, longitude = 0) =>
   });
 
 describe('Tileset2D compatibility and independent consumers', () => {
+  it('does not rescan stats or rebuild unions during tile and priority lookups', async () => {
+    const tileset = new Tileset2D({getTileData: async () => []});
+    const view = new Tile2DView(tileset);
+    try {
+      view.update(viewport());
+      await vi.waitFor(() => expect(view.isLoaded).toBe(true));
+      view.update(viewport());
+      const stats = vi.spyOn(tileset as any, '_updateStats');
+      const selected = vi.spyOn(tileset as any, '_getSelectedTilesUnion');
+      const visible = vi.spyOn(tileset as any, '_getVisibleTilesUnion');
+      for (const tile of tileset.tiles) {
+        expect(tileset.getTile(tile.index)).toBe(tile);
+        (tileset as any)._getNearestAncestor(tile);
+        expect((tileset as any)._getRequestPriority(tile)).toBe(0);
+      }
+      expect(stats).not.toHaveBeenCalled();
+      expect(selected).not.toHaveBeenCalled();
+      expect(visible).not.toHaveBeenCalled();
+    } finally {
+      view.finalize();
+      tileset.finalize();
+    }
+  });
+
+  it('publishes eviction stats once per batch without rescanning bytes per tile', async () => {
+    const tileset = new Tileset2D({maxCacheSize: 100, getTileData: async () => ({byteLength: 16})});
+    const view = new Tile2DView(tileset);
+    try {
+      for (const longitude of [0, 60, 120]) {
+        view.update(viewport(5, longitude));
+        await vi.waitFor(() => expect(view.isLoaded).toBe(true));
+        view.update(viewport(5, longitude));
+      }
+      const stats = vi.spyOn(tileset as any, '_updateStats');
+      const bytes = vi.spyOn(tileset as any, '_getCacheByteSize');
+      tileset.setOptions({maxCacheSize: 1});
+      view.update(viewport(5, 120));
+      expect(stats.mock.calls.length).toBeLessThanOrEqual(2);
+      expect(bytes).not.toHaveBeenCalled();
+      expect(tileset.stats.get('Unloaded Tiles').count).toBeGreaterThan(1);
+      expect(tileset.stats.get('Tiles In Cache').count).toBe(tileset.tiles.length);
+      expect(tileset.cacheByteSize).toBe(tileset.tiles.length * 16);
+    } finally {
+      view.finalize();
+      tileset.finalize();
+    }
+  });
+
   it('uses one class and cache for legacy updates and new consumers', async () => {
     expect(Tileset2D).toBe(_Tileset2D);
     const getTileData = vi.fn(async ({id}) => ({id, byteLength: 16}));

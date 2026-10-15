@@ -111,7 +111,7 @@ type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
 /**
  * Compatibility MVT layer retaining binary data, TileJSON, and rendered-feature APIs.
- * @deprecated Use MVT2DLayer for new applications that do not require these legacy APIs.
+ * Remains supported while MVT2DLayer gains equivalent feature coverage.
  */
 export default class MVTLayer<
   FeaturePropertiesT = any,

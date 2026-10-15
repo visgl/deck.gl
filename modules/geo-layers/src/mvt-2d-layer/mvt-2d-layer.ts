@@ -7,6 +7,7 @@ import {
   type GetPickingInfoParams,
   type UpdateParameters,
   type Layer,
+  type Viewport,
   type PickingInfo
 } from '@deck.gl/core';
 import {GeoJsonLayer, type GeoJsonLayerProps} from '@deck.gl/layers';
@@ -89,7 +90,7 @@ export class MVT2DLayer extends Tile2DLayer<
   declare state: Tile2DLayer<MVT2DData>['state'] & {
     /** Whether sublayers currently use WGS84 coordinates. */
     geographic?: boolean;
-    /** Whether the current view uses globe rendering without planar clipping. */
+    /** Whether any scoped view needs globe rendering without planar clipping. */
     globe?: boolean;
     /** Feature ID highlighted by this layer hover interaction. */
     hoveredFeatureId?: string | number | null;
@@ -148,7 +149,7 @@ export class MVT2DLayer extends Tile2DLayer<
   /** View changes invalidate render geometry, never the shared decoded cache. */
   updateState(params: UpdateParameters<this>): void {
     const geographic = this._usesGeographicCoordinates();
-    const globe = Boolean(this.context.viewport.resolution);
+    const globe = this._getRenderingViewports().some(viewport => Boolean(viewport.resolution));
     if (this.state.geographic !== geographic || this.state.globe !== globe) {
       this.state.tileLayers.clear();
       this.state.geographic = geographic;
@@ -157,13 +158,22 @@ export class MVT2DLayer extends Tile2DLayer<
     super.updateState(params);
   }
 
-  /** Uses per-vertex latitude scaling for low-zoom extrusions and globe rendering. */
-  private _usesGeographicCoordinates(): boolean {
-    const viewport = this.context.viewport;
-    return Boolean(viewport.resolution) || Boolean(this.props.extruded && viewport.zoom < 12);
+  /** Returns all active views scoped to this layer, independent of activation order. */
+  private _getRenderingViewports(): Viewport[] {
+    const viewports = this.context.layerManager?.getViewports() || [this.context.viewport];
+    return viewports.filter(
+      viewport => !this.props.viewIds || this.props.viewIds.includes(viewport.id)
+    );
   }
 
-  /** Supplies local transforms/clipping on maps and geographic geometry on globes. */
+  /** Uses geographic geometry in every view if any scoped view requires it. */
+  private _usesGeographicCoordinates(): boolean {
+    return this._getRenderingViewports().some(
+      viewport => Boolean(viewport.resolution) || Boolean(this.props.extruded && viewport.zoom < 12)
+    );
+  }
+
+  /** Supplies transforms and clipping compatible with all scoped views. */
   renderSubLayers(props: Parameters<Tile2DLayer<MVT2DData>['renderSubLayers']>[0]) {
     if (!props.data) return null;
     const {x, y, z} = props.tile.index;
@@ -177,7 +187,7 @@ export class MVT2DLayer extends Tile2DLayer<
       coordinateOrigin: geographic ? [0, 0, 0] : [scale * x, WORLD_SIZE - scale * y, 0],
       coordinateSystem: geographic ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN,
       extensions:
-        geographic && this.context.viewport.resolution
+        geographic && this._getRenderingViewports().some(viewport => Boolean(viewport.resolution))
           ? props.extensions
           : [...(props.extensions || []), new ClipExtension()]
     });

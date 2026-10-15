@@ -98,7 +98,7 @@ An external `Tileset2D` can be passed to one or more `Tile2DLayer` instances. Th
 
 `'best-available'` shows loaded selected tiles, falling back to the closest loaded ancestor or loaded descendants while a request is pending. `'no-overlap'` suppresses descendants while a visible ancestor covers them. `'never'` shows only directly selected tiles, so gaps may appear during loading.
 
-Custom refinement callbacks receive all cached tiles with mutable `isSelected`, `isVisible`, `state`, `parent`, and `children` flags/links for that consumer. New layers use view-local facades; their changes do not affect another viewport or the legacy default view. Do not mutate content, IDs, or tile metadata in these callbacks.
+Custom refinement callbacks receive all cached tiles through view-local facades with `isSelected`, `isVisible`, `state`, `parent`, and `children` flags/links for that consumer. Only `isVisible` is copied back after the callback; selection remains controlled by traversal. Facades are recreated on every call, so do not use object identity to retain callback state. Content, `userData`, and other shared objects still belong to the shared tile: mutating them affects every consumer. Do not mutate content, IDs, or tile metadata in these callbacks.
 
 ```ts
 tileset.setOptions({

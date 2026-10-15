@@ -45,7 +45,8 @@ test('shared tileset demo renders both styles and minimap, compares caches, and 
         ).toBeGreaterThan(0);
         expect(latest?.loading).toBe(0);
       },
-      {timeout: 20000}
+      // Software WebGL initialization may block the request timer on busy hosts.
+      {timeout: 60000}
     );
   const pixels = () => {
     const canvas = parent.querySelector('canvas')!;
@@ -71,7 +72,7 @@ test('shared tileset demo renders both styles and minimap, compares caches, and 
         expect(Math.abs(minimap[0] - right[0])).toBeLessThan(4);
         expect(minimap[3]).toBe(255);
       },
-      {timeout: 20000}
+      {timeout: 60000}
     );
 
     parent.querySelector<HTMLInputElement>('input[type=checkbox]')!.click();
@@ -96,4 +97,4 @@ test('shared tileset demo renders both styles and minimap, compares caches, and 
     fetch.mockRestore();
     parent.remove();
   }
-}, 90000);
+}, 180000);

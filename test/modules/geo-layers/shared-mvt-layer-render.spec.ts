@@ -4,10 +4,181 @@
 
 import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {webgl2Adapter} from '@luma.gl/webgl';
-import {expect, test} from 'vitest';
-import {MVT2DLayer, Tileset2D} from '@deck.gl/geo-layers';
+import {expect, test, vi} from 'vitest';
+import {MVT2DLayer, Tile2DLayer, Tileset2D} from '@deck.gl/geo-layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {lngLatToWorld} from '@math.gl/web-mercator';
+
+/** Simultaneous projection modes must draw and pick regardless of activation order. */
+test('one MVT layer renders simultaneous map and globe views in either order', async () => {
+  const parent = document.createElement('div');
+  document.body.append(parent);
+  const tileset = new Tileset2D({
+    maxZoom: 0,
+    getTileData: async () => [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [0.45, 0.45],
+              [0.55, 0.45],
+              [0.55, 0.55],
+              [0.45, 0.55],
+              [0.45, 0.45]
+            ]
+          ]
+        }
+      }
+    ]
+  });
+  let deck: Deck<any> | undefined;
+  let capture: ((counts: number[]) => void) | undefined;
+  const frame = () =>
+    new Promise<number[]>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('No simultaneous loaded frame')), 20000);
+      capture = counts => {
+        clearTimeout(timer);
+        capture = undefined;
+        resolve(counts);
+      };
+    });
+  const map = new MapView({id: 'map', x: 0, width: '50%'});
+  const globe = new GlobeView({id: 'globe', x: '50%', width: '50%'});
+  const layers = () => [
+    new MVT2DLayer({
+      id: 'mixed',
+      data: tileset,
+      pickable: true,
+      getFillColor: [255, 0, 0],
+      stroked: false,
+      parameters: {cullMode: 'none'}
+    })
+  ];
+  try {
+    const ready = frame();
+    deck = new Deck({
+      parent,
+      width: 256,
+      height: 128,
+      useDevicePixels: false,
+      deviceProps: {adapters: [webgl2Adapter], _reuseDevices: false},
+      views: [map, globe],
+      initialViewState: {longitude: 0, latitude: 0, zoom: 0},
+      layers: layers(),
+      onError: error => {
+        throw error;
+      },
+      onAfterRender: () => {
+        if (!capture || !(deck as any)?.layerManager.getLayers().every(layer => layer.isLoaded))
+          return;
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 128;
+        const context = canvas.getContext('2d')!;
+        context.drawImage(deck!.getCanvas()!, 0, 0);
+        const pixels = context.getImageData(0, 0, 256, 128).data;
+        const counts = [0, 0];
+        for (let y = 0; y < 128; y++)
+          for (let x = 0; x < 256; x++) {
+            const i = (y * 256 + x) * 4;
+            if (pixels[i] > 200 && pixels[i + 1] < 60 && pixels[i + 2] < 60)
+              counts[x < 128 ? 0 : 1]++;
+          }
+        capture(counts);
+      }
+    });
+    const assertViews = (counts: number[]) => {
+      expect(counts.every(count => count > 20)).toBe(true);
+      for (const x of [64, 192]) {
+        const info = deck!.pickObject({x, y: 64});
+        expect(info?.object).toBeTruthy();
+        expect(info!.object.geometry.coordinates[0][0][0]).toBeCloseTo(-18, 5);
+      }
+    };
+    assertViews(await ready);
+    const reversed = frame();
+    deck.setProps({views: [globe, map], layers: layers()});
+    assertViews(await reversed);
+  } finally {
+    const device = deck?.device;
+    deck?.finalize();
+    device?.destroy();
+    (device?.handle as WebGL2RenderingContext | undefined)
+      ?.getExtension('WEBGL_lose_context')
+      ?.loseContext();
+    tileset.finalize();
+    parent.remove();
+  }
+}, 90000);
+
+/** A real Deck, rather than a mocked getter, drives view retention and cache reuse. */
+test('shared consumers follow real Deck view removal, renaming and recreation', async () => {
+  const parent = document.createElement('div');
+  document.body.append(parent);
+  const getTileData = vi.fn(async () => []);
+  const tileset = new Tileset2D({getTileData});
+  let deck: Deck<any> | undefined;
+  const viewState = {
+    main: {longitude: 0, latitude: 0, zoom: 4},
+    mini: {longitude: 90, latitude: 0, zoom: 5},
+    mini2: {longitude: 90, latitude: 0, zoom: 5}
+  };
+  const createDeck = () =>
+    new Deck({
+      parent,
+      width: 256,
+      height: 256,
+      deviceProps: {adapters: [webgl2Adapter], _reuseDevices: false},
+      views: [new MapView({id: 'main'}), new MapView({id: 'mini'})],
+      viewState,
+      layers: [new Tile2DLayer({id: 'lifecycle', data: tileset, renderSubLayers: () => null})]
+    });
+  const wait = async (count: number) => {
+    await vi.waitFor(
+      () => {
+        expect(tileset.stats.get('Consumers').count).toBe(count);
+        expect(tileset.loadingTiles.length).toBe(0);
+      },
+      {timeout: 20000}
+    );
+  };
+  const destroy = () => {
+    const device = deck?.device;
+    deck?.finalize();
+    device?.destroy();
+    (device?.handle as WebGL2RenderingContext | undefined)
+      ?.getExtension('WEBGL_lose_context')
+      ?.loseContext();
+    deck = undefined;
+  };
+  try {
+    deck = createDeck();
+    await wait(2);
+    deck.setProps({views: [new MapView({id: 'main'})]});
+    await wait(1);
+    expect(tileset.selectedTiles!.every(tile => tile.zoom === 4)).toBe(true);
+    deck.setProps({views: [new MapView({id: 'main'}), new MapView({id: 'mini2'})]});
+    await wait(2);
+    const ids = () =>
+      Array.from((deck as any).layerManager.getLayers()[0].state.tilesetViews.keys());
+    expect(ids().sort()).toEqual(['main', 'mini2']);
+    const requests = getTileData.mock.calls.length;
+    const cached = tileset.tiles.length;
+    destroy();
+    expect(tileset.stats.get('Consumers').count).toBe(0);
+    expect(tileset.tiles).toHaveLength(cached);
+    deck = createDeck();
+    await wait(2);
+    expect(getTileData).toHaveBeenCalledTimes(requests);
+  } finally {
+    destroy();
+    tileset.finalize();
+    parent.remove();
+  }
+}, 90000);
 
 /** A real deck.gl view switch must redraw geographic content without decoding it again. */
 test('shared MVT consumers draw in map, globe and map again', async () => {

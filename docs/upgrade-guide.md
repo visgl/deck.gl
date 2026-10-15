@@ -8,7 +8,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ### Tile layer compatibility
 
-`TileLayer` and `MVTLayer` are deprecated in favor of [Tile2DLayer](./api-reference/geo-layers/tile-2d-layer.md) and [MVT2DLayer](./api-reference/geo-layers/mvt-2d-layer.md). They remain available for existing applications and subclasses while feature parity is completed. Keep using `MVTLayer` if your application requires binary MVT data, TileJSON URL resolution, or `getRenderedFeatures`.
+`TileLayer` is deprecated in favor of [Tile2DLayer](./api-reference/geo-layers/tile-2d-layer.md) and remains available for existing applications and subclasses. `MVTLayer` remains supported and is not deprecated: keep using it if your application requires binary MVT data, TileJSON URL resolution, or `getRenderedFeatures`, which [MVT2DLayer](./api-reference/geo-layers/mvt-2d-layer.md) does not yet support.
 
 `Tileset2D` supports both generations of layers. `_Tileset2D` remains an alias for that same class, and existing custom `TilesetClass` subclasses retain their indexing and metadata hooks. New layers keep render caches and selection state per consumer rather than storing them on tile headers.
 

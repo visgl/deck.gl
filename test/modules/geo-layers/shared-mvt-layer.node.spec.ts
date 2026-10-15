@@ -9,6 +9,7 @@ import {
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import {MVT2DLayer, Tile2DLayer, Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
+import type {GeoJsonLayer} from '@deck.gl/layers';
 import {Tile2DView} from '../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
 import {getMVTDataInWGS84} from '../../../modules/geo-layers/src/mvt-2d-layer/mvt-2d-layer';
 
@@ -32,6 +33,32 @@ async function waitLoaded(view: Tile2DView) {
 }
 
 describe('MVT2DLayer', () => {
+  it.each(['map-globe', 'globe-map', 'low-high', 'high-low'])(
+    'uses geographic sublayers independent of viewport order: %s',
+    order => {
+      const map = new WebMercatorViewport({id: 'map', width: 128, height: 128, zoom: 13});
+      const globe = new GlobeViewport({id: 'globe', width: 128, height: 128, zoom: 0});
+      const low = new WebMercatorViewport({id: 'low', width: 128, height: 128, zoom: 8});
+      const views = order.includes('globe') ? [map, globe] : [low, map];
+      if (order === 'globe-map' || order === 'high-low') views.reverse();
+      const layer = new MVT2DLayer({data: null, extruded: true});
+      layer.context = {viewport: views[0], layerManager: {getViewports: () => views}} as any;
+      layer.initializeState();
+      const tile = {index: {x: 0, y: 0, z: 0}};
+      for (const active of views) {
+        layer.context.viewport = active;
+        const sublayer = layer.renderSubLayers({data: DATA, tile} as any) as GeoJsonLayer;
+        expect(sublayer.props.coordinateSystem).toBe(COORDINATE_SYSTEM.LNGLAT);
+        expect(sublayer.props.extensions || []).toHaveLength(order.includes('globe') ? 0 : 1);
+      }
+      const scoped = new MVT2DLayer({data: null, extruded: true, viewIds: ['map']});
+      scoped.context = layer.context;
+      scoped.initializeState();
+      const sublayer = scoped.renderSubLayers({data: DATA, tile} as any) as GeoJsonLayer;
+      expect(sublayer.props.coordinateSystem).toBe(COORDINATE_SYSTEM.CARTESIAN);
+    }
+  );
+
   it('retains decoded tiles for a staggered consumer and detaches independently', async () => {
     const fetch = vi.fn(async () => DATA);
     const loader = new MVT2DLayer({data: 'https://example.com/{z}/{x}/{y}.mvt', fetch});

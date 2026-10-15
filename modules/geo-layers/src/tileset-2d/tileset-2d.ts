@@ -377,9 +377,11 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       this._updateStats();
       return;
     }
+    const selectedTiles = this._getSelectedTilesUnion();
+    const visibleTiles = this._getVisibleTilesUnion();
     for (const id of this._cache.keys()) {
       const tile = this._cache.get(id) as Tile2DHeader;
-      if (!this._getSelectedTilesUnion().has(tile) && !this._getVisibleTilesUnion().has(tile)) {
+      if (!selectedTiles.has(tile) && !visibleTiles.has(tile)) {
         this._cache.delete(id);
         tile.abort();
         this._handleTileUnload(tile);
@@ -653,12 +655,15 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Prioritizes requested tiles while retaining the default-view center-distance ordering. */
   private _getRequestPriority(tile: Tile2DHeader): number {
-    if (this._consumers.size)
-      return this._getSelectedTilesUnion().has(tile)
-        ? 0
-        : this._getVisibleTilesUnion().has(tile)
-          ? VISIBLE_TILE_PRIORITY
-          : -1;
+    if (this._consumers.size) {
+      let visible = tile.isVisible;
+      if (tile.isSelected) return 0;
+      for (const consumer of this._consumers.values()) {
+        if (consumer.selectedTiles.has(tile)) return 0;
+        visible ||= consumer.visibleTiles.has(tile);
+      }
+      return visible ? VISIBLE_TILE_PRIORITY : -1;
+    }
     if (!tile.isSelected && !tile.isVisible) {
       return -1;
     }
@@ -826,7 +831,8 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
         if (!visibleTiles.has(tile) && !selectedTiles.has(tile)) {
           this._cache.delete(id);
           tile.abort();
-          this._cacheByteSize = this._getCacheByteSize();
+          const byteLength = (tile.content as any)?.byteLength;
+          this._cacheByteSize -= Number.isFinite(byteLength) ? byteLength : 0;
           this._handleTileUnload(tile);
         }
         if (this._cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
@@ -876,7 +882,6 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       });
     }
 
-    this._updateStats();
     return tile;
   }
 
@@ -1089,7 +1094,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     for (const listener of this._listeners) {
       listener.onTileUnload?.(tile);
     }
-    this._updateStats();
+    // The caller publishes stats once after the entire eviction batch.
   }
 
   /** Notifies listeners that metadata or effective options changed. */

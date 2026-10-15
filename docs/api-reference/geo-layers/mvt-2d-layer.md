@@ -64,14 +64,16 @@ Passes options to loaders.gl for URL-template loading. The layer enforces `mvt.c
 
 ## Multiple Views
 
-For simultaneous map and globe rendering, use separate `MVT2DLayer` instances backed by the same tileset and scope them with `viewIds`. Tile-local and geographic rendering need different sublayers, but use the same decoded cache:
+One `MVT2DLayer` can render in simultaneous map and globe views, including map views on either side of zoom 12. It uses geographic geometry for all its scoped views whenever any view requires it: globe rendering or an extruded map below zoom 12. The choice is independent of viewport order. When any scoped view is a globe, planar tile clipping is disabled for the shared sublayers so buffered geometry remains intact.
+
+For independent styling or to keep high-zoom maps on the tile-local rendering path, use separate layers backed by the same tileset and scope them with `viewIds`:
 
 ```ts
 const mapLayer = new MVT2DLayer({id: 'map-tiles', data: tileset, viewIds: ['map']});
 const globeLayer = new MVT2DLayer({id: 'globe-tiles', data: tileset, viewIds: ['globe']});
 ```
 
-One layer can serve several views using the same projection/rendering mode. A layer switching from map to globe and back invalidates its rendered geometry but does not decode again while the content remains cached. Map extrusions below zoom 12 use geographic geometry for latitude-correct meter heights, including off-center features.
+A change in the aggregate rendering mode invalidates rendered geometry but does not decode again while the content remains cached. Map extrusions below zoom 12 use geographic geometry for latitude-correct meter heights, including off-center features.
 
 ## Picking and Highlighting
 

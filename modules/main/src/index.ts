@@ -127,6 +127,7 @@ export {
   Tileset2D,
   Tile2DHeader,
   tile2DDeckAdapter,
+  /** @deprecated Use Tileset2D. */
   _Tileset2D,
   TripsLayer,
   Tile3DLayer,

@@ -225,7 +225,11 @@ export default class LayerManager {
   // INTERNAL METHODS
   //
 
-  /** Returns the complete active viewport set for layer traversal and consumer cleanup. */
+  /**
+   * Returns the complete active viewport set for layer traversal and consumer cleanup.
+   * Includes views excluded by render-time layerFilter callbacks. Without a Deck,
+   * returns the currently activated viewport.
+   */
   getViewports(): Viewport[] {
     return this.context.deck?.getViewports() || [this.context.viewport];
   }
