@@ -7,7 +7,8 @@ import {vectorTableSource} from '@carto/api-client';
 import {VectorTileLayer} from '@deck.gl/carto';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {testPickingLayer} from '../../layers/test-picking-layer';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {withMockFetchMapsV3} from '../mock-fetch';
 
 test(`VectorTileLayer#picking`, async () => {
@@ -107,6 +108,86 @@ test(`VectorTileLayer#pickingMVT`, async () => {
   }).catch(e => {
     throw e;
   });
+});
+
+test('VectorTileLayer#MVT coordinates', async () => {
+  // A polygon in tile (1, 0) at zoom 1, in [lng, lat] as MVTLoader returns it for 'wgs84'
+  const polygon = geojsonToBinary([
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [10, 10],
+            [20, 10],
+            [20, 20],
+            [10, 20],
+            [10, 10]
+          ]
+        ]
+      },
+      properties: {cartodb_id: 1}
+    }
+  ]);
+
+  for (const [viewport, coordinates] of [
+    [new WebMercatorViewport({longitude: 0, latitude: 0, zoom: 1}), 'local'],
+    [new GlobeViewport({longitude: 0, latitude: 0, zoom: 1}), 'wgs84']
+  ] as const) {
+    const mvtOptions: any[] = [];
+    await withMockFetchMapsV3(async () => {
+      const {tiles, ...tilejson} = await vectorTableSource({
+        accessToken: 'XXX',
+        connectionName: 'carto_dw',
+        tableName: 'carto-demo-data.demo_tables.test'
+      });
+      const data = {
+        ...tilejson,
+        tiles: tiles.map(url => url.replace(/formatTiles=\w+/, 'formatTiles=mvt'))
+      };
+      await testLayerAsync({
+        Layer: VectorTileLayer,
+        viewport,
+        testCases: [
+          {
+            props: {
+              data,
+              fetch: (url, {loadOptions}) => {
+                mvtOptions.push(loadOptions.mvt);
+                return polygon;
+              }
+            },
+            onAfterUpdate: ({layer}) => {
+              if (!layer.isLoaded) return;
+              // autoLabels directly: the text layer does not load headless
+              const tile = layer.state.tileset.selectedTiles.find(
+                t => t.index.x === 1 && t.index.y === 0
+              );
+              const [, labels] = layer.renderSubLayers({
+                ...layer.props,
+                id: 'labels-test',
+                autoLabels: true,
+                data: polygon,
+                tile
+              });
+              const labelCount = labels.props.data.points.positions.value.length;
+              if (coordinates === 'wgs84') {
+                expect(labelCount, 'a label for the WGS84 polygon').toBeGreaterThan(0);
+              }
+            }
+          }
+        ],
+        onError: err => expect(err).toBeFalsy()
+      });
+    });
+
+    expect(mvtOptions.length, 'tiles fetched').toBeGreaterThan(0);
+    for (const options of mvtOptions) {
+      expect(options.coordinates, 'mvt.coordinates').toBe(coordinates);
+      expect(options.tileIndex, 'mvt.tileIndex').toBeTruthy();
+    }
+  }
 });
 
 function createTestVectorTileLayer(

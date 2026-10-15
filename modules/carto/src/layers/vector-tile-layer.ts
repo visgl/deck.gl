@@ -103,7 +103,16 @@ export default class VectorTileLayer<
       return Promise.reject('Invalid URL');
     }
 
-    const loadOptions = this.getLoadOptions();
+    let loadOptions = this.getLoadOptions();
+    if (this.state.mvt) {
+      // As in MVTLayer: GlobeView draws in WGS84, MVT tiles are tile-relative
+      loadOptions = mergeLoadOptions(loadOptions, {
+        mvt: {
+          coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
+          tileIndex: tile.index
+        }
+      });
+    }
     const {fetch} = this.props;
     const {signal} = tile;
 
@@ -216,7 +225,7 @@ export default class VectorTileLayer<
       if (props.data.polygons && props.data.polygons.positions.value.length > 0) {
         labelData.points = createPointsFromPolygons(
           props.data.polygons,
-          this.state.mvt ? MVT_BBOX : tileBbox,
+          this.state.mvt && !this.context.viewport.resolution ? MVT_BBOX : tileBbox,
           props,
           tileBbox
         );
