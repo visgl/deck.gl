@@ -4,11 +4,19 @@
 
 import {test, expect, vi} from 'vitest';
 
-import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
+import {
+  Layer,
+  CompositeLayer,
+  LayerManager,
+  Viewport,
+  MapView,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
@@ -625,4 +633,59 @@ test('LayersPass#GLViewport', () => {
       `${name} sets viewport correctly`
     ).toEqual(expectedGLViewport);
   }
+});
+
+test('LayersPass#isAuxiliaryPass', () => {
+  const layer = new PathLayer({
+    id: 'path',
+    data: [
+      {
+        path: [
+          [-122.45, 37.75],
+          [-122.35, 37.85]
+        ]
+      }
+    ],
+    getPath: d => d.path
+  });
+  const viewportProps = {width: 100, height: 100, longitude: -122.4, latitude: 37.8, zoom: 11};
+  // A GlobeViewport subdivides paths (`resolution`); the viewport an auxiliary pass makes for
+  // itself, e.g. a TerrainExtension cover, is web mercator and has no resolution.
+  const screenViewport = new GlobeViewport({id: 'screen', ...viewportProps});
+  const auxiliaryViewport = new WebMercatorViewport({id: 'auxiliary', ...viewportProps});
+
+  const layerManager = new LayerManager(device, {viewport: screenViewport});
+  const layersPass = new DrawLayersPass(device);
+  layerManager.setLayers([layer]);
+  layerManager.updateLayers();
+
+  const renderOnce = (viewport: Viewport, isAuxiliaryPass: boolean) => {
+    layersPass.render({
+      viewports: [viewport],
+      layers: layerManager.getLayers(),
+      isAuxiliaryPass,
+      onViewportActive: layerManager.activateViewport,
+      onError: err => expect(err).toBeFalsy()
+    });
+    layerManager.activateViewport(screenViewport);
+  };
+
+  renderOnce(screenViewport, false);
+  layer.getNeedsRedraw({clearRedrawFlags: true});
+  expect(layer.state.tessellationResolution, 'tessellated for the screen viewport').toBe(
+    screenViewport.resolution
+  );
+
+  renderOnce(auxiliaryViewport, true);
+  expect(layer.internalState!.viewport!.id, 'auxiliary viewport is not adopted').toBe('screen');
+  expect(layer.state.tessellationResolution, 'geometry is not re-tessellated').toBe(
+    screenViewport.resolution
+  );
+  expect(layer.getNeedsRedraw(), 'auxiliary pass leaves no pending redraw').toBeFalsy();
+
+  renderOnce(auxiliaryViewport, false);
+  expect(
+    layer.state.tessellationResolution,
+    'a primary pass still re-tessellates on viewport change'
+  ).toBeUndefined();
 });
