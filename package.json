@@ -59,7 +59,7 @@
     "@luma.gl/test-utils": "^10.0.0-alpha.4",
     "@luma.gl/webgl": "^10.0.0-alpha.4",
     "@luma.gl/webgpu": "^10.0.0-alpha.4",
-    "@math.gl/projection": "^5.0.0-alpha.15",
+    "@math.gl/projection": "^5.0.0-alpha.17",
     "@probe.gl/bench": "^4.1.1",
     "@probe.gl/test-utils": "^4.1.1",
     "@types/jscodeshift": "^17.3.0",

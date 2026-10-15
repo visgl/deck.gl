@@ -160,7 +160,4 @@ export type {
   CustomProjectionViewProps,
   CustomProjectionViewState
 } from './views/custom-projection-view';
-export type {
-  ProjectionConverter,
-  CustomProjectionViewportOptions
-} from './viewports/custom-projection-viewport';
+export type {CustomProjectionViewportOptions} from './viewports/custom-projection-viewport';

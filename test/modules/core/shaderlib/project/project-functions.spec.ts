@@ -7,6 +7,7 @@ import {test, expect} from 'vitest';
 import {
   COORDINATE_SYSTEM,
   WebMercatorViewport,
+  FirstPersonViewport,
   OrthographicViewport,
   project,
   ProjectProps,
@@ -134,6 +135,45 @@ const TEST_CASES: TestCase[] = [
     result: [-0.014222222222187497, 0.03599369037291922, 0.016187212628251565]
   }
 ];
+
+// First-person cameras retain Mercator shader coordinates without CPU preprojection.
+const firstPersonViewport = new FirstPersonViewport({
+  longitude: TEST_COORDINATE_ORIGIN[0],
+  latitude: TEST_COORDINATE_ORIGIN[1],
+  position: [10, 20, 100]
+});
+const mercatorReference = new WebMercatorViewport({
+  longitude: TEST_COORDINATE_ORIGIN[0],
+  latitude: TEST_COORDINATE_ORIGIN[1],
+  zoom: firstPersonViewport.zoom,
+  position: [10, 20, 100],
+  legacyMeterSizes: true
+});
+for (const coordinateSystem of [
+  'default',
+  'lnglat-offsets',
+  'meter-offsets',
+  'cartesian'
+] as const) {
+  const position: NumberArray3 =
+    coordinateSystem === 'default'
+      ? ([...TEST_COORDINATE_ORIGIN.slice(0, 2), 100] as NumberArray3)
+      : [0, 0, coordinateSystem === 'cartesian' ? 0 : 100];
+  const coordinateOrigin: NumberArray3 =
+    coordinateSystem === 'cartesian'
+      ? [...firstPersonViewport.projectFlat(TEST_COORDINATE_ORIGIN), 0]
+      : TEST_COORDINATE_ORIGIN;
+  TEST_CASES.push({
+    title: `FirstPersonViewport:${coordinateSystem}`,
+    position,
+    projectProps: {viewport: firstPersonViewport, coordinateSystem, coordinateOrigin},
+    result: projectPosition(position, {
+      viewport: mercatorReference,
+      coordinateSystem,
+      coordinateOrigin
+    })
+  });
+}
 
 test('project#projectPosition', () => {
   const oldEpsilon = config.EPSILON;

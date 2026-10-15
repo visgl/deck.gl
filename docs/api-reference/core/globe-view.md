@@ -15,6 +15,16 @@ It's recommended that you read the [Views and Projections guide](../../developer
 </div>
 
 
+## Target CRS
+
+`GlobeViewport.crs` describes standard geocentric XYZ coordinates in meters on the
+existing deck.gl sphere, with radius 6370972 meters. The descriptor is defined locally
+using math.gl's geocentric projection plugin. The viewport retains its common-space
+orientation, radius, and altitude behavior during the CRS transition.
+
+Descriptor bounds enclose the reference sphere and describe a rendering target, not
+coordinate validity or limits on altitude.
+
 ## Limitations
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.

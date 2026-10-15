@@ -12,8 +12,16 @@ For applications and custom viewport subclasses using `distanceScales` or `getDi
 
 - `unitsPerDegree` and `unitsPerDegree2` are renamed to `unitsPerWorldUnit` and `unitsPerWorldUnit2`.
 - `degreesPerUnit` is removed. Divide by the corresponding component of `unitsPerWorldUnit` instead.
-- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to the CRS linear unit factors, or `[1, 1, 1]` without a CRS; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
 - `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
+
+### Base Viewport CRS
+
+`Viewport` no longer selects Web Mercator from `longitude` and `latitude`. Supply a
+resolved `crs` descriptor for its default coordinate conversions and distance scales,
+or use `WebMercatorViewport` to retain Mercator-specific behavior. Without a descriptor,
+the base viewport uses local coordinates. Built-in `MapView`, `FirstPersonView`, and
+`GlobeView` retain their existing projection behavior.
 
 ### GlobeView `position`
 

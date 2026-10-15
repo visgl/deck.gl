@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
@@ -49,15 +50,15 @@ function createViewport(
   scale = 1,
   camera: {pitch?: number; bearing?: number; zoom?: number} = {}
 ) {
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     ...camera,
     width: 400,
     height: 300,
-    toCrs: signature,
-    fromCrs: '+units=m',
+    signature: signature,
+
     // Isolate preprocessing from distortion while evaluating each requested data anchor.
-    getDistanceScale: () => [normalizationScale, normalizationScale],
-    projection: {
+    distanceScale: () => [normalizationScale, normalizationScale, 1],
+    converter: {
       forward: p => project(p).map((v, i) => v * scale * (i < 2 ? projectedUnit : 1)),
       inverse: ([x, y, z = 0]) => [
         Math.sqrt(x / (scale * projectedUnit)),
@@ -681,13 +682,13 @@ for (const LayerType of [ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer]
       skip
     }) => {
       if (gpuAggregation && !WebGLAggregator.isSupported(device)) return skip();
-      const viewport = new CustomProjectionViewport({
+      const viewport = createTestViewport({
         width: 400,
         height: 300,
         zoom: 3,
-        fromCrs: 'map-meters',
-        projection: {forward: p => p, inverse: p => p},
-        getDistanceScale: () => [1, 1]
+
+        converter: {forward: p => p, inverse: p => p},
+        distanceScale: () => [1, 1, 1]
       });
       const manager = createManager(viewport);
       const referenceManager = createManager(viewport);
@@ -826,11 +827,11 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
     const options = {
       width: 400,
       height: 300,
-      fromCrs: 'map-meters',
-      projection: {forward: p => p, inverse: p => p},
-      getDistanceScale: ([x, y]) => [1 + x / 1000000, 1 + y / 1000000] as [number, number]
+
+      converter: {forward: p => p, inverse: p => p},
+      distanceScale: ([x, y]) => [1 + x / 1000000, 1 + y / 1000000, 1] as const
     };
-    const manager = createManager(new CustomProjectionViewport({...options, center: [0, 0, 0]}));
+    const manager = createManager(createTestViewport({...options, center: [0, 0, 0]}));
     const points = [
       [100000, 200000, 0],
       [300000, 400000, 0]
@@ -855,7 +856,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
         expect(size[0]).toBeCloseTo(expectedSizeX, 10);
         expect(size[1]).toBeCloseTo((normalizationScale * 100000) / 1.3, 10);
       }
-      const viewport = new CustomProjectionViewport({...options, center: [800000, 900000, 0]});
+      const viewport = createTestViewport({...options, center: [800000, 900000, 0]});
       manager.activateViewport(viewport);
       layer = layer.clone({data: points.slice()});
       manager.setLayers([layer]);
@@ -870,3 +871,33 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
     }
   });
 }
+
+test('HeatmapLayer ground-density color domain uses the Jacobian scalar', () => {
+  const domains: number[][] = [];
+  for (const z of [1, 2]) {
+    const viewport = createTestViewport({
+      width: 400,
+      height: 300,
+      distanceScale: () => [0.25, 1, z]
+    });
+    const manager = createManager(viewport);
+    const layer = new HeatmapLayer({
+      data: [
+        [100000, 200000, 0],
+        [300000, 400000, 0]
+      ],
+      getPosition: p => p,
+      weightsTextureSize: 32,
+      colorDomain: [1, 10],
+      aggregation: 'SUM'
+    });
+    try {
+      manager.setLayers([layer]);
+      domains.push(layer.state.colorDomain.slice());
+    } finally {
+      manager.finalize();
+    }
+  }
+  expect(domains[0].every(Number.isFinite)).toBe(true);
+  expect(domains[1]).toEqual(domains[0].map(value => value * 2));
+});
