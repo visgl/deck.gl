@@ -122,6 +122,26 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels)
 Converts the size of a geometry from the screen space to the clip space.
 
 
+### project_globe_is_occluded
+
+```glsl
+bool project_globe_is_occluded(vec3 commonPosition)
+```
+
+Returns `true` when the globe hides `commonPosition` from the camera in `GlobeView`, that is, when the segment from the camera to the position passes through the sphere. The test is exact at any altitude, so a position above the surface stays visible past the horizon of the ground below it. Always `false` in flat projections. Layers with camera-facing geometry such as icons, text and billboard points use it to hide objects whose anchor is behind the globe, since back-face culling cannot tell the near side from the far side for such geometry.
+
+
+### project_globe_billboard_clipspace
+
+```glsl
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition)
+```
+
+Adjusts the clip-space position of a billboard anchored at `commonPosition` so that in `GlobeView` its depth moves toward the camera by the amount the globe surface rises within a 64 pixel radius around the anchor. A sprite whose anchor is visible is then not clipped by the curve of the globe around it, for example by a basemap or a `SolidPolygonLayer` drawn as the earth's surface. The shift only depends on where the anchor is on the globe, so sprites anchored at the same place keep their depth order whatever their altitude, and a label's glyphs stay at the depth of their background. Returns `clipPosition` unchanged in flat projections. Pair with `project_globe_is_occluded`.
+
+The shift is paid for in depth against the rest of the scene. It is zero where the surface faces the camera, and where the surface is foreshortened it grows with the grazing angle, roughly the 64 pixel radius times the tangent of the angle between the camera ray and the surface normal: about 1.8 km at zoom 12 with pitch 60°. Other 3D geometry that is in front of a billboard's anchor by less than that no longer hides the billboard. A sprite that reaches further than 64 pixels toward the point of the globe below the camera can also still lose its inner pixels to the surface. Both are fixed trade-offs; the radius is a constant in the shader module and is not configurable.
+
+
 ### project_normal
 
 ```glsl
