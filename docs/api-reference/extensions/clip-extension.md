@@ -69,6 +69,10 @@ Supported format: `[left, bottom, right, top]`
 - the anchor attribute goes by some other name
 - to clip an anchored layer by geometry, like the text layer
 
+## Remarks
+
+- With `clipByInstance: true` the anchor position is compared with `clipBounds` in the layer's own coordinate system without any projection, so geospatial bounds require the layer's positions to be lng/lat, and bounds that cross the antimeridian (e.g. `[170, -20, -170, 20]`) must be split into two layers.
+
 ## Source
 
 [modules/extensions/src/clip](https://github.com/visgl/deck.gl/tree/master/modules/extensions/src/clip)
