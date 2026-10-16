@@ -14,11 +14,11 @@ import {expect, test, vi} from 'vitest';
 import {
   ArrowLineRenderer,
   convertArrowLineColumnsToGPUVectors
-} from '../../../../examples/arrow/arrow-lines/arrow-line-renderer';
+} from '../../../../examples/v10-experimental/shared/arrow/arrow-lines/arrow-line-renderer';
 import {
   makeArrowLineRecordBatches,
   makeArrowLineSourceData
-} from '../../../../examples/arrow/arrow-lines/arrow-line-data';
+} from '../../../../examples/v10-experimental/shared/arrow/arrow-lines/arrow-line-data';
 
 for (const ModelClass of [PathTripsStorageModel, PathStorageModel]) {
   test(`${ModelClass.name} receives live styling without replacing path data`, () => {

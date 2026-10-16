@@ -3,14 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {ArrowTextDataSource} from '../../../../examples/deck/arrow-text-layer/arrow-text-data-source';
+import {ArrowTextDataSource} from '../../../../examples/v10-experimental/arrow-text-layer/arrow-text-data-source';
 
 const mocks = vi.hoisted(() => ({
   panelProps: null as any,
   beginTableStream: vi.fn(),
   makeSource: vi.fn()
 }));
-vi.mock('../../../../examples/deck/arrow-example-source-panel', () => ({
+vi.mock('../../../../examples/v10-experimental/arrow-example-source-panel', () => ({
   DeckArrowSourcePanel: class {
     constructor(props: any) {
       mocks.panelProps = props;
@@ -20,10 +20,13 @@ vi.mock('../../../../examples/deck/arrow-example-source-panel', () => ({
     beginTableStream = mocks.beginTableStream;
   }
 }));
-vi.mock('../../../../examples/arrow/arrow-text-2d/arrow-text-data', async importOriginal => ({
-  ...(await importOriginal<any>()),
-  makeStreamingArrowTextSourceAsync: mocks.makeSource
-}));
+vi.mock(
+  '../../../../examples/v10-experimental/shared/arrow/arrow-text-2d/arrow-text-data',
+  async importOriginal => ({
+    ...(await importOriginal<any>()),
+    makeStreamingArrowTextSourceAsync: mocks.makeSource
+  })
+);
 
 test('text animation toggles preserve loaded batches and pending source generation', async () => {
   const progress = vi.fn();

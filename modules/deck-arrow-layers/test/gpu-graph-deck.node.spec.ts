@@ -15,7 +15,7 @@ import * as experimentalModule from '@luma.gl/experimental';
 import * as gpuGraphModule from '@luma.gl/gpgpu/gpu-graph';
 import {describe, expect, test} from 'vitest';
 
-import {createGPUGraphExplorerDeck} from '../../../examples/deck/gpu-graph-explorer/app';
+import {createGPUGraphExplorerDeck} from '../../../examples/v10-experimental/gpu-graph-explorer/app';
 import {
   GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT,
   GRAPH_EXPLORER_MAXIMUM_EXACT_VERTEX_COUNT,
@@ -25,7 +25,7 @@ import {
   GRAPH_EXPLORER_VERTEX_COUNTS,
   makeGraphExplorerDataset
 } from '../../../examples/experimental/gpu-graph-explorer/graph-data';
-import {getExampleSupportDefinition} from '../../../examples/example-support-registry';
+import {getExampleSupportDefinition} from '../../../examples/v10-experimental/shared/example-support-registry';
 
 describe('optional GPU Graph deck.gl integration package isolation', () => {
   test('keeps deck.gl entirely outside graph production imports and dependencies', () => {
@@ -74,7 +74,7 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
 
   test('loads deck.gl graph adapters through the private package boundary', () => {
     const exampleSource = readFileSync(
-      new URL('../../../examples/deck/gpu-graph-explorer/app.ts', import.meta.url),
+      new URL('../../../examples/v10-experimental/gpu-graph-explorer/app.ts', import.meta.url),
       'utf8'
     );
 
@@ -85,7 +85,9 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
 
   test('provides a standalone entry without creating an example workspace', () => {
     expect(
-      existsSync(new URL('../../../examples/deck/gpu-graph-explorer/index.html', import.meta.url))
+      existsSync(
+        new URL('../../../examples/v10-experimental/gpu-graph-explorer/index.html', import.meta.url)
+      )
     ).toBe(true);
     expect(typeof createGPUGraphExplorerDeck).toBe('function');
     expect(typeof GPUGraphDeckEffect).toBe('function');
@@ -182,8 +184,8 @@ describe('GPU Graph native deck.gl resident layers', () => {
 
   test('renders accessible graph scale, truthful GPU diagnostics, and real analytic controls', () => {
     const source = [
-      '../../../examples/deck/gpu-graph-explorer/app.ts',
-      '../../../examples/deck/gpu-graph-explorer/app-ui.ts'
+      '../../../examples/v10-experimental/gpu-graph-explorer/app.ts',
+      '../../../examples/v10-experimental/gpu-graph-explorer/app-ui.ts'
     ]
       .map(path => readFileSync(new URL(path, import.meta.url), 'utf8'))
       .join('\n');
@@ -226,7 +228,7 @@ describe('GPU Graph native deck.gl resident layers', () => {
 
   test('disables exact and spatial layout controls at their actual execution boundaries', () => {
     const source = readFileSync(
-      new URL('../../../examples/deck/gpu-graph-explorer/app-ui.ts', import.meta.url),
+      new URL('../../../examples/v10-experimental/gpu-graph-explorer/app-ui.ts', import.meta.url),
       'utf8'
     );
 
@@ -261,7 +263,7 @@ describe('GPU Graph standalone example metadata', () => {
       'webgpu'
     ]);
     const readme = readFileSync(
-      new URL('../../../examples/deck/README.md', import.meta.url),
+      new URL('../../../examples/v10-experimental/README.md', import.meta.url),
       'utf8'
     );
     expect(readme).toContain('gpu-graph-explorer');

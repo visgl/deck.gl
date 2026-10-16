@@ -3,10 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {ArrowPathDataSource} from '../../../../examples/deck/arrow-path-layer/arrow-path-data-source';
+import {ArrowPathDataSource} from '../../../../examples/v10-experimental/arrow-path-layer/arrow-path-data-source';
 
 const panel = vi.hoisted(() => ({props: null as any, beginTableStream: vi.fn()}));
-vi.mock('../../../../examples/deck/arrow-example-source-panel', () => ({
+vi.mock('../../../../examples/v10-experimental/arrow-example-source-panel', () => ({
   DeckArrowSourcePanel: class {
     constructor(props: any) {
       panel.props = props;
