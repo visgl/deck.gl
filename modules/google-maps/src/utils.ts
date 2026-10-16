@@ -241,7 +241,7 @@ export function getViewPropsFromCoordinateTransformer(
 
   // Match Google projection matrix
   const fovy = 25;
-  const aspect = height ? width / height : 1;
+  const aspect = width > 0 && height > 0 ? width / height : 1;
 
   // Match depth range (crucial for correct z-sorting)
   const near = 0.75;
