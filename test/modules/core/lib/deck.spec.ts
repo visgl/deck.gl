@@ -8,6 +8,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
 import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
+import {Device} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -73,6 +74,56 @@ function finalizeOwnedDeck(deck: Deck): void {
 }
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
+
+const gpuDebugTestCases = [
+  {name: 'default', props: {}, expected: false},
+  {name: 'enabled', props: {debug: true}, expected: true},
+  {name: 'device override off', props: {debug: true, deviceProps: {debug: false}}, expected: false},
+  {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true}
+];
+
+webglTest.each(gpuDebugTestCases)('Deck#GPU debug $name', async ({props, expected}) => {
+  const defaultDebug = Device.defaultProps.debug;
+  let deck: Deck | undefined;
+  try {
+    Device.defaultProps.debug = !expected;
+    deck = new Deck({
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      ...props
+    });
+    await waitForRender(deck);
+    expect(deck.device!.props.debug).toBe(expected);
+  } finally {
+    Device.defaultProps.debug = defaultDebug;
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
+webglTest.each(gpuDebugTestCases)(
+  'Deck#GPU debug $name forwards to attached context',
+  async ({props, expected}) => {
+    const defaultDebug = Device.defaultProps.debug;
+    let deck: Deck | undefined;
+    try {
+      Device.defaultProps.debug = !expected;
+      const canvas = document.createElement('canvas');
+      deck = new Deck({
+        gl: canvas.getContext('webgl2'),
+        width: 1,
+        height: 1,
+        viewState: {longitude: 0, latitude: 0, zoom: 0},
+        ...props
+      });
+      await waitForRender(deck);
+      expect(deck.device!.props.debug).toBe(expected);
+    } finally {
+      Device.defaultProps.debug = defaultDebug;
+      if (deck) finalizeOwnedDeck(deck);
+    }
+  }
+);
 
 test('Deck#constructor', async () => {
   const callbacks = {
