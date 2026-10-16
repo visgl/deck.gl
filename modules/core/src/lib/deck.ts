@@ -378,6 +378,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     getEventRoot: canvas => this._getEventRoot(canvas)
   });
   private _ownedCanvas: HTMLCanvasElement | null = null;
+  /** True until `_ownedCanvas` gets a drawing buffer size, either from props or from luma */
+  private _ownedCanvasNeedsSize: boolean = false;
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
@@ -648,6 +650,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   redraw(reason?: string): void {
     if (!this.layerManager) {
       // Not yet initialized
+      return;
+    }
+    if (this._ownedCanvasNeedsSize && this.canvas === this._ownedCanvas) {
+      // Drawing now would stretch a 300x150 frame over the canvas. Redraw flags are kept, and the
+      // resize that reports the size requests a redraw.
       return;
     }
     // Check if we need to redraw
@@ -1145,6 +1152,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
       this._ownedCanvas = canvas;
+      // Without numeric props the drawing buffer is the default 300x150 until luma measures it
+      this._ownedCanvasNeedsSize =
+        typeof props.width !== 'number' || typeof props.height !== 'number';
+      // Apply the CSS size now, so that luma does not start from the default layout
+      this._setCanvasSize(this.props, canvas);
     } else {
       this._ownedCanvas = null;
     }
@@ -1263,6 +1275,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       if (this._isMultiCanvasMode()) {
         this._updateMultiCanvasDimensions();
       } else if (canvasContext === this._canvasContext && this._canvasContext) {
+        this._updateOwnedCanvasNeedsSize();
         // Deck owns resize handling for the active render CanvasContext. Applications should use
         // DeckProps.onResize instead of the lower-level luma device callback while Deck is active.
         this._onCanvasContextResize(this._canvasContext, {
@@ -1283,9 +1296,21 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._deviceResizeHandler = null;
   }
 
+  /** Stops holding redraws once luma reports a size for a canvas that has a layout. */
+  private _updateOwnedCanvasNeedsSize(): void {
+    const canvas = this._ownedCanvas;
+    // Without a layout (detached or hidden) luma can only report the default canvas size
+    if (canvas && canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+      this._ownedCanvasNeedsSize = false;
+    }
+  }
+
   /** Updates canvas width and/or height, if provided as props. */
-  private _setCanvasSize(props: Required<DeckProps<ViewsT>>): void {
-    if (this._isMultiCanvasMode() || !this.canvas) {
+  private _setCanvasSize(
+    props: Required<DeckProps<ViewsT>>,
+    canvas: HTMLCanvasElement | null = this.canvas
+  ): void {
+    if (this._isMultiCanvasMode() || !canvas) {
       return;
     }
 
@@ -1293,13 +1318,13 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // Set size ONLY if props are being provided, otherwise let canvas be layouted freely
     if (width || width === 0) {
       const cssWidth = Number.isFinite(width) ? `${width}px` : (width as string);
-      this.canvas.style.width = cssWidth;
+      canvas.style.width = cssWidth;
     }
     if (height || height === 0) {
       const cssHeight = Number.isFinite(height) ? `${height}px` : (height as string);
       // Note: position==='absolute' required for height 100% to work
-      this.canvas.style.position = props.style?.position || 'absolute';
-      this.canvas.style.height = cssHeight;
+      canvas.style.position = props.style?.position || 'absolute';
+      canvas.style.height = cssHeight;
     }
   }
 
@@ -1619,6 +1644,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     this._setDeviceCanvasContext(device, {
       syncDrawingBuffer: Boolean(this.props.gl && this.props.device !== device)
     });
+    if (this._canvasContext?.isInitialized) {
+      // luma measured the canvas before the resize handler was installed, do not wait for it
+      this._updateOwnedCanvasNeedsSize();
+    }
 
     if (this._isMultiCanvasMode()) {
       this._syncCanvasTargets();
