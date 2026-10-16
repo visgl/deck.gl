@@ -13,7 +13,7 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -525,6 +525,55 @@ test('MVTLayer#dataInWGS84', async () => {
     Layer: TestMVTLayer,
     viewport,
     testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('MVTLayer#reload on coordinate frame change', async () => {
+  const frames: string[] = [];
+
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      frames.push(this.context.viewport.resolution ? 'wgs84' : 'local');
+      return geoJSONData;
+    }
+  }
+
+  TestMVTLayer.layerName = 'TestMVTLayer';
+
+  const viewState = {longitude: 0, latitude: 0, zoom: 1};
+  let loaded = 0;
+
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new GlobeViewport(viewState),
+    testCases: [
+      {
+        props: {data: ['https://json/{z}/{x}/{y}.mvt'], binary: false},
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          loaded = frames.length;
+          expect(
+            frames.every(f => f === 'wgs84'),
+            'tiles loaded in WGS84'
+          ).toBeTruthy();
+        }
+      },
+      {
+        // GlobeView above zoom 12
+        viewport: new WebMercatorViewport(viewState),
+        updateProps: {},
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          const reloaded = frames.slice(loaded);
+          expect(reloaded.length, 'tiles loaded again').toBe(loaded);
+          expect(
+            reloaded.every(f => f === 'local'),
+            'tiles loaded in tile coordinates'
+          ).toBeTruthy();
+        }
+      }
+    ],
     onError: err => expect(err).toBeFalsy()
   });
 });
