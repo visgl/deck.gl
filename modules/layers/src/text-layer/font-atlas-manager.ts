@@ -68,7 +68,7 @@ export type FontSettings = {
    * @default 64
    */
   fontSize?: number;
-  /** Whitespace buffer around each side of the character. In general, bigger `fontSize` requires bigger `buffer`. Increase `buffer` will add more space between each character when layout `characterSet` in `fontAtlas`. This option could be tuned to provide sufficient space for drawing each character and avoiding overlapping of neighboring characters.
+  /** Whitespace buffer around each side of the character. In general, bigger `fontSize` requires bigger `buffer`. Increase `buffer` will add more space between each character when layout `characterSet` in `fontAtlas`. This option could be tuned to provide sufficient space for drawing each character and avoiding overlapping of neighboring characters. When `sdf` is `true`, at least `radius * (1 - cutoff)` pixels are used so that outlines are not clipped.
    * @default 4
    */
   buffer?: number;
@@ -288,7 +288,7 @@ export default class FontAtlasManager {
 
   // eslint-disable-next-line max-statements
   private _generateFontAtlas(characterSet: Set<string>, cachedFontAtlas?: FontAtlas): FontAtlas {
-    const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
+    const {fontFamily, fontWeight, fontSize, sdf} = this.props;
     let canvas = cachedFontAtlas && cachedFontAtlas.data;
     if (!canvas) {
       canvas = document.createElement('canvas');
@@ -298,20 +298,23 @@ export default class FontAtlasManager {
     setTextStyle(ctx, fontFamily, fontSize, fontWeight);
     const defaultMeasure = (char?: string) => measureText(ctx, fontSize, char);
 
+    // Renderers and the atlas layout use at least the padding that the distance field needs
+    const settings = {...this.props, buffer: getGlyphPadding(this.props)};
+
     let renderer: FontRenderer | undefined;
     if (this._getFontRenderer) {
-      renderer = this._getFontRenderer(this.props);
+      renderer = this._getFontRenderer(settings);
     } else if (sdf) {
       renderer = {
         measure: defaultMeasure,
-        draw: getSdfFontRenderer(this.props)
+        draw: getSdfFontRenderer(settings)
       };
     }
 
     // 1. build mapping
     const {mapping, canvasHeight, xOffset, yOffsetMin, yOffsetMax} = buildMapping({
       measureText: char => (renderer ? renderer.measure(char) : defaultMeasure(char)),
-      buffer,
+      buffer: settings.buffer,
       characterSet,
       maxCanvasWidth: MAX_CANVAS_WIDTH,
       ...(cachedFontAtlas && {
@@ -386,6 +389,21 @@ export default class FontAtlasManager {
     }
     return `${fontFamily} ${fontWeight} ${fontSize} ${buffer}`;
   }
+}
+
+/**
+ * Space to reserve around each glyph in the atlas. A signed distance field extends
+ * `radius * (1 - cutoff)` pixels beyond the glyph edge before reaching zero. Outlines are drawn
+ * inside that range, so a smaller padding clips them at the edges of the glyph frame.
+ * The padding is capped so that a glyph up to twice `fontSize` wide still fits the atlas width.
+ */
+function getGlyphPadding({sdf, buffer, radius, cutoff, fontSize}: Required<FontSettings>): number {
+  if (!sdf) {
+    return buffer;
+  }
+  const fieldPadding = Math.ceil(radius * (1 - cutoff));
+  const maxPadding = Math.floor(MAX_CANVAS_WIDTH / 2 - fontSize);
+  return Math.max(buffer, Math.min(fieldPadding, maxPadding));
 }
 
 function getSdfFontRenderer({
