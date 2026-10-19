@@ -318,6 +318,8 @@ export default class IconManager {
   private _pendingCount: number = 0;
 
   private _autoPacking: boolean = false;
+  private _finalized: boolean = false;
+  private _textureGeneration: number = 0;
 
   // / internal state used for autoPacking
 
@@ -347,7 +349,15 @@ export default class IconManager {
   }
 
   finalize(): void {
-    this._texture?.delete();
+    if (this._finalized) {
+      return;
+    }
+    this._finalized = true;
+    const texture = this._texture;
+    this._texture = null;
+    this._externalTexture = null;
+    this._canvas = null;
+    texture?.destroy();
   }
 
   getTexture(): Texture | null {
@@ -372,6 +382,10 @@ export default class IconManager {
     iconMapping?: IconMapping | null;
     textureParameters?: SamplerProps | null;
   }) {
+    if (this._finalized) {
+      return;
+    }
+
     if (loadOptions) {
       this._loadOptions = loadOptions;
     }
@@ -385,9 +399,13 @@ export default class IconManager {
     }
 
     if (iconAtlas) {
-      this._texture?.delete();
+      this._textureGeneration++;
+      const texture = this._texture;
       this._texture = null;
       this._externalTexture = iconAtlas;
+      if (texture !== iconAtlas) {
+        texture?.destroy();
+      }
     }
 
     if (textureParameters) {
@@ -400,11 +418,24 @@ export default class IconManager {
   }
 
   packIcons(data: any, getIcon: AccessorFunction<any, UnpackedIcon>): void {
-    if (!this._autoPacking || typeof document === 'undefined') {
+    if (this._finalized || !this._autoPacking || typeof document === 'undefined') {
       return;
     }
 
-    const icons = Object.values(getDiffIcons(data, getIcon, this._mapping) || {});
+    const textureGeneration = this._textureGeneration;
+    const iconMapping = this._mapping;
+    const icons = Object.values(getDiffIcons(data, getIcon, iconMapping) || {});
+
+    // The icon accessor may update or finalize this manager.
+    if (
+      this._finalized ||
+      !this._autoPacking ||
+      textureGeneration !== this._textureGeneration ||
+      iconMapping !== this._mapping ||
+      this._texture?.destroyed
+    ) {
+      return;
+    }
 
     if (icons.length > 0) {
       // generate icon mapping
@@ -447,6 +478,17 @@ export default class IconManager {
 
       this.onUpdate(true);
 
+      // The update callback may finalize this manager or replace its atlas or mapping.
+      if (
+        this._finalized ||
+        textureGeneration !== this._textureGeneration ||
+        mapping !== this._mapping ||
+        !this._texture ||
+        this._texture.destroyed
+      ) {
+        return;
+      }
+
       // load images
       this._canvas = this._canvas || document.createElement('canvas');
       this._loadIcons(icons);
@@ -459,18 +501,42 @@ export default class IconManager {
       sourceIndex: number;
     })[]
   ): void {
+    const mapping = this._mapping;
+    const textureGeneration = this._textureGeneration;
+
     // This method is only called in the auto packing case, where _canvas is defined
     const ctx = this._canvas!.getContext('2d', {
       willReadFrequently: true
     }) as CanvasRenderingContext2D;
 
     for (const icon of icons) {
-      this._pendingCount++;
-      load(icon.url, this._loadOptions)
-        .then(imageData => {
-          const id = getIconId(icon);
+      const id = getIconId(icon);
+      const iconDef = mapping[id];
+      const loadOptions = this._loadOptions;
+      const getCurrentTexture = (): Texture | null => {
+        const texture = this._texture;
+        // Atlas growth replaces the texture without invalidating its pending icon loads.
+        return !this._finalized &&
+          textureGeneration === this._textureGeneration &&
+          iconDef &&
+          this._mapping[id] === iconDef &&
+          texture &&
+          !texture.destroyed
+          ? texture
+          : null;
+      };
 
-          const iconDef = this._mapping[id];
+      if (!getCurrentTexture()) {
+        continue;
+      }
+
+      this._pendingCount++;
+      load(icon.url, loadOptions)
+        .then(imageData => {
+          const texture = getCurrentTexture();
+          if (!texture) {
+            return;
+          }
           const {x: initialX, y: initialY, width: maxWidth, height: maxHeight} = iconDef;
 
           const {image, width, height} = resizeImage(
@@ -483,7 +549,7 @@ export default class IconManager {
           const x = initialX + (maxWidth - width) / 2;
           const y = initialY + (maxHeight - height) / 2;
 
-          this._texture?.copyExternalImage({
+          texture.copyExternalImage({
             image,
             x,
             y,
@@ -496,18 +562,19 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          if (this._texture) {
-            regenerateMipmaps(this._texture);
-          }
+          regenerateMipmaps(texture);
 
           this.onUpdate(width !== maxWidth || height !== maxHeight);
         })
         .catch(error => {
+          if (!getCurrentTexture()) {
+            return;
+          }
           this.onError({
             url: icon.url,
             source: icon.source,
             sourceIndex: icon.sourceIndex,
-            loadOptions: this._loadOptions,
+            loadOptions,
             error
           });
         })
