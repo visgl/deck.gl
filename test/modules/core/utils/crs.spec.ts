@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
+import ViewManager from '@deck.gl/core/lib/view-manager';
 import {_CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
 import type {CRSDescriptor} from '@math.gl/projection/core';
@@ -118,4 +119,97 @@ test('CustomProjectionView resolves a PROJJSON definition', async () => {
   })!;
   expect(viewport.crs.projection).toBe('tmerc');
   expect(viewport.projectPosition([0, 0, 0])).toEqual([0, 0, 0]);
+});
+
+test('failed CRS loads allow a fresh view to retry', async () => {
+  const definition = 'test:retry-after-failure';
+  const request = deferredCRS();
+  const getCRS = vi
+    .spyOn(projectionEngine, 'getCRS')
+    .mockReturnValueOnce(request.promise)
+    .mockResolvedValueOnce(source);
+  try {
+    const failedView = new CustomProjectionView({crs: definition});
+    const failed = failedView.initialize();
+    const shared = resolveCRS(definition);
+    expect(getCRS).toHaveBeenCalledTimes(1);
+    const error = new Error('Temporary module load failure');
+    const assertions = Promise.all([
+      expect(failed).rejects.toBe(error),
+      expect(shared).rejects.toBe(error)
+    ]);
+    request.reject(error);
+    await assertions;
+    const retry = new CustomProjectionView({crs: definition});
+    await retry.initialize();
+    expect(getCRS).toHaveBeenCalledTimes(2);
+    expect(resolveCRS(definition)).toBe(source);
+    expect(
+      retry.makeViewport({width: 400, height: 300, viewState: {center: [0, 0, 0], zoom: 0}})
+    ).not.toBeNull();
+  } finally {
+    getCRS.mockRestore();
+  }
+});
+
+test('failed CRS loads do not evict a descriptor registered by signature', async () => {
+  const definition = 'test:pending-signature';
+  const request = deferredCRS();
+  const descriptor = {...source, signature: definition};
+  const getCRS = vi
+    .spyOn(projectionEngine, 'getCRS')
+    .mockReturnValueOnce(request.promise)
+    .mockResolvedValueOnce(descriptor);
+  try {
+    const pending = resolveCRS(definition);
+    await resolveCRS('test:other-definition');
+    const failure = expect(pending).rejects.toThrow('load failure');
+    request.reject(new Error('load failure'));
+    await failure;
+    expect(resolveCRS(definition)).toBe(descriptor);
+  } finally {
+    getCRS.mockRestore();
+  }
+});
+
+test('structured CRS equality retains viewports and detects nested changes', async () => {
+  const reference = {
+    crs: {
+      state: 'explicit',
+      definition: projectedCRS,
+      representation: 'projjson',
+      provenance: 'metadata'
+    },
+    coordinateFrame: 'projected',
+    coordinateOrder: ['x', 'y']
+  } as const;
+  for (const crs of [projectedCRS, reference]) {
+    const view = new CustomProjectionView({crs, controller: {keyboard: false}});
+    const copy = new CustomProjectionView({
+      crs: structuredClone(crs),
+      controller: {keyboard: false}
+    });
+    expect(view.equals(copy)).toBe(true);
+    expect(view.equals(copy.clone({controller: {keyboard: true}}))).toBe(false);
+    expect(view.equals(copy.clone({width: 100}))).toBe(false);
+    const changed = structuredClone(crs);
+    const definition = 'crs' in changed ? changed.crs.definition : changed;
+    Object.assign(definition.base_crs.datum.ellipsoid, {semi_major_axis: 6378000});
+    expect(view.equals(copy.clone({crs: changed}))).toBe(false);
+    await view.initialize();
+    const manager = new ViewManager({
+      views: [view],
+      width: 400,
+      height: 300,
+      viewState: {center: [0, 0, 0], zoom: 0}
+    });
+    try {
+      const viewport = manager.getViewports()[0];
+      manager.setProps({views: [copy]});
+      expect(manager.updateViewports()).toBe(false);
+      expect(manager.getViewports()[0]).toBe(viewport);
+    } finally {
+      manager.finalize();
+    }
+  }
 });

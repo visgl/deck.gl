@@ -70,11 +70,18 @@ export function resolveCRS(
   const key = typeof definition === 'string' ? definition : JSON.stringify(definition);
   const existing = resolvedCRS.get(key);
   if (existing) return existing;
-  const pending = projectionEngine.getCRS(definition).then(crs => {
-    resolvedCRS.set(key, crs);
-    resolvedCRS.set(crs.signature, crs);
-    return crs;
-  });
+  const pending = projectionEngine.getCRS(definition).then(
+    crs => {
+      resolvedCRS.set(key, crs);
+      resolvedCRS.set(crs.signature, crs);
+      return crs;
+    },
+    error => {
+      // Allow a fresh request after a transient load failure without evicting a newer result.
+      if (resolvedCRS.get(key) === pending) resolvedCRS.delete(key);
+      throw error;
+    }
+  );
   resolvedCRS.set(key, pending);
   return pending;
 }

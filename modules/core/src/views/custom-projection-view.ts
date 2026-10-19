@@ -4,6 +4,7 @@
 
 import View from './view';
 import {resolveCRS} from '../utils/crs';
+import {deepEqual} from '../utils/deep-equal';
 import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
@@ -49,6 +50,15 @@ export default class CustomProjectionView extends View<
   #initialization?: Promise<void>;
   constructor(props: CustomProjectionViewProps) {
     super(props);
+  }
+  /** Compare CRS definition contents while retaining ordinary View prop equality. */
+  equals(view: this): boolean {
+    if (this === view) return true;
+    if (this.constructor !== view.constructor) return false;
+    const {crs, ...props} = this.props;
+    const {crs: otherCrs, ...otherProps} = view.props;
+    // Structured CRS definitions can nest more deeply than View's layout and controller props.
+    return deepEqual(crs, otherCrs, -1) && deepEqual(props, otherProps, 2);
   }
   /** Resolve the target CRS once for this view before creating its synchronous viewport. */
   initialize(): void | Promise<void> {
