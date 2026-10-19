@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
+import {_CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import {resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
@@ -47,4 +48,74 @@ test('CRS resolver shares aliases, pending requests and loaded descriptors', asy
   } finally {
     getCRS.mockRestore();
   }
+});
+
+const geographicCRS = {
+  type: 'GeographicCRS',
+  name: 'WGS 84',
+  datum: {
+    type: 'GeodeticReferenceFrame',
+    name: 'World Geodetic System 1984',
+    ellipsoid: {name: 'WGS 84', semi_major_axis: 6378137, inverse_flattening: 298.257223563}
+  },
+  coordinate_system: {
+    subtype: 'ellipsoidal',
+    axis: [
+      {name: 'Longitude', abbreviation: 'lon', direction: 'east', unit: 'degree'},
+      {name: 'Latitude', abbreviation: 'lat', direction: 'north', unit: 'degree'}
+    ]
+  }
+} as const;
+
+const projectedCRS = {
+  type: 'ProjectedCRS',
+  name: 'Test transverse Mercator',
+  base_crs: geographicCRS,
+  conversion: {name: 'Test conversion', method: {name: 'Transverse Mercator'}, parameters: []},
+  coordinate_system: {
+    subtype: 'Cartesian',
+    axis: [
+      {name: 'Easting', abbreviation: 'E', direction: 'east', unit: 'metre'},
+      {name: 'Northing', abbreviation: 'N', direction: 'north', unit: 'metre'}
+    ]
+  }
+} as const;
+
+test('CRS resolver accepts WKT, PROJJSON, CRS references and spatial references', async () => {
+  const reference = {
+    state: 'explicit',
+    definition: projectedCRS,
+    representation: 'projjson',
+    provenance: 'metadata'
+  } as const;
+  const definitions = [
+    'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]',
+    geographicCRS,
+    projectedCRS,
+    reference,
+    {crs: reference, coordinateFrame: 'projected', coordinateOrder: ['x', 'y']} as const
+  ];
+  for (const definition of definitions) {
+    const pending = resolveCRS(definition);
+    expect(resolveCRS(structuredClone(definition))).toBe(pending);
+    const crs = (await pending)!;
+    expect(resolveCRS(structuredClone(definition))).toBe(crs);
+    const coordinate = [1, 1, 4];
+    const projected = crs.converter.WGS84.from(coordinate);
+    crs.converter.WGS84.to(projected).forEach((value, axis) => {
+      expect(value).toBeCloseTo(coordinate[axis], 6);
+    });
+  }
+});
+
+test('CustomProjectionView resolves a PROJJSON definition', async () => {
+  const view = new CustomProjectionView({crs: projectedCRS});
+  await view.initialize();
+  const viewport = view.makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {center: [0, 0, 0], zoom: 0}
+  })!;
+  expect(viewport.crs.projection).toBe('tmerc');
+  expect(viewport.projectPosition([0, 0, 0])).toEqual([0, 0, 0]);
 });

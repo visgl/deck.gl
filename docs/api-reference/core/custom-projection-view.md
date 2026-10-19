@@ -27,7 +27,7 @@ Inherits [View options](./view.md#constructor), including layout, padding and co
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `crs` | Required | A supported planar CRS identifier, such as `EPSG:3857`, or PROJ string. Linear axis units are read from the descriptor. |
+| `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Linear axis units are read from the descriptor. |
 | `resolution` | `0` | Maximum subdivision cell size in WGS84 degrees for paths, polygons and bitmaps. Smaller positive values smooth projected curves at higher processing cost. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 

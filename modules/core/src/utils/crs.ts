@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {projectionEngine} from '@math.gl/projection';
-import type {CRSConversion, CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSConversion, CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
 import {GLOBE_CRS} from '../viewports/globe-util';
 import {OSM_TILE_CRS} from '../viewports/web-mercator-util';
 
@@ -42,13 +42,14 @@ const resolvedCRS = new Map<string, CRSDescriptor | Promise<CRSDescriptor>>([
 ]);
 
 /** Resolve built-in attribute CRSs synchronously, sharing loading and loaded math.gl descriptors.
+ * Accepts the same CRS definitions and spatial-reference objects as math.gl.
  * Cartesian positions and meter offsets do not declare an absolute source CRS.
  */
 export function resolveCRS(
-  coordinateSystem: string
+  coordinateSystem: TypeScriptCRSInput
 ): CRSDescriptor | Promise<CRSDescriptor> | null {
   let definition = coordinateSystem;
-  switch (coordinateSystem.toLowerCase()) {
+  switch (typeof coordinateSystem === 'string' ? coordinateSystem.toLowerCase() : null) {
     case 'lnglat':
     case 'longlat':
     case 'wgs84':
@@ -65,13 +66,15 @@ export function resolveCRS(
       definition = 'EPSG:4978';
       break;
   }
-  const existing = resolvedCRS.get(definition);
+  // Key structured definitions by their contents so newly allocated equivalent inputs share loading.
+  const key = typeof definition === 'string' ? definition : JSON.stringify(definition);
+  const existing = resolvedCRS.get(key);
   if (existing) return existing;
   const pending = projectionEngine.getCRS(definition).then(crs => {
-    resolvedCRS.set(definition, crs);
+    resolvedCRS.set(key, crs);
     resolvedCRS.set(crs.signature, crs);
     return crs;
   });
-  resolvedCRS.set(definition, pending);
+  resolvedCRS.set(key, pending);
   return pending;
 }
