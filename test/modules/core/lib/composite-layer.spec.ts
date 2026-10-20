@@ -90,7 +90,7 @@ test('CompositeLayer#getSubLayerProps', () => {
     );
   }
 
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new WebMercatorViewport()});
   layerManager.setLayers([layer]);
   const sublayers = layer.getSubLayers();
   const subProps = sublayers[0].props;
@@ -288,7 +288,7 @@ test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', () => {
 });
 
 test('CompositeLayer#setState', () => {
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new WebMercatorViewport()});
   const compositeLayer = new TestCompositeLayer(BASE_LAYER_PROPS);
   let subLayer = null;
 
