@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import InfoPanel from '../info-panel';
 import {loadData, joinPath} from '../../utils/data-utils';
 import {normalizeParam} from '../../utils/format-utils';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {cloneMapStyle, MAPBOX_STYLES} from '../../constants/defaults';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import {DeviceTabs} from '../device-tabs';
 import {useStore} from '../../store/device-store';
@@ -173,7 +173,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
               key={device?.id}
               device={device}
               data={data}
-              mapStyle={mapStyle || MAPBOX_STYLES.BLANK}
+              mapStyle={cloneMapStyle(mapStyle || MAPBOX_STYLES.BLANK)}
               params={params}
               useParam={useParam}
               onStateChange={updateMeta}

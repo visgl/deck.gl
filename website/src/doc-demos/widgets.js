@@ -31,7 +31,7 @@ import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
 import { Map } from 'react-map-gl/maplibre';
 import { useColorMode } from '@docusaurus/theme-common';
-import { MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
+import { cloneMapStyle, MAPBOX_STYLES, DATA_URI } from '../constants/defaults';
 import {OBJLoader} from '@loaders.gl/obj';
 
 const COUNTRIES =
@@ -93,9 +93,9 @@ function GeoDemoBase(deckProps) {
         {...deckProps}
         style={style}
       >
-        {deckProps.map && <Map reuseMaps mapStyle={deckProps.mapLabels
+        {deckProps.map && <Map reuseMaps mapStyle={cloneMapStyle(deckProps.mapLabels
           ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
-          : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT)} />}
+          : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT))} />}
       </DeckGL>
       {showAttribution && <OpenFreeMapAttribution />}
     </div>

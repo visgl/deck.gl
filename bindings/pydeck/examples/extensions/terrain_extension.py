@@ -66,8 +66,7 @@ r = pdk.Deck(
         '<a href="https://openmaptiles.org/">© OpenMapTiles</a> | '
         'Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     ),
-    map_provider="maplibre",
-    map_style="https://tiles.openfreemap.org/styles/dark",
+    # The draped MVT layer is the basemap; don't add a second flat basemap underneath.
+    map_provider=None,
 )
-# The basemap attribution control displays the OpenFreeMap TileJSON credits.
 r.to_html("terrain_extension.html")

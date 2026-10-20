@@ -17,5 +17,10 @@ export const MAPBOX_STYLES = {
   }
 };
 
+/** Return a fresh style object for MapLibre, which mutates style specifications while loading. */
+export function cloneMapStyle(style) {
+  return style && typeof style === 'object' ? JSON.parse(JSON.stringify(style)) : style;
+}
+
 export const DATA_URI = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website';
 export const GITHUB_TREE = 'https://github.com/visgl/deck.gl/tree/master';
