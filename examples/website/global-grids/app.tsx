@@ -129,7 +129,7 @@ export default function App({
         }),
     extruded: true,
     getElevation: 50000,
-    beforeId: 'watername_ocean',
+    beforeId: 'waterway_line_label',
     loaders: [CSVLoader],
     loadOptions: {csv: {header: true, dynamicTyping: false}}
   } as Omit<H3HexagonLayerProps<GridCell>, 'data' | 'id'> & {beforeId: string};
@@ -193,7 +193,7 @@ export default function App({
         projection="globe"
         id="map"
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle="https://tiles.openfreemap.org/styles/positron"
         dragRotate={false}
         maxPitch={0}
       >

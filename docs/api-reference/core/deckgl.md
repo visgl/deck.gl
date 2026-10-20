@@ -9,7 +9,7 @@ Make sure to read the [Using deck.gl Scripting API](../../get-started/using-stan
 
 ```js
 new deck.DeckGL({
-  mapStyle: 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json',
+  mapStyle: 'https://tiles.openfreemap.org/styles/positron',
   initialViewState: {
     longitude: -122.45,
     latitude: 37.8,
