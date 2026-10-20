@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {
-  LayerManager,
-  Viewport,
-  AttributeManager,
-  _CustomProjectionViewport as CustomProjectionViewport
-} from '@deck.gl/core';
+import {LayerManager, Viewport, AttributeManager} from '@deck.gl/core';
 import {
   ScreenGridLayer,
   GridLayer,
@@ -21,12 +17,12 @@ import {Matrix4} from '@math.gl/core';
 
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
   return projected
-    ? new CustomProjectionViewport({
+    ? createTestViewport({
         width: 400,
         height: 300,
-        toCrs: signature,
-        fromCrs: '+units=m',
-        projection: {
+        signature: signature,
+
+        converter: {
           forward: ([x, y, z = 0]) => [x * scale, y * scale, z * scale],
           inverse: ([x, y, z = 0]) => [x / scale, y / scale, z / scale]
         },

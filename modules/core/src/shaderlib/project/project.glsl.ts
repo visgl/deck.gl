@@ -388,11 +388,6 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels) {
 }
 
 float project_size_to_pixel(float meters) {
-#ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
-    return meters * project_external_size_scale().x * project.scale;
-  }
-#endif
   return project_size(meters) * project.scale;
 }
 vec2 project_size_to_pixel(vec2 meters) {

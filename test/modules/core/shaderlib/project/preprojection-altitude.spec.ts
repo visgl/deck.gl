@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestCRS} from '../../viewports/test-crs';
 import {test, expect} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -18,11 +19,13 @@ class MeterAltitudeViewport extends CustomProjectionViewport {
     super({
       width: 800,
       height: 600,
-      projection: {
-        forward: ([x, y, z = 0]) => [x * 3, y * 4, z],
-        inverse: ([x, y, z = 0]) => [x / 3, y / 4, z]
-      },
-      getDistanceScale: () => [0.5, 0.5]
+      crs: createTestCRS({
+        converter: {
+          forward: ([x, y, z = 0]) => [x * 3, y * 4, z],
+          inverse: ([x, y, z = 0]) => [x / 3, y / 4, z]
+        },
+        distanceScale: () => [0.5, 0.5, 1]
+      })
     });
     this.isGeospatial = geospatial;
   }

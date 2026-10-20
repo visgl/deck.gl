@@ -23,7 +23,7 @@ import type {AnimatedArcLayerProps} from './animated-arc-layer';
 // Data source
 const DATA_URL =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/globe/2020-01-14.csv';
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -40,

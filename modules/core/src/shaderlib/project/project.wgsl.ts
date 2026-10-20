@@ -404,11 +404,6 @@ fn project_pixel_size_to_clipspace(pixels: vec2<f32>) -> vec2<f32> {
 }
 
 fn project_meter_size_to_pixel(meters: f32) -> f32 {
-#ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
-    return meters * project_external_size_scale().x * project.scale;
-  }
-#endif
   return project_size_float(meters) * project.scale;
 }
 

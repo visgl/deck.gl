@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {
-  LayerManager,
-  Viewport,
-  _CustomProjectionViewport as CustomProjectionViewport
-} from '@deck.gl/core';
+import {LayerManager, Viewport} from '@deck.gl/core';
 import {
   ArcLayer,
   BitmapLayer,
@@ -26,11 +23,11 @@ import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
 
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
   return projected
-    ? new CustomProjectionViewport({
+    ? createTestViewport({
         width: 400,
         height: 300,
-        toCrs: signature,
-        projection: {
+        signature: signature,
+        converter: {
           forward: ([x, y, z = 0]) => [x * scale, y * scale, z * scale],
           inverse: ([x, y, z = 0]) => [x / scale, y / scale, z / scale]
         },

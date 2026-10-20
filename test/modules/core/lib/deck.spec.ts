@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {Deck, log, MapView} from '@deck.gl/core';
+import {Deck, Layer, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -1448,4 +1448,70 @@ test('Deck#props omitted are unchanged', async () => {
       }
     });
   });
+});
+
+test('Deck waits for asynchronous viewports before initializing and updating layers', async () => {
+  const initialGate = createDeferred<void>();
+  const nextGate = createDeferred<void>();
+  const readyViews = new WeakSet<MapView>();
+  class PendingView extends MapView {
+    initialize() {
+      const gate = this.id === 'initial' ? initialGate : nextGate;
+      return gate.promise.then(() => {
+        readyViews.add(this);
+      });
+    }
+    makeViewport(options) {
+      return readyViews.has(this) ? super.makeViewport(options) : null;
+    }
+  }
+  class PendingLayer extends Layer {
+    initializeState() {}
+    shouldUpdateState() {
+      return true;
+    }
+  }
+  PendingLayer.layerName = 'PendingLayer';
+  const layer = new PendingLayer({id: 'pending-layer'});
+  const initialize = vi.spyOn(layer, '_initialize');
+  const update = vi.spyOn(layer, '_update');
+  const updateState = vi.spyOn(layer, 'updateState');
+  const errors = vi.fn();
+  const loaded = createDeferred<void>();
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    views: new PendingView({id: 'initial'}),
+    viewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: [layer],
+    onLoad: () => loaded.resolve(),
+    onError: errors
+  });
+  try {
+    await loaded.promise;
+    await sleep(50);
+    expect(deck.getViewports()).toHaveLength(0);
+    expect(initialize).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    initialGate.resolve();
+    await vi.waitFor(() => expect(initialize).toHaveBeenCalledTimes(1));
+    expect(deck.getViewports()).toHaveLength(1);
+    expect(layer.context.viewport.id).toBe('initial');
+
+    deck.setProps({views: new PendingView({id: 'next'})});
+    update.mockClear();
+    updateState.mockClear();
+    layer.setNeedsUpdate();
+    await sleep(50);
+    expect(deck.getViewports()).toHaveLength(0);
+    expect(update).not.toHaveBeenCalled();
+    nextGate.resolve();
+    await vi.waitFor(() => expect(updateState).toHaveBeenCalled());
+    expect(initialize).toHaveBeenCalledTimes(1);
+    expect(layer.internalState!.viewport!.id).toBe('next');
+    expect(errors).not.toHaveBeenCalled();
+  } finally {
+    deck.finalize();
+  }
 });

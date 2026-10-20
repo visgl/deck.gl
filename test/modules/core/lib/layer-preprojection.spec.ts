@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
 import {Layer, LayerManager, Viewport, CompositeLayer} from '@deck.gl/core';
-import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {getEmptyPickingInfo} from '@deck.gl/core/lib/picking/pick-info';
@@ -75,9 +75,9 @@ function getPositions(layer: PositionLayer) {
 }
 
 test('Cartesian sublayers bypass preprojection and use map-meter XYZ', () => {
-  const viewport = new CustomProjectionViewport({
-    projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    getDistanceScale: () => [0.25, 1]
+  const viewport = createTestViewport({
+    converter: {forward: p => p.slice(), inverse: p => p.slice()},
+    distanceScale: () => [0.25, 1, 1]
   });
   const manager = createManager(viewport);
   const transform = vi.spyOn(viewport, 'preproject');
@@ -135,8 +135,8 @@ test('Layer position precision follows projection mode, not preproject availabil
 });
 
 test('Cartesian model matrix updates do not rebuild position attributes', () => {
-  const viewport = new CustomProjectionViewport({
-    projection: {forward: p => p.slice(), inverse: p => p.slice()}
+  const viewport = createTestViewport({
+    converter: {forward: p => p.slice(), inverse: p => p.slice()}
   });
   const manager = createManager(viewport);
   const accessor = vi.fn(position => position);
@@ -232,7 +232,7 @@ test('Projection-dependent generated attributes do not acquire position transfor
 
 test('Layer refreshes custom projection attributes only when CRS metadata changes', () => {
   const projection = {forward: p => p.slice(), inverse: p => p.slice()};
-  const initial = new CustomProjectionViewport({projection});
+  const initial = createTestViewport({converter: projection});
   const manager = createManager(initial);
   const accessor = vi.fn(point => point);
   const layer = new PositionLayer({data: [[2, 3, 4]], getPosition: accessor});
@@ -244,29 +244,21 @@ test('Layer refreshes custom projection attributes only when CRS metadata change
       forward: ([x, y, z]) => [x * 2, y, z],
       inverse: ([x, y, z]) => [x / 2, y, z]
     };
-    for (const crs of [
-      {},
-      {fromCrs: 'EPSG:4326', toCrs: 'first'},
-      {fromCrs: 'WGS84', toCrs: 'first'},
-      {fromCrs: 'WGS84', toCrs: 'second'}
-    ]) {
-      const viewport = new CustomProjectionViewport({
-        ...crs,
-        projection: changedProjection
-      });
+    for (const [crs, changed] of [
+      ['test', false],
+      ['first', true],
+      ['first', false],
+      ['second', true]
+    ] as const) {
+      const viewport = createTestViewport({signature: crs, converter: changedProjection});
       manager.activateViewport(viewport);
       layer.activateViewport(viewport);
-      if ('fromCrs' in crs) {
-        expect(accessor).toHaveBeenCalledTimes(1);
-        expect(getPositions(layer)).toEqual([4, 3, 4]);
-      } else {
-        expect(accessor).not.toHaveBeenCalled();
-        expect(getPositions(layer)).toEqual([2, 3, 4]);
-      }
+      expect(accessor).toHaveBeenCalledTimes(changed ? 1 : 0);
+      expect(getPositions(layer)).toEqual(crs === 'test' ? [2, 3, 4] : [4, 3, 4]);
       accessor.mockClear();
-      const replacement = new CustomProjectionViewport({
-        ...crs,
-        projection: {...changedProjection}
+      const replacement = createTestViewport({
+        signature: crs,
+        converter: {...changedProjection}
       });
       manager.activateViewport(replacement);
       layer.activateViewport(replacement);
