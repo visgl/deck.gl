@@ -10,6 +10,7 @@
 import * as Polygon from './polygon';
 import {Tesselator} from '@deck.gl/core';
 import {
+  subdividePolyline,
   cutPolygonByGrid,
   cutPolygonByMercatorBounds,
   modifyPolygonWindingDirection,
@@ -43,6 +44,7 @@ export default class PolygonTesselator extends Tesselator<
     fp64?: boolean;
     IndexType?: Uint32ArrayConstructor | Uint16ArrayConstructor;
     resolution?: number;
+    projectionTolerance?: number;
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
@@ -128,7 +130,7 @@ export default class PolygonTesselator extends Tesselator<
     if (this.normalize) {
       const normalizedPolygon = Polygon.normalize(polygon, size);
       if (this.opts.resolution) {
-        return cutPolygonByGrid(
+        const parts = cutPolygonByGrid(
           Polygon.getPositions(normalizedPolygon),
           Polygon.getHoleIndices(normalizedPolygon),
           {
@@ -137,9 +139,10 @@ export default class PolygonTesselator extends Tesselator<
             edgeTypes: true
           }
         ) as CutPolygon[];
+        return this.refinePolygons(parts, size);
       }
       if (this.opts.wrapLongitude) {
-        return cutPolygonByMercatorBounds(
+        const parts = cutPolygonByMercatorBounds(
           Polygon.getPositions(normalizedPolygon),
           Polygon.getHoleIndices(normalizedPolygon),
           {
@@ -148,11 +151,61 @@ export default class PolygonTesselator extends Tesselator<
             edgeTypes: true
           }
         ) as CutPolygon[];
+        return this.refinePolygons(parts, size);
       }
-      return normalizedPolygon;
+      return this.opts.projectionTolerance
+        ? this.refinePolygons([normalizedPolygon], size)
+        : normalizedPolygon;
     }
     // normalize is explicitly set to false, assume that user passed in already normalized polygons
     return polygon as NormalizedPolygonGeometry;
+  }
+
+  /** Preserve hole offsets and outgoing cut-edge visibility while densifying each ring. */
+  private refinePolygons(
+    polygons: (NormalizedPolygonGeometry | CutPolygon)[],
+    size: number
+  ): CutPolygon[] {
+    const {projectionTolerance, transform} = this.opts;
+    if (!projectionTolerance) return polygons as CutPolygon[];
+    if (!transform) throw new Error('Projection refinement requires preprojected polygons');
+    return polygons.map(polygon => {
+      const input = Polygon.getPositions(polygon);
+      const holes = Polygon.getHoleIndices(polygon);
+      const inputEdges = (polygon as CutPolygon).edgeTypes;
+      const positions: number[] = [];
+      const holeIndices: number[] = [];
+      const edgeTypes: number[] = [];
+      let start = 0;
+      for (const end of [...(holes || []), input.length]) {
+        if (start) holeIndices.push(positions.length);
+        // Grid clipping may return an implicitly closed ring. Include its closing
+        // edge in refinement before projected-space winding and triangulation.
+        const ring = Array.from(input.slice(start, end));
+        if (
+          ring.length &&
+          ring.slice(0, size).some((value, i) => value !== ring[ring.length - size + i])
+        ) {
+          ring.push(...ring.slice(0, size));
+        }
+        const refined = subdividePolyline(ring, {
+          size: size as 2 | 3,
+          targetSize: 3,
+          transform: position => transform(Array.from(position)),
+          tolerance: projectionTolerance
+        });
+        for (const value of refined.sourcePositions) positions.push(value);
+        for (let i = 0; i < refined.segmentIndices.length; i++) {
+          // Endpoints belong to the preceding segment; visibility belongs to the outgoing edge.
+          const segment = refined.segmentIndices[i] + (refined.segmentFractions[i] === 1 ? 1 : 0);
+          const sourceIndex = start / size + segment;
+          edgeTypes.push(inputEdges ? inputEdges[sourceIndex] : 1);
+        }
+        edgeTypes[edgeTypes.length - 1] = 0;
+        start = end;
+      }
+      return {positions, holeIndices, edgeTypes};
+    });
   }
 
   /** Implement base Tesselator interface */

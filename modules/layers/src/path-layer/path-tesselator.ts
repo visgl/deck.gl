@@ -4,6 +4,7 @@
 
 import {Tesselator} from '@deck.gl/core';
 import {normalizePath} from './path';
+import {subdividePolyline} from '@math.gl/polygon';
 
 import type {TypedArray} from '@math.gl/core';
 import type {PathGeometry, FlatPathGeometry, NormalizedPathGeometry} from './path';
@@ -20,6 +21,7 @@ export default class PathTesselator extends Tesselator<
   {
     fp64?: boolean;
     resolution?: number;
+    projectionTolerance?: number;
     wrapLongitude?: boolean;
     loop?: boolean;
     isWebGPU?: boolean;
@@ -82,11 +84,24 @@ export default class PathTesselator extends Tesselator<
   }
 
   protected prepareGeometry(path: PathGeometry): PathGeometry {
-    return (
+    const prepared = (
       this.normalize
         ? normalizePath(path, this.inputPositionSize, this.opts.resolution, this.opts.wrapLongitude)
         : path
-    ) as PathGeometry;
+    ) as NormalizedPathGeometry;
+    const {projectionTolerance, transform} = this.opts;
+    if (!projectionTolerance) return prepared as PathGeometry;
+    if (!this.normalize || !transform) {
+      throw new Error('Projection refinement requires normalized, preprojected paths');
+    }
+    const refine = (part: FlatPathGeometry) =>
+      subdividePolyline(part, {
+        size: this.inputPositionSize as 2 | 3,
+        targetSize: 3,
+        transform: position => transform(Array.from(position)),
+        tolerance: projectionTolerance
+      }).sourcePositions;
+    return (isCut(prepared) ? prepared.map(refine) : refine(prepared)) as PathGeometry;
   }
 
   /* Implement base Tesselator interface */

@@ -124,3 +124,94 @@ test('projected polygon winding preserves cut edges and triangulated area', () =
     release(tesselator);
   }
 });
+
+test('adaptive path edges bound projected chord error and preserve source altitude', () => {
+  const path = [
+    [0, 0, 3],
+    [8, 0, 7]
+  ];
+  const tolerance = 0.05;
+  const tesselator = new PathTesselator({
+    data: [path],
+    getGeometry: p => p,
+    positionFormat: 'XYZ',
+    fp64: true,
+    projectionTolerance: tolerance,
+    transform: ([x, y, z]) => [x, y + x * x, z]
+  });
+  try {
+    expect(tesselator.instanceCount).toBeGreaterThan(2);
+    const positions = tesselator.get('positions')!;
+    for (const i of tesselator.getPathSegmentIndices(0)) {
+      const x = positions[i * 3],
+        nextX = positions[(i + 1) * 3];
+      expect((nextX - x) ** 2 / 4).toBeLessThanOrEqual(tolerance);
+      expect(positions[i * 3 + 1]).toBeCloseTo(x * x, 10);
+      expect(positions[i * 3 + 2]).toBeCloseTo(3 + x / 2, 10);
+    }
+    expect(path).toEqual([
+      [0, 0, 3],
+      [8, 0, 7]
+    ]);
+  } finally {
+    release(tesselator);
+  }
+});
+
+test('adaptive polygon rings preserve holes and hidden cut edges after winding reversal', () => {
+  const polygon = [
+    [
+      [0, 0],
+      [8, 0],
+      [8, 8],
+      [0, 8]
+    ],
+    [
+      [2, 2],
+      [2, 6],
+      [6, 6],
+      [6, 2]
+    ]
+  ];
+  for (const resolution of [0, 4]) {
+    const tesselator = new PolygonTesselator({
+      data: [polygon],
+      getGeometry: p => p,
+      positionFormat: 'XY',
+      fp64: true,
+      projectionTolerance: 0.05,
+      resolution,
+      transform: ([x, y]) => [-x, y + x * x, 3]
+    });
+    try {
+      const positions = tesselator.get('positions')!,
+        indices = tesselator.get('indices')!,
+        valid = tesselator.get('vertexValid')!;
+      expect(tesselator.instanceCount).toBeGreaterThan(10);
+      let area = 0,
+        visibleVerticalLength = 0;
+      for (let i = 0; i < indices.length; i += 3) {
+        const a = indices[i] * 3,
+          b = indices[i + 1] * 3,
+          c = indices[i + 2] * 3;
+        area +=
+          Math.abs(
+            (positions[b] - positions[a]) * (positions[c + 1] - positions[a + 1]) -
+              (positions[c] - positions[a]) * (positions[b + 1] - positions[a + 1])
+          ) / 2;
+      }
+      for (let i = 0; i < tesselator.instanceCount; i++) {
+        expect(positions[i * 3 + 2]).toBe(3);
+        if (valid[i] && positions[i * 3] === positions[(i + 1) * 3]) {
+          // Grid cut edges are vertical too: they must not add to the true ring boundaries.
+          visibleVerticalLength += Math.abs(positions[(i + 1) * 3 + 1] - positions[i * 3 + 1]);
+        }
+      }
+
+      expect(area).toBeCloseTo(48, 6);
+      expect(visibleVerticalLength).toBeCloseTo(24, 6);
+    } finally {
+      release(tesselator);
+    }
+  }
+});
