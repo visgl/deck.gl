@@ -7,7 +7,7 @@
 import type {ShaderModule} from '@luma.gl/shadertools';
 import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
-import type {Texture} from '@luma.gl/core';
+import type {Parameters, RenderPass, Texture} from '@luma.gl/core';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
@@ -17,11 +17,21 @@ export type TerrainModuleProps = {
   isPicking: boolean;
   heightMap: Texture | null;
   heightMapBounds?: Bounds | null;
+  /** The height map holds meters rather than common space units */
+  heightMapInMeters?: boolean;
   dummyHeightMap: Texture;
   terrainCover?: TerrainCover | null;
   drawToTerrainHeightMap?: boolean;
   useTerrainHeightMap?: boolean;
   terrainSkipRender?: boolean;
+  /** Draws the surface that stands in for external terrain when picking, from the external terrain layer's draw */
+  drawPickingSurface?:
+    | ((opts: {
+        renderPass: RenderPass;
+        parameters: Parameters;
+        shaderModuleProps: Record<string, any>;
+      }) => void)
+    | null;
 };
 
 type TerrainModuleUniforms = {
@@ -45,7 +55,9 @@ export const TERRAIN_MODE = {
   /** A terrain layer rendering to screen, using the cover fbo as texture */
   USE_COVER_ONLY: 4,
   /** Draped layer is rendered into a texture, and never to screen */
-  SKIP: 5
+  SKIP: 5,
+  /** An offset layer reading ground elevation in meters from the height map */
+  USE_HEIGHT_MAP_METERS: 6
 };
 
 const TERRAIN_MODE_CONSTANTS = Object.keys(TERRAIN_MODE)
@@ -102,7 +114,7 @@ if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
   vec2 texCoords = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
   position = vec4(texCoords * 2.0 - 1.0, 0.0, 1.0);
 }
-if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP || terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP_METERS) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
@@ -112,7 +124,10 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec2 texCoords = (anchorMercPos - terrain.bounds.xy) / terrain.bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
-    if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP_METERS) {
+      // Raise the object by the displacement of its anchor, in any projection mode
+      geometry.position.xyz += project_position(vec3(anchor.xy, terrainZ)) - anchorCommon;
+    } else if (project.projectionMode == PROJECTION_MODE_GLOBE) {
       // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
       // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
       terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
@@ -157,6 +172,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         drawToTerrainHeightMap,
         heightMap,
         heightMapBounds,
+        heightMapInMeters,
         dummyHeightMap,
         terrainCover,
         useTerrainHeightMap,
@@ -174,7 +190,7 @@ if ((terrain.mode == TERRAIN_MODE_USE_COVER) || (terrain.mode == TERRAIN_MODE_US
         mode = TERRAIN_MODE.WRITE_HEIGHT_MAP;
         bounds = heightMapBounds!;
       } else if (useTerrainHeightMap && heightMap) {
-        mode = TERRAIN_MODE.USE_HEIGHT_MAP;
+        mode = heightMapInMeters ? TERRAIN_MODE.USE_HEIGHT_MAP_METERS : TERRAIN_MODE.USE_HEIGHT_MAP;
         sampler = heightMap;
         bounds = heightMapBounds!;
       } else if (terrainCover) {

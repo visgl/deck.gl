@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Texture} from '@luma.gl/core';
+import {Device, Parameters, RenderPass, Texture} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
 
 import {terrainModule, TerrainModuleProps} from './shader-module';
@@ -10,8 +10,18 @@ import {TerrainCover} from './terrain-cover';
 import {TerrainPass} from './terrain-pass';
 import {TerrainPickingPass, TerrainPickingPassRenderOptions} from './terrain-picking-pass';
 import {HeightMapBuilder} from './height-map-builder';
+import {TerrainPickingSurface} from './terrain-picking-surface';
+import {getExternalTerrain} from './external-terrain';
+import {makeViewport} from '../utils/projection-utils';
 
 import type {Effect, EffectContext, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
+import type {ExternalTerrain, ExternalTerrainDrapeRenderer} from './external-terrain';
+
+/**
+ * Pixels around the offset layers covered by a height map of external terrain, which keeps
+ * objects on the edge of the layers' bounds, or a single point, inside the height map
+ */
+const EXTERNAL_HEIGHT_MAP_PADDING = 32;
 
 /** Class to manage terrain effect */
 export class TerrainEffect implements Effect {
@@ -31,8 +41,25 @@ export class TerrainEffect implements Effect {
   private terrainPickingPass!: TerrainPickingPass;
   /** One texture for each primitive terrain layer, into which the draped layers render */
   private terrainCovers: Map<string, TerrainCover> = new Map();
+  /** Terrain drawn by another renderer, which a terrain layer stands for */
+  private externalTerrain: ExternalTerrain | null = null;
+  /** The layer that stands for the external terrain, which draws it in the picking pass */
+  private externalTerrainLayerId: string | null = null;
+  /** The `id` of the external terrain that the height map holds */
+  private externalHeightMapId: string | null = null;
+  /** Layers draped over the external terrain, with the options to draw them */
+  private externalDrape: {layers: Layer[]; opts: PreRenderOptions; viewport: Viewport} | null =
+    null;
+  /** True if a terrain layer is present, which offset and draped layers follow */
+  private hasTerrain: boolean = false;
+  private device?: Device;
+  /** Stands in for the external terrain in the picking buffer, once draped layers are pickable */
+  private pickingSurface?: TerrainPickingSurface;
+  /** True if the external terrain layer draws the picking surface in the current picking pass */
+  private drawsPickingSurface: boolean = false;
 
   setup({device, deck}: EffectContext) {
+    this.device = device;
     this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
@@ -52,6 +79,7 @@ export class TerrainEffect implements Effect {
   }
 
   preRender(opts: PreRenderOptions): void {
+    this.drawsPickingSurface = false;
     // @ts-expect-error pickZ only defined in picking pass
     if (opts.pickZ) {
       // Do not update if picking attributes
@@ -71,7 +99,35 @@ export class TerrainEffect implements Effect {
       opts as TerrainPickingPassRenderOptions
     );
 
-    const terrainLayers = layers.filter(l => l.props.operation.includes('terrain'));
+    if (!isPicking) {
+      // Includes terrain layers that have not loaded yet, which keep the draped layers hidden
+      const allTerrainLayers = opts.layers.filter(l => l.props.operation.includes('terrain'));
+      // Terrain layers that deck.gl draws take precedence over terrain drawn by another renderer
+      const externalTerrainLayer = allTerrainLayers.every(getExternalTerrain)
+        ? allTerrainLayers[0]
+        : undefined;
+      this._setExternalTerrain(
+        externalTerrainLayer ? getExternalTerrain(externalTerrainLayer) : null
+      );
+      this.externalTerrainLayerId = externalTerrainLayer?.id ?? null;
+      this.hasTerrain = allTerrainLayers.length > 0;
+    }
+
+    if (this.externalTerrain) {
+      if (isPicking) {
+        this._updateExternalPickingSurface(layers, viewport, opts);
+      } else {
+        this._updateExternalHeightMap(this.externalTerrain, opts.layers, viewport);
+        this._updateExternalDrape(this.externalTerrain, opts, viewport);
+        // Covers of terrain layers that deck.gl drew before
+        this._pruneTerrainCovers();
+      }
+      return;
+    }
+
+    const terrainLayers = layers.filter(
+      l => l.props.operation.includes('terrain') && !getExternalTerrain(l)
+    );
     if (terrainLayers.length === 0) {
       return;
     }
@@ -121,15 +177,27 @@ export class TerrainEffect implements Effect {
         isPicking: this.isPicking,
         heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
         heightMapBounds: this.heightMap?.bounds,
+        heightMapInMeters: this.externalTerrain !== null,
         dummyHeightMap: this.dummyHeightMap!,
         terrainCover,
-        useTerrainHeightMap: terrainDrawMode === 'offset',
-        terrainSkipRender: terrainDrawMode === 'drape' || !layer.props.operation.includes('draw')
+        useTerrainHeightMap: terrainDrawMode === 'offset' && this.hasTerrain,
+        terrainSkipRender:
+          (terrainDrawMode === 'drape' && this.hasTerrain) ||
+          !layer.props.operation.includes('draw'),
+        drawPickingSurface:
+          this.drawsPickingSurface && layer.id === this.externalTerrainLayerId
+            ? this._drawPickingSurface
+            : null
       }
     };
   }
 
   cleanup({deck}: EffectContext): void {
+    this._setExternalTerrain(null);
+
+    this.pickingSurface?.delete();
+    this.pickingSurface = undefined;
+
     if (this.dummyHeightMap) {
       this.dummyHeightMap.delete();
       this.dummyHeightMap = undefined;
@@ -174,6 +242,195 @@ export class TerrainEffect implements Effect {
       }
     });
   }
+
+  /**
+   * Hands the draped layers to new external terrain, and takes them back from the previous one.
+   * A new object with the same `id` is the same terrain, so it only receives the renderer.
+   */
+  private _setExternalTerrain(externalTerrain: ExternalTerrain | null) {
+    const previous = this.externalTerrain;
+    if (externalTerrain === previous) {
+      return;
+    }
+    this.externalTerrain = externalTerrain;
+    if (externalTerrain?.id !== previous?.id) {
+      previous?.setDrapeRenderer?.(null);
+      this.externalHeightMapId = null;
+      this.externalDrape = null;
+    }
+    externalTerrain?.setDrapeRenderer?.(this._renderExternalDrape);
+  }
+
+  /**
+   * Asks the external terrain for the ground heights under the offset layers and the pickable draped
+   * layers, in meters, when the viewport, the layers or the terrain change: the tiles a host draws
+   * depend on its camera. It covers the layers of every `layerFilter`, since a host that draws the
+   * layers in groups shares one height map between them.
+   */
+  private _updateExternalHeightMap(
+    externalTerrain: ExternalTerrain,
+    layers: Layer[],
+    viewport: Viewport
+  ) {
+    const layersOnTerrain = layers.filter(
+      l =>
+        !l.isComposite &&
+        l.props.visible &&
+        (l.state.terrainDrawMode === 'offset' ||
+          (l.state.terrainDrawMode === 'drape' && l.props.pickable))
+    );
+    if (!this.heightMap || layersOnTerrain.length === 0) {
+      return;
+    }
+    const shouldUpdate = this.heightMap.shouldUpdate({
+      layers: layersOnTerrain,
+      viewport,
+      padding: EXTERNAL_HEIGHT_MAP_PADDING
+    });
+    if (!shouldUpdate && externalTerrain.id === this.externalHeightMapId) {
+      return;
+    }
+    const target = this.heightMap.getRenderFramebuffer();
+    const {renderViewport, bounds} = this.heightMap;
+    if (!target || !renderViewport || !bounds) {
+      return;
+    }
+    target.resize({
+      width: Math.ceil(renderViewport.width),
+      height: Math.ceil(renderViewport.height)
+    });
+    externalTerrain.renderHeightMap({target, bounds});
+    this.externalHeightMapId = externalTerrain.id;
+  }
+
+  /**
+   * Draws the picking colors of the draped layers over the height map's bounds, like a terrain cover,
+   * for the surface that the external terrain layer draws in its place
+   */
+  private _updateExternalPickingSurface(
+    layers: Layer[],
+    viewport: Viewport,
+    opts: PreRenderOptions
+  ) {
+    const drapeLayers = layers.filter(l => l.state.terrainDrawMode === 'drape');
+    const bounds = this.heightMap?.renderViewport ? this.heightMap.bounds : null;
+    const coverViewport =
+      bounds && makeViewport({bounds, zoom: Math.ceil(viewport.zoom + 0.5), viewport});
+    if (!drapeLayers.some(l => l.props.pickable) || !bounds || !coverViewport || !this.device) {
+      return;
+    }
+    this.pickingSurface ??= new TerrainPickingSurface(this.device);
+    this.pickingSurface.setBounds(bounds);
+    const target = this.pickingSurface.getPickingCover(coverViewport.width, coverViewport.height);
+    this.terrainPickingPass.renderPickingCover(target, coverViewport, {
+      ...opts,
+      effects: opts.effects?.filter(e => e !== this),
+      layers: drapeLayers,
+      shaderModuleProps: {
+        terrain: {
+          dummyHeightMap: this.dummyHeightMap,
+          terrainSkipRender: false
+        },
+        project: {
+          devicePixelRatio: 1
+        }
+      }
+    });
+    this.drawsPickingSurface = true;
+  }
+
+  /** Draws the picking surface when the external terrain layer draws in the picking pass */
+  private _drawPickingSurface = ({
+    renderPass,
+    parameters,
+    shaderModuleProps
+  }: {
+    renderPass: RenderPass;
+    parameters: Parameters;
+    shaderModuleProps: Record<string, any>;
+  }) => {
+    const heightMap = this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture;
+    if (heightMap) {
+      this.pickingSurface?.draw({
+        renderPass,
+        parameters,
+        project: shaderModuleProps.project,
+        heightMap
+      });
+    }
+  };
+
+  /** Remembers the draped layers for the external terrain, and tells it when they change */
+  private _updateExternalDrape(
+    externalTerrain: ExternalTerrain,
+    opts: PreRenderOptions,
+    viewport: Viewport
+  ) {
+    const layers = opts.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
+    const previousLayers = this.externalDrape?.layers ?? [];
+    let changed =
+      layers.length !== previousLayers.length ||
+      layers.some((l, i) => l.id !== previousLayers[i].id);
+    for (const layer of layers) {
+      if (layer.state.terrainCoverNeedsRedraw) {
+        layer.state.terrainCoverNeedsRedraw = false;
+        changed = true;
+      }
+    }
+    this.externalDrape = {
+      layers,
+      opts: {...opts, effects: opts.effects?.filter(e => e !== this)},
+      viewport
+    };
+    if (changed) {
+      externalTerrain.onDrapeChange?.(layers);
+    }
+  }
+
+  /** Draws the draped layers into a framebuffer of the external terrain's renderer */
+  private _renderExternalDrape: ExternalTerrainDrapeRenderer = ({
+    target,
+    bounds,
+    layerFilter,
+    devicePixelRatio = 1
+  }) => {
+    const drape = this.externalDrape;
+    // The host may draw before the next preRender, after layers were updated or removed
+    const layers = drape?.layers
+      .map(layer => layer.getCurrentLayer())
+      .filter(layer => layer !== null);
+    if (!drape || !layers?.length) {
+      return;
+    }
+    const width = target.width / devicePixelRatio;
+    const height = target.height / devicePixelRatio;
+    const viewport = makeViewport({
+      bounds,
+      width,
+      height,
+      // Given, because makeViewport caps the zoom it derives at 20
+      zoom: Math.log2(Math.min(width / (bounds[2] - bounds[0]), height / (bounds[3] - bounds[1]))),
+      viewport: drape.viewport
+    });
+    if (!viewport) {
+      return;
+    }
+    this.terrainPass.renderDrapedLayers(target, viewport, {
+      ...drape.opts,
+      views: undefined,
+      layers,
+      layerFilter,
+      shaderModuleProps: {
+        terrain: {
+          dummyHeightMap: this.dummyHeightMap,
+          terrainSkipRender: false
+        },
+        project: {
+          devicePixelRatio
+        }
+      }
+    });
+  };
 
   private _updateTerrainCovers(
     terrainLayers: Layer[],
@@ -251,6 +508,7 @@ export class TerrainEffect implements Effect {
     const idsToRemove: string[] = [];
     for (const [id, terrainCover] of this.terrainCovers) {
       if (!terrainCover.isActive) {
+        terrainCover.delete();
         idsToRemove.push(id);
       }
     }
