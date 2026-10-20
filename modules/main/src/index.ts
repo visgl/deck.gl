@@ -190,7 +190,6 @@ export type {
   CustomProjectionViewState,
   CustomProjectionViewProps,
   CustomProjectionViewportOptions,
-  ProjectionConverter,
   CoordinateSystem,
   ChangeFlags,
   LayersList,

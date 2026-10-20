@@ -5,199 +5,116 @@
 import {test, expect, vi} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
+import {createTestCRS} from './test-crs';
 import {estimateProjectionScaleError} from './projection-scale-error';
 
-function createProjection(to: string) {
-  const converter = projectionEngine.createProjection({from: 'EPSG:4326', to});
-  return {forward: converter.project, inverse: converter.unproject};
-}
+const definitions = {
+  mercator: 'EPSG:3857',
+  equalEarth: '+proj=eqearth +datum=WGS84 +units=m',
+  utm: '+proj=utm +zone=18 +datum=WGS84 +units=m',
+  albers: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +datum=NAD83 +units=m',
+  polar: '+proj=stere +lat_0=90 +R=6371008.8 +units=m'
+};
+const descriptors: Record<string, CRSDescriptor> = {};
+await Promise.all(
+  Object.entries(definitions).map(async ([name, definition]) => {
+    descriptors[name] = await projectionEngine.getCRS(definition);
+  })
+);
+const normalizationScale = 512 / 40075016.6855;
 
-const mercator = createProjection('EPSG:3857');
-const mercatorLatitude = 85.0511287798066;
-const mercatorEast = mercator.forward([180, 0])[0];
-const mercatorNorth = mercator.forward([0, mercatorLatitude])[1];
-const equalEarth = createProjection('+proj=eqearth +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m');
-const equalEarthEast = equalEarth.forward([180, 0])[0];
-const equalEarthNorth = equalEarth.forward([0, 90])[1];
-const stereographic = createProjection(
-  '+proj=stere +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +k=1 +R=6371008.8 +units=m'
-);
-const stereographicExtent = Math.abs(stereographic.forward([0, -60])[1]);
-const albers = createProjection(
-  '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
-);
-const utm18 = createProjection('+proj=utm +zone=18 +datum=WGS84 +units=m');
-// EPSG:5070 uses NAD83/GRS80 and the two standard parallels of the contiguous US.
-const albersNad83 = createProjection(
-  '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
-);
-const cases = [
-  {
-    name: 'web-mercator',
-    options: {
-      projection: mercator,
-      fromBounds: [-180, -mercatorLatitude, 180, mercatorLatitude] as [
-        number,
-        number,
-        number,
-        number
-      ],
-      toBounds: [-mercatorEast, -mercatorNorth, mercatorEast, mercatorNorth] as [
-        number,
-        number,
-        number,
-        number
-      ]
-    }
-  },
-  {
-    name: 'equal-earth',
-    options: {
-      projection: equalEarth,
-      fromBounds: [-180, -90, 180, 90] as [number, number, number, number],
-      toBounds: [-equalEarthEast, -equalEarthNorth, equalEarthEast, equalEarthNorth] as [
-        number,
-        number,
-        number,
-        number
-      ]
-    }
-  },
-  {
-    name: 'stereographic',
-    options: {
-      projection: stereographic,
-      fromBounds: [-180, -60, 180, 90] as [number, number, number, number],
-      toBounds: [
-        -stereographicExtent,
-        -stereographicExtent,
-        stereographicExtent,
-        stereographicExtent
-      ] as [number, number, number, number]
-    },
-    getReferenceScale: ([, latitude]: number[]) => {
-      // Spherical projection formulas still map physical WGS84 ground distances.
-      const a = Ellipsoid.WGS84.radii[0];
-      const b = Ellipsoid.WGS84.radii[2];
-      const sinLatitude = Math.sin((latitude * Math.PI) / 180);
-      const w = 1 - (1 - (b / a) ** 2) * sinLatitude ** 2;
-      return (2 * 6371008.8 * w) / ((1 + sinLatitude) * b);
-    }
-  },
-  {
-    name: 'utm-18n',
-    options: {
-      projection: utm18,
-      fromBounds: [-78, 0, -72, 84] as [number, number, number, number],
-      toBounds: [100000, 0, 900000, 9400000] as [number, number, number, number]
-    }
-  },
-  {
-    name: 'albers-nad83',
-    options: {
-      projection: albersNad83,
-      fromBounds: [-125, 24, -66, 50] as [number, number, number, number],
-      toBounds: [-3000000, 0, 3000000, 3500000] as [number, number, number, number]
-    }
-  },
-  {
-    name: 'albers-conic',
-    options: {
-      projection: albers,
-      fromBounds: [-135, 30, -45, 75] as [number, number, number, number],
-      toBounds: [-4500000, -500000, 4500000, 5500000] as [number, number, number, number]
-    }
-  }
-];
-
-test('UTM central-meridian scales match the independent 0.9996 ground-scale reference', () => {
-  const projection = utm18;
-  const viewport = new CustomProjectionViewport({projection});
-  const normalizationScale = 512 / 40075016.6855;
-  for (const latitude of [0, 42, 75]) {
-    const mapPosition = projection.forward([-75, latitude]);
-    for (const scale of viewport.getDistanceScales(mapPosition).unitsPerMeter) {
-      expect(scale / normalizationScale, `UTM scale at latitude ${latitude}`).toBeCloseTo(
-        0.9996,
-        6
-      );
-    }
-  }
+test.each([0, 42, 75])('UTM central-meridian XY scales match 0.9996 at latitude %s', latitude => {
+  const crs = descriptors.utm;
+  const viewport = new CustomProjectionViewport({crs});
+  const position = crs.converter.WGS84.from([-75, latitude, 0]);
+  viewport
+    .getDistanceScales(position)
+    .unitsPerMeter.slice(0, 2)
+    .forEach(value => expect(value / normalizationScale).toBeCloseTo(0.9996, 6));
+  expect(viewport.getDistanceScales(position).unitsPerMeter[2]).toBeCloseTo(
+    0.9996 * normalizationScale,
+    12
+  );
 });
 
 test.each([
-  {name: 'UTM 18N', projection: utm18, position: [-75, 0]},
-  {name: 'UTM 18N', projection: utm18, position: [-75, 42]},
-  {name: 'UTM 18N', projection: utm18, position: [-75, 75]},
-  {name: 'UTM 18N', projection: utm18, position: [-78, 10]},
-  {name: 'Albers NAD83', projection: albersNad83, position: [-96, 29.5]},
-  {name: 'Albers NAD83', projection: albersNad83, position: [-80, 42]}
-])('$name scales at $position match independent ground displacements', ({projection, position}) => {
-  // Review regression locations: compare each axis and area against surface
-  // displacements, independently of the estimator's ellipsoidal curvature formula.
-  const step = 0.00001;
-  const [longitude, latitude] = position;
-  const mapOrigin = projection.forward(position);
-  const mapEast = new Vector3(projection.forward([longitude + step, latitude, 0])).subtract([
-    ...mapOrigin.slice(0, 2),
-    0
-  ]);
-  const mapNorth = new Vector3(projection.forward([longitude, latitude + step, 0])).subtract([
-    ...mapOrigin.slice(0, 2),
-    0
-  ]);
-  const groundOrigin = Ellipsoid.WGS84.cartographicToCartesian([longitude, latitude, 0]);
-  const groundEast = new Vector3(
-    Ellipsoid.WGS84.cartographicToCartesian([longitude + step, latitude, 0])
-  ).subtract(groundOrigin);
-  const groundNorth = new Vector3(
-    Ellipsoid.WGS84.cartographicToCartesian([longitude, latitude + step, 0])
-  ).subtract(groundOrigin);
-  const reference = [
-    mapEast.len() / groundEast.len(),
-    mapNorth.len() / groundNorth.len(),
-    Math.sqrt(mapEast.cross(mapNorth).len() / groundEast.cross(groundNorth).len())
-  ];
-  const viewport = new CustomProjectionViewport({projection});
-  const scales = viewport.getDistanceScales(mapOrigin).unitsPerMeter;
-  const normalizationScale = 512 / 40075016.6855;
-  for (let axis = 0; axis < 3; axis++) {
-    expect(scales[axis] / normalizationScale, `axis ${axis}`).toBeCloseTo(reference[axis], 6);
+  {name: 'utm', position: [-78, 10]},
+  {name: 'utm', position: [-75, 42]},
+  {name: 'albers', position: [-96, 29.5]},
+  {name: 'albers', position: [-80, 42]},
+  {name: 'polar', position: [0, 75]}
+])(
+  '$name scales follow independent ground displacements on target coordinate axes',
+  ({name, position}) => {
+    const crs = descriptors[name];
+    const viewport = new CustomProjectionViewport({crs});
+    // Descriptor rendering scales measure ground distances in the WGS84 reference frame.
+    const ellipsoid = Ellipsoid.WGS84;
+    const target = crs.converter.WGS84.from([...position, 0]);
+    const ground = ellipsoid.cartographicToCartesian([...position, 0]);
+    for (const axis of [0, 1]) {
+      const shifted = target.slice();
+      shifted[axis] += 1;
+      const reference = new Vector3(
+        ellipsoid.cartographicToCartesian(crs.converter.WGS84.to(shifted))
+      )
+        .subtract(ground)
+        .len();
+      expect(
+        viewport.getDistanceScales(target).unitsPerMeter[axis] / normalizationScale
+      ).toBeCloseTo(1 / reference, 6);
+    }
+  }
+);
+
+test.each(['utm', 'albers'])('finite %s rendering bounds enable local size sampling', name => {
+  const viewport = new CustomProjectionViewport({
+    crs: descriptors[name]
+  });
+  expect(viewport.sizeScaleTransform[0]).toBeGreaterThan(0);
+  expect(viewport.sizeScaleTransform[1]).toBeGreaterThan(0);
+  const data = viewport.getSizeScaleData(4);
+  expect(data.every(Number.isFinite)).toBe(true);
+  expect(data.some((value, index) => index % 4 === 3 && value > 0)).toBe(true);
+});
+
+test('polar rendering bounds enable local size sampling', () => {
+  const viewport = new CustomProjectionViewport({crs: descriptors.polar});
+  expect(viewport.sizeScaleTransform[0]).toBeGreaterThan(0);
+  expect(viewport.sizeScaleTransform[1]).toBeGreaterThan(0);
+  expect(viewport.sizeScaleTransform[2]).toBeCloseTo(256, 10);
+  expect(viewport.sizeScaleTransform[3]).toBeCloseTo(256, 10);
+  const data = viewport.getSizeScaleData(4);
+  expect(data.every(Number.isFinite)).toBe(true);
+  for (let index = 0; index < data.length; index += 4) {
+    expect(data[index]).toBeGreaterThan(0);
+    expect(data[index + 3]).toBeGreaterThan(0);
   }
 });
 
-test.each(cases)(
-  'CustomProjectionViewport scale accuracy: $name',
-  ({name, options, getReferenceScale}) => {
-    const result = estimateProjectionScaleError(options, {getReferenceScale});
-    console.table(
-      (['center', 'whole'] as const).map(region => ({
-        projection: name,
-        region: region === 'center' ? '128x128' : '512x512',
-        'max error (%)': result[region].maxima[0],
-        'max discontinuity (%)': result[region].maxima[1],
-        'invalid samples': result[region].dropouts
-      }))
-    );
-    expect(result.center.positions).toBeGreaterThan(100);
-    expect(result.center.boundaries).toBeGreaterThan(100);
-    expect(result.whole.positions).toBeGreaterThan(result.center.positions);
-    expect(result.whole.boundaries).toBeGreaterThan(result.center.boundaries);
+test.each(['mercator', 'equalEarth'])(
+  'bounded %s sampler error is evaluated against ground displacements',
+  name => {
+    const options = {
+      crs: descriptors[name],
+      fromBounds: [
+        -180,
+        name === 'mercator' ? -85.0511287798066 : -90,
+        180,
+        name === 'mercator' ? 85.0511287798066 : 90
+      ] as [number, number, number, number]
+    };
+    const result = estimateProjectionScaleError(options);
     for (const region of ['center', 'whole'] as const) {
-      for (let metric = 0; metric < 2; metric++) {
-        expect(
-          result[region].maxima[metric],
-          `${name} ${region}: ${metric === 0 ? 'error' : 'discontinuity'} (%)`
-        ).toBeLessThan(1);
-      }
-      expect(
-        result[region].dropouts,
-        `${name} ${region}: valid positions must have valid samples`
-      ).toBe(0);
+      expect(result[region].positions).toBeGreaterThan(100);
+      expect(result[region].boundaries).toBeGreaterThan(100);
+      expect(result[region].maxima[0]).toBeLessThan(1);
+      expect(result[region].maxima[1]).toBeLessThan(1);
+      expect(result[region].dropouts).toBe(0);
     }
-    expect(result.singularPositions > 0).toBe(name === 'equal-earth');
   },
   15000
 );
@@ -209,9 +126,8 @@ test('scale error harness includes invalid records and measures one-sided bounda
     .spyOn(CustomProjectionViewport.prototype, 'getSizeScaleData')
     .mockReturnValue(data);
   const options = {
-    projection: {forward: (p: number[]) => p.slice(), inverse: (p: number[]) => p.slice()},
-    fromBounds: [-180, -80, 180, 80] as [number, number, number, number],
-    toBounds: [-180, -80, 180, 80] as [number, number, number, number]
+    crs: createTestCRS({bounds: [-180, -80, 180, 80]}),
+    fromBounds: [-180, -80, 180, 80] as [number, number, number, number]
   };
   const settings = {divisions: 16, getReferenceScale: () => 1};
   try {

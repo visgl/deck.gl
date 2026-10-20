@@ -2114,10 +2114,22 @@
   dependencies:
     "@math.gl/types" "5.0.0-alpha.15"
 
+"@math.gl/core@5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/core/-/core-5.0.0-alpha.17.tgz#6ed67a98d4c6bb5d6108c90bdba5233909991d35"
+  integrity sha512-/2UGqFFITsmJ4N5dMIYWZhUPaiIU+fOgDhgh+Tq9YL0y+WN/tSsBL6Ej8tQ36PQI/YpEwaL3WBw4XzyxDrnlLA==
+  dependencies:
+    "@math.gl/types" "5.0.0-alpha.17"
+
 "@math.gl/crs@5.0.0-alpha.15":
   version "5.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@math.gl/crs/-/crs-5.0.0-alpha.15.tgz#6cbe69b18463c07b75adb65992df91bb4dc3d52d"
   integrity sha512-6N3MuSnxSE2PN/oMpKn2LXBM/B+mKzIf9WMycEuW8Ndw5HgaYZKaxy/fRMb4o4R+cPafNTO7sak3ziu31KactA==
+
+"@math.gl/crs@5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/crs/-/crs-5.0.0-alpha.17.tgz#b6812172fabc1b72ab69d8c7ab444b1c175e0ad0"
+  integrity sha512-MSkM7XRi+hK7zbxGkFLhiGcLUxQvWjpUHHy66PdkoKZ243CVr4IF3hLgyUTQW+iL+c6PXHh2TM39ow5+RnTr1g==
 
 "@math.gl/culling@5.0.0-alpha.15", "@math.gl/culling@^5.0.0-alpha.15":
   version "5.0.0-alpha.15"
@@ -2186,13 +2198,21 @@
   dependencies:
     "@math.gl/core" "5.0.0-alpha.15"
 
-"@math.gl/projection@5.0.0-alpha.15", "@math.gl/projection@^5.0.0-alpha.15":
+"@math.gl/projection@5.0.0-alpha.15":
   version "5.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@math.gl/projection/-/projection-5.0.0-alpha.15.tgz#3a332db629f81e6fb9c638c212a0cc54372229db"
   integrity sha512-NM37lXVH3G4bHmrdRrGt4F/COAcD8CYFLBcktYMWsi9zj4Idcpn5JpizFOC0qf2gL4/zWKAxvRwmagzrE0c7JQ==
   dependencies:
     "@math.gl/core" "5.0.0-alpha.15"
     "@math.gl/crs" "5.0.0-alpha.15"
+
+"@math.gl/projection@^5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/projection/-/projection-5.0.0-alpha.17.tgz#0e61db0c8011e8cbf8662c54b51fc8a52d4f05c3"
+  integrity sha512-y5CtwfuOUy9tHXPcG9C4xk6pX40glp0YXErUW2D2ME+7yVAwBHZK4F9oJH3MDg07/YMeDhIvXCIZ/W+lKx65+g==
+  dependencies:
+    "@math.gl/core" "5.0.0-alpha.17"
+    "@math.gl/crs" "5.0.0-alpha.17"
 
 "@math.gl/sun@^5.0.0-alpha.15":
   version "5.0.0-alpha.15"
@@ -2208,6 +2228,11 @@
   version "5.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-5.0.0-alpha.15.tgz#d9d9f007a4dc87a0675144515f65bfb4dbeecf08"
   integrity sha512-ZhfbZE6cmOG1CCt61Uuel28OKmoqhXRK/7Gnhcay1XeYlBzq+9UAVYsTRhAwwCtRT+TYukAESE1TMCgHYrlzgQ==
+
+"@math.gl/types@5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/types/-/types-5.0.0-alpha.17.tgz#0308ea3679e5ebdaafcac6fed02ea371ceb85c78"
+  integrity sha512-2p6YdQrZQ5DGmpwkLDyI3qk8tB3wKboq89WstH4XLunC1n+7ZlSVkaNkBRz4Q8diDms1RUcv/JuyuEWeU4OvOA==
 
 "@math.gl/web-mercator@^4.1.0":
   version "4.1.0"

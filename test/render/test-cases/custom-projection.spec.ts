@@ -25,13 +25,12 @@ const converter = projectionEngine.createProjection({
   from: 'EPSG:4326',
   to: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'
 });
-const projection = {forward: converter.project, inverse: converter.unproject};
 // Frame all 50 states, including Hawaii and the Aleutian Islands.
 const view = new CustomProjectionView({
-  projection,
-  toBounds: [-7400000, 0, 2600000, 6500000],
+  crs: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs',
   resolution: 1
 });
+await view.initialize();
 const data = states as FeatureCollection<
   Polygon | MultiPolygon,
   {STATE: string; NAME: string; STUSAB: string}
@@ -133,10 +132,10 @@ const aggregationConverter = projectionEngine.createProjection({
   to: '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
 });
 const aggregationView = new CustomProjectionView({
-  projection: {forward: aggregationConverter.project, inverse: aggregationConverter.unproject},
-  toBounds: [-4500000, -500000, 4500000, 5500000],
+  crs: '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
   resolution: 1
 });
+await aggregationView.initialize();
 const colorRange: [number, number, number][] = [
   [255, 255, 178],
   [254, 217, 118],
@@ -255,30 +254,16 @@ testCases.push({
 });
 
 const scaleProbePositions: [number, number][] = [];
-const metersPerDegree = 40075016.6855 / 360;
 for (let longitude = -150; longitude <= 150; longitude += 50) {
   for (let latitude = -75; latitude <= 75; latitude += 25) {
     scaleProbePositions.push([longitude, latitude]);
   }
 }
+const meterSizeView = new CustomProjectionView({crs: '+proj=eqc +R=6378137 +units=m'});
+await meterSizeView.initialize();
 testCases.push({
   name: 'custom-projection-meter-sizes',
-  views: new CustomProjectionView({
-    // Equirectangular projection: map-meter XY with latitude-dependent ground scale.
-    projection: {
-      forward: ([x, y, z = 0]) => [x * metersPerDegree, y * metersPerDegree, z],
-      inverse: ([x, y, z = 0]) => [x / metersPerDegree, y / metersPerDegree, z]
-    },
-    fromCrs: 'EPSG:4326',
-    toCrs: '+proj=eqc +R=6378137 +units=m',
-    toBounds: [
-      -180 * metersPerDegree,
-      -90 * metersPerDegree,
-      180 * metersPerDegree,
-      90 * metersPerDegree
-    ],
-    fromBounds: [-180, -90, 180, 90]
-  }),
+  views: meterSizeView,
   viewState: {center: [0, 0, 0], zoom: 0.5},
   layers: [
     new ScatterplotLayer({

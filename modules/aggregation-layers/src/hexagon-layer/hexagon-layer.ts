@@ -85,7 +85,7 @@ type _HexagonLayerProps<DataT> = {
 
   /**
    * Custom accessor to retrieve a hexagonal bin index from each data object.
-   * With CustomProjectionView, position is in map meters in toCrs.
+   * With CustomProjectionView, position is in map meters in crs.
    * Not supported by GPU aggregation.
    * @default null
    */

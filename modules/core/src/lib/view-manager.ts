@@ -114,6 +114,7 @@ export default class ViewManager<ViewsT extends View[]> {
   timeline: Timeline;
 
   private _viewports: Viewport[];
+  private _failedViews = new WeakSet<View>();
   private _viewportMap: {[viewId: string]: Viewport};
   private _isUpdating: boolean;
   private _needsRedraw: string | false;
@@ -401,10 +402,12 @@ export default class ViewManager<ViewsT extends View[]> {
     views = flatten(views, Boolean);
 
     const previousViews = this.views;
-    // Equal descriptors retain their loading state when applications recreate views.
+    // Retain pending and ready views, but let a fresh descriptor retry failed initialization.
     views = views.map(view => {
       const previous = previousViews.find(candidate => candidate.id === view.id);
-      return previous?.equals(view) ? previous : view;
+      return previous && !this._failedViews.has(previous) && previous.equals(view)
+        ? previous
+        : view;
     });
     const viewsChanged = this._diffViews(views, previousViews);
     if (viewsChanged) {
@@ -418,7 +421,9 @@ export default class ViewManager<ViewsT extends View[]> {
     this.views = views;
     for (const view of views) {
       if (previousViews.includes(view)) continue;
+      this._failedViews.delete(view);
       const onError = (error: Error) => {
+        this._failedViews.add(view);
         if (!this.views.includes(view)) return;
         if (this._eventCallbacks.onError) this._eventCallbacks.onError(error);
         else log.error(String(error))();
@@ -658,6 +663,9 @@ export default class ViewManager<ViewsT extends View[]> {
       return true;
     }
 
-    return newViews.some((_, i) => !newViews[i].equals(oldViews[i]));
+    return newViews.some(
+      (view, i) =>
+        !view.equals(oldViews[i]) || (view !== oldViews[i] && this._failedViews.has(oldViews[i]))
+    );
   }
 }
