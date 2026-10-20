@@ -120,7 +120,10 @@ export function makeLayerDemo(config) {
 
     const layer = new Layer(layerProps);
 
-    const mapStyleSheet = colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
+    const mapStyleSheet = React.useMemo(
+      () => cloneMapStyle(colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT),
+      [colorMode]
+    );
 
     return (
       <DemoPlaceholder>
@@ -135,7 +138,7 @@ export function makeLayerDemo(config) {
             {mapStyle && (
               <Map
                 reuseMaps
-                mapStyle={cloneMapStyle(mapStyleSheet)}
+                mapStyle={mapStyleSheet}
               />
             )}
           </DeckGL>

@@ -77,6 +77,9 @@ function GeoDemoBase(deckProps) {
     .flat(Infinity)
     .some(layer => layer instanceof MVTLayer);
   const style = {...(isDarkMode ? DarkGlassTheme : LightGlassTheme), ...deckProps.style};
+  const mapStyle = useMemo(() => cloneMapStyle(deckProps.mapLabels
+    ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
+    : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT)), [deckProps.mapLabels, isDarkMode]);
 
   return (
     <div style={DEMO_CONTAINER_STYLE}>
@@ -93,9 +96,7 @@ function GeoDemoBase(deckProps) {
         {...deckProps}
         style={style}
       >
-        {deckProps.map && <Map reuseMaps mapStyle={cloneMapStyle(deckProps.mapLabels
-          ? (isDarkMode ? MAPBOX_STYLES.DARK_LABEL : MAPBOX_STYLES.LIGHT_LABEL)
-          : (isDarkMode ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT))} />}
+        {deckProps.map && <Map reuseMaps mapStyle={mapStyle} />}
       </DeckGL>
       {showAttribution && <OpenFreeMapAttribution />}
     </div>

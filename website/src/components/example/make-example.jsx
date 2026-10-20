@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   Children,
   isValidElement,
   cloneElement
@@ -99,6 +100,10 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     // their existing, independently initialized WebGL path.
     const device = useStore(state => (DemoComponent.hasDeviceTabs ? state.device : undefined));
     const baseUrl = useBaseUrl('/');
+    const clonedMapStyle = useMemo(
+      () => cloneMapStyle(mapStyle || MAPBOX_STYLES.BLANK),
+      [mapStyle]
+    );
     useSharedDeviceCanvas(device);
 
     const useParam = useCallback(newParameters => {
@@ -173,7 +178,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
               key={device?.id}
               device={device}
               data={data}
-              mapStyle={cloneMapStyle(mapStyle || MAPBOX_STYLES.BLANK)}
+              mapStyle={clonedMapStyle}
               params={params}
               useParam={useParam}
               onStateChange={updateMeta}
