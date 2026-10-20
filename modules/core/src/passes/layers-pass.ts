@@ -86,12 +86,14 @@ export type RenderStats = {
 /** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
+  private _activatedLayers = new Set<Layer>();
 
   render(options: LayersPassRenderOptions): void {
     this._render(options);
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    this._activatedLayers.clear();
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
@@ -452,8 +454,12 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // If a layer is drawn, update its viewportChanged flag
-    layer.activateViewport(drawContext.viewport);
+    // One attribute set is shared by all views. Only the first eligible viewport
+    // selects its conversion; later views and picking reuse the prepared geometry.
+    if (!drawContext.isPicking && !this._activatedLayers.has(layer)) {
+      this._activatedLayers.add(layer);
+      layer.activateViewport(drawContext.viewport);
+    }
 
     return true;
   }

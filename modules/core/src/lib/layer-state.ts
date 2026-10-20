@@ -64,8 +64,12 @@ export default class LayerState<LayerT extends Layer> extends ComponentState<Lay
   unpreproject: ((position: number[]) => [number, number, number]) | null = null;
   /** Input/target identity used to retain a conversion pair across camera changes. */
   preprojectionSignature: string | null = null;
+  /** Packed position conversion changed since the last attribute update. */
+  preprojectionChanged = false;
+  /** Target geometry configuration, independent of the packed attribute CRS. */
+  tessellationSignature: string | null = null;
 
-  /** The last viewport rendered by this layer */
+  /** First eligible viewport, retained for attribute and sublayer updates. */
   viewport?: Viewport;
 
   uniformTransitions!: UniformTransitionManager;

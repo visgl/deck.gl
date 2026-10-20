@@ -251,6 +251,8 @@ Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` 
 
 `'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
 
+In [multi-view applications](../../developer-guide/views.md), the first viewport allowed by the layer filter determines the layer's CPU coordinate conversion. Use separate layer instances when views require different packed coordinate systems.
+
 `'default'` uses WGS84 in geospatial views and Cartesian coordinates in non-geospatial views. Shader-supported source CRSs retain their attribute coordinates. Other source CRSs are converted on the CPU to WGS84, or to the target CRS of a custom projection.
 
 See the article on [Coordinate Systems](../../developer-guide/coordinate-systems.md) for details.

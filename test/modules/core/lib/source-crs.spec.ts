@@ -6,6 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {
   Layer,
   LayerManager,
+  MapView,
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
@@ -13,6 +14,7 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {projectionEngine} from '@math.gl/projection';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import {Matrix4} from '@math.gl/core';
+import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {supportsSourceCRS} from '@deck.gl/core/shaderlib/project/coordinate-systems';
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
@@ -258,5 +260,99 @@ test('Viewport projects a declared source CRS independently of attribute packing
     const targetPosition = viewport.crs!.converter.WGS84.from(geographic);
     const actual = viewport.projectPosition(targetPosition, {sourceCrs: viewport.crs!});
     for (let axis = 0; axis < 3; axis++) expect(actual[axis]).toBeCloseTo(expected[axis], 7);
+  }
+});
+
+test('CPU-packed WGS84 attributes survive camera, precision and built-in target changes', () => {
+  const initial = new WebMercatorViewport({zoom: 11});
+  const manager = new LayerManager(device, {viewport: initial});
+  const getPosition = vi.fn(p => p);
+  let layer = new PositionLayer({coordinateSystem: 'globe', data: [[6370972, 0, 0]], getPosition});
+  try {
+    manager.setLayers([layer]);
+    layer.activateViewport(initial);
+    getPosition.mockClear();
+    for (const viewport of [
+      new WebMercatorViewport({zoom: 13}),
+      new GlobeViewport({resolution: 20}),
+      new GlobeViewport({resolution: 60}),
+      new WebMercatorViewport({zoom: 4})
+    ]) {
+      manager.activateViewport(viewport);
+      layer.activateViewport(viewport);
+      layer = layer.clone({});
+      manager.setLayers([layer]);
+      expect(layer.state.packedCrs).toBe(WGS84_CRS);
+      expect(getPosition).not.toHaveBeenCalled();
+    }
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Pending target CRS retains attributes until its viewport is materialized', () => {
+  const initial = createTestViewport({id: 'primary', signature: 'old-target'});
+  const secondary = new WebMercatorViewport({id: 'secondary'});
+  const manager = new LayerManager(device, {viewport: initial});
+  const getPosition = vi.fn(p => p);
+  let layer = new PositionLayer({data: [[2, 3, 4]], getPosition});
+  try {
+    manager.setLayers([layer]);
+    layer.activateViewport(initial);
+    getPosition.mockClear();
+    manager.setViewports(
+      [secondary],
+      [new MapView({id: 'primary'}), new MapView({id: 'secondary'})]
+    );
+    layer = layer.clone({data: [[3, 4, 5]]});
+    manager.setLayers([layer]);
+    manager.activateViewport(secondary);
+    layer.activateViewport(secondary);
+    layer._update();
+    expect(getPosition).not.toHaveBeenCalled();
+    expect(layer.internalState!.viewport).toBe(initial);
+    const replacement = createTestViewport({id: 'primary', signature: 'new-target'});
+    manager.setViewports(
+      [replacement, secondary],
+      [new MapView({id: 'primary'}), new MapView({id: 'secondary'})]
+    );
+    manager.updateLayers();
+    expect(getPosition).toHaveBeenCalledTimes(1);
+    expect(layer.internalState!.viewport).toBe(replacement);
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Multi-view layers retain the first eligible viewport across frames and clones', () => {
+  const first = createTestViewport({id: 'first', signature: 'first'});
+  const second = createTestViewport({id: 'second', signature: 'second'});
+  const third = createTestViewport({id: 'third', signature: 'third'});
+  const manager = new LayerManager(device, {viewport: first});
+  const pass = new DrawLayersPass(device);
+  const getPosition = vi.fn(p => p);
+  let layer = new PositionLayer({data: [[2, 3, 4]], getPosition});
+  const draw = () =>
+    pass.render({
+      pass: 'screen',
+      layers: manager.getLayers(),
+      viewports: [first, second, third],
+      onViewportActive: manager.activateViewport,
+      layerFilter: ({viewport}) => viewport.id !== 'first'
+    });
+  try {
+    manager.setLayers([layer]);
+    draw();
+    expect(layer.internalState!.viewport).toBe(second);
+    getPosition.mockClear();
+    for (let i = 0; i < 3; i++) {
+      layer = layer.clone({});
+      manager.setLayers([layer]);
+      draw();
+      expect(layer.internalState!.viewport).toBe(second);
+      expect(getPosition).not.toHaveBeenCalled();
+    }
+  } finally {
+    manager.finalize();
   }
 });

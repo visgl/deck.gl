@@ -358,26 +358,39 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     this._sourceCrs = sourceCrs;
     if (this.internalState) {
       this.internalState.sourceCrs = sourceCrs;
-      this._updatePreprojection(this.context.viewport);
+      this._updatePreprojection(this.internalState.viewport || this.context.viewport);
     }
   }
 
   private _updatePreprojection(viewport: Viewport): boolean {
     const internalState = this.internalState!;
+    const needsPreprojection = !supportsSourceCRS(
+      viewport.projectionMode,
+      internalState.sourceCrs,
+      viewport.crs
+    );
+    // Only the source-to-packed conversion affects attributes. Camera precision,
+    // target common space and subdivision are handled separately from packing.
     const signature = JSON.stringify([
       internalState.sourceCrs?.signature,
-      viewport.crs?.signature,
-      // Shader-only precision mode changes retain the same packed coordinates.
-      supportsSourceCRS(viewport.projectionMode, internalState.sourceCrs, viewport.crs)
-        ? null
-        : viewport.projectionMode,
-      viewport.projectionSignature
+      needsPreprojection
+        ? viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+          ? viewport.crs?.signature
+          : 'WGS84'
+        : null
     ]);
     const changed = internalState.preprojectionSignature !== signature;
     if (changed) {
       Object.assign(internalState, viewport.getPreprojection(internalState.sourceCrs));
       internalState.preprojectionSignature = signature;
+      internalState.preprojectionChanged = true;
     }
+    const tessellationSignature = JSON.stringify([
+      viewport.crs?.signature,
+      viewport.projectionSignature
+    ]);
+    const geometryChanged = internalState.tessellationSignature !== tessellationSignature;
+    internalState.tessellationSignature = tessellationSignature;
     // Subclasses can replace state during initializeState; publish the retained pair
     // again before updates without allocating new conversion functions each frame.
     Object.assign(this.state, {
@@ -386,10 +399,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       preproject: internalState.preproject,
       unpreproject: internalState.unpreproject
     });
-    if (changed && internalState.changeFlags) {
+    if ((changed || geometryChanged) && internalState.changeFlags) {
       this.setChangeFlags({projectionChanged: true});
     }
-    return changed;
+    return changed || geometryChanged;
   }
 
   /** Returns true if using shader-based WGS84 longitude wrapping */
@@ -727,10 +740,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
-    if (this._coordinateSystemLoading) return;
+    if (!this.context.layerManager.isViewportReady(this)) return;
     const oldViewport = this.internalState.viewport;
-    const projectionChanged = this._updatePreprojection(viewport);
     this.internalState.viewport = viewport;
+    if (this._coordinateSystemLoading) return;
+    const projectionChanged = this._updatePreprojection(viewport);
 
     if (!oldViewport || !areViewportsEqual({oldViewport, viewport})) {
       this.setChangeFlags({
@@ -1170,7 +1184,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** (Internal) Called by layer manager when a new layer is added or an existing layer is matched with a new instance */
   _update(): void {
-    if (!this.internalState || this._coordinateSystemLoading) return;
+    if (
+      !this.internalState ||
+      this._coordinateSystemLoading ||
+      !this.context.layerManager.isViewportReady(this)
+    )
+      return;
     this._updatePreprojection(this.internalState?.viewport || this.context.viewport);
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
@@ -1189,7 +1208,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const currentViewport = context.viewport;
     const propsInTransition = this._updateUniformTransition();
     internalState.propsInTransition = propsInTransition;
-    // Overwrite this.context.viewport during update to use the last activated viewport on this layer
+    // Use the first eligible viewport retained by this layer for lifecycle updates
     // In multi-view applications, a layer may only be drawn in one of the views
     // Which would make the "active" viewport different from the shared context
     context.viewport = internalState.viewport || currentViewport;
@@ -1202,7 +1221,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const coordinateSystemChanged =
         updateParams.props.coordinateSystem !== updateParams.oldProps.coordinateSystem;
       if (
-        updateParams.changeFlags.projectionChanged ||
+        internalState.preprojectionChanged ||
         (this.internalState.preproject &&
           (coordinateSystemChanged ||
             !deepEqual(updateParams.props.modelMatrix, updateParams.oldProps.modelMatrix, 1) ||
@@ -1256,6 +1275,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       this.props = currentProps;
       this._clearChangeFlags();
       internalState.needsUpdate = false;
+      internalState.preprojectionChanged = false;
       internalState.resetOldProps();
     }
   }

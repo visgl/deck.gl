@@ -17,6 +17,7 @@ import ProjectionScaleResources from './projection-scale-resources';
 import {resolveCRS} from '../utils/crs';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import type Viewport from '../viewports/viewport';
+import type View from '../views/view';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
@@ -68,6 +69,7 @@ export default class LayerManager {
     }
   >();
   private _lastRenderedLayers: LayersList = [];
+  private _viewports = new Map<string, Viewport | null>();
   readonly projectionScaleResources: ProjectionScaleResources;
   private _needsRedraw: string | false = false;
   private _needsUpdate: string | false = false;
@@ -248,6 +250,30 @@ export default class LayerManager {
   // INTERNAL METHODS
   //
 
+  /** Refresh view availability without substituting another view for a pending CRS. */
+  setViewports(viewports: Viewport[], views: View[]): void {
+    this._viewports = new Map(views.map(view => [view.id, null]));
+    for (const viewport of viewports) this._viewports.set(viewport.id, viewport);
+    this.context.viewport = viewports[0] || null;
+    for (const layer of this.layers) {
+      const state = layer.internalState;
+      if (!state?.viewport) continue;
+      const viewport = this._viewports.get(state.viewport.id);
+      if (viewport === null) continue;
+      if (viewport !== state.viewport) {
+        state.viewport = viewport;
+        layer.setChangeFlags({viewportChanged: true});
+      }
+    }
+    this.setNeedsUpdate('viewports changed');
+  }
+
+  /** Whether the layer's selected view has materialized its replacement viewport. */
+  isViewportReady(layer: Layer): boolean {
+    const viewport = layer.internalState?.viewport;
+    return !viewport || this._viewports.get(viewport.id) !== null;
+  }
+
   /** Set the current viewport, or suspend layer updates when none is available. */
   activateViewport = (viewport?: Viewport | null) => {
     debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
@@ -258,13 +284,10 @@ export default class LayerManager {
       // materialized viewport before any attribute or sublayer update can run.
       for (const layer of this.layers) {
         const internalState = layer.internalState;
-        if (internalState) {
-          const oldViewport = internalState.viewport;
+        if (internalState && this.isViewportReady(layer)) {
           internalState.viewport = viewport;
           layer.setChangeFlags({
-            viewportChanged: true,
-            projectionChanged:
-              (oldViewport?.projectionSignature ?? null) !== (viewport.projectionSignature ?? null)
+            viewportChanged: true
           });
         }
       }
@@ -366,7 +389,7 @@ export default class LayerManager {
         }
 
         if (oldLayer?.internalState) this._transferLayerState(oldLayer, newLayer);
-        const ready = this._resolveLayerCrs(newLayer);
+        const ready = this.isViewportReady(newLayer) && this._resolveLayerCrs(newLayer);
         if (ready) {
           if (!newLayer.internalState) this._initializeLayer(newLayer);
           else this._updateLayer(newLayer);
@@ -391,9 +414,10 @@ export default class LayerManager {
   /* eslint-enable complexity,max-statements */
 
   private _resolveLayerCrs(layer: Layer): boolean {
+    const viewport = layer.internalState?.viewport || this.context.viewport!;
     const coordinateSystem =
       (layer.props.coordinateSystem ?? 'default') === 'default'
-        ? this.context.viewport!.isGeospatial
+        ? viewport.isGeospatial
           ? 'WGS84'
           : 'cartesian'
         : layer.props.coordinateSystem;
@@ -402,9 +426,7 @@ export default class LayerManager {
       entry = {coordinateSystem, layer};
       this._coordinateSystems.set(layer.id, entry);
       const resolved =
-        coordinateSystem === this.context.viewport!.crs?.signature
-          ? this.context.viewport!.crs!
-          : resolveCRS(coordinateSystem);
+        coordinateSystem === viewport.crs?.signature ? viewport.crs! : resolveCRS(coordinateSystem);
       if (resolved instanceof Promise) {
         entry.pending = resolved;
         const request = entry;

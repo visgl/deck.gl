@@ -332,7 +332,7 @@ for (const projected of [false, true]) {
       manager.activateViewport(changed);
       layer.activateViewport(changed);
       expect(update).toHaveBeenCalledTimes(1);
-      expect(accessor).toHaveBeenCalledTimes(1);
+      expect(accessor).toHaveBeenCalledTimes(projected ? 1 : 0);
       expect(getPositions(layer)).toEqual(projected ? [102, 3, 4] : [2, 3, 4]);
       expect(update.mock.calls[0][0].changeFlags.projectionChanged).toBe(true);
       expect(
@@ -447,7 +447,7 @@ for (const projected of [false, true]) {
       vi.spyOn(viewport.crs!.converter.WGS84, 'to').mockImplementation(() => {
         throw new Error('Outside domain');
       });
-      expect(pick().coordinate).toBeUndefined();
+      expect(pick().coordinate).toBeNull();
     }
     const modelMatrix = new Matrix4().translate([10, 20, 30]);
     const uniforms = getUniformsFromViewport({viewport, modelMatrix, autoWrapLongitude: true});
@@ -505,5 +505,23 @@ test('Composite layers defer projection updates without an attribute manager', (
   } finally {
     manager.finalize();
     vi.restoreAllMocks();
+  }
+});
+
+test('Picking reports null for failed and non-finite unprojections', () => {
+  const viewport = new Viewport();
+  const unproject = vi.spyOn(viewport, 'unproject');
+  try {
+    const pick = () => getEmptyPickingInfo({viewports: [viewport], pixelRatio: 1, x: 0, y: 0});
+    unproject.mockImplementation(() => {
+      throw new Error('Outside inverse domain');
+    });
+    expect(pick().coordinate).toBeNull();
+    unproject.mockReturnValue([NaN, Infinity]);
+    expect(pick().coordinate).toBeNull();
+    unproject.mockReturnValue([1, 2]);
+    expect(pick().coordinate).toEqual([1, 2]);
+  } finally {
+    unproject.mockRestore();
   }
 });

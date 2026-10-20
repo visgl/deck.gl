@@ -262,8 +262,8 @@ export type HexagonLayerPickingInfo<DataT> = PickingInfo<{
   elevationValue: number;
   /** Number of data points in the picked cell */
   count: number;
-  /** Centroid of the hexagon */
-  position: [number, number];
+  /** Centroid of the hexagon, or null when inverse projection is unavailable. */
+  position: [number, number] | null;
   /** Indices of the data objects in the picked cell. Only available if using CPU aggregation. */
   pointIndices?: number[];
   /** The data objects in the picked cell. Only available if using CPU aggregation and layer data is an array. */
@@ -657,15 +657,22 @@ export default class HexagonLayer<
           centroidCommon[1] += this.state.hexOriginCommon[1];
         }
         const viewport = this.context.viewport;
-        const packedCentroid = viewport.unprojectFlat(centroidCommon);
-        const centroid = this.state.unpreproject
-          ? this.state.unpreproject([...packedCentroid, 0])
-          : packedCentroid;
+        let position: [number, number] | null = null;
+        try {
+          const packedCentroid = viewport.unprojectFlat(centroidCommon);
+          const centroid = this.state.unpreproject
+            ? this.state.unpreproject([...packedCentroid, 0])
+            : packedCentroid;
+          if (centroid.every(Number.isFinite)) position = [centroid[0], centroid[1]];
+        } catch {
+          // A bin may overlap the render target while its center is outside the inverse domain.
+        }
+        if (!position) info.coordinate = null;
 
         object = {
           col: bin.id[0],
           row: bin.id[1],
-          position: [centroid[0], centroid[1]],
+          position,
           colorValue: bin.value[0],
           elevationValue: bin.value[1],
           count: bin.count
