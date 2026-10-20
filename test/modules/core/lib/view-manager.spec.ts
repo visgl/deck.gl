@@ -499,3 +499,46 @@ test.each(['synchronous', 'asynchronous'] as const)(
     }
   }
 );
+
+test.each(['synchronous', 'asynchronous'] as const)(
+  'ViewManager replaces a view after %s failure even when the retry is synchronous',
+  async failureType => {
+    const error = new Error('View initialization failed');
+    const onError = vi.fn();
+    let attempts = 0;
+    class RetryingView extends MapView {
+      #ready = false;
+      initialize() {
+        if (++attempts === 1) {
+          if (failureType === 'synchronous') throw error;
+          return Promise.reject(error);
+        }
+        this.#ready = true;
+      }
+      makeViewport(options: Parameters<MapView['makeViewport']>[0]) {
+        return this.#ready ? super.makeViewport(options) : null;
+      }
+    }
+    const view = new RetryingView({id: 'retry'});
+    const manager = new ViewManager({
+      views: [view],
+      onError,
+      width: 100,
+      height: 100,
+      viewState: {longitude: 0, latitude: 0, zoom: 1}
+    });
+    try {
+      await vi.waitFor(() => expect(onError).toHaveBeenCalledExactlyOnceWith(error));
+      expect(manager.getViewports()).toHaveLength(0);
+      manager.setProps({views: [view]});
+      expect(attempts).toBe(1);
+      const replacement = view.clone({});
+      manager.setProps({views: [replacement]});
+      expect(attempts).toBe(2);
+      expect(manager.views[0]).toBe(replacement);
+      expect(manager.getViewports()).toHaveLength(1);
+    } finally {
+      manager.finalize();
+    }
+  }
+);

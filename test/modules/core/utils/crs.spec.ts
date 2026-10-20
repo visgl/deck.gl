@@ -213,3 +213,46 @@ test('structured CRS equality retains viewports and detects nested changes', asy
     }
   }
 });
+
+test('ViewManager retries failed structured CRS with an equivalent new view', async () => {
+  const definition = {...projectedCRS, name: 'Retry through ViewManager'};
+  const request = deferredCRS();
+  const getCRS = vi
+    .spyOn(projectionEngine, 'getCRS')
+    .mockReturnValueOnce(request.promise)
+    .mockResolvedValueOnce(source);
+  const onError = vi.fn();
+  const view = new CustomProjectionView({crs: definition});
+  const manager = new ViewManager({
+    views: [view],
+    onError,
+    width: 400,
+    height: 300,
+    viewState: {center: [0, 0, 0], zoom: 0}
+  });
+  try {
+    manager.setProps({views: [view.clone({crs: structuredClone(definition)})]});
+    expect(manager.views[0]).toBe(view);
+    expect(getCRS).toHaveBeenCalledTimes(1);
+    const error = new Error('Temporary module load failure');
+    request.reject(error);
+    await vi.waitFor(() => expect(onError).toHaveBeenCalledWith(error));
+    expect(manager.getViewports()).toHaveLength(0);
+    const replacement = view.clone({crs: structuredClone(definition)});
+    manager.setProps({views: [replacement]});
+    expect(manager.views[0]).toBe(replacement);
+    expect(getCRS).toHaveBeenCalledTimes(2);
+    await replacement.initialize();
+    manager.updateViewports();
+    expect(manager.getViewports()).toHaveLength(1);
+    const viewport = manager.getViewports()[0];
+    manager.setProps({views: [replacement.clone({crs: structuredClone(definition)})]});
+    expect(manager.views[0]).toBe(replacement);
+    expect(manager.getViewports()[0]).toBe(viewport);
+    expect(getCRS).toHaveBeenCalledTimes(2);
+    expect(onError).toHaveBeenCalledTimes(1);
+  } finally {
+    manager.finalize();
+    getCRS.mockRestore();
+  }
+});
