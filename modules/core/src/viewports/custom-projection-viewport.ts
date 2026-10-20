@@ -23,6 +23,17 @@ const WGS84_ECCENTRICITY_SQUARED = 1 - (WGS84_SEMI_MINOR_AXIS / WGS84_SEMI_MAJOR
 
 /** A planar map converter, compatible with proj4js converters targeting a meter-based CRS. */
 export type ProjectionConverter = {
+  /** Optional normalized source coordinates, used instead of CRS-name heuristics for sizing. */
+  sourceCoordinates?: {
+    /** Geographic longitude/latitude or projected easting/northing. */
+    kind: 'geographic' | 'projected';
+    /** Radians per geographic unit, or meters per projected unit. */
+    unitScale: number;
+    /** Geographic ground ellipsoid; defaults to WGS84. */
+    semiMajorAxis?: number;
+    /** Squared eccentricity of the ground ellipsoid; defaults to WGS84. */
+    eccentricitySquared?: number;
+  };
   /** Converts world XYZ to map meters: planar X/Y and altitude Z in meters. */
   forward: (position: number[]) => number[];
   /** Converts map-meter XYZ back to world coordinates, or returns null outside its domain. */
@@ -418,7 +429,9 @@ function getCustomProjectionUnitsPerMeter(
     localScale = [1 / scale[0], 1 / scale[1], 1 / Math.sqrt(scale[0] * scale[1])];
   } else {
     const position = worldPosition || projection.inverse(mapPosition!);
-    const geographic = isGeographicCrs(fromCrs);
+    const geographic = projection.sourceCoordinates
+      ? projection.sourceCoordinates.kind === 'geographic'
+      : isGeographicCrs(fromCrs);
     localScale =
       geographic === undefined
         ? [1, 1, 1]
@@ -453,17 +466,21 @@ function estimateUnitsPerMeter(
   geographic: boolean,
   fromBounds?: CustomProjectionViewportOptions['fromBounds']
 ): [number, number, number] | null {
-  const metersPerUnit = [1, 1, 1];
+  const source = projection.sourceCoordinates;
+  const unitScale = source?.unitScale ?? (geographic ? Math.PI / 180 : 1);
+  const metersPerUnit = [unitScale, unitScale, 1];
   if (geographic) {
     // Ground distance belongs to the input locations, independently of the
     // target projection's spherical or ellipsoidal coordinate formulas.
-    const latitude = (center[1] * Math.PI) / 180;
-    const w = 1 - WGS84_ECCENTRICITY_SQUARED * Math.sin(latitude) ** 2;
-    const primeVerticalRadius = WGS84_SEMI_MAJOR_AXIS / Math.sqrt(w);
-    const meridionalRadius = (primeVerticalRadius * (1 - WGS84_ECCENTRICITY_SQUARED)) / w;
+    const latitude = center[1] * unitScale;
+    const semiMajorAxis = source?.semiMajorAxis ?? WGS84_SEMI_MAJOR_AXIS;
+    const eccentricitySquared = source?.eccentricitySquared ?? WGS84_ECCENTRICITY_SQUARED;
+    const w = 1 - eccentricitySquared * Math.sin(latitude) ** 2;
+    const primeVerticalRadius = semiMajorAxis / Math.sqrt(w);
+    const meridionalRadius = (primeVerticalRadius * (1 - eccentricitySquared)) / w;
     metersPerUnit[0] =
-      primeVerticalRadius * Math.max(1e-6, Math.abs(Math.cos(latitude))) * (Math.PI / 180);
-    metersPerUnit[1] = meridionalRadius * (Math.PI / 180);
+      primeVerticalRadius * Math.max(1e-6, Math.abs(Math.cos(latitude))) * unitScale;
+    metersPerUnit[1] = meridionalRadius * unitScale;
   }
   // Sample a one-meter displacement in each input direction.
   const stepX = 1 / metersPerUnit[0];
