@@ -12,6 +12,11 @@ import {
   _WMSLayer as WMSLayer,
   QuadkeyLayer,
   S2Layer,
+  Tile2DHeader,
+  Tile2DLayer,
+  MVT2DLayer,
+  tile2DDeckAdapter,
+  Tileset2D,
   TileLayer,
   TripsLayer,
   TerrainLayer,
@@ -26,6 +31,11 @@ test('Top-level imports', () => {
   expect(H3HexagonLayer, 'H3HexagonLayer symbol imported').toBeTruthy();
   expect(H3ClusterLayer, 'H3ClusterLayer symbol imported').toBeTruthy();
   expect(TileLayer, 'TileLayer symbol imported').toBeTruthy();
+  expect(Tile2DLayer, 'Tile2DLayer symbol imported').toBeTruthy();
+  expect(MVT2DLayer, 'MVT2DLayer symbol imported').toBeTruthy();
+  expect(tile2DDeckAdapter, 'Shared tile adapter exported').toBeTruthy();
+  expect(Tileset2D, 'Tileset2D symbol imported').toBeTruthy();
+  expect(Tile2DHeader, 'Tile2DHeader symbol imported').toBeTruthy();
   expect(WMSLayer, 'WMSLayer symbol imported').toBeTruthy();
   expect(TripsLayer, 'TripsLayer symbol imported').toBeTruthy();
   expect(TerrainLayer, 'TerrainLayer symbol imported').toBeTruthy();
@@ -34,6 +44,8 @@ test('Top-level imports', () => {
 
 import './a5-layer.spec';
 import './tile-layer';
+import './shared-tile-2d-layer.spec';
+import './tile-2d-example.spec';
 import './wms-layer.spec';
 import './quadkey-layer.spec';
 import './s2-layer.spec';

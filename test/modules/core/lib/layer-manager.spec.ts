@@ -4,7 +4,9 @@
 
 /* eslint-disable func-style, no-console, max-len */
 import {test, expect} from 'vitest';
-import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
+import {LayerManager, ScatterplotLayer, Layer, CompositeLayer, Viewport, MapView} from 'deck.gl';
+import ViewManager from '../../../../modules/core/src/lib/view-manager';
+import {Timeline} from '@luma.gl/engine';
 import {device} from '@deck.gl/test-utils/vitest';
 
 class TestLayer extends Layer {
@@ -52,6 +54,46 @@ test('LayerManager#getLayers', () => {
   expect(layers.length, 'LayerManager.getLayers()').toBe(3);
   layers = layerManager.getLayers({layerIds: ['non-existent-id']});
   expect(layers.length, 'LayerManager.getLayers()').toBe(0);
+});
+
+test('LayerManager#getViewports follows active views, removal and renaming', () => {
+  const viewManager = new ViewManager({
+    width: 256,
+    height: 256,
+    timeline: new Timeline(),
+    eventManager: null
+  });
+  const deck = {getViewports: () => viewManager.getViewports()} as any;
+  const layerManager = new LayerManager(device, {deck});
+  try {
+    const setViews = (ids: string[]) =>
+      viewManager.setProps({
+        views: ids.map(id => new MapView({id})),
+        viewState: {longitude: 0, latitude: 0, zoom: 4}
+      });
+    setViews(['main', 'mini']);
+    expect(layerManager.getViewports().map(viewport => viewport.id)).toEqual(['main', 'mini']);
+    setViews(['main']);
+    expect(layerManager.getViewports().map(viewport => viewport.id)).toEqual(['main']);
+    setViews(['main', 'mini2']);
+    expect(layerManager.getViewports().map(viewport => viewport.id)).toEqual(['main', 'mini2']);
+  } finally {
+    layerManager.finalize();
+    viewManager.finalize();
+  }
+});
+
+test('LayerManager#getViewports falls back to the active viewport without a deck', () => {
+  const viewport = new Viewport({id: 'fallback'});
+  const layerManager = new LayerManager(device, {viewport});
+  try {
+    expect(layerManager.getViewports()).toEqual([viewport]);
+    const next = new Viewport({id: 'next'});
+    layerManager.activateViewport(next);
+    expect(layerManager.getViewports()).toEqual([next]);
+  } finally {
+    layerManager.finalize();
+  }
 });
 
 test('LayerManager#setLayers', () => {

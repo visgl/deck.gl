@@ -61,6 +61,7 @@
     "@math.gl/core": "^5.0.0-alpha.15",
     "@math.gl/culling": "^5.0.0-alpha.15",
     "@math.gl/web-mercator": "^5.0.0-alpha.15",
+    "@probe.gl/stats": "^4.1.1",
     "@types/geojson": "^7946.0.8",
     "a5-js": "^0.10.0",
     "compress-utils": "^0.8.0",

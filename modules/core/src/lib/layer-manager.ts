@@ -225,7 +225,16 @@ export default class LayerManager {
   // INTERNAL METHODS
   //
 
-  /** Make a viewport "current" in layer context, updating viewportChanged flags */
+  /**
+   * Returns the complete active viewport set for layer traversal and consumer cleanup.
+   * Includes views excluded by render-time layerFilter callbacks. Without a Deck,
+   * returns the currently activated viewport.
+   */
+  getViewports(): Viewport[] {
+    return this.context.deck?.getViewports() || [this.context.viewport];
+  }
+
+  /** Makes a viewport current for the next layer update or render pass. */
   activateViewport = (viewport: Viewport) => {
     debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
     if (viewport) {

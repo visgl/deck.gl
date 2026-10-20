@@ -39,6 +39,7 @@ const sidebars = {
         'scatterplot-layer',
         'scenegraph-layer',
         'screen-grid-layer',
+        'shared-tile-2d-layer',
         // 'simple-mesh-layer',
         'terrain-layer',
         'text-layer',
