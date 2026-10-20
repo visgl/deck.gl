@@ -6,6 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {
   Layer,
   LayerManager,
+  Viewport,
   MapView,
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport
@@ -319,6 +320,62 @@ test('Pending target CRS retains attributes until its viewport is materialized',
     manager.updateLayers();
     expect(getPosition).toHaveBeenCalledTimes(1);
     expect(layer.internalState!.viewport).toBe(replacement);
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Initial viewport selects projection context without freezing subsequent render activation', () => {
+  const first = new Viewport({id: 'local'});
+  const selected = createTestViewport({id: 'selected'});
+  const next = createTestViewport({id: 'next', longitude: 10});
+  const manager = new LayerManager(device, {viewport: first});
+  const layer = new PositionLayer({data: [[2, 3, 4]], getPosition: p => p});
+  const activation = vi.spyOn(layer, 'activateViewport');
+  const initializeState = layer.initializeState.bind(layer);
+  const initialize = vi.spyOn(layer, 'initializeState').mockImplementation(() => {
+    expect(layer.context.viewport).toBe(selected);
+    expect(layer.internalState!.viewport).toBe(selected);
+    initializeState();
+  });
+  manager.setViewports(
+    [first, selected],
+    [new MapView({id: 'local'}), new MapView({id: 'selected'})]
+  );
+  manager.setProps({layerFilter: ({viewport}) => viewport.id === 'selected'});
+  try {
+    manager.setLayers([layer]);
+    expect(activation).not.toHaveBeenCalled();
+    expect(initialize).toHaveBeenCalledOnce();
+    expect(manager.context.viewport).toBe(first);
+    expect(layer.internalState!.viewport).toBe(selected);
+    expect(layer.state.sourceCrs).toBe(WGS84_CRS);
+    expect(layer.state.preproject).toBeTypeOf('function');
+    const pass = new DrawLayersPass(device);
+    pass.render({
+      pass: 'screen',
+      layers: [layer],
+      viewports: [next],
+      onViewportActive: manager.activateViewport
+    });
+    expect(layer.internalState!.viewport).toBe(next);
+    expect(activation).toHaveBeenLastCalledWith(next);
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('No matching initial viewport leaves the stored viewport empty', () => {
+  const viewport = new WebMercatorViewport();
+  const manager = new LayerManager(device, {viewport});
+  const layer = new PositionLayer({data: [[2, 3, 4]], getPosition: p => p});
+  const activation = vi.spyOn(layer, 'activateViewport');
+  manager.setProps({layerFilter: () => false});
+  try {
+    manager.setLayers([layer]);
+    expect(layer.internalState).toBeTruthy();
+    expect(layer.internalState!.viewport).toBeUndefined();
+    expect(activation).not.toHaveBeenCalled();
   } finally {
     manager.finalize();
   }

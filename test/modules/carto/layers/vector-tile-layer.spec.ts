@@ -10,6 +10,32 @@ import {testPickingLayer} from '../../layers/test-picking-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {withMockFetchMapsV3} from '../mock-fetch';
 
+test('VectorTileLayer preserves binary picking when the viewport requests subdivision', async () => {
+  class SubdividingViewport extends WebMercatorViewport {
+    getSubdivisionStep(): number {
+      return 1;
+    }
+  }
+  await withMockFetchMapsV3(async () => {
+    await testPickingLayer({
+      layer: createTestVectorTileLayer([-123, 45], 'binary'),
+      viewport: new SubdividingViewport({longitude: 0, latitude: 0, zoom: 1}),
+      testCases: [
+        {
+          pickedColor: new Uint8Array([1, 0, 0, 0]),
+          pickedLayerId: 'mvt-0-0-1-points-circle',
+          mode: 'hover',
+          onAfterUpdate: ({layer, info}) => {
+            expect(layer.getSubdivisionStep()).toBe(0);
+            expect(layer.state.binary).toBe(true);
+            expect(info.object.geometry.coordinates).toEqual([-123, 45]);
+          }
+        }
+      ]
+    });
+  });
+});
+
 test(`VectorTileLayer#picking`, async () => {
   await withMockFetchMapsV3(async () => {
     await testPickingLayer({

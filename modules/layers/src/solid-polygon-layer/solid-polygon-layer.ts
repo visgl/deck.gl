@@ -368,6 +368,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         getGeometry: props.getPolygon,
         transform: this.usePositionTransforms().transform?.bind(this),
         // Tessellation uses a temporary target-space copy; attributes retain their shader-supported CRS.
+        // For shader-supported positions, triangulation assumes modelMatrix and
+        // coordinateOrigin remain fixed while data is unchanged; GPU transforms do not retriangulate.
         preproject: this.state.packedCrs
           ? position => viewport.projectPosition(position, {sourceCrs: this.state.packedCrs!})
           : undefined,

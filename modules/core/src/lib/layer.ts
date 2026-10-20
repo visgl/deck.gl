@@ -1095,67 +1095,76 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /* eslint-disable max-statements */
   /* (Internal) Called by layer manager when a new layer is found */
-  _initialize() {
+  _initialize(initialViewport?: Viewport) {
     assert(!this.internalState); // finalized layer cannot be reused
 
-    debug(TRACE_INITIALIZE, this);
+    const previousViewport = this.context.viewport;
+    // Initial projection and subclass setup must agree with the viewport selected
+    // for this layer, before rendering has had a chance to activate it.
+    this.context.viewport = initialViewport || previousViewport;
+    try {
+      debug(TRACE_INITIALIZE, this);
 
-    const attributeManager = this._getAttributeManager();
+      const attributeManager = this._getAttributeManager();
 
-    this.internalState = new LayerState<this>({
-      attributeManager,
-      layer: this
-    });
-    this._clearChangeFlags(); // populate this.internalState.changeFlags
+      this.internalState = new LayerState<this>({
+        attributeManager,
+        layer: this
+      });
+      this.internalState.viewport = initialViewport;
+      this._clearChangeFlags(); // populate this.internalState.changeFlags
 
-    this.state = {};
-    const coordinateSystem =
-      (this.props.coordinateSystem ?? 'default') === 'default'
-        ? this.context.viewport.isGeospatial
-          ? 'WGS84'
-          : 'cartesian'
-        : this.props.coordinateSystem;
-    const sourceCrs =
-      this._sourceCrs === undefined ? resolveCRS(coordinateSystem) : this._sourceCrs;
-    // LayerManager resolves asynchronous descriptors before initialization.
-    assert(!(sourceCrs instanceof Promise));
-    this.internalState.sourceCrs = sourceCrs;
-    this._updatePreprojection(this.context.viewport);
-    // for backwards compatibility with older layers
-    // TODO - remove in next release
-    /* eslint-disable accessor-pairs */
-    Object.defineProperty(this.state, 'attributeManager', {
-      get: () => {
-        log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()')();
-        return attributeManager;
+      this.state = {};
+      const coordinateSystem =
+        (this.props.coordinateSystem ?? 'default') === 'default'
+          ? this.context.viewport.isGeospatial
+            ? 'WGS84'
+            : 'cartesian'
+          : this.props.coordinateSystem;
+      const sourceCrs =
+        this._sourceCrs === undefined ? resolveCRS(coordinateSystem) : this._sourceCrs;
+      // LayerManager resolves asynchronous descriptors before initialization.
+      assert(!(sourceCrs instanceof Promise));
+      this.internalState.sourceCrs = sourceCrs;
+      this._updatePreprojection(this.context.viewport);
+      // for backwards compatibility with older layers
+      // TODO - remove in next release
+      /* eslint-disable accessor-pairs */
+      Object.defineProperty(this.state, 'attributeManager', {
+        get: () => {
+          log.deprecated('layer.state.attributeManager', 'layer.getAttributeManager()')();
+          return attributeManager;
+        }
+      });
+      /* eslint-enable accessor-pairs */
+
+      this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
+      this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
+
+      // Ensure any async props are updated
+      this.internalState.setAsyncProps(this.props);
+
+      // Call subclass lifecycle methods
+      this.initializeState(this.context);
+
+      // Initialize extensions
+      for (const extension of this.props.extensions) {
+        extension.initializeState.call(this, this.context, extension);
       }
-    });
-    /* eslint-enable accessor-pairs */
+      // End subclass lifecycle methods
 
-    this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
-    this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
+      // initializeState callback tends to clear state
+      this.setChangeFlags({
+        dataChanged: 'init',
+        propsChanged: 'init',
+        viewportChanged: true,
+        extensionsChanged: true
+      });
 
-    // Ensure any async props are updated
-    this.internalState.setAsyncProps(this.props);
-
-    // Call subclass lifecycle methods
-    this.initializeState(this.context);
-
-    // Initialize extensions
-    for (const extension of this.props.extensions) {
-      extension.initializeState.call(this, this.context, extension);
+      this._update();
+    } finally {
+      this.context.viewport = previousViewport;
     }
-    // End subclass lifecycle methods
-
-    // initializeState callback tends to clear state
-    this.setChangeFlags({
-      dataChanged: 'init',
-      propsChanged: 'init',
-      viewportChanged: true,
-      extensionsChanged: true
-    });
-
-    this._update();
   }
 
   /** (Internal) Called by layer manager to transfer state from an old layer */

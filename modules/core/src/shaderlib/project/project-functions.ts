@@ -154,6 +154,16 @@ export function getWorldPosition(
   switch (viewport.projectionMode) {
     case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
       switch (coordinateSystem) {
+        case 'meter-offsets': {
+          const origin = viewport.projectPosition(coordinateOrigin);
+          const targetOrigin = viewport.crs!.converter.WGS84.from(coordinateOrigin);
+          const {unitsPerMeter} = viewport.getDistanceScales(targetOrigin);
+          return [
+            origin[0] + x * unitsPerMeter[0],
+            origin[1] + y * unitsPerMeter[1],
+            origin[2] + z * unitsPerMeter[2]
+          ];
+        }
         case 'cartesian': {
           const scale = viewport.distanceScales.unitsPerWorldUnit;
           return [

@@ -212,7 +212,8 @@ if (outDir) {
 
 ![subdivision](https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/images/docs/viewport-resolution.png)
 
-<small>Left to right: same polygons in resolution 0, 10, 60, rendering 487, 501, 591 outline vertices respectively.
+<small>
+Left to right: same polygons in resolution 0, 10, 60, rendering 487, 501, 591 outline vertices respectively.
 Notice the shape of the 49th-parallel.
 <br/><i>Natural Earth 1:110 country boundaries of continental Canada and United States. Albers projection, central metidian -96°, standard parallels 29.5° / 45.5°</i>
 </small>

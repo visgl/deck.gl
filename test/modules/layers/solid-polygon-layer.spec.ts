@@ -10,6 +10,28 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
 import {geoJSONData} from './data/fixtures';
+import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
+
+test('PolygonTesselator preserves supplied geocentric triangle winding', () => {
+  const positions = new Float32Array([1, 0, 0, 0, 0, 1, 0, 1, 0]);
+  const indices = new Uint16Array([0, 1, 2]);
+  const data = {length: 1, startIndices: [0, 3]};
+  const tesselator = new PolygonTesselator({
+    data,
+    geometryBuffer: positions,
+    buffers: {indices},
+    normalize: false,
+    positionFormat: 'XYZ',
+    full3d: true,
+    geocentric: true,
+    preproject: () => {
+      throw new Error('Prepared triangles must bypass triangulation');
+    }
+  });
+  expect(tesselator.get('indices')).toBeFalsy();
+  expect(Array.from(positions)).toEqual([1, 0, 0, 0, 0, 1, 0, 1, 0]);
+  expect(Array.from(indices)).toEqual([0, 1, 2]);
+});
 
 test('SolidPolygonLayer#binary positions without preprojection remain in world coordinates', () => {
   const viewport = new MapView().makeViewport({

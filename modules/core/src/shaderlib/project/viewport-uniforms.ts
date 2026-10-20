@@ -34,12 +34,7 @@ export function getShaderCoordinateFrame(coordinateSystem: string, viewport: Vie
     case 'lnglat-offsets':
       return COORDINATE_SYSTEM.GEODETIC;
     case 'meter-offsets':
-      switch (viewport.projectionMode) {
-        case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
-          return COORDINATE_SYSTEM.PROJECTED;
-        default:
-          return COORDINATE_SYSTEM.IDENTITY;
-      }
+      return COORDINATE_SYSTEM.IDENTITY;
     case 'cartesian':
       switch (viewport.crs?.coordinateFrame) {
         case 'geographic':
@@ -65,6 +60,7 @@ function getShaderProjectionMode(projectionMode: number, coordinateSystem: strin
           return PROJECTION_MODE.GLOBE_METER_OFFSETS;
         case PROJECTION_MODE.WEB_MERCATOR:
         case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
+        case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
           return PROJECTION_MODE.METER_OFFSETS;
       }
       break;
@@ -161,6 +157,12 @@ export function getOffsetOrigin(
       break;
 
     case PROJECTION_MODE.CUSTOM_GEOSPATIAL: {
+      if (coordinateSystem === 'meter-offsets') {
+        // Only the geographic anchor is projected; attributes remain local meters.
+        shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+        commonOrigin = viewport.projectPosition(coordinateOrigin);
+        break;
+      }
       geospatialOrigin = null;
       const scale = viewport.distanceScales.unitsPerWorldUnit;
       // Round in the units stored in position attributes, so the GPU receives
@@ -438,11 +440,18 @@ function calculateViewportUniforms({
 
   if (geospatialOrigin) {
     // Get high-precision DistanceScales from geospatial viewport
-    const distanceScalesAtOrigin = viewport.getDistanceScales(geospatialOrigin);
+    const scaleOrigin =
+      viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+        ? viewport.crs!.converter.WGS84.from(geospatialOrigin)
+        : geospatialOrigin;
+    const distanceScalesAtOrigin = viewport.getDistanceScales(scaleOrigin);
     switch (coordinateSystem) {
       case 'meter-offsets':
         uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
         uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
+        if (viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL) {
+          uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
+        }
         break;
 
       case 'lnglat':

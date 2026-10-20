@@ -285,6 +285,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     () => layer.project([0, 0, 100]),
     'default coordinate system does not throw'
@@ -301,6 +302,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]),
     'returns correct value'
@@ -316,6 +318,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     equals(
       layer.project([100, 100, 100]),
@@ -334,6 +337,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {zoom: 0, rotationOrbit: 30}
   });
+  layer.activateViewport(layer.context.viewport);
 
   expect(
     equals(

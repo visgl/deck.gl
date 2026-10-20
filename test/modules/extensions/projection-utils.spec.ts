@@ -4,6 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {
+  LayerManager,
   OrthographicViewport,
   WebMercatorViewport,
   _GlobeViewport as GlobeViewport,
@@ -11,8 +12,12 @@ import {
 } from '@deck.gl/core';
 import type {ProjectUniforms} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils/vitest';
+import {testLayer, device} from '@deck.gl/test-utils/vitest';
+import {resolveCRS} from '@deck.gl/core/utils/crs';
+import {Matrix4} from '@math.gl/core';
+import {createTestViewport} from '../core/viewports/test-crs';
 import {
+  joinLayerBounds,
   getFlatCommonOrigin,
   isFlatViewport,
   lngLatToMercatorCommon,
@@ -211,3 +216,44 @@ function normalize(v: number[]): number[] {
 function cross(a: number[], b: number[]): number[] {
   return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
+
+test('joinLayerBounds projects packed bounds without repeating source transforms', async () => {
+  const source = (await resolveCRS('EPSG:3857'))!;
+  const custom = createTestViewport({
+    converter: {
+      forward: ([x, y, z]) => [x * 3, y * 4, z],
+      inverse: ([x, y, z]) => [x / 3, y / 4, z]
+    }
+  });
+  for (const viewport of [mercatorViewport, custom]) {
+    const manager = new LayerManager(device, {viewport});
+    const data = [
+      [10, 20, 0],
+      [30, 40, 0]
+    ];
+    const isCustom = viewport === custom;
+    const layer = new ScatterplotLayer({
+      data,
+      getPosition: p => p,
+      coordinateSystem: isCustom ? 'lnglat' : 'EPSG:3857',
+      coordinateOrigin: [1, 2, 0],
+      modelMatrix: new Matrix4().translate([3, 4, 0])
+    });
+    try {
+      manager.setLayers([layer]);
+      expect(layer.state.preproject).toBeTypeOf('function');
+      const corners = data.map(([x, y, z]) => {
+        const transformed = [x + 4, y + 6, z];
+        return viewport.projectPosition(
+          isCustom ? transformed : source.converter.WGS84.to(transformed)
+        );
+      });
+      const expected = [corners[0][0], corners[0][1], corners[1][0], corners[1][1]];
+      joinLayerBounds([layer], viewport)!.forEach((value, i) =>
+        expect(value).toBeCloseTo(expected[i], 6)
+      );
+    } finally {
+      manager.finalize();
+    }
+  }
+});

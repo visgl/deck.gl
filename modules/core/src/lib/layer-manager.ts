@@ -70,6 +70,7 @@ export default class LayerManager {
   >();
   private _lastRenderedLayers: LayersList = [];
   private _viewports = new Map<string, Viewport | null>();
+  private _layerFilter: Deck['props']['layerFilter'] = null;
   readonly projectionScaleResources: ProjectionScaleResources;
   private _needsRedraw: string | false = false;
   private _needsUpdate: string | false = false;
@@ -187,6 +188,10 @@ export default class LayerManager {
 
   /** Set props needed for layer rendering and picking. */
   setProps(props: any): void {
+    if ('layerFilter' in props && props.layerFilter !== this._layerFilter) {
+      this._layerFilter = props.layerFilter;
+      this.setNeedsUpdate('layerFilter changed');
+    }
     if ('debug' in props) {
       this._debug = props.debug;
     }
@@ -389,10 +394,15 @@ export default class LayerManager {
         }
 
         if (oldLayer?.internalState) this._transferLayerState(oldLayer, newLayer);
-        const ready = this.isViewportReady(newLayer) && this._resolveLayerCrs(newLayer);
+        const initialViewport = !newLayer.internalState
+          ? this._getInitialViewport(newLayer)
+          : undefined;
+        const ready =
+          this.isViewportReady(newLayer) && this._resolveLayerCrs(newLayer, initialViewport);
         if (ready) {
-          if (!newLayer.internalState) this._initializeLayer(newLayer);
-          else this._updateLayer(newLayer);
+          if (!newLayer.internalState) {
+            this._initializeLayer(newLayer, initialViewport);
+          } else this._updateLayer(newLayer);
         }
         generatedLayers.push(newLayer);
 
@@ -413,8 +423,27 @@ export default class LayerManager {
   }
   /* eslint-enable complexity,max-statements */
 
-  private _resolveLayerCrs(layer: Layer): boolean {
-    const viewport = layer.internalState?.viewport || this.context.viewport!;
+  private _getInitialViewport(layer: Layer): Viewport | undefined {
+    const viewports = this._viewports.size ? this._viewports.values() : [this.context.viewport];
+    for (const viewport of viewports) {
+      // Use the same root-layer filter as rendering, only to seed initialization.
+      if (
+        viewport &&
+        (!this._layerFilter ||
+          this._layerFilter({
+            layer: layer.root,
+            viewport,
+            isPicking: false,
+            renderPass: 'screen'
+          }))
+      )
+        return viewport;
+    }
+    return undefined;
+  }
+
+  private _resolveLayerCrs(layer: Layer, initialViewport?: Viewport): boolean {
+    const viewport = layer.internalState?.viewport || initialViewport || this.context.viewport!;
     const coordinateSystem =
       (layer.props.coordinateSystem ?? 'default') === 'default'
         ? viewport.isGeospatial
@@ -466,9 +495,9 @@ export default class LayerManager {
   // / EXCEPTION SAFE LAYER ACCESS
 
   /** Safely initializes a single layer, calling layer methods */
-  private _initializeLayer(layer: Layer): void {
+  private _initializeLayer(layer: Layer, initialViewport?: Viewport): void {
     try {
-      layer._initialize();
+      layer._initialize(initialViewport);
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
       this._handleError('initialization', err as Error, layer);

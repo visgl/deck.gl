@@ -76,6 +76,11 @@ export default class VectorTileLayer<
     this.setState({binary: true});
   }
 
+  getSubdivisionStep(): number {
+    // CARTO tiles always contain prepared binary geometry, independent of the viewport.
+    return 0;
+  }
+
   updateState(parameters) {
     const {props} = parameters;
     if (props.data) {
