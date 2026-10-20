@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView, type MapViewState} from '@deck.gl/core';
+import {Deck, MapView, type MapViewState} from '@deck.gl/core';
 import {SunLayer, MoonLayer, CloudLayer, AtmosphereLayer} from '@deck.gl-community/gpu-layers';
 import type {CloudProps, AtmosphereProps} from '@luma.gl/shadertools';
 import {getMoonPosition, getMoonIllumination, getSkyDirection} from '@math.gl/sun';
@@ -138,7 +138,7 @@ export function createRiverfrontSoftShadowScene(
         clouds: () => ({...getClouds(), cover: cloudSettings.shadows ? getClouds().cover : 0}),
         atmosphere: getAtmosphere,
         pickable: true,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: CITY_ORIGIN
       })
     ];

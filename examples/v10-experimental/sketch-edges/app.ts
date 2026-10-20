@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {SketchEdgeLayer} from '@deck.gl-community/gpu-layers';
 import type {Buffer} from '@luma.gl/core';
 import type {MakeEdgeGeometryOptions} from '@luma.gl/engine';
@@ -91,7 +91,7 @@ export function createSketchScene(parent: HTMLDivElement, options: DeckExampleDe
           features: surroundings,
           data: surroundings,
           visible: contextVisible,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: ORIGIN
         }),
         new BuildingMeshLayer({
@@ -101,7 +101,7 @@ export function createSketchScene(parent: HTMLDivElement, options: DeckExampleDe
           pickable: true,
           opacity: 0.34,
           visible: fillsVisible,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: ORIGIN
         }),
         edgesVisible &&

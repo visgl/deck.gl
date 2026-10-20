@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import type {PatternFillProps} from '@luma.gl/shadertools';
 import {makeCityFeatures, CITY_ORIGIN} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
@@ -62,7 +62,7 @@ export function createPatternScene(parent: HTMLDivElement, options: DeckExampleD
           features: surroundings,
           data: surroundings,
           pattern: {width: 0},
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: CITY_ORIGIN
         }),
         new BuildingMeshLayer({
@@ -71,7 +71,7 @@ export function createPatternScene(parent: HTMLDivElement, options: DeckExampleD
           data: features,
           pattern: {...pattern, width: enabled ? pattern.width : 0},
           pickable: true,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: CITY_ORIGIN
         })
       ]
