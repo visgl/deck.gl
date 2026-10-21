@@ -346,7 +346,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
-      (this.state.preproject &&
+      (viewport.isGeospatial &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)));
     const geometryConfigChanged =
@@ -367,11 +367,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         buffers,
         getGeometry: props.getPolygon,
         transform: this.usePositionTransforms().transform?.bind(this),
-        // Tessellation uses a temporary target-space copy; attributes retain their shader-supported CRS.
-        // For shader-supported positions, triangulation assumes modelMatrix and
-        // coordinateOrigin remain fixed while data is unchanged; GPU transforms do not retriangulate.
+        // Triangulate where the shader draws the polygon, including layer transforms.
+        // CPU-preprojected positions already contain those transforms.
         preproject: this.state.packedCrs
-          ? position => viewport.projectPosition(position, {sourceCrs: this.state.packedCrs!})
+          ? position =>
+              this.state.preproject
+                ? viewport.projectPosition(position, {sourceCrs: this.state.packedCrs!})
+                : this.projectPosition(position, {viewport, autoOffset: false})
           : undefined,
         positionFormat: props.positionFormat,
         // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.

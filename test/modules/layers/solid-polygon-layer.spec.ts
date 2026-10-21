@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
+import {expect, test, vi} from 'vitest';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {LayerManager, MapView, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
@@ -196,3 +196,67 @@ test.each(['XY', 'XYZ'] as const)(
     }
   }
 );
+
+test('SolidPolygonLayer retriangulates geospatial geometry when transforms change', () => {
+  const viewport = new GlobeViewport();
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const ring = [
+    [-135, 80],
+    [-45, 80],
+    [45, 80],
+    [135, 80],
+    [-135, 80]
+  ];
+  let layer = new SolidPolygonLayer({
+    id: 'transformed-polar-polygon',
+    data: [ring],
+    getPolygon: polygon => polygon,
+    modelMatrix: new Matrix4(),
+    coordinateOrigin: [0, 0, 0]
+  });
+  const expectOutwardTriangles = () => {
+    const tessellator = layer.state.polygonTesselator;
+    const indices = tessellator.get('indices');
+    const packed = tessellator.get('positions');
+    expect(indices).toHaveLength(6);
+    for (let i = 0; i < indices.length; i += 3) {
+      const [a, b, c] = Array.from(indices.slice(i, i + 3), index =>
+        layer.projectPosition(Array.from(packed.slice(index * 3, index * 3 + 3)), {
+          autoOffset: false
+        })
+      );
+      const orientation =
+        a[0] * (b[1] * c[2] - b[2] * c[1]) +
+        a[1] * (b[2] * c[0] - b[0] * c[2]) +
+        a[2] * (b[0] * c[1] - b[1] * c[0]);
+      expect(orientation).toBeGreaterThan(0);
+    }
+  };
+  try {
+    manager.setLayers([layer]);
+    expect(layer.state.preproject).toBeNull();
+    expectOutwardTriangles();
+    const updateGeometry = vi.spyOn(layer.state.polygonTesselator, 'updateGeometry');
+    // Equal array values should not rebuild geometry when the layer is cloned.
+    layer = layer.clone({modelMatrix: new Matrix4(), coordinateOrigin: [0, 0, 0]});
+    manager.setLayers([layer]);
+    expect(updateGeometry).not.toHaveBeenCalled();
+
+    layer = layer.clone({modelMatrix: new Matrix4().translate([0, -160, 0])});
+    manager.setLayers([layer]);
+    expect(updateGeometry).toHaveBeenCalledTimes(1);
+    expectOutwardTriangles();
+
+    layer = layer.clone({coordinateOrigin: [0, 160, 0]});
+    manager.setLayers([layer]);
+    expect(updateGeometry).toHaveBeenCalledTimes(2);
+    expectOutwardTriangles();
+  } finally {
+    manager.finalize();
+  }
+});
