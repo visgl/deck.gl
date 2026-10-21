@@ -91,7 +91,9 @@ export abstract class GPUTransitionBase<SettingsT extends TransitionSettings>
       // Retain placeholder value to generate correct shader layout
       value: this.attributeInTransition.value as NumericArray,
       // A WebGPU Float32-backed fp64 transition still stores interleaved high/low tuples.
-      stride
+      stride,
+      // The transition output mirrors the source column, including interleaved fp64 rows
+      isDoublePrecisionBuffer: this.attribute.isDoublePrecisionBuffer
     });
   }
 
