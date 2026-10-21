@@ -251,6 +251,53 @@ test('TextLayer - utils#transformParagraph - autoWrapping', () => {
   expect(transformedData).toEqual(expected);
 });
 
+test('TextLayer - utils#transformParagraph - letter spacing', () => {
+  const text = 'ab\nc';
+  const lineHeight = 4;
+  const baselineOffset = 1;
+
+  const iconMapping = {
+    a: {width: 1, height: 4, advance: 2, anchorX: 0.5, anchorY: 3},
+    b: {width: 3, height: 4, advance: 4, anchorX: 1.5, anchorY: 3},
+    c: {width: 2, height: 4, advance: 3, anchorX: 1, anchorY: 3}
+  };
+
+  // Spacing follows each character of a row but the last
+  const expected = {
+    x: [0.5, 4.5, 0, 1],
+    y: [3, 3, 0, 7],
+    rowWidth: [7, 7, 0, 3],
+    size: [7, 8]
+  };
+
+  const transformedData = transformParagraph(
+    text,
+    baselineOffset,
+    lineHeight,
+    null,
+    null,
+    iconMapping,
+    1
+  );
+  expect(transformedData).toEqual(expected);
+});
+
+test('TextLayer - utils#autoWrapping - letter spacing', () => {
+  const text = Array.from('aaaa');
+  const iconMapping = {
+    a: {width: 2, height: 4, advance: 2, anchorX: 1, anchorY: 3}
+  };
+
+  expect(autoWrapping(text, 'break-all', 7, iconMapping, 0, 4), 'no spacing').toEqual([3]);
+  // Three characters with spacing are 2 + 1 + 2 + 1 + 2 = 8 wide
+  expect(autoWrapping(text, 'break-all', 7, iconMapping, 0, 4, 1), 'too narrow').toEqual([2]);
+  expect(autoWrapping(text, 'break-all', 8, iconMapping, 0, 4, 1), 'exact fit').toEqual([3]);
+  expect(
+    autoWrapping(Array.from('aa aa'), 'break-word', 6, iconMapping, 0, 5, 1),
+    'break-word'
+  ).toEqual([3]);
+});
+
 test('TextLayer - utils#getTextFromBuffer', () => {
   const value = new Uint8Array([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33]);
 
