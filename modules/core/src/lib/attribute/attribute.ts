@@ -16,7 +16,9 @@ import {toDoublePrecisionArray} from '../../utils/math-utils';
 import * as range from '../../utils/range';
 import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
-import type {Device, Buffer, BufferLayout} from '@luma.gl/core';
+import {Buffer, getTypedArrayFromDataType} from '@luma.gl/core';
+import type {Device, BufferLayout} from '@luma.gl/core';
+import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/gpgpu/gpu-data';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 
@@ -429,14 +431,71 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return result;
   }
 
+  /**
+   * Returns typed shader attributes without copying GPU storage. Vectors borrow this
+   * attribute's buffers and must be reacquired after updates that replace storage.
+   * Constants contain one raw, unnormalized row. Unallocated attributes are omitted.
+   */
+  getGPUValue(): Record<string, GPUVector | GPUConstant> {
+    if (!this.isConstant && !this.getBuffer()) {
+      return {};
+    }
+    const layout = this._getShaderBufferLayout();
+    const values = this.getValue();
+    const result: Record<string, GPUVector | GPUConstant> = {};
+    let constantValue = this.getConstantValue();
+    if (
+      this.doublePrecision &&
+      (constantValue instanceof Float32Array || constantValue instanceof Float64Array)
+    ) {
+      constantValue =
+        this.device.type === 'webgpu'
+          ? toDoublePrecisionArray(constantValue, {size: this.size})
+          : new Float32Array([...this.value!, ...new Float32Array(this.size)]);
+    }
+    for (const definition of layout.attributes || []) {
+      const name = definition.attribute;
+      const value = values[name];
+      const formatInfo = getGPUVectorFormatInfo(definition.format);
+      if (this.isConstant && constantValue) {
+        const ArrayType = getTypedArrayFromDataType(formatInfo.type);
+        const offset = (definition.byteOffset || 0) / constantValue.BYTES_PER_ELEMENT;
+        result[name] = new GPUConstant({
+          format: definition.format,
+          value: new ArrayType(constantValue.subarray(offset, offset + formatInfo.components))
+        });
+      } else if (value instanceof Buffer) {
+        result[name] = new GPUVector({
+          type: 'buffer',
+          name,
+          buffer: value,
+          format: definition.format,
+          length: this.numInstances,
+          byteOffset: definition.byteOffset || 0,
+          byteStride: layout.byteStride,
+          ownsBuffer: false
+        });
+      } else if (value) {
+        // Includes the synthetic fp64 low constant for float32 input on WebGL.
+        result[name] = new GPUConstant({
+          format: definition.format,
+          value: new (getTypedArrayFromDataType(formatInfo.type))(value)
+        });
+      }
+    }
+    return result;
+  }
+
   /** Generate WebGPU-style buffer layout descriptor from this attribute */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}
   ): BufferLayout {
-    // Clear change flag
     this.state.layoutChanged = false;
+    return this._getShaderBufferLayout(modelInfo);
+  }
 
+  private _getShaderBufferLayout(modelInfo?: {isInstanced?: boolean}): BufferLayout {
     const shaderAttributeDefs = this.settings.shaderAttributes;
     const result: BufferLayout = super._getBufferLayout();
     const {stepMode} = this.settings;

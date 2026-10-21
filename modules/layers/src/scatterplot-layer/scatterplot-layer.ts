@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
@@ -300,7 +300,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
-    return new Model(this.context.device, {
+    return this._createGPUTableModel({
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

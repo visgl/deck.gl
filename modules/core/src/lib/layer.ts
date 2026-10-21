@@ -6,6 +6,8 @@
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import AttributeManager from './attribute/attribute-manager';
+import GPUTableModel from './attribute/gpu-table-model';
+import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
@@ -31,7 +33,7 @@ import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import {PROJECTION_MODE} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
+import type {Model, ModelProps} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -802,6 +804,54 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attribute.value = pickingColorCache.subarray(0, numInstances * 4);
   }
 
+  /** @internal Creates a model that consumes AttributeManager's typed GPU columns. */
+  protected _createGPUTableModel(props: ModelProps): Model {
+    return new GPUTableModel(this.context.device, props);
+  }
+
+  private _setGPUTableModelAttributes(
+    model: GPUTableModel,
+    attributeManager: AttributeManager,
+    changedAttributes: Record<string, Attribute>
+  ): void {
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const bindings = attributeManager.getBufferGroupBindings(
+      changedAttributes,
+      model,
+      excludeAttributes
+    );
+    const attributes = {...attributeManager.getAttributes()};
+    let indexBuffer: Buffer | null | undefined;
+    for (const name in attributes) {
+      if (excludeAttributes[name] || bindings.groupedAttributeIds.has(name)) {
+        delete attributes[name];
+      } else if (attributes[name].settings.isIndexed) {
+        indexBuffer = attributes[name].getBuffer();
+        delete attributes[name];
+      }
+    }
+    const columns = attributeManager.getGPUAttributes(attributes);
+    for (const layout of bindings.bufferLayouts) {
+      const buffer = bindings.buffers[layout.name];
+      if (buffer) {
+        columns[layout.name] = new GPUVector({
+          type: 'interleaved',
+          name: layout.name,
+          buffer,
+          length: this.getNumInstances(),
+          byteStride: layout.byteStride!,
+          attributes: layout.attributes!,
+          ownsBuffer: false
+        });
+      }
+    }
+    model.setGPUAttributes(columns, bindings.bufferLayouts);
+    if (indexBuffer !== undefined) {
+      model.setIndexBuffer(indexBuffer);
+    }
+  }
+
   /** Apply changed attributes to model */
   // eslint-disable-next-line max-statements
   protected _setModelAttributes(
@@ -816,6 +866,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     const attributeManager = this.getAttributeManager();
+    if (model instanceof GPUTableModel && attributeManager) {
+      this._setGPUTableModelAttributes(model, attributeManager, changedAttributes);
+      return;
+    }
     if (attributeManager?.hasBufferGroups()) {
       this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
       return;

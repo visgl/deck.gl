@@ -14,6 +14,7 @@ import {NumericArray} from '../../types/types';
 import AttributeTransitionManager from './attribute-transition-manager';
 
 import type {Device, BufferLayout} from '@luma.gl/core';
+import type {GPUVector, GPUConstant} from '@luma.gl/gpgpu/gpu-data';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -272,6 +273,22 @@ export default class AttributeManager {
    */
   getAttributes(): {[id: string]: Attribute} {
     return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
+  }
+
+  /**
+   * Returns borrowed GPU vectors and raw constants keyed by shader attribute name.
+   * Active transitions override source attributes. Reacquire after attribute updates;
+   * retaining a vector does not extend the lifetime of its backing buffer.
+   * @param attributes Optional subset, such as the result of getChangedAttributes().
+   */
+  getGPUAttributes(
+    attributes: Record<string, Attribute> = this.getAttributes()
+  ): Record<string, GPUVector | GPUConstant> {
+    const result: Record<string, GPUVector | GPUConstant> = {};
+    for (const attribute of Object.values(attributes)) {
+      Object.assign(result, attribute.getGPUValue());
+    }
+    return result;
   }
 
   /**

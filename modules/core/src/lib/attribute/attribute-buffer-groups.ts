@@ -6,6 +6,7 @@ import Attribute from './attribute';
 import {getStride} from './gl-utils';
 
 import {Buffer} from '@luma.gl/core';
+import {GPUConstant, GPUVector, getGPUVectorBuffer} from '@luma.gl/gpgpu/gpu-data';
 import {
   backendRegistry,
   cleanEvaluateSync,
@@ -335,11 +336,9 @@ export default class AttributeBufferGroups {
     assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
     assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
 
-    if (attribute.isConstant) {
-      const constantValue = attribute.getConstantValue();
-      if (!constantValue) {
-        throw new Error(`Attribute group ${group.id} is missing constant value ${attribute.id}`);
-      }
+    const column = attribute.getGPUValue()[attribute.id];
+    if (column instanceof GPUConstant) {
+      const constantValue = column.value;
       assertU32Aligned(`${group.id}.${attribute.id} constant byteOffset`, constantValue.byteOffset);
 
       // The packed output is a byte-for-byte vertex buffer. Reinterpret the source row as u32
@@ -357,9 +356,9 @@ export default class AttributeBufferGroups {
       });
     }
 
-    const buffer = attribute.getBuffer();
-    const byteOffset = attribute.byteOffset;
-    const stride = attribute.getAccessor().stride || rowByteLength;
+    const buffer = column instanceof GPUVector ? getGPUVectorBuffer(column) : null;
+    const byteOffset = column instanceof GPUVector ? column.byteOffset : 0;
+    const stride = column instanceof GPUVector ? column.byteStride : rowByteLength;
 
     assertU32Aligned(`${group.id}.${attribute.id} byteOffset`, byteOffset);
     assertU32Aligned(`${group.id}.${attribute.id} stride`, stride);
