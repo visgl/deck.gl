@@ -479,7 +479,10 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         // Includes the synthetic fp64 low constant for float32 input on WebGL.
         result[name] = new GPUConstant({
           format: definition.format,
-          value: new (getTypedArrayFromDataType(formatInfo.type))(value)
+          value: new (getTypedArrayFromDataType(formatInfo.type))(value).subarray(
+            0,
+            formatInfo.components
+          )
         });
       }
     }
