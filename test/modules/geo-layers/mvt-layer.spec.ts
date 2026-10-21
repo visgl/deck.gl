@@ -13,7 +13,7 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -525,6 +525,46 @@ test('MVTLayer#dataInWGS84', async () => {
     Layer: TestMVTLayer,
     viewport,
     testCases,
+    onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('MVTLayer#cullMode', async () => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+
+  TestMVTLayer.layerName = 'TestMVTLayer';
+
+  const expectCullMode =
+    (cullMode: string | undefined) =>
+    ({subLayers}) => {
+      for (const layer of subLayers) {
+        expect(layer.props.parameters.cullMode, `${layer.id} cullMode`).toBe(cullMode);
+      }
+    };
+
+  const props = {data: ['https://json/{z}/{x}/{y}.mvt'], binary: false};
+  const viewState = {longitude: 0, latitude: 0, zoom: 1};
+
+  // Tile-relative coordinates under a y-flipped modelMatrix: back faces must be drawn
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new WebMercatorViewport(viewState),
+    testCases: [
+      {props, onAfterUpdate: expectCullMode('none')},
+      {updateProps: {parameters: {cullMode: 'back'}}, onAfterUpdate: expectCullMode('back')}
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+
+  // WGS84 coordinates on the globe keep the view's culling
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new GlobeViewport(viewState),
+    testCases: [{props, onAfterUpdate: expectCullMode(undefined)}],
     onError: err => expect(err).toBeFalsy()
   });
 });
