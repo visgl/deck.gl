@@ -126,15 +126,19 @@ export default class MVTLayer<
 
   initializeState(): void {
     super.initializeState();
-    // Prepared binary geometry bypasses normalization/subdivision.
-    const binary = this.getSubdivisionStep() > 0 ? false : this.props.binary;
     this.setState({
-      binary,
+      binary: this.useBinary(),
       data: null,
       tileJSON: null,
       hoveredFeatureId: null,
       hoveredFeatureLayerName: null
     });
+  }
+
+  /** Select the tile data format; subclasses with fixed-format loaders can override it. */
+  protected useBinary(): boolean {
+    // Prepared binary geometry bypasses subdivision, so request GeoJSON when needed.
+    return this.getSubdivisionStep() > 0 ? false : this.props.binary;
   }
 
   get isLoaded(): boolean {
@@ -143,7 +147,7 @@ export default class MVTLayer<
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
     const dataChanged = changeFlags.dataChanged;
-    const binary = this.getSubdivisionStep() > 0 ? false : props.binary;
+    const binary = this.useBinary();
     if (binary !== this.state.binary) {
       this.setState({binary});
       // The tile representation must change when subdivision is enabled/disabled.

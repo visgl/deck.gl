@@ -71,14 +71,9 @@ export default class VectorTileLayer<
     super(...propObjects);
   }
 
-  initializeState(): void {
-    super.initializeState();
-    this.setState({binary: true});
-  }
-
-  getSubdivisionStep(): number {
-    // CARTO tiles always contain prepared binary geometry, independent of the viewport.
-    return 0;
+  protected useBinary(): boolean {
+    // Both CARTO's native tiles and its MVT loader always return binary geometry.
+    return true;
   }
 
   updateState(parameters) {
