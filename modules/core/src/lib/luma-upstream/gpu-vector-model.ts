@@ -16,7 +16,7 @@ import {
  * Model API. Consumes typed columns with deck.gl's resolved physical layouts.
  * Vectors remain caller-owned; only WebGPU constant buffers are owned here.
  */
-export default class GPUTableModel extends Model {
+export default class GPUVectorModel extends Model {
   private constantBuffers: Record<string, Buffer> = {};
 
   /** Binds a complete column map using layouts resolved by AttributeManager. */

@@ -8,7 +8,7 @@ import {LayerManager, MapView} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import ScatterplotLayer from '@deck.gl/layers/scatterplot-layer/scatterplot-layer';
-import GPUTableModel from '@deck.gl/core/lib/attribute/gpu-table-model';
+import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
 
 test('ScatterplotLayer consumes GPU columns across constant and buffer updates', () => {
@@ -35,7 +35,7 @@ test('ScatterplotLayer consumes GPU columns across constant and buffer updates',
       ...testCase,
       onAfterUpdate: ({layer}) => {
         const model = layer.getModels()[0];
-        expect(model).toBeInstanceOf(GPUTableModel);
+        expect(model).toBeInstanceOf(GPUVectorModel);
         const columns = layer.getAttributeManager().getGPUVectors();
         expect(columns.instancePositions).toBeInstanceOf(GPUVector);
         expect(columns.instancePositions.length).toBe(layer.props.data.length);
@@ -92,7 +92,7 @@ test('ScatterplotLayer GPU columns retain WebGPU grouping and release constant b
   try {
     manager.setLayers([layer]);
     const model = layer.getModels()[0];
-    expect(model).toBeInstanceOf(GPUTableModel);
+    expect(model).toBeInstanceOf(GPUVectorModel);
     expect(model.bufferLayout.some(layout => layout.name === 'scatterplot-instance-data')).toBe(
       true
     );

@@ -6,7 +6,7 @@
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import AttributeManager from './attribute/attribute-manager';
-import GPUTableModel from './attribute/gpu-table-model';
+import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -805,12 +805,12 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** @internal Creates a model that consumes AttributeManager's typed GPU columns. */
-  protected _createGPUTableModel(props: ModelProps): Model {
-    return new GPUTableModel(this.context.device, props);
+  protected _createGPUVectorModel(props: ModelProps): Model {
+    return new GPUVectorModel(this.context.device, props);
   }
 
-  private _setGPUTableModelAttributes(
-    model: GPUTableModel,
+  private _setGPUVectorModelAttributes(
+    model: GPUVectorModel,
     attributeManager: AttributeManager,
     changedAttributes: Record<string, Attribute>
   ): void {
@@ -866,8 +866,8 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     const attributeManager = this.getAttributeManager();
-    if (model instanceof GPUTableModel && attributeManager) {
-      this._setGPUTableModelAttributes(model, attributeManager, changedAttributes);
+    if (model instanceof GPUVectorModel && attributeManager) {
+      this._setGPUVectorModelAttributes(model, attributeManager, changedAttributes);
       return;
     }
     if (attributeManager?.hasBufferGroups()) {
