@@ -9,7 +9,7 @@ import Viewport, {
   type DistanceScales,
   type ProjectPositionOptions
 } from './viewport';
-import {PROJECTION_MODE} from '../lib/constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {OSM_TILE_CRS, getMercatorScales} from './web-mercator-util';
 
 import {
@@ -31,6 +31,8 @@ import {Matrix4, Vector3, clamp} from '@math.gl/core';
 import * as vec2 from '@math.gl/core/vec2';
 
 export type WebMercatorViewportOptions = {
+  /** Subdivision intervals around the earth for nonlinear source CRS conversions. Default 0 disables subdivision. */
+  resolution?: number;
   /** Name of the viewport */
   id?: string;
   /** Left offset from the canvas edge, in pixels */

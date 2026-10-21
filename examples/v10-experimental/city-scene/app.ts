@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView, type MapViewState} from '@deck.gl/core';
+import {Deck, MapView, type MapViewState} from '@deck.gl/core';
 import {SceneBufferEffect, SketchEdgeLayer, WaterSurfaceLayer} from '@deck.gl-community/gpu-layers';
 import type {Buffer} from '@luma.gl/core';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
@@ -156,7 +156,7 @@ export function createCityScene(parent: HTMLDivElement, options: DeckExampleDevi
       pickable: true,
       autoHighlight: true,
       highlightColor: [255, 196, 92, 160],
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: 'meter-offsets',
       coordinateOrigin: CITY_ORIGIN
     });
     const water =

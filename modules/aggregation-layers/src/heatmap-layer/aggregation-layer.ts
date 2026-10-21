@@ -28,7 +28,7 @@ export default abstract class AggregationLayer<
     ignoreProps?: Record<string, any>;
     dimensions?: any;
     changedAttributes?: Record<string, any>;
-  };
+  } & CompositeLayer['state'];
 
   initializeAggregationLayer(dimensions: any) {
     super.initializeState(this.context);

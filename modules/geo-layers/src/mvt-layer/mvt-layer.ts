@@ -9,8 +9,6 @@ import {
   PickingInfo,
   UpdateParameters,
   GetPickingInfoParams,
-  Viewport,
-  COORDINATE_SYSTEM,
   DefaultProps
 } from '@deck.gl/core';
 import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
@@ -44,6 +42,7 @@ const WORLD_SIZE = 512;
 
 const defaultProps: DefaultProps<MVTLayerProps> = {
   ...GeoJsonLayer.defaultProps,
+  coordinateSystem: 'OSMTile512',
   data: urlType,
   onDataLoad: {type: 'function', value: null, optional: true, compare: false},
   uniqueIdProperty: '',
@@ -127,10 +126,8 @@ export default class MVTLayer<
 
   initializeState(): void {
     super.initializeState();
-    // GlobeView doesn't work well with binary data
-    const binary = this.context.viewport.resolution !== undefined ? false : this.props.binary;
     this.setState({
-      binary,
+      binary: this.useBinary(),
       data: null,
       tileJSON: null,
       hoveredFeatureId: null,
@@ -138,12 +135,29 @@ export default class MVTLayer<
     });
   }
 
+  /** Select the tile data format; subclasses with fixed-format loaders can override it. */
+  protected useBinary(): boolean {
+    // Prepared binary geometry bypasses subdivision, so request GeoJSON when needed.
+    return this.getSubdivisionStep() > 0 ? false : this.props.binary;
+  }
+
   get isLoaded(): boolean {
     return Boolean(this.state?.data && super.isLoaded);
   }
 
   updateState({props, oldProps, context, changeFlags}: UpdateParameters<this>) {
-    if (changeFlags.dataChanged) {
+    const dataChanged = changeFlags.dataChanged;
+    const binary = this.useBinary();
+    if (binary !== this.state.binary) {
+      this.setState({binary});
+      // The tile representation must change when subdivision is enabled/disabled.
+      changeFlags = {
+        ...changeFlags,
+        dataChanged: 'tile geometry format changed',
+        propsOrDataChanged: true
+      };
+    }
+    if (dataChanged) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateTileData();
     }
@@ -233,7 +247,7 @@ export default class MVTLayer<
       mvt: {
         ...loadOptions?.mvt,
         shape: binary ? 'binary-geometry' : 'geojson-table',
-        coordinates: this.context.viewport.resolution ? 'wgs84' : 'local',
+        coordinates: 'local',
         tileIndex: index
         // Local worker debug
         // workerUrl: `modules/mvt/dist/mvt-loader.worker.js`
@@ -258,19 +272,22 @@ export default class MVTLayer<
     const worldScale = Math.pow(2, z);
 
     const xScale = WORLD_SIZE / worldScale;
-    const yScale = -xScale;
+    const yScale = xScale;
 
     const xOffset = (WORLD_SIZE * x) / worldScale;
-    const yOffset = WORLD_SIZE * (1 - y / worldScale);
+    const yOffset = (WORLD_SIZE * y) / worldScale;
 
     const modelMatrix = new Matrix4().scale([xScale, yScale, 1]);
 
     props.autoHighlight = false;
 
-    if (!this.context.viewport.resolution) {
-      props.modelMatrix = modelMatrix;
-      props.coordinateOrigin = [xOffset, yOffset, 0];
-      props.coordinateSystem = COORDINATE_SYSTEM.CARTESIAN;
+    // Tile-local data stays viewport-independent. Sublayers convert the declared
+    // southward-Y world coordinates to the active viewport's attribute CRS.
+    props.modelMatrix = modelMatrix;
+    props.coordinateOrigin = [xOffset, yOffset, 0];
+    props.coordinateSystem = 'OSMTile512';
+    if (this.context.viewport.crs?.signature === 'OSMTile512') {
+      // Rectangular common-space clipping is only valid for the Mercator target.
       props.extensions = [...(props.extensions || []), new ClipExtension()];
     }
 
@@ -313,7 +330,8 @@ export default class MVTLayer<
   }
 
   protected _isWGS84(): boolean {
-    return Boolean(this.context.viewport.resolution);
+    // Subclasses with geographic loaders (e.g. CARTO) override this picking contract.
+    return false;
   }
 
   getPickingInfo(params: GetPickingInfoParams): MVTLayerPickingInfo<FeaturePropertiesT> {
@@ -328,8 +346,7 @@ export default class MVTLayer<
     if (info.object && !this._isWGS84()) {
       info.object = transformTileCoordsToWGS84(
         info.object,
-        info.tile!.bbox as GeoBoundingBox, // eslint-disable-line
-        this.context.viewport
+        info.tile!.bbox as GeoBoundingBox // eslint-disable-line
       );
     }
 
@@ -439,7 +456,7 @@ export default class MVTLayer<
 
               const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
               tile._contentWGS84 = content.map(feature =>
-                transformTileCoordsToWGS84(feature, bbox, this.context.viewport)
+                transformTileCoordsToWGS84(feature, bbox)
               );
             }
             return tile._contentWGS84;
@@ -470,11 +487,7 @@ function isFeatureIdDefined(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }
 
-function transformTileCoordsToWGS84(
-  object: Feature,
-  bbox: GeoBoundingBox,
-  viewport: Viewport
-): Feature {
+function transformTileCoordsToWGS84(object: Feature, bbox: GeoBoundingBox): Feature {
   const feature = {
     ...object,
     geometry: {
@@ -485,7 +498,7 @@ function transformTileCoordsToWGS84(
   // eslint-disable-next-line accessor-pairs
   Object.defineProperty(feature.geometry, 'coordinates', {
     get: () => {
-      const wgs84Geom = transform(object.geometry, bbox, viewport);
+      const wgs84Geom = transform(object.geometry, bbox);
       return wgs84Geom.coordinates;
     }
   });

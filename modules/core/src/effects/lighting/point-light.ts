@@ -3,7 +3,6 @@
 // Copyright (c) vis.gl contributors
 
 import {projectPosition} from '../../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 import type Layer from '../../lib/layer';
 
@@ -66,9 +65,7 @@ export class PointLight {
       viewport,
       coordinateSystem,
       coordinateOrigin,
-      fromCoordinateSystem: viewport.isGeospatial
-        ? COORDINATE_SYSTEM.LNGLAT
-        : COORDINATE_SYSTEM.CARTESIAN,
+      fromCoordinateSystem: viewport.isGeospatial ? 'lnglat' : 'cartesian',
       fromCoordinateOrigin: [0, 0, 0]
     });
     projectedLight.color = this.color;

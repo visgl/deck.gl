@@ -2,14 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  COORDINATE_SYSTEM,
-  Deck,
-  MapView,
-  _GlobeView,
-  type Viewport,
-  type MapViewState
-} from '@deck.gl/core';
+import {Deck, MapView, _GlobeView, type Viewport, type MapViewState} from '@deck.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
 import {
   integrateSurfaceWeather,
@@ -234,7 +227,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
           lighting: getLighting,
           fog: getFog,
           surfaceWeather: getSurfaceWeather,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: CITY_ORIGIN
         }),
         new WeatherParticleLayer({

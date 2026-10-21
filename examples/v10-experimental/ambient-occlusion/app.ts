@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView, type Viewport} from '@deck.gl/core';
+import {Deck, MapView, type Viewport} from '@deck.gl/core';
 import {SceneBufferEffect, WaterSurfaceLayer} from '@deck.gl-community/gpu-layers';
 import type {Buffer} from '@luma.gl/core';
 import type {CompositeShaderPass} from '@luma.gl/shadertools';
@@ -131,7 +131,7 @@ export function createRiverfrontAmbientOcclusionScene(
           features: dryFeatures,
           data: dryFeatures,
           pickable: true,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: CITY_ORIGIN,
           roughness: 0.84
         }),

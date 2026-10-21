@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {MapView, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
@@ -227,7 +227,7 @@ function withGlobeSideBySide(testCase: TestCase): TestCase {
     name: `${testCase.name}-map-vs-globe`,
     views: [
       new MapView({id: 'map', width: '50%'}),
-      new GlobeView({id: 'globe', x: '50%', width: '50%'})
+      new GlobeView({resolution: 36, id: 'globe', x: '50%', width: '50%'})
     ],
     viewState: {map: viewState, globe: viewState},
     // Absorbs the SwiftShader sin/cos drift described above; same threshold as other globe cases
@@ -364,7 +364,7 @@ function createElevationLayers(
 }
 
 const CARTESIAN = {
-  coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+  coordinateSystem: 'cartesian',
   getPath: (path: number[][]) => path,
   widthUnits: 'pixels' as const,
   getWidth: 10,
@@ -589,7 +589,7 @@ const testCases: TestCase[] = [
             [horizontalPosition, verticalPosition + 22]
           ]);
         }),
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         getPath: (path: number[][]) => path,
         widthUnits: 'pixels' as const,
         getWidth: 1.5,

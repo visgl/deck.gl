@@ -101,8 +101,8 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
       id: 'points',
       data: [[10, 20]],
       getPosition: p => p,
-      coordinateSystem: 'meter-offsets',
-      coordinateOrigin: [100, 100, 0]
+      coordinateSystem: 'WGS84',
+      coordinateOrigin: [0, 0, 0]
     });
     manager.setLayers([layer]);
     const positions = () => layer.getAttributeManager()!.attributes.instancePositions.value!;
@@ -262,6 +262,7 @@ test('geometry layers retessellate all rows on projection and model matrix chang
     }
     const viewport = createTestViewport({
       ...options,
+      signature: 'shifted',
       converter: {
         forward: p => [p[0] + 50, p[1], p[2]],
         inverse: p => [p[0] - 50, p[1], p[2]]
@@ -425,7 +426,7 @@ test('WebGPU binary polygons project every subdivided vertex', async ({skip}) =>
   if (!webgpuDevice) return skip();
   const viewport = createTestViewport({
     ...options,
-    resolution: 5,
+    resolution: 72,
     converter: {
       forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
       inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]

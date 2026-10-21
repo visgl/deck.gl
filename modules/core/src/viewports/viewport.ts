@@ -4,7 +4,9 @@
 
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import log from '../utils/log';
+import assert from '../utils/assert';
 import {WGS84_CRS} from '../utils/crs';
+import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import {
   createMat4,
   getCameraPosition,
@@ -17,7 +19,7 @@ import {
 import {Matrix4, Vector3, equals, clamp} from '@math.gl/core';
 import * as mat4 from '@math.gl/core/mat4';
 
-import {PROJECTION_MODE} from '../lib/constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 
 export type ProjectPositionOptions = {
   /** CRS of the input coordinates. Defaults to WGS84 for geospatial viewports. */
@@ -47,6 +49,8 @@ export type Padding = {
 export type ViewportOptions = {
   /** Prepared target CRS descriptor; resolution belongs to the View. */
   crs?: CRSDescriptor;
+  /** Subdivision intervals around the earth. Default 0 disables subdivision. */
+  resolution?: number;
   /** Name of the viewport */
   id?: string;
   /** Left offset from the canvas edge, in pixels */
@@ -59,10 +63,6 @@ export type ViewportOptions = {
   height?: number;
   /** Viewport center in world space. If geospatial, refers to meter offsets from lng, lat, elevation */
   position?: number[];
-  /** World-coordinate conversion installed before camera initialization. */
-  preproject?: ((position: number[]) => [number, number, number]) | null;
-  /** Inverse conversion paired with preproject, installed before camera initialization. */
-  postUnproject?: ((position: number[]) => [number, number, number] | null) | null;
   /** Zoom level */
   zoom?: number;
   /** Padding around the viewport, in pixels. */
@@ -193,18 +193,71 @@ export default class Viewport {
   viewProjectionMatrix!: number[];
   pixelProjectionMatrix!: number[];
   pixelUnprojectionMatrix!: number[];
-  resolution?: number;
-  /** Optional world-coordinate conversion for position attributes.
-   * The subclass defines the output coordinate space; projectPosition still accepts world coordinates.
-   */
-  preproject: ((position: number[]) => [number, number, number]) | null = null;
-  /** Inverse of preproject; null means outside the domain. */
-  postUnproject: ((position: number[]) => [number, number, number] | null) | null = null;
-  /** Identity of CPU attribute preprojection, including normalization. */
+  /** Subdivision intervals around the earth; zero disables subdivision. */
+  readonly resolution: number;
+  /** Viewport tessellation/preprojection configuration; layer source CRS is tracked separately. */
   get projectionSignature(): unknown {
-    // Shader-only viewports keep attributes unchanged. A CRS identity here would
-    // spuriously invalidate them on first draw, after their initial layer update.
-    return this.preproject ? (this.crs?.signature ?? null) : null;
+    return this.resolution || null;
+  }
+
+  /** Return the subdivision step in source CRS world units, or zero for a linear/disabled path.
+   * Derives an equatorial interval from the source ellipsoid circumference divided by resolution.
+   * Geographic steps are in degrees; linear steps use CRS axis units.
+   */
+  getSubdivisionStep(sourceCrs: CRSDescriptor): number {
+    if (!this.resolution || !this.crs || sourceCrs.signature === this.crs.signature) {
+      return 0;
+    }
+    switch (this.projectionMode) {
+      case PROJECTION_MODE.WEB_MERCATOR:
+      case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
+        // Mercator retains its straight-segment rendering of geographic attributes.
+        if (sourceCrs.coordinateFrame === 'geographic') return 0;
+        break;
+    }
+    const radius = sourceCrs.ellipsoid?.semiMajorAxis ?? WGS84_CRS.ellipsoid!.semiMajorAxis;
+    const meters = (2 * Math.PI * radius) / this.resolution;
+    switch (sourceCrs.coordinateFrame) {
+      case 'geographic':
+        return meters / ((radius * Math.PI) / 180);
+      default: {
+        const x = sourceCrs.xUnit.metersPerUnit;
+        const y = sourceCrs.yUnit.metersPerUnit;
+        // Non-geographic descriptors must supply linear units for subdivision.
+        assert(typeof x === 'number' && x > 0 && typeof y === 'number' && y > 0);
+        return meters / Math.max(x, y);
+      }
+    }
+  }
+
+  /** Prepare conversion between a source CRS and the coordinates accepted by the project shader. */
+  getPreprojection(sourceCrs: CRSDescriptor | null): {
+    preproject: ((position: number[]) => [number, number, number]) | null;
+    unpreproject: ((position: number[]) => [number, number, number]) | null;
+    packedCrs: CRSDescriptor | null;
+  } {
+    if (supportsSourceCRS(this.projectionMode, sourceCrs, this.crs)) {
+      return {preproject: null, unpreproject: null, packedCrs: sourceCrs};
+    }
+    const custom = this.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL;
+    const geographic = sourceCrs!.signature === 'WGS84';
+    const sourceConverter = sourceCrs!.converter.WGS84;
+    const targetConverter = custom ? this.crs!.converter.WGS84 : null;
+    return {
+      preproject: position => {
+        const wgs84 = geographic ? position : sourceConverter.to(position);
+        const packed = targetConverter
+          ? targetConverter.from(targetConverter.normalize(wgs84))
+          : wgs84;
+        return [packed[0], packed[1], packed[2] ?? 0];
+      },
+      unpreproject: position => {
+        const wgs84 = targetConverter ? targetConverter.to(position) : position;
+        const source = geographic ? wgs84 : sourceConverter.from(wgs84);
+        return [source[0], source[1], source[2] ?? 0];
+      },
+      packedCrs: custom ? this.crs! : WGS84_CRS
+    };
   }
 
   private _commonToTargetMatrix?: Matrix4;
@@ -213,6 +266,10 @@ export default class Viewport {
 
   // eslint-disable-next-line complexity
   constructor(opts: ViewportOptions = {}) {
+    this.resolution = opts.resolution ?? 0;
+    if (!Number.isFinite(this.resolution) || this.resolution < 0) {
+      throw new Error('resolution must be finite and non-negative');
+    }
     this.crs = opts.crs;
     if (opts.targetToCommonMatrix) {
       this.targetToCommonMatrix = new Matrix4(opts.targetToCommonMatrix);
@@ -245,8 +302,6 @@ export default class Viewport {
     this.focalDistance = opts.focalDistance || 1;
     this.position = opts.position || ZERO_VECTOR;
     this.modelMatrix = opts.modelMatrix || null;
-    this.preproject = opts.preproject || null;
-    this.postUnproject = opts.postUnproject || null;
 
     this.isGeospatial = Boolean(this.crs);
 

@@ -146,6 +146,13 @@ Returns:
 * `[longitude, latitude, altitude]`
 
 
+#### `getPreprojection`
+
+Returns conversions between a source CRS and the CRS accepted by the viewport's projection shader.
+
+- `sourceCrs` (`CRSDescriptor | null`) - Resolved source descriptor; `null` denotes Cartesian or meter-offset input.
+- Returns `{preproject, unpreproject, packedCrs}`. Both functions are `null` when the shader accepts the source CRS directly. Otherwise, `preproject` converts source coordinates to packed coordinates and `unpreproject` reverses that conversion. `packedCrs` describes the attribute coordinates. These functions do not apply the layer's model matrix or coordinate origin.
+
 #### `getBounds` {#getbounds}
 
 Extracts the axis-aligned bounding box of the current visible area.
@@ -199,6 +206,24 @@ if (outDir) {
 * Functions (including projection and unprojection of coordinates) are available both in JavaScript and in GLSL, so that layers can do consistent projection calculations in both GLSL and JavaScript.
 * To support pixel project/unproject functions (in addition to the clipspace projection that Camera classes typically manage), the `Viewport` is also aware of the viewport extents.
 * In geospatial setups, Viewports can contain geospatial anchors.
+
+
+### Geometry Approximation
+
+![subdivision](https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/images/docs/viewport-resolution.png)
+
+<small>
+Left to right: same polygons in resolution 0, 10, 60, rendering 487, 501, 591 outline vertices respectively.
+Notice the shape of the 49th-parallel.
+<br/><i>Natural Earth 1:110 country boundaries of continental Canada and United States. Albers projection, central metidian -96°, standard parallels 29.5° / 45.5°</i>
+</small>
+
+
+When a geometry is displayed in a different CRS from its definition, long segments are still rendered as straight lines, instead of warping along the surface of the new CRS.
+
+Use `resolution` to divide long straight lines into smaller segments to better follow the shape of the target CRS. Subdivision adds vertices before projection so paths, polygon edges and bitmap meshes can follow projected curves more closely. Higher values produce finer detail, with more processing and memory overhead. Subdivision is by default disabled.
+
+The setting is relative to the earth's circumference and works across source CRSs with different units. For example, `resolution: 36` gives a 10-degree step for WGS84 geometry. When implementing a custom layer, use `context.viewport.getSubdivisionStep(sourceCrs)` to retrieve a step in the geometry's source CRS units.
 
 ## Source
 

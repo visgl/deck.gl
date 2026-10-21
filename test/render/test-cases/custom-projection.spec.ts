@@ -3,7 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {describe, expect} from 'vitest';
-import {_CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
+import {
+  MapView,
+  _GlobeView as GlobeView,
+  _CustomProjectionView as CustomProjectionView
+} from '@deck.gl/core';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {ContourLayer, HeatmapLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 import {
@@ -15,6 +19,9 @@ import {projectionEngine} from '@math.gl/projection';
 import type {FeatureCollection, Polygon, MultiPolygon} from 'geojson';
 import states from 'deck.gl-test/data/us-states.geo.json';
 import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';
+import france from 'deck.gl-test/data/crs/france-regions.geo.json';
+import switzerland from 'deck.gl-test/data/crs/switzerland-cantons.geo.json';
+import antarctica from 'deck.gl-test/data/crs/antarctica-land.geo.json';
 import {runRenderTestSuite} from '../render-test-suite';
 import {defaultOnAfterRender} from '../deck-test-utils';
 import type {TestCase} from '../deck-test-utils';
@@ -28,9 +35,8 @@ const converter = projectionEngine.createProjection({
 // Frame all 50 states, including Hawaii and the Aleutian Islands.
 const view = new CustomProjectionView({
   crs: '+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs',
-  resolution: 1
+  resolution: 360
 });
-await view.initialize();
 const data = states as FeatureCollection<
   Polygon | MultiPolygon,
   {STATE: string; NAME: string; STUSAB: string}
@@ -75,8 +81,6 @@ function createLayers() {
 
 function checkPickedStates(probes: (typeof alaska)[]): TestCase['onAfterRender'] {
   return params => {
-    // The initial render callback can run before the canvas has a viewport.
-    if (!params.deck.getViewports().length) return;
     defaultOnAfterRender({
       ...params,
       done: () => {
@@ -133,9 +137,8 @@ const aggregationConverter = projectionEngine.createProjection({
 });
 const aggregationView = new CustomProjectionView({
   crs: '+proj=aea +lat_0=30 +lon_0=-90 +lat_1=35 +lat_2=65 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
-  resolution: 1
+  resolution: 360
 });
-await aggregationView.initialize();
 const colorRange: [number, number, number][] = [
   [255, 255, 178],
   [254, 217, 118],
@@ -260,7 +263,6 @@ for (let longitude = -150; longitude <= 150; longitude += 50) {
   }
 }
 const meterSizeView = new CustomProjectionView({crs: '+proj=eqc +R=6378137 +units=m'});
-await meterSizeView.initialize();
 testCases.push({
   name: 'custom-projection-meter-sizes',
   views: meterSizeView,
@@ -281,6 +283,68 @@ testCases.push({
   ],
   goldenImage: './test/render/golden-images/custom-projection-meter-sizes.png'
 });
+
+testCases.push(
+  {
+    name: 'custom-projection-france-map',
+    views: new MapView(),
+    viewState: {longitude: 2.5, latitude: 46.5, zoom: 4.2},
+    layers: [
+      new GeoJsonLayer({
+        id: 'france-regions',
+        parameters: {depthCompare: 'always', depthWriteEnabled: false},
+        data: france,
+        coordinateSystem:
+          '+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0 +units=m',
+        getFillColor: [86, 158, 204],
+        getLineColor: [35, 48, 61],
+        getLineWidth: 1,
+        lineWidthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/custom-projection-france-map.png'
+  },
+  {
+    name: 'custom-projection-switzerland-equal-earth',
+    views: new CustomProjectionView({crs: '+proj=eqearth +datum=WGS84 +units=m'}),
+    viewState: {center: [8.2, 46.8, 0], zoom: 6.7},
+    layers: [
+      new GeoJsonLayer({
+        id: 'switzerland-cantons',
+        // Keep map outlines visible above the fill, including elevated Swiss boundaries.
+        parameters: {depthCompare: 'always', depthWriteEnabled: false},
+        data: switzerland,
+        coordinateSystem:
+          '+proj=somerc +lat_0=46.9524055555556 +lon_0=7.43958333333333 +k_0=1 +x_0=2600000 +y_0=1200000 +ellps=bessel +towgs84=674.374,15.056,405.346 +units=m',
+        getFillColor: [246, 201, 137],
+        getLineColor: [35, 48, 61],
+        getLineWidth: 1,
+        lineWidthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/custom-projection-switzerland-equal-earth.png'
+  },
+  {
+    name: 'custom-projection-antarctica-globe',
+    views: new GlobeView(),
+    viewState: {longitude: 0, latitude: -90, zoom: -1.1},
+    layers: [
+      new GeoJsonLayer({
+        id: 'antarctica-land',
+        parameters: {depthCompare: 'always', depthWriteEnabled: false},
+        data: antarctica,
+        coordinateSystem: '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +datum=WGS84 +units=m',
+        filled: true,
+        stroked: true,
+        getFillColor: [86, 158, 204],
+        getLineColor: [0, 0, 0],
+        getLineWidth: 1,
+        lineWidthUnits: 'pixels'
+      })
+    ],
+    goldenImage: './test/render/golden-images/custom-projection-antarctica-globe.png'
+  }
+);
 
 describe.each(['webgl', 'webgpu'] as const)('CustomProjectionView / %s', deviceType => {
   runRenderTestSuite(testCases, deviceType, {

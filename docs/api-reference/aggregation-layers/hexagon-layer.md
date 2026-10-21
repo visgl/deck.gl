@@ -517,6 +517,7 @@ This callback will be called when hexagon elevation domain has been calculated.
 
 The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-object) field returned by hover/click events of this layer represents an aggregated hexagon. The object contains the following fields:
 
+- `position` (number[] | null) - Center of the picked hexagon in the source CRS, or `null` when inverse projection is unavailable.
 - `col` (number) - Column index of the picked hexagon.
 - `row` (number) - Row index of the picked hexagon.
 - `colorValue` (number) - Aggregated color value, as determined by `getColorWeight` and `colorAggregation`

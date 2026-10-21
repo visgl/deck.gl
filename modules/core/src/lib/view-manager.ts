@@ -95,7 +95,7 @@ type ViewManagerProps<ViewsT extends ViewOrViews> = {
   /** Release view-scoped resources when a descriptor leaves the active view set. */
   onViewRemoved?: (viewId: string) => void;
   onError?: (error: Error) => void;
-  pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
+  pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[] | null} | null;
   width?: number;
   height?: number;
   /** Resolve existing luma contexts, which own all canvas resize and pixel-size tracking. */
@@ -128,7 +128,11 @@ export default class ViewManager<ViewsT extends View[]> {
     onViewRemoved?: (viewId: string) => void;
     onError?: (error: Error) => void;
   };
-  private _pickPosition?: (x: number, y: number, viewId?: string) => {coordinate?: number[]} | null;
+  private _pickPosition?: (
+    x: number,
+    y: number,
+    viewId?: string
+  ) => {coordinate?: number[] | null} | null;
   /** Context lookup supplied by Deck; context dimensions remain owned and observed by luma. */
   private _getCanvasContext?: CanvasContextResolver;
 

@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {OrthographicView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 import {points} from 'deck.gl-test/data';
 
@@ -42,7 +42,7 @@ const testCases = [
         id: 'contour-infoviz',
         data: screenSpaceData,
         getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         cellSize: 40,
         gridOrigin: [0, 15],
         contours: [
@@ -69,7 +69,7 @@ const testCases = [
         id: 'contour-isobands-infoviz',
         data: screenSpaceData,
         getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         cellSize: 40,
         gridOrigin: [0, 15],
         contours: [

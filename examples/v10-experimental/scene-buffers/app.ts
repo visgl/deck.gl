@@ -1,7 +1,7 @@
 // luma.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {COORDINATE_SYSTEM, Deck, MapView} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {SceneBufferEffect} from '@deck.gl-community/gpu-layers';
 import {CITY_ORIGIN, makeCityFeatures, type CityFeature} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
@@ -91,7 +91,7 @@ export function createBufferScene(parent: HTMLDivElement, options: DeckExampleDe
   });
   function updateLayers() {
     const coordinates = {
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: 'meter-offsets',
       coordinateOrigin: CITY_ORIGIN,
       roughness: 0.7
     };

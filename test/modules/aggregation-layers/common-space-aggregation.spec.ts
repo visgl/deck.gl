@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {createTestViewport} from '../core/viewports/test-crs';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
@@ -25,6 +26,17 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Matrix4} from '@math.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
+import {createAggregationViewport} from '@deck.gl/aggregation-layers/common/utils/projection-utils';
+
+test('aggregation viewport preserves custom projection mode for packed coordinates', () => {
+  const viewport = createTestViewport();
+  const aggregationViewport = createAggregationViewport(viewport, [0, 0]);
+  expect(aggregationViewport.projectionMode).toBe(viewport.projectionMode);
+  expect(aggregationViewport.projectFlat([10, 20])).toEqual([
+    10 * viewport.distanceScales.unitsPerWorldUnit[0],
+    20 * viewport.distanceScales.unitsPerWorldUnit[1]
+  ]);
+});
 
 const data = [
   [1, 2, 0],
@@ -68,7 +80,7 @@ function createViewport(
     }
   });
   // Count data preprojection, not constructor inverse validation.
-  vi.spyOn(viewport, 'preproject');
+  vi.spyOn(viewport.crs!.converter.WGS84, 'from');
   return viewport;
 }
 
@@ -122,7 +134,9 @@ test('CPU ScreenGrid projects packed attributes without repeating position trans
         const packed = Array.from(
           layer.getAttributeManager()!.attributes.positions.value!.slice(0, 3)
         );
-        const preproject = viewport.preproject ? vi.spyOn(viewport, 'preproject') : null;
+        const preproject = viewport.crs?.converter.WGS84
+          ? vi.spyOn(viewport.crs!.converter.WGS84, 'from')
+          : null;
         preproject?.mockClear();
         const aggregator = layer.state.aggregator as CPUAggregator;
         const getBin = aggregator.props.getBin;
@@ -170,7 +184,7 @@ for (const binary of [false, true]) {
           getWeight: (_, {index}) => weights[index],
           modelMatrix,
           coordinateSystem: 'lnglat-offsets',
-          coordinateOrigin: [100, 200, 300],
+          coordinateOrigin: [0, 0, 0],
           cellSizePixels,
           aggregation,
           gpuAggregation
@@ -261,7 +275,7 @@ test('ScreenGridLayer reuses packed positions across backend changes and WebGPU 
       manager.setLayers([layer]);
       const positions = layer.getAttributeManager()!.attributes.positions.value;
       getPosition.mockClear();
-      vi.mocked(viewport.preproject!).mockClear();
+      vi.mocked(viewport.crs!.converter.WGS84.from).mockClear();
       for (const gpuAggregation of [true, false, true]) {
         layer = layer.clone({gpuAggregation});
         manager.setLayers([layer]);
@@ -273,7 +287,7 @@ test('ScreenGridLayer reuses packed positions across backend changes and WebGPU 
         layer.draw({shaderModuleProps: {project: {viewport, modelMatrix}}} as any);
         expect(layer.getAttributeManager()!.attributes.positions.value).toBe(positions);
         expect(getPosition).not.toHaveBeenCalled();
-        expect(viewport.preproject).not.toHaveBeenCalled();
+        expect(viewport.crs!.converter.WGS84.from).not.toHaveBeenCalled();
         const aggregator = layer.state.aggregator;
         const bins = Array.from({length: aggregator.binCount}, (_, i) =>
           aggregator.getBin(i)
@@ -304,7 +318,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
       data,
       modelMatrix,
       coordinateSystem: 'lnglat-offsets',
-      coordinateOrigin: [100, 200, 0]
+      coordinateOrigin: [0, 0, 0]
     } as any);
     const reference = new LayerType({
       ...props,
@@ -356,7 +370,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
       data,
       modelMatrix,
       coordinateSystem: 'lnglat',
-      coordinateOrigin: [100, 200, 0]
+      coordinateOrigin: [0, 0, 0]
     } as any);
     const reference = new LayerType({
       ...props,
@@ -370,7 +384,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
       referenceManager.setLayers([reference]);
       expect(bins(layer)).toEqual(bins(reference));
       // Only original data is projected. Contour output must never call preproject.
-      expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
+      expect(viewport.crs!.converter.WGS84.from).toHaveBeenCalledTimes(data.length);
       if (layer instanceof HexagonLayer && reference instanceof HexagonLayer) {
         const picking = {info: {index: 0}};
         const referencePosition = reference.getPickingInfo({info: {index: 0}} as any).object!
@@ -400,7 +414,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
           });
           expect(uniforms.modelMatrix).toBe(child.props.modelMatrix);
         }
-        expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
+        expect(viewport.crs!.converter.WGS84.from).toHaveBeenCalledTimes(data.length);
       }
 
       // GPU binning uses a separate viewport, but must still ignore the consumed
@@ -410,7 +424,7 @@ for (const LayerType of [GridLayer, HexagonLayer, ContourLayer]) {
         viewport,
         modelMatrix,
         coordinateSystem: 'lnglat',
-        coordinateOrigin: [100, 200, 0],
+        coordinateOrigin: [0, 0, 0],
         autoWrapLongitude: true
       };
       layer.draw({shaderModuleProps: {project: projectProps}} as any);
@@ -490,7 +504,7 @@ test('ContourLayer supports ordinary application-provided Cartesian sublayers', 
     data,
     getPosition: p => p,
     modelMatrix,
-    coordinateOrigin: [100, 200, 300],
+    coordinateOrigin: [0, 0, 0],
     cellSize: 20,
     gpuAggregation: false,
     contours: [{threshold: 0.5}, {threshold: [0.5, 10]}],
@@ -516,7 +530,7 @@ test('ContourLayer supports ordinary application-provided Cartesian sublayers', 
           .map(value => value * normalizationScale)
       );
     }
-    expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
+    expect(viewport.crs!.converter.WGS84.from).toHaveBeenCalledTimes(data.length);
   } finally {
     manager.finalize();
     vi.restoreAllMocks();
@@ -546,7 +560,9 @@ for (const [LayerType, accessor] of [
     try {
       manager.setLayers([layer]);
       expect(received).toEqual(
-        data.map(p => viewport.preproject!(modelMatrix.transformAsPoint(p)))
+        data.map(p =>
+          viewport.getPreprojection(WGS84_CRS).preproject!(modelMatrix.transformAsPoint(p))
+        )
       );
     } finally {
       manager.finalize();
@@ -572,7 +588,7 @@ test('HeatmapLayer uses the same bounds and texture coordinates as a non-geo vie
     ).toEqual(
       reference._worldToCommonBounds(reference.state.worldBounds, {useLayerCoordinateSystem: true})
     );
-    expect(viewport.preproject).toHaveBeenCalledTimes(data.length);
+    expect(viewport.crs!.converter.WGS84.from).toHaveBeenCalledTimes(data.length);
 
     const update = vi.spyOn(layer, '_updateWeightmap');
     const changed = createViewport('changed');
@@ -644,12 +660,7 @@ for (const deviceType of ['webgl', 'webgpu']) {
 }
 
 test('Cartesian aggregation bounds apply layer transforms before any viewport projection', () => {
-  const viewport = new Viewport({
-    width: 400,
-    height: 300,
-    preproject: position => position.map(value => value * 10),
-    distanceScales: {unitsPerWorldUnit: [2, 3, 4]}
-  });
+  const viewport = createTestViewport({width: 400, height: 300});
   const manager = createManager(viewport);
   const layer = new ScreenGridLayer({
     data: [
@@ -698,7 +709,7 @@ for (const LayerType of [ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer]
         [500000, 200000, 0]
       ];
       const matrix = new Matrix4().rotateZ(0.3).scale([2, 3, 1]);
-      const preproject = vi.spyOn(viewport, 'preproject');
+      const preproject = vi.spyOn(viewport.crs!.converter.WGS84, 'from');
       let packedPositions;
       const getPosition = vi.fn(p => p);
       const snapshots = new Map<

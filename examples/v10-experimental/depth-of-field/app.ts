@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView, type Viewport} from '@deck.gl/core';
+import {Deck, MapView, type Viewport} from '@deck.gl/core';
 import {SceneBufferEffect, ShaderPassEffect} from '@deck.gl-community/gpu-layers';
 import {dofCompositeShaderPass} from '@luma.gl/effects';
 import {Matrix4} from '@math.gl/core';
@@ -118,7 +118,7 @@ export function createRiverfrontDepthOfFieldScene(
         features,
         data: features,
         pickable: true,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: CITY_ORIGIN
       })
     ],

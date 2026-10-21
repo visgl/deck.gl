@@ -172,8 +172,18 @@ export function joinLayerBounds(
   for (const layer of layers) {
     const layerBounds = layer.getBounds();
     if (layerBounds) {
-      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport, autoOffset: false});
-      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport, autoOffset: false});
+      // Attribute bounds already include CPU conversion and source-space transforms.
+      const options = layer.state.preproject
+        ? {
+            viewport,
+            autoOffset: false,
+            coordinateSystem: layer.state.packedCrs!.signature,
+            coordinateOrigin: [0, 0, 0] as [number, number, number],
+            modelMatrix: null
+          }
+        : {viewport, autoOffset: false};
+      const bottomLeftCommon = layer.projectPosition(layerBounds[0], options);
+      const topRightCommon = layer.projectPosition(layerBounds[1], options);
 
       bounds[0] = Math.min(bounds[0], bottomLeftCommon[0]);
       bounds[1] = Math.min(bounds[1], bottomLeftCommon[1]);

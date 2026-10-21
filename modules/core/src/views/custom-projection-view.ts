@@ -32,7 +32,7 @@ export type CustomProjectionViewState = {
 } & CommonViewState;
 /** Configuration for a custom planar projection. */
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
-  Pick<CustomProjectionViewportOptions, 'resolution' | 'orthographic'> & {
+  Pick<CustomProjectionViewportOptions, 'orthographic'> & {
     /** Planar CRS identifier, PROJ string, WKT, PROJJSON or spatial reference accepted by math.gl. */
     crs: TypeScriptCRSInput;
   };

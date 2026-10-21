@@ -96,13 +96,13 @@ const testCases = [
     // under GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
     // globe -> Mercator inverse, so the draped fills follow the terrain on the globe.
     // The stroke is left out on purpose: a draped PathLayer on GlobeView is re-tessellated twice
-    // per frame (Layer.activateViewport -> PathLayer.shouldUpdateState sees viewport.resolution /
+    // per frame (Layer.activateViewport -> PathLayer.shouldUpdateState sees viewport.getSubdivisionStep(sourceCrs) /
     // projectionMode flip between the Mercator terrain-cover pass and the globe screen pass),
     // which flags needsRedraw every frame and starves the screenshot. Add `stroked` back once
     // that is fixed.
     name: 'terrain-extension-drape-fill-globe',
     skip: ['webgpu'],
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
