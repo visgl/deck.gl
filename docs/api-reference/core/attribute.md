@@ -67,7 +67,7 @@ Update attribute options. See `constructor` for possible options.
 
 Returns a `Buffer` object associated with this attribute, if any.
 
-### getGPUValue
+### getGPUVector
 
 Returns a map from shader attribute names to luma.gl `GPUVector` or `GPUConstant` objects. Unallocated attributes are omitted. A double-precision attribute exposes separate high and low shader entries; varying high and low entries share their backing buffer.
 

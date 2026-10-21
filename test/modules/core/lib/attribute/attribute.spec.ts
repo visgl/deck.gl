@@ -1285,13 +1285,13 @@ test('Attribute#updateBuffer', () => {
   attribute.delete();
 });
 
-test('Attribute#getGPUValue borrows strided buffers and preserves layout flags', () => {
+test('Attribute#getGPUVector borrows strided buffers and preserves layout flags', () => {
   const attribute = new Attribute(device, {id: 'positions', size: 2, accessor: 'getPosition'});
   const buffer = device.createBuffer({data: new Float32Array([99, 1, 2, 99, 3, 4])});
   attribute.numInstances = 2;
   attribute.setExternalBuffer({buffer, offset: 4, stride: 12});
   const layoutChanged = attribute.layoutChanged();
-  const vector = attribute.getGPUValue().positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  const vector = attribute.getGPUVector().positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
   expect(vector.format).toBe('float32x2');
   expect(vector.length).toBe(2);
   expect(vector.byteOffset).toBe(4);
@@ -1306,7 +1306,7 @@ test('Attribute#getGPUValue borrows strided buffers and preserves layout flags',
   buffer.destroy();
 });
 
-test('Attribute#getGPUValue preserves raw normalized constants', () => {
+test('Attribute#getGPUVector preserves raw normalized constants', () => {
   const attribute = new Attribute(device, {
     id: 'colors',
     size: 4,
@@ -1314,7 +1314,7 @@ test('Attribute#getGPUValue preserves raw normalized constants', () => {
     accessor: 'getColor'
   });
   attribute.setConstantValue(null, [128, 64, 255, 0]);
-  const constant = attribute.getGPUValue().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+  const constant = attribute.getGPUVector().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
   expect(constant.format).toBe('unorm8x4');
   expect(constant.value).toEqual(new Uint8Array([128, 64, 255, 0]));
   attribute.setConstantValue(null, [1, 2, 3, 4]);
@@ -1322,7 +1322,7 @@ test('Attribute#getGPUValue preserves raw normalized constants', () => {
   attribute.delete();
 });
 
-test('Attribute#getGPUValue exposes fp64 views and float32 low constants', () => {
+test('Attribute#getGPUVector exposes fp64 views and float32 low constants', () => {
   const attribute = new Attribute(device, {
     id: 'positions',
     size: 3,
@@ -1332,7 +1332,7 @@ test('Attribute#getGPUValue exposes fp64 views and float32 low constants', () =>
   });
   attribute.numInstances = 1;
   attribute.setExternalBuffer(new Float64Array([1.1, 2.2, 3.3]));
-  let columns = attribute.getGPUValue();
+  let columns = attribute.getGPUVector();
   const high = columns.positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
   const low = columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUVector;
   expect(high.data[0].buffer).toBe(low.data[0].buffer);
@@ -1340,12 +1340,12 @@ test('Attribute#getGPUValue exposes fp64 views and float32 low constants', () =>
   expect(low.byteOffset).toBe(12);
   expect(high.byteStride).toBe(24);
   attribute.setExternalBuffer(new Float32Array([1, 2, 3]));
-  columns = attribute.getGPUValue();
+  columns = attribute.getGPUVector();
   expect((columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
     new Float32Array(3)
   );
   attribute.setConstantValue(null, [1, 2, 3]);
-  columns = attribute.getGPUValue();
+  columns = attribute.getGPUVector();
   expect((columns.positions as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
     new Float32Array([1, 2, 3])
   );

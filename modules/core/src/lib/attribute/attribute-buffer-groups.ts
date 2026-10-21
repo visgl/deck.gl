@@ -336,7 +336,7 @@ export default class AttributeBufferGroups {
     assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
     assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
 
-    const column = attribute.getGPUValue()[attribute.id];
+    const column = attribute.getGPUVector()[attribute.id];
     if (column instanceof GPUConstant) {
       const constantValue = column.value;
       assertU32Aligned(`${group.id}.${attribute.id} constant byteOffset`, constantValue.byteOffset);

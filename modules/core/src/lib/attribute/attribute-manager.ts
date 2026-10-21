@@ -281,12 +281,12 @@ export default class AttributeManager {
    * retaining a vector does not extend the lifetime of its backing buffer.
    * @param attributes Optional subset, such as the result of getChangedAttributes().
    */
-  getGPUAttributes(
+  getGPUVectors(
     attributes: Record<string, Attribute> = this.getAttributes()
   ): Record<string, GPUVector | GPUConstant> {
     const result: Record<string, GPUVector | GPUConstant> = {};
     for (const attribute of Object.values(attributes)) {
-      Object.assign(result, attribute.getGPUValue());
+      Object.assign(result, attribute.getGPUVector());
     }
     return result;
   }

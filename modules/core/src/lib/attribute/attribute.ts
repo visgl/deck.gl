@@ -436,7 +436,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
    * attribute's buffers and must be reacquired after updates that replace storage.
    * Constants contain one raw, unnormalized row. Unallocated attributes are omitted.
    */
-  getGPUValue(): Record<string, GPUVector | GPUConstant> {
+  getGPUVector(): Record<string, GPUVector | GPUConstant> {
     if (!this.isConstant && !this.getBuffer()) {
       return {};
     }

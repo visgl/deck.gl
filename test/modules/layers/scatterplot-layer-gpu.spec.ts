@@ -36,7 +36,7 @@ test('ScatterplotLayer consumes GPU columns across constant and buffer updates',
       onAfterUpdate: ({layer}) => {
         const model = layer.getModels()[0];
         expect(model).toBeInstanceOf(GPUTableModel);
-        const columns = layer.getAttributeManager().getGPUAttributes();
+        const columns = layer.getAttributeManager().getGPUVectors();
         expect(columns.instancePositions).toBeInstanceOf(GPUVector);
         expect(columns.instancePositions.length).toBe(layer.props.data.length);
         const colorLocation = model.pipeline.shaderLayout.attributes.find(
@@ -109,7 +109,7 @@ test('ScatterplotLayer GPU columns retain WebGPU grouping and release constant b
     });
     manager.setLayers([nextLayer]);
     expect(constantBuffer.destroyed).toBe(true);
-    expect(nextLayer.getAttributeManager()!.getGPUAttributes().instancePositions).toBeInstanceOf(
+    expect(nextLayer.getAttributeManager()!.getGPUVectors().instancePositions).toBeInstanceOf(
       GPUVector
     );
   } finally {

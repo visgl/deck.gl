@@ -831,7 +831,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
         delete attributes[name];
       }
     }
-    const columns = attributeManager.getGPUAttributes(attributes);
+    const columns = attributeManager.getGPUVectors(attributes);
     for (const layout of bindings.bufferLayouts) {
       const buffer = bindings.buffers[layout.name];
       if (buffer) {

@@ -472,7 +472,7 @@ test('AttributeManager.getBufferLayouts', () => {
   ).toBe('instance');
 });
 
-test('AttributeManager#getGPUAttributes follows transition storage and row counts', () => {
+test('AttributeManager#getGPUVectors follows transition storage and row counts', () => {
   const manager = new AttributeManager(device, {timeline: new Timeline()});
   manager.addInstanced({radii: {size: 1, accessor: 'getRadius', transition: true}});
   manager.update({data: [1, 2], numInstances: 2, props: {getRadius: d => d}});
@@ -485,7 +485,7 @@ test('AttributeManager#getGPUAttributes follows transition storage and row count
     transitions: {getRadius: 1000}
   });
   manager.updateTransition();
-  const column = manager.getGPUAttributes().radii as GPUVector;
+  const column = manager.getGPUVectors().radii as GPUVector;
   expect(column).toBeInstanceOf(GPUVector);
   expect(column.length).toBe(3);
   expect(column.data[0].buffer).toBe(manager.getAttributes().radii.getBuffer());
