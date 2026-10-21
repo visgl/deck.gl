@@ -148,6 +148,7 @@ export type {
 } from './controllers/controller';
 
 // INTERNAL, DO NOT USE
+export {default as _GPUVectorModel} from './lib/luma-upstream/gpu-vector-model';
 // @deprecated internal do not use
 export {default as _Component} from './lifecycle/component';
 // @deprecated internal do not use

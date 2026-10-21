@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  color,
+  project32,
+  picking,
+  UNIT,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
 import {type Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
@@ -300,7 +307,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
-    return this._createGPUVectorModel({
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

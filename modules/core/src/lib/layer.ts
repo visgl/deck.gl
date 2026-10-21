@@ -33,7 +33,7 @@ import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import {PROJECTION_MODE} from './constants';
 import type Attribute from './attribute/attribute';
-import type {Model, ModelProps} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -802,11 +802,6 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
 
     attribute.value = pickingColorCache.subarray(0, numInstances * 4);
-  }
-
-  /** @internal Creates a model that consumes AttributeManager's typed GPU columns. */
-  protected _createGPUVectorModel(props: ModelProps): Model {
-    return new GPUVectorModel(this.context.device, props);
   }
 
   private _setGPUVectorModelAttributes(
