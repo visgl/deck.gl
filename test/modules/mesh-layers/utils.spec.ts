@@ -4,27 +4,26 @@
 
 import {test, expect} from 'vitest';
 import {shouldComposeModelMatrix} from '@deck.gl/mesh-layers/utils/matrix';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 test('shouldComposeModelMatrix', () => {
   expect(
-    shouldComposeModelMatrix({isGeospatial: false}, COORDINATE_SYSTEM.DEFAULT),
+    shouldComposeModelMatrix({isGeospatial: false}, 'default'),
     'Should composeModelMatrix for cartesian.'
   ).toBeTruthy();
   expect(
-    shouldComposeModelMatrix({isGeospatial: true}, COORDINATE_SYSTEM.DEFAULT),
+    shouldComposeModelMatrix({isGeospatial: true}, 'default'),
     'Should not composeModelMatrix for lnglat.'
   ).toBeFalsy();
   expect(
-    shouldComposeModelMatrix({}, COORDINATE_SYSTEM.IDENTITY),
-    'Should composeModelMatrix for identity.'
+    shouldComposeModelMatrix({}, 'cartesian'),
+    'Should composeModelMatrix for cartesian.'
   ).toBeTruthy();
   expect(
-    shouldComposeModelMatrix({}, COORDINATE_SYSTEM.METER_OFFSETS),
+    shouldComposeModelMatrix({}, 'meter-offsets'),
     'Should composeModelMatrix for meter_offsets.'
   ).toBeTruthy();
   expect(
-    shouldComposeModelMatrix({}, COORDINATE_SYSTEM.LNGLAT_OFFSETS),
+    shouldComposeModelMatrix({}, 'lnglat-offsets'),
     'Should not composeModelMatrix for lnglat_offsets.'
   ).toBeFalsy();
 });
