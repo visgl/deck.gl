@@ -19,16 +19,49 @@ import {
 export default class GPUVectorModel extends Model {
   private constantBuffers: Record<string, Buffer> = {};
 
-  /** Binds a complete column map using layouts resolved by AttributeManager. */
+  /** Binds typed columns and optional complete, prepacked physical buffers. */
   setGPUAttributes(
     columns: Record<string, GPUVector | GPUConstant>,
-    bufferLayouts: BufferLayout[]
+    bufferLayouts: BufferLayout[],
+    packedBuffers: Record<string, Buffer> = {}
   ): void {
-    const buffers: Record<string, Buffer> = {};
+    const buffers: Record<string, Buffer> = {...packedBuffers};
     const constants: Record<string, TypedArray> = {};
     const usedConstantBuffers = new Set<string>();
 
-    for (const layout of bufferLayouts) {
+    // WebGPU constants need their own zero-stride binding when they share a
+    // physical layout with vectors (e.g. float32 positions and a zero fp64 low).
+    const layouts = bufferLayouts.flatMap(layout => {
+      if (this.device.type !== 'webgpu' || packedBuffers[layout.name]) {
+        return [layout];
+      }
+      const definitions = layout.attributes || [];
+      const constantAttributes = definitions.filter(
+        definition => columns[definition.attribute] instanceof GPUConstant
+      );
+      if (!constantAttributes.length || constantAttributes.length === definitions.length) {
+        return [layout];
+      }
+      return [
+        {
+          ...layout,
+          attributes: definitions.filter(
+            definition => !(columns[definition.attribute] instanceof GPUConstant)
+          )
+        },
+        {
+          ...layout,
+          name: `${layout.name}-constants`,
+          byteStride: 0,
+          attributes: constantAttributes
+        }
+      ];
+    });
+
+    for (const layout of layouts) {
+      if (packedBuffers[layout.name]) {
+        continue;
+      }
       const vector = columns[layout.name];
       if (vector instanceof GPUVector) {
         buffers[layout.name] = getGPUVectorBuffer(vector) as Buffer;
@@ -79,7 +112,7 @@ export default class GPUVectorModel extends Model {
         delete this.constantBuffers[name];
       }
     }
-    this.setBufferLayout(bufferLayouts);
+    this.setBufferLayout(layouts);
     this.setAttributes(buffers);
     if (this.device.type === 'webgl') {
       this.setConstantAttributes(constants);

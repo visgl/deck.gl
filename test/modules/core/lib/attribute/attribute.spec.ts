@@ -1373,3 +1373,48 @@ test('Attribute#getGPUVector sizes synthetic fp64 constants for binary inputs', 
   expect(low.value).toEqual(new Float32Array(2));
   attribute.delete();
 });
+
+test.each(['webgl', 'webgpu'] as const)(
+  'Attribute#setData synchronizes raw constants on %s',
+  async (backend, {skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const attribute = new Attribute(testDevice, {
+      id: 'colors',
+      size: 4,
+      type: 'unorm8',
+      accessor: 'getColor'
+    });
+    try {
+      attribute.setConstantValue(null, [255, 0, 0, 255]);
+      const original = attribute.getGPUVector()
+        .colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+      expect(attribute.setData({constant: true, value: [0, 255, 0, 255]})).toBe(true);
+      const current = attribute.getGPUVector()
+        .colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+      expect(current.value).toEqual(new Uint8Array([0, 255, 0, 255]));
+      expect(original.value).toEqual(new Uint8Array([255, 0, 0, 255]));
+      expect(attribute.value).toEqual(new Float32Array([0, 1, 0, 1]));
+      expect(attribute.setData({constant: true, value: [0, 255, 0, 255]})).toBe(false);
+      if (backend === 'webgpu') {
+        const bytes = await attribute.getBuffer()!.readAsync(0, 4);
+        expect(Array.from(bytes)).toEqual([0, 255, 0, 255]);
+        expect(attribute.getBufferLayout().byteStride).toBe(0);
+      } else {
+        expect(attribute.getValue().colors).toEqual(new Float32Array([0, 1, 0, 1]));
+      }
+      attribute.setData(new Uint8Array([1, 2, 3, 4]));
+      expect(attribute.getConstantValue()).toBeNull();
+      expect(attribute.getGPUVector().colors.constructor.name).toBe('GPUVector');
+      attribute.setData({constant: true, value: [0, 0, 255, 255]});
+      expect(
+        (attribute.getGPUVector().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value
+      ).toEqual(new Uint8Array([0, 0, 255, 255]));
+    } finally {
+      attribute.delete();
+    }
+  }
+);

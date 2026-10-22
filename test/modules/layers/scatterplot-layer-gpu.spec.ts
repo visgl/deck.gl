@@ -116,3 +116,96 @@ test('ScatterplotLayer GPU columns retain WebGPU grouping and release constant b
     manager.finalize();
   }
 });
+
+test('ScatterplotLayer binds mixed WebGPU position vectors and constants separately', async ({
+  skip
+}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) {
+    skip();
+    return;
+  }
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const positions = device.createBuffer({
+    data: new Float32Array([99, 1, 2, 3, 99, 4, 5, 6]),
+    usage: Buffer.VERTEX | Buffer.COPY_SRC | Buffer.COPY_DST
+  });
+  const layer = new ScatterplotLayer({
+    id: 'mixed-gpu-scatterplot',
+    data: {
+      length: 2,
+      attributes: {getPosition: {buffer: positions, size: 3, stride: 16, offset: 4}}
+    }
+  });
+  let ownedBuffer: Buffer;
+  try {
+    manager.setLayers([layer]);
+    const model = layer.getModels()[0];
+    const highSlot = model.vertexArray.getBufferSlot('instancePositions')!;
+    const lowSlot = model.vertexArray.getBufferSlot('instancePositions64Low')!;
+    expect(highSlot).not.toBe(lowSlot);
+    expect(model.vertexArray.attributes[highSlot]).toBe(positions);
+    const highLayout = model.bufferLayout.find(layout =>
+      layout.attributes?.some(definition => definition.attribute === 'instancePositions')
+    )!;
+    expect(highLayout.byteStride).toBe(16);
+    expect(highLayout.attributes![0].byteOffset).toBe(4);
+    const lowLayout = model.bufferLayout.find(layout =>
+      layout.attributes?.some(definition => definition.attribute === 'instancePositions64Low')
+    )!;
+    expect(lowLayout.byteStride).toBe(0);
+    ownedBuffer = model.vertexArray.attributes[lowSlot] as Buffer;
+    expect(ownedBuffer).not.toBe(positions);
+    const bytes = await ownedBuffer.readAsync();
+    const byteOffset = lowLayout.attributes![0].byteOffset || 0;
+    expect(new Float32Array(bytes.buffer, bytes.byteOffset + byteOffset, 3)).toEqual(
+      new Float32Array(3)
+    );
+
+    const varying = layer.clone({
+      data: [
+        [1, 2, 3],
+        [4, 5, 6]
+      ],
+      getPosition: d => d
+    });
+    manager.setLayers([varying]);
+    expect(ownedBuffer.destroyed).toBe(true);
+    expect(positions.destroyed).toBe(false);
+    const varyingModel = varying.getModels()[0];
+    expect(varyingModel.vertexArray.getBufferSlot('instancePositions')).toBe(
+      varyingModel.vertexArray.getBufferSlot('instancePositions64Low')
+    );
+
+    const mixedAgain = varying.clone({data: layer.props.data});
+    manager.setLayers([mixedAgain]);
+    const mixedModel = mixedAgain.getModels()[0];
+    const mixedLowSlot = mixedModel.vertexArray.getBufferSlot('instancePositions64Low')!;
+    const mixedBuffer = mixedModel.vertexArray.attributes[mixedLowSlot] as Buffer;
+    const constant = mixedAgain.clone({data: [1, 2], getPosition: [7, 8, 9]});
+    manager.setLayers([constant]);
+    expect(mixedBuffer.destroyed).toBe(true);
+    expect(positions.destroyed).toBe(false);
+    const constantModel = constant.getModels()[0];
+    const constantSlot = constantModel.vertexArray.getBufferSlot('instancePositions')!;
+    ownedBuffer = constantModel.vertexArray.attributes[constantSlot] as Buffer;
+    expect(constantSlot).toBe(constantModel.vertexArray.getBufferSlot('instancePositions64Low'));
+  } finally {
+    manager.finalize();
+    expect(positions.destroyed).toBe(false);
+    if (ownedBuffer) {
+      expect(ownedBuffer.destroyed).toBe(true);
+    }
+    positions.destroy();
+  }
+});

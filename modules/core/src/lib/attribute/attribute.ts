@@ -283,18 +283,32 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       return false;
     }
 
-    const wasConstant = this.isConstant;
     const transformedValue =
       this.settings.transform && context ? this.settings.transform.call(context, value) : value;
+    this.setData({constant: true, value: transformedValue});
+    return true;
+  }
+
+  /** Updates storage, retaining raw constant bytes alongside shader-normalized values. */
+  override setData(
+    data: Parameters<DataColumn<AttributeOptions, AttributeInternalState>['setData']>[0]
+  ): boolean {
+    const wasConstant = this.isConstant;
+    if (ArrayBuffer.isView(data) || data instanceof Buffer || !data.constant) {
+      const hasChanged = super.setData(data);
+      this.state.constantValue = null;
+      this.state.layoutChanged ||= wasConstant && this.device.type === 'webgpu';
+      return hasChanged;
+    }
     const ArrayType = this.settings.defaultType;
     // DataColumn normalizes constants for shader consumption. Buffer grouping needs the original
     // vertex-format bytes so that interleaving preserves integer and normalized attribute formats.
     this.state.constantValue = this._normalizeValue(
-      transformedValue,
+      data.value,
       new ArrayType(this.size),
       0
     ) as TypedArray;
-    const hasChanged = this.setData({constant: true, value: transformedValue});
+    const hasChanged = super.setData(data);
     if (this.device.type === 'webgpu') {
       let bufferValue = this.state.constantValue;
       if (
@@ -322,7 +336,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       this.setNeedsRedraw();
     }
     this.clearNeedsUpdate();
-    return true;
+    return hasChanged;
   }
 
   /** Returns one row in its vertex-buffer representation for WebGPU buffer grouping. */
