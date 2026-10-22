@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 14166)
-Total output lines: 1627
-
 // deck.gl
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
@@ -694,7 +691,246 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   }
 
   /** Send updated attributes to the WebGL model */
-  prote…2166 tokens truncated…     } else if (value) {
+  protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
+    // If some buffer layout changed
+    let bufferLayoutChanged = false;
+    for (const id in changedAttributes) {
+      if (changedAttributes[id].layoutChanged()) {
+        bufferLayoutChanged = true;
+      }
+    }
+
+    for (const model of this.getModels()) {
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
+    }
+  }
+
+  /** Recalculate any attributes if needed */
+  protected _updateAttributes(): void {
+    const attributeManager = this.getAttributeManager();
+    if (!attributeManager) {
+      return;
+    }
+    const props = this.props;
+
+    // Figure out data length
+    const numInstances = this.getNumInstances();
+    const startIndices = this.getStartIndices();
+
+    attributeManager.update({
+      data: props.data,
+      numInstances,
+      startIndices,
+      props,
+      transitions: props.transitions,
+      // @ts-ignore (TS2339) property attribute is not present on some acceptable data types
+      buffers: props.data.attributes,
+      context: this
+    });
+
+    const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+    this.updateAttributes(changedAttributes);
+  }
+
+  /** Update attribute transitions. This is called in drawLayer, no model updates required. */
+  private _updateAttributeTransition() {
+    const attributeManager = this.getAttributeManager();
+    if (attributeManager) {
+      attributeManager.updateTransition();
+    }
+  }
+
+  /** Update uniform (prop) transitions. This is called in updateState, may result in model updates. */
+  private _updateUniformTransition(): Layer<PropsT>['props'] {
+    // @ts-ignore (TS2339) internalState is alwasy defined when this method is called
+    const {uniformTransitions} = this.internalState;
+    if (uniformTransitions.active) {
+      // clone props
+      const propsInTransition = uniformTransitions.update();
+      const props = Object.create(this.props);
+      for (const key in propsInTransition) {
+        Object.defineProperty(props, key, {value: propsInTransition[key]});
+      }
+      return props;
+    }
+    return this.props;
+  }
+
+  /** Updater for the automatically populated instancePickingColors attribute */
+  protected calculateInstancePickingColors(
+    attribute: Attribute,
+    {numInstances}: {numInstances: number}
+  ) {
+    if (attribute.constant) {
+      return;
+    }
+
+    // calculateInstancePickingColors always generates the same sequence.
+    // pickingColorCache saves the largest generated sequence for reuse
+    const cacheSize = Math.floor(pickingColorCache.length / 4);
+
+    // Record when using the picking buffer cache, so that layers can always point at the most recently allocated cache
+    // @ts-ignore (TS2531) internalState is always defined when this method is called
+    this.internalState.usesPickingColorCache = true;
+
+    const isPickingColorCacheInvalid = numInstances > 0 && pickingColorCache[0] === 0;
+    if (cacheSize < numInstances || isPickingColorCacheInvalid) {
+      if (numInstances > MAX_PICKING_COLOR_CACHE_SIZE) {
+        log.warn(
+          'Layer has too many data objects. Picking might not be able to distinguish all objects.'
+        )();
+      }
+
+      pickingColorCache = typedArrayManager.allocate(pickingColorCache, numInstances, {
+        size: 4,
+        copy: true,
+        maxCount: Math.max(numInstances, MAX_PICKING_COLOR_CACHE_SIZE)
+      });
+
+      // If the attribute is larger than the cache, resize the cache and populate the missing chunk
+      const newCacheSize = Math.floor(pickingColorCache.length / 4);
+      const pickingColor: [number, number, number] = [0, 0, 0];
+      const startIndex = isPickingColorCacheInvalid ? 0 : cacheSize;
+      for (let i = startIndex; i < newCacheSize; i++) {
+        this.encodePickingColor(i, pickingColor);
+        pickingColorCache[i * 4 + 0] = pickingColor[0];
+        pickingColorCache[i * 4 + 1] = pickingColor[1];
+        pickingColorCache[i * 4 + 2] = pickingColor[2];
+        pickingColorCache[i * 4 + 3] = 0;
+      }
+    }
+
+    attribute.value = pickingColorCache.subarray(0, numInstances * 4);
+  }
+
+  private _setGPUVectorModelAttributes(
+    model: GPUVectorModel,
+    attributeManager: AttributeManager,
+    changedAttributes: Record<string, Attribute>
+  ): void {
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const bindings = attributeManager.getBufferGroupBindings(
+      changedAttributes,
+      model,
+      excludeAttributes
+    );
+    const attributes = {...attributeManager.getAttributes()};
+    let indexBuffer: Buffer | null | undefined;
+    for (const name in attributes) {
+      if (excludeAttributes[name] || bindings.groupedAttributeIds.has(name)) {
+        delete attributes[name];
+      } else if (attributes[name].settings.isIndexed) {
+        indexBuffer = attributes[name].getBuffer();
+        delete attributes[name];
+      }
+    }
+    const columns = attributeManager.getGPUVectors(attributes, {
+      ...bindings,
+      length: this.getNumInstances()
+    });
+    model.setGPUAttributes(columns, bindings.bufferLayouts);
+    if (indexBuffer !== undefined) {
+      model.setIndexBuffer(indexBuffer);
+    }
+  }
+
+  /** Apply changed attributes to model */
+  // eslint-disable-next-line max-statements
+  protected _setModelAttributes(
+    model: Model,
+    changedAttributes: {
+      [id: string]: Attribute;
+    },
+    bufferLayoutChanged = false
+  ) {
+    if (!Object.keys(changedAttributes).length) {
+      return;
+    }
+
+    const attributeManager = this.getAttributeManager();
+    if (model instanceof GPUVectorModel && attributeManager) {
+      this._setGPUVectorModelAttributes(model, attributeManager, changedAttributes);
+      return;
+    }
+    if (attributeManager?.hasBufferGroups()) {
+      this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
+      return;
+    }
+
+    if (bufferLayoutChanged) {
+      // AttributeManager is always defined when this method is called
+      const manager = this.getAttributeManager()!;
+      model.setBufferLayout(manager.getBufferLayouts(model));
+      // All attributes must be reset after buffer layout change
+      changedAttributes = manager.getAttributes();
+    }
+
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const attributeBuffers: Record<string, Buffer> = {};
+    const constantAttributes: Record<string, TypedArray> = {};
+
+    for (const name in changedAttributes) {
+      if (excludeAttributes[name]) {
+        continue;
+      }
+      const values = changedAttributes[name].getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (changedAttributes[name].settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
+          constantAttributes[attributeName] = value;
+        }
+      }
+    }
+    // TODO - update buffer map?
+    model.setAttributes(attributeBuffers);
+    model.setConstantAttributes(constantAttributes);
+  }
+
+  /** Apply explicit WebGPU buffer groups while preserving legacy bindings for fallbacks. */
+  private _setGroupedModelAttributes(
+    model: Model,
+    attributeManager: AttributeManager,
+    changedAttributes: {[id: string]: Attribute}
+  ) {
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const bindings = attributeManager.getBufferGroupBindings(
+      changedAttributes,
+      model,
+      excludeAttributes
+    );
+
+    // Runtime state can make a declared group temporarily ineligible, e.g. during transitions.
+    // Refreshing the layout here lets the group safely fall back to standalone bindings.
+    model.setBufferLayout(bindings.bufferLayouts);
+
+    const attributeBuffers: Record<string, Buffer> = {...bindings.buffers};
+    const constantAttributes: Record<string, TypedArray> = {};
+    const attributes = attributeManager.getAttributes();
+
+    for (const name in attributes) {
+      if (excludeAttributes[name] || bindings.groupedAttributeIds.has(name)) {
+        continue;
+      }
+      const attribute = attributes[name];
+      const values = attribute.getValue();
+      for (const attributeName in values) {
+        const value = values[attributeName];
+        if (value instanceof Buffer) {
+          if (attribute.settings.isIndexed) {
+            model.setIndexBuffer(value);
+          } else {
+            attributeBuffers[attributeName] = value;
+          }
+        } else if (value) {
           constantAttributes[attributeName] = value;
         }
       }
