@@ -492,3 +492,38 @@ test('AttributeManager#getGPUVectors follows transition storage and row counts',
   expect(column.data[0].buffer).not.toBe(sourceBuffer);
   manager.finalize();
 });
+
+test('AttributeManager#getGPUVectors wraps packed buffers as interleaved vectors', () => {
+  const manager = new AttributeManager(device);
+  manager.addInstanced({positions: {size: 2, accessor: 'getPosition'}});
+  manager.update({
+    data: [
+      [0, 0],
+      [1, 1]
+    ],
+    numInstances: 2,
+    props: {getPosition: d => d}
+  });
+  const sourceBuffer = manager.getAttributes().positions.getBuffer()!;
+  const bufferLayout = {
+    name: 'packedPositions',
+    byteStride: 8,
+    attributes: [{attribute: 'positions', format: 'float32x2', byteOffset: 0}]
+  };
+
+  const columns = manager.getGPUVectors(
+    {},
+    {
+      bufferLayouts: [bufferLayout],
+      buffers: {packedPositions: sourceBuffer},
+      length: 2
+    }
+  );
+  const column = columns.packedPositions as GPUVector;
+
+  expect(column).toBeInstanceOf(GPUVector);
+  expect(column.length).toBe(2);
+  expect(column.data[0].buffer).toBe(sourceBuffer);
+  expect(column.data[0].byteStride).toBe(8);
+  manager.finalize();
+});
