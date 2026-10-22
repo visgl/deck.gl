@@ -589,7 +589,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     if (this.layerManager) {
       this.viewManager!.setProps(resolvedProps);
       // Make sure that any new layer gets initialized with the current viewport
-      this.layerManager.activateViewport(this.getViewports()[0]);
+      this.layerManager.setViewports(this.getViewports(), this.viewManager!.views);
       this.layerManager.setProps(resolvedProps);
       this.effectManager!.setProps(resolvedProps);
       this.deckRenderer!.setProps(resolvedProps);
@@ -842,7 +842,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     x: number,
     y: number,
     viewId?: string
-  ): {coordinate?: number[]} | null {
+  ): {coordinate?: number[] | null} | null {
     const internalPickingMode = this._getInternalPickingMode();
     if (internalPickingMode !== 'sync') {
       return null;
@@ -1367,7 +1367,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.height = newHeight;
       this.viewManager?.setProps({width: newWidth, height: newHeight});
       // Make sure that any new layer gets initialized with the current viewport
-      this.layerManager?.activateViewport(this.getViewports()[0]);
+      this.layerManager?.setViewports(this.getViewports(), this.viewManager!.views);
       this.props.onResize({width: newWidth, height: newHeight}, canvasContext || undefined);
     }
   }
@@ -1669,6 +1669,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       onViewStateChange: this._onViewStateChange.bind(this),
       onInteractionStateChange: this._onInteractionStateChange.bind(this),
       onViewRemoved: viewId => this.layerManager?.projectionScaleResources.delete(viewId),
+      onError: error => this.props.onError?.(error),
       pickPosition: this._pickPositionForController.bind(this),
       views: this._getViews(),
       viewState: this._getViewState(),
@@ -1814,6 +1815,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     }
 
     this._updateCursor();
+
+    // Resolve newly initialized views before layers consume their projection context.
+    if (this.viewManager!.updateViewports()) {
+      this.layerManager!.setViewports(this.getViewports(), this.viewManager!.views);
+    }
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw

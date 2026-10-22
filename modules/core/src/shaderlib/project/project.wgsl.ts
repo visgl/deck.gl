@@ -2,21 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {PROJECTION_MODE, UNIT} from '../../lib/constants';
-import {getShaderCoordinateSystem} from './viewport-uniforms';
+import {UNIT} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from './constants';
 
-const SHADER_COORDINATE_SYSTEMS = [
-  'default',
-  'lnglat',
-  'meter-offsets',
-  'lnglat-offsets',
-  'cartesian'
-] as const;
-
-const COORDINATE_SYSTEM_WGSL_CONSTANTS = SHADER_COORDINATE_SYSTEMS.map(
-  coordinateSystem =>
-    `const COORDINATE_SYSTEM_${coordinateSystem.toUpperCase().replaceAll('-', '_')}: i32 = ${getShaderCoordinateSystem(coordinateSystem)};`
-).join('');
+const COORDINATE_SYSTEM_WGSL_CONSTANTS = Object.entries(COORDINATE_SYSTEM)
+  .map(([name, value]) => `const COORDINATE_SYSTEM_${name}: i32 = ${value};`)
+  .join('');
 const PROJECTION_MODE_WGSL_CONSTANTS = Object.keys(PROJECTION_MODE)
   .map(key => `const PROJECTION_MODE_${key}: i32 = ${PROJECTION_MODE[key]};`)
   .join('');
@@ -41,7 +32,7 @@ const GLOBE_RADIUS: f32 = 256.0;
 // -----------------------------------------------------------------------------
 struct ProjectUniforms {
   wrapLongitude: i32,
-  coordinateSystem: i32,
+  coordinateFrame: i32,
   commonUnitsPerMeter: vec3<f32>,
   projectionMode: i32,
   scale: f32,
@@ -110,7 +101,7 @@ fn _project_size_at_latitude_m(meters: f32, lat: f32) -> f32 {
 // (Note: This function relies on "geometry" being provided.)
 fn project_size() -> f32 {
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
-      project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT &&
+      project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC &&
       project.pseudoMeters == 0) {
     if (geometry.position.w == 0.0) {
       return _project_size_at_latitude(geometry.worldPosition.y);
@@ -205,7 +196,7 @@ struct RotationResult {
 };
 
 fn project_needs_rotation(commonPosition: vec3<f32>) -> RotationResult {
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return RotationResult(true, project_get_orientation_matrix(commonPosition));
   } else {
     return RotationResult(false, mat3x3<f32>());  // identity alternative if needed
@@ -272,7 +263,7 @@ fn project_globe_to_mercator_(spherePos: vec3<f32>) -> vec2<f32> {
 // Flat common space (Mercator or cartesian) of a common position; identity except under GLOBE.
 // WGSL has no function overloading: pass position.xyz for a vec4. See project.glsl.ts.
 fn project_common_position_to_flat(commonPosition: vec3<f32>) -> vec2<f32> {
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return project_globe_to_mercator_(commonPosition);
   }
   return commonPosition.xy;
@@ -296,7 +287,7 @@ fn project_common_position_to_flat_wrapped(commonPosition: vec3<f32>, referenceX
 // e.g. the camera); identity for flat modes. For periodic patterns.
 fn project_common_position_to_flat_continuous(commonPosition: vec3<f32>, referenceX: f32) -> vec2<f32> {
   var flatPosition = project_common_position_to_flat(commonPosition);
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     flatPosition.x = project_wrap_flat_x_(flatPosition.x, referenceX);
   }
   return flatPosition;
@@ -309,19 +300,19 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
 
   // Work around for a Mac+NVIDIA bug:
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       return vec4<f32>(
         project_mercator_(position_world.xy),
         _project_size_at_latitude_m(position_world.z, position_world.y),
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_PROJECTED) {
       position_world = vec4f(position_world.xyz + project.coordinateOrigin, position_world.w);
     }
   }
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN) {
+  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEOCENTRIC) {
       // Globe-centered Cartesian XYZ are meters, not longitude/latitude.
       let position_low = project.modelMatrix * vec4<f32>(position64Low, 0.0);
       return vec4<f32>(
@@ -329,20 +320,20 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       return vec4<f32>(
         project_globe_(position_world.xyz),
         position_world.w
       );
     }
-    if (project.coordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS) {
+    if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       let enuMatrix = project_get_orientation_matrix(project.commonOrigin);
       let offsetCommon = (enuMatrix * vec3<f32>(-position_world.x, -position_world.y, position_world.z)) * project.commonUnitsPerMeter;
       return vec4<f32>(project.commonOrigin + offsetCommon, position_world.w);
     }
   }
   if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
-    if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+    if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
       if (abs(position_world.y - project.coordinateOrigin.y) > 0.25) {
         return vec4<f32>(
           project_mercator_(position_world.xy) - project.commonOrigin.xy,
@@ -355,8 +346,8 @@ fn project_position_vec4_f64(position: vec4<f32>, position64Low: vec3<f32>) -> v
   if (project.projectionMode == PROJECTION_MODE_IDENTITY ||
       project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL ||
       (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET &&
-       (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-        project.coordinateSystem == COORDINATE_SYSTEM_CARTESIAN))) {
+       (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC ||
+        project.coordinateFrame == COORDINATE_SYSTEM_PROJECTED))) {
     position_world = vec4f(position_world.xyz - project.coordinateOrigin, position_world.w);
   }
 
@@ -404,11 +395,6 @@ fn project_pixel_size_to_clipspace(pixels: vec2<f32>) -> vec2<f32> {
 }
 
 fn project_meter_size_to_pixel(meters: f32) -> f32 {
-#ifdef USE_EXTERNAL_PROJECTION
-  if (project.projectionMode == PROJECTION_MODE_CUSTOM_GEOSPATIAL) {
-    return meters * project_external_size_scale().x * project.scale;
-  }
-#endif
   return project_size_float(meters) * project.scale;
 }
 

@@ -3,7 +3,6 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  COORDINATE_SYSTEM,
   Layer,
   picking,
   project32,
@@ -37,7 +36,7 @@ const sketchEdge = {
 export class SketchEdgeLayer extends Layer<SketchEdgeLayerProps> {
   static override layerName = 'SketchEdgeLayer';
   static override defaultProps = {
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     getPolygonOffset: () => [0, 0],
     color: [35, 31, 29, 255],
     style: {}

@@ -40,7 +40,7 @@ The JavaScript uniforms are extracted from both contextual and per-layer props. 
 
 Uniforms are considered private to each shader module. They may change in between patch releases. Always use documented functions instead of accessing module uniforms directly.
 
-The uniforms of the `project` shader module are prefixed with `project_` in their names.
+The `project.coordinateFrame` uniform describes packed attributes as identity, geodetic, projected, or geocentric coordinates. It is distinct from a layer's `coordinateSystem` CRS string. Local meter and degree offsets select their own projection modes. Both numeric enum definitions are internal to the project shader module.
 
 ## GLSL Functions
 

@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, WebMercatorViewport, project, project32, color, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  WebMercatorViewport,
+  project,
+  project32,
+  color,
+  picking,
+  UNIT,
+  _deepEqual as deepEqual
+} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
@@ -170,9 +179,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
   state!: {
     model?: Model;
     pathTesselator: PathTesselator;
-    tessellationResolution?: number;
+    subdivisionStep?: number;
     pathProjectionScale: PathProjectionScale;
-  };
+  } & Layer['state'];
 
   getShaders() {
     const {antialiasing} = this.props;
@@ -245,7 +254,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const {viewport} = this.context;
     return (
       super.shouldUpdateState(params) ||
-      this.state?.tessellationResolution !== viewport.resolution ||
+      this.state?.subdivisionStep !== this.getSubdivisionStep() ||
       !pathProjectionScalesEqual(
         this.state?.pathProjectionScale,
         this.getPathProjectionScale(viewport)
@@ -351,7 +360,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         fp64: this.use64bitPositions(),
         isWebGPU
       }),
-      tessellationResolution: this.context.viewport.resolution,
+      subdivisionStep: this.getSubdivisionStep(),
       pathProjectionScale: this.getPathProjectionScale(this.context.viewport)
     });
   }
@@ -362,7 +371,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
     const attributeManager = this.getAttributeManager();
     const {viewport} = this.context;
-    const tessellationResolutionChanged = this.state.tessellationResolution !== viewport.resolution;
+    const subdivisionStepChanged = this.state.subdivisionStep !== this.getSubdivisionStep();
     const pathProjectionScale = this.getPathProjectionScale(viewport);
     const pathProjectionScaleChanged = !pathProjectionScalesEqual(
       this.state.pathProjectionScale,
@@ -375,12 +384,14 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const geometryConfigurationChanged =
       changeFlags.projectionChanged ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
-      (viewport.preproject && props.modelMatrix !== oldProps.modelMatrix) ||
+      (this.state.preproject &&
+        (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
       getPathChanged ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
       props.wrapLongitude !== oldProps.wrapLongitude ||
-      tessellationResolutionChanged;
+      subdivisionStepChanged;
     const geometryChanged = changeFlags.dataChanged || geometryConfigurationChanged;
 
     if (geometryChanged) {
@@ -397,16 +408,19 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         transform: this.usePositionTransforms().transform?.bind(this),
         positionFormat: props.positionFormat,
         // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
-        wrapLongitude: props.wrapLongitude && !viewport.preproject,
-        // TODO - move the flag out of the viewport
-        resolution: viewport.resolution,
+        wrapLongitude:
+          props.wrapLongitude &&
+          !this.state.preproject &&
+          this.state.sourceCrs?.signature === 'WGS84',
+        // Subdivision runs in accessor coordinates before the source CRS transform.
+        resolution: this.getSubdivisionStep(),
         // A partial data diff is only valid while normalization inputs remain unchanged.
         dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });
       this.setState({
         numInstances: pathTesselator.instanceCount,
         startIndices: pathTesselator.vertexStarts,
-        tessellationResolution: viewport.resolution,
+        subdivisionStep: this.getSubdivisionStep(),
         pathProjectionScale
       });
       if (!changeFlags.dataChanged || geometryConfigurationChanged) {

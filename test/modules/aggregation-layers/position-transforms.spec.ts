@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
+import LayerState from '@deck.gl/core/lib/layer-state';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect, vi} from 'vitest';
-import {
-  LayerManager,
-  Viewport,
-  AttributeManager,
-  _CustomProjectionViewport as CustomProjectionViewport
-} from '@deck.gl/core';
+import {LayerManager, Viewport, AttributeManager} from '@deck.gl/core';
 import {
   ScreenGridLayer,
   GridLayer,
@@ -21,12 +19,12 @@ import {Matrix4} from '@math.gl/core';
 
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
   return projected
-    ? new CustomProjectionViewport({
+    ? createTestViewport({
         width: 400,
         height: 300,
-        toCrs: signature,
-        fromCrs: '+units=m',
-        projection: {
+        signature: signature,
+
+        converter: {
           forward: ([x, y, z = 0]) => [x * scale, y * scale, z * scale],
           inverse: ([x, y, z = 0]) => [x / scale, y / scale, z / scale]
         },
@@ -100,6 +98,9 @@ test('HeatmapLayer packed position layout composes projection with XY normalizat
       viewport: createViewport('packed', projected),
       device: {type: 'webgpu'}
     } as any;
+    layer.state = {} as any;
+    layer.internalState = new LayerState({layer, attributeManager: attributes});
+    layer._setSourceCrs(projected ? WGS84_CRS : null);
     vi.spyOn(layer, 'getAttributeManager').mockReturnValue(attributes);
     vi.spyOn(layer, 'setState').mockImplementation(() => {});
     try {

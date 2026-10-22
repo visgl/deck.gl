@@ -181,7 +181,7 @@ describe('@deck.gl-community/gpu-layers/query package boundary', () => {
 
   test('uses the public query graph ID in the Taxi inspector', () => {
     const appUiSource = readFileSync(
-      new URL('../../../examples/deck/luspatial-taxi/app-ui.ts', import.meta.url),
+      new URL('../../../examples/v10-experimental/luspatial-taxi/app-ui.ts', import.meta.url),
       'utf8'
     );
     expect(appUiSource).toContain('LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS.query');

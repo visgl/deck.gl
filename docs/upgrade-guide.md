@@ -6,18 +6,42 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### Viewport distance scales
+### Viewport
 
-For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+#### CRS configuration
 
-- `unitsPerDegree` and `unitsPerDegree2` are renamed to `unitsPerWorldUnit` and `unitsPerWorldUnit2`.
-- `degreesPerUnit` is removed. Divide by the corresponding component of `unitsPerWorldUnit` instead.
-- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to `[1, 1, 1]`; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
-- `metersPerUnit` is always derived from `unitsPerMeter`, overriding any supplied reciprocal values.
+`Viewport` now uses a resolved `crs` descriptor for coordinate conversions and distance scales, allowing the base class to work with different coordinate reference systems. Supply `crs` when constructing a geospatial `Viewport`; without it, the viewport uses local coordinates.
 
-### GlobeView `position`
+If you previously constructed `Viewport` with `longitude` and `latitude` to select Web Mercator, use `WebMercatorViewport` instead. These options belong to the geographic subclasses. Built-in `MapView`, `FirstPersonView`, and `GlobeView` retain their existing projection behavior.
 
-`GlobeView` applies `viewState.position` as meter offsets to the east, north and up at every zoom, as `MapView` does. Up to zoom 12 it used to add them along the globe's axes, so the camera target moved by an amount that depended on the location, and the view jumped at zoom 12. Applications that set `position` on a `GlobeView` now get the target where `position` says.
+#### Distance scales
+
+Distance scales now describe world units for any CRS, so the same API supports geographic degrees and projected linear units. For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+
+- Use `unitsPerWorldUnit` and `unitsPerWorldUnit2` in place of `unitsPerDegree` and `unitsPerDegree2`.
+- For the removed `degreesPerUnit` field, divide by the corresponding component of `unitsPerWorldUnit` instead.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to the CRS linear unit factors, or `[1, 1, 1]` without a CRS; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `metersPerUnit` is derived from `unitsPerMeter` to keep reciprocal scales consistent. Supply `unitsPerMeter` instead of a separate `metersPerUnit` value.
+
+#### Subdivision resolution
+
+`viewport.resolution` now controls subdivision detail across CRSs with different units. Higher values generate finer geometry. It defaults to `0` (subdivision disabled), including for `GlobeView`, so applications can opt into the additional processing and memory overhead.
+
+To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
+
+#### GlobeView position
+
+`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
+
+### Coordinate and projection constants
+
+Layer coordinate systems now use CRS strings, allowing applications to declare their data's CRS directly. Pass strings such as `'lnglat'`, `'cartesian'`, or `'meter-offsets'` to `coordinateSystem`; `COORDINATE_SYSTEM` and `_PROJECTION_MODE` are no longer exported.
+
+The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` to distinguish packed attribute coordinates from the layer's source CRS. Shader coordinate-frame and projection-mode enums are internal to the module; meter and degree offsets select their own projection modes.
+
+### Layer coordinate origins
+
+Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
 
 ## Upgrading to v9.4
 
