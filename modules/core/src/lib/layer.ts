@@ -5,6 +5,7 @@
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
+import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -826,7 +827,21 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
     }
     const columns = attributeManager.getGPUVectors(attributes);
-    model.setGPUAttributes(columns, bindings.bufferLayouts, bindings.buffers);
+    for (const layout of bindings.bufferLayouts) {
+      const buffer = bindings.buffers[layout.name];
+      if (buffer) {
+        columns[layout.name] = new GPUVector({
+          type: 'interleaved',
+          name: layout.name,
+          buffer,
+          length: this.getNumInstances(),
+          byteStride: layout.byteStride!,
+          attributes: layout.attributes!,
+          ownsBuffer: false
+        });
+      }
+    }
+    model.setGPUAttributes(columns, bindings.bufferLayouts);
     if (indexBuffer !== undefined) {
       model.setIndexBuffer(indexBuffer);
     }

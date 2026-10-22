@@ -19,20 +19,31 @@ import {
 export default class GPUVectorModel extends Model {
   private constantBuffers: Record<string, Buffer> = {};
 
-  /** Binds typed columns and optional complete, prepacked physical buffers. */
+  /** Binds typed columns using their resolved physical layouts. */
   setGPUAttributes(
-    columns: Record<string, GPUVector | GPUConstant>,
-    bufferLayouts: BufferLayout[],
-    packedBuffers: Record<string, Buffer> = {}
+    columns: Readonly<Record<string, GPUVector | GPUConstant>>,
+    bufferLayouts: BufferLayout[]
   ): void {
-    const buffers: Record<string, Buffer> = {...packedBuffers};
+    for (const [name, column] of Object.entries(columns)) {
+      if (!(column instanceof GPUVector) && !(column instanceof GPUConstant)) {
+        throw new TypeError(
+          `GPUVectorModel.setGPUAttributes expected GPUVector or GPUConstant for "${name}"`
+        );
+      }
+    }
+
+    const buffers: Record<string, Buffer> = {};
     const constants: Record<string, TypedArray> = {};
     const usedConstantBuffers = new Set<string>();
 
     // WebGPU constants need their own zero-stride binding when they share a
     // physical layout with vectors (e.g. float32 positions and a zero fp64 low).
     const layouts = bufferLayouts.flatMap(layout => {
-      if (this.device.type !== 'webgpu' || packedBuffers[layout.name]) {
+      const packedVector = columns[layout.name];
+      if (
+        this.device.type !== 'webgpu' ||
+        (packedVector instanceof GPUVector && packedVector.bufferLayout)
+      ) {
         return [layout];
       }
       const definitions = layout.attributes || [];
@@ -59,9 +70,6 @@ export default class GPUVectorModel extends Model {
     });
 
     for (const layout of layouts) {
-      if (packedBuffers[layout.name]) {
-        continue;
-      }
       const vector = columns[layout.name];
       if (vector instanceof GPUVector) {
         buffers[layout.name] = getGPUVectorBuffer(vector) as Buffer;

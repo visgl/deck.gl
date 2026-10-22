@@ -12,6 +12,11 @@ import ScatterplotLayer from '@deck.gl/layers/scatterplot-layer/scatterplot-laye
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
 
+test('GPUVectorModel rejects untyped attribute inputs', () => {
+  const model = Object.create(GPUVectorModel.prototype) as GPUVectorModel;
+  expect(() => model.setGPUAttributes({positions: {} as GPUVector}, [])).toThrow(TypeError);
+});
+
 test('ScatterplotLayer consumes GPU columns across constant and buffer updates', () => {
   testLayer({
     Layer: ScatterplotLayer,
