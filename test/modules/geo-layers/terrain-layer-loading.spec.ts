@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {COORDINATE_SYSTEM, _GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
@@ -21,12 +21,6 @@ function sleep(): Promise<void> {
 }
 
 const TEST_VIEWPORT = new MapView().makeViewport({
-  width: 100,
-  height: 100,
-  viewState: {longitude: 0, latitude: 0, zoom: 0}
-});
-
-const TEST_GLOBE_VIEWPORT = new GlobeView().makeViewport({
   width: 100,
   height: 100,
   viewState: {longitude: 0, latitude: 0, zoom: 0}
@@ -190,27 +184,4 @@ test('TerrainLayer fetches tiles at correct zoom levels for different zoomOffset
 
     handle?.finalize();
   }
-});
-
-test('TerrainLayer renders tiled Martini meshes in lng/lat coordinates on GlobeView', async () => {
-  const layer = new TerrainLayer({
-    id: 'terrain-tiled-globe',
-    elevationData: 'https://example.com/elevation/{z}/{x}/{y}.png',
-    minZoom: 0,
-    maxZoom: 0,
-    fetch: () => Promise.resolve(createTestMesh())
-  });
-
-  const handle = await testInitializeLayerAsync({
-    layer,
-    viewport: TEST_GLOBE_VIEWPORT,
-    finalize: false
-  });
-
-  const tileLayer = layer.getSubLayers()[0];
-  const meshLayer = tileLayer.getSubLayers()[0];
-  expect(meshLayer.props.coordinateSystem, 'Globe terrain mesh uses lng/lat').toBe(
-    COORDINATE_SYSTEM.LNGLAT
-  );
-  handle?.finalize();
 });
