@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, color, project32, picking, gouraudMaterial} from '@deck.gl/core';
+import {
+  Layer,
+  color,
+  project32,
+  picking,
+  gouraudMaterial,
+  _deepEqual as deepEqual
+} from '@deck.gl/core';
 import {Model, Geometry} from '@luma.gl/engine';
 
 // Polygon geometry generation is managed by the polygon tesselator
@@ -126,13 +133,14 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   static layerName = 'SolidPolygonLayer';
 
   state!: {
+    subdivisionStep?: number;
     topModel?: Model;
     sideModel?: Model;
     wireframeModel?: Model;
     models?: Model[];
     numInstances: number;
     polygonTesselator: PolygonTesselator;
-  };
+  } & Layer['state'];
 
   getShaders(type) {
     const ringWindingOrderCW = !this.props._normalize && this.props._windingOrder === 'CCW' ? 0 : 1;
@@ -164,29 +172,9 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   initializeState() {
-    const {viewport} = this.context;
-    let {coordinateSystem} = this.props;
-    const {_full3d} = this.props;
-    if (viewport.isGeospatial && coordinateSystem === 'default') {
-      coordinateSystem = 'lnglat';
-    }
-
-    let preproject: ((xy: number[]) => number[]) | undefined;
-
-    if (coordinateSystem === 'lnglat') {
-      if (_full3d) {
-        preproject = viewport.projectPosition.bind(viewport);
-      } else {
-        preproject = viewport.projectFlat.bind(viewport);
-      }
-    }
-
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
-        // Lnglat coordinates are usually projected non-linearly, which affects tesselation results
-        // Provide a preproject function if the coordinates are in lnglat
-        preproject,
         fp64: this.use64bitPositions(),
         IndexType: Uint32Array
       })
@@ -206,6 +194,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         noAlloc
       },
       vertexPositions: {
+        ...this.usePositionTransforms(),
         size: 3,
         type: 'float64',
         stepMode: 'dynamic',
@@ -215,31 +204,13 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         // eslint-disable-next-line @typescript-eslint/unbound-method
         update: this.calculatePositions,
         noAlloc,
-        ...(isWebGPU
-          ? {}
-          : {
-              shaderAttributes: {
-                nextVertexPositions: {
-                  vertexOffset: 1
-                }
-              }
-            })
-      },
-      ...(isWebGPU
-        ? {
-            // WebGPU cannot express WebGL's one-vertex offset view in a buffer layout.
-            nextVertexPositions: {
-              size: 3,
-              type: 'float64',
-              stepMode: 'dynamic',
-              fp64: this.use64bitPositions(),
-              transition: false,
-              // eslint-disable-next-line @typescript-eslint/unbound-method
-              update: this.calculateNextPositions,
-              noAlloc
-            }
+        shaderAttributes: {
+          // luma.gl binds the same buffer at a shifted offset on WebGPU.
+          nextVertexPositions: {
+            vertexOffset: 1
           }
-        : {}),
+        }
+      },
       [isWebGPU ? 'vertexValid' : 'instanceVertexValid']: {
         size: 1,
         type: isWebGPU ? 'float32' : 'uint16',
@@ -366,8 +337,21 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   }
 
   protected updateGeometry({props, oldProps, changeFlags}: UpdateParameters<this>) {
+    const {viewport} = this.context;
+    const subdivisionStep = this.getSubdivisionStep();
+    const geocentric = Boolean(
+      this.state.packedCrs && viewport.crs?.coordinateFrame === 'geocentric'
+    );
+    const projectionChanged =
+      changeFlags.projectionChanged ||
+      this.state.subdivisionStep !== subdivisionStep ||
+      props.coordinateSystem !== oldProps.coordinateSystem ||
+      (viewport.isGeospatial &&
+        (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)));
     const geometryConfigChanged =
       changeFlags.dataChanged ||
+      projectionChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
@@ -380,24 +364,39 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         data: props.data,
         normalize: props._normalize,
         geometryBuffer: buffers.getPolygon,
-        // Keep derived WebGPU attributes independent of external binary accessor buffers.
-        buffers: this.context.device.type === 'webgpu' ? {...buffers} : buffers,
+        buffers,
         getGeometry: props.getPolygon,
+        transform: this.usePositionTransforms().transform?.bind(this),
+        // Triangulate where the shader draws the polygon, including layer transforms.
+        // CPU-preprojected positions already contain those transforms.
+        preproject: this.state.packedCrs
+          ? position =>
+              this.state.preproject
+                ? viewport.projectPosition(position, {sourceCrs: this.state.packedCrs!})
+                : this.projectPosition(position, {viewport, autoOffset: false})
+          : undefined,
         positionFormat: props.positionFormat,
-        wrapLongitude: props.wrapLongitude,
-        // TODO - move the flag out of the viewport
-        resolution: this.context.viewport.resolution,
+        // Longitude cutting assumes geographic input and cannot run on preprojected coordinates.
+        wrapLongitude:
+          props.wrapLongitude &&
+          !this.state.preproject &&
+          this.state.sourceCrs?.signature === 'WGS84',
+        resolution: subdivisionStep,
         fp64: this.use64bitPositions(),
-        dataChanged: changeFlags.dataChanged,
-        full3d: props._full3d
+        dataChanged: projectionChanged ? undefined : changeFlags.dataChanged,
+        // A geocentric target needs a polygon plane selected from XYZ, even for flat source data.
+        full3d: props._full3d || geocentric,
+        geocentric
       });
 
       this.setState({
+        subdivisionStep,
         numInstances: polygonTesselator.instanceCount,
         startIndices: polygonTesselator.vertexStarts
       });
 
-      if (!changeFlags.dataChanged) {
+      if (!changeFlags.dataChanged || projectionChanged) {
+        // Projection changes affect all triangles, even alongside a partial data update.
         // Base `layer.updateState` only invalidates all attributes on data change
         // Cover the rest of the scenarios here
         this.getAttributeManager()!.invalidateAll();
@@ -507,26 +506,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
   protected calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
     attribute.startIndices = polygonTesselator.vertexStarts;
-
-    const binaryPositions = (this.props.data as any).attributes?.getPolygon;
-    if (this.context.device.type === 'webgpu' && ArrayBuffer.isView(binaryPositions?.value)) {
-      const {value, size = 3, offset = 0, stride} = binaryPositions;
-      const elementOffset = offset / value.BYTES_PER_ELEMENT;
-      const elementStride = stride ? stride / value.BYTES_PER_ELEMENT : size;
-      const positions = new Float64Array(polygonTesselator.instanceCount * 3);
-
-      for (let vertexIndex = 0; vertexIndex < polygonTesselator.instanceCount; vertexIndex++) {
-        const sourceIndex = elementOffset + vertexIndex * elementStride;
-        const targetIndex = vertexIndex * 3;
-        positions[targetIndex] = value[sourceIndex];
-        positions[targetIndex + 1] = value[sourceIndex + 1];
-        positions[targetIndex + 2] = size > 2 ? value[sourceIndex + 2] : 0;
-      }
-
-      attribute.value = positions;
-      return;
-    }
-
     attribute.value = polygonTesselator.get('positions');
   }
 
@@ -540,34 +519,5 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       this.context.device.type === 'webgpu' && vertexValid
         ? Float32Array.from(vertexValid)
         : vertexValid;
-  }
-
-  protected calculateNextPositions(attribute) {
-    const {polygonTesselator} = this.state;
-    const attributes = this.getAttributeManager()!.getAttributes();
-    const positions = attributes.vertexPositions.value;
-    const vertexValid =
-      (this.props.data as any).attributes?.instanceVertexValid?.value ||
-      attributes.vertexValid?.value ||
-      polygonTesselator.get('vertexValid');
-    attribute.startIndices = polygonTesselator.vertexStarts;
-
-    if (!positions) {
-      attribute.value = positions;
-      return;
-    }
-
-    const vertexCount = positions.length / 3;
-    const nextPositions = new (positions.constructor as typeof Float32Array)(positions.length);
-    for (let vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
-      const sourceIndex = vertexIndex * 3;
-      const nextSourceIndex =
-        vertexValid?.[vertexIndex] && vertexIndex + 1 < vertexCount ? sourceIndex + 3 : sourceIndex;
-      for (let componentIndex = 0; componentIndex < 3; componentIndex++) {
-        nextPositions[sourceIndex + componentIndex] = positions[nextSourceIndex + componentIndex];
-      }
-    }
-
-    attribute.value = nextPositions;
   }
 }

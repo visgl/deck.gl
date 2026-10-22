@@ -7,7 +7,7 @@ import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 /* eslint-disable callback-return */
-import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
@@ -63,7 +63,7 @@ const testCases = [
       new ScatterplotLayer({
         id: 'scatterplot-lnglat',
         data: dataSamples.points,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: 'lnglat',
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,

@@ -11,7 +11,7 @@ export {VERSION} from './lib/init';
 export {getShaderAssembler} from './shaderlib/index';
 
 // Core Library
-export {COORDINATE_SYSTEM, OPERATION, UNIT} from './lib/constants';
+export {OPERATION, UNIT} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';
@@ -38,6 +38,7 @@ export {default as DeckRenderer} from './lib/deck-renderer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';
+export type {ProjectPositionOptions} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
 export {default as _GlobeViewport} from './viewports/globe-viewport';
 export {default as OrbitViewport} from './viewports/orbit-viewport';
@@ -151,3 +152,12 @@ export type {
 export {default as _Component} from './lifecycle/component';
 // @deprecated internal do not use
 export {default as _ComponentState} from './lifecycle/component-state';
+
+export {default as _CustomProjectionView} from './views/custom-projection-view';
+export {default as _CustomProjectionViewport} from './viewports/custom-projection-viewport';
+export {default as _CustomProjectionController} from './controllers/custom-projection-controller';
+export type {
+  CustomProjectionViewProps,
+  CustomProjectionViewState
+} from './views/custom-projection-view';
+export type {CustomProjectionViewportOptions} from './viewports/custom-projection-viewport';

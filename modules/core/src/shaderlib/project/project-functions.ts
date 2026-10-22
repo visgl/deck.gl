@@ -6,17 +6,20 @@
  * Projection utils
  * TODO: move to Viewport class?
  */
+import {getSourceCRS} from './coordinate-systems';
 import {getOffsetOrigin} from './viewport-uniforms';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
+import {PROJECTION_MODE} from './constants';
 
-import {vec3, vec4} from '@math.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 
 import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import type {NumericArray} from '../../types/types';
 
-const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
+const DEFAULT_COORDINATE_ORIGIN: [number, number, number] = [0, 0, 0];
 
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
 // offset modes apply the y adjustment (unitsPerMeter2) when projecting z
@@ -37,6 +40,22 @@ function lngLatZToWorldPosition(
   return p;
 }
 
+function resolveCoordinateSystem(
+  coordinateSystem: CoordinateSystem,
+  viewport: Viewport
+): CoordinateSystem {
+  switch (viewport.projectionMode) {
+    case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
+      return coordinateSystem;
+  }
+  switch (coordinateSystem) {
+    case 'default':
+      return viewport.isGeospatial ? 'lnglat' : 'cartesian';
+    default:
+      return coordinateSystem;
+  }
+}
+
 function normalizeParameters(opts: {
   viewport: Viewport;
   coordinateSystem: CoordinateSystem;
@@ -52,28 +71,23 @@ function normalizeParameters(opts: {
   fromCoordinateSystem: CoordinateSystem;
   fromCoordinateOrigin: [number, number, number];
 } {
-  const {viewport, modelMatrix, coordinateOrigin} = opts;
-  let {coordinateSystem, fromCoordinateSystem, fromCoordinateOrigin} = opts;
-
-  if (coordinateSystem === 'default') {
-    coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
-  }
-
-  if (fromCoordinateSystem === undefined) {
-    fromCoordinateSystem = coordinateSystem;
-  } else if (fromCoordinateSystem === 'default') {
-    fromCoordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
-  }
-  if (fromCoordinateOrigin === undefined) {
-    fromCoordinateOrigin = coordinateOrigin;
-  }
+  const {
+    viewport,
+    modelMatrix,
+    coordinateSystem,
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+    fromCoordinateSystem = coordinateSystem,
+    fromCoordinateOrigin = fromCoordinateSystem === coordinateSystem
+      ? coordinateOrigin
+      : DEFAULT_COORDINATE_ORIGIN
+  } = opts;
 
   return {
     viewport,
-    coordinateSystem,
+    coordinateSystem: resolveCoordinateSystem(coordinateSystem, viewport),
     coordinateOrigin,
     modelMatrix,
-    fromCoordinateSystem,
+    fromCoordinateSystem: resolveCoordinateSystem(fromCoordinateSystem, viewport),
     fromCoordinateOrigin
   };
 }
@@ -85,7 +99,7 @@ export function getWorldPosition(
     viewport,
     modelMatrix,
     coordinateSystem,
-    coordinateOrigin,
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
     offsetMode
   }: {
     viewport: Viewport;
@@ -99,6 +113,68 @@ export function getWorldPosition(
 
   if (modelMatrix) {
     [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
+  }
+
+  const sourceCrs = getSourceCRS(coordinateSystem, viewport);
+  if (sourceCrs) {
+    const {preproject} = viewport.getPreprojection(sourceCrs);
+    if (preproject) {
+      const packed = preproject([
+        x + coordinateOrigin[0],
+        y + coordinateOrigin[1],
+        z + coordinateOrigin[2]
+      ]);
+      switch (viewport.projectionMode) {
+        case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
+          return packed.map(
+            (value, axis) => value * viewport.distanceScales.unitsPerWorldUnit[axis]
+          ) as [number, number, number];
+        default:
+          return lngLatZToWorldPosition(packed, viewport, offsetMode);
+      }
+    }
+    switch (viewport.projectionMode) {
+      case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
+        return [x, y, z].map(
+          (value, axis) =>
+            (value + coordinateOrigin[axis]) * viewport.distanceScales.unitsPerWorldUnit[axis]
+        ) as [number, number, number];
+    }
+    switch (coordinateSystem) {
+      case 'lnglat-offsets':
+        break;
+      default:
+        x += coordinateOrigin[0];
+        y += coordinateOrigin[1];
+        z += coordinateOrigin[2] || 0;
+        coordinateSystem = 'lnglat';
+    }
+  }
+
+  switch (viewport.projectionMode) {
+    case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
+      switch (coordinateSystem) {
+        case 'meter-offsets': {
+          const origin = viewport.projectPosition(coordinateOrigin);
+          const targetOrigin = viewport.crs!.converter.WGS84.from(coordinateOrigin);
+          const {unitsPerMeter} = viewport.getDistanceScales(targetOrigin);
+          return [
+            origin[0] + x * unitsPerMeter[0],
+            origin[1] + y * unitsPerMeter[1],
+            origin[2] + z * unitsPerMeter[2]
+          ];
+        }
+        case 'cartesian': {
+          const scale = viewport.distanceScales.unitsPerWorldUnit;
+          return [
+            (x + coordinateOrigin[0]) * scale[0],
+            (y + coordinateOrigin[1]) * scale[1],
+            (z + coordinateOrigin[2]) * scale[2]
+          ];
+        }
+        default:
+          return viewport.projectPosition([x, y, z]);
+      }
   }
 
   switch (coordinateSystem) {
@@ -156,7 +232,7 @@ export function projectPosition(
     modelMatrix?: NumericArray | null;
     /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
     fromCoordinateSystem?: CoordinateSystem;
-    /** The coordinate origin that the supplied position is in. Default to the same as `coordinateOrigin`. */
+    /** The source coordinate origin. Defaults to `coordinateOrigin` for the same source system, or zero for a different system. */
     fromCoordinateOrigin?: [number, number, number];
     /** Whether to apply offset mode automatically as does the project shader module.
      * Offset mode places the origin of the common space at the given viewport's center. It is used in some use cases
@@ -179,6 +255,7 @@ export function projectPosition(
   const {
     geospatialOrigin = DEFAULT_COORDINATE_ORIGIN,
     shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+    commonOrigin,
     offsetMode = false
   } = autoOffset ? getOffsetOrigin(viewport, coordinateSystem, coordinateOrigin) : {};
 
@@ -191,9 +268,8 @@ export function projectPosition(
   });
 
   if (offsetMode) {
-    const positionCommonSpace = viewport.projectPosition(
-      geospatialOrigin || shaderCoordinateOrigin
-    );
+    const positionCommonSpace =
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
     vec3.sub(worldPosition, worldPosition, positionCommonSpace);
   }
 

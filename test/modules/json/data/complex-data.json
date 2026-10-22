@@ -85,7 +85,7 @@
         }
       ],
       "pointSize": 10,
-      "coordinateSystem": "@@#COORDINATE_SYSTEM.METER_OFFSETS",
+      "coordinateSystem": "meter-offsets",
       "coordinateOrigin": [-122.4, 37.74]
     }
   ]

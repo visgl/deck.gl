@@ -5,8 +5,8 @@
 import {test, expect} from 'vitest';
 
 import {
-  COORDINATE_SYSTEM,
   WebMercatorViewport,
+  FirstPersonViewport,
   OrthographicViewport,
   project,
   ProjectProps,
@@ -39,6 +39,16 @@ export type TestCase = {
   result: NumberArray3;
 };
 const TEST_CASES: TestCase[] = [
+  {
+    title: 'WGS84 alias applies source origin before GPU projection',
+    position: [-0.01, 0.02, 1000],
+    projectProps: {
+      viewport: TEST_VIEWPORT,
+      coordinateSystem: 'EPSG:4326',
+      coordinateOrigin: TEST_COORDINATE_ORIGIN
+    },
+    result: [-0.014226562499999318, 0.03599588695612965, 0.016187212628251565]
+  },
   {
     title: 'LNGLAT:WEB_MERCATOR',
     position: [-70, 41, 1000],
@@ -135,6 +145,47 @@ const TEST_CASES: TestCase[] = [
   }
 ];
 
+// First-person cameras retain Mercator shader coordinates without CPU preprojection.
+const firstPersonViewport = new FirstPersonViewport({
+  longitude: TEST_COORDINATE_ORIGIN[0],
+  latitude: TEST_COORDINATE_ORIGIN[1],
+  position: [10, 20, 100]
+});
+const mercatorReference = new WebMercatorViewport({
+  longitude: TEST_COORDINATE_ORIGIN[0],
+  latitude: TEST_COORDINATE_ORIGIN[1],
+  zoom: firstPersonViewport.zoom,
+  position: [10, 20, 100],
+  legacyMeterSizes: true
+});
+for (const coordinateSystem of [
+  'default',
+  'lnglat-offsets',
+  'meter-offsets',
+  'cartesian'
+] as const) {
+  const position: NumberArray3 =
+    coordinateSystem === 'default'
+      ? ([...TEST_COORDINATE_ORIGIN.slice(0, 2), 100] as NumberArray3)
+      : [0, 0, coordinateSystem === 'cartesian' ? 0 : 100];
+  const coordinateOrigin: NumberArray3 =
+    coordinateSystem === 'default'
+      ? [0, 0, 0]
+      : coordinateSystem === 'cartesian'
+        ? [...firstPersonViewport.projectFlat(TEST_COORDINATE_ORIGIN), 0]
+        : TEST_COORDINATE_ORIGIN;
+  TEST_CASES.push({
+    title: `FirstPersonViewport:${coordinateSystem}`,
+    position,
+    projectProps: {viewport: firstPersonViewport, coordinateSystem, coordinateOrigin},
+    result: projectPosition(position, {
+      viewport: mercatorReference,
+      coordinateSystem,
+      coordinateOrigin
+    })
+  });
+}
+
 test('project#projectPosition', () => {
   const oldEpsilon = config.EPSILON;
   config.EPSILON = 1e-7;
@@ -163,7 +214,7 @@ test('project#projectPosition rejects legacy numeric coordinate systems', () => 
 
   const identityResult = projectPosition([0, 0, 0], {
     viewport: TEST_VIEWPORT,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+    coordinateSystem: 'cartesian',
     coordinateOrigin: [256, 256, 0]
   });
 

@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {MapView, LayerManager} from '@deck.gl/core';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -142,7 +142,7 @@ test('MaskEffect#coordinates', () => {
 
   const TEST_MASK_LAYER_CARTESIAN = TEST_MASK_LAYER.clone({
     coordinateOrigin: [1, 2, 3],
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    coordinateSystem: 'cartesian'
   });
 
   const layerManager = new LayerManager(device, {viewport: testViewport});
@@ -165,18 +165,14 @@ test('MaskEffect#coordinates', () => {
   let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   let mask = parameters.maskChannels['test-mask-layer'];
   expect(mask?.coordinateOrigin, 'Mask has correct coordinate origin').toEqual([0, 0, 0]);
-  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe(
-    COORDINATE_SYSTEM.DEFAULT
-  );
+  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe('default');
 
   preRenderWithLayers([TEST_MASK_LAYER_CARTESIAN, TEST_LAYER], 'Update to cartesion coordinates');
 
   parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
   mask = parameters.maskChannels['test-mask-layer'];
   expect(mask?.coordinateOrigin, 'Mask has correct coordinate origin').toEqual([1, 2, 3]);
-  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe(
-    COORDINATE_SYSTEM.CARTESIAN
-  );
+  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe('cartesian');
 
   maskEffect.cleanup();
   layerManager.finalize();

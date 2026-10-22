@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {BitmapLayer} from '@deck.gl/layers';
+import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
 import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
 import {Map as MapLibreV5Map} from 'maplibre-gl-v5';
 import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
 import {test, expect} from 'vitest';
+
+import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
 
 import type {Map as MapLibreMap} from 'maplibre-gl-v6';
 
@@ -52,6 +54,19 @@ function readCenterPixel(gl: WebGL2RenderingContext): number[] {
     pixel
   );
   return Array.from(pixel);
+}
+
+/** Returns the URL of a raster-dem tile of constant height, in the Mapbox Terrain-RGB encoding */
+async function createDemTileURL(elevation: number): Promise<string> {
+  const value = Math.round((elevation + 10000) * 10);
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const context = canvas.getContext('2d')!;
+  context.fillStyle = `rgb(${value >> 16}, ${(value >> 8) & 255}, ${value & 255})`;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+  return URL.createObjectURL(blob!);
 }
 
 // Aliases in modules/maplibre/package.json pin the earliest supported release of each major.
@@ -185,5 +200,61 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
 
     map.remove();
     container.remove();
+  });
+}
+
+for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
+  webglTest(`MapLibreOverlay picks over terrain with MapLibre ${version}`, async () => {
+    const container = document.createElement('div');
+    Object.assign(container.style, {width: '400px', height: '300px'});
+    document.body.append(container);
+    const demTileURL = await createDemTileURL(1000);
+
+    const summit: [number, number, number] = [8.5, 47.3, 1000];
+    const map = new MapClass({
+      container,
+      style: {
+        version: 8,
+        sources: {dem: {type: 'raster-dem', tiles: [demTileURL], tileSize: 256, maxzoom: 12}},
+        layers: []
+      },
+      center: [summit[0], summit[1]],
+      zoom: 13,
+      pitch: 60,
+      attributionControl: false
+    }) as unknown as MapLibreMap;
+
+    try {
+      await new Promise<void>(resolve => map.once('load', () => resolve()));
+
+      const overlay = new MapLibreOverlay({
+        interleaved: true,
+        layers: [
+          new ScatterplotLayer<[number, number, number]>({
+            id: 'summit',
+            data: [summit],
+            getPosition: d => d,
+            getRadius: 8,
+            radiusUnits: 'pixels',
+            pickable: true
+          })
+        ]
+      });
+      map.addControl(overlay);
+      await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+
+      // MapLibre raises the center elevation as the terrain loads, without a move event
+      map.setTerrain({source: 'dem'});
+      await new Promise<void>(resolve => map.once('idle', () => resolve()));
+
+      const elevation = getMapLibreElevation(map);
+      expect(elevation).toBeCloseTo(1000);
+      expect(overlay._deck!.props.viewState.position).toEqual([0, 0, elevation]);
+      expect(overlay.pickObject({x: 200, y: 150})?.layer?.id).toBe('summit');
+    } finally {
+      map.remove();
+      container.remove();
+      URL.revokeObjectURL(demTileURL);
+    }
   });
 }

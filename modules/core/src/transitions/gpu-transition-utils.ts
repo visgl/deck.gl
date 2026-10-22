@@ -157,10 +157,10 @@ export function padBuffer({
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
   }
 
+  // The buffer read already accounts for byteOffset; i is relative to that data.
   const getMissingData = isConstant
     ? (i: number, chunk: NumericArray) => getData(toData, chunk)
-    : (i: number, chunk: NumericArray) =>
-        getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
+    : (i: number, chunk: NumericArray) => getData(toData.subarray(i, i + size), chunk);
 
   // TODO(v9.1): Avoid non-portable synchronous reads.
   const source = buffer
