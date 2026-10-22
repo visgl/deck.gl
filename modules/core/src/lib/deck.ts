@@ -61,6 +61,11 @@ function noop() {}
 
 const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 
+/** GPU debug setting for a device Deck creates or attaches; `deviceProps.debug` wins. */
+function getDeviceDebug(props: Pick<DeckProps, 'debug' | 'deviceProps'>): boolean | undefined {
+  return props.deviceProps?.debug ?? props.debug;
+}
+
 export type DeckMetrics = {
   fps: number;
   setPropsTime: number;
@@ -435,12 +440,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         log.error('WebGL1 context not supported.')();
       }
       deviceOrPromise = webgl2Adapter.attach(props.gl, {
-        debug: props.debug,
         // Enable shader and pipeline caching for attached devices (matches _createDevice defaults)
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
         _cachePipelines: true,
-        ...this.props.deviceProps
+        ...props.deviceProps,
+        debug: getDeviceDebug(props)
       });
     }
 
@@ -1456,10 +1461,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     // This behavior is expected to change in deck.gl v10 to support WebGPU only builds.
     const deviceProps = {
       adapters: [],
-      debug: props.debug,
       _cacheShaders: true,
       _cachePipelines: true,
-      ...props.deviceProps
+      ...props.deviceProps,
+      debug: getDeviceDebug(props)
     };
     if (!deviceProps.adapters.includes(webgl2Adapter)) {
       deviceProps.adapters.push(webgl2Adapter);
