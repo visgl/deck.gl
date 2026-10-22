@@ -14,6 +14,7 @@ import makeTooltip from './widget-tooltip';
 
 import mapboxgl, {modifyMapboxElements} from './utils/mapbox-utils';
 import {loadModule, loadScript} from './utils/script-utils';
+import {installSharedModuleImportMap} from './shared-modules';
 import {createGoogleMapsDeckOverlay} from './utils/google-maps-utils';
 import {createMapLibreDeckOverlay} from './utils/maplibre-utils';
 
@@ -110,6 +111,8 @@ export function addCustomLibraries(customLibraries, onComplete) {
 
   customLibraries.forEach(({libraryName, resourceUri, module}) => {
     if (module) {
+      // Lets the module import the widget's deck.gl and luma.gl by bare specifier
+      installSharedModuleImportMap();
       // Each registration receives the namespace of the module it asked for (loads are cached per
       // name and URL), so two registrations sharing a name but not a URL both get registered.
       loadModule(resourceUri, libraryName).then(
