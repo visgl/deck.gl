@@ -1,0 +1,222 @@
+# ClusterTileLayer
+
+`ClusterTileLayer` is a layer for visualizing point data aggregated using spatial indexes like [Quadbin](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#quadbin) or [H3](https://docs.carto.com/data-and-analysis/analytics-toolbox-for-bigquery/key-concepts/spatial-indexes#h3) with dynamic clustering. It provides efficient visualization of large point datasets with automatic clustering based on zoom level and customizable aggregation strategies. The layer automatically detects the spatial index type and renders cells accordingly.
+
+## Usage[​](#usage "Direct link to Usage")
+
+```
+import {DeckGL} from '@deck.gl/react';
+
+import {ClusterTileLayer} from '@deck.gl/carto';
+
+import {quadbinTableSource} from '@carto/api-client';
+
+
+
+function App({viewState}) {
+
+  const data = quadbinTableSource({
+
+    accessToken: 'XXX',
+
+    connectionName: 'carto_dw',
+
+    tableName: 'carto-demo-data.demo_tables.quadbin'
+
+  });
+
+
+
+  const layer = new ClusterTileLayer({
+
+    data,
+
+
+
+    // Clustering props
+
+    getWeight: d => d.properties.longitude_count,
+
+    getPosition: d => [d.properties.longitude_average, d.properties.latitude_average];
+
+
+
+    // Styling (supports all GeoJsonLayer props)
+
+    pointType: 'circle+text',
+
+    getPointRadius: d => d.properties.longitude_count / d.properties.stats.longitude_count,
+
+    pointRadiusUnits: 'pixels',
+
+    pointRadiusScale: 50,
+
+    getText: d => d.properties.longitude_count,
+
+    textSizeScale: 20
+
+  });
+
+
+
+  return <DeckGL viewState={viewState} layers={[layer]} />;
+
+}
+```
+
+## Installation[​](#installation "Direct link to Installation")
+
+To install the dependencies from NPM:
+
+```
+npm install deck.gl
+
+# or
+
+npm install @deck.gl/core @deck.gl/layers @deck.gl/carto
+```
+
+```
+import {ClusterTileLayer} from '@deck.gl/carto';
+
+new ClusterTileLayer({});
+```
+
+To use pre-bundled scripts:
+
+```
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js"></script>
+
+<script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
+
+
+
+<!-- or -->
+
+<script src="https://unpkg.com/@deck.gl/core@^9.0.0/dist.min.js"></script>
+
+<script src="https://unpkg.com/@deck.gl/layers@^9.0.0/dist.min.js"></script>
+
+<script src="https://unpkg.com/@deck.gl/geo-layers@^9.0.0/dist.min.js"></script>
+
+<script src="https://unpkg.com/@deck.gl/carto@^9.0.0/dist.min.js"></script>
+```
+
+```
+new deck.carto.ClusterTileLayer({});
+```
+
+## Properties[​](#properties "Direct link to Properties")
+
+Inherits all properties from [`TileLayer`](https://deck.gl/docs/api-reference/geo-layers/tile-layer.md) and [`GeoJsonLayer`](https://deck.gl/docs/api-reference/layers/geojson-layer.md), with exceptions indicated below.
+
+#### `data` (TilejsonResult)[​](#data "Direct link to data")
+
+Required. A valid `TilejsonResult` object.
+
+Use one of the following [Data Sources](https://deck.gl/docs/api-reference/carto/data-sources.md) to fetch this from the CARTO API:
+
+**Quadbin sources:**
+
+* [quadbinTableSource](https://deck.gl/docs/api-reference/carto/data-sources.md#quadbintablesource)
+* [quadbinQuerySource](https://deck.gl/docs/api-reference/carto/data-sources.md#quadbinquerysource)
+* [quadbinTilesetSource](https://deck.gl/docs/api-reference/carto/data-sources.md#quadbintilesetsource)
+
+**H3 sources:**
+
+* [h3TableSource](https://deck.gl/docs/api-reference/carto/data-sources.md#h3tablesource)
+* [h3QuerySource](https://deck.gl/docs/api-reference/carto/data-sources.md#h3querysource)
+* [h3TilesetSource](https://deck.gl/docs/api-reference/carto/data-sources.md#h3tilesetsource)
+
+### Clustering Options[​](#clustering-options "Direct link to Clustering Options")
+
+The following props control how the data is grouped into clusters. The accessor methods will be called on each spatial index cell (quadbin or H3) in the data to retrieve the position and weight of the cell. All of the properties are then aggregated and made available to the `GeoJsonLayer` accessors for styling.
+
+#### `clusterLevel` (number, optional)[​](#clusterlevel "Direct link to clusterlevel")
+
+* Default: `5`
+
+The number of aggregation levels to cluster cells by. Larger values increase the clustering radius, with an increment of `clusterLevel` doubling the radius.
+
+#### `getPosition` ([Accessor\<Position>](https://deck.gl/docs/developer-guide/using-layers.md#accessors), optional)[​](#getposition "Direct link to getposition")
+
+The (average) position of points in a cell used for clustering. If not supplied the center of the spatial index cell (quadbin or H3) is used.
+
+#### `getWeight` ([Accessor\<number>](https://deck.gl/docs/developer-guide/using-layers.md#accessors))[​](#getweight "Direct link to getweight")
+
+* Default: `1`
+
+The weight of each cell used for clustering.
+
+## Aggregated data[​](#aggregated-data "Direct link to Aggregated data")
+
+When using the `GeoJsonLayer` accessors to style the clusters, aggregated values will be passed to the styling accessor functions.
+
+### Aggregation types[​](#aggregation-types "Direct link to Aggregation types")
+
+The type aggregation is infered based on the property name, for example `population_average` will be aggregated using a (mean) average operation across all the spatial index cells that are present in the cluster, while `age_min` will give the minimum value present in the cluster.
+
+The following suffixes are supported:
+
+| Suffix     | Operation | Example               |
+| ---------- | --------- | --------------------- |
+| `_average` | Mean      | `temperature_average` |
+| `_count`   | Count     | `point_count`         |
+| `_min`     | Minimum   | `age_min`             |
+| `_max`     | Maximum   | `age_max`             |
+| `_sum`     | Sum       | `population_sum`      |
+| `_any`     | Any value | `category_any`        |
+
+### Global aggregation[​](#global-aggregation "Direct link to Global aggregation")
+
+In addition to the aggregated values across the cluster, the features passed to the styling accessors contain a `stats` object which contains the same properties, but aggregated across all the data being displayed. This is useful for normalizing the values, such that the largest cluster has a constant value.
+
+### Example[​](#example "Direct link to Example")
+
+Display clusters using an `'cluster'` icon scaled between 20 and 80, switching to an icon defined by the `icon_any` property once the cluster only contains a single point.
+
+```
+// Data present in spatial index cell (quadbin or H3)
+
+type PropertiesType = {
+
+  longitude_count: number; // count of points in cell
+
+  longitude_average: number;
+
+  latitude_average: number;
+
+  icon_any: string;
+
+};
+
+
+
+const layer = new ClusterTileLayer<PropertiesType>({
+
+  data, // Defined using `quadbinTableSource`, `h3TableSource` or similar
+
+
+
+  // Clustering props
+
+  getWeight: d => d.properties.longitude_count,
+
+  getPosition: d => [d.properties.longitude_average, d.properties.latitude_average];
+
+
+
+  // Style
+
+  pointType: 'icon',
+
+  iconAtlas,
+
+  iconMapping,
+
+  getIcon: d => d.longitude_count > 1 : 'cluster' : d.icon_any,
+
+  getIconSize: d => 20 + 80 * d.properties.longitude_count / d.properties.stats.longitude_count
+
+});
+```
