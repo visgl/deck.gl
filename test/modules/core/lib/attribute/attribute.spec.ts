@@ -1374,10 +1374,9 @@ test('Attribute#getGPUVector sizes synthetic fp64 constants for binary inputs', 
   attribute.delete();
 });
 
-test.each(['webgl', 'webgpu'] as const)(
-  'Attribute#setData synchronizes raw constants on %s',
-  async (backend, {skip}) => {
-    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Attribute#setData synchronizes raw constants on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
     if (!testDevice) {
       skip();
       return;
@@ -1416,5 +1415,5 @@ test.each(['webgl', 'webgpu'] as const)(
     } finally {
       attribute.delete();
     }
-  }
-);
+  });
+}

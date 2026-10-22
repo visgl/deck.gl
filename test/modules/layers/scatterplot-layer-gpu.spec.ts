@@ -7,6 +7,7 @@ import {testLayer} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
+import type {Model} from '@luma.gl/engine';
 import ScatterplotLayer from '@deck.gl/layers/scatterplot-layer/scatterplot-layer';
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
@@ -120,7 +121,7 @@ test('ScatterplotLayer GPU columns retain WebGPU grouping and release constant b
 test('ScatterplotLayer binds mixed WebGPU position vectors and constants separately', async ({
   skip
 }) => {
-  const device = await getWebGPUTestDevice();
+  const device = await getWebGPUTestDevice('core');
   if (!device) {
     skip();
     return;
@@ -151,8 +152,8 @@ test('ScatterplotLayer binds mixed WebGPU position vectors and constants separat
   try {
     manager.setLayers([layer]);
     const model = layer.getModels()[0];
-    const highSlot = model.vertexArray.getBufferSlot('instancePositions')!;
-    const lowSlot = model.vertexArray.getBufferSlot('instancePositions64Low')!;
+    const highSlot = getAttributeBufferSlot(model, 'instancePositions');
+    const lowSlot = getAttributeBufferSlot(model, 'instancePositions64Low');
     expect(highSlot).not.toBe(lowSlot);
     expect(model.vertexArray.attributes[highSlot]).toBe(positions);
     const highLayout = model.bufferLayout.find(layout =>
@@ -165,6 +166,7 @@ test('ScatterplotLayer binds mixed WebGPU position vectors and constants separat
     )!;
     expect(lowLayout.byteStride).toBe(0);
     ownedBuffer = model.vertexArray.attributes[lowSlot] as Buffer;
+    expect(ownedBuffer).toBeInstanceOf(Buffer);
     expect(ownedBuffer).not.toBe(positions);
     const bytes = await ownedBuffer.readAsync();
     const byteOffset = lowLayout.attributes![0].byteOffset || 0;
@@ -183,23 +185,23 @@ test('ScatterplotLayer binds mixed WebGPU position vectors and constants separat
     expect(ownedBuffer.destroyed).toBe(true);
     expect(positions.destroyed).toBe(false);
     const varyingModel = varying.getModels()[0];
-    expect(varyingModel.vertexArray.getBufferSlot('instancePositions')).toBe(
-      varyingModel.vertexArray.getBufferSlot('instancePositions64Low')
+    expect(getAttributeBufferSlot(varyingModel, 'instancePositions')).toBe(
+      getAttributeBufferSlot(varyingModel, 'instancePositions64Low')
     );
 
     const mixedAgain = varying.clone({data: layer.props.data});
     manager.setLayers([mixedAgain]);
     const mixedModel = mixedAgain.getModels()[0];
-    const mixedLowSlot = mixedModel.vertexArray.getBufferSlot('instancePositions64Low')!;
+    const mixedLowSlot = getAttributeBufferSlot(mixedModel, 'instancePositions64Low');
     const mixedBuffer = mixedModel.vertexArray.attributes[mixedLowSlot] as Buffer;
     const constant = mixedAgain.clone({data: [1, 2], getPosition: [7, 8, 9]});
     manager.setLayers([constant]);
     expect(mixedBuffer.destroyed).toBe(true);
     expect(positions.destroyed).toBe(false);
     const constantModel = constant.getModels()[0];
-    const constantSlot = constantModel.vertexArray.getBufferSlot('instancePositions')!;
+    const constantSlot = getAttributeBufferSlot(constantModel, 'instancePositions');
     ownedBuffer = constantModel.vertexArray.attributes[constantSlot] as Buffer;
-    expect(constantSlot).toBe(constantModel.vertexArray.getBufferSlot('instancePositions64Low'));
+    expect(constantSlot).toBe(getAttributeBufferSlot(constantModel, 'instancePositions64Low'));
   } finally {
     manager.finalize();
     expect(positions.destroyed).toBe(false);
@@ -209,3 +211,13 @@ test('ScatterplotLayer binds mixed WebGPU position vectors and constants separat
     positions.destroy();
   }
 });
+
+function getAttributeBufferSlot(model: Model, attributeName: string): number {
+  const layout = model.bufferLayout.find(candidate =>
+    candidate.attributes?.some(definition => definition.attribute === attributeName)
+  );
+  expect(layout).toBeDefined();
+  const slot = model.vertexArray.getBufferSlot(layout!.name);
+  expect(slot).not.toBeNull();
+  return slot!;
+}
