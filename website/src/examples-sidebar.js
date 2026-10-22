@@ -24,6 +24,7 @@ const sidebars = {
       label: 'Layers',
       items: [
         'arc-layer',
+        'bitmap-layer',
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
