@@ -79,7 +79,12 @@ const gpuDebugTestCases = [
   {name: 'default', props: {}, expected: false},
   {name: 'enabled', props: {debug: true}, expected: true},
   {name: 'device override off', props: {debug: true, deviceProps: {debug: false}}, expected: false},
-  {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true}
+  {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true},
+  {
+    name: 'device override unset',
+    props: {debug: true, deviceProps: {debug: undefined}},
+    expected: true
+  }
 ];
 
 webglTest.each(gpuDebugTestCases)('Deck#GPU debug $name', async ({props, expected}) => {
