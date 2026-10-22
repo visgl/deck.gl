@@ -82,7 +82,10 @@ export default class ShadowPass extends LayersPass {
       ...layer.props.parameters,
       blend: false,
       depthWriteEnabled: true,
-      depthCompare: 'less-equal'
+      depthCompare: 'less-equal',
+      // The shadow map stores gl_FragCoord.z, which includes the per-layer polygon offset
+      // (`getPolygonOffset`). Draw without it so layers do not shadow themselves.
+      depthBias: 0
     };
   }
 

@@ -70,3 +70,18 @@ test('ShadowPass#getShaderModuleProps', () => {
   expect(shaderModuleProps.shadow.drawToShadowMap, `ShadowPass has module props`).toBe(true);
   shadowPass.delete();
 });
+
+test('ShadowPass#getLayerParameters', () => {
+  const layer = new PolygonLayer({
+    data: FIXTURES.polygons.slice(0, 3),
+    getPolygon: f => f,
+    parameters: {depthBias: 10}
+  });
+
+  const shadowPass = new ShadowPass(device, {pixelRatio: 1.0});
+  const parameters = shadowPass.getLayerParameters(layer, 3, null);
+
+  expect(parameters.depthBias, `ShadowPass draws without polygon offset`).toBe(0);
+  expect(parameters.blend, `ShadowPass disables blending`).toBe(false);
+  shadowPass.delete();
+});
