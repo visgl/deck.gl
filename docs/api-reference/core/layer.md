@@ -850,18 +850,20 @@ Returns:
 
 #### `projectPosition` {#projectposition}
 
-Projects a coordinate to common space using the current viewport and layer coordinate system. Can be useful to calculate common-space angles and distances.
+To calculate common-space angles and distances, use `projectPosition` to convert coordinates from a resolved source CRS. With the default parameters, the result uses the same common-space origin as this layer's shader. Set `autoOffset: false` for absolute common-space coordinates.
 
 Parameters:
 
-* `coordinates` (number[]) - `[x, y, z]` in this layer's coordinate system.
-* `params` (object, optional) - Projection parameters override. It accepts the following fields:
-  - `viewport` (Viewport) - defaults to `this.context.viewport`.
+* `coordinates` (number[]) - `[x, y, z]` in the source CRS.
+* `params` (object, optional):
+  - `sourceCrs` (CRSDescriptor) - absolute CRS of the supplied coordinates. Defaults to the layer's resolved CRS. Passing a descriptor selects that CRS instead of the layer's coordinate-system mode.
+  - `coordinateSystem` (`'cartesian'` | `'meter-offsets'`) - selects local coordinates or meter offsets and takes precedence over `sourceCrs`.
+  - `viewport` ([Viewport](./viewport.md)) - supplies the target projection; defaults to the layer's active viewport.
   - `modelMatrix` (Matrix4 | null) - defaults to `this.props.modelMatrix`. Pass `null` to skip the layer matrix.
-  - `coordinateOrigin` (number[3]) - defaults to `this.props.coordinateOrigin`.
-  - `coordinateSystem` (string) - defaults to `this.props.coordinateSystem`.
-  - `fromCoordinateOrigin` (number[3]) - defaults to passed `coordinateOrigin` for the same source system, or `[0, 0, 0]` for a different system.
-  - `fromCoordinateSystem` (string) - defaults to passed `coordinateSystem`.
+  - `coordinateOrigin` (number[3]) - input origin applied before CRS conversion; defaults to `this.props.coordinateOrigin`.
+  - `autoOffset` (boolean) - defaults to `true`. Set to `false` to return absolute common-space coordinates.
+
+The supplied CRS and origin also determine the automatic common-space offset. Use `autoOffset: false` to compare positions projected with different parameter sets.
 
 Returns:
 
