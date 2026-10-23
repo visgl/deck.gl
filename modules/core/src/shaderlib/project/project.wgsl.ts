@@ -200,7 +200,10 @@ struct RotationResult {
 };
 
 fn project_needs_rotation(commonPosition: vec3<f32>) -> RotationResult {
-  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+    // Meter offsets lie in the tangent plane at the coordinate origin, as in project_position
+    return RotationResult(true, project_get_orientation_matrix(project.commonOrigin));
+  } else if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     return RotationResult(true, project_get_orientation_matrix(commonPosition));
   } else {
     return RotationResult(false, mat3x3<f32>());  // identity alternative if needed

@@ -215,6 +215,88 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       );
     }
   });
+
+  test(`Globe meter-offset normals point east, north and up of the origin: ${backend}`, async ({
+    skip
+  }) => {
+    const targetDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
+    if (!targetDevice || targetDevice.type !== backend) return skip();
+
+    const normal = [0.3, -0.5, 0.8].map(x => x / Math.hypot(0.3, 0.5, 0.8));
+    // A vertex near the origin, for layers that set geometry.position first
+    const vertex = [500, 300, 20];
+    // [before setting geometry.position, after setting it to the vertex]
+    const projectNormals = async (viewport: Viewport, coordinateOrigin: number[]) => {
+      const props = {
+        viewport,
+        coordinateSystem: 'meter-offsets' as const,
+        coordinateOrigin: coordinateOrigin as [number, number, number]
+      };
+      if (backend === 'webgl') {
+        const normals: number[][] = [];
+        for (const setPosition of [0, 1]) {
+          const result = await runOnGPU({
+            vs: `#version 300 es
+              out vec3 outValue;
+              void main() {
+                if (test.uCommonPos.w > 0.0) {
+                  geometry.position = vec4(project_position(test.uPos, test.uPos64Low), 1.0);
+                }
+                outValue = project_normal(test.uInput);
+              }`,
+            varying: 'outValue',
+            modules: [project, testUniforms],
+            vertexCount: 1,
+            shaderInputProps: {
+              project: props,
+              test: {
+                uCommonPos: [0, 0, 0, setPosition],
+                uPos: vertex as NumberArray3,
+                uPos64Low: [0, 0, 0],
+                uInput: normal as NumberArray3
+              }
+            }
+          });
+          normals.push(Array.from(result.slice(0, 3)));
+        }
+        return normals;
+      }
+      const result = await runWGSL(
+        targetDevice,
+        [project],
+        {project: props},
+        `output[0] = vec4<f32>(project_normal(${wgslVec3(normal)}), 0.0);
+        geometry.position = vec4<f32>(project_position_vec3_f64(${wgslVec3(vertex)}, vec3<f32>(0.0)), 1.0);
+        output[1] = vec4<f32>(project_normal(${wgslVec3(normal)}), 0.0);`,
+        2
+      );
+      return [Array.from(result.slice(0, 3)), Array.from(result.slice(4, 7))];
+    };
+
+    for (const [longitude, latitude] of LOCATIONS.slice(0, 4)) {
+      const label = `${longitude}, ${latitude}`;
+      const viewState = {longitude, latitude, width: 800, height: 600};
+      const coordinateOrigin = [longitude, latitude, 0];
+      const globeNormals = await projectNormals(
+        new GlobeViewport({...viewState, zoom: 11.999}),
+        coordinateOrigin
+      );
+      // Above zoom 12 GlobeView uses WebMercatorViewport, whose common axes point east and north
+      const [mercatorNormal] = await projectNormals(
+        new WebMercatorViewport({...viewState, zoom: 12.001}),
+        coordinateOrigin
+      );
+      mercatorNormal.forEach((value, i) => expect(value, label).toBeCloseTo(normal[i], 5));
+      // On the globe the normal keeps those components in the origin's east, north and up
+      const axes = getEastNorthUp(longitude, latitude);
+      for (const globeNormal of globeNormals) {
+        axes.forEach((axis, i) => {
+          const component = axis.reduce((sum, value, j) => sum + value * globeNormal[j], 0);
+          expect(component, label).toBeCloseTo(mercatorNormal[i], 5);
+        });
+      }
+    }
+  });
 }
 
 /** Screen pixel of a meter offset from an anchor, via project32. */
