@@ -11,6 +11,7 @@ import {getDeckInstance, getProjection} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
+import {nullAdapter} from '@luma.gl/test-utils';
 
 import MockMapboxMap from './mapbox-gl-mock/map';
 import {DEFAULT_PARAMETERS, approxDeepEqual} from './fixtures';
@@ -62,6 +63,91 @@ test('MapboxOverlay#overlaid passes pixelSizeSource css-dpr', () => {
   ).toBe('css-dpr');
 
   map.removeControl(overlay);
+});
+
+test('MapboxOverlay#overlaid first frame is drawn at the map size', async () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const mapContainer = map.getContainer();
+  Object.assign(mapContainer.style, {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '400px',
+    height: '300px'
+  });
+  document.body.appendChild(mapContainer);
+
+  const frameSizes: [number, number][] = [];
+  const overlay = new MapboxOverlay({
+    // Does not need a GL context
+    deviceProps: {type: 'null', adapters: [nullAdapter]},
+    useDevicePixels: false,
+    layers: [],
+    // The map redraws the overlay from its own render event, as soon as Deck is ready
+    onLoad: () => map.fire({type: 'render'}),
+    onAfterRender: () => {
+      const canvasContext = overlay._deck.device.getDefaultCanvasContext();
+      frameSizes.push(canvasContext.getDrawingBufferSize());
+    }
+  });
+
+  // Like mapbox-gl, insert the control only after onAdd returns
+  mapContainer.appendChild(overlay.onAdd(map));
+
+  try {
+    await vi.waitFor(() => expect(frameSizes.length).toBeGreaterThan(0));
+
+    expect(frameSizes[0], 'Not drawn at the default 300x150 canvas size').toEqual([400, 300]);
+  } finally {
+    overlay.onRemove();
+    mapContainer.remove();
+  }
+});
+
+test('MapboxOverlay#overlaid first frame after a late insert is drawn at the map size', async () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const mapContainer = map.getContainer();
+  Object.assign(mapContainer.style, {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '400px',
+    height: '300px'
+  });
+  document.body.appendChild(mapContainer);
+
+  const frameSizes: [number, number][] = [];
+  const overlay = new MapboxOverlay({
+    // Does not need a GL context
+    deviceProps: {type: 'null', adapters: [nullAdapter]},
+    useDevicePixels: false,
+    layers: [],
+    onAfterRender: () => {
+      const canvasContext = overlay._deck.device.getDefaultCanvasContext();
+      frameSizes.push(canvasContext.getDrawingBufferSize());
+    }
+  });
+
+  const container = overlay.onAdd(map);
+  // The canvas has no layout yet, luma can only report its default size
+  await sleep(100);
+  mapContainer.appendChild(container);
+  map.fire({type: 'render'});
+
+  try {
+    await vi.waitFor(() => expect(frameSizes.length).toBeGreaterThan(0));
+
+    expect(frameSizes[0], 'Not drawn at the default 300x150 canvas size').toEqual([400, 300]);
+  } finally {
+    overlay.onRemove();
+    mapContainer.remove();
+  }
 });
 
 test('MapboxOverlay#overlaid', async () => {
