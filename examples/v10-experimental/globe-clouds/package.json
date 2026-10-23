@@ -1,0 +1,12 @@
+{
+  "name": "deck.gl-examples-private-globe-clouds",
+  "version": "10.0.0-alpha.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "test:visual": "node visual-test.mjs",
+    "generate:thumbnail": "node visual-test.mjs --thumbnail"
+  }
+}

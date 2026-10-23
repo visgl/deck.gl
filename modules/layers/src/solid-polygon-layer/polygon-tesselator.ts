@@ -46,6 +46,7 @@ export default class PolygonTesselator extends Tesselator<
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
+    geocentric?: boolean;
   }
 > {
   constructor(opts) {
@@ -169,10 +170,10 @@ export default class PolygonTesselator extends Tesselator<
 
   /** Override base Tesselator method */
   protected getGeometryFromBuffer(buffer) {
-    if (this.normalize || !this.buffers.indices) {
+    // Supplied triangles avoid triangulation, but not conversion of their positions.
+    if (this.normalize || this.opts.transform || !this.buffers.indices) {
       return super.getGeometryFromBuffer(buffer);
     }
-    // we don't need to read the positions if no normalization/tesselation
     return null;
   }
 
@@ -215,7 +216,8 @@ export default class PolygonTesselator extends Tesselator<
       polygon,
       this.positionSize,
       this.opts.preproject,
-      this.opts.full3d
+      this.opts.full3d,
+      this.opts.geocentric
     );
 
     // make sure the buffer is large enough

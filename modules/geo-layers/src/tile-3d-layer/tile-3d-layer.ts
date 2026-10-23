@@ -9,7 +9,7 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
-  COORDINATE_SYSTEM,
+  CoordinateSystem,
   FilterContext,
   GetPickingInfoParams,
   Layer,
@@ -31,6 +31,30 @@ import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.g
 import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
 
 const SINGLE_DATA = [0];
+
+/**
+ * Numeric `COORDINATE_SYSTEM` values used by deck.gl before v9.3, still emitted on tile content by
+ * released versions of loaders such as `@loaders.gl/i3s`. Mapped back to the string constants that
+ * the layers understand.
+ */
+const LEGACY_COORDINATE_SYSTEMS: Record<number, CoordinateSystem> = {
+  [-1]: 'default',
+  0: 'cartesian',
+  1: 'lnglat',
+  2: 'meter-offsets',
+  3: 'lnglat-offsets'
+};
+
+/** @internal Exported for testing. */
+export function normalizeCoordinateSystem(
+  coordinateSystem: CoordinateSystem | number
+): CoordinateSystem | number {
+  if (typeof coordinateSystem === 'number') {
+    // Unrecognized values are passed through so that the core reports `Invalid coordinateSystem`
+    return LEGACY_COORDINATE_SYSTEMS[coordinateSystem] ?? coordinateSystem;
+  }
+  return coordinateSystem;
+}
 
 const defaultProps: DefaultProps<Tile3DLayerProps> = {
   getPointColor: {type: 'accessor', value: [0, 0, 0, 255]},
@@ -331,7 +355,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         id: `${this.id}-pointcloud-${tileHeader.id}`,
         tile: tileHeader,
         data,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
         getColor: constantRGBA || getPointColor,
@@ -358,7 +382,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         data: instances || SINGLE_DATA,
         scenegraph: gltf,
 
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
         getTransformMatrix: instance => instance.modelMatrix,
@@ -378,7 +402,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       indices,
       modelMatrix,
       cartographicOrigin,
-      coordinateSystem = COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem = 'meter-offsets',
       material,
       featureIds
     } = content;
@@ -407,7 +431,7 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         pbrMaterial: material,
         modelMatrix,
         coordinateOrigin: cartographicOrigin,
-        coordinateSystem,
+        coordinateSystem: normalizeCoordinateSystem(coordinateSystem),
         featureIds,
         _offset: 0
       }
