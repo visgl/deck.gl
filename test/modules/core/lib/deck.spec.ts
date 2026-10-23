@@ -1440,6 +1440,54 @@ test('Deck#props omitted are unchanged', async () => {
   });
 });
 
+test('Deck#props explicitly undefined use defaults', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 0
+      },
+
+      layers: [],
+
+      // e.g. `onAfterRender: debug ? callback : undefined`
+      onAfterRender: undefined,
+      onBeforeRender: () => {},
+
+      onLoad: () => {
+        try {
+          expect(deck.props.onAfterRender, 'onAfterRender falls back to default').toBe(
+            Deck.defaultProps.onAfterRender
+          );
+
+          deck.setProps({
+            onBeforeRender: undefined,
+            // Only called if rendering did not stop after the first frame
+            onAfterRender: () => {
+              try {
+                expect(deck.props.onBeforeRender, 'onBeforeRender restored to default').toBe(
+                  Deck.defaultProps.onBeforeRender
+                );
+                deck.finalize();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }
+          });
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
 test('Deck waits for asynchronous viewports before initializing and updating layers', async () => {
   const initialGate = createDeferred<void>();
   const nextGate = createDeferred<void>();

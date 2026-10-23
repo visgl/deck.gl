@@ -306,6 +306,17 @@ const defaultProps: DeckProps = {
   drawPickingColors: false
 };
 
+/** Replace explicitly `undefined` props with their defaults, so `undefined` behaves like omitting the prop */
+function resolveUndefinedProps<PropsT extends DeckProps<any>>(props: PropsT): PropsT {
+  const resolvedProps: Record<string, unknown> = {...props};
+  for (const key in resolvedProps) {
+    if (resolvedProps[key] === undefined && key in defaultProps) {
+      resolvedProps[key] = defaultProps[key as keyof DeckProps];
+    }
+  }
+  return resolvedProps as PropsT;
+}
+
 /* eslint-disable max-statements */
 export default class Deck<ViewsT extends ViewOrViews = null> {
   static defaultProps = defaultProps;
@@ -406,7 +417,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   constructor(props: DeckProps<ViewsT>) {
     const initialProps = props;
     // @ts-ignore views
-    this.props = {...defaultProps, ...props};
+    this.props = {...defaultProps, ...resolveUndefinedProps(props)};
     props = this.props;
 
     this._validateCanvasConfiguration(props);
@@ -526,7 +537,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Merge with existing props
     assert(!('_canvases' in props) || Array.isArray(props._canvases) === this._isMultiCanvasMode());
-    Object.assign(this.props, props);
+    Object.assign(this.props, resolveUndefinedProps(props));
     this._validateCanvasConfiguration(this.props);
     this._validateInternalPickingMode();
 
