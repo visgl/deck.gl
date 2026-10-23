@@ -117,7 +117,8 @@ export class WebGLBinSorter {
       return;
     }
     const masks = getMaskByOperation(operations);
-    this._updateBins('SUM', masks.SUM + masks.MEAN);
+    // COUNT reads the point count from the alpha channel, which the SUM pass also writes
+    this._updateBins('SUM', masks.SUM + masks.MEAN + masks.COUNT);
     this._updateBins('MIN', masks.MIN);
     this._updateBins('MAX', masks.MAX);
   }
