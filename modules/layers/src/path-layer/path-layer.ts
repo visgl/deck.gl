@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   WebMercatorViewport,
   project,
   project32,
@@ -13,7 +14,7 @@ import {
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
@@ -545,7 +546,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       1, 0
     ];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
