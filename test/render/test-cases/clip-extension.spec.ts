@@ -25,6 +25,9 @@ import type {TestCase} from '../deck-test-utils';
  *   both centred on the antimeridian. A red rectangle spanning 150°E to 150°W is clipped by bounds
  *   that also cross 180°. Expected: one red rectangle 20° wide and 40° tall in the middle of each
  *   half, nothing else.
+ * - `clip-geometry-antipode`: MapView showing 0° to 180°. Two red squares, one inside bounds about
+ *   the prime meridian and one 180° away straddling the antimeridian. Expected: one red square at
+ *   the centre, nothing at the right edge.
  *
  * The map, globe and orthographic variants of the grid cases show the same picture. On the globe
  * the clip edges follow parallels and meridians, which is where the flat bounds are evaluated.
@@ -77,6 +80,23 @@ const ANTIMERIDIAN_POLYGON = [
 /** Left edge east of the right edge: the bounds cross the antimeridian */
 const ANTIMERIDIAN_CLIP_BOUNDS: [number, number, number, number] = [170, -20, -170, 20];
 const ANTIMERIDIAN_VIEW_STATE = {longitude: 180, latitude: 0, zoom: 1.6};
+
+/** Squares inside bounds about the prime meridian and 180° away, written past the antimeridian */
+const ANTIPODE_POLYGONS = [
+  [
+    [-5, -5],
+    [-5, 5],
+    [5, 5],
+    [5, -5]
+  ],
+  [
+    [170, -5],
+    [170, 5],
+    [190, 5],
+    [190, -5]
+  ]
+];
+const ANTIPODE_CLIP_BOUNDS: [number, number, number, number] = [-10, -10, 10, 10];
 
 // Only the globe preset needs a looser threshold: the sphere is tessellated, so edges that
 // follow parallels/meridians are not pixel-identical to the flat presets
@@ -147,6 +167,27 @@ const testCases: TestCase[] = [
     ],
     imageDiffOptions: {threshold: 0.985},
     goldenImage: './test/render/golden-images/clip-geometry-antimeridian-map-vs-globe.png'
+  },
+  {
+    // The second square straddles the point 180° from the bounds centre, where a per-vertex wrap
+    // would tear its triangles across the world and leak a stripe into the bounds.
+    // Expected: one red square at the centre, nothing at the right edge
+    name: 'clip-geometry-antipode',
+    views: new MapView(),
+    viewState: {longitude: 90, latitude: 0, zoom: 0.6},
+    layers: [
+      new PolygonLayer({
+        id: 'clip-geometry-antipode',
+        data: ANTIPODE_POLYGONS,
+        getPolygon: d => d,
+        getFillColor: [200, 0, 0],
+        stroked: false,
+        clipBounds: ANTIPODE_CLIP_BOUNDS,
+        clipByInstance: false,
+        extensions: [new ClipExtension()]
+      })
+    ],
+    goldenImage: './test/render/golden-images/clip-geometry-antipode.png'
   }
 ];
 

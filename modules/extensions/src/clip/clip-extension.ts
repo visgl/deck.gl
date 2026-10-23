@@ -6,7 +6,7 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {LayerExtension, project} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
-import {projectBoundsToFlatCommon} from '../utils/projection-utils';
+import {projectBoundsToFlatCommon, TILE_SIZE} from '../utils/projection-utils';
 
 const defaultProps = {
   clipBounds: [0, 0, 1, 1],
@@ -28,15 +28,28 @@ export type ClipExtensionProps = {
 const shaderFunction = /* glsl */ `
 layout(std140) uniform clipUniforms {
   vec4 bounds;
+  float worldWidth;
 } clip;
 
 bool clip_isInBounds(vec2 position) {
   return position.x >= clip.bounds[0] && position.y >= clip.bounds[1] && position.x < clip.bounds[2] && position.y < clip.bounds[3];
 }
+
+// Geometry mode: move a flat position to the world copy nearest the bounds centre before the test,
+// so bounds that cross the antimeridian (right edge unwrapped past one world width) clip correctly
+bool clip_isGeometryInBounds(vec2 position) {
+  if (clip.worldWidth > 0.0) {
+    float centerX = 0.5 * (clip.bounds[0] + clip.bounds[2]);
+    position.x -= clip.worldWidth * floor((position.x - centerX) / clip.worldWidth + 0.5);
+  }
+  return clip_isInBounds(position);
+}
 `;
 
 export type ClipModuleProps = {
   bounds: Readonly<[number, number, number, number]>;
+  /** Width of one world copy in flat common space; 0 disables wrapping */
+  worldWidth: number;
 };
 
 type WebGPUClipModuleProps = ClipModuleProps & {
@@ -52,7 +65,8 @@ const shaderModuleVs: ShaderModule<ClipModuleProps> = {
   name: 'clip',
   vs: shaderFunction,
   uniformTypes: {
-    bounds: 'vec4<f32>'
+    bounds: 'vec4<f32>',
+    worldWidth: 'f32'
   }
 };
 
@@ -77,13 +91,12 @@ in float clip_isVisible;
  */
 const shaderModuleFs: ShaderModule<ClipModuleProps> = {
   name: 'clip',
-  // The vertex injection below calls project_common_position_to_flat_wrapped()
+  // The vertex injection below calls project_common_position_to_flat_continuous()
   dependencies: [project],
-  // The vertex stage reads clip.bounds as the wrap reference
-  vs: shaderFunction,
   fs: shaderFunction,
   uniformTypes: {
-    bounds: 'vec4<f32>'
+    bounds: 'vec4<f32>',
+    worldWidth: 'f32'
   }
 };
 
@@ -93,18 +106,18 @@ out vec2 clip_commonPosition;
 `,
   // Flat (Mercator / cartesian) common space, so that the position can be compared with the
   // bounds produced by projectBoundsToFlatCommon() in every projection mode, including globe.
-  // Wrapping around the bounds centre keeps geometry continuous across the antimeridian and lets
-  // bounds that cross it (right edge unwrapped past one world width) clip correctly.
+  // Continuous within each triangle (the globe seam is moved opposite the camera); the fragment
+  // stage wraps about the bounds centre, which a per-vertex wrap would tear 180° from the bounds.
   'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-  clip_commonPosition = project_common_position_to_flat_wrapped(
-    geometry.position, 0.5 * (clip.bounds[0] + clip.bounds[2])
+  clip_commonPosition = project_common_position_to_flat_continuous(
+    geometry.position, project_common_position_to_flat(project.cameraPosition).x
   );
 `,
   'fs:#decl': /* glsl */ `
 in vec2 clip_commonPosition;
 `,
   'fs:DECKGL_FILTER_COLOR': /* glsl */ `
-  if (!clip_isInBounds(clip_commonPosition)) discard;
+  if (!clip_isGeometryInBounds(clip_commonPosition)) discard;
 `
 };
 
@@ -143,7 +156,8 @@ export default class ClipExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as WebGPUClipModuleProps;
+    const {viewport} = this.context;
+    const clipProps = {worldWidth: 0} as WebGPUClipModuleProps;
     if (this.state.clipByInstance) {
       // Instance shaders see packed attributes. Match their CPU conversion when
       // the layer source CRS needs preprojection (e.g. tile-local MVT positions).
@@ -161,8 +175,11 @@ export default class ClipExtension extends LayerExtension {
         clipProps.bounds = clipBounds;
       }
     } else {
-      // Pairs with project_common_position_to_flat() in the vertex shader
+      // Pairs with project_common_position_to_flat_continuous() in the vertex shader
       clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds);
+      if (viewport.isGeospatial && !project.isCustomProjection(viewport)) {
+        clipProps.worldWidth = TILE_SIZE;
+      }
     }
 
     if (this.context.device.type === 'webgpu') {
