@@ -132,6 +132,12 @@ Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin
 
 `A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
 
+#### Meter offsets in GlobeView
+
+Below zoom 12, `GlobeView` turned meter offsets from a position half a turn about the local up direction, toward the west and south. This applies to `SimpleMeshLayer` and `ScenegraphLayer` meshes, `ColumnLayer` angles, `IconLayer` and `TextLayer` with `billboard: false`, and custom layers that pass an offset to `project_position_to_clipspace`. These offsets now point east, north and up, matching `MapView` and `GlobeView` above zoom 12. If your application turned its meshes or offsets by 180° in `GlobeView` to compensate, remove that rotation.
+
+`project_get_orientation_matrix` now returns east, north and up columns, and the same matrix in WGSL; WebGPU previously ignored the location. At the poles, east is the common-space x axis.
+
 #### projectPosition
 
 [`layer.projectPosition`](./api-reference/core/layer.md#projectposition) now uses simplified parameters when the input position is not in the layer's own CRS. Calls that use the layer's own CRS can continue to call `layer.projectPosition(position)`.
