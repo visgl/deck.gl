@@ -151,10 +151,14 @@ vec4 project_size(vec4 meters) {
 
 // Get rotation matrix that aligns the z axis with the given up vector
 // Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
+// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z.
+// At a pole, ux is the limit of east along the longitude that up retains; it is +x only when up
+// lies exactly on the polar axis.
 mat3 project_get_orientation_matrix(vec3 up) {
   vec3 uz = normalize(up);
   // Tangent on XY plane
-  vec3 ux = abs(uz.z) == 1.0 ? vec3(1.0, 0.0, 0.0) : normalize(vec3(uz.y, -uz.x, 0));
+  float horizontalLength = length(uz.xy);
+  vec3 ux = horizontalLength > 0.0 ? vec3(-uz.y, uz.x, 0.0) / horizontalLength : vec3(1.0, 0.0, 0.0);
   vec3 uy = cross(uz, ux);
   return mat3(ux, uy, uz);
 }
@@ -311,7 +315,7 @@ vec4 project_position(vec4 position, vec3 position64Low) {
     }
     if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
       mat3 enuMatrix = project_get_orientation_matrix(project.commonOrigin);
-      vec3 offsetCommon = (enuMatrix * vec3(-position_world.xy, position_world.z)) * project.commonUnitsPerMeter;
+      vec3 offsetCommon = (enuMatrix * position_world.xyz) * project.commonUnitsPerMeter;
       return vec4(project.commonOrigin + offsetCommon, position_world.w);
     }
   }

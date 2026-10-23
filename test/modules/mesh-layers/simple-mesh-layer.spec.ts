@@ -5,9 +5,9 @@
 import {test, expect} from 'vitest';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 
-import {LayerManager, MapView} from '@deck.gl/core';
+import {Deck, LayerManager, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {SimpleMeshLayer} from 'deck.gl';
-import {TruncatedConeGeometry} from '@luma.gl/engine';
+import {CubeGeometry, TruncatedConeGeometry} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
@@ -92,4 +92,56 @@ test('SimpleMeshLayer#tests', () => {
   });
 
   testLayer({Layer: SimpleMeshLayer, testCases, onError: err => expect(err).toBeFalsy()});
+});
+
+test('SimpleMeshLayer#translates meshes east, north and up on GlobeView', async () => {
+  const EARTH_RADIUS = 6370972;
+  const anchor = [-122, 38];
+  // Geographic position of a meter offset from the anchor
+  const move = ([east, north]: number[]) => [
+    anchor[0] + (east / (EARTH_RADIUS * Math.cos((anchor[1] * Math.PI) / 180)) / Math.PI) * 180,
+    anchor[1] + (north / EARTH_RADIUS / Math.PI) * 180
+  ];
+  const datum = {position: anchor};
+  const deck = new Deck({
+    width: 400,
+    height: 300,
+    useDevicePixels: false,
+    views: new GlobeView(),
+    viewState: {longitude: anchor[0], latitude: anchor[1], zoom: 3}
+  });
+  try {
+    for (const translation of [
+      [400000, 0, 0],
+      [0, 400000, 0]
+    ] as [number, number, number][]) {
+      await new Promise<void>(resolve => {
+        deck.setProps({
+          layers: [
+            new SimpleMeshLayer({
+              id: `globe-mesh-${translation.join('-')}`,
+              data: [datum],
+              mesh: new CubeGeometry(),
+              getPosition: d => d.position,
+              getScale: [80000, 80000, 80000],
+              getTranslation: translation,
+              pickable: true
+            })
+          ],
+          onAfterRender: () => {
+            // @ts-expect-error private member
+            if (!deck.layerManager.needsUpdate()) resolve();
+          }
+        });
+      });
+      const viewport = deck.getViewports()[0];
+      const [x, y] = viewport.project(move(translation));
+      const [oppositeX, oppositeY] = viewport.project(move(translation.map(value => -value)));
+      const label = `translation ${JSON.stringify(translation)}`;
+      expect(deck.pickObject({x, y})?.object, label).toBe(datum);
+      expect(deck.pickObject({x: oppositeX, y: oppositeY}), label).toBeNull();
+    }
+  } finally {
+    deck.finalize();
+  }
 });
