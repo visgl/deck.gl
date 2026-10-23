@@ -4,8 +4,8 @@
 
 import {expect, test, vi} from 'vitest';
 import {Model} from '@luma.gl/engine';
-import {GPUCulledTraceLayer} from '../../../../examples/deck/gpu-culled-trace/gpu-culled-trace-layer';
-import {GPUCulledArrowTextLayer} from '../../../../examples/deck/gpu-culled-trace/gpu-culled-arrow-text-layer';
+import {GPUCulledTraceLayer} from '../../../../examples/v10-experimental/gpu-culled-trace/gpu-culled-trace-layer';
+import {GPUCulledArrowTextLayer} from '../../../../examples/v10-experimental/gpu-culled-trace/gpu-culled-arrow-text-layer';
 
 for (const text of [false, true]) {
   test(`${text ? 'text' : 'trace'} indirect draw waits for pipeline readiness`, () => {

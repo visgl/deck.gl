@@ -4,14 +4,14 @@
 
 import {expect, test, vi} from 'vitest';
 import type {ArrowPathLayer} from '@deck.gl-community/arrow-layers';
-import type {ArrowPathDataSourceProps} from '../../../../examples/deck/arrow-path-layer/arrow-path-data-source';
-import {MEASURE_SWEEP_DURATION} from '../../../../examples/arrow/arrow-lines/arrow-line-data';
-import {createArrowPathLayerDeck} from '../../../../examples/deck/arrow-path-layer/app';
+import type {ArrowPathDataSourceProps} from '../../../../examples/v10-experimental/arrow-path-layer/arrow-path-data-source';
+import {MEASURE_SWEEP_DURATION} from '../../../../examples/v10-experimental/shared/arrow/arrow-lines/arrow-line-data';
+import {createArrowPathLayerDeck} from '../../../../examples/v10-experimental/arrow-path-layer/app';
 
 const callbacks = vi.hoisted(() => ({
   onDataUpdated: null as ArrowPathDataSourceProps['onDataUpdated'] | null
 }));
-vi.mock('../../../../examples/deck/arrow-path-layer/arrow-path-data-source', () => ({
+vi.mock('../../../../examples/v10-experimental/arrow-path-layer/arrow-path-data-source', () => ({
   ArrowPathDataSource: class {
     constructor(props: ArrowPathDataSourceProps) {
       callbacks.onDataUpdated = props.onDataUpdated;
@@ -20,7 +20,7 @@ vi.mock('../../../../examples/deck/arrow-path-layer/arrow-path-data-source', () 
     finalize(): void {}
   }
 }));
-vi.mock('../../../../examples/deck/arrow-deck', () => ({
+vi.mock('../../../../examples/v10-experimental/arrow-deck', () => ({
   ArrowDeck: class {
     props: any;
     constructor(props: any) {

@@ -2,16 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../../viewports/test-crs';
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@deck.gl/core';
-import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
+import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
 import {device} from '@deck.gl/test-utils/vitest';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
-import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
+import {getWorldPosition} from './project-glsl-test-utils';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
 import {Matrix4} from '@math.gl/core';
+import {projectionEngine} from '@math.gl/projection';
 
 const normalizationScale = 512 / 40075016.6855;
 const gpuTest = device.type === 'webgl' ? test : test.skip;
@@ -23,8 +26,8 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     const targetDevice = backend === 'webgpu' ? await getWebGPUTestDevice() : device;
     if (!targetDevice || targetDevice.type !== backend) return skip();
     const center: [number, number, number] = [12345678.123, -9876543.321, 0];
-    const viewport = new CustomProjectionViewport({
-      projection: {forward: p => p.slice(), inverse: p => p.slice()},
+    const viewport = createTestViewport({
+      converter: {forward: p => p.slice(), inverse: p => p.slice()},
       center,
       zoom: 20
     });
@@ -92,9 +95,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
 }
 
 gpuTest('Cartesian map-meter XYZ retain their model matrix and origin', async () => {
-  const viewport = new CustomProjectionViewport({
-    projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    getDistanceScale: () => [0.25, 1]
+  const viewport = createTestViewport({
+    converter: {forward: p => p.slice(), inverse: p => p.slice()},
+    distanceScale: () => [0.25, 1, 0.5]
   });
   const props = {
     viewport,
@@ -123,9 +126,9 @@ test('external projection WGSL normalizes XYZ and uses scalar and per-axis dista
 }) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) return skip();
-  const viewport = new CustomProjectionViewport({
-    projection: {forward: p => p.slice(), inverse: p => p.slice()},
-    getDistanceScale: () => [0.25, 1],
+  const viewport = createTestViewport({
+    converter: {forward: p => p.slice(), inverse: p => p.slice()},
+    distanceScale: () => [0.25, 1, 0.5],
     center: [300, 200, 0]
   });
   const output = webgpuDevice.createBuffer({
@@ -160,8 +163,9 @@ test('external projection WGSL normalizes XYZ and uses scalar and per-axis dista
       50.5 * normalizationScale
     ];
     expectedPosition.forEach((value, i) => expect(values[i]).toBeCloseTo(value, 4));
-    const [x, y, scalar] = viewport.distanceScales.unitsPerMeter;
-    [scalar, scalar, scalar, 0, x, y, 0, 0, x, y, scalar, 0].forEach((value, i) => {
+    const [x, y, z] = viewport.distanceScales.unitsPerMeter;
+    const scalar = z;
+    [scalar, scalar, scalar, 0, x, y, 0, 0, x, y, z, 0].forEach((value, i) => {
       expect(values[i + 4] / (512 / 40075016.6855)).toBeCloseTo(value / (512 / 40075016.6855), 6);
     });
   } finally {
@@ -174,12 +178,12 @@ for (const metersPerZUnit of [1, 0.3048]) {
   gpuTest(
     `CustomProjectionViewport converts world altitude to meters without changing meter sizes, metersPerZUnit=${metersPerZUnit}`,
     async () => {
-      const viewport = new CustomProjectionViewport({
-        projection: {
+      const viewport = createTestViewport({
+        converter: {
           forward: ([x, y, z = 0]) => [x, y, z * metersPerZUnit],
           inverse: ([x, y, z = 0]) => [x, y, z / metersPerZUnit]
         },
-        getDistanceScale: () => [0.25, 1]
+        distanceScale: () => [0.25, 1, 0.5]
       });
       const input = [200, 300, 50];
       expect(viewport.projectionMode).toBe(PROJECTION_MODE.CUSTOM_GEOSPATIAL);
@@ -187,7 +191,7 @@ for (const metersPerZUnit of [1, 0.3048]) {
         viewport.distanceScales.unitsPerWorldUnit
       );
       const normalizationScale = 512 / 40075016.6855;
-      const position = viewport.preproject!(input);
+      const position = viewport.getPreprojection(WGS84_CRS).preproject!(input);
       expect(position).toEqual([200, 300, 50 * metersPerZUnit]);
       const common = viewport.projectPosition(input);
       [
@@ -265,3 +269,27 @@ for (const metersPerZUnit of [1, 0.3048]) {
     }
   );
 }
+
+gpuTest(
+  'target feet convert packed XYZ to the same common lengths as meters on the GPU',
+  async () => {
+    const crsDefinition = '+proj=merc +a=6378137 +b=6378137 +units=ft +vunits=ft';
+    const crs = await projectionEngine.getCRS(crsDefinition);
+    const viewport = new CustomProjectionViewport({crs, center: [0, 0, 0]});
+    const source = [0.1, 0.1, 100];
+    const position = viewport.getPreprojection(WGS84_CRS).preproject!(source);
+    const result = await runOnGPU({
+      vs: `#version 300 es
+      out vec3 result;
+      void main() { result = project_position(test.uPos, test.uPos64Low) + project.commonOrigin; }`,
+      modules: [project, testUniforms],
+      vertexCount: 1,
+      varying: 'result',
+      shaderInputProps: {project: {viewport}, test: {uPos: position, uPos64Low: [0, 0, 0]}}
+    });
+    viewport
+      .projectPosition(source)
+      .forEach((value, axis) => expect(result[axis]).toBeCloseTo(value, 6));
+    expect(result[2] / normalizationScale).toBeCloseTo(source[2], 4);
+  }
+);

@@ -296,3 +296,65 @@ function getCulling(p, planes) {
   }
   return outDir;
 }
+
+test('WebMercatorViewport describes OSMTile512 without changing common-space projection', () => {
+  for (const latitude of [0, 40, 60]) {
+    const viewport = new WebMercatorViewport({longitude: 12, latitude});
+    const crs = viewport.crs!;
+    expect(crs.signature).toBe('OSMTile512');
+    expect(crs.axis).toBe('esu');
+    expect(crs.renderingBounds).toEqual([
+      [0, 0, 0],
+      [512, 512, 0]
+    ]);
+    const source = [12, latitude, 100, 7];
+    const tile = crs.converter.WGS84.from(source);
+    const common = viewport.projectPosition(source);
+    expect(tile[0]).toBeCloseTo(common[0], 10);
+    expect(tile[1]).toBeCloseTo(512 - common[1], 10);
+    expect(tile.slice(2)).toEqual([100, 7]);
+    expect(common[2]).toBe(100 * getDistanceScales({longitude: 12, latitude}).unitsPerMeter[2]);
+    const restored = crs.converter.WGS84.to(tile);
+    expect(restored[0]).toBeCloseTo(12, 10);
+    expect(restored[1]).toBeCloseTo(latitude, 10);
+    expect(restored.slice(2)).toEqual(source.slice(2));
+    const output = new Float64Array(4);
+    expect(crs.converter.WGS84.from(source, output)).toBe(output);
+    expect(Array.from(output)).toEqual(tile);
+    expect(crs.converter.WGS84.to(output, output)).toBe(output);
+    expect(output[2]).toBe(100);
+    expect(source).toEqual([12, latitude, 100, 7]);
+    const scale = crs.getRenderingScale(tile)!;
+    expect(scale[0]).toBeCloseTo(viewport.distanceScales.metersPerUnit[0], 6);
+    expect(scale[1]).toBeCloseTo(viewport.distanceScales.metersPerUnit[1], 6);
+    expect(scale[2]).toBe(1);
+  }
+});
+
+test('OSMTile512 normalization is explicit and preserves altitude', () => {
+  const crs = new WebMercatorViewport().crs!;
+  const normalized = crs.converter.WGS84.normalize([372, 90, 123]);
+  expect(normalized[0]).toBe(12);
+  expect(normalized[1]).toBeCloseTo(85.051129, 6);
+  expect(normalized[2]).toBe(123);
+  // Conversion retains continuous longitude for repeated worlds; only normalization wraps it.
+  expect(crs.converter.WGS84.from([372, 0])[0]).toBeGreaterThan(512);
+  expect(crs.converter.WGS84.from([0, 60])[1]).toBeLessThan(256);
+});
+
+test.each([
+  {longitude: NaN, latitude: NaN},
+  {longitude: 0, latitude: NaN},
+  {longitude: NaN, latitude: 0}
+])('WebMercatorViewport preserves local fallback for non-finite anchors: %j', options => {
+  const viewport = new WebMercatorViewport(options);
+  expect(viewport.isGeospatial).toBe(false);
+  expect(viewport.crs).toBeUndefined();
+  expect(viewport.projectFlat([4, 5])).toEqual([4, 5]);
+  expect(viewport.unprojectFlat([4, 5])).toEqual([4, 5]);
+  expect(viewport.getDistanceScales([4, 5])).toBe(viewport.distanceScales);
+  const position = [4, 5, 6];
+  viewport
+    .unprojectPosition(viewport.projectPosition(position))
+    .forEach((value, axis) => expect(value).toBeCloseTo(position[axis], 10));
+});

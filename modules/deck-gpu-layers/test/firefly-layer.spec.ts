@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {Deck, MapView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {luma, Buffer, Texture} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/webgpu';
 import {webgl2Adapter} from '@luma.gl/webgl';
@@ -56,7 +56,7 @@ test.each(['webgpu', 'webgl'] as const)(
       layers: [
         new FireflyLayer({
           id: 'firefly-test',
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: [0, 0, 0],
           points,
           pointCount: 1,

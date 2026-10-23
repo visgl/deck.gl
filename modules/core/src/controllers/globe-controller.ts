@@ -17,7 +17,7 @@ import {
   type CameraFrame,
   GLOBE_INERTIA_EASING,
   GlobeInertiaInterpolator
-} from '../viewports/globe-utils';
+} from '../viewports/globe-util';
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
 
 import type {MjolnirGestureEvent} from 'mjolnir.js';
