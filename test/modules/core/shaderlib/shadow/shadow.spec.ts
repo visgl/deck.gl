@@ -7,6 +7,7 @@ import {MapView, OrbitView} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
 import shadow from '@deck.gl/core/shaderlib/shadow/shadow';
 import {Matrix4, Vector3} from '@math.gl/core';
+import type {Texture} from '@luma.gl/core';
 
 const TEST_VIEWPORT1 = new MapView().makeViewport({
   width: 800,
@@ -194,4 +195,19 @@ test('shadow#getUniforms', () => {
       `Shadow viewProjection matrix in Identity mode is correct!`
     ).toBe(value.result);
   }
+});
+
+test('shadow#getUniforms keeps bound shadow maps for empty props', () => {
+  // Passes that leave the LightingEffect out (picking, masks) call getUniforms with empty props.
+  const uniforms = shadow.getUniforms({});
+  expect(uniforms, 'Shadows are off').toEqual({drawShadowMap: false, useShadowMap: false});
+  expect('shadow_uShadowMap0' in uniforms, 'Bound shadow maps are left alone').toBe(false);
+
+  const dummyShadowMap = {id: 'dummy'} as unknown as Texture;
+  expect(shadow.getUniforms({dummyShadowMap, shadowEnabled: false}), 'Dummy map is bound').toEqual({
+    drawShadowMap: false,
+    useShadowMap: false,
+    shadow_uShadowMap0: dummyShadowMap,
+    shadow_uShadowMap1: dummyShadowMap
+  });
 });
