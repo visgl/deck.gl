@@ -35,6 +35,9 @@ import fontMapping from '../../data/font-atlas.json';
  *   no far-side labels.
  * - `globe-occlusion-points-billboard`: billboard ScatterplotLayer at the same grid. Expected:
  *   20 blue dots, no red ones.
+ * - `globe-occlusion-icons-meter-offsets`: a 5 x 4 grid of markers placed with
+ *   `coordinateSystem: 'meter-offsets'` around an origin on the limb, over an opaque earth.
+ *   Expected: whole markers, none cut by the surface.
  * - `globe-occlusion-marks-surface`: non-billboard ScatterplotLayer and IconLayer at the grid and
  *   along the horizon. Expected: near-side marks foreshortened on the surface, whole up to the
  *   limb, no far-side marks and no marks torn across the viewport.
@@ -79,6 +82,14 @@ const EARTH = [
   [-60, 89.9],
   [-180, 89.9]
 ];
+
+/** East-west and north-south meter offsets around lng 60, lat 10, reaching the limb */
+const METER_OFFSET_GRID: {position: number[]}[] = [];
+for (let east = -400000; east <= 400000; east += 200000) {
+  for (let north = -900000; north <= 900000; north += 600000) {
+    METER_OFFSET_GRID.push({position: [east, north, 0]});
+  }
+}
 
 const NEAR_COLOR = [30, 90, 200];
 const FAR_COLOR = [220, 40, 40];
@@ -188,14 +199,14 @@ async function loadPrepackedFontAtlas(): Promise<void> {
 const testCases: TestCase[] = [
   {
     name: 'globe-occlusion-icons',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [createIconLayer('icons', GRID, getSideColor)],
     goldenImage: './test/render/golden-images/globe-occlusion-icons.png'
   },
   {
     name: 'globe-occlusion-icons-surface',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
       new SolidPolygonLayer({
@@ -210,7 +221,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-icons-altitude',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
       createIconLayer('icons', HORIZON, d => (d.position[2] > 0 ? [230, 140, 0] : NEAR_COLOR))
@@ -219,14 +230,14 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-text',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [createTextLayer('labels')],
     goldenImage: './test/render/golden-images/globe-occlusion-text.png'
   },
   {
     name: 'globe-occlusion-text-content-box',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     // Content boxes are in meters; this one fixes the height at about 40 px at zoom 0.9 and leaves
     // the width free, so the background takes its clip-rect path while no glyph is cut
@@ -235,7 +246,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-points-billboard',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
       new ScatterplotLayer<Marker>({
@@ -252,7 +263,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-marks-surface',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
       new SolidPolygonLayer({
@@ -278,8 +289,37 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/globe-occlusion-marks-surface.png'
   },
   {
+    // Meter offsets take the GLOBE_METER_OFFSETS projection mode. Expected: markers around the
+    // limb origin drawn whole over the earth, like the lng/lat markers on the limb
+    name: 'globe-occlusion-icons-meter-offsets',
+    views: new GlobeView({resolution: 36}),
+    viewState: VIEW_STATE,
+    layers: [
+      new SolidPolygonLayer({
+        id: 'earth',
+        data: [EARTH],
+        getPolygon: d => d,
+        getFillColor: [225, 225, 225]
+      }),
+      new IconLayer({
+        id: 'icons',
+        data: METER_OFFSET_GRID,
+        coordinateSystem: 'meter-offsets',
+        coordinateOrigin: [73, 10],
+        iconAtlas: ICON_ATLAS,
+        iconMapping,
+        sizeScale: 12,
+        getPosition: d => d.position,
+        getColor: NEAR_COLOR,
+        getIcon: () => 'marker',
+        getSize: 2
+      })
+    ],
+    goldenImage: './test/render/golden-images/globe-occlusion-icons-meter-offsets.png'
+  },
+  {
     name: 'globe-occlusion-billboard-depth',
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: DEPTH_VIEW_STATE,
     layers: [
       new SolidPolygonLayer({
