@@ -30,6 +30,14 @@ type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/';
 const EMPTY_GRID_CELLS: GridCell[] = [];
 
+const GRID_DATA_FILES: Record<GridSystem, string> = {
+  a5: 'landcover-a5v1.csv',
+  geohash: 'landcover-geohash.csv',
+  h3: 'landcover-h3.csv',
+  quadkey: 'landcover-quadkey.csv',
+  s2: 'landcover-s2.csv'
+};
+
 export default function App({
   device,
   gridSystem,
@@ -72,7 +80,7 @@ export default function App({
 
     Promise.all(
       pendingSystems.map(async system => {
-        const response = await fetch(`${DATA_URL}landcover-${system}.csv`, {
+        const response = await fetch(`${DATA_URL}${GRID_DATA_FILES[system]}`, {
           signal: abortController.signal
         });
         if (!response.ok) {
@@ -115,7 +123,9 @@ export default function App({
   );
 
   const getGridData = (system: GridSystem): string | GridCell[] =>
-    isWebGPU ? filteredGridData[system] || EMPTY_GRID_CELLS : `${DATA_URL}landcover-${system}.csv`;
+    isWebGPU
+      ? filteredGridData[system] || EMPTY_GRID_CELLS
+      : `${DATA_URL}${GRID_DATA_FILES[system]}`;
 
   const commonLayerProps = {
     opacity: 0.8,
@@ -124,10 +134,10 @@ export default function App({
     ...(isWebGPU
       ? {}
       : {
-          getFilterCategory: (cell: GridCell) => cell.value,
-          filterCategories,
-          extensions: [new DataFilterExtension({categorySize: 1})]
-        }),
+        getFilterCategory: (cell: GridCell) => cell.value,
+        filterCategories,
+        extensions: [new DataFilterExtension({categorySize: 1})]
+      }),
     extruded: true,
     getElevation: 50000,
     beforeId: 'waterway_line_label',
@@ -137,45 +147,45 @@ export default function App({
 
   const layers = [
     loaded.includes('a5') &&
-      new A5Layer<GridCell>({
-        id: 'a5-layer',
-        data: getGridData('a5'),
-        visible: gridSystem === 'a5',
-        getPentagon: (d: GridCell) => d.id,
-        ...commonLayerProps
-      }),
+    new A5Layer<GridCell>({
+      id: 'a5-layer',
+      data: getGridData('a5'),
+      visible: gridSystem === 'a5',
+      getPentagon: (d: GridCell) => d.id,
+      ...commonLayerProps
+    }),
     loaded.includes('geohash') &&
-      new GeohashLayer<GridCell>({
-        id: 'geohash-layer',
-        data: getGridData('geohash'),
-        visible: gridSystem === 'geohash',
-        getGeohash: (d: GridCell) => d.id,
-        ...commonLayerProps
-      }),
+    new GeohashLayer<GridCell>({
+      id: 'geohash-layer',
+      data: getGridData('geohash'),
+      visible: gridSystem === 'geohash',
+      getGeohash: (d: GridCell) => d.id,
+      ...commonLayerProps
+    }),
     loaded.includes('h3') &&
-      new H3HexagonLayer<GridCell>({
-        id: 'h3-layer',
-        data: getGridData('h3'),
-        visible: gridSystem === 'h3',
-        getHexagon: (d: GridCell) => d.id,
-        ...commonLayerProps
-      }),
+    new H3HexagonLayer<GridCell>({
+      id: 'h3-layer',
+      data: getGridData('h3'),
+      visible: gridSystem === 'h3',
+      getHexagon: (d: GridCell) => d.id,
+      ...commonLayerProps
+    }),
     loaded.includes('quadkey') &&
-      new QuadkeyLayer<GridCell>({
-        id: 'quadkey-layer',
-        data: getGridData('quadkey'),
-        visible: gridSystem === 'quadkey',
-        getQuadkey: (d: GridCell) => d.id,
-        ...commonLayerProps
-      }),
+    new QuadkeyLayer<GridCell>({
+      id: 'quadkey-layer',
+      data: getGridData('quadkey'),
+      visible: gridSystem === 'quadkey',
+      getQuadkey: (d: GridCell) => d.id,
+      ...commonLayerProps
+    }),
     loaded.includes('s2') &&
-      new S2Layer<GridCell>({
-        id: 's2-layer',
-        data: getGridData('s2'),
-        visible: gridSystem === 's2',
-        getS2Token: (d: GridCell) => d.id,
-        ...commonLayerProps
-      })
+    new S2Layer<GridCell>({
+      id: 's2-layer',
+      data: getGridData('s2'),
+      visible: gridSystem === 's2',
+      getS2Token: (d: GridCell) => d.id,
+      ...commonLayerProps
+    })
   ];
 
   return (

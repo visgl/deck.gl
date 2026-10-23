@@ -8,7 +8,7 @@ import {A5Layer} from '@deck.gl/geo-layers';
 import {PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
-const A5_CELLS = [7160826761612099584n, 7160839955751632896n, 7160980693239988224n];
+const A5_CELLS = [7176167147842830336n, 7176180341982363648n, 7175991225982386176n];
 
 const TEST_CASES = [
   {name: 'bigint cell identifiers', data: A5_CELLS},

@@ -43,6 +43,10 @@ The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` 
 
 Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
 
+### A5Layer
+
+`A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
+
 ## Upgrading to v9.4
 
 ### pydeck lighting
