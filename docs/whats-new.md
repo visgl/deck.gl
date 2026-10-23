@@ -16,6 +16,10 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### @deck.gl/google-maps
+
+- `GoogleMapsOverlay` supports CSS `scale()` transforms on the map or its ancestors, including different horizontal and vertical scales. On raster maps the overlay stays aligned with the base map, and on raster and vector maps hover and click pick the object under the pointer.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
