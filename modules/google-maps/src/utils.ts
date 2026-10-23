@@ -19,17 +19,22 @@ type UserData = {
 /**
  * Get a new deck instance
  * @param map (google.maps.Map) - The parent Map instance
- * @param overlay (google.maps.OverlayView) - A maps Overlay instance
+ * @param pane (HTMLElement) - The element to place the deck container in
  * @param [deck] (Deck) - a previously created instances
  */
 export function createDeckInstance(
   map: google.maps.Map,
-  overlay: google.maps.OverlayView | google.maps.WebGLOverlayView,
+  pane: HTMLElement | null | undefined,
   deck: Deck | null | undefined,
   props
 ): Deck {
   if (deck) {
     if (deck.userData._googleMap === map) {
+      // The pane may be new, e.g. the positioning container of an overlay bound again to the map
+      const parent = deck.props.parent;
+      if (pane && parent && parent.parentElement !== pane) {
+        pane.appendChild(parent);
+      }
       return deck;
     }
     // deck instance was created for a different map
@@ -61,7 +66,7 @@ export function createDeckInstance(
       }
     }),
     style: props.interleaved ? null : {pointerEvents: 'none'},
-    parent: getContainer(overlay, props.style),
+    parent: getContainer(pane, props.style),
     views: new MapView({repeat: true}),
     initialViewState: {
       longitude: 0,
@@ -87,25 +92,13 @@ export function createDeckInstance(
 
 // Create a container that will host the deck canvas and tooltip
 function getContainer(
-  overlay: google.maps.OverlayView | google.maps.WebGLOverlayView,
+  pane: HTMLElement | null | undefined,
   style?: Partial<CSSStyleDeclaration>
 ): HTMLElement {
   const container = document.createElement('div');
   container.style.position = 'absolute';
   Object.assign(container.style, style);
-
-  const googleMapsContainer = (overlay.getMap() as google.maps.Map).getDiv();
-
-  // Check if there's a pre-created positioning container (for vector maps)
-  const positioningContainer = googleMapsContainer.querySelector(`#${POSITIONING_CONTAINER_ID}`);
-
-  if (positioningContainer) {
-    // Vector maps (both interleaved and non-interleaved): Use positioning container
-    positioningContainer.appendChild(container);
-  } else if ('getPanes' in overlay) {
-    // Raster maps: Append to overlayLayer pane
-    overlay.getPanes()?.overlayLayer.appendChild(container);
-  }
+  pane?.appendChild(container);
   return container;
 }
 
@@ -125,6 +118,8 @@ export function destroyDeckInstance(deck: Deck) {
   }
 
   deck.finalize();
+  // Deck does not remove a canvas it does not own, such as the `device` prop's
+  deck.props.parent?.remove();
 }
 
 /* eslint-disable max-statements */
