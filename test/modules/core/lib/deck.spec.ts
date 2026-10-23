@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {Deck, Layer, log, MapView} from '@deck.gl/core';
+import {Deck, DirectionalLight, Layer, LightingEffect, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -482,6 +482,46 @@ webglTest('Deck#rendering, picking, logging', async () => {
           resolve();
         } catch (error) {
           log.priority = 0;
+          reject(error);
+        }
+      }
+    });
+  });
+});
+
+webglTest('Deck#picking under a shadow light', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 12
+      },
+
+      effects: [
+        new LightingEffect({
+          sun: new DirectionalLight({direction: [-1, -1, -2], _shadow: true})
+        })
+      ],
+      layers: [
+        new ScatterplotLayer({
+          data: [{position: [0, 0]}],
+          radiusMinPixels: 100,
+          pickable: true
+        })
+      ],
+
+      onAfterRender: () => {
+        try {
+          const info = deck.pickObject({x: 0, y: 0});
+          expect(info && info.index, 'Picked object under a shadow light').toBe(0);
+          deck.finalize();
+          resolve();
+        } catch (error) {
           reject(error);
         }
       }
