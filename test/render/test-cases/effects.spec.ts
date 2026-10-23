@@ -79,6 +79,63 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/shadow-effect.png'
   },
+  {
+    // The top of the viewport is above the horizon
+    name: 'shadow-effect-high-pitch',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({
+          color: [255, 255, 255],
+          intensity: 1.0
+        }),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [1, -1, -0.6],
+          _shadow: true
+        })
+      })
+    ],
+    viewState: {
+      latitude: 37.74,
+      longitude: -122.4,
+      zoom: 16,
+      pitch: 80,
+      bearing: 0
+    },
+    layers: [
+      new SolidPolygonLayer({
+        id: 'ground',
+        data: [
+          [
+            [-122.434, 37.713],
+            [-122.366, 37.713],
+            [-122.366, 37.767],
+            [-122.434, 37.767]
+          ]
+        ],
+        getPolygon: f => f,
+        getFillColor: [200, 200, 200]
+      }),
+      new SolidPolygonLayer({
+        id: 'boxes',
+        data: Array.from({length: 9}, (_, i) => {
+          const x = -122.4032 + i * 0.0008;
+          return [
+            [x - 0.0002, 37.7398],
+            [x + 0.0002, 37.7398],
+            [x + 0.0002, 37.7402],
+            [x - 0.0002, 37.7402]
+          ];
+        }),
+        extruded: true,
+        getPolygon: f => f,
+        getElevation: 60,
+        getFillColor: [230, 80, 60]
+      })
+    ],
+    goldenImage: './test/render/golden-images/shadow-effect-high-pitch.png'
+  },
   ...[true, false].map(maskInverted => ({
     name: `mask-effect${maskInverted ? '-inverted' : ''}`,
     viewState: {
