@@ -35,6 +35,8 @@ export function createDeckInstance(
       if (pane && parent && parent.parentElement !== pane) {
         pane.appendChild(parent);
       }
+      // Show the layers that removing the previous overlay hid
+      deck.setProps({layerFilter: props.layerFilter ?? null});
       return deck;
     }
     // deck instance was created for a different map
