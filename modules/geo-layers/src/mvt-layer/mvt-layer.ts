@@ -122,6 +122,7 @@ export default class MVTLayer<
     highlightColor?: number[];
     hoveredFeatureId: number | string | null;
     hoveredFeatureLayerName: string | null;
+    wgs84: boolean;
   };
 
   initializeState(): void {
@@ -131,7 +132,8 @@ export default class MVTLayer<
       data: null,
       tileJSON: null,
       hoveredFeatureId: null,
-      hoveredFeatureLayerName: null
+      hoveredFeatureLayerName: null,
+      wgs84: Boolean(this.context.viewport.resolution)
     });
   }
 
@@ -160,6 +162,14 @@ export default class MVTLayer<
     if (dataChanged) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       this._updateTileData();
+    }
+
+    // getTileData parses tiles in the viewport's frame (GlobeView switches to Web Mercator
+    // above zoom 12): tiles loaded in the other frame must be loaded again
+    const wgs84 = Boolean(context.viewport.resolution);
+    if (wgs84 !== this.state.wgs84) {
+      this.state.tileset?.reloadAll();
+      this.setState({wgs84});
     }
 
     if (this.state?.data) {
