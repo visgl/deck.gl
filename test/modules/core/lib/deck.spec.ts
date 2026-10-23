@@ -361,6 +361,10 @@ test('Deck#useDevicePixels forwards to canvas context', async () => {
     // Numeric overrides should flow through unchanged so luma can size the drawing buffer.
     deck.setProps({useDevicePixels: 2});
     expect(useDevicePixels, 'numeric DPR override is forwarded').toBe(2);
+
+    // Explicitly undefined resets the canvas context to the default.
+    deck.setProps({useDevicePixels: undefined});
+    expect(useDevicePixels, 'undefined resets to default').toBe(true);
   } finally {
     deck.finalize();
   }

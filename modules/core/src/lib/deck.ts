@@ -519,6 +519,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
+    props = resolveUndefinedProps(props);
 
     if ('onLayerHover' in props) {
       log.removed('onLayerHover', 'onHover')();
@@ -537,7 +538,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     // Merge with existing props
     assert(!('_canvases' in props) || Array.isArray(props._canvases) === this._isMultiCanvasMode());
-    Object.assign(this.props, resolveUndefinedProps(props));
+    Object.assign(this.props, props);
     this._validateCanvasConfiguration(this.props);
     this._validateInternalPickingMode();
 
