@@ -176,7 +176,7 @@ Same as `project_common_position_to_flat`, made continuous across the antimeridi
 mat3 project_get_orientation_matrix(vec3 up)
 ```
 
-Returns a matrix that rotates any vector defined in the default common space to a new orientation, such that `vec3(0, 0, 1)` is aligned with `up`. `up` is a normal in common space.
+Returns a matrix that rotates any vector defined in the default common space to a new orientation, such that `vec3(0, 0, 1)` is aligned with `up`. `up` is a normal in common space. In `GlobeView`, `vec3(1, 0, 0)` and `vec3(0, 1, 0)` then point east and north at the position `up`, so meter offsets keep the orientation they have in `MapView`. At the poles, east is the common-space x axis.
 
 
 ## Remarks

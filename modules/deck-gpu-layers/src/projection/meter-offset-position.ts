@@ -25,18 +25,18 @@ export function getMeterOffsetPosition(
     const up = origin.map(value => value / radius);
     const horizontalLength = Math.hypot(up[0], up[1]);
     // Match project_get_orientation_matrix, including its pole convention.
-    const west =
-      Math.abs(up[2]) === 1 ? [1, 0, 0] : [up[1] / horizontalLength, -up[0] / horizontalLength, 0];
-    const south = [
-      up[1] * west[2] - up[2] * west[1],
-      up[2] * west[0] - up[0] * west[2],
-      up[0] * west[1] - up[1] * west[0]
+    const east =
+      horizontalLength > 0 ? [-up[1] / horizontalLength, up[0] / horizontalLength, 0] : [1, 0, 0];
+    const north = [
+      up[1] * east[2] - up[2] * east[1],
+      up[2] * east[0] - up[0] * east[2],
+      up[0] * east[1] - up[1] * east[0]
     ];
     const dot = (axis: number[]) =>
       axis.reduce((sum, value, index) => sum + value * relative[index], 0);
     return [
-      -dot(west) / scales.unitsPerMeter[0],
-      -dot(south) / scales.unitsPerMeter[1],
+      dot(east) / scales.unitsPerMeter[0],
+      dot(north) / scales.unitsPerMeter[1],
       dot(up) / scales.unitsPerMeter[2]
     ];
   }
