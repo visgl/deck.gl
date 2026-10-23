@@ -7,7 +7,7 @@ import ViewManager from '@deck.gl/core/lib/view-manager';
 import {_CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
 import {projectionEngine} from '@math.gl/projection';
 import type {CRSDescriptor} from '@math.gl/projection/core';
-import {resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
+import {areCRSEqual, resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {GLOBE_CRS} from '@deck.gl/core/viewports/globe-util';
 import {createTestCRS} from '../viewports/test-crs';
 
@@ -254,5 +254,20 @@ test('ViewManager retries failed structured CRS with an equivalent new view', as
   } finally {
     manager.finalize();
     getCRS.mockRestore();
+  }
+});
+
+test('CRS equality compares definitions without resolving them', () => {
+  expect(areCRSEqual('EPSG:4326', 'EPSG:4326')).toBe(true);
+  expect(areCRSEqual('EPSG:4326', 'WGS84')).toBe(false);
+  expect(areCRSEqual(projectedCRS, structuredClone(projectedCRS))).toBe(true);
+  expect(areCRSEqual(projectedCRS, {...projectedCRS, name: 'Other CRS'})).toBe(false);
+  expect(areCRSEqual(projectedCRS, JSON.stringify(projectedCRS))).toBe(true);
+  const stringify = vi.spyOn(JSON, 'stringify');
+  try {
+    expect(areCRSEqual(projectedCRS, projectedCRS)).toBe(true);
+    expect(stringify).not.toHaveBeenCalled();
+  } finally {
+    stringify.mockRestore();
   }
 });

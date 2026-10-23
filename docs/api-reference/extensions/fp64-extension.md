@@ -54,7 +54,7 @@ new Fp64Extension();
 
 ## Layer Properties
 
-When added to a layer via the `extensions` prop, the `Fp64Extension` requires the `coordinateSystem` prop of the layer to be `'lnglat'`.
+When added to a layer via the `extensions` prop, the `Fp64Extension` uses WGS84 position attributes. Set [`coordinateSystem`](../core/layer.md#coordinatesystem) to `'lnglat'`, an alias such as `'EPSG:4326'`, or a CRS definition that is preprojected to WGS84.
 
 ## Limitations
 

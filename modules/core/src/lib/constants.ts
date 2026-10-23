@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {TypeScriptCRSInput} from '@math.gl/projection/core';
+
 import {Pan, DoubleClickDrag, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
  */
-export type CoordinateSystem = string;
+export type CoordinateSystem = TypeScriptCRSInput;
 
 export const UNIT = {
   common: 0,

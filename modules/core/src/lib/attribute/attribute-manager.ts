@@ -13,7 +13,9 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Device, BufferLayout} from '@luma.gl/core';
+import type {Buffer, Device, BufferLayout} from '@luma.gl/core';
+import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUConstant} from '@luma.gl/gpgpu/gpu-data';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -272,6 +274,42 @@ export default class AttributeManager {
    */
   getAttributes(): {[id: string]: Attribute} {
     return {...this.attributes, ...this.attributeTransitionManager.getAttributes()};
+  }
+
+  /**
+   * Returns borrowed GPU vectors and raw constants keyed by shader attribute name.
+   * Active transitions override source attributes. Reacquire after attribute updates;
+   * retaining a vector does not extend the lifetime of its backing buffer.
+   * @param attributes Optional subset, such as the result of getChangedAttributes().
+   * @param packedBuffers Optional grouped buffers to expose as interleaved vectors.
+   */
+  getGPUVectors(
+    attributes: Record<string, Attribute> = this.getAttributes(),
+    packedBuffers?: Pick<AttributeBufferGroupBindings, 'bufferLayouts' | 'buffers'> & {
+      length: number;
+    }
+  ): Record<string, GPUVector | GPUConstant> {
+    const result: Record<string, GPUVector | GPUConstant> = {};
+    for (const attribute of Object.values(attributes)) {
+      Object.assign(result, attribute.getGPUVector());
+    }
+    if (packedBuffers) {
+      for (const layout of packedBuffers.bufferLayouts) {
+        const buffer: Buffer | undefined = packedBuffers.buffers[layout.name];
+        if (buffer) {
+          result[layout.name] = new GPUVector({
+            type: 'interleaved',
+            name: layout.name,
+            buffer,
+            length: packedBuffers.length,
+            byteStride: layout.byteStride!,
+            attributes: layout.attributes!,
+            ownsBuffer: false
+          });
+        }
+      }
+    }
+    return result;
   }
 
   /**
