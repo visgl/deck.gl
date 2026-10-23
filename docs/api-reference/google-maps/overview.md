@@ -57,4 +57,4 @@ Not supported features:
 - Controller
 - React integration
 - Gesture event callbacks (e.g. `onDrag*`)
-- CSS rotate or skew transforms on the map or its ancestors (scale transforms are supported)
+- CSS rotate or skew transforms on the map or its ancestors
