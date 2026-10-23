@@ -408,6 +408,51 @@ test('MapboxOverlay#interleaved drops useDevicePixels', () => {
   expect(overlaid._props.useDevicePixels, 'useDevicePixels is kept in overlaid mode').toBe(1.5);
 });
 
+webglTest('MapboxOverlay#interleaved passes pixelSizeSource css-dpr', async () => {
+  // Use a new context so that luma attaches a new device instead of returning the test device
+  const canvas = document.createElement('canvas');
+  Object.assign(canvas.style, {width: '400px', height: '300px'});
+  document.body.append(canvas);
+  const gl = canvas.getContext('webgl2')!;
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  map.painter = {context: {gl}};
+  const overlay = new MapboxOverlay({
+    interleaved: true,
+    deviceProps: {id: 'mapbox-device', createCanvasContext: {id: 'mapbox-canvas'}},
+    layers: [new ScatterplotLayer()]
+  });
+
+  try {
+    map.addControl(overlay);
+
+    const deck = overlay._deck;
+    expect(deck, 'Deck instance is created').toBeTruthy();
+    expect(
+      deck.props.deviceProps,
+      'pixelSizeSource is css-dpr in interleaved mode and user device props are kept'
+    ).toMatchObject({
+      id: 'mapbox-device',
+      createCanvasContext: {id: 'mapbox-canvas', pixelSizeSource: 'css-dpr'}
+    });
+
+    await vi.waitUntil(() => deck.device);
+    const canvasContext = deck.device!.getDefaultCanvasContext();
+    expect(canvasContext.canvas, 'Device is attached to the map canvas').toBe(canvas);
+    expect(
+      canvasContext.props,
+      'pixelSizeSource reaches the attached canvas context'
+    ).toMatchObject({id: 'mapbox-canvas', pixelSizeSource: 'css-dpr'});
+
+    map.removeControl(overlay);
+  } finally {
+    canvas.remove();
+  }
+});
+
 webglTest('MapboxOverlay#interleaved#remove and add', () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},
