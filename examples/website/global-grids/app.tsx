@@ -134,10 +134,10 @@ export default function App({
     ...(isWebGPU
       ? {}
       : {
-        getFilterCategory: (cell: GridCell) => cell.value,
-        filterCategories,
-        extensions: [new DataFilterExtension({categorySize: 1})]
-      }),
+          getFilterCategory: (cell: GridCell) => cell.value,
+          filterCategories,
+          extensions: [new DataFilterExtension({categorySize: 1})]
+        }),
     extruded: true,
     getElevation: 50000,
     beforeId: 'waterway_line_label',
@@ -147,45 +147,45 @@ export default function App({
 
   const layers = [
     loaded.includes('a5') &&
-    new A5Layer<GridCell>({
-      id: 'a5-layer',
-      data: getGridData('a5'),
-      visible: gridSystem === 'a5',
-      getPentagon: (d: GridCell) => d.id,
-      ...commonLayerProps
-    }),
+      new A5Layer<GridCell>({
+        id: 'a5-layer',
+        data: getGridData('a5'),
+        visible: gridSystem === 'a5',
+        getPentagon: (d: GridCell) => d.id,
+        ...commonLayerProps
+      }),
     loaded.includes('geohash') &&
-    new GeohashLayer<GridCell>({
-      id: 'geohash-layer',
-      data: getGridData('geohash'),
-      visible: gridSystem === 'geohash',
-      getGeohash: (d: GridCell) => d.id,
-      ...commonLayerProps
-    }),
+      new GeohashLayer<GridCell>({
+        id: 'geohash-layer',
+        data: getGridData('geohash'),
+        visible: gridSystem === 'geohash',
+        getGeohash: (d: GridCell) => d.id,
+        ...commonLayerProps
+      }),
     loaded.includes('h3') &&
-    new H3HexagonLayer<GridCell>({
-      id: 'h3-layer',
-      data: getGridData('h3'),
-      visible: gridSystem === 'h3',
-      getHexagon: (d: GridCell) => d.id,
-      ...commonLayerProps
-    }),
+      new H3HexagonLayer<GridCell>({
+        id: 'h3-layer',
+        data: getGridData('h3'),
+        visible: gridSystem === 'h3',
+        getHexagon: (d: GridCell) => d.id,
+        ...commonLayerProps
+      }),
     loaded.includes('quadkey') &&
-    new QuadkeyLayer<GridCell>({
-      id: 'quadkey-layer',
-      data: getGridData('quadkey'),
-      visible: gridSystem === 'quadkey',
-      getQuadkey: (d: GridCell) => d.id,
-      ...commonLayerProps
-    }),
+      new QuadkeyLayer<GridCell>({
+        id: 'quadkey-layer',
+        data: getGridData('quadkey'),
+        visible: gridSystem === 'quadkey',
+        getQuadkey: (d: GridCell) => d.id,
+        ...commonLayerProps
+      }),
     loaded.includes('s2') &&
-    new S2Layer<GridCell>({
-      id: 's2-layer',
-      data: getGridData('s2'),
-      visible: gridSystem === 's2',
-      getS2Token: (d: GridCell) => d.id,
-      ...commonLayerProps
-    })
+      new S2Layer<GridCell>({
+        id: 's2-layer',
+        data: getGridData('s2'),
+        visible: gridSystem === 's2',
+        getS2Token: (d: GridCell) => d.id,
+        ...commonLayerProps
+      })
   ];
 
   return (
