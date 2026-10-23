@@ -45,13 +45,19 @@ export class LatLngBounds {
   }
 }
 
+/** `cssScale` is a CSS `scale()` on the map: one factor, or separate `[x, y]` factors */
+function getCssScale(opts): {x: number; y: number} {
+  const [x, y = x] = [opts.cssScale ?? 1].flat();
+  return {x, y};
+}
+
 export class Projection {
   constructor(opts) {
     this._viewport = new WebMercatorViewport(opts);
     // Div pixels are relative to the overlay pane, which is anchored at the map center
     this._divOrigin = {x: opts.width / 2, y: opts.height / 2};
     // Like Google Maps, container pixels add the pane offset in rendered (CSS transformed) units
-    this._cssScale = opts.cssScale ?? 1;
+    this._cssScale = getCssScale(opts);
   }
 
   getWorldWidth() {
@@ -66,16 +72,16 @@ export class Projection {
   fromLatLngToContainerPixel(latLng) {
     const p = this.fromLatLngToDivPixel(latLng);
     return new Point(
-      p.x + this._divOrigin.x * this._cssScale,
-      p.y + this._divOrigin.y * this._cssScale
+      p.x + this._divOrigin.x * this._cssScale.x,
+      p.y + this._divOrigin.y * this._cssScale.y
     );
   }
 
   fromContainerPixelToLatLng(point) {
     return this.fromDivPixelToLatLng(
       new Point(
-        point.x - this._divOrigin.x * this._cssScale,
-        point.y - this._divOrigin.y * this._cssScale
+        point.x - this._divOrigin.x * this._cssScale.x,
+        point.y - this._divOrigin.y * this._cssScale.y
       )
     );
   }
@@ -124,9 +130,9 @@ export class Map {
     firstChild.style.height = `${opts.height}px`;
     Object.defineProperty(firstChild, 'offsetWidth', {value: opts.width});
     Object.defineProperty(firstChild, 'offsetHeight', {value: opts.height});
-    const cssScale = opts.cssScale ?? 1;
+    const cssScale = getCssScale(opts);
     firstChild.getBoundingClientRect = () =>
-      new DOMRect(0, 0, opts.width * cssScale, opts.height * cssScale);
+      new DOMRect(0, 0, opts.width * cssScale.x, opts.height * cssScale.y);
     this._mapDiv.appendChild(firstChild);
   }
 
