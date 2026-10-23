@@ -178,8 +178,9 @@ fn project_size_vec4(meters: vec4<f32>) -> vec4<f32> {
 }
 
 // Returns a rotation matrix aligning the z‑axis with the given up vector.
-// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z;
-// at the poles, ux is +x, the limit of east along longitude 0.
+// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z.
+// At a pole, ux is the limit of east along the longitude that up retains; it is +x only when up
+// lies exactly on the polar axis.
 fn project_get_orientation_matrix(up: vec3<f32>) -> mat3x3<f32> {
   let uz = normalize(up);
   // Tangent on XY plane

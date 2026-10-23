@@ -151,8 +151,9 @@ vec4 project_size(vec4 meters) {
 
 // Get rotation matrix that aligns the z axis with the given up vector
 // Find 3 unit vectors ux, uy, uz that are perpendicular to each other and uz == up
-// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z;
-// at the poles, ux is +x, the limit of east along longitude 0.
+// On the globe, ux points east and uy north. Longitude 0 lies on -y and the north pole on +z.
+// At a pole, ux is the limit of east along the longitude that up retains; it is +x only when up
+// lies exactly on the polar axis.
 mat3 project_get_orientation_matrix(vec3 up) {
   vec3 uz = normalize(up);
   // Tangent on XY plane

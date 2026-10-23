@@ -110,35 +110,38 @@ test('SimpleMeshLayer#translates meshes east, north and up on GlobeView', async 
     views: new GlobeView(),
     viewState: {longitude: anchor[0], latitude: anchor[1], zoom: 3}
   });
-  for (const translation of [
-    [400000, 0, 0],
-    [0, 400000, 0]
-  ] as [number, number, number][]) {
-    await new Promise<void>(resolve => {
-      deck.setProps({
-        layers: [
-          new SimpleMeshLayer({
-            id: `globe-mesh-${translation.join('-')}`,
-            data: [datum],
-            mesh: new CubeGeometry(),
-            getPosition: d => d.position,
-            getScale: [80000, 80000, 80000],
-            getTranslation: translation,
-            pickable: true
-          })
-        ],
-        onAfterRender: () => {
-          // @ts-expect-error private member
-          if (!deck.layerManager.needsUpdate()) resolve();
-        }
+  try {
+    for (const translation of [
+      [400000, 0, 0],
+      [0, 400000, 0]
+    ] as [number, number, number][]) {
+      await new Promise<void>(resolve => {
+        deck.setProps({
+          layers: [
+            new SimpleMeshLayer({
+              id: `globe-mesh-${translation.join('-')}`,
+              data: [datum],
+              mesh: new CubeGeometry(),
+              getPosition: d => d.position,
+              getScale: [80000, 80000, 80000],
+              getTranslation: translation,
+              pickable: true
+            })
+          ],
+          onAfterRender: () => {
+            // @ts-expect-error private member
+            if (!deck.layerManager.needsUpdate()) resolve();
+          }
+        });
       });
-    });
-    const viewport = deck.getViewports()[0];
-    const [x, y] = viewport.project(move(translation));
-    const [oppositeX, oppositeY] = viewport.project(move(translation.map(value => -value)));
-    const label = `translation ${JSON.stringify(translation)}`;
-    expect(deck.pickObject({x, y})?.object, label).toBe(datum);
-    expect(deck.pickObject({x: oppositeX, y: oppositeY}), label).toBeNull();
+      const viewport = deck.getViewports()[0];
+      const [x, y] = viewport.project(move(translation));
+      const [oppositeX, oppositeY] = viewport.project(move(translation.map(value => -value)));
+      const label = `translation ${JSON.stringify(translation)}`;
+      expect(deck.pickObject({x, y})?.object, label).toBe(datum);
+      expect(deck.pickObject({x: oppositeX, y: oppositeY}), label).toBeNull();
+    }
+  } finally {
+    deck.finalize();
   }
-  deck.finalize();
 });
