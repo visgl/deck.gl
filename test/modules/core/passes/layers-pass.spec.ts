@@ -650,43 +650,45 @@ test('LayersPass#isAuxiliaryPass', () => {
     getPath: d => d.path
   });
   const viewportProps = {width: 100, height: 100, longitude: -122.4, latitude: 37.8, zoom: 11};
-  // A GlobeViewport subdivides paths (`resolution`); the viewport an auxiliary pass makes for
-  // itself, e.g. a TerrainExtension cover, is web mercator and has no resolution.
-  const screenViewport = new GlobeViewport({id: 'screen', ...viewportProps});
+  // A GlobeViewport with a resolution subdivides paths; the viewport an auxiliary pass makes for
+  // itself, e.g. a TerrainExtension cover, is web mercator and does not.
+  const screenViewport = new GlobeViewport({id: 'screen', resolution: 36, ...viewportProps});
   const auxiliaryViewport = new WebMercatorViewport({id: 'auxiliary', ...viewportProps});
 
   const layerManager = new LayerManager(device, {viewport: screenViewport});
   const layersPass = new DrawLayersPass(device);
-  layerManager.setLayers([layer]);
-  layerManager.updateLayers();
 
-  const renderOnce = (viewport: Viewport, isAuxiliaryPass: boolean) => {
-    layersPass.render({
-      viewports: [viewport],
-      layers: layerManager.getLayers(),
-      isAuxiliaryPass,
-      onViewportActive: layerManager.activateViewport,
-      onError: err => expect(err).toBeFalsy()
-    });
-    layerManager.activateViewport(screenViewport);
-  };
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.updateLayers();
 
-  renderOnce(screenViewport, false);
-  layer.getNeedsRedraw({clearRedrawFlags: true});
-  expect(layer.state.tessellationResolution, 'tessellated for the screen viewport').toBe(
-    screenViewport.resolution
-  );
+    const renderOnce = (viewport: Viewport, isAuxiliaryPass: boolean) => {
+      layersPass.render({
+        viewports: [viewport],
+        layers: layerManager.getLayers(),
+        isAuxiliaryPass,
+        onViewportActive: layerManager.activateViewport,
+        onError: err => expect(err).toBeFalsy()
+      });
+      layerManager.activateViewport(screenViewport);
+    };
 
-  renderOnce(auxiliaryViewport, true);
-  expect(layer.internalState!.viewport!.id, 'auxiliary viewport is not adopted').toBe('screen');
-  expect(layer.state.tessellationResolution, 'geometry is not re-tessellated').toBe(
-    screenViewport.resolution
-  );
-  expect(layer.getNeedsRedraw(), 'auxiliary pass leaves no pending redraw').toBeFalsy();
+    renderOnce(screenViewport, false);
+    layer.getNeedsRedraw({clearRedrawFlags: true});
+    const screenStep = layer.state.subdivisionStep;
+    expect(screenStep, 'subdivided for the screen viewport').toBeGreaterThan(0);
 
-  renderOnce(auxiliaryViewport, false);
-  expect(
-    layer.state.tessellationResolution,
-    'a primary pass still re-tessellates on viewport change'
-  ).toBeUndefined();
+    renderOnce(auxiliaryViewport, true);
+    expect(layer.internalState!.viewport!.id, 'auxiliary viewport is not adopted').toBe('screen');
+    expect(layer.state.subdivisionStep, 'geometry is not re-tessellated').toBe(screenStep);
+    expect(layer.getNeedsRedraw(), 'auxiliary pass leaves no pending redraw').toBeFalsy();
+
+    renderOnce(auxiliaryViewport, false);
+    expect(
+      layer.state.subdivisionStep,
+      'a primary pass still re-tessellates on viewport change'
+    ).toBe(0);
+  } finally {
+    layerManager.finalize();
+  }
 });
