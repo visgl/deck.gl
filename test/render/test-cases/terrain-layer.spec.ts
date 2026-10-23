@@ -99,7 +99,7 @@ const testCases = [
     // GPU time per terrain tile under SwiftShader.
     name: 'terrain-extension-drape-fill-globe',
     skip: ['webgpu'],
-    views: new GlobeView(),
+    views: new GlobeView({resolution: 36}),
     viewState: {
       longitude: -122.45,
       latitude: 37.75,
@@ -127,10 +127,7 @@ const testCases = [
   },
   {
     name: 'terrain-extension-offset',
-    // Re-enabled during the Vitest migration, but still produces a large,
-    // deterministic render mismatch under the current Chromium render project.
-    // Keep this skipped until the offset path matches the historical golden.
-    skip: true,
+    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,

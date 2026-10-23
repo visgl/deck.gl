@@ -2,17 +2,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, Vector3} from '@math.gl/core';
 import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import {altitudeToFovy, fovyToAltitude, MAX_LATITUDE} from '@math.gl/web-mercator';
-import Viewport, {type DistanceScales} from './viewport';
-import {PROJECTION_MODE} from '../lib/constants';
+import Viewport, {type DistanceScales, type ProjectPositionOptions} from './viewport';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {mod} from '../utils/math-utils';
+import {GLOBE_CRS, GLOBE_EARTH_RADIUS as EARTH_RADIUS, zoomAdjust} from './globe-util';
+
+export {zoomAdjust} from './globe-util';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;
-const EARTH_RADIUS = 6370972;
 export const GLOBE_RADIUS = 256;
 // Where along the screen-pixel-to-globe-center distance ratio the anchored
 // zoom starts losing strength. Below this ratio the anchor uses full correction; from
@@ -86,7 +88,7 @@ export type GlobeViewportOptions = {
   nearZ?: number;
   /** Optionally override the far plane position. `farZMultiplier` is ignored if `farZ` is supplied. */
   farZ?: number;
-  /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10` */
+  /** Subdivision intervals around the earth. Default 0 disables subdivision. */
   resolution?: number;
 };
 
@@ -98,7 +100,6 @@ export default class GlobeViewport extends Viewport {
   bearing: number;
   pitch: number;
   fovy: number;
-  resolution: number;
 
   constructor(opts: GlobeViewportOptions = {}) {
     const {
@@ -109,8 +110,7 @@ export default class GlobeViewport extends Viewport {
       // Matches Maplibre defaults
       // https://github.com/maplibre/maplibre-gl-js/blob/f8ab4b48d59ab8fe7b068b102538793bbdd4c848/src/geo/projection/globe_transform.ts#L632-L633
       nearZMultiplier = 0.5,
-      farZMultiplier = 1,
-      resolution = 10
+      farZMultiplier = 1
     } = opts;
 
     let {latitude = 0, height, altitude = 1.5, fovy} = opts;
@@ -156,8 +156,9 @@ export default class GlobeViewport extends Viewport {
       .rotateZ(-longitude * DEGREES_TO_RADIANS)
       .scale(scale / height);
 
-    super({
+    const viewportOptions = {
       ...opts,
+      crs: GLOBE_CRS,
       // x, y, width,
       height,
 
@@ -176,7 +177,8 @@ export default class GlobeViewport extends Viewport {
       focalDistance: altitude,
       near: nearZ,
       far: farZ
-    });
+    };
+    super(viewportOptions);
 
     this.scale = scale;
     this.latitude = latitude;
@@ -184,7 +186,12 @@ export default class GlobeViewport extends Viewport {
     this.bearing = bearing;
     this.pitch = pitch;
     this.fovy = fovy;
-    this.resolution = resolution;
+  }
+
+  protected _getCenter(options: GlobeViewportOptions, position: number[]): number[] {
+    return new Vector3(position)
+      .scale(this.distanceScales.unitsPerMeter)
+      .add(this.projectPosition([options.longitude ?? 0, options.latitude ?? 0, 0]));
   }
 
   get projectionMode() {
@@ -342,7 +349,8 @@ export default class GlobeViewport extends Viewport {
     return Number.isFinite(targetZ) ? [X, Y, targetZ as number] : [X, Y];
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: number[], options: ProjectPositionOptions = {}): [number, number, number] {
+    if (options.sourceCrs) return this._projectPositionFromCRS(xyz, options.sourceCrs);
     const [lng, lat, Z = 0] = xyz;
     const lambda = lng * DEGREES_TO_RADIANS;
     const phi = lat * DEGREES_TO_RADIANS;
@@ -414,14 +422,6 @@ export default class GlobeViewport extends Viewport {
     nextViewState.zoom += zoomAdjust(nextViewState.latitude);
     return nextViewState;
   }
-}
-
-export function zoomAdjust(latitude: number, clampToPoles?: boolean): number {
-  if (clampToPoles) {
-    latitude = Math.max(Math.min(latitude, MAX_LATITUDE), -MAX_LATITUDE);
-  }
-  const scaleAdjust = Math.PI * Math.cos((latitude * Math.PI) / 180);
-  return Math.log2(scaleAdjust);
 }
 
 function transformVector(matrix: number[], vector: number[]): number[] {

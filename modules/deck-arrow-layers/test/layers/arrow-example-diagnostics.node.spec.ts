@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {ArrowPolygonDataSource} from '../../../../examples/arrow/arrow-polygons/arrow-polygon-data-source';
-import {GPUTraceCullingEffect} from '../../../../examples/deck/gpu-culled-trace/gpu-trace-culling-effect';
+import {ArrowPolygonDataSource} from '../../../../examples/v10-experimental/shared/arrow/arrow-polygons/arrow-polygon-data-source';
+import {GPUTraceCullingEffect} from '../../../../examples/v10-experimental/gpu-culled-trace/gpu-trace-culling-effect';
 
 function makeTraceEffect(readAsync: () => Promise<Uint8Array>) {
   const effect = Object.create(GPUTraceCullingEffect.prototype);

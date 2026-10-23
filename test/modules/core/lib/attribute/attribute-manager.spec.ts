@@ -7,6 +7,8 @@ import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {Timeline} from '@luma.gl/engine';
+import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 
 function update(attribute, {data}) {
   const {value, size} = attribute;
@@ -468,4 +470,60 @@ test('AttributeManager.getBufferLayouts', () => {
     attributeManager.getBufferLayouts({isInstanced: true})[3].stepMode,
     'dynamic attribute.stepMode in instancedModel'
   ).toBe('instance');
+});
+
+test('AttributeManager#getGPUVectors follows transition storage and row counts', () => {
+  const manager = new AttributeManager(device, {timeline: new Timeline()});
+  manager.addInstanced({radii: {size: 1, accessor: 'getRadius', transition: true}});
+  manager.update({data: [1, 2], numInstances: 2, props: {getRadius: d => d}});
+  const sourceBuffer = manager.getAttributes().radii.getBuffer();
+  manager.invalidateAll();
+  manager.update({
+    data: [3, 4, 5],
+    numInstances: 3,
+    props: {getRadius: d => d},
+    transitions: {getRadius: 1000}
+  });
+  manager.updateTransition();
+  const column = manager.getGPUVectors().radii as GPUVector;
+  expect(column).toBeInstanceOf(GPUVector);
+  expect(column.length).toBe(3);
+  expect(column.data[0].buffer).toBe(manager.getAttributes().radii.getBuffer());
+  expect(column.data[0].buffer).not.toBe(sourceBuffer);
+  manager.finalize();
+});
+
+test('AttributeManager#getGPUVectors wraps packed buffers as interleaved vectors', () => {
+  const manager = new AttributeManager(device);
+  manager.addInstanced({positions: {size: 2, accessor: 'getPosition'}});
+  manager.update({
+    data: [
+      [0, 0],
+      [1, 1]
+    ],
+    numInstances: 2,
+    props: {getPosition: d => d}
+  });
+  const sourceBuffer = manager.getAttributes().positions.getBuffer()!;
+  const bufferLayout = {
+    name: 'packedPositions',
+    byteStride: 8,
+    attributes: [{attribute: 'positions', format: 'float32x2', byteOffset: 0}]
+  };
+
+  const columns = manager.getGPUVectors(
+    {},
+    {
+      bufferLayouts: [bufferLayout],
+      buffers: {packedPositions: sourceBuffer},
+      length: 2
+    }
+  );
+  const column = columns.packedPositions as GPUVector;
+
+  expect(column).toBeInstanceOf(GPUVector);
+  expect(column.length).toBe(2);
+  expect(column.data[0].buffer).toBe(sourceBuffer);
+  expect(column.data[0].byteStride).toBe(8);
+  manager.finalize();
 });

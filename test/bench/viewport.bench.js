@@ -7,7 +7,6 @@ import * as data from 'deck.gl-test/data';
 
 import {WebMercatorViewport} from 'deck.gl';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core/lib/constants';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
 
 const VIEWPORT_PARAMS = {
@@ -28,14 +27,14 @@ export default function viewportBench(suite) {
       return getUniformsFromViewport({
         viewport: data.sampleViewport,
         modelMatrix: data.sampleModelMatrix,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        coordinateSystem: 'lnglat'
       });
     })
     .add('getUniformsFromViewport#METER_OFFSETS', () => {
       return getUniformsFromViewport({
         viewport: data.sampleViewport,
         modelMatrix: data.sampleModelMatrix,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateSystem: 'meter-offsets'
       });
     })
     .add('getUniformsFromViewport#LNGLAT - FP64', () => {
@@ -43,7 +42,7 @@ export default function viewportBench(suite) {
         viewport: data.sampleViewport,
         fp64: true,
         modelMatrix: data.sampleModelMatrix,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+        coordinateSystem: 'lnglat'
       });
     })
     .add('getUniformsFromViewport#METER_OFFSETS - FP64', () => {
@@ -51,7 +50,7 @@ export default function viewportBench(suite) {
         viewport: data.sampleViewport,
         fp64: true,
         modelMatrix: data.sampleModelMatrix,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+        coordinateSystem: 'meter-offsets'
       });
     })
     .add('WebMercatorViewport', () => {

@@ -17,6 +17,7 @@ import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
+import type CompositeLayer from '../lib/composite-layer';
 import type {Effect} from '../lib/effect';
 import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 import type {PickingProps} from '@luma.gl/shadertools';
@@ -91,12 +92,14 @@ export type RenderStats = {
 /** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
+  private _activatedLayers = new Set<Layer>();
 
   render(options: LayersPassRenderOptions): void {
     this._render(options);
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    this._activatedLayers.clear();
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
@@ -428,6 +431,7 @@ export default class LayersPass extends Pass {
     layerFilterCache: Record<string, boolean>,
     isAuxiliaryPass: boolean = false
   ) {
+    if (!layer.internalState || !layer.isCoordinateSystemLoaded) return false;
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
     if (!shouldDrawLayer) {
@@ -438,8 +442,11 @@ export default class LayersPass extends Pass {
 
     let parent = layer.parent;
     while (parent) {
-      // @ts-ignore
-      if (!parent.props.visible || !parent.filterSubLayer(drawContext)) {
+      if (
+        !parent.isCoordinateSystemLoaded ||
+        !parent.props.visible ||
+        !(parent as CompositeLayer).filterSubLayer(drawContext)
+      ) {
         return false;
       }
       drawContext.layer = parent;
@@ -456,10 +463,12 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // If a layer is drawn, update its viewportChanged flag. Auxiliary passes are exempt: their
-    // viewport is transient, and adopting it would make the layer re-update on every pass boundary.
-    // Projection uniforms come from the pass viewport, so drawing stays correct either way.
-    if (!isAuxiliaryPass) {
+    // One attribute set is shared by all views. Only the first eligible viewport
+    // selects its conversion; later views and picking reuse the prepared geometry.
+    // Auxiliary passes draw into a transient viewport of their own making; adopting it would
+    // make the layer re-update on every pass boundary.
+    if (!drawContext.isPicking && !isAuxiliaryPass && !this._activatedLayers.has(layer)) {
+      this._activatedLayers.add(layer);
       layer.activateViewport(drawContext.viewport);
     }
 
@@ -487,6 +496,7 @@ export default class LayersPass extends Pass {
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
+        sourceCrs: layer.internalState!.sourceCrs,
         coordinateOrigin: layerProps.coordinateOrigin,
         autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps

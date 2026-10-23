@@ -203,7 +203,7 @@ test('LayersPass#layerIndexResolver', () => {
     const resolver = layerIndexResolver();
     const resolver2 = layerIndexResolver();
 
-    const layerManager = new LayerManager(device, {});
+    const layerManager = new LayerManager(device, {viewport: new Viewport()});
     layerManager.setLayers(testCase.layers);
     const layers = layerManager.getLayers();
 
@@ -248,7 +248,7 @@ test('LayersPass#shouldDrawLayer', () => {
     })
   ];
 
-  const layerManager = new LayerManager(device, {});
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
   const layersPass = new DrawLayersPass(device);
   layerManager.setLayers(layers);
 
@@ -301,6 +301,7 @@ test('LayersPass#viewParameters', () => {
   ];
 
   const layerManager = new LayerManager(device, {
+    viewport: new Viewport(),
     deck: {
       props: {
         parameters: {
@@ -499,7 +500,8 @@ test('LayersPass#WebGPU renders and picks each repeated world in a separate pass
 
 test('LayersPass#uses the supplied canvas context for viewport and clear passes', () => {
   const layer = new TestLayer({id: 'canvas-context-layer'});
-  const layerManager = new LayerManager(device, {});
+  const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
+  const layerManager = new LayerManager(device, {viewport});
   const layersPass = new DrawLayersPass(device);
   const framebuffer = device.createFramebuffer({
     width: 60,
@@ -511,7 +513,6 @@ test('LayersPass#uses the supplied canvas context for viewport and clear passes'
     getDrawingBufferSize: () => [60, 40],
     cssToDeviceRatio: () => 2
   } as CanvasContext;
-  const viewport = new Viewport({id: 'canvas-context-view', x: 2, y: 3, width: 10, height: 8});
 
   layerManager.setLayers([layer]);
   const beginRenderPass = vi.spyOn(device, 'beginRenderPass');
@@ -544,7 +545,7 @@ test('LayersPass#GLViewport', () => {
     })
   ];
 
-  const layerManager = new LayerManager(device, {});
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
   const layersPass = new DrawLayersPass(device);
   const framebuffer = device.createFramebuffer({
     width: 100,

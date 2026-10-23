@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {project} from '@deck.gl/core';
+
 import {
   CompositeLayer,
   LayerDataSource,
@@ -30,7 +32,7 @@ export default abstract class AggregationLayer<
   state!: {
     aggregatorType: string;
     aggregator: Aggregator;
-  };
+  } & CompositeLayer['state'];
 
   /** Allow this layer to participates in the draw cycle */
   get isDrawable() {
@@ -56,12 +58,12 @@ export default abstract class AggregationLayer<
     const layer = this.getCurrentLayer()!;
     return layer.projectPosition(
       position,
-      layer.context.viewport.preproject && layer.props.coordinateSystem !== 'cartesian'
+      layer.state.preproject
         ? /* Preprojected attributes have already consumed the converter and model matrix */
           {
             viewport,
             autoOffset: false,
-            coordinateSystem: 'cartesian',
+            sourceCrs: layer.internalState!.packedCrs!,
             coordinateOrigin: [0, 0, 0],
             modelMatrix: null
           }
@@ -73,8 +75,7 @@ export default abstract class AggregationLayer<
   getBounds(): [number[], number[]] | null {
     const bounds = super.getBounds();
     const {viewport} = this.context;
-    if (!bounds || !viewport.preproject || this.props.coordinateSystem !== 'cartesian')
-      return bounds;
+    if (!bounds || !project.isCustomProjection(viewport) || this.state.preproject) return bounds;
     // Both backends need bounds in packed coordinates, before viewport projection.
     // Transforming the box is conservative under rotation, but includes every transformed point.
     const result: [number[], number[]] = [Array(3).fill(Infinity), Array(3).fill(-Infinity)];
@@ -107,8 +108,8 @@ export default abstract class AggregationLayer<
       return true;
     }
     if (
-      this.context.viewport.preproject &&
-      params.props.coordinateSystem === 'cartesian' &&
+      project.isCustomProjection(this.context.viewport) &&
+      !this.state.preproject &&
       (!deepEqual(params.props.modelMatrix, params.oldProps.modelMatrix, 1) ||
         !deepEqual(params.props.coordinateOrigin, params.oldProps.coordinateOrigin, 1))
     ) {
@@ -166,8 +167,8 @@ export default abstract class AggregationLayer<
     // GPUAggregator.preDraw() is called in the draw cycle here right before Buffers are used by sublayer.draw()
     const {aggregator} = this.state;
     if (
-      this.context.viewport.preproject &&
-      this.props.coordinateSystem !== 'cartesian' &&
+      project.isCustomProjection(this.context.viewport) &&
+      this.state.preproject &&
       shaderModuleProps.project
     ) {
       // Grid/hexagon/contour aggregation uses a separate precision viewport.

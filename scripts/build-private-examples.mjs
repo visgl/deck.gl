@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {build} from 'vite';
 import {execFileSync} from 'node:child_process';
 
-const examplesRoot = fileURLToPath(new URL('../examples/deck/', import.meta.url));
+const examplesRoot = fileURLToPath(new URL('../examples/v10-experimental/', import.meta.url));
 const requestedExamples = process.argv.slice(2);
 const examples = readdirSync(examplesRoot, {withFileTypes: true})
   .filter(entry => entry.isDirectory() && existsSync(resolve(examplesRoot, entry.name, 'index.html')))
