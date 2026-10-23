@@ -76,7 +76,17 @@ struct Geometry {
   pickingColor: vec3<f32>,
 };
 
-var<private> geometry: Geometry;
+// Start like the GLSL geometry module: w = 0 marks the position as not yet set, and a normal
+// projected before a layer sets it (with a composed model matrix) is not rotated, rather than
+// rotated by the orientation of a zero vector.
+var<private> geometry: Geometry = Geometry(
+  vec3<f32>(0.0),
+  vec3<f32>(0.0),
+  vec4<f32>(0.0, 0.0, 1.0, 0.0),
+  vec3<f32>(0.0),
+  vec2<f32>(0.0),
+  vec3<f32>(0.0)
+);
 `;
 
 export const projectWGSL = /* wgsl */ `\
