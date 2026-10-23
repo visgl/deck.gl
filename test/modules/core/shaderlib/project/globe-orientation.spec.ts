@@ -24,7 +24,8 @@ const EARTH_RADIUS = 6370972;
 const GLOBE_METERS_TO_COMMON = 256 / EARTH_RADIUS;
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
-// [longitude, latitude]. The poles use longitude 0, where east is +x on the globe.
+// [longitude, latitude]. At a pole, east is its limit along the longitude, which the projected
+// position retains in a tiny horizontal component.
 const LOCATIONS = [
   [-122, 38],
   [0, 0],
@@ -33,7 +34,9 @@ const LOCATIONS = [
   [20, 89.9],
   [-60, -89.9],
   [0, 90],
-  [0, -90]
+  [0, -90],
+  [90, 90],
+  [-135, -90]
 ];
 
 /** East, north and up at a location, in GlobeViewport common space. */
@@ -84,7 +87,8 @@ async function runWGSL(
   }
 }
 
-const wgslVec3 = (value: number[]) => `vec3<f32>(${value.map(x => x.toFixed(9)).join(', ')})`;
+// Exponent notation keeps the tiny horizontal component of a position at a pole
+const wgslVec3 = (value: number[]) => `vec3<f32>(${value.map(x => x.toExponential(9)).join(', ')})`;
 
 for (const backend of ['webgl', 'webgpu'] as const) {
   test(`project_get_orientation_matrix points east, north and up on the globe: ${backend}`, async ({

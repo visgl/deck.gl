@@ -24,7 +24,8 @@ export function getMeterOffsetPosition(
     const radius = Math.hypot(...origin);
     const up = origin.map(value => value / radius);
     const horizontalLength = Math.hypot(up[0], up[1]);
-    // Match project_get_orientation_matrix, including its pole convention.
+    // Match project_get_orientation_matrix: at a pole, the limit of east along the origin's
+    // longitude, or +x exactly on the polar axis.
     const east =
       horizontalLength > 0 ? [-up[1] / horizontalLength, up[0] / horizontalLength, 0] : [1, 0, 0];
     const north = [
