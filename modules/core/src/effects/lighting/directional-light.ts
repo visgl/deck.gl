@@ -35,8 +35,9 @@ export type DirectionalLightOptions = {
   /** (Experimental) fit this light's shadow map to the part of these bounds in view, instead of
    * to the whole view: `[[minX, minY, minZ], [maxX, maxY, maxZ]]` in world coordinates
    * (longitude, latitude and meters in geospatial views). Shadows stay sharp and visible in
-   * zoomed-out and steeply pitched views, but only geometry inside the bounds casts and receives
-   * them, so the bounds should cover the full height of the shadow casters.
+   * zoomed-out and steeply pitched views. The shadow map covers a light-aligned box around the
+   * bounds: geometry just outside the bounds may still cast and receive shadows, and geometry
+   * beyond that box does not. The bounds should cover the full height of the shadow casters.
    * @default null
    */
   _shadowBounds?: ShadowBounds | null;

@@ -34,7 +34,7 @@ const directionalLight = new DirectionalLight({color, intensity, direction});
 * `intensity` - (number) Strength of directional light source, default value is `1.0`.
 * `direction` - (number[3])  3D vector specifies the direction the light comes from, default value is `[0, 0, -1]`.
 * `_shadow` - (boolean, optional) Enable experimental shadow effect, default value is `false`.
-* `_shadowBounds` - (number[2][3], optional) Experimental. Fit the light's shadow map to the part of these bounds in view, instead of to the whole view: `[[minX, minY, minZ], [maxX, maxY, maxZ]]` in world coordinates (longitude, latitude and meters in geospatial views). Without bounds, the shadow map stretches over everything in view, so in zoomed-out or steeply pitched views its texels get coarse and small objects' shadows fade out. Only geometry inside the bounds casts and receives shadows, so the bounds should cover the full height of the shadow casters. Default value is `null`.
+* `_shadowBounds` - (number[2][3], optional) Experimental. Fit the light's shadow map to the part of these bounds in view, instead of to the whole view: `[[minX, minY, minZ], [maxX, maxY, maxZ]]` in world coordinates (longitude, latitude and meters in geospatial views). Without bounds, the shadow map stretches over everything in view, so in zoomed-out or steeply pitched views its texels get coarse and small objects' shadows fade out. The shadow map covers a light-aligned box around the bounds: geometry just outside the bounds may still cast and receive shadows, and geometry beyond that box does not. The bounds should cover the full height of the shadow casters. Default value is `null`.
 
 ## Source
 
