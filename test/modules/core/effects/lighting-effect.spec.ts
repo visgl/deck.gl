@@ -123,3 +123,38 @@ test('LightingEffect#preRender, cleanup', () => {
   expect(lightingEffect.shadowPasses.length, 'LightingEffect creates shadow passes').toBe(0);
   expect(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map').toBeFalsy();
 });
+
+test('LightingEffect#getShaderModuleProps passes shadow bounds', () => {
+  const shadowBounds: [number[], number[]] = [
+    [-122.43, 37.75, 0],
+    [-122.42, 37.76, 20]
+  ];
+  const dirLight = new DirectionalLight({
+    direction: [-1, -1, -2],
+    _shadow: true,
+    _shadowBounds: shadowBounds
+  });
+  const lightingEffect = new LightingEffect({dirLight});
+
+  const layer = new PolygonLayer({
+    data: FIXTURES.polygons.slice(0, 3),
+    getPolygon: f => f
+  });
+  layer.context = {viewport: testViewport};
+  const layerManager = new LayerManager(device, {viewport: testViewport});
+  layerManager.setLayers([layer]);
+  const effectContext = makeMockContext(device, layerManager);
+  lightingEffect.setup(effectContext);
+  lightingEffect.preRender({
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    viewports: [testViewport],
+    pixelRatio: 1
+  });
+
+  const {shadow} = lightingEffect.getShaderModuleProps(layer, {project: {viewport: testViewport}});
+  expect(shadow.shadowBounds, 'Shadow bounds reach the shadow module').toEqual([shadowBounds]);
+
+  lightingEffect.cleanup(effectContext);
+  layerManager.finalize();
+});

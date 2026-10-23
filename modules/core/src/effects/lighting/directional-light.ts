@@ -11,6 +11,9 @@ const DEFAULT_LIGHT_DIRECTION = [0.0, 0.0, -1.0] as [number, number, number];
 
 let idCount = 0;
 
+/** Axis-aligned box in world coordinates: `[[minX, minY, minZ], [maxX, maxY, maxZ]]` */
+export type ShadowBounds = [number[], number[]];
+
 export type DirectionalLightOptions = {
   id?: string;
   /** Light color, [r, g, b] in the 0-255 range
@@ -29,6 +32,14 @@ export type DirectionalLightOptions = {
    * @default false
    */
   _shadow?: boolean;
+  /** (Experimental) fit this light's shadow map to the part of these bounds in view, instead of
+   * to the whole view: `[[minX, minY, minZ], [maxX, maxY, maxZ]]` in world coordinates
+   * (longitude, latitude and meters in geospatial views). Shadows stay sharp and visible in
+   * zoomed-out and steeply pitched views, but only geometry inside the bounds casts and receives
+   * them, so the bounds should cover the full height of the shadow casters.
+   * @default null
+   */
+  _shadowBounds?: ShadowBounds | null;
 };
 
 export class DirectionalLight {
@@ -38,12 +49,13 @@ export class DirectionalLight {
   type = 'directional' as const;
   direction: [number, number, number];
   shadow: boolean;
+  shadowBounds: ShadowBounds | null;
 
   constructor(props: DirectionalLightOptions = {}) {
     const {color = DEFAULT_LIGHT_COLOR} = props;
     const {intensity = DEFAULT_LIGHT_INTENSITY} = props;
     const {direction = DEFAULT_LIGHT_DIRECTION} = props;
-    const {_shadow = false} = props;
+    const {_shadow = false, _shadowBounds = null} = props;
 
     this.id = props.id || `directional-${idCount++}`;
     this.color = color;
@@ -51,6 +63,7 @@ export class DirectionalLight {
     this.type = 'directional';
     this.direction = new Vector3(direction).normalize().toArray() as [number, number, number];
     this.shadow = _shadow;
+    this.shadowBounds = _shadowBounds;
   }
 
   getProjectedLight(opts: {layer: Layer}): DirectionalLight {
