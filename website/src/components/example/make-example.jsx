@@ -20,8 +20,16 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import {DeviceTabs} from '../device-tabs';
 import {useStore} from '../../store/device-store';
 
-const DemoContainer = styled.div`
+// Stacks the device tabs above the demo, so the demo fills the remaining height
+const ExampleLayout = styled.div`
+  display: flex;
+  flex-direction: column;
   height: 100%;
+`;
+
+const DemoContainer = styled.div`
+  flex: 1;
+  min-height: 0;
   position: relative;
 
   .tooltip,
@@ -164,7 +172,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     };
 
     return (
-      <>
+      <ExampleLayout>
         {DemoComponent.hasDeviceTabs && <DeviceTabs />}
         <DemoContainer style={style}>
           {/*
@@ -198,7 +206,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
 
           {isInteractive && mapStyle && <MapTip>Hold down shift to rotate</MapTip>}
         </DemoContainer>
-      </>
+      </ExampleLayout>
     );
   };
 }
