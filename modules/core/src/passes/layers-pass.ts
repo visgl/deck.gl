@@ -485,6 +485,7 @@ export default class LayersPass extends Pass {
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
+        sourceCrs: layer.internalState!.sourceCrs,
         coordinateOrigin: layerProps.coordinateOrigin,
         autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps

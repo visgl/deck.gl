@@ -157,7 +157,6 @@ type BaseLayerProps = Pick<
   | 'pickable'
   | 'opacity'
   | 'coordinateOrigin'
-  | 'coordinateSystem'
   | 'wrapLongitude'
   | 'positionFormat'
   | 'colorFormat'
@@ -167,6 +166,8 @@ type BaseLayerProps = Pick<
   | 'autoHighlight'
 > & {
   data: any;
+  // Accept structured CRS definitions without expanding recursive PROJJSON types in the editor schema.
+  coordinateSystem?: string | Record<string, unknown>;
   modelMatrix?: number[];
   highlightColor?: number[];
 };

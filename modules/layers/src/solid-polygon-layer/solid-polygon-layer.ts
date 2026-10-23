@@ -345,7 +345,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const projectionChanged =
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
-      props.coordinateSystem !== oldProps.coordinateSystem ||
       (viewport.isGeospatial &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)));

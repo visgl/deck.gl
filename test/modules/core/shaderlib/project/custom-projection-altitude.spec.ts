@@ -9,7 +9,7 @@ import {_CustomProjectionViewport as CustomProjectionViewport, project} from '@d
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
 import {device} from '@deck.gl/test-utils/vitest';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
-import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
+import {getWorldPosition} from './project-glsl-test-utils';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
