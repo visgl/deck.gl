@@ -14,7 +14,12 @@ import PathLayer from '@deck.gl/layers/path-layer/path-layer';
 import SolidPolygonLayer from '@deck.gl/layers/solid-polygon-layer/solid-polygon-layer';
 import TripsLayer from '@deck.gl/geo-layers/trips-layer/trips-layer';
 
-const COLOR = [128, 64, 255, 255] as const;
+const COLORS = [
+  [128, 64, 255, 255],
+  [32, 200, 96, 192],
+  [240, 128, 48, 64]
+] as const;
+const COLOR = COLORS[0];
 const DATA = [
   {
     path: [
@@ -46,6 +51,38 @@ function getAttributeBuffer(model: Model, name: string): Buffer {
           )!.name
         )!;
   return model.vertexArray.attributes[slot] as Buffer;
+}
+
+async function expectBoundColor(
+  model: Model,
+  name: string,
+  color: readonly number[],
+  constant: boolean
+) {
+  if (model.device.type === 'webgl' && constant) {
+    const location = model.pipeline.shaderLayout.attributes!.find(
+      attribute => attribute.name === name
+    )!.location;
+    expect(model.vertexArray.attributes[location]).toEqual(
+      new Float32Array(color).map(value => value / 255)
+    );
+    return;
+  }
+  const layout = model.bufferLayout.find(candidate =>
+    candidate.attributes?.some(attribute => attribute.attribute === name)
+  )!;
+  const definition = layout.attributes!.find(attribute => attribute.attribute === name)!;
+  // Both backends normalize these raw bytes through the bound vertex format.
+  expect(definition.format).toBe('unorm8x4');
+  const bytes = await getAttributeBuffer(model, name).readAsync();
+  const offset = definition.byteOffset || 0;
+  expect(Array.from(bytes.subarray(offset, offset + 4))).toEqual(color);
+  // Packed groups can repeat constant colors in nonzero-stride records.
+  if (layout.byteStride && bytes.length >= offset + layout.byteStride + 4) {
+    expect(
+      Array.from(bytes.subarray(offset + layout.byteStride, offset + layout.byteStride + 4))
+    ).toEqual(color);
+  }
 }
 
 for (const backend of ['webgl', 'webgpu'] as const) {
@@ -96,21 +133,23 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       for (const fixture of fixtures) {
         let layer = fixture.layer;
         for (let update = 0; update < 3; update++) {
+          const color = COLORS[update];
           layer = layer.clone({
-            [fixture.accessor]: update === 1 ? () => COLOR : COLOR,
+            [fixture.accessor]: update === 1 ? () => color : color,
             updateTriggers: {[fixture.accessor]: update}
           });
           manager.setLayers([layer]);
           const columns = layer.getAttributeManager()!.getGPUVectors();
           expect(columns[fixture.color]).toBeInstanceOf(update === 1 ? GPUVector : GPUConstant);
           if (update !== 1) {
-            expect(Array.from((columns[fixture.color] as GPUConstant).value)).toEqual(COLOR);
+            expect(Array.from((columns[fixture.color] as GPUConstant).value)).toEqual(color);
           }
           const positions = columns[fixture.position] as GPUVector;
           expect(positions).toBeInstanceOf(GPUVector);
           expect(positions.ownsBuffer).toBe(false);
           for (const model of layer.getModels()) {
             expect(model).toBeInstanceOf(GPUVectorModel);
+            await expectBoundColor(model, fixture.color, color, update !== 1);
             expect(getAttributeBuffer(model, fixture.position)).toBe(positions.data[0].buffer);
             expect(getAttributeBuffer(model, fixture.position).destroyed).toBe(false);
           }
