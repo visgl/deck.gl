@@ -401,7 +401,7 @@ vec2 project_pixel_size(vec2 pixels) {
 // position passes through the sphere. Exact for positions at any altitude, so a point above the
 // surface stays visible past the horizon of the ground below it. Always false for flat projections.
 bool project_globe_is_occluded(vec3 commonPosition) {
-  if (project.projectionMode != PROJECTION_MODE_GLOBE && project.projectionMode != PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return false;
   }
   vec3 eye = project.cameraPosition;
@@ -440,7 +440,7 @@ float project_globe_ray_distance_(vec3 eye, vec3 direction, float fallback) {
 // Pair with project_globe_is_occluded, which hides the sprite once the anchor itself is behind
 // the globe. Identity for flat projections.
 vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition) {
-  if (project.projectionMode != PROJECTION_MODE_GLOBE && project.projectionMode != PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return clipPosition;
   }
   vec3 eye = project.cameraPosition;

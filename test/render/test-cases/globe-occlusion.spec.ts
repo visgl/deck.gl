@@ -19,9 +19,12 @@ import fontMapping from '../../data/font-atlas.json';
  * clip a visible sprite. Non-billboard marks lie on the surface and are handled by culling.
  *
  * The far-side cases look at the globe from above lng 0, lat 10 at zoom 0.9. Blue objects are on
- * the near side and must be visible; red objects are on the far side and must be hidden.
+ * the near side and must be visible; red objects are on the far side and must be hidden. Red
+ * objects are drawn four times larger, so that any of them showing through covers enough of the
+ * frame to fail the image diff, whose threshold is loose for SwiftShader.
  *
- * - `globe-occlusion-icons`: markers every 30° of longitude at four latitudes. Expected: 20 blue
+ * - `globe-occlusion-icons`: markers every 30° of longitude at four latitudes, plus a grid placed
+ *   with `coordinateSystem: 'meter-offsets'` around an origin on the far side. Expected: 20 blue
  *   markers, no red ones.
  * - `globe-occlusion-icons-surface`: the same markers over an opaque SolidPolygonLayer earth.
  *   Expected: the same 20 blue markers, drawn whole, including the ones on the limb.
@@ -94,6 +97,8 @@ for (let east = -400000; east <= 400000; east += 200000) {
 const NEAR_COLOR = [30, 90, 200];
 const FAR_COLOR = [220, 40, 40];
 const getSideColor = (d: Marker) => (d.farSide ? FAR_COLOR : NEAR_COLOR);
+const FAR_SCALE = 4;
+const getSideScale = (d: Marker) => (d.farSide ? FAR_SCALE : 1);
 
 const DEPTH_VIEW_STATE = {longitude: 0, latitude: 0, zoom: 12, pitch: 60, bearing: 0};
 
@@ -157,7 +162,7 @@ function createTextLayer(id: string, props: Partial<TextLayer<Marker>['props']> 
     getPosition: d => d.position,
     getText: d => d.label,
     getColor: getSideColor,
-    getSize: 14,
+    getSize: d => 14 * getSideScale(d),
     background: true,
     getBackgroundColor: [225, 225, 225],
     backgroundPadding: [2, 1],
@@ -201,7 +206,16 @@ const testCases: TestCase[] = [
     name: 'globe-occlusion-icons',
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
-    layers: [createIconLayer('icons', GRID, getSideColor)],
+    layers: [
+      createIconLayer('icons', GRID, getSideColor).clone({getSize: d => 2 * getSideScale(d)}),
+      // Nothing else is drawn in front of the far side, so only the occlusion test can hide these.
+      // The grid bunches up into one patch there, so it is drawn larger again
+      createIconLayer('icons-meter-offsets', METER_OFFSET_GRID, FAR_COLOR).clone({
+        coordinateSystem: 'meter-offsets',
+        coordinateOrigin: [-150, 10, 0],
+        sizeScale: 12 * 2 * FAR_SCALE
+      })
+    ],
     goldenImage: './test/render/golden-images/globe-occlusion-icons.png'
   },
   {
@@ -254,7 +268,7 @@ const testCases: TestCase[] = [
         data: GRID,
         billboard: true,
         radiusUnits: 'pixels',
-        getRadius: 8,
+        getRadius: d => 8 * getSideScale(d),
         getPosition: d => d.position,
         getFillColor: getSideColor
       })

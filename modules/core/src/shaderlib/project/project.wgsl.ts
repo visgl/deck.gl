@@ -419,7 +419,7 @@ fn project_pixel_size_vec2(pixels: vec2<f32>) -> vec2<f32> {
 // True when the globe hides commonPosition from the camera: the segment from the camera to the
 // position passes through the sphere. Exact at any altitude. Always false for flat projections.
 fn project_globe_is_occluded(commonPosition: vec3<f32>) -> bool {
-  if (project.projectionMode != PROJECTION_MODE_GLOBE && project.projectionMode != PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return false;
   }
   let eye = project.cameraPosition;
@@ -454,7 +454,7 @@ const GLOBE_BILLBOARD_FOOTPRINT_PIXELS: f32 = 64.0;
 // 60, so other 3D geometry that is in front of the anchor by less than the shift no longer hides
 // the sprite. Pair with project_globe_is_occluded. Identity for flat projections.
 fn project_globe_billboard_clipspace(clipPosition: vec4<f32>, commonPosition: vec3<f32>) -> vec4<f32> {
-  if (project.projectionMode != PROJECTION_MODE_GLOBE && project.projectionMode != PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+  if (!(project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
     return clipPosition;
   }
   let eye = project.cameraPosition;
