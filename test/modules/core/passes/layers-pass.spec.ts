@@ -4,12 +4,21 @@
 
 import {test, expect, vi} from 'vitest';
 
-import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
+import {
+  Layer,
+  CompositeLayer,
+  LayerManager,
+  Viewport,
+  MapView,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
+import {createTestViewport} from '../viewports/test-crs';
 import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {getGLParameters} from '@luma.gl/webgl';
@@ -625,5 +634,110 @@ test('LayersPass#GLViewport', () => {
       layerManager.context.renderPass.glParameters.viewport,
       `${name} sets viewport correctly`
     ).toEqual(expectedGLViewport);
+  }
+});
+
+test('LayersPass#isAuxiliaryPass', () => {
+  const layer = new PathLayer({
+    id: 'path',
+    data: [
+      {
+        path: [
+          [-122.45, 37.75],
+          [-122.35, 37.85]
+        ]
+      }
+    ],
+    getPath: d => d.path
+  });
+  const viewportProps = {width: 100, height: 100, longitude: -122.4, latitude: 37.8, zoom: 11};
+  // A GlobeViewport with a resolution subdivides paths; the viewport an auxiliary pass makes for
+  // itself, e.g. a TerrainExtension cover, is web mercator and does not.
+  const screenViewport = new GlobeViewport({id: 'screen', resolution: 36, ...viewportProps});
+  const auxiliaryViewport = new WebMercatorViewport({id: 'auxiliary', ...viewportProps});
+
+  const layerManager = new LayerManager(device, {viewport: screenViewport});
+  const layersPass = new DrawLayersPass(device);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.updateLayers();
+
+    const renderOnce = (viewport: Viewport, isAuxiliaryPass: boolean) => {
+      layersPass.render({
+        viewports: [viewport],
+        layers: layerManager.getLayers(),
+        isAuxiliaryPass,
+        onViewportActive: layerManager.activateViewport,
+        onError: err => expect(err).toBeFalsy()
+      });
+      layerManager.activateViewport(screenViewport);
+    };
+
+    renderOnce(screenViewport, false);
+    layer.getNeedsRedraw({clearRedrawFlags: true});
+    const screenStep = layer.state.subdivisionStep;
+    expect(screenStep, 'subdivided for the screen viewport').toBeGreaterThan(0);
+
+    renderOnce(auxiliaryViewport, true);
+    expect(layer.internalState!.viewport!.id, 'auxiliary viewport is not adopted').toBe('screen');
+    expect(layer.state.subdivisionStep, 'geometry is not re-tessellated').toBe(screenStep);
+    expect(layer.getNeedsRedraw(), 'auxiliary pass leaves no pending redraw').toBeFalsy();
+
+    renderOnce(auxiliaryViewport, false);
+    expect(
+      layer.state.subdivisionStep,
+      'a primary pass still re-tessellates on viewport change'
+    ).toBe(0);
+  } finally {
+    layerManager.finalize();
+  }
+});
+
+test('LayersPass#isAuxiliaryPass adopts a viewport with a different projection', () => {
+  const layer = new PathLayer({
+    id: 'path',
+    data: [
+      {
+        path: [
+          [10, 10],
+          [20, 20]
+        ]
+      }
+    ],
+    getPath: d => d.path
+  });
+  // A custom projection packs positions in its own CRS; a web mercator terrain cover cannot
+  // draw them, so the auxiliary pass must still re-update the layer.
+  const screenViewport = createTestViewport({
+    id: 'screen',
+    width: 100,
+    height: 100,
+    converter: {
+      forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
+      inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]
+    }
+  });
+  const auxiliaryViewport = new WebMercatorViewport({id: 'auxiliary', width: 100, height: 100});
+
+  const layerManager = new LayerManager(device, {viewport: screenViewport});
+  const layersPass = new DrawLayersPass(device);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.updateLayers();
+
+    for (const viewport of [screenViewport, auxiliaryViewport]) {
+      layersPass.render({
+        viewports: [viewport],
+        layers: layerManager.getLayers(),
+        isAuxiliaryPass: viewport === auxiliaryViewport,
+        onViewportActive: layerManager.activateViewport,
+        onError: err => expect(err).toBeFalsy()
+      });
+    }
+    expect(layer.internalState!.viewport!.id, 'auxiliary viewport is adopted').toBe('auxiliary');
+  } finally {
+    layerManager.finalize();
   }
 });
