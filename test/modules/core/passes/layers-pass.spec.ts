@@ -18,6 +18,7 @@ import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
 import {PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
+import {createTestViewport} from '../viewports/test-crs';
 import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {getGLParameters} from '@luma.gl/webgl';
@@ -688,6 +689,54 @@ test('LayersPass#isAuxiliaryPass', () => {
       layer.state.subdivisionStep,
       'a primary pass still re-tessellates on viewport change'
     ).toBe(0);
+  } finally {
+    layerManager.finalize();
+  }
+});
+
+test('LayersPass#isAuxiliaryPass adopts a viewport with a different projection', () => {
+  const layer = new PathLayer({
+    id: 'path',
+    data: [
+      {
+        path: [
+          [10, 10],
+          [20, 20]
+        ]
+      }
+    ],
+    getPath: d => d.path
+  });
+  // A custom projection packs positions in its own CRS; a web mercator terrain cover cannot
+  // draw them, so the auxiliary pass must still re-update the layer.
+  const screenViewport = createTestViewport({
+    id: 'screen',
+    width: 100,
+    height: 100,
+    converter: {
+      forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
+      inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]
+    }
+  });
+  const auxiliaryViewport = new WebMercatorViewport({id: 'auxiliary', width: 100, height: 100});
+
+  const layerManager = new LayerManager(device, {viewport: screenViewport});
+  const layersPass = new DrawLayersPass(device);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.updateLayers();
+
+    for (const viewport of [screenViewport, auxiliaryViewport]) {
+      layersPass.render({
+        viewports: [viewport],
+        layers: layerManager.getLayers(),
+        isAuxiliaryPass: viewport === auxiliaryViewport,
+        onViewportActive: layerManager.activateViewport,
+        onError: err => expect(err).toBeFalsy()
+      });
+    }
+    expect(layer.internalState!.viewport!.id, 'auxiliary viewport is adopted').toBe('auxiliary');
   } finally {
     layerManager.finalize();
   }
