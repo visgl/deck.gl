@@ -18,6 +18,19 @@ import type {TestCase} from '../deck-test-utils';
 
 const cube = new CubeGeometry();
 
+const groundPlane = {
+  attributes: {
+    positions: {
+      size: 3,
+      value: new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0])
+    },
+    normals: {
+      size: 3,
+      value: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1])
+    }
+  }
+};
+
 const MASK_POLYGON = [
   [-122.48, 37.75],
   [-122.43, 37.73],
@@ -78,6 +91,54 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/shadow-effect.png'
+  },
+  {
+    // A lit SimpleMeshLayer must not shadow itself: the ground receives only the box's shadow
+    name: 'shadow-effect-simple-mesh',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({
+          color: [255, 255, 255],
+          intensity: 1.0
+        }),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [1, -0.5, -1],
+          _shadow: true
+        })
+      })
+    ],
+    viewState: {
+      latitude: 37.74,
+      longitude: -122.4,
+      zoom: 16,
+      pitch: 45,
+      bearing: 20
+    },
+    layers: [
+      new SimpleMeshLayer({
+        id: 'ground',
+        data: [0],
+        mesh: groundPlane,
+        sizeScale: 300,
+        coordinateSystem: 'meter-offsets',
+        coordinateOrigin: [-122.4, 37.74, 0],
+        getPosition: d => [0, 0, 0],
+        getColor: [200, 200, 200]
+      }),
+      new SimpleMeshLayer({
+        id: 'box',
+        data: [0],
+        mesh: cube,
+        sizeScale: 30,
+        coordinateSystem: 'meter-offsets',
+        coordinateOrigin: [-122.4, 37.74, 0],
+        getPosition: d => [0, 0, 80],
+        getColor: [230, 80, 60]
+      })
+    ],
+    goldenImage: './test/render/golden-images/shadow-effect-simple-mesh.png'
   },
   ...[true, false].map(maskInverted => ({
     name: `mask-effect${maskInverted ? '-inverted' : ''}`,
