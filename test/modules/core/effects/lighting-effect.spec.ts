@@ -5,9 +5,9 @@
 import {test, expect} from 'vitest';
 import {LightingEffect} from '@deck.gl/core';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
-import {MapView, LayerManager} from '@deck.gl/core';
+import {MapView, LayerManager, WebMercatorViewport} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
-import {equals} from '@math.gl/core';
+import {equals, Matrix4} from '@math.gl/core';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 
@@ -122,4 +122,50 @@ test('LightingEffect#preRender, cleanup', () => {
   layerManager.finalize();
   expect(lightingEffect.shadowPasses.length, 'LightingEffect creates shadow passes').toBe(0);
   expect(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map').toBeFalsy();
+});
+
+// Independently specified WGS84 lights must share the rendered geometry's reference.
+test.each(['meter-offsets', 'lnglat-offsets'])(
+  'PointLight retains the %s layer reference',
+  coordinateSystem => {
+    const viewport = new WebMercatorViewport({longitude: -120, latitude: 35, zoom: 14});
+    const manager = new LayerManager(device, {viewport});
+    const layer = new PolygonLayer({
+      coordinateSystem,
+      coordinateOrigin: [-122.45, 37.78, 0],
+      modelMatrix: new Matrix4().translate([100, 200, 300]),
+      data: []
+    });
+    try {
+      manager.setLayers([layer]);
+      const light = new PointLight({position: [-122.46, 37.8, 1000]});
+      const result = light.getProjectedLight({layer}).position;
+      expect(
+        equals(result, [-0.014222222222187497, 0.03599369037291922, 0.016187212628251565])
+      ).toBe(true);
+    } finally {
+      manager.finalize();
+    }
+  }
+);
+
+test('PointLight preserves offset altitude scaling below the Mercator auto-offset threshold', () => {
+  const viewport = new WebMercatorViewport({longitude: -120, latitude: 35, zoom: 8});
+  const manager = new LayerManager(device, {viewport});
+  const layer = new PolygonLayer({
+    coordinateSystem: 'meter-offsets',
+    coordinateOrigin: [-122.45, 37.78, 0],
+    data: []
+  });
+  try {
+    manager.setLayers([layer]);
+    const result = new PointLight({position: [-122.46, 37.8, 1000]}).getProjectedLight({
+      layer
+    }).position;
+    expect(equals(result, [-0.014222222222187497, 0.03599369037291922, 0.016187212628251565])).toBe(
+      true
+    );
+  } finally {
+    manager.finalize();
+  }
 });
