@@ -63,8 +63,7 @@ export default abstract class AggregationLayer<
           {
             viewport,
             autoOffset: false,
-            coordinateSystem:
-              layer.internalState!.packedCrs?.signature === 'WGS84' ? 'lnglat' : 'cartesian',
+            sourceCrs: layer.internalState!.packedCrs!,
             coordinateOrigin: [0, 0, 0],
             modelMatrix: null
           }
