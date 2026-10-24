@@ -605,7 +605,11 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (!project.isCustomProjection(viewport) && this.props.coordinateSystem === 'lnglat') {
+      if (
+        !project.isCustomProjection(viewport) &&
+        this.internalState!.packedCrs?.signature === 'WGS84' &&
+        this.props.coordinateSystem !== 'lnglat-offsets'
+      ) {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -716,6 +720,7 @@ export default class HeatmapLayer<
         devicePixelRatio,
         modelMatrix,
         coordinateSystem,
+        sourceCrs: this.internalState!.sourceCrs,
         coordinateOrigin,
         sizeScale: this.context.layerManager.projectionScaleResources.get(viewport)
       },
@@ -786,7 +791,7 @@ export default class HeatmapLayer<
       // Attribute bounds already consumed CPU source conversion and layer transforms.
       const params = this.state.preproject
         ? {
-            coordinateSystem: 'lnglat',
+            sourceCrs: this.internalState!.packedCrs!,
             coordinateOrigin: [0, 0, 0] as [number, number, number],
             modelMatrix: null
           }
