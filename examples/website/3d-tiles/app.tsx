@@ -31,7 +31,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 
 export default function App({
   device,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json',
+  mapStyle = 'https://tiles.openfreemap.org/styles/dark',
   updateAttributions
 }: {
   device?: Device;

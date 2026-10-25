@@ -134,7 +134,21 @@ export default class ClipExtension extends LayerExtension {
     const {clipBounds} = this.props;
     const clipProps = {} as WebGPUClipModuleProps;
     if (this.state.clipByInstance) {
-      clipProps.bounds = clipBounds;
+      // Instance shaders see packed attributes. Match their CPU conversion when
+      // the layer source CRS needs preprojection (e.g. tile-local MVT positions).
+      const transform = this.usePositionTransforms().transform;
+      if (transform) {
+        const corner0 = transform.call(this, [clipBounds[0], clipBounds[1], 0]);
+        const corner1 = transform.call(this, [clipBounds[2], clipBounds[3], 0]);
+        clipProps.bounds = [
+          Math.min(corner0[0], corner1[0]),
+          Math.min(corner0[1], corner1[1]),
+          Math.max(corner0[0], corner1[0]),
+          Math.max(corner0[1], corner1[1])
+        ];
+      } else {
+        clipProps.bounds = clipBounds;
+      }
     } else {
       const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
       const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);

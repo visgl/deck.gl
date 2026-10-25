@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect} from 'vitest';
 
-import {
-  COORDINATE_SYSTEM,
-  WebMercatorViewport,
-  _GlobeViewport as GlobeViewport
-} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
@@ -66,6 +63,44 @@ test('BitmapLayer#constructor', () => {
   });
 });
 
+test('BitmapLayer#imageCoordinateSystem with preprojection', () => {
+  const viewport = createTestViewport({
+    width: 800,
+    height: 600,
+    converter: {
+      forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
+      inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
+    }
+  });
+  const bounds: NonNullable<BitmapLayer['props']['bounds']>[] = [
+    [0, -30, 45, 0],
+    [
+      [0, -30],
+      [0, 0],
+      [45, 0],
+      [45, -30]
+    ]
+  ];
+  for (const imageBounds of bounds) {
+    testLayer({
+      Layer: BitmapLayer,
+      viewport,
+      onError: error => {
+        throw error;
+      },
+      testCases: (['default', 'cartesian', 'lnglat'] as const).map(imageCoordinateSystem => ({
+        title: `CustomProjectionView + imageCoordinateSystem: ${imageCoordinateSystem}`,
+        props: {bounds: imageBounds, _imageCoordinateSystem: imageCoordinateSystem},
+        onAfterUpdate({layer}) {
+          expect(layer.state.coordinateConversion).toBe(0);
+          expect(layer.state.bounds).toEqual([0, 0, 0, 0]);
+          expect(layer.state.mesh.texCoords.length).toBeGreaterThan(0);
+        }
+      }))
+    });
+  }
+});
+
 test('BitmapLayer#imageCoordinateSystem', () => {
   testLayer({
     Layer: BitmapLayer,
@@ -85,7 +120,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'MapView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -96,7 +131,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'MapView + imageCoordinateSystem: LNGLAT',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          _imageCoordinateSystem: 'lnglat'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -126,7 +161,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'GlobeView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -137,7 +172,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'GlobeView + imageCoordinateSystem: LNGLAT',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          _imageCoordinateSystem: 'lnglat'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -156,7 +191,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
         [2, 3, 0],
         [2, 1, 1]
       ],
-      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      _imageCoordinateSystem: 'cartesian'
     }),
     onError: () =>
       console.log('Layer should throw if _imageCoordinateSystem is used with quad bounds')
@@ -176,12 +211,14 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
     longitude: 0,
     zoom: 1
   });
+  // GlobeView({resolution: 10}) hands its viewport a subdivision resolution.
   const globeViewport = new GlobeViewport({
     width: 800,
     height: 600,
     latitude: 0,
     longitude: 0,
-    zoom: 1
+    zoom: 1,
+    resolution: 10
   });
 
   testLayer({
@@ -194,13 +231,13 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
         props: {
           id: 'projection-switch',
           bounds,
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           expect(layer.state.coordinateConversion, 'MapView needs no coordinate conversion').toBe(
             0
           );
-          expect(layer.state.meshResolution, 'MapView stores its flat projection').toBeUndefined();
+          expect(layer.state.subdivisionStep, 'MapView draws a flat mesh').toBe(0);
           expect(layer.state.mesh.vertexCount, 'MapView uses one quad').toBe(6);
         }
       },
@@ -213,9 +250,7 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
             layer.state.coordinateConversion,
             'GlobeView converts Web Mercator image coordinates'
           ).toBe(1);
-          expect(layer.state.meshResolution, 'GlobeView stores its curved resolution').toBe(
-            globeViewport.resolution
-          );
+          expect(layer.state.subdivisionStep, 'GlobeView subdivides the mesh').toBeGreaterThan(0);
           expect(layer.state.mesh.vertexCount, 'GlobeView tessellates the bitmap').toBeGreaterThan(
             6
           );
@@ -227,10 +262,7 @@ test('BitmapLayer#imageCoordinateSystem updates when the projection changes', ()
         updateProps: {},
         onAfterUpdate({layer}) {
           expect(layer.state.coordinateConversion, 'MapView removes coordinate conversion').toBe(0);
-          expect(
-            layer.state.meshResolution,
-            'MapView restores its flat projection'
-          ).toBeUndefined();
+          expect(layer.state.subdivisionStep, 'MapView restores the flat mesh').toBe(0);
           expect(layer.state.mesh.vertexCount, 'MapView restores one quad').toBe(6);
         }
       }

@@ -9,42 +9,36 @@
 //
 
 export {
-  // CONSTANTS
   VERSION,
-  COORDINATE_SYSTEM,
   OPERATION,
   UNIT,
-  // Main class
   Deck,
-  // Base Layers
   Layer,
   CompositeLayer,
-  // Views
   View,
   MapView,
   FirstPersonView,
   OrbitView,
   OrthographicView,
+  _CustomProjectionView,
   _GlobeView,
-  // Viewports
   Viewport,
   WebMercatorViewport,
   _GlobeViewport,
   OrbitViewport,
   OrthographicViewport,
   FirstPersonViewport,
-  // Controllers
+  _CustomProjectionViewport,
   Controller,
   MapController,
   TerrainController,
   OrbitController,
   FirstPersonController,
   OrthographicController,
+  _CustomProjectionController,
   _GlobeController,
-  // For custom layers
   Attribute,
   AttributeManager,
-  // Shader modules
   color,
   picking,
   project,
@@ -52,32 +46,24 @@ export {
   gouraudMaterial,
   phongMaterial,
   shadow,
-  // Internal classes
   LayerManager,
   DeckRenderer,
-  // Logging
   log,
   assert,
-  // Transition bindings
   TRANSITION_EVENTS,
   TransitionInterpolator,
   LinearInterpolator,
   FlyToInterpolator,
-  // Effects
   LightingEffect,
   PostProcessEffect,
-  // Lights
   AmbientLight,
   PointLight,
   DirectionalLight,
-  // Extension
   LayerExtension,
-  // Utilities
   Tesselator,
   fp64LowPart,
   createIterable,
   getShaderAssembler,
-  // Widgets
   Widget
 } from '@deck.gl/core';
 
@@ -130,6 +116,13 @@ export {
 export {ScenegraphLayer, SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 //
+// MAPLIBRE INTEGRATION PACKAGE
+//
+
+export {MapLibreOverlay} from '@deck.gl/maplibre';
+export type {MapLibreOverlayProps} from '@deck.gl/maplibre';
+
+//
 // REACT BINDINGS PACKAGE
 //
 
@@ -177,6 +170,9 @@ export type {
   OrbitViewState,
   OrthographicViewState,
   GlobeViewState,
+  CustomProjectionViewState,
+  CustomProjectionViewProps,
+  CustomProjectionViewportOptions,
   CoordinateSystem,
   ChangeFlags,
   LayersList,

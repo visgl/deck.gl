@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
-import {COORDINATE_SYSTEM, WebMercatorViewport, project32} from '@deck.gl/core';
+import {WebMercatorViewport, project32} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 // import {Matrix4, config} from '@math.gl/core';
 import {config, NumberArray3} from '@math.gl/core';
@@ -74,7 +74,7 @@ const TEST_CASES: TestCase[] = [
     title: 'LNGLAT mode',
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: 'lnglat'
     },
     tests: [
       {
@@ -103,7 +103,7 @@ const TEST_CASES: TestCase[] = [
     title: 'LNGLAT mode - high zoom',
     projectProps: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: 'lnglat'
     },
     tests: [
       {
@@ -128,7 +128,7 @@ const TEST_CASES: TestCase[] = [
     title: 'LNGLAT_OFFSETS mode',
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+      coordinateSystem: 'lnglat-offsets',
       coordinateOrigin: [-122.05, 37.92, 0]
     },
     tests: [
@@ -159,7 +159,7 @@ webglTest('project32&64#vs', async () => {
     for (const usefp64 of [false, true]) {
       /* eslint-disable max-nested-callbacks, complexity */
       for (const testCase of TEST_CASES) {
-        if (usefp64 && testCase.projectProps.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT) {
+        if (usefp64 && testCase.projectProps.coordinateSystem !== 'lnglat') {
           // Apply 64 bit projection only for LNGLAT mode.
           continue;
         }

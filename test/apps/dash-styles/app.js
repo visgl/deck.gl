@@ -17,6 +17,21 @@ import {PathStyleExtension} from '@deck.gl/extensions';
 // Use the `scene` control to switch to the four-path 3D elevation fixture from the render
 // matrix. At pitch 0 its orthographic MapView gives every path identical screen geometry;
 // drag to pitch or rotate the view to inspect the actual climbs from different angles.
+//
+// What each control is for:
+//
+// - `scene`         '3D elevation' reproduces the 0, 300, 720 and 900 meter golden fixture.
+// - `dash mode`     'segment' restarts the pattern at every vertex, so the 20 and 120
+//                   segment rows collapse to solid lines. 'path' should make all rows match.
+// - `dash units`    Set `width units` to 'meters' first, then zoom: 'widths' rows grow with
+//                   the stroke, while 'pixels' rows hold their size on screen.
+// - `billboard`     'both' draws a red flat copy and a blue billboarded one of every row.
+//                   They stay aligned on flat geometry; pitch and elevation make their
+//                   extrusion geometrically different.
+// - `justified`     Dashes finish cleanly at each end of the active run: per segment in
+//                   'segment' mode and across the complete path in 'path' mode.
+// - `dash/gap size` Drag toward the bottom of the range to reach subpixel periods, where
+//                   the stroke should fade to an even tone rather than shimmer.
 
 const MAP_CENTER = [-122.4, 37.78];
 const MATRIX_INITIAL_VIEW_STATE = {
@@ -75,7 +90,9 @@ const state = {
   dashMode: 'segment',
   dashJustified: false,
   capRounded: false,
+  jointRounded: false,
   widthUnits: 'pixels',
+  dashUnits: 'widths',
   width: 8,
   billboard: 'both',
   showCircle: true
@@ -88,21 +105,21 @@ const CONTROLS = [
     label: 'scene',
     options: ['segment matrix', '3D elevation']
   },
-  {key: 'dashSize', type: 'range', label: 'dash size', min: 0.25, max: 16, step: 0.25},
-  {key: 'gapSize', type: 'range', label: 'gap size', min: 0.25, max: 16, step: 0.25},
+  {key: 'dashSize', type: 'number', label: 'dash size', min: 0, step: 'any'},
+  {key: 'gapSize', type: 'number', label: 'gap size', min: 0, step: 'any'},
   {key: 'width', type: 'range', label: 'stroke width', min: 1, max: 40, step: 1},
-  {
-    key: 'dashMode',
-    type: 'select',
-    label: 'dash mode',
-    // Layer 1 expresses path mode through the legacy highPrecisionDash option. Layer 4
-    // replaces this implementation with the dashMode API while preserving the control.
-    options: ['segment', 'path']
-  },
+  {key: 'dashMode', type: 'select', label: 'dash mode', options: ['segment', 'path']},
   {key: 'widthUnits', type: 'select', label: 'width units', options: ['pixels', 'meters']},
+  {
+    key: 'dashUnits',
+    type: 'select',
+    label: 'dash units',
+    options: ['widths', 'pixels', 'meters', 'common']
+  },
   {key: 'billboard', type: 'select', label: 'billboard', options: ['both', 'off', 'on']},
   {key: 'dashJustified', type: 'checkbox', label: 'justified'},
   {key: 'capRounded', type: 'checkbox', label: 'rounded caps'},
+  {key: 'jointRounded', type: 'checkbox', label: 'rounded joints'},
   {key: 'showCircle', type: 'checkbox', label: 'dense circle'}
 ];
 
@@ -130,11 +147,17 @@ function buildControls(onChange) {
       input = document.createElement('input');
       input.type = 'checkbox';
       input.checked = state[control.key];
-    } else {
+    } else if (control.type === 'range') {
       input = document.createElement('input');
       input.type = 'range';
       input.min = control.min;
       input.max = control.max;
+      input.step = control.step;
+      input.value = state[control.key];
+    } else {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.min = control.min;
       input.step = control.step;
       input.value = state[control.key];
     }
@@ -147,7 +170,7 @@ function buildControls(onChange) {
       state[control.key] =
         control.type === 'checkbox'
           ? input.checked
-          : control.type === 'range'
+          : control.type === 'range' || control.type === 'number'
             ? Number(input.value)
             : input.value;
       if (control.type === 'range') {
@@ -176,11 +199,14 @@ function billboardVariants() {
   return [false, true];
 }
 
+function dashArray() {
+  // PathStyleExtension interprets these literal values according to dashUnits. In particular,
+  // absolute units must not be rescaled when the stroke width changes.
+  return [state.dashSize, state.gapSize];
+}
+
 function dashExtension() {
-  return new PathStyleExtension({
-    dash: true,
-    highPrecisionDash: state.dashMode === 'path'
-  });
+  return new PathStyleExtension({dash: true, dashMode: state.dashMode});
 }
 
 function getLongitudePerPixel(zoom) {
@@ -225,7 +251,7 @@ function buildElevationLayers() {
       const comparisonOffsetPixels = variants.length > 1 ? (variantIndex - 0.5) * 12 : 0;
       layers.push(
         new PathLayer({
-          id: `elevation-${heightMeters}-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          id: `elevation-${heightMeters}-${billboard ? 'billboard' : 'flat'}`,
           data: [createElevationPath(baselineOffsetPixels + comparisonOffsetPixels, heightMeters)],
           getPath: path => path,
           billboard,
@@ -233,10 +259,11 @@ function buildElevationLayers() {
           getWidth: state.widthUnits === 'meters' ? state.width * 8 : state.width,
           widthMinPixels: 1,
           getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-          getDashArray: [state.dashSize, state.gapSize],
+          getDashArray: dashArray(),
+          dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
-          jointRounded: state.capRounded,
+          jointRounded: state.jointRounded,
           extensions
         })
       );
@@ -280,7 +307,7 @@ function buildSegmentMatrixLayers() {
 
       layers.push(
         new PathLayer({
-          id: `row-${rowIndex}-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          id: `row-${rowIndex}-${billboard ? 'billboard' : 'flat'}`,
           data: [buildPath(latitude)],
           getPath: path => path,
           billboard,
@@ -288,10 +315,11 @@ function buildSegmentMatrixLayers() {
           getWidth: state.widthUnits === 'meters' ? state.width * 8 : state.width,
           widthMinPixels: 1,
           getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-          getDashArray: [state.dashSize, state.gapSize],
+          getDashArray: dashArray(),
+          dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
-          jointRounded: state.capRounded,
+          jointRounded: state.jointRounded,
           extensions
         })
       );
@@ -319,7 +347,7 @@ function buildSegmentMatrixLayers() {
     billboardVariants().forEach((billboard, variantIndex) => {
       layers.push(
         new PathLayer({
-          id: `circle-${billboard ? 'billboard' : 'flat'}-${state.dashMode}`,
+          id: `circle-${billboard ? 'billboard' : 'flat'}`,
           data: [
             createCirclePath(
               120,
@@ -333,10 +361,11 @@ function buildSegmentMatrixLayers() {
           getWidth: state.widthUnits === 'meters' ? state.width * 8 : state.width,
           widthMinPixels: 1,
           getColor: billboard ? [0, 90, 200] : [200, 0, 0],
-          getDashArray: [state.dashSize, state.gapSize],
+          getDashArray: dashArray(),
+          dashUnits: state.dashUnits,
           dashJustified: state.dashJustified,
           capRounded: state.capRounded,
-          jointRounded: state.capRounded,
+          jointRounded: state.jointRounded,
           extensions
         })
       );
@@ -363,17 +392,23 @@ function getInitialViewState() {
 const readout = document.getElementById('readout');
 
 function updateReadout(viewState) {
-  const period = state.dashSize + state.gapSize;
-  // One dash unit is half the stroke width - see the extension docs.
-  const halfWidthPixels = state.widthUnits === 'pixels' ? state.width / 2 : null;
-  const periodPixels = halfWidthPixels === null ? null : (period * halfWidthPixels).toFixed(1);
+  const [dashSize, gapSize] = dashArray();
+  const period = dashSize + gapSize;
+  const formattedPeriod = state.dashUnits === 'common' ? Number(period.toPrecision(4)) : period;
+  const unitLabel = state.dashUnits === 'widths' ? 'half-widths' : state.dashUnits;
+  let periodPixels = null;
+  if (state.dashUnits === 'pixels') {
+    periodPixels = period;
+  } else if (state.dashUnits === 'widths' && state.widthUnits === 'pixels') {
+    periodPixels = period * (state.width / 2);
+  }
   const orientation =
     state.scene === '3D elevation'
       ? `  |  pitch ${viewState.pitch.toFixed(1)}°  |  bearing ${viewState.bearing.toFixed(1)}°`
       : '';
   readout.textContent =
-    `zoom ${viewState.zoom.toFixed(2)}${orientation}  |  dash period ${period} half-widths` +
-    (periodPixels === null ? '' : ` (~${periodPixels}px)`);
+    `zoom ${viewState.zoom.toFixed(2)}${orientation}  |  dash period ${formattedPeriod} ${unitLabel}` +
+    (periodPixels === null ? '' : ` (~${periodPixels.toFixed(1)}px)`);
 }
 
 let currentViewState = getInitialViewState();

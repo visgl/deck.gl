@@ -185,7 +185,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     materials?: {destroy(): void}[] | null;
     models: Model[];
     firstDrawSignaled: boolean;
-  };
+  } & Layer['state'];
 
   getShaders() {
     const defines: {LIGHTING_PBR?: 1} = {};
@@ -224,6 +224,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         accessor: 'getPosition',
         transition: supportsTransitions
       },
@@ -421,7 +422,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           sizeScale,
           sizeMinPixels,
           sizeMaxPixels,
-          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem) ? 1 : 0,
+          composeModelMatrix: shouldComposeModelMatrix(
+            viewport,
+            this.state.sourceCrs?.signature || coordinateSystem,
+            Boolean(this.state.preproject)
+          )
+            ? 1
+            : 0,
           sceneModelMatrix: worldMatrix
         };
 

@@ -1,0 +1,768 @@
+{
+  "recordedAt": "2026-09-30T18:11:26.312Z",
+  "repositoryHead": "279bb164ca3cabdcc145d5b3a37b1af04fc89e97",
+  "source": "served build",
+  "browser": "151.0.7922.34",
+  "machine": {
+    "processor": "Apple M2",
+    "model": "Mac14,7",
+    "memoryBytes": 17179869184,
+    "platform": "darwin",
+    "release": "27.0.0"
+  },
+  "device": {
+    "type": "webgpu",
+    "info": {
+      "type": "webgpu",
+      "vendor": "apple",
+      "renderer": "",
+      "version": "",
+      "gpu": "apple",
+      "gpuType": "unknown",
+      "gpuBackend": "unknown",
+      "gpuArchitecture": "metal-3",
+      "fallback": false,
+      "featureLevel": "core",
+      "subgroupMinSize": 32,
+      "subgroupMaxSize": 32,
+      "shadingLanguage": "wgsl",
+      "shadingLanguageVersion": 100
+    },
+    "adapter": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "identifier": "",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "debug": false,
+    "debugGPUTime": false
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 720,
+    "devicePixelRatio": 1
+  },
+  "camera": "district",
+  "timeSeconds": 2,
+  "warmupFrames": 30,
+  "samples": 120,
+  "rounds": 3,
+  "timing": "CPU submission through native queue completion; excludes animation-frame wait; not GPU-only time or FPS",
+  "memory": "luma-tracked buffer/texture bytes after queue completion; excludes driver overhead; external references reported separately",
+  "configurations": [
+    {
+      "name": "district",
+      "water": false,
+      "reflections": false,
+      "edges": "none",
+      "quality": "balanced"
+    },
+    {
+      "name": "river",
+      "water": true,
+      "reflections": false,
+      "edges": "none",
+      "quality": "balanced"
+    },
+    {
+      "name": "river-pencil",
+      "water": true,
+      "reflections": false,
+      "edges": "pencil",
+      "quality": "balanced"
+    },
+    {
+      "name": "reflections-fast",
+      "water": true,
+      "reflections": true,
+      "edges": "none",
+      "quality": "fast"
+    },
+    {
+      "name": "reflections-balanced",
+      "water": true,
+      "reflections": true,
+      "edges": "none",
+      "quality": "balanced"
+    },
+    {
+      "name": "reflections-detailed",
+      "water": true,
+      "reflections": true,
+      "edges": "none",
+      "quality": "detailed"
+    },
+    {
+      "name": "reflections-pencil",
+      "water": true,
+      "reflections": true,
+      "edges": "pencil",
+      "quality": "balanced"
+    }
+  ],
+  "summaries": [
+    {
+      "name": "district",
+      "medianCompletedMilliseconds": 2.9,
+      "maximumRoundPercentile95Milliseconds": 3.3,
+      "maximumOwnedBytes": 30341287,
+      "maximumGrowthBytes": 0
+    },
+    {
+      "name": "river",
+      "medianCompletedMilliseconds": 3.7,
+      "maximumRoundPercentile95Milliseconds": 4.3,
+      "maximumOwnedBytes": 30348215,
+      "maximumGrowthBytes": 0
+    },
+    {
+      "name": "river-pencil",
+      "medianCompletedMilliseconds": 3.9,
+      "maximumRoundPercentile95Milliseconds": 4.6,
+      "maximumOwnedBytes": 30353383,
+      "maximumGrowthBytes": 0
+    },
+    {
+      "name": "reflections-fast",
+      "medianCompletedMilliseconds": 6.2,
+      "maximumRoundPercentile95Milliseconds": 7.3,
+      "maximumOwnedBytes": 71374615,
+      "maximumGrowthBytes": 0
+    },
+    {
+      "name": "reflections-balanced",
+      "medianCompletedMilliseconds": 7,
+      "maximumRoundPercentile95Milliseconds": 7.5,
+      "maximumOwnedBytes": 78286615,
+      "maximumGrowthBytes": 0
+    },
+    {
+      "name": "reflections-detailed",
+      "medianCompletedMilliseconds": 9.3,
+      "maximumRoundPercentile95Milliseconds": 10.9,
+      "maximumOwnedBytes": 105934615,
+      "maximumGrowthBytes": 0
+    },
+    {
+      "name": "reflections-pencil",
+      "medianCompletedMilliseconds": 7.1,
+      "maximumRoundPercentile95Milliseconds": 7.8,
+      "maximumOwnedBytes": 78291783,
+      "maximumGrowthBytes": 0
+    }
+  ],
+  "measurements": [
+    {
+      "name": "district",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1,
+        "percentile95": 1.2,
+        "maximum": 1.3
+      },
+      "completedMilliseconds": {
+        "median": 2.8,
+        "percentile95": 3.3,
+        "maximum": 3.5
+      },
+      "initialMemory": {
+        "ownedBytes": 30341287,
+        "bufferBytes": 85064,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30341287,
+        "bufferBytes": 85064,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "river",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1.2,
+        "percentile95": 1.6,
+        "maximum": 1.7
+      },
+      "completedMilliseconds": {
+        "median": 3.7,
+        "percentile95": 4.2,
+        "maximum": 4.4
+      },
+      "initialMemory": {
+        "ownedBytes": 30348215,
+        "bufferBytes": 91992,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30348215,
+        "bufferBytes": 91992,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "river-pencil",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1.3,
+        "percentile95": 1.8,
+        "maximum": 1.9
+      },
+      "completedMilliseconds": {
+        "median": 3.9,
+        "percentile95": 4.6,
+        "maximum": 4.8
+      },
+      "initialMemory": {
+        "ownedBytes": 30353383,
+        "bufferBytes": 97160,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30353383,
+        "bufferBytes": 97160,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-fast",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 3,
+        "percentile95": 3.5,
+        "maximum": 3.9
+      },
+      "completedMilliseconds": {
+        "median": 6.1,
+        "percentile95": 6.6,
+        "maximum": 7.1
+      },
+      "initialMemory": {
+        "ownedBytes": 71374615,
+        "bufferBytes": 107192,
+        "textureBytes": 71267423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 71374615,
+        "bufferBytes": 107192,
+        "textureBytes": 71267423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-balanced",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 3,
+        "percentile95": 3.4,
+        "maximum": 3.7
+      },
+      "completedMilliseconds": {
+        "median": 7,
+        "percentile95": 7.4,
+        "maximum": 7.7
+      },
+      "initialMemory": {
+        "ownedBytes": 78286615,
+        "bufferBytes": 107192,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 78286615,
+        "bufferBytes": 107192,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-detailed",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.4,
+        "maximum": 3.8
+      },
+      "completedMilliseconds": {
+        "median": 9.3,
+        "percentile95": 9.8,
+        "maximum": 10.1
+      },
+      "initialMemory": {
+        "ownedBytes": 105934615,
+        "bufferBytes": 107192,
+        "textureBytes": 105827423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 105934615,
+        "bufferBytes": 107192,
+        "textureBytes": 105827423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-pencil",
+      "round": 1,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.6,
+        "maximum": 4
+      },
+      "completedMilliseconds": {
+        "median": 6.9,
+        "percentile95": 7.4,
+        "maximum": 7.6
+      },
+      "initialMemory": {
+        "ownedBytes": 78291783,
+        "bufferBytes": 112360,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 78291783,
+        "bufferBytes": 112360,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "river",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1.2,
+        "percentile95": 1.4,
+        "maximum": 1.4
+      },
+      "completedMilliseconds": {
+        "median": 3.7,
+        "percentile95": 4.3,
+        "maximum": 4.4
+      },
+      "initialMemory": {
+        "ownedBytes": 30348215,
+        "bufferBytes": 91992,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30348215,
+        "bufferBytes": 91992,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "river-pencil",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1.2,
+        "percentile95": 1.5,
+        "maximum": 1.7
+      },
+      "completedMilliseconds": {
+        "median": 4,
+        "percentile95": 4.5,
+        "maximum": 4.8
+      },
+      "initialMemory": {
+        "ownedBytes": 30353383,
+        "bufferBytes": 97160,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30353383,
+        "bufferBytes": 97160,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-fast",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.4,
+        "maximum": 3.6
+      },
+      "completedMilliseconds": {
+        "median": 6.2,
+        "percentile95": 6.7,
+        "maximum": 11.8
+      },
+      "initialMemory": {
+        "ownedBytes": 71374615,
+        "bufferBytes": 107192,
+        "textureBytes": 71267423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 71374615,
+        "bufferBytes": 107192,
+        "textureBytes": 71267423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-balanced",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.2,
+        "maximum": 3.4
+      },
+      "completedMilliseconds": {
+        "median": 6.9,
+        "percentile95": 7.3,
+        "maximum": 7.5
+      },
+      "initialMemory": {
+        "ownedBytes": 78286615,
+        "bufferBytes": 107192,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 78286615,
+        "bufferBytes": 107192,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-detailed",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 3,
+        "percentile95": 4.1,
+        "maximum": 4.8
+      },
+      "completedMilliseconds": {
+        "median": 9.4,
+        "percentile95": 10.9,
+        "maximum": 13.3
+      },
+      "initialMemory": {
+        "ownedBytes": 105934615,
+        "bufferBytes": 107192,
+        "textureBytes": 105827423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 105934615,
+        "bufferBytes": 107192,
+        "textureBytes": 105827423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-pencil",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 3.1,
+        "percentile95": 3.8,
+        "maximum": 4.2
+      },
+      "completedMilliseconds": {
+        "median": 7.1,
+        "percentile95": 7.8,
+        "maximum": 8.2
+      },
+      "initialMemory": {
+        "ownedBytes": 78291783,
+        "bufferBytes": 112360,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 78291783,
+        "bufferBytes": 112360,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "district",
+      "round": 2,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 0.8,
+        "percentile95": 1,
+        "maximum": 1
+      },
+      "completedMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.3,
+        "maximum": 3.6
+      },
+      "initialMemory": {
+        "ownedBytes": 30341287,
+        "bufferBytes": 85064,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30341287,
+        "bufferBytes": 85064,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "river-pencil",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1.3,
+        "percentile95": 1.5,
+        "maximum": 1.6
+      },
+      "completedMilliseconds": {
+        "median": 3.9,
+        "percentile95": 4.4,
+        "maximum": 6.5
+      },
+      "initialMemory": {
+        "ownedBytes": 30353383,
+        "bufferBytes": 97160,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30353383,
+        "bufferBytes": 97160,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-fast",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 3.7,
+        "percentile95": 4,
+        "maximum": 4.3
+      },
+      "completedMilliseconds": {
+        "median": 6.9,
+        "percentile95": 7.3,
+        "maximum": 7.6
+      },
+      "initialMemory": {
+        "ownedBytes": 71374615,
+        "bufferBytes": 107192,
+        "textureBytes": 71267423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 71374615,
+        "bufferBytes": 107192,
+        "textureBytes": 71267423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-balanced",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.4,
+        "maximum": 3.8
+      },
+      "completedMilliseconds": {
+        "median": 7,
+        "percentile95": 7.5,
+        "maximum": 7.9
+      },
+      "initialMemory": {
+        "ownedBytes": 78286615,
+        "bufferBytes": 107192,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 78286615,
+        "bufferBytes": 107192,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-detailed",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.1,
+        "maximum": 3.2
+      },
+      "completedMilliseconds": {
+        "median": 9.3,
+        "percentile95": 9.6,
+        "maximum": 9.9
+      },
+      "initialMemory": {
+        "ownedBytes": 105934615,
+        "bufferBytes": 107192,
+        "textureBytes": 105827423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 105934615,
+        "bufferBytes": 107192,
+        "textureBytes": 105827423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "reflections-pencil",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 3,
+        "percentile95": 3.6,
+        "maximum": 3.8
+      },
+      "completedMilliseconds": {
+        "median": 7.1,
+        "percentile95": 7.6,
+        "maximum": 14.9
+      },
+      "initialMemory": {
+        "ownedBytes": 78291783,
+        "bufferBytes": 112360,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 78291783,
+        "bufferBytes": 112360,
+        "textureBytes": 78179423,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "district",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 0.8,
+        "percentile95": 1,
+        "maximum": 1.2
+      },
+      "completedMilliseconds": {
+        "median": 2.9,
+        "percentile95": 3.2,
+        "maximum": 3.4
+      },
+      "initialMemory": {
+        "ownedBytes": 30341287,
+        "bufferBytes": 85064,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30341287,
+        "bufferBytes": 85064,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    },
+    {
+      "name": "river",
+      "round": 3,
+      "samples": 120,
+      "submissionMilliseconds": {
+        "median": 1.1,
+        "percentile95": 1.4,
+        "maximum": 1.4
+      },
+      "completedMilliseconds": {
+        "median": 3.7,
+        "percentile95": 4.1,
+        "maximum": 4.3
+      },
+      "initialMemory": {
+        "ownedBytes": 30348215,
+        "bufferBytes": 91992,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      },
+      "finalMemory": {
+        "ownedBytes": 30348215,
+        "bufferBytes": 91992,
+        "textureBytes": 30256223,
+        "externalBytes": 3686400
+      }
+    }
+  ],
+  "budgets": {
+    "district": {
+      "medianCompletedMilliseconds": 3.7,
+      "maximumRoundPercentile95Milliseconds": 5.0,
+      "maximumOwnedBytes": 32505856,
+      "maximumGrowthBytes": 0
+    },
+    "river": {
+      "medianCompletedMilliseconds": 4.7,
+      "maximumRoundPercentile95Milliseconds": 6.5,
+      "maximumOwnedBytes": 32505856,
+      "maximumGrowthBytes": 0
+    },
+    "river-pencil": {
+      "medianCompletedMilliseconds": 4.9,
+      "maximumRoundPercentile95Milliseconds": 6.9,
+      "maximumOwnedBytes": 32505856,
+      "maximumGrowthBytes": 0
+    },
+    "reflections-fast": {
+      "medianCompletedMilliseconds": 7.8,
+      "maximumRoundPercentile95Milliseconds": 11.0,
+      "maximumOwnedBytes": 75497472,
+      "maximumGrowthBytes": 0
+    },
+    "reflections-balanced": {
+      "medianCompletedMilliseconds": 8.8,
+      "maximumRoundPercentile95Milliseconds": 11.3,
+      "maximumOwnedBytes": 82837504,
+      "maximumGrowthBytes": 0
+    },
+    "reflections-detailed": {
+      "medianCompletedMilliseconds": 11.7,
+      "maximumRoundPercentile95Milliseconds": 16.4,
+      "maximumOwnedBytes": 112197632,
+      "maximumGrowthBytes": 0
+    },
+    "reflections-pencil": {
+      "medianCompletedMilliseconds": 8.9,
+      "maximumRoundPercentile95Milliseconds": 11.7,
+      "maximumOwnedBytes": 82837504,
+      "maximumGrowthBytes": 0
+    }
+  }
+}

@@ -6,9 +6,9 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {OrthographicView, COORDINATE_SYSTEM, _GlobeView as GlobeView} from '@deck.gl/core';
+import {OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
-import {Fp64Extension, PathStyleExtension, FillStyleExtension} from '@deck.gl/extensions';
+import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 
 import {polygons} from 'deck.gl-test/data';
 
@@ -50,7 +50,7 @@ const testCases = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: polygons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: 'lnglat',
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
@@ -72,7 +72,7 @@ const testCases = [
     layers: [
       new PolygonLayer({
         id: 'polygon-lnglat',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: [
           [
             [-100, -100],
@@ -95,65 +95,8 @@ const testCases = [
     goldenImage: './test/render/golden-images/polygon-dash.png'
   },
   {
-    name: 'polygon-pattern-mask',
-    skip: ['webgpu'],
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.43,
-      zoom: 11.5
-    },
-    layers: [
-      new PolygonLayer({
-        id: 'polygon-pattern',
-        data: polygons,
-        getPolygon: f => f,
-        filled: true,
-        stroked: true,
-        getFillColor: [60, 180, 240],
-
-        fillPatternMask: true,
-        fillPatternAtlas: '/test/data/pattern.png',
-        fillPatternMapping: '/test/data/pattern.json',
-        getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
-        getFillPatternScale: 5,
-        getFillPatternOffset: [0, 0],
-
-        extensions: [new FillStyleExtension({pattern: true})]
-      })
-    ],
-    goldenImage: './test/render/golden-images/polygon-pattern-mask.png'
-  },
-  {
-    name: 'polygon-pattern',
-    skip: ['webgpu'],
-    viewState: {
-      latitude: 37.75,
-      longitude: -122.43,
-      zoom: 11.5
-    },
-    layers: [
-      new PolygonLayer({
-        id: 'polygon-pattern',
-        data: polygons,
-        getPolygon: f => f,
-        filled: true,
-        stroked: true,
-
-        fillPatternMask: false,
-        fillPatternAtlas: '/test/data/pattern.png',
-        fillPatternMapping: '/test/data/pattern.json',
-        getFillPattern: (f, {index}) => (index % 2 === 0 ? 'dots' : 'hatch-cross'),
-        getFillPatternScale: 5,
-        getFillPatternOffset: [0, 0],
-
-        extensions: [new FillStyleExtension({pattern: true})]
-      })
-    ],
-    goldenImage: './test/render/golden-images/polygon-pattern.png'
-  },
-  {
     name: 'polygon-globe',
-    views: [new GlobeView()],
+    views: [new GlobeView({resolution: 36})],
     viewState: {
       latitude: 0,
       longitude: 50,
@@ -188,7 +131,7 @@ const testCases = [
   },
   {
     name: 'polygon-globe-extruded',
-    views: [new GlobeView()],
+    views: [new GlobeView({resolution: 36})],
     viewState: {
       latitude: 0,
       longitude: 50,

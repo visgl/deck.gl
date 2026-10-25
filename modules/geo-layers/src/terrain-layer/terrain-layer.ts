@@ -6,7 +6,6 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
-  COORDINATE_SYSTEM,
   DefaultProps,
   Layer,
   LayersList,
@@ -222,6 +221,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       terrain: {
         skirtHeight: this.state.isTiled ? effectiveMeshMaxError * 2 : 0,
         ...loadOptions?.terrain,
+        shape: 'mesh',
         bounds,
         meshMaxError: effectiveMeshMaxError,
         elevationDecoder
@@ -255,7 +255,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       topRight = [bbox.right, bbox.top];
     }
     const bounds: Bounds = [bottomLeft[0], bottomLeft[1], topRight[0], topRight[1]];
-    const isGlobe = Boolean(viewport.resolution);
+    const isGlobe = viewport.crs?.coordinateFrame === 'geocentric';
     const overlappedBounds = getOverlappedBounds(bounds, this.props.tileSize, isGlobe);
 
     const terrainPromise =
@@ -303,7 +303,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     // Bounds are baked with projectFlat. In GlobeView projectFlat is identity,
     // so tiled terrain meshes are in lng/lat degrees instead of common-space
     // web-mercator units.
-    const isGlobe = Boolean(viewport.resolution);
+    const isGlobe = viewport.crs?.coordinateFrame === 'geocentric';
     const boundingBox = mesh?.header?.boundingBox;
     const hasLngLatBounds =
       boundingBox &&
@@ -311,8 +311,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         ([x, y]) =>
           x >= -MAX_LONGITUDE && x <= MAX_LONGITUDE && y >= -MAX_LATITUDE && y <= MAX_LATITUDE
       );
-    const coordinateSystem =
-      isGlobe && hasLngLatBounds ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN;
+    const coordinateSystem = isGlobe && hasLngLatBounds ? 'lnglat' : 'cartesian';
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,

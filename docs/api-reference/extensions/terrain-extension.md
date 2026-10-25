@@ -9,7 +9,7 @@ To use this extension, first define a terrain source with the prop `operation: '
 
 For each layer that should be fitted to the terrain surface, add the `TerrainExtension` to its `extensions` prop.
 
-The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them. When pairing with a `TerrainLayer` source on `GlobeView`, set the source's `tesselator: 'grid'` so its mesh is valid on both projections.
+The extension works on both `MapView` and `GlobeView`. Terrain cover and height-map FBOs are computed in absolute Mercator common space so the same draw target can be sampled from either projection without re-rendering when the user toggles between them.
 
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>
@@ -29,16 +29,17 @@ const layers = [
   new TerrainLayer({
       id: 'terrain',
       minZoom: 0,
-      maxZoom: 23,
+      maxZoom: 12,
       strategy: 'no-overlap',
       elevationDecoder: {
-        rScaler: 6553.6,
-        gScaler: 25.6,
-        bScaler: 0.1,
-        offset: -10000
+        rScaler: 256,
+        gScaler: 1,
+        bScaler: 1 / 256,
+        offset: -32768
       },
-      elevationData: `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`,
-      texture: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`,
+      elevationData: 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp',
+      texture: 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp',
+      tileSize: 512,
       operation: 'terrain+draw'
     }),
     new GeoJsonLayer({

@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {describe} from 'vitest';
+import {afterAll, describe} from 'vitest';
+import type {Buffer} from '@luma.gl/core';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
 /* eslint-disable callback-return */
-import {GL} from '@luma.gl/webgl/constants';
-import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
@@ -64,7 +64,7 @@ const testCases = [
       new ScatterplotLayer({
         id: 'scatterplot-lnglat',
         data: dataSamples.points,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: 'lnglat',
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
@@ -139,10 +139,11 @@ const testCases = [
         getRadius: d => 1000,
         radiusUnits: 'pixels'
       }),
-      ...[true, false].map(
-        antialiasing =>
+      // Composite the antialiased pass twice to make partial edge coverage easier to inspect.
+      ...[true, true, false].map(
+        (antialiasing, drawIndex) =>
           new ScatterplotLayer({
-            id: `circles-${antialiasing}`,
+            id: `circles-${drawIndex}`,
             data: Array(399)
               .fill()
               .map((x, i) => i),
@@ -151,8 +152,8 @@ const testCases = [
             getRadius: d => 4 + 8 * (d % 2),
             antialiasing,
             parameters: {
-              blendFunc: [GL.ONE, GL.ONE_MINUS_DST_COLOR, GL.SRC_ALPHA, GL.DST_ALPHA],
-              blendEquation: [GL.FUNC_SUBTRACT, GL.FUNC_ADD]
+              depthCompare: 'always',
+              depthWriteEnabled: false
             },
             radiusUnits: 'pixels'
           })
@@ -240,6 +241,40 @@ const testCases = [
   }
 ];
 
+// Exercise actual GPU buffers on both render backends using the existing reference.
+const positionBuffers: Buffer[] = [];
+afterAll(() => {
+  for (const buffer of positionBuffers) {
+    buffer.destroy();
+  }
+});
+const referenceCase = testCases[0];
+const externalBufferCase: TestCase = {
+  ...referenceCase,
+  name: 'scatterplot-lnglat-external-buffer',
+  onBeforeRender: ({deck}) => {
+    const buffer = deck.device.createBuffer({
+      data: new Float32Array(
+        dataSamples.points.flatMap(point => [99, point.COORDINATES[0], point.COORDINATES[1], 0])
+      )
+    });
+    positionBuffers.push(buffer);
+    deck.setProps({
+      layers: [
+        referenceCase.layers[0].clone({
+          data: {
+            length: dataSamples.points.length,
+            attributes: {
+              getPosition: {buffer, size: 3, stride: 16, offset: 4},
+              getRadius: new Float32Array(dataSamples.points.map(point => point.SPACES))
+            }
+          }
+        })
+      ]
+    });
+  }
+};
+
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+  runRenderTestSuite([...testCases, externalBufferCase] as TestCase[], deviceType);
 });

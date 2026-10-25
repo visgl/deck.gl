@@ -72,7 +72,7 @@ type _BitmapLayerProps = {
    * > Note: this prop is experimental.
    *
    * Specifies how image coordinates should be geographically interpreted.
-   * @default COORDINATE_SYSTEM.DEFAULT
+   * @default 'default'
    */
   _imageCoordinateSystem?: CoordinateSystem;
 
@@ -123,13 +123,13 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   static defaultProps = defaultProps;
 
   state!: {
+    subdivisionStep?: number;
     disablePicking?: boolean;
     model?: Model;
     mesh?: any;
-    meshResolution?: number;
     coordinateConversion: number;
     bounds: [number, number, number, number];
-  };
+  } & Layer['state'];
 
   getShaders() {
     return super.getShaders({
@@ -156,7 +156,22 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
-        update: attribute => (attribute.value = this.state.mesh.positions),
+        ...this.usePositionTransforms(),
+        update: function (this: BitmapLayer, attribute) {
+          const {positions} = this.state.mesh;
+          const {transform} = attribute.settings;
+          if (!transform) {
+            attribute.value = positions;
+            return;
+          }
+          // Custom updaters do not run Attribute's accessor transform. Keep the source
+          // mesh untouched so projection/modelMatrix changes always start from input space.
+          const projected = new Float64Array(positions.length);
+          for (let i = 0; i < positions.length; i += 3) {
+            projected.set(transform.call(this, positions.subarray(i, i + 3)), i);
+          }
+          attribute.value = projected;
+        },
         noAlloc
       },
       texCoords: {
@@ -167,6 +182,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
+  // GlobeView switches between a curved GlobeViewport and a flat WebMercatorViewport at
+  // zoom 12. A viewport change alone does not flag props, so check the subdivision step
+  // and image coordinate conversion whenever the viewport changes.
   shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
     return changeFlags.propsOrDataChanged || changeFlags.viewportChanged;
   }
@@ -174,7 +192,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     // setup model first
     const attributeManager = this.getAttributeManager()!;
-    const meshResolution = this.context.viewport.resolution;
 
     if (changeFlags.extensionsChanged) {
       this.state.model?.destroy();
@@ -182,18 +199,23 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       attributeManager.invalidateAll();
     }
 
-    if (props.bounds !== oldProps.bounds || meshResolution !== this.state.meshResolution) {
+    const subdivisionStep = this.getSubdivisionStep();
+    if (
+      props.bounds !== oldProps.bounds ||
+      changeFlags.projectionChanged ||
+      this.state.subdivisionStep !== subdivisionStep
+    ) {
       const oldMesh = this.state.mesh;
-      const mesh = this._createMesh(meshResolution);
+      const mesh = this._createMesh();
       this.state.model!.setVertexCount(mesh.vertexCount);
       for (const key in mesh) {
         if (oldMesh && oldMesh[key] !== mesh[key]) {
           attributeManager.invalidate(key);
         }
       }
-      this.setState({mesh, meshResolution, ...this._getCoordinateUniforms(meshResolution)});
+      this.setState({mesh, subdivisionStep, ...this._getCoordinateUniforms()});
     } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
-      this.setState(this._getCoordinateUniforms(meshResolution));
+      this.setState(this._getCoordinateUniforms());
     }
   }
 
@@ -239,7 +261,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  protected _createMesh(resolution?: number) {
+  protected _createMesh() {
     const {bounds} = this.props;
 
     let normalizedBounds = bounds;
@@ -260,7 +282,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ];
     }
 
-    return createMesh(normalizedBounds, resolution);
+    return createMesh(normalizedBounds, this.getSubdivisionStep());
   }
 
   protected _getModel(): Model {
@@ -311,16 +333,21 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     }
   }
 
-  _getCoordinateUniforms(resolution?: number) {
+  _getCoordinateUniforms() {
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== 'default') {
+    // Preprojection has already converted the mesh positions to common space.
+    // Geographic/Mercator fragment conversions cannot use these coordinates.
+    if (!this.state.preproject && imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
       if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
       }
 
       // The default behavior (linearly interpolated tex coords)
-      const defaultImageCoordinateSystem = resolution ? 'lnglat' : 'cartesian';
+      const defaultImageCoordinateSystem =
+        this.context.viewport.isGeospatial && this.context.viewport.crs?.signature !== 'OSMTile512'
+          ? 'lnglat'
+          : 'cartesian';
       imageCoordinateSystem = imageCoordinateSystem === 'lnglat' ? 'lnglat' : 'cartesian';
 
       if (imageCoordinateSystem === 'lnglat' && defaultImageCoordinateSystem === 'cartesian') {

@@ -7,8 +7,7 @@ type SolidPolygonShaderType = 'top' | 'side';
 function getSolidPolygonVertexHelpers() {
   return /* wgsl */ `\
 fn project_offset_normal(vector: vec3<f32>) -> vec3<f32> {
-  if (project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT ||
-      project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
+  if (project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC) {
     return normalize(vector * project.commonUnitsPerWorldUnit);
   }
   return project_normal(vector);

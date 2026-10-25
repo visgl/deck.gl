@@ -97,10 +97,10 @@ The container to append the auto-created canvas to.
 
 * Default: `false`
 
-Flag to enable GPU debug mode. Also requires an extra luma.gl import:
+Flag to enable GPU debug mode. Import the luma.gl WebGL debug subpath to register the optional debugging tools. The tools are loaded on demand when debug mode is enabled:
 
 ```js
-import '@luma.gl/debug';
+import '@luma.gl/webgl/debug';
 import {Deck} from '@deck.gl/core';
 
 new Deck({
@@ -259,6 +259,7 @@ Notes:
 
 - `layerFilter` does not override the visibility if the layer is disabled via `visible: false` or `pickable: false` props.
 - All the lifecycle methods other than `draw` are still triggered even a if a layer is filtered out using this method.
+- To select a layer's initial viewport, accept it in `layerFilter` with `isPicking: false` and `renderPass: 'screen'`. The first matching viewport supplies its initial projection context. The filter runs before initialization, so use layer props rather than initialized state. If none match, initialization uses the shared viewport context.
 
 #### `views` (View | View[]) {#views}
 
