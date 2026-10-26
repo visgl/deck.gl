@@ -29,6 +29,19 @@ test.each([
     expected: [255, 0, 0, 255]
   },
   {
+    name: 'additive children keep drawing after coplanar parents',
+    additive: true,
+    coplanar: true,
+    expected: [0, 255, 0, 255]
+  },
+  {
+    name: 'additive children under a replaced ancestor keep their draw order',
+    additive: true,
+    coplanar: true,
+    replacedRoot: true,
+    expected: [0, 255, 0, 255]
+  },
+  {
     name: 'targets without stencil retain ordinary depth testing',
     noStencil: true,
     expected: [255, 0, 0, 255]
@@ -78,6 +91,8 @@ test.each([
   async ({
     stencil = 255,
     additive,
+    coplanar,
+    replacedRoot,
     noStencil,
     filterChild,
     skipped,
@@ -105,14 +120,15 @@ test.each([
       left: number,
       right: number,
       depth: number,
-      color: string
+      color: string,
+      refine = additive ? TILE_REFINEMENT.ADD : TILE_REFINEMENT.REPLACE
     ): Tile3D => {
       const tile = {
         id,
         parent,
         selected: true,
         type: 'scenegraph',
-        refine: additive ? TILE_REFINEMENT.ADD : TILE_REFINEMENT.REPLACE,
+        refine,
         viewportIds: ['coverage'],
         content: {gltf: new GroupNode([]), cartographicOrigin: [0, 0, 0]},
         tileDrawn: true
@@ -120,9 +136,22 @@ test.each([
       fixtures.push({tile, left, right, depth, color});
       return tile;
     };
-    const parent = addTile('parent', null, -1, 1, -0.75, '1, 0, 0, 1');
+    // A distant replacement root is fully masked by its additive descendants.
+    const root = replacedRoot
+      ? addTile('root', null, -1, 1, 0.9, '1, 0, 1, 1', TILE_REFINEMENT.REPLACE)
+      : null;
+    const parent = addTile('parent', root, -1, 1, -0.75, '1, 0, 0, 1');
     const intermediate = {...parent, id: 'skipped', parent, selected: false} as Tile3D;
-    const child = addTile('child', skipped ? intermediate : parent, -1, 0, 0.5, '0, 1, 0, 1');
+    // A coplanar child is visible only if it draws after its parent, as without coverage.
+    const childDepth = coplanar ? -0.75 : 0.5;
+    const child = addTile(
+      'child',
+      skipped ? intermediate : parent,
+      -1,
+      0,
+      childDepth,
+      '0, 1, 0, 1'
+    );
     if (filterChild) child.viewportIds = ['other-viewport'];
     if (blended) Object.assign(child.content.gltf, {materials: [{alphaMode: 'BLEND'}]});
     if (siblings) {

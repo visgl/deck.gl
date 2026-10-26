@@ -53,7 +53,8 @@ type CoverageNode = {tile: Tile3D; layer: Layer; children: CoverageNode[]};
 type CoverageEntry = {path: Tile3D[]; ancestorMask: number; descendantMask: number};
 
 /**
- * Draws replacement descendants first and masks only their own ancestors.
+ * Draws replacement descendants first and masks only their own ancestors. Additive
+ * parents keep their ordinary coarse-to-fine order and rely on depth testing alone.
  * Single-child replacement chains share one reserved stencil bit. Branching subtrees
  * use separate bits, cleared between siblings while preserving ancestor coverage.
  */
@@ -99,6 +100,10 @@ export class Tile3DRefinementCoverage {
       if (parent) nodes.get(parent)!.children.push(node);
       else roots.push(node);
     }
+    const replaces = (node: CoverageNode): boolean =>
+      node.children.length > 0 && node.tile.refine === TILE_REFINEMENT.REPLACE;
+    // Without a selected replacement there is nothing to mask; keep the original order.
+    if (!Array.from(nodes.values()).some(replaces)) return layers;
 
     const ordered: Layer[] = [];
     let overflow = false;
@@ -108,8 +113,10 @@ export class Tile3DRefinementCoverage {
       ancestorMask: number,
       sharedMask: number
     ): void => {
-      const replacesChildren =
-        node.children.length > 0 && node.tile.refine === TILE_REFINEMENT.REPLACE;
+      const replacesChildren = replaces(node);
+      // Only replacement parents draw after the descendants that mask them. Additive
+      // parents keep drawing first, so coplanar children resolve as without coverage.
+      if (!replacesChildren) ordered.push(node.layer);
       const descendantMask = replacesChildren ? sharedMask || this.bits[path.length] : 0;
       if (replacesChildren && !descendantMask) overflow = true;
       const branch = replacesChildren && !sharedMask ? [...path, node.tile] : path;
@@ -125,7 +132,7 @@ export class Tile3DRefinementCoverage {
         ancestorMask,
         descendantMask: descendantMask || 0
       });
-      ordered.push(node.layer);
+      if (replacesChildren) ordered.push(node.layer);
     };
     for (const root of roots) visit(root, [], 0, 0);
     if (overflow) {
