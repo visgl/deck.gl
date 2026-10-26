@@ -623,8 +623,12 @@ export default class GlobeController extends Controller<MapState> {
             interpolator = new GlobeInertiaInterpolator({axis, totalAngle});
           }
           // Bounded views must interpolate to the constrained endpoint. A rigid spin
-          // ignores that endpoint and could finish outside the configured limits.
-          const hasBounds = viewportProps.maxBounds || hasBearingLimits(viewportProps);
+          // ignores that endpoint and could finish outside the configured limits. Map
+          // inertia keeps its bearing, so bearing limits alone keep the raw longitude
+          // target and its fling direction.
+          const hasBounds =
+            viewportProps.maxBounds ||
+            (viewportProps.navigation !== 'map' && hasBearingLimits(viewportProps));
           if (hasBounds) interpolator = this.transition.transitionInterpolator;
 
           const newControllerState = this.controllerState.panEnd();

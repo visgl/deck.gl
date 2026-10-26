@@ -601,6 +601,34 @@ test('GlobeController bearing transitions within limits stay on the configured t
   controller.finalize();
 });
 
+test.each([-1, 1])(
+  'GlobeController map fling keeps its direction with only bearing limits %s',
+  direction => {
+    let now = 0;
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+    const controller = createController({
+      controller: {inertia: 900},
+      initialViewState: {zoom: 2, minBearing: -45, maxBearing: 45}
+    });
+    controller.handleEvent(gesture('panstart'));
+    controller.handleEvent(gesture('panmove', 50 - direction * 5));
+    now = 16;
+    controller.handleEvent(gesture('panmove', 50 - direction * 50));
+    let previousLongitude = controller.props.longitude;
+    controller.handleEvent(gesture('panend', 50 - direction * 50));
+    let travel = 0;
+    for (let frame = 0; frame < 9; frame++) {
+      advance(controller, 100);
+      const step = getBearingDelta(controller.props.longitude, previousLongitude);
+      expect(step * direction, 'each frame continues the fling').toBeGreaterThanOrEqual(0);
+      travel += step;
+      previousLongitude = controller.props.longitude;
+    }
+    expect(Math.abs(travel), 'the fling travels more than half a turn').toBeGreaterThan(180);
+    controller.finalize();
+  }
+);
+
 test('GlobeController constrained fling finishes inside bounds', () => {
   let now = 0;
   vi.spyOn(Date, 'now').mockImplementation(() => now);
