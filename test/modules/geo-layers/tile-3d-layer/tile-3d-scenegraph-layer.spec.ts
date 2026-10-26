@@ -47,6 +47,29 @@ test.each([
     expected: [255, 0, 0, 255]
   },
   {
+    name: 'targets without stencil keep coplanar children after their parents',
+    noStencil: true,
+    coplanar: true,
+    expected: [0, 255, 0, 255]
+  },
+  {
+    name: 'losing the stencil target restores the original order',
+    lostStencil: true,
+    coplanar: true,
+    expected: [0, 255, 0, 255]
+  },
+  {
+    name: 'gaining a stencil target starts coverage',
+    gainedStencil: true,
+    expected: [0, 255, 0, 255]
+  },
+  {
+    name: 'frames mixing targets keep the original order',
+    mixedTargets: true,
+    coplanar: true,
+    expected: [0, 255, 0, 255]
+  },
+  {
     name: 'filtered children leave parent coverage intact',
     filterChild: true,
     expected: [255, 0, 0, 255]
@@ -104,6 +127,9 @@ test.each([
     coplanar,
     replacedRoot,
     noStencil,
+    lostStencil,
+    gainedStencil,
+    mixedTargets,
     filterChild,
     skipped,
     blended,
@@ -118,12 +144,16 @@ test.each([
     const renderer = new DeckRenderer(device);
     const picker = new DeckPicker(device);
     const pickPass = new PickLayersPass(device);
-    const framebuffer = device.createFramebuffer({
-      width: 32,
-      height: 16,
-      colorAttachments: ['rgba8unorm'],
-      depthStencilAttachment: noStencil ? 'depth16unorm' : 'depth24plus-stencil8'
-    });
+    const createTarget = (withStencil: boolean) =>
+      device.createFramebuffer({
+        width: 32,
+        height: 16,
+        colorAttachments: ['rgba8unorm'],
+        depthStencilAttachment: withStencil ? 'depth24plus-stencil8' : 'depth16unorm'
+      });
+    const stencilTarget = createTarget(!noStencil);
+    const unmaskedTarget = createTarget(false);
+    let framebuffer = gainedStencil ? unmaskedTarget : stencilTarget;
     type TileFixture = {tile: Tile3D; left: number; right: number; depth: number; color: string};
     const fixtures: TileFixture[] = [];
     const addTile = (
@@ -267,13 +297,31 @@ test.each([
       });
       layerManager.setLayers([layer]);
       layer.setState({tileset3d: tileset});
-      layerManager.updateLayers();
-      expect(layer.getSubLayers()).toHaveLength(fixtures.length);
-      renderOptions.layers = layerManager.getLayers();
-      for (let attempt = 0; attempt < 4; attempt++) {
-        renderer.renderLayers({...renderOptions, target: framebuffer});
-        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      const renderFrames = async (count: number) => {
+        for (let frame = 0; frame < count; frame++) {
+          // Like Deck, apply pending layer updates before drawing each frame.
+          layerManager.updateLayers();
+          renderOptions.layers = layerManager.getLayers();
+          // Like a terrain height map, an earlier pass may draw into a target without stencil.
+          if (mixedTargets) renderer.renderLayers({...renderOptions, target: unmaskedTarget});
+          renderer.renderLayers({...renderOptions, target: framebuffer});
+          await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        }
+      };
+      if (blendedModel) {
+        // Draw once without the child so its blended models join an already reordered plan.
+        Object.assign(child, {selected: false});
+        await renderFrames(1);
+        Object.assign(child, {selected: true});
+        layer.setNeedsUpdate();
       }
+      await renderFrames(4);
+      if (lostStencil || gainedStencil) {
+        // For example, a post-processing effect without stencil is added or removed.
+        framebuffer = lostStencil ? unmaskedTarget : stencilTarget;
+        await renderFrames(3);
+      }
+      expect(layer.getSubLayers()).toHaveLength(fixtures.length);
       const pixels = device.readPixelsToArrayWebGL(framebuffer, {
         sourceWidth: 32,
         sourceHeight: 16
@@ -296,9 +344,7 @@ test.each([
       }
 
       if (blendedModel) {
-        // The first draw dropped the stale plan and requested one in the original order.
-        expect(layerManager.needsUpdate()).toBeTruthy();
-        layerManager.updateLayers();
+        // The child's first draw dropped the reordered plan and replanned in the original order.
         const sublayerTiles = layer
           .getSubLayers()
           .map(sublayer => (sublayer.props as {tile?: Tile3D}).tile);
@@ -329,7 +375,8 @@ test.each([
       renderer.finalize();
       picker.finalize();
       pickPass.cleanup();
-      framebuffer.destroy();
+      stencilTarget.destroy();
+      unmaskedTarget.destroy();
     }
   }
 );

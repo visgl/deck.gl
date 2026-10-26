@@ -499,7 +499,11 @@ export default class Tile3DLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         return layer;
       })
       .filter(Boolean);
-    return this.state.refinementCoverage.updateLayers(layers, this.props._refinementStencil);
+    return this.state.refinementCoverage.updateLayers(
+      layers,
+      this.props._refinementStencil,
+      this.context.device
+    );
   }
 }
 

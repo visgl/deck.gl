@@ -29,10 +29,34 @@ function enablesBlending(parameters?: Record<string, unknown> | null): boolean {
   return parameters.blend === true || BLEND_PARAMETERS.some(key => parameters[key] !== undefined);
 }
 
-/** Layer draw options; the picking pass activates the picking shader module. */
+/** Layer draw options; picking and shadow passes set their shader module props. */
 type DrawOptions<DataT> = Parameters<ScenegraphLayer<DataT>['draw']>[0] & {
-  shaderModuleProps?: {picking?: {isActive?: boolean | number}};
+  shaderModuleProps?: {
+    picking?: {isActive?: boolean | number};
+    shadow?: {drawToShadowMap?: boolean};
+  };
 };
+
+/** Passes that draw coverage layers. Shadow maps store depth only and never mask. */
+type CoveragePass = 'color' | 'picking' | 'shadow';
+
+/** Whether the default WebGL framebuffer has a stencil buffer. */
+function canvasCanMask(device: Device): boolean {
+  const {gl} = device as Device & {gl?: WebGL2RenderingContext};
+  return device.type === 'webgl' && Boolean(gl?.getContextAttributes()?.stencil);
+}
+
+/** Whether a render pass target lets WebGL stencil coverage run. */
+function targetCanMask(device: Device, renderPass: RenderPass): boolean {
+  if (device.type !== 'webgl') return false;
+  const framebuffer = renderPass.props.framebuffer as
+    | (Framebuffer & {handle: WebGLFramebuffer | null})
+    | null;
+  if (framebuffer?.depthStencilAttachment) {
+    return framebuffer.depthStencilAttachment.texture.format.includes('stencil');
+  }
+  return (!framebuffer || framebuffer.handle === null) && canvasCanMask(device);
+}
 
 /** Defers creation through the ordinary layer update so attributes stay synchronized. */
 export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
@@ -91,8 +115,13 @@ export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
 
   draw(options: DrawOptions<DataT>): void {
     if (this.props.refinementCoverage) {
-      const isPicking = Boolean(options.shaderModuleProps?.picking?.isActive);
-      this.props.refinementCoverage.draw(this, isPicking, () => super.draw(options));
+      const {picking, shadow} = options.shaderModuleProps || {};
+      const pass: CoveragePass = picking?.isActive
+        ? 'picking'
+        : shadow?.drawToShadowMap
+          ? 'shadow'
+          : 'color';
+      this.props.refinementCoverage.draw(this, pass, () => super.draw(options));
     } else {
       super.draw(options);
     }
@@ -121,15 +150,26 @@ export class Tile3DRefinementCoverage {
   private viewport: Viewport | null = null;
   private path: Tile3D[] = [];
   /**
-   * Whether the latest color pass could apply coverage. Picking targets always have
-   * stencil, so picking follows this to hit what is visible.
+   * Whether color targets can mask, learned from color passes. Until one draws, the
+   * canvas decides. Picking targets always have stencil, so picking masks only when
+   * the draw list was reordered for color.
    */
-  private colorCoverage = false;
+  private colorMasking: boolean | null = null;
+  /** Whether the latest checked color pass could not mask. */
+  private sawUnmaskedTarget = false;
+  /** The latest color pass whose target was checked. */
+  private checkedPass: RenderPass | null = null;
+  /** Whether the current selection has a coverage plan, whether or not it is applied. */
+  private planned = false;
 
-  /** Returns a postorder draw list and initializes its ancestry coverage plan. */
-  updateLayers(layers: Layer[], stencilMask: number): Layer[] {
+  /**
+   * Returns a postorder draw list and initializes its ancestry coverage plan. Layers keep
+   * their original order when color targets cannot mask, so coplanar children still win.
+   */
+  updateLayers(layers: Layer[], stencilMask: number, device: Device): Layer[] {
     this.entries.clear();
     this.renderPass = null;
+    this.planned = false;
     this.bits = Array.from({length: 8}, (_, index) => 1 << index).filter(
       bit => (stencilMask & bit) !== 0
     );
@@ -191,35 +231,32 @@ export class Tile3DRefinementCoverage {
       this.entries.clear();
       return layers;
     }
+    this.planned = true;
+    // Reordered parents would cover coplanar children wherever masking cannot run.
+    if (!(this.colorMasking ?? canvasCanMask(device))) {
+      this.entries.clear();
+      return layers;
+    }
     const selectedLayers = new Set(ordered);
     return ordered.concat(layers.filter(layer => !selectedLayers.has(layer)));
   }
 
   /** Applies scoped WebGL stencil state without changing color, depth, or geometry. */
-  draw(layer: Tile3DScenegraphLayer<any>, isPicking: boolean, draw: () => void): void {
+  draw(layer: Tile3DScenegraphLayer<any>, pass: CoveragePass, draw: () => void): void {
+    if (pass === 'shadow') return draw();
+    if (pass === 'color') this.checkColorTarget(layer);
     const entry = layer.props.tile && this.entries.get(layer.props.tile);
     if (!entry || !(entry.ancestorMask | entry.descendantMask)) return draw();
     if (!layer.isOpaque()) {
       // Models created after this plan blend with what is behind them, so they must not
       // mask ancestors. Fall back to depth testing now and replan in the original order.
-      this.entries.clear();
-      layer.parent?.setNeedsUpdate();
+      this.replan(layer);
       return draw();
     }
     const {device, viewport, renderPass} = layer.context;
-    if (device.type !== 'webgl') return draw();
+    if (!targetCanMask(device, renderPass)) return draw();
     const webglDevice = device as Device & {gl: WebGL2RenderingContext};
     const webglPass = renderPass as RenderPass & {glParameters: Record<string, any>};
-    const framebuffer = renderPass.props.framebuffer as
-      | (Framebuffer & {handle: WebGLFramebuffer | null})
-      | null;
-    const hasStencil = framebuffer?.depthStencilAttachment
-      ? framebuffer.depthStencilAttachment.texture.format.includes('stencil')
-      : (!framebuffer || framebuffer.handle === null) &&
-        webglDevice.gl.getContextAttributes()?.stencil;
-    if (!isPicking) this.colorCoverage = Boolean(hasStencil);
-    // Without stencil in the color target, depth testing decides what is visible and picked.
-    if (!hasStencil || (isPicking && !this.colorCoverage)) return draw();
 
     if (this.renderPass !== renderPass || this.viewport !== viewport) {
       this.renderPass = renderPass;
@@ -256,5 +293,28 @@ export class Tile3DRefinementCoverage {
     } finally {
       webglPass.glParameters = previousParameters;
     }
+  }
+
+  /** Records whether this color pass can mask, replanning when the draw order does not fit. */
+  private checkColorTarget(layer: Tile3DScenegraphLayer<any>): void {
+    const {device, renderPass} = layer.context;
+    if (renderPass === this.checkedPass) return;
+    this.checkedPass = renderPass;
+    const canMask = targetCanMask(device, renderPass);
+    // A masking pass right after an unmasked one does not count, so frames that mix targets,
+    // such as a terrain height map and the screen, keep the original order instead of
+    // alternating.
+    this.colorMasking = canMask && !this.sawUnmaskedTarget;
+    this.sawUnmaskedTarget = !canMask;
+    // Replan when the draw order no longer matches: a reordered list that cannot be masked
+    // lets coplanar parents cover their children, and an unordered list cannot mask.
+    if (this.planned && this.colorMasking !== this.entries.size > 0) this.replan(layer);
+  }
+
+  /** Stops applying the current plan and asks the Tile3DLayer for a new draw list. */
+  private replan(layer: Tile3DScenegraphLayer<any>): void {
+    this.entries.clear();
+    this.planned = false;
+    layer.parent?.setNeedsUpdate();
   }
 }
