@@ -151,3 +151,55 @@ test('GridCellLayer - packed geometry matches the model buffer layout', () => {
     onError: err => expect(err).toBeFalsy()
   });
 });
+
+test('ColumnLayer - cap regenerates extruded geometry and is ignored for flat columns', () => {
+  // diskResolution 8 => 9 vertices around the edge
+  const FLAT_VERTEX_COUNT = 9 * 3 + 1;
+  // capSegs: dome = max(2, round(8 / 4)) = 2, cone = 1
+  const DOME_VERTEX_COUNT = 9 * 2 * (1 + 2) + 2 + 1;
+  const CONE_VERTEX_COUNT = 9 * 2 * (1 + 1) + 1 + 1;
+
+  testLayer({
+    Layer: ColumnLayer,
+    testCases: [
+      {
+        title: 'extruded dome',
+        props: {
+          data: [{position: [0, 0]}],
+          diskResolution: 8,
+          extruded: true,
+          cap: 'dome'
+        },
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.fillModel!.vertexCount, 'dome fill vertex count').toBe(
+            DOME_VERTEX_COUNT
+          );
+          expectUniqueGeometryLayout(layer);
+        }
+      },
+      {
+        title: 'update cap',
+        updateProps: {cap: 'cone'},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.fillModel!.vertexCount, 'cone fill vertex count').toBe(
+            CONE_VERTEX_COUNT
+          );
+        }
+      },
+      {
+        title: 'flat stroked column ignores cap',
+        updateProps: {extruded: false, stroked: true},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.fillModel!.vertexCount, 'flat fill vertex count').toBe(
+            FLAT_VERTEX_COUNT
+          );
+          // The stroke drops the flat top: diskResolution + 1 vertices
+          expect(layer.state.strokeModel!.vertexCount, 'stroke vertex count').toBe(
+            FLAT_VERTEX_COUNT - 9
+          );
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+});
