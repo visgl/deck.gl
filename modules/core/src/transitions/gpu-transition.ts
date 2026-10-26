@@ -68,6 +68,7 @@ export abstract class GPUTransitionBase<SettingsT extends TransitionSettings>
 
   start(transitionSettings: SettingsT, numInstances: number, duration: number = Infinity) {
     this.settings = transitionSettings;
+    this.attributeInTransition.numInstances = this.attribute.numInstances;
     this.currentStartIndices = this.attribute.startIndices;
     this.currentLength = getAttributeBufferLength(this.attribute, numInstances);
     this.transition.start({...transitionSettings, duration});

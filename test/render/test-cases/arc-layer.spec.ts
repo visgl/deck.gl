@@ -9,7 +9,7 @@ import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suit
 import type {TestCase} from '../deck-test-utils';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
-import {COORDINATE_SYSTEM, Deck, MapView, OrthographicView} from '@deck.gl/core';
+import {Deck, MapView, OrthographicView} from '@deck.gl/core';
 import {ArcLayer} from '@deck.gl/layers';
 
 import * as dataSamples from 'deck.gl-test/data';
@@ -264,7 +264,7 @@ function createAntialiasingGoldenVariant(antialiasing: boolean): ArcLayer {
       sourcePosition: [sourcePosition[0] + xOffset, sourcePosition[1], 0],
       targetPosition: [targetPosition[0] + xOffset, targetPosition[1], 0]
     })),
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     getSourcePosition: data => data.sourcePosition,
     getTargetPosition: data => data.targetPosition,
     getSourceColor: [200, 60, 0],

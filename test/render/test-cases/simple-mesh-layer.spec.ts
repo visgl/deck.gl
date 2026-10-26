@@ -6,13 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {
-  OrbitView,
-  COORDINATE_SYSTEM,
-  LightingEffect,
-  AmbientLight,
-  PointLight
-} from '@deck.gl/core';
+import {OrbitView, LightingEffect, AmbientLight, PointLight} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {Matrix4} from '@math.gl/core';
 import {CubeGeometry, SphereGeometry} from '@luma.gl/engine';
@@ -55,7 +49,7 @@ const testCases = [
         sizeScale: 30,
         modelMatrix: new Matrix4().translate([0, 0, 1000]),
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getColor: d => d.color,
         getOrientation: d => d.orientation
@@ -85,7 +79,7 @@ const testCases = [
         data: meshSampleData,
         mesh: cube,
         sizeScale: 30,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
         getPosition: d => d.position,
         getColor: d => d.color,
@@ -110,7 +104,7 @@ const testCases = [
         mesh: cube,
         sizeScale: 30,
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         modelMatrix: new Matrix4().rotateX((-45 / 180) * Math.PI),
         getPosition: d => d.position,
         getColor: d => d.color,

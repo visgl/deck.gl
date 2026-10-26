@@ -7,7 +7,7 @@ import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {device} from '@deck.gl/test-utils/vitest';
+import {device, gl} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
 import * as mapsApi from './mock-maps-api';
@@ -166,6 +166,169 @@ for (const interleaved of [true, false]) {
 
     overlay.finalize();
   });
+}
+
+/** Release Deck-owned WebGL contexts before Chromium evicts the shared test device. */
+function finalizeOverlay(overlay: GoogleMapsOverlay): void {
+  const deckDevice = overlay._deck?.device;
+  overlay.finalize();
+  if (deckDevice && deckDevice !== device) {
+    deckDevice.loseDevice();
+    deckDevice.destroy();
+  }
+}
+
+for (const positioningFirst of [true, false]) {
+  test(`GoogleMapsOverlay#interleaved context (positioning first:${positioningFirst})`, async () => {
+    const map = new mapsApi.Map({
+      width: 1,
+      height: 1,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType: mapsApi.RenderingType.VECTOR
+    });
+    // Defer the mock's synchronous callbacks so both Google callback orders can be tested.
+    const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
+      map._overlays.add(mapOverlay);
+    });
+    const overlay = new GoogleMapsOverlay({interleaved: true, layers: []});
+
+    try {
+      overlay.setMap(map);
+      const positioningOverlay = overlay._positioningOverlay;
+      const webglOverlay = overlay._overlay;
+
+      if (positioningFirst) {
+        positioningOverlay.onAdd();
+        expect(overlay._deck, 'Deck waits for the shared context').toBeNull();
+      }
+      webglOverlay.onContextRestored({gl});
+      const deck = overlay._deck;
+      if (!positioningFirst) {
+        positioningOverlay.onAdd();
+      }
+
+      expect(overlay._deck, 'Positioning does not replace the shared Deck').toBe(deck);
+      expect(deck.props.gl, 'Deck is created with the supplied context').toBe(gl);
+      await expect.poll(() => deck.isInitialized).toBe(true);
+      expect(deck.getCanvas(), 'Deck uses the supplied context canvas').toBe(gl.canvas);
+      expect(deck.props._customRender, 'Map owns redraws').toBeTypeOf('function');
+    } finally {
+      finalizeOverlay(overlay);
+      addOverlaySpy.mockRestore();
+    }
+  });
+}
+
+test('GoogleMapsOverlay#non-interleaved context', async () => {
+  const map = new mapsApi.Map({
+    width: 1,
+    height: 1,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    renderingType: mapsApi.RenderingType.VECTOR
+  });
+  const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
+    map._overlays.add(mapOverlay);
+  });
+  const overlay = new GoogleMapsOverlay({interleaved: false, layers: []});
+
+  try {
+    overlay.setMap(map);
+    overlay._positioningOverlay.onAdd();
+    const deck = overlay._deck;
+    expect(deck, 'Positioning creates Deck before the context arrives').toBeTruthy();
+
+    overlay._overlay.onContextRestored({gl});
+    expect(overlay._deck, 'Context callback does not replace Deck').toBe(deck);
+    expect(deck.props.gl, 'Deck does not use the supplied context').toBeNull();
+    await expect.poll(() => deck.isInitialized).toBe(true);
+    expect(deck.getCanvas(), 'Deck keeps its own canvas').not.toBe(gl.canvas);
+    expect(deck.getCanvas().parentElement.parentElement.id).toBe('deck-gl-google-maps-container');
+  } finally {
+    finalizeOverlay(overlay);
+    addOverlaySpy.mockRestore();
+  }
+});
+
+for (const interleaved of [true, false]) {
+  for (const positioningFirst of [true, false]) {
+    for (const changeBeforeContext of [true, false]) {
+      test(`GoogleMapsOverlay#vector rendering mode (interleaved:${interleaved}, positioning first:${positioningFirst}, change before context:${changeBeforeContext})`, async () => {
+        const map = new mapsApi.Map({
+          width: 1,
+          height: 1,
+          longitude: 0,
+          latitude: 0,
+          zoom: 1,
+          renderingType: mapsApi.RenderingType.VECTOR
+        });
+        const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
+          map._overlays.add(mapOverlay);
+        });
+        const overlay = new GoogleMapsOverlay({interleaved, layers: []});
+        const spies = [addOverlaySpy];
+
+        try {
+          overlay.setMap(map);
+          if (changeBeforeContext) {
+            overlay.setProps({interleaved: !interleaved});
+          }
+          if (positioningFirst) {
+            overlay._positioningOverlay.onAdd();
+            if (interleaved) {
+              expect(overlay._deck, 'Deck waits for the shared context').toBeNull();
+            } else {
+              expect(overlay._deck, 'Positioning still creates the standalone Deck').toBeTruthy();
+            }
+          }
+
+          overlay._overlay.onContextRestored({gl});
+          if (!positioningFirst) {
+            overlay._positioningOverlay.onAdd();
+          }
+          const deck = overlay._deck;
+          expect(deck.props.gl, 'Deck uses the context selected at binding').toBe(
+            interleaved ? gl : null
+          );
+          await expect.poll(() => deck.isInitialized).toBe(true);
+          expect(deck.getCanvas() === gl.canvas, 'Canvas matches the selected mode').toBe(
+            interleaved
+          );
+          deck.animationLoop.stop();
+          if (!changeBeforeContext) {
+            overlay.setProps({interleaved: !interleaved});
+          }
+
+          const redrawSpy = vi.spyOn(deck, 'redraw');
+          const drawLayersSpy = vi.spyOn(deck, '_drawLayers');
+          spies.push(redrawSpy, drawLayersSpy);
+          map.opts.longitude = 0.01;
+          overlay._overlay.onDraw({gl, transformer: map.transformer});
+
+          if (interleaved) {
+            expect(
+              drawLayersSpy,
+              'Map motion draws directly into the shared context'
+            ).toHaveBeenCalledWith('google-vector', {clearCanvas: false});
+            expect(
+              redrawSpy,
+              'Shared rendering does not defer another map repaint'
+            ).not.toHaveBeenCalled();
+          } else {
+            expect(redrawSpy, 'Map motion redraws the standalone canvas').toHaveBeenCalled();
+            expect(deck.props.width, 'Standalone canvas retains its CSS width').toBe(1);
+            expect(deck.props.height, 'Standalone canvas retains its CSS height').toBe(1);
+          }
+        } finally {
+          spies.forEach(spy => spy.mockRestore());
+          finalizeOverlay(overlay);
+        }
+      });
+    }
+  }
 }
 
 test('GoogleMapsOverlay#style', () => {

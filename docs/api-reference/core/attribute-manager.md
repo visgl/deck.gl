@@ -159,7 +159,21 @@ Parameters:
 On WebGPU, the result may contain more layouts than there are attributes: the `64Low` parts of `float64` attributes bound to external buffers read from one shared zero buffer, declared as an additional layout. Pass this result to the `Model` as is, rather than assembling layouts from individual attributes.
 
 
+#### `getGPUVectors` {#getgpuvectors}
+
+Returns a map of shader attribute names to luma.gl `GPUVector` or `GPUConstant` objects. Active transition attributes replace their source attributes in the result. Pass an attribute map, such as `getChangedAttributes()`, to retrieve a subset.
+
+GPU constants preserve raw values and formats; normalized colors are normalized when bound to shaders. See [Attribute.getGPUVector](./attribute.md#getgpuvector).
+
+```typescript
+const columns = attributeManager.getGPUVectors();
+```
+
 ## Remarks
+
+GPU vectors borrow the manager's existing buffers without copying them. Reacquire the map after updates that may replace storage, and do not retain it beyond the manager's lifetime.
+
+Supplying GPU vectors through `data.attributes` is not supported by this initial integration.
 
 ### Attribute Type
 

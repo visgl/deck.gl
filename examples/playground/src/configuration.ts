@@ -21,7 +21,13 @@ import {DracoWorkerLoader} from '@loaders.gl/draco';
 import {Tiles3DLoader, CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
 // Note: deck already registers JSONLoader...
-registerLoaders([CSVLoader, DracoWorkerLoader]);
+registerLoaders([
+  {
+    ...CSVLoader,
+    options: {...CSVLoader.options, csv: {...CSVLoader.options.csv, shape: 'object-row-table'}}
+  },
+  DracoWorkerLoader
+]);
 
 export default {
   // Classes that should be instantiatable by JSON converter

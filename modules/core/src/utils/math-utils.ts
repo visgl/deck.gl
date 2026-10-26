@@ -8,6 +8,8 @@ import {Vector3, NumericArray} from '@math.gl/core';
 
 import type {Matrix4} from '@math.gl/core';
 
+export {worldToPixels, pixelsToWorld} from '@math.gl/web-mercator';
+
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4(): number[] {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];

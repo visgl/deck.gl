@@ -3,10 +3,11 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {MapView, OrbitView} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
 import shadow from '@deck.gl/core/shaderlib/shadow/shadow';
 import {Matrix4, Vector3} from '@math.gl/core';
+import {pixelsToWorld} from '@math.gl/web-mercator';
 
 const TEST_VIEWPORT1 = new MapView().makeViewport({
   width: 800,
@@ -180,7 +181,7 @@ test('shadow#getUniforms', () => {
   uniforms = shadow.getUniforms({
     project: {
       viewport,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      coordinateSystem: 'cartesian'
     },
     shadowMatrices: [viewMatrix],
     drawToShadowMap: true,
@@ -193,5 +194,69 @@ test('shadow#getUniforms', () => {
       insideClipSpace(result),
       `Shadow viewProjection matrix in Identity mode is correct!`
     ).toBe(value.result);
+  }
+});
+
+test('shadow#getUniforms high pitch', () => {
+  const width = 800;
+  const height = 600;
+  const viewMatrix = new Matrix4().lookAt({
+    eye: new Vector3([1, -0.5, -1]).negate()
+  });
+
+  // With the default fov, the top edge of the viewport reaches the horizon at pitch ~71.6
+  for (const pitch of [60, 70, 72, 75, 80, 85]) {
+    const viewport = new MapView().makeViewport({
+      width,
+      height,
+      viewState: {latitude: 37.75, longitude: -122.43, zoom: 10, pitch}
+    });
+    const {pixelUnprojectionMatrix} = viewport;
+    const uniforms = shadow.getUniforms({
+      project: {viewport},
+      shadowMatrices: [viewMatrix],
+      drawToShadowMap: true,
+      dummyShadowMaps: [true]
+    });
+    const toShadowClip = xyz => uniforms.viewProjectionMatrix0.transform(xyz);
+
+    // Every visible ground point is inside the shadow map
+    let visibleCount = 0;
+    let coveredCount = 0;
+    for (let y = 5; y < height; y += 50) {
+      for (let x = 5; x < width; x += 50) {
+        const near = pixelsToWorld([x, y, -1], pixelUnprojectionMatrix);
+        const far = pixelsToWorld([x, y, 1], pixelUnprojectionMatrix);
+        const t = near[2] / (near[2] - far[2]);
+        if (t >= 0 && t <= 1) {
+          visibleCount++;
+          const ground = [near[0] + (far[0] - near[0]) * t, near[1] + (far[1] - near[1]) * t, 0];
+          if (insideClipSpace(toShadowClip(ground))) {
+            coveredCount++;
+          }
+        }
+      }
+    }
+    expect(visibleCount, `pitch ${pitch}: ground is visible`).toBeGreaterThan(0);
+    expect(coveredCount, `pitch ${pitch}: visible ground is in the shadow map`).toBe(visibleCount);
+
+    // The shadow map is no larger than the view frustum
+    const frustumCorners = [];
+    for (const [x, y] of [
+      [0, 0],
+      [width, 0],
+      [0, height],
+      [width, height]
+    ]) {
+      frustumCorners.push(toShadowClip(pixelsToWorld([x, y, -1], pixelUnprojectionMatrix)));
+      frustumCorners.push(toShadowClip(pixelsToWorld([x, y, 1], pixelUnprojectionMatrix)));
+    }
+    for (const axis of [0, 1]) {
+      const values = frustumCorners.map(corner => corner[axis]);
+      expect(
+        Math.min(...values) <= -1 + 1e-6 && Math.max(...values) >= 1 - 1e-6,
+        `pitch ${pitch}: shadow map does not extend past the view frustum`
+      ).toBe(true);
+    }
   }
 });

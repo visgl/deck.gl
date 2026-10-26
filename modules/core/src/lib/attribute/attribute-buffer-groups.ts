@@ -335,6 +335,7 @@ export default class AttributeBufferGroups {
     assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
     assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
 
+    // Pack complete physical rows; shader views may only expose parts of a row.
     if (attribute.isConstant) {
       const constantValue = attribute.getConstantValue();
       if (!constantValue) {
