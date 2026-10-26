@@ -261,6 +261,7 @@ Notes:
 
 - `layerFilter` does not override the visibility if the layer is disabled via `visible: false` or `pickable: false` props.
 - All the lifecycle methods other than `draw` are still triggered even a if a layer is filtered out using this method.
+- To select a layer's initial viewport, accept it in `layerFilter` with `isPicking: false` and `renderPass: 'screen'`. The first matching viewport supplies its initial projection context. The filter runs before initialization, so use layer props rather than initialized state. If none match, initialization uses the shared viewport context.
 
 #### `views` (View | View[]) {#views}
 

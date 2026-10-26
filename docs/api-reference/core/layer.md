@@ -241,7 +241,7 @@ Normally only used when the application wants to work with coordinates that are 
 
 * Default: `'default'`
 
-Specifies how layer positions and offsets should be geographically interpreted. One of:
+Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` are applied. Built-in coordinate systems include:
 
 - `'default'`
 - `'cartesian'`
@@ -249,7 +249,11 @@ Specifies how layer positions and offsets should be geographically interpreted. 
 - `'meter-offsets'`
 - `'lnglat-offsets'`
 
-The default is to interpret positions as latitude and longitude, however it is also possible to interpret positions as meter offsets added to projection center specified by the `coordinateOrigin` prop.
+`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
+
+In [multi-view applications](../../developer-guide/views.md), the first viewport allowed by the layer filter determines the layer's CPU coordinate conversion. Use separate layer instances when views require different packed coordinate systems.
+
+`'default'` uses WGS84 in geospatial views and Cartesian coordinates in non-geospatial views. Shader-supported source CRSs retain their attribute coordinates. Other source CRSs are converted on the CPU to WGS84, or to the target CRS of a custom projection.
 
 See the article on [Coordinate Systems](../../developer-guide/coordinate-systems.md) for details.
 
@@ -257,7 +261,7 @@ See the article on [Coordinate Systems](../../developer-guide/coordinate-systems
 
 * Default: `[0, 0, 0]`
 
-Specifies a reference point for coordinates that are expressed as offsets. Used when the `coordinateSystem` is set to one of the following modes:
+For an absolute CRS, this value is added in source CRS units after `modelMatrix`, before projection. For offset modes, it specifies the geographic reference point:
 
 - `'cartesian'` (optional)
 - `'meter-offsets'` (required)
@@ -846,22 +850,24 @@ Returns:
 
 #### `projectPosition` {#projectposition}
 
-Projects a map coordinate to world coordinate using the current viewport settings and the current coordinate system. Can be useful to calculate world space angle and distances.
+To calculate common-space angles and distances, use `projectPosition` to convert coordinates from a resolved source CRS. With the default parameters, the result uses the same common-space origin as this layer's shader. Set `autoOffset: false` for absolute common-space coordinates.
 
 Parameters:
 
-* `coordinates` (number[]) - `[x, y, z]` in this layer's coordinate system.
-* `params` (object, optional) - Projection parameters override. It accepts the following fields:
-  - `viewport` (Viewport) - defaults to `this.context.viewport`.
-  - `modelMatrix` (Matrix4) - defaults to `this.props.modelMatrix`.
-  - `coordinateOrigin` (number[3]) - defaults to `this.props.coordinateOrigin`.
-  - `coordinateSystem` (string) - defaults to `this.props.coordinateSystem`.
-  - `fromCoordinateOrigin` (number[3]) - defaults to passed `coordinateOrigin`.
-  - `fromCoordinateSystem` (string) - defaults to passed `coordinateSystem`.
+* `coordinates` (number[]) - `[x, y, z]` in the source CRS.
+* `params` (object, optional):
+  - `sourceCrs` (CRSDescriptor) - absolute CRS of the supplied coordinates. Defaults to the layer's resolved CRS. Passing a descriptor selects that CRS instead of the layer's coordinate-system mode.
+  - `coordinateSystem` (`'cartesian'` | `'meter-offsets'`) - selects local coordinates or meter offsets and takes precedence over `sourceCrs`.
+  - `viewport` ([Viewport](./viewport.md)) - supplies the target projection; defaults to the layer's active viewport.
+  - `modelMatrix` (Matrix4 | null) - defaults to `this.props.modelMatrix`. Pass `null` to skip the layer matrix.
+  - `coordinateOrigin` (number[3]) - input origin applied before CRS conversion; defaults to `this.props.coordinateOrigin`.
+  - `autoOffset` (boolean) - defaults to `true`. Set to `false` to return absolute common-space coordinates.
+
+The supplied CRS and origin also determine the automatic common-space offset. Use `autoOffset: false` to compare positions projected with different parameter sets.
 
 Returns:
 
-* World coordinates in `[x, y]`.
+* Common-space coordinates in `[x, y, z]`.
 
 ### Layer Picking Methods
 

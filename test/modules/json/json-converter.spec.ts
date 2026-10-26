@@ -4,7 +4,6 @@
 
 import {test, expect, vi} from 'vitest';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {MapController} from '@deck.gl/core';
 import {JSONConfiguration, JSONConverter} from '@deck.gl/json';
 import {JSON_CONFIGURATION, log, calculateRadius} from './json-configuration-for-deck';
@@ -31,11 +30,12 @@ test('JSONConverter#convert', () => {
   expect(deckProps.views.length, 'JSONConverter converted views').toBe(2);
   expect(deckProps.controller, 'Should evaluate constants.').toBe(MapController);
 
-  deckProps = jsonConverter.convert(COMPLEX_JSON);
+  deckProps = jsonConverter.convert({...COMPLEX_JSON, primitive: '@@#GL.TRIANGLES'});
   const pointCloudLayerProps = deckProps.layers[3].props;
-  expect(pointCloudLayerProps.coordinateSystem, 'Should evaluate enums.').toBe(
-    COORDINATE_SYSTEM.METER_OFFSETS
+  expect(deckProps.primitive, 'Should evaluate enums.').toBe(
+    JSON_CONFIGURATION.enumerations.GL.TRIANGLES
   );
+  expect(pointCloudLayerProps.coordinateSystem, 'Should retain CRS strings.').toBe('meter-offsets');
 
   expect(deckProps.layers[0].props.getRadius, 'Should evaluate functions.').toEqual(
     calculateRadius({base: 10, exponent: 3})

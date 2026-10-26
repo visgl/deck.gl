@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {MapView, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {MapView, OrbitView} from '@deck.gl/core';
 import project from '@deck.gl/core/shaderlib/project/project';
 import shadow from '@deck.gl/core/shaderlib/shadow/shadow';
 import {Matrix4, Vector3} from '@math.gl/core';
@@ -180,7 +180,7 @@ test('shadow#getUniforms', () => {
   uniforms = shadow.getUniforms({
     project: {
       viewport,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      coordinateSystem: 'cartesian'
     },
     shadowMatrices: [viewMatrix],
     drawToShadowMap: true,

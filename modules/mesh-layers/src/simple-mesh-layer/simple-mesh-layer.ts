@@ -220,7 +220,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     emptyTexture: Texture;
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
-  };
+  } & Layer['state'];
 
   getShaders() {
     return super.getShaders({
@@ -267,6 +267,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         size: 3,
         accessor: 'getPosition'
       },
@@ -336,7 +337,13 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
-      composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
+      composeModelMatrix:
+        !_instanced ||
+        shouldComposeModelMatrix(
+          viewport,
+          this.state.sourceCrs?.signature || coordinateSystem,
+          Boolean(this.state.preproject)
+        ),
       flatShading: !this.state.hasNormals
     };
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
