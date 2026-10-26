@@ -8,6 +8,27 @@ import {Tile3D, TILE_REFINEMENT} from '@loaders.gl/tiles';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import type TileProcessingScheduler from './tile-processing-scheduler';
 
+/** Parameters that composite fragments with the pixels behind them. */
+const BLEND_PARAMETERS = [
+  'blendColorOperation',
+  'blendColorSrcFactor',
+  'blendColorDstFactor',
+  'blendAlphaOperation',
+  'blendAlphaSrcFactor',
+  'blendAlphaDstFactor',
+  'blendEquation',
+  'blendFunc'
+];
+
+/**
+ * Whether render parameters request blending, as glTF `BLEND` and transmission materials do.
+ * Deck's default alpha blending leaves fragments with full alpha opaque, so it does not count.
+ */
+function enablesBlending(parameters?: Record<string, unknown> | null): boolean {
+  if (!parameters || parameters.blend === false) return false;
+  return parameters.blend === true || BLEND_PARAMETERS.some(key => parameters[key] !== undefined);
+}
+
 /** Defers creation through the ordinary layer update so attributes stay synchronized. */
 export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
   DataT,
@@ -19,7 +40,11 @@ export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
 > {
   static layerName = 'Tile3DScenegraphLayer';
 
-  state!: ScenegraphLayer<DataT>['state'] & {scenegraphPending?: boolean};
+  state!: ScenegraphLayer<DataT>['state'] & {
+    scenegraphPending?: boolean;
+    /** Whether the created scene's own model parameters enable blending. */
+    blendedModels?: boolean;
+  };
 
   updateState(parameters: UpdateParameters<this>): void {
     const retryScenegraph =
@@ -34,7 +59,29 @@ export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
   protected _updateScenegraph(): void {
     this.state.scenegraphPending = !this.props.tileProcessingScheduler.run(this, () => {
       super._updateScenegraph();
+      // WebGL draws replace model parameters with layer parameters, so record
+      // the scene's own blending, including custom `getScene` models, beforehand.
+      this.state.blendedModels = this.state.models.some(model =>
+        enablesBlending(model.parameters as Record<string, unknown>)
+      );
     });
+  }
+
+  /**
+   * Whether drawn pixels replace what is behind them, so they may mask replacement ancestors.
+   * Fragment shader alpha cannot be inspected; translucent custom models must enable blending
+   * in their model parameters.
+   */
+  isOpaque(): boolean {
+    const {opacity, parameters, tile} = this.props;
+    const gltf = tile?.content?.gltf;
+    const materials: {alphaMode?: string}[] | undefined = gltf?.materials || gltf?.json?.materials;
+    return !(
+      opacity < 1 ||
+      enablesBlending(parameters) ||
+      this.state?.blendedModels ||
+      materials?.some(material => material.alphaMode === 'BLEND')
+    );
   }
 
   draw(options: Parameters<ScenegraphLayer<DataT>['draw']>[0]): void {
@@ -82,13 +129,7 @@ export class Tile3DRefinementCoverage {
       const tile = (layer.props as {tile?: Tile3D}).tile;
       if (!tile?.selected) continue;
       // Blended geometry and custom sublayers cannot establish opaque pixel coverage.
-      if (
-        !(layer instanceof Tile3DScenegraphLayer) ||
-        layer.props.opacity < 1 ||
-        (tile.content?.gltf?.materials || tile.content?.gltf?.json?.materials)?.some(
-          (material: {alphaMode?: string}) => material.alphaMode === 'BLEND'
-        )
-      ) {
+      if (!(layer instanceof Tile3DScenegraphLayer) || !layer.isOpaque()) {
         return layers;
       }
       nodes.set(tile, {tile, layer, children: []});
@@ -147,6 +188,13 @@ export class Tile3DRefinementCoverage {
   draw(layer: Tile3DScenegraphLayer<any>, draw: () => void): void {
     const entry = layer.props.tile && this.entries.get(layer.props.tile);
     if (!entry || !(entry.ancestorMask | entry.descendantMask)) return draw();
+    if (!layer.isOpaque()) {
+      // Models created after this plan blend with what is behind them, so they must not
+      // mask ancestors. Fall back to depth testing now and replan in the original order.
+      this.entries.clear();
+      layer.parent?.setNeedsUpdate();
+      return draw();
+    }
     const {device, viewport, renderPass} = layer.context;
     if (device.type !== 'webgl') return draw();
     const webglDevice = device as Device & {gl: WebGL2RenderingContext};

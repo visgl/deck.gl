@@ -62,6 +62,16 @@ test.each([
     expected: [255, 0, 0, 255]
   },
   {
+    name: 'blending layer parameters retain ordinary depth testing',
+    layerBlending: true,
+    expected: [255, 0, 0, 255]
+  },
+  {
+    name: 'custom blended models retain ordinary depth testing',
+    blendedModel: true,
+    expected: [255, 0, 0, 255]
+  },
+  {
     name: 'unrelated sibling branches can reuse reserved bits',
     siblings: true,
     stencil: 48,
@@ -97,6 +107,8 @@ test.each([
     filterChild,
     skipped,
     blended,
+    layerBlending,
+    blendedModel,
     siblings,
     chainLength = 0,
     expected
@@ -178,16 +190,26 @@ test.each([
       data: '',
       _refinementStencil: stencil,
       pickable: true,
-      parameters: {depthCompare: 'less-equal', depthWriteEnabled: true},
+      parameters: {
+        depthCompare: 'less-equal',
+        depthWriteEnabled: true,
+        // Replacing blend factors keep output pixels comparable to the opaque cases.
+        ...(layerBlending && {blendColorSrcFactor: 'one', blendColorDstFactor: 'zero'})
+      },
       _subLayerProps: {
         scenegraph: {
           getScene: (_scenegraph, {layer: sceneLayer}) => {
-            const {left, right, depth, color} = fixtures.find(
+            const {tile, left, right, depth, color} = fixtures.find(
               fixture => fixture.tile === sceneLayer.props.tile
             )!;
             return new GroupNode([
               new ModelNode({
                 model: new Model(device, {
+                  // Only scene creation reveals the model's blending, after the draw plan.
+                  parameters:
+                    blendedModel && tile === child
+                      ? {blend: true, blendColorSrcFactor: 'one', blendColorDstFactor: 'zero'}
+                      : undefined,
                   modules: [picking],
                   geometry: new Geometry({
                     topology: 'triangle-list',
@@ -271,6 +293,16 @@ test.each([
           Array.from(pixels.slice(middleOffset, middleOffset + 4)),
           'the shared bit preserves intermediate coverage outside the finest child'
         ).toEqual([255, 255, 0, 255]);
+      }
+
+      if (blendedModel) {
+        // The first draw dropped the stale plan and requested one in the original order.
+        expect(layerManager.needsUpdate()).toBeTruthy();
+        layerManager.updateLayers();
+        const sublayerTiles = layer
+          .getSubLayers()
+          .map(sublayer => (sublayer.props as {tile?: Tile3D}).tile);
+        expect(sublayerTiles).toEqual(fixtures.map(fixture => fixture.tile));
       }
 
       // Exercise the actual picking pass and its standard framebuffer allocation.
