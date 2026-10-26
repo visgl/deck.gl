@@ -165,6 +165,29 @@ test('Tileset2D#coverage LOD prioritizes closer prefetch ancestors before safety
   tileset.finalize();
 });
 
+test('Tileset2D#coverage LOD requests the globe fallback below the coverage floor', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+
+  tileset.update(new GlobeViewport({...testViewState, width: 100, height: 100, zoom: 6}));
+  const prefetchTiles = Array.from(tileset._cache.values()).filter(tile => tile.isPrefetch);
+
+  expect(
+    tileset.selectedTiles!.every(tile => tile.zoom === 6),
+    'zoom 6 tiles are selected'
+  ).toBe(true);
+  expect(tileset._cache.get('4-6-4')?.isPrefetch, 'zoom 4 fallback is prefetched').toBe(true);
+  expect(
+    prefetchTiles.every(tile => tile.zoom === 4),
+    'only the fallback zoom is prefetched'
+  ).toBe(true);
+
+  tileset.finalize();
+});
+
 test('Tileset2D#coverage LOD ignores subdivision resolution on flat viewports', () => {
   const tileset = new Tileset2D({
     getTileData,

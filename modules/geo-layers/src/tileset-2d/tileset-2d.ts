@@ -719,7 +719,7 @@ export class Tileset2D {
     const seen = new Set<string>();
     for (const selectedTile of this._selectedTiles) {
       const selectedZoom = this.getTileZoom(selectedTile.index);
-      if (selectedZoom > minZoom) {
+      if (selectedZoom > fallbackZoom) {
         this._updateCoveragePrefetchTiles(selectedTile.index, minZoom, fallbackZoom, seen);
       }
     }
@@ -743,8 +743,12 @@ export class Tileset2D {
     }
 
     for (let priority = 0; priority < coverageZooms.length; priority++) {
-      const index = this._getAncestorIndex(selectedIndex, coverageZooms[priority]);
-      this._addCoveragePrefetchTile(index, priority, seen);
+      // On globes, a tile selected between the fallback and coverage floors only has the
+      // fallback zoom below it
+      if (coverageZooms[priority] < selectedZoom) {
+        const index = this._getAncestorIndex(selectedIndex, coverageZooms[priority]);
+        this._addCoveragePrefetchTile(index, priority, seen);
+      }
     }
   }
 
