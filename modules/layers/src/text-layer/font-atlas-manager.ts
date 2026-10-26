@@ -395,14 +395,16 @@ export default class FontAtlasManager {
  * Space to reserve around each glyph in the atlas. A signed distance field extends
  * `radius * (1 - cutoff)` pixels beyond the glyph edge before reaching zero. Outlines are drawn
  * inside that range, so a smaller padding clips them at the edges of the glyph frame.
- * The padding is capped so that a glyph up to twice `fontSize` wide still fits the atlas width.
+ * The padding is capped so that the widest bitmap TinySDF can draw still fits the atlas width.
+ * TinySDF clips glyphs to `fontSize + 3 * padding` pixels and adds `padding` on each side, so
+ * its bitmaps are at most `fontSize + 5 * padding` pixels wide.
  */
 function getGlyphPadding({sdf, buffer, radius, cutoff, fontSize}: Required<FontSettings>): number {
   if (!sdf) {
     return buffer;
   }
   const fieldPadding = Math.ceil(radius * (1 - cutoff));
-  const maxPadding = Math.floor(MAX_CANVAS_WIDTH / 2 - fontSize);
+  const maxPadding = Math.floor((MAX_CANVAS_WIDTH - fontSize) / 5);
   return Math.max(buffer, Math.min(fieldPadding, maxPadding));
 }
 

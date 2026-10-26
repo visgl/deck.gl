@@ -54,10 +54,8 @@ test('TextLayer - fontAtlasCacheLimit - less than hard limit', () => {
   ).toBeTruthy();
 });
 
-test('FontAtlasManager - SDF glyph frames hold the full distance field', () => {
-  // The default `buffer` is smaller than the distance field, see #9032
-  const fontAtlasManager = new FontAtlasManager();
-  fontAtlasManager.setProps({sdf: true, characterSet: 'Hgjy_|.'});
+/** Largest alpha on the border of each glyph frame. Zero means the distance field fits the frame. */
+function getFrameEdgeAlphas(fontAtlasManager: FontAtlasManager): Record<string, number> {
   const {data: canvas, mapping} = fontAtlasManager.atlas!;
   const context = canvas.getContext('2d')!;
 
@@ -75,8 +73,18 @@ test('FontAtlasManager - SDF glyph frames hold the full distance field', () => {
     }
     edgeAlphas[char] = maxEdgeAlpha;
   }
+  return edgeAlphas;
+}
 
-  expect(edgeAlphas, 'distance field reaches zero inside each glyph frame').toEqual({
+test('FontAtlasManager - SDF glyph frames hold the full distance field', () => {
+  // The default `buffer` is smaller than the distance field, see #9032
+  const fontAtlasManager = new FontAtlasManager();
+  fontAtlasManager.setProps({sdf: true, characterSet: 'Hgjy_|.'});
+
+  expect(
+    getFrameEdgeAlphas(fontAtlasManager),
+    'distance field reaches zero inside each glyph frame'
+  ).toEqual({
     H: 0,
     g: 0,
     j: 0,
@@ -85,6 +93,16 @@ test('FontAtlasManager - SDF glyph frames hold the full distance field', () => {
     '|': 0,
     '.': 0
   });
+});
+
+test('FontAtlasManager - SDF glyph frames hold the full distance field with a large font', () => {
+  const fontAtlasManager = new FontAtlasManager();
+  fontAtlasManager.setProps({sdf: true, fontSize: 512, characterSet: 'Hg'});
+
+  expect(
+    getFrameEdgeAlphas(fontAtlasManager),
+    'distance field reaches zero inside each glyph frame'
+  ).toEqual({H: 0, g: 0});
 });
 
 test('FontAtlasManager - SDF glyph padding fits the atlas with a large radius', () => {
