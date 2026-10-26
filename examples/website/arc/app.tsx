@@ -47,7 +47,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 30
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 type CountyProperties = {
   /** county name */

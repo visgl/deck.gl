@@ -13,7 +13,7 @@ const AIR_PORTS =
 
 const map = new maplibregl.Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  style: 'https://tiles.openfreemap.org/styles/positron',
   center: [0.45, 51.47],
   zoom: 0
 });
@@ -36,7 +36,7 @@ const deckOverlay = new DeckOverlay({
       onClick: info =>
         // eslint-disable-next-line
         info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
-      // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
+      // beforeId: 'waterway_line_label' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',

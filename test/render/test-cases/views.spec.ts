@@ -3,13 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {SphereGeometry} from '@luma.gl/engine';
-import {
-  COORDINATE_SYSTEM,
-  _GlobeView as GlobeView,
-  OrthographicView,
-  MapView,
-  FirstPersonView
-} from '@deck.gl/core';
+import {_GlobeView as GlobeView, OrthographicView, MapView, FirstPersonView} from '@deck.gl/core';
 import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {MVTLayer} from '@deck.gl/geo-layers';
@@ -68,7 +62,7 @@ const testCases = [
       new ScatterplotLayer({
         id: 'orthographic-64',
         opacity: 0.1,
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: dataSamples.getPoints100K().map(p => [p[0] + 10000, p[1] + 10000]),
         getPosition: d => d,
         getRadius: 0,
@@ -101,7 +95,7 @@ const testCases = [
     const id = `globe-mvt${binary ? '-binary' : ''}`;
     return {
       name: id,
-      views: new GlobeView(),
+      views: new GlobeView({resolution: 36}),
       viewState: {
         longitude: -100,
         latitude: 80,
@@ -112,7 +106,7 @@ const testCases = [
           id: 'earth-sphere',
           data: [{position: [0, 0, 0]}],
           mesh: new SphereGeometry({radius: EARTH_RADIUS_METERS, nlat: 18, nlong: 36}),
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           getColor: [255, 255, 255]
         }),
         new MVTLayer({

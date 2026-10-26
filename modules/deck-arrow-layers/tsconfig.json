@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "preserveSymlinks": true
+  },
+  "references": [
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../deck-gpu-layers"
+    }
+  ]
+}
