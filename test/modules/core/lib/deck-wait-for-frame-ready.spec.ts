@@ -14,8 +14,8 @@ const DATA = [{position: [0, 0]}];
 function createDeck(props: DeckProps = {}) {
   return new Deck({
     device,
-    width: 10,
-    height: 10,
+    width: 1,
+    height: 1,
     initialViewState: {longitude: 0, latitude: 0, zoom: 1},
     ...props
   });
