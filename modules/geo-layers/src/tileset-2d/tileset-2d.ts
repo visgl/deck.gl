@@ -720,6 +720,10 @@ export class Tileset2D {
         this._updateCoveragePrefetchTiles(selectedTile.index, minZoom, fallbackZoom, seen);
       }
     }
+    // `isSelected` still holds the previous selection until updateTileStates runs. Compare
+    // against the new selection so a tile that was selected before zooming in stays as coverage.
+    const selectedTiles = new Set(this._selectedTiles);
+    this._prefetchTiles = this._prefetchTiles.filter(tile => !selectedTiles.has(tile));
   }
 
   private _updateCoveragePrefetchTiles(
@@ -757,10 +761,8 @@ export class Tileset2D {
     seen.add(id);
 
     const tile = this._getTile(index, true);
-    if (tile && !tile.isSelected) {
-      tile.isPrefetch = true;
-      this._prefetchTiles.push(tile);
-    }
+    tile.isPrefetch = true;
+    this._prefetchTiles.push(tile);
   }
 
   private _getAncestorIndex(index: TileIndex, zoom: number): TileIndex {

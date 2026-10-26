@@ -180,6 +180,33 @@ test('Tileset2D#coverage LOD ignores subdivision resolution on flat viewports', 
   tileset.finalize();
 });
 
+test('Tileset2D#coverage LOD keeps the previous selection as coverage when zooming in', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxRequests: 1,
+    onTileLoad: () => {}
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, zoom: 11}));
+  const parent = tileset._cache.get('585-783-11')!;
+  expect(parent.isSelected, 'zoom 11 selects the parent tile').toBe(true);
+
+  tileset.update(testViewport);
+
+  expect(parent.isSelected, 'parent tile is no longer selected').toBe(false);
+  expect(parent.isPrefetch, 'parent tile becomes coverage').toBe(true);
+  expect(parent.isLoading, 'parent tile request is not aborted').toBe(true);
+  expect(
+    (tileset as any)._getRequestPriority(parent),
+    'parent tile request stays queued'
+  ).toBeGreaterThanOrEqual(0);
+  expect(tileset._cache.get('292-391-10')?.isLoading, 'stale coverage request is aborted').toBe(
+    false
+  );
+
+  tileset.finalize();
+});
+
 test('Tileset2D#coverage LOD keeps immediate child placeholders over coarse ancestors', () => {
   const tileset = new Tileset2D({
     getTileData: () => new Promise(() => {}),
