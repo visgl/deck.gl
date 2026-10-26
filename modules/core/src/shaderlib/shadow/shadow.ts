@@ -149,14 +149,42 @@ type ShadowModuleBindings = {
   shadow_uShadowMap1: Texture;
 };
 
-function screenToCommonSpace(xyz: number[], pixelUnprojectionMatrix: number[]): number[] {
-  const [x, y, z] = xyz;
-  const coord = pixelsToWorld([x, y, z], pixelUnprojectionMatrix);
-
-  if (Number.isFinite(z)) {
-    return coord;
+/**
+ * Returns the corners of the view frustum in common space. For geospatial viewports the frustum
+ * is clipped to z >= 0, since the visible geometry is assumed to be on or above the ground.
+ */
+function getFrustumCorners(viewport: Viewport): number[][] {
+  const {width, height, pixelUnprojectionMatrix} = viewport;
+  const screenCorners = [
+    [0, 0],
+    [width, 0],
+    [width, height],
+    [0, height]
+  ];
+  const near = screenCorners.map(([x, y]) => pixelsToWorld([x, y, -1], pixelUnprojectionMatrix));
+  const far = screenCorners.map(([x, y]) => pixelsToWorld([x, y, 1], pixelUnprojectionMatrix));
+  if (!viewport.isGeospatial) {
+    return near.concat(far);
   }
-  return [coord[0], coord[1], 0];
+
+  // Frustum vertices above the ground, plus the points where frustum edges cross the ground.
+  // At high pitch the far plane crosses the ground, so the visible area ends at the far plane
+  // instead of where the corner rays hit the ground.
+  const corners = near.concat(far).filter(corner => corner[2] >= 0);
+  for (let i = 0; i < 4; i++) {
+    const j = (i + 1) % 4;
+    for (const [a, b] of [
+      [near[i], far[i]],
+      [near[i], near[j]],
+      [far[i], far[j]]
+    ]) {
+      if (a[2] < 0 !== b[2] < 0) {
+        const t = a[2] / (a[2] - b[2]);
+        corners.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 0]);
+      }
+    }
+  }
+  return corners.length > 0 ? corners : near.concat(far);
 }
 
 function getViewportCenterPosition({
@@ -228,21 +256,7 @@ function getViewProjectionMatrices({
   shadowBounds?: (ShadowBounds | null)[];
 }): Matrix4[] {
   const projectionMatrices: Matrix4[] = [];
-  const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
-  const farZ = viewport.isGeospatial ? undefined : 1;
-  const corners = [
-    [0, 0, farZ], // top left ground
-    [viewport.width, 0, farZ], // top right ground
-    [0, viewport.height, farZ], // bottom left ground
-    [viewport.width, viewport.height, farZ], // bottom right ground
-    [0, 0, -1], // top left near
-    [viewport.width, 0, -1], // top right near
-    [0, viewport.height, -1], // bottom left near
-    [viewport.width, viewport.height, -1] // bottom right near
-  ].map(pixel =>
-    // @ts-expect-error z may be undefined
-    screenToCommonSpace(pixel, pixelUnprojectionMatrix)
-  );
+  const corners = getFrustumCorners(viewport);
 
   for (let i = 0; i < shadowMatrices.length; i++) {
     const shadowMatrix = shadowMatrices[i];
@@ -269,14 +283,20 @@ function getViewProjectionMatrices({
 // eslint-disable-next-line complexity
 function createShadowUniforms(
   opts: Partial<ShadowModuleProps>
-): ShadowModuleBindings & ShadowModuleUniforms {
+): Partial<ShadowModuleBindings> & ShadowModuleUniforms {
   const {shadowEnabled = true, project: projectProps} = opts;
   if (!shadowEnabled || !projectProps || !opts.shadowMatrices || !opts.shadowMatrices.length) {
+    const uniforms = {drawShadowMap: false, useShadowMap: false};
+    // Passes that leave the LightingEffect out (picking, masks) still call getUniforms, with
+    // empty props. Keep the shadow maps already bound then: undefined bindings would unbind
+    // them, and luma.gl skips draws with missing texture bindings.
+    if (!opts.dummyShadowMap) {
+      return uniforms;
+    }
     return {
-      drawShadowMap: false,
-      useShadowMap: false,
-      shadow_uShadowMap0: opts.dummyShadowMap!,
-      shadow_uShadowMap1: opts.dummyShadowMap!
+      ...uniforms,
+      shadow_uShadowMap0: opts.dummyShadowMap,
+      shadow_uShadowMap1: opts.dummyShadowMap
     };
   }
   const projectUniforms = project.getUniforms(projectProps) as ProjectUniforms;

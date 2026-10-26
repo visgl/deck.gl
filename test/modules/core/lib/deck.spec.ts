@@ -3,11 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {Deck, Layer, log, MapView} from '@deck.gl/core';
+import {Deck, DirectionalLight, Layer, LightingEffect, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
 import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
+import {Device} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -73,6 +74,61 @@ function finalizeOwnedDeck(deck: Deck): void {
 }
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
+
+const gpuDebugTestCases = [
+  {name: 'default', props: {}, expected: false},
+  {name: 'enabled', props: {debug: true}, expected: true},
+  {name: 'device override off', props: {debug: true, deviceProps: {debug: false}}, expected: false},
+  {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true},
+  {
+    name: 'device override unset',
+    props: {debug: true, deviceProps: {debug: undefined}},
+    expected: true
+  }
+];
+
+webglTest.each(gpuDebugTestCases)('Deck#GPU debug $name', async ({props, expected}) => {
+  const defaultDebug = Device.defaultProps.debug;
+  let deck: Deck | undefined;
+  try {
+    Device.defaultProps.debug = !expected;
+    deck = new Deck({
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      ...props
+    });
+    await waitForRender(deck);
+    expect(deck.device!.props.debug).toBe(expected);
+  } finally {
+    Device.defaultProps.debug = defaultDebug;
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
+webglTest.each(gpuDebugTestCases)(
+  'Deck#GPU debug $name forwards to attached context',
+  async ({props, expected}) => {
+    const defaultDebug = Device.defaultProps.debug;
+    let deck: Deck | undefined;
+    try {
+      Device.defaultProps.debug = !expected;
+      const canvas = document.createElement('canvas');
+      deck = new Deck({
+        gl: canvas.getContext('webgl2'),
+        width: 1,
+        height: 1,
+        viewState: {longitude: 0, latitude: 0, zoom: 0},
+        ...props
+      });
+      await waitForRender(deck);
+      expect(deck.device!.props.debug).toBe(expected);
+    } finally {
+      Device.defaultProps.debug = defaultDebug;
+      if (deck) finalizeOwnedDeck(deck);
+    }
+  }
+);
 
 test('Deck#constructor', async () => {
   const callbacks = {
@@ -483,6 +539,48 @@ webglTest('Deck#rendering, picking, logging', async () => {
         } catch (error) {
           log.priority = 0;
           reject(error);
+        }
+      }
+    });
+  });
+});
+
+webglTest('Deck#picking under a shadow light', async () => {
+  await new Promise<void>((resolve, reject) => {
+    const deck = new Deck({
+      device,
+      width: 1,
+      height: 1,
+
+      viewState: {
+        longitude: 0,
+        latitude: 0,
+        zoom: 12
+      },
+
+      effects: [
+        new LightingEffect({
+          sun: new DirectionalLight({direction: [-1, -1, -2], _shadow: true})
+        })
+      ],
+      layers: [
+        new ScatterplotLayer({
+          data: [{position: [0, 0]}],
+          radiusMinPixels: 100,
+          pickable: true
+        })
+      ],
+
+      onAfterRender: () => {
+        try {
+          const info = deck.pickObject({x: 0, y: 0});
+          expect(info && info.index, 'Picked object under a shadow light').toBe(0);
+          resolve();
+        } catch (error) {
+          reject(error);
+        } finally {
+          // Release the Deck even if picking throws: later tests share the device
+          deck.finalize();
         }
       }
     });
