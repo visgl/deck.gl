@@ -75,7 +75,7 @@ Each value in `data.attributes` may be one of the following formats:
 - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
   + `buffer` ([Buffer](https://luma.gl/docs/api-reference/core/resources/buffer))
   + `value` (TypedArray)
-  + `type` ("uint8" | "sint8" | "unorm8" | "snorm8" | "uint16" | "sint16" | "unorm16" | "snorm16" | "uint32" | "sint32" | "float32") - A WebGPU-style data type, see [VertexFormat](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat).
+  + `type` ("uint8" | "sint8" | "unorm8" | "snorm8" | "uint16" | "sint16" | "unorm16" | "snorm16" | "uint32" | "sint32" | "float32" | "float64") - A WebGPU-style data type, see [VertexFormat](https://luma.gl/docs/api-guide/gpu/gpu-attributes#vertexformat). `"float64"` is only valid for double-precision attributes, see the remarks below.
   + `size` (number) - the number of elements per vertex attribute.
   + `offset` (number) - offset of the first vertex attribute into the buffer, in bytes
   + `stride` (number) - the offset between the beginning of consecutive vertex attributes, in bytes
@@ -83,7 +83,9 @@ Each value in `data.attributes` may be one of the following formats:
 
 **Remarks**
 
-* A standalone `Buffer` supplied to a `float64` attribute provides the high part only; the `64Low` part is zero on both WebGL and WebGPU. This also applies when a `value` is supplied alongside the `buffer`. Specify `stride: 12` for tightly packed float32x3 positions, since the default stride of a double-precision attribute may be 24 bytes. Supply a `Float64Array` instead to preserve double-precision positions. On WebGPU, the zero low parts share one additional vertex-buffer slot per model; custom layers must account for this in their device's vertex-buffer limit.
+* A `Buffer` supplied to a double-precision attribute, such as `getPosition`, holds float32 values. By default it provides the high part only, and the `64Low` part is zero on both WebGL and WebGPU. Specify `stride: 12` for tightly packed float32x3 positions, since the default stride of a double-precision attribute may be 24 bytes.
+* To keep double precision in a `Buffer`, write each row as `size` float32 high parts `Math.fround(x)` followed by `size` float32 low parts `x - Math.fround(x)`, and specify `type: 'float64'`. The default stride is then `size * 8` bytes, and `offset` and `stride` locate the high part of each row. Without a `type`, a `Float64Array` `value` supplied alongside the `buffer` also declares this layout.
+* On WebGPU, the zero low parts of `Buffer`s that provide the high part only share one additional vertex-buffer slot per model; custom layers must account for this in their device's vertex-buffer limit.
 * Some layers may accept alternative data formats. For example, the [GeoJsonLayer](../layers/geojson-layer.md) supports any valid GeoJSON object as `data`. These exceptions, if any, are documented in each layer's documentation.
 * When an iterable value is passed to `data`, every accessor function receives the current element as the first argument. When a non-iterable value (any object with a `length` field) is passed to `data`, the accessor functions are responsible of interpreting the data format. The latter is often used with binary inputs. Read about this in [accessors](../../developer-guide/using-layers.md#accessors).
 * The automatic URL loading support is intended as a convenience for simple use cases. There are many limitations, including control over request parameters and headers, ability to parse non-JSON data, control of post-processing, CORS support etc. In such cases, it is always possible to load data using traditional JavaScript techniques and rerender the layer with the resulting data array.

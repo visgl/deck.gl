@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 // External Buffers bound to double-precision (`type: 'float64'`) attributes on WebGPU.
-// As on WebGL, an external Buffer only supplies the high part, and the low part is zero.
+// As on WebGL, an external Buffer supplies the high part with a zero low part, unless it is
+// declared to hold [high, low] rows with `type: 'float64'` or a `Float64Array` value.
 
 /// <reference types="@webgpu/types" />
 
@@ -279,9 +280,12 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
   }
 
   describe.each([
-    {name: 'lnglat', isCartesian: false, positions: LNGLAT_POINTS},
-    {name: 'cartesian', isCartesian: true, positions: CARTESIAN_POINTS}
-  ])('float64 external Buffer ($name)', ({name, isCartesian, positions}) => {
+    // At zoom 11, lnglat positions are projected without their low part, so the lnglat rows use
+    // the real float64 split. Cartesian positions always add the low part, so their rows move
+    // 40 units into it, which displaces each point by 40 pixels if the low part is not read.
+    {name: 'lnglat', isCartesian: false, positions: LNGLAT_POINTS, lowOffset: null},
+    {name: 'cartesian', isCartesian: true, positions: CARTESIAN_POINTS, lowOffset: [40, 40, 0]}
+  ])('float64 external Buffer ($name)', ({name, isCartesian, positions, lowOffset}) => {
     const coordinateSystem = isCartesian ? 'cartesian' : 'lnglat';
     const goldenImage = `./test/render/golden-images/webgpu/scatterplot-float64-${name}.png`;
 
@@ -353,6 +357,44 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))('float64 external Buffer on 
 
     test('Buffer written as [x, y, z, 0, 0, 0] rows renders', async () => {
       await renderBuffer(HIGH_LOW_ROW, buffer => ({instancePositions: buffer}));
+    });
+
+    /** [high, low] rows whose high part alone would draw every point at the wrong pixel */
+    const SPLIT_ROW = (row: number[]) => {
+      const low = lowOffset || row.map(value => value - Math.fround(value));
+      return [...row.map((value, i) => value - low[i]), ...low];
+    };
+
+    test("[high, low] rows with type 'float64' read the low part", async () => {
+      await renderBuffer(SPLIT_ROW, buffer => ({
+        getPosition: {buffer, size: 3, type: 'float64'}
+      }));
+    });
+
+    test("[high, low] rows with type 'float64' honor offset and stride", async () => {
+      // One unrelated float before each row, e.g. an interleaved id column
+      await renderBuffer(
+        row => [5, ...SPLIT_ROW(row)],
+        buffer => ({getPosition: {buffer, size: 3, type: 'float64', offset: 4, stride: 28}})
+      );
+    });
+
+    test('a Float64Array value supplied with the Buffer reads the low part', async () => {
+      await renderBuffer(SPLIT_ROW, buffer => ({
+        getPosition: {buffer, value: new Float64Array(positions.flat()), size: 3}
+      }));
+    });
+
+    test("type 'float32' reads the high part only, even with a Float64Array value", async () => {
+      await renderBuffer(INTERLEAVED_ROW, buffer => ({
+        getPosition: {
+          buffer,
+          value: new Float64Array(positions.flat()),
+          size: 3,
+          type: 'float32',
+          stride: 24
+        }
+      }));
     });
 
     test('interleaved rows: the 12 bytes after each position are not read', async () => {

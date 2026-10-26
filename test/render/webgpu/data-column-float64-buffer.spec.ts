@@ -4,6 +4,7 @@
 
 // On WebGL, the low part of an external Buffer bound to a double-precision attribute is a
 // constant zero. WebGPU has no constant attributes, so it is read from a one-row zero buffer.
+// A Buffer declared with `type: 'float64'` or a `Float64Array` value holds [high, low] rows.
 
 /// <reference types="@webgpu/types" />
 
@@ -12,6 +13,7 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
+import {GPUConstant} from '@luma.gl/gpgpu/gpu-data';
 
 import Attribute from '@deck.gl/core/lib/attribute/attribute';
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
@@ -272,13 +274,10 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))(
       attribute.delete();
     });
 
-    test.each([
-      ['Float32Array', Float32Array],
-      ['Float64Array', Float64Array]
-    ])('ignores the type of a %s value supplied with a Buffer', (_, ArrayType) => {
+    test('reads the high part only of a Buffer supplied with a Float32Array value', () => {
       const attribute = createPositionAttribute();
       const buffer = createBuffer(NUM_INSTANCES * 12);
-      attribute.setExternalBuffer({buffer, value: new ArrayType(NUM_INSTANCES * 3), stride: 12});
+      attribute.setExternalBuffer({buffer, value: new Float32Array(NUM_INSTANCES * 3), stride: 12});
 
       expect(attribute.isDoublePrecisionBuffer, 'the Buffer holds high parts only').toBe(false);
       expect(attribute.hasZeroLowBuffer).toBe(true);
@@ -287,6 +286,100 @@ describe.runIf(isRenderTestDeviceEnabled('webgpu'))(
         'instancePositions'
       ]);
       expect(lowLayout.name).toBe(ZERO_LOW_BUFFER_NAME);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test.each([
+      ["type 'float64'", {type: 'float64'}],
+      ['a Float64Array value', {value: new Float64Array(NUM_INSTANCES * 3)}],
+      ["type 'float64' on an fp64: false attribute", {type: 'float64'}, {fp64: false}]
+    ])('reads [high, low] rows from a Buffer declared with %s', (_, binary, options = {}) => {
+      const attribute = createPositionAttribute(options);
+      const buffer = createBuffer(NUM_INSTANCES * 24);
+      attribute.setExternalBuffer({buffer, ...binary});
+
+      expect(attribute.isDoublePrecisionBuffer).toBe(true);
+      expect(attribute.hasZeroLowBuffer).toBe(false);
+      expect(attribute.getBufferLayouts()).toEqual([
+        {
+          name: 'instancePositions',
+          byteStride: 24,
+          stepMode: 'instance',
+          attributes: [
+            {attribute: 'instancePositions', format: 'float32x3', byteOffset: 0},
+            {attribute: 'instancePositions64Low', format: 'float32x3', byteOffset: 12}
+          ]
+        }
+      ]);
+      const value = attribute.getValue();
+      expect(value.instancePositions).toBe(buffer);
+      expect(value.instancePositions64Low, 'low part read from the same Buffer').toBe(buffer);
+      expect(Object.keys(attribute.getGPUVector()).sort()).toEqual([
+        'instancePositions',
+        'instancePositions64Low'
+      ]);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test("type 'float64' honors the offset and stride of [high, low] rows", () => {
+      const attribute = createPositionAttribute();
+      const buffer = createBuffer(NUM_INSTANCES * 28);
+      attribute.setExternalBuffer({buffer, type: 'float64', offset: 4, stride: 28});
+
+      const layouts = attribute.getBufferLayouts();
+      expect(layouts).toHaveLength(1);
+      expect(layouts[0].byteStride).toBe(28);
+      expect(layouts[0].attributes?.map(attribute => attribute.byteOffset)).toEqual([4, 16]);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test("type 'float32' reads the high part only, even with a Float64Array value", () => {
+      const attribute = createPositionAttribute();
+      const buffer = createBuffer(NUM_INSTANCES * 24);
+      attribute.setExternalBuffer({
+        buffer,
+        value: new Float64Array(NUM_INSTANCES * 3),
+        type: 'float32',
+        stride: 24
+      });
+
+      expect(attribute.isDoublePrecisionBuffer).toBe(false);
+      expect(attribute.hasZeroLowBuffer).toBe(true);
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test("type 'float64' requires a double-precision attribute", () => {
+      const attribute = new Attribute(device, {
+        id: 'instanceRadius',
+        size: 1,
+        accessor: 'getRadius'
+      });
+      const buffer = createBuffer(NUM_INSTANCES * 8);
+      expect(() => attribute.setExternalBuffer({buffer, type: 'float64'})).toThrow(
+        'is not double precision'
+      );
+
+      buffer.destroy();
+      attribute.delete();
+    });
+
+    test('exposes the zero low part to GPUVectorModel as constants', () => {
+      const attribute = createPositionAttribute();
+      const buffer = createBuffer(NUM_INSTANCES * 12);
+      attribute.setExternalBuffer({buffer, stride: 12});
+
+      const vectors = attribute.getGPUVector();
+      expect(Object.keys(vectors).sort()).toEqual(['instancePositions', 'instancePositions64Low']);
+      expect(vectors.instancePositions64Low).toBeInstanceOf(GPUConstant);
+      expect(Array.from((vectors.instancePositions64Low as GPUConstant).value)).toEqual([0, 0, 0]);
 
       buffer.destroy();
       attribute.delete();

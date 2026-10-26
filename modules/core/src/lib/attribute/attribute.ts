@@ -7,7 +7,8 @@ import DataColumn, {
   DataColumnOptions,
   ShaderAttributeOptions,
   BufferAccessor,
-  DataColumnSettings
+  DataColumnSettings,
+  LogicalDataType
 } from './data-column';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
@@ -67,7 +68,17 @@ export type AttributeOptions = DataColumnOptions<{
   shaderAttributes?: Record<string, Partial<ShaderAttributeOptions>>;
 }>;
 
-export type BinaryAttribute = Partial<BufferAccessor> & {value?: TypedArray; buffer?: Buffer};
+export type BinaryAttribute = Omit<Partial<BufferAccessor>, 'type'> & {
+  /**
+   * Vertex data type. On a double-precision attribute, `'float64'` declares that `buffer`
+   * holds deck.gl's interleaved layout: per row, `size` float32 high parts followed by
+   * `size` float32 low parts. Any other type reads the high parts only, with a zero low part.
+   * Without a type, a `Float64Array` `value` implies the interleaved layout.
+   */
+  type?: LogicalDataType;
+  value?: TypedArray;
+  buffer?: Buffer;
+};
 
 type AttributeInternalState = {
   startIndices: NumericArray | null;
@@ -517,6 +528,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         });
       }
     }
+    if (this.hasZeroLowBuffer) {
+      // External Buffers supply the high part only. GPUVectorModel binds these zero constants
+      // in their own zero-stride layout on WebGPU.
+      for (const definition of this._getAttributeZeroLowBufferLayout().attributes || []) {
+        const formatInfo = getGPUVectorFormatInfo(definition.format);
+        result[definition.attribute] = new GPUConstant({
+          format: definition.format,
+          value: new Float32Array(formatInfo.components)
+        });
+      }
+    }
     return result;
   }
 
@@ -573,11 +595,13 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     if (!this.hasZeroLowBuffer) {
       return [result];
     }
+    return [result, {...this._getAttributeZeroLowBufferLayout(), stepMode: result.stepMode}];
+  }
+
+  /** Zero low-part layout of this attribute and its shader attributes */
+  private _getAttributeZeroLowBufferLayout(): BufferLayout {
     const {shaderAttributes} = this.settings;
-    const lowLayout = super._getZeroLowBufferLayout(
-      shaderAttributes && {[this.id]: null, ...shaderAttributes}
-    );
-    return [result, {...lowLayout, stepMode: result.stepMode}];
+    return this._getZeroLowBufferLayout(shaderAttributes && {[this.id]: null, ...shaderAttributes});
   }
 
   /** Borrow the manager's row; standalone attributes own their fallback buffer. */

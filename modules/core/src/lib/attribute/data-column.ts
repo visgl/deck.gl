@@ -228,8 +228,8 @@ export default class DataColumn<Options, State> {
   /** @internal Whether this column's GPU buffer contains interleaved high and low components. */
   get isDoublePrecisionBuffer(): boolean {
     if (this.state.externalBuffer) {
-      // External Buffers hold high parts only, regardless of the type of an accompanying `value`.
-      // Only deck.gl-produced buffers, e.g. transitions, opt into interleaved rows explicitly.
+      // Set from the binary attribute's `type: 'float64'`, a `Float64Array` value, or the
+      // internal `isDoublePrecisionBuffer` option. Otherwise the Buffer holds high parts only.
       return this.doublePrecision && this.state.isExternalDoublePrecisionBuffer;
     }
     return this._shouldSplitDoublePrecisionValue(this.value);
@@ -431,10 +431,10 @@ export default class DataColumn<Options, State> {
           normalized?: boolean;
           /**
            * @internal Set to `true` if `buffer` holds interleaved [high, low] rows of a
-           * double-precision attribute. Otherwise an external buffer supplies the high part only.
+           * double-precision attribute. Applications declare this with `type: 'float64'`.
            */
           isDoublePrecisionBuffer?: boolean;
-        } & Partial<BufferAccessor>)
+        } & Omit<Partial<BufferAccessor>, 'type'> & {type?: LogicalDataType})
   ): boolean {
     const {state} = this;
 
@@ -443,7 +443,7 @@ export default class DataColumn<Options, State> {
       value?: NumericArray;
       buffer?: Buffer;
       isDoublePrecisionBuffer?: boolean;
-    } & Partial<BufferAccessor>;
+    } & Omit<Partial<BufferAccessor>, 'type'> & {type?: LogicalDataType};
     if (ArrayBuffer.isView(data)) {
       opts = {value: data};
     } else if (data instanceof Buffer) {
@@ -452,7 +452,7 @@ export default class DataColumn<Options, State> {
       opts = data;
     }
 
-    const accessor: DataColumnSettings<Options> = {...this.settings, ...opts};
+    const accessor = {...this.settings, ...opts} as DataColumnSettings<Options>;
 
     if (ArrayBuffer.isView(opts.value)) {
       if (!opts.type) {
@@ -469,6 +469,14 @@ export default class DataColumn<Options, State> {
       }
       accessor.bytesPerElement = opts.value.BYTES_PER_ELEMENT;
       accessor.stride = getStride(accessor);
+    }
+
+    const isDoublePrecisionBuffer = Boolean(opts.buffer) && this._isDoublePrecisionBuffer(opts);
+    if (isDoublePrecisionBuffer) {
+      // Each row holds `size` float32 high parts followed by `size` float32 low parts
+      accessor.type = 'float32';
+      accessor.bytesPerElement = Float64Array.BYTES_PER_ELEMENT;
+      accessor.stride = opts.stride || accessor.size * Float64Array.BYTES_PER_ELEMENT;
     }
 
     state.bounds = null; // clear cached bounds
@@ -491,7 +499,7 @@ export default class DataColumn<Options, State> {
     } else if (opts.buffer) {
       const buffer = opts.buffer;
       state.externalBuffer = buffer;
-      state.isExternalDoublePrecisionBuffer = Boolean(opts.isDoublePrecisionBuffer);
+      state.isExternalDoublePrecisionBuffer = isDoublePrecisionBuffer;
       state.constant = false;
       this.value = opts.value || null;
     } else if (opts.value) {
@@ -602,6 +610,27 @@ export default class DataColumn<Options, State> {
   }
 
   // PRIVATE HELPER METHODS
+
+  /**
+   * Whether an external Buffer holds interleaved [high, low] rows: declared with
+   * `type: 'float64'`, or implied by a `Float64Array` value when no `type` is given.
+   */
+  private _isDoublePrecisionBuffer(opts: {
+    type?: LogicalDataType;
+    value?: NumericArray;
+    isDoublePrecisionBuffer?: boolean;
+  }): boolean {
+    if (opts.type === 'float64' && !this.doublePrecision) {
+      throw new Error(`Attribute ${this.id} is not double precision and cannot read type float64`);
+    }
+    if (!this.doublePrecision) {
+      return false;
+    }
+    if (opts.isDoublePrecisionBuffer !== undefined) {
+      return opts.isDoublePrecisionBuffer;
+    }
+    return opts.type ? opts.type === 'float64' : opts.value instanceof Float64Array;
+  }
   private _shouldSplitDoublePrecisionValue(
     value: NumericArray | null
   ): value is Float32Array | Float64Array {
