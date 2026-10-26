@@ -409,7 +409,7 @@ function DemoPane({
   return (
     <div style={styles.pane}>
       <DeckGL
-        views={new GlobeView()}
+        views={new GlobeView({resolution: 36})}
         viewState={viewState}
         controller={false}
         parameters={{cull: true}}
