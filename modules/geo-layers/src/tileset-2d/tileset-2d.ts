@@ -640,6 +640,7 @@ export class Tileset2D {
 
       if (_cache.size > maxCacheSize || this._cacheByteSize > maxCacheByteSize) {
         this._evictTiles(tile => !tile.isVisible && !tile.isSelected);
+        this._prefetchTiles = this._prefetchTiles.filter(tile => _cache.has(tile.id));
       }
       this._rebuildTree();
       this._dirty = true;
@@ -665,6 +666,8 @@ export class Tileset2D {
       if (shouldEvict(tile)) {
         this._cacheByteSize -= opts.maxCacheByteSize !== null ? tile.byteLength : 0;
         _cache.delete(id);
+        // An evicted tile keeps no request priority, so a queued request is dropped
+        tile.isPrefetch = false;
         this.opts.onTileUnload?.(tile);
       }
       if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {

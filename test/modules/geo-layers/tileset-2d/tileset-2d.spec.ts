@@ -207,6 +207,58 @@ test('Tileset2D#coverage LOD keeps the previous selection as coverage when zoomi
   tileset.finalize();
 });
 
+test('Tileset2D#coverage LOD evicts stale tiles before prefetch tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxCacheSize: 3,
+    onTileLoad: () => {},
+    onTileUnload: () => {}
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  tileset.update(testViewport);
+
+  expect(Array.from(tileset._cache.keys()).sort(), 'stale tiles are evicted first').toEqual([
+    '0-0-0',
+    '1171-1566-12',
+    '585-783-11'
+  ]);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD drops requests of evicted prefetch tiles', () => {
+  const unloadedTiles: any[] = [];
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxCacheSize: 1,
+    onTileLoad: () => {},
+    onTileUnload: tile => unloadedTiles.push(tile)
+  });
+  tileset.update(testViewport);
+
+  expect(Array.from(tileset._cache.keys()), 'only the selected tile fits').toEqual([
+    '1171-1566-12'
+  ]);
+  expect(unloadedTiles.map(tile => tile.id).sort(), 'prefetch tiles are evicted last').toEqual([
+    '0-0-0',
+    '585-783-11'
+  ]);
+
+  // Updating again with the same viewport must not mark evicted tiles as prefetch again
+  tileset.update(testViewport);
+  for (const tile of unloadedTiles) {
+    expect(tile.isPrefetch, `${tile.id} is no longer a prefetch tile`).toBe(false);
+    expect(
+      (tileset as any)._getRequestPriority(tile),
+      `${tile.id} request is dropped`
+    ).toBeLessThan(0);
+  }
+
+  tileset.finalize();
+});
+
 test('Tileset2D#coverage LOD keeps immediate child placeholders over coarse ancestors', () => {
   const tileset = new Tileset2D({
     getTileData: () => new Promise(() => {}),
