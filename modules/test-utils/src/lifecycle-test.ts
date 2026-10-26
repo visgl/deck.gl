@@ -260,39 +260,41 @@ export async function testLayerAsync<LayerT extends Layer>(
   const resources = setupLayerTests(`testing ${Layer.layerName}`, opts);
 
   let layer = new Layer();
-  // Run successive update tests
-  for (const testCase of testCases) {
-    // Save old state before update
-    const oldState = {...layer.state};
+  try {
+    // Run successive update tests
+    for (const testCase of testCases) {
+      // Save old state before update
+      const oldState = {...layer.state};
 
-    const {layer: newLayer, spyMap} = runLayerTestUpdate(
-      testCase,
-      resources,
-      layer,
-      spies,
-      createSpy
-    );
+      const {layer: newLayer, spyMap} = runLayerTestUpdate(
+        testCase,
+        resources,
+        layer,
+        spies,
+        createSpy
+      );
 
-    await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
-
-    // Async props may finish while an assertion is awaited. Apply their requested updates too.
-    while (
-      !newLayer.isLoaded ||
-      resources.layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)
-    ) {
-      await update(resources);
       await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+
+      // Async props may finish while an assertion is awaited. Apply their requested updates too.
+      while (
+        !newLayer.isLoaded ||
+        resources.layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)
+      ) {
+        await update(resources);
+        await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+      }
+
+      // Reset spies between test cases
+      Object.keys(spyMap).forEach(k => resetSpy(spyMap[k]));
+      layer = newLayer;
     }
-
-    // Reset spies between test cases
-    Object.keys(spyMap).forEach(k => resetSpy(spyMap[k]));
-    layer = newLayer;
-  }
-
-  // Use async cleanup to allow pending luma.gl async operations to complete
-  const error = await cleanupAfterLayerTestsAsync(resources);
-  if (error) {
-    onError(error, `${Layer.layerName} should delete all resources`);
+  } finally {
+    // Use async cleanup to allow pending luma.gl async operations to complete
+    const error = await cleanupAfterLayerTestsAsync(resources);
+    if (error) {
+      onError(error, `${Layer.layerName} should delete all resources`);
+    }
   }
 }
 
@@ -476,34 +478,32 @@ function runLayerTestUpdate<LayerT extends Layer>(
 }
 
 /* global setTimeout */
-function update({draw, layerManager, deckRenderer}: TestResources): Promise<void> {
-  return new Promise(resolve => {
-    const onAnimationFrame = () => {
-      if (layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)) {
-        layerManager.setNeedsUpdate('pending layer update');
-      }
-      if (layerManager.needsUpdate()) {
-        layerManager.updateLayers();
+async function update({draw, layerManager, deckRenderer}: TestResources): Promise<void> {
+  let delay = 0;
+  while (true) {
+    // Let asynchronous data and coordinate-system loads finish between update attempts.
+    await new Promise<void>(resolve => setTimeout(resolve, delay));
+    if (layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)) {
+      layerManager.setNeedsUpdate('pending layer update');
+    }
+    if (!layerManager.needsUpdate()) {
+      delay = 50;
+      continue;
+    }
+    layerManager.updateLayers();
 
-        const viewport = layerManager.context.viewport;
-        // Lifecycle tests always provide a viewport before running updates.
-        assert(viewport);
-        if (draw)
-          deckRenderer.renderLayers({
-            pass: 'test',
-            views: {},
-            effects: [],
-            viewports: [viewport],
-            layers: layerManager.getLayers(),
-            onViewportActive: layerManager.activateViewport
-          });
-        resolve();
-        return;
-      }
-
-      setTimeout(onAnimationFrame, 50);
-    };
-
-    onAnimationFrame();
-  });
+    const viewport = layerManager.context.viewport;
+    // Lifecycle tests always provide a viewport before running updates.
+    assert(viewport);
+    if (draw)
+      deckRenderer.renderLayers({
+        pass: 'test',
+        views: {},
+        effects: [],
+        viewports: [viewport],
+        layers: layerManager.getLayers(),
+        onViewportActive: layerManager.activateViewport
+      });
+    return;
+  }
 }
