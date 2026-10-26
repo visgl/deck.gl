@@ -98,7 +98,10 @@ export default class ShadowPass extends LayersPass {
       shadow: {
         project: otherShaderModuleProps.project,
         drawToShadowMap: true
-      }
+      },
+      // The shadow map stores depth packed into RGBA. Layers that light their color after
+      // DECKGL_FILTER_COLOR (e.g. SimpleMeshLayer) would otherwise scale the packed depth.
+      lighting: {enabled: false}
     };
   }
 }

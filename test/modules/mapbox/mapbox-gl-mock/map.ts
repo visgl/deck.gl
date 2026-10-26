@@ -85,7 +85,8 @@ export default class Map extends Evented {
 
   addControl(control) {
     this._controls.push(control);
-    control.onAdd(this);
+    // Like Mapbox, place the control element in the map, and leave removing it to the control
+    this._container.append(control.onAdd(this));
   }
   removeControl(control) {
     const i = this._controls.indexOf(control);

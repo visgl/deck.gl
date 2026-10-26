@@ -409,9 +409,14 @@ for (const projected of [false, true]) {
         });
 
       const override = new ProjectionViewport('override', !projected);
-      expect(layer.projectPosition(point, {viewport: override, autoOffset: false})).toEqual(
-        projected ? [12, 23, 34] : [224, 669, 1336]
-      );
+      // Changing the target no longer implicitly reinterprets the input's CRS.
+      expect(
+        layer.projectPosition(point, {
+          viewport: override,
+          ...(projected ? {coordinateSystem: 'cartesian' as const} : {sourceCrs: WGS84_CRS}),
+          autoOffset: false
+        })
+      ).toEqual(projected ? [12, 23, 34] : [224, 669, 1336]);
     } finally {
       manager.finalize();
       vi.restoreAllMocks();

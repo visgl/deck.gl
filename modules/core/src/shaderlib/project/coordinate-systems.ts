@@ -4,6 +4,7 @@
 
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import {resolveCRS} from '../../utils/crs';
+import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import {PROJECTION_MODE} from './constants';
 
@@ -30,10 +31,14 @@ export function supportsSourceCRS(
 }
 
 /** Resolve the absolute input CRS of a project operation after default/offset aliases. */
-export function getSourceCRS(coordinateSystem: string, viewport: Viewport): CRSDescriptor | null {
+export function getSourceCRS(
+  coordinateSystem: CoordinateSystem,
+  viewport: Viewport
+): CRSDescriptor | null {
   coordinateSystem ??= 'default';
-  if (typeof coordinateSystem !== 'string')
+  if (typeof coordinateSystem !== 'string' && typeof coordinateSystem !== 'object') {
     throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
+  }
   let name = coordinateSystem;
   switch (coordinateSystem) {
     case 'default':
@@ -48,13 +53,19 @@ export function getSourceCRS(coordinateSystem: string, viewport: Viewport): CRSD
 
 /** Describe packed attributes in the legacy shader coordinate-system vocabulary. */
 export function getPackedCoordinateSystem(
-  coordinateSystem: string,
-  viewport: Viewport
+  coordinateSystem: CoordinateSystem,
+  viewport: Viewport,
+  sourceCrs = getSourceCRS(coordinateSystem, viewport)
 ): {
   coordinateSystem: string;
   preprojected: boolean;
 } {
-  const sourceCrs = getSourceCRS(coordinateSystem, viewport);
+  // Explicit local modes bypass CRS conversion on both CPU and GPU paths.
+  switch (coordinateSystem) {
+    case 'cartesian':
+    case 'meter-offsets':
+      return {coordinateSystem, preprojected: false};
+  }
   const preprojected = !supportsSourceCRS(viewport.projectionMode, sourceCrs, viewport.crs);
   if (preprojected) {
     switch (viewport.projectionMode) {
@@ -67,8 +78,6 @@ export function getPackedCoordinateSystem(
   switch (coordinateSystem) {
     case 'default':
       return {coordinateSystem: sourceCrs ? 'lnglat' : 'cartesian', preprojected};
-    case 'cartesian':
-    case 'meter-offsets':
     case 'lnglat-offsets':
       return {coordinateSystem, preprojected};
   }
