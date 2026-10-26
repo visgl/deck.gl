@@ -17,8 +17,8 @@ const renderedDecks = new Set<Deck<any>>();
 function createDeck(props: DeckProps = {}) {
   const deck: Deck<any> = new Deck({
     device,
-    width: 10,
-    height: 10,
+    width: 1,
+    height: 1,
     initialViewState: VIEW_STATE,
     onAfterRender: () => renderedDecks.add(deck),
     ...props
