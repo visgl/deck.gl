@@ -10,6 +10,7 @@ except ImportError:
 
 from pydeck import Deck
 from pydeck import map_styles
+from pydeck.bindings.json_tools import serialize
 from pydeck.bindings.base_map_provider import BaseMapProvider
 from IPython.display import HTML
 
@@ -59,6 +60,23 @@ def test_json_output():
     for t in TEST_CASES:
         actual, expected = t[0], t[1]
         assert json.loads(str(actual.to_json())) == json.loads(expected)
+
+
+def test_serialize_compact():
+    """Verify that compact serialization drops whitespace and preserves the payload"""
+    r = pydeck_examples.create_minimal_test_object()
+    pretty = serialize(r)
+    compact = serialize(r, compact=True)
+    assert json.loads(compact) == json.loads(pretty)
+    assert "\n" not in compact
+    assert len(compact) < len(pretty)
+
+
+def test_to_html_embeds_compact_json():
+    """Verify that to_html embeds the deck JSON without indentation"""
+    r = pydeck_examples.create_minimal_test_object()
+    html = r.to_html(as_string=True, notebook_display=False)
+    assert serialize(r, compact=True) in html
 
 
 @pytest.mark.skip("Skipping widget test, see #7783")
@@ -140,3 +158,26 @@ def test_repr_html_google_colab():
     pydeck.io.html.iframe_with_srcdoc.assert_not_called()
     pydeck.io.html.render_for_colab.assert_called_once()
     assert output == ""
+
+
+def test_default_deck_has_no_views_and_a_controller():
+    """deck.gl falls back to a full-screen MapView and applies the top-level controller to it"""
+    default = json.loads(pydeck.Deck().to_json())
+    assert "views" not in default
+    assert default["controller"] is True
+    assert "controller" not in json.loads(pydeck.Deck(controller=None).to_json())
+
+    splitter = pydeck.Widget(
+        "SplitterWidget",
+        view_layout={
+            "orientation": "horizontal",
+            "views": [pydeck.View(type="MapView", id="a"), pydeck.View(type="MapView", id="b")],
+        },
+    )
+    assert "views" not in json.loads(pydeck.Deck(widgets=[splitter]).to_json())
+
+    explicit = json.loads(pydeck.Deck(views=[pydeck.View(type="MapView", id="c", controller=False)]).to_json())
+    assert explicit["views"][0]["id"] == "c"
+    assert "controller" not in explicit, "explicit views keep their own controller settings"
+    forced = pydeck.Deck(views=[pydeck.View(type="MapView", id="c")], controller={"scrollZoom": False})
+    assert json.loads(forced.to_json())["controller"] == {"scrollZoom": False}

@@ -152,6 +152,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getPosition'
       },

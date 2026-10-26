@@ -7,15 +7,7 @@ import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  PolygonLayer,
-  PointCloudLayer,
-  MapView,
-  FirstPersonView,
-  // ThirdPersonView,
-  TripsLayer
-} from 'deck.gl';
+import DeckGL, {PolygonLayer, PointCloudLayer, MapView, FirstPersonView, TripsLayer} from 'deck.gl';
 
 // Source data CSV
 const DATA_URL = {
@@ -115,7 +107,7 @@ class Root extends Component {
           }
         ],
         getColor: d => d.color,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: [longitude, latitude],
         opacity: 1,
         pointSize: 5

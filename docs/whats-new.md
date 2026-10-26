@@ -2,6 +2,20 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## Unreleased
+
+### deck.gl v10 examples (Experimental)
+
+The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
+
+### Custom projections (Experimental)
+
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+
+### Layer source CRS (Experimental)
+
+Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
@@ -46,7 +60,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
-- Pointer-anchored zoom now rotates the camera frame like a physical ball, keeping steering smooth and consistent around the poles while allowing bearing to evolve naturally.
+- [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes render the same in `GlobeView` as in `MapView`.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**
@@ -124,6 +138,8 @@ deck.gl's Python bindings gain first-class support for [layer extensions](./api-
 
 The Jupyter integration now recognizes the canonical `GlobeView` type name while retaining `_GlobeView` as a backwards-compatible alias.
 
+pydeck documents [multi-view layouts](https://deckgl.readthedocs.io/en/latest/view.html) and the [`SplitterWidget`](https://deckgl.readthedocs.io/en/latest/widget.html), with gallery examples for both. `Deck` sends a top-level `controller` (new argument, default `True`) and leaves `views` to deck.gl, so widgets such as `SplitterWidget` can manage them.
+
 ```python
 import pydeck as pdk
 
@@ -138,6 +154,19 @@ layer = pdk.Layer(
 ```
 
 Experiment with these features via the new [pydeck playground](https://deck.gl/pydeck).
+
+pydeck draws [charts](https://deckgl.readthedocs.io/en/latest/view.html#non-geospatial-charts) on `OrthographicView` and `OrbitView` without a basemap. The gallery gains a [scatter plot](https://deckgl.readthedocs.io/en/latest/gallery/scatter_plot.html), a [bar chart](https://deckgl.readthedocs.io/en/latest/gallery/bar_chart.html) and a [surface plot](https://deckgl.readthedocs.io/en/latest/gallery/surface_plot.html).
+
+[Custom layer libraries](https://deckgl.readthedocs.io/en/latest/custom_layers.html#es-module-bundles) published as ES modules load with `module=True`:
+
+```python
+import pydeck as pdk
+
+pdk.settings.register_library("MyLayers", "https://example.com/my-layers.mjs", module=True)
+layer = pdk.Layer("MyLayer", data=df)  # MyLayers exports MyLayer
+```
+
+HTML exports get lighter: `Deck.to_html()` embeds the deck.gl JSON compactly, without indentation, while `to_json()` keeps the pretty-printed form for notebooks and diffs.
 
 ## deck.gl v9.3
 
