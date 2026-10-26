@@ -1061,6 +1061,15 @@ test('Attribute#setBinaryValue', () => {
   expect(attribute.state.binaryAccessor, 'binaryAccessor is assigned').toBeTruthy();
   expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
+  attribute.clearNeedsUpdate();
+  expect(attribute.setBinaryValue(value), 'unchanged source without invalidation').toBeTruthy();
+  attribute.setNeedsUpdate('projection changed');
+  expect(
+    attribute.setBinaryValue(value),
+    'retransform unchanged source after invalidation'
+  ).toBeFalsy();
+  expect(attribute.needsUpdate(), 'preserve transform invalidation').toBeTruthy();
+
   expect(
     () => attribute.setBinaryValue([0, 1, 2, 3]),
     'should throw if external value is invalid'
@@ -1275,3 +1284,136 @@ test('Attribute#updateBuffer', () => {
 
   attribute.delete();
 });
+
+test('Attribute#getGPUVector borrows strided buffers and preserves layout flags', () => {
+  const attribute = new Attribute(device, {id: 'positions', size: 2, accessor: 'getPosition'});
+  const buffer = device.createBuffer({data: new Float32Array([99, 1, 2, 99, 3, 4])});
+  attribute.numInstances = 2;
+  attribute.setExternalBuffer({buffer, offset: 4, stride: 12});
+  const layoutChanged = attribute.layoutChanged();
+  const vector = attribute.getGPUVector().positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  expect(vector.format).toBe('float32x2');
+  expect(vector.length).toBe(2);
+  expect(vector.byteOffset).toBe(4);
+  expect(vector.byteStride).toBe(12);
+  expect(vector.data[0].buffer).toBe(buffer);
+  expect(vector.ownsBuffer).toBe(false);
+  expect(attribute.layoutChanged()).toBe(layoutChanged);
+  vector.destroy();
+  expect(buffer.destroyed).toBe(false);
+  attribute.delete();
+  expect(buffer.destroyed).toBe(false);
+  buffer.destroy();
+});
+
+test('Attribute#getGPUVector preserves raw normalized constants', () => {
+  const attribute = new Attribute(device, {
+    id: 'colors',
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor'
+  });
+  attribute.setConstantValue(null, [128, 64, 255, 0]);
+  const constant = attribute.getGPUVector().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+  expect(constant.format).toBe('unorm8x4');
+  expect(constant.value).toEqual(new Uint8Array([128, 64, 255, 0]));
+  attribute.setConstantValue(null, [1, 2, 3, 4]);
+  expect(constant.value).toEqual(new Uint8Array([128, 64, 255, 0]));
+  attribute.delete();
+});
+
+test.each([2, 3])('Attribute#getGPUVector exposes fp64 views with size %i', size => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    size,
+    type: 'float64',
+    fp64: true,
+    accessor: 'getPosition'
+  });
+  attribute.numInstances = 1;
+  attribute.setExternalBuffer(new Float64Array([1.1, 2.2, 3.3].slice(0, size)));
+  let columns = attribute.getGPUVector();
+  const high = columns.positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  const low = columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  expect(high.data[0].buffer).toBe(low.data[0].buffer);
+  expect(high.byteOffset).toBe(0);
+  expect(low.byteOffset).toBe(size * 4);
+  expect(high.byteStride).toBe(size * 8);
+  attribute.setExternalBuffer(new Float32Array([1, 2, 3].slice(0, size)));
+  columns = attribute.getGPUVector();
+  expect((columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
+    new Float32Array(size)
+  );
+  attribute.setConstantValue(null, [1, 2, 3]);
+  columns = attribute.getGPUVector();
+  expect((columns.positions as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
+    new Float32Array([1, 2, 3].slice(0, size))
+  );
+  expect((columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
+    new Float32Array(size)
+  );
+  attribute.delete();
+});
+
+// Binary inputs can override the declared position size without changing Attribute.size.
+test('Attribute#getGPUVector sizes synthetic fp64 constants for binary inputs', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    size: 3,
+    type: 'float64',
+    fp64: true,
+    accessor: 'getPosition'
+  });
+  attribute.numInstances = 1;
+  attribute.setExternalBuffer({value: new Float32Array([1, 2]), size: 2});
+  const columns = attribute.getGPUVector();
+  expect(columns.positions.format).toBe('float32x2');
+  const low = columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+  expect(low.format).toBe('float32x2');
+  expect(low.value).toEqual(new Float32Array(2));
+  attribute.delete();
+});
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Attribute#setData synchronizes raw constants on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const attribute = new Attribute(testDevice, {
+      id: 'colors',
+      size: 4,
+      type: 'unorm8',
+      accessor: 'getColor'
+    });
+    try {
+      attribute.setConstantValue(null, [255, 0, 0, 255]);
+      const original = attribute.getGPUVector()
+        .colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+      expect(attribute.setData({constant: true, value: [0, 255, 0, 255]})).toBe(true);
+      const current = attribute.getGPUVector()
+        .colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+      expect(current.value).toEqual(new Uint8Array([0, 255, 0, 255]));
+      expect(original.value).toEqual(new Uint8Array([255, 0, 0, 255]));
+      expect(attribute.value).toEqual(new Float32Array([0, 1, 0, 1]));
+      expect(attribute.setData({constant: true, value: [0, 255, 0, 255]})).toBe(false);
+      if (backend === 'webgpu') {
+        const bytes = await attribute.getBuffer()!.readAsync(0, 4);
+        expect(Array.from(bytes)).toEqual([0, 255, 0, 255]);
+        expect(attribute.getBufferLayout().byteStride).toBe(0);
+      } else {
+        expect(attribute.getValue().colors).toEqual(new Float32Array([0, 1, 0, 1]));
+      }
+      attribute.setData(new Uint8Array([1, 2, 3, 4]));
+      expect(attribute.getConstantValue()).toBeNull();
+      expect(attribute.getGPUVector().colors.constructor.name).toBe('GPUVector');
+      attribute.setData({constant: true, value: [0, 0, 255, 255]});
+      expect(
+        (attribute.getGPUVector().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value
+      ).toEqual(new Uint8Array([0, 0, 255, 255]));
+    } finally {
+      attribute.delete();
+    }
+  });
+}
