@@ -8,7 +8,7 @@ import {device} from './utils/setup-gl';
 
 import type {Layer, CompositeLayer, Viewport} from '@deck.gl/core';
 import type {Timeline} from '@luma.gl/engine';
-import type {StatsManager} from '@luma.gl/core';
+import type {Device, StatsManager} from '@luma.gl/core';
 
 const testViewport = new MapView({}).makeViewport({
   width: 100,
@@ -116,7 +116,7 @@ export async function testInitializeLayerAsync(
   const layerManager = initializeLayerManager(opts);
   const deckRenderer = new DeckRenderer(device);
   while (!opts.layer.isLoaded) {
-    await update({layerManager, deckRenderer, oldResourceCounts: {}});
+    await update({draw: true, layerManager, deckRenderer, oldResourceCounts: {}});
   }
   if (opts.finalize === false) {
     return {
@@ -166,7 +166,7 @@ export type LayerTestCase<LayerT extends Layer> = {
   /** Called before layer updates */
   onBeforeUpdate?: (params: {layer: Layer; testCase: LayerTestCase<LayerT>}) => void;
 
-  /** Called after layer is updated */
+  /** Called after layer is updated. Async assertions require `testLayerAsync`. */
   onAfterUpdate?: (params: {
     testCase: LayerTestCase<LayerT>;
     layer: LayerT;
@@ -174,16 +174,21 @@ export type LayerTestCase<LayerT extends Layer> = {
     subLayers: Layer[];
     subLayer: Layer | null;
     spies: Record<string, Spy>;
-  }) => void;
+  }) => void | Promise<void>;
 };
 
 type TestResources = {
+  draw: boolean;
   layerManager: LayerManager;
   deckRenderer: DeckRenderer;
   oldResourceCounts: Record<string, number>;
 };
 
 export type TestLayerOptions<LayerT extends Layer> = {
+  /** Render after each update. Disable for tests that only inspect attribute bindings. */
+  draw?: boolean;
+  /** Device used to initialize and render the layer. Defaults to the WebGL test device. */
+  device?: Device;
   /** The layer class to test against */
   Layer: LayerClass<LayerT>;
   /** The initial viewport
@@ -268,11 +273,11 @@ export async function testLayerAsync<LayerT extends Layer>(
       createSpy
     );
 
-    runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+    await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
     while (!newLayer.isLoaded) {
       await update(resources);
-      runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
+      await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
 
     // Reset spies between test cases
@@ -290,10 +295,14 @@ export async function testLayerAsync<LayerT extends Layer>(
 function setupLayerTests(
   testTitle: string,
   {
+    device: testDevice = device,
+    draw = true,
     viewport = testViewport,
     timeline,
     onError = defaultOnError
   }: {
+    device?: Device;
+    draw?: boolean;
     viewport?: Viewport;
     timeline?: Timeline;
     onError?: (error: Error, title: string) => void;
@@ -301,8 +310,8 @@ function setupLayerTests(
 ): TestResources {
   const oldResourceCounts = getResourceCounts();
 
-  const layerManager = new LayerManager(device, {viewport, timeline});
-  const deckRenderer = new DeckRenderer(device);
+  const layerManager = new LayerManager(testDevice, {viewport, timeline});
+  const deckRenderer = new DeckRenderer(testDevice);
 
   const props = {
     layerFilter: null,
@@ -312,7 +321,7 @@ function setupLayerTests(
   layerManager.setProps(props);
   deckRenderer.setProps(props);
 
-  return {layerManager, deckRenderer, oldResourceCounts};
+  return {draw, layerManager, deckRenderer, oldResourceCounts};
 }
 
 function cleanupAfterLayerTests({
@@ -398,7 +407,7 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
       : [];
     const subLayer = subLayers.length ? subLayers[0] : null;
 
-    testCase.onAfterUpdate({
+    return testCase.onAfterUpdate({
       testCase,
       layer: newLayer,
       oldState,
@@ -411,7 +420,7 @@ function runLayerTestPostUpdateCheck<LayerT extends Layer>(
 
 function runLayerTestUpdate<LayerT extends Layer>(
   testCase: LayerTestCase<LayerT>,
-  {layerManager, deckRenderer}: TestResources,
+  {draw, layerManager, deckRenderer}: TestResources,
   layer: LayerT,
   spies: string[],
   spyFactory: SpyFactory
@@ -439,6 +448,7 @@ function runLayerTestUpdate<LayerT extends Layer>(
   spies = testCase.spies || spies;
   const spyMap = injectSpies(layer, spies, spyFactory);
   const drawLayers = () => {
+    if (!draw) return;
     deckRenderer.renderLayers({
       pass: 'test',
       views: {},
@@ -462,7 +472,7 @@ function runLayerTestUpdate<LayerT extends Layer>(
 }
 
 /* global setTimeout */
-function update({layerManager, deckRenderer}: TestResources): Promise<void> {
+function update({draw, layerManager, deckRenderer}: TestResources): Promise<void> {
   return new Promise(resolve => {
     const onAnimationFrame = () => {
       if (layerManager.needsUpdate()) {
@@ -471,14 +481,15 @@ function update({layerManager, deckRenderer}: TestResources): Promise<void> {
         const viewport = layerManager.context.viewport;
         // Lifecycle tests always provide a viewport before running updates.
         assert(viewport);
-        deckRenderer.renderLayers({
-          pass: 'test',
-          views: {},
-          effects: [],
-          viewports: [viewport],
-          layers: layerManager.getLayers(),
-          onViewportActive: layerManager.activateViewport
-        });
+        if (draw)
+          deckRenderer.renderLayers({
+            pass: 'test',
+            views: {},
+            effects: [],
+            viewports: [viewport],
+            layers: layerManager.getLayers(),
+            onViewportActive: layerManager.activateViewport
+          });
         resolve();
         return;
       }
