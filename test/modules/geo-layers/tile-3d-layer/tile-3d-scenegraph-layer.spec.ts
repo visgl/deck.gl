@@ -305,28 +305,25 @@ test.each([
         expect(sublayerTiles).toEqual(fixtures.map(fixture => fixture.tile));
       }
 
-      // Exercise the actual picking pass and its standard framebuffer allocation.
-      if (!noStencil) {
-        picker._resizeBuffer({getDrawingBufferSize: () => [32, 16]} as CanvasContext);
-        const {decodePickingColor} = pickPass.render({
-          ...renderOptions,
-          pickingFBO: picker.pickingFBO!,
-          deviceRect: {x: 0, y: 0, width: 32, height: 16},
-          pickZ: false
-        });
-        const picked = device.readPixelsToArrayWebGL(picker.pickingFBO!, {
-          sourceWidth: 32,
-          sourceHeight: 16
-        });
-        const expectedTile = expected[0] === 255 ? parent : siblings ? fixtures[3].tile : child;
-        expect(
-          decodePickingColor!(picked.slice(leftOffset, leftOffset + 4))?.pickedLayer.props.tile,
-          'picking matches visible coverage'
-        ).toBe(expectedTile);
-        expect(picker.depthFBO!.depthStencilAttachment!.texture.format).toBe(
-          'depth24plus-stencil8'
-        );
-      }
+      // Exercise the actual picking pass and its standard framebuffer allocation. Picking
+      // targets always have stencil, so coverage must follow the color target to match it.
+      picker._resizeBuffer({getDrawingBufferSize: () => [32, 16]} as CanvasContext);
+      const {decodePickingColor} = pickPass.render({
+        ...renderOptions,
+        pickingFBO: picker.pickingFBO!,
+        deviceRect: {x: 0, y: 0, width: 32, height: 16},
+        pickZ: false
+      });
+      const picked = device.readPixelsToArrayWebGL(picker.pickingFBO!, {
+        sourceWidth: 32,
+        sourceHeight: 16
+      });
+      const expectedTile = expected[0] === 255 ? parent : siblings ? fixtures[3].tile : child;
+      expect(
+        decodePickingColor!(picked.slice(leftOffset, leftOffset + 4))?.pickedLayer.props.tile,
+        'picking matches visible coverage'
+      ).toBe(expectedTile);
+      expect(picker.depthFBO!.depthStencilAttachment!.texture.format).toBe('depth24plus-stencil8');
     } finally {
       layerManager.finalize();
       renderer.finalize();

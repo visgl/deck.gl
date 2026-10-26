@@ -29,6 +29,11 @@ function enablesBlending(parameters?: Record<string, unknown> | null): boolean {
   return parameters.blend === true || BLEND_PARAMETERS.some(key => parameters[key] !== undefined);
 }
 
+/** Layer draw options; the picking pass activates the picking shader module. */
+type DrawOptions<DataT> = Parameters<ScenegraphLayer<DataT>['draw']>[0] & {
+  shaderModuleProps?: {picking?: {isActive?: boolean | number}};
+};
+
 /** Defers creation through the ordinary layer update so attributes stay synchronized. */
 export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
   DataT,
@@ -84,9 +89,10 @@ export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
     );
   }
 
-  draw(options: Parameters<ScenegraphLayer<DataT>['draw']>[0]): void {
+  draw(options: DrawOptions<DataT>): void {
     if (this.props.refinementCoverage) {
-      this.props.refinementCoverage.draw(this, () => super.draw(options));
+      const isPicking = Boolean(options.shaderModuleProps?.picking?.isActive);
+      this.props.refinementCoverage.draw(this, isPicking, () => super.draw(options));
     } else {
       super.draw(options);
     }
@@ -114,6 +120,11 @@ export class Tile3DRefinementCoverage {
   private renderPass: RenderPass | null = null;
   private viewport: Viewport | null = null;
   private path: Tile3D[] = [];
+  /**
+   * Whether the latest color pass could apply coverage. Picking targets always have
+   * stencil, so picking follows this to hit what is visible.
+   */
+  private colorCoverage = false;
 
   /** Returns a postorder draw list and initializes its ancestry coverage plan. */
   updateLayers(layers: Layer[], stencilMask: number): Layer[] {
@@ -185,7 +196,7 @@ export class Tile3DRefinementCoverage {
   }
 
   /** Applies scoped WebGL stencil state without changing color, depth, or geometry. */
-  draw(layer: Tile3DScenegraphLayer<any>, draw: () => void): void {
+  draw(layer: Tile3DScenegraphLayer<any>, isPicking: boolean, draw: () => void): void {
     const entry = layer.props.tile && this.entries.get(layer.props.tile);
     if (!entry || !(entry.ancestorMask | entry.descendantMask)) return draw();
     if (!layer.isOpaque()) {
@@ -206,7 +217,9 @@ export class Tile3DRefinementCoverage {
       ? framebuffer.depthStencilAttachment.texture.format.includes('stencil')
       : (!framebuffer || framebuffer.handle === null) &&
         webglDevice.gl.getContextAttributes()?.stencil;
-    if (!hasStencil) return draw();
+    if (!isPicking) this.colorCoverage = Boolean(hasStencil);
+    // Without stencil in the color target, depth testing decides what is visible and picked.
+    if (!hasStencil || (isPicking && !this.colorCoverage)) return draw();
 
     if (this.renderPass !== renderPass || this.viewport !== viewport) {
       this.renderPass = renderPass;
