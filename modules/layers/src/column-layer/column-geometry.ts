@@ -105,10 +105,27 @@ function tesselateColumn(props: ColumnGeometryProps): {
   }
 
   if (useCap) {
-    // Cap ring strips: rings sweep from the column's top edge (theta=0) up to the apex (theta=PI/2).
-    // Each ring pair (s, s+1) is interleaved as a triangle strip: ring_s[0], ring_{s+1}[0], ring_s[1], ...
-    // At the apex (s=capSegs), all ring vertices share the same point, producing valid cone-like triangles
-    // with degenerate fillers between them.
+    // cap profile: ring s is at theta = (s / capSegs) * PI / 2, from the top edge of the
+    // sides (theta = 0) to the apex (theta = PI / 2). It has radius `radius * cos(theta)`
+    // and sits `radius * sin(theta)` above the sides.
+    //
+    //   dome (capSegs = 2)              cone (capSegs = 1)
+    //
+    //           2 *                           * 1
+    //       1 *-'   '-* 1                   /   \
+    //        /         \                  /       \
+    //     0 *           * 0           0 *           * 0
+    //       |   side    |               |   side    |
+    //
+    // cap tesselation: each pair of rings (s, s + 1) is a strip 0, 1, 2, 3, 4, 5, ...
+    //
+    // 1 - 3 - 5  ... ring s + 1
+    // | \ | \ |
+    // 0 - 2 - 4  ... ring s
+    //
+    // The apex ring has radius 0, so the last strip collapses into a fan around the apex.
+    // A bridge vertex joins the cap to the sides, and a duplicated last vertex joins
+    // consecutive strips, both through degenerate triangles.
 
     // Bridge vertex: one extra copy of ring0[0] to create a clean degenerate transition from the side strip.
     const vx0 = vertices ? vertices[0] : radius;
