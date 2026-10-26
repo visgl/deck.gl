@@ -575,10 +575,12 @@ webglTest('Deck#picking under a shadow light', async () => {
         try {
           const info = deck.pickObject({x: 0, y: 0});
           expect(info && info.index, 'Picked object under a shadow light').toBe(0);
-          deck.finalize();
           resolve();
         } catch (error) {
           reject(error);
+        } finally {
+          // Release the Deck even if picking throws: later tests share the device
+          deck.finalize();
         }
       }
     });
