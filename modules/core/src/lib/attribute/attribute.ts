@@ -98,7 +98,7 @@ const VERSIONED_BINARY_KEYS: (keyof BinaryAttribute)[] = [
  * Copies the fields of a versioned binary input. A copy is needed because applications bump
  * `version` on the same object in place.
  */
-function getVersionedBinarySnapshot(
+export function getVersionedBinarySnapshot(
   input: TypedArray | Buffer | BinaryAttribute
 ): BinaryAttribute | null {
   const {version, value, buffer, type, size, offset, stride} = input as BinaryAttribute;
@@ -109,7 +109,7 @@ function getVersionedBinarySnapshot(
  * An unversioned input is unchanged if it is the same object. A versioned input is unchanged if
  * its version, data source and layout all match the last applied input.
  */
-function isBinaryInputUnchanged(
+export function isBinaryInputUnchanged(
   previousInput: TypedArray | Buffer | BinaryAttribute | null,
   previousSnapshot: BinaryAttribute | null,
   input: TypedArray | Buffer | BinaryAttribute
@@ -431,30 +431,6 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     this.setNeedsRedraw();
     this._uploadBinary(buffer);
     return true;
-  }
-
-  /**
-   * Returns `true` if `buffers` holds a versioned input for this attribute that differs from the
-   * one last applied. Used to detect in-place version bumps that do not change the `data` object.
-   */
-  hasVersionedBinaryChanged(
-    buffers: Record<string, TypedArray | Buffer | BinaryAttribute>
-  ): boolean {
-    const {accessor} = this.settings;
-    const {state} = this;
-    const external = buffers[this.id];
-    if (external) {
-      return (
-        (external as BinaryAttribute).version !== undefined &&
-        !isBinaryInputUnchanged(state.lastExternalBuffer, state.lastExternalSnapshot, external)
-      );
-    }
-    const binary = typeof accessor === 'string' ? buffers[accessor] : undefined;
-    return Boolean(
-      binary &&
-        (binary as BinaryAttribute).version !== undefined &&
-        !isBinaryInputUnchanged(state.binaryValue, state.binaryValueSnapshot, binary)
-    );
   }
 
   // Binary value is a typed array packed from mapping the source data with the accessor

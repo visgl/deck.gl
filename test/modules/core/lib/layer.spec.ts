@@ -4,7 +4,15 @@
 
 import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {Layer, LayerExtension, AttributeManager, MapView, OrbitView, picking} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  Layer,
+  LayerExtension,
+  AttributeManager,
+  MapView,
+  OrbitView,
+  picking
+} from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
@@ -914,6 +922,72 @@ for (const bufferName of ['instancePositions', 'getPosition']) {
           onAfterUpdate: () => {
             expectCallCounts({[entryMethod]: 1, setData: 1, write: 1});
             expect(readBufferFloat32(attribute, 6)).toEqual([9, 9, 9, 9, 9, 9]);
+          }
+        }
+      ]
+    });
+  });
+}
+
+class VersionedAttributeCompositeLayer extends CompositeLayer {
+  renderLayers() {
+    return new VersionedAttributeLayer(this.getSubLayerProps({id: 'child', data: this.props.data}));
+  }
+}
+VersionedAttributeCompositeLayer.layerName = 'VersionedAttributeCompositeLayer';
+
+for (const bufferName of ['instancePositions', 'getPosition']) {
+  test(`CompositeLayer#data.attributes.${bufferName}#version`, () => {
+    const positions: Record<string, any> = {
+      value: new Float32Array([0, 0, 0, 1, 1, 1]),
+      size: 3,
+      version: 1
+    };
+    const data = {length: 2, attributes: {[bufferName]: positions}};
+    let renderLayers;
+
+    testLayer({
+      Layer: VersionedAttributeCompositeLayer,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {
+          title: 'initial upload',
+          props: {data},
+          onAfterUpdate: ({subLayer}) => {
+            const attribute = subLayer.getAttributeManager().getAttributes().instancePositions;
+            expect(readBufferFloat32(attribute, 6)).toEqual([0, 0, 0, 1, 1, 1]);
+            renderLayers = vi.spyOn(VersionedAttributeCompositeLayer.prototype, 'renderLayers');
+          }
+        },
+        {
+          title: 'same object, same version',
+          updateProps: {data},
+          onBeforeUpdate: () => renderLayers.mockClear(),
+          onAfterUpdate: () => expect(renderLayers).not.toHaveBeenCalled()
+        },
+        {
+          title: 'same object, new version',
+          updateProps: {data},
+          onBeforeUpdate: () => {
+            renderLayers.mockClear();
+            positions.value.set([2, 2, 2, 3, 3, 3]);
+            positions.version = 2;
+          },
+          onAfterUpdate: ({subLayer}) => {
+            expect(renderLayers).toHaveBeenCalledTimes(1);
+            const attribute = subLayer.getAttributeManager().getAttributes().instancePositions;
+            expect(readBufferFloat32(attribute, 6)).toEqual([2, 2, 2, 3, 3, 3]);
+          }
+        },
+        {
+          title: 'applied version',
+          updateProps: {data},
+          onBeforeUpdate: () => renderLayers.mockClear(),
+          onAfterUpdate: () => {
+            expect(renderLayers).not.toHaveBeenCalled();
+            renderLayers.mockRestore();
           }
         }
       ]
