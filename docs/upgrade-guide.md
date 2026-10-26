@@ -45,6 +45,12 @@ The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` 
 
 Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
 
+#### Meter offsets in GlobeView
+
+Below zoom 12, `GlobeView` turned meter offsets from a position half a turn about the local up direction, toward the west and south. This applies to `SimpleMeshLayer` and `ScenegraphLayer` meshes, `ColumnLayer` angles, `IconLayer` and `TextLayer` with `billboard: false`, and custom layers that pass an offset to `project_position_to_clipspace`. These offsets now point east, north and up, matching `MapView` and `GlobeView` above zoom 12. If your application turned its meshes or offsets by 180° in `GlobeView` to compensate, remove that rotation.
+
+`project_get_orientation_matrix` now returns east, north and up columns, and the same matrix in WGSL; WebGPU previously ignored the location. At a pole, east is its limit along the position's longitude, and the common-space x axis only when the position lies exactly on the polar axis.
+
 #### projectPosition
 
 [`layer.projectPosition`](./api-reference/core/layer.md#projectposition) now uses simplified parameters when the input position is not in the layer's own CRS. Calls that use the layer's own CRS can continue to call `layer.projectPosition(position)`.
