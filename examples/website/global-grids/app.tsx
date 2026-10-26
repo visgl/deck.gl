@@ -202,6 +202,9 @@ export default function App({
       <Map
         reuseMaps
         projection="globe"
+        // On WebGPU the deck canvas is overlaid in a MapLibre control slot, which is stacked above
+        // the website's info panel unless the map is a stacking context of its own
+        style={{isolation: 'isolate'}}
         id="map"
         initialViewState={INITIAL_VIEW_STATE}
         mapStyle="https://tiles.openfreemap.org/styles/positron"
