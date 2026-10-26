@@ -179,6 +179,7 @@ In the right context, enabling GPU aggregation can significantly speed up your a
 CPU aggregation is used as fallback in the following cases:
 
 - The current browser does not support GPU aggregation
+- The layer is rendered with WebGPU, which does not support WebGL GPU aggregation
 - `gridAggregator` is defined
 - `getColorValue` is defined
 - `getElevationValue` is defined
@@ -190,6 +191,8 @@ CPU aggregation is used as fallback in the following cases:
 
 Size of each cell in meters.
 
+
+In geospatial views, this size represents locally approximated ground meters. The viewport's distance scale is evaluated at the center of the data bounds and applied uniformly to all bins. Projection distortion may vary across the dataset, so ground dimensions away from that anchor are approximate. Panning does not change the bin definitions.
 
 #### `colorAggregation` (string, optional) {#coloraggregation}
 

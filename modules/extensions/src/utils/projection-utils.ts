@@ -2,8 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {WebMercatorViewport, OrthographicViewport} from '@deck.gl/core';
-import type {Layer, Viewport} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
+import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
+import * as vec3 from '@math.gl/core/vec3';
+import * as vec4 from '@math.gl/core/vec4';
+import type {NumericArray} from '@math.gl/core';
+
+/** TILE_SIZE in the project shader module */
+const TILE_SIZE = 512;
+/** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
+const GLOBE_METERS_TO_COMMON = 256 / 6370972;
 
 /** Bounds in CARTESIAN coordinates */
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number];
@@ -28,6 +36,142 @@ export function getMercatorReferenceViewport(viewport: Viewport): Viewport {
   return viewport.isGeospatial ? MERCATOR_REFERENCE_VIEWPORT : viewport;
 }
 
+// Flat common space: Mercator (geospatial) or cartesian (OrthographicView). CPU counterparts of
+// project_common_position_to_flat(). Adding a non-flat projection: update the flatten branch in
+// core project.glsl.ts / project.wgsl.ts, isFlatViewport(), and test/render/view-presets.ts.
+
+/** False only for GlobeViewport, whose common space is a sphere. The single globe check in this module. */
+export function isFlatViewport(viewport: Viewport): boolean {
+  return !(viewport instanceof _GlobeViewport);
+}
+
+/** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
+export type FlatProjectOptions = {
+  sourceCrs?: import('@math.gl/projection/core').CRSDescriptor;
+  coordinateSystem?: 'cartesian' | 'meter-offsets';
+  coordinateOrigin?: [number, number, number];
+  modelMatrix?: NumericArray | null;
+};
+
+/**
+ * CPU counterpart of `project_common_position_to_flat(project_position(position))`, relative to
+ * `getFlatCommonOrigin()`. Always pair with the GPU function: a raw `layer.projectPosition()`
+ * disagrees with it under globe or auto-offset.
+ */
+export function projectToFlatCommon(
+  layer: Layer,
+  position: number[],
+  opts: FlatProjectOptions = {}
+): [number, number, number] {
+  // Same resolution as Layer.projectPosition so multi-view setups stay consistent
+  const viewport = getLayerViewport(layer);
+  if (isFlatViewport(viewport)) {
+    return layer.projectPosition(position, opts);
+  }
+  if (getSourceCoordinateSystem(layer, opts) === 'meter-offsets') {
+    return projectGlobeMeterOffsetsToFlatCommon(layer, viewport, position, opts);
+  }
+  return layer.projectPosition(position, {
+    ...opts,
+    viewport: getMercatorReferenceViewport(viewport),
+    autoOffset: false
+  });
+}
+
+/**
+ * Mirrors the shader's GLOBE + METER_OFFSETS path: a linear offset in the tangent plane at the
+ * origin. Do not go through lng/lat; the error grows with the square of the offset (~200 m at 300 km).
+ */
+function projectGlobeMeterOffsetsToFlatCommon(
+  layer: Layer,
+  viewport: Viewport,
+  position: number[],
+  opts: FlatProjectOptions
+): [number, number, number] {
+  const origin = opts.coordinateOrigin ?? layer.props.coordinateOrigin;
+  const modelMatrix = opts.modelMatrix === undefined ? layer.props.modelMatrix : opts.modelMatrix;
+  let [x, y, z = 0] = position;
+  if (modelMatrix) {
+    [x, y, z] = vec4.transformMat4([] as number[], [x, y, z, 1], modelMatrix);
+  }
+  // project.commonOrigin: sphere position of the coordinate origin
+  const originCommon = viewport.projectPosition(origin);
+  // project_get_orientation_matrix(commonOrigin)
+  const uz = vec3.normalize([] as number[], originCommon);
+  const ux = Math.abs(uz[2]) === 1 ? [1, 0, 0] : vec3.normalize([] as number[], [uz[1], -uz[0], 0]);
+  const uy = vec3.cross([] as number[], uz, ux);
+  // enuMatrix * vec3(-x, -y, z) * metersToCommon
+  const displaced = [0, 1, 2].map(
+    i => originCommon[i] + (ux[i] * -x + uy[i] * -y + uz[i] * z) * GLOBE_METERS_TO_COMMON
+  );
+  // project_globe_to_mercator_
+  const lngLatZ = viewport.unprojectPosition(displaced);
+  return MERCATOR_REFERENCE_VIEWPORT.projectPosition(lngLatZ);
+}
+
+/**
+ * Projects `[minX, minY, maxX, maxY]` into flat common bounds. Lng/lat bounds with
+ * `minX - maxX > 180` take the shorter arc across the antimeridian, so `maxX` may exceed TILE_SIZE;
+ * test against them with `project_common_position_to_flat_wrapped()` about the bounds centre.
+ * Otherwise edges are re-ordered, so `[right, top, left, bottom]` input still works.
+ */
+export function projectBoundsToFlatCommon(
+  layer: Layer,
+  bounds: Readonly<[number, number, number, number]>,
+  opts?: FlatProjectOptions
+): Bounds {
+  const a = projectToFlatCommon(layer, [bounds[0], bounds[1], 0], opts);
+  const b = projectToFlatCommon(layer, [bounds[2], bounds[3], 0], opts);
+  if (
+    bounds[0] - bounds[2] > 180 &&
+    getLayerViewport(layer).isGeospatial &&
+    getSourceCoordinateSystem(layer, opts) === 'lnglat'
+  ) {
+    b[0] += TILE_SIZE;
+  }
+  return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
+}
+
+function getLayerViewport(layer: Layer): Viewport {
+  return layer.internalState?.viewport || layer.context.viewport;
+}
+
+/** Input coordinate frame used for flat projection and angular bounds. */
+function getSourceCoordinateSystem(layer: Layer, opts: FlatProjectOptions = {}): string {
+  const coordinateSystem =
+    opts.coordinateSystem ?? opts.sourceCrs?.signature ?? layer.props.coordinateSystem;
+  switch (coordinateSystem) {
+    case 'cartesian':
+    case 'meter-offsets':
+    case 'lnglat-offsets':
+      return coordinateSystem;
+  }
+  const sourceCrs = opts.sourceCrs ?? layer.internalState!.sourceCrs;
+  // The antimeridian threshold is in degrees, with longitude on the first axis.
+  if (
+    sourceCrs?.coordinateFrame === 'geographic' &&
+    sourceCrs.axis.startsWith('en') &&
+    sourceCrs.xUnit.degreesPerUnit === 1 &&
+    sourceCrs.yUnit.degreesPerUnit === 1
+  ) {
+    return 'lnglat';
+  }
+  return sourceCrs?.signature ?? 'cartesian';
+}
+
+/**
+ * Origin of `project_common_position_to_flat()` results: `project.commonOrigin` on flat viewports,
+ * `[0, 0]` under globe, where commonOrigin is a sphere position and must never be re-added.
+ */
+export function getFlatCommonOrigin(
+  projectUniforms: ProjectUniforms,
+  viewport: Viewport
+): [number, number] {
+  return isFlatViewport(viewport)
+    ? [projectUniforms.commonOrigin[0], projectUniforms.commonOrigin[1]]
+    : [0, 0];
+}
+
 /*
  * Compute the union of bounds from multiple layers
  * Returns bounds in CARTESIAN coordinates
@@ -43,8 +187,18 @@ export function joinLayerBounds(
   for (const layer of layers) {
     const layerBounds = layer.getBounds();
     if (layerBounds) {
-      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport, autoOffset: false});
-      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport, autoOffset: false});
+      // Attribute bounds already include CPU conversion and source-space transforms.
+      const options = layer.state.preproject
+        ? {
+            viewport,
+            autoOffset: false,
+            sourceCrs: layer.state.packedCrs!,
+            coordinateOrigin: [0, 0, 0] as [number, number, number],
+            modelMatrix: null
+          }
+        : {viewport, autoOffset: false};
+      const bottomLeftCommon = layer.projectPosition(layerBounds[0], options);
+      const topRightCommon = layer.projectPosition(layerBounds[1], options);
 
       bounds[0] = Math.min(bounds[0], bottomLeftCommon[0]);
       bounds[1] = Math.min(bounds[1], bottomLeftCommon[1]);
@@ -179,6 +333,12 @@ export function getRenderBounds(
 ): Bounds {
   if (!layerBounds) {
     return [0, 0, 1, 1];
+  }
+
+  // layerBounds are flat (Mercator) but getViewportBounds() would return sphere coordinates for a
+  // non-flat viewport; the two cannot be intersected. Render the full layer extent instead.
+  if (!isFlatViewport(viewport)) {
+    return layerBounds;
   }
 
   const viewportBounds = getViewportBounds(viewport, zRange);

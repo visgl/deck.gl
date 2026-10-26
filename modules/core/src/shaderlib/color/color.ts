@@ -27,6 +27,8 @@ export type ColorUniforms = {
 export default {
   name: 'color',
   dependencies: [],
+  // Intentionally WGSL-only. Layers can include this module unconditionally because
+  // the GLSL assembler treats modules without vs/fs source as no-ops.
   source: colorWGSL,
   getUniforms: (_props: Partial<ColorProps>) => {
     // TODO (kaapp) Handle layer opacity

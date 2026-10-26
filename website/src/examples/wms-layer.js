@@ -48,6 +48,8 @@ const SERVICES = {
 class WMSDemo extends Component {
   static title = 'Web Map Service (WMS)';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/wms`;
 
   static parameters = {
@@ -126,6 +128,8 @@ class WMSDemo extends Component {
       <DemoContainer>
         <App
           {...otherProps}
+          key={this.props.device?.type}
+          device={this.props.device}
           serviceUrl={service.serviceUrl}
           initialViewState={service.viewState}
           layers={layers[params.layer.value] || service.defaultLayers}

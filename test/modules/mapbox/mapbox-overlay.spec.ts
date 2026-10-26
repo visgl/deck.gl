@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapboxOverlay} from '@deck.gl/mapbox';
-import {getDeckInstance} from '@deck.gl/mapbox/deck-utils';
+import {getDeckInstance, getProjection} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
 import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -41,6 +41,42 @@ class TestScatterplotLayer extends ScatterplotLayer {
   }
 }
 TestScatterplotLayer.layerName = 'TestScatterplotLayer';
+
+test('MapboxOverlay#overlaid passes pixelSizeSource css-dpr', () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({
+    device,
+    layers: [new ScatterplotLayer()]
+  });
+
+  map.addControl(overlay);
+
+  const deck = overlay._deck;
+  expect(deck, 'Deck instance is created').toBeTruthy();
+  expect(
+    deck.props.deviceProps?.createCanvasContext?.pixelSizeSource,
+    'pixelSizeSource is css-dpr in overlaid mode'
+  ).toBe('css-dpr');
+
+  map.removeControl(overlay);
+});
+
+test('MapboxOverlay#overlaid removes its container', () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({device});
+
+  map.addControl(overlay);
+  expect(map.getContainer().childElementCount, 'container is added to the map').toBe(1);
+
+  map.removeControl(overlay);
+  expect(map.getContainer().childElementCount, 'container is removed from the map').toBe(0);
+});
 
 test('MapboxOverlay#overlaid', async () => {
   const map = new MockMapboxMap({
@@ -343,7 +379,8 @@ webglTest('MapboxOverlay#interleaved', async () => {
 
     expect(overlay._props.useDevicePixels, 'useDevicePixels is not forwarded').toBe(undefined);
 
-    await sleep(100);
+    // Assert the first completed draw before a later animation frame can redraw the same layer.
+    await vi.waitUntil(() => drawLog.length > 0);
     expect(map.getLayer('deck-layer-group-last'), 'Layer group is added').toBeTruthy();
     expect(drawLog, 'layers correctly filtered').toEqual(['poi']);
     drawLog = [];
@@ -353,7 +390,7 @@ webglTest('MapboxOverlay#interleaved', async () => {
       layerFilter: undefined
     });
 
-    await sleep(100);
+    await vi.waitUntil(() => drawLog.length > 0);
     expect(map.getLayer('deck-layer-group-last'), 'Layer group exists').toBeTruthy();
     expect(drawLog, 'layers correctly filtered').toEqual(['cities']);
 
@@ -364,6 +401,25 @@ webglTest('MapboxOverlay#interleaved', async () => {
 
   expect(overlay._deck, 'Deck instance is created').toBeTruthy();
   await renderPromise;
+});
+
+test('MapboxOverlay#interleaved drops useDevicePixels', () => {
+  // The base map owns the drawing buffer size in interleaved mode, so useDevicePixels cannot apply
+  const interleaved = new MapboxOverlay({interleaved: true, useDevicePixels: 1.5});
+  expect(
+    'useDevicePixels' in interleaved._props,
+    'useDevicePixels is dropped in interleaved mode'
+  ).toBeFalsy();
+
+  // setProps must drop it too, even though `interleaved` is not in the partial props
+  interleaved.setProps({useDevicePixels: 1.5});
+  expect(
+    'useDevicePixels' in interleaved._props,
+    'useDevicePixels is dropped by setProps in interleaved mode'
+  ).toBeFalsy();
+
+  const overlaid = new MapboxOverlay({useDevicePixels: 1.5});
+  expect(overlaid._props.useDevicePixels, 'useDevicePixels is kept in overlaid mode').toBe(1.5);
 });
 
 webglTest('MapboxOverlay#interleaved#remove and add', () => {
@@ -995,4 +1051,18 @@ test('MapboxLayerGroup#afterRender fires onBeforeRender/onAfterRender without no
       getDeckInstance({map, deck});
     });
   });
+});
+
+test('MapboxOverlay#getProjection falls back to mercator before the style is set', () => {
+  const map = new MockMapboxMap({center: {lng: 0, lat: 0}, zoom: 1});
+
+  map.getProjection = () => {
+    throw new TypeError("Cannot read properties of undefined (reading 'projection')");
+  };
+  expect(getProjection(map as any), 'falls back to mercator when getProjection throws').toBe(
+    'mercator'
+  );
+
+  map.getProjection = () => ({type: 'globe'});
+  expect(getProjection(map as any), 'detects globe once the style is set').toBe('globe');
 });

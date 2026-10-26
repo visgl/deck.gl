@@ -8,8 +8,11 @@ import * as FIXTURES from 'deck.gl-test/data';
 
 import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
 
+import {LayerManager, MapView} from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {ContourLayer, ContourLayerProps} from '@deck.gl/aggregation-layers';
+import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
+import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
+import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const getPosition = d => d.COORDINATES;
@@ -18,6 +21,50 @@ const CONTOURS: ContourLayerProps['contours'] = [
   {threshold: 5, color: [0, 255, 0]}, // => Isoline for threshold 5
   {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
 ];
+
+test('ContourLayer#WebGPU renders isolines and isobands with CPU aggregation', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: -122, latitude: 38, zoom: 10}
+  });
+  const errors: Error[] = [];
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  layerManager.setProps({onError: error => errors.push(error)});
+
+  const layer = new ContourLayer({
+    id: 'webgpu-contours',
+    data: FIXTURES.points,
+    getPosition,
+    gpuAggregation: true,
+    contours: CONTOURS,
+    cellSize: 200
+  });
+
+  webgpuDevice.handle.pushErrorScope('validation');
+  layerManager.setLayers([layer]);
+
+  expect(errors).toEqual([]);
+  expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+
+  const renderedLayers = layerManager.getLayers();
+  expect(renderedLayers.some(renderedLayer => renderedLayer instanceof PathLayer)).toBe(true);
+  expect(renderedLayers.some(renderedLayer => renderedLayer instanceof SolidPolygonLayer)).toBe(
+    true
+  );
+
+  await webgpuDevice.handle.queue.onSubmittedWorkDone();
+  expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
+
+  layerManager.finalize();
+});
 
 test('ContourLayer', () => {
   const testCases = generateLayerTests({

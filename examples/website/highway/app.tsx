@@ -6,6 +6,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
 import {CSVLoader} from '@loaders.gl/csv';
@@ -46,7 +47,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxZoom: 8
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 type Accident = {
   state: string;
@@ -130,11 +131,13 @@ function renderTooltip({
 }
 
 export default function App({
+  device,
   roads = DATA_URL.ROADS,
   year,
   accidents,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   roads?: string | Road[];
   accidents?: Accident[];
   year?: number;
@@ -183,6 +186,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       pickingRadius={5}
       initialViewState={INITIAL_VIEW_STATE}
@@ -199,7 +203,8 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const accidents = (await load(DATA_URL.ACCIDENTS, CSVLoader)).data;
+  const accidents = (await load(DATA_URL.ACCIDENTS, CSVLoader, {csv: {shape: 'object-row-table'}}))
+    .data;
 
   root.render(<App accidents={accidents} year={accidents[0].year} />);
 }

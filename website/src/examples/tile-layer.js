@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class MapTileDemo extends Component {
   static title = 'Raster Map Tiles';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/map-tile`;
 
   static parameters = {
@@ -19,6 +21,7 @@ class MapTileDemo extends Component {
     maxZoom: {displayName: 'Max Zoom', type: 'range', value: 8, step: 1, min: 0, max: 19, accentColor: '#0275ff'},
     visibleMinZoom: {displayName: 'Visible Min Zoom', type: 'range', value: 1, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
     visibleMaxZoom: {displayName: 'Visible Max Zoom', type: 'range', value: 12, step: 1, min: 0, max: 19, accentColor: '#1a2b4a'},
+    zoomOffset: {displayName: 'Zoom Offset', type: 'range', value: 0, step: 1, min: -2, max: 2},
     showBorder: {displayName: 'Show tile borders', type: 'checkbox', value: false},
     useExtent: {displayName: 'Extent (France)', type: 'checkbox', value: false}
   };
@@ -60,11 +63,14 @@ class MapTileDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
+        device={this.props.device}
         showBorder={params.showBorder.value}
         minZoom={params.minZoom.value}
         maxZoom={params.maxZoom.value}
         visibleMinZoom={params.visibleMinZoom.value}
         visibleMaxZoom={params.visibleMaxZoom.value}
+        zoomOffset={params.zoomOffset.value}
         useExtent={params.useExtent.value}
         onTilesLoad={this._onTilesLoad}
         onZoomChange={this._onZoomChange}

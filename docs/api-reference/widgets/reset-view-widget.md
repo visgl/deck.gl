@@ -116,6 +116,12 @@ The `ResetViewWidget` accepts the generic [`WidgetProps`](../core/widget.md#widg
 
 Tooltip message displayed while hovering a mouse over the widget.
 
+#### `tooltip` (string | HTMLElement | false, optional) {#tooltip}
+
+* Default: value of `label`
+
+Custom tooltip content. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `initialViewState` (ViewState, optional) {#initialviewstate}
 
 * Default: `deck.props.initialViewState`

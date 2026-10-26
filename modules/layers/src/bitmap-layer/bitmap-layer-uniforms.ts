@@ -5,7 +5,21 @@
 import type {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
-const uniformBlock = `\
+const uniformBlockWGSL = /* wgsl */ `
+struct BitmapUniforms {
+  bounds: vec4<f32>,
+  coordinateConversion: f32,
+  desaturate: f32,
+  tintColor: vec3<f32>,
+  transparentColor: vec4<f32>,
+};
+
+@group(0) @binding(auto) var<uniform> bitmap: BitmapUniforms;
+@group(0) @binding(auto) var bitmapTexture: texture_2d<f32>;
+@group(0) @binding(auto) var bitmapTextureSampler: sampler;
+`;
+
+const uniformBlockGLSL = `\
 layout(std140) uniform bitmapUniforms {
   vec4 bounds;
   float coordinateConversion;
@@ -26,8 +40,9 @@ export type BitmapProps = {
 
 export const bitmapUniforms = {
   name: 'bitmap',
-  vs: uniformBlock,
-  fs: uniformBlock,
+  source: uniformBlockWGSL,
+  vs: uniformBlockGLSL,
+  fs: uniformBlockGLSL,
   uniformTypes: {
     bounds: 'vec4<f32>',
     coordinateConversion: 'f32',

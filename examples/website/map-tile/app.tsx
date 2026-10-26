@@ -13,6 +13,7 @@ import ZoomRangeWidget from './zoom-range-widget';
 
 import type {Position, MapViewState} from '@deck.gl/core';
 import type {TileLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {Device} from '@luma.gl/core';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 47.65,
@@ -57,7 +58,9 @@ export default function App({
   maxZoom = 7,
   visibleMinZoom,
   visibleMaxZoom = 7,
-  useExtent = false
+  zoomOffset = 0,
+  useExtent = false,
+  device
 }: {
   showBorder?: boolean;
   onTilesLoad?: () => void;
@@ -66,7 +69,9 @@ export default function App({
   maxZoom?: number;
   visibleMinZoom?: number;
   visibleMaxZoom?: number;
+  zoomOffset?: number;
   useExtent?: boolean;
+  device?: Device;
 }) {
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const onViewStateChange = useCallback(
@@ -95,6 +100,7 @@ export default function App({
     tileSize: 512,
     visibleMinZoom,
     visibleMaxZoom,
+    zoomOffset,
     extent: useExtent ? FRANCE_EXTENT : undefined,
     renderSubLayers: props => {
       const [[west, south], [east, north]] = props.tile.boundingBox;
@@ -127,6 +133,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={[tileLayer]}
       views={new MapView({repeat: true})}
       initialViewState={INITIAL_VIEW_STATE}

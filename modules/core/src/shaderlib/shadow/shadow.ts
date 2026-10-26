@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../project/constants';
 import project from '../project/project';
 import {Vector3, Matrix4} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core';
@@ -12,11 +12,7 @@ import {pixelsToWorld} from '@math.gl/web-mercator';
 import type {Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
-import {
-  ProjectProps,
-  ProjectUniforms,
-  getShaderCoordinateSystem
-} from '../project/viewport-uniforms';
+import {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
 layout(std140) uniform shadowUniforms {
@@ -240,7 +236,7 @@ function createShadowUniforms(
       .translate(new Vector3(projectProps.viewport.center).negate());
 
     if (
-      projectUniforms.coordinateSystem === getShaderCoordinateSystem('lnglat') &&
+      projectUniforms.coordinateFrame === COORDINATE_SYSTEM.GEODETIC &&
       projectUniforms.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;

@@ -5,6 +5,17 @@
 import {Texture} from '@luma.gl/core';
 import type {ShaderModule} from '@luma.gl/shadertools';
 
+const uniformBlockWGSL = /* wgsl */ `\
+struct weightUniforms {
+  commonBounds: vec4<f32>,
+  radiusPixels: f32,
+  textureWidth: f32,
+  weightsScale: f32,
+};
+
+@group(0) @binding(auto) var<uniform> weight: weightUniforms;
+`;
+
 const uniformBlock = `\
 layout(std140) uniform weightUniforms {
   vec4 commonBounds;
@@ -23,6 +34,7 @@ export type WeightProps = {
 
 export const weightUniforms = {
   name: 'weight',
+  source: uniformBlockWGSL,
   vs: uniformBlock,
   uniformTypes: {
     commonBounds: 'vec4<f32>',
@@ -39,6 +51,14 @@ export type MaxWeightProps = {
 
 export const maxWeightUniforms = {
   name: 'maxWeight',
+  source: /* wgsl */ `\
+struct maxWeightUniforms {
+  textureSize: f32,
+};
+
+@group(0) @binding(auto) var<uniform> maxWeight: maxWeightUniforms;
+@group(0) @binding(auto) var inTexture: texture_2d<f32>;
+`,
   vs: `\
 layout(std140) uniform maxWeightUniforms {
   float textureSize;

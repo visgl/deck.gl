@@ -46,7 +46,7 @@ class MaskExtensionDemo extends Component {
         <p>Global flights, highlighting cities where a plane passed overhead in the last N mins</p>
         <p>
           Data source: <a href="https://zenodo.org/record/3974209">Crowdsourced air traffic data</a>{' '}
-          from <a href="http://www.opensky-network.org"> The OpenSky Network</a>
+          from <a href="https://opensky-network.org"> The OpenSky Network</a>
         </p>
       </div>
     );

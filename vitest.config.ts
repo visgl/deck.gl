@@ -2,14 +2,35 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {defineConfig, configDefaults, TestUserConfig} from 'vitest/config';
+import {getVitestConfig} from '@vis.gl/dev-tools';
+import {TestUserConfig} from 'vitest/config';
 import {playwright} from '@vitest/browser-playwright';
 
+const renderTestDeviceValue = process.env.RENDER_TEST_DEVICE;
+const renderTestDevice = renderTestDeviceValue === 'null' ? undefined : renderTestDeviceValue;
+if (renderTestDevice && renderTestDevice !== 'webgl' && renderTestDevice !== 'webgpu') {
+  throw new Error(`Invalid RENDER_TEST_DEVICE: ${renderTestDevice}`);
+}
+
 const chromiumLaunchArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+const chromiumGpuLaunchArgs =
+  renderTestDevice === 'webgl'
+    ? chromiumLaunchArgs
+    : [
+        ...chromiumLaunchArgs,
+        '--enable-unsafe-webgpu',
+        '--ignore-gpu-blocklist',
+        '--enable-gpu',
+        '--enable-features=Vulkan',
+        '--use-vulkan=swiftshader'
+      ];
+const renderTestDefine = {
+  'import.meta.env.RENDER_TEST_DEVICE': JSON.stringify(renderTestDevice ?? null)
+};
 
 const headlessPlaywright = playwright({
   launchOptions: {
-    args: chromiumLaunchArgs
+    args: chromiumGpuLaunchArgs
   }
 });
 
@@ -26,7 +47,7 @@ const browserPlaywright = playwright({
 // Playwright provider with viewport configured for render tests
 const renderPlaywright = playwright({
   launchOptions: {
-    args: chromiumLaunchArgs
+    args: chromiumGpuLaunchArgs
   },
   contextOptions: {
     viewport: {width: 1024, height: 768}
@@ -36,6 +57,10 @@ import {resolve} from 'path';
 import {browserCommands} from './test/setup/browser-commands';
 
 const rootDir = import.meta.dirname;
+// These prototypes require locally linked, unpublished luma.gl peers.
+const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
+const privateNodeTests = includePrivateModules ? ['modules/deck-*/test/**/*.node.spec.ts'] : [];
+const privateBrowserTests = includePrivateModules ? ['modules/deck-*/test/**/*.spec.ts'] : [];
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
@@ -56,6 +81,9 @@ const excludedTests = [
 // Match aliases from .ocularrc.js
 // Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
+  '@deck.gl-community/gpu-layers/query': resolve(rootDir, 'modules/deck-gpu-layers/src/query'),
+  '@deck.gl-community/gpu-layers': resolve(rootDir, 'modules/deck-gpu-layers/src'),
+  '@deck.gl-community/arrow-layers': resolve(rootDir, 'modules/deck-arrow-layers/src'),
   // Explicit vitest entry point (must come before @deck.gl/test-utils)
   '@deck.gl/test-utils/vitest': resolve(rootDir, 'modules/test-utils/src/vitest.ts'),
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
@@ -69,6 +97,7 @@ const aliases = {
   '@deck.gl/jupyter-widget': resolve(rootDir, 'modules/jupyter-widget/src'),
   '@deck.gl/layers': resolve(rootDir, 'modules/layers/src'),
   '@deck.gl/mapbox': resolve(rootDir, 'modules/mapbox/src'),
+  '@deck.gl/maplibre': resolve(rootDir, 'modules/maplibre/src'),
   '@deck.gl/mesh-layers': resolve(rootDir, 'modules/mesh-layers/src'),
   '@deck.gl/react': resolve(rootDir, 'modules/react/src'),
   '@deck.gl/test-utils': resolve(rootDir, 'modules/test-utils/src'),
@@ -76,6 +105,9 @@ const aliases = {
   'deck.gl': resolve(rootDir, 'modules/main/src'),
   'deck.gl-test': resolve(rootDir, 'test')
 };
+
+// Linked private luma.gl peers must share resource classes and Arrow types with deck.gl.
+const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/gpgpu', '@luma.gl/shadertools', 'apache-arrow'];
 
 // Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
 // until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly
@@ -89,7 +121,7 @@ const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
-  exclude: ['modules/test-utils/**', '**/node_modules/**']
+  exclude: ['modules/test-utils/**', '**/node_modules/**', ...(includePrivateModules ? [] : ['modules/deck-*/**'])]
 };
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
@@ -107,12 +139,16 @@ const optimizeDepsConfig = {
     '@luma.gl/webgl',
     '@luma.gl/shadertools',
     '@luma.gl/effects',
+    'maplibre-gl-v4',
+    'maplibre-gl-v5',
     // loaders.gl dependencies
     '@loaders.gl/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'
-  ]
+  ],
+  // MapLibre v6 is native ESM. Add future ESM-only major aliases here.
+  exclude: ['maplibre-gl-v6']
 };
 
 // Server configuration for serving test data files with correct MIME types
@@ -135,21 +171,16 @@ const assetsIncludeConfig = [
   '**/*.terrain' // Terrain files
 ];
 
-export default defineConfig({
-  test: {
-    // Globally exclude tape-based tests from all vitest projects
-    exclude: [...configDefaults.exclude, '**/*.tape.spec.ts'],
-    coverage: coverageConfig,
-    projects: [
+const projects = [
       // Node project - simple smoke tests (*.node.spec.ts only)
       // Used by test-fast for quick validation
       {
         extends: true,
-        resolve: {alias: aliases},
+        resolve: {alias: aliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         test: {
           name: 'node',
           environment: 'node',
-          include: ['test/modules/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.node.spec.ts', ...privateNodeTests],
           globals: false,
           testTimeout: 30000,
           setupFiles: ['./test/setup/vitest-node-setup.ts'],
@@ -173,11 +204,26 @@ export default defineConfig({
         }
       },
 
+      // Tape compatibility project - verifies the legacy @deck.gl/test-utils entry point
+      {
+        extends: true,
+        resolve: {alias: aliases},
+        test: {
+          name: 'tape-compat',
+          environment: 'node',
+          include: ['test/smoke/**/*.tape.spec.js'],
+          globals: false,
+          testTimeout: 30000,
+          setupFiles: ['./test/setup/vitest-node-setup.ts'],
+          sequence: {groupOrder: 0}
+        }
+      },
+
       // Headless project - unit tests in headless browser
       // Used by test-headless and test-ci
       {
         extends: true,
-        resolve: {alias: browserAliases},
+        resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
         server: serverConfig,
@@ -187,8 +233,8 @@ export default defineConfig({
           // automated runs. These browser-input tests have become flaky across
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
-          include: ['test/modules/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -215,14 +261,14 @@ export default defineConfig({
       // Used by test-browser
       {
         extends: true,
-        resolve: {alias: browserAliases},
+        resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
         server: serverConfig,
         test: {
           name: 'browser',
-          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts'],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts'],
+          include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,
@@ -246,6 +292,7 @@ export default defineConfig({
       // Used by test-render
       {
         extends: true,
+        define: renderTestDefine,
         resolve: {alias: browserAliases},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,
@@ -278,6 +325,9 @@ export default defineConfig({
           sequence: {groupOrder: 4}
         }
       }
-    ]
-  }
+];
+
+export default getVitestConfig({
+  coverage: coverageConfig,
+  projects: Object.fromEntries(projects.map(project => [project.test.name, project]))
 });

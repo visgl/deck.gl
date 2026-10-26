@@ -53,23 +53,16 @@ df["growth"] = json["features"].apply(lambda row: row["properties"]["growth"])
 df["elevation"] = json["features"].apply(lambda row: calculate_elevation(row["properties"]["valuePerSqm"]))
 df["fill_color"] = json["features"].apply(lambda row: color_scale(row["properties"]["growth"]))
 
-# Add sunlight shadow to the polygons
-sunlight = {
-    "@@type": "_SunLight",
-    "timestamp": 1564696800000,  # datetime.datetime(2019, 7, 1, 22, tzinfo=datetime.timezone.utc).timestamp() * 1000
-    "color": [255, 255, 255],
-    "intensity": 1.0,
-    "_shadow": True,
-}
-
-ambient_light = {"@@type": "AmbientLight", "color": [255, 255, 255], "intensity": 1.0}
-
-lighting_effect = {
-    "@@type": "LightingEffect",
-    "shadowColor": [0, 0, 0, 0.5],
-    "ambientLight": ambient_light,
-    "directionalLights": [sunlight],
-}
+# Add sunlight and shadows to the polygons
+sunlight = pdk.Effect(
+    "SunLight",
+    timestamp=1564696800000,  # datetime.datetime(2019, 7, 1, 22, tzinfo=datetime.timezone.utc).timestamp() * 1000
+    color=[255, 255, 255],
+    intensity=1.0,
+    _shadow=True,
+)
+ambient_light = pdk.Effect("AmbientLight", color=[255, 255, 255], intensity=1.0)
+lighting_effect = pdk.Effect("LightingEffect", ambient_light=ambient_light, sunlight=sunlight)
 
 view_state = pdk.ViewState(
     **{"latitude": 49.254, "longitude": -123.13, "zoom": 11, "maxZoom": 16, "pitch": 45, "bearing": 0}
@@ -105,11 +98,12 @@ polygon_layer = pdk.Layer(
 
 tooltip = {"html": "<b>Value per Square Meter:</b> {valuePerSqm} <br /><b>Growth rate:</b> {growth}"}
 
+# Keep the standalone renderer so custom lighting remains available.
 r = pdk.Deck(
     polygon_layer,
     initial_view_state=view_state,
     effects=[lighting_effect],
-    map_style=pdk.map_styles.LIGHT,
+    map_style="https://tiles.openfreemap.org/styles/positron",
     tooltip=tooltip,
 )
 r.to_html("polygon_layer.html")

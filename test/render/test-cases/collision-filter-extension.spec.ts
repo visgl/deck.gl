@@ -2,43 +2,69 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, beforeAll, afterAll, afterEach} from 'vitest';
-import {
-  createContainer,
-  removeContainer,
-  finalizeDeck,
-  runRenderTest,
-  DeckTestContext,
-  TestCase
-} from '../deck-test-utils';
-import testCases from './collision-filter-extension';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {CollisionFilterExtension, MaskExtension} from '@deck.gl/extensions';
+import {points} from 'deck.gl-test/data';
+import {describe} from 'vitest';
+import {runRenderTestSuite} from '../render-test-suite';
+import type {TestCase} from '../deck-test-utils';
 
-const ctx: DeckTestContext = {
-  deck: null,
-  container: null
-};
+const getYear = d => d.YR_INSTALLED || 1997;
 
-beforeAll(() => {
-  ctx.container = createContainer();
-});
+const testCases = [
+  {
+    name: 'simple',
+    props: {}
+  },
+  {
+    name: '2x-radius',
+    props: {collisionTestProps: {radiusScale: 2}}
+  },
+  {
+    name: 'disabled',
+    props: {collisionEnabled: false}
+  },
+  {
+    name: 'ascending',
+    props: {getCollisionPriority: d => getYear(d) - 2000}
+  },
+  {
+    name: 'descending',
+    props: {getCollisionPriority: d => 2000 - getYear(d)}
+  }
+].map(({name, props}) => ({
+  name: `collision-filter-effect-${name}`,
+  viewState: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11.5,
+    pitch: 0,
+    bearing: 0
+  },
+  layers: [
+    new ScatterplotLayer({
+      id: name,
+      data: points,
+      extensions: [new CollisionFilterExtension()],
+      getPosition: d => d.COORDINATES,
+      getRadius: 10,
+      getFillColor: d => {
+        const value = (255 * (2014 - getYear(d))) / 21; // range 1997-2014
+        return [value, 0, 255 - value];
+      },
+      radiusUnits: 'pixels',
+      ...props
+    })
+  ],
+  imageDiffOptions: {
+    threshold: 0.985
+  },
+  goldenImage: `./test/render/golden-images/collision-filter-effect-${name}.png`
+}));
 
-afterEach(() => {
-  finalizeDeck(ctx);
-});
-
-afterAll(() => {
-  finalizeDeck(ctx);
-  removeContainer(ctx.container);
-  ctx.container = null;
-});
-
-const activeTests = (testCases as TestCase[]).filter(tc => !tc.skip);
-const skippedTests = (testCases as TestCase[]).filter(tc => tc.skip);
-
-skippedTests.forEach(tc => {
-  test.skip(tc.name, () => {});
-});
-
-test.each(activeTests)('$name', async testCase => {
-  await runRenderTest(testCase, ctx);
+describe.each([
+  'webgl'
+  // 'webgpu'
+] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });

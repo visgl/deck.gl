@@ -1,6 +1,6 @@
 # DeckRenderer
 
-This class is an experimental implementation of the ArcGIS [ExternalRenderer](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-externalRenderers.html#ExternalRenderer) interface and can be added to 3D views of maps created with the ArcGIS
+This class is an experimental implementation of the ArcGIS [RenderNode](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-3d-webgl-RenderNode.html) interface and can be added to 3D views of maps created with the ArcGIS
 API for JavaScript.
 
 
@@ -11,7 +11,6 @@ import {DeckRenderer} from '@deck.gl/arcgis';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import ArcGISMap from '@arcgis/core/Map';
 import SceneView from '@arcgis/core/views/SceneView';
-import * as externalRenderers from '@arcgis/core/views/3d/externalRenderers';
 
 const sceneView = new SceneView({
   container: 'viewDiv',
@@ -38,8 +37,6 @@ const renderer = new DeckRenderer(sceneView, {
     })
   ]
 });
-
-externalRenderers.add(sceneView, renderer);
 ```
 
 
@@ -49,7 +46,7 @@ externalRenderers.add(sceneView, renderer);
 new DeckRenderer(sceneView, props)
 ```
 
-- `sceneView` ([SceneView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-SceneView.html)) - the view to use this renderer with. `viewingMode` must be set to `'local'`.
+- `sceneView` ([SceneView](https://developers.arcgis.com/javascript/latest/api-reference/esri-views-SceneView.html)) - the view to use this renderer with. `viewingMode` must be set to `'local'`. `DeckRenderer` manages its internal deck.gl view state from the live `SceneView` camera and self-registers as a RenderNode; do not add it to `map.layers`.
 - `props` (object) - forwarded to a `Deck` instance. The following [Deck](../core/deck.md) props are supported:
 
 - `layers`

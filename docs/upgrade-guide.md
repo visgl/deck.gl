@@ -1,6 +1,126 @@
+---
+description: "Breaking changes, removals and deprecations for each deck.gl release, with migration notes."
+---
+
 # Upgrade Guide
 
+## Upgrading to v10
+
+### Viewport
+
+#### CRS configuration
+
+`Viewport` now uses a resolved `crs` descriptor for coordinate conversions and distance scales, allowing the base class to work with different coordinate reference systems. Supply `crs` when constructing a geospatial `Viewport`; without it, the viewport uses local coordinates.
+
+If you previously constructed `Viewport` with `longitude` and `latitude` to select Web Mercator, use `WebMercatorViewport` instead. These options belong to the geographic subclasses. Built-in `MapView`, `FirstPersonView`, and `GlobeView` retain their existing projection behavior.
+
+#### Distance scales
+
+Distance scales now describe world units for any CRS, so the same API supports geographic degrees and projected linear units. For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+
+- Use `unitsPerWorldUnit` and `unitsPerWorldUnit2` in place of `unitsPerDegree` and `unitsPerDegree2`.
+- For the removed `degreesPerUnit` field, divide by the corresponding component of `unitsPerWorldUnit` instead.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to the CRS linear unit factors, or `[1, 1, 1]` without a CRS; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `metersPerUnit` is derived from `unitsPerMeter` to keep reciprocal scales consistent. Supply `unitsPerMeter` instead of a separate `metersPerUnit` value.
+
+#### Subdivision resolution
+
+`viewport.resolution` now controls subdivision detail across CRSs with different units. Higher values generate finer geometry. It defaults to `0` (subdivision disabled), including for `GlobeView`, so applications can opt into the additional processing and memory overhead.
+
+To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
+
+#### GlobeView position
+
+`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
+
+### Layer
+
+#### Coordinate and projection constants
+
+Layer coordinate systems now use CRS strings, allowing applications to declare their data's CRS directly. Pass strings such as `'lnglat'`, `'cartesian'`, or `'meter-offsets'` to `coordinateSystem`; `COORDINATE_SYSTEM` and `_PROJECTION_MODE` are no longer exported.
+
+The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` to distinguish packed attribute coordinates from the layer's source CRS. Shader coordinate-frame and projection-mode enums are internal to the module; meter and degree offsets select their own projection modes.
+
+#### Coordinate origins
+
+Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
+
+#### projectPosition
+
+[`layer.projectPosition`](./api-reference/core/layer.md#projectposition) now uses simplified parameters when the input position is not in the layer's own CRS. Calls that use the layer's own CRS can continue to call `layer.projectPosition(position)`.
+
+| v9.4 parameter | v9.4 definition | v10 parameter | v10 definition / behavior |
+| --- | --- | --- | --- |
+| `coordinateSystem` | Overrides target common-space anchor. | (removed) | Matches input CRS. |
+| `fromCoordinateSystem` | Describes how to interpret the supplied position. Defaults to the layer's `coordinateSystem` prop. | `coordinateSystem` | Describes how to interpret the supplied position. Defaults to the layer's `coordinateSystem` prop. |
+|  | | `sourceCrs` | CRS descriptor for `coordinateSystem`. Defaults to the layer's resolved CRS. |
+| `coordinateOrigin` | Overrides target common-space anchor | (removed) | Matches input CRS origin |
+| `fromCoordinateOrigin` | Origin added to the supplied position before projection. Defaults to the layer's `coordinateOrigin` prop. | `coordinateOrigin` | Origin added to the supplied position before projection. Defaults to the layer's `coordinateOrigin` prop. |
+
+```ts
+const layer = new GeoJsonLayer({
+  id: 'mvt-2-1-0',
+  coordinateSystem: 'OSMTile512',
+  coordinateOrigin: [128, 0, 0],
+  modelMatrix: new Matrix4().scale([128, 128, 1]),
+});
+
+// Before
+const commonPosition1 = layer.projectPosition(mvtLocalPoint);
+const commonPosition2 = layer.projectPosition(lnglat, {
+  fromCoordinateSystem: 'lnglat',
+  fromCoordinateOrigin: [0, 0, 0],
+  modelMatrix: null
+});
+
+// After
+const commonPosition1 = layer.projectPosition(mvtLocalPoint);
+const sourceCrs = await projectionEngine.getCRS('EPSG:4326');
+const commonPosition2 = layer.projectPosition(lnglat, {
+  sourceCrs,
+  coordinateOrigin: [0, 0, 0],
+  modelMatrix: null
+});
+```
+
 ## Upgrading to v9.4
+
+### pydeck lighting
+
+The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
+`lightSettings` layer prop, which deck.gl has not supported since v7. Use deck-level
+lighting effects instead:
+
+```python
+import pydeck as pdk
+
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+pdk.Deck(layers=[layer], effects=[lighting])
+```
+
+### Controller touch gestures
+
+The `touchRotate` controller option is deprecated. Historically, `touchRotate: true` enabled two touchscreen gestures: a two-finger twist changed bearing, and a two-finger vertical drag changed pitch.
+
+`touchRotate: true` is now treated as an alias for `multiTouchDrag: 'rotate'`. This preserves the existing twist and vertical-drag behaviors, and also allows a horizontal two-finger drag to change bearing. If both options are supplied, `multiTouchDrag` takes precedence. Trackpad gestures still require the separate `trackpadGesture: true` opt-in.
+
+Use `multiTouchDrag: 'rotate'` instead:
+
+```ts
+// Before
+controller: {
+  touchRotate: true
+}
+
+// After
+controller: {
+  multiTouchDrag: 'rotate'
+}
+```
 
 #### `pickMultipleObjects()` pick depth limits
 
@@ -14,6 +134,23 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 
 - In such cases, use the new picking shader helper functions to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL.
 - However, if the logical picking id is different from the rendered instance id, layers can register and populate an explicit `rowIndexes` attribute.
+
+### FillStyleExtension
+
+Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
+
+### PathStyleExtension
+
+`highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
+
+```js
+// Before
+new PathStyleExtension({highPrecisionDash: true});
+// After
+new PathStyleExtension({dashMode: 'path'});
+```
+
+See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
 
 ## Upgrading to v9.3
 
@@ -51,6 +188,53 @@ new Deck({
 - The experimental `_renderLayersInGroups` prop has been removed from `MapboxOverlay`. In interleaved mode, layers are now always rendered in groups by `beforeId` or `slot`, enabling cross-layer extension handling (e.g. MaskExtension, CollisionFilterExtension) by default. If you were using `_renderLayersInGroups: true`, simply remove the prop.
 - Note: extensions that require shared rendering context (MaskExtension, CollisionFilterExtension) only work between layers in the same group. Ensure affected layers share the same `beforeId` or `slot` value.
 
+### @deck.gl/arcgis
+
+`DeckRenderer` now integrates with ArcGIS `SceneView` through `RenderNode` instead of `externalRenderers`.
+
+If your app uses 3D ArcGIS integration, migrate as follows:
+
+- Load `esri/views/3d/webgl/RenderNode` instead of `esri/views/3d/externalRenderers`.
+- If you pass a custom `esri` object to `loadArcGISModules`, make sure it exposes `esri.views['3d'].webgl.RenderNode`.
+- Remove `externalRenderers.add(sceneView, renderer)`. `DeckRenderer` now self-registers as a `RenderNode`.
+- `SceneView` integration still requires `viewingMode: 'local'`.
+- If you are loading ArcGIS via `esri-loader`, consider pinning the ArcGIS JS API script with `loadScriptOptions` (for example, `{url: 'https://js.arcgis.com/4.32/'}`) to avoid unintentional version drift.
+
+```js
+// Before
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/externalRenderers'
+]).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView, externalRenderers] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  const renderer = new DeckRenderer(sceneView, {layers});
+  externalRenderers.add(sceneView, renderer);
+});
+
+// After
+loadArcGISModules([
+  'esri/Map',
+  'esri/views/SceneView',
+  'esri/views/3d/webgl/RenderNode'
+], {
+  url: 'https://js.arcgis.com/4.32/'
+}).then(({DeckRenderer, modules}) => {
+  const [ArcGISMap, SceneView] = modules;
+  const sceneView = new SceneView({
+    map: new ArcGISMap({basemap: 'dark-gray-vector'}),
+    viewingMode: 'local'
+  });
+
+  new DeckRenderer(sceneView, {layers});
+});
+```
+
 ### Widgets
 
 The following widgets have breaking changes in v9.3:
@@ -62,7 +246,6 @@ The following widgets have breaking changes in v9.3:
 - [ContextMenuWidget](./api-reference/widgets/context-menu-widget.md) - no longer experimental (removed underscore in export)
 - [ThemeWidget](./api-reference/widgets/theme-widget.md) - no longer experimental (removed underscore in export)
 - [LoadingWidget](./api-reference/widgets/loading-widget.md) - no longer experimental (removed underscore in export)
-
 
 ## Upgrading to v9.1
 

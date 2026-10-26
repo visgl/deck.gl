@@ -139,22 +139,34 @@ Callback when the user clicks the theme toggle button.
 
 Tooltip message displayed while hovering a mouse over the widget when light mode is available.
 
+#### `lightModeTooltip` (string | HTMLElement | false, optional) {#lightmodetooltip}
+
+* Default: value of `lightModeLabel`
+
+Custom tooltip content when in light mode. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `darkModeLabel` (string, optional) {#darkmodelabel}
 
 * Default: `'Dark Mode'`
 
 Tooltip message displayed while hovering a mouse over the widget when dark mode is available.
 
+#### `darkModeTooltip` (string | HTMLElement | false, optional) {#darkmodetooltip}
+
+* Default: value of `darkModeLabel`
+
+Custom tooltip content when in dark mode. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 ## Styles
 
-| Name          | Type                     | Default                                 |
-| ------------- | ------------------------ | --------------------------------------- |
-| `--icon-sun`  | [SVG Data Url][data_url] | [Material Symbol Add][icon_sun_url]     |
-| `--icon-moon` | [SVG Data Url][data_url] | [Material Symbol Remove][icon_moon_url] |
+| Name          | Type                     | Default                                        |
+| ------------- | ------------------------ | ---------------------------------------------- |
+| `--icon-sun`  | [SVG Data Url][data_url] | [Material Symbol Light Mode][icon_sun_url]     |
+| `--icon-moon` | [SVG Data Url][data_url] | [Material Symbol Dark Mode][icon_moon_url]     |
 
 [data_url]: https://developer.mozilla.org/en-US/docs/Web/CSS/url#using_a_data_url
-[icon_sun_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:add:FILL@0;wght@600;GRAD@0;opsz@40
-[icon_moon_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:remove:FILL@0;wght@600;GRAD@0;opsz@40
+[icon_sun_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:light_mode:FILL@0;wght@400;GRAD@0;opsz@40
+[icon_moon_url]: https://fonts.google.com/icons?selected=Material+Symbols+Rounded:dark_mode:FILL@0;wght@400;GRAD@0;opsz@40
 
 ## Source
 

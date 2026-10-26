@@ -10,6 +10,8 @@ Data is loaded from URL templates in the `data` property.
 
 This layer also handles feature clipping so that there are no features divided by tile divisions.
 
+The default `GeoJsonLayer` rendering path supports both WebGL and WebGPU. Custom layers returned from `renderSubLayers` must separately support the selected device backend.
+
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -23,9 +25,7 @@ import {MVTLayer} from '@deck.gl/geo-layers';
 
 const layer = new MVTLayer({
   id: 'MVTLayer',
-  data: [
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
   minZoom: 0,
   maxZoom: 14,
   getFillColor: f => {
@@ -67,6 +67,14 @@ new Deck({
   getTooltip: ({object}) => object && (object.properties.name || object.properties.layerName),
   layers: [layer]
 });
+
+const attribution = document.createElement('div');
+attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+Object.assign(attribution.style, {
+  position: 'absolute', right: '0', bottom: '0',
+  background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'
+});
+document.body.appendChild(attribution);
 ```
 
   </TabItem>
@@ -86,9 +94,7 @@ type PropertiesType = {
 
 const layer = new MVTLayer<PropertiesType>({
   id: 'MVTLayer',
-  data: [
-    'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-  ],
+  data: 'https://tiles.openfreemap.org/planet',
   minZoom: 0,
   maxZoom: 14,
   getFillColor: (f: Feature<Geometry, PropertiesType>) => {
@@ -130,6 +136,14 @@ new Deck({
   getTooltip: ({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName),
   layers: [layer]
 });
+
+const attribution = document.createElement('div');
+attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+Object.assign(attribution.style, {
+  position: 'absolute', right: '0', bottom: '0',
+  background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'
+});
+document.body.appendChild(attribution);
 ```
 
   </TabItem>
@@ -152,9 +166,7 @@ type PropertiesType = {
 function App() {
   const layer = new MVTLayer<PropertiesType>({
     id: 'MVTLayer',
-    data: [
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
     minZoom: 0,
     maxZoom: 14,
     getFillColor: (f: Feature<Geometry, PropertiesType>) => {
@@ -186,16 +198,23 @@ function App() {
     picking: true
   });
 
-  return <DeckGL
-    initialViewState={{
-      longitude: -122.4,
-      latitude: 37.74,
-      zoom: 11
-    }}
-    controller
-    getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
-    layers={[layer]}
-  />;
+  return <>
+    <DeckGL
+      initialViewState={{
+        longitude: -122.4,
+        latitude: 37.74,
+        zoom: 11
+      }}
+      controller
+      getTooltip={({object}: MVTLayerPickingInfo<PropertiesType>) => object && (object.properties.name || object.properties.layerName)}
+      layers={[layer]}
+    />
+    <div style={{position: 'absolute', right: 0, bottom: 0, background: 'rgba(255,255,255,0.8)', padding: '0 5px', font: '12px/20px sans-serif'}}>
+      <a href="https://openfreemap.org/">OpenFreeMap</a>{' '}
+      <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from{' '}
+      <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+    </div>
+  </>;
 }
 ```
 
@@ -203,6 +222,8 @@ function App() {
 </Tabs>
 
 
+
+When rendering OpenFreeMap tiles directly with `MVTLayer`, include visible attribution as above. MapLibre basemaps display their TileJSON attribution automatically.
 
 ## Installation
 
@@ -322,6 +343,8 @@ Remarks:
 - In most of the cases you probably want to use it attached to `onViewStateChange` and `onViewportLoad`.
 
 ## Tile
+
+Tiles are loaded in tile-local coordinates. Sublayers declare `coordinateSystem: 'OSMTile512'`, with a tile-specific model matrix and origin mapping positions to a 512-unit Mercator world (X eastward, Y southward, Z in meters). Each sublayer converts these positions for the active viewport.
 
 Aside from all members of the [Tile](./tile-layer.md#tile) class, tile instances from the `MVTLayer` also include the following fields:
 

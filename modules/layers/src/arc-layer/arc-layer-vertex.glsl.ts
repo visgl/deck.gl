@@ -137,7 +137,7 @@ void main(void) {
   vec3 source;
   vec3 target;
 
-  if ((arc.greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+  if ((arc.greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC && project.projectionMode != PROJECTION_MODE_GEODETIC_OFFSETS) {
     source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
     target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
@@ -188,7 +188,7 @@ void main(void) {
     float antiMeridianX = 0.0;
 
     if (arc.useShortestPath) {
-      if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+      if ((project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET || project.projectionMode == PROJECTION_MODE_GEODETIC_OFFSETS)) {
         antiMeridianX = -(project.coordinateOrigin.x + 180.) / 360. * TILE_SIZE;
       }
       float thresholdRatio = (antiMeridianX - source.x) / (target.x - source.x);
@@ -228,6 +228,17 @@ void main(void) {
     getExtrusionOffset((next.xy - curr.xy) * indexDir, segmentSide, widthPixels),
     0.0);
   DECKGL_FILTER_SIZE(offset, geometry);
+#ifdef ANTIALIASING
+  float halfWidthPixels = length(offset.xy);
+  if (halfWidthPixels > 0.0) {
+    // The coverage ramp is centered on the declared edge. Extend the rasterized envelope by half
+    // a device pixel so fragments on the outside half of the ramp are generated too.
+    float coverageScale = 1.0 + 0.5 / project.devicePixelRatio / halfWidthPixels;
+    offset.xy *= coverageScale;
+    uv.y *= coverageScale;
+  }
+  geometry.uv = uv;
+#endif
   DECKGL_FILTER_GL_POSITION(curr, geometry);
   gl_Position = curr + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
 

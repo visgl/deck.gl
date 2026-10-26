@@ -38,7 +38,7 @@ test('GimbalWidget', async () => {
   expect(outerRing.style.transform).toBe('rotateY(-30deg)');
   expect(innerRing.style.transform).toBe('rotateX(45deg)');
 
-  testInstance.click('.deck-widget-button > button');
+  testInstance.click('.deck-widget-button button');
   expect(onReset).toHaveBeenCalledWith({
     viewId: 'orbit',
     rotationOrbit: 0,

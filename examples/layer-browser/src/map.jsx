@@ -6,7 +6,7 @@
 
 import React, {PureComponent} from 'react';
 import {Map, useControl} from 'react-map-gl/maplibre';
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import autobind from 'react-autobind';
 
 import {DeckGL} from '@deck.gl/react';
@@ -43,12 +43,12 @@ const INITIAL_VIEW_STATES = {
   }
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 const ViewportLabel = props => <div style={VIEW_LABEL_STYLES}>{props.children}</div>;
 
 function DeckGLOverlay(props) {
-  const overlay = useControl(() => new MapboxOverlay(props));
+  const overlay = useControl(() => new MapLibreOverlay(props));
   overlay.setProps(props);
   return null;
 }
@@ -152,7 +152,7 @@ export default class DeckMap extends PureComponent {
           initialViewState={INITIAL_VIEW_STATES.basemap}
         >
           <DeckGLOverlay
-            layers={layers.map(l => l.clone({beforeId: 'watername_ocean'}))}
+            layers={layers.map(l => l.clone({beforeId: 'waterway_line_label'}))}
             initialViewState={INITIAL_VIEW_STATES}
             layerFilter={this._layerFilter}
             {...(!interleaved && {views})}

@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import React, {useState, useCallback} from 'react';
-import {createRoot} from 'react-dom/client';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
+import React, {useCallback, useState} from 'react';
+import {createRoot} from 'react-dom/client';
 
-import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
-import {MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import type {MapViewState} from '@deck.gl/core';
-
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {TerrainLayer, TerrainLayerProps} from '@deck.gl/geo-layers';
 
 const INITIAL_VIEW_STATE: MapViewState = {
   latitude: 46.24,
@@ -22,52 +20,77 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxPitch: 89
 };
 
-const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
-const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
+const TERRAIN_IMAGE = 'https://tiles.mapterhorn.com/{z}/{x}/{y}.webp';
+const SURFACE_IMAGE = 'https://tiles.versatiles.org/tiles/satellite/{z}/{x}/{y}.webp';
 
-// https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb
-// Note - the elevation rendered by this example is greatly exagerated!
+// Mapterhorn serves Terrarium-encoded elevation tiles.
 const ELEVATION_DECODER: TerrainLayerProps['elevationDecoder'] = {
-  rScaler: 6553.6,
-  gScaler: 25.6,
-  bScaler: 0.1,
-  offset: -10000
+  rScaler: 256,
+  gScaler: 1,
+  bScaler: 1 / 256,
+  offset: -32768
 };
 
 export default function App({
+  device,
   texture = SURFACE_IMAGE,
   wireframe = false,
   globeView = false,
-  initialViewState = INITIAL_VIEW_STATE
+  zoomOffset = 0,
+  minZoom = 0,
+  maxZoom = 12,
+  visibleMinZoom = 0,
+  visibleMaxZoom = 16,
+  initialViewState = INITIAL_VIEW_STATE,
+  onZoomChange
 }: {
+  device?: Device;
   texture?: string;
   wireframe?: boolean;
   globeView?: boolean;
+  zoomOffset?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  visibleMinZoom?: number;
+  visibleMaxZoom?: number;
   initialViewState?: MapViewState;
+  onZoomChange?: (zoom: number) => void;
 }) {
   const [viewState, setViewState] = useState(initialViewState);
-  const onViewStateChange = useCallback(({viewState: vs}) => setViewState(vs), []);
+  const onViewStateChange = useCallback(
+    ({viewState: vs}) => {
+      setViewState(vs);
+      onZoomChange?.(vs.zoom);
+    },
+    [onZoomChange]
+  );
 
   const layer = new TerrainLayer({
     id: 'terrain',
-    minZoom: 0,
-    maxZoom: 14,
+    minZoom,
+    // Use the global coverage level; higher-resolution coverage varies by region.
+    maxZoom: Math.min(maxZoom, 12),
+    visibleMinZoom,
+    visibleMaxZoom,
+    tileSize: 512,
     refinementStrategy: 'best-available',
     elevationDecoder: ELEVATION_DECODER,
     elevationData: TERRAIN_IMAGE,
     texture,
     wireframe,
+    zoomOffset,
     color: [255, 255, 255],
     pickable: '3d'
   });
 
   return (
     <DeckGL
+      device={device}
       views={globeView ? new GlobeView() : new MapView()}
       viewState={viewState}
       onViewStateChange={onViewStateChange}
       controller={true}
-      parameters={{cull: true}}
+      parameters={{cullMode: 'back'}}
       layers={[layer]}
       getTooltip={info => {
         if (info.picked && info.coordinate && info.coordinate.length === 3) {
@@ -76,7 +99,19 @@ export default function App({
         }
         return null;
       }}
-    />
+    >
+      <div
+        style={{position: 'absolute', bottom: 0, right: 0, background: 'white', padding: '2px 6px'}}
+      >
+        <a href="https://mapterhorn.com/attribution" target="_blank" rel="noreferrer">
+          © Mapterhorn
+        </a>
+        {' | '}
+        <a href="https://versatiles.org/sources/" target="_blank" rel="noreferrer">
+          VersaTiles sources
+        </a>
+      </div>
+    </DeckGL>
   );
 }
 

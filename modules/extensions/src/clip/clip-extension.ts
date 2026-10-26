@@ -38,6 +38,11 @@ export type ClipModuleProps = {
   bounds: Readonly<[number, number, number, number]>;
 };
 
+type WebGPUClipModuleProps = ClipModuleProps & {
+  enabled?: boolean;
+  mode?: 'instance' | 'geometry';
+};
+
 /*
  * The vertex-shader version clips geometries by their anchor position
  * e.g. ScatterplotLayer - show if the center of a circle is within bounds
@@ -109,6 +114,10 @@ export default class ClipExtension extends LayerExtension {
     }
     this.state.clipByInstance = clipByInstance;
 
+    if (this.context.device.type === 'webgpu') {
+      return {};
+    }
+
     return clipByInstance
       ? {
           modules: [shaderModuleVs],
@@ -123,9 +132,23 @@ export default class ClipExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as ClipModuleProps;
+    const clipProps = {} as WebGPUClipModuleProps;
     if (this.state.clipByInstance) {
-      clipProps.bounds = clipBounds;
+      // Instance shaders see packed attributes. Match their CPU conversion when
+      // the layer source CRS needs preprojection (e.g. tile-local MVT positions).
+      const transform = this.usePositionTransforms().transform;
+      if (transform) {
+        const corner0 = transform.call(this, [clipBounds[0], clipBounds[1], 0]);
+        const corner1 = transform.call(this, [clipBounds[2], clipBounds[3], 0]);
+        clipProps.bounds = [
+          Math.min(corner0[0], corner1[0]),
+          Math.min(corner0[1], corner1[1]),
+          Math.max(corner0[0], corner1[0]),
+          Math.max(corner0[1], corner1[1])
+        ];
+      } else {
+        clipProps.bounds = clipBounds;
+      }
     } else {
       const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
       const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
@@ -136,6 +159,11 @@ export default class ClipExtension extends LayerExtension {
         Math.max(corner0[0], corner1[0]),
         Math.max(corner0[1], corner1[1])
       ];
+    }
+
+    if (this.context.device.type === 'webgpu') {
+      clipProps.enabled = true;
+      clipProps.mode = this.state.clipByInstance ? 'instance' : 'geometry';
     }
 
     this.setShaderModuleProps({clip: clipProps});

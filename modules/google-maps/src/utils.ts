@@ -49,6 +49,17 @@ export function createDeckInstance(
     // The basemap owns the shared canvas in interleaved mode; Deck only forwards the preferred DPR.
     // In non-interleaved mode this still feeds the luma canvas context that Deck creates.
     useDevicePixels: props.useDevicePixels ?? true,
+    ...(!props.gl && {
+      deviceProps: {
+        ...props.deviceProps,
+        createCanvasContext: {
+          ...(typeof props.deviceProps?.createCanvasContext === 'object'
+            ? props.deviceProps.createCanvasContext
+            : undefined),
+          pixelSizeSource: 'css-dpr'
+        }
+      }
+    }),
     style: props.interleaved ? null : {pointerEvents: 'none'},
     parent: getContainer(overlay, props.style),
     views: new MapView({repeat: true}),
@@ -173,7 +184,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   topOffset = Math.round(topOffset);
 
   // Compute fractional bearing
-  const delta = new Vector2(topLngLat).sub(bottomLngLat);
+  const delta = new Vector2(topLngLat).subtract(bottomLngLat);
   let bearing = (180 * delta.verticalAngle()) / Math.PI;
   if (bearing < 0) bearing += 360;
 
@@ -191,7 +202,7 @@ export function getViewPropsFromOverlay(map: google.maps.Map, overlay: google.ma
   } else if (bearing === heading) {
     // Fractional zoom calculation only correct when bearing is not animating
     const viewDiagonal = new Vector2([topRight.x, topRight.y])
-      .sub([bottomLeft.x, bottomLeft.y])
+      .subtract([bottomLeft.x, bottomLeft.y])
       .len();
     const mapDiagonal = new Vector2([width, -height]).len();
     scale = mapDiagonal ? viewDiagonal / mapDiagonal : 1;

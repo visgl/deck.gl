@@ -1,22 +1,23 @@
 <html>
   <head>
-    <title>Interleaving deck.gl with Maplibre Layers using MapboxOverlay</title>
+    <title>Interleaving deck.gl with MapLibre layers using MapLibreOverlay</title>
     
-    <script src="https://unpkg.com/deck.gl@^9.0.0-beta.5/dist.min.js"></script>
-    <script src="https://unpkg.com/maplibre-gl@^3.0.0/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/deck.gl@^9.4.0-alpha.2/dist.min.js"></script>
 
-    <link href="https://unpkg.com/maplibre-gl@^3.0.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <link href="https://unpkg.com/maplibre-gl@^6.0.0/dist/maplibre-gl.css" rel="stylesheet" />
   </head>
 
   <body style="margin:0"></body>
 
-  <script type="text/javascript">
+  <script type="module">
 
-    const {MapboxOverlay, ScatterplotLayer, ArcLayer} = deck;
+    import {MapLibreMap} from 'https://unpkg.com/maplibre-gl@^6.0.0/dist/maplibre-gl.mjs';
 
-    const map = new maplibregl.Map({
+    const {MapLibreOverlay, ScatterplotLayer, ArcLayer} = deck;
+
+    const map = new MapLibreMap({
       container: document.body,
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      style: 'https://tiles.openfreemap.org/styles/positron',
       center: [-122.4, 37.79],
       zoom: 15,
       pitch: 60,
@@ -27,10 +28,9 @@
       const firstLabelLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
 
       map.removeLayer('building')
-      map.removeLayer('building-top')
       map.addLayer({
         'id': '3d-buildings',
-        'source': 'carto',
+        'source': 'openmaptiles',
         'source-layer': 'building',
         'type': 'fill-extrusion',
         'minzoom': 15,
@@ -53,7 +53,7 @@
         }
       }, firstLabelLayerId);
 
-      const deckOverlay = new MapboxOverlay({
+      const deckOverlay = new MapLibreOverlay({
         interleaved: true,
         layers: [
           new ScatterplotLayer({

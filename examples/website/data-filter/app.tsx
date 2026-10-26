@@ -6,6 +6,7 @@ import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map} from 'react-map-gl/maplibre';
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
@@ -38,7 +39,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 const MS_PER_DAY = 8.64e7;
 
@@ -89,9 +90,11 @@ function getTooltip({object}: PickingInfo<Earthquake>) {
 }
 
 export default function App({
+  device,
   data,
   mapStyle = MAP_STYLE
 }: {
+  device?: Device;
   data?: Earthquake[];
   mapStyle?: string;
 }) {
@@ -132,6 +135,7 @@ export default function App({
   return (
     <>
       <DeckGL
+        device={device}
         views={MAP_VIEW}
         layers={layers}
         initialViewState={INITIAL_VIEW_STATE}
@@ -159,7 +163,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const data = (await load(DATA_URL, CSVLoader)).data;
+  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
 
   const earthquakes = data.map(row => ({
     timestamp: new Date(`${row.DateTime} UTC`).getTime(),

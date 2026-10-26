@@ -2,18 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import {GeoJsonLayer, ArcLayer} from '@deck.gl/layers';
-import maplibregl from 'maplibre-gl';
+import {Map, NavigationControl, setWorkerUrl} from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+setWorkerUrl(maplibreWorkerUrl);
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson';
 
-const map = new maplibregl.Map({
+const map = new Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  style: 'https://tiles.openfreemap.org/styles/positron',
   center: [0.45, 51.47],
   zoom: 4,
   bearing: 0,
@@ -38,7 +41,7 @@ const deckOverlay = new DeckOverlay({
       onClick: info =>
         // eslint-disable-next-line
         info.object && alert(`${info.object.properties.name} (${info.object.properties.abbrev})`)
-      // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
+      // beforeId: 'waterway_line_label' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',
@@ -55,4 +58,4 @@ const deckOverlay = new DeckOverlay({
 });
 
 map.addControl(deckOverlay);
-map.addControl(new maplibregl.NavigationControl());
+map.addControl(new NavigationControl());

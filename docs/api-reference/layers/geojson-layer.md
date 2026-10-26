@@ -311,6 +311,12 @@ Type of line joint. If `true`, draw round joints. Otherwise draw miter joints.
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
+#### `lineAntialiasing` (boolean, optional) {#lineantialiasing}
+
+* Default: `false`
+
+If `true`, lines are rendered with smoothed edges. If `false`, they are rendered with rough edges. Antialiasing can cause artifacts where a line overlaps itself. Forwarded to the underlying [PathLayer](./path-layer.md#antialiasing).
+
 #### `lineBillboard` (boolean, optional) {#linebillboard}
 
 * Default: `false`
