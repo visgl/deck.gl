@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test} from 'vitest';
-import {Layer, type UpdateParameters} from '@deck.gl/core';
+import {CompositeLayer, Layer, type UpdateParameters} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 class AsyncDataLayer extends Layer {
@@ -41,3 +41,43 @@ for (const asyncAssertion of [false, true]) {
     expect(checkedLengths.at(-1)).toBe(rows.length);
   });
 }
+
+class ParentUpdateLayer extends Layer {
+  static layerName = 'ParentUpdateLayer';
+
+  initializeState(): void {
+    this.parent?.setState({ready: true});
+  }
+}
+
+class DeferredParentLayer extends CompositeLayer {
+  static layerName = 'DeferredParentLayer';
+
+  initializeState(): void {
+    this.setState({ready: false});
+  }
+
+  renderLayers() {
+    return new ParentUpdateLayer(this.getSubLayerProps({id: 'child'}), {
+      data: [this.state.ready]
+    });
+  }
+}
+
+test('testLayerAsync applies updates requested by initializing sublayers', async () => {
+  let checkedReady = false;
+  await testLayerAsync({
+    Layer: DeferredParentLayer,
+    draw: false,
+    testCases: [
+      {
+        title: 'initializing sublayer updates parent',
+        props: {},
+        onAfterUpdate: ({subLayer}) => {
+          checkedReady = subLayer?.props.data[0];
+        }
+      }
+    ]
+  });
+  expect(checkedReady).toBe(true);
+});
