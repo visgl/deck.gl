@@ -10,7 +10,9 @@ import {
   OrbitView,
   OrthographicView,
   FirstPersonView,
-  _GlobeView as GlobeView
+  WebMercatorViewport,
+  _GlobeView as GlobeView,
+  _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import {Timeline} from '@luma.gl/engine';
 
@@ -229,6 +231,34 @@ test('MapController only handles trackpad pinch when trackpad gestures are enabl
   enabledController.handleEvent(makePinchEvent('pinchstart', 1) as any);
   enabledController.handleEvent(makePinchEvent('pinchmove', 1.2) as any);
   expect(enabledController.props.zoom, 'trackpad pinch follows touchZoom').toBeGreaterThan(10);
+});
+
+test('MapController preserves pinch inertia for trackpad input', () => {
+  const controller = createTestController({
+    view: new MapView({controller: {inertia: 500, trackpadGesture: true}}),
+    initialViewState: {
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 10,
+      pitch: 30,
+      bearing: -45
+    }
+  });
+  const makePinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    ...makeGestureEvent(type, {pointerType: 'trackpad'}),
+    scale,
+    rotation: 0,
+    deltaTime
+  });
+
+  controller.handleEvent(makePinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makePinchEvent('pinchmove', 1.1, 16) as any);
+  controller.handleEvent(makePinchEvent('pinchend', 1.2, 32) as any);
+
+  expect(
+    controller.transitionManager.transition.inProgress,
+    'trackpad pinch retains its inertia transition'
+  ).toBe(true);
 });
 
 test('MapController restricts wheel zoom to mouse input when trackpad gestures are enabled', () => {
@@ -856,6 +886,133 @@ test('GlobeController preserves pointer zoom in free rotation mode', () => {
     pointerController.props.longitude,
     'free rotation keeps the requested pointer anchor'
   ).not.toBeCloseTo(centerController.props.longitude);
+});
+
+test('GlobeController zooms around the pointer past zoom 12, where GlobeView switches to WebMercatorViewport', () => {
+  // Above zoom 12 the view renders with a WebMercatorViewport, which has no
+  // getZoomAnchorStrength; the wheel handler threw on it (#10736).
+  const pointer: [number, number] = [840, 240];
+  const controller = createTestController({
+    view: new GlobeView({controller: {zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 1280,
+      height: 720,
+      longitude: 10,
+      latitude: 45,
+      zoom: 12.5,
+      minZoom: 0,
+      maxZoom: 20
+    }
+  });
+  const anchor = new WebMercatorViewport(controller.props).unproject(pointer);
+  const wheelEvent = makeWheelEvent();
+  wheelEvent.offsetCenter = {x: pointer[0], y: pointer[1]};
+  wheelEvent.delta = 60;
+
+  controller.handleEvent(wheelEvent as any);
+
+  expect(controller.props.zoom, 'the wheel zooms in').toBeGreaterThan(12.5);
+  const underPointer = new WebMercatorViewport(controller.props).unproject(pointer);
+  // GlobeController anchors to ~1e-6 degrees here, not exactly like MapController, so 5 digits.
+  // A center-anchored zoom would be off by ~5e-3.
+  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 5);
+  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 5);
+});
+
+test('GlobeController zooms through the zoom 12 viewport handoff', () => {
+  // A single wheel gesture can start below zoom 12 on a GlobeViewport and land
+  // above it on a WebMercatorViewport. The anchor is resolved against the
+  // pre-gesture viewport, so this case does not hit #10736 itself; it pins that
+  // the coordinate under the pointer survives the handoff.
+  const pointer: [number, number] = [760, 300];
+  const view = new GlobeView({controller: {zoomAround: 'pointer'}});
+  const controller = createTestController({
+    view,
+    initialViewState: {
+      width: 1280,
+      height: 720,
+      longitude: 10,
+      latitude: 45,
+      zoom: 11.9,
+      minZoom: 0,
+      maxZoom: 20
+    }
+  });
+  const makeViewport = () =>
+    view.makeViewport({
+      width: controller.props.width,
+      height: controller.props.height,
+      viewState: controller.props
+    })!;
+
+  const before = makeViewport();
+  expect(before, 'the gesture starts on a globe viewport').toBeInstanceOf(GlobeViewport);
+  const anchor = before.unproject(pointer);
+  const wheelEvent = makeWheelEvent();
+  wheelEvent.offsetCenter = {x: pointer[0], y: pointer[1]};
+  wheelEvent.delta = 60;
+
+  controller.handleEvent(wheelEvent as any);
+
+  expect(controller.props.zoom, 'the wheel zooms past the handoff').toBeGreaterThan(12);
+  const after = makeViewport();
+  expect(after, 'the gesture ends on a web mercator viewport').toBeInstanceOf(WebMercatorViewport);
+  const underPointer = after.unproject(pointer);
+  expect(underPointer[0], 'the pointer keeps its longitude').toBeCloseTo(anchor[0], 5);
+  expect(underPointer[1], 'the pointer keeps its latitude').toBeCloseTo(anchor[1], 5);
+});
+
+test('GlobeController hands off touch pinch to pan and another pinch', () => {
+  const controller = createTestController({
+    view: new GlobeView({controller: {inertia: 500, zoomAround: 'pointer'}}),
+    initialViewState: {
+      width: 1280,
+      height: 720,
+      longitude: 0,
+      latitude: 45,
+      zoom: 5,
+      minZoom: 0
+    }
+  });
+  const makeTouchPinchEvent = (type: string, scale: number, deltaTime: number) => ({
+    ...makeGestureEvent(type, {x: 640, y: 360}),
+    scale,
+    rotation: 0,
+    deltaTime,
+    srcEvent: {pointerType: 'touch'}
+  });
+
+  controller.handleEvent(makeTouchPinchEvent('pinchstart', 1, 0) as any);
+  controller.handleEvent(makeTouchPinchEvent('pinchmove', 1.2, 16) as any);
+  const zoomAfterPinchMove = controller.props.zoom;
+  controller.handleEvent(makeTouchPinchEvent('pinchend', 10, 17) as any);
+
+  expect(controller.props.zoom, 'touch lift does not project a noisy pinch velocity').toBeCloseTo(
+    zoomAfterPinchMove
+  );
+  expect(
+    controller.handleEvent(makeGestureEvent('panstart', {x: 640, y: 360}) as any),
+    'one-finger pan starts immediately after pinch'
+  ).toBe(true);
+  const beforePan = controller.props;
+  controller.handleEvent(makeGestureEvent('panmove', {x: 680, y: 380}) as any);
+  expect(
+    Math.hypot(
+      controller.props.longitude - beforePan.longitude,
+      controller.props.latitude - beforePan.latitude
+    ),
+    'pan moves the globe after pinch'
+  ).toBeGreaterThan(0);
+  controller.handleEvent(makeGestureEvent('panend', {x: 680, y: 380}) as any);
+
+  expect(
+    controller.handleEvent(makeTouchPinchEvent('pinchstart', 1, 0) as any),
+    'second pinch starts immediately after pan'
+  ).toBe(true);
+  const zoomBeforeSecondPinch = controller.props.zoom;
+  controller.handleEvent(makeTouchPinchEvent('pinchmove', 0.8, 16) as any);
+  expect(controller.props.zoom, 'second pinch changes zoom').not.toBeCloseTo(zoomBeforeSecondPinch);
+  controller.handleEvent(makeTouchPinchEvent('pinchend', 0.8, 32) as any);
 });
 
 test('GlobeController initializes multipan like pointer pan', () => {

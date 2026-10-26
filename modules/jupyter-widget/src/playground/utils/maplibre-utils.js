@@ -7,6 +7,8 @@ import {log} from '@deck.gl/core';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {Map, NavigationControl} from 'maplibre-gl';
 
+import {forwardLayerUpdates} from './overlay-utils';
+
 export function createMapLibreDeckOverlay({
   container,
   onClick,
@@ -80,12 +82,7 @@ export function createMapLibreDeckOverlay({
     });
   }
 
-  // Expose setProps method to update layers
-  deckOverlay.setProps = function (props) {
-    if (props.layers) {
-      deckOverlay.setProps({layers: props.layers});
-    }
-  };
+  forwardLayerUpdates(deckOverlay);
 
   return deckOverlay;
 }

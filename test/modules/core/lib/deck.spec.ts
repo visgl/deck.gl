@@ -3,11 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect, vi} from 'vitest';
-import {Deck, log, MapView} from '@deck.gl/core';
+import {Deck, Layer, log, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {FullscreenWidget} from '@deck.gl/widgets';
 import {device} from '@deck.gl/test-utils/vitest';
 import type {CanvasContext, CanvasContextProps} from '@luma.gl/core';
+import {Device} from '@luma.gl/core';
 import {sleep} from './async-iterator-test-utils';
 
 function createDeferred<T>() {
@@ -72,7 +73,82 @@ function finalizeOwnedDeck(deck: Deck): void {
   ownedDevice?.destroy();
 }
 
+function dispatchPointerEvent(
+  target: EventTarget,
+  type: 'pointerdown' | 'pointermove' | 'pointerup',
+  {pointerId, x, y}: {pointerId: number; x: number; y: number}
+): void {
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      clientX: x,
+      clientY: y,
+      bubbles: true,
+      cancelable: true,
+      pointerId,
+      pointerType: 'touch',
+      isPrimary: pointerId === 1,
+      button: 0,
+      buttons: type === 'pointerup' ? 0 : 1
+    })
+  );
+}
+
 const webglTest = device.type === 'webgl' ? test : test.skip;
+
+const gpuDebugTestCases = [
+  {name: 'default', props: {}, expected: false},
+  {name: 'enabled', props: {debug: true}, expected: true},
+  {name: 'device override off', props: {debug: true, deviceProps: {debug: false}}, expected: false},
+  {name: 'device override on', props: {debug: false, deviceProps: {debug: true}}, expected: true},
+  {
+    name: 'device override unset',
+    props: {debug: true, deviceProps: {debug: undefined}},
+    expected: true
+  }
+];
+
+webglTest.each(gpuDebugTestCases)('Deck#GPU debug $name', async ({props, expected}) => {
+  const defaultDebug = Device.defaultProps.debug;
+  let deck: Deck | undefined;
+  try {
+    Device.defaultProps.debug = !expected;
+    deck = new Deck({
+      width: 1,
+      height: 1,
+      viewState: {longitude: 0, latitude: 0, zoom: 0},
+      ...props
+    });
+    await waitForRender(deck);
+    expect(deck.device!.props.debug).toBe(expected);
+  } finally {
+    Device.defaultProps.debug = defaultDebug;
+    if (deck) finalizeOwnedDeck(deck);
+  }
+});
+
+webglTest.each(gpuDebugTestCases)(
+  'Deck#GPU debug $name forwards to attached context',
+  async ({props, expected}) => {
+    const defaultDebug = Device.defaultProps.debug;
+    let deck: Deck | undefined;
+    try {
+      Device.defaultProps.debug = !expected;
+      const canvas = document.createElement('canvas');
+      deck = new Deck({
+        gl: canvas.getContext('webgl2'),
+        width: 1,
+        height: 1,
+        viewState: {longitude: 0, latitude: 0, zoom: 0},
+        ...props
+      });
+      await waitForRender(deck);
+      expect(deck.device!.props.debug).toBe(expected);
+    } finally {
+      Device.defaultProps.debug = defaultDebug;
+      if (deck) finalizeOwnedDeck(deck);
+    }
+  }
+);
 
 test('Deck#constructor', async () => {
   const callbacks = {
@@ -1106,6 +1182,165 @@ test('Deck#async pointerdown delays click callback until picking resolves', asyn
   deck.finalize();
 });
 
+test('Deck disambiguates mobile touch gestures', async () => {
+  const testDeck = new Deck({
+    id: 'mobile-gesture-arbitration-test',
+    device,
+    width: 800,
+    height: 400,
+    viewState: {longitude: -122, latitude: 38, zoom: 10},
+    controller: {
+      doubleClickZoom: false,
+      doubleClickDragZoom: true,
+      multiTouchDrag: 'rotate',
+      touchZoom: true
+    },
+    layers: []
+  });
+  await waitForRender(testDeck);
+
+  const eventManager = testDeck.getEventManager()!;
+  const root = eventManager.getElement()!;
+  const gestureEvents: string[] = [];
+  for (const type of ['dblclickdragstart', 'dblclickdragmove', 'dblclickdragend', 'panstart']) {
+    eventManager.on(type, () => gestureEvents.push(type));
+  }
+
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 1, x: 400, y: 200});
+  await sleep(600);
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 1, x: 400, y: 200});
+  await sleep(400);
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 2, x: 400, y: 200});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 2, x: 400, y: 180});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 2, x: 400, y: 160});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 2, x: 400, y: 160});
+
+  expect(gestureEvents, 'double-tap drag owns the second press').toEqual([
+    'dblclickdragstart',
+    'dblclickdragmove',
+    'dblclickdragend'
+  ]);
+  gestureEvents.length = 0;
+  for (const type of ['multipanstart', 'multipanmove', 'pinchstart']) {
+    eventManager.on(type, () => gestureEvents.push(type));
+  }
+
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 1, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 2, x: 450, y: 250});
+  for (const offset of [10, 20, 30, 40]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 1, x: 350, y: 250 - offset});
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 2, x: 450, y: 250 - offset});
+    // Hammer updates input direction on a 25ms sampling interval.
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 1, x: 350, y: 210});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 2, x: 450, y: 210});
+
+  expect(gestureEvents, 'two-finger translation claims multipan').toContain('multipanstart');
+  expect(gestureEvents, 'translation does not begin pinch zoom').not.toContain('pinchstart');
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 3, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 4, x: 450, y: 250});
+  for (const offset of [10, 20, 30, 40]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 3, x: 350 + offset, y: 250});
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 4, x: 450 + offset, y: 250});
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 3, x: 390, y: 250});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 4, x: 490, y: 250});
+
+  expect(gestureEvents, 'horizontal two-finger translation claims multipan').toContain(
+    'multipanstart'
+  );
+  expect(gestureEvents, 'horizontal translation does not begin pinch zoom').not.toContain(
+    'pinchstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 5, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 6, x: 450, y: 250});
+  for (const offset of [10, 20, 30]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 5, x: 350 - offset, y: 250});
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 6, x: 450 + offset, y: 250});
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 5, x: 320, y: 250});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 6, x: 480, y: 250});
+
+  expect(gestureEvents, 'two-finger separation still claims pinch zoom').toContain('pinchstart');
+  expect(gestureEvents, 'pinch zoom does not begin multipan').not.toContain('multipanstart');
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 7, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 8, x: 450, y: 250});
+  for (const step of [1, 2, 3, 4]) {
+    dispatchPointerEvent(window, 'pointermove', {
+      pointerId: 7,
+      x: 350 - step,
+      y: 250 - step * 4
+    });
+    dispatchPointerEvent(window, 'pointermove', {
+      pointerId: 8,
+      x: 450 + step,
+      y: 250 - step * 4
+    });
+    await sleep(30);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 7, x: 346, y: 234});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 8, x: 454, y: 234});
+
+  expect(gestureEvents, 'a small moving pinch claims pinch zoom').toContain('pinchstart');
+  expect(gestureEvents, 'a small moving pinch does not begin multipan').not.toContain(
+    'multipanstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 9, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 10, x: 450, y: 250});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 9, x: 351, y: 243});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 10, x: 449, y: 257});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 9, x: 351, y: 243});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 10, x: 449, y: 257});
+
+  expect(gestureEvents, 'a two-finger twist claims pinch rotation').toContain('pinchstart');
+  expect(gestureEvents, 'a two-finger twist does not begin multipan').not.toContain(
+    'multipanstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 11, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 12, x: 450, y: 250});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 11, x: 350, y: 220});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 12, x: 450, y: 220});
+  await sleep(30);
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 11, x: 350, y: 210});
+  dispatchPointerEvent(window, 'pointermove', {pointerId: 12, x: 450, y: 210});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 11, x: 350, y: 210});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 12, x: 450, y: 210});
+
+  expect(gestureEvents, 'a large staggered translation claims multipan').toContain('multipanstart');
+  expect(gestureEvents, 'a large staggered translation does not begin pinch').not.toContain(
+    'pinchstart'
+  );
+
+  gestureEvents.length = 0;
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 13, x: 350, y: 250});
+  dispatchPointerEvent(root, 'pointerdown', {pointerId: 14, x: 450, y: 250});
+  for (const offset of [8, 16, 24]) {
+    dispatchPointerEvent(window, 'pointermove', {pointerId: 13, x: 350 - offset, y: 250});
+    await sleep(25);
+  }
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 13, x: 326, y: 250});
+  dispatchPointerEvent(window, 'pointerup', {pointerId: 14, x: 450, y: 250});
+
+  expect(gestureEvents, 'an anchored pinch claims pinch after the arbitration delay').toContain(
+    'pinchstart'
+  );
+  expect(gestureEvents, 'an anchored pinch does not begin multipan').not.toContain('multipanstart');
+  testDeck.finalize();
+});
+
 test('Deck#controller pickPosition returns null in async mode', async () => {
   const deck = new Deck({
     device,
@@ -1438,4 +1673,70 @@ test('Deck#props omitted are unchanged', async () => {
       }
     });
   });
+});
+
+test('Deck waits for asynchronous viewports before initializing and updating layers', async () => {
+  const initialGate = createDeferred<void>();
+  const nextGate = createDeferred<void>();
+  const readyViews = new WeakSet<MapView>();
+  class PendingView extends MapView {
+    initialize() {
+      const gate = this.id === 'initial' ? initialGate : nextGate;
+      return gate.promise.then(() => {
+        readyViews.add(this);
+      });
+    }
+    makeViewport(options) {
+      return readyViews.has(this) ? super.makeViewport(options) : null;
+    }
+  }
+  class PendingLayer extends Layer {
+    initializeState() {}
+    shouldUpdateState() {
+      return true;
+    }
+  }
+  PendingLayer.layerName = 'PendingLayer';
+  const layer = new PendingLayer({id: 'pending-layer'});
+  const initialize = vi.spyOn(layer, '_initialize');
+  const update = vi.spyOn(layer, '_update');
+  const updateState = vi.spyOn(layer, 'updateState');
+  const errors = vi.fn();
+  const loaded = createDeferred<void>();
+  const deck = new Deck({
+    device,
+    width: 1,
+    height: 1,
+    views: new PendingView({id: 'initial'}),
+    viewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: [layer],
+    onLoad: () => loaded.resolve(),
+    onError: errors
+  });
+  try {
+    await loaded.promise;
+    await sleep(50);
+    expect(deck.getViewports()).toHaveLength(0);
+    expect(initialize).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    initialGate.resolve();
+    await vi.waitFor(() => expect(initialize).toHaveBeenCalledTimes(1));
+    expect(deck.getViewports()).toHaveLength(1);
+    expect(layer.context.viewport.id).toBe('initial');
+
+    deck.setProps({views: new PendingView({id: 'next'})});
+    update.mockClear();
+    updateState.mockClear();
+    layer.setNeedsUpdate();
+    await sleep(50);
+    expect(deck.getViewports()).toHaveLength(0);
+    expect(update).not.toHaveBeenCalled();
+    nextGate.resolve();
+    await vi.waitFor(() => expect(updateState).toHaveBeenCalled());
+    expect(initialize).toHaveBeenCalledTimes(1);
+    expect(layer.internalState!.viewport!.id).toBe('next');
+    expect(errors).not.toHaveBeenCalled();
+  } finally {
+    deck.finalize();
+  }
 });

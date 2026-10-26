@@ -13,7 +13,7 @@ import {geojsonToBinary} from '@loaders.gl/gis';
 import {MVTLoader} from '@loaders.gl/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -225,21 +225,67 @@ test('ClipExtension', () => {
 });
 
 test('MVTLayer#transformCoordsToWGS84', () => {
-  const viewport = new WebMercatorViewport({
-    latitude: 0,
-    longitude: 0,
-    zoom: 1
-  });
-
   const bbox = {west: -180, north: 85.0511287798066, east: 0, south: 0};
 
   for (const tc of TRANSFORM_COORDS_DATA) {
-    const func = transform(tc.geom, bbox, viewport);
+    const func = transform(tc.geom, bbox);
     expect(func, `transform ${tc.geom.type} returned expected WGS84 coordinates`).toEqual(
       tc.result
     );
   }
 });
+
+for (const ViewportType of [WebMercatorViewport, GlobeViewport]) {
+  test(`MVTLayer#OSMTile512 ${ViewportType.name}`, async () => {
+    const viewport = new ViewportType({
+      width: 100,
+      height: 100,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1
+    });
+    let requests = 0;
+    let checked = false;
+    await testLayerAsync({
+      Layer: MVTLayer,
+      viewport,
+      testCases: [
+        {
+          props: {
+            data: ['https://server.com/{z}/{x}/{y}.mvt'],
+            binary: false,
+            stroked: false,
+            fetch: (url, {loadOptions}) => {
+              requests++;
+              expect(loadOptions.mvt.coordinates).toBe('local');
+              return Promise.resolve(geoJSONData);
+            }
+          },
+          onAfterUpdate: ({layer, subLayers}) => {
+            if (!layer.isLoaded) return;
+            for (const subLayer of subLayers) {
+              const {x, y, z} = subLayer.props.tile.index;
+              const scale = 512 / 2 ** z;
+              expect(subLayer.props.coordinateSystem).toBe('OSMTile512');
+              expect(subLayer.props.coordinateOrigin).toEqual([x * scale, y * scale, 0]);
+              expect(subLayer.props.modelMatrix[0]).toBe(scale);
+              expect(subLayer.props.modelMatrix[5]).toBe(scale);
+              // Public tile/picking data stays geographic even on a non-Mercator view.
+              const tile = subLayer.props.tile;
+              expect(tile.dataInWGS84[0].geometry.coordinates).toEqual(
+                transform(geoJSONData[0].geometry, tile.bbox).coordinates
+              );
+              checked = true;
+            }
+          }
+        }
+      ],
+      onError: err => expect(err).toBeFalsy()
+    });
+    expect(requests).toBeGreaterThan(0);
+    expect(checked).toBe(true);
+  });
+}
 
 test('MVTLayer#autoHighlight', async () => {
   class TestMVTLayer extends MVTLayer {

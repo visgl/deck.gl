@@ -2,89 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import log from '../utils/log';
+import type {TypeScriptCRSInput} from '@math.gl/projection/core';
+
 import {Pan, DoubleClickDrag, Pinch, Tap} from 'mjolnir.js';
-import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
+import type {
+  DoubleClickDragRecognizerOptions,
+  InputCoherenceCondition,
+  PanRecognizerOptions,
+  PinchRecognizerOptions,
+  TapRecognizerOptions
+} from 'mjolnir.js';
 
 /**
  * The coordinate system that positions/dimensions are defined in.
  */
-export type CoordinateSystem =
-  | 'default'
-  | 'lnglat'
-  | 'meter-offsets'
-  | 'lnglat-offsets'
-  | 'cartesian';
-
-/**
- * The coordinate system that positions/dimensions are defined in.
- * String constants are the public API.
- * @deprecated Use string constants directly.
- */
-export const COORDINATE_SYSTEM = {
-  /**
-   * `LNGLAT` if rendering into a geospatial viewport, `CARTESIAN` otherwise
-   */
-  DEFAULT: 'default',
-  /**
-   * Positions are interpreted as [longitude, latitude, elevation]
-   * longitude/latitude are in degrees, elevation is in meters.
-   * Dimensions are in meters.
-   */
-  LNGLAT: 'lnglat',
-
-  /**
-   * Positions are interpreted as [x, y, z] in meter offsets from the coordinate origin.
-   * Dimensions are in meters.
-   */
-  METER_OFFSETS: 'meter-offsets',
-
-  /**
-   * Positions are interpreted as [deltaLng, deltaLat, elevation] from the coordinate origin.
-   * deltaLng/deltaLat are in degrees, elevation is in meters.
-   * Dimensions are in meters.
-   */
-  LNGLAT_OFFSETS: 'lnglat-offsets',
-
-  /**
-   * Positions and dimensions are in the common units of the viewport.
-   */
-  CARTESIAN: 'cartesian'
-} as const;
-
-// Deprecated
-/* eslint-disable accessor-pairs */
-Object.defineProperty(COORDINATE_SYSTEM, 'IDENTITY', {
-  get: () => {
-    log.deprecated('COORDINATE_SYSTEM.IDENTITY', 'COORDINATE_SYSTEM.CARTESIAN')();
-    return COORDINATE_SYSTEM.CARTESIAN;
-  }
-});
-/* eslint-enable accessor-pairs */
-
-/**
- * How coordinates are transformed from the world space into the common space.
- */
-export const PROJECTION_MODE = {
-  /**
-   * Render geospatial data in Web Mercator projection
-   */
-  WEB_MERCATOR: 1,
-  /**
-   * Render geospatial data as a 3D globe
-   */
-  GLOBE: 2,
-
-  /**
-   * (Internal use only) Web Mercator projection at high zoom
-   */
-  WEB_MERCATOR_AUTO_OFFSET: 4,
-
-  /**
-   * No transformation
-   */
-  IDENTITY: 0
-} as const;
+export type CoordinateSystem = TypeScriptCRSInput;
 
 export const UNIT = {
   common: 0,
@@ -100,14 +32,34 @@ export const EVENT_HANDLERS = {
   panend: 'onDragEnd'
 } as const satisfies {[eventName: string]: string};
 
+// Touch pointers rarely report movement in the same frame. A transient scale or
+// rotation from one pointer moving ahead of the other must not claim a pinch, so
+// wait until both pointers have moved, or one pointer has moved deliberately for
+// 40ms, before choosing between two-finger translation and pinch/twist.
+const PINCH_COHERENCE: InputCoherenceCondition[] = [
+  {movementDeltaTime: 40, distance: 2, scale: 0.03},
+  {movementDeltaTime: 40, distance: 2, rotation: 3},
+  {distancePerPointer: 1, scale: 0.03},
+  {distancePerPointer: 1, rotation: 3}
+];
+const MULTIPAN_COHERENCE: InputCoherenceCondition[] = [{distancePerPointer: 1}];
+
 // Order matters: recognizeWith/requireFailure resolve by name, so a recognizer
-// must be registered before any later entry can reference it.
+// must be registered before any later entry can reference it. On the same input,
+// the first recognizer to qualify claims the gesture.
 export const RECOGNIZERS = {
-  multipan: [Pan, {threshold: 10, pointers: 2, trackpad: true}],
-  pinch: [Pinch, {trackpad: true}, null, ['multipan']],
-  pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
+  multipan: [Pan, {threshold: 10, pointers: 2, trackpad: true, coherent: MULTIPAN_COHERENCE}],
+  pinch: [Pinch, {trackpad: true, coherent: PINCH_COHERENCE}, null, ['multipan']],
   dblclick: [Tap, {event: 'dblclick', taps: 2, enable: false}],
-  dblclickdrag: [DoubleClickDrag, {event: 'dblclickdrag', enable: false}, ['dblclick'], null],
+  // Register before pan so the second touch can claim double-tap-drag before
+  // the ordinary one-pointer pan recognizer sees the same movement.
+  dblclickdrag: [
+    DoubleClickDrag,
+    {event: 'dblclickdrag', enable: false, time: 750},
+    ['dblclick'],
+    null
+  ],
+  pan: [Pan, {threshold: 1}, ['pinch'], ['multipan']],
   click: [Tap, {event: 'click'}, ['dblclickdrag'], ['dblclick', 'dblclickdrag']]
 } as const;
 
@@ -116,6 +68,8 @@ export type RecognizerOptions = {
   multipan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
   pan?: Omit<PanRecognizerOptions, 'event' | 'enable'>;
   dblclick?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
+  /** Options for continuous zoom with double-click/tap followed by vertical drag. */
+  dblclickdrag?: Omit<DoubleClickDragRecognizerOptions, 'event' | 'enable'>;
   click?: Omit<TapRecognizerOptions, 'event' | 'enable'>;
 };
 

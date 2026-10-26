@@ -9,7 +9,7 @@ import {
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
-import {Globe} from '@deck.gl/core/viewports/globe-utils';
+import {Globe} from '@deck.gl/core/viewports/globe-util';
 import {Timeline} from '@luma.gl/engine';
 import {createTestController} from './test-controller';
 
