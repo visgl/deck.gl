@@ -85,6 +85,11 @@ test.each([
     expected: [255, 0, 0, 255]
   },
   {
+    name: 'transmissive content retains ordinary depth testing',
+    transmission: true,
+    expected: [255, 0, 0, 255]
+  },
+  {
     name: 'blending layer parameters retain ordinary depth testing',
     layerBlending: true,
     expected: [255, 0, 0, 255]
@@ -133,6 +138,7 @@ test.each([
     filterChild,
     skipped,
     blended,
+    transmission,
     layerBlending,
     blendedModel,
     siblings,
@@ -196,6 +202,11 @@ test.each([
     );
     if (filterChild) child.viewportIds = ['other-viewport'];
     if (blended) Object.assign(child.content.gltf, {materials: [{alphaMode: 'BLEND'}]});
+    if (transmission) {
+      // luma.gl blends transmissive glTF materials, but the custom test models do not.
+      const extensions = {KHR_materials_transmission: {transmissionFactor: 0.5}};
+      Object.assign(child.content.gltf, {materials: [{extensions}]});
+    }
     if (siblings) {
       const firstBranch = addTile('first-branch', parent, -1, 0, 0, '1, 1, 0, 1');
       child.parent = firstBranch;

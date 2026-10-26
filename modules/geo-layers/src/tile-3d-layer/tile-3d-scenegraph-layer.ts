@@ -29,6 +29,27 @@ function enablesBlending(parameters?: Record<string, unknown> | null): boolean {
   return parameters.blend === true || BLEND_PARAMETERS.some(key => parameters[key] !== undefined);
 }
 
+/** The glTF material fields that make luma.gl blend a material. */
+type GLTFMaterialBlending = {
+  alphaMode?: string;
+  extensions?: {
+    KHR_materials_transmission?: {transmissionFactor?: number; transmissionTexture?: unknown};
+  };
+};
+
+/**
+ * Whether luma.gl draws a glTF material with blending: `BLEND` alpha, or transmission,
+ * which it approximates with premultiplied-alpha blending.
+ */
+function isBlendedMaterial({alphaMode, extensions}: GLTFMaterialBlending): boolean {
+  const transmission = extensions?.KHR_materials_transmission;
+  return (
+    alphaMode === 'BLEND' ||
+    (transmission?.transmissionFactor ?? 0) > 0 ||
+    Boolean(transmission?.transmissionTexture)
+  );
+}
+
 /** Layer draw options; picking and shadow passes set their shader module props. */
 type DrawOptions<DataT> = Parameters<ScenegraphLayer<DataT>['draw']>[0] & {
   shaderModuleProps?: {
@@ -104,12 +125,13 @@ export default class Tile3DScenegraphLayer<DataT> extends ScenegraphLayer<
   isOpaque(): boolean {
     const {opacity, parameters, tile} = this.props;
     const gltf = tile?.content?.gltf;
-    const materials: {alphaMode?: string}[] | undefined = gltf?.materials || gltf?.json?.materials;
+    const materials: GLTFMaterialBlending[] | undefined = gltf?.materials || gltf?.json?.materials;
+    // Material checks apply before models exist, including while creation is deferred.
     return !(
       opacity < 1 ||
       enablesBlending(parameters) ||
       this.state?.blendedModels ||
-      materials?.some(material => material.alphaMode === 'BLEND')
+      materials?.some(isBlendedMaterial)
     );
   }
 
