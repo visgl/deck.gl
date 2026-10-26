@@ -361,6 +361,39 @@ test('TileLayer#debounceTime', async () => {
   });
 });
 
+test('TileLayer#lodStrategy', () => {
+  const testViewport = new WebMercatorViewport({width: 1200, height: 400, zoom: 8});
+  const getPrefetchTiles = layer =>
+    layer.state.tileset.tiles.filter(tile => tile.isPrefetch && !tile.isSelected);
+  const testCases = [
+    {
+      title: 'lodStrategy defaults to none',
+      props: {getTileData: () => new Promise(() => {})},
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.tileset.opts.lodStrategy, 'tileset lodStrategy').toBe('none');
+        expect(getPrefetchTiles(layer), 'no coverage tiles are prefetched').toEqual([]);
+      }
+    },
+    {
+      title: 'lodStrategy = coverage',
+      updateProps: {lodStrategy: 'coverage'},
+      onAfterUpdate: ({layer}) => {
+        expect(layer.state.tileset.opts.lodStrategy, 'tileset lodStrategy').toBe('coverage');
+        expect(getPrefetchTiles(layer).length, 'coverage tiles are prefetched').toBeGreaterThan(0);
+      }
+    }
+  ];
+
+  testLayer({
+    Layer: TileLayer,
+    viewport: testViewport,
+    testCases,
+    onError: err => {
+      throw err;
+    }
+  });
+});
+
 function sleep(ms) {
   return new Promise(resolve => {
     /* global setTimeout */

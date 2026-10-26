@@ -180,6 +180,86 @@ test('Tileset2D#coverage LOD ignores subdivision resolution on flat viewports', 
   tileset.finalize();
 });
 
+test('Tileset2D#getRequestPriority orders coverage prefetch tiles after visible tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => [x, y]
+    }
+  });
+
+  const selectedAtEdge = {
+    bbox: {left: 0, top: 0, right: 10, bottom: 10},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true,
+    isPrefetch: false
+  };
+  const visiblePrefetchAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 9},
+    isSelected: false,
+    isVisible: true,
+    isPrefetch: true
+  };
+  const prefetchAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 1},
+    isSelected: false,
+    isVisible: false,
+    isPrefetch: true
+  };
+  const staleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 8},
+    isSelected: false,
+    isVisible: false,
+    isPrefetch: false
+  };
+  const getRequestPriority = tile => (tileset as any)._getRequestPriority(tile);
+
+  expect(
+    getRequestPriority(selectedAtEdge),
+    'selected tiles load before visible placeholders'
+  ).toBeLessThan(getRequestPriority(visiblePrefetchAtCenter));
+  expect(
+    getRequestPriority(visiblePrefetchAtCenter),
+    'visible placeholders load before prefetch coverage'
+  ).toBeLessThan(getRequestPriority(prefetchAtCenter));
+  expect(getRequestPriority(staleAtCenter), 'stale tiles are not requested').toBeLessThan(0);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD does not abort pending prefetch requests', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxRequests: 1,
+    onTileLoad: () => {}
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  const staleTiles = Array.from(tileset._cache.values()).filter(tile => tile.id !== '0-0-0');
+
+  tileset.update(testViewport);
+
+  expect(staleTiles.length, 'previous viewport requested its own tiles').toBe(2);
+  for (const tile of staleTiles) {
+    expect(tile.isLoading, `stale ${tile.id} request is aborted`).toBe(false);
+  }
+  for (const id of ['1171-1566-12', '585-783-11', '0-0-0']) {
+    expect(tileset._cache.get(id)?.isLoading, `${id} request continues`).toBe(true);
+  }
+
+  tileset.finalize();
+});
+
 test('Tileset2D#coverage LOD keeps the previous selection as coverage when zooming in', () => {
   const tileset = new Tileset2D({
     getTileData: () => new Promise(() => {}),

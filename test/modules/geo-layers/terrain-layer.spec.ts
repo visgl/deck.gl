@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {generateLayerTests, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
@@ -117,6 +117,34 @@ test('TerrainLayer', async () => {
     Layer: TerrainLayer,
     testCases: testCasesNonTiled,
     onError: err => expect(err).toBeFalsy()
+  });
+});
+
+test('TerrainLayer#lodStrategy is forwarded to the tile layer', () => {
+  testLayer({
+    Layer: TerrainLayer,
+    viewport: new MapView({}).makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {longitude: 0, latitude: 0, zoom: 4}
+    }),
+    testCases: [
+      {
+        props: {
+          id: 'terrain-lod-strategy',
+          elevationData: 'terrain/{z}/{x}/{y}.png',
+          lodStrategy: 'coverage',
+          fetch: () => new Promise(() => {})
+        },
+        onAfterUpdate: ({subLayers}) => {
+          expect(subLayers[0], 'renders a TileLayer').toBeInstanceOf(TileLayer);
+          expect(subLayers[0].props.lodStrategy, 'TileLayer lodStrategy').toBe('coverage');
+        }
+      }
+    ],
+    onError: err => {
+      throw err;
+    }
   });
 });
 
