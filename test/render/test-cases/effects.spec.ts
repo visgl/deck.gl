@@ -40,6 +40,27 @@ const MASK_POLYGON = [
   [-122.48, 37.75]
 ];
 
+// Coplanar ground tiles, one layer each. Tiles with a higher layer index must not shadow themselves.
+const SHADOW_TILE_SIZE = 0.0008;
+const shadowTileLayers = Array.from({length: 8}, (_, i) => {
+  const x = -122.4 + ((i % 4) - 1.5) * SHADOW_TILE_SIZE;
+  const y = 37.74 + (0.5 - Math.floor(i / 4)) * SHADOW_TILE_SIZE;
+  const r = SHADOW_TILE_SIZE / 2;
+  return new SolidPolygonLayer({
+    id: `shadow-tile-${i}`,
+    data: [
+      [
+        [x - r, y - r],
+        [x + r, y - r],
+        [x + r, y + r],
+        [x - r, y + r]
+      ]
+    ],
+    getPolygon: f => f,
+    getFillColor: [200, 200, 200]
+  });
+});
+
 const testCases = [
   {
     name: 'shadow-effect',
@@ -139,6 +160,106 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/shadow-effect-simple-mesh.png'
+  },
+  {
+    name: 'shadow-effect-layer-index',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({
+          color: [255, 255, 255],
+          intensity: 1.0
+        }),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [1, -0.5, -1],
+          _shadow: true
+        })
+      })
+    ],
+    viewState: {
+      latitude: 37.74,
+      longitude: -122.4,
+      zoom: 17,
+      pitch: 45,
+      bearing: 0
+    },
+    layers: [
+      ...shadowTileLayers,
+      new SolidPolygonLayer({
+        id: 'shadow-box',
+        data: [
+          [
+            [-122.4003, 37.7397],
+            [-122.3997, 37.7397],
+            [-122.3997, 37.7403],
+            [-122.4003, 37.7403]
+          ]
+        ],
+        extruded: true,
+        getPolygon: f => f,
+        getElevation: 40,
+        getFillColor: [230, 80, 60]
+      })
+    ],
+    goldenImage: './test/render/golden-images/shadow-effect-layer-index.png'
+  },
+  {
+    // The top of the viewport is above the horizon
+    name: 'shadow-effect-high-pitch',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({
+          color: [255, 255, 255],
+          intensity: 1.0
+        }),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [1, -1, -0.6],
+          _shadow: true
+        })
+      })
+    ],
+    viewState: {
+      latitude: 37.74,
+      longitude: -122.4,
+      zoom: 16,
+      pitch: 80,
+      bearing: 0
+    },
+    layers: [
+      new SolidPolygonLayer({
+        id: 'ground',
+        data: [
+          [
+            [-122.434, 37.713],
+            [-122.366, 37.713],
+            [-122.366, 37.767],
+            [-122.434, 37.767]
+          ]
+        ],
+        getPolygon: f => f,
+        getFillColor: [200, 200, 200]
+      }),
+      new SolidPolygonLayer({
+        id: 'boxes',
+        data: Array.from({length: 9}, (_, i) => {
+          const x = -122.4032 + i * 0.0008;
+          return [
+            [x - 0.0002, 37.7398],
+            [x + 0.0002, 37.7398],
+            [x + 0.0002, 37.7402],
+            [x - 0.0002, 37.7402]
+          ];
+        }),
+        extruded: true,
+        getPolygon: f => f,
+        getElevation: 60,
+        getFillColor: [230, 80, 60]
+      })
+    ],
+    goldenImage: './test/render/golden-images/shadow-effect-high-pitch.png'
   },
   ...[true, false].map(maskInverted => ({
     name: `mask-effect${maskInverted ? '-inverted' : ''}`,
