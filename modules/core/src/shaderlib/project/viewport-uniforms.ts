@@ -4,13 +4,18 @@
 
 /* eslint-disable complexity, camelcase */
 
-import {mat4, Matrix4Like, vec4} from '@math.gl/core';
+import {Matrix4Like} from '@math.gl/core';
+import * as mat4 from '@math.gl/core/mat4';
+import * as vec4 from '@math.gl/core/vec4';
 
-import {PROJECTION_MODE} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from './constants';
 
+import {getPackedCoordinateSystem} from './coordinate-systems';
 import memoize from '../../utils/memoize';
 
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import type Viewport from '../../viewports/viewport';
+import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';
 
 type Vec3 = [number, number, number];
@@ -21,24 +26,54 @@ const ZERO_VECTOR: Vec4 = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
 const VECTOR_TO_POINT_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 const IDENTITY_MATRIX: Matrix4Like = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-const DEFAULT_PIXELS_PER_UNIT2: Vec3 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN: Vec3 = [0, 0, 0];
 
-/** Coordinate system constants */
-const COORDINATE_SYSTEM_NUMBERS = {
-  default: -1,
-  cartesian: 0,
-  lnglat: 1,
-  'meter-offsets': 2,
-  'lnglat-offsets': 3
-} as const satisfies Record<CoordinateSystem, -1 | 0 | 1 | 2 | 3>;
-
-export function getShaderCoordinateSystem(coordinateSystem: CoordinateSystem) {
-  const shaderCoordinateSystem = COORDINATE_SYSTEM_NUMBERS[coordinateSystem];
-  if (shaderCoordinateSystem === undefined) {
-    throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
+/** Uniform frame of normalized, packed attributes. */
+export function getShaderCoordinateFrame(coordinateSystem: string, viewport: Viewport): number {
+  switch (coordinateSystem) {
+    case 'lnglat':
+    case 'lnglat-offsets':
+      return COORDINATE_SYSTEM.GEODETIC;
+    case 'meter-offsets':
+      return COORDINATE_SYSTEM.IDENTITY;
+    case 'cartesian':
+      switch (viewport.crs?.coordinateFrame) {
+        case 'geographic':
+          return COORDINATE_SYSTEM.GEODETIC;
+        case 'geocentric':
+          return COORDINATE_SYSTEM.GEOCENTRIC;
+        case 'projected':
+          return COORDINATE_SYSTEM.PROJECTED;
+        default:
+          return COORDINATE_SYSTEM.IDENTITY;
+      }
+    default:
+      throw new Error(`Invalid coordinateSystem: ${coordinateSystem}`);
   }
-  return shaderCoordinateSystem;
+}
+
+/** Offset algorithms are projection modes, not absolute attribute frames. */
+function getShaderProjectionMode(projectionMode: number, coordinateSystem: string): number {
+  switch (coordinateSystem) {
+    case 'meter-offsets':
+      switch (projectionMode) {
+        case PROJECTION_MODE.GLOBE:
+          return PROJECTION_MODE.GLOBE_METER_OFFSETS;
+        case PROJECTION_MODE.WEB_MERCATOR:
+        case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
+        case PROJECTION_MODE.CUSTOM_GEOSPATIAL:
+          return PROJECTION_MODE.METER_OFFSETS;
+      }
+      break;
+    case 'lnglat-offsets':
+      switch (projectionMode) {
+        case PROJECTION_MODE.WEB_MERCATOR:
+        case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
+          return PROJECTION_MODE.GEODETIC_OFFSETS;
+      }
+      break;
+  }
+  return projectionMode;
 }
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
@@ -46,10 +81,12 @@ const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 export function getOffsetOrigin(
   viewport: Viewport,
   coordinateSystem: CoordinateSystem,
-  coordinateOrigin: Vec3 = DEFAULT_COORDINATE_ORIGIN
+  coordinateOrigin: Vec3 = DEFAULT_COORDINATE_ORIGIN,
+  sourceCrs?: CRSDescriptor | null
 ): {
   geospatialOrigin: Vec3 | null;
   shaderCoordinateOrigin: Vec3;
+  commonOrigin?: Vec3;
   offsetMode: boolean;
 } {
   if (coordinateOrigin.length < 3) {
@@ -57,43 +94,62 @@ export function getOffsetOrigin(
   }
 
   let shaderCoordinateOrigin = coordinateOrigin;
+  let commonOrigin: Vec3 | undefined;
+  const packed = getPackedCoordinateSystem(coordinateSystem, viewport, sourceCrs);
+  coordinateSystem = packed.coordinateSystem;
+  if (packed.preprojected) {
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+  }
   let geospatialOrigin: Vec3 | null;
   let offsetMode = true;
 
-  if (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets') {
-    geospatialOrigin = coordinateOrigin;
-  } else {
-    geospatialOrigin = viewport.isGeospatial
-      ? // @ts-expect-error longitude and latitude are not defined on the base Viewport, but is expected on geospatial viewports
-        [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0]
-      : null;
+  switch (coordinateSystem) {
+    case 'lnglat-offsets':
+    case 'meter-offsets':
+      geospatialOrigin = coordinateOrigin;
+      break;
+    default:
+      geospatialOrigin = viewport.isGeospatial
+        ? // @ts-expect-error longitude and latitude belong to geospatial subclasses
+          [Math.fround(viewport.longitude), Math.fround(viewport.latitude), 0]
+        : null;
   }
 
   switch (viewport.projectionMode) {
     case PROJECTION_MODE.WEB_MERCATOR:
-      if (coordinateSystem === 'lnglat' || coordinateSystem === 'cartesian') {
-        geospatialOrigin = [0, 0, 0];
-        offsetMode = false;
+      switch (coordinateSystem) {
+        case 'lnglat':
+          geospatialOrigin = [0, 0, 0];
+          offsetMode = false;
+          break;
+        case 'cartesian':
+          // Cartesian Z retains the camera's meter scale across Mercator precision modes.
+          offsetMode = false;
+          geospatialOrigin = viewport.unprojectPosition([
+            Math.fround(viewport.center[0]),
+            Math.fround(viewport.center[1]),
+            0
+          ]);
+          break;
       }
       break;
-
     case PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET:
-      if (coordinateSystem === 'lnglat') {
-        // viewport center in world space
-        // @ts-expect-error when using LNGLAT coordinates, we expect the viewport to be geospatial, in which case geospatialOrigin is defined
-        shaderCoordinateOrigin = geospatialOrigin;
-      } else if (coordinateSystem === 'cartesian') {
-        // viewport center in common space
-        shaderCoordinateOrigin = [
-          Math.fround(viewport.center[0]),
-          Math.fround(viewport.center[1]),
-          0
-        ];
-        // Geospatial origin (wgs84) must match shaderCoordinateOrigin (common)
-        geospatialOrigin = viewport.unprojectPosition(shaderCoordinateOrigin);
-        shaderCoordinateOrigin[0] -= coordinateOrigin[0];
-        shaderCoordinateOrigin[1] -= coordinateOrigin[1];
-        shaderCoordinateOrigin[2] -= coordinateOrigin[2];
+      switch (coordinateSystem) {
+        case 'lnglat':
+          // @ts-expect-error geospatialOrigin is defined for Mercator geographic input
+          shaderCoordinateOrigin = geospatialOrigin;
+          break;
+        case 'cartesian':
+          shaderCoordinateOrigin = [
+            Math.fround(viewport.center[0]),
+            Math.fround(viewport.center[1]),
+            0
+          ];
+          geospatialOrigin = viewport.unprojectPosition(shaderCoordinateOrigin);
+          shaderCoordinateOrigin[0] -= coordinateOrigin[0];
+          shaderCoordinateOrigin[1] -= coordinateOrigin[1];
+          shaderCoordinateOrigin[2] -= coordinateOrigin[2];
+          break;
       }
       break;
 
@@ -101,6 +157,26 @@ export function getOffsetOrigin(
       shaderCoordinateOrigin = viewport.position.map(Math.fround) as Vec3;
       shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
       break;
+
+    case PROJECTION_MODE.CUSTOM_GEOSPATIAL: {
+      if (coordinateSystem === 'meter-offsets') {
+        // Only the geographic anchor is projected; attributes remain local meters.
+        shaderCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+        commonOrigin = viewport.projectPosition(coordinateOrigin);
+        break;
+      }
+      geospatialOrigin = null;
+      const scale = viewport.distanceScales.unitsPerWorldUnit;
+      // Round in the units stored in position attributes, so the GPU receives
+      // this exact origin. Derive its common position from the same value.
+      shaderCoordinateOrigin = viewport.center.map((value, i) =>
+        Math.fround(value / scale[i] - coordinateOrigin[i])
+      ) as Vec3;
+      commonOrigin = shaderCoordinateOrigin.map(
+        (value, i) => (value + coordinateOrigin[i]) * scale[i]
+      ) as Vec3;
+      break;
+    }
 
     case PROJECTION_MODE.GLOBE:
       offsetMode = false;
@@ -112,7 +188,7 @@ export function getOffsetOrigin(
       offsetMode = false;
   }
 
-  return {geospatialOrigin, shaderCoordinateOrigin, offsetMode};
+  return {geospatialOrigin, shaderCoordinateOrigin, commonOrigin, offsetMode};
 }
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -136,7 +212,7 @@ function calculateMatrixAndOffset(
   let projectionCenter = ZERO_VECTOR;
   let originCommon: Vec4 = ZERO_VECTOR;
   let cameraPosCommon: Vec3 = viewport.cameraPosition as Vec3;
-  const {geospatialOrigin, shaderCoordinateOrigin, offsetMode} = getOffsetOrigin(
+  const {geospatialOrigin, shaderCoordinateOrigin, commonOrigin, offsetMode} = getOffsetOrigin(
     viewport,
     coordinateSystem,
     coordinateOrigin
@@ -147,7 +223,8 @@ function calculateMatrixAndOffset(
     // This is the key to offset mode precision
     // (avoids doing this addition in 32 bit precision in GLSL)
     // @ts-expect-error the 4th component is assigned below
-    originCommon = viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+    originCommon =
+      commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
 
     cameraPosCommon = [
       cameraPosCommon[0] - originCommon[0],
@@ -183,7 +260,8 @@ function calculateMatrixAndOffset(
 }
 
 export type ProjectUniforms = {
-  coordinateSystem: number;
+  /** Coordinate frame of packed attributes; independent of the layer CRS identifier. */
+  coordinateFrame: number;
   projectionMode: number;
   coordinateOrigin: Vec3;
   commonOrigin: Vec3;
@@ -191,6 +269,10 @@ export type ProjectUniforms = {
   // Backward compatibility
   // TODO: remove in v9
   pseudoMeters: boolean;
+  /** Width and height of the square local size-scale field. */
+  sizeScaleSize: number;
+  /** Map-meter XY to sampler-space XY scale and translation. */
+  sizeScaleTransform: [number, number, number, number];
 
   // Screen size
   viewportSize: [number, number];
@@ -213,9 +295,18 @@ export type ProjectUniforms = {
 
 export type ProjectProps = {
   viewport: Viewport;
+  /** Scalar XY scale, X/Y slopes and Z scale: float32 storage buffer on WebGPU,
+   * RGBA32Uint float-bit texture on WebGL. Required when USE_EXTERNAL_PROJECTION
+   * is enabled; ordinary projection shader variants do not use this binding.
+   */
+  sizeScale?: Buffer | Texture;
+  /** Mapping associated with the bound scale field, when using a separate aggregation viewport. */
+  sizeScaleTransform?: [number, number, number, number];
   devicePixelRatio?: number;
   modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
+  /** Resolved source descriptor supplied by the layer; omitted for standalone shader use. */
+  sourceCrs?: CRSDescriptor | null;
   coordinateOrigin?: Vec3;
   autoWrapLongitude?: boolean;
 };
@@ -236,10 +327,39 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = 'default',
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
-  autoWrapLongitude = false
+  autoWrapLongitude = false,
+  sourceCrs
 }: ProjectProps): ProjectUniforms {
-  if (coordinateSystem === 'default') {
-    coordinateSystem = viewport.isGeospatial ? 'lnglat' : 'cartesian';
+  const packed = getPackedCoordinateSystem(coordinateSystem, viewport, sourceCrs);
+  coordinateSystem = packed.coordinateSystem;
+  switch (coordinateSystem) {
+    case 'lnglat-offsets':
+      switch (viewport.projectionMode) {
+        case PROJECTION_MODE.GLOBE:
+          // Geographic offsets on a globe are WGS84 coordinates plus their source origin.
+          coordinateSystem = 'lnglat';
+          break;
+      }
+      break;
+  }
+  if (
+    !packed.preprojected &&
+    coordinateSystem === 'lnglat' &&
+    coordinateOrigin.some(value => value !== 0)
+  ) {
+    // Apply the source-CRS origin before projection without selecting a local
+    // Taylor approximation: an arbitrary origin need not be near the camera.
+    const translated = Array.from(modelMatrix || IDENTITY_MATRIX);
+    translated[12] += coordinateOrigin[0];
+    translated[13] += coordinateOrigin[1];
+    translated[14] += coordinateOrigin[2] || 0;
+    modelMatrix = translated as Matrix4Like;
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+  }
+  if (packed.preprojected) {
+    coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
+    modelMatrix = null;
+    autoWrapLongitude = false;
   }
 
   const uniforms = getMemoizedViewportUniforms({
@@ -263,7 +383,7 @@ function calculateViewportUniforms({
 }: {
   viewport: Viewport;
   devicePixelRatio: number;
-  coordinateSystem: CoordinateSystem;
+  coordinateSystem: string;
   coordinateOrigin: Vec3;
 }): ProjectUniforms {
   const {
@@ -292,8 +412,8 @@ function calculateViewportUniforms({
 
   const uniforms: ProjectUniforms = {
     // Projection mode values
-    coordinateSystem: getShaderCoordinateSystem(coordinateSystem),
-    projectionMode: viewport.projectionMode,
+    coordinateFrame: getShaderCoordinateFrame(coordinateSystem, viewport),
+    projectionMode: getShaderProjectionMode(viewport.projectionMode, coordinateSystem),
     coordinateOrigin: shaderCoordinateOrigin,
     commonOrigin: originCommon.slice(0, 3) as Vec3,
     center: projectionCenter,
@@ -302,15 +422,17 @@ function calculateViewportUniforms({
     // TODO: remove in v9
     // @ts-expect-error _pseudoMeters is only defined on WebMercator viewport
     pseudoMeters: Boolean(viewport._pseudoMeters),
+    sizeScaleSize: 1,
+    sizeScaleTransform: [1, 1, 0, 0],
 
     // Screen size
     viewportSize,
     devicePixelRatio,
 
     focalDistance,
-    commonUnitsPerMeter: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit: distanceScales.unitsPerMeter as Vec3,
-    commonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
+    commonUnitsPerMeter: distanceScales.unitsPerMeter,
+    commonUnitsPerWorldUnit: distanceScales.unitsPerWorldUnit,
+    commonUnitsPerWorldUnit2: distanceScales.unitsPerWorldUnit2,
     scale: viewport.scale, // This is the mercator scale (2 ** zoom)
     wrapLongitude: false,
 
@@ -323,19 +445,18 @@ function calculateViewportUniforms({
 
   if (geospatialOrigin) {
     // Get high-precision DistanceScales from geospatial viewport
-    // TODO: stricter types in Viewport classes
-    const distanceScalesAtOrigin = viewport.getDistanceScales(geospatialOrigin) as {
-      unitsPerMeter: Vec3;
-      metersPerUnit: Vec3;
-      unitsPerMeter2: Vec3;
-      unitsPerDegree: Vec3;
-      degreesPerUnit: Vec3;
-      unitsPerDegree2: Vec3;
-    };
+    const scaleOrigin =
+      viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
+        ? viewport.crs!.converter.WGS84.from(geospatialOrigin)
+        : geospatialOrigin;
+    const distanceScalesAtOrigin = viewport.getDistanceScales(scaleOrigin);
     switch (coordinateSystem) {
       case 'meter-offsets':
         uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerMeter;
         uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerMeter2;
+        if (viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL) {
+          uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
+        }
         break;
 
       case 'lnglat':
@@ -344,8 +465,8 @@ function calculateViewportUniforms({
         if (!viewport._pseudoMeters) {
           uniforms.commonUnitsPerMeter = distanceScalesAtOrigin.unitsPerMeter;
         }
-        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerDegree;
-        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerDegree2;
+        uniforms.commonUnitsPerWorldUnit = distanceScalesAtOrigin.unitsPerWorldUnit;
+        uniforms.commonUnitsPerWorldUnit2 = distanceScalesAtOrigin.unitsPerWorldUnit2;
         break;
 
       // a.k.a "preprojected" positions

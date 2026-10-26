@@ -18,6 +18,7 @@ import type Viewport from '../viewports/viewport';
 import type {RenderPassTimestamps} from '../lib/frame-timer';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
+import type CompositeLayer from '../lib/composite-layer';
 import type {Effect} from '../lib/effect';
 import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
 import type {PickingProps} from '@luma.gl/shadertools';
@@ -88,12 +89,14 @@ export type RenderStats = {
 /** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
+  private _activatedLayers = new Set<Layer>();
 
   render(options: LayersPassRenderOptions): void {
     this._render(options);
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    this._activatedLayers.clear();
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
@@ -430,6 +433,7 @@ export default class LayersPass extends Pass {
     layerFilter: ((params: FilterContext) => boolean) | undefined | null,
     layerFilterCache: Record<string, boolean>
   ) {
+    if (!layer.internalState || !layer.isCoordinateSystemLoaded) return false;
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
     if (!shouldDrawLayer) {
@@ -440,8 +444,11 @@ export default class LayersPass extends Pass {
 
     let parent = layer.parent;
     while (parent) {
-      // @ts-ignore
-      if (!parent.props.visible || !parent.filterSubLayer(drawContext)) {
+      if (
+        !parent.isCoordinateSystemLoaded ||
+        !parent.props.visible ||
+        !(parent as CompositeLayer).filterSubLayer(drawContext)
+      ) {
         return false;
       }
       drawContext.layer = parent;
@@ -458,8 +465,12 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // If a layer is drawn, update its viewportChanged flag
-    layer.activateViewport(drawContext.viewport);
+    // One attribute set is shared by all views. Only the first eligible viewport
+    // selects its conversion; later views and picking reuse the prepared geometry.
+    if (!drawContext.isPicking && !this._activatedLayers.has(layer)) {
+      this._activatedLayers.add(layer);
+      layer.activateViewport(drawContext.viewport);
+    }
 
     return true;
   }
@@ -481,9 +492,11 @@ export default class LayersPass extends Pass {
       } satisfies PickingProps,
       project: {
         viewport: layer.context.viewport,
+        sizeScale: layer.context.layerManager.projectionScaleResources.get(layer.context.viewport),
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
+        sourceCrs: layer.internalState!.sourceCrs,
         coordinateOrigin: layerProps.coordinateOrigin,
         autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps

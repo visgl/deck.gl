@@ -12,8 +12,12 @@ import debug from '../debug/index';
 import {flatten} from '../utils/flatten';
 import {Stats} from '@probe.gl/stats';
 import ResourceManager from './resource/resource-manager';
+import ProjectionScaleResources from './projection-scale-resources';
 
-import Viewport from '../viewports/viewport';
+import {resolveCRS, areCRSEqual} from '../utils/crs';
+import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
+import type Viewport from '../viewports/viewport';
+import type View from '../views/view';
 
 import type Layer from './layer';
 import type CompositeLayer from './composite-layer';
@@ -45,15 +49,29 @@ export type LayersList = (Layer | undefined | false | null | LayersList)[];
 export type LayerManagerProps = {
   deck?: Deck<any>;
   stats?: Stats;
-  viewport?: Viewport;
+  viewport?: Viewport | null;
   timeline?: Timeline;
 };
 export default class LayerManager {
   layers: Layer[];
-  context: LayerContext;
+  // Layer lifecycle callbacks receive a viewport; the manager may wait without one.
+  context: Omit<LayerContext, 'viewport'> & {viewport: Viewport | null};
   resourceManager: ResourceManager;
 
+  private _coordinateSystems = new Map<
+    string,
+    {
+      coordinateSystem: TypeScriptCRSInput;
+      layer: Layer;
+      sourceCrs?: CRSDescriptor | null;
+      pending?: Promise<CRSDescriptor>;
+      error?: Error;
+    }
+  >();
   private _lastRenderedLayers: LayersList = [];
+  private _viewports = new Map<string, Viewport | null>();
+  private _layerFilter: Deck['props']['layerFilter'] = null;
+  readonly projectionScaleResources: ProjectionScaleResources;
   private _needsRedraw: string | false = false;
   private _needsUpdate: string | false = false;
   private _nextLayers: LayersList | null = null;
@@ -80,6 +98,7 @@ export default class LayerManager {
     // will be skipped.
     this.layers = [];
     this.resourceManager = new ResourceManager({device, protocol: 'deck://'});
+    this.projectionScaleResources = new ProjectionScaleResources(device);
 
     this.context = {
       mousePosition: null,
@@ -93,8 +112,7 @@ export default class LayerManager {
       defaultShaderModules: [layerUniforms],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
-      // Make sure context.viewport is not empty on the first layer initialization
-      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
+      viewport: viewport || null,
       timeline: timeline || new Timeline(),
       resourceManager: this.resourceManager,
       onError: undefined
@@ -105,11 +123,13 @@ export default class LayerManager {
 
   /** Method to call when the layer manager is not needed anymore. */
   finalize() {
+    this.projectionScaleResources.destroy();
     this.resourceManager.finalize();
     // Finalize all layers
     for (const layer of this.layers) {
       this._finalizeLayer(layer);
     }
+    this._coordinateSystems.clear();
   }
 
   /** Check if a redraw is needed */
@@ -168,6 +188,10 @@ export default class LayerManager {
 
   /** Set props needed for layer rendering and picking. */
   setProps(props: any): void {
+    if ('layerFilter' in props && props.layerFilter !== this._layerFilter) {
+      this._layerFilter = props.layerFilter;
+      this.setNeedsUpdate('layerFilter changed');
+    }
     if ('debug' in props) {
       this._debug = props.debug;
     }
@@ -187,16 +211,24 @@ export default class LayerManager {
     }
   }
 
-  /** Supply a new layer list, initiating sublayer generation and layer matching */
+  /** Supply a new layer list, deferring matching and sublayer generation until a viewport exists. */
   setLayers(newLayers: LayersList, reason?: string): void {
     debug(TRACE_SET_LAYERS, this, reason, newLayers);
 
+    if (!this.context.viewport) {
+      // Keep the latest input and dirty flags until projection context is available.
+      this._nextLayers = newLayers;
+      this.setNeedsUpdate(reason || 'viewport pending');
+      return;
+    }
+
+    this._nextLayers = null;
     this._lastRenderedLayers = newLayers;
 
     const flatLayers = flatten(newLayers, Boolean) as Layer[];
 
     for (const layer of flatLayers) {
-      layer.context = this.context;
+      layer.context = this.context as LayerContext;
     }
 
     this._updateLayers(this.layers, flatLayers);
@@ -204,6 +236,8 @@ export default class LayerManager {
 
   /** Update layers from last cycle if `setNeedsUpdate()` has been called */
   updateLayers(): void {
+    if (!this.context.viewport) return;
+
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
@@ -221,11 +255,48 @@ export default class LayerManager {
   // INTERNAL METHODS
   //
 
-  /** Make a viewport "current" in layer context, updating viewportChanged flags */
-  activateViewport = (viewport: Viewport) => {
+  /** Refresh view availability without substituting another view for a pending CRS. */
+  setViewports(viewports: Viewport[], views: View[]): void {
+    this._viewports = new Map(views.map(view => [view.id, null]));
+    for (const viewport of viewports) this._viewports.set(viewport.id, viewport);
+    this.context.viewport = viewports[0] || null;
+    for (const layer of this.layers) {
+      const state = layer.internalState;
+      if (!state?.viewport) continue;
+      const viewport = this._viewports.get(state.viewport.id);
+      if (viewport === null) continue;
+      if (viewport !== state.viewport) {
+        state.viewport = viewport;
+        layer.setChangeFlags({viewportChanged: true});
+      }
+    }
+    this.setNeedsUpdate('viewports changed');
+  }
+
+  /** Whether the layer's selected view has materialized its replacement viewport. */
+  isViewportReady(layer: Layer): boolean {
+    const viewport = layer.internalState?.viewport;
+    return !viewport || this._viewports.get(viewport.id) !== null;
+  }
+
+  /** Set the current viewport, or suspend layer updates when none is available. */
+  activateViewport = (viewport?: Viewport | null) => {
     debug(TRACE_ACTIVATE_VIEWPORT, this, viewport);
-    if (viewport) {
-      this.context.viewport = viewport;
+    const wasPending = !this.context.viewport;
+    this.context.viewport = viewport || null;
+    if (viewport && wasPending) {
+      // A retained layer viewport belongs to the previous view. Resume against the
+      // materialized viewport before any attribute or sublayer update can run.
+      for (const layer of this.layers) {
+        const internalState = layer.internalState;
+        if (internalState && this.isViewportReady(layer)) {
+          internalState.viewport = viewport;
+          layer.setChangeFlags({
+            viewportChanged: true
+          });
+        }
+      }
+      this.setNeedsUpdate('viewport available');
     }
   };
 
@@ -303,7 +374,7 @@ export default class LayerManager {
     generatedLayers: Layer[]
   ) {
     for (const newLayer of newLayers) {
-      newLayer.context = this.context;
+      newLayer.context = this.context as LayerContext;
 
       // Given a new coming layer, find its matching old layer (if any)
       const oldLayer = oldLayerMap[newLayer.id];
@@ -322,16 +393,24 @@ export default class LayerManager {
           newLayer.validateProps();
         }
 
-        if (!oldLayer) {
-          this._initializeLayer(newLayer);
-        } else {
-          this._transferLayerState(oldLayer, newLayer);
-          this._updateLayer(newLayer);
+        if (oldLayer?.internalState) this._transferLayerState(oldLayer, newLayer);
+        const initialViewport = !newLayer.internalState
+          ? this._getInitialViewport(newLayer)
+          : undefined;
+        const ready =
+          this.isViewportReady(newLayer) && this._resolveLayerCrs(newLayer, initialViewport);
+        if (ready) {
+          if (!newLayer.internalState) {
+            this._initializeLayer(newLayer, initialViewport);
+          } else this._updateLayer(newLayer);
         }
         generatedLayers.push(newLayer);
 
         // Call layer lifecycle method: render sublayers
-        sublayers = newLayer.isComposite ? (newLayer as CompositeLayer).getSubLayers() : null;
+        sublayers =
+          newLayer.internalState && newLayer.isComposite
+            ? (newLayer as CompositeLayer).getSubLayers()
+            : null;
         // End layer lifecycle method: render sublayers
       } catch (err) {
         this._handleError('matching', err as Error, newLayer); // Record first exception
@@ -343,6 +422,66 @@ export default class LayerManager {
     }
   }
   /* eslint-enable complexity,max-statements */
+
+  private _getInitialViewport(layer: Layer): Viewport | undefined {
+    const viewports = this._viewports.size ? this._viewports.values() : [this.context.viewport];
+    for (const viewport of viewports) {
+      // Use the same root-layer filter as rendering, only to seed initialization.
+      if (
+        viewport &&
+        (!this._layerFilter ||
+          this._layerFilter({
+            layer: layer.root,
+            viewport,
+            isPicking: false,
+            renderPass: 'screen'
+          }))
+      )
+        return viewport;
+    }
+    return undefined;
+  }
+
+  private _resolveLayerCrs(layer: Layer, initialViewport?: Viewport): boolean {
+    const viewport = layer.internalState?.viewport || initialViewport || this.context.viewport!;
+    const coordinateSystem =
+      (layer.props.coordinateSystem ?? 'default') === 'default'
+        ? viewport.isGeospatial
+          ? 'WGS84'
+          : 'cartesian'
+        : layer.props.coordinateSystem;
+    let entry = this._coordinateSystems.get(layer.id);
+    if (!entry || !areCRSEqual(entry.coordinateSystem, coordinateSystem)) {
+      entry = {coordinateSystem, layer};
+      this._coordinateSystems.set(layer.id, entry);
+      const resolved =
+        coordinateSystem === viewport.crs?.signature ? viewport.crs! : resolveCRS(coordinateSystem);
+      if (resolved instanceof Promise) {
+        entry.pending = resolved;
+        const request = entry;
+        resolved.then(
+          sourceCrs => {
+            if (this._coordinateSystems.get(layer.id) !== request) return;
+            request.sourceCrs = sourceCrs;
+            request.pending = undefined;
+            this.setNeedsUpdate('source CRS loaded');
+          },
+          error => {
+            if (this._coordinateSystems.get(layer.id) !== request) return;
+            request.error = error;
+            request.pending = undefined;
+            request.layer.raiseError(error, 'loading coordinateSystem');
+          }
+        );
+      } else {
+        entry.sourceCrs = resolved;
+      }
+    }
+    entry.coordinateSystem = coordinateSystem;
+    entry.layer = layer;
+    layer._setSourceCrs(entry.pending || entry.error ? undefined : entry.sourceCrs);
+    return !entry.pending && !entry.error;
+  }
 
   // Finalize any old layers that were not matched
   private _finalizeOldLayers(oldLayerMap: {[layerId: string]: Layer | null}): void {
@@ -357,9 +496,9 @@ export default class LayerManager {
   // / EXCEPTION SAFE LAYER ACCESS
 
   /** Safely initializes a single layer, calling layer methods */
-  private _initializeLayer(layer: Layer): void {
+  private _initializeLayer(layer: Layer, initialViewport?: Viewport): void {
     try {
-      layer._initialize();
+      layer._initialize(initialViewport);
       layer.lifecycle = LIFECYCLE.INITIALIZED;
     } catch (err) {
       this._handleError('initialization', err as Error, layer);
@@ -388,6 +527,11 @@ export default class LayerManager {
 
   /** Safely finalizes a single layer, removing all resources */
   private _finalizeLayer(layer: Layer): void {
+    this._coordinateSystems.delete(layer.id);
+    if (!layer.internalState) {
+      layer.lifecycle = LIFECYCLE.FINALIZED;
+      return;
+    }
     this._needsRedraw = this._needsRedraw || `finalized ${layer}`;
 
     layer.lifecycle = LIFECYCLE.AWAITING_FINALIZATION;

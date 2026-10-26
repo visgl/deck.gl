@@ -31,6 +31,7 @@ const MVT_BBOX: GeoBoundingBox = {west: 0, east: 1, south: 0, north: 1};
 
 const defaultProps: DefaultProps<VectorTileLayerProps> = {
   ...MVTLayer.defaultProps,
+  coordinateSystem: 'lnglat',
   autoLabels: false,
   data: TilejsonPropType,
   dataComparator: TilejsonPropType.equal,
@@ -70,9 +71,9 @@ export default class VectorTileLayer<
     super(...propObjects);
   }
 
-  initializeState(): void {
-    super.initializeState();
-    this.setState({binary: true});
+  protected useBinary(): boolean {
+    // Both CARTO's native tiles and its MVT loader always return binary geometry.
+    return true;
   }
 
   updateState(parameters) {
