@@ -46,6 +46,24 @@ class ReadonlyTypeNodeParser {
   }
 }
 
+// Native typed arrays cannot be represented in JSON. Handle them before
+// resolving their declarations, including Float16Array from newer math.gl peers.
+class TypedArrayNodeParser {
+  supportsNode(node) {
+    return (
+      ts.isTypeReferenceNode(node) &&
+      ts.isIdentifier(node.typeName) &&
+      /^(?:Int(?:8|16|32)|Uint(?:8|16|32)|Uint8Clamped|Float(?:16|32|64)|BigInt64|BigUint64)Array$/.test(
+        node.typeName.text
+      )
+    );
+  }
+
+  createType() {
+    return new NeverType();
+  }
+}
+
 class ClassTypeNodeParser {
   constructor(typeChecker) {
     this.typeChecker = typeChecker;
@@ -58,7 +76,16 @@ class ClassTypeNodeParser {
 
     const target = ts.isTypeReferenceNode(node) ? node.typeName : node.expression;
     const symbol = this.getResolvedSymbol(target);
-    return Boolean(symbol && symbol.declarations?.some(declaration => ts.isClassDeclaration(declaration)));
+    return Boolean(
+      symbol &&
+        symbol.declarations?.some(
+          declaration =>
+            ts.isClassDeclaration(declaration) ||
+            // Loader objects contain parsing functions and recursive runtime state.
+            (symbol.name === 'Loader' &&
+              declaration.getSourceFile().fileName.includes('@loaders.gl/loader-utils/'))
+        )
+    );
   }
 
   createType(node) {
@@ -183,6 +210,7 @@ const config = {
 const program = createProgram(config);
 const parser = createParser(program, config, prs => {
   prs.addNodeParser(new ThisTypeNodeParser());
+  prs.addNodeParser(new TypedArrayNodeParser());
   prs.addNodeParser(new ClassTypeNodeParser(program.getTypeChecker()));
   prs.addNodeParser(new ReadonlyTypeNodeParser(prs));
 });

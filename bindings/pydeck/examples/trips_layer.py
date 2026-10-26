@@ -35,5 +35,9 @@ layer = pdk.Layer(
 view_state = pdk.ViewState(latitude=37.7749295, longitude=-122.4194155, zoom=11, bearing=0, pitch=45)
 
 # Render
-r = pdk.Deck(layers=[layer], initial_view_state=view_state)
+r = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("trips_layer.html")

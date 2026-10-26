@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
+import {LayerManager, MapView, DeckRenderer, assert} from '@deck.gl/core';
 
 import {device} from './utils/setup-gl';
 
@@ -420,6 +420,8 @@ function runLayerTestUpdate<LayerT extends Layer>(
   spyMap: Record<string, Spy>;
 } {
   const {props, updateProps, onBeforeUpdate, viewport = layerManager.context.viewport} = testCase;
+  // Lifecycle tests construct their manager with a materialized test viewport.
+  assert(viewport);
 
   if (onBeforeUpdate) {
     onBeforeUpdate({layer, testCase});
@@ -466,11 +468,14 @@ function update({layerManager, deckRenderer}: TestResources): Promise<void> {
       if (layerManager.needsUpdate()) {
         layerManager.updateLayers();
 
+        const viewport = layerManager.context.viewport;
+        // Lifecycle tests always provide a viewport before running updates.
+        assert(viewport);
         deckRenderer.renderLayers({
           pass: 'test',
           views: {},
           effects: [],
-          viewports: [layerManager.context.viewport],
+          viewports: [viewport],
           layers: layerManager.getLayers(),
           onViewportActive: layerManager.activateViewport
         });

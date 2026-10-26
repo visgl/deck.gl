@@ -12,6 +12,14 @@ const darkCodeTheme = prismThemes.nightOwl;
 const {getSwcLoaderOptions, rspack} = require('@docusaurus/faster');
 const {resolve} = require('path');
 const websiteBaseUrl = process.env.WEBSITE_BASE_URL || '/';
+const websiteBasePathSegments = websiteBaseUrl.split('/').filter(Boolean);
+const websiteBasePath =
+  websiteBasePathSegments.length === 0 ? '' : `/${websiteBasePathSegments.join('/')}`;
+
+/** Prefix a site-relative route with the configured website base path (staging builds). */
+function prefixWebsiteRoute(route) {
+  return `${websiteBasePath}${route}`;
+}
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -89,11 +97,51 @@ const config = {
   ],
 
   plugins: [
+    // Publishes /llms.txt (a curated Markdown index of the documentation) and a raw
+    // Markdown sibling for every docs page (e.g. /docs/api-reference/json/overview.md),
+    // so coding agents can read current deck.gl documentation at inference time.
+    // Mirrors the setup used by luma.gl (https://luma.gl/llms.txt).
+    [
+      '@signalwire/docusaurus-plugin-llms-txt',
+      {
+        siteTitle: 'deck.gl',
+        siteDescription:
+          'GPU-powered, highly performant large-scale data visualization. Layers, views, ' +
+          'base map integrations (MapLibre, Mapbox, Google Maps, ArcGIS), the @deck.gl/json ' +
+          'declarative format, and the developer guide.',
+        // Plugin 1.x builds its route tree from base-prefixed Docusaurus paths.
+        // Preserve the configured three levels after the post-build base-path normalization
+        // (scripts/normalize-llm-output.mjs).
+        depth: Math.min(5, 3 + websiteBasePathSegments.length),
+        enableDescriptions: true,
+        includeOrder: [
+          '/docs/get-started/**',
+          '/docs/whats-new',
+          '/docs/upgrade-guide',
+          '/docs/developer-guide/**',
+          '/docs/api-reference/**'
+        ].map(prefixWebsiteRoute),
+        onRouteError: 'warn',
+        content: {
+          enableMarkdownFiles: true,
+          enableLlmsFullTxt: false,
+          relativePaths: false,
+          includeBlog: false,
+          includePages: false,
+          includeDocs: true,
+          includeVersionedDocs: false,
+          includeGeneratedIndex: true,
+          // /examples is the only other docs instance; TEST-STATUS is an internal tracker.
+          excludeRoutes: ['/examples/**', '/docs/TEST-STATUS'].map(prefixWebsiteRoute)
+        }
+      }
+    ],
     [
       './ocular-docusaurus-plugin',
       {
         debug: true,
         resolve: {
+          // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
@@ -112,26 +160,7 @@ const config = {
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
-            'react-dom': resolve('node_modules/react-dom'),
-            // Explicit subpaths must precede the namespace alias, which otherwise bypasses
-            // package exports and resolves them as nonexistent directories.
-            '@luma.gl/webgl/constants': resolve(
-              '../node_modules/@luma.gl/webgl/dist/constants'
-            ),
-            '@luma.gl/gpgpu/webgpu': resolve(
-              '../node_modules/@luma.gl/gpgpu/dist/operations/webgpu'
-            ),
-            '@luma.gl/gpgpu/gpu-data': resolve('../node_modules/@luma.gl/gpgpu/dist/gpu-data'),
-            '@luma.gl/shadertools/wgsl': resolve('../node_modules/@luma.gl/shadertools/dist/wgsl'),
-            '@luma.gl': resolve('../node_modules/@luma.gl'),
-            '@math.gl': resolve('../node_modules/@math.gl'),
-            '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
-            '@loaders.gl/i3s': resolve('node_modules/@loaders.gl/i3s'),
-            '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
-            '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
-            '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
-            '@loaders.gl/schema': resolve('../node_modules/@loaders.gl/schema-utils'),
-            '@loaders.gl': resolve('../node_modules/@loaders.gl')
+            'react-dom': resolve('node_modules/react-dom')
           }
         },
         plugins: [

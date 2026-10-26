@@ -5,10 +5,88 @@
 import {test, expect} from 'vitest';
 import {vectorTableSource} from '@carto/api-client';
 import {VectorTileLayer} from '@deck.gl/carto';
+import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
+import type {Feature} from 'geojson';
 import {geojsonToBinary} from '@loaders.gl/gis';
 import {testPickingLayer} from '../../layers/test-picking-layer';
 import {WebMercatorViewport} from '@deck.gl/core';
 import {withMockFetchMapsV3} from '../mock-fetch';
+
+test('VectorTileLayer preserves binary geometry and picking when the viewport requests subdivision', async () => {
+  class SubdividingViewport extends WebMercatorViewport {
+    getSubdivisionStep(): number {
+      return 1;
+    }
+  }
+  await withMockFetchMapsV3(async () => {
+    await testPickingLayer({
+      layer: createTestVectorTileLayer([-123, 45], 'binary', [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [-120, 40],
+              [-100, 40]
+            ]
+          }
+        },
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-120, 40],
+                [-100, 40],
+                [-100, 60],
+                [-120, 60],
+                [-120, 40]
+              ]
+            ]
+          }
+        }
+      ]),
+      viewport: new SubdividingViewport({longitude: 0, latitude: 0, zoom: 1}),
+      testCases: [
+        {
+          pickedColor: new Uint8Array([1, 0, 0, 0]),
+          pickedLayerId: 'mvt-0-0-1-points-circle',
+          mode: 'hover',
+          onAfterUpdate: ({layer, info}) => {
+            expect(layer.getSubdivisionStep()).toBe(1);
+            const children = layer.context.layerManager.layers;
+            const paths = children.filter(child => child instanceof PathLayer);
+            const polygons = children.filter(child => child instanceof SolidPolygonLayer);
+            expect(paths.length).toBeGreaterThan(0);
+            expect(polygons.length).toBeGreaterThan(0);
+            for (const path of paths) {
+              expect(path.getSubdivisionStep()).toBe(1);
+              expect(path.props._pathType).toBe('open');
+              const positions = path.props.data.attributes.getPath;
+              expect(path.state.pathTesselator.instanceCount).toBe(
+                positions.value.length / positions.size
+              );
+            }
+            for (const polygon of polygons) {
+              expect(polygon.getSubdivisionStep()).toBe(1);
+              expect(polygon.props._normalize).toBe(false);
+              const {getPolygon, indices} = polygon.props.data.attributes;
+              expect(polygon.state.polygonTesselator.instanceCount).toBe(
+                getPolygon.value.length / getPolygon.size
+              );
+              expect(polygon.getAttributeManager()!.attributes.indices.value).toEqual(indices);
+            }
+            expect(layer.state.binary).toBe(true);
+            expect(info.object.geometry.coordinates).toEqual([-123, 45]);
+          }
+        }
+      ]
+    });
+  });
+});
 
 test(`VectorTileLayer#picking`, async () => {
   await withMockFetchMapsV3(async () => {
@@ -111,7 +189,8 @@ test(`VectorTileLayer#pickingMVT`, async () => {
 
 function createTestVectorTileLayer(
   coordinates: [number, number],
-  format: 'binary' | 'mvt'
+  format: 'binary' | 'mvt',
+  additionalFeatures: Feature[] = []
 ): VectorTileLayer {
   const geoJSONData = [
     {
@@ -122,7 +201,9 @@ function createTestVectorTileLayer(
     }
   ];
 
-  const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
+  const geoJSONBinaryData = geojsonToBinary(
+    JSON.parse(JSON.stringify([...geoJSONData, ...additionalFeatures]))
+  );
 
   class TestVectorTileLayer extends VectorTileLayer {
     static readonly layerName = 'TestVectorTileLayer';

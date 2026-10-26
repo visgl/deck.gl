@@ -21,6 +21,7 @@ import {filterGridCells, normalizeGridCells, type GridCell} from './grid-data';
 import {LANDCOVER_LEGEND} from './landcover-palette';
 
 import {createRoot} from 'react-dom/client';
+import {parse} from '@loaders.gl/core';
 import {CSVLoader} from '@loaders.gl/csv';
 
 const INITIAL_VIEW_STATE: GlobeViewState = {longitude: 0, latitude: 0, zoom: 2};
@@ -78,7 +79,7 @@ export default function App({
           throw new Error(`Failed to load ${system} grid data: ${response.status}`);
         }
 
-        const table = await CSVLoader.parseText(await response.text(), {
+        const table = await parse(await response.text(), CSVLoader, {
           csv: {shape: 'object-row-table', dynamicTyping: false}
         });
         if (table.shape !== 'object-row-table') {
@@ -129,9 +130,9 @@ export default function App({
         }),
     extruded: true,
     getElevation: 50000,
-    beforeId: 'watername_ocean',
+    beforeId: 'waterway_line_label',
     loaders: [CSVLoader],
-    loadOptions: {csv: {header: true, dynamicTyping: false}}
+    loadOptions: {csv: {shape: 'object-row-table', header: true, dynamicTyping: false}}
   } as Omit<H3HexagonLayerProps<GridCell>, 'data' | 'id'> & {beforeId: string};
 
   const layers = [
@@ -191,9 +192,12 @@ export default function App({
       <Map
         reuseMaps
         projection="globe"
+        // On WebGPU the deck canvas is overlaid in a MapLibre control slot, which is stacked above
+        // the website's info panel unless the map is a stacking context of its own
+        style={{isolation: 'isolate'}}
         id="map"
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle="https://tiles.openfreemap.org/styles/positron"
         dragRotate={false}
         maxPitch={0}
       >
