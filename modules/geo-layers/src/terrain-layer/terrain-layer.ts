@@ -336,8 +336,8 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
     const ranges = tiles
       .map(tile => tile.content)
       .filter(Boolean)
-      .flatMap(arr => {
-        const bounds = arr?.[0]?.header?.boundingBox;
+      .flatMap(tileContent => {
+        const bounds = tileContent?.[0]?.header?.boundingBox;
         return bounds ? [bounds.map(bound => bound[2])] : [];
       });
     if (ranges.length === 0) {
