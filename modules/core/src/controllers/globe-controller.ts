@@ -320,9 +320,12 @@ export default class GlobeController extends Controller<MapState> {
     const navigation = props.navigation || 'map';
     const navigationChanged = this.props && navigation !== (this.props.navigation || 'map');
     // The event's cached controller state may precede the latest controlled view state.
+    // During a transition, props hold its destination until the application applies
+    // the next frame, so report the interpolated view state that is displayed.
     const oldViewState = navigationChanged
       ? new this.ControllerState({
           ...(this.props as ControllerProps & MapStateProps),
+          ...this.transitionManager.getViewportInTransition(),
           makeViewport: this.makeViewport
         }).getViewportProps()
       : undefined;
