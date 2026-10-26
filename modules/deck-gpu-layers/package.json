@@ -1,0 +1,49 @@
+{
+  "name": "@deck.gl-community/gpu-layers",
+  "version": "10.0.0-alpha.3",
+  "private": true,
+  "description": "deck.gl layers using the WebGPU-only GPU compute graph",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/deck.gl.git"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./query": {
+      "types": "./dist/query/index.d.ts",
+      "import": "./dist/query/index.js",
+      "require": "./dist/query/index.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@deck.gl/core": "9.4.0-beta.4",
+    "@luma.gl/core": "^10.0.0-alpha.4",
+    "@luma.gl/engine": "^10.0.0-alpha.4",
+    "@luma.gl/gpgpu": "^10.0.0-alpha.4",
+    "@luma.gl/shadertools": "^10.0.0-alpha.4",
+    "@math.gl/core": "^5.0.0-alpha.15",
+    "@math.gl/sun": "^5.0.0-alpha.15"
+  },
+  "devDependencies": {
+    "@deck.gl/layers": "9.4.0-beta.4"
+  },
+  "peerDependencies": {
+    "@luma.gl/experimental": "^10.0.0-alpha.3",
+    "@luma.gl/text": "^10.0.0-alpha.3"
+  }
+}

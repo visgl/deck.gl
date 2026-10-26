@@ -47,5 +47,9 @@ line_layer = pdk.Layer(
 
 layers = [scatterplot, line_layer]
 
-r = pdk.Deck(layers=layers, initial_view_state=INITIAL_VIEW_STATE)
+r = pdk.Deck(
+    layers=layers,
+    initial_view_state=INITIAL_VIEW_STATE,
+    map_style="https://tiles.openfreemap.org/styles/dark",
+)
 r.to_html("line_layer.html")

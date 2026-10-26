@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {
   _GlobeController as GlobeController,
   _GlobeView as GlobeView,
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import ViewManager from '@deck.gl/core/lib/view-manager';
-import {Globe} from '@deck.gl/core/viewports/globe-utils';
+import {Globe} from '@deck.gl/core/viewports/globe-util';
 import {Timeline} from '@luma.gl/engine';
 import {createTestController} from './test-controller';
 
@@ -148,6 +148,69 @@ test.each(['map', 'ball'] as const)(
     controller.finalize();
   }
 );
+
+test('GlobeController navigation change during inertia emits the displayed view state', () => {
+  const view = new GlobeView({controller: {navigation: 'ball', inertia: 500}});
+  const updates: any[] = [];
+  const controller = new GlobeController({
+    timeline: new Timeline(),
+    // A controlled application applies emitted view states on its next render.
+    onViewStateChange: update => {
+      updates.push(update);
+    },
+    onStateChange: () => {},
+    makeViewport: viewState => view.makeViewport({width: 800, height: 600, viewState})
+  } as any);
+  let props: any = {
+    ...view.controller,
+    id: 'test-view',
+    x: 0,
+    y: 0,
+    ...INITIAL_VIEW_STATE,
+    zoom: 3
+  };
+  const render = () => {
+    props = {...props, ...updates[updates.length - 1].viewState};
+    controller.setProps(props);
+  };
+  controller.setProps(props);
+
+  const now = vi.spyOn(Date, 'now');
+  try {
+    now.mockReturnValue(1000);
+    controller.handleEvent(makePanEvent('panstart'));
+    controller.handleEvent(makePanEvent('panmove', 420, 300));
+    render();
+    now.mockReturnValue(1016);
+    controller.handleEvent(makePanEvent('panmove', 440, 300));
+    render();
+    controller.handleEvent(makePanEvent('panend', 440, 300));
+  } finally {
+    now.mockRestore();
+  }
+  // Applying the inertia destination starts the transition and emits its first frame.
+  render();
+  expect(controller.transitionManager.transition.inProgress, 'inertia started').toBe(true);
+  const destination = props;
+  const displayed = updates[updates.length - 1].viewState;
+  expect(displayed.longitude, 'the destination is not displayed yet').not.toBeCloseTo(
+    destination.longitude,
+    3
+  );
+
+  updates.length = 0;
+  controller.setProps({...props, ...displayed, navigation: 'map'});
+  expect(updates).toHaveLength(1);
+  for (const property of ['longitude', 'latitude', 'zoom', 'bearing']) {
+    expect(updates[0].oldViewState[property], `displayed ${property}`).toBeCloseTo(
+      displayed[property],
+      10
+    );
+  }
+  expect(updates[0].oldViewState.navigation).toBe('ball');
+  expect(updates[0].viewState.navigation).toBe('map');
+  controller.finalize();
+});
 
 test.each([0, 45, 360, 405])(
   'GlobeController defaults to map navigation at bearing %s',

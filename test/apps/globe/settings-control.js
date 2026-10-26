@@ -36,6 +36,7 @@ export function createSettingsControl({
     .globe-controls footer {display: flex; align-items: center; justify-content: space-between; margin-top: 12px;}
     .globe-controls details {margin-top: 10px;}
     .globe-controls summary {cursor: pointer; color: #c5c9ca;}
+    .globe-controls .gesture-hint {margin-top: 8px; color: #c5c9ca;}
     .globe-readout {left: 12px; bottom: 12px; width: 330px; pointer-events: none;}
     .globe-readout header {display: flex; justify-content: space-between; margin-bottom: 8px;}
     .globe-readout table {width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums;}
@@ -86,6 +87,7 @@ export function createSettingsControl({
         <button type="button" data-zoom-around="center">Center</button>
       </div>
       <label><input type="checkbox" data-option="data" /> Airports + routes</label>
+      <div class="gesture-hint">Pinch to zoom<br>Two-finger drag to rotate<br>Double-tap to zoom<br>Double-tap + drag for smooth zoom</div>
     </details>
     <footer>
       <label><input type="checkbox" data-option="inertia" /> Momentum</label>

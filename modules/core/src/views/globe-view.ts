@@ -35,6 +35,8 @@ export type GlobeViewState = {
   minBearing?: number;
   /** Maximum unwrapped bearing in degrees. Default unbounded. May exceed 180 to define a range across south. */
   maxBearing?: number;
+  /** Viewport center offsets from lng, lat in meters */
+  position?: number[];
   /** The near plane position */
   nearZ?: number;
   /** The far plane position */
@@ -42,8 +44,6 @@ export type GlobeViewState = {
 } & CommonViewState;
 
 export type GlobeViewProps = {
-  /** The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`. */
-  resolution?: number;
   /** Scaler for the near plane, 1 unit equals to the height of the viewport. Default to `0.1`. Overwrites the `near` parameter. */
   nearZMultiplier?: number;
   /** Scaler for the far plane, 1 unit equals to the distance from the camera to the top edge of the screen. Default to `1.01`. Overwrites the `far` parameter. */

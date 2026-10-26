@@ -1,3 +1,7 @@
+---
+description: "How layers manage GPU attributes: the AttributeManager, accessors, update triggers and instanced attributes."
+---
+
 # Attribute Management
 
 ## Overview

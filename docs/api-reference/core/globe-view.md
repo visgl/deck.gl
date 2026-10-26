@@ -15,6 +15,16 @@ It's recommended that you read the [Views and Projections guide](../../developer
 </div>
 
 
+## Target CRS
+
+`GlobeViewport.crs` describes standard geocentric XYZ coordinates in meters on the
+existing deck.gl sphere, with radius 6370972 meters. The descriptor is defined locally
+using math.gl's geocentric projection plugin. The viewport retains its common-space
+orientation, radius, and altitude behavior during the CRS transition.
+
+Descriptor bounds enclose the reference sphere and describe a rendering target, not
+coordinate validity or limits on altitude.
+
 ## Limitations
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
@@ -25,7 +35,7 @@ The goal of `GlobeView` is to provide a generic solution to rendering and naviga
 - Support for `TileLayer` and `MVTLayer` is experimental.
 - These layers currently do not work in this view:
   + Aggregation layers: `HeatmapLayer`, `ContourLayer`
-  + `TerrainLayer`
+- Support for `TerrainLayer` and [TerrainExtension](../extensions/terrain-extension.md) is experimental.
 - [MaskExtension](../extensions/mask-extension.md) is not supported in this view.
 
 When GeoJson paths and polygons are rendered with this view, the straight lines and flat surfaces are warped to the surface of the globe. Note that the warped edges still correspond to straight lines in the Mercator projection. To draw lines along the shortest distance on the globe, use the [GreatCircleLayer](../geo-layers/great-circle-layer.md).
@@ -40,9 +50,6 @@ const view = new GlobeView({id, ...});
 
 `GlobeView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-#### `resolution` (number, optional) {#resolution}
-
-The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
 #### `nearZMultiplier` (number, optional) {#nearzmultiplier}
 
@@ -78,6 +85,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
 - `minBearing` (number, optional) - minimum bearing angle in degrees. Unrestricted by default.
 - `maxBearing` (number, optional) - maximum bearing angle in degrees. Unrestricted by default. Use an increasing numerical interval, such as `[-45, 45]` around north or `[170, 190]` across south. With limits enabled, bearings stay unwrapped: use `185`, not `-175`, for the latter interval.
+- `position` (number[3], optional) - Viewport center offsets from lng, lat in meters. Default: `[0,0,0]`.
 
 Navigation preserves the current bearing by default, so north stays up when `bearing` is `0`. Panning, pointer-anchored zoom, and pan inertia do not rotate the bearing or cross the poles. Explicit rotation gestures still change bearing and pitch. Set `controller: {navigation: 'ball'}` to opt into full camera-frame rotation through the poles. See [GlobeController navigation](./globe-controller.md#navigation) for details.
 

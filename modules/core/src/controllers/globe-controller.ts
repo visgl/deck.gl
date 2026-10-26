@@ -18,7 +18,7 @@ import {
   type CameraFrame,
   GLOBE_INERTIA_EASING,
   GlobeInertiaInterpolator
-} from '../viewports/globe-utils';
+} from '../viewports/globe-util';
 
 import type {MjolnirGestureEvent} from 'mjolnir.js';
 
@@ -451,9 +451,12 @@ export default class GlobeController extends Controller<MapState> {
   setProps(props: ControllerProps & MapStateProps): void {
     const navigation = props.navigation || 'map';
     const navigationChanged = this.props && navigation !== (this.props.navigation || 'map');
+    // During a transition, props hold its destination until the application applies
+    // the next frame, so report the interpolated view state that is displayed.
     const oldViewState = navigationChanged
       ? new this.ControllerState({
           ...(this.props as ControllerProps & MapStateProps),
+          ...this.transitionManager.getViewportInTransition(),
           makeViewport: this.makeViewport
         }).getViewportProps()
       : undefined;

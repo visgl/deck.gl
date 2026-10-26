@@ -8,6 +8,12 @@ import type {ShaderModule} from '@luma.gl/shadertools';
 import {BufferTransform, BufferTransformProps} from '@luma.gl/engine';
 import {ProjectProps} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils';
+import {getSourceCRS} from '@deck.gl/core/shaderlib/project/coordinate-systems';
+import {
+  type ProjectPositionParameters,
+  projectPosition as projectResolvedPosition,
+  getWorldPosition as getResolvedWorldPosition
+} from '@deck.gl/core/shaderlib/project/project-functions';
 
 export function getPixelOffset(p1, p2) {
   return [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2], 1];
@@ -74,11 +80,14 @@ export async function runOnGPU({
     feedbackBuffers: {[varying]: OUT_BUFFER},
     varyings: [varying]
   });
-  transform.model.shaderInputs.setProps(shaderInputProps);
-  transform.run({discard: true});
-
-  const result: Uint8Array = await OUT_BUFFER.readAsync();
-  return new Float32Array(result.buffer);
+  try {
+    transform.model.shaderInputs.setProps(shaderInputProps);
+    transform.run({discard: true});
+    const result: Uint8Array = await OUT_BUFFER.readAsync();
+    return new Float32Array(result.buffer);
+  } finally {
+    transform.destroy();
+  }
 }
 
 export function verifyGPUResult(
@@ -94,4 +103,38 @@ export function verifyGPUResult(
   } else {
     return `returns ${actualArr}, expecting ${expectedArr}`;
   }
+}
+
+// Resolve public shader fixture props at the boundary; CPU and GPU projection
+// then calculate their own offsets from the same rendering reference.
+type ProjectionFixtureProps = ProjectProps & {
+  autoOffset?: boolean;
+  offsetMode?: boolean;
+};
+
+export function getTestProjectionParameters(
+  props: ProjectionFixtureProps
+): ProjectPositionParameters {
+  const {viewport, coordinateSystem = 'default', coordinateOrigin = [0, 0, 0]} = props;
+  return {
+    viewport,
+    sourceCrs: getSourceCRS(coordinateSystem, viewport),
+    coordinateSystem,
+    modelMatrix: props.modelMatrix || null,
+    coordinateOrigin
+  };
+}
+
+export function projectPosition(position: number[], props: ProjectionFixtureProps) {
+  return projectResolvedPosition(position, {
+    ...getTestProjectionParameters(props),
+    autoOffset: props.autoOffset
+  });
+}
+
+export function getWorldPosition(position: number[], props: ProjectionFixtureProps) {
+  return getResolvedWorldPosition(position, {
+    ...getTestProjectionParameters(props),
+    offsetMode: props.offsetMode ?? false
+  });
 }

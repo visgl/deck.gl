@@ -51,6 +51,9 @@ export const deck = new Deck({
   views: getView(viewType),
   initialViewState: INITIAL_VIEW_STATE,
   controller: getControllerOptions(),
+  eventRecognizerOptions: {
+    dblclick: {time: 500}
+  },
   parameters: {
     cull: true
   },
