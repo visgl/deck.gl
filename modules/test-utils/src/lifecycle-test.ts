@@ -250,7 +250,7 @@ export function testLayer<LayerT extends Layer>(opts: TestLayerOptions<LayerT>):
 
 /**
  * Initialize and updates a layer over a sequence of scenarios (test cases).
- * Each test case is awaited until the layer's isLoaded flag is true.
+ * Each test case waits for loaded data and checks all requested layer updates.
  */
 export async function testLayerAsync<LayerT extends Layer>(
   opts: TestLayerOptions<LayerT>
@@ -275,7 +275,11 @@ export async function testLayerAsync<LayerT extends Layer>(
 
     await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
 
-    while (!newLayer.isLoaded) {
+    // Async props may finish while an assertion is awaited. Apply their requested updates too.
+    while (
+      !newLayer.isLoaded ||
+      resources.layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)
+    ) {
       await update(resources);
       await runLayerTestPostUpdateCheck(testCase, newLayer, oldState, spyMap);
     }
