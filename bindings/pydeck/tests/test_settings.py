@@ -5,6 +5,7 @@ import re
 import pytest
 
 import pydeck
+from pydeck.frontend_semver import DECKGL_SEMVER
 from pydeck.settings import DECKGL_MINOR, SHARED_PACKAGES
 
 
@@ -142,3 +143,11 @@ def test_shared_packages_match_jupyter_widget():
     assert specifiers, "SHARED_MODULES not found"
     packages = {"/".join(specifier.split("/")[:2]) for specifier in specifiers}
     assert set(SHARED_PACKAGES) == packages
+
+
+def test_frontend_semver_matches_jupyter_widget():
+    package_json = pathlib.Path(__file__).parents[3] / "modules/jupyter-widget/package.json"
+    if not package_json.exists():
+        pytest.skip("jupyter-widget source not available")
+    major, minor = json.loads(package_json.read_text())["version"].split(".")[:2]
+    assert DECKGL_SEMVER == f"~{major}.{minor}.*"
