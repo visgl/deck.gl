@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
+import {
+  WebMercatorViewport,
+  OrthographicView,
+  Viewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 
 const testViewState = {
@@ -21,12 +26,6 @@ const testViewState = {
 
 // testViewState should load tile 12-1171-1566
 const testViewport = new WebMercatorViewport(testViewState);
-
-class ResolutionViewport extends WebMercatorViewport {
-  get resolution() {
-    return 1;
-  }
-}
 
 const getTileData = () => Promise.resolve(null);
 
@@ -121,15 +120,17 @@ test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () 
   tileset.finalize();
 });
 
-test('Tileset2D#coverage LOD uses higher minimum coverage zoom for resolution viewports', () => {
+test('Tileset2D#coverage LOD uses higher minimum coverage zoom for globe viewports', () => {
   const tileset = new Tileset2D({
     getTileData,
     lodStrategy: 'coverage',
     onTileLoad: () => {}
   });
-  const resolutionViewport = new ResolutionViewport(testViewState);
+  // GlobeView no longer sets a default subdivision resolution
+  const globeViewport = new GlobeViewport(testViewState);
+  expect(globeViewport.resolution, 'GlobeViewport subdivision is off by default').toBe(0);
 
-  tileset.update(resolutionViewport);
+  tileset.update(globeViewport);
 
   expect(tileset._cache.get('0-0-0')?.isPrefetch, 'root tile is not prefetched').not.toBe(true);
   expect(tileset._cache.get('4-6-4')?.isPrefetch, 'fallback coverage tile is prefetched').toBe(
@@ -152,9 +153,7 @@ test('Tileset2D#coverage LOD prioritizes closer prefetch ancestors before safety
     lodStrategy: 'coverage',
     onTileLoad: () => {}
   });
-  const resolutionViewport = new ResolutionViewport(testViewState);
-
-  tileset.update(resolutionViewport);
+  tileset.update(new GlobeViewport(testViewState));
 
   expect((tileset as any)._getRequestPriority(tileset._cache.get('585-783-11'))).toBeLessThan(
     (tileset as any)._getRequestPriority(tileset._cache.get('18-24-6'))
@@ -162,6 +161,21 @@ test('Tileset2D#coverage LOD prioritizes closer prefetch ancestors before safety
   expect((tileset as any)._getRequestPriority(tileset._cache.get('18-24-6'))).toBeLessThan(
     (tileset as any)._getRequestPriority(tileset._cache.get('4-6-4'))
   );
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD ignores subdivision resolution on flat viewports', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+
+  tileset.update(new WebMercatorViewport({...testViewState, resolution: 36}));
+
+  expect(tileset._cache.get('0-0-0')?.isPrefetch, 'root coverage tile is prefetched').toBe(true);
+  expect(tileset._cache.get('4-6-4'), 'globe fallback tile is not requested').toBeFalsy();
 
   tileset.finalize();
 });
@@ -249,7 +263,7 @@ test('Tileset2D#coverage LOD ignores cached descendants that are not direct chil
   tileset.finalize();
 });
 
-test('Tileset2D#coverage LOD keeps cached root below the resolution fallback floor', () => {
+test('Tileset2D#coverage LOD keeps cached root below the globe fallback floor', () => {
   const tileset = new Tileset2D({
     getTileData: () => new Promise(() => {}),
     lodStrategy: 'coverage',
@@ -257,7 +271,7 @@ test('Tileset2D#coverage LOD keeps cached root below the resolution fallback flo
     onTileLoad: () => {}
   });
   Object.assign(tileset, {
-    _viewport: new ResolutionViewport({...testViewState, width: 100, height: 100, zoom: 6})
+    _viewport: new GlobeViewport({...testViewState, width: 100, height: 100, zoom: 6})
   });
 
   const root = seedTile(tileset, {x: 0, y: 0, z: 0}, true);

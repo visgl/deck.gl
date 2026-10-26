@@ -54,8 +54,8 @@ export type LODStrategy = 'none' | 'coverage';
 
 const DEFAULT_CACHE_SCALE = 5;
 const COVERAGE_ZOOM_DELTA = 1;
-const MIN_RESOLUTION_COVERAGE_ZOOM = 6;
-const MIN_RESOLUTION_FALLBACK_ZOOM = 4;
+const MIN_GLOBE_COVERAGE_ZOOM = 6;
+const MIN_GLOBE_FALLBACK_ZOOM = 4;
 const SELECTED_TILE_PRIORITY = 0;
 const VISIBLE_TILE_PRIORITY = 1e8;
 const PREFETCH_TILE_PRIORITY = 2e8;
@@ -773,18 +773,24 @@ export class Tileset2D {
 
   private _getMinCoverageZoom(): number {
     const minZoom = this._getMinCoverageFallbackZoom();
-    if (this._viewport?.resolution) {
-      return Math.max(minZoom, MIN_RESOLUTION_COVERAGE_ZOOM);
+    if (this._isGlobeViewport()) {
+      return Math.max(minZoom, MIN_GLOBE_COVERAGE_ZOOM);
     }
     return minZoom;
   }
 
   private _getMinCoverageFallbackZoom(): number {
     const minZoom = this._minZoom ?? 0;
-    if (this._viewport?.resolution) {
-      return Math.max(minZoom, MIN_RESOLUTION_FALLBACK_ZOOM);
+    if (this._isGlobeViewport()) {
+      return Math.max(minZoom, MIN_GLOBE_FALLBACK_ZOOM);
     }
     return minZoom;
+  }
+
+  // `viewport.resolution` only sets geometry subdivision and defaults to 0 in GlobeView,
+  // so identify globes by their geocentric target CRS.
+  private _isGlobeViewport(): boolean {
+    return this._viewport?.crs?.coordinateFrame === 'geocentric';
   }
 
   _getNearestAncestor(tile: Tile2DHeader): Tile2DHeader | null {
