@@ -87,7 +87,12 @@ jobs:
         run: yarn build
 
       - name: Run WebGPU tests
+        id: render
         run: xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-webgpu
+
+      - name: Verify WebGPU terrain height maps
+        if: ${{ !cancelled() && steps.render.outcome != 'skipped' }}
+        run: RENDER_TEST_DEVICE=webgpu yarn vitest run --project headless test/modules/extensions/terrain/terrain-webgpu.spec.ts
 
       - name: Upload render test failure images
         if: failure()

@@ -71,7 +71,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 #endif
 
   varyings.position = centerResult.clipPosition;
-  // DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  deckgl_filter_position(&varyings.position);
   let clipPixels = project_pixel_size_to_clipspace(offset.xy);
   varyings.position.x += clipPixels.x;
   varyings.position.y += clipPixels.y;

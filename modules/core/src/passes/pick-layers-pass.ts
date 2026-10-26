@@ -165,8 +165,17 @@ export default class PickLayersPass extends LayersPass {
         pickParameters.blendAlphaSrcFactor = 'one';
       }
     } else if (operation.includes('terrain')) {
-      // Pure terrain layers (without 'draw') don't need picking colors
-      pickParameters.blend = false;
+      if (layer.state?._hasPickingCover) {
+        // Draped objects already carry their encoded layer index in the cover.
+        pickParameters.blend = false;
+      } else {
+        // Non-pickable terrain must occlude objects without writing an unencoded
+        // alpha of 1 (layer 255), including offset-only terrain on WebGPU.
+        Object.assign(pickParameters, PICKING_BLENDING, {
+          blend: true,
+          blendAlphaSrcFactor: 'zero'
+        });
+      }
     }
 
     return pickParameters;

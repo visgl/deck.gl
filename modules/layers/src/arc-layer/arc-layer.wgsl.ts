@@ -307,6 +307,7 @@ fn vertexMain(
 #endif
 
   var output: Varyings;
+  deckgl_filter_position(&currentClip);
   output.position = currentClip + vec4<f32>(project_pixel_size_to_clipspace(offset), 0.0, 0.0);
   let color = mix(attributes.instanceSourceColors, attributes.instanceTargetColors, segmentRatio);
   output.color = vec4<f32>(color.rgb, color.a * layer.opacity);

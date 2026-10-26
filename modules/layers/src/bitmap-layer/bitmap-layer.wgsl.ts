@@ -96,6 +96,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     output.vTexPos = geometry.worldPosition.xy;
   }
 
+  deckgl_filter_position(&output.position);
   return output;
 }
 

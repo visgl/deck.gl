@@ -34,5 +34,8 @@ export function mergeShaders(target, source) {
       result.inject = mergedInjection;
     }
   }
+  if ('plugins' in source) {
+    result.plugins = (target.plugins || []).concat(source.plugins || []);
+  }
   return result;
 }
