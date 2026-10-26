@@ -7,7 +7,7 @@ import {WebMercatorViewport} from '@deck.gl/core';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
 import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
 import {TERRAIN_MODE} from '@deck.gl/extensions/terrain/shader-module';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {TerrainLoader} from '@loaders.gl/terrain';
 
@@ -217,6 +217,59 @@ test('TerrainEffect#without draw operation', async () => {
   uniforms = getLayerUniforms(meshLayer);
   expect(uniforms.mode, 'TERRAIN_MODE.SKIP').toBe(TERRAIN_MODE.SKIP);
   expect(model.bindings.terrain_map?.width, 'Terrain cover using empty texture').toBe(1);
+
+  lifecycle.finalize();
+});
+
+test('TerrainEffect#releases covers of removed terrain layers', async () => {
+  const terrainEffect = new TerrainEffect();
+
+  const data = [
+    [-122.45, 37.75],
+    [-122.35, 37.85]
+  ];
+  const terrainLayerA = new ScatterplotLayer({
+    id: 'terrain-a',
+    data,
+    getPosition: d => d,
+    operation: 'terrain+draw'
+  });
+  const terrainLayerB = new ScatterplotLayer({
+    id: 'terrain-b',
+    data,
+    getPosition: d => d,
+    operation: 'terrain+draw'
+  });
+  const drapeLayer = new ScatterplotLayer({
+    id: 'drape',
+    data,
+    getPosition: d => d,
+    extensions: [new TerrainExtension()],
+    terrainDrawMode: 'drape'
+  });
+
+  const lifecycle = new LifecycleTester();
+  await lifecycle.update({
+    viewport: new WebMercatorViewport({
+      width: 800,
+      height: 600,
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 10
+    }),
+    effects: [terrainEffect],
+    layers: [terrainLayerA, terrainLayerB, drapeLayer]
+  });
+  const texture = terrainEffect.terrainCovers.get('terrain-b')?.getRenderFramebuffer()
+    ?.colorAttachments[0].texture;
+  expect(texture, 'Terrain cover is rendered').toBeTruthy();
+
+  // Removing a terrain layer, e.g. when a terrain tile is evicted, prunes its cover
+  await lifecycle.update({
+    layers: [terrainLayerA, drapeLayer]
+  });
+  expect(terrainEffect.terrainCovers.has('terrain-b'), 'Terrain cover is pruned').toBe(false);
+  expect(texture.destroyed, 'Pruned terrain cover releases its texture').toBe(true);
 
   lifecycle.finalize();
 });
