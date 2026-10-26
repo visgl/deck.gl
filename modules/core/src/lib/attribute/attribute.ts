@@ -70,6 +70,8 @@ export type AttributeOptions = DataColumnOptions<{
 export type BinaryAttribute = Partial<BufferAccessor> & {
   value?: TypedArray;
   buffer?: Buffer;
+  /** Set to `true` if supplying float values to a unorm attribute */
+  normalized?: boolean;
   /**
    * Content version. Changing it re-uploads the data even if the object is the same, e.g. after
    * rewriting `value` in place. While set, a new object with the same version, `value`/`buffer`
@@ -91,7 +93,8 @@ const VERSIONED_BINARY_KEYS: (keyof BinaryAttribute)[] = [
   'type',
   'size',
   'offset',
-  'stride'
+  'stride',
+  'normalized'
 ];
 
 /**
@@ -101,8 +104,10 @@ const VERSIONED_BINARY_KEYS: (keyof BinaryAttribute)[] = [
 export function getVersionedBinarySnapshot(
   input: TypedArray | Buffer | BinaryAttribute
 ): BinaryAttribute | null {
-  const {version, value, buffer, type, size, offset, stride} = input as BinaryAttribute;
-  return version === undefined ? null : {version, value, buffer, type, size, offset, stride};
+  const {version, value, buffer, type, size, offset, stride, normalized} = input as BinaryAttribute;
+  return version === undefined
+    ? null
+    : {version, value, buffer, type, size, offset, stride, normalized};
 }
 
 /**
@@ -513,23 +518,22 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /**
    * Row offsets map to element offsets only for the same, tightly packed, deck-owned array.
    * An input with its own `buffer` must be bound instead, so rows are never written for it.
+   * Rows are only written if a full upload of the input would keep the current format and layout.
    */
-  private _canWriteRows({value, buffer, type, size, offset, stride}: BinaryAttribute): boolean {
+  private _canWriteRows(input: BinaryAttribute): boolean {
+    const {value, buffer} = input;
+    if (!value || buffer || value !== this.value || !this.buffer || this.state.externalBuffer) {
+      return false;
+    }
     const accessor = this.getAccessor();
-    return Boolean(
-      value &&
-        !buffer &&
-        value === this.value &&
-        this.buffer &&
-        !this.state.externalBuffer &&
-        !this.settings.isIndexed &&
-        !offset &&
-        !accessor.offset &&
-        (!type || type === accessor.type) &&
-        (size ?? this.size) === this.size &&
-        accessor.size === this.size &&
-        getStride(accessor) === this.size * value.BYTES_PER_ELEMENT &&
-        (!stride || stride === getStride(accessor))
+    const nextAccessor = this._getDataAccessor(input);
+    return (
+      !this.settings.isIndexed &&
+      bufferLayoutEqual(nextAccessor, accessor) &&
+      Boolean(nextAccessor.normalized) === Boolean(accessor.normalized) &&
+      !accessor.offset &&
+      accessor.size === this.size &&
+      getStride(accessor) === this.size * value.BYTES_PER_ELEMENT
     );
   }
 

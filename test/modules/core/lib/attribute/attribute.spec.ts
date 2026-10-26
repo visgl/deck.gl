@@ -1120,6 +1120,63 @@ test('Attribute#setExternalBuffer - dataRange', () => {
   externalBuffer.destroy();
 });
 
+test('Attribute#setExternalBuffer - version snapshot includes normalized', () => {
+  const attribute = new Attribute(device, {
+    id: 'colors',
+    type: 'unorm8',
+    size: 4,
+    update: () => {}
+  });
+  attribute.numInstances = 1;
+
+  const value = new Uint8Array([255, 0, 0, 255]);
+  attribute.setExternalBuffer({value, version: 1, normalized: true});
+  expect(attribute.getAccessor().type).toBe('unorm8');
+  const setDataSpy = vi.spyOn(attribute, 'setData');
+
+  // New wrapper, same array and version, but the values are no longer normalized
+  attribute.setExternalBuffer({value, version: 1, normalized: false});
+  expect(setDataSpy, 'changed normalized: full upload').toHaveBeenCalledTimes(1);
+  expect(attribute.getAccessor().type, 'format follows normalized').toBe('uint8');
+
+  setDataSpy.mockRestore();
+  attribute.delete();
+});
+
+test('Attribute#setExternalBuffer - dataRange keeps the format of a full upload', () => {
+  const attribute = new Attribute(device, {
+    id: 'radius',
+    type: 'float32',
+    size: 1,
+    update: () => {}
+  });
+  attribute.numInstances = 3;
+
+  const value = new Uint8Array([1, 2, 3]);
+  attribute.setExternalBuffer({value, type: 'unorm8', version: 1});
+  expect(attribute.getAccessor().type).toBe('unorm8');
+  const setDataSpy = vi.spyOn(attribute, 'setData');
+  const updateSubBufferSpy = vi.spyOn(attribute, 'updateSubBuffer');
+
+  // Without the explicit type, a full upload infers uint8, so the rows cannot be written alone
+  value[1] = 5;
+  attribute.setExternalBuffer({value, version: 2, dataRange: {startRow: 1, endRow: 2}});
+  expect(setDataSpy, 'inferred type differs: full upload').toHaveBeenCalledTimes(1);
+  expect(updateSubBufferSpy, 'inferred type differs: no partial write').toHaveBeenCalledTimes(0);
+  expect(attribute.getAccessor().type, 'format of a full upload').toBe('uint8');
+
+  // Same inferred type: rows are written
+  setDataSpy.mockClear();
+  value[2] = 6;
+  attribute.setExternalBuffer({value, version: 3, dataRange: {startRow: 2}});
+  expect(setDataSpy, 'same inferred type: no full upload').toHaveBeenCalledTimes(0);
+  expect(updateSubBufferSpy, 'same inferred type: partial write').toHaveBeenCalledTimes(1);
+
+  setDataSpy.mockRestore();
+  updateSubBufferSpy.mockRestore();
+  attribute.delete();
+});
+
 test('Attribute#setExternalBuffer - switching between versioned and unversioned', () => {
   const attribute = new Attribute(device, {
     id: 'positions',
