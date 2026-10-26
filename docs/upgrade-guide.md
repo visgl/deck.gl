@@ -51,6 +51,8 @@ Below zoom 12, `GlobeView` turned meter offsets from a position half a turn abou
 
 `project_get_orientation_matrix` now returns east, north and up columns, and the same matrix in WGSL; WebGPU previously ignored the location. At a pole, east is its limit along the position's longitude, and the common-space x axis only when the position lies exactly on the polar axis.
 
+With `coordinateSystem: 'meter-offsets'`, `project_normal` now turns normals to the east, north and up of the coordinate origin, as `project_position` does for positions. In `GlobeView`, `SimpleMeshLayer`, `ScenegraphLayer` and `PointCloudLayer`, including `Tile3DLayer` glTF and point-cloud tiles, previously lit them as if they stood at the north pole (NaN on WebGPU).
+
 #### projectPosition
 
 [`layer.projectPosition`](./api-reference/core/layer.md#projectposition) now uses simplified parameters when the input position is not in the layer's own CRS. Calls that use the layer's own CRS can continue to call `layer.projectPosition(position)`.

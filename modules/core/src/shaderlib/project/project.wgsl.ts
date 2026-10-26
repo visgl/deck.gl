@@ -76,7 +76,17 @@ struct Geometry {
   pickingColor: vec3<f32>,
 };
 
-var<private> geometry: Geometry;
+// Start like the GLSL geometry module: w = 0 marks the position as not yet set, and a normal
+// projected before a layer sets it (with a composed model matrix) is not rotated, rather than
+// rotated by the orientation of a zero vector.
+var<private> geometry: Geometry = Geometry(
+  vec3<f32>(0.0),
+  vec3<f32>(0.0),
+  vec4<f32>(0.0, 0.0, 1.0, 0.0),
+  vec3<f32>(0.0),
+  vec2<f32>(0.0),
+  vec3<f32>(0.0)
+);
 `;
 
 export const projectWGSL = /* wgsl */ `\
@@ -200,7 +210,10 @@ struct RotationResult {
 };
 
 fn project_needs_rotation(commonPosition: vec3<f32>) -> RotationResult {
-  if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
+  if (project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS) {
+    // Meter offsets lie in the tangent plane at the coordinate origin, as in project_position
+    return RotationResult(true, project_get_orientation_matrix(project.commonOrigin));
+  } else if (project.projectionMode == PROJECTION_MODE_GLOBE) {
     return RotationResult(true, project_get_orientation_matrix(commonPosition));
   } else {
     return RotationResult(false, mat3x3<f32>());  // identity alternative if needed
