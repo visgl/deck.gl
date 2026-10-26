@@ -479,6 +479,9 @@ function runLayerTestUpdate<LayerT extends Layer>(
 function update({draw, layerManager, deckRenderer}: TestResources): Promise<void> {
   return new Promise(resolve => {
     const onAnimationFrame = () => {
+      if (layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)) {
+        layerManager.setNeedsUpdate('pending layer update');
+      }
       if (layerManager.needsUpdate()) {
         layerManager.updateLayers();
 
