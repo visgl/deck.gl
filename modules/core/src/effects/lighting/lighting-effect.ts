@@ -98,6 +98,11 @@ export default class LightingEffect implements Effect {
 
     this.shadow = this.directionalLights.some(light => light.shadow);
     if (this.context) {
+      if (!this.shadow) {
+        // Release shadow resources and the shadow module. Otherwise layers keep the module
+        // without shadow map bindings and skip drawing.
+        this.cleanup(this.context);
+      }
       // Create resources if necessary
       this.setup(this.context);
     }
