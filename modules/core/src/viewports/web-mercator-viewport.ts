@@ -4,10 +4,18 @@
 
 // View and Projection Matrix calculations for mapbox-js style
 // map view properties
-import Viewport from './viewport';
+import Viewport, {
+  type ViewportOptions,
+  type DistanceScales,
+  type ProjectPositionOptions
+} from './viewport';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
+import {OSM_TILE_CRS, getMercatorScales} from './web-mercator-util';
 
 import {
   pixelsToWorld,
+  lngLatToWorld,
+  worldToLngLat,
   getViewMatrix,
   addMetersToLngLat,
   unitsPerMeter,
@@ -19,10 +27,12 @@ import {
 } from '@math.gl/web-mercator';
 import {Padding} from './viewport';
 
-import {Matrix4, clamp} from '@math.gl/core';
+import {Matrix4, Vector3, clamp} from '@math.gl/core';
 import * as vec2 from '@math.gl/core/vec2';
 
 export type WebMercatorViewportOptions = {
+  /** Subdivision intervals around the earth for nonlinear source CRS conversions. Default 0 disables subdivision. */
+  resolution?: number;
   /** Name of the viewport */
   id?: string;
   /** Left offset from the canvas edge, in pixels */
@@ -73,6 +83,12 @@ export type WebMercatorViewportOptions = {
   legacyMeterSizes?: boolean;
 };
 
+type MercatorCameraOptions = ViewportOptions &
+  Pick<
+    WebMercatorViewportOptions,
+    'longitude' | 'latitude' | 'pitch' | 'bearing' | 'altitude' | 'repeat' | 'legacyMeterSizes'
+  >;
+
 /**
  * Manages transformations to/from WGS84 coordinates using the Web Mercator Projection.
  */
@@ -92,8 +108,25 @@ export default class WebMercatorViewport extends Viewport {
   /** @deprecated Revert to approximated meter size calculation prior to v8.5 */
   private _pseudoMeters: boolean;
 
-  /* eslint-disable complexity, max-statements */
   constructor(opts: WebMercatorViewportOptions = {}) {
+    const options = WebMercatorViewport._getViewportOptions(opts);
+    super(options);
+    this.latitude = options.latitude ?? 0;
+    this.longitude = options.longitude ?? 0;
+    this.zoom = options.zoom ?? 0;
+    this.pitch = options.pitch ?? 0;
+    this.bearing = options.bearing ?? 0;
+    this.altitude = options.altitude ?? 1.5;
+    this.fovy = options.fovy ?? 75;
+    this.orthographic = options.orthographic ?? false;
+    this._subViewports = options.repeat ? [] : null;
+    this._pseudoMeters = options.legacyMeterSizes ?? false;
+    Object.freeze(this);
+  }
+
+  /** Prepare map-camera parameters before initializing the base viewport. */
+  /* eslint-disable complexity, max-statements */
+  private static _getViewportOptions(opts: WebMercatorViewportOptions): MercatorCameraOptions {
     const {
       latitude = 0,
       longitude = 0,
@@ -107,14 +140,9 @@ export default class WebMercatorViewport extends Viewport {
       orthographic = false,
       projectionMatrix,
 
-      repeat = false,
       worldOffset = 0,
       position,
-      padding,
-
-      // backward compatibility
-      // TODO: remove in v9
-      legacyMeterSizes = false
+      padding
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -180,8 +208,13 @@ export default class WebMercatorViewport extends Viewport {
       viewMatrixUncentered = viewOffset.multiplyLeft(viewMatrixUncentered);
     }
 
-    super({
+    // Empty aggregation grids can supply non-finite anchors. Preserve the legacy
+    // local-coordinate fallback rather than sampling Mercator scales at NaN.
+    const geospatial = Number.isFinite(longitude) && Number.isFinite(latitude);
+    return {
       ...opts,
+      crs: geospatial ? OSM_TILE_CRS : undefined,
+      distanceScales: geospatial ? getMercatorScales(longitude, latitude) : undefined,
       // x, y,
       width,
       height,
@@ -195,26 +228,46 @@ export default class WebMercatorViewport extends Viewport {
       // projection matrix parameters
       ...projectionParameters,
       fovy,
-      focalDistance: altitude
-    });
-
-    // Save parameters
-    this.latitude = latitude;
-    this.longitude = longitude;
-    this.zoom = zoom;
-    this.pitch = pitch;
-    this.bearing = bearing;
-    this.altitude = altitude;
-    this.fovy = fovy;
-
-    this.orthographic = orthographic;
-
-    this._subViewports = repeat ? [] : null;
-    this._pseudoMeters = legacyMeterSizes;
-
-    Object.freeze(this);
+      focalDistance: altitude,
+      altitude,
+      orthographic
+    };
   }
   /* eslint-enable complexity, max-statements */
+
+  protected _getCenter(options: MercatorCameraOptions, position: number[]): number[] {
+    if (!this.crs) return super._getCenter(options, position);
+    return new Vector3(position)
+      .scale(this.distanceScales.unitsPerMeter)
+      .add(this.projectPosition([options.longitude ?? 0, options.latitude ?? 0, 0]));
+  }
+
+  get projectionMode(): number {
+    return this.crs
+      ? this.zoom < 12
+        ? PROJECTION_MODE.WEB_MERCATOR
+        : PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET
+      : PROJECTION_MODE.IDENTITY;
+  }
+
+  projectFlat(position: number[]): [number, number] {
+    if (!this.crs) return position as [number, number];
+    const projected = lngLatToWorld(position);
+    // Match the shader's latitude clamp while allowing continuous repeated worlds.
+    projected[1] = clamp(projected[1], -318, 830);
+    return projected;
+  }
+
+  unprojectFlat(position: number[]): [number, number] {
+    return this.crs ? worldToLngLat(position) : (position as [number, number]);
+  }
+
+  /** Mercator scales at a WGS84 longitude/latitude anchor. */
+  getDistanceScales(coordinateOrigin?: number[]): DistanceScales {
+    return coordinateOrigin && this.crs
+      ? getMercatorScales(coordinateOrigin[0], coordinateOrigin[1], true)
+      : this.distanceScales;
+  }
 
   get subViewports(): WebMercatorViewport[] | null {
     if (this._subViewports && !this._subViewports.length) {
@@ -246,10 +299,11 @@ export default class WebMercatorViewport extends Viewport {
     );
   }
 
-  projectPosition(xyz: number[]): [number, number, number] {
+  projectPosition(xyz: number[], options: ProjectPositionOptions = {}): [number, number, number] {
+    if (options.sourceCrs) return this._projectPositionFromCRS(xyz, options.sourceCrs);
     if (this._pseudoMeters) {
-      // Backward compatibility
-      return super.projectPosition(xyz);
+      const [x, y] = this.projectFlat(xyz);
+      return [x, y, (xyz[2] || 0) * this.distanceScales.unitsPerWorldUnit[2]];
     }
     const [X, Y] = this.projectFlat(xyz);
     const Z = (xyz[2] || 0) * unitsPerMeter(xyz[1]);
@@ -258,8 +312,8 @@ export default class WebMercatorViewport extends Viewport {
 
   unprojectPosition(xyz: number[]): [number, number, number] {
     if (this._pseudoMeters) {
-      // Backward compatibility
-      return super.unprojectPosition(xyz);
+      const [x, y] = this.unprojectFlat(xyz);
+      return [x, y, (xyz[2] || 0) / this.distanceScales.unitsPerWorldUnit[2]];
     }
     const [X, Y] = this.unprojectFlat(xyz);
     const Z = (xyz[2] || 0) / unitsPerMeter(Y);
@@ -306,6 +360,7 @@ export default class WebMercatorViewport extends Viewport {
   }
 
   getBounds(options: {z?: number} = {}): [number, number, number, number] {
+    // math.gl types this helper with its own viewport class; deck supplies the fields it uses.
     // @ts-ignore
     const corners = getBounds(this, options.z || 0);
 

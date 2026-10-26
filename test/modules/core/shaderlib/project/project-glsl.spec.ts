@@ -4,13 +4,7 @@
 
 import {test, expect} from 'vitest';
 
-import {
-  COORDINATE_SYSTEM,
-  WebMercatorViewport,
-  OrthographicViewport,
-  project,
-  ProjectProps
-} from '@deck.gl/core';
+import {WebMercatorViewport, OrthographicViewport, project, ProjectProps} from '@deck.gl/core';
 import {Matrix4, Vector3, config, equals, NumericArray, NumberArray3} from '@math.gl/core';
 import {fp64} from '@luma.gl/shadertools';
 const {fp64LowPart} = fp64;
@@ -114,7 +108,7 @@ const TEST_CASES: TestCase[] = [
     title: 'LNGLAT mode',
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: 'lnglat'
     },
     tests: [
       {
@@ -181,7 +175,7 @@ const TEST_CASES: TestCase[] = [
     title: 'LNGLAT mode - auto offset',
     projectProps: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+      coordinateSystem: 'lnglat'
     },
     tests: [
       {
@@ -226,7 +220,7 @@ const TEST_CASES: TestCase[] = [
     title: 'METER_OFFSETS mode',
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: 'meter-offsets',
       coordinateOrigin: [-122.05, 37.92, 0],
       modelMatrix: new Matrix4().translate([0, 0, 100])
     },
@@ -262,7 +256,7 @@ const TEST_CASES: TestCase[] = [
     title: 'LNGLAT_OFFSETS mode',
     projectProps: {
       viewport: TEST_VIEWPORT,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+      coordinateSystem: 'lnglat-offsets',
       coordinateOrigin: [-122.05, 37.92, 0]
     },
     tests: [
@@ -292,10 +286,40 @@ const TEST_CASES: TestCase[] = [
     ]
   },
   {
+    title: 'CARTESIAN mode',
+    projectProps: {
+      viewport: TEST_VIEWPORT,
+      coordinateSystem: 'cartesian'
+    },
+    tests: [
+      {
+        name: 'project_position',
+        vs: TRANSFORM_VS.project_position,
+        testProps: {
+          // common space position with z in meters
+          uPos: [...TEST_VIEWPORT.projectFlat([-122, 38]), 1000] as NumberArray3,
+          uPos64Low: [0, 0, 0]
+        },
+        // z is scaled at the viewport latitude, same as in WEB_MERCATOR_AUTO_OFFSET mode
+        output: TEST_VIEWPORT.projectPosition([-122, 38, 1000]).concat([1]),
+        precision: PIXEL_TOLERANCE
+      },
+      {
+        name: 'project_common_position_to_clipspace(vec4)',
+        vs: TRANSFORM_VS.project_common_position_to_clipspace,
+        testProps: {
+          uPos: [...TEST_VIEWPORT.projectFlat([-122, 38]), 1000] as NumberArray3
+        },
+        output: TEST_VIEWPORT.project([-122, 38, 1000]),
+        precision: PIXEL_TOLERANCE
+      }
+    ]
+  },
+  {
     title: 'IDENTITY mode with modelMatrix',
     projectProps: {
       viewport: TEST_VIEWPORT_ORTHO,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       modelMatrix: new Matrix4().rotateZ(Math.PI / 2).translate([0, 0, 10])
     },
     tests: [
@@ -374,7 +398,7 @@ void main() {
       shaderInputProps: {
         project: {
           viewport: TEST_VIEWPORT,
-          coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          coordinateSystem: 'lnglat'
         },
         test: {uDirUp: up as NumberArray3, uInput: v as NumberArray3}
       }

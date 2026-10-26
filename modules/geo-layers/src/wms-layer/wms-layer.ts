@@ -16,7 +16,6 @@ import {
   UpdateParameters,
   DefaultProps,
   Viewport,
-  COORDINATE_SYSTEM,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
@@ -134,10 +133,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
       image &&
       new BitmapLayer({
         ...this.getSubLayerProps({id: 'bitmap'}),
-        _imageCoordinateSystem:
-          lastRequestParameters.srs === 'EPSG:4326'
-            ? COORDINATE_SYSTEM.LNGLAT
-            : COORDINATE_SYSTEM.CARTESIAN,
+        _imageCoordinateSystem: lastRequestParameters.srs === 'EPSG:4326' ? 'lnglat' : 'cartesian',
         bounds,
         image
       })
@@ -211,7 +207,7 @@ export class WMSLayer<ExtraPropsT extends {} = {}> extends CompositeLayer<
     let {srs} = this.props;
     if (srs === 'auto') {
       // BitmapLayer only supports LNGLAT or CARTESIAN (Web-Mercator)
-      srs = viewport.resolution ? 'EPSG:4326' : 'EPSG:3857';
+      srs = viewport.crs?.signature === 'OSMTile512' ? 'EPSG:3857' : 'EPSG:4326';
     }
     const requestParams: GetImageParameters = {
       width,

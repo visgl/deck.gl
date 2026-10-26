@@ -58,6 +58,8 @@ To render, a `FirstPersonView` needs to be combined with a `viewState` object wi
 - `minPitch` (number, optional) - min pitch angle. Default `-90` (up).
 
 
+When both `longitude` and `latitude` are supplied, the viewport uses the `OSMTile512` CRS. Otherwise, positions use local coordinates. Altitude is scaled using the camera latitude.
+
 ## Controller
 
 By default, `FirstPersonView` uses the `FirstPersonController` to handle interactivity. To enable the controller, use:

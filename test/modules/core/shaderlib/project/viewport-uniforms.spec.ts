@@ -3,8 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport, OrbitViewport, project} from '@deck.gl/core';
+import {WebMercatorViewport, OrbitViewport, project} from '@deck.gl/core';
+import type {ProjectUniforms} from '@deck.gl/core';
 import {project64} from '@deck.gl/extensions';
 
 const TEST_VIEWPORTS = {
@@ -38,7 +40,7 @@ const TEST_VIEWPORTS = {
 
 const UNIFORMS = {
   // Projection mode values
-  coordinateSystem: Number,
+  coordinateFrame: Number,
   center: Array,
 
   // Screen size
@@ -87,7 +89,7 @@ test('project#getUniforms', () => {
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.map,
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    coordinateSystem: 'cartesian'
   });
   expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
   expect(uniforms.center, 'Returned zero projection center').toEqual([0, 0, 0, 0]);
@@ -112,7 +114,7 @@ test('project#getUniforms', () => {
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: Object.freeze([-122.4, 37.7])
   });
   expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
@@ -123,7 +125,7 @@ test('project#getUniforms', () => {
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.mapHighZoom,
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    coordinateSystem: 'cartesian'
   });
   expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
   expect(
@@ -142,7 +144,7 @@ test('project#getUniforms', () => {
 
   uniforms = project.getUniforms({
     viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+    coordinateSystem: 'cartesian'
   });
   expect(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated').toBeFalsy();
   expect(uniforms.coordinateOrigin, 'Returned shader coordinate origin').toEqual([
@@ -152,6 +154,58 @@ test('project#getUniforms', () => {
     uniforms.center.some(x => x),
     'Returned non-trivial projection center'
   ).toBeTruthy();
+});
+
+test('project#getUniforms CARTESIAN z scale is continuous across zoom 12', () => {
+  // Common space positions with z in meters, e.g. TerrainLayer meshes.
+  // Their z must be scaled at the viewport latitude in both WEB_MERCATOR (zoom < 12)
+  // and WEB_MERCATOR_AUTO_OFFSET (zoom >= 12) modes
+  for (const zoom of [11.99, 12]) {
+    const viewport = new WebMercatorViewport({
+      width: 800,
+      height: 600,
+      latitude: 46.2,
+      longitude: -122.19,
+      zoom,
+      pitch: 60
+    });
+    const uniforms = project.getUniforms({
+      viewport,
+      coordinateSystem: 'cartesian'
+    }) as ProjectUniforms;
+    const unitsPerMeter = viewport.getDistanceScales().unitsPerMeter[2];
+
+    expect(
+      uniforms.commonUnitsPerWorldUnit[2] / unitsPerMeter,
+      `z is scaled at the viewport latitude at zoom ${zoom}`
+    ).toBeCloseTo(1, 6);
+    expect(
+      uniforms.commonUnitsPerMeter[2] / unitsPerMeter,
+      `sizes are scaled at the viewport latitude at zoom ${zoom}`
+    ).toBeCloseTo(1, 6);
+  }
+});
+
+test('project#getUniforms CARTESIAN z scale is continuous across zoom 12 with a position offset', () => {
+  // A north-south offset moves the viewport center away from the viewport latitude
+  const zScales = [11.99, 12].map(zoom => {
+    const viewport = new WebMercatorViewport({
+      width: 800,
+      height: 600,
+      latitude: 46.2,
+      longitude: -122.19,
+      zoom,
+      pitch: 60,
+      position: [0, 100000, 0]
+    });
+    const uniforms = project.getUniforms({
+      viewport,
+      coordinateSystem: 'cartesian'
+    }) as ProjectUniforms;
+    return uniforms.commonUnitsPerWorldUnit[2];
+  });
+
+  expect(zScales[1] / zScales[0], 'z scale at zoom 12 relative to zoom 11.99').toBeCloseTo(1, 6);
 });
 
 test('project#getUniforms rejects legacy numeric coordinate systems', () => {
@@ -171,17 +225,31 @@ test('project#getUniforms rejects legacy numeric coordinate systems', () => {
   ).toThrow(/Invalid coordinateSystem/);
 });
 
-test('project#getUniforms normalizes IDENTITY to CARTESIAN', () => {
-  const cartesian = project.getUniforms({
-    viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+test('project uniforms describe packed frames separately from offset modes', () => {
+  const local = project.getUniforms({viewport: TEST_VIEWPORTS.infoVis});
+  const geographic = project.getUniforms({viewport: TEST_VIEWPORTS.map});
+  const projected = project.getUniforms({
+    viewport: TEST_VIEWPORTS.map,
+    coordinateSystem: 'cartesian'
   });
-  const identity = project.getUniforms({
-    viewport: TEST_VIEWPORTS.infoVis,
-    coordinateSystem: COORDINATE_SYSTEM.IDENTITY
+  const meterOffsets = project.getUniforms({
+    viewport: TEST_VIEWPORTS.map,
+    coordinateSystem: 'meter-offsets',
+    coordinateOrigin: [-122.4, 37.7, 0]
   });
-
-  expect(identity, 'IDENTITY matches CARTESIAN').toEqual(cartesian);
+  const degreeOffsets = project.getUniforms({
+    viewport: TEST_VIEWPORTS.map,
+    coordinateSystem: 'lnglat-offsets',
+    coordinateOrigin: [-122.4, 37.7, 0]
+  });
+  expect(local.coordinateFrame).toBe(COORDINATE_SYSTEM.IDENTITY);
+  expect(geographic.coordinateFrame).toBe(COORDINATE_SYSTEM.GEODETIC);
+  expect(projected.coordinateFrame).toBe(COORDINATE_SYSTEM.PROJECTED);
+  expect(meterOffsets.coordinateFrame).toBe(COORDINATE_SYSTEM.IDENTITY);
+  expect(meterOffsets.projectionMode).toBe(PROJECTION_MODE.METER_OFFSETS);
+  expect(degreeOffsets.coordinateFrame).toBe(COORDINATE_SYSTEM.GEODETIC);
+  expect(degreeOffsets.projectionMode).toBe(PROJECTION_MODE.GEODETIC_OFFSETS);
+  expect(geographic).not.toHaveProperty('coordinateSystem');
 });
 
 test('project64#getUniforms', () => {

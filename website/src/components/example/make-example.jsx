@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   Children,
   isValidElement,
   cloneElement
@@ -14,13 +15,21 @@ import styled from 'styled-components';
 import InfoPanel from '../info-panel';
 import {loadData, joinPath} from '../../utils/data-utils';
 import {normalizeParam} from '../../utils/format-utils';
-import {MAPBOX_STYLES} from '../../constants/defaults';
+import {cloneMapStyle, MAPBOX_STYLES} from '../../constants/defaults';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import {DeviceTabs} from '../device-tabs';
 import {useStore} from '../../store/device-store';
 
-const DemoContainer = styled.div`
+// Stacks the device tabs above the demo, so the demo fills the remaining height
+const ExampleLayout = styled.div`
+  display: flex;
+  flex-direction: column;
   height: 100%;
+`;
+
+const DemoContainer = styled.div`
+  flex: 1;
+  min-height: 0;
   position: relative;
 
   .tooltip,
@@ -99,6 +108,10 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     // their existing, independently initialized WebGL path.
     const device = useStore(state => (DemoComponent.hasDeviceTabs ? state.device : undefined));
     const baseUrl = useBaseUrl('/');
+    const clonedMapStyle = useMemo(
+      () => cloneMapStyle(mapStyle || MAPBOX_STYLES.BLANK),
+      [mapStyle]
+    );
     useSharedDeviceCanvas(device);
 
     const useParam = useCallback(newParameters => {
@@ -159,7 +172,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
     };
 
     return (
-      <>
+      <ExampleLayout>
         {DemoComponent.hasDeviceTabs && <DeviceTabs />}
         <DemoContainer style={style}>
           {/*
@@ -173,7 +186,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
               key={device?.id}
               device={device}
               data={data}
-              mapStyle={mapStyle || MAPBOX_STYLES.BLANK}
+              mapStyle={clonedMapStyle}
               params={params}
               useParam={useParam}
               onStateChange={updateMeta}
@@ -193,7 +206,7 @@ export default function makeExample(DemoComponent, {isInteractive = true, style}
 
           {isInteractive && mapStyle && <MapTip>Hold down shift to rotate</MapTip>}
         </DemoContainer>
-      </>
+      </ExampleLayout>
     );
   };
 }

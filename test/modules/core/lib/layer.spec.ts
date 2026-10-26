@@ -2,16 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {
-  Layer,
-  LayerExtension,
-  AttributeManager,
-  COORDINATE_SYSTEM,
-  MapView,
-  OrbitView,
-  picking
-} from '@deck.gl/core';
+import {Layer, LayerExtension, AttributeManager, MapView, OrbitView, picking} from '@deck.gl/core';
 import {testInitializeLayer, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {equals, Matrix4} from '@math.gl/core';
 import {Timeline, Model} from '@luma.gl/engine';
@@ -274,17 +267,14 @@ test('Layer#use64bitPositions', () => {
   let layer = new SubLayer({});
   expect(layer.use64bitPositions(), 'returns true for default settings').toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
-  expect(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT').toBeTruthy();
+  layer = new SubLayer({coordinateSystem: 'lnglat'});
+  expect(layer.use64bitPositions(), 'returns true for lnglat').toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.CARTESIAN});
-  expect(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.CARTESIAN').toBeTruthy();
+  layer = new SubLayer({coordinateSystem: 'cartesian'});
+  expect(layer.use64bitPositions(), 'returns true for cartesian').toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS});
-  expect(
-    layer.use64bitPositions(),
-    'returns false for COORDINATE_SYSTEM.METER_OFFSETS'
-  ).toBeFalsy();
+  layer = new SubLayer({coordinateSystem: 'meter-offsets'});
+  expect(layer.use64bitPositions(), 'returns false for meter-offsets').toBeFalsy();
 });
 
 test('Layer#project', () => {
@@ -295,6 +285,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     () => layer.project([0, 0, 100]),
     'default coordinate system does not throw'
@@ -304,20 +295,21 @@ test('Layer#project', () => {
     'returns correct value for default coordinate system'
   ).toBeTruthy();
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
+  layer = new SubLayer({coordinateSystem: 'lnglat'});
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     equals(layer.project([0, 0, 100]), [200, 150, 0.9981698636949582]),
     'returns correct value'
   ).toBeTruthy();
 
   layer = new SubLayer({
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateSystem: 'meter-offsets',
     coordinateOrigin: [0.01, 0.01]
   });
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
@@ -326,6 +318,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {longitude: 0, latitude: 0, zoom: 10}
   });
+  layer.activateViewport(layer.context.viewport);
   expect(
     equals(
       layer.project([100, 100, 100]),
@@ -335,7 +328,7 @@ test('Layer#project', () => {
   ).toBeTruthy();
 
   layer = new SubLayer({
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
   });
   testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
@@ -344,6 +337,7 @@ test('Layer#project', () => {
     height: 300,
     viewState: {zoom: 0, rotationOrbit: 30}
   });
+  layer.activateViewport(layer.context.viewport);
 
   expect(
     equals(
@@ -352,6 +346,44 @@ test('Layer#project', () => {
     ),
     'returns correct value'
   ).toBeTruthy();
+});
+
+test('Layer#projectPosition overrides projection props without mutating them', () => {
+  const modelMatrix = new Matrix4().translate([10, 20, 30]);
+  const coordinateOrigin: [number, number, number] = [100, 200, 300];
+  const layer = new SubLayer({modelMatrix, coordinateOrigin});
+  testInitializeLayer({layer, onError: err => expect(err).toBeFalsy()});
+  const viewport = createTestViewport({
+    converter: {
+      forward: ([x, y, z = 0]) => [x * 2, y * 3, z],
+      inverse: ([x, y, z = 0]) => [x / 2, y / 3, z]
+    },
+    distanceScale: () => [1, 1, 1]
+  });
+  const position = [1, 2, 3];
+  expect(layer.projectPosition(position, {viewport, autoOffset: false})).toEqual(
+    viewport.projectPosition(
+      modelMatrix.transformAsPoint(position).map((value, axis) => value + coordinateOrigin[axis])
+    )
+  );
+  const projectParams = {
+    viewport,
+    autoOffset: false,
+    coordinateSystem: 'cartesian' as const,
+    coordinateOrigin: [4, 5, 6] as [number, number, number],
+    modelMatrix: null
+  };
+  const scale = viewport.distanceScales.unitsPerWorldUnit;
+  expect(layer.projectPosition(position, projectParams)).toEqual(
+    [5, 7, 9].map((value, axis) => value * scale[axis])
+  );
+  expect(
+    layer.projectPosition(position, {...projectParams, modelMatrix: new Matrix4().scale([2, 3, 4])})
+  ).toEqual([6, 11, 18].map((value, axis) => value * scale[axis]));
+  expect(layer.props.modelMatrix).toBe(modelMatrix);
+  expect(layer.props.coordinateOrigin).toBe(coordinateOrigin);
+  expect(layer.props.coordinateSystem).toBe('default');
+  expect(position).toEqual([1, 2, 3]);
 });
 
 test('Layer#Async Iterable Data', async () => {

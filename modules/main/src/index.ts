@@ -9,17 +9,12 @@
 //
 
 export {
-  // CONSTANTS
   VERSION,
-  COORDINATE_SYSTEM,
   OPERATION,
   UNIT,
-  // Main class
   Deck,
-  // Base Layers
   Layer,
   CompositeLayer,
-  // Views
   View,
   MapView,
   FirstPersonView,
@@ -27,7 +22,6 @@ export {
   OrthographicView,
   _CustomProjectionView,
   _GlobeView,
-  // Viewports
   Viewport,
   WebMercatorViewport,
   _GlobeViewport,
@@ -35,7 +29,6 @@ export {
   OrthographicViewport,
   FirstPersonViewport,
   _CustomProjectionViewport,
-  // Controllers
   Controller,
   MapController,
   TerrainController,
@@ -44,10 +37,8 @@ export {
   OrthographicController,
   _CustomProjectionController,
   _GlobeController,
-  // For custom layers
   Attribute,
   AttributeManager,
-  // Shader modules
   color,
   picking,
   project,
@@ -55,32 +46,24 @@ export {
   gouraudMaterial,
   phongMaterial,
   shadow,
-  // Internal classes
   LayerManager,
   DeckRenderer,
-  // Logging
   log,
   assert,
-  // Transition bindings
   TRANSITION_EVENTS,
   TransitionInterpolator,
   LinearInterpolator,
   FlyToInterpolator,
-  // Effects
   LightingEffect,
   PostProcessEffect,
-  // Lights
   AmbientLight,
   PointLight,
   DirectionalLight,
-  // Extension
   LayerExtension,
-  // Utilities
   Tesselator,
   fp64LowPart,
   createIterable,
   getShaderAssembler,
-  // Widgets
   Widget
 } from '@deck.gl/core';
 
@@ -190,7 +173,6 @@ export type {
   CustomProjectionViewState,
   CustomProjectionViewProps,
   CustomProjectionViewportOptions,
-  ProjectionConverter,
   CoordinateSystem,
   ChangeFlags,
   LayersList,
