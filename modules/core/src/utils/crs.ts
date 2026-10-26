@@ -41,6 +41,14 @@ const resolvedCRS = new Map<string, CRSDescriptor | Promise<CRSDescriptor>>([
   [OSM_TILE_CRS.signature, OSM_TILE_CRS]
 ]);
 
+/** Compare supplied CRS definitions synchronously, using the resolver's key convention. */
+export function areCRSEqual(a: TypeScriptCRSInput, b: TypeScriptCRSInput): boolean {
+  if (a === b) return true;
+  const keyA = typeof a === 'string' ? a : JSON.stringify(a);
+  const keyB = typeof b === 'string' ? b : JSON.stringify(b);
+  return keyA === keyB;
+}
+
 /** Resolve built-in attribute CRSs synchronously, sharing loading and loaded math.gl descriptors.
  * Accepts the same CRS definitions and spatial-reference objects as math.gl.
  * Cartesian positions and meter offsets do not declare an absolute source CRS.
