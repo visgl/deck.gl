@@ -14,7 +14,7 @@ import {Buffer} from '@luma.gl/core';
 import {Matrix4} from '@math.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
-import {getWorldPosition} from '@deck.gl/core/shaderlib/project/project-functions';
+import {getWorldPosition} from './project-glsl-test-utils';
 
 test('WebGPU local meter scale preserves CPU altitude with rectangular bounds, matrix and origin', async ({
   skip

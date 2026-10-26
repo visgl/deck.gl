@@ -13,6 +13,7 @@ import {COORDINATE_SYSTEM, PROJECTION_MODE} from './constants';
 import {getPackedCoordinateSystem} from './coordinate-systems';
 import memoize from '../../utils/memoize';
 
+import type {CRSDescriptor} from '@math.gl/projection/core';
 import type Viewport from '../../viewports/viewport';
 import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';
@@ -80,7 +81,8 @@ const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 export function getOffsetOrigin(
   viewport: Viewport,
   coordinateSystem: CoordinateSystem,
-  coordinateOrigin: Vec3 = DEFAULT_COORDINATE_ORIGIN
+  coordinateOrigin: Vec3 = DEFAULT_COORDINATE_ORIGIN,
+  sourceCrs?: CRSDescriptor | null
 ): {
   geospatialOrigin: Vec3 | null;
   shaderCoordinateOrigin: Vec3;
@@ -93,7 +95,7 @@ export function getOffsetOrigin(
 
   let shaderCoordinateOrigin = coordinateOrigin;
   let commonOrigin: Vec3 | undefined;
-  const packed = getPackedCoordinateSystem(coordinateSystem, viewport);
+  const packed = getPackedCoordinateSystem(coordinateSystem, viewport, sourceCrs);
   coordinateSystem = packed.coordinateSystem;
   if (packed.preprojected) {
     coordinateOrigin = DEFAULT_COORDINATE_ORIGIN;
@@ -303,6 +305,8 @@ export type ProjectProps = {
   devicePixelRatio?: number;
   modelMatrix?: Matrix4Like | null;
   coordinateSystem?: CoordinateSystem;
+  /** Resolved source descriptor supplied by the layer; omitted for standalone shader use. */
+  sourceCrs?: CRSDescriptor | null;
   coordinateOrigin?: Vec3;
   autoWrapLongitude?: boolean;
 };
@@ -323,9 +327,10 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = 'default',
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
-  autoWrapLongitude = false
+  autoWrapLongitude = false,
+  sourceCrs
 }: ProjectProps): ProjectUniforms {
-  const packed = getPackedCoordinateSystem(coordinateSystem, viewport);
+  const packed = getPackedCoordinateSystem(coordinateSystem, viewport, sourceCrs);
   coordinateSystem = packed.coordinateSystem;
   switch (coordinateSystem) {
     case 'lnglat-offsets':
@@ -378,7 +383,7 @@ function calculateViewportUniforms({
 }: {
   viewport: Viewport;
   devicePixelRatio: number;
-  coordinateSystem: CoordinateSystem;
+  coordinateSystem: string;
   coordinateOrigin: Vec3;
 }): ProjectUniforms {
   const {

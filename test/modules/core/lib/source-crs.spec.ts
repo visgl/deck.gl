@@ -15,10 +15,12 @@ import {device} from '@deck.gl/test-utils/vitest';
 import {projectionEngine} from '@math.gl/projection';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import {Matrix4} from '@math.gl/core';
+import {addMetersToLngLat} from '@math.gl/web-mercator';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {supportsSourceCRS} from '@deck.gl/core/shaderlib/project/coordinate-systems';
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
+import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';
 import {GLOBE_CRS} from '@deck.gl/core/viewports/globe-util';
 import {createTestCRS, createTestViewport} from '../viewports/test-crs';
 
@@ -408,6 +410,186 @@ test('Multi-view layers retain the first eligible viewport across frames and clo
       draw();
       expect(layer.internalState!.viewport).toBe(second);
       expect(getPosition).not.toHaveBeenCalled();
+    }
+  } finally {
+    manager.finalize();
+  }
+});
+
+const geographicCRS = {
+  type: 'GeographicCRS',
+  name: 'WGS 84',
+  datum: {
+    type: 'GeodeticReferenceFrame',
+    name: 'World Geodetic System 1984',
+    ellipsoid: {name: 'WGS 84', semi_major_axis: 6378137, inverse_flattening: 298.257223563}
+  },
+  coordinate_system: {
+    subtype: 'ellipsoidal',
+    axis: [
+      {name: 'Longitude', abbreviation: 'lon', direction: 'east', unit: 'degree'},
+      {name: 'Latitude', abbreviation: 'lat', direction: 'north', unit: 'degree'}
+    ]
+  }
+} as const;
+
+test('Structured layer CRS resolves before initialization and compares by definition key', async () => {
+  const definition = {...geographicCRS, name: 'Layer structured CRS regression'};
+  const manager = new LayerManager(device, {viewport: new WebMercatorViewport()});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  let layer = new PositionLayer({
+    coordinateSystem: definition,
+    data: [[20, 30, 0]],
+    getPosition: p => p
+  });
+  try {
+    manager.setLayers([layer]);
+    expect(layer.internalState).toBeNull();
+    await resolveCRS(definition);
+    manager.updateLayers();
+    expect(layer.isLoaded).toBe(true);
+    layer.validateProps();
+    const update = vi.spyOn(PositionLayer.prototype, 'updateState');
+    const projectionProps = {
+      viewport: manager.context.viewport!,
+      coordinateSystem: definition
+    };
+    const expectedUniforms = getUniformsFromViewport(projectionProps);
+    const stringify = vi.spyOn(JSON, 'stringify');
+    const projected = layer.projectPosition([20, 30, 0], {autoOffset: false});
+    const expected = manager.context.viewport!.projectPosition([20, 30, 0]);
+    projected.forEach((value, axis) => expect(value).toBeCloseTo(expected[axis], 6));
+    layer.projectPosition([21, 31, 0]);
+    expect(
+      getUniformsFromViewport({
+        ...projectionProps,
+        sourceCrs: layer.internalState!.sourceCrs
+      })
+    ).toEqual(expectedUniforms);
+    expect(stringify).not.toHaveBeenCalled();
+    layer = layer.clone();
+    manager.setLayers([layer]);
+    expect(stringify.mock.calls.some(([value]) => value === definition)).toBe(false);
+    stringify.mockRestore();
+    layer = layer.clone({coordinateSystem: structuredClone(definition)});
+    manager.setLayers([layer]);
+    expect(update).not.toHaveBeenCalled();
+
+    // A different key still raises projectionChanged when it resolves to the same descriptor.
+    const getCRS = vi.spyOn(projectionEngine, 'getCRS').mockResolvedValue(layer.state.sourceCrs!);
+    const changed = {...definition, name: 'Changed layer CRS key'};
+    layer = layer.clone({coordinateSystem: changed});
+    manager.setLayers([layer]);
+    expect(update).not.toHaveBeenCalled();
+    expect(layer.internalState!.changeFlags.projectionChanged).toBe(true);
+    await resolveCRS(changed);
+    manager.updateLayers();
+    expect(update).toHaveBeenCalledOnce();
+    expect(getCRS).toHaveBeenCalledOnce();
+  } finally {
+    manager.finalize();
+    vi.restoreAllMocks();
+  }
+});
+
+test('Projection overrides define the input coordinates and automatic reference', () => {
+  const viewport = new WebMercatorViewport({longitude: 30, latitude: 40, zoom: 14});
+  const manager = new LayerManager(device, {viewport});
+  const layer = new PositionLayer({
+    coordinateSystem: 'meter-offsets',
+    coordinateOrigin: [10, 20, 0]
+  });
+  try {
+    manager.setLayers([layer]);
+    const point = [11, 21, 0];
+    const absolute = viewport.projectPosition(point);
+    const {commonOrigin: origin} = getUniformsFromViewport({viewport, coordinateSystem: 'lnglat'});
+    const options = {
+      sourceCrs: WGS84_CRS,
+      coordinateOrigin: [0, 0, 0] as [number, number, number],
+      modelMatrix: null
+    };
+    expect(layer.projectPosition(point, options)).toEqual(
+      absolute.map((value, axis) => value - origin[axis])
+    );
+    expect(layer.projectPosition(point, {...options, autoOffset: false})).toEqual(absolute);
+    expect(layer.projectPosition([0, 0, 0], {coordinateOrigin: [11, 22, 0]})).toEqual([0, 0, 0]);
+    expect(
+      layer.projectPosition([0, 0, 0], {
+        coordinateOrigin: [11, 22, 0],
+        autoOffset: false
+      })
+    ).toEqual(viewport.projectPosition([11, 22, 0]));
+    expect(layer.props.coordinateOrigin).toEqual([10, 20, 0]);
+    expect(layer.internalState!.sourceCrs).toBeNull();
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Explicit local and meter-offset modes take precedence over an absolute source CRS', () => {
+  const viewport = new WebMercatorViewport({longitude: 30, latitude: 40, zoom: 14});
+  const manager = new LayerManager(device, {viewport});
+  const coordinateOrigin: [number, number, number] = [10, 20, 30];
+  const layer = new PositionLayer({coordinateSystem: 'lnglat', coordinateOrigin});
+  const point = [1, 2, 3];
+  try {
+    manager.setLayers([layer]);
+    const defaultPosition = layer.projectPosition(point);
+    for (const sourceCrs of [undefined, WGS84_CRS]) {
+      expect(
+        layer.projectPosition(point, {
+          coordinateSystem: 'cartesian',
+          sourceCrs,
+          autoOffset: false
+        })
+      ).toEqual([11, 22, 33]);
+      expect(
+        layer.projectPosition(point, {
+          coordinateSystem: 'meter-offsets',
+          sourceCrs,
+          autoOffset: false
+        })
+      ).toEqual(viewport.projectPosition(addMetersToLngLat(coordinateOrigin, point)));
+    }
+    expect(layer.projectPosition(point)).toEqual(defaultPosition);
+    expect(layer.internalState!.sourceCrs).toBe(WGS84_CRS);
+  } finally {
+    manager.finalize();
+  }
+});
+
+test('Local projection overrides ignore unsupported source CRS on CPU and GPU paths', () => {
+  const viewport = createTestViewport({longitude: 30, latitude: 40});
+  const manager = new LayerManager(device, {viewport});
+  const layer = new PositionLayer({coordinateSystem: 'lnglat'});
+  const unusedCrs = createTestCRS({
+    signature: 'unused',
+    converter: {
+      forward: () => {
+        throw new Error('Local coordinates must not be converted');
+      },
+      inverse: () => {
+        throw new Error('Local coordinates must not be converted');
+      }
+    }
+  });
+  try {
+    manager.setLayers([layer]);
+    for (const coordinateSystem of ['cartesian', 'meter-offsets'] as const) {
+      const params = {coordinateSystem, coordinateOrigin: [10, 20, 0] as [number, number, number]};
+      for (const autoOffset of [false, true]) {
+        expect(
+          layer.projectPosition([1, 2, 3], {...params, autoOffset, sourceCrs: unusedCrs})
+        ).toEqual(layer.projectPosition([1, 2, 3], {...params, autoOffset}));
+      }
+      expect(getUniformsFromViewport({viewport, ...params, sourceCrs: unusedCrs})).toEqual(
+        getUniformsFromViewport({viewport, ...params, sourceCrs: null})
+      );
     }
   } finally {
     manager.finalize();
