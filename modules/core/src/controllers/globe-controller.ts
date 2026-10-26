@@ -43,6 +43,29 @@ function alignBearing(bearing: number, reference: number): number {
   return reference + mod(bearing - reference + 180, 360) - 180;
 }
 
+type BearingLimitProps = Pick<MapStateProps, 'minBearing' | 'maxBearing'>;
+
+/** Returns the equivalent bearing on the turn configured by the limits, or the nearest limit's turn. */
+function getBearingOnLimitTurn(bearing: number, props: BearingLimitProps): number {
+  const minBearing = props.minBearing ?? -Infinity;
+  const maxBearing = props.maxBearing ?? Infinity;
+  if (!Number.isFinite(minBearing)) {
+    return maxBearing - mod(maxBearing - bearing, 360);
+  }
+  const alignedBearing = minBearing + mod(bearing - minBearing, 360);
+  return alignedBearing <= maxBearing ||
+    alignedBearing - maxBearing <= minBearing + 360 - alignedBearing
+    ? alignedBearing
+    : alignedBearing - 360;
+}
+
+function haveSameBearingLimits(props: BearingLimitProps, otherProps: BearingLimitProps): boolean {
+  return (
+    (props.minBearing ?? -Infinity) === (otherProps.minBearing ?? -Infinity) &&
+    (props.maxBearing ?? Infinity) === (otherProps.maxBearing ?? Infinity)
+  );
+}
+
 function degreesToPixels(angle: number, zoom: number = 0): number {
   const radians = Math.min(180, angle) * DEGREES_TO_RADIANS;
   const size = GLOBE_RADIUS * 2 * Math.sin(radians / 2);
@@ -465,6 +488,7 @@ export default class GlobeController extends Controller<MapState> {
       this._cancelInteraction();
       props = {...props, transitionDuration: 0};
     }
+    this._alignTransitionStartBearing(props);
     super.setProps(props);
     if (navigationChanged) {
       this.updateViewport(
@@ -473,6 +497,31 @@ export default class GlobeController extends Controller<MapState> {
         {},
         oldViewState
       );
+    }
+  }
+
+  /**
+   * Bounded bearings are unwrapped on the turn their limits configure. When new limits
+   * take effect, start any transition from the equivalent bearing on that turn so the
+   * camera does not spin a full turn to reach the same direction.
+   */
+  private _alignTransitionStartBearing(props: MapStateProps): void {
+    const {transitionManager} = this;
+    const previousProps: Record<string, any> | undefined = transitionManager.props;
+    if (
+      !previousProps ||
+      !hasBearingLimits(props as Required<MapStateProps>) ||
+      haveSameBearingLimits(previousProps, props)
+    ) {
+      return;
+    }
+    const alignStart = <T extends Record<string, any>>(startProps: T): T =>
+      Number.isFinite(startProps.bearing)
+        ? {...startProps, bearing: getBearingOnLimitTurn(startProps.bearing, props)}
+        : startProps;
+    transitionManager.props = alignStart(previousProps);
+    if (transitionManager.propsInTransition) {
+      transitionManager.propsInTransition = alignStart(transitionManager.propsInTransition);
     }
   }
 

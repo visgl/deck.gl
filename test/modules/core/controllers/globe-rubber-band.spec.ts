@@ -5,10 +5,12 @@
 import {afterEach, expect, test, vi} from 'vitest';
 import {
   type ControllerProps,
+  _GlobeController as GlobeController,
   _GlobeView as GlobeView,
   LinearInterpolator,
   MapView
 } from '@deck.gl/core';
+import {Timeline} from '@luma.gl/engine';
 import {zoomAdjust} from '../../../../modules/core/src/viewports/globe-viewport';
 import {createTestController} from './test-controller';
 
@@ -513,6 +515,90 @@ test('GlobeController keeps one-shot zoom and keyboard rotation hard', () => {
     expect(controller.props.pitch).toBeLessThanOrEqual(60);
     controller.finalize();
   }
+});
+
+/** Drives a controller from application view state, like a controlled deck.gl app. */
+function createControlledController(initialViewState: Record<string, unknown>) {
+  const view = new GlobeView({controller: true});
+  const bearings: number[] = [];
+  let props: any = {
+    ...view.controller,
+    id: 'test-view',
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
+    longitude: 0,
+    latitude: 0,
+    zoom: 4,
+    ...initialViewState
+  };
+  const controller = new GlobeController({
+    timeline: new Timeline(),
+    onViewStateChange: ({viewState}) => {
+      bearings.push(viewState.bearing);
+      props = {...props, ...viewState};
+      controller.setProps(props);
+    },
+    onStateChange: () => {},
+    makeViewport: viewState => view.makeViewport({width: 100, height: 100, viewState})
+  } as any);
+  controller.setProps(props);
+  const update = (nextProps: Record<string, unknown>) => {
+    props = {...props, ...nextProps};
+    controller.setProps(props);
+  };
+  return {controller, bearings, update};
+}
+
+const getBearingDelta = (bearing: number, reference: number) =>
+  ((((bearing - reference + 180) % 360) + 360) % 360) - 180;
+
+test('GlobeController enabling bearing limits does not spin to an equivalent bearing', () => {
+  const {controller, bearings, update} = createControlledController({bearing: -175});
+  update({
+    bearing: 185,
+    minBearing: 170,
+    maxBearing: 190,
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator(['bearing'])
+  });
+  for (let elapsed = 0; elapsed < 300; elapsed += 50) {
+    advance(controller as any, 50);
+  }
+
+  for (const bearing of bearings) {
+    expect(getBearingDelta(bearing, 185), 'each frame faces the target direction').toBeCloseTo(
+      0,
+      6
+    );
+  }
+  expect(controller.props.bearing, 'the bounded bearing stays on its turn').toBeCloseTo(185);
+  controller.finalize();
+});
+
+test('GlobeController bearing transitions within limits stay on the configured turn', () => {
+  const {controller, bearings, update} = createControlledController({
+    bearing: 10,
+    minBearing: 0,
+    maxBearing: 300
+  });
+  update({
+    bearing: 290,
+    transitionDuration: 300,
+    transitionInterpolator: new LinearInterpolator(['bearing'])
+  });
+  for (let elapsed = 0; elapsed < 300; elapsed += 50) {
+    advance(controller as any, 50);
+  }
+
+  expect(bearings.length, 'the transition emits frames').toBeGreaterThan(1);
+  for (const bearing of bearings) {
+    expect(bearing, 'frames avoid the excluded wedge').toBeGreaterThanOrEqual(0);
+    expect(bearing, 'frames avoid the excluded wedge').toBeLessThanOrEqual(300);
+  }
+  expect(controller.props.bearing).toBeCloseTo(290);
+  controller.finalize();
 });
 
 test('GlobeController constrained fling finishes inside bounds', () => {
