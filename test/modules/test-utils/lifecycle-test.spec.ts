@@ -81,3 +81,62 @@ test('testLayerAsync applies updates requested by initializing sublayers', async
   });
   expect(checkedReady).toBe(true);
 });
+
+test('testLayerAsync lets timers finish between requested updates', async () => {
+  let started = false;
+  let completed = false;
+  await testLayerAsync({
+    Layer: AsyncDataLayer,
+    draw: false,
+    testCases: [
+      {
+        title: 'timer completion',
+        props: {},
+        onAfterUpdate: ({layer}) => {
+          if (!started) {
+            started = true;
+            setTimeout(() => {
+              completed = true;
+            }, 0);
+          }
+          if (!completed) layer.setNeedsUpdate();
+        }
+      }
+    ]
+  });
+  expect(completed).toBe(true);
+});
+
+class FailingDataLayer extends AsyncDataLayer {
+  static layerName = 'FailingDataLayer';
+  static finalized = false;
+
+  updateState(params: UpdateParameters<this>): void {
+    if (Array.isArray(params.props.data) && params.props.data.length) {
+      throw new Error('loaded data update failed');
+    }
+    super.updateState(params);
+  }
+
+  finalizeState(): void {
+    super.finalizeState(this.context);
+    FailingDataLayer.finalized = true;
+  }
+}
+
+test('testLayerAsync finalizes and rejects when a deferred layer update fails', async () => {
+  FailingDataLayer.finalized = false;
+  await expect(
+    testLayerAsync({
+      Layer: FailingDataLayer,
+      draw: false,
+      testCases: [
+        {
+          title: 'deferred update failure',
+          props: {data: new Promise(resolve => setTimeout(() => resolve([1]), 0))}
+        }
+      ]
+    })
+  ).rejects.toThrow('loaded data update failed');
+  expect(FailingDataLayer.finalized).toBe(true);
+});
