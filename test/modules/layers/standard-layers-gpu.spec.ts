@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
-import {device, testLayer} from '@deck.gl/test-utils/vitest';
+import {afterAll, beforeAll, expect, test} from 'vitest';
+import {GPUDataEvaluator} from '@luma.gl/gpgpu';
+import type {Layer} from '@deck.gl/core';
+import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Buffer, type Texture} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
@@ -17,6 +18,14 @@ import IconLayer from '@deck.gl/layers/icon-layer/icon-layer';
 import TextLayer from '@deck.gl/layers/text-layer/text-layer';
 import TextBackgroundLayer from '@deck.gl/layers/text-layer/text-background-layer/text-background-layer';
 
+const bufferPoolSize = GPUDataEvaluator.bufferPoolSize;
+beforeAll(() => {
+  GPUDataEvaluator.bufferPoolSize = 0;
+});
+afterAll(() => {
+  GPUDataEvaluator.bufferPoolSize = bufferPoolSize;
+});
+
 const COLOR = [128, 64, 255, 255] as const;
 const DATA = [
   {position: [0, 0, 0], sourcePosition: [0, 0, 0], targetPosition: [1, 1, 0], color: COLOR},
@@ -27,41 +36,46 @@ function createFixtures(iconAtlas: Texture) {
   const props = {data: DATA};
   return [
     {
-      layer: new ArcLayer({...props, getSourceColor: COLOR}),
+      Layer: ArcLayer,
+      props: {...props, getSourceColor: COLOR},
       accessor: 'getSourceColor',
       colorAttribute: 'instanceSourceColors',
       positionAttribute: 'instanceSourcePositions'
     },
     {
-      layer: new LineLayer({...props, getColor: COLOR}),
+      Layer: LineLayer,
+      props: {...props, getColor: COLOR},
       accessor: 'getColor',
       colorAttribute: 'instanceColors',
       positionAttribute: 'instanceSourcePositions'
     },
     {
-      layer: new PointCloudLayer({...props, getColor: COLOR}),
+      Layer: PointCloudLayer,
+      props: {...props, getColor: COLOR},
       accessor: 'getColor',
       colorAttribute: 'instanceColors',
       positionAttribute: 'instancePositions'
     },
     {
-      layer: new IconLayer({
+      Layer: IconLayer,
+      props: {
         ...props,
         iconAtlas,
         iconMapping: {dot: {x: 0, y: 0, width: 1, height: 1}},
         getIcon: 'dot',
         getColor: COLOR
-      }),
+      },
       accessor: 'getColor',
       colorAttribute: 'instanceColors',
       positionAttribute: 'instancePositions'
     },
     {
-      layer: new TextBackgroundLayer({
+      Layer: TextBackgroundLayer,
+      props: {
         ...props,
         getFillColor: COLOR,
         getBoundingRect: [0, 0, 1, 1]
-      }),
+      },
       accessor: 'getFillColor',
       colorAttribute: 'instanceFillColors',
       positionAttribute: 'instancePositions'
@@ -93,68 +107,64 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       skip();
       return;
     }
-    const viewport = new MapView().makeViewport({
-      width: 100,
-      height: 100,
-      viewState: {longitude: 0, latitude: 0, zoom: 1}
-    });
-    const manager = new LayerManager(testDevice, {viewport});
-    manager.setProps({
-      onError: error => {
-        throw error;
-      }
-    });
     const iconAtlas = testDevice.createTexture({
       width: 1,
       height: 1,
       data: new Uint8Array([255, 255, 255, 255])
     });
     try {
-      for (const {layer, accessor, colorAttribute, positionAttribute} of createFixtures(
+      for (const {Layer, props, accessor, colorAttribute, positionAttribute} of createFixtures(
         iconAtlas
       )) {
-        manager.setLayers([layer]);
-        const model = layer.getModels()[0];
-        expect(model).toBeInstanceOf(GPUVectorModel);
-        const attributeManager = layer.getAttributeManager()!;
-        const columns = attributeManager.getGPUVectors();
-        expect(columns[colorAttribute]).toBeInstanceOf(GPUConstant);
-        expect(Array.from((columns[colorAttribute] as GPUConstant).value)).toEqual(COLOR);
-        const position = columns[positionAttribute] as GPUVector;
-        expect(position).toBeInstanceOf(GPUVector);
-        expect(position.ownsBuffer).toBe(false);
-        expect(getAttributeBuffer(model, positionAttribute)).toBe(position.data[0].buffer);
-        if (backend === 'webgl') {
-          const location = model.pipeline.shaderLayout.attributes!.find(
-            attribute => attribute.name === colorAttribute
-          )!.location;
-          expect(model.vertexArray.attributes[location]).toEqual(
-            new Float32Array(COLOR).map(value => value / 255)
-          );
-        }
-
-        const varying = layer.clone({
-          [accessor]: (row: (typeof DATA)[number]) => row.color,
-          updateTriggers: {[accessor]: 1}
+        await testLayerAsync<Layer>({
+          Layer,
+          device: testDevice,
+          draw: false,
+          testCases: [
+            {props},
+            {
+              updateProps: {
+                [accessor]: (row: (typeof DATA)[number]) => row.color,
+                updateTriggers: {[accessor]: 1}
+              }
+            },
+            {updateProps: {[accessor]: COLOR, updateTriggers: {[accessor]: 2}}}
+          ].map((testCase, index) => ({
+            ...testCase,
+            title: `attribute update ${index}`,
+            onAfterUpdate: ({layer}) => {
+              const model = layer.getModels()[0];
+              expect(model).toBeInstanceOf(GPUVectorModel);
+              const attributeManager = layer.getAttributeManager()!;
+              const columns = attributeManager.getGPUVectors();
+              const varying = index === 1;
+              expect(columns[colorAttribute]).toBeInstanceOf(varying ? GPUVector : GPUConstant);
+              if (varying) {
+                expect((columns[colorAttribute] as GPUVector).length).toBe(DATA.length);
+                const group = attributeManager.getAttributes()[colorAttribute].settings.bufferGroup;
+                if (backend === 'webgpu' && group) {
+                  expect(model.bufferLayout.some(layout => layout.name === group)).toBe(true);
+                }
+              } else {
+                expect(Array.from((columns[colorAttribute] as GPUConstant).value)).toEqual(COLOR);
+                if (backend === 'webgl') {
+                  const location = model.pipeline.shaderLayout.attributes!.find(
+                    attribute => attribute.name === colorAttribute
+                  )!.location;
+                  expect(model.vertexArray.attributes[location]).toEqual(
+                    new Float32Array(COLOR).map(value => value / 255)
+                  );
+                }
+              }
+              const position = columns[positionAttribute] as GPUVector;
+              expect(position).toBeInstanceOf(GPUVector);
+              expect(position.ownsBuffer).toBe(false);
+              expect(getAttributeBuffer(model, positionAttribute)).toBe(position.data[0].buffer);
+            }
+          }))
         });
-        manager.setLayers([varying]);
-        const varyingColumns = varying.getAttributeManager()!.getGPUVectors();
-        expect(varyingColumns[colorAttribute]).toBeInstanceOf(GPUVector);
-        expect((varyingColumns[colorAttribute] as GPUVector).length).toBe(DATA.length);
-        const group = varying.getAttributeManager()!.getAttributes()[colorAttribute]
-          .settings.bufferGroup;
-        if (backend === 'webgpu' && group) {
-          expect(model.bufferLayout.some(layout => layout.name === group)).toBe(true);
-        }
-
-        const constant = varying.clone({[accessor]: COLOR, updateTriggers: {[accessor]: 2}});
-        manager.setLayers([constant]);
-        const constantColumn = constant.getAttributeManager()!.getGPUVectors()[colorAttribute];
-        expect(constantColumn).toBeInstanceOf(GPUConstant);
-        expect(Array.from((constantColumn as GPUConstant).value)).toEqual(COLOR);
       }
     } finally {
-      manager.finalize();
       expect(iconAtlas.destroyed).toBe(false);
       iconAtlas.destroy();
     }
