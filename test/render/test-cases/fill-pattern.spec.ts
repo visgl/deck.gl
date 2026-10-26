@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, MapView, OrthographicView} from '@deck.gl/core';
+import {MapView, OrthographicView} from '@deck.gl/core';
 import type {Unit} from '@deck.gl/core';
 import {PolygonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {
@@ -66,7 +66,7 @@ function createPatternLayer({
   return new PolygonLayer<PatternDatum, FillStyleExtensionProps<PatternDatum>>({
     id,
     data,
-    coordinateSystem: cartesian ? COORDINATE_SYSTEM.CARTESIAN : undefined,
+    coordinateSystem: cartesian ? 'cartesian' : 'default',
     getPolygon: d => d.polygon,
     getFillColor: d => d.color ?? [40, 120, 220],
     getLineColor: [20, 20, 20],
@@ -213,7 +213,7 @@ const orientationTestCases: TestCase[] = [false, true].map(flipY => ({
     new PolygonLayer<PatternDatum, FillStyleExtensionProps<PatternDatum>>({
       id: `orientation-${flipY}`,
       data: ORTHOGRAPHIC_POLYGON,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPolygon: d => d.polygon,
       getFillColor: [40, 120, 220],
       stroked: false,
@@ -255,7 +255,7 @@ const customPatternTestCase: TestCase = {
     new ScatterplotLayer<PatternSwatch, FillStyleExtensionProps<PatternSwatch>>({
       id: 'procedural-configs',
       data: PATTERN_SWATCHES,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPosition: d => d.position,
       getRadius: 44,
       radiusUnits: 'pixels',

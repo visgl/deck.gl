@@ -138,7 +138,8 @@ async function createIsolatedDeviceContext(
 
 function activateDeviceContext(container: HTMLDivElement): void {
   for (const deviceContainer of deviceContextContainers) {
-    deviceContainer.style.display = deviceContainer === container ? 'block' : 'none';
+    // Preserve canvas layout so resize observers do not report zero size between backend switches.
+    deviceContainer.style.visibility = deviceContainer === container ? 'visible' : 'hidden';
   }
   container.style.display = 'block';
 }

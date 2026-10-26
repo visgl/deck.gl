@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Layer, LayerExtension, log} from '@deck.gl/core';
+import {Layer, LayerExtension, log, project, type ProjectUniforms} from '@deck.gl/core';
 import mask, {MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
 
@@ -60,21 +60,22 @@ export default class MaskExtension extends LayerExtension {
     const {maskChannels} = shaderModuleProps.mask || {};
     const {viewport} = context;
     if (maskChannels && maskChannels[maskId]) {
-      const {index, bounds, coordinateOrigin: fromCoordinateOrigin} = maskChannels[maskId];
-      let {coordinateSystem: fromCoordinateSystem} = maskChannels[maskId];
+      const {index, bounds} = maskChannels[maskId];
       maskProps.enabled = true;
       maskProps.channel = index;
       maskProps.inverted = maskInverted;
 
-      if (fromCoordinateSystem === COORDINATE_SYSTEM.DEFAULT) {
-        fromCoordinateSystem = viewport.isGeospatial
-          ? COORDINATE_SYSTEM.LNGLAT
-          : COORDINATE_SYSTEM.CARTESIAN;
-      }
-      const opts = {modelMatrix: null, fromCoordinateOrigin, fromCoordinateSystem};
-      const bl = this.projectPosition([bounds[0], bounds[1], 0], opts);
-      const tr = this.projectPosition([bounds[2], bounds[3], 0], opts);
-      maskProps.bounds = [bl[0], bl[1], tr[0], tr[1]];
+      // Bounds come from the mask viewport, independently of either layer's CRS
+      // and transforms. Align their absolute common coordinates with this shader.
+      const {commonOrigin} = project.getUniforms(shaderModuleProps.project) as ProjectUniforms;
+      const bl = viewport.projectPosition([bounds[0], bounds[1], 0]);
+      const tr = viewport.projectPosition([bounds[2], bounds[3], 0]);
+      maskProps.bounds = [
+        bl[0] - commonOrigin[0],
+        bl[1] - commonOrigin[1],
+        tr[0] - commonOrigin[0],
+        tr[1] - commonOrigin[1]
+      ];
     } else {
       if (maskId) {
         log.warn(`Could not find a mask layer with id: ${maskId}`)();
