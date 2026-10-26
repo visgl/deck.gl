@@ -8,7 +8,7 @@ import {luma, Buffer, Texture, type Device, type Framebuffer} from '@luma.gl/cor
 import {webgl2Adapter, type WebGLDevice} from '@luma.gl/webgl';
 import {webglDevice as sharedWebGLDevice} from '@luma.gl/test-utils';
 import {webgpuAdapter, type WebGPUDevice} from '@luma.gl/webgpu';
-import {COORDINATE_SYSTEM, Deck, OrbitView, type Layer} from '@deck.gl/core';
+import {Deck, OrbitView, type Layer} from '@deck.gl/core';
 import {
   _TerrainExtension as TerrainExtension,
   type TerrainExtensionProps
@@ -131,7 +131,7 @@ function renderFrame(
     new PathLayer({
       id: `path-${props.terrainDrawMode ?? 'xyz'}`,
       data: DATA,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPath: d => d.path,
       widthUnits: 'pixels',
       getWidth: 8,
@@ -234,7 +234,7 @@ function createTerrain(height: (x: number, y: number) => number, draw = false, o
       indices: new Uint16Array(indices),
       attributes: {positions: {size: 3, value: new Float32Array(positions)}}
     }),
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     _instanced: false,
     getPosition: [0, 0, 0],
     getColor: [0, 0, 0],
@@ -400,7 +400,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const props = {
         id: kind,
         data: [{}],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         extensions: [new TerrainExtension()],
         terrainDrawMode: 'offset' as const,
         getPosition: [0, 0, 0] as [number, number, number],
@@ -484,7 +484,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     const scatter = new ScatterplotLayer({
       id: 'points-xyz',
       data: points.map(([x, y]) => [x, y, height(x, y)]),
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPosition: d => d,
       radiusUnits: 'pixels',
       getRadius: 8,
