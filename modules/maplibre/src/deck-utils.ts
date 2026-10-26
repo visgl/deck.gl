@@ -214,6 +214,10 @@ export function drawMapLibreLayerGroup(
       if (deck.props.layerFilter && !deck.props.layerFilter(params)) {
         return false;
       }
+      if (params.renderPass !== 'screen') {
+        // Effect passes (e.g. mask, shadow) render maps used by layers in every group
+        return true;
+      }
 
       const layer = params.layer as Layer<MapLibreLayerProps>;
       return layer.props.beforeId === group.beforeId;
@@ -291,7 +295,8 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
       viewports,
       layerFilter: params =>
         (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-        (params.viewport.id !== MAPLIBRE_VIEW_ID ||
+        (params.renderPass !== 'screen' ||
+          params.viewport.id !== MAPLIBRE_VIEW_ID ||
           !map.getLayer(getMapLibreLayerGroupId(params.layer as Layer<MapLibreLayerProps>))),
       clearCanvas: false
     });
