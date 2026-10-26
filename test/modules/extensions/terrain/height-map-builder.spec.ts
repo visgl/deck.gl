@@ -96,3 +96,37 @@ test('HeightMapBuilder#diffing#globe', async () => {
   heightMap.delete();
   lifecycle.finalize();
 });
+
+test('HeightMapBuilder#delete releases the height map texture', async () => {
+  const lifecycle = new LifecycleTester();
+  const viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0
+  });
+  const terrainLayer = new ScatterplotLayer({
+    data: [
+      [-90, -40.97989806962013],
+      [0, 0]
+    ],
+    getPosition: d => d
+  });
+  await lifecycle.update({viewport, layers: [terrainLayer]});
+
+  const heightMap = new HeightMapBuilder(terrainLayer.context.device);
+  heightMap.shouldUpdate({layers: [terrainLayer], viewport});
+  const fbo = heightMap.getRenderFramebuffer()!;
+
+  // TerrainPass resizes the height map before drawing into it
+  const initialTexture = fbo.colorAttachments[0].texture;
+  fbo.resize({width: 256, height: 256});
+  expect(initialTexture.destroyed, 'resize() releases the replaced texture').toBe(true);
+
+  const texture = fbo.colorAttachments[0].texture;
+  heightMap.delete();
+  expect(texture.destroyed, 'delete() releases the height map texture').toBe(true);
+
+  lifecycle.finalize();
+});
