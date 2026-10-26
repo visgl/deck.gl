@@ -3,7 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* global google, document */
-import {Deck, MapView} from '@deck.gl/core';
+import {Deck, Layer, MapView} from '@deck.gl/core';
+import type {LayersList} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
@@ -122,6 +123,16 @@ export function destroyDeckInstance(deck: Deck) {
   deck.finalize();
   // Deck does not remove a canvas it does not own, such as the `device` prop's
   deck.props.parent?.remove();
+}
+
+/** Copies the layers, so that they can be added to a new deck */
+export function cloneLayers(layers: LayersList): LayersList {
+  return layers.map(layer => {
+    if (Array.isArray(layer)) {
+      return cloneLayers(layer);
+    }
+    return layer instanceof Layer ? layer.clone({}) : layer;
+  });
 }
 
 /* eslint-disable max-statements */

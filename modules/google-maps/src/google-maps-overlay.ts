@@ -9,6 +9,7 @@ import {WebGLDevice} from '@luma.gl/webgl';
 import {
   createDeckInstance,
   destroyDeckInstance,
+  cloneLayers,
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer,
   POSITIONING_CONTAINER_ID
@@ -169,6 +170,10 @@ export default class GoogleMapsOverlay {
       if (this._deck) {
         destroyDeckInstance(this._deck);
         this._deck = null;
+        // The destroyed deck finalized the layers, and a finalized layer cannot be added to another deck
+        if (this.props.layers) {
+          this.props.layers = cloneLayers(this.props.layers);
+        }
       }
     }
     this._createOverlay(map);

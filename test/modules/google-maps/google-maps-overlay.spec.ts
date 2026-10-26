@@ -233,7 +233,15 @@ for (const interleaved of [true, false]) {
     const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
       map._overlays.add(mapOverlay);
     });
-    const overlay = new GoogleMapsOverlay({interleaved, layers: [], ...(!interleaved && {device})});
+    const layer = new ScatterplotLayer({
+      data: [{position: [0, 0]}],
+      getPosition: d => d.position
+    });
+    const overlay = new GoogleMapsOverlay({
+      interleaved,
+      layers: [layer],
+      ...(!interleaved && {device})
+    });
 
     try {
       overlay.setMap(map);
@@ -243,6 +251,9 @@ for (const interleaved of [true, false]) {
       expect(vectorDeck.props.gl, 'Deck uses the context selected at binding').toBe(
         interleaved ? gl : null
       );
+      await expect.poll(() => vectorDeck.isInitialized).toBe(true);
+      overlay._overlay.onDraw({gl, transformer: map.transformer});
+      await expect.poll(() => layer.isLoaded, 'Layer is initialized').toBe(true);
       addOverlaySpy.mockRestore();
 
       // Google reports VECTOR first, then falls back when the browser cannot run the vector map
@@ -265,6 +276,13 @@ for (const interleaved of [true, false]) {
 
       map.draw();
       expect(deck.props.width, 'Raster overlay draws').toBe(800);
+      await expect.poll(() => deck.layerManager?.getLayers()[0]?.isLoaded).toBe(true);
+      const [rasterLayer] = deck.layerManager.getLayers();
+      expect(rasterLayer, 'Layer is copied for the new deck').not.toBe(layer);
+      expect(
+        rasterLayer.getAttributeManager().attributes.instancePositions.getBuffer()?.destroyed,
+        'Layer draws with live buffers'
+      ).toBe(false);
     } finally {
       addOverlaySpy.mockRestore();
       finalizeOverlay(overlay);
