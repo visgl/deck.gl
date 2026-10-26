@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
+import {createTestCRS} from './test-crs';
 import {vecNormalized} from '../../../utils/utils';
 import {
   OrthographicViewport,
@@ -148,10 +149,69 @@ test('Viewport.getScales', () => {
     const viewport = new Viewport(vc.mapState);
     const distanceScales = viewport.getDistanceScales();
     expect(
-      distanceScales.metersPerUnit && distanceScales.unitsPerMeter,
+      distanceScales.unitsPerWorldUnit && distanceScales.unitsPerMeter,
       'distanceScales defined'
     ).toBeTruthy();
+    expect(distanceScales.unitsPerWorldUnit2).toEqual([0, 0, 0]);
+    expect(distanceScales.unitsPerMeter2).toEqual([0, 0, 0]);
   }
+});
+
+test('Viewport normalizes partial distance scales', () => {
+  for (const geospatial of [false, true]) {
+    const options = geospatial ? {longitude: -122, latitude: 38} : {};
+    const defaults = new Viewport({...options, distanceScales: {}}).distanceScales;
+    expect(defaults).toEqual({
+      unitsPerWorldUnit: [1, 1, 1],
+      unitsPerMeter: [1, 1, 1],
+      metersPerUnit: [1, 1, 1],
+      unitsPerWorldUnit2: [0, 0, 0],
+      unitsPerMeter2: [0, 0, 0]
+    });
+    const worldOnly = new Viewport({
+      ...options,
+      distanceScales: {unitsPerWorldUnit: [2, 4, 8]}
+    }).distanceScales;
+    expect(worldOnly.unitsPerMeter).toEqual([2, 4, 8]);
+    expect(worldOnly.metersPerUnit).toEqual([0.5, 0.25, 0.125]);
+    const metersOnly = new Viewport({
+      ...options,
+      distanceScales: {unitsPerMeter: [4, 8, 16]}
+    }).distanceScales;
+    expect(metersOnly.unitsPerWorldUnit).toEqual([1, 1, 1]);
+    expect(metersOnly.metersPerUnit).toEqual([0.25, 0.125, 0.0625]);
+    const supplied = Object.freeze({
+      unitsPerWorldUnit: [2, 4, 8] as [number, number, number],
+      unitsPerMeter: [4, 8, 16] as [number, number, number],
+      metersPerUnit: [99, 99, 99] as [number, number, number],
+      unitsPerWorldUnit2: [1, 2, 3] as [number, number, number],
+      unitsPerMeter2: [4, 5, 6] as [number, number, number]
+    });
+    const scales = new Viewport({...options, distanceScales: supplied}).distanceScales;
+    expect(scales).toEqual({...supplied, metersPerUnit: [0.25, 0.125, 0.0625]});
+    expect(supplied.metersPerUnit).toEqual([99, 99, 99]);
+  }
+  expect(new Viewport().distanceScales.metersPerUnit).toEqual([1, 1, 1]);
+});
+
+test('Viewport uses position scales independently of ground-meter scales', () => {
+  const viewport = new Viewport({
+    width: 800,
+    height: 600,
+    zoom: 2,
+    distanceScales: {
+      unitsPerWorldUnit: [1, 1, 3],
+      unitsPerMeter: [2, 2, 6],
+      unitsPerWorldUnit2: [0, 0, 0],
+      unitsPerMeter2: [0, 0, 0]
+    }
+  });
+  expect(viewport.projectPosition([4, 5, 7])).toEqual([4, 5, 21]);
+  expect(viewport.unprojectPosition([4, 5, 21])).toEqual([4, 5, 7]);
+  expect(viewport.metersPerPixel).toBeCloseTo(1 / 24);
+  const pixel = viewport.project([4, 5, 7]);
+  const world = viewport.unproject(pixel.slice(0, 2), {targetZ: 7});
+  world.forEach((value, i) => expect(value).toBeCloseTo([4, 5, 7][i]));
 });
 
 test('Viewport.containsPixel', () => {
@@ -271,3 +331,91 @@ function getCulling(p, planes) {
   }
   return outDirs.length ? outDirs : null;
 }
+
+test('Viewport delegates conversion and target-coordinate scale sampling to its CRS', () => {
+  const getDistanceScale = vi.fn(() => [2, 4, 8] as [number, number, number]);
+  const crs = createTestCRS({
+    converter: {
+      forward: ([x, y, z = 0]) => [x + 100, y * 2, z * 3],
+      inverse: ([x, y, z = 0]) => [x - 100, y / 2, z / 3]
+    },
+    distanceScale: getDistanceScale
+  });
+  const viewport = new Viewport({crs, distanceScales: {unitsPerWorldUnit: [2, 3, 4]}});
+  expect(viewport.crs).toBe(crs);
+  expect(viewport.isGeospatial).toBe(true);
+  expect(viewport.projectPosition([1, 2, 3])).toEqual([202, 12, 36]);
+  expect(viewport.unprojectPosition([202, 12, 36])).toEqual([1, 2, 3]);
+  expect(viewport.projectFlat([1, 2])).toEqual([202, 12]);
+  expect(viewport.unprojectFlat([202, 12])).toEqual([1, 2]);
+  const scales = viewport.getDistanceScales([101, 4, 9]);
+  expect(getDistanceScale).toHaveBeenCalledWith([101, 4, 9]);
+  expect(scales.unitsPerMeter).toEqual([1, 0.75, 0.5]);
+  expect(scales.metersPerUnit).toEqual([1, 4 / 3, 2]);
+  const pixel = viewport.project([1, 2, 3]);
+  viewport
+    .unproject(pixel)
+    .forEach((value, index) => expect(value).toBeCloseTo([1, 2, 3][index], 6));
+});
+
+test('Viewport derives initial scales from its CRS and retains camera fallback', () => {
+  const getDistanceScale = vi.fn(() => [2, 4, 8] as [number, number, number]);
+  const crs = createTestCRS({distanceScale: getDistanceScale});
+  const viewport = new Viewport({crs, position: [10, 20, 30]});
+  expect(getDistanceScale).toHaveBeenCalledWith([10, 20, 30]);
+  expect(viewport.distanceScales.unitsPerMeter).toEqual([0.5, 0.25, 0.125]);
+  crs.getRenderingScale = () => null;
+  expect(viewport.getDistanceScales([99, 99, 99])).toBe(viewport.distanceScales);
+});
+
+test('Viewport remains local without a CRS even if longitude and latitude are supplied', () => {
+  // Extra fields from a shared view state do not select a projection on the base class.
+  const options = {longitude: 12, latitude: 60, zoom: 0};
+  const viewport = new Viewport(options);
+  expect(viewport.crs).toBeUndefined();
+  expect(viewport.isGeospatial).toBe(false);
+  expect(viewport.projectPosition([12, 60, 100])).toEqual([12, 60, 100]);
+  expect(viewport.unprojectPosition([12, 60, 100])).toEqual([12, 60, 100]);
+  expect(viewport.getDistanceScales([12, 60])).toBe(viewport.distanceScales);
+  expect(viewport.zoom).toBe(0);
+});
+
+test('Viewport uses CRS linear units for its default common-space scale', () => {
+  const crs = createTestCRS({
+    metersPerUnit: [0.3048, 0.3048, 1],
+    distanceScale: () => [0.3048, 0.3048, 1]
+  });
+  const viewport = new Viewport({crs});
+  expect(viewport.distanceScales.unitsPerWorldUnit).toEqual([0.3048, 0.3048, 1]);
+  expect(viewport.distanceScales.unitsPerMeter).toEqual([1, 1, 1]);
+  expect(viewport.projectPosition([10, 20, 30])).toEqual([10 * 0.3048, 20 * 0.3048, 30]);
+  expect(viewport.unprojectPosition([10 * 0.3048, 20 * 0.3048, 30])).toEqual([10, 20, 30]);
+});
+
+test('Viewport transforms target coordinates into a separately oriented common space', () => {
+  const crs = createTestCRS({distanceScale: () => [2, 4, 8]});
+  const matrix = new Matrix4().translate([0, 512, 0]).scale([1, -1, 2]);
+  const viewport = new Viewport({crs, targetToCommonMatrix: matrix});
+  expect(viewport.projectPosition([10, 20, 30])).toEqual([10, 492, 60]);
+  expect(viewport.unprojectPosition([10, 492, 60])).toEqual([10, 20, 30]);
+  expect(viewport.projectFlat([10, 20])).toEqual([10, 492]);
+  expect(viewport.unprojectFlat([10, 492])).toEqual([10, 20]);
+  expect(viewport.getDistanceScales([10, 20]).unitsPerMeter).toEqual([0.5, 0.25, 0.25]);
+  const pixel = viewport.project([10, 20, 30]);
+  viewport
+    .unproject(pixel)
+    .forEach((value, axis) => expect(value).toBeCloseTo([10, 20, 30][axis], 6));
+  const restored = viewport.unproject(pixel.slice(0, 2), {targetZ: 30});
+  restored.forEach((value, axis) => expect(value).toBeCloseTo([10, 20, 30][axis], 6));
+  expect(viewport.equals(new Viewport({crs, targetToCommonMatrix: matrix}))).toBe(true);
+  expect(viewport.equals(new Viewport({crs}))).toBe(false);
+});
+
+test('Viewport tracks CRS identity separately from CPU attribute preprojection', () => {
+  const crs = createTestCRS({signature: 'first'});
+  const viewport = new Viewport({crs});
+  expect(viewport.projectionSignature).toBeNull();
+  expect(viewport.equals(new Viewport({crs: createTestCRS({signature: 'second'})}))).toBe(false);
+  expect(new WebMercatorViewport().projectionSignature).toBeNull();
+  expect(new GlobeViewport().projectionSignature).toBeNull();
+});

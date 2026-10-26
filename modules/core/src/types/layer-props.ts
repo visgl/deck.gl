@@ -169,7 +169,10 @@ export type LayerProps = {
    */
   opacity?: number;
   /**
-   * The coordinate system of the data. Default to COORDINATE_SYSTEM.LNGLAT in a geospatial view or COORDINATE_SYSTEM.CARTESIAN in a non-geospatial view.
+   * CRS identifier, PROJ string, PROJJSON or spatial reference accepted by math.gl,
+   * describing positions after modelMatrix and coordinateOrigin.
+   * `default` resolves to WGS84 in a geospatial view or cartesian in a non-geospatial view.
+   * A CRS that requires asynchronous loading blocks layer initialization and updates until resolved.
    */
   coordinateSystem?: CoordinateSystem;
   /**
