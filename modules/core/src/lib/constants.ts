@@ -4,10 +4,10 @@
 
 import type {TypeScriptCRSInput} from '@math.gl/projection/core';
 
-import {Pan, DoubleClickDrag, Tap} from 'mjolnir.js';
-import {TwoFingerPan, TwoFingerPinch, TWO_FINGER_PINCH_THRESHOLD} from './two-finger-recognizers';
+import {Pan, DoubleClickDrag, Pinch, Tap} from 'mjolnir.js';
 import type {
   DoubleClickDragRecognizerOptions,
+  InputCoherenceCondition,
   PanRecognizerOptions,
   PinchRecognizerOptions,
   TapRecognizerOptions
@@ -32,16 +32,24 @@ export const EVENT_HANDLERS = {
   panend: 'onDragEnd'
 } as const satisfies {[eventName: string]: string};
 
+// Touch pointers rarely report movement in the same frame. A transient scale or
+// rotation from one pointer moving ahead of the other must not claim a pinch, so
+// wait until both pointers have moved, or one pointer has moved deliberately for
+// 40ms, before choosing between two-finger translation and pinch/twist.
+const PINCH_COHERENCE: InputCoherenceCondition[] = [
+  {movementDeltaTime: 40, distance: 2, scale: 0.03},
+  {movementDeltaTime: 40, distance: 2, rotation: 3},
+  {distancePerPointer: 1, scale: 0.03},
+  {distancePerPointer: 1, rotation: 3}
+];
+const MULTIPAN_COHERENCE: InputCoherenceCondition[] = [{distancePerPointer: 1}];
+
 // Order matters: recognizeWith/requireFailure resolve by name, so a recognizer
-// must be registered before any later entry can reference it.
+// must be registered before any later entry can reference it. On the same input,
+// the first recognizer to qualify claims the gesture.
 export const RECOGNIZERS = {
-  multipan: [TwoFingerPan, {threshold: 10, pointers: 2, trackpad: true}],
-  pinch: [
-    TwoFingerPinch,
-    {threshold: TWO_FINGER_PINCH_THRESHOLD, trackpad: true},
-    null,
-    ['multipan']
-  ],
+  multipan: [Pan, {threshold: 10, pointers: 2, trackpad: true, coherent: MULTIPAN_COHERENCE}],
+  pinch: [Pinch, {trackpad: true, coherent: PINCH_COHERENCE}, null, ['multipan']],
   dblclick: [Tap, {event: 'dblclick', taps: 2, enable: false}],
   // Register before pan so the second touch can claim double-tap-drag before
   // the ordinary one-pointer pan recognizer sees the same movement.
