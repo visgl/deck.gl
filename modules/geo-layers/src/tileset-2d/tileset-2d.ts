@@ -173,7 +173,8 @@ export class Tileset2D {
 
     this.onTileLoad = tile => {
       this.opts.onTileLoad?.(tile);
-      if (this.opts.maxCacheByteSize !== null) {
+      // A request can still complete after its tile was evicted; only count cached tiles
+      if (this.opts.maxCacheByteSize !== null && this._cache.get(tile.id) === tile) {
         this._cacheByteSize += tile.byteLength;
         this._resizeCache();
       }
@@ -668,6 +669,7 @@ export class Tileset2D {
         _cache.delete(id);
         // An evicted tile keeps no request priority, so a queued request is dropped
         tile.isPrefetch = false;
+        tile.abort();
         this.opts.onTileUnload?.(tile);
       }
       if (_cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {

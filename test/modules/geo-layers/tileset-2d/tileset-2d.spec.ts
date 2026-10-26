@@ -642,6 +642,36 @@ test('Tileset2D#maxCacheByteSize', async () => {
   expect(tileset._cache.get('910-459-12'), 'expected tile is in cache').toBeTruthy();
 });
 
+test('Tileset2D#maxCacheByteSize ignores tiles evicted while loading', async () => {
+  const requests = new Map<string, {resolve: (data: unknown) => void; signal: AbortSignal}>();
+  const tileset = new Tileset2D({
+    getTileData: ({id, signal}) =>
+      new Promise(resolve => requests.set(id, {resolve, signal: signal!})),
+    maxCacheSize: 1,
+    maxCacheByteSize: 1000,
+    onTileLoad: () => {},
+    onTileUnload: () => {}
+  });
+  tileset.update(testViewport);
+  const evictedTile = tileset.selectedTiles![0];
+  await sleep(10);
+  const request = requests.get(evictedTile.id)!;
+  expect(request, 'tile request started').toBeTruthy();
+
+  tileset.update(
+    new WebMercatorViewport(Object.assign({}, testViewState, {longitude: -100, latitude: 80}))
+  );
+  expect(tileset._cache.has(evictedTile.id), 'loading tile is evicted').toBe(false);
+  expect(request.signal.aborted, 'evicted tile request is aborted').toBe(true);
+
+  // getTileData may ignore the abort signal and return data anyway
+  request.resolve({byteLength: 100});
+  await sleep(10);
+  expect((tileset as any)._cacheByteSize, 'evicted tile bytes are not counted').toBe(0);
+
+  tileset.finalize();
+});
+
 test('Tileset2D#debounceTime', async () => {
   const tileset = new Tileset2D({
     getTileData: () => sleep(2),
