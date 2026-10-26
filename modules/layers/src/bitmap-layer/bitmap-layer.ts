@@ -182,13 +182,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  // GlobeView switches between a curved GlobeViewport and a flat WebMercatorViewport at
-  // zoom 12. A viewport change alone does not flag props, so check the subdivision step
-  // and image coordinate conversion whenever the viewport changes.
-  shouldUpdateState({changeFlags}: UpdateParameters<this>): boolean {
-    return changeFlags.propsOrDataChanged || changeFlags.viewportChanged;
-  }
-
   updateState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     // setup model first
     const attributeManager = this.getAttributeManager()!;
