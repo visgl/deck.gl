@@ -3,7 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {afterEach, expect, test, vi} from 'vitest';
-import {type ControllerProps, _GlobeView as GlobeView, LinearInterpolator} from '@deck.gl/core';
+import {
+  type ControllerProps,
+  _GlobeView as GlobeView,
+  LinearInterpolator,
+  MapView
+} from '@deck.gl/core';
 import {zoomAdjust} from '../../../../modules/core/src/viewports/globe-viewport';
 import {createTestController} from './test-controller';
 
@@ -53,6 +58,28 @@ function advance(controller: ReturnType<typeof createController>, milliseconds: 
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+test.each([
+  {name: 'MapController', view: new MapView({controller: true})},
+  {name: 'GlobeController', view: new GlobeView({controller: true})}
+])('$name view state omits unset bearing limits', ({view}) => {
+  const viewStates: Record<string, unknown>[] = [];
+  const controller = createTestController({
+    view,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 4},
+    onViewStateChange: ({viewState}) => {
+      viewStates.push(viewState);
+    }
+  });
+  controller.handleEvent(gesture('panstart') as any);
+  controller.handleEvent(gesture('panmove', 60, 60) as any);
+
+  expect(viewStates.length, 'the pan emits a view state').toBeGreaterThan(0);
+  for (const viewState of viewStates) {
+    expect(viewState, 'no implicit minimum bearing').not.toHaveProperty('minBearing');
+    expect(viewState, 'no implicit maximum bearing').not.toHaveProperty('maxBearing');
+  }
+});
 
 test.each([
   {minBearing: -170, maxBearing: 170, direction: 1},

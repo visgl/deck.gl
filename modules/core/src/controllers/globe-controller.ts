@@ -243,7 +243,7 @@ class GlobeState extends MapState {
       props.bearing = constrain(
         'bearing',
         props.bearing,
-        clamp(props.bearing, props.minBearing, props.maxBearing),
+        clamp(props.bearing, props.minBearing ?? -Infinity, props.maxBearing ?? Infinity),
         ROTATION_RUBBER_BAND_RANGE
       );
     } else {

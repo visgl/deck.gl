@@ -152,8 +152,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
       minZoom = 0,
       maxPitch = 60,
       minPitch = 0,
-      minBearing = -Infinity,
-      maxBearing = Infinity,
+      minBearing,
+      maxBearing,
 
       /** Interaction states, required to calculate change during transform */
       /* The point on map being grabbed when the operation first started */
@@ -199,8 +199,9 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         minZoom,
         maxPitch,
         minPitch,
-        minBearing,
-        maxBearing,
+        // GlobeController-only limits stay out of view states unless supplied.
+        ...((minBearing === undefined ? {} : {minBearing}) as {minBearing: number}),
+        ...((maxBearing === undefined ? {} : {maxBearing}) as {maxBearing: number}),
         normalize,
         position,
         maxBounds,
