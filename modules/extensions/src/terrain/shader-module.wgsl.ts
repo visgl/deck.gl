@@ -83,9 +83,12 @@ export const terrainPlugin: ShaderPlugin = {
         target: 'vs:deckgl_filter_position',
         injection: /* wgsl */ `
   let commonPos = geometry.position.xyz;
+  // Globe meter offsets are projected into the same globe common space as absolute positions.
+  let isGlobe = project.projectionMode == PROJECTION_MODE_GLOBE ||
+    project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS;
   var terrainMercPos = commonPos.xy;
   terrainHeight = commonPos.z + project.commonOrigin.z;
-  if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+  if (isGlobe) {
     terrainMercPos = terrain_globe_to_mercator(commonPos);
     terrainHeight = length(commonPos) - GLOBE_RADIUS;
   }
@@ -100,7 +103,7 @@ export const terrainPlugin: ShaderPlugin = {
     let anchor = project_position_vec3_f32(vec3<f32>(geometry.worldPosition.xy, 0.0));
     var anchorMerc = anchor;
     var offset = vec3<f32>(0.0, 0.0, 1.0);
-    if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if (isGlobe) {
       anchorMerc = vec3<f32>(terrain_globe_to_mercator(anchor), 0.0);
       offset = normalize(commonPos) * cos(radians(geometry.worldPosition.y)) * PI;
     }
