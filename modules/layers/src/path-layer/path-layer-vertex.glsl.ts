@@ -29,6 +29,9 @@ out float vMiterLength;
 out vec2 vPathPosition;
 out float vPathLength;
 out float vJointType;
+#ifdef DASH_ENABLED
+out vec2 vPathBounds;
+#endif
 
 const float EPSILON = 0.001;
 const vec3 ZERO_OFFSET = vec3(0.0);
@@ -41,6 +44,9 @@ float flipIfTrue(bool flag) {
 vec3 getLineJoinOffset(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   vec2 width
+#ifdef DASH_ENABLED
+  , float sourcePathLength, vec2 sourcePathRange
+#endif
 #ifdef ANTIALIASING
   , float coverageScale
 #endif
@@ -83,6 +89,37 @@ vec3 getLineJoinOffset(
   // length of the segment
   float L = isEnd ? lenA : lenB;
 
+#ifdef DASH_ENABLED
+  // Extrusion happens in the XY plane, so L above is a 2D length and vPathPosition.y below
+  // measures 2D distance along the segment. For a path that also moves in Z the true arc
+  // length is longer by this ratio. Scaling vPathLength and vPathPosition.y by it makes the
+  // coordinate measure real 3D distance - which is what CPU-side dash offsets accumulate -
+  // while leaving the joint tests in the fragment shader unchanged, since they compare the
+  // two against each other and both are scaled alike.
+  // Billboard mode extrudes in clip space, where the perspective divide has already reduced
+  // the segment to its screen projection, so its complete common-space length is supplied by
+  // the caller.
+  vec3 currDelta3 = isEnd ? deltaA3 : deltaB3;
+  float currLength2D = length(currDelta3.xy);
+  float arcLengthRatio = 1.0;
+  float pathPositionOffset = 0.0;
+  float pathLength = L;
+  if (path.billboard) {
+    // clipLine may shorten the visible screen-space segment. Preserve the corresponding interval
+    // of the complete common-space arclength instead of compressing the full dash period into the
+    // visible span. Keep pathLength complete so justification is stable as the camera clips it.
+    float visiblePathLength = sourcePathLength * (sourcePathRange.y - sourcePathRange.x);
+    arcLengthRatio = L > 0.0 ? visiblePathLength / L : 0.0;
+    pathPositionOffset = sourcePathLength * sourcePathRange.x;
+    pathLength = sourcePathLength;
+  } else if (currLength2D > 0.0) {
+    // Do not clamp a valid denominator to EPSILON: high-zoom Web Mercator deltas are often
+    // smaller than that in common space, and changing their scale corrupts even flat paths.
+    arcLengthRatio = length(currDelta3) / currLength2D;
+    pathLength = L * arcLengthRatio;
+  }
+#endif
+
   // A = angle of the corner
   float sinHalfA = abs(dot(miterVec, perp));
   float cosHalfA = abs(dot(dirA, miterVec));
@@ -124,7 +161,11 @@ vec3 getLineJoinOffset(
   // The physical stroke still ends at offsetVec; the scaled coordinates and vertices only extend
   // its rasterized envelope to include the outer half of the centered coverage ramp.
   vec2 coverageOffsetVec = offsetVec * coverageScale;
+#ifdef DASH_ENABLED
+  vPathLength = pathLength;
+#else
   vPathLength = L;
+#endif
   vCornerOffset = coverageOffsetVec;
   vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
   vMiterLength = isCap ? isJoint : vMiterLength;
@@ -132,7 +173,11 @@ vec3 getLineJoinOffset(
   vec2 offsetFromStartOfPath = coverageOffsetVec + deltaA * float(isEnd);
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
+#ifdef DASH_ENABLED
+    pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio
+#else
     dot(offsetFromStartOfPath, dir)
+#endif
   );
   geometry.uv = vPathPosition;
 
@@ -140,7 +185,11 @@ vec3 getLineJoinOffset(
   vec3 offset = vec3(coverageOffsetVec * width * isValid, 0.0);
 #else
   // Generate variables for fragment shader
+#ifdef DASH_ENABLED
+  vPathLength = pathLength;
+#else
   vPathLength = L;
+#endif
   vCornerOffset = offsetVec;
   vMiterLength = dot(vCornerOffset, miterVec * turnDirection);
   vMiterLength = isCap ? isJoint : vMiterLength;
@@ -148,7 +197,11 @@ vec3 getLineJoinOffset(
   vec2 offsetFromStartOfPath = vCornerOffset + deltaA * float(isEnd);
   vPathPosition = vec2(
     dot(offsetFromStartOfPath, perp),
+#ifdef DASH_ENABLED
+    pathPositionOffset + dot(offsetFromStartOfPath, dir) * arcLengthRatio
+#else
     dot(offsetFromStartOfPath, dir)
+#endif
   );
   geometry.uv = vPathPosition;
 
@@ -169,6 +222,22 @@ void clipLine(inout vec4 position, vec4 refPosition) {
     position = refPosition + (position - refPosition) * r;
   }
 }
+
+#ifdef DASH_ENABLED
+// Return the visible interval of the original segment before clipLine moves either endpoint.
+vec2 getClippedPathRange(float startW, float endW) {
+  bool startClipped = startW < EPSILON;
+  bool endClipped = endW < EPSILON;
+  if (startClipped && endClipped) {
+    return vec2(0.0);
+  }
+  if (startClipped || endClipped) {
+    float intersection = clamp((EPSILON - startW) / (endW - startW), 0.0, 1.0);
+    return startClipped ? vec2(intersection, 1.0) : vec2(0.0, intersection);
+  }
+  return vec2(0.0, 1.0);
+}
+#endif
 
 void main() {
   geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
@@ -194,9 +263,35 @@ void main() {
 
   if (path.billboard) {
     // Extrude in clipspace
-    vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64Low, ZERO_OFFSET);
+#ifdef DASH_ENABLED
+    vec4 prevPositionCommon;
+    vec4 nextPositionCommon;
+    vec4 prevPositionScreen = project_position_to_clipspace(
+      prevPosition, prevPosition64Low, ZERO_OFFSET, prevPositionCommon
+    );
+#else
+    vec4 prevPositionScreen = project_position_to_clipspace(
+      prevPosition, prevPosition64Low, ZERO_OFFSET
+    );
+#endif
     vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64Low, ZERO_OFFSET, geometry.position);
-    vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64Low, ZERO_OFFSET);
+#ifdef DASH_ENABLED
+    vec4 nextPositionScreen = project_position_to_clipspace(
+      nextPosition, nextPosition64Low, ZERO_OFFSET, nextPositionCommon
+    );
+#else
+    vec4 nextPositionScreen = project_position_to_clipspace(
+      nextPosition, nextPosition64Low, ZERO_OFFSET
+    );
+#endif
+
+#ifdef DASH_ENABLED
+    vec4 sourcePathStartScreen = mix(currPositionScreen, prevPositionScreen, isEnd);
+    vec4 sourcePathEndScreen = mix(nextPositionScreen, currPositionScreen, isEnd);
+    vec2 billboardPathRange = getClippedPathRange(
+      sourcePathStartScreen.w, sourcePathEndScreen.w
+    );
+#endif
 
     clipLine(prevPositionScreen, currPositionScreen);
     clipLine(nextPositionScreen, currPositionScreen);
@@ -211,16 +306,34 @@ void main() {
       : 1.0;
 #endif
 
+#ifdef DASH_ENABLED
+    vec3 currentDeltaCommon = isEnd > 0.0
+      ? geometry.position.xyz - prevPositionCommon.xyz
+      : nextPositionCommon.xyz - geometry.position.xyz;
+    float billboardPathLength = width.x > 0.0
+      ? length(currentDeltaCommon) * project.scale / (width.x * project.focalDistance)
+      : 0.0;
+#endif
+
     vec3 offset = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
       project_pixel_size_to_clipspace(width.xy)
+#ifdef DASH_ENABLED
+      ,
+      billboardPathLength, billboardPathRange
+#endif
 #ifdef ANTIALIASING
       ,
       coverageScale
 #endif
     );
+#ifdef DASH_ENABLED
+    // Phase and justification use the complete source segment, while cap and joint coverage
+    // must still recognize the endpoints moved by clipLine.
+    vPathBounds = billboardPathLength * billboardPathRange;
+#endif
 
     DECKGL_FILTER_GL_POSITION(currPositionScreen, geometry);
     gl_Position = vec4(currPositionScreen.xyz + offset * currPositionScreen.w, currPositionScreen.w);
@@ -241,10 +354,16 @@ void main() {
 
     vec3 offset = getLineJoinOffset(
       prevPosition, currPosition, nextPosition, width.xy
+#ifdef DASH_ENABLED
+      , 1.0, vec2(0.0, 1.0)
+#endif
 #ifdef ANTIALIASING
       , coverageScale
 #endif
     );
+#ifdef DASH_ENABLED
+    vPathBounds = vec2(0.0, vPathLength);
+#endif
     geometry.position = vec4(currPosition + offset, 1.0);
     gl_Position = project_common_position_to_clipspace(geometry.position);
     DECKGL_FILTER_GL_POSITION(gl_Position, geometry);

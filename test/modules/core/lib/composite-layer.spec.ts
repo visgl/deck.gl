@@ -3,13 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {test, expect} from 'vitest';
-import {
-  LayerManager,
-  CompositeLayer,
-  Layer,
-  COORDINATE_SYSTEM,
-  WebMercatorViewport
-} from '@deck.gl/core';
+import {LayerManager, CompositeLayer, Layer, WebMercatorViewport} from '@deck.gl/core';
 import {device, testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 
 const SUB_LAYER_ID = 'sub-layer-id';
@@ -24,7 +18,7 @@ const BASE_LAYER_PROPS = {
   highlightedObjectIndex: 3,
   autoHighlight: true,
   highlightColor: [1, 1, 1],
-  coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  coordinateSystem: 'meter-offsets',
   coordinateOrigin: [1, 1, 1],
   wrapLongitude: false,
   modelMatrix: [1]
@@ -90,7 +84,7 @@ test('CompositeLayer#getSubLayerProps', () => {
     );
   }
 
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new WebMercatorViewport()});
   layerManager.setLayers([layer]);
   const sublayers = layer.getSubLayers();
   const subProps = sublayers[0].props;
@@ -288,7 +282,7 @@ test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', () => {
 });
 
 test('CompositeLayer#setState', () => {
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new WebMercatorViewport()});
   const compositeLayer = new TestCompositeLayer(BASE_LAYER_PROPS);
   let subLayer = null;
 

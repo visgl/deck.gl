@@ -240,31 +240,47 @@ Widgets with internal state expose getter methods (e.g., `getThemeMode()`, `getF
 
 ## Writing new Widgets
 
-A widget should inherit the `Widget` class. 
+A widget should extend the [`Widget`](../core/widget.md) class.
 Here is a custom widget that shows a spinner while layers are loading:
 
 ```ts
 import {Deck, Widget} from '@deck.gl/core';
+import type {Layer, WidgetProps, WidgetPlacement} from '@deck.gl/core';
 
-class LoadingIndicator extends Widget {
-  element?: HTMLDivElement;
-  size: number;
+type LoadingIndicatorProps = WidgetProps & {
+  placement?: WidgetPlacement;
+  size?: number;
+};
 
-  constructor(options: {
-    size: number;
-  }) {
-    this.size = options.size;
+class LoadingIndicator extends Widget<LoadingIndicatorProps> {
+  static defaultProps: Required<LoadingIndicatorProps> = {
+    ...Widget.defaultProps,
+    id: 'loading-indicator',
+    placement: 'top-left',
+    size: 32
+  };
+
+  className = 'spinner';
+  placement: WidgetPlacement = 'top-left';
+  loading = false;
+
+  constructor(props: LoadingIndicatorProps = {}) {
+    super(props);
+    this.placement = this.props.placement;
   }
 
   onRenderHTML(el: HTMLElement) {
-    el.className = 'spinner';
-    el.style.width = `${this.size}px`;
+    el.style.width = `${this.props.size}px`;
+    el.style.display = this.loading ? 'block' : 'none';
     // TODO - create animation for .spinner in the CSS stylesheet
   }
 
-  onRedraw({layers}) {
-    const isVisible = layers.some(layer => !layer.isLoaded);
-    this.rootElement.style.display = isVisible ? 'block' : 'none';
+  onRedraw({layers}: {layers: Layer[]}) {
+    const loading = layers.some(layer => !layer.isLoaded);
+    if (loading !== this.loading) {
+      this.loading = loading;
+      this.updateHTML();
+    }
   }
 }
 
@@ -272,6 +288,8 @@ new Deck({
   widgets: [new LoadingIndicator({size: 48})]
 });
 ```
+
+For a full walk-through of the widget lifecycle, styling, and using Preact or React to render widget UI, see the [Writing Custom Widgets](../../developer-guide/custom-widgets/README.md) developer guide.
 
 ## Tooltips
 

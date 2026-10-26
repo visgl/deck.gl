@@ -51,7 +51,7 @@ prop" is `antialiasing: true`.
 | `@deck.gl/arcgis` | **no** | no | no — depth attachment | yes | **this prop — only avenue** |
 | App-supplied `_framebuffer` | **no** | no | if color-only | yes | whichever fits the target |
 | WebGPU, any target | **no** | no such attribute | no — deferred | yes | **this prop — only avenue** |
-| `PathStyleExtension` offset ([#8063](https://github.com/visgl/deck.gl/issues/8063), [#9395](https://github.com/visgl/deck.gl/issues/9395)) | **no** — edge is a `discard` | no | no | partial | this prop; full fix needs an extension change |
+| `PathStyleExtension` offset ([#8063](https://github.com/visgl/deck.gl/issues/8063), [#9395](https://github.com/visgl/deck.gl/issues/9395)) | **no** without analytic coverage | no | no | yes | this prop; the extension now shares its coverage envelope |
 
 Three rows have no alternative at all, and one — post-processing — is better served by luma.gl#2741
 than by this proposal. The two efforts overlap only there; neither subsumes the other.
@@ -206,11 +206,6 @@ alpha-to-coverage under Alternatives for why that is not available yet.
   `LineLayer` and `ArcLayer` ends are likewise unfeathered.
 - **Self-overlap.** Where a stroke overlaps itself, or points overlap each other, the blended edges
   composite twice, the same trade-off `ScatterplotLayer.antialiasing` already documents.
-- **`PathStyleExtension` offset.** The extension hard-`discard`s outside `|vPathPosition.x| > 1`
-  before layer code runs, clipping the outer half of the centered ramp. This improves
-  [#8063](https://github.com/visgl/deck.gl/issues/8063) and
-  [#9395](https://github.com/visgl/deck.gl/issues/9395) without closing them; a complete fix means
-  turning that discard into a coverage term inside the extension.
 
 ## Prior art
 
@@ -240,15 +235,14 @@ z-fighting. This answers empirically what deck's source cannot: the `WebGLOverla
 not provide multisampling, and unlike MapLibre there is no documented option to ask for it. That
 makes an in-shader solution the only avenue there.
 
-**`PathStyleExtension` offset already breaks antialiasing.**
+**`PathStyleExtension` offset historically broke antialiasing.**
 [#8063](https://github.com/visgl/deck.gl/issues/8063) (2023) and
-[#9395](https://github.com/visgl/deck.gl/issues/9395) (2025) are both open. The mechanism is worth
-stating because it is not obvious: the extension defines the stroke's visible edge with a `discard`
-rather than with geometry, and `discard` kills every sample of a fragment, so MSAA cannot smooth
-that edge at all — no context attribute will fix those two issues. Analytic coverage does improve
-them, since it computes coverage in the shader instead of relying on the rasterizer. The improvement
-is partial: the extension's discard still clips the outer half of the ramp, as recorded under
-Limitations. A complete fix means turning that discard into a coverage term inside the extension.
+[#9395](https://github.com/visgl/deck.gl/issues/9395) (2025) document the original hard edge. Before
+v9.4, the extension defined the stroke's visible boundary with a `discard`, which killed every
+sample and clipped the outer half of PathLayer's centered analytic ramp. The extension now defers
+fragment rejection until derivatives have been evaluated and lets `PathLayer.antialiasing` own the
+lateral boundary. Offset and unoffset paths therefore share the complete coverage envelope when
+analytic antialiasing is enabled; non-analytic rendering intentionally retains the hard clip.
 
 **Offscreen MSAA is being addressed separately, and is complementary rather than overlapping.**
 [deck.gl#10404](https://github.com/visgl/deck.gl/issues/10404) tracks post-process effects losing
@@ -265,9 +259,10 @@ Both efforts should land; see the matrix above for the split.
 No part of this proposal is descoped by it. Interleaved base maps draw into the host's default
 framebuffer rather than an offscreen target, and routing them through one would break the depth
 interaction that interleaving exists for — the same reason post-process effects cannot be used in
-interleaved mode. WebGPU is a deferred follow-up in that RFC. And the `PathStyleExtension` offset
-edge is defined by a `discard`, which kills every sample of a fragment, so no sample count smooths
-it. ArcGIS could move once multisampled depth is supported, since its framebuffer is depth-attached.
+interleaved mode. WebGPU is a deferred follow-up in that RFC. A non-analytic
+`PathStyleExtension` offset still uses a hard clip, while enabling analytic coverage gives the
+extension a shader-defined envelope that does not depend on the framebuffer's sample count.
+ArcGIS could move once multisampled depth is supported, since its framebuffer is depth-attached.
 
 What does change is post-processing. deck's render buffers pass only `colorAttachments`
 (`DeckRenderer._prepareRenderBuffers`), and luma auto-creates a depth attachment only when both
@@ -301,10 +296,6 @@ WebGPU screenshot goldens can be enabled once CI has hardware WebGPU presentatio
   arbitrarily triangulated fill with no boundary-distance varying. Applying the stroke technique
   would feather internal triangle edges. Supporting it needs a separate tessellation or boundary
   rendering design and remains deferred.
-- **`PathStyleExtension` offset ramp clipping**, above — the remaining half of
-  [#8063](https://github.com/visgl/deck.gl/issues/8063) /
-  [#9395](https://github.com/visgl/deck.gl/issues/9395). Same underlying problem as the next item: a
-  `discard` that alpha cannot soften.
 - **Revisit alpha-to-coverage** once [luma.gl#2741](https://github.com/visgl/luma.gl/issues/2741)
   gives WebGPU a multisampled target, which unblocks the `@builtin(sample_mask)` route. That would
   address the flat-cap and self-overlap limitations and the `discard`-defined edges together. Closing

@@ -168,13 +168,6 @@ describe('LineLayer render tests', () => {
   describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
     runRenderTestSuite(testCases, deviceType);
   });
-
-  describe('webgl-no-msaa', () => {
-    runRenderTestSuite([antialiasingTestCase], 'webgl', {
-      deviceMode: 'isolated',
-      webgl: {antialias: false}
-    });
-  });
 });
 
 describe.runIf(isRenderTestDeviceEnabled('webgl'))('LineLayer#antialiasing', () => {
