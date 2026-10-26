@@ -43,14 +43,19 @@ function alignBearing(bearing: number, reference: number): number {
   return reference + mod(bearing - reference + 180, 360) - 180;
 }
 
-type BearingLimitProps = Pick<MapStateProps, 'minBearing' | 'maxBearing'>;
+type BearingLimitProps = Pick<MapStateProps, 'bearing' | 'minBearing' | 'maxBearing'>;
 
-/** Returns the equivalent bearing on the turn configured by the limits, or the nearest limit's turn. */
-function getBearingOnLimitTurn(bearing: number, props: BearingLimitProps): number {
+/**
+ * Returns the bearing equivalent to `bearing` from which a transition toward `props` starts.
+ * Two-sided limits exclude some directions, so start on their configured turn, or on the
+ * nearest limit's turn. A one-sided limit admits every direction, so take the short way to
+ * the constrained target bearing.
+ */
+function getTransitionStartBearing(bearing: number, props: BearingLimitProps): number {
   const minBearing = props.minBearing ?? -Infinity;
   const maxBearing = props.maxBearing ?? Infinity;
-  if (!Number.isFinite(minBearing)) {
-    return maxBearing - mod(maxBearing - bearing, 360);
+  if (!Number.isFinite(minBearing) || !Number.isFinite(maxBearing)) {
+    return alignBearing(bearing, clamp(props.bearing ?? 0, minBearing, maxBearing));
   }
   const alignedBearing = minBearing + mod(bearing - minBearing, 360);
   return alignedBearing <= maxBearing ||
@@ -502,7 +507,7 @@ export default class GlobeController extends Controller<MapState> {
 
   /**
    * Bounded bearings are unwrapped on the turn their limits configure. When new limits
-   * take effect, start any transition from the equivalent bearing on that turn so the
+   * take effect, start any transition from an equivalent bearing on that turn so the
    * camera does not spin a full turn to reach the same direction.
    */
   private _alignTransitionStartBearing(props: MapStateProps): void {
@@ -517,7 +522,7 @@ export default class GlobeController extends Controller<MapState> {
     }
     const alignStart = <T extends Record<string, any>>(startProps: T): T =>
       Number.isFinite(startProps.bearing)
-        ? {...startProps, bearing: getBearingOnLimitTurn(startProps.bearing, props)}
+        ? {...startProps, bearing: getTransitionStartBearing(startProps.bearing, props)}
         : startProps;
     transitionManager.props = alignStart(previousProps);
     if (transitionManager.propsInTransition) {

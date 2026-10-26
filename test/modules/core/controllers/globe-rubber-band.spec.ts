@@ -577,6 +577,39 @@ test('GlobeController enabling bearing limits does not spin to an equivalent bea
   controller.finalize();
 });
 
+test.each([
+  {bearing: 40, limits: {maxBearing: 30}, target: 30, requestTarget: false},
+  {bearing: 40, limits: {maxBearing: 30}, target: 30, requestTarget: true},
+  {bearing: -40, limits: {minBearing: -30}, target: -30, requestTarget: false},
+  {bearing: -40, limits: {minBearing: -30}, target: -30, requestTarget: true}
+])(
+  'GlobeController eases back to a newly enabled one-sided bearing limit %#',
+  ({bearing, limits, target, requestTarget}) => {
+    const {controller, bearings, update} = createControlledController({bearing});
+    update({
+      ...limits,
+      ...(requestTarget ? {bearing: target} : null),
+      transitionDuration: 300,
+      transitionInterpolator: new LinearInterpolator(['bearing'])
+    });
+    for (let elapsed = 0; elapsed < 300; elapsed += 50) {
+      advance(controller as any, 50);
+    }
+
+    for (const frameBearing of bearings) {
+      expect(
+        Math.abs(getBearingDelta(frameBearing, bearing)),
+        'frames stay between the start and the limit'
+      ).toBeLessThanOrEqual(Math.abs(target - bearing) + 1e-6);
+    }
+    if (requestTarget) {
+      expect(bearings.length, 'the transition emits frames').toBeGreaterThan(1);
+      expect(controller.props.bearing).toBeCloseTo(target);
+    }
+    controller.finalize();
+  }
+);
+
 test('GlobeController bearing transitions within limits stay on the configured turn', () => {
   const {controller, bearings, update} = createControlledController({
     bearing: 10,
