@@ -196,6 +196,10 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
 
       map.removeControl(overlay);
       expect(overlay._deck).toBeFalsy();
+      if (!interleaved) {
+        // MapLibre leaves removing the control element to the control
+        expect(container.querySelector('.maplibregl-ctrl-top-left')?.childElementCount).toBe(0);
+      }
     }
 
     map.remove();

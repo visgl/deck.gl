@@ -169,7 +169,8 @@ export type LayerProps = {
    */
   opacity?: number;
   /**
-   * CRS identifier or PROJ string of positions after modelMatrix and coordinateOrigin.
+   * CRS identifier, PROJ string, PROJJSON or spatial reference accepted by math.gl,
+   * describing positions after modelMatrix and coordinateOrigin.
    * `default` resolves to WGS84 in a geospatial view or cartesian in a non-geospatial view.
    * A CRS that requires asynchronous loading blocks layer initialization and updates until resolved.
    */
