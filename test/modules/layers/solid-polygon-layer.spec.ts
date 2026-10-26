@@ -69,6 +69,60 @@ test('SolidPolygonLayer#binary positions without preprojection remain in world c
   }
 });
 
+test('SolidPolygonLayer#data.attributes.getPolygon#version', () => {
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: 0, latitude: 0, zoom: 1}
+  });
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  // Normalized binary polygons are tessellated by the layer, not uploaded by the attribute
+  const polygon: {value: Float32Array; size: number; version: number} = {
+    value: new Float32Array([0, 0, 1, 0, 1, 1]),
+    size: 2,
+    version: 1
+  };
+  const data = {length: 1, startIndices: [0, 3], attributes: {getPolygon: polygon}};
+  const props = {id: 'versioned-polygon', data, positionFormat: 'XY'} as const;
+  const updateState = vi.spyOn(SolidPolygonLayer.prototype, 'updateState');
+  const getPositions = () => {
+    const layer = manager.getLayers()[0] as SolidPolygonLayer;
+    const attribute = layer.getAttributeManager()!.getAttributes().vertexPositions;
+    const vertexCount = layer.state.polygonTesselator.instanceCount;
+    return Array.from((attribute.value as Float64Array).subarray(0, vertexCount * 3));
+  };
+  try {
+    manager.setLayers([new SolidPolygonLayer(props)]);
+    const initialPositions = getPositions();
+    expect(initialPositions).toContain(1);
+
+    updateState.mockClear();
+    manager.setLayers([new SolidPolygonLayer(props)]);
+    expect(updateState, 'same object and version does not update the layer').not.toHaveBeenCalled();
+
+    polygon.value.set([10, 10, 11, 10, 11, 11]);
+    polygon.version = 2;
+    manager.setLayers([new SolidPolygonLayer(props)]);
+    expect(updateState, 'a version bump updates the layer').toHaveBeenCalledTimes(1);
+    // x and y moved by 10, z is unchanged
+    expect(getPositions(), 'a version bump tessellates the rewritten polygon').toEqual(
+      initialPositions.map((value, index) => (index % 3 === 2 ? value : value + 10))
+    );
+
+    updateState.mockClear();
+    manager.setLayers([new SolidPolygonLayer(props)]);
+    expect(updateState, 'the applied version is not dirty').not.toHaveBeenCalled();
+  } finally {
+    updateState.mockRestore();
+    manager.finalize();
+  }
+});
+
 test('SolidPolygonLayer#WebGPU binary extruded polygons', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
