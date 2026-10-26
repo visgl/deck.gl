@@ -86,7 +86,7 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Run WebGPU tests
+      - name: Run WebGPU unit and render tests
         run: xvfb-run -a --server-args="-screen 0 1280x1024x24" yarn test-webgpu
 
       - name: Upload render test failure images
