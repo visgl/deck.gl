@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
-import {device} from '@deck.gl/test-utils/vitest';
+import {afterAll, beforeAll, expect, test} from 'vitest';
+import {GPUDataEvaluator} from '@luma.gl/gpgpu';
+import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Geometry, type Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
@@ -12,6 +12,14 @@ import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import BitmapLayer from '@deck.gl/layers/bitmap-layer/bitmap-layer';
 import SimpleMeshLayer from '@deck.gl/mesh-layers/simple-mesh-layer/simple-mesh-layer';
 import MeshLayer from '@deck.gl/geo-layers/mesh-layer/mesh-layer';
+
+const bufferPoolSize = GPUDataEvaluator.bufferPoolSize;
+beforeAll(() => {
+  GPUDataEvaluator.bufferPoolSize = 0;
+});
+afterAll(() => {
+  GPUDataEvaluator.bufferPoolSize = bufferPoolSize;
+});
 
 const COLOR = [128, 64, 255, 255] as const;
 const DATA = [{position: [0, 0, 0]}, {position: [1, 1, 0]}];
@@ -48,17 +56,6 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       skip();
       return;
     }
-    const viewport = new MapView().makeViewport({
-      width: 100,
-      height: 100,
-      viewState: {longitude: 0, latitude: 0, zoom: 1}
-    });
-    const manager = new LayerManager(testDevice, {viewport});
-    manager.setProps({
-      onError: error => {
-        throw error;
-      }
-    });
     const texture = testDevice.createTexture({
       width: 1,
       height: 1,
@@ -66,26 +63,34 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     });
     const positions = testDevice.createBuffer({data: new Float32Array([0, 0, 0, 1, 1, 0])});
     try {
-      let bitmap = new BitmapLayer({image: texture, bounds: [0, 0, 1, 1]});
-      for (const bounds of [
-        [0, 0, 1, 1],
-        [0, 0, 2, 2]
-      ]) {
-        bitmap = bitmap.clone({bounds});
-        manager.setLayers([bitmap]);
-        const model = bitmap.state.model!;
-        const attributes = bitmap.getAttributeManager()!;
-        expect(model).toBeInstanceOf(GPUVectorModel);
-        for (const name of ['positions', 'texCoords']) {
-          const column = attributes.getGPUVectors()[name] as GPUVector;
-          expect(column).toBeInstanceOf(GPUVector);
-          expect(column.ownsBuffer).toBe(false);
-          expect(getAttributeBuffer(model, name)).toBe(column.data[0].buffer);
-        }
-        expect(model.vertexArray.indexBuffer).toBe(attributes.getAttributes().indices.getBuffer());
-      }
+      await testLayerAsync({
+        Layer: BitmapLayer,
+        device: testDevice,
+        draw: false,
+        testCases: [
+          [0, 0, 1, 1],
+          [0, 0, 2, 2]
+        ].map(bounds => ({
+          title: `bounds ${bounds}`,
+          props: {image: texture, bounds},
+          onAfterUpdate: ({layer: bitmap}) => {
+            const model = bitmap.state.model!;
+            const attributes = bitmap.getAttributeManager()!;
+            expect(model).toBeInstanceOf(GPUVectorModel);
+            for (const name of ['positions', 'texCoords']) {
+              const column = attributes.getGPUVectors()[name] as GPUVector;
+              expect(column).toBeInstanceOf(GPUVector);
+              expect(column.ownsBuffer).toBe(false);
+              expect(getAttributeBuffer(model, name)).toBe(column.data[0].buffer);
+            }
+            expect(model.vertexArray.indexBuffer).toBe(
+              attributes.getAttributes().indices.getBuffer()
+            );
+          }
+        }))
+      });
       for (const Layer of [SimpleMeshLayer, MeshLayer]) {
-        let layer = new Layer({
+        const props = {
           data: DATA,
           mesh: createGeometry(),
           texture,
@@ -101,43 +106,50 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 }
               }
             : {})
+        };
+        await testLayerAsync<SimpleMeshLayer | MeshLayer>({
+          Layer,
+          device: testDevice,
+          draw: false,
+          testCases: [0, 1, 2].map(update => ({
+            title: `color update ${update}`,
+            ...(update === 0 ? {props} : {}),
+            updateProps: {
+              getColor: update === 1 ? () => COLOR : COLOR,
+              updateTriggers: {getColor: update},
+              ...(update === 2
+                ? {data: {length: 2, attributes: {getPosition: {buffer: positions, size: 3}}}}
+                : {})
+            },
+            onAfterUpdate: ({layer}) => {
+              const model = layer.state.model!;
+              const columns = layer.getAttributeManager()!.getGPUVectors();
+              expect(model).toBeInstanceOf(GPUVectorModel);
+              expect(columns.instanceColors).toBeInstanceOf(update === 1 ? GPUVector : GPUConstant);
+              if (update !== 1)
+                expect(Array.from((columns.instanceColors as GPUConstant).value)).toEqual(COLOR);
+              if (Layer === SimpleMeshLayer) {
+                expect(getAttributeBuffer(model, 'instancePositions')).toBe(
+                  (columns.instancePositions as GPUVector).data[0].buffer
+                );
+              }
+              if (update === 1) {
+                expect(getAttributeBuffer(model, 'instanceColors')).toBe(
+                  (columns.instanceColors as GPUVector).data[0].buffer
+                );
+              }
+              expect(Object.values(model._gpuGeometry!.attributes)).toContain(
+                getAttributeBuffer(model, 'positions')
+              );
+              expect(model.vertexArray.indexBuffer).toBe(model._gpuGeometry!.indices);
+              if (update === 2 && Layer === SimpleMeshLayer) {
+                expect(getAttributeBuffer(layer.state.model!, 'instancePositions')).toBe(positions);
+              }
+            }
+          }))
         });
-        for (let update = 0; update < 3; update++) {
-          layer = layer.clone({
-            getColor: update === 1 ? () => COLOR : COLOR,
-            updateTriggers: {getColor: update},
-            ...(update === 2
-              ? {data: {length: 2, attributes: {getPosition: {buffer: positions, size: 3}}}}
-              : {})
-          });
-          manager.setLayers([layer]);
-          const model = layer.state.model!;
-          const columns = layer.getAttributeManager()!.getGPUVectors();
-          expect(model).toBeInstanceOf(GPUVectorModel);
-          expect(columns.instanceColors).toBeInstanceOf(update === 1 ? GPUVector : GPUConstant);
-          if (update !== 1)
-            expect(Array.from((columns.instanceColors as GPUConstant).value)).toEqual(COLOR);
-          if (Layer === SimpleMeshLayer) {
-            expect(getAttributeBuffer(model, 'instancePositions')).toBe(
-              (columns.instancePositions as GPUVector).data[0].buffer
-            );
-          }
-          if (update === 1) {
-            expect(getAttributeBuffer(model, 'instanceColors')).toBe(
-              (columns.instanceColors as GPUVector).data[0].buffer
-            );
-          }
-          expect(Object.values(model._gpuGeometry!.attributes)).toContain(
-            getAttributeBuffer(model, 'positions')
-          );
-          expect(model.vertexArray.indexBuffer).toBe(model._gpuGeometry!.indices);
-        }
-        if (Layer === SimpleMeshLayer) {
-          expect(getAttributeBuffer(layer.state.model!, 'instancePositions')).toBe(positions);
-        }
       }
     } finally {
-      manager.finalize();
       expect(texture.destroyed).toBe(false);
       expect(positions.destroyed).toBe(false);
       texture.destroy();
