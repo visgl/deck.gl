@@ -196,18 +196,22 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     columns?: ScatterplotLayerColumns;
   };
 
+  /** Bypasses accessor attribute generation when explicit columns drive the model. */
   protected _getAttributeManager() {
     return hasScatterplotColumns(this.props) ? null : super._getAttributeManager();
   }
 
+  /** Uses the prepared column length as the instance count in column mode. */
   getNumInstances(): number {
     return this.state?.columns ? this.state.columns.length : super.getNumInstances();
   }
 
+  /** Keeps the layer loading until its asynchronous column conversion finishes. */
   get isLoaded(): boolean {
     return !this.state?.columns?.loading && super.isLoaded;
   }
 
+  /** Releases column-owned resources and invalidates pending conversions on removal. */
   finalizeState(context) {
     this.state.columns?.destroy();
     super.finalizeState(context);
@@ -239,6 +243,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     this.initializeAccessorAttributes();
   }
 
+  /** Registers the normal accessor attributes when entering or returning to accessor mode. */
   private initializeAccessorAttributes() {
     const attributes: Record<string, any> = (this.props.data as any)?.attributes?.rowIndexes
       ? {

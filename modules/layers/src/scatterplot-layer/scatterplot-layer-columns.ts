@@ -83,12 +83,14 @@ export class ScatterplotLayerColumns {
   private version = 0;
   private request?: Request;
   loading = false;
+  /** Number of rows in the last successfully prepared columns, used as the instance count. */
   get length(): number {
     return this.prepared?.length ?? 0;
   }
+  /** Uses the layer's device to upload accessor values and convert Arrow columns. */
   constructor(private readonly device: Device) {}
 
-  /** Initial shader input layouts used before asynchronous conversion completes. */
+  /** Supplies shader input layouts while asynchronous conversion has not produced buffers yet. */
   getBufferLayouts(useRowIndexes = false): BufferLayout[] {
     const formats: Record<string, VertexFormat> = {
       instancePositions: 'float32x3',
@@ -126,7 +128,11 @@ export class ScatterplotLayerColumns {
     );
   }
 
-  /** Converts a replacement atomically; older requests cannot overwrite newer columns. */
+  /**
+   * Converts explicit columns and fills missing inputs from accessors or binary attributes.
+   * Replaces the previous result only after all inputs succeed; superseded requests release
+   * their allocations so asynchronous completions cannot overwrite newer state.
+   */
   async update(
     props: Record<string, any>,
     changed: () => void,
@@ -252,7 +258,11 @@ export class ScatterplotLayerColumns {
     }
   }
 
-  /** Binds each row-aligned buffer range directly, preserving independently chunked columns. */
+  /**
+   * Draws row-aligned ranges using borrowed views of the prepared buffers.
+   * A boundary from any column starts a new draw because columns may have different chunking.
+   * The row offset keeps picking indices consistent across those draws.
+   */
   draw(model: GPUVectorModel, renderPass: RenderPass): void {
     const prepared = this.prepared;
     if (!prepared) return;
@@ -332,6 +342,10 @@ export class ScatterplotLayerColumns {
     this.request = undefined;
   }
 
+  /**
+   * Provides indexed rows for fallback accessors without copying already indexable data.
+   * Materializes iterables and retains one-shot iterator rows across pending or failed requests.
+   */
   private getRows(data: any, previousRequest?: Request): Rows {
     if (data && Number.isFinite(data.length))
       return {length: data.length, at: index => data[index]};
@@ -352,6 +366,11 @@ export class ScatterplotLayerColumns {
     return {length: rows.length, at: index => rows[index]};
   }
 
+  /**
+   * Builds a missing shader input from a binary attribute, constant, or row accessor.
+   * Borrows compatible buffers; otherwise packs and owns uploads, including position residuals
+   * and coordinate transforms needed to match the normal attribute path.
+   */
   private async makeAccessorColumn(
     props: Record<string, any>,
     accessor: string,
