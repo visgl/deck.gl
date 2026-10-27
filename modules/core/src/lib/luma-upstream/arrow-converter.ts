@@ -2,28 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {
-  convertArrowToGPUVector,
-  getArrowVectorByPath,
-  type ArrowGPUConversionOptions,
-  type ArrowGPUConversionSemantic,
-  type PreparedArrowGPUVector
-} from '@luma.gl/arrow';
 import type {Device} from '@luma.gl/core';
-import type {GPUVector, GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
-import {DataType, Table, type RecordBatch, type Vector} from 'apache-arrow';
-import {
-  makeLayerGPUVectorFromArrow,
-  assertArrowVectorHasNoNulls,
-  type ArrowGPUVectorColumnSelector,
-  type ArrowGPUVectorLayerData
-} from './arrow-conversion-utils';
+import type {GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import {DataType, type RecordBatch, type Vector} from 'apache-arrow';
+import {uploadArrowVector, type PreparedArrowGPUVector} from './arrow-to-gpu-vector';
 
-/** Layer-oriented semantics, including position and scalar aliases for numeric conversion. */
-export type ArrowConverterSemantic = ArrowGPUConversionSemantic | 'position' | 'scalar';
+/** Structural Arrow input contract, without loading Arrow in accessor-only layers. */
+export type ColumnSource = Pick<Vector, 'length' | 'type' | 'data'>;
+
+/** Layer-oriented semantics, for numeric, position, scalar, and color conversion. */
+export type ArrowConverterSemantic = 'auto' | 'numeric' | 'position' | 'scalar' | 'color';
 
 /** Conversion options. Null rows are rejected unless validity preservation is requested. */
-export type ArrowConverterOptions = Omit<ArrowGPUConversionOptions, 'semantic'> & {
+export type ArrowConverterOptions = {
+  name?: string;
+  format?: GPUVectorFormat;
   /** Selects conversion rules; positions preserve XY/XYZ width, colors default to RGBA8. */
   semantic?: ArrowConverterSemantic;
   /** Preserve validity for consumers that understand nulls, or reject them (default). */
@@ -75,24 +68,12 @@ export class ArrowConverter {
   /** Uses the supplied device for conversion and uploads without taking ownership of it. */
   constructor(private readonly device: Device) {}
 
-  /** Synchronously uploads a directly compatible named or explicit Arrow column. */
-  uploadColumn<FormatT extends GPUVectorFormat>(
-    data: ArrowGPUVectorLayerData,
-    selector: ArrowGPUVectorColumnSelector,
-    options: {name: string; id: string; format: FormatT}
-  ): GPUVector<FormatT> {
-    return makeLayerGPUVectorFromArrow(this.device, data, selector, options);
-  }
-
   /** Converts one Arrow vector; destroy the returned handle after its last GPU use. */
   async convert(
     vector: Vector,
     options: ArrowConverterOptions = {}
   ): Promise<PreparedArrowGPUVector> {
     const {semantic = 'auto', nullPolicy = 'reject', ...conversion} = options;
-    if (nullPolicy === 'reject') {
-      assertArrowVectorHasNoNulls(vector);
-    }
     if (
       semantic === 'position' &&
       (!DataType.isFixedSizeList(vector.type) || ![2, 3].includes(vector.type.listSize))
@@ -103,7 +84,7 @@ export class ArrowConverter {
       throw new Error('Arrow scalar input must be numeric');
     }
     let format = conversion.format;
-    if (!format && !conversion.formats) {
+    if (!format) {
       if (semantic === 'color') format = 'unorm8x4';
       if (semantic === 'scalar') format = 'float32';
       if (semantic === 'position') {
@@ -113,11 +94,15 @@ export class ArrowConverter {
         format = vector.type.listSize === 2 ? 'float32x2' : 'float32x3';
       }
     }
-    return convertArrowToGPUVector(this.device, vector, {
-      ...conversion,
+    if (!format) {
+      const width = DataType.isFixedSizeList(vector.type) ? vector.type.listSize : 1;
+      format = (width === 1 ? 'float32' : `float32x${width}`) as GPUVectorFormat;
+    }
+    return uploadArrowVector(this.device, vector, {
+      name: conversion.name,
       format,
-      semantic: semantic === 'position' || semantic === 'scalar' ? 'numeric' : semantic,
-      preserveDataChunks: conversion.preserveDataChunks ?? true
+      color: semantic === 'color',
+      preserveNulls: nullPolicy === 'preserve'
     });
   }
 
@@ -205,7 +190,9 @@ export class ArrowConverter {
 }
 
 function resolveColumn(batch: RecordBatch, source: string): Vector {
-  const vector = getArrowVectorByPath(new Table([batch]), source);
+  const [name, ...path] = source.split('.');
+  let vector: Vector | null = batch.getChild(name);
+  for (const field of path) vector = vector?.getChild(field) ?? null;
   if (!vector) throw new Error(`Arrow column "${source}" is missing`);
   return vector;
 }

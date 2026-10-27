@@ -4,12 +4,17 @@
 
 import {expect, test, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/test-utils';
-import {makeArrowFixedSizeListVector} from '@luma.gl/arrow';
-import {Float32, Table, vectorFromArray} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Float64, Table, vectorFromArray} from 'apache-arrow';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 
 function positions() {
-  return makeArrowFixedSizeListVector(new Float32(), 2, new Float32Array([1, 2, 3, 4]));
+  return vectorFromArray(
+    [
+      [1, 2],
+      [3, 4]
+    ],
+    new FixedSizeList(2, new Field('values', new Float32(), false))
+  );
 }
 
 test('ArrowConverter uploads positions and preserves chunks', async () => {
@@ -126,7 +131,10 @@ test('ArrowConverter rejects stream format changes and releases the rejected out
   const device = new NullDevice({});
   const converter = new ArrowConverter(device);
   const first = positions();
-  const second = makeArrowFixedSizeListVector(new Float32(), 3, new Float32Array([1, 2, 3]));
+  const second = vectorFromArray(
+    [[1, 2, 3]],
+    new FixedSizeList(3, new Field('values', new Float32(), false))
+  );
   const buffers = vi.spyOn(device, 'createBuffer');
   const stream = converter.convertVectors([first, second], {semantic: 'position'});
   const result = (await stream.next()).value!;
@@ -135,6 +143,35 @@ test('ArrowConverter rejects stream format changes and releases the rejected out
   for (const buffer of buffers.mock.results.slice(originalCount))
     expect(buffer.value.destroyed).toBe(true);
   expect(result.vector.data[0].buffer!.destroyed).toBe(false);
+  result.destroy();
+  device.destroy();
+});
+
+test('ArrowConverter uploads sliced numeric chunks and Float64 residuals', async () => {
+  const device = new NullDevice({});
+  const buffers = vi.spyOn(device, 'createBuffer');
+  const source = vectorFromArray([100, 1.00000001, 2.00000002], new Float64()).slice(1);
+  const result = await new ArrowConverter(device).convert(source, {semantic: 'scalar'});
+  const values = buffers.mock.calls.map(([props]) => {
+    const bytes = props!.data as Uint8Array;
+    return new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
+  });
+  expect(Array.from(values[0])).toEqual([1, 2]);
+  expect(values[0][0] + values[1][0]).toBeCloseTo(1.00000001, 14);
+  expect(result.residualVector?.length).toBe(2);
+  result.destroy();
+  device.destroy();
+});
+
+test('ArrowConverter expands RGB floats to normalized RGBA bytes', async () => {
+  const device = new NullDevice({});
+  const buffers = vi.spyOn(device, 'createBuffer');
+  const source = vectorFromArray(
+    [[1, 0.5, 0]],
+    new FixedSizeList(3, new Field('values', new Float32(), false))
+  );
+  const result = await new ArrowConverter(device).convert(source, {semantic: 'color'});
+  expect(Array.from(buffers.mock.calls[0][0]!.data as Uint8Array)).toEqual([255, 128, 0, 255]);
   result.destroy();
   device.destroy();
 });

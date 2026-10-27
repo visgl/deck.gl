@@ -73,15 +73,3 @@ export {
   type GPUGraphDeckNodeSizeMode,
   type GPUGraphNodeLayerProps
 } from './gpu-graph/gpu-graph-node-layer';
-
-export {
-  ArrowConverter,
-  type ArrowConverterSemantic,
-  type ArrowConverterOptions,
-  type ArrowConverterColumn,
-  type ArrowConverterSchema,
-  type ArrowConverterSource,
-  type ArrowConverterIteratorOptions,
-  type ArrowConvertedChunk,
-  type ArrowConvertedBatch
-} from '@deck.gl/core/arrow';

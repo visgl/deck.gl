@@ -35,13 +35,13 @@
       "require": "./dist/index.cjs"
     },
     "./arrow": {
-      "types": "./dist/arrow/index.d.ts",
+      "types": "./dist/lib/luma-upstream/arrow-converter.d.ts",
       "visgl:webgl-only": {
-        "import": "./dist.webgl-only/arrow/index.js",
-        "require": "./dist.webgl-only/arrow/index.cjs"
+        "import": "./dist.webgl-only/lib/luma-upstream/arrow-converter.js",
+        "require": "./dist.webgl-only/lib/luma-upstream/arrow-converter.cjs"
       },
-      "import": "./dist/arrow/index.js",
-      "require": "./dist/arrow/index.cjs"
+      "import": "./dist/lib/luma-upstream/arrow-converter.js",
+      "require": "./dist/lib/luma-upstream/arrow-converter.cjs"
     }
   },
   "files": [
@@ -77,13 +77,9 @@
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4",
   "peerDependencies": {
-    "@luma.gl/arrow": "^10.0.0-alpha.3",
     "apache-arrow": ">=17.0.0"
   },
   "peerDependenciesMeta": {
-    "@luma.gl/arrow": {
-      "optional": true
-    },
     "apache-arrow": {
       "optional": true
     }
