@@ -3603,6 +3603,11 @@ a5-js@^0.10.0:
   resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.10.0.tgz#d164d9f567e6f980aa1ba8d2afbdbde51ebd27d0"
   integrity sha512-DB0OG4SHbaDK6ML4LTsNaxpxdXxtIynpRDKdSAm5q6s7r+AI81+PwjEaA+q0jKZ0bOpCOAiVe/81vodvBoEVZA==
 
+a5-js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-1.0.0.tgz#9a0981b6dd8ea7a91cc8ee0b613cf22d40c04f11"
+  integrity sha512-32CLrp3WpIkETZVVLuBB0zHK1eICxQkKtgUN433F/0MfgEnr3BqIoFXshmthoL+ECwNrUHfL3JG/0tpM7h6awQ==
+
 abab@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.6.tgz#41b80f2c871d19686216b82309231cfd3cb3d291"
