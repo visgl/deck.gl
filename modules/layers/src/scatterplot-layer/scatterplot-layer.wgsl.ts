@@ -18,6 +18,7 @@ struct ScatterplotUniforms {
   billboard: i32,
   radiusUnits: i32,
   lineWidthUnits: i32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
@@ -216,7 +217,7 @@ export function getShaderWGSL(useRowIndexes: boolean): string {
       'PICKING_COLOR_VALUE',
       useRowIndexes
         ? 'picking_getPickingColorFromIndex(attributes.rowIndexes)'
-        : 'picking_getPickingColorFromIndex(attributes.instanceIndex)'
+        : 'picking_getPickingColorFromIndex(attributes.instanceIndex + scatterplot.rowIndexOffset)'
     );
 }
 
