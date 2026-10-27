@@ -34,6 +34,8 @@ import type {
   DefaultProps
 } from '@deck.gl/core';
 
+const defaultPosition = (row: any) => row.position;
+
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 /** All props supported by the ScatterplotLayer */
@@ -164,7 +166,7 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   billboard: false,
   antialiasing: true,
 
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', value: defaultPosition},
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -301,6 +303,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     if (hasScatterplotColumns(this.props)) {
       if (this.props.extensions.length)
         throw new Error('Scatterplot Arrow columns do not support extensions');
+      if (!this.props.positions && this.internalState!.isAsyncPropLoading('data')) return;
       const enteringColumns = !this.state.columns;
       if (enteringColumns) {
         this.internalState!.attributeManager?.finalize();
@@ -331,7 +334,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
           error => this.raiseError(error, 'converting Arrow columns'),
           {
             transform: this.usePositionTransforms().transform?.bind(this),
-            fp64: this.use64bitPositions()
+            fp64: this.use64bitPositions(),
+            requireRows: this.props.getPosition === defaultPosition
           }
         );
       }

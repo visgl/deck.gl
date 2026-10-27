@@ -4,7 +4,7 @@
 
 import {expect, test, vi} from 'vitest';
 import {NullDevice} from '@luma.gl/test-utils';
-import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
+import {Field, FixedSizeList, Float32, Table, vectorFromArray} from 'apache-arrow';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 import {ScatterplotLayerColumns} from '../../../modules/layers/src/scatterplot-layer/scatterplot-layer-columns';
 
@@ -170,5 +170,141 @@ test('Scatterplot borrows strided binary fallbacks and releases owned uploads', 
   columns.destroy();
   expect(buffer.destroyed).toBe(false);
   buffer.destroy();
+  device.destroy();
+});
+
+test('Scatterplot reuses generator rows for all accessors and later column updates', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  function* rows() {
+    yield {position: [1, 2], radius: 3};
+    yield {position: [3, 4], radius: 5};
+  }
+  const data = rows();
+  const getPosition = vi.fn(row => row.position);
+  const getRadius = vi.fn(row => row.radius);
+  const error = vi.fn();
+  const input = {
+    ...props(),
+    positions: undefined,
+    radii: vectorFromArray([1, 2], new Float32()),
+    data,
+    getPosition,
+    getRadius
+  };
+  await columns.update(input, () => {}, error);
+  await columns.update(
+    {
+      ...input,
+      radii: undefined,
+      fillColors: vectorFromArray(
+        [
+          [1, 0, 0, 1],
+          [0, 1, 0, 1]
+        ],
+        new FixedSizeList(4, new Field('values', new Float32(), false))
+      )
+    },
+    () => {},
+    error
+  );
+  expect(error).not.toHaveBeenCalled();
+  expect(getPosition.mock.calls.map(([row]) => row.position)).toEqual([
+    [1, 2],
+    [3, 4],
+    [1, 2],
+    [3, 4]
+  ]);
+  expect(getRadius.mock.calls.map(([row]) => row.radius)).toEqual([3, 5]);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot uses luma binary normalization and float-compatible scalar formats', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const buffers = vi.spyOn(device, 'createBuffer');
+  const error = vi.fn();
+  await columns.update(
+    {
+      ...props(),
+      data: {
+        length: 2,
+        attributes: {
+          getRadius: new Int32Array([3, 5]),
+          getFillColor: new Uint16Array([65535, 0, 0, 65535, 0, 65535, 0, 65535])
+        }
+      }
+    },
+    () => {},
+    error
+  );
+  expect(error).not.toHaveBeenCalled();
+  const prepared = (columns as any).prepared.columns;
+  expect(prepared.instanceRadius.format).toBe('float32');
+  expect(prepared.instanceFillColors.format).toBe('unorm16x4');
+  expect(
+    buffers.mock.calls.some(
+      ([options]) =>
+        options!.data instanceof Float32Array &&
+        Array.from(options!.data as Float32Array).join() === '3,5'
+    )
+  ).toBe(true);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot uses array rows directly without copying or iterating them', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const data = [{position: [1, 2]}, {position: [3, 4]}];
+  data.slice = () => {
+    throw new Error('copied row array');
+  };
+  data[Symbol.iterator] = () => {
+    throw new Error('iterated row array');
+  };
+  const error = vi.fn();
+  await columns.update(
+    {
+      ...props(),
+      positions: undefined,
+      radii: vectorFromArray([1, 2], new Float32()),
+      data,
+      getPosition: row => row.position
+    },
+    () => {},
+    error
+  );
+  expect(error).not.toHaveBeenCalled();
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot accesses Arrow table rows lazily without materializing them', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const data = new Table({radius: vectorFromArray([3, 5], new Float32())});
+  const iterator = vi.spyOn(data, Symbol.iterator).mockImplementation(() => {
+    throw new Error('materialized table');
+  });
+  const seen: number[] = [];
+  const error = vi.fn();
+  await columns.update(
+    {
+      ...props(),
+      data,
+      getRadius: row => {
+        seen.push(row.radius);
+        return row.radius;
+      }
+    },
+    () => {},
+    error
+  );
+  expect(error).not.toHaveBeenCalled();
+  expect(seen).toEqual([3, 5]);
+  expect(iterator).not.toHaveBeenCalled();
+  columns.destroy();
   device.destroy();
 });
