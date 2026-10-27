@@ -17,6 +17,11 @@ import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
 import clipExtension from '../utils/clip-extension';
+import {
+  ScatterplotLayerColumns,
+  hasScatterplotColumns,
+  type ScatterplotColumnProps
+} from './scatterplot-layer-columns';
 
 import type {
   LayerProps,
@@ -35,7 +40,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 export type ScatterplotLayerProps<DataT = unknown> = _ScatterplotLayerProps<DataT> & LayerProps;
 
 /** Props added by the ScatterplotLayer */
-type _ScatterplotLayerProps<DataT> = {
+type _ScatterplotLayerProps<DataT> = ScatterplotColumnProps & {
   data: LayerDataSource<DataT>;
   /**
    * The units of the radius, one of `'meters'`, `'common'`, and `'pixels'`.
@@ -165,6 +170,11 @@ const defaultProps: DefaultProps<ScatterplotLayerProps> = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineWidth: {type: 'accessor', value: 1},
   getPixelOffset: {type: 'accessor', value: [0, 0]},
+  positions: {type: 'object', value: null, optional: true},
+  radii: {type: 'object', value: null, optional: true},
+  fillColors: {type: 'object', value: null, optional: true},
+  lineColors: {type: 'object', value: null, optional: true},
+  lineWidths: {type: 'object', value: null, optional: true},
 
   // deprecated
   strokeWidth: {deprecatedFor: 'getLineWidth'},
@@ -181,7 +191,25 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   state!: {
     model?: Model;
+    columns?: ScatterplotLayerColumns;
   };
+
+  protected _getAttributeManager() {
+    return hasScatterplotColumns(this.props) ? null : super._getAttributeManager();
+  }
+
+  getNumInstances(): number {
+    return this.state?.columns ? this.state.columns.length : super.getNumInstances();
+  }
+
+  get isLoaded(): boolean {
+    return !this.state?.columns?.loading && super.isLoaded;
+  }
+
+  finalizeState(context) {
+    this.state.columns?.destroy();
+    super.finalizeState(context);
+  }
 
   getShaders() {
     const useRowIndexes = Boolean((this.props.data as any)?.attributes?.rowIndexes);
@@ -201,6 +229,15 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   }
 
   initializeState() {
+    if (hasScatterplotColumns(this.props)) {
+      if (this.props.extensions.length)
+        throw new Error('Scatterplot Arrow columns do not support extensions');
+      return;
+    }
+    this.initializeAccessorAttributes();
+  }
+
+  private initializeAccessorAttributes() {
     const attributes: Record<string, any> = (this.props.data as any)?.attributes?.rowIndexes
       ? {
           /** Caller-provided logical picking index per point instance. */
@@ -261,6 +298,41 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   }
 
   updateState(params: UpdateParameters<this>) {
+    if (hasScatterplotColumns(this.props)) {
+      const enteringColumns = !this.state.columns;
+      if (enteringColumns) {
+        this.internalState!.attributeManager?.finalize();
+        this.internalState!.attributeManager = null;
+        this.state.columns = new ScatterplotLayerColumns(this.context.device);
+      }
+      if (enteringColumns || params.changeFlags.extensionsChanged) {
+        this.state.model?.destroy();
+        this.state.model = this._getModel();
+      }
+      if (
+        params.changeFlags.dataChanged ||
+        params.changeFlags.updateTriggersChanged ||
+        this.state.columns!.needsUpdate(params.props, params.oldProps)
+      ) {
+        void this.state.columns!.update(
+          this.props,
+          () => {
+            this.setState({});
+            this.setNeedsUpdate();
+          },
+          error => this.raiseError(error, 'converting Arrow columns')
+        );
+      }
+      return;
+    }
+    if (this.state.columns) {
+      this.state.columns.destroy();
+      this.state.columns = undefined;
+      this.internalState!.attributeManager = super._getAttributeManager();
+      this.initializeAccessorAttributes();
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+    }
     super.updateState(params);
 
     if (params.changeFlags.extensionsChanged) {
@@ -297,11 +369,16 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthUnits: UNIT[lineWidthUnits],
       lineWidthScale,
       lineWidthMinPixels,
-      lineWidthMaxPixels
+      lineWidthMaxPixels,
+      rowIndexOffset: 0
     };
     const model = this.state.model!;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
-    model.draw(this.context.renderPass);
+    if (this.state.columns) {
+      this.state.columns.draw(model as GPUVectorModel, this.context.renderPass);
+    } else {
+      model.draw(this.context.renderPass);
+    }
   }
 
   protected _getModel() {
@@ -310,7 +387,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
-      bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
+      bufferLayout:
+        this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

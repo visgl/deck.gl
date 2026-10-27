@@ -18,6 +18,7 @@ layout(std140) uniform scatterplotUniforms {
   bool billboard;
   highp int radiusUnits;
   highp int lineWidthUnits;
+  highp uint rowIndexOffset;
 } scatterplot;
 `;
 
@@ -34,6 +35,8 @@ export type ScatterplotProps = {
   billboard: boolean;
   radiusUnits: number;
   lineWidthUnits: number;
+  /** Global row offset for chunked column draws. */
+  rowIndexOffset?: number;
 };
 
 export const scatterplotUniforms = {
@@ -53,6 +56,7 @@ export const scatterplotUniforms = {
     antialiasing: 'f32',
     billboard: 'f32',
     radiusUnits: 'i32',
-    lineWidthUnits: 'i32'
+    lineWidthUnits: 'i32',
+    rowIndexOffset: 'u32'
   }
 } as const satisfies ShaderModule<ScatterplotProps>;
