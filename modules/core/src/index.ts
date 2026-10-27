@@ -162,3 +162,12 @@ export type {
   CustomProjectionViewState
 } from './views/custom-projection-view';
 export type {CustomProjectionViewportOptions} from './viewports/custom-projection-viewport';
+
+// Optional Arrow conversion installs only a factory in the main core module.
+export {
+  registerColumnConverter as _registerColumnConverter,
+  createColumnConverter as _createColumnConverter,
+  type ColumnSource as _ColumnSource,
+  type ColumnConverter as _ColumnConverter,
+  type ColumnConverterFactory as _ColumnConverterFactory
+} from './lib/luma-upstream/column-converter';

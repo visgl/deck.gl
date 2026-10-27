@@ -131,3 +131,11 @@ The original standalone examples and their shared fixtures are available in
 [`examples/v10-experimental`](../../examples/v10-experimental/README.md). Run `yarn build-private-examples`
 after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.
+
+## ArrowConverter prototype
+
+`ArrowConverter` exposed by `@deck.gl/core/arrow` centralizes Arrow-to-GPU conversion and streaming.
+It supports semantic position, color, scalar, and luma.gl conversion options, preserves chunks,
+and yields owned results from vector or record-batch streams. See
+[the conversion API and ownership examples](../core/src/arrow/README.md).
+
