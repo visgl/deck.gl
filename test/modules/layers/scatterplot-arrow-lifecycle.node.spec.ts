@@ -81,3 +81,94 @@ test('Scatterplot discards an upload superseded by a newer update', async () => 
     device.destroy();
   }
 });
+
+test('Scatterplot attempts invalid inputs once and retries changed inputs', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const input = {...props(), radii: vectorFromArray([1], new Float32())};
+  const error = vi.fn();
+  await columns.update(input, () => {}, error);
+  expect(error).toHaveBeenCalledOnce();
+  expect(columns.needsUpdate(input, input)).toBe(false);
+  expect(columns.needsUpdate({...input, radii: undefined}, input)).toBe(true);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot evaluates fallback accessors without rows and rejects partial row data', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const seen: unknown[] = [];
+  const getRadius = vi.fn((row, {index}) => {
+    seen.push([row, index]);
+    return index + 1;
+  });
+  const error = vi.fn();
+  await columns.update({...props(), getRadius}, () => {}, error);
+  expect(error).not.toHaveBeenCalled();
+  expect(seen).toEqual([
+    [null, 0],
+    [null, 1]
+  ]);
+  const old = (columns as any).prepared;
+  await columns.update({...props(), data: [{}]}, () => {}, error);
+  expect(error.mock.calls[0][0].message).toMatch('data rows');
+  expect((columns as any).prepared).toBe(old);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot preserves transformed fallback position residuals', async () => {
+  const device = new NullDevice({});
+  const buffers = vi.spyOn(device, 'createBuffer');
+  const columns = new ScatterplotLayerColumns(device);
+  const transform = vi.fn(value => [value[0] + 0.00000001, value[1] * 2, 0]);
+  const error = vi.fn();
+  await columns.update(
+    {
+      ...props(),
+      positions: undefined,
+      radii: vectorFromArray([1, 2], new Float32()),
+      getPosition: () => [1, 2]
+    },
+    () => {},
+    error,
+    {fp64: true, transform}
+  );
+  expect(error).not.toHaveBeenCalled();
+  expect(transform).toHaveBeenCalledTimes(2);
+  const data = buffers.mock.calls
+    .map(([options]) => options!.data)
+    .filter(value => value instanceof Float32Array) as Float32Array[];
+  expect(Array.from(data[data.length - 1]).slice(0, 3)).toEqual([1, 4, 0]);
+  expect(data[data.length - 2][0]).toBeCloseTo(0.00000001, 14);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot borrows strided binary fallbacks and releases owned uploads', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const buffer = device.createBuffer({data: new Float32Array([99, 3, 99, 5])});
+  const getRadius = vi.fn(() => 1);
+  const error = vi.fn();
+  await columns.update(
+    {
+      ...props(),
+      data: {length: 2, attributes: {getRadius: {buffer, offset: 4, stride: 8}}},
+      getRadius
+    },
+    () => {},
+    error
+  );
+  expect(error).not.toHaveBeenCalled();
+  expect(getRadius).not.toHaveBeenCalled();
+  const radius = (columns as any).prepared.columns.instanceRadius;
+  expect(radius.data[0].buffer).toBe(buffer);
+  expect(radius.data[0].byteOffset).toBe(4);
+  expect(radius.data[0].byteStride).toBe(8);
+  columns.destroy();
+  expect(buffer.destroyed).toBe(false);
+  buffer.destroy();
+  device.destroy();
+});

@@ -299,19 +299,27 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   updateState(params: UpdateParameters<this>) {
     if (hasScatterplotColumns(this.props)) {
+      if (this.props.extensions.length)
+        throw new Error('Scatterplot Arrow columns do not support extensions');
       const enteringColumns = !this.state.columns;
       if (enteringColumns) {
         this.internalState!.attributeManager?.finalize();
         this.internalState!.attributeManager = null;
         this.state.columns = new ScatterplotLayerColumns(this.context.device);
       }
-      if (enteringColumns || params.changeFlags.extensionsChanged) {
+      if (
+        enteringColumns ||
+        params.changeFlags.extensionsChanged ||
+        Boolean((params.props.data as any)?.attributes?.rowIndexes) !==
+          Boolean((params.oldProps.data as any)?.attributes?.rowIndexes)
+      ) {
         this.state.model?.destroy();
         this.state.model = this._getModel();
       }
       if (
         params.changeFlags.dataChanged ||
         params.changeFlags.updateTriggersChanged ||
+        params.changeFlags.projectionChanged ||
         this.state.columns!.needsUpdate(params.props, params.oldProps)
       ) {
         void this.state.columns!.update(
@@ -320,7 +328,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
             this.setState({});
             this.setNeedsUpdate();
           },
-          error => this.raiseError(error, 'converting Arrow columns')
+          error => this.raiseError(error, 'converting Arrow columns'),
+          {
+            transform: this.usePositionTransforms().transform?.bind(this),
+            fp64: this.use64bitPositions()
+          }
         );
       }
       return;
@@ -388,7 +400,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout:
-        this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
+        this.state.columns?.getBufferLayouts(
+          Boolean((this.props.data as any)?.attributes?.rowIndexes)
+        ) ?? this.getAttributeManager()!.getBufferLayouts(),
       geometry: new Geometry({
         topology: 'triangle-strip',
         attributes: {

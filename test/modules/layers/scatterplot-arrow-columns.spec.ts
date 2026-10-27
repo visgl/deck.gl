@@ -20,7 +20,10 @@ afterAll(() => {
 });
 
 function positions(rows: number[][]) {
-  return vectorFromArray(rows, new FixedSizeList(3, new Field('values', new Float32(), false)));
+  return vectorFromArray(
+    rows,
+    new FixedSizeList(rows[0].length, new Field('values', new Float32(), false))
+  );
 }
 
 for (const backend of ['webgl', 'webgpu'] as const) {
@@ -31,9 +34,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       return;
     }
     const source = positions([
-      [0, 0, 0],
-      [1, 1, 1]
-    ]).concat(positions([[2, 2, 2]]));
+      [0, 0],
+      [1, 1]
+    ]).concat(positions([[2, 2]]));
     const radii = vectorFromArray([2], new Float32()).concat(
       vectorFromArray([4, 6], new Float32())
     );
@@ -94,6 +97,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             }
             expect(layer.getAttributeManager()).toBeNull();
             expect(layer.getNumInstances()).toBe(3);
+            layer.disablePickingIndex(1);
+            expect(layer.internalState!.disabledPickingIndices).toContain(1);
+            layer.restorePickingColors();
+            expect(layer.internalState!.disabledPickingIndices).toEqual([]);
             if (index < 2) {
               expect(getPosition).not.toHaveBeenCalled();
               expect(getRadius).not.toHaveBeenCalled();
@@ -115,6 +122,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 expect(await (testDevice as any).handle.popErrorScope()).toBeNull();
               expect(bindings.mock.calls).toHaveLength(index < 2 ? 3 : 1);
               const columns = bindings.mock.calls[0][0] as any;
+              expect(columns.instancePositions.format).toBe('float32x3');
               if (index === 0) oldBuffer = columns.instancePositions.data[0].buffer;
               expect(columns.instancePositions.length).toBe(index < 2 ? 1 : 3);
             } finally {
@@ -132,6 +140,142 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       conversions.mockRestore();
       framebuffer.destroy();
       texture.destroy();
+    }
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot Arrow mode refreshes fallback positions with projection on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const {createTestViewport} = await import('../core/viewports/test-crs');
+    const viewports = [2, 3].map(scale =>
+      createTestViewport({
+        width: 100,
+        height: 100,
+        signature: String(scale),
+        converter: {forward: p => [p[0] * scale, p[1], p[2]], inverse: p => p}
+      })
+    );
+    await testLayerAsync({
+      viewport: viewports[0],
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      draw: false,
+      testCases: [2, 3].map((scale, index) => ({
+        ...(index === 0
+          ? {
+              props: {
+                data: [
+                  [10, 20],
+                  [11, 21]
+                ],
+                getPosition: row => row,
+                radii: vectorFromArray([1, 2], new Float32()),
+                coordinateSystem: 'WGS84'
+              }
+            }
+          : {}),
+        viewport: viewports[index],
+        onBeforeUpdate: ({layer}) => {
+          if (index) {
+            layer.context.layerManager.activateViewport(viewports[index]);
+            layer.activateViewport(viewports[index]);
+          }
+        },
+        onAfterUpdate: async ({layer}) => {
+          if (!layer.isLoaded) return;
+          const columns = (layer.state.columns as any).prepared.columns;
+          const bytes = await columns.instancePositions.data[0].buffer.readAsync();
+          expect(new Float32Array(bytes.buffer, bytes.byteOffset, 3)[0]).toBe(10 * scale);
+          expect(columns.instancePositions64Low.format).toBe('float32x3');
+          expect(layer.getAttributeManager()).toBeNull();
+        }
+      })),
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+}
+
+test('Scatterplot rejects extensions when entering or updating Arrow mode', async () => {
+  const {LayerExtension} = await import('@deck.gl/core');
+  const errors: Error[] = [];
+  await testLayerAsync({
+    Layer: ScatterplotLayer,
+    draw: false,
+    testCases: [
+      {props: {data: [{}, {}], getPosition: () => [0, 0]}},
+      {
+        updateProps: {
+          positions: positions([
+            [0, 0],
+            [1, 1]
+          ]),
+          extensions: [new LayerExtension()]
+        },
+        onAfterUpdate: () => expect(errors.at(-1)?.message).toContain('do not support extensions')
+      },
+      {updateProps: {extensions: []}},
+      {
+        updateProps: {extensions: [new LayerExtension()]},
+        onAfterUpdate: () => expect(errors.at(-1)?.message).toContain('do not support extensions')
+      }
+    ],
+    onError: error => {
+      errors.push(error);
+    }
+  });
+  expect(errors).toHaveLength(2);
+});
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot Arrow mode preserves binary radii and logical row indexes on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const radii = testDevice.createBuffer({data: new Float32Array([3, 5])});
+    try {
+      await testLayerAsync({
+        Layer: ScatterplotLayer,
+        device: testDevice,
+        testCases: [
+          {
+            props: {
+              positions: positions([
+                [0, 0],
+                [1, 1]
+              ]),
+              data: {length: 2, attributes: {getRadius: radii, rowIndexes: new Uint32Array([5, 7])}}
+            },
+            onAfterUpdate: ({layer}) => {
+              if (!layer.isLoaded) return;
+              const columns = (layer.state.columns as any).prepared.columns;
+              expect(columns.instanceRadius.data[0].buffer).toBe(radii);
+              expect(columns.rowIndexes.format).toBe('uint32');
+              layer.disablePickingIndex(5);
+              expect(layer.internalState!.disabledPickingIndices).toEqual([5]);
+              layer.restorePickingColors();
+            }
+          }
+        ],
+        onError: error => {
+          throw error;
+        }
+      });
+      expect(radii.destroyed).toBe(false);
+    } finally {
+      radii.destroy();
     }
   });
 }

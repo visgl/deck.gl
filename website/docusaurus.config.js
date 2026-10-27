@@ -147,6 +147,7 @@ const config = {
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),
+            '@deck.gl/core/arrow': resolve('../modules/core/dist/lib/luma-upstream/arrow-converter.js'),
             '@deck.gl/core': resolve('../modules/core/dist'),
             '@deck.gl/extensions': resolve('../modules/extensions/dist'),
             '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
