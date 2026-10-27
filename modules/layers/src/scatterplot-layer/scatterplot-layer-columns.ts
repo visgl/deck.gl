@@ -58,6 +58,11 @@ export type ScatterplotColumnProps = {
   lineWidths?: ScatterplotColumn | null;
 };
 
+type PositionOptions = {
+  transform?: ((value: number[]) => readonly number[]) | null;
+  fp64?: boolean;
+};
+
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {columns: Columns; destroy(): void; length: number};
 
@@ -70,6 +75,7 @@ export function hasScatterplotColumns(props: ScatterplotColumnProps): boolean {
 export class ScatterplotLayerColumns {
   private prepared?: Prepared;
   private version = 0;
+  private attempted = false;
   loading = false;
   get length(): number {
     return this.prepared?.length ?? 0;
@@ -77,7 +83,7 @@ export class ScatterplotLayerColumns {
   constructor(private readonly device: Device) {}
 
   /** Initial shader input layouts used before asynchronous conversion completes. */
-  getBufferLayouts(): BufferLayout[] {
+  getBufferLayouts(useRowIndexes = false): BufferLayout[] {
     const formats: Record<string, VertexFormat> = {
       instancePositions: 'float32x3',
       instancePositions64Low: 'float32x3',
@@ -87,6 +93,7 @@ export class ScatterplotLayerColumns {
       instanceLineWidths: 'float32',
       instancePixelOffset: 'float32x2'
     };
+    if (useRowIndexes) formats.rowIndexes = 'uint32';
     let offset = 0;
     const attributes = Object.entries(formats).map(([name, format]) => {
       const attribute = {attribute: name, format, byteOffset: offset};
@@ -99,8 +106,11 @@ export class ScatterplotLayerColumns {
   /** Checks only column/accessor inputs; uniform-only changes do not upload columns again. */
   needsUpdate(props: Record<string, any>, oldProps: Record<string, any>): boolean {
     return (
-      (!this.prepared && !this.loading) ||
+      !this.attempted ||
       props.getPixelOffset !== oldProps.getPixelOffset ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
+      props.coordinateSystem !== oldProps.coordinateSystem ||
       Object.entries(DEFINITIONS).some(
         ([name, definition]) =>
           props[name] !== oldProps[name] ||
@@ -113,10 +123,12 @@ export class ScatterplotLayerColumns {
   async update(
     props: Record<string, any>,
     changed: () => void,
-    failed: (error: Error) => void
+    failed: (error: Error) => void,
+    positionOptions: PositionOptions = {}
   ): Promise<void> {
     const version = ++this.version;
     this.loading = true;
+    this.attempted = true;
     const results: Array<{destroy(): void}> = [];
     try {
       const {ArrowConverter} = await import('@deck.gl/core/arrow');
@@ -128,7 +140,14 @@ export class ScatterplotLayerColumns {
         if (!source) continue;
         const result = await converter.convert(source as Parameters<typeof converter.convert>[0], {
           name,
-          semantic: definition.semantic
+          semantic: definition.semantic,
+          ...(name === 'positions'
+            ? {
+                format: 'float32x3',
+                transform: positionOptions.transform ?? undefined,
+                fp64: positionOptions.fp64
+              }
+            : {})
         });
         results.push(result);
         if (version !== this.version) {
@@ -143,30 +162,53 @@ export class ScatterplotLayerColumns {
           columns.instancePositions64Low = result.residualVector;
       }
       length ??= 0;
+      const rows = Array.from(createIterable(props.data).iterable);
+      if (rows.length && rows.length !== length)
+        throw new Error('Scatterplot data rows must match column lengths');
       for (const [name, definition] of Object.entries(DEFINITIONS)) {
         if (!props[name]) {
-          columns[definition.attribute] = this.makeAccessorColumn(
+          columns[definition.attribute] = await this.makeAccessorColumn(
             props,
             definition.accessor,
             definition.size,
             definition.semantic === 'color',
             length,
-            results
+            results,
+            columns,
+            positionOptions
           );
         }
       }
-      columns.instancePixelOffset = this.makeAccessorColumn(
+      columns.instancePixelOffset = await this.makeAccessorColumn(
         props,
         'getPixelOffset',
         2,
         false,
         length,
-        results
+        results,
+        columns,
+        positionOptions
       );
+      if (props.data?.attributes?.rowIndexes) {
+        columns.rowIndexes = await this.makeAccessorColumn(
+          props,
+          'rowIndexes',
+          1,
+          false,
+          length,
+          results,
+          columns,
+          positionOptions
+        );
+      }
       columns.instancePositions64Low ??= new GPUConstant({
         format: 'float32x3',
         value: new Float32Array(3)
       });
+      if (version !== this.version) {
+        for (const result of results) result.destroy();
+        return;
+      }
       this.prepared?.destroy();
       this.prepared = {
         columns,
@@ -266,46 +308,163 @@ export class ScatterplotLayerColumns {
     this.prepared = undefined;
   }
 
-  private makeAccessorColumn(
+  private async makeAccessorColumn(
     props: Record<string, any>,
     accessor: string,
     size: number,
     color: boolean,
     length: number,
-    owned: Array<{destroy(): void}>
-  ): GPUVector | GPUConstant {
+    owned: Array<{destroy(): void}>,
+    columns: Columns,
+    positionOptions: PositionOptions
+  ): Promise<GPUVector | GPUConstant> {
+    const binary = props.data?.attributes?.[accessor];
+    if (binary) {
+      const descriptor = ArrayBuffer.isView(binary)
+        ? {value: binary}
+        : binary instanceof Buffer
+          ? {buffer: binary}
+          : binary;
+      const values = descriptor.value;
+      const sourceSize = descriptor.size ?? size;
+      const type =
+        descriptor.type ??
+        (accessor === 'rowIndexes'
+          ? 'uint32'
+          : values instanceof Float64Array
+            ? 'float64'
+            : values instanceof Float32Array
+              ? 'float32'
+              : values instanceof Uint16Array
+                ? 'uint16'
+                : values instanceof Uint32Array
+                  ? 'uint32'
+                  : values instanceof Int32Array
+                    ? 'int32'
+                    : values instanceof Int16Array
+                      ? 'int16'
+                      : values instanceof Int8Array
+                        ? 'int8'
+                        : color
+                          ? 'unorm8'
+                          : values
+                            ? 'uint8'
+                            : 'float32');
+      if (
+        sourceSize === size &&
+        type !== 'float64' &&
+        !(accessor === 'getPosition' && positionOptions.transform)
+      ) {
+        const format = (size === 1 ? type : `${type}x${size}`) as any;
+        const bytes = getGPUVectorFormatInfo(format).byteLength;
+        const buffer =
+          descriptor.buffer ??
+          this.device.createBuffer({
+            data: values,
+            usage: Buffer.VERTEX | Buffer.COPY_SRC | Buffer.COPY_DST
+          });
+        if (!descriptor.buffer) owned.push(buffer);
+        if (
+          length &&
+          (descriptor.offset ?? 0) + (length - 1) * (descriptor.stride ?? bytes) + bytes >
+            buffer.byteLength
+        )
+          throw new Error('Binary attribute is shorter than the Arrow columns');
+        return new GPUVector({
+          type: 'buffer',
+          name: accessor,
+          buffer,
+          ownsBuffer: false,
+          format,
+          length,
+          byteOffset: descriptor.offset ?? 0,
+          byteStride: descriptor.stride ?? bytes
+        });
+      }
+      const constructors = {
+        float32: Float32Array,
+        float64: Float64Array,
+        unorm8: Uint8Array,
+        uint8: Uint8Array,
+        uint16: Uint16Array,
+        uint32: Uint32Array,
+        int8: Int8Array,
+        int16: Int16Array,
+        int32: Int32Array
+      };
+      const TypedArray = constructors[type];
+      if (!TypedArray) throw new Error(`Unsupported binary type: ${type}`);
+      const bytes = values ?? (await descriptor.buffer.readAsync());
+      const view =
+        values ??
+        new TypedArray(
+          bytes.buffer,
+          bytes.byteOffset,
+          bytes.byteLength / TypedArray.BYTES_PER_ELEMENT
+        );
+      const stride =
+        (descriptor.stride ?? sourceSize * view.BYTES_PER_ELEMENT) / view.BYTES_PER_ELEMENT;
+      const offset = (descriptor.offset ?? 0) / view.BYTES_PER_ELEMENT;
+      if (length && offset + (length - 1) * stride + sourceSize > view.length)
+        throw new Error('Binary attribute is shorter than the Arrow columns');
+      props = {
+        ...props,
+        [accessor]: (_row, {index}) =>
+          sourceSize === 1
+            ? view[offset + index * stride]
+            : Array.from(
+                view.subarray(offset + index * stride, offset + index * stride + sourceSize)
+              )
+      };
+    }
     const source = props[accessor];
     const format = color ? 'unorm8x4' : size === 1 ? 'float32' : `float32x${size}`;
+    const lows =
+      accessor === 'getPosition' && positionOptions.fp64
+        ? new Float32Array(Math.max(1, length) * size)
+        : undefined;
     const pack = (value: any, target: Float32Array | Uint8Array, offset: number) => {
-      for (let component = 0; component < size; component++)
+      if (accessor === 'getPosition' && positionOptions.transform)
+        value = positionOptions.transform(value);
+      for (let component = 0; component < size; component++) {
         target[offset + component] =
           size === 1 ? Number(value) : (value?.[component] ?? (color && component === 3 ? 255 : 0));
+        if (lows) lows[offset + component] = (value?.[component] ?? 0) - target[offset + component];
+      }
     };
     if (typeof source !== 'function') {
       const value = color ? new Uint8Array(size) : new Float32Array(size);
       pack(source, value, 0);
+      if (lows)
+        columns.instancePositions64Low = new GPUConstant({
+          format: 'float32x3',
+          value: lows.slice(0, size)
+        });
       return new GPUConstant({format: format as any, value});
     }
     const values = color ? new Uint8Array(length * size) : new Float32Array(length * size);
     const {iterable, objectInfo} = createIterable(props.data, 0, length);
-    let index = 0;
-    for (const row of iterable) {
-      if (index >= length) break;
-      objectInfo.index++;
-      pack(source(row, objectInfo), values, index++ * size);
+    const iterator = iterable[Symbol.iterator]();
+    for (let index = 0; index < length; index++) {
+      objectInfo.index = index;
+      pack(source(iterator.next().value ?? null, objectInfo), values, index * size);
     }
-    const buffer = this.device.createBuffer({
-      data: values,
-      usage: Buffer.VERTEX | Buffer.COPY_DST | Buffer.COPY_SRC
-    });
-    owned.push(buffer);
-    return new GPUVector({
-      type: 'buffer',
-      name: accessor,
-      buffer,
-      ownsBuffer: false,
-      format: format as any,
-      length
-    });
+    const upload = (data: Float32Array | Uint8Array) => {
+      const buffer = this.device.createBuffer({
+        data,
+        usage: Buffer.VERTEX | Buffer.COPY_DST | Buffer.COPY_SRC
+      });
+      owned.push(buffer);
+      return new GPUVector({
+        type: 'buffer',
+        name: accessor,
+        buffer,
+        ownsBuffer: false,
+        format: format as any,
+        length
+      });
+    };
+    if (lows) columns.instancePositions64Low = upload(lows);
+    return upload(values);
   }
 }
