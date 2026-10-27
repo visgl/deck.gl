@@ -17,6 +17,10 @@ export type ArrowConverterSemantic = 'auto' | 'numeric' | 'position' | 'scalar' 
 export type ArrowConverterOptions = {
   name?: string;
   format?: GPUVectorFormat;
+  /** Preserve high/low components after numeric conversion. */
+  fp64?: boolean;
+  /** Transform numeric rows before packing, e.g. source-coordinate conversion. */
+  transform?: (value: number[]) => readonly number[];
   /** Selects conversion rules; positions preserve XY/XYZ width, colors default to RGBA8. */
   semantic?: ArrowConverterSemantic;
   /** Preserve validity for consumers that understand nulls, or reject them (default). */
@@ -102,7 +106,9 @@ export class ArrowConverter {
       name: conversion.name,
       format,
       color: semantic === 'color',
-      preserveNulls: nullPolicy === 'preserve'
+      preserveNulls: nullPolicy === 'preserve',
+      fp64: conversion.fp64,
+      transform: conversion.transform
     });
   }
 
@@ -111,7 +117,7 @@ export class ArrowConverter {
     batch: RecordBatch,
     schema: ArrowConverterSchema
   ): Promise<ArrowConvertedBatch> {
-    const columns: Record<string, PreparedArrowGPUVector> = {};
+    const columns: Record<string, PreparedArrowGPUVector> = Object.create(null);
     try {
       for (const [name, {source, ...options}] of Object.entries(schema)) {
         // The resolver supports nested paths and also validates missing columns.

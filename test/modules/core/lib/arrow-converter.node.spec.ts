@@ -175,3 +175,42 @@ test('ArrowConverter expands RGB floats to normalized RGBA bytes', async () => {
   result.destroy();
   device.destroy();
 });
+
+test('ArrowConverter owns special output names during destruction and rollback', async () => {
+  const device = new NullDevice({});
+  const converter = new ArrowConverter(device);
+  const batch = new Table({positions: positions()}).batches[0];
+  const schema = JSON.parse('{"__proto__":{"source":"positions","semantic":"position"}}');
+  const result = await converter.convertBatch(batch, schema);
+  expect(Object.hasOwn(result.columns, '__proto__')).toBe(true);
+  const buffer = result.columns.__proto__.vector.data[0].buffer!;
+  result.destroy();
+  expect(buffer.destroyed).toBe(true);
+  const buffers = vi.spyOn(device, 'createBuffer');
+  await expect(
+    converter.convertBatch(batch, {...schema, missing: {source: 'missing'}})
+  ).rejects.toThrow('missing');
+  for (const upload of buffers.mock.results) expect(upload.value.destroyed).toBe(true);
+  device.destroy();
+});
+
+test('ArrowConverter ignores child nulls outside a list slice', async () => {
+  const device = new NullDevice({});
+  const source = vectorFromArray(
+    [
+      [null, 2],
+      [3, 4]
+    ],
+    new FixedSizeList(2, new Field('values', new Float32(), true))
+  );
+  const converter = new ArrowConverter(device);
+  await expect(converter.convert(source, {semantic: 'position'})).rejects.toThrow('null');
+  const result = await converter.convert(source.slice(1), {
+    semantic: 'position',
+    format: 'float32x3'
+  });
+  expect(result.vector.length).toBe(1);
+  expect(result.vector.format).toBe('float32x3');
+  result.destroy();
+  device.destroy();
+});

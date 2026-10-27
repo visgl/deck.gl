@@ -18,7 +18,14 @@ export type PreparedArrowGPUVector = {
 export function uploadArrowVector(
   device: Device,
   vector: Vector,
-  options: {name?: string; format: GPUVectorFormat; color: boolean; preserveNulls: boolean}
+  options: {
+    name?: string;
+    format: GPUVectorFormat;
+    color: boolean;
+    preserveNulls: boolean;
+    fp64?: boolean;
+    transform?: (value: number[]) => readonly number[];
+  }
 ): PreparedArrowGPUVector {
   const {name = 'arrow-column', format, color, preserveNulls} = options;
   const width = format === 'float32' ? 1 : Number(/x([234])$/.exec(format)?.[1]);
@@ -31,7 +38,7 @@ export function uploadArrowVector(
   if (!DataType.isInt(type) && !DataType.isFloat(type)) {
     throw new Error('Arrow input must contain numeric values');
   }
-  if ((!color && sourceWidth !== width) || (color && ![3, 4].includes(sourceWidth))) {
+  if ((!color && sourceWidth > width) || (color && ![3, 4].includes(sourceWidth))) {
     throw new Error('Arrow input width does not match the requested output format');
   }
   const parts: GPUVector[] = [];
@@ -73,14 +80,23 @@ export function uploadArrowVector(
         format === 'unorm8x4'
           ? new Uint8Array(chunk.length * width)
           : new Float32Array(chunk.length * width);
-      const low = type instanceof Float64 && !color ? new Float32Array(values.length) : undefined;
+      const low =
+        (options.fp64 || options.transform || type instanceof Float64) && !color
+          ? new Float32Array(values.length)
+          : undefined;
       const valid = preserveNulls ? new Uint32Array(chunk.length) : undefined;
       for (let row = 0; row < chunk.length; row++) {
         const value = chunk.get(row);
-        let rowValid = value !== null;
+        const source = Array.from({length: sourceWidth}, (_, component) =>
+          list ? value?.get(component) : value
+        );
+        let rowValid =
+          value !== null &&
+          source.every(component => component !== null && component !== undefined);
+        const transformed =
+          options.transform && rowValid ? options.transform(source.map(Number)) : source;
         for (let component = 0; component < width; component++) {
-          const input =
-            component < sourceWidth ? (list ? value?.get(component) : value) : color ? 255 : 0;
+          const input = component < transformed.length ? transformed[component] : color ? 255 : 0;
           rowValid &&= input !== null && input !== undefined;
           let number = Number(input ?? 0);
           // Floating point colors use [0, 1]; integer colors use [0, 255].
