@@ -67,6 +67,8 @@ type PositionOptions = {
 
 type Rows = {length: number; at(index: number): any};
 
+type Request = {source: unknown; rows?: Rows};
+
 type Columns = Record<string, GPUVector | GPUConstant>;
 type Prepared = {columns: Columns; destroy(): void; length: number; source: unknown; rows: Rows};
 
@@ -79,8 +81,7 @@ export function hasScatterplotColumns(props: ScatterplotColumnProps): boolean {
 export class ScatterplotLayerColumns {
   private prepared?: Prepared;
   private version = 0;
-  private attempted = false;
-  private data?: unknown;
+  private request?: Request;
   loading = false;
   get length(): number {
     return this.prepared?.length ?? 0;
@@ -111,8 +112,8 @@ export class ScatterplotLayerColumns {
   /** Checks only column/accessor inputs; uniform-only changes do not upload columns again. */
   needsUpdate(props: Record<string, any>, oldProps: Record<string, any>): boolean {
     return (
-      !this.attempted ||
-      props.data !== this.data ||
+      !this.request ||
+      props.data !== this.request.source ||
       props.getPixelOffset !== oldProps.getPixelOffset ||
       props.modelMatrix !== oldProps.modelMatrix ||
       props.coordinateOrigin !== oldProps.coordinateOrigin ||
@@ -134,11 +135,14 @@ export class ScatterplotLayerColumns {
   ): Promise<void> {
     const version = ++this.version;
     this.loading = true;
-    this.attempted = true;
-    this.data = props.data;
+    const previousRequest = this.request;
+    const request: Request = {source: props.data};
+    this.request = request;
     const results: Array<{destroy(): void}> = [];
     try {
-      const rows = this.getRows(props.data);
+      const rows = this.getRows(props.data, previousRequest);
+      request.rows = rows;
+      if (version !== this.version) return;
       if (!props.positions && positionOptions.requireRows && !rows.length) {
         this.prepared?.destroy();
         this.prepared = {columns: {}, length: 0, source: props.data, rows, destroy() {}};
@@ -325,9 +329,10 @@ export class ScatterplotLayerColumns {
     this.version++;
     this.prepared?.destroy();
     this.prepared = undefined;
+    this.request = undefined;
   }
 
-  private getRows(data: any): Rows {
+  private getRows(data: any, previousRequest?: Request): Rows {
     if (data && Number.isFinite(data.length))
       return {length: data.length, at: index => data[index]};
     if (data && Number.isFinite(data.numRows) && typeof data.get === 'function') {
@@ -335,9 +340,14 @@ export class ScatterplotLayerColumns {
     }
     const iterator = data?.[Symbol.iterator]?.();
     if (!iterator) return {length: 0, at: () => null};
-    // A one-shot source's materialized rows belong to its prepared result.
-    if (iterator === data && this.prepared && this.prepared.source === data)
-      return this.prepared.rows;
+    // Normalize a one-shot input once, even while its request is pending or failed.
+    if (iterator === data) {
+      if (previousRequest && previousRequest.source === data) {
+        if (previousRequest.rows) return previousRequest.rows;
+        throw new Error('Replace a failed row iterator before retrying');
+      }
+      if (this.prepared && this.prepared.source === data) return this.prepared.rows;
+    }
     const rows = Array.from({[Symbol.iterator]: () => iterator});
     return {length: rows.length, at: index => rows[index]};
   }

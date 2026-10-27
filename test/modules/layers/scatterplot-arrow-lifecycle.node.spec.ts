@@ -308,3 +308,74 @@ test('Scatterplot accesses Arrow table rows lazily without materializing them', 
   columns.destroy();
   device.destroy();
 });
+
+test('Scatterplot retains iterator input when the first conversion fails', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  function* rows() {
+    yield {position: [1, 2]};
+    yield {position: [3, 4]};
+  }
+  const getPosition = vi.fn(row => row.position);
+  const input = {...props(), positions: undefined, data: rows(), getPosition};
+  const error = vi.fn();
+  await columns.update({...input, radii: vectorFromArray([1], new Float32())}, () => {}, error);
+  expect(error).toHaveBeenCalledOnce();
+  await columns.update({...input, radii: vectorFromArray([1, 2], new Float32())}, () => {}, error);
+  expect(error).toHaveBeenCalledOnce();
+  expect(getPosition.mock.calls.map(([row]) => row.position)).toEqual([
+    [1, 2],
+    [3, 4]
+  ]);
+  expect(columns.length).toBe(2);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Scatterplot shares normalized iterator input with a replacement pending request', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  function* rows() {
+    yield {position: [1, 2]};
+    yield {position: [3, 4]};
+  }
+  const input = {
+    ...props(),
+    positions: undefined,
+    radii: vectorFromArray([1, 2], new Float32()),
+    data: rows(),
+    getPosition: row => row.position
+  };
+  let resume!: () => void;
+  const gate = new Promise<void>(resolve => {
+    resume = resolve;
+  });
+  const convert = ArrowConverter.prototype.convert;
+  let calls = 0;
+  const spy = vi.spyOn(ArrowConverter.prototype, 'convert').mockImplementation(async function (
+    this: ArrowConverter,
+    ...args
+  ) {
+    if (++calls === 1) await gate;
+    return convert.apply(this, args);
+  });
+  const error = vi.fn();
+  try {
+    const old = columns.update(input, () => {}, error);
+    await vi.waitFor(() => expect(spy).toHaveBeenCalledOnce());
+    await columns.update(
+      {...input, radii: vectorFromArray([3, 4], new Float32())},
+      () => {},
+      error
+    );
+    resume();
+    await old;
+    expect(error).not.toHaveBeenCalled();
+    expect(columns.length).toBe(2);
+  } finally {
+    resume();
+    spy.mockRestore();
+    columns.destroy();
+    device.destroy();
+  }
+});
