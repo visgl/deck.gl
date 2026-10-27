@@ -20,3 +20,5 @@ const layer = new ScatterplotLayer({
   fillColors: colorVector
 });
 ```
+
+Hybrid column inputs using the default `getPosition` wait for row data before drawing. Custom function accessors can still use row indexes without row objects. Arrays and Arrow tables are read directly; single-use row iterators are materialized once and shared by fallback accessors.

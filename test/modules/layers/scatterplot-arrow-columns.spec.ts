@@ -279,3 +279,74 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     }
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot hybrid columns wait for row data on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    let finalLength = 0;
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {
+          props: {radii: vectorFromArray([1, 2], new Float32())},
+          onAfterUpdate: ({layer}) => expect(layer.getNumInstances()).toBe(0)
+        },
+        {
+          updateProps: {data: Promise.resolve([{position: [0, 0]}, {position: [1, 1]}])},
+          onAfterUpdate: ({layer}) => {
+            if (layer.isLoaded) finalLength = layer.getNumInstances();
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(finalLength).toBe(2);
+  });
+
+  test(`Scatterplot hybrid columns render integer binary attributes on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {
+          props: {
+            positions: positions([
+              [0, 0],
+              [1, 1]
+            ]),
+            data: {
+              length: 2,
+              attributes: {
+                getRadius: new Int32Array([3, 5]),
+                getFillColor: new Uint16Array([65535, 0, 0, 65535, 0, 65535, 0, 65535])
+              }
+            }
+          },
+          onAfterUpdate: ({layer}) => {
+            if (!layer.isLoaded) return;
+            const columns = (layer.state.columns as any).prepared.columns;
+            expect(columns.instanceRadius.format).toBe('float32');
+            expect(columns.instanceFillColors.format).toBe('unorm16x4');
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+}
