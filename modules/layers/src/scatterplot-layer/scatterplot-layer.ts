@@ -388,7 +388,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       lineWidthMaxPixels,
       rowIndexOffset: 0
     };
-    const model = this.state.model!;
+    const model = this.state.model;
+    if (!model) return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     if (this.state.columns) {
       this.state.columns.draw(model as GPUVectorModel, this.context.renderPass);

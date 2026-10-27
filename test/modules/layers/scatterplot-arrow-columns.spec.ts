@@ -350,3 +350,42 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     });
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot hybrid columns can draw while initial rows are pending on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    let pendingDraws = 0;
+    let finalLength = 0;
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {
+          props: {
+            radii: vectorFromArray([1, 2], new Float32()),
+            data: new Promise(resolve =>
+              setTimeout(() => resolve([{position: [0, 0]}, {position: [1, 1]}]), 100)
+            )
+          },
+          onAfterUpdate: ({layer}) => {
+            if (!layer.isLoaded) {
+              expect(() => layer.draw({uniforms: {}})).not.toThrow();
+              pendingDraws++;
+            } else finalLength = layer.getNumInstances();
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(pendingDraws).toBeGreaterThan(0);
+    expect(finalLength).toBe(2);
+  });
+}

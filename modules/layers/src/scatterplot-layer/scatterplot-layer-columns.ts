@@ -68,7 +68,7 @@ type PositionOptions = {
 type Rows = {length: number; at(index: number): any};
 
 type Columns = Record<string, GPUVector | GPUConstant>;
-type Prepared = {columns: Columns; destroy(): void; length: number};
+type Prepared = {columns: Columns; destroy(): void; length: number; source: unknown; rows: Rows};
 
 /** Returns whether the caller selected the explicit-column path. */
 export function hasScatterplotColumns(props: ScatterplotColumnProps): boolean {
@@ -81,8 +81,6 @@ export class ScatterplotLayerColumns {
   private version = 0;
   private attempted = false;
   private data?: unknown;
-  private rowSource?: unknown;
-  private cachedRows: any[] = [];
   loading = false;
   get length(): number {
     return this.prepared?.length ?? 0;
@@ -143,7 +141,7 @@ export class ScatterplotLayerColumns {
       const rows = this.getRows(props.data);
       if (!props.positions && positionOptions.requireRows && !rows.length) {
         this.prepared?.destroy();
-        this.prepared = {columns: {}, length: 0, destroy() {}};
+        this.prepared = {columns: {}, length: 0, source: props.data, rows, destroy() {}};
         this.loading = false;
         changed();
         return;
@@ -232,6 +230,8 @@ export class ScatterplotLayerColumns {
       this.prepared = {
         columns,
         length,
+        source: props.data,
+        rows,
         destroy: () => {
           for (const result of results) result.destroy();
         }
@@ -325,30 +325,20 @@ export class ScatterplotLayerColumns {
     this.version++;
     this.prepared?.destroy();
     this.prepared = undefined;
-    this.rowSource = undefined;
-    this.cachedRows = [];
   }
 
   private getRows(data: any): Rows {
-    if (data && Number.isFinite(data.length)) {
-      this.rowSource = undefined;
-      this.cachedRows = [];
+    if (data && Number.isFinite(data.length))
       return {length: data.length, at: index => data[index]};
-    }
     if (data && Number.isFinite(data.numRows) && typeof data.get === 'function') {
-      this.rowSource = undefined;
-      this.cachedRows = [];
       return {length: data.numRows, at: index => data.get(index)};
     }
     const iterator = data?.[Symbol.iterator]?.();
-    if (!iterator) {
-      this.rowSource = undefined;
-      this.cachedRows = [];
-    } else if (iterator !== data || this.rowSource !== data) {
-      this.cachedRows = Array.from({[Symbol.iterator]: () => iterator});
-      this.rowSource = data;
-    }
-    const rows = this.cachedRows;
+    if (!iterator) return {length: 0, at: () => null};
+    // A one-shot source's materialized rows belong to its prepared result.
+    if (iterator === data && this.prepared && this.prepared.source === data)
+      return this.prepared.rows;
+    const rows = Array.from({[Symbol.iterator]: () => iterator});
     return {length: rows.length, at: index => rows[index]};
   }
 
