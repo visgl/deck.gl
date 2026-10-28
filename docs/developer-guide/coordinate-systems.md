@@ -148,3 +148,9 @@ If you are familiar with the traditional 3D graphics/game engine terminologies, 
 - deck.gl's world space maps to the standard "model space", i.e. the data that comes in before any transforms have been applied.
 - deck.gl's common space plays the role of standard "world space", but there are a few important differences. To compensate for the lack of 64-bit floats in WebGL2/WebGPU, deck.gl may apply a dynamic translation to common-space positions, determined by the viewport, to improve the precision of projection.
 - Zoom levels are applied by scaling the view matrix with `Math.pow(2, zoom)`.
+
+## External engines and geometry preprocessing
+
+For external engines that provide geometry streaming, clipping or domain boundaries, see
+[Projection domains and worker preprocessing](./projection-domains.md). The example renders
+D3-streamed GeoArrow polygons and inverse-mapped raster fixtures in Cartesian coordinates.

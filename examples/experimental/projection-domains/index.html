@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Projection domains and D3 workers</title>
+<style>body{margin:0;background:#111d2a;color:#eef3f7;font:15px system-ui}#map{position:absolute;inset:190px 0 0}header{padding:18px 24px;max-width:1000px}h1{margin:0 0 8px;font-size:23px}p{margin:8px 0}select{margin:0 20px 0 8px;padding:5px}output{display:block;margin-top:12px;color:#b6cfdd}</style></head>
+<body><header><h1>Projection domains and D3 workers</h1><p>GeoArrow → worker → D3 clipping → triangulation → deck.gl binary layers. The white outline is target-domain geometry; the checkerboard is an inverse-mapped synthetic raster.</p>
+<label>Projection<select id="projection"><option value="equirectangular">Equirectangular / seam</option><option value="orthographic">Rotated hemisphere</option><option value="interrupted">Interrupted Mollweide</option></select></label>
+<label>Raster<select id="raster"><option value="world">360° image</option><option value="rotated">Rotated grid across 180°</option><option value="polar">South-pole-containing grid</option></select></label>
+<output id="status" aria-live="polite"></output></header><div id="map"></div><script type="module" src="./app.ts"></script></body></html>
