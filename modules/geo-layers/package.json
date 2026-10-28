@@ -62,7 +62,7 @@
     "@math.gl/culling": "^5.0.0-alpha.15",
     "@math.gl/web-mercator": "^5.0.0-alpha.15",
     "@types/geojson": "^7946.0.8",
-    "a5-js": "^0.10.0",
+    "a5-js": "^1.0.0",
     "compress-utils": "^0.8.0",
     "h3-js": "^4.4.0",
     "long": "^3.2.0"
