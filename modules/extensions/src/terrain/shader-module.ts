@@ -125,8 +125,11 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP || terrain.mode == TERRAIN_MODE_
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
     if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP_METERS) {
-      // Raise the object by the displacement of its anchor, in any projection mode
-      geometry.position.xyz += project_position(vec3(anchor.xy, terrainZ)) - anchorCommon;
+      // Raise the object by the ground height, which the layer's modelMatrix does not scale
+      vec3 up = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
+        ? normalize(geometry.position.xyz)
+        : vec3(0.0, 0.0, 1.0);
+      geometry.position.xyz += up * project_size(terrainZ);
     } else if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
       // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
       // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
