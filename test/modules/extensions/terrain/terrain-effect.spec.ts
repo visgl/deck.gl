@@ -455,6 +455,26 @@ test('TerrainEffect#external terrain', async () => {
   expect(terrainEffect.terrainCovers.size, 'Terrain covers are released').toBe(0);
   expect(groundCover.destroyed, 'Terrain cover is destroyed').toBe(true);
 
+  // Hidden terrain layers do not take precedence
+  await lifecycle.update({
+    layers: [
+      new SolidPolygonLayer({
+        id: 'ground',
+        data: [GLACIER],
+        getPolygon: d => d,
+        operation: 'terrain',
+        visible: false
+      }),
+      externalTerrainLayer,
+      summitLayer,
+      glacierLayer
+    ]
+  });
+  expect(externalTerrain.setDrapeRenderer).toHaveBeenLastCalledWith(renderDrape);
+  expect(getLayerUniforms(summitLayer).mode, 'TERRAIN_MODE.USE_HEIGHT_MAP_METERS').toBe(
+    TERRAIN_MODE.USE_HEIGHT_MAP_METERS
+  );
+
   // Without terrain, layers draw as usual
   await lifecycle.update({layers: [summitLayer, glacierLayer]});
   expect(getLayerUniforms(summitLayer).mode, 'TERRAIN_MODE.NONE').toBe(TERRAIN_MODE.NONE);
