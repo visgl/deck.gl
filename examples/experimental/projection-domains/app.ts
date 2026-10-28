@@ -125,7 +125,9 @@ async function update() {
 }
 projectionSelect.addEventListener('change', update);
 rasterSelect.addEventListener('change', update);
-window.addEventListener('pagehide', () => {
+window.addEventListener('pagehide', event => {
+  // A persisted page resumes with the same module state on Back/Forward navigation.
+  if (event.persisted) return;
   client.terminate();
   deck.finalize();
 });
