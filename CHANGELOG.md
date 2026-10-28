@@ -19,6 +19,39 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.4
 
+#### deck.gl [v9.4.1] - Oct 28 2026
+
+- fix(core): honor Deck GPU debug option during device initialization (#10782)
+- fix(core): fit the shadow map to the visible frustum at high pitch (#10893)
+- fix(core): release shadow resources when LightingEffect turns shadows off (#10891)
+- fix(core): draw the shadow map without per-layer polygon offset (#10892)
+- fix(core): disable lighting in ShadowPass (#10890)
+- fix(core): let GlobeController zoom past level 12 (#10737)
+- fix(maplibre,mapbox): remove the overlaid container when the overlay is removed (#10899)
+- feat(jupyter-widget): ES module libraries import deck.gl by package name (experimental) (#10794)
+- fix(google-maps): wait for shared context in interleaved mode (#10792)
+- fix(core): scale cartesian z at the viewport latitude below zoom 12 (#10790)
+- fix(carto): render PointLabelLayer backgrounds (#10533)
+- fix(geo-layers): normalize legacy numeric coordinateSystem in Tile3DLayer (#10538)
+- fix(mapbox): guard getProjection against throw when map style is not ready (#10551)
+- fix(mapbox): synchronize camera before onLoad callback (#10735)
+- fix(arcgis): import MapView from the public @deck.gl/core entry (#10788)
+- fix(layers): remove WebGPU custom packing in SolidPolygonLayer (#10803)
+- fix(jupyter-widget): defer updated layers until custom libraries load (#10787)
+- fix(jupyter-widget): MapLibre overlay setProps no longer recurses (#10768)
+- feat(jupyter-widget): load ES module custom libraries (#10665)
+- fix(jupyter-widget): render layers with extensions from unloaded custom libraries (#10764)
+- fix(maplibre): ship a CJS build, like every other @deck.gl/* package (#10692)
+- fix(maplibre): keep picking in sync with the terrain elevation (#10756)
+- fix(react): align widget root with the DeckGL canvas (#10724)
+- fix(core): resolve transition edge cases (#10738)
+- refactor(extensions): order PathStyle shader coordinates (#10644)
+- fix(core): disable a controller with no view state instead of throwing (#10731)
+- Revert "fix(core): rotate GlobeView like a ball through poles (#10598)" (#10713)
+- feat: flat common-space helpers for non-flat projections (#10657)
+- fix(maplibre): sync camera changes made during Deck initialization (#10702)
+- chore: bump luma.gl to 9.4.2 (#10726)
+
 #### deck.gl [v9.4.0] - Sep 5 2026
 
 deck.gl v9.4 brings together a collection of completed improvements focused on performance, stability, and usability. Highlights include:
