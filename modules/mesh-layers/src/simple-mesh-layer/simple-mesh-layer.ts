@@ -8,6 +8,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color,
   project32,
   picking,
@@ -18,7 +19,7 @@ import {
   phongMaterial
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -220,7 +221,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     emptyTexture: Texture;
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
-  };
+  } & Layer['state'];
 
   getShaders() {
     return super.getShaders({
@@ -267,6 +268,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         size: 3,
         accessor: 'getPosition'
       },
@@ -336,7 +338,13 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
-      composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
+      composeModelMatrix:
+        !_instanced ||
+        shouldComposeModelMatrix(
+          viewport,
+          this.state.sourceCrs?.signature || coordinateSystem,
+          Boolean(this.state.preproject)
+        ),
       flatShading: !this.state.hasNormals
     };
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
@@ -348,7 +356,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   protected getModel(mesh: Mesh): Model {
-    const model = new Model(this.context.device, {
+    const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

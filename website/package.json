@@ -12,15 +12,17 @@
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
-    "write-heading-ids": "node ../scripts/write-heading-ids.mjs"
+    "write-heading-ids": "node ../scripts/write-heading-ids.mjs",
+    "build-v10-examples": "node scripts/build-v10-examples.mjs",
+    "prestart": "yarn build-v10-examples"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.0",
-    "@loaders.gl/core": "^5.0.0-alpha.9",
-    "@loaders.gl/i3s": "^5.0.0-alpha.9",
-    "@loaders.gl/las": "^5.0.0-alpha.9",
-    "@loaders.gl/obj": "^5.0.0-alpha.9",
-    "@loaders.gl/ply": "^5.0.0-alpha.9",
+    "@loaders.gl/core": "^5.0.0-alpha.11",
+    "@loaders.gl/i3s": "^5.0.0-alpha.11",
+    "@loaders.gl/las": "^5.0.0-alpha.11",
+    "@loaders.gl/obj": "^5.0.0-alpha.11",
+    "@loaders.gl/ply": "^5.0.0-alpha.11",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",

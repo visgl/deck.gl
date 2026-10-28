@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color as colorModule,
   project32,
   picking,
@@ -17,7 +18,7 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
@@ -72,7 +73,7 @@ type _BitmapLayerProps = {
    * > Note: this prop is experimental.
    *
    * Specifies how image coordinates should be geographically interpreted.
-   * @default COORDINATE_SYSTEM.DEFAULT
+   * @default 'default'
    */
   _imageCoordinateSystem?: CoordinateSystem;
 
@@ -123,12 +124,13 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   static defaultProps = defaultProps;
 
   state!: {
+    subdivisionStep?: number;
     disablePicking?: boolean;
     model?: Model;
     mesh?: any;
     coordinateConversion: number;
     bounds: [number, number, number, number];
-  };
+  } & Layer['state'];
 
   getShaders() {
     return super.getShaders({
@@ -155,7 +157,22 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
-        update: attribute => (attribute.value = this.state.mesh.positions),
+        ...this.usePositionTransforms(),
+        update: function (this: BitmapLayer, attribute) {
+          const {positions} = this.state.mesh;
+          const {transform} = attribute.settings;
+          if (!transform) {
+            attribute.value = positions;
+            return;
+          }
+          // Custom updaters do not run Attribute's accessor transform. Keep the source
+          // mesh untouched so projection/modelMatrix changes always start from input space.
+          const projected = new Float64Array(positions.length);
+          for (let i = 0; i < positions.length; i += 3) {
+            projected.set(transform.call(this, positions.subarray(i, i + 3)), i);
+          }
+          attribute.value = projected;
+        },
         noAlloc
       },
       texCoords: {
@@ -176,7 +193,12 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       attributeManager.invalidateAll();
     }
 
-    if (props.bounds !== oldProps.bounds) {
+    const subdivisionStep = this.getSubdivisionStep();
+    if (
+      props.bounds !== oldProps.bounds ||
+      changeFlags.projectionChanged ||
+      this.state.subdivisionStep !== subdivisionStep
+    ) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
       this.state.model!.setVertexCount(mesh.vertexCount);
@@ -185,7 +207,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
           attributeManager.invalidate(key);
         }
       }
-      this.setState({mesh, ...this._getCoordinateUniforms()});
+      this.setState({mesh, subdivisionStep, ...this._getCoordinateUniforms()});
     } else if (props._imageCoordinateSystem !== oldProps._imageCoordinateSystem) {
       this.setState(this._getCoordinateUniforms());
     }
@@ -254,7 +276,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       ];
     }
 
-    return createMesh(normalizedBounds, this.context.viewport.resolution);
+    return createMesh(normalizedBounds, this.getSubdivisionStep());
   }
 
   protected _getModel(): Model {
@@ -271,7 +293,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
             .filter(layout => layout.name !== 'indices')
         : this.getAttributeManager()!.getBufferLayouts();
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout,
@@ -307,16 +329,19 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
 
   _getCoordinateUniforms() {
     let {_imageCoordinateSystem: imageCoordinateSystem} = this.props;
-    if (imageCoordinateSystem !== 'default') {
+    // Preprojection has already converted the mesh positions to common space.
+    // Geographic/Mercator fragment conversions cannot use these coordinates.
+    if (!this.state.preproject && imageCoordinateSystem !== 'default') {
       const {bounds} = this.props;
       if (!isRectangularBounds(bounds)) {
         throw new Error('_imageCoordinateSystem only supports rectangular bounds');
       }
 
       // The default behavior (linearly interpolated tex coords)
-      const defaultImageCoordinateSystem = this.context.viewport.resolution
-        ? 'lnglat'
-        : 'cartesian';
+      const defaultImageCoordinateSystem =
+        this.context.viewport.isGeospatial && this.context.viewport.crs?.signature !== 'OSMTile512'
+          ? 'lnglat'
+          : 'cartesian';
       imageCoordinateSystem = imageCoordinateSystem === 'lnglat' ? 'lnglat' : 'cartesian';
 
       if (imageCoordinateSystem === 'lnglat' && defaultImageCoordinateSystem === 'cartesian') {

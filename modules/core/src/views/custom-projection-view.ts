@@ -3,6 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import View from './view';
+import {resolveCRS} from '../utils/crs';
+import {deepEqual} from '../utils/deep-equal';
+import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';
@@ -10,7 +13,7 @@ import CustomProjectionController from '../controllers/custom-projection-control
 
 /** World-coordinate center and zoom with MapView-style pitch and bearing. */
 export type CustomProjectionViewState = {
-  /** Center in fromCrs world coordinates. Navigation fixes its Z component at zero. */
+  /** Center in WGS84 longitude/latitude coordinates. Navigation fixes its Z component at zero. */
   center: [number, number, number];
   /** Zoom level; one increment doubles the scale. */
   zoom: number;
@@ -29,18 +32,12 @@ export type CustomProjectionViewState = {
 } & CommonViewState;
 /** Configuration for a custom planar projection. */
 export type CustomProjectionViewProps = CommonViewProps<CustomProjectionViewState> &
-  Pick<
-    CustomProjectionViewportOptions,
-    | 'projection'
-    | 'fromBounds'
-    | 'fromCrs'
-    | 'toCrs'
-    | 'resolution'
-    | 'getDistanceScale'
-    | 'orthographic'
-  >;
+  Pick<CustomProjectionViewportOptions, 'orthographic'> & {
+    /** Planar CRS identifier, PROJ string, WKT, PROJJSON or spatial reference accepted by math.gl. */
+    crs: TypeScriptCRSInput;
+  };
 
-/** A planar view for pluggable input/output coordinate conversion.
+/** A planar WGS84 view with a target CRS resolved by math.gl.
  * @experimental Exported as `_CustomProjectionView`; this API may change.
  */
 export default class CustomProjectionView extends View<
@@ -48,8 +45,37 @@ export default class CustomProjectionView extends View<
   CustomProjectionViewProps
 > {
   static displayName = 'CustomProjectionView';
+  // Private slots can hold async state even though View seals its public properties.
+  #crs?: CRSDescriptor;
+  #initialization?: Promise<void>;
   constructor(props: CustomProjectionViewProps) {
     super(props);
+  }
+  /** Compare CRS definition contents while retaining ordinary View prop equality. */
+  equals(view: this): boolean {
+    if (this === view) return true;
+    if (this.constructor !== view.constructor) return false;
+    const {crs, ...props} = this.props;
+    const {crs: otherCrs, ...otherProps} = view.props;
+    // Structured CRS definitions can nest more deeply than View's layout and controller props.
+    return deepEqual(crs, otherCrs, -1) && deepEqual(props, otherProps, 2);
+  }
+  /** Resolve the target CRS once for this view before creating its synchronous viewport. */
+  initialize(): void | Promise<void> {
+    if (this.#crs) return;
+    if (this.#initialization) return this.#initialization;
+    const resolved = resolveCRS(this.props.crs);
+    const setCrs = (crs: CRSDescriptor | null) => {
+      if (!crs || crs.coordinateFrame !== 'projected') {
+        throw new Error('CustomProjectionView requires a projected CRS');
+      }
+      this.#crs = crs;
+    };
+    if (resolved instanceof Promise) {
+      this.#initialization = resolved.then(setCrs);
+      return this.#initialization;
+    }
+    setCrs(resolved);
   }
   getViewportType() {
     return CustomProjectionViewport;
@@ -60,11 +86,13 @@ export default class CustomProjectionView extends View<
   makeViewport(options: {width: number; height: number; viewState: CustomProjectionViewState}) {
     const viewState = this.filterViewState(options.viewState);
     const dimensions = this.getDimensions(options);
-    if (!dimensions.width || !dimensions.height) return null;
+    if (!dimensions.width || !dimensions.height || !this.#crs) return null;
+    const {crs, ...viewportProps} = this.props;
     return new CustomProjectionViewport({
       ...viewState,
-      ...this.props,
+      ...viewportProps,
       ...dimensions,
+      crs: this.#crs,
       padding: dimensions.padding
     });
   }

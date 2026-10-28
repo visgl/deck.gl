@@ -4,7 +4,8 @@
 
 import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
+import {_GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
@@ -128,7 +129,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     this.setState({parsedPBRMaterial});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
-    const model = new Model(this.context.device, {
+    const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id,
       geometry: mesh,

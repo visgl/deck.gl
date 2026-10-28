@@ -5,7 +5,7 @@
 import {Buffer} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {GLSLShaderAssembler} from '@luma.gl/shadertools';
-import {COORDINATE_SYSTEM, project32} from '@deck.gl/core';
+import {project32} from '@deck.gl/core';
 
 import {createRenderTarget} from './utils';
 import {mercatorCommonToLngLat} from '../utils/projection-utils';
@@ -143,7 +143,7 @@ export class TerrainPickingSurface {
     this.model.shaderInputs.setProps({
       project: {
         ...project,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: 'lnglat',
         coordinateOrigin: [0, 0, 0],
         modelMatrix: null
       }

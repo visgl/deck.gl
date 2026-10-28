@@ -10,7 +10,6 @@ import {describe} from 'vitest';
 import {runPersistentRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {Matrix4} from '@math.gl/core';
 import {registerLoaders} from '@loaders.gl/core';
@@ -41,7 +40,7 @@ const testCases = [
         data: meshSampleData,
         scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: d => d.orientation,
         _animations: {
@@ -72,7 +71,7 @@ const testCases = [
         data: meshSampleData,
         scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: d => d.orientation,
         _animations: {
@@ -103,7 +102,7 @@ const testCases = [
         data: meshSampleData,
         scenegraph: '/test/data/BoxAnimated.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: d => d.orientation,
         _animations: {
@@ -131,7 +130,7 @@ const testCases = [
         scenegraph:
           'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
         coordinateOrigin: [-122.45, 37.75, 0],
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+        coordinateSystem: 'lnglat-offsets',
         getPosition: d => [d.position[0] / 1e5, d.position[1] / 1e5, 10],
         getOrientation: (d, {index}) => [-3 * index, -0.5 * index, 0],
         sizeScale: 50,

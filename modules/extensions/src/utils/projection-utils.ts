@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {WebMercatorViewport, OrthographicViewport, _GlobeViewport} from '@deck.gl/core';
-import type {CoordinateSystem, Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
+import type {Layer, ProjectUniforms, Viewport} from '@deck.gl/core';
 import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import type {NumericArray} from '@math.gl/core';
@@ -53,8 +53,9 @@ export function isFlatViewport(viewport: Viewport): boolean {
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
-  fromCoordinateSystem?: CoordinateSystem;
-  fromCoordinateOrigin?: [number, number, number];
+  sourceCrs?: import('@math.gl/projection/core').CRSDescriptor;
+  coordinateSystem?: 'cartesian' | 'meter-offsets';
+  coordinateOrigin?: [number, number, number];
   modelMatrix?: NumericArray | null;
 };
 
@@ -93,7 +94,7 @@ function projectGlobeMeterOffsetsToFlatCommon(
   position: number[],
   opts: FlatProjectOptions
 ): [number, number, number] {
-  const origin = opts.fromCoordinateOrigin ?? layer.props.coordinateOrigin;
+  const origin = opts.coordinateOrigin ?? layer.props.coordinateOrigin;
   const modelMatrix = opts.modelMatrix === undefined ? layer.props.modelMatrix : opts.modelMatrix;
   let [x, y, z = 0] = position;
   if (modelMatrix) {
@@ -141,13 +142,27 @@ function getLayerViewport(layer: Layer): Viewport {
   return layer.internalState?.viewport || layer.context.viewport;
 }
 
-/** The coordinate system `position` is expressed in, with `default` resolved */
-function getSourceCoordinateSystem(layer: Layer, opts: FlatProjectOptions = {}): CoordinateSystem {
-  const coordinateSystem = opts.fromCoordinateSystem ?? layer.props.coordinateSystem;
-  if (coordinateSystem === 'default') {
-    return getLayerViewport(layer).isGeospatial ? 'lnglat' : 'cartesian';
+/** Input coordinate frame used for flat projection and angular bounds. */
+function getSourceCoordinateSystem(layer: Layer, opts: FlatProjectOptions = {}): string {
+  const coordinateSystem =
+    opts.coordinateSystem ?? opts.sourceCrs?.signature ?? layer.props.coordinateSystem;
+  switch (coordinateSystem) {
+    case 'cartesian':
+    case 'meter-offsets':
+    case 'lnglat-offsets':
+      return coordinateSystem;
   }
-  return coordinateSystem;
+  const sourceCrs = opts.sourceCrs ?? layer.internalState!.sourceCrs;
+  // The antimeridian threshold is in degrees, with longitude on the first axis.
+  if (
+    sourceCrs?.coordinateFrame === 'geographic' &&
+    sourceCrs.axis.startsWith('en') &&
+    sourceCrs.xUnit.degreesPerUnit === 1 &&
+    sourceCrs.yUnit.degreesPerUnit === 1
+  ) {
+    return 'lnglat';
+  }
+  return sourceCrs?.signature ?? 'cartesian';
 }
 
 /**
@@ -178,8 +193,18 @@ export function joinLayerBounds(
   for (const layer of layers) {
     const layerBounds = layer.getBounds();
     if (layerBounds) {
-      const bottomLeftCommon = layer.projectPosition(layerBounds[0], {viewport, autoOffset: false});
-      const topRightCommon = layer.projectPosition(layerBounds[1], {viewport, autoOffset: false});
+      // Attribute bounds already include CPU conversion and source-space transforms.
+      const options = layer.state.preproject
+        ? {
+            viewport,
+            autoOffset: false,
+            sourceCrs: layer.state.packedCrs!,
+            coordinateOrigin: [0, 0, 0] as [number, number, number],
+            modelMatrix: null
+          }
+        : {viewport, autoOffset: false};
+      const bottomLeftCommon = layer.projectPosition(layerBounds[0], options);
+      const topRightCommon = layer.projectPosition(layerBounds[1], options);
 
       bounds[0] = Math.min(bounds[0], bottomLeftCommon[0]);
       bounds[1] = Math.min(bounds[1], bottomLeftCommon[1]);

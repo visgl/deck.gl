@@ -38,7 +38,7 @@ export default class SunLight extends DirectionalLight {
 
   getProjectedLight({layer}: {layer: Layer}): DirectionalLight {
     const {viewport} = layer.context;
-    const isGlobe = viewport.resolution && viewport.resolution > 0;
+    const isGlobe = viewport.crs?.coordinateFrame === 'geocentric';
 
     if (isGlobe) {
       // Rotate vector to align with the direction of the globe projection (up at lon:0,lat:0 is [0, -1, 0])

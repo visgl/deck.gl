@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../../lib/constants';
+import {COORDINATE_SYSTEM, PROJECTION_MODE} from '../project/constants';
 import project from '../project/project';
 import {Vector3, Matrix4} from '@math.gl/core';
 import type {NumericArray} from '@math.gl/core';
@@ -12,11 +12,7 @@ import {pixelsToWorld} from '@math.gl/web-mercator';
 import type {Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shadertools';
 import type Viewport from '../../viewports/viewport';
-import {
-  ProjectProps,
-  ProjectUniforms,
-  getShaderCoordinateSystem
-} from '../project/viewport-uniforms';
+import {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
 layout(std140) uniform shadowUniforms {
@@ -146,14 +142,42 @@ type ShadowModuleBindings = {
   shadow_uShadowMap1: Texture;
 };
 
-function screenToCommonSpace(xyz: number[], pixelUnprojectionMatrix: number[]): number[] {
-  const [x, y, z] = xyz;
-  const coord = pixelsToWorld([x, y, z], pixelUnprojectionMatrix);
-
-  if (Number.isFinite(z)) {
-    return coord;
+/**
+ * Returns the corners of the view frustum in common space. For geospatial viewports the frustum
+ * is clipped to z >= 0, since the visible geometry is assumed to be on or above the ground.
+ */
+function getFrustumCorners(viewport: Viewport): number[][] {
+  const {width, height, pixelUnprojectionMatrix} = viewport;
+  const screenCorners = [
+    [0, 0],
+    [width, 0],
+    [width, height],
+    [0, height]
+  ];
+  const near = screenCorners.map(([x, y]) => pixelsToWorld([x, y, -1], pixelUnprojectionMatrix));
+  const far = screenCorners.map(([x, y]) => pixelsToWorld([x, y, 1], pixelUnprojectionMatrix));
+  if (!viewport.isGeospatial) {
+    return near.concat(far);
   }
-  return [coord[0], coord[1], 0];
+
+  // Frustum vertices above the ground, plus the points where frustum edges cross the ground.
+  // At high pitch the far plane crosses the ground, so the visible area ends at the far plane
+  // instead of where the corner rays hit the ground.
+  const corners = near.concat(far).filter(corner => corner[2] >= 0);
+  for (let i = 0; i < 4; i++) {
+    const j = (i + 1) % 4;
+    for (const [a, b] of [
+      [near[i], far[i]],
+      [near[i], near[j]],
+      [far[i], far[j]]
+    ]) {
+      if (a[2] < 0 !== b[2] < 0) {
+        const t = a[2] / (a[2] - b[2]);
+        corners.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 0]);
+      }
+    }
+  }
+  return corners.length > 0 ? corners : near.concat(far);
 }
 
 function getViewportCenterPosition({
@@ -174,21 +198,7 @@ function getViewProjectionMatrices({
   shadowMatrices: Matrix4[];
 }): Matrix4[] {
   const projectionMatrices: Matrix4[] = [];
-  const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
-  const farZ = viewport.isGeospatial ? undefined : 1;
-  const corners = [
-    [0, 0, farZ], // top left ground
-    [viewport.width, 0, farZ], // top right ground
-    [0, viewport.height, farZ], // bottom left ground
-    [viewport.width, viewport.height, farZ], // bottom right ground
-    [0, 0, -1], // top left near
-    [viewport.width, 0, -1], // top right near
-    [0, viewport.height, -1], // bottom left near
-    [viewport.width, viewport.height, -1] // bottom right near
-  ].map(pixel =>
-    // @ts-expect-error z may be undefined
-    screenToCommonSpace(pixel, pixelUnprojectionMatrix)
-  );
+  const corners = getFrustumCorners(viewport);
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
@@ -240,7 +250,7 @@ function createShadowUniforms(
       .translate(new Vector3(projectProps.viewport.center).negate());
 
     if (
-      projectUniforms.coordinateSystem === getShaderCoordinateSystem('lnglat') &&
+      projectUniforms.coordinateFrame === COORDINATE_SYSTEM.GEODETIC &&
       projectUniforms.projectionMode === PROJECTION_MODE.WEB_MERCATOR
     ) {
       viewProjectionMatrices[i] = viewProjectionMatrixCentered;

@@ -9,7 +9,12 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {Tesselator} from '@deck.gl/core';
-import {cutPolygonByGrid, cutPolygonByMercatorBounds} from '@math.gl/polygon';
+import {
+  cutPolygonByGrid,
+  cutPolygonByMercatorBounds,
+  modifyPolygonWindingDirection,
+  WINDING
+} from '@math.gl/polygon';
 
 import type {
   PolygonGeometry,
@@ -41,6 +46,7 @@ export default class PolygonTesselator extends Tesselator<
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
+    geocentric?: boolean;
   }
 > {
   constructor(opts) {
@@ -78,16 +84,56 @@ export default class PolygonTesselator extends Tesselator<
     }
   }
 
-  /** Implement base Tesselator interface */
+  protected prepareGeometry(polygon: PolygonGeometry): PolygonGeometry {
+    // Cutting requires closed, flat input rings; winding is checked again after projection.
+    return this.preparePolygon(polygon, this.inputPositionSize) as PolygonGeometry;
+  }
+
   protected normalizeGeometry(polygon: PolygonGeometry): NormalizedPolygonGeometry | CutPolygon[] {
+    if (!this.opts.transform) return this.preparePolygon(polygon, this.positionSize);
+    const prepared = polygon as NormalizedPolygonGeometry | CutPolygon[];
+    if (!this.normalize) return prepared;
+    if (isCut(prepared)) {
+      for (const part of prepared) {
+        // Reversing a ring also reverses its outgoing edges. Keep cut-edge visibility
+        // attached to the original edge when a projection flips winding.
+        const {positions, holeIndices, edgeTypes} = part;
+        const ends = [...(holeIndices || []), positions.length];
+        let start = 0;
+        for (let ring = 0; ring < ends.length; ring++) {
+          const end = ends[ring];
+          const reversed = modifyPolygonWindingDirection(
+            positions,
+            ring === 0 ? WINDING.CLOCKWISE : WINDING.COUNTER_CLOCKWISE,
+            {start, end, size: this.positionSize, isClosed: true}
+          );
+          if (reversed && edgeTypes) {
+            const first = start / this.positionSize;
+            const last = end / this.positionSize - 1;
+            const edges = edgeTypes.slice(first, last).reverse();
+            for (let i = 0; i < edges.length; i++) edgeTypes[first + i] = edges[i];
+          }
+          start = end;
+        }
+      }
+      return prepared;
+    }
+    return Polygon.normalize(prepared, this.positionSize);
+  }
+
+  /** Implement base Tesselator interface */
+  private preparePolygon(
+    polygon: PolygonGeometry,
+    size: number
+  ): NormalizedPolygonGeometry | CutPolygon[] {
     if (this.normalize) {
-      const normalizedPolygon = Polygon.normalize(polygon, this.positionSize);
+      const normalizedPolygon = Polygon.normalize(polygon, size);
       if (this.opts.resolution) {
         return cutPolygonByGrid(
           Polygon.getPositions(normalizedPolygon),
           Polygon.getHoleIndices(normalizedPolygon),
           {
-            size: this.positionSize,
+            size: size,
             gridResolution: this.opts.resolution,
             edgeTypes: true
           }
@@ -98,7 +144,7 @@ export default class PolygonTesselator extends Tesselator<
           Polygon.getPositions(normalizedPolygon),
           Polygon.getHoleIndices(normalizedPolygon),
           {
-            size: this.positionSize,
+            size: size,
             maxLatitude: 86,
             edgeTypes: true
           }
@@ -124,10 +170,10 @@ export default class PolygonTesselator extends Tesselator<
 
   /** Override base Tesselator method */
   protected getGeometryFromBuffer(buffer) {
-    if (this.normalize || !this.buffers.indices) {
+    // Supplied triangles avoid triangulation, but not conversion of their positions.
+    if (this.normalize || this.opts.transform || !this.buffers.indices) {
       return super.getGeometryFromBuffer(buffer);
     }
-    // we don't need to read the positions if no normalization/tesselation
     return null;
   }
 
@@ -170,7 +216,8 @@ export default class PolygonTesselator extends Tesselator<
       polygon,
       this.positionSize,
       this.opts.preproject,
-      this.opts.full3d
+      this.opts.full3d,
+      this.opts.geocentric
     );
 
     // make sure the buffer is large enough
