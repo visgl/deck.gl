@@ -30,7 +30,7 @@
     "test-fast": "ocular-lint && ocular-test node",
     "test-headless": "ocular-test headless",
     "test-render": "ocular-test render",
-    "test-webgpu": "RENDER_TEST_DEVICE=webgpu ocular-test render",
+    "test-webgpu": "RENDER_TEST_DEVICE=webgpu ocular-test headless render",
     "test-ci": "RENDER_TEST_DEVICE=webgl ocular-test node headless render --coverage",
     "test-browser": "ocular-test browser",
     "test-tape-compat": "ocular-test tape-compat",
