@@ -58,6 +58,8 @@ export class TerrainEffect implements Effect {
   private pickingSurface?: TerrainPickingSurface;
   /** True if the external terrain layer draws the picking surface in the current picking pass */
   private drawsPickingSurface: boolean = false;
+  /** True if the current picking pass draws depth rather than picking colors */
+  private isPickingZ: boolean = false;
 
   setup({device, deck}: EffectContext) {
     this.device = device;
@@ -83,9 +85,12 @@ export class TerrainEffect implements Effect {
   preRender(opts: PreRenderOptions): void {
     this.drawsPickingSurface = false;
     // @ts-expect-error pickZ only defined in picking pass
-    if (opts.pickZ) {
+    this.isPickingZ = Boolean(opts.pickZ);
+    if (this.isPickingZ) {
       // Do not update if picking attributes
       this.isDrapingEnabled = false;
+      // The external terrain layer draws the depth of the surface that the picking pass drew
+      this.drawsPickingSurface = Boolean(this.externalTerrain && this.pickingSurface);
       return;
     }
 
@@ -358,7 +363,8 @@ export class TerrainEffect implements Effect {
         renderPass,
         parameters,
         project: shaderModuleProps.project,
-        heightMap
+        heightMap,
+        depth: this.isPickingZ
       });
     }
   };

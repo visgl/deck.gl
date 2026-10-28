@@ -23,12 +23,16 @@ in vec2 positions;
 in vec2 texCoords;
 uniform highp sampler2D heightMap;
 out vec2 vTexCoords;
+out float vDepth;
+out float vKnown;
 
 void main() {
   vTexCoords = texCoords;
-  float elevation = texture(heightMap, texCoords).r;
-  vec3 position = project_position(vec3(positions, elevation));
+  vec4 elevation = texture(heightMap, texCoords);
+  vKnown = elevation.a;
+  vec3 position = project_position(vec3(positions, elevation.r));
   gl_Position = project_common_position_to_clipspace(vec4(position, 1.0));
+  vDepth = gl_Position.z / gl_Position.w;
 }
 `;
 
@@ -48,12 +52,29 @@ void main() {
 }
 `;
 
+/** Writes the depth of the surface where the elevation is known, as layers do in the depth picking pass */
+const depthFs = /* glsl */ `\
+#version 300 es
+precision highp float;
+in float vDepth;
+in float vKnown;
+out vec4 fragColor;
+
+void main() {
+  if (vKnown < 0.5) {
+    discard;
+  }
+  fragColor = vec4(vDepth, 0.0, 0.0, 1.0);
+}
+`;
+
 /**
  * Stands in for terrain drawn by another renderer in the picking buffer, so that the layers draped
  * over it can be picked: a grid raised by the height map, showing the draped layers' picking colors.
  */
 export class TerrainPickingSurface {
   private model: Model;
+  private depthModel: Model;
   private positions: Buffer;
   private texCoords: Buffer;
   private indices: Buffer;
@@ -75,22 +96,8 @@ export class TerrainPickingSurface {
       indexType: 'uint16',
       data: getIndices()
     });
-    this.model = new Model(device, {
-      id: 'terrain-picking-surface',
-      vs,
-      fs,
-      modules: [project32],
-      // Without the default modules of layers, such as the terrain module
-      shaderAssembler: new GLSLShaderAssembler(),
-      topology: 'triangle-list',
-      bufferLayout: [
-        {name: 'positions', format: 'float32x2'},
-        {name: 'texCoords', format: 'float32x2'}
-      ],
-      attributes: {positions: this.positions, texCoords: this.texCoords},
-      indexBuffer: this.indices,
-      vertexCount: (GRID_SIZE - 1) * (GRID_SIZE - 1) * 6
-    });
+    this.model = this._createModel(device, 'terrain-picking-surface', fs);
+    this.depthModel = this._createModel(device, 'terrain-picking-surface-depth', depthFs);
   }
 
   /** Returns the framebuffer for the draped layers' picking colors, covering the height map */
@@ -124,23 +131,28 @@ export class TerrainPickingSurface {
     this.positions.write(positions);
   }
 
-  /** Draws the surface in the picking pass, with the parameters of the layer that draws it */
+  /**
+   * Draws the surface in the picking pass, with the parameters of the layer that draws it.
+   * With `depth`, it draws its depth for the picking pass that finds the coordinate of a pick.
+   */
   draw({
     renderPass,
     parameters,
     project,
-    heightMap
+    heightMap,
+    depth = false
   }: {
     renderPass: RenderPass;
     parameters: Parameters;
     project: ProjectProps;
     heightMap: Texture;
+    depth?: boolean;
   }): void {
-    this.model.setBindings({
-      heightMap,
-      pickingCover: this.pickingCover.colorAttachments[0].texture
-    });
-    this.model.shaderInputs.setProps({
+    const model = depth ? this.depthModel : this.model;
+    model.setBindings(
+      depth ? {heightMap} : {heightMap, pickingCover: this.pickingCover.colorAttachments[0].texture}
+    );
+    model.shaderInputs.setProps({
       project: {
         ...project,
         coordinateSystem: 'lnglat',
@@ -148,25 +160,49 @@ export class TerrainPickingSurface {
         modelMatrix: null
       }
     });
-    this.model.setParameters({
-      ...parameters,
-      // Keeps the layer index that the picking cover holds in its alpha
-      blendAlphaSrcFactor: 'one',
-      // Objects on the ground stay in front, and the terrain doesn't hide anything
-      depthBias: 1,
-      depthBiasSlopeScale: 1,
-      depthWriteEnabled: false
-    });
-    this.model.draw(renderPass);
+    model.setParameters(
+      depth
+        ? parameters
+        : {
+            ...parameters,
+            // Keeps the layer index that the picking cover holds in its alpha
+            blendAlphaSrcFactor: 'one',
+            // Objects on the ground stay in front, and the terrain doesn't hide anything
+            depthBias: 1,
+            depthBiasSlopeScale: 1,
+            depthWriteEnabled: false
+          }
+    );
+    model.draw(renderPass);
   }
 
   delete(): void {
     this.model.destroy();
+    this.depthModel.destroy();
     this.positions.destroy();
     this.texCoords.destroy();
     this.indices.destroy();
     this.pickingCover.colorAttachments[0].destroy();
     this.pickingCover.destroy();
+  }
+
+  private _createModel(device: Device, id: string, fragmentShader: string): Model {
+    return new Model(device, {
+      id,
+      vs,
+      fs: fragmentShader,
+      modules: [project32],
+      // Without the default modules of layers, such as the terrain module
+      shaderAssembler: new GLSLShaderAssembler(),
+      topology: 'triangle-list',
+      bufferLayout: [
+        {name: 'positions', format: 'float32x2'},
+        {name: 'texCoords', format: 'float32x2'}
+      ],
+      attributes: {positions: this.positions, texCoords: this.texCoords},
+      indexBuffer: this.indices,
+      vertexCount: (GRID_SIZE - 1) * (GRID_SIZE - 1) * 6
+    });
   }
 }
 

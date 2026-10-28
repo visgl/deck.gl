@@ -561,6 +561,10 @@ webglTest('TerrainEffect#picks layers draped over external terrain', async () =>
     expect(pick([8.012, 46.5, 2000])?.layer?.id, 'Point on the terrain with a model matrix').toBe(
       'hut'
     );
+    const [x, y] = viewport.project([8.003, 46.502, 2000]);
+    const picked = deck.pickObject({x, y, unproject3D: true});
+    expect(picked?.layer?.id, 'Draped layer picked in 3D').toBe('west');
+    expect(picked?.coordinate?.[2], 'Coordinate on the terrain').toBeCloseTo(2000, -2);
   } finally {
     deck.finalize();
     webglContext!.getExtension('WEBGL_lose_context')?.loseContext();
