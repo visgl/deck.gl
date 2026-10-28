@@ -12,7 +12,7 @@ export type ExternalTerrainDrapeRenderer = (opts: {
   target: Framebuffer;
   /** The area that `target` covers in Web Mercator common space, with `minY` in its first row */
   bounds: Bounds;
-  /** Selects the layers to draw, by the root layer as in `Deck.layerFilter` */
+  /** Selects the layers to draw, by the root layer as in `Deck.layerFilter`, which also applies */
   layerFilter?: (context: FilterContext) => boolean;
   /** Framebuffer pixels per CSS pixel, which sizes layers with pixel units */
   devicePixelRatio?: number;

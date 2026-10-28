@@ -363,6 +363,17 @@ test('TerrainEffect#external terrain', async () => {
   expect(Array.from(device.readPixelsToArrayWebGL(tile)), 'Layer filter').toEqual(
     new Array(64).fill(0)
   );
+  lifecycle.effectContext.deck.props.layerFilter = ({layer}) => layer.id !== 'glacier';
+  renderDrape({target: tile, bounds: tileBounds});
+  expect(Array.from(device.readPixelsToArrayWebGL(tile)), "Deck's layer filter").toEqual(
+    new Array(64).fill(0)
+  );
+  renderDrape({target: tile, bounds: tileBounds, layerFilter: () => true});
+  expect(
+    Array.from(device.readPixelsToArrayWebGL(tile)),
+    "Deck's layer filter and the host's"
+  ).toEqual(new Array(64).fill(0));
+  lifecycle.effectContext.deck.props.layerFilter = null;
   tile.destroy();
 
   // A host that draws the layers in groups shares one height map between them

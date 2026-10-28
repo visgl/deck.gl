@@ -14,7 +14,7 @@ import {TerrainPickingSurface} from './terrain-picking-surface';
 import {getExternalTerrain} from './external-terrain';
 import {makeViewport} from '../utils/projection-utils';
 
-import type {Effect, EffectContext, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
+import type {Deck, Effect, EffectContext, PreRenderOptions, Layer, Viewport} from '@deck.gl/core';
 import type {ExternalTerrain, ExternalTerrainDrapeRenderer} from './external-terrain';
 
 /**
@@ -53,6 +53,7 @@ export class TerrainEffect implements Effect {
   /** True if a terrain layer is present, which offset and draped layers follow */
   private hasTerrain: boolean = false;
   private device?: Device;
+  private deck?: Deck<any>;
   /** Stands in for the external terrain in the picking buffer, once draped layers are pickable */
   private pickingSurface?: TerrainPickingSurface;
   /** True if the external terrain layer draws the picking surface in the current picking pass */
@@ -60,6 +61,7 @@ export class TerrainEffect implements Effect {
 
   setup({device, deck}: EffectContext) {
     this.device = device;
+    this.deck = deck;
     this.dummyHeightMap = device.createTexture({
       width: 1,
       height: 1,
@@ -194,6 +196,7 @@ export class TerrainEffect implements Effect {
 
   cleanup({deck}: EffectContext): void {
     this._setExternalTerrain(null);
+    this.deck = undefined;
 
     this.pickingSurface?.delete();
     this.pickingSurface = undefined;
@@ -415,11 +418,13 @@ export class TerrainEffect implements Effect {
     if (!viewport) {
       return;
     }
+    const deckLayerFilter = this.deck?.props.layerFilter;
     this.terrainPass.renderDrapedLayers(target, viewport, {
       ...drape.opts,
       views: undefined,
       layers,
-      layerFilter,
+      layerFilter: context =>
+        (!deckLayerFilter || deckLayerFilter(context)) && (!layerFilter || layerFilter(context)),
       shaderModuleProps: {
         terrain: {
           dummyHeightMap: this.dummyHeightMap,
