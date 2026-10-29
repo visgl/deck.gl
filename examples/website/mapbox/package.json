@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/csv": "^5.0.0-alpha.9",
+    "@loaders.gl/csv": "^5.0.0-alpha.11",
     "d3-scale": "^4.0.0",
     "deck.gl": "^9.0.0",
     "mapbox-gl": "^3.0.0",

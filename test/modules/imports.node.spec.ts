@@ -81,13 +81,11 @@ describe('Top-level imports', () => {
     expect(deck.LineLayer, 'LineLayer symbol imported').toBeTruthy();
     expect(deck.MapLibreOverlay, 'MapLibreOverlay symbol imported').toBeTruthy();
 
-    expect(deck.COORDINATE_SYSTEM.LNGLAT, 'COORDINATE_SYSTEM.LNGLAT imported').toBe('lnglat');
-    expect(deck.COORDINATE_SYSTEM.METER_OFFSETS, 'COORDINATE_SYSTEM.METERS imported').toBe(
-      'meter-offsets'
-    );
-    expect(deck.COORDINATE_SYSTEM.CARTESIAN, 'COORDINATE_SYSTEM.CARTESIAN imported').toBe(
-      'cartesian'
-    );
+    for (const exports of [core, deck]) {
+      expect(exports).not.toHaveProperty('COORDINATE_SYSTEM');
+      expect(exports).not.toHaveProperty('PROJECTION_MODE');
+      expect(exports).not.toHaveProperty('_PROJECTION_MODE');
+    }
   });
 
   test('deck.gl default import', () => {

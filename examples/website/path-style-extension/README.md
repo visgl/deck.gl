@@ -34,4 +34,4 @@ The sample is a pinned street-design snapshot from the City of Seattle Departmen
 
 ### Basemap
 
-The basemap is provided by the [CARTO free basemap service](https://carto.com/basemaps). To use a different basemap, see the [base map guide](../../../docs/get-started/using-with-map.md).
+The basemap is provided by the [OpenFreeMap](https://openfreemap.org/). To use a different basemap, see the [base map guide](../../../docs/get-started/using-with-map.md).

@@ -15,6 +15,16 @@ It's recommended that you read the [Views and Projections guide](../../developer
 </div>
 
 
+## Target CRS
+
+`GlobeViewport.crs` describes standard geocentric XYZ coordinates in meters on the
+existing deck.gl sphere, with radius 6370972 meters. The descriptor is defined locally
+using math.gl's geocentric projection plugin. The viewport retains its common-space
+orientation, radius, and altitude behavior during the CRS transition.
+
+Descriptor bounds enclose the reference sphere and describe a rendering target, not
+coordinate validity or limits on altitude.
+
 ## Limitations
 
 The goal of `GlobeView` is to provide a generic solution to rendering and navigating data in the 3D space.
@@ -40,9 +50,6 @@ const view = new GlobeView({id, ...});
 
 `GlobeView` takes the same parameters as the [View](./view.md) superclass constructor, plus the following:
 
-#### `resolution` (number, optional) {#resolution}
-
-The resolution at which to turn flat features into 3D meshes, in degrees. Smaller numbers will generate more detailed mesh. Default `10`.
 
 #### `nearZMultiplier` (number, optional) {#nearzmultiplier}
 
@@ -76,6 +83,7 @@ To render, `GlobeView` needs to be used together with a `viewState` with the fol
 - `minZoom` (number, optional) - min zoom level. Default `0`.
 - `maxPitch` (number, optional) - max pitch angle. Default `60`.
 - `minPitch` (number, optional) - min pitch angle. Default `0`.
+- `position` (number[3], optional) - Viewport center offsets from lng, lat in meters. Default: `[0,0,0]`.
 
 When `bearing` is `0` (the default), north is always kept pointing up and the globe behaves like a traditional desk globe — horizontal drag changes longitude, vertical drag changes latitude, and the polar axis stays fixed. When the user changes the bearing (via shift+drag or right-click drag), the globe enters free rotation mode where bearing evolves naturally to avoid orientation discontinuities near the poles.
 

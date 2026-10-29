@@ -19,7 +19,7 @@ const PITCH_ACCEL = 1.2;
 export type CustomProjectionStateProps = {
   width: number;
   height: number;
-  /** Camera center in fromCrs world coordinates. */
+  /** Camera center in WGS84 longitude/latitude. */
   center?: [number, number, number];
   zoom?: number;
   pitch?: number;
@@ -31,7 +31,7 @@ export type CustomProjectionStateProps = {
   minPitch?: number;
   maxPitch?: number;
 
-  /** Optional world-coordinate bounds in fromCrs. Defaults to null (unrestricted). */
+  /** Optional longitude/latitude bounds in WGS84. Defaults to null (unrestricted). */
   maxBounds?: ControllerProps['maxBounds'];
   maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
 };

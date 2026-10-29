@@ -8,6 +8,15 @@ A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines 
 
 While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices, you typically do not directly create `Viewport` instances. Instead, `Viewport` classes are created using the [View](./view.md) class descriptors and the current `viewState`.
 
+The base class uses an optional, already-resolved `crs` descriptor for its default
+WGS84-to-target conversion and target-coordinate distance scales. Linear target axes default to metre-based common units using the descriptor’s unit factors.
+Without a descriptor, positions remain in local coordinates; supplying longitude and latitude does not select
+a projection. CRS resolution belongs to the View, not the viewport constructor.
+
+Specialized viewports retain their projection conventions. In particular,
+`WebMercatorViewport` and geospatial `FirstPersonViewport` use `@math.gl/web-mercator`
+for their Mercator projection, altitude scaling, and high-precision distance scales.
+
 ## Overview of Viewport Classes
 
 | Viewport Class        | Description |
@@ -38,12 +47,13 @@ View Matrix Parameters
 
 * `viewMatrix` (number[16], optional) - 4x4 view matrix. Defaults to the identity matrix.
 
-Position and Geospatial Anchor Options (Optional)
+Position and CRS Options (Optional)
 
-* `latitude` (number, optional) - Center of viewport on map (alternative to center). Must be provided if constructing a geospatial viewport.
-* `longitude` (number, optional) - Center of viewport on map (alternative to center). Must be provided if constructing a geospatial viewport.
+* `crs` (CRSDescriptor, optional) - Prepared target CRS. Default conversions accept WGS84 positions and produce target coordinates scaled into common space.
+* `targetToCommonMatrix` (number[16], optional) - Affine transform from target CRS coordinates to common space, replacing default `unitsPerWorldUnit` scaling. Use it to align target axes with common space. Screen unprojection onto an elevation plane requires the transform to preserve horizontal planes.
+* `distanceScales` (object or function, optional) - Partial distance scales, or a function that samples them at a world-coordinate anchor. The function receives no anchor when initializing camera scales. Default scale sampling uses the CRS descriptor.
 * `zoom` (number, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) .
-* `focalDistance` (number, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
+* `focalDistance` (number, optional) - Modifier of the projection scale. Default `1`.
 
 * `position` (number[3], optional) - Position of viewport camera. Default `[0, 0, 0]`.
 * `modelMatrix` (number[16], optional) - Optional 4x4 model matrix applied to position.
@@ -111,15 +121,16 @@ Returns:
 
 #### `projectPosition` {#projectposition}
 
-Projects latitude, longitude (and altitude) to coordinates in the [common space](./project.md).
+Converts a position to the viewport's [common space](./project.md). To project coordinates from a different CRS, pass its resolved math.gl CRS descriptor as `options.sourceCrs`.
 
 Parameters:
 
-* `coordinates` (number[]) - `[lng, lat, altitude]` Passing an altitude is optional.
+* `coordinates` (number[]) - `[x, y, z]`, with optional altitude. Defaults to longitude/latitude/altitude for geospatial viewports and local coordinates otherwise.
+* `options.sourceCrs` (CRSDescriptor, optional) - The CRS of `coordinates`.
 
 Returns:
 
-* `[x, y, z]` in WebMercator coordinates.
+* `[x, y, z]` in the viewport's common space.
 
 
 #### `unprojectPosition` {#unprojectposition}
@@ -134,6 +145,13 @@ Returns:
 
 * `[longitude, latitude, altitude]`
 
+
+#### `getPreprojection`
+
+Returns conversions between a source CRS and the CRS accepted by the viewport's projection shader.
+
+- `sourceCrs` (`CRSDescriptor | null`) - Resolved source descriptor; `null` denotes Cartesian or meter-offset input.
+- Returns `{preproject, unpreproject, packedCrs}`. Both functions are `null` when the shader accepts the source CRS directly. Otherwise, `preproject` converts source coordinates to packed coordinates and `unpreproject` reverses that conversion. `packedCrs` describes the attribute coordinates. These functions do not apply the layer's model matrix or coordinate origin.
 
 #### `getBounds` {#getbounds}
 
@@ -188,6 +206,24 @@ if (outDir) {
 * Functions (including projection and unprojection of coordinates) are available both in JavaScript and in GLSL, so that layers can do consistent projection calculations in both GLSL and JavaScript.
 * To support pixel project/unproject functions (in addition to the clipspace projection that Camera classes typically manage), the `Viewport` is also aware of the viewport extents.
 * In geospatial setups, Viewports can contain geospatial anchors.
+
+
+### Geometry Approximation
+
+![subdivision](https://raw.githubusercontent.com/visgl/deck.gl-data/refs/heads/master/images/docs/viewport-resolution.png)
+
+<small>
+Left to right: same polygons in resolution 0, 10, 60, rendering 487, 501, 591 outline vertices respectively.
+Notice the shape of the 49th-parallel.
+<br/><i>Natural Earth 1:110 country boundaries of continental Canada and United States. Albers projection, central metidian -96°, standard parallels 29.5° / 45.5°</i>
+</small>
+
+
+When a geometry is displayed in a different CRS from its definition, long segments are still rendered as straight lines, instead of warping along the surface of the new CRS.
+
+Use `resolution` to divide long straight lines into smaller segments to better follow the shape of the target CRS. Subdivision adds vertices before projection so paths, polygon edges and bitmap meshes can follow projected curves more closely. Higher values produce finer detail, with more processing and memory overhead. Subdivision is by default disabled.
+
+The setting is relative to the earth's circumference and works across source CRSs with different units. For example, `resolution: 36` gives a 10-degree step for WGS84 geometry. When implementing a custom layer, use `context.viewport.getSubdivisionStep(sourceCrs)` to retrieve a step in the geometry's source CRS units.
 
 ## Source
 

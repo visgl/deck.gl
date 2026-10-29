@@ -1,91 +1,70 @@
 # CustomProjectionView (Experimental)
 
-`CustomProjectionView` renders a planar map using application-supplied coordinate conversion functions. It supports 2D map projections, not globe projections or arbitrary 3D coordinate transformations. Layers can still display altitude and extruded geometry. It uses [CustomProjectionViewport](./custom-projection-viewport.md) and [CustomProjectionController](./custom-projection-controller.md).
+`CustomProjectionView` renders a planar map in a target CRS resolved by `@math.gl/projection`. Input positions and camera centers use WGS84 longitude/latitude in degrees and altitude in meters. It supports planar projections, with altitude and extruded geometry, using [CustomProjectionViewport](./custom-projection-viewport.md) and [CustomProjectionController](./custom-projection-controller.md).
 
-The converter returns XYZ in **map meters**: X/Y locate a point on the planar map, and Z represents altitude in meters. World coordinates can use other units, provided the converter converts them to map meters. See the [coordinate contract](./custom-projection-viewport.md#coordinate-contract).
-
-This API is experimental and may change. Import it as `_CustomProjectionView` from `@deck.gl/core` or `deck.gl`.
+Import it as `_CustomProjectionView` from `@deck.gl/core` or `deck.gl`. This API is experimental and may change.
 
 ## Usage
 
-This example uses [proj4](https://github.com/proj4js/proj4js) to configure an Equal Earth view. deck.gl does not bundle a projection library.
-
 ```js
 import {Deck, _CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
-import proj4 from 'proj4';
-
-// WGS 84 longitude/latitude to Equal Earth (EPSG:8857), in meters.
-const fromCrs = 'EPSG:4326';
-const toCrs = '+proj=eqearth +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m';
 
 new Deck({
   views: new CustomProjectionView({
-    fromCrs,
-    toCrs,
-    projection: proj4(fromCrs, toCrs),
-    fromBounds: [-180, -90, 180, 90],
-    resolution: 5 // degrees in fromCrs
+    crs: '+proj=eqearth +lon_0=0 +datum=WGS84 +units=m',
+    resolution: 72,
+    controller: true
   }),
-  controller: true,
   initialViewState: {center: [0, 0, 0], zoom: 1}
 });
 ```
 
-This example uses UTM zone 10N eastings and northings as world coordinates and converts them to Web Mercator.
-
-```js
-const fromCrs = '+proj=utm +zone=10 +datum=WGS84 +units=m';
-const toCrs = 'EPSG:3857';
-
-const view = new CustomProjectionView({
-  fromCrs,
-  toCrs,
-  projection: proj4(fromCrs, toCrs),
-  resolution: 100000  // in world-coordinate (fromCrs) units aka meters
-});
-```
+The view resolves its CRS descriptor asynchronously using `projectionEngine.getCRS(crs)`. Deck waits for the descriptor before creating its viewport and controller. Resolution errors reach Deck's `onError` callback. For standalone viewport creation, see [CustomProjectionViewport](./custom-projection-viewport.md#usage).
 
 ## Constructor
 
-Inherits [View options](./view.md#constructor), including layout, padding, controller settings and GPU parameters. Additional options:
+Inherits [View options](./view.md#constructor), including layout, padding and controller settings.
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `projection` | Required | `{forward, inverse}` conversion functions. See the [coordinate contract](./custom-projection-viewport.md#coordinate-contract). |
-| `fromCrs` | `'WGS84'` | CRS name or PROJ string describing world coordinates. |
-| `toCrs` | None | Planar, meter-based map CRS name or PROJ string. |
-| `fromBounds` | None | The projection's valid domain, expressed as `[minX, minY, maxX, maxY]` in world coordinates (`fromCrs`). |
-| `resolution` | `0` | Set a positive value in world-coordinate units (`fromCrs`) to subdivide paths and polygon edges so they follow the projection. Smaller positive values produce smoother curves but take longer to process. `0` disables subdivision. |
-| `getDistanceScale` | None | `([x, y]) => [xScale, yScale]`, with `[x, y]` in `toCrs`: real-world ground meters per map meter along X/Y, to adjust for horizontal projection distortion. Altitude does not affect scale. See [meter size](./custom-projection-viewport.md#meter-size). |
+| `crs` | Required | A supported planar CRS definition: an identifier such as `EPSG:3857`, a PROJ string, WKT, PROJJSON object, or math.gl spatial-reference object. Linear axis units are read from the descriptor. |
+| `resolution` | `0` | Subdivision intervals around the earth for paths, polygons and bitmaps. The step is `EarthCircumference / resolution`, converted to source CRS units. Higher values generate more detailed geometry. Zero disables subdivision. |
 | `orthographic` | `false` | Use an orthographic camera instead of perspective. |
 
-Coordinates outside `fromBounds` are clamped to its boundary, not clipped. `fromBounds` describes the projection's valid domain.
+The descriptor supplies conversion functions, WGS84 normalization, target-coordinate bounds and ground distance scales. For example, Web Mercator normalizes longitude and clamps latitude to its supported range. Bounds describe the size-sampling rectangle; they do not clip geometry.
 
-CRS strings are used to uniquely identify the projection. They do not construct the converter.
+## Methods
 
+### `initialize()`
+
+Resolves the target descriptor and returns a promise. Deck calls this automatically. When using the view directly, await `initialize()` before calling `makeViewport()`; the latter returns `null` while the descriptor is unavailable.
 
 ## View State
 
 | Property | Default | Description |
 | --- | --- | --- |
-| `center` | `[0, 0, 0]` | Camera center in world coordinates (`fromCrs`). Navigation locks Z to zero. |
+| `center` | `[0, 0, 0]` | WGS84 longitude, latitude and altitude. Navigation fixes altitude at zero. |
 | `zoom` | `0` | Each increment doubles the scale. |
-| `pitch` | `0` | Map pitch in degrees, as in `MapView`. |
-| `bearing` | `0` | Map bearing in degrees, as in `MapView`. |
+| `pitch` | `0` | Map pitch in degrees. |
+| `bearing` | `0` | Map bearing in degrees. |
 | `minZoom`, `maxZoom` | `-Infinity`, `Infinity` | Zoom constraints; controller bounds may impose an additional minimum. |
-| `minPitch`, `maxPitch` | `0`, `85` | Pitch constraints, clamped to the range 0–85 degrees. |
+| `minPitch`, `maxPitch` | `0`, `85` | Pitch constraints, clamped to 0–85 degrees. |
 
-To center on a city when using `fromCrs: 'EPSG:4326'`, supply its longitude and latitude directly, for example `center: [-122.4, 37.8, 0]`.
-
-TypeScript configuration types are exported as `CustomProjectionViewProps`, `CustomProjectionViewState`, `CustomProjectionViewportOptions` and `ProjectionConverter`. Like the classes, these types are experimental.
+The experimental TypeScript types are `CustomProjectionViewProps`, `CustomProjectionViewState` and `CustomProjectionViewportOptions`.
 
 ## Controller
 
-Enable interaction with `controller: true`. The default [CustomProjectionController](./custom-projection-controller.md) pans and zooms in common space, with map-style pitch and bearing controls. Panning is unrestricted unless you supply `controller.maxBounds` in world coordinates (`fromCrs`).
+Enable interaction with `controller: true`. The default controller pans and zooms on the common-space ground plane, with map-style pitch and bearing controls. Optional `controller.maxBounds` use WGS84 longitude/latitude.
+
+## Meter Size
+
+Meter-based widths, radii and elevations use ground distance scales from the CRS descriptor. The Earth model comes from the target CRS parameters, with a WGS84 ellipsoid fallback when unspecified. Scalar marker sizes and elevations use the descriptor’s Jacobian scalar, preserving aspect ratio and projected area. The determinant accounts for shear as well as axis scaling. Position altitude retains the fixed target-unit-to-common scale.
+
+Local sizing uses a texture over the descriptor's finite bounds. Outside those bounds, where scale evaluation fails, or for an unbounded projection, rendering uses the viewport-center scales. Failed evaluations never enter the texture. A nonpositive or nonfinite Taylor reconstruction on a steep curve uses the positive sample at the cell center.
 
 ## Changing Projections
 
-`CustomProjectionView` supports swapping the custom projection at runtime. To avoid unnecessary updates, a new `projection` object alone does not trigger layer updates. To refresh projected positions, change one or more of: `fromCrs`, `toCrs`, or `resolution` alongside the updated converter.
+`CustomProjectionView` supports swapping the custom projection at runtime. Change `crs` to load a new descriptor and refresh projected positions. Changing `resolution` also rebuilds subdivided geometry.
 
 Use a new layer ID when switching a layer between `MapView` and `CustomProjectionView`.
 
@@ -93,12 +72,13 @@ When displaying multiple views with different projections, create a separate lay
 
 ## Limitations
 
-- Supported layers are `ScatterplotLayer`, `PathLayer` and `SolidPolygonLayer`, including their use by `PolygonLayer` and the corresponding `GeoJsonLayer` sublayers. Other layers are not yet supported.
 - Tiled layers and `WMSLayer` are not supported, including `TileLayer`, `Tile3DLayer`, `MVTLayer`, `TerrainLayer` and layers built on them.
-- Meter scale is approximated at the viewport center. Meter-based sizes may not reflect distortion elsewhere in the projection.
-- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in `fromCrs`. `modelMatrix` is applied before conversion,  and `coordinateOrigin` is ignored. Bypass this behavior with `coordinateSystem: 'cartesian'`. Cartesian positions are in map meters in `toCrs`, and `modelMatrix` and `coordinateOrigin` both apply.
+- `BitmapLayer` approximates the projection with a triangle mesh. A positive `resolution` creates an interior grid in the source CRS and projects every grid vertex; higher values improve the approximation at a higher processing cost. Image coordinates are linearly interpolated within each triangle. Subdivision cannot correct an image's pixel-to-coordinate mapping when it differs from the declared source CRS.
+- Great-circle paths are not supported by `GreatCircleLayer` or `ArcLayer` with `greatCircle: true`. They fall back to ordinary arcs between projected endpoints, as with `greatCircle: false`. To preserve a great-circle path, sample it in geographic coordinates and render the samples with `PathLayer`.
+- `LineLayer`, `ArcLayer`, `PathLayer` and `SolidPolygonLayer` ignore `wrapLongitude` when the layer uses CPU preprojection or its source coordinates are not WGS84. Split geometry at the desired longitude boundary before passing it to these layers.
+- With `coordinateSystem: 'default'`, layer positions are interpreted as coordinates in WGS84. `modelMatrix` and then `coordinateOrigin` are applied in the source CRS before conversion. Use a CRS identifier or PROJ string to declare another source CRS. Positions whose CRS signature matches the view's descriptor bypass CPU conversion. Legacy `coordinateSystem: 'cartesian'` also bypasses conversion. Cartesian positions are in target CRS units in `crs`, and `modelMatrix` and `coordinateOrigin` both apply.
 - Split geometry at projection discontinuities before passing it to the layer. This view does not automatically clip geometry at those boundaries. The converter must return finite coordinates for the geometry you render.
-- Picked coordinates are returned as world coordinates in `fromCrs`. They may be unavailable where `projection.inverse` cannot return a valid position.
+- Picked coordinates are returned as world coordinates in WGS84. They may be unavailable where the descriptor’s inverse converter cannot return a valid position.
 
 ## Source
 
