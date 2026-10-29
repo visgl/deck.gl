@@ -4,7 +4,12 @@
 
 import {test, expect} from 'vitest';
 import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
-import {WebMercatorViewport, OrthographicView, Viewport} from '@deck.gl/core';
+import {
+  WebMercatorViewport,
+  OrthographicView,
+  Viewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
 import {Matrix4} from '@math.gl/core';
 
 const testViewState = {
@@ -55,6 +60,24 @@ test('Tileset2D#update', () => {
   expect(tileset.tiles[0].bbox, 'tile has metadata').toBeTruthy();
 });
 
+test('Tileset2D#update with coverage LOD', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+  tileset.update(testViewport);
+
+  expect(tileset._cache.get('0-0-0')?.isPrefetch, 'root coverage tile is prefetched').toBe(true);
+  expect(
+    tileset._cache.get('585-783-11')?.isPrefetch,
+    'nearest lower resolution coverage tile is prefetched'
+  ).toBe(true);
+  expect(tileset._cache.get('1171-1566-12')?.isSelected, 'target tile remains selected').toBe(true);
+
+  tileset.finalize();
+});
+
 test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () => {
   const tileset = new Tileset2D({
     getTileData,
@@ -93,6 +116,357 @@ test('Tileset2D#getRequestPriority ranks tiles by viewport center distance', () 
   expect((tileset as any)._getRequestPriority(selectedNearCenter)).toBeLessThan(
     (tileset as any)._getRequestPriority(visibleAtCenter)
   );
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD uses higher minimum coverage zoom for globe viewports', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+  // GlobeView no longer sets a default subdivision resolution
+  const globeViewport = new GlobeViewport(testViewState);
+  expect(globeViewport.resolution, 'GlobeViewport subdivision is off by default').toBe(0);
+
+  tileset.update(globeViewport);
+
+  expect(tileset._cache.get('0-0-0')?.isPrefetch, 'root tile is not prefetched').not.toBe(true);
+  expect(tileset._cache.get('4-6-4')?.isPrefetch, 'fallback coverage tile is prefetched').toBe(
+    true
+  );
+  expect(tileset._cache.get('18-24-6')?.isPrefetch, 'minimum coverage tile is prefetched').toBe(
+    true
+  );
+  expect(
+    tileset._cache.get('585-783-11')?.isPrefetch,
+    'nearest lower resolution coverage tile is prefetched'
+  ).toBe(true);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD prioritizes closer prefetch ancestors before safety fallback', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+  tileset.update(new GlobeViewport(testViewState));
+
+  expect((tileset as any)._getRequestPriority(tileset._cache.get('585-783-11'))).toBeLessThan(
+    (tileset as any)._getRequestPriority(tileset._cache.get('18-24-6'))
+  );
+  expect((tileset as any)._getRequestPriority(tileset._cache.get('18-24-6'))).toBeLessThan(
+    (tileset as any)._getRequestPriority(tileset._cache.get('4-6-4'))
+  );
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD requests the globe fallback below the coverage floor', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+
+  tileset.update(new GlobeViewport({...testViewState, width: 100, height: 100, zoom: 6}));
+  const prefetchTiles = Array.from(tileset._cache.values()).filter(tile => tile.isPrefetch);
+
+  expect(
+    tileset.selectedTiles!.every(tile => tile.zoom === 6),
+    'zoom 6 tiles are selected'
+  ).toBe(true);
+  expect(tileset._cache.get('4-6-4')?.isPrefetch, 'zoom 4 fallback is prefetched').toBe(true);
+  expect(
+    prefetchTiles.every(tile => tile.zoom === 4),
+    'only the fallback zoom is prefetched'
+  ).toBe(true);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD ignores subdivision resolution on flat viewports', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+
+  tileset.update(new WebMercatorViewport({...testViewState, resolution: 36}));
+
+  expect(tileset._cache.get('0-0-0')?.isPrefetch, 'root coverage tile is prefetched').toBe(true);
+  expect(tileset._cache.get('4-6-4'), 'globe fallback tile is not requested').toBeFalsy();
+
+  tileset.finalize();
+});
+
+test('Tileset2D#getRequestPriority orders coverage prefetch tiles after visible tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData,
+    lodStrategy: 'coverage',
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: {
+      width: 100,
+      height: 100,
+      project: ([x, y]) => [x, y]
+    }
+  });
+
+  const selectedAtEdge = {
+    bbox: {left: 0, top: 0, right: 10, bottom: 10},
+    index: {x: 0, y: 0, z: 10},
+    isSelected: true,
+    isVisible: true,
+    isPrefetch: false
+  };
+  const visiblePrefetchAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 9},
+    isSelected: false,
+    isVisible: true,
+    isPrefetch: true
+  };
+  const prefetchAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 1},
+    isSelected: false,
+    isVisible: false,
+    isPrefetch: true
+  };
+  const staleAtCenter = {
+    bbox: {left: 0, top: 0, right: 100, bottom: 100},
+    index: {x: 0, y: 0, z: 8},
+    isSelected: false,
+    isVisible: false,
+    isPrefetch: false
+  };
+  const getRequestPriority = tile => (tileset as any)._getRequestPriority(tile);
+
+  expect(
+    getRequestPriority(selectedAtEdge),
+    'selected tiles load before visible placeholders'
+  ).toBeLessThan(getRequestPriority(visiblePrefetchAtCenter));
+  expect(
+    getRequestPriority(visiblePrefetchAtCenter),
+    'visible placeholders load before prefetch coverage'
+  ).toBeLessThan(getRequestPriority(prefetchAtCenter));
+  expect(getRequestPriority(staleAtCenter), 'stale tiles are not requested').toBeLessThan(0);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD does not abort pending prefetch requests', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxRequests: 1,
+    onTileLoad: () => {}
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  const staleTiles = Array.from(tileset._cache.values()).filter(tile => tile.id !== '0-0-0');
+
+  tileset.update(testViewport);
+
+  expect(staleTiles.length, 'previous viewport requested its own tiles').toBe(2);
+  for (const tile of staleTiles) {
+    expect(tile.isLoading, `stale ${tile.id} request is aborted`).toBe(false);
+  }
+  for (const id of ['1171-1566-12', '585-783-11', '0-0-0']) {
+    expect(tileset._cache.get(id)?.isLoading, `${id} request continues`).toBe(true);
+  }
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD keeps the previous selection as coverage when zooming in', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxRequests: 1,
+    onTileLoad: () => {}
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, zoom: 11}));
+  const parent = tileset._cache.get('585-783-11')!;
+  expect(parent.isSelected, 'zoom 11 selects the parent tile').toBe(true);
+
+  tileset.update(testViewport);
+
+  expect(parent.isSelected, 'parent tile is no longer selected').toBe(false);
+  expect(parent.isPrefetch, 'parent tile becomes coverage').toBe(true);
+  expect(parent.isLoading, 'parent tile request is not aborted').toBe(true);
+  expect(
+    (tileset as any)._getRequestPriority(parent),
+    'parent tile request stays queued'
+  ).toBeGreaterThanOrEqual(0);
+  expect(tileset._cache.get('292-391-10')?.isLoading, 'stale coverage request is aborted').toBe(
+    false
+  );
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD evicts stale tiles before prefetch tiles', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxCacheSize: 3,
+    onTileLoad: () => {},
+    onTileUnload: () => {}
+  });
+  tileset.update(new WebMercatorViewport({...testViewState, longitude: -100, latitude: 80}));
+  tileset.update(testViewport);
+
+  expect(Array.from(tileset._cache.keys()).sort(), 'stale tiles are evicted first').toEqual([
+    '0-0-0',
+    '1171-1566-12',
+    '585-783-11'
+  ]);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD drops requests of evicted prefetch tiles', () => {
+  const unloadedTiles: any[] = [];
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    maxCacheSize: 1,
+    onTileLoad: () => {},
+    onTileUnload: tile => unloadedTiles.push(tile)
+  });
+  tileset.update(testViewport);
+
+  expect(Array.from(tileset._cache.keys()), 'only the selected tile fits').toEqual([
+    '1171-1566-12'
+  ]);
+  expect(unloadedTiles.map(tile => tile.id).sort(), 'prefetch tiles are evicted last').toEqual([
+    '0-0-0',
+    '585-783-11'
+  ]);
+
+  // Updating again with the same viewport must not mark evicted tiles as prefetch again
+  tileset.update(testViewport);
+  for (const tile of unloadedTiles) {
+    expect(tile.isPrefetch, `${tile.id} is no longer a prefetch tile`).toBe(false);
+    expect(
+      (tileset as any)._getRequestPriority(tile),
+      `${tile.id} request is dropped`
+    ).toBeLessThan(0);
+  }
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD keeps immediate child placeholders over coarse ancestors', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    refinementStrategy: 'best-available',
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: new WebMercatorViewport({...testViewState, width: 100, height: 100, zoom: 2})
+  });
+
+  const root = seedTile(tileset, {x: 0, y: 0, z: 0}, true);
+  const selected = seedTile(tileset, {x: 0, y: 0, z: 1}, false);
+  const child = seedTile(tileset, {x: 0, y: 0, z: 2}, true);
+  const grandchild = seedTile(tileset, {x: 0, y: 0, z: 3}, true);
+
+  (tileset as any)._rebuildTree();
+  (tileset as any)._selectedTiles = [selected];
+  (tileset as any).updateTileStates();
+
+  expect(root.isVisible, 'coarse ancestor remains visible underneath').toBe(true);
+  expect(child.isVisible, 'immediate loaded child remains visible as the closest placeholder').toBe(
+    true
+  );
+  expect(selected.isVisible, 'pending selected tile is hidden').toBe(false);
+  expect(grandchild.isVisible, 'deeper stale child is not used').toBe(false);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD keeps direct child placeholders while zooming out', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    refinementStrategy: 'best-available',
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: new WebMercatorViewport({...testViewState, width: 100, height: 100, zoom: 2.4})
+  });
+
+  const root = seedTile(tileset, {x: 0, y: 0, z: 0}, true);
+  const selected = seedTile(tileset, {x: 0, y: 0, z: 2}, false);
+  const child = seedTile(tileset, {x: 0, y: 0, z: 3}, true);
+
+  (tileset as any)._rebuildTree();
+  (tileset as any)._selectedTiles = [selected];
+  (tileset as any).updateTileStates();
+
+  expect(root.isVisible, 'coarse ancestor remains visible underneath').toBe(true);
+  expect(child.isVisible, 'direct child remains visible while selected tile is pending').toBe(true);
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD ignores cached descendants that are not direct children', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    refinementStrategy: 'best-available',
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: new WebMercatorViewport({...testViewState, width: 100, height: 100, zoom: 2})
+  });
+
+  const root = seedTile(tileset, {x: 0, y: 0, z: 0}, true);
+  const selected = seedTile(tileset, {x: 0, y: 0, z: 2}, false);
+  const staleDescendant = seedTile(tileset, {x: 0, y: 0, z: 4}, true);
+
+  (tileset as any)._rebuildTree();
+  (tileset as any)._selectedTiles = [selected];
+  (tileset as any).updateTileStates();
+
+  expect(root.isVisible, 'coarse ancestor covers pending selected tile').toBe(true);
+  expect(selected.isVisible, 'pending selected tile is hidden').toBe(false);
+  expect(staleDescendant.isVisible, 'deeper cached descendant is not used as placeholder').toBe(
+    false
+  );
+
+  tileset.finalize();
+});
+
+test('Tileset2D#coverage LOD keeps cached root below the globe fallback floor', () => {
+  const tileset = new Tileset2D({
+    getTileData: () => new Promise(() => {}),
+    lodStrategy: 'coverage',
+    refinementStrategy: 'best-available',
+    onTileLoad: () => {}
+  });
+  Object.assign(tileset, {
+    _viewport: new GlobeViewport({...testViewState, width: 100, height: 100, zoom: 6})
+  });
+
+  const root = seedTile(tileset, {x: 0, y: 0, z: 0}, true);
+  const fallback = seedTile(tileset, {x: 4, y: 6, z: 4}, true);
+  const selected = seedTile(tileset, {x: 18, y: 24, z: 6}, false);
+
+  (tileset as any)._rebuildTree();
+  (tileset as any)._selectedTiles = [selected];
+  (tileset as any).updateTileStates();
+
+  expect(fallback.isVisible, 'fallback ancestor covers pending selected tile').toBe(true);
+  expect(root.isVisible, 'root remains below the visible fallback floor').toBe(false);
+  expect(selected.isVisible, 'pending selected tile is hidden').toBe(false);
 
   tileset.finalize();
 });
@@ -266,6 +640,36 @@ test('Tileset2D#maxCacheByteSize', async () => {
 
   expect(tileset._cache.size, 'cache is resized after tile data is loaded').toBe(1);
   expect(tileset._cache.get('910-459-12'), 'expected tile is in cache').toBeTruthy();
+});
+
+test('Tileset2D#maxCacheByteSize ignores tiles evicted while loading', async () => {
+  const requests = new Map<string, {resolve: (data: unknown) => void; signal: AbortSignal}>();
+  const tileset = new Tileset2D({
+    getTileData: ({id, signal}) =>
+      new Promise(resolve => requests.set(id, {resolve, signal: signal!})),
+    maxCacheSize: 1,
+    maxCacheByteSize: 1000,
+    onTileLoad: () => {},
+    onTileUnload: () => {}
+  });
+  tileset.update(testViewport);
+  const evictedTile = tileset.selectedTiles![0];
+  await sleep(10);
+  const request = requests.get(evictedTile.id)!;
+  expect(request, 'tile request started').toBeTruthy();
+
+  tileset.update(
+    new WebMercatorViewport(Object.assign({}, testViewState, {longitude: -100, latitude: 80}))
+  );
+  expect(tileset._cache.has(evictedTile.id), 'loading tile is evicted').toBe(false);
+  expect(request.signal.aborted, 'evicted tile request is aborted').toBe(true);
+
+  // getTileData may ignore the abort signal and return data anyway
+  request.resolve({byteLength: 100});
+  await sleep(10);
+  expect((tileset as any)._cacheByteSize, 'evicted tile bytes are not counted').toBe(0);
+
+  tileset.finalize();
 });
 
 test('Tileset2D#debounceTime', async () => {
@@ -758,6 +1162,18 @@ function validateVisibility(strategy, selectedTiles, tiles) {
     }
   }
   return null;
+}
+
+function seedTile(tileset, index, loaded) {
+  const tile = (tileset as any)._getTile(index, true);
+  tile.content = loaded ? {} : null;
+  Object.assign(tile, {
+    _isLoaded: loaded,
+    _loader: undefined,
+    _isCancelled: false,
+    _needsReload: false
+  });
+  return tile;
 }
 
 function contains(bbox, point) {

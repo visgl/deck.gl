@@ -13,8 +13,8 @@ export type {
   TileBoundingBox
 } from './types';
 
-export type {Tileset2DProps, RefinementStrategy} from './tileset-2d';
-export {Tileset2D, STRATEGY_DEFAULT} from './tileset-2d';
+export type {Tileset2DProps, RefinementStrategy, LODStrategy} from './tileset-2d';
+export {Tileset2D, STRATEGY_DEFAULT, LOD_STRATEGY_COVERAGE, LOD_STRATEGY_NONE} from './tileset-2d';
 
 export {Tile2DHeader} from './tile-2d-header';
 

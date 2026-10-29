@@ -16,6 +16,10 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### Tile coverage prefetching
+
+[`TileLayer`](./api-reference/geo-layers/tile-layer.md#lodstrategy) and [`TerrainLayer`](./api-reference/geo-layers/terrain-layer.md) accept `lodStrategy: 'coverage'`. Alongside the tiles in view, the layer requests their lower-resolution ancestors and shows them while sharper tiles load, which reduces blank areas during camera transitions. The default, `'none'`, keeps the current behavior.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
