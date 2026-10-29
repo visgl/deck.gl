@@ -2,11 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {test, expect, vi} from 'vitest';
+import {
+  LayerManager,
+  MapView,
+  WebMercatorViewport,
+  _GlobeViewport as GlobeViewport
+} from '@deck.gl/core';
+import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import {ClipExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {testLayer} from '@deck.gl/test-utils/vitest';
+import {device, testLayer} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
@@ -211,4 +217,69 @@ test('ClipExtension#WebGPU PathLayer dash arclength with billboard', async ({ski
   expect(await webgpuDevice.handle.popErrorScope()).toBeNull();
 
   layerManager.finalize();
+});
+
+test('ClipExtension#bounds follow the viewport being drawn in an auxiliary pass', () => {
+  const layer = new SolidPolygonLayer({
+    id: 'clip-auxiliary-pass',
+    data: [
+      {
+        polygon: [
+          [-122.45, 37.75],
+          [-122.35, 37.75],
+          [-122.35, 37.85],
+          [-122.45, 37.85]
+        ]
+      }
+    ],
+    getPolygon: d => d.polygon,
+    clipBounds: [-122.42, 37.78, -122.38, 37.82],
+    extensions: [new ClipExtension()]
+  });
+  const viewportProps = {width: 100, height: 100, longitude: -122.4, latitude: 37.8, zoom: 11};
+  // A terrain cover draws draped layers in a web mercator viewport the layer does not adopt
+  const screenViewport = new GlobeViewport({id: 'screen', resolution: 36, ...viewportProps});
+  const auxiliaryViewport = new WebMercatorViewport({id: 'auxiliary', ...viewportProps});
+
+  const layerManager = new LayerManager(device, {viewport: screenViewport});
+  const layersPass = new DrawLayersPass(device);
+
+  try {
+    layerManager.setLayers([layer]);
+    layerManager.updateLayers();
+    expect(layer.state.clipByInstance, 'polygons clip by geometry').toBe(false);
+
+    const clipProps: any[] = [];
+    const setShaderModuleProps = layer.setShaderModuleProps.bind(layer);
+    vi.spyOn(layer, 'setShaderModuleProps').mockImplementation(props => {
+      if (props.clip) clipProps.push(props.clip);
+      setShaderModuleProps(props);
+    });
+
+    layersPass.render({
+      viewports: [auxiliaryViewport],
+      layers: layerManager.getLayers(),
+      isAuxiliaryPass: true,
+      onViewportActive: layerManager.activateViewport,
+      onError: err => expect(err).toBeFalsy()
+    });
+    layerManager.activateViewport(screenViewport);
+
+    expect(layer.internalState!.viewport!.id, 'auxiliary viewport is not adopted').toBe('screen');
+    const [x0, y0, x1, y1] = layer.props.clipBounds;
+    const corner0 = layer.projectPosition([x0, y0, 0], {viewport: auxiliaryViewport});
+    const corner1 = layer.projectPosition([x1, y1, 0], {viewport: auxiliaryViewport});
+    expect(clipProps.at(-1).bounds, 'bounds are in the auxiliary common space').toEqual([
+      Math.min(corner0[0], corner1[0]),
+      Math.min(corner0[1], corner1[1]),
+      Math.max(corner0[0], corner1[0]),
+      Math.max(corner0[1], corner1[1])
+    ]);
+    expect(
+      layer.projectPosition([x0, y0, 0], {viewport: screenViewport}),
+      'globe and web mercator common spaces differ'
+    ).not.toEqual(corner0);
+  } finally {
+    layerManager.finalize();
+  }
 });

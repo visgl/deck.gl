@@ -130,7 +130,7 @@ export default class ClipExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<Required<ClipExtensionProps>>): void {
+  draw(this: Layer<Required<ClipExtensionProps>>, {shaderModuleProps}: any): void {
     const {clipBounds} = this.props;
     const clipProps = {} as WebGPUClipModuleProps;
     if (this.state.clipByInstance) {
@@ -150,8 +150,11 @@ export default class ClipExtension extends LayerExtension {
         clipProps.bounds = clipBounds;
       }
     } else {
-      const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
-      const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
+      // Match the common space of the viewport being drawn. Auxiliary passes such as terrain
+      // covers draw in a viewport of their own that the layer does not adopt.
+      const viewport = shaderModuleProps?.project?.viewport;
+      const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0], {viewport});
+      const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0], {viewport});
 
       clipProps.bounds = [
         Math.min(corner0[0], corner1[0]),
