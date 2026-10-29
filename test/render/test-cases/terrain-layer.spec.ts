@@ -24,7 +24,7 @@ const DECODER = {
   offset: -32768 * 4
 };
 
-function waitAfterDefaultCompletion(waitMs = 0) {
+function waitAfterDefaultCompletion(waitMs = 0, {untilSettled = false} = {}) {
   let doneScheduled = false;
 
   return ({deck, layers, done}) => {
@@ -33,8 +33,11 @@ function waitAfterDefaultCompletion(waitMs = 0) {
     // @ts-expect-error Accessing protected layerManager in test code
     const needsUpdate = deck.layerManager?.needsUpdate();
     const allLoaded = layers.every(layer => layer.isLoaded);
+    // Optionally also wait for a frame that requests no further redraw, so a layer that
+    // re-updates on every frame times out instead of being captured mid-loop
+    const settled = !untilSettled || !deck.needsRedraw();
 
-    if (!needsUpdate && allLoaded && !doneScheduled) {
+    if (!needsUpdate && allLoaded && settled && !doneScheduled) {
       doneScheduled = true;
       if (waitMs > 0) {
         setTimeout(done, waitMs);
@@ -92,12 +95,12 @@ const testCases = [
   },
   {
     // GlobeView twin of the case above (same viewState; zoom 11.5 stays below GlobeView's zoom-12
-    // handoff to WebMercatorViewport), fills only. TerrainLayer switches its tile meshes to LNGLAT
-    // under GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
-    // globe -> Mercator inverse, so the draped fills follow the terrain on the globe.
-    // The stroke is left out to keep the test fast: draping strokes costs several hundred ms of
-    // GPU time per terrain tile under SwiftShader.
-    name: 'terrain-extension-drape-fill-globe',
+    // handoff to WebMercatorViewport). TerrainLayer switches its tile meshes to LNGLAT under
+    // GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
+    // globe -> Mercator inverse, so the draped fills and strokes follow the terrain on the globe.
+    // The stroke guards the terrain cover pass: a draped PathLayer that adopts the cover's
+    // Mercator viewport re-tessellates on every frame, and deck never settles.
+    name: 'terrain-extension-drape-globe',
     skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),
     viewState: {
@@ -116,14 +119,14 @@ const testCases = [
       }),
       new GeoJsonLayer({
         data: choropleths,
-        stroked: false,
+        getLineWidth: 50,
         getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
         extensions: [new TerrainExtension()]
       })
     ],
-    onAfterRender: waitAfterDefaultCompletion(500),
+    onAfterRender: waitAfterDefaultCompletion(500, {untilSettled: true}),
     imageDiffOptions: {threshold: 0.985},
-    goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
+    goldenImage: './test/render/golden-images/terrain-extension-drape-globe.png'
   },
   {
     name: 'terrain-extension-offset',
