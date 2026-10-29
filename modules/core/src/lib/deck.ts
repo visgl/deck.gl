@@ -1232,14 +1232,15 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   private _getViews(): View[] {
     const {views} = this.props;
     const normalizedViews: View[] = Array.isArray(views)
-      ? views
+      ? [...views]
       : // If null, default to a full screen map view port
         views
         ? [views]
         : [new MapView({id: 'default-view'})];
     if (normalizedViews.length && this.props.controller) {
       // Backward compatibility: support controller prop
-      // Clone the view so that ViewManager._diffViews detects the change
+      // Clone the view so that ViewManager._diffViews detects the change.
+      // The array is a copy, so this doesn't write into the caller's views.
       normalizedViews[0] = normalizedViews[0].clone({controller: this.props.controller});
     }
     return normalizedViews;
