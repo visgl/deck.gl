@@ -61,10 +61,15 @@ export function installSharedModuleImportMap() {
     const names = Object.keys(namespace).filter(
       name => IDENTIFIER.test(name) && name !== 'default'
     );
+    // Export names such as math.gl's `eval` cannot be local bindings in strict mode.
+    const exports = names.map(
+      (name, index) =>
+        `const value${index} = ns[${JSON.stringify(name)}]; export {value${index} as ${name}};`
+    );
     const source =
       `const ns = globalThis[${JSON.stringify(REGISTRY_NAME)}][${JSON.stringify(specifier)}];\n` +
       'export default ns;\n' +
-      `export const {${names.join(', ')}} = ns;\n`;
+      exports.join('\n');
     imports[specifier] = URL.createObjectURL(new Blob([source], {type: 'text/javascript'}));
   }
 
