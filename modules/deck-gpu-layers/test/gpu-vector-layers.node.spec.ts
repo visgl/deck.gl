@@ -15,7 +15,7 @@ import {
 } from '@deck.gl-community/gpu-layers';
 import type {Buffer, RenderPass, Texture} from '@luma.gl/core';
 import {GPUData, GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
-import {NullDevice} from '@luma.gl/test-utils';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import {describe, expect, test, vi} from 'vitest';
 import {
   createGPUVectorStyleBuffer,

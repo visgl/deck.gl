@@ -56,7 +56,6 @@
     "@loaders.gl/terrain": "^5.0.0-alpha.11",
     "@loaders.gl/tiles": "^5.0.0-alpha.11",
     "@loaders.gl/wms": "^5.0.0-alpha.11",
-    "@luma.gl/gltf": "^10.0.0-alpha.4",
     "@luma.gl/shadertools": "^10.0.0-alpha.4",
     "@math.gl/core": "^5.0.0-alpha.15",
     "@math.gl/culling": "^5.0.0-alpha.15",

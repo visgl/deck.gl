@@ -9,7 +9,7 @@ import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-3d-layer';
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {TILE_TYPE} from '@loaders.gl/tiles';
 
 test('Tile3DLayer#normalizeCoordinateSystem', () => {

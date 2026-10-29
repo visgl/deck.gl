@@ -8,7 +8,7 @@ import {webgpuAdapter} from '@luma.gl/webgpu';
 import {webgl2Adapter} from '@luma.gl/webgl';
 import {Model} from '@luma.gl/engine';
 import {fromHalfFloat} from '@luma.gl/shadertools';
-import {getTestDevice} from '@luma.gl/test-utils';
+import {getTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 import {SunLayer, MoonLayer, CloudLayer, AtmosphereLayer, SkyLayer, StarfieldLayer} from '../src';
 

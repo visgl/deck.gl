@@ -9,7 +9,7 @@ import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Buffer, type Texture} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import ArcLayer from '@deck.gl/layers/arc-layer/arc-layer';
 import LineLayer from '@deck.gl/layers/line-layer/line-layer';

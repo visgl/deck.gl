@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 test('GeoJsonLayer#WebGPU binary points and paths', async ({skip}) => {

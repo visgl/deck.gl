@@ -1435,7 +1435,7 @@
     hysnappy "^1.1.1"
     snappyjs "^0.6.1"
 
-"@loaders.gl/core@^5.0.0-alpha.11", "@loaders.gl/core@~5.0.0-alpha.11":
+"@loaders.gl/core@^5.0.0-alpha.11":
   version "5.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-5.0.0-alpha.11.tgz#4f10a0ee5cedfeb13eb3da6fe7195613eec76662"
   integrity sha512-5hk0wEWkW+C9tmgjtwa3kvDoboPIAAnFOr2ZhjxCk+0uV0p/DkjAkpWyswbEK0W5FBgi01MkYhFAySBx1/eULg==
@@ -1511,7 +1511,7 @@
     apache-arrow ">= 17.0.0"
     zod "^4.1.12"
 
-"@loaders.gl/gltf@5.0.0-alpha.11", "@loaders.gl/gltf@^5.0.0-alpha.11", "@loaders.gl/gltf@~5.0.0-alpha.11":
+"@loaders.gl/gltf@5.0.0-alpha.11", "@loaders.gl/gltf@^5.0.0-alpha.11":
   version "5.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-5.0.0-alpha.11.tgz#79686cab1e486f13e3a5f042d0b1831d4eef4f1d"
   integrity sha512-ZjtFAL0LGFX2oFaVR/nGZrlyN0U3oY5YSQJeKLfRAcYhCH07edsw+wKS6/LXh+FecaNQbMcGtFP76KLLJZOG4w==
@@ -1624,7 +1624,7 @@
     "@loaders.gl/schema-utils" "5.0.0-alpha.11"
     "@mapbox/martini" "^0.2.0"
 
-"@loaders.gl/textures@5.0.0-alpha.11", "@loaders.gl/textures@~5.0.0-alpha.11":
+"@loaders.gl/textures@5.0.0-alpha.11":
   version "5.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/@loaders.gl/textures/-/textures-5.0.0-alpha.11.tgz#96c322cc924b5f139e872aca4303f950ef41d128"
   integrity sha512-9/swVlrLMhHRwIvbDFqrka32mkPuxwFP+iNQre7MVxj47aXiACiB9EogIfP9jRuxS3dkK9bxFYowivHUI/4dog==
@@ -1736,16 +1736,6 @@
     "@probe.gl/log" "^4.1.1"
     "@probe.gl/stats" "^4.1.1"
 
-"@luma.gl/gltf@^10.0.0-alpha.4":
-  version "10.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/gltf/-/gltf-10.0.0-alpha.4.tgz#11ca403616f2c4311255837a0af1ffceed848dec"
-  integrity sha512-imG0NlpdVC/GR7jpOGHppgJn1zfPEmlkX5v+VL6S3uwt5VZpEurERunhZuvppLjBmV6+EyTgQ2dFibph/rYDBA==
-  dependencies:
-    "@loaders.gl/core" "~5.0.0-alpha.11"
-    "@loaders.gl/gltf" "~5.0.0-alpha.11"
-    "@loaders.gl/textures" "~5.0.0-alpha.11"
-    "@math.gl/core" "5.0.0-alpha.15"
-
 "@luma.gl/gpgpu@^10.0.0-alpha.4":
   version "10.0.0-alpha.4"
   resolved "https://registry.yarnpkg.com/@luma.gl/gpgpu/-/gpgpu-10.0.0-alpha.4.tgz#74892b5fdfd00e785ab8615bddc76b9abbbbca62"
@@ -1763,14 +1753,6 @@
   dependencies:
     "@math.gl/core" "5.0.0-alpha.15"
     "@math.gl/types" "~5.0.0-alpha.15"
-
-"@luma.gl/test-utils@^10.0.0-alpha.4":
-  version "10.0.0-alpha.4"
-  resolved "https://registry.yarnpkg.com/@luma.gl/test-utils/-/test-utils-10.0.0-alpha.4.tgz#681175b1837363208996ddccb61205e6a09499b7"
-  integrity sha512-dBMLN+oOMnlAnoFOYCkQyFdIWQZW+6M2P8IGVdJVQdpmE20yM3f1WLET5NKPeyqEQK5kgAhhZylSgD7RjcG0og==
-  dependencies:
-    "@probe.gl/env" "^4.1.1"
-    "@probe.gl/stats" "^4.1.1"
 
 "@luma.gl/webgl@^10.0.0-alpha.4":
   version "10.0.0-alpha.4"

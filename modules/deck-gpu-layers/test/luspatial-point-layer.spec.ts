@@ -8,7 +8,7 @@ import {Buffer, type Device} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {DrawCommandBuffer} from '@luma.gl/gpgpu/gpu-core';
 import {ShaderAssembler} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, it} from 'vitest';
 import {vi, type MockInstance} from 'vitest';
 

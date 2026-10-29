@@ -11,7 +11,7 @@ import {
 import {Buffer} from '@luma.gl/core';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, it} from 'vitest';
 import {vi} from 'vitest';
 import {userEvent} from 'vitest/browser';

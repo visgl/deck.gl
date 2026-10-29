@@ -6,7 +6,7 @@ import {Layer, project32, color, picking, log} from '@deck.gl/core';
 import type {Device, RenderPipelineParameters} from '@luma.gl/core';
 import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
-import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
+import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/engine/gltf';
 import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 

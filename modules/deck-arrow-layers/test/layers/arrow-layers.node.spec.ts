@@ -6,7 +6,7 @@ import {expect, it} from 'vitest';
 import {ArrowPathLayer, ArrowPolygonLayer, ArrowTextLayer} from '@deck.gl-community/arrow-layers';
 import {makeGPUVectorFromArrow, makeArrowFixedSizeListVector} from '@luma.gl/arrow';
 import type {Model} from '@luma.gl/engine';
-import {NullDevice} from '@luma.gl/test-utils';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';
 import {
   convertArrowLayerColorVector,

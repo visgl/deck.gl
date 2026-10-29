@@ -20,7 +20,7 @@ import {
   getShaderModuleSource,
   getShaderModuleUniformLayoutValidationResult
 } from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const getPosition = d => d.COORDINATES;
 

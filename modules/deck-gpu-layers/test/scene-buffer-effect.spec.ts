@@ -5,7 +5,7 @@
 import {Deck, OrthographicView, type Effect} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {SceneBufferEffect} from '@deck.gl-community/gpu-layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 import {CaptureTestLayer, waitUntil, readCapture} from './scene-buffer-test-utils';
 

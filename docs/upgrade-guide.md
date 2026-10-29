@@ -1513,3 +1513,11 @@ Use the new static function `AttributeManager.setDefaultLogFunctions` to set log
 #### Removed method: `AttributeManager.addDynamic`
 
 This method has been deprecated since version 2.5 and is now removed in v4. Use `AttributeManager.add()` instead.
+
+### luma.gl test and glTF imports
+
+With the luma.gl package consolidation, import device test helpers from `@luma.gl/core/test-utils`
+instead of `@luma.gl/test-utils`. The deprecated synchronous device is isolated at
+`@luma.gl/core/test-utils-legacy`. Import glTF rendering APIs from `@luma.gl/engine/gltf`
+instead of the removed `@luma.gl/gltf` package. These paths require a luma.gl v10 release
+containing the subpath migrations.

@@ -25,7 +25,7 @@ import type {Device} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 import {buildBitmapFontAtlas} from '@luma.gl/text';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';
 import {
   Field,
