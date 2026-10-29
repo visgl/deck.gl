@@ -8,6 +8,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color,
   project32,
   picking,
@@ -18,7 +19,7 @@ import {
   phongMaterial
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -355,7 +356,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   protected getModel(mesh: Mesh): Model {
-    const model = new Model(this.context.device, {
+    const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
