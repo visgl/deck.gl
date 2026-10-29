@@ -208,6 +208,50 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
 }
 
 for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
+  webglTest(`MapLibreOverlay interleaved uses css-dpr with MapLibre ${version}`, async () => {
+    const container = document.createElement('div');
+    Object.assign(container.style, {width: '400px', height: '300px'});
+    document.body.append(container);
+
+    const map = new MapClass({
+      container,
+      style: {version: 8, sources: {}, layers: []},
+      center: [-122.45, 37.78],
+      zoom: 14,
+      attributionControl: false
+    }) as unknown as MapLibreMap;
+
+    try {
+      await new Promise<void>(resolve => map.once('load', () => resolve()));
+
+      const overlay = new MapLibreOverlay({
+        interleaved: true,
+        deviceProps: {id: 'maplibre-device', createCanvasContext: {id: 'maplibre-canvas'}},
+        layers: []
+      });
+      map.addControl(overlay);
+      await waitForRender(() => Boolean(overlay._deck?.isInitialized));
+
+      const deck = overlay._deck!;
+      expect(deck.props.deviceProps).toMatchObject({
+        id: 'maplibre-device',
+        createCanvasContext: {id: 'maplibre-canvas', pixelSizeSource: 'css-dpr'}
+      });
+      // Page zoom changes the CSS size of the shared canvas, not always its device pixel size
+      expect(deck.device!.getDefaultCanvasContext().props).toMatchObject({
+        id: 'maplibre-canvas',
+        pixelSizeSource: 'css-dpr'
+      });
+
+      map.removeControl(overlay);
+    } finally {
+      map.remove();
+      container.remove();
+    }
+  });
+}
+
+for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
   webglTest(`MapLibreOverlay picks over terrain with MapLibre ${version}`, async () => {
     const container = document.createElement('div');
     Object.assign(container.style, {width: '400px', height: '300px'});
