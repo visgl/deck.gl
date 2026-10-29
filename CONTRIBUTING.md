@@ -88,7 +88,7 @@ It is possible to test against the local source of other dependency libraries by
 
 Maintainers publish releases by following the vis.gl [publish checklist](https://github.com/visgl/tsc/blob/master/developer-process/publish-checklist.md), which also covers verifying a release and recovering a partial one. Notes for deck.gl:
 
-- `yarn publish-prod` and `yarn publish-beta` push a version tag. The [release workflow](https://github.com/visgl/deck.gl/blob/master/.github/workflows/release.yml) then publishes every package to npm. To run it again for an existing tag, use `gh workflow run release.yml --ref vX.Y.Z`.
+- `yarn publish-prod` and `yarn publish-beta` push a version tag. The [release workflow](https://github.com/visgl/deck.gl/blob/master/.github/workflows/release.yml) then publishes every package to npm. To run it again for an existing tag, use `gh workflow run release.yml --ref vX.Y.Z`. This only works for tags whose `release.yml` has the `workflow_dispatch` trigger; for older tags, re-push the tag as described in the checklist.
 - Pushing to a `X.Y-release` branch deploys the website when its minor version matches `deck.gl@latest`.
 - pydeck is published to PyPI separately, see [bindings/pydeck/PUBLISH.md](https://github.com/visgl/deck.gl/blob/master/bindings/pydeck/PUBLISH.md).
 
