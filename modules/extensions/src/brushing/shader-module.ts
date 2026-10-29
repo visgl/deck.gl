@@ -40,9 +40,13 @@ const vertex = /* glsl */ `
     if (!brushing.enabled) {
       return true;
     }
-    vec2 source_commonspace = project_position(position);
-    vec2 target_commonspace = project_position(brushing.mousePos);
-    float distance = length((target_commonspace - source_commonspace) / project.commonUnitsPerMeter.xy);
+    // 3D chord distance in common space. Identical to the 2D distance under the flat
+    // (Mercator / identity) projection modes, where both z are 0; on the globe common space is
+    // sphere XYZ, so dropping z would shrink distances (especially north-south) and let far
+    // points pass the test.
+    vec3 source_commonspace = project_position(vec3(position, 0.0));
+    vec3 target_commonspace = project_position(vec3(brushing.mousePos, 0.0));
+    float distance = length((target_commonspace - source_commonspace) / project.commonUnitsPerMeter);
 
     return distance <= brushing.radius;
   }
