@@ -9,6 +9,7 @@ import {DeckGL} from '@deck.gl/react';
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 import type {Color, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL =
@@ -23,7 +24,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 const colorRange: Color[] = [
   [255, 255, 178, 25],
@@ -41,13 +42,15 @@ export default function App({
   cellSize = 20,
   gpuAggregation = true,
   aggregation = 'SUM',
-  mapStyle = MAP_STYLE
+  mapStyle = MAP_STYLE,
+  device
 }: {
   data?: string | DataPoint[];
   cellSize?: number;
   gpuAggregation?: boolean;
   aggregation?: 'SUM' | 'MEAN' | 'MIN' | 'MAX';
   mapStyle?: string;
+  device?: Device;
 }) {
   const layers = [
     new ScreenGridLayer<DataPoint>({
@@ -64,7 +67,7 @@ export default function App({
   ];
 
   return (
-    <DeckGL layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+    <DeckGL device={device} layers={layers} initialViewState={INITIAL_VIEW_STATE} controller={true}>
       <Map reuseMaps mapStyle={mapStyle} />
     </DeckGL>
   );

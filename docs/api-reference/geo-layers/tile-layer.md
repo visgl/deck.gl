@@ -1,4 +1,9 @@
+---
+description: "TileLayer loads tiled data for the current viewport and renders it through sub-layers."
+---
+
 # TileLayer
+![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {TileLayerDemo} from '@site/src/doc-demos/geo-layers';
 

@@ -25,14 +25,64 @@ test('Attribute#constructor', () => {
   expect(() => new Attribute(device, {size: 1}), 'Attribute missing update option').toThrow();
 });
 
+const WEBGL_ONLY_X3_TYPES = [
+  'uint8',
+  'sint8',
+  'unorm8',
+  'snorm8',
+  'uint16',
+  'sint16',
+  'unorm16',
+  'snorm16'
+] as const;
+
+test.each(WEBGL_ONLY_X3_TYPES)(
+  'Attribute#getBufferLayout uses the WebGL-only suffix for %s x3',
+  type => {
+    const attribute = new Attribute(device, {
+      size: 3,
+      type,
+      accessor: 'a'
+    });
+
+    expect(attribute.getBufferLayout().attributes[0].format).toBe(`${type}x3-webgl`);
+
+    attribute.delete();
+  }
+);
+
+test.each([
+  {type: 'float32', size: 3, format: 'float32x3'},
+  {type: 'unorm16', size: 2, format: 'unorm16x2'},
+  {type: 'unorm16', size: 4, format: 'unorm16x4'}
+] as const)(
+  'Attribute#getBufferLayout does not use the WebGL-only suffix for $type x$size',
+  ({type, size, format}) => {
+    const attribute = new Attribute(device, {
+      size,
+      type,
+      accessor: 'a'
+    });
+
+    expect(attribute.getBufferLayout().attributes[0].format).toBe(format);
+
+    attribute.delete();
+  }
+);
+
 test('Attribute#delete', () => {
   const attribute = new Attribute(device, {size: 1, accessor: 'a'});
-  attribute.setData(new Float32Array(4));
+  attribute.allocate(4);
 
   expect(attribute._buffer, 'Attribute created Buffer object').toBeTruthy();
+  expect(attribute.state.allocatedValue, 'Attribute owns an allocated typed array').toBeTruthy();
 
   attribute.delete();
   expect(attribute._buffer, 'Attribute deleted Buffer object').toBeFalsy();
+  expect(attribute.state.allocatedValue, 'Attribute released its allocated typed array').toBeNull();
+
+  attribute.delete();
+  expect(attribute.state.allocatedValue, 'Repeated delete remains a no-op').toBeNull();
 });
 
 test('Attribute#getUpdateTriggers', () => {
@@ -166,7 +216,7 @@ test('Attribute#setConstantValue', () => {
   expect(attribute.getValue().colors, 'constant value is normalized').toEqual([1, 1, 0]);
 });
 
-test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
+test('Attribute#setConstantValue keeps one constant value - webgpu', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) {
     skip();
@@ -178,21 +228,54 @@ test('Attribute#setConstantBufferValue - webgpu', async ({skip}) => {
   });
 
   attribute.numInstances = 2;
-  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant materializes a buffer').toBe(
-    true
-  );
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'webgpu constant is accepted').toBe(true);
 
-  expect(attribute.state.constant, 'webgpu constant is materialized as a buffer').toBeFalsy();
-  expect(attribute.value, 'repeated attribute value is generated').toEqual([1, 2, 3, 1, 2, 3]);
-  expect(
-    attribute.getValue().positions instanceof Buffer,
-    'webgpu constant is exposed as a buffer'
-  ).toBeTruthy();
+  expect(attribute.state.constant, 'webgpu constant remains constant').toBeTruthy();
+  expect(attribute.value, 'only one attribute value is retained').toEqual([1, 2, 3]);
+  const buffer = attribute.getValue().positions as Buffer;
+  expect(buffer, 'webgpu constant is exposed as a one-row buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync(0, 12);
+  expect(new Float32Array(bytes.buffer, bytes.byteOffset, 3)).toEqual(new Float32Array([1, 2, 3]));
+  expect(attribute.getBufferLayout().byteStride, 'constant buffer broadcasts its row').toBe(0);
+  expect(attribute.getConstantValue(), 'raw constant is retained for buffer grouping').toEqual([
+    1, 2, 3
+  ]);
 
-  expect(
-    attribute.setConstantValue(this, [1, 2, 3]),
-    'same emulated constant does not regenerate the buffer'
-  ).toBe(false);
+  expect(attribute.setConstantValue(this, [1, 2, 3]), 'same constant remains valid').toBe(true);
+
+  attribute.delete();
+});
+
+test('Attribute#updateBuffer keeps a one-instance constant updater - webgpu', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+  }
+  const matrix = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
+  const attribute = new Attribute(webgpuDevice, {
+    id: 'instanceModelMatrix',
+    size: 12,
+    update: target => {
+      // Matrix attributes use this legacy constant-updater path when all transforms are static.
+      target.constant = true;
+      target.value = new Float32Array(matrix);
+    }
+  });
+
+  attribute.allocate(1);
+  attribute.updateBuffer({
+    numInstances: 1,
+    data: [0],
+    props: {},
+    context: null
+  });
+
+  expect(attribute.isConstant, 'constant updater remains constant').toBeTruthy();
+  const buffer = attribute.getValue().instanceModelMatrix as Buffer;
+  expect(buffer, 'constant updater is exposed as a one-row buffer').toBeInstanceOf(Buffer);
+  const bytes = await buffer.readAsync(0, matrix.byteLength);
+  expect(new Float32Array(bytes.buffer, bytes.byteOffset, matrix.length)).toEqual(matrix);
+  expect(attribute.getBufferLayout().byteStride).toBe(0);
 
   attribute.delete();
 });
@@ -342,15 +425,15 @@ test('Attribute#updateBuffer', () => {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
         255, 0, 0, 255,
         128, 128, 128, 128,
         255, 255, 255, 255,
-        0, 0, 0, 128, 
+        0, 0, 0, 128,
         0, 0, 0, 255
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
         255, 0, 0, 255, 255, 0, 0, 255,
         128, 128, 128, 128,
@@ -377,14 +460,14 @@ test('Attribute#updateBuffer', () => {
         size: 3,
         accessor: (_, {index}) => [index, 0, 0]
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       standard: [
         0, 0, 0,
         1, 0, 0,
         2, 0, 0,
         3, 0, 0
       ],
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       'variable size': [
         0, 0, 0, 0, 0, 0,
         1, 0, 0,
@@ -425,9 +508,8 @@ test('Attribute#updateBuffer', () => {
         attribute.value.slice(0, result.length),
         `${testCase.title} updates attribute buffer`
       ).toEqual(result);
-
-      attribute.delete();
     }
+    testCase.attribute.delete();
   }
 });
 
@@ -567,7 +649,7 @@ test('Attribute#standard accessor - variable width', () => {
         defaultValue: [0, 0, 0, 255],
         accessor: 'getColor'
       }),
-      // prettier-ignore
+      // biome-ignore format: preserve layout
       result: [
         255, 0, 0, 255,
         255, 255, 0, 255,
@@ -979,6 +1061,15 @@ test('Attribute#setBinaryValue', () => {
   expect(attribute.state.binaryAccessor, 'binaryAccessor is assigned').toBeTruthy();
   expect(attribute.needsUpdate(), 'attribute still needs update').toBeTruthy();
 
+  attribute.clearNeedsUpdate();
+  expect(attribute.setBinaryValue(value), 'unchanged source without invalidation').toBeTruthy();
+  attribute.setNeedsUpdate('projection changed');
+  expect(
+    attribute.setBinaryValue(value),
+    'retransform unchanged source after invalidation'
+  ).toBeFalsy();
+  expect(attribute.needsUpdate(), 'preserve transform invalidation').toBeTruthy();
+
   expect(
     () => attribute.setBinaryValue([0, 1, 2, 3]),
     'should throw if external value is invalid'
@@ -1097,6 +1188,42 @@ describe('Attribute#doublePrecision', () => {
     buffer.delete();
     attribute.delete();
   });
+
+  test('Attribute#doublePrecision#fp64:false interleaves zero lows on WebGPU', async ({skip}) => {
+    const webgpuDevice = await getWebGPUTestDevice();
+    if (!webgpuDevice) {
+      skip();
+    }
+    const attribute = new Attribute(webgpuDevice, {
+      id: 'positions',
+      type: 'float64',
+      fp64: false,
+      size: 3,
+      accessor: 'getPosition'
+    });
+
+    attribute.allocate(2);
+    attribute.updateBuffer({
+      numInstances: 2,
+      data: [0, 1],
+      props: {
+        getPosition: d => [d, 1, 2]
+      }
+    });
+
+    const bufferLayout = attribute.getBufferLayout();
+    expect(bufferLayout.byteStride).toBe(24);
+    expect(bufferLayout.attributes?.map(a => a.byteOffset)).toEqual([0, 12]);
+    expect(attribute.getValue().positions64Low).toBe(attribute.getBuffer());
+
+    const buffer = attribute.getBuffer()!;
+    const bytes = await buffer.readAsync(0, 48);
+    expect(new Float32Array(bytes.buffer, bytes.byteOffset, 12)).toEqual(
+      new Float32Array([0, 1, 2, 0, 0, 0, 1, 1, 2, 0, 0, 0])
+    );
+
+    attribute.delete();
+  });
 });
 
 test('Attribute#updateBuffer', () => {
@@ -1157,3 +1284,136 @@ test('Attribute#updateBuffer', () => {
 
   attribute.delete();
 });
+
+test('Attribute#getGPUVector borrows strided buffers and preserves layout flags', () => {
+  const attribute = new Attribute(device, {id: 'positions', size: 2, accessor: 'getPosition'});
+  const buffer = device.createBuffer({data: new Float32Array([99, 1, 2, 99, 3, 4])});
+  attribute.numInstances = 2;
+  attribute.setExternalBuffer({buffer, offset: 4, stride: 12});
+  const layoutChanged = attribute.layoutChanged();
+  const vector = attribute.getGPUVector().positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  expect(vector.format).toBe('float32x2');
+  expect(vector.length).toBe(2);
+  expect(vector.byteOffset).toBe(4);
+  expect(vector.byteStride).toBe(12);
+  expect(vector.data[0].buffer).toBe(buffer);
+  expect(vector.ownsBuffer).toBe(false);
+  expect(attribute.layoutChanged()).toBe(layoutChanged);
+  vector.destroy();
+  expect(buffer.destroyed).toBe(false);
+  attribute.delete();
+  expect(buffer.destroyed).toBe(false);
+  buffer.destroy();
+});
+
+test('Attribute#getGPUVector preserves raw normalized constants', () => {
+  const attribute = new Attribute(device, {
+    id: 'colors',
+    size: 4,
+    type: 'unorm8',
+    accessor: 'getColor'
+  });
+  attribute.setConstantValue(null, [128, 64, 255, 0]);
+  const constant = attribute.getGPUVector().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+  expect(constant.format).toBe('unorm8x4');
+  expect(constant.value).toEqual(new Uint8Array([128, 64, 255, 0]));
+  attribute.setConstantValue(null, [1, 2, 3, 4]);
+  expect(constant.value).toEqual(new Uint8Array([128, 64, 255, 0]));
+  attribute.delete();
+});
+
+test.each([2, 3])('Attribute#getGPUVector exposes fp64 views with size %i', size => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    size,
+    type: 'float64',
+    fp64: true,
+    accessor: 'getPosition'
+  });
+  attribute.numInstances = 1;
+  attribute.setExternalBuffer(new Float64Array([1.1, 2.2, 3.3].slice(0, size)));
+  let columns = attribute.getGPUVector();
+  const high = columns.positions as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  const low = columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUVector;
+  expect(high.data[0].buffer).toBe(low.data[0].buffer);
+  expect(high.byteOffset).toBe(0);
+  expect(low.byteOffset).toBe(size * 4);
+  expect(high.byteStride).toBe(size * 8);
+  attribute.setExternalBuffer(new Float32Array([1, 2, 3].slice(0, size)));
+  columns = attribute.getGPUVector();
+  expect((columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
+    new Float32Array(size)
+  );
+  attribute.setConstantValue(null, [1, 2, 3]);
+  columns = attribute.getGPUVector();
+  expect((columns.positions as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
+    new Float32Array([1, 2, 3].slice(0, size))
+  );
+  expect((columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value).toEqual(
+    new Float32Array(size)
+  );
+  attribute.delete();
+});
+
+// Binary inputs can override the declared position size without changing Attribute.size.
+test('Attribute#getGPUVector sizes synthetic fp64 constants for binary inputs', () => {
+  const attribute = new Attribute(device, {
+    id: 'positions',
+    size: 3,
+    type: 'float64',
+    fp64: true,
+    accessor: 'getPosition'
+  });
+  attribute.numInstances = 1;
+  attribute.setExternalBuffer({value: new Float32Array([1, 2]), size: 2});
+  const columns = attribute.getGPUVector();
+  expect(columns.positions.format).toBe('float32x2');
+  const low = columns.positions64Low as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+  expect(low.format).toBe('float32x2');
+  expect(low.value).toEqual(new Float32Array(2));
+  attribute.delete();
+});
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Attribute#setData synchronizes raw constants on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const attribute = new Attribute(testDevice, {
+      id: 'colors',
+      size: 4,
+      type: 'unorm8',
+      accessor: 'getColor'
+    });
+    try {
+      attribute.setConstantValue(null, [255, 0, 0, 255]);
+      const original = attribute.getGPUVector()
+        .colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+      expect(attribute.setData({constant: true, value: [0, 255, 0, 255]})).toBe(true);
+      const current = attribute.getGPUVector()
+        .colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant;
+      expect(current.value).toEqual(new Uint8Array([0, 255, 0, 255]));
+      expect(original.value).toEqual(new Uint8Array([255, 0, 0, 255]));
+      expect(attribute.value).toEqual(new Float32Array([0, 1, 0, 1]));
+      expect(attribute.setData({constant: true, value: [0, 255, 0, 255]})).toBe(false);
+      if (backend === 'webgpu') {
+        const bytes = await attribute.getBuffer()!.readAsync(0, 4);
+        expect(Array.from(bytes)).toEqual([0, 255, 0, 255]);
+        expect(attribute.getBufferLayout().byteStride).toBe(0);
+      } else {
+        expect(attribute.getValue().colors).toEqual(new Float32Array([0, 1, 0, 1]));
+      }
+      attribute.setData(new Uint8Array([1, 2, 3, 4]));
+      expect(attribute.getConstantValue()).toBeNull();
+      expect(attribute.getGPUVector().colors.constructor.name).toBe('GPUVector');
+      attribute.setData({constant: true, value: [0, 0, 255, 255]});
+      expect(
+        (attribute.getGPUVector().colors as import('@luma.gl/gpgpu/gpu-data').GPUConstant).value
+      ).toEqual(new Uint8Array([0, 0, 255, 255]));
+    } finally {
+      attribute.delete();
+    }
+  });
+}

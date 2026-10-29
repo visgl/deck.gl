@@ -5,9 +5,13 @@
 import React, {useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {Map, NavigationControl, Popup, useControl} from 'react-map-gl/maplibre';
+import {setWorkerUrl} from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import {GeoJsonLayer, ArcLayer} from 'deck.gl';
-import {MapboxOverlay as DeckOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+setWorkerUrl(maplibreWorkerUrl);
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const AIR_PORTS =
@@ -21,7 +25,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay(props));
   overlay.setProps(props);
@@ -45,7 +50,7 @@ function Root() {
       pickable: true,
       autoHighlight: true,
       onClick: info => setSelected(info.object)
-      // beforeId: 'watername_ocean' // In interleaved mode, render the layer under map labels
+      // beforeId: 'waterway_line_label' // In interleaved mode, render the layer under map labels
     }),
     new ArcLayer({
       id: 'arcs',

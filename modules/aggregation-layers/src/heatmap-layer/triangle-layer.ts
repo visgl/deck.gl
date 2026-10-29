@@ -4,7 +4,8 @@
 
 import type {Buffer, Device, Texture} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {Layer, LayerContext, project32} from '@deck.gl/core';
+import {Layer, LayerContext, color, project32} from '@deck.gl/core';
+import source from './triangle-layer.wgsl';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 import {TriangleProps, triangleUniforms} from './triangle-layer-uniforms';
@@ -31,7 +32,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   };
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, triangleUniforms]});
+    return super.getShaders({source, vs, fs, modules: [project32, color, triangleUniforms]});
   }
 
   initializeState({device}: LayerContext): void {

@@ -20,12 +20,10 @@ export {
   Model,
   BufferTransform,
   TextureTransform,
-
   // Geometry
   Geometry,
   CubeGeometry,
   SphereGeometry,
-
   // Scenegraph
   ScenegraphNode,
   GroupNode,

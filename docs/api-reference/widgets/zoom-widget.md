@@ -147,11 +147,23 @@ Zoom level delta applied by each button click.
 
 Tooltip message displayed while hovering a mouse over the zoom in button.
 
+#### `zoomInTooltip` (string | HTMLElement | false, optional) {#zoomintooltip}
+
+* Default: value of `zoomInLabel`
+
+Custom tooltip content for the zoom in button. Overrides the default label text in the tooltip. Pass `false` to disable.
+
 #### `zoomOutLabel` (string, optional) {#zoomoutlabel}
 
 * Default: `'Zoom Out'`
 
 Tooltip message displayed while hovering a mouse over the zoom out button.
+
+#### `zoomOutTooltip` (string | HTMLElement | false, optional) {#zoomouttooltip}
+
+* Default: value of `zoomOutLabel`
+
+Custom tooltip content for the zoom out button. Overrides the default label text in the tooltip. Pass `false` to disable.
 
 #### `transitionDuration` (number, optional) {#transitionduration}
 

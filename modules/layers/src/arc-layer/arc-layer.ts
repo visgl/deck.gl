@@ -5,6 +5,7 @@
 import {
   Layer,
   project32,
+  color,
   picking,
   UNIT,
   UpdateParameters,
@@ -15,12 +16,14 @@ import {
   Position,
   Accessor,
   Color,
-  DefaultProps
+  DefaultProps,
+  _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
 
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
+import {shaderWGSL} from './arc-layer.wgsl';
 import vs from './arc-layer-vertex.glsl';
 import fs from './arc-layer-fragment.glsl';
 
@@ -41,7 +44,8 @@ const defaultProps: DefaultProps<ArcLayerProps> = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
+  antialiasing: false
 };
 
 /** All properties supported by ArcLayer. */
@@ -85,6 +89,15 @@ type _ArcLayerProps<DataT> = {
    * @default Number.MAX_SAFE_INTEGER
    */
   widthMaxPixels?: number;
+
+  /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where arcs overlap. Only the edges
+   * along the width of the arc are smoothed - the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
 
   /**
    * Method called to retrieve the source position of each object.
@@ -138,7 +151,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   state!: {
     model?: Model;
-  };
+  } & Layer['state'];
 
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
@@ -148,7 +161,14 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, modules: [project32, picking, arcUniforms]}); // 'project' module added by default.
+    const {antialiasing} = this.props;
+    return super.getShaders({
+      vs,
+      fs,
+      source: shaderWGSL,
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
+      modules: [project32, color, picking, arcUniforms]
+    }); // 'project' module added by default.
   }
 
   // This layer has its own wrapLongitude logic
@@ -165,6 +185,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getSourcePosition'
       },
@@ -172,6 +193,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getTargetPosition'
       },
@@ -214,7 +236,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -238,7 +261,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMinPixels,
       widthMaxPixels,
       greatCircle,
-      useShortestPath: wrapLongitude
+      useShortestPath:
+        wrapLongitude && !this.state.preproject && this.state.sourceCrs?.signature === 'WGS84'
     };
 
     const model = this.state.model!;
@@ -248,7 +272,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

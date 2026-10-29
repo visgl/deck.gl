@@ -3,13 +3,20 @@
 // Copyright (c) vis.gl contributors
 
 import {Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
-import {Layer, picking, UpdateParameters, Color} from '@deck.gl/core';
+import {Geometry} from '@luma.gl/engine';
+import {
+  Layer,
+  color,
+  picking,
+  UpdateParameters,
+  Color,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
 import {createColorRangeTexture, updateColorRangeTexture} from '../common/utils/color-utils';
+import source from './screen-grid-cell-layer.wgsl';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import {ScreenGridProps, screenGridUniforms} from './screen-grid-layer-uniforms';
-import {ShaderModule} from '@luma.gl/shadertools';
 import type {ScaleType} from '../common/types';
 
 /** Proprties added by ScreenGridCellLayer. */
@@ -27,12 +34,12 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
   static layerName = 'ScreenGridCellLayer';
 
   state!: {
-    model?: Model;
+    model?: GPUVectorModel;
     colorTexture: Texture;
   };
 
-  getShaders(): {vs: string; fs: string; modules: ShaderModule[]} {
-    return super.getShaders({vs, fs, modules: [picking, screenGridUniforms]});
+  getShaders() {
+    return super.getShaders({source, vs, fs, modules: [color, picking, screenGridUniforms]});
   }
 
   initializeState() {
@@ -105,8 +112,8 @@ export default class ScreenGridCellLayer<ExtraPropsT extends {} = {}> extends La
 
   // Private Methods
 
-  _getModel(): Model {
-    return new Model(this.context.device, {
+  _getModel(): GPUVectorModel {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

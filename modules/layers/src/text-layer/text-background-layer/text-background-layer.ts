@@ -2,14 +2,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, project32, picking, UNIT} from '@deck.gl/core';
+import {
+  Layer,
+  color,
+  project32,
+  picking,
+  UNIT,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 
 import {TextBackgroundProps, textBackgroundUniforms} from './text-background-layer-uniforms';
 import {TextModuleProps, textUniforms} from '../text-uniforms';
 import vs from './text-background-layer-vertex.glsl';
 import fs from './text-background-layer-fragment.glsl';
+import source from './text-background-layer.wgsl';
 
 import type {
   LayerProps,
@@ -84,7 +92,8 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     return super.getShaders({
       vs,
       fs,
-      modules: [project32, picking, textBackgroundUniforms, textUniforms]
+      source,
+      modules: [project32, color, picking, textBackgroundUniforms, textUniforms]
     });
   }
 
@@ -94,32 +103,39 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getPosition'
       },
+      // Interleave six inputs to stay below WebGPU's portable vertex-buffer and storage-buffer limits.
       instanceSizes: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getSize',
         defaultValue: 1
       },
       instanceAngles: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getAngle'
       },
       instanceRects: {
         size: 4,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getBoundingRect'
       },
       instanceClipRect: {
         size: 4,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getClipRect',
         defaultValue: [0, 0, -1, -1]
       },
       instancePixelOffsets: {
         size: 2,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getPixelOffset'
       },
       instanceFillColors: {
@@ -139,6 +155,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
       instanceLineWidths: {
         size: 1,
         transition: true,
+        bufferGroup: 'text-background-instance-data',
         accessor: 'getLineWidth',
         defaultValue: 1
       }
@@ -196,7 +213,7 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
     // a square that minimally cover the unit circle
     const positions = [0, 0, 1, 0, 0, 1, 1, 1];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

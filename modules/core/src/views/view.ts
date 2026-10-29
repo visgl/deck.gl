@@ -16,12 +16,15 @@ import type {Parameters} from '@luma.gl/core';
 export type CommonViewState = TransitionProps;
 
 export type CommonViewProps<ViewState> = {
+  /** Subdivision intervals around the earth. Default 0 disables subdivision. */
+  resolution?: number;
   /** A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view. */
   id?: string;
   /**
-   * Optional id of the presentation canvas associated with this view.
-   * Integrations that render views into multiple canvases can use this id to route view-scoped
-   * resources such as event managers.
+   * The id of the presentation canvas this view should render into when `Deck` is using
+   * multi-canvas presentation.
+   *
+   * When not supplied, the view renders into the first configured canvas.
    */
   canvasId?: string;
   /** A relative (e.g. `'50%'`) or absolute position. Default `0`. */
@@ -112,6 +115,9 @@ export default abstract class View<
     Object.seal(this);
   }
 
+  /** Prepare asynchronous resources before this view can create a viewport. */
+  initialize(): void | Promise<void> {}
+
   equals(view: this): boolean {
     if (this === view) {
       return true;
@@ -127,7 +133,10 @@ export default abstract class View<
     return new ViewConstructor({...this.props, ...newProps});
   }
 
-  /** Make viewport from canvas dimensions and view state */
+  /** Create a viewport from canvas dimensions and view state.
+   * To wait for resources prepared by initialize(), override this method to return null
+   * until they are ready. This method may be called while initialize() is still pending.
+   */
   makeViewport({width, height, viewState}: {width: number; height: number; viewState: ViewState}) {
     viewState = this.filterViewState(viewState);
 

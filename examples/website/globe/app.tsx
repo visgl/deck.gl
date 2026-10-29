@@ -8,6 +8,7 @@ import {useState, useMemo, useCallback} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {DeckGL} from '@deck.gl/react';
+import type {Device} from '@luma.gl/core';
 import {
   _GlobeView as GlobeView,
   LightingEffect,
@@ -69,7 +70,7 @@ type DailyFlights = {
   flights: Flight[];
 };
 
-export default function App({data}: {data?: DailyFlights[]}) {
+export default function App({device, data}: {device?: Device; data?: DailyFlights[]}) {
   const [currentTime, setCurrentTime] = useState(0);
 
   const timeRange: [number, number] = [currentTime, currentTime + TIME_WINDOW];
@@ -126,6 +127,7 @@ export default function App({data}: {data?: DailyFlights[]}) {
   return (
     <>
       <DeckGL
+        device={device}
         views={new GlobeView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
@@ -179,7 +181,9 @@ export async function renderToDOM(container: HTMLDivElement) {
   const data: DailyFlights[] = [];
   for (const date of dates) {
     const url = `${DATA_URL}/${date}.csv`;
-    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data;
+    const flights: Flight[] = (
+      await load(url, CSVLoader, {csv: {shape: 'object-row-table', skipEmptyLines: true}})
+    ).data;
 
     // Join flight data from multiple dates into one continuous animation
     const offset = SEC_PER_DAY * data.length;

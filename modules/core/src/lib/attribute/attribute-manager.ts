@@ -4,6 +4,7 @@
 
 /* eslint-disable guard-for-in */
 import Attribute, {AttributeOptions} from './attribute';
+import AttributeBufferGroups, {type AttributeBufferGroupBindings} from './attribute-buffer-groups';
 import log from '../../utils/log';
 import memoize from '../../utils/memoize';
 import {mergeBounds} from '../../utils/math-utils';
@@ -12,7 +13,9 @@ import {NumericArray} from '../../types/types';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
-import type {Device, BufferLayout} from '@luma.gl/core';
+import type {Buffer, Device, BufferLayout} from '@luma.gl/core';
+import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUConstant} from '@luma.gl/gpgpu/gpu-data';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 
@@ -56,6 +59,7 @@ export default class AttributeManager {
 
   private stats?: Stats;
   private attributeTransitionManager: AttributeTransitionManager;
+  private attributeBufferGroups: AttributeBufferGroups | null;
   private mergeBoundsMemoized: any = memoize(mergeBounds);
 
   constructor(
@@ -85,12 +89,21 @@ export default class AttributeManager {
       id: `${id}-transitions`,
       timeline
     });
+    this.attributeBufferGroups =
+      device.type === 'webgpu'
+        ? new AttributeBufferGroups(device, {
+            id,
+            isTransitionAttribute: attributeName =>
+              this.attributeTransitionManager.hasAttribute(attributeName)
+          })
+        : null;
 
     // For debugging sanity, prevent uninitialized members
     Object.seal(this);
   }
 
   finalize() {
+    this.attributeBufferGroups?.finalize();
     for (const attributeName in this.attributes) {
       this.attributes[attributeName].delete();
     }
@@ -264,6 +277,42 @@ export default class AttributeManager {
   }
 
   /**
+   * Returns borrowed GPU vectors and raw constants keyed by shader attribute name.
+   * Active transitions override source attributes. Reacquire after attribute updates;
+   * retaining a vector does not extend the lifetime of its backing buffer.
+   * @param attributes Optional subset, such as the result of getChangedAttributes().
+   * @param packedBuffers Optional grouped buffers to expose as interleaved vectors.
+   */
+  getGPUVectors(
+    attributes: Record<string, Attribute> = this.getAttributes(),
+    packedBuffers?: Pick<AttributeBufferGroupBindings, 'bufferLayouts' | 'buffers'> & {
+      length: number;
+    }
+  ): Record<string, GPUVector | GPUConstant> {
+    const result: Record<string, GPUVector | GPUConstant> = {};
+    for (const attribute of Object.values(attributes)) {
+      Object.assign(result, attribute.getGPUVector());
+    }
+    if (packedBuffers) {
+      for (const layout of packedBuffers.bufferLayouts) {
+        const buffer: Buffer | undefined = packedBuffers.buffers[layout.name];
+        if (buffer) {
+          result[layout.name] = new GPUVector({
+            type: 'interleaved',
+            name: layout.name,
+            buffer,
+            length: packedBuffers.length,
+            byteStride: layout.byteStride!,
+            attributes: layout.attributes!,
+            ownsBuffer: false
+          });
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
    * Computes the spatial bounds of a given set of attributes
    */
   getBounds(attributeNames: string[]) {
@@ -301,8 +350,39 @@ export default class AttributeManager {
       isInstanced?: boolean;
     }
   ): BufferLayout[] {
+    if (this.hasBufferGroups()) {
+      return this.attributeBufferGroups!.getBufferLayouts(this.getAttributes(), modelInfo);
+    }
     return Object.values(this.getAttributes()).map(attribute =>
       attribute.getBufferLayout(modelInfo)
+    );
+  }
+
+  /** @internal Returns whether this WebGPU manager has explicitly grouped attributes. */
+  hasBufferGroups(): boolean {
+    return Boolean(this.attributeBufferGroups?.hasGroups(this.attributes));
+  }
+
+  /**
+   * @internal Resolves runtime layouts and additional shared buffers for a grouped WebGPU model.
+   */
+  getBufferGroupBindings(
+    changedAttributes: {[id: string]: Attribute},
+    modelInfo?: {isInstanced?: boolean},
+    excludeAttributes: Record<string, boolean> = {}
+  ): AttributeBufferGroupBindings {
+    if (!this.attributeBufferGroups) {
+      return {
+        bufferLayouts: this.getBufferLayouts(modelInfo),
+        buffers: {},
+        groupedAttributeIds: new Set<string>()
+      };
+    }
+    return this.attributeBufferGroups.getBindings(
+      this.getAttributes(),
+      changedAttributes,
+      modelInfo,
+      excludeAttributes
     );
   }
 

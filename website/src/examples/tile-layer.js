@@ -12,6 +12,8 @@ import {makeExample} from '../components';
 class MapTileDemo extends Component {
   static title = 'Raster Map Tiles';
 
+  static hasDeviceTabs = true;
+
   static code = `${GITHUB_TREE}/examples/website/map-tile`;
 
   static parameters = {
@@ -61,6 +63,8 @@ class MapTileDemo extends Component {
     return (
       <App
         {...otherProps}
+        key={this.props.device?.type}
+        device={this.props.device}
         showBorder={params.showBorder.value}
         minZoom={params.minZoom.value}
         maxZoom={params.maxZoom.value}

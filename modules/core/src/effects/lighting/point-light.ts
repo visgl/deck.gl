@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {projectPosition} from '../../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../../lib/constants';
+import {WGS84_CRS} from '../../utils/crs';
+import {getWorldPosition} from '../../shaderlib/project/project-functions';
+import {getOffsetOrigin} from '../../shaderlib/project/viewport-uniforms';
+import * as vec3 from '@math.gl/core/vec3';
 
 import type Layer from '../../lib/layer';
 
@@ -62,15 +64,27 @@ export class PointLight {
     const {projectedLight} = this;
     const viewport = layer.context.viewport;
     const {coordinateSystem, coordinateOrigin} = layer.props;
-    const position = projectPosition(this.position, {
+    const {offsetMode, commonOrigin, geospatialOrigin, shaderCoordinateOrigin} = getOffsetOrigin(
       viewport,
       coordinateSystem,
       coordinateOrigin,
-      fromCoordinateSystem: viewport.isGeospatial
-        ? COORDINATE_SYSTEM.LNGLAT
-        : COORDINATE_SYSTEM.CARTESIAN,
-      fromCoordinateOrigin: [0, 0, 0]
+      layer.internalState!.sourceCrs
+    );
+    // Lights have their own coordinates but share the receiving shader's altitude
+    // convention and common origin. Layer transforms apply only to the geometry.
+    const position = getWorldPosition(this.position, {
+      viewport,
+      sourceCrs: viewport.isGeospatial ? WGS84_CRS : null,
+      coordinateSystem: viewport.isGeospatial ? 'lnglat' : 'cartesian',
+      coordinateOrigin: [0, 0, 0],
+      modelMatrix: null,
+      offsetMode
     });
+    if (offsetMode) {
+      const origin =
+        commonOrigin || viewport.projectPosition(geospatialOrigin || shaderCoordinateOrigin);
+      vec3.sub(position, position, origin);
+    }
     projectedLight.color = this.color;
     projectedLight.intensity = this.intensity;
     projectedLight.position = position;

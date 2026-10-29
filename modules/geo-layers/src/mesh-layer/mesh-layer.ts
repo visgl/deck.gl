@@ -4,15 +4,17 @@
 
 import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
-import {pbrMaterial} from '@luma.gl/shadertools';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
+import {_GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 
 import {MeshProps, meshUniforms} from './mesh-layer-uniforms';
+import {meshPbrMaterial} from './mesh-pbr-material';
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
+import source from './mesh-layer.wgsl';
 
 export type Mesh = {
   attributes: MeshAttributes;
@@ -62,9 +64,13 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   getShaders() {
     const shaders = super.getShaders();
-    const modules = shaders.modules;
-    modules.push(pbrMaterial, meshUniforms);
-    return {...shaders, vs, fs};
+    return {
+      ...shaders,
+      vs,
+      fs,
+      source,
+      modules: [...shaders.modules, meshPbrMaterial, meshUniforms]
+    };
   }
 
   initializeState() {
@@ -123,7 +129,7 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
     this.setState({parsedPBRMaterial});
     const shaders = this.getShaders();
     validateGeometryAttributes(mesh.attributes);
-    const model = new Model(this.context.device, {
+    const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id,
       geometry: mesh,
@@ -131,7 +137,8 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
       defines: {
         ...shaders.defines,
         ...parsedPBRMaterial?.defines,
-        HAS_UV_REGIONS: mesh.attributes.uvRegions ? 1 : 0
+        HAS_UV_REGIONS: mesh.attributes.uvRegions ? 1 : 0,
+        HAS_FEATURE_IDS: this.props.featureIds ? 1 : 0
       },
       parameters: parsedPBRMaterial?.parameters,
       isInstanced: true
@@ -150,8 +157,11 @@ export default class MeshLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
       const {pbr_baseColorSampler} = parsedPBRMaterial.bindings;
       const {emptyTexture} = this.state;
+      const meshTexture = pbr_baseColorSampler || emptyTexture;
       const simpleMeshProps = {
-        sampler: pbr_baseColorSampler || emptyTexture,
+        ...(this.context.device.type === 'webgpu'
+          ? {simpleMeshTexture: meshTexture}
+          : {sampler: meshTexture}),
         hasTexture: Boolean(pbr_baseColorSampler)
       };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -28,7 +28,8 @@ const config = {
 
   bundle: {
     globalName: 'deck',
-    externals: ['h3-js'],
+    // LERC loads this Node builtin only in its Node.js initialization branch.
+    externals: ['h3-js', 'module'],
     target: ['chrome110', 'firefox110', 'safari15'],
     format: 'umd',
     globals: {
@@ -36,7 +37,8 @@ const config = {
       '@luma.gl/core': 'globalThis.luma',
       '@luma.gl/engine': 'globalThis.luma',
       '@loaders.gl/core': 'globalThis.loaders',
-      'h3-js': 'globalThis.h3 || {}'
+      'h3-js': 'globalThis.h3 || {}',
+      module: 'globalThis.process?.getBuiltinModule?.(\'module\') || {}'
     }
   },
 
@@ -49,9 +51,6 @@ const config = {
   },
 
   entry: {
-    // Tests now use vitest (yarn test, yarn test-headless, yarn test-render)
-    // Only tape-compat smoke test still uses ocular-test for backward compatibility testing
-    'tape-compat': 'test/smoke/tape-compat.tape.spec.ts',
     // TODO: Migrate bench and size to vitest (Phase 7)
     bench: 'test/bench/index.js',
     'bench-browser': 'test/bench/browser.html',

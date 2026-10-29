@@ -52,7 +52,7 @@ jobs:
     if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_deploy }}
 
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
 
@@ -78,8 +78,22 @@ jobs:
           WEBSITE_BASE_URL: ${{ needs.check_branch.outputs.website_base_url }}
         run: (cd website && yarn build)
 
+      # Pages checks the branch root, even when the site lives under /next/.
+      - name: Prepare Pages marker
+        run: |
+          mkdir -p "website-pages-marker"
+          touch "website-pages-marker/.nojekyll"
+
+      - name: Disable Jekyll at the Pages branch root
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # 4.9.0
+        with:
+          token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
+          branch: gh-pages
+          folder: website-pages-marker
+          clean: false
+
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # 4.8.0
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # 4.9.0
         with:
           token: ${{ secrets.WEBSITE_DEPLOY_TOKEN }}
           branch: gh-pages
@@ -88,3 +102,4 @@ jobs:
           clean: true
           clean-exclude: |
             next
+            .nojekyll

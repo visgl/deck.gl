@@ -2,13 +2,21 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {
+  Layer,
+  color,
+  project32,
+  picking,
+  UNIT,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
+import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -182,7 +190,13 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       fs,
       source: getShaderWGSL(useRowIndexes),
       defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
-      modules: [project32, color, picking, scatterplotUniforms]
+      modules: [
+        project32,
+        color,
+        picking,
+        scatterplotUniforms,
+        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
+      ]
     });
   }
 
@@ -203,38 +217,44 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
-        accessor: 'getPosition'
+        accessor: 'getPosition',
+        ...this.usePositionTransforms()
       },
       instanceRadius: {
         size: 1,
         transition: true,
         accessor: 'getRadius',
-        defaultValue: 1
+        defaultValue: 1,
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,
         transition: true,
         type: 'unorm8',
         accessor: 'getFillColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: [0, 0, 0, 255],
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineColors: {
         size: this.props.colorFormat.length,
         transition: true,
         type: 'unorm8',
         accessor: 'getLineColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: [0, 0, 0, 255],
+        bufferGroup: 'scatterplot-instance-data'
       },
       instanceLineWidths: {
         size: 1,
         transition: true,
         accessor: 'getLineWidth',
-        defaultValue: 1
+        defaultValue: 1,
+        bufferGroup: 'scatterplot-instance-data'
       },
       instancePixelOffset: {
         size: 2,
         transition: true,
-        accessor: 'getPixelOffset'
+        accessor: 'getPixelOffset',
+        bufferGroup: 'scatterplot-instance-data'
       },
       ...attributes
     });
@@ -287,7 +307,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

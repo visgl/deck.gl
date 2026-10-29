@@ -52,7 +52,7 @@ test('CPUAggregator#1D', () => {
   expect(aggregator.binCount, 'binCount').toBe(14);
 
   expect(binaryAttributeToArray(aggregator.getBins(), aggregator.binCount), 'getBins()').toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
   );
 
@@ -60,7 +60,7 @@ test('CPUAggregator#1D', () => {
     binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     'getResult() - total counts'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [1, 5, 5, 3, 2, 3, 2, 2, 2, 1, 2, 1, 1, 2]
   );
   expect(aggregator.getResultDomain(0), 'getResultDomain() - counts').toEqual([1, 5]);
@@ -69,7 +69,7 @@ test('CPUAggregator#1D', () => {
     binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     'getResult() - mean income'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [25, 48, 54, 100, 145, 250, 72.5, 252.5, 107.5, 0, 127.5, 0, 40, 25]
   );
   expect(aggregator.getResultDomain(1), 'getResultDomain() - mean income').toEqual([0, 252.5]);
@@ -78,7 +78,7 @@ test('CPUAggregator#1D', () => {
     binaryAttributeToArray(aggregator.getResult(2), aggregator.binCount),
     'getResult() - max education'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [1, 3, 4, 5, 4, 5, 3, 3, 5, 3, 4, 1, 2, 3]
   );
   expect(aggregator.getResultDomain(2), 'getResultDomain() - max education').toEqual([1, 5]);
@@ -142,7 +142,7 @@ test('CPUAggregator#2D', () => {
   expect(aggregator.binCount, 'binCount').toBe(12);
 
   expect(binaryAttributeToArray(aggregator.getBins(), aggregator.binCount), 'getBins()').toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [ 2, 2, 2, 3, 2, 4,
       3, 3, 3, 4, 3, 5,
       4, 4, 4, 5, 4, 3, 4, 2,
@@ -153,7 +153,7 @@ test('CPUAggregator#2D', () => {
     binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
     'getResult() - total counts'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [ 4, 4, 2, 2, 2, 1, 2, 1, 1, 1, 3, 1 ]
   );
   expect(aggregator.getResultDomain(0), 'getResultDomain() - counts').toEqual([1, 4]);
@@ -162,7 +162,7 @@ test('CPUAggregator#2D', () => {
     binaryAttributeToArray(aggregator.getResult(1), aggregator.binCount),
     'getResult() - mean income'
   ).toEqual(
-    // prettier-ignore
+    // biome-ignore format: preserve layout
     [25, 97.5, 10, 90, 175, 60, 320, 110, 80, 65, 200, 120 ]
   );
   expect(aggregator.getResultDomain(1), 'getResultDomain() - mean income').toEqual([10, 320]);

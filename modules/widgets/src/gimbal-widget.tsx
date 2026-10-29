@@ -5,6 +5,7 @@
 import {Widget, LinearInterpolator} from '@deck.gl/core';
 import type {Viewport, WidgetPlacement, WidgetProps} from '@deck.gl/core';
 import {render} from 'preact';
+import {Tooltip} from './lib/components/tooltip';
 
 export type GimbalWidgetProps = WidgetProps & {
   placement?: WidgetPlacement;
@@ -12,6 +13,8 @@ export type GimbalWidgetProps = WidgetProps & {
   viewId?: string | null;
   /** Tooltip message. */
   label?: string;
+  /** Custom tooltip content. Overrides label for tooltip display. */
+  tooltip?: string | HTMLElement | false;
   /** Width of gimbal lines. */
   strokeWidth?: number;
   /** Transition duration in ms when resetting rotation. */
@@ -37,6 +40,7 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     placement: 'top-left',
     viewId: null,
     label: 'Gimbal',
+    tooltip: undefined!,
     strokeWidth: 1.5,
     transitionDuration: 200,
     onReset: () => {}
@@ -62,64 +66,68 @@ export class GimbalWidget extends Widget<GimbalWidgetProps> {
     const widgetViewport = this.viewports[viewId];
     const {rotationOrbit, rotationX} = this.getNormalizedRotation(widgetViewport);
     // Note - we use CSS 3D transforms instead of SVG 2D transforms
+    const tooltipContent =
+      this.props.tooltip === false ? undefined : (this.props.tooltip ?? this.props.label);
     const ui = (
       <div className="deck-widget-button" style={{perspective: 100, pointerEvents: 'auto'}}>
-        <button
-          type="button"
-          onClick={() => {
-            for (const viewport of Object.values(this.viewports)) {
-              this.resetOrbitView(viewport);
-            }
-          }}
-          title={this.props.label}
-          style={{position: 'relative', width: 26, height: 26}}
-        >
-          {/* Outer ring */}
-          <svg
-            className="gimbal-outer-ring"
-            width="100%"
-            height="100%"
-            viewBox="0 0 26 26"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              transform: `rotateY(${rotationOrbit}deg)`
+        <Tooltip content={tooltipContent}>
+          <button
+            type="button"
+            onClick={() => {
+              for (const viewport of Object.values(this.viewports)) {
+                this.resetOrbitView(viewport);
+              }
             }}
+            aria-label={this.props.label}
+            style={{position: 'relative', width: 26, height: 26}}
           >
-            <circle
-              cx="13"
-              cy="13"
-              r="10"
-              stroke="var(--icon-gimbal-outer-color, rgb(68, 92, 204))"
-              strokeWidth={this.props.strokeWidth}
-              fill="none"
-            />
-          </svg>
+            {/* Outer ring */}
+            <svg
+              className="gimbal-outer-ring"
+              width="100%"
+              height="100%"
+              viewBox="0 0 26 26"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                transform: `rotateY(${rotationOrbit}deg)`
+              }}
+            >
+              <circle
+                cx="13"
+                cy="13"
+                r="10"
+                stroke="var(--icon-gimbal-outer-color, rgb(68, 92, 204))"
+                strokeWidth={this.props.strokeWidth}
+                fill="none"
+              />
+            </svg>
 
-          {/* Inner ring */}
-          <svg
-            className="gimbal-inner-ring"
-            width="100%"
-            height="100%"
-            viewBox="0 0 26 26"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              transform: `rotateX(${rotationX}deg)`
-            }}
-          >
-            <circle
-              cx="13"
-              cy="13"
-              r="7"
-              stroke="var(--icon-gimbal-inner-color, rgb(240, 92, 68))"
-              strokeWidth={this.props.strokeWidth}
-              fill="none"
-            />
-          </svg>
-        </button>
+            {/* Inner ring */}
+            <svg
+              className="gimbal-inner-ring"
+              width="100%"
+              height="100%"
+              viewBox="0 0 26 26"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                transform: `rotateX(${rotationX}deg)`
+              }}
+            >
+              <circle
+                cx="13"
+                cy="13"
+                r="7"
+                stroke="var(--icon-gimbal-inner-color, rgb(240, 92, 68))"
+                strokeWidth={this.props.strokeWidth}
+                fill="none"
+              />
+            </svg>
+          </button>
+        </Tooltip>
       </div>
     );
 

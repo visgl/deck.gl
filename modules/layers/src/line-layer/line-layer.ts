@@ -15,12 +15,13 @@ import {
   Accessor,
   Color,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
-import {shaderWGSL as source} from './line-layer.wgsl';
+import {shaderWGSL} from './line-layer.wgsl';
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
 
@@ -35,7 +36,8 @@ const defaultProps: DefaultProps<LineLayerProps> = {
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 0, min: 0},
-  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0}
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
+  antialiasing: false
 };
 
 /** All properties supported by LineLayer. */
@@ -67,6 +69,15 @@ type _LineLayerProps<DataT> = {
    * @default Number.MAX_SAFE_INTEGER
    */
   widthMaxPixels?: number;
+
+  /**
+   * When enabled, computes edge coverage in the shader. When disabled, relies on render-target
+   * multisampling. Shader-computed coverage can cause artifacts where lines overlap. Only the edges
+   * along the width of the line are smoothed - the two ends are not.
+   * @default false
+   * @see https://luma.gl/docs/api-guide/gpu/gpu-antialiasing
+   */
+  antialiasing?: boolean;
 
   /**
    * Source position of each object.
@@ -104,7 +115,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   state!: {
     model?: Model;
-  };
+  } & Layer['state'];
 
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
@@ -114,7 +125,14 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   getShaders() {
-    return super.getShaders({vs, fs, source, modules: [project32, color, picking, lineUniforms]});
+    const {antialiasing} = this.props;
+    return super.getShaders({
+      vs,
+      fs,
+      source: shaderWGSL,
+      defines: antialiasing ? {ANTIALIASING: 1} : {},
+      modules: [project32, color, picking, lineUniforms]
+    });
   }
 
   // This layer has its own wrapLongitude logic
@@ -131,6 +149,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getSourcePosition'
       },
@@ -138,6 +157,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getTargetPosition'
       },
@@ -161,7 +181,8 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   updateState(params: UpdateParameters<this>): void {
     super.updateState(params);
 
-    if (params.changeFlags.extensionsChanged) {
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged || props.antialiasing !== oldProps.antialiasing) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
@@ -169,7 +190,11 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
   }
 
   draw({uniforms}): void {
-    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels, wrapLongitude} = this.props;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
+    const wrapLongitude =
+      this.props.wrapLongitude &&
+      !this.state.preproject &&
+      this.state.sourceCrs?.signature === 'WGS84';
     const model = this.state.model!;
     const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
@@ -198,7 +223,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

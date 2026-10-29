@@ -1,6 +1,130 @@
+---
+description: "Breaking changes, removals and deprecations for each deck.gl release, with migration notes."
+---
+
 # Upgrade Guide
 
+## Upgrading to v10
+
+### Viewport
+
+#### CRS configuration
+
+`Viewport` now uses a resolved `crs` descriptor for coordinate conversions and distance scales, allowing the base class to work with different coordinate reference systems. Supply `crs` when constructing a geospatial `Viewport`; without it, the viewport uses local coordinates.
+
+If you previously constructed `Viewport` with `longitude` and `latitude` to select Web Mercator, use `WebMercatorViewport` instead. These options belong to the geographic subclasses. Built-in `MapView`, `FirstPersonView`, and `GlobeView` retain their existing projection behavior.
+
+#### Distance scales
+
+Distance scales now describe world units for any CRS, so the same API supports geographic degrees and projected linear units. For applications and custom viewport subclasses using `distanceScales` or `getDistanceScales()`:
+
+- Use `unitsPerWorldUnit` and `unitsPerWorldUnit2` in place of `unitsPerDegree` and `unitsPerDegree2`.
+- For the removed `degreesPerUnit` field, divide by the corresponding component of `unitsPerWorldUnit` instead.
+- `ViewportOptions.distanceScales` accepts partial scales. Omitted `unitsPerWorldUnit` defaults to the CRS linear unit factors, or `[1, 1, 1]` without a CRS; omitted `unitsPerMeter` uses `unitsPerWorldUnit`. Both second-order arrays default to `[0, 0, 0]`.
+- `metersPerUnit` is derived from `unitsPerMeter` to keep reciprocal scales consistent. Supply `unitsPerMeter` instead of a separate `metersPerUnit` value.
+
+#### Subdivision resolution
+
+`viewport.resolution` now controls subdivision detail across CRSs with different units. Higher values generate finer geometry. It defaults to `0` (subdivision disabled), including for `GlobeView`, so applications can opt into the additional processing and memory overhead.
+
+To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
+
+#### GlobeView position
+
+`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
+
+### Layer
+
+#### Coordinate and projection constants
+
+Layer coordinate systems now use CRS strings, allowing applications to declare their data's CRS directly. Pass strings such as `'lnglat'`, `'cartesian'`, or `'meter-offsets'` to `coordinateSystem`; `COORDINATE_SYSTEM` and `_PROJECTION_MODE` are no longer exported.
+
+The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` to distinguish packed attribute coordinates from the layer's source CRS. Shader coordinate-frame and projection-mode enums are internal to the module; meter and degree offsets select their own projection modes.
+
+#### Coordinate origins
+
+Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
+
+#### A5Layer
+
+`A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
+
+#### projectPosition
+
+[`layer.projectPosition`](./api-reference/core/layer.md#projectposition) now uses simplified parameters when the input position is not in the layer's own CRS. Calls that use the layer's own CRS can continue to call `layer.projectPosition(position)`.
+
+| v9.4 parameter | v9.4 definition | v10 parameter | v10 definition / behavior |
+| --- | --- | --- | --- |
+| `coordinateSystem` | Overrides target common-space anchor. | (removed) | Matches input CRS. |
+| `fromCoordinateSystem` | Describes how to interpret the supplied position. Defaults to the layer's `coordinateSystem` prop. | `coordinateSystem` | Describes how to interpret the supplied position. Defaults to the layer's `coordinateSystem` prop. |
+|  | | `sourceCrs` | CRS descriptor for `coordinateSystem`. Defaults to the layer's resolved CRS. |
+| `coordinateOrigin` | Overrides target common-space anchor | (removed) | Matches input CRS origin |
+| `fromCoordinateOrigin` | Origin added to the supplied position before projection. Defaults to the layer's `coordinateOrigin` prop. | `coordinateOrigin` | Origin added to the supplied position before projection. Defaults to the layer's `coordinateOrigin` prop. |
+
+```ts
+const layer = new GeoJsonLayer({
+  id: 'mvt-2-1-0',
+  coordinateSystem: 'OSMTile512',
+  coordinateOrigin: [128, 0, 0],
+  modelMatrix: new Matrix4().scale([128, 128, 1]),
+});
+
+// Before
+const commonPosition1 = layer.projectPosition(mvtLocalPoint);
+const commonPosition2 = layer.projectPosition(lnglat, {
+  fromCoordinateSystem: 'lnglat',
+  fromCoordinateOrigin: [0, 0, 0],
+  modelMatrix: null
+});
+
+// After
+const commonPosition1 = layer.projectPosition(mvtLocalPoint);
+const sourceCrs = await projectionEngine.getCRS('EPSG:4326');
+const commonPosition2 = layer.projectPosition(lnglat, {
+  sourceCrs,
+  coordinateOrigin: [0, 0, 0],
+  modelMatrix: null
+});
+```
+
 ## Upgrading to v9.4
+
+### pydeck lighting
+
+The obsolete `pydeck.LightSettings` binding has been removed. It serialized the
+`lightSettings` layer prop, which deck.gl has not supported since v7. Use deck-level
+lighting effects instead:
+
+```python
+import pydeck as pdk
+
+lighting = pdk.Effect(
+    "LightingEffect",
+    ambient=pdk.Effect("AmbientLight", intensity=0.6),
+    sun=pdk.Effect("SunLight", timestamp=1564696800000, _shadow=True),
+)
+pdk.Deck(layers=[layer], effects=[lighting])
+```
+
+### Controller touch gestures
+
+The `touchRotate` controller option is deprecated. Historically, `touchRotate: true` enabled two touchscreen gestures: a two-finger twist changed bearing, and a two-finger vertical drag changed pitch.
+
+`touchRotate: true` is now treated as an alias for `multiTouchDrag: 'rotate'`. This preserves the existing twist and vertical-drag behaviors, and also allows a horizontal two-finger drag to change bearing. If both options are supplied, `multiTouchDrag` takes precedence. Trackpad gestures still require the separate `trackpadGesture: true` opt-in.
+
+Use `multiTouchDrag: 'rotate'` instead:
+
+```ts
+// Before
+controller: {
+  touchRotate: true
+}
+
+// After
+controller: {
+  multiTouchDrag: 'rotate'
+}
+```
 
 #### `pickMultipleObjects()` pick depth limits
 
@@ -14,6 +138,23 @@ In rare cases, custom WebGL layer shaders may need an update if they explicitly 
 
 - In such cases, use the new picking shader helper functions to derive the color from the instance id, for example `picking_setPickingColorFromInstanceID()` in GLSL or `picking_getPickingColorFromIndex(instanceIndex)` in WGSL.
 - However, if the logical picking id is different from the rendered instance id, layers can register and populate an explicit `rowIndexes` attribute.
+
+### FillStyleExtension
+
+Pattern atlas orientation previously aligned with the orientation of common space (bottom-left origin for most viewports), result in vertically flipped patterns from the supplied image. They now align with the screen space.
+
+### PathStyleExtension
+
+`highPrecisionDash` is deprecated. Use `dashMode: 'path'` instead, which draws the same way:
+
+```js
+// Before
+new PathStyleExtension({highPrecisionDash: true});
+// After
+new PathStyleExtension({dashMode: 'path'});
+```
+
+See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
 
 ## Upgrading to v9.3
 
@@ -167,7 +308,7 @@ The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module)
 See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
 
 Layers need to be modified:
-- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- `getShaders()` needs to additionally return the `ShaderModule` that defines the UBO
 - Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
 
 For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
@@ -495,7 +636,7 @@ Note that this flag may be removed in a future release.
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supported. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 - If a composite layer has `visible: false`, all of the layers generated by it will also be hidden regardless of their own `visible` prop. In previous versions, a descendant layer may be visible as long as it has `visible: true`, which often led to confusing behavior if a composite layer does not propagate its props correctly.
 

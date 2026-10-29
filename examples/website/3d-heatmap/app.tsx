@@ -12,6 +12,7 @@ import {CSVLoader} from '@loaders.gl/csv';
 import {load} from '@loaders.gl/core';
 
 import type {Color, PickingInfo, MapViewState} from '@deck.gl/core';
+import type {Device} from '@luma.gl/core';
 
 // Source data CSV
 const DATA_URL =
@@ -46,7 +47,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: -27
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 export const colorRange: Color[] = [
   [1, 152, 189],
@@ -78,13 +79,15 @@ export default function App({
   mapStyle = MAP_STYLE,
   radius = 1000,
   upperPercentile = 100,
-  coverage = 1
+  coverage = 1,
+  device
 }: {
   data?: DataPoint[] | null;
   mapStyle?: string;
   radius?: number;
   upperPercentile?: number;
   coverage?: number;
+  device?: Device;
 }) {
   const layers = [
     new HexagonLayer<DataPoint>({
@@ -115,6 +118,7 @@ export default function App({
 
   return (
     <DeckGL
+      device={device}
       layers={layers}
       effects={[lightingEffect]}
       initialViewState={INITIAL_VIEW_STATE}
@@ -130,7 +134,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const data = (await load(DATA_URL, CSVLoader)).data;
+  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
   const points: DataPoint[] = data
     .map(d => (Number.isFinite(d.lng) ? [d.lng, d.lat] : null))
     .filter(Boolean);

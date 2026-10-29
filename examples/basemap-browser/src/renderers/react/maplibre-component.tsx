@@ -4,14 +4,14 @@
 
 import React from 'react';
 import {Map as MapLibreMap, useControl as useMapLibreControl} from 'react-map-gl/maplibre';
-import {MapboxOverlay} from '@deck.gl/mapbox';
+import {MapLibreOverlay} from '@deck.gl/maplibre';
 import type {Config} from '../../types';
 import {getBaseMapViewState} from '../../config';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 function MapLibreDeckOverlay(props: any) {
-  const overlay = useMapLibreControl(() => new MapboxOverlay(props));
+  const overlay = useMapLibreControl(() => new MapLibreOverlay(props));
   overlay.setProps(props);
   return null;
 }
@@ -30,6 +30,7 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
     multiView,
     views,
     layerFilter,
+    useDevicePixels,
     onViewStateChange
   } = config;
 
@@ -58,9 +59,16 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
   return (
     <div style={{width: '100%', height: '100%'}}>
       <MapLibreMap
-        key={`maplibre-${interleaved}-${globe}-${multiView}`}
+        key={`maplibre-${interleaved}-${globe}-${multiView}-${useDevicePixels}`}
         mapStyle={mapStyle}
         initialViewState={mapInitialViewState}
+        pixelRatio={
+          typeof useDevicePixels === 'number'
+            ? useDevicePixels
+            : useDevicePixels === false
+              ? 1
+              : undefined
+        }
         onLoad={e => {
           if (globe && isMountedRef.current) {
             // Set projection before rendering overlay (critical for globe + interleaved mode)
@@ -90,6 +98,7 @@ export default function MapLibreComponent({config}: MapLibreComponentProps) {
           <MapLibreDeckOverlay
             layers={layers}
             interleaved={interleaved}
+            useDevicePixels={useDevicePixels}
             views={multiView ? views : undefined}
             layerFilter={multiView ? layerFilter : undefined}
             initialViewState={multiView ? initialViewState : undefined}

@@ -94,9 +94,15 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     return attrs
 
 
-def serialize(serializable):
+def serialize(serializable, compact=False):
     """Takes a serializable object and JSONifies it"""
-    return json.dumps(serializable, sort_keys=True, default=default_serialize, indent=2)
+    return json.dumps(
+        serializable,
+        sort_keys=True,
+        default=default_serialize,
+        indent=None if compact else 2,
+        separators=(",", ":") if compact else None,
+    )
 
 
 class JSONMixin(object):

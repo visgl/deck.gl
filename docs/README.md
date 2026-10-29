@@ -1,3 +1,7 @@
+---
+description: "deck.gl maps large datasets to GPU-rendered layers, drawn through views over optional base maps."
+---
+
 # Introduction
   
 <p align="center">
