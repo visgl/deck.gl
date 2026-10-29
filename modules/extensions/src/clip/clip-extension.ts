@@ -54,7 +54,7 @@ export default class ClipExtension extends LayerExtension {
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const {viewport} = this.context;
+    const viewport = shaderModuleProps?.project?.viewport ?? this.context.viewport;
     const clipProps = {worldWidth: 0} as ClipModuleProps;
     if (this.state.clipByInstance) {
       // Instance shaders see packed attributes. Match their CPU conversion when
@@ -74,7 +74,7 @@ export default class ClipExtension extends LayerExtension {
       }
     } else {
       // Pairs with project_common_position_to_flat_continuous() in the vertex shader
-      clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds);
+      clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds, {viewport});
       if (viewport.isGeospatial && !project.isCustomProjection(viewport)) {
         clipProps.worldWidth = TILE_SIZE;
       }
