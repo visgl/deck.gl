@@ -6,10 +6,13 @@ import {Layer, project32, color, picking, log} from '@deck.gl/core';
 import type {Device, RenderPipelineParameters} from '@luma.gl/core';
 import {pbrMaterial} from '@luma.gl/shadertools';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
-import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
+import {
+  GLTFAnimator,
+  PBREnvironment,
+  createScenegraphsFromGLTF,
+  postProcessGLTF
+} from '@luma.gl/gltf';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
-// luma.gl alpha.4 still consumes the legacy postprocessed glTF representation.
-import {postProcessGLTF} from '@loaders.gl/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -269,7 +272,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && typeof props.scenegraph === 'object') {
-      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
+      // Converts loaders.gl glTF data to a luma.gl scenegraph.
       const gltf = props.scenegraph;
 
       // Tiles3DLoader already processes GLTF

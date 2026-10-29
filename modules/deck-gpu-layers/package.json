@@ -32,18 +32,17 @@
   "sideEffects": false,
   "dependencies": {
     "@deck.gl/core": "9.4.0-beta.4",
-    "@luma.gl/core": "^10.0.0-alpha.4",
-    "@luma.gl/engine": "^10.0.0-alpha.4",
-    "@luma.gl/gpgpu": "^10.0.0-alpha.4",
-    "@luma.gl/shadertools": "^10.0.0-alpha.4",
+    "@luma.gl/anari": "^10.0.0-alpha.5",
+    "@luma.gl/core": "^10.0.0-alpha.5",
+    "@luma.gl/engine": "^10.0.0-alpha.5",
+    "@luma.gl/gpgpu": "^10.0.0-alpha.5",
+    "@luma.gl/graph": "^10.0.0-alpha.5",
+    "@luma.gl/shadertools": "^10.0.0-alpha.5",
+    "@luma.gl/text": "^10.0.0-alpha.5",
     "@math.gl/core": "^5.0.0-beta.1",
     "@math.gl/earth": "^5.0.0-beta.1"
   },
   "devDependencies": {
     "@deck.gl/layers": "9.4.0-beta.4"
-  },
-  "peerDependencies": {
-    "@luma.gl/experimental": "^10.0.0-alpha.3",
-    "@luma.gl/text": "^10.0.0-alpha.3"
   }
 }

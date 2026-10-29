@@ -6,7 +6,7 @@ import {ArrowTextLayer, type ArrowTextLayerProps} from '@deck.gl-community/arrow
 import type {ArrowTextRenderer} from '@luma.gl/arrow';
 import {Buffer, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {DrawCommandBuffer} from '@luma.gl/gpgpu/gpu-core';
+import {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
 import type {TextStorageModel} from '@luma.gl/text/experimental';
 
 export type GPUCulledTextDraw = {

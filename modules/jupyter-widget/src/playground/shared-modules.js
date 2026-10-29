@@ -19,8 +19,8 @@ import * as lumaCore from '@luma.gl/core';
 import * as lumaEngine from '@luma.gl/engine';
 import * as lumaShadertools from '@luma.gl/shadertools';
 import * as lumaShadertoolsWgsl from '@luma.gl/shadertools/wgsl';
-import * as lumaWebgl from '@luma.gl/webgl';
-import * as lumaWebglConstants from '@luma.gl/webgl/constants';
+import * as lumaWebgl from '@luma.gl/core/webgl';
+import * as lumaWebglConstants from '@luma.gl/core/webgl-constants';
 import * as loadersCore from '@loaders.gl/core';
 import * as mathCore from '@math.gl/core';
 
@@ -36,8 +36,8 @@ export const SHARED_MODULES = {
   '@luma.gl/engine': lumaEngine,
   '@luma.gl/shadertools': lumaShadertools,
   '@luma.gl/shadertools/wgsl': lumaShadertoolsWgsl,
-  '@luma.gl/webgl': lumaWebgl,
-  '@luma.gl/webgl/constants': lumaWebglConstants,
+  '@luma.gl/core/webgl': lumaWebgl,
+  '@luma.gl/core/webgl-constants': lumaWebglConstants,
   '@loaders.gl/core': loadersCore,
   '@math.gl/core': mathCore
 };

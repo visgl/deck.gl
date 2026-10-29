@@ -5,8 +5,7 @@
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
-import {GLTFEnvironment} from '@luma.gl/experimental';
-import {GL} from '@luma.gl/webgl/constants';
+import {loadPBREnvironment} from '@luma.gl/gltf';
 
 import * as dataSamples from '../data-samples';
 
@@ -18,16 +17,10 @@ const GLTF_BASE_URL =
 const CUBE_1x1x1 =
   'https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/layer-browser/cube_1x1x1.glb';
 
-const CUBE_FACE_TO_DIRECTION = {
-  [GL.TEXTURE_CUBE_MAP_POSITIVE_X]: 'right',
-  [GL.TEXTURE_CUBE_MAP_NEGATIVE_X]: 'left',
-  [GL.TEXTURE_CUBE_MAP_POSITIVE_Y]: 'top',
-  [GL.TEXTURE_CUBE_MAP_NEGATIVE_Y]: 'bottom',
-  [GL.TEXTURE_CUBE_MAP_POSITIVE_Z]: 'front',
-  [GL.TEXTURE_CUBE_MAP_NEGATIVE_Z]: 'back'
-};
+const CUBE_FACE_TO_DIRECTION = ['right', 'left', 'top', 'bottom', 'front', 'back'];
 
 const IMAGE_BASED_LIGHTING_ENVIRONMENT = {
+  loadImage: async url => createImageBitmap(await (await fetch(url)).blob()),
   brdfLutUrl: `${GLTF_BASE_URL}/brdfLUT.png`,
   getTexUrl: (type, dir, mipLevel) =>
     `${GLTF_BASE_URL}/papermill/${type}/${type}_${CUBE_FACE_TO_DIRECTION[dir]}_${mipLevel}.jpg`
@@ -111,8 +104,8 @@ const ScenegraphLayerPbrIblExample = {
     getTranslation: d => [0, 0, 1000],
     getScale: [10, 10, 10],
     _lighting: 'pbr',
-    _imageBasedLightingEnvironment: ({gl}) =>
-      new GLTFEnvironment(gl, IMAGE_BASED_LIGHTING_ENVIRONMENT)
+    _imageBasedLightingEnvironment: ({device}) =>
+      loadPBREnvironment(device, IMAGE_BASED_LIGHTING_ENVIRONMENT)
   }
 };
 

@@ -33,7 +33,7 @@ import {
   type TextGlyphAlphaShaderSettings
 } from '@luma.gl/text/experimental';
 import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {type GPURecordBatchSourceInfo} from '@luma.gl/experimental/gpu-tables';
+import {type GPURecordBatchSourceInfo} from '@luma.gl/graph/gpu-tables';
 import {Vector} from 'apache-arrow';
 import {
   deckArrowViewport,

@@ -6,6 +6,16 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### luma.gl v10 alpha.5
+
+The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
+`@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
+`@luma.gl/core/webgpu`. WebGL constants and debugging tools move to
+`@luma.gl/core/webgl-constants` and `@luma.gl/core/webgl-debug`.
+
+Import `postProcessGLTF` from `@luma.gl/gltf`; the legacy loaders.gl postprocessor
+dependency is no longer needed.
+
 ### loaders.gl and math.gl v5 beta
 
 Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.1`. Several packages are consolidated; update imports and declare the containing package as a dependency:
@@ -27,8 +37,6 @@ Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.1`. Several pac
 Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
 
 The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
-
-`ScenegraphLayer` still uses the legacy glTF postprocessor required by luma.gl `10.0.0-alpha.4`; its compatibility dependency remains pinned separately.
 
 ### Viewport
 

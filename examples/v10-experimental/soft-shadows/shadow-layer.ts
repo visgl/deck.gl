@@ -13,7 +13,7 @@ import {
 } from '@deck.gl/core';
 import type {Buffer, RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {shadow} from '@luma.gl/experimental';
+import {shadow} from '@luma.gl/anari';
 import {
   lambertMaterial,
   clouds,

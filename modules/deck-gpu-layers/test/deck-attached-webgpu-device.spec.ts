@@ -6,7 +6,7 @@ import {Deck, Layer, OrthographicView} from '@deck.gl/core';
 import {Buffer, Texture, type Device, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {ShaderAssembler} from '@luma.gl/shadertools';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {expect, it} from 'vitest';
 
 const VIEWPORT_SIZE = 16;

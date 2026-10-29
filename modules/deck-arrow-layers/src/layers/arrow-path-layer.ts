@@ -31,7 +31,7 @@ import {
 } from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
-import {PathAttributeModel, PathStorageModel} from '@luma.gl/experimental/models';
+import {PathAttributeModel, PathStorageModel} from '@luma.gl/engine/models';
 import {
   DataType,
   vectorFromArray,

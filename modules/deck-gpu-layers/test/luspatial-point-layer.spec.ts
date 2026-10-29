@@ -6,7 +6,7 @@ import {Deck, OrthographicView, type Layer} from '@deck.gl/core';
 import {LuSpatialPointLayer} from '@deck.gl-community/gpu-layers';
 import {Buffer, type Device} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
-import {DrawCommandBuffer} from '@luma.gl/gpgpu/gpu-core';
+import {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
 import {ShaderAssembler} from '@luma.gl/shadertools';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {expect, it} from 'vitest';

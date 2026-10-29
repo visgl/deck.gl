@@ -20,7 +20,7 @@ SHARED_PACKAGES = (
     "@luma.gl/core",
     "@luma.gl/engine",
     "@luma.gl/shadertools",
-    "@luma.gl/webgl",
+    "@luma.gl/core/webgl",
     "@loaders.gl/core",
     "@math.gl/core",
 )

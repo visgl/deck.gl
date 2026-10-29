@@ -15,7 +15,7 @@ import {
 } from '@deck.gl/core';
 import {Buffer, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import type {DrawCommandBuffer} from '@luma.gl/gpgpu/gpu-core';
+import type {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
 
 /** Properties accepted by {@link LuSpatialPointLayer}. */
 export type LuSpatialPointLayerProps = Omit<LayerProps, 'data'> & {

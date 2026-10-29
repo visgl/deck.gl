@@ -11,8 +11,8 @@ import {
   GPUGraphEdgeLayer,
   GPUGraphNodeLayer
 } from '@deck.gl-community/arrow-layers';
-import * as experimentalModule from '@luma.gl/experimental';
-import * as gpuGraphModule from '@luma.gl/gpgpu/gpu-graph';
+import * as experimentalModule from '@luma.gl/graph';
+import * as gpuGraphModule from '@luma.gl/graph/gpu-graph-algorithms';
 import {describe, expect, test} from 'vitest';
 
 import {createGPUGraphExplorerDeck} from '../../../examples/v10-experimental/gpu-graph-explorer/app';
@@ -31,7 +31,7 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
   test('keeps deck.gl entirely outside graph production imports and dependencies', () => {
     const packageJson = JSON.parse(
       readFileSync(
-        new URL('../../../node_modules/@luma.gl/experimental/package.json', import.meta.url),
+        new URL('../../../node_modules/@luma.gl/graph/package.json', import.meta.url),
         'utf8'
       )
     ) as {
@@ -67,8 +67,8 @@ describe('optional GPU Graph deck.gl integration package isolation', () => {
 
     expect(packageJson.private).toBe(true);
     expect(packageJson.dependencies?.['@deck.gl/core']).toContain('9.4.0');
-    expect(packageJson.peerDependencies?.['@luma.gl/experimental']).toContain(packageJson.version!);
-    expect(packageJson.dependencies?.['@luma.gl/gpgpu']).toContain('10.0.0-alpha.4');
+    expect(packageJson.dependencies?.['@luma.gl/graph']).toContain('10.0.0-alpha.5');
+    expect(packageJson.dependencies?.['@luma.gl/gpgpu']).toContain('10.0.0-alpha.5');
     expect(packageJson.dependencies?.['@luma.gl/tables']).toBeUndefined();
   });
 
@@ -140,9 +140,9 @@ describe('GPU Graph native deck.gl resident layers', () => {
       new URL('../src/gpu-graph/gpu-graph-effect.ts', import.meta.url),
       'utf8'
     );
-    expect(effectSource).toContain('GPUGraphDegree');
-    expect(effectSource).toContain('GPUGraphLabelPropagation');
-    expect(effectSource).toContain('GPUGraphSpatialForceLayout');
+    expect(effectSource).toContain('GPUGraphAlgorithmsDegree');
+    expect(effectSource).toContain('GPUGraphAlgorithmsLabelPropagation');
+    expect(effectSource).toContain('GPUGraphAlgorithmsSpatialForceLayout');
     expect(effectSource).toContain('addSampledLayoutToGraph');
     expect(effectSource).toContain('this.renderedVertexCount = dataset.vertexCount');
     expect(effectSource).toContain('this.renderedEdgeCount = Math.min');

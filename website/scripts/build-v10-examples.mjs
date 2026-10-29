@@ -9,9 +9,9 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build, loadConfigFromFile, mergeConfig} from 'vite';
 
-// These private packages are not published. Pin their sources so clean CI and
-// deployment builds use the same peers, rather than a developer's local links.
-const lumaRevision = '23eb0f713e1f66dc8cf6c9b73aefbd740309de92';
+// The Arrow package is not published. Pin its source to the installed alpha's
+// revision so CI and deployment builds use compatible peers.
+const lumaRevision = 'f94cb23e034d0627dfcab1f9df4d13eec5f5e49d';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const examplesRoot = resolve(root, 'examples/v10-experimental');
 const sections = JSON.parse(readFileSync(resolve(root, 'website/src/examples/v10/examples.json')));
@@ -31,18 +31,8 @@ try {
   writeFileSync(archivePath, Buffer.from(await response.arrayBuffer()));
   execFileSync('tar', ['-xzf', archivePath, '--strip-components=1', '-C', sourceRoot]);
 
-  // The pinned unpublished peers still use pre-consolidation math.gl imports.
-  const aliases = [
-    {
-      find: /^@math\.gl\/geoarrow(?:\/(?:wkb|tessellation))?$/,
-      replacement: fileURLToPath(import.meta.resolve('@math.gl/geospatial/geoarrow'))
-    },
-    {
-      find: '@math.gl/polygon',
-      replacement: fileURLToPath(import.meta.resolve('@math.gl/geometry'))
-    }
-  ];
-  for (const moduleName of ['experimental', 'arrow', 'text', 'splats']) {
+  const aliases = [];
+  for (const moduleName of ['arrow']) {
     const moduleRoot = resolve(sourceRoot, 'modules', moduleName);
     const metadata = JSON.parse(readFileSync(resolve(moduleRoot, 'package.json')));
     for (const [subpath, entry] of Object.entries(metadata.exports)) {
@@ -72,6 +62,9 @@ try {
       alias: aliases,
       // Also resolve imports made by the temporary luma.gl source checkout.
       dedupe: [
+        '@luma.gl/splats',
+        '@luma.gl/text',
+        '@luma.gl/graph',
         '@math.gl/core',
         '@math.gl/geospatial',
         '@math.gl/geometry',

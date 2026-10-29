@@ -102,7 +102,7 @@ the supplied graph and existing layout; it does not transfer ownership or add an
 dependency to this package. Omitting the optional configuration retains the regular exact-layout
 constructor shown above.
 
-The graph algorithms remain in `@luma.gl/gpgpu/gpu-graph`; only this existing private adapter
+The graph algorithms remain in `@luma.gl/graph/gpu-graph-algorithms`; only this existing private adapter
 package depends on deck.gl. Its diagnostics report actual resident populations, visible edge
 detail, CPU encoding, and frame cadence without inventing GPU timings or claiming convergence for
 a fixed iteration budget.
@@ -118,12 +118,10 @@ Run `yarn build-private` and `yarn lint` from the repository root. Run
 tests exclude these prototypes because their upstream peers are unpublished. The copied examples and integration tests live in this repository.
 Gallery-specific assertions were adapted to the standalone example metadata.
 
-The upstream `@luma.gl/arrow`, `@luma.gl/experimental`, and `@luma.gl/text` packages
-are private and unavailable on npm. They are peer dependencies here. To build or run
-these packages, build a compatible luma.gl checkout and link the required private
-packages into deck.gl (for example, run `yarn link` in each luma.gl package, then
-`yarn link @luma.gl/experimental @luma.gl/text @luma.gl/arrow` in deck.gl).
-These modules require those peers at runtime; a regular install alone is insufficient.
+luma.gl alpha.5 publishes the graph and text packages used here.
+Only `@luma.gl/arrow` remains unpublished; link it from the matching luma.gl
+revision when running Arrow examples locally. The website build pins that
+Arrow source revision automatically.
 
 Apache Arrow is also a peer dependency (`>=17.0.0`), so applications and the luma.gl
 adapter share the same Arrow types. Supply it in the consuming workspace. The deck.gl

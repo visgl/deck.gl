@@ -8,8 +8,8 @@ import {
   type GLSLShaderAssembler,
   type WGSLShaderAssembler
 } from '@luma.gl/shadertools';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 
 /** GPU backend exposed by the standalone and website-hosted deck.gl examples. */
 export type DeckExampleDeviceType = 'webgl' | 'webgpu';

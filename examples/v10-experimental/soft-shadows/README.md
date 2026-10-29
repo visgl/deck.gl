@@ -4,7 +4,7 @@ See [setup and commands](../README.md) before running this example.
 
 A deck.gl riverfront with animated, geographically calculated summer sunlight. The visible SunLayer, surface lighting, and shadows use the same `@math.gl/earth/sun` direction at the district origin in New York on June 21, 2026. Times are EDT; the animated clock covers a full 24-hour cycle in about 30 seconds by default. Scrubbing time pauses the sun animation. Clouds continue drifting independently.
 
-The example reuses `ShadowMapRenderer` and the `shadow` shader module from `@luma.gl/experimental`, including cascade fitting, blocker search, PCSS penumbrae, and cascade blending. It reuses the Lambert material and shared riverfront mesh fixture. Example code bridges Deck projection/picking and light-space drawing; it contains no independent shadow-filter implementation.
+The example reuses `ShadowMapRenderer` and the `shadow` shader module from `@luma.gl/anari`, including cascade fitting, blocker search, PCSS penumbrae, and cascade blending. It reuses the Lambert material and shared riverfront mesh fixture. Example code bridges Deck projection/picking and light-space drawing; it contains no independent shadow-filter implementation.
 
 Shadow receivers and casters share local east/north/up meters. The camera adapter converts Deck viewport units and OpenGL clip depth to the renderer's meter distances and WebGPU clip depth. Each cascade has its own caster model/uniform storage. Direct sunlight or moonlight is shadowed; ambient lighting is preserved.
 

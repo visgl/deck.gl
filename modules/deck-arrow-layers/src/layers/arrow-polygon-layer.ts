@@ -30,8 +30,8 @@ import {
 } from './arrow-layer-types';
 import type {ArrowLayerPickingInfo} from './arrow-layer-types';
 import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {type GPURecordBatchSourceInfo} from '@luma.gl/experimental/gpu-tables';
-import {POLYGON_STORAGE_SHADER_LAYOUT} from '@luma.gl/experimental/models';
+import {type GPURecordBatchSourceInfo} from '@luma.gl/graph/gpu-tables';
+import {POLYGON_STORAGE_SHADER_LAYOUT} from '@luma.gl/engine/models';
 import {Vector} from 'apache-arrow';
 import {
   assertArrowLayerColorGPUVector,

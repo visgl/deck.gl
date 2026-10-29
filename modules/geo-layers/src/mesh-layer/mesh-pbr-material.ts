@@ -33,7 +33,11 @@ const source = (pbrMaterial.source as string)
   )
   .replace(/pbrProjection\.camera/g, 'project.cameraPosition');
 
-export const meshPbrMaterial = {
+export const meshPbrMaterial: ShaderModule<
+  PBRMaterialProps,
+  PBRMaterialUniforms,
+  PBRMaterialBindings
+> = {
   ...pbrMaterial,
   source
-} as const satisfies ShaderModule<PBRMaterialProps, PBRMaterialUniforms, PBRMaterialBindings>;
+};
