@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {MaskExtension} from '@deck.gl/extensions';
+import {BitmapLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {device} from '@deck.gl/test-utils';
 import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
@@ -205,6 +206,77 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
     map.remove();
     container.remove();
   });
+}
+
+for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
+  webglTest(
+    `MapLibreOverlay masks a layer in a later layer group with MapLibre ${version}`,
+    async () => {
+      const container = document.createElement('div');
+      Object.assign(container.style, {width: '400px', height: '300px'});
+      document.body.append(container);
+
+      const map = new MapClass({
+        container,
+        style: {
+          version: 8,
+          sources: {},
+          layers: [{id: 'labels', type: 'background'}]
+        },
+        center: [-122.45, 37.78],
+        zoom: 14,
+        attributionControl: false
+      }) as unknown as MapLibreMap;
+
+      try {
+        await new Promise<void>(resolve => map.once('load', () => resolve()));
+
+        const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
+        const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
+        let centerPixel: number[] = [];
+        const overlay = new MapLibreOverlay({
+          interleaved: true,
+          onAfterRender: ({gl}) => {
+            centerPixel = readCenterPixel(gl!);
+          },
+          layers: [
+            // MapLibre draws this group first, before the group that contains the mask layer
+            new BitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'}),
+            new SolidPolygonLayer({
+              id: 'mask',
+              data: [
+                {polygon: [-122.455, 37.775, -122.445, 37.775, -122.445, 37.785, -122.455, 37.785]}
+              ],
+              getPolygon: d => d.polygon,
+              positionFormat: 'XY',
+              operation: 'mask'
+            }),
+            new BitmapLayer({
+              id: 'masked',
+              image,
+              bounds,
+              extensions: [new MaskExtension()],
+              maskId: 'mask'
+            })
+          ]
+        });
+        map.addControl(overlay);
+        await waitForRender(() => centerPixel[0] === 255).catch(() => {});
+
+        expect(map.getLayersOrder()).toEqual([
+          'deck-maplibre-layer-group-before:labels',
+          'labels',
+          'deck-maplibre-layer-group-last'
+        ]);
+        expect(centerPixel, 'masked layer is drawn inside the mask').toEqual([255, 0, 0, 255]);
+
+        map.removeControl(overlay);
+      } finally {
+        map.remove();
+        container.remove();
+      }
+    }
+  );
 }
 
 for (const {version, MapClass} of MAPLIBRE_VERSIONS) {

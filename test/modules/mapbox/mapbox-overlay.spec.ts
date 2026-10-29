@@ -6,6 +6,7 @@ import {test, expect, vi} from 'vitest';
 
 import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
+import {MaskExtension} from '@deck.gl/extensions';
 import {MapboxOverlay} from '@deck.gl/mapbox';
 import {getDeckInstance, getProjection} from '@deck.gl/mapbox/deck-utils';
 import MapboxLayerGroup from '@deck.gl/mapbox/mapbox-layer-group';
@@ -867,6 +868,60 @@ test('MapboxLayerGroup#external Deck multiple views', async () => {
   expect(drawLog, 'layers drawn into the correct views').toEqual([
     ['mapbox', 'scatterplot-map'],
     ['view-two', 'scatterplot-second-view']
+  ]);
+
+  deck.finalize();
+});
+
+test('MapboxLayerGroup#mask layer in a later layer group', async () => {
+  // Mask layers are only drawn by the mask pass
+  const drawLog: string[] = [];
+  const onRedrawLayer = ({layer}) => {
+    drawLog.push(layer.id);
+  };
+
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 12
+  });
+
+  await map.once('load');
+
+  const layerProps = {
+    data: [{position: [-122.46, 37.77]}, {position: [-122.44, 37.79]}],
+    getPosition: d => d.position,
+    getRadius: 1000,
+    onAfterRedraw: onRedrawLayer
+  };
+  const deck = new Deck({
+    device,
+    viewState: {longitude: -122.45, latitude: 37.78, zoom: 12},
+    layers: [
+      new TestScatterplotLayer({...layerProps, id: 'bottom', slot: 'bottom'}),
+      new TestScatterplotLayer({...layerProps, id: 'mask', operation: 'mask'}),
+      new TestScatterplotLayer({
+        ...layerProps,
+        id: 'masked',
+        extensions: [new MaskExtension()],
+        maskId: 'mask'
+      })
+    ],
+    parameters: DEFAULT_PARAMETERS
+  });
+
+  getDeckInstance({map, deck});
+
+  // The map draws the bottom group first, before the group that contains the mask layer
+  map.addLayer(new MapboxLayerGroup({id: 'deck-layer-group-slot:bottom', slot: 'bottom'}));
+  const renderPromise = map.once('render');
+  map.addLayer(new MapboxLayerGroup({id: 'deck-layer-group-last'}));
+  await renderPromise;
+
+  expect((map as any)._renderError, 'render should not throw').toBeFalsy();
+  expect(drawLog, 'mask layer is drawn into the mask before the masked layer').toEqual([
+    'mask',
+    'bottom',
+    'masked'
   ]);
 
   deck.finalize();

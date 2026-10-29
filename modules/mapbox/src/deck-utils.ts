@@ -147,6 +147,10 @@ export function drawLayerGroup(
       if (deck.props.layerFilter && !deck.props.layerFilter(params)) {
         return false;
       }
+      if (params.renderPass !== 'screen') {
+        // Effect passes (e.g. mask, shadow) render maps used by layers in every group
+        return true;
+      }
 
       const layer = params.layer as Layer<LayerOverlayProps>;
       if (layer.props.beforeId === group.beforeId && layer.props.slot === group.slot) {
@@ -335,7 +339,8 @@ function afterRender(deck: Deck, map: Map): void {
       viewports,
       layerFilter: params =>
         (!deck.props.layerFilter || deck.props.layerFilter(params)) &&
-        (params.viewport.id !== MAPBOX_VIEW_ID ||
+        (params.renderPass !== 'screen' ||
+          params.viewport.id !== MAPBOX_VIEW_ID ||
           !map.getLayer(getLayerGroupId(params.layer as Layer<LayerOverlayProps>))),
       clearCanvas: false
     });
