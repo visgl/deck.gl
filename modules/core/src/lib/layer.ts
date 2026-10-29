@@ -24,7 +24,7 @@ import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/p
 import Component from '../lifecycle/component';
 import type {CRSDescriptor} from '@math.gl/projection/core';
 import {areCRSEqual, resolveCRS} from '../utils/crs';
-import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
+import {getPreprojectionSignature} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
@@ -367,21 +367,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   private _updatePreprojection(viewport: Viewport): boolean {
     const internalState = this.internalState!;
-    const needsPreprojection = !supportsSourceCRS(
-      viewport.projectionMode,
-      internalState.sourceCrs,
-      viewport.crs
-    );
-    // Only the source-to-packed conversion affects attributes. Camera precision,
-    // target common space and subdivision are handled separately from packing.
-    const signature = JSON.stringify([
-      internalState.sourceCrs?.signature,
-      needsPreprojection
-        ? viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL
-          ? viewport.crs?.signature
-          : 'WGS84'
-        : null
-    ]);
+    const signature = getPreprojectionSignature(viewport, internalState.sourceCrs);
     const changed = internalState.preprojectionSignature !== signature;
     if (changed) {
       Object.assign(internalState, viewport.getPreprojection(internalState.sourceCrs));
