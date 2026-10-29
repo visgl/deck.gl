@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color as colorModule,
   project32,
   picking,
@@ -17,7 +18,7 @@ import {
   Position,
   DefaultProps
 } from '@deck.gl/core';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import type {SamplerProps, Texture} from '@luma.gl/core';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 
@@ -292,7 +293,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
             .filter(layout => layout.name !== 'indices')
         : this.getAttributeManager()!.getBufferLayouts();
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout,
