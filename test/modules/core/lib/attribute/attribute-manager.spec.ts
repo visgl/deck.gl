@@ -6,7 +6,7 @@
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
 import {test, expect} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Timeline} from '@luma.gl/engine';
 import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 

@@ -7,7 +7,7 @@ import {LayerManager, MapView} from '@deck.gl/core';
 import {ClipExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {geojsonToBinary} from '@loaders.gl/gis';
 
 import {geojson} from 'deck.gl-test/data';

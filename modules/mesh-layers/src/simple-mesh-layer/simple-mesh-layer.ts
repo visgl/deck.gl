@@ -20,7 +20,7 @@ import {
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {type Model, Geometry} from '@luma.gl/engine';
-import {ParsedPBRMaterial} from '@luma.gl/gltf';
+import {ParsedPBRMaterial} from '@luma.gl/engine/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 

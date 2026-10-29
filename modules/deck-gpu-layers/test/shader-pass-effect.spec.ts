@@ -6,7 +6,7 @@ import type {PostRenderOptions} from '@deck.gl/core';
 import {ShaderPassEffect} from '@deck.gl-community/gpu-layers';
 import {Buffer, Texture} from '@luma.gl/core';
 import type {ShaderPass} from '@luma.gl/shadertools';
-import {getTestDevice} from '@luma.gl/test-utils';
+import {getTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 
 const invert: ShaderPass = {

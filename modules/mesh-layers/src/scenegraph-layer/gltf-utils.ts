@@ -4,7 +4,7 @@
 
 /* global requestAnimationFrame */
 import type {GroupNode, ScenegraphNode, ModelNode} from '@luma.gl/engine';
-import type {GLTFScenegraphs} from '@luma.gl/gltf';
+import type {GLTFScenegraphs} from '@luma.gl/engine/gltf';
 
 export async function waitForGLTFAssets(
   gltfObjects: GLTFScenegraphs | {scenes: GroupNode[]}

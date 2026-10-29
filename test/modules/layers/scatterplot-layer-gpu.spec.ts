@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import ScatterplotLayer from '@deck.gl/layers/scatterplot-layer/scatterplot-layer';

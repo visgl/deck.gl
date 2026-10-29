@@ -36,7 +36,7 @@ import type {Loader} from '@loaders.gl/loader-utils';
 import type {CoordinateSystem} from './constants';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
+import type {Model, GPUVectorModel as LumaGPUVectorModel} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -933,10 +933,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
-  /** Apply changed attributes to model */
+  /** Apply changed attributes to a render or transform model. */
   // eslint-disable-next-line max-statements
   protected _setModelAttributes(
-    model: Model,
+    model: Model | LumaGPUVectorModel,
     changedAttributes: {
       [id: string]: Attribute;
     },
@@ -996,7 +996,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Apply explicit WebGPU buffer groups while preserving legacy bindings for fallbacks. */
   private _setGroupedModelAttributes(
-    model: Model,
+    model: Model | LumaGPUVectorModel,
     attributeManager: AttributeManager,
     changedAttributes: {[id: string]: Attribute}
   ) {
