@@ -885,7 +885,8 @@ test('Deck#getView with single view', async () => {
 
 test('Deck#controller prop does not modify the views array', async () => {
   const mapView = new MapView({id: 'map'});
-  const views = Object.freeze([mapView]);
+  const views: MapView[] = [mapView];
+  Object.freeze(views);
 
   await new Promise<void>((resolve, reject) => {
     const deck = new Deck({
