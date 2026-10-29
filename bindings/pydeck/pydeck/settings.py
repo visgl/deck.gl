@@ -88,6 +88,8 @@ class Settings:
     def register_library(self, name=None, uri=None, module=False, npm=None):
         """Registers a JavaScript library to load into the pydeck frontend.
 
+        Registering a ``name`` that is already registered replaces its entry in ``custom_libraries``.
+
         Parameters
         ----------
         name : str, default None
@@ -137,6 +139,11 @@ class Settings:
         entry = {"libraryName": name, "resourceUri": uri}
         if module:
             entry["module"] = True
+        # Re-running a notebook cell registers the same name again; replace the entry in place
+        for index, existing in enumerate(self.custom_libraries):
+            if existing.get("libraryName") == name:
+                self.custom_libraries[index] = entry
+                return
         self.custom_libraries.append(entry)
 
 
