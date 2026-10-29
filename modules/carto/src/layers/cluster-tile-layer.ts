@@ -12,8 +12,8 @@ import {
   TileLayerPickingInfo
 } from '@deck.gl/geo-layers';
 import {registerLoaders} from '@loaders.gl/core';
-import {binaryToGeojson} from '@loaders.gl/gis';
-import {BinaryFeatureCollection} from '@loaders.gl/schema';
+import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
+import {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry} from 'geojson';
 
 import {
@@ -236,7 +236,7 @@ class ClusterGeoJsonLayer<
 
     if (info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
+      info.object = convertBinaryFeatureCollectionToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }

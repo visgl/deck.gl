@@ -26,15 +26,15 @@ import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {default as MeshLayer} from '../mesh-layer/mesh-layer';
 
 import {coreApi} from '@loaders.gl/core';
-import {MeshAttributes} from '@loaders.gl/schema';
-import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.gl/tiles';
-import {Tiles3DLoader} from '@loaders.gl/3d-tiles';
+import {MeshAttributes} from '@loaders.gl/core/schema';
+import {Tileset3D, Tiles3DSource, I3SSource, Tile3D, TILE_TYPE} from '@loaders.gl/tiles-3d';
+import {Tiles3DLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 const SINGLE_DATA = [0];
 
 /**
  * Numeric `COORDINATE_SYSTEM` values used by deck.gl before v9.3, still emitted on tile content by
- * released versions of loaders such as `@loaders.gl/i3s`. Mapped back to the string constants that
+ * released versions of loaders such as `@loaders.gl/tiles-3d/i3s`. Mapped back to the string constants that
  * the layers understand.
  */
 const LEGACY_COORDINATE_SYSTEMS: Record<number, CoordinateSystem> = {

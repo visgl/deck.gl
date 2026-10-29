@@ -497,7 +497,7 @@ phase shading, and a faint dark-side contribution: `phase` is 0 for new, 0.25 fo
 0.5 for full, and 0.75 for last quarter. `limbAngle` rotates the phase pattern counterclockwise
 from the screen's rightward axis, in radians.
 
-The layers use `@math.gl/sun` for automatic position and lunar phase when supplied with an
+The layers use `@math.gl/earth/sun` for automatic position and lunar phase when supplied with an
 observer and timestamp. Explicit directions and phase values remain supported. They do not
 illuminate geometry or cast shadows, write depth, or participate in picking. Draw them before
 transparent scene layers. Riverfront soft shadows and weather share math.gl astronomy with
@@ -583,7 +583,7 @@ astronomy timestamp drive every component. The application advances the clock; c
 
 ```typescript
 import {SkyLayer} from '@deck.gl-community/gpu-layers';
-import {createSkyObserver} from '@math.gl/sun';
+import {createSkyObserver} from '@math.gl/earth/sun';
 
 const sky = new SkyLayer({
   id: 'sky',
@@ -618,7 +618,7 @@ horizon proximity do not change the size.
 
 `StarfieldLayer` defaults to math.gl's BSC5 catalog and sidereal/precession rotation.
 Optional `data` uses `getStarLayerData(..., {coordinates: 'equatorial'})` from
-`@math.gl/sun/stars`; an empty array renders no stars. The catalog is calculated once
+`@math.gl/earth/sun/stars`; an empty array renders no stars. The catalog is calculated once
 and reused, and changing the timestamp only changes rotation uniforms. Catalog stars
 use compact sprites with subtle spectral tint. `colorStrength` defaults to `0.2`;
 set it to `0` for neutral stars or `1` for the original catalog RGB. Picking and

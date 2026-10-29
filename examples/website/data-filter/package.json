@@ -9,9 +9,9 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@loaders.gl/tables": "^5.0.0-beta.1",
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
-    "@loaders.gl/csv": "^5.0.0-alpha.11",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "deck.gl": "^9.0.0",

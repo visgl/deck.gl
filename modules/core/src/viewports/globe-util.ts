@@ -3,11 +3,15 @@
 // Copyright (c) vis.gl contributors
 
 import {clamp, Quaternion} from '@math.gl/core';
-import * as vec3 from '@math.gl/core/vec3';
+import {vec3} from '@math.gl/core';
 import TransitionInterpolator from '../transitions/transition-interpolator';
 import {MAX_LATITUDE} from '@math.gl/web-mercator';
-import {geocentric} from '@math.gl/projection/projections/geocent';
-import type {CRSConversion, CRSDescriptor, CRSRenderingScale} from '@math.gl/projection/core';
+import {geocentric} from '@math.gl/geospatial/projection/projections/geocent';
+import type {
+  CRSConversion,
+  CRSDescriptor,
+  CRSRenderingScale
+} from '@math.gl/geospatial/projection/core';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const RADIANS_TO_DEGREES = 180 / Math.PI;

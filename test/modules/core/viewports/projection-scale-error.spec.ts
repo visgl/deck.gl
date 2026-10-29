@@ -4,8 +4,8 @@
 
 import {test, expect, vi} from 'vitest';
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import {projectionEngine} from '@math.gl/projection';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {Ellipsoid} from '@math.gl/geospatial';
 import {Vector3} from '@math.gl/core';
 import {createTestCRS} from './test-crs';

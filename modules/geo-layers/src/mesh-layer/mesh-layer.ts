@@ -6,7 +6,7 @@ import type {NumericArray} from '@math.gl/core';
 import {parsePBRMaterial, ParsedPBRMaterial} from '@luma.gl/gltf';
 import type {Model} from '@luma.gl/engine';
 import {_GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
-import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {UpdateParameters, DefaultProps, LayerContext} from '@deck.gl/core';
 import {SimpleMeshLayer, SimpleMeshLayerProps} from '@deck.gl/mesh-layers';
 

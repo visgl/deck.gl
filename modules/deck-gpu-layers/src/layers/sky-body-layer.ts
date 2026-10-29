@@ -15,7 +15,7 @@ import type {Buffer, RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
 import {pointGlow, type ShaderModule} from '@luma.gl/shadertools';
 import {type NumberArray3, type NumberArray4} from '@math.gl/core';
-import type {SkyObserver} from '@math.gl/sun';
+import type {SkyObserver} from '@math.gl/earth/sun';
 import {getSkyObserver, getSkyProjectionMatrix} from './sky-coordinates';
 
 export type SkyBodyLayerProps = LayerProps & {

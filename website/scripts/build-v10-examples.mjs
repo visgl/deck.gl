@@ -31,7 +31,17 @@ try {
   writeFileSync(archivePath, Buffer.from(await response.arrayBuffer()));
   execFileSync('tar', ['-xzf', archivePath, '--strip-components=1', '-C', sourceRoot]);
 
-  const aliases = [];
+  // The pinned unpublished peers still use pre-consolidation math.gl imports.
+  const aliases = [
+    {
+      find: /^@math\.gl\/geoarrow(?:\/(?:wkb|tessellation))?$/,
+      replacement: fileURLToPath(import.meta.resolve('@math.gl/geospatial/geoarrow'))
+    },
+    {
+      find: '@math.gl/polygon',
+      replacement: fileURLToPath(import.meta.resolve('@math.gl/geometry'))
+    }
+  ];
   for (const moduleName of ['experimental', 'arrow', 'text', 'splats']) {
     const moduleRoot = resolve(sourceRoot, 'modules', moduleName);
     const metadata = JSON.parse(readFileSync(resolve(moduleRoot, 'package.json')));
@@ -61,12 +71,10 @@ try {
     resolve: {
       alias: aliases,
       // Also resolve imports made by the temporary luma.gl source checkout.
-      // Let projection resolve its own CRS dependency; the root may use an older API.
       dedupe: [
         '@math.gl/core',
-        '@math.gl/geoarrow',
-        '@math.gl/polygon',
-        '@math.gl/projection',
+        '@math.gl/geospatial',
+        '@math.gl/geometry',
         '@mapbox/tiny-sdf'
       ]
     },

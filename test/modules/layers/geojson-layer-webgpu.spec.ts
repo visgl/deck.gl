@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 test('GeoJsonLayer#WebGPU binary points and paths', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
@@ -20,7 +20,7 @@ test('GeoJsonLayer#WebGPU binary points and paths', async ({skip}) => {
     height: 100,
     viewState: {longitude: 0, latitude: 0, zoom: 1}
   });
-  const data = geojsonToBinary([
+  const data = convertGeojsonToBinaryFeatureCollection([
     {type: 'Feature', properties: {}, geometry: {type: 'Point', coordinates: [0, 0]}},
     {
       type: 'Feature',

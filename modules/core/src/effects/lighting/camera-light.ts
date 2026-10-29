@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
-import type {NumberArray16} from '@math.gl/types';
+import type {NumberArray16} from '@math.gl/core';
 import {PointLight} from './point-light';
 import {getUniformsFromViewport} from '../../shaderlib/project/viewport-uniforms';
 import type Layer from '../../lib/layer';

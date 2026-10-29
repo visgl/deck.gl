@@ -9,7 +9,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@loaders.gl/las": "^5.0.0-alpha.11",
+    "@loaders.gl/pointclouds": "^5.0.0-beta.1",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "deck.gl": "^9.4.0",

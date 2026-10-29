@@ -13,7 +13,7 @@ import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resourc
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {device} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {projectionEngine} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 import {createTestCRS, createTestViewport} from './test-crs';
 import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
 

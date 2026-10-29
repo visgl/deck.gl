@@ -4,7 +4,7 @@
 
 /* global console, window */
 /* eslint-disable no-console */
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {registerLoaders} from '@loaders.gl/core';
 
 // Avoid calling it GL - would be removed by babel-plugin-inline-webgl-constants

@@ -14,7 +14,7 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 import {Buffer} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
 import {Matrix4} from '@math.gl/core';
-import {projectionEngine} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 
 const normalizationScale = 512 / 40075016.6855;
 const gpuTest = device.type === 'webgl' ? test : test.skip;

@@ -10,7 +10,7 @@ import {normalizeCoordinateSystem} from '@deck.gl/geo-layers/tile-3d-layer/tile-
 import {Deck, WebMercatorViewport} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {TILE_TYPE} from '@loaders.gl/tiles';
+import {TILE_TYPE} from '@loaders.gl/tiles-3d';
 
 test('Tile3DLayer#normalizeCoordinateSystem', () => {
   // Loaders that predate the v9.3 string constants report numeric values, see issue #10368
@@ -37,7 +37,7 @@ test('Tile3DLayer#mesh sub layer normalizes legacy numeric coordinateSystem', ()
       attributes: {positions: {value: new Float32Array([0, 0, 0]), size: 3}},
       indices: {value: new Uint16Array([0]), size: 1},
       cartographicOrigin: [0, 0, 0],
-      // `@loaders.gl/i3s` reports the pre-v9.3 numeric enum, see issue #10368
+      // `@loaders.gl/tiles-3d/i3s` reports the pre-v9.3 numeric enum, see issue #10368
       coordinateSystem: 2
     }
   };

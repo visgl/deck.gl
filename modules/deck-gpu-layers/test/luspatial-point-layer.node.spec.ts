@@ -191,7 +191,7 @@ describe('@deck.gl-community/gpu-layers package boundary', () => {
       '@luma.gl/shadertools',
       '@luma.gl/text',
       '@math.gl/core',
-      '@math.gl/sun'
+      '@math.gl/earth/sun'
     ]);
   });
 });

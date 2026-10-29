@@ -9,7 +9,7 @@ import {
   Plane,
   AxisAlignedBoundingBox,
   makeOrientedBoundingBoxFromPoints
-} from '@math.gl/culling';
+} from '@math.gl/geometry/culling';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';

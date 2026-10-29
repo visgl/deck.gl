@@ -9,8 +9,8 @@ import {
   _deepEqual as deepEqual,
   _mergeShaders as mergeShaders
 } from '@deck.gl/core';
-import * as vec3 from '@math.gl/core/vec3';
-import * as vec4 from '@math.gl/core/vec4';
+import {vec3} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 import {
   dashShaders,
   Defines,

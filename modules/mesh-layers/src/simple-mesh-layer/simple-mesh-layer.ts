@@ -38,9 +38,9 @@ import type {
   Color,
   TextureSource
 } from '@deck.gl/core';
-import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
-import {getMeshBoundingBox} from '@loaders.gl/schema';
+import {getMeshBoundingBox} from '@loaders.gl/core/schema';
 
 function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
   const positionAttribute = attributes.positions || attributes.POSITION;

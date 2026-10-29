@@ -8,7 +8,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {geojsonToBinary} from '@loaders.gl/gis';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 import {geojson} from 'deck.gl-test/data';
 
@@ -122,7 +122,7 @@ test('ClipExtension#WebGPU GeoJson sublayers', async ({skip}) => {
 
   for (const [format, data] of [
     ['geojson', {type: 'FeatureCollection', features}],
-    ['binary', geojsonToBinary(features as any)]
+    ['binary', convertGeojsonToBinaryFeatureCollection(features as any)]
   ] as const) {
     const errors: Error[] = [];
     const layerManager = new LayerManager(webgpuDevice, {viewport});

@@ -142,7 +142,7 @@ const optimizeDepsConfig = {
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
-    '@loaders.gl/polyfills',
+    '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'

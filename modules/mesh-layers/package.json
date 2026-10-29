@@ -47,12 +47,11 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/geoarrow": "^5.0.0-alpha.11",
-    "@loaders.gl/gltf": "^5.0.0-alpha.11",
-    "@loaders.gl/schema": "^5.0.0-alpha.11",
+    "@loaders.gl/core": "^5.0.0-beta.1",
+    "@loaders.gl/gltf": "5.0.0-alpha.11",
+    "@loaders.gl/scene": "^5.0.0-beta.1",
     "@luma.gl/gltf": "^10.0.0-alpha.4",
-    "@luma.gl/shadertools": "^10.0.0-alpha.4",
-    "compress-utils": "^0.8.0"
+    "@luma.gl/shadertools": "^10.0.0-alpha.4"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0",
