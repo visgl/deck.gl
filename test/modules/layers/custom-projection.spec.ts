@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {
-  LayerManager,
-  _CustomProjectionViewport as CustomProjectionViewport,
-  WebMercatorViewport
-} from '@deck.gl/core';
+import {LayerManager, WebMercatorViewport} from '@deck.gl/core';
 import {
   ArcLayer,
   LineLayer,
@@ -22,7 +19,7 @@ import {getWebGPUTestDevice} from '@luma.gl/test-utils';
 
 const projection = {forward: p => p, inverse: p => p};
 const options = {
-  projection,
+  converter: projection,
 
   width: 800,
   height: 600
@@ -33,7 +30,7 @@ for (const LayerType of [LineLayer, ArcLayer]) {
     for (const wrapLongitude of [false, true]) {
       test(`${LayerType.layerName} wrapping: projected=${projected}, wrapLongitude=${wrapLongitude}`, () => {
         const viewport = projected
-          ? new CustomProjectionViewport(options)
+          ? createTestViewport(options)
           : new WebMercatorViewport({width: 800, height: 600});
         const manager = new LayerManager(device, {viewport});
         manager.setProps({
@@ -89,9 +86,9 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
     },
     inverse: p => p
   };
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     ...options,
-    projection: viewportOptionsProjection
+    converter: viewportOptionsProjection
   });
   const manager = new LayerManager(device, {viewport});
   manager.setProps({
@@ -104,8 +101,8 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
       id: 'points',
       data: [[10, 20]],
       getPosition: p => p,
-      coordinateSystem: 'meter-offsets',
-      coordinateOrigin: [100, 100, 0]
+      coordinateSystem: 'WGS84',
+      coordinateOrigin: [0, 0, 0]
     });
     manager.setLayers([layer]);
     const positions = () => layer.getAttributeManager()!.attributes.instancePositions.value!;
@@ -114,16 +111,16 @@ test('position opt-in invalidates on projection and matrix changes, not navigati
     const before = calls;
     layer.activateViewport(viewport);
     expect(calls).toBe(before);
-    const cameraMoved = new CustomProjectionViewport({
+    const cameraMoved = createTestViewport({
       ...options,
-      projection: viewportOptionsProjection,
+      converter: viewportOptionsProjection,
       zoom: 2,
       center: [200, 200, 0]
     });
     const beforeCameraUpdate = calls;
     layer.activateViewport(cameraMoved);
     expect(calls).toBe(beforeCameraUpdate);
-    const changedViewport = new CustomProjectionViewport({...options, toCrs: 'changed'});
+    const changedViewport = createTestViewport({...options, signature: 'changed'});
     manager.activateViewport(changedViewport);
     layer.activateViewport(changedViewport);
     expect(Array.from(positions().slice(0, 3))).toEqual([10, 20, 0]);
@@ -154,9 +151,9 @@ test('generated paths and polygon fills project without mutating input geometry'
     ]
   ];
   const original = JSON.stringify(data);
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     ...options,
-    projection: {forward: p => [p[0] + 100, p[1] + 50, p[2]], inverse: p => p}
+    converter: {forward: p => [p[0] + 100, p[1] + 50, p[2]], inverse: p => p}
   });
   const manager = new LayerManager(device, {viewport});
   manager.setProps({
@@ -185,9 +182,9 @@ test('WebGPU generated positions use preprojection for current and next vertices
 }) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) return skip();
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     ...options,
-    projection: {forward: p => [p[0] + 100, p[1] + 50, p[2]], inverse: p => p}
+    converter: {forward: p => [p[0] + 100, p[1] + 50, p[2]], inverse: p => p}
   });
   const manager = new LayerManager(webgpuDevice, {viewport});
   manager.setProps({
@@ -236,7 +233,7 @@ test('geometry layers retessellate all rows on projection and model matrix chang
       [30, 30]
     ]
   ];
-  const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+  const manager = new LayerManager(device, {viewport: createTestViewport(options)});
   manager.setProps({
     onError: error => {
       throw error;
@@ -263,9 +260,10 @@ test('geometry layers retessellate all rows on projection and model matrix chang
         expect(values[offset]).toBeCloseTo(sources[j][offset] + 100, 6);
       }
     }
-    const viewport = new CustomProjectionViewport({
+    const viewport = createTestViewport({
       ...options,
-      projection: {
+      signature: 'shifted',
+      converter: {
         forward: p => [p[0] + 50, p[1], p[2]],
         inverse: p => [p[0] - 50, p[1], p[2]]
       }
@@ -296,10 +294,10 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
       'unknown'
     ]) {
       const spherical = ['WGS84', 'EPSG:4326', '+proj=longlat +datum=WGS84'].includes(fromCrs);
-      const viewport = new CustomProjectionViewport({
+      const viewport = createTestViewport({
         ...options,
-        fromCrs,
-        projection: {
+
+        converter: {
           forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
           inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
         }
@@ -360,9 +358,9 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
 
   test(`${LayerType.layerName} rebuilds all rows when coordinateSystem changes`, () => {
     const manager = new LayerManager(device, {
-      viewport: new CustomProjectionViewport({
+      viewport: createTestViewport({
         ...options,
-        projection: {
+        converter: {
           forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
           inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]
         }
@@ -426,10 +424,10 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
 test('WebGPU binary polygons project every subdivided vertex', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();
   if (!webgpuDevice) return skip();
-  const viewport = new CustomProjectionViewport({
+  const viewport = createTestViewport({
     ...options,
-    resolution: 5,
-    projection: {
+    resolution: 72,
+    converter: {
       forward: ([x, y, z = 0]) => [x + 100, y + 50, z],
       inverse: ([x, y, z = 0]) => [x - 100, y - 50, z]
     }

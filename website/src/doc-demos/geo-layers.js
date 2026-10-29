@@ -89,7 +89,7 @@ export const A5LayerDemo = makeLayerDemo({
   Layer: A5Layer,
   getTooltip: '({object}) => object && `${object.pentagon} count: ${object.count}`',
   props: `{
-    data: '${DATA_URI}/sf.bike.parking.a5.json',
+    data: '${DATA_URI}/sf.bike.parking.a5v1.json',
     pickable: true,
     wireframe: false,
     filled: true,
@@ -197,11 +197,10 @@ export const TerrainLayerDemo = makeLayerDemo({
 export const MVTLayerDemo = makeLayerDemo({
   Layer: MVTLayer,
   mapStyle: null,
+  attribution: true,
   getTooltip: '({object}) => object && (object.properties.name || object.properties.layerName)',
   props: `{
-    data: [
-      'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'
-    ],
+    data: 'https://tiles.openfreemap.org/planet',
 
     minZoom: 0,
     maxZoom: 14,

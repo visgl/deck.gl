@@ -16,10 +16,11 @@ import {
   Position,
   Accessor,
   Color,
-  DefaultProps
+  DefaultProps,
+  _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
 
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 
 import {arcUniforms, ArcProps} from './arc-layer-uniforms';
 import {shaderWGSL} from './arc-layer.wgsl';
@@ -150,7 +151,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
 
   state!: {
     model?: Model;
-  };
+  } & Layer['state'];
 
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
@@ -260,7 +261,8 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       widthMinPixels,
       widthMaxPixels,
       greatCircle,
-      useShortestPath: wrapLongitude && !this.context.viewport.preproject
+      useShortestPath:
+        wrapLongitude && !this.state.preproject && this.state.sourceCrs?.signature === 'WGS84'
     };
 
     const model = this.state.model!;
@@ -270,7 +272,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   protected _getModel(): Model {
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

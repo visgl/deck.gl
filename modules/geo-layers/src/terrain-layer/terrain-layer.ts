@@ -6,7 +6,6 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
-  COORDINATE_SYSTEM,
   DefaultProps,
   _GlobeViewport as GlobeViewport,
   Layer,
@@ -296,8 +295,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         ([x, y]) =>
           x >= -MAX_LONGITUDE && x <= MAX_LONGITUDE && y >= -MAX_LATITUDE && y <= MAX_LATITUDE
       );
-    const coordinateSystem =
-      isGlobe && hasLngLatBounds ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN;
+    const coordinateSystem = isGlobe && hasLngLatBounds ? 'lnglat' : 'cartesian';
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,

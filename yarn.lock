@@ -468,6 +468,15 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@deck.gl-community/panels@^9.4.2":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@deck.gl-community/panels/-/panels-9.4.2.tgz#08291652f0fd29e8466db3976a0908f2b7b6da4f"
+  integrity sha512-3idGnjX1AdlGkVorewqf9H7f5psPEeb19ap3r+7mDq7NJl8bN8CkX5d3MqfIgj+6H4eoSv/qtUaw4MeiB57bKw==
+  dependencies:
+    "@probe.gl/stats" "^4.1.1"
+    monaco-editor "^0.53.0"
+    preact "^10.17.0"
+
 "@emnapi/core@1.4.5":
   version "1.4.5"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.4.5.tgz#bfbb0cbbbb9f96ec4e2c4fd917b7bbe5495ceccb"
@@ -2105,10 +2114,22 @@
   dependencies:
     "@math.gl/types" "5.0.0-alpha.15"
 
+"@math.gl/core@5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/core/-/core-5.0.0-alpha.17.tgz#6ed67a98d4c6bb5d6108c90bdba5233909991d35"
+  integrity sha512-/2UGqFFITsmJ4N5dMIYWZhUPaiIU+fOgDhgh+Tq9YL0y+WN/tSsBL6Ej8tQ36PQI/YpEwaL3WBw4XzyxDrnlLA==
+  dependencies:
+    "@math.gl/types" "5.0.0-alpha.17"
+
 "@math.gl/crs@5.0.0-alpha.15":
   version "5.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@math.gl/crs/-/crs-5.0.0-alpha.15.tgz#6cbe69b18463c07b75adb65992df91bb4dc3d52d"
   integrity sha512-6N3MuSnxSE2PN/oMpKn2LXBM/B+mKzIf9WMycEuW8Ndw5HgaYZKaxy/fRMb4o4R+cPafNTO7sak3ziu31KactA==
+
+"@math.gl/crs@5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/crs/-/crs-5.0.0-alpha.17.tgz#b6812172fabc1b72ab69d8c7ab444b1c175e0ad0"
+  integrity sha512-MSkM7XRi+hK7zbxGkFLhiGcLUxQvWjpUHHy66PdkoKZ243CVr4IF3hLgyUTQW+iL+c6PXHh2TM39ow5+RnTr1g==
 
 "@math.gl/culling@5.0.0-alpha.15", "@math.gl/culling@^5.0.0-alpha.15":
   version "5.0.0-alpha.15"
@@ -2177,13 +2198,21 @@
   dependencies:
     "@math.gl/core" "5.0.0-alpha.15"
 
-"@math.gl/projection@5.0.0-alpha.15", "@math.gl/projection@^5.0.0-alpha.15":
+"@math.gl/projection@5.0.0-alpha.15":
   version "5.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@math.gl/projection/-/projection-5.0.0-alpha.15.tgz#3a332db629f81e6fb9c638c212a0cc54372229db"
   integrity sha512-NM37lXVH3G4bHmrdRrGt4F/COAcD8CYFLBcktYMWsi9zj4Idcpn5JpizFOC0qf2gL4/zWKAxvRwmagzrE0c7JQ==
   dependencies:
     "@math.gl/core" "5.0.0-alpha.15"
     "@math.gl/crs" "5.0.0-alpha.15"
+
+"@math.gl/projection@^5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/projection/-/projection-5.0.0-alpha.17.tgz#0e61db0c8011e8cbf8662c54b51fc8a52d4f05c3"
+  integrity sha512-y5CtwfuOUy9tHXPcG9C4xk6pX40glp0YXErUW2D2ME+7yVAwBHZK4F9oJH3MDg07/YMeDhIvXCIZ/W+lKx65+g==
+  dependencies:
+    "@math.gl/core" "5.0.0-alpha.17"
+    "@math.gl/crs" "5.0.0-alpha.17"
 
 "@math.gl/sun@^5.0.0-alpha.15":
   version "5.0.0-alpha.15"
@@ -2199,6 +2228,11 @@
   version "5.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@math.gl/types/-/types-5.0.0-alpha.15.tgz#d9d9f007a4dc87a0675144515f65bfb4dbeecf08"
   integrity sha512-ZhfbZE6cmOG1CCt61Uuel28OKmoqhXRK/7Gnhcay1XeYlBzq+9UAVYsTRhAwwCtRT+TYukAESE1TMCgHYrlzgQ==
+
+"@math.gl/types@5.0.0-alpha.17":
+  version "5.0.0-alpha.17"
+  resolved "https://registry.npmjs.org/@math.gl/types/-/types-5.0.0-alpha.17.tgz#0308ea3679e5ebdaafcac6fed02ea371ceb85c78"
+  integrity sha512-2p6YdQrZQ5DGmpwkLDyI3qk8tB3wKboq89WstH4XLunC1n+7ZlSVkaNkBRz4Q8diDms1RUcv/JuyuEWeU4OvOA==
 
 "@math.gl/web-mercator@^4.1.0":
   version "4.1.0"
@@ -3192,6 +3226,11 @@
   dependencies:
     "@types/geojson" "*"
 
+"@types/trusted-types@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-1.0.6.tgz#569b8a08121d3203398290d602d84d73c8dcf5da"
+  integrity sha512-230RC8sFeHoT6sSUlRO6a8cAnclO06eeiq1QDfiv2FGCLWFvvERWgwIQD4FWqD9A69BN7Lzee4OXwoMVnnsWDw==
+
 "@types/trusted-types@^2.0.2":
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-2.0.7.tgz#baccb07a970b91707df3a3e8ba6896c57ead2d11"
@@ -3563,6 +3602,11 @@ a5-js@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-0.10.0.tgz#d164d9f567e6f980aa1ba8d2afbdbde51ebd27d0"
   integrity sha512-DB0OG4SHbaDK6ML4LTsNaxpxdXxtIynpRDKdSAm5q6s7r+AI81+PwjEaA+q0jKZ0bOpCOAiVe/81vodvBoEVZA==
+
+a5-js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/a5-js/-/a5-js-1.0.0.tgz#9a0981b6dd8ea7a91cc8ee0b613cf22d40c04f11"
+  integrity sha512-32CLrp3WpIkETZVVLuBB0zHK1eICxQkKtgUN433F/0MfgEnr3BqIoFXshmthoL+ECwNrUHfL3JG/0tpM7h6awQ==
 
 abab@^2.0.6:
   version "2.0.6"
@@ -5546,11 +5590,6 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
 
-fsevents@2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
-  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
-
 fsevents@~2.3.2, fsevents@~2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
@@ -7420,6 +7459,13 @@ moment@^2.24.0, moment@^2.29.4:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.30.1.tgz#f8c91c07b7a786e30c59926df530b4eac96974ae"
   integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
 
+monaco-editor@^0.53.0:
+  version "0.53.0"
+  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.53.0.tgz#2f485492e0ee822be13b1b45e3092922963737ae"
+  integrity sha512-0WNThgC6CMWNXXBxTbaYYcunj08iB5rnx4/G56UOPeL9UVIUGGHA1GR0EWIh9Ebabj7NpCRawQ5b0hfN1jQmYQ==
+  dependencies:
+    "@types/trusted-types" "^1.0.6"
+
 mrmime@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/mrmime/-/mrmime-2.0.1.tgz#bc3e87f7987853a54c9850eeb1f1078cd44adddc"
@@ -8300,19 +8346,17 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-playwright-core@1.59.1:
-  version "1.59.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.59.1.tgz#d8a2b28bcb8f2bd08ef3df93b02ae83c813244b2"
-  integrity sha512-HBV/RJg81z5BiiZ9yPzIiClYV/QMsDCKUyogwH9p3MCP6IYjUFu/MActgYAvK0oWyV9NlwM3GLBjADyWgydVyg==
+playwright-core@1.64.1:
+  version "1.64.1"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.64.1.tgz#ca9ec82d7da6ced1b2326ec59ef097aaa9a29f94"
+  integrity sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==
 
-playwright@^1.58.0:
-  version "1.59.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.59.1.tgz#f7b0ca61637ae25264cec370df671bbe1f368a4a"
-  integrity sha512-C8oWjPR3F81yljW9o5OxcWzfh6avkVwDD2VYdwIGqTkl+OGFISgypqzfu7dOe4QNLL2aqcWBmI3PMtLIK233lw==
+playwright@^1.64.1:
+  version "1.64.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.64.1.tgz#c174f48e17f5f3fba71726a9bcdeb8534d5c665d"
+  integrity sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==
   dependencies:
-    playwright-core "1.59.1"
-  optionalDependencies:
-    fsevents "2.3.2"
+    playwright-core "1.64.1"
 
 pngjs-nozlib@^1.0.0:
   version "1.0.0"

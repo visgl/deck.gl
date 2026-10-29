@@ -12,6 +12,33 @@ function release(tesselator) {
   }
 }
 
+for (const Tesselator of [PathTesselator, PolygonTesselator]) {
+  test(`${Tesselator.name} transforms prepared binary XY positions`, () => {
+    const source = new Float32Array([0, 0, 1, 0, 0, 1, 0, 0]);
+    const indices = new Uint32Array([0, 1, 2]);
+    const tesselator = new Tesselator({
+      data: {length: 1, startIndices: [0, 4]},
+      geometryBuffer: {value: source, size: 2},
+      buffers: Tesselator === PolygonTesselator ? {indices} : {},
+      normalize: false,
+      fp64: true,
+      transform: p => [p[0] + 10, -p[1], 7]
+    });
+    try {
+      expect(Array.from(tesselator.get('positions')!.slice(0, 12))).toEqual([
+        10, -0, 7, 11, -0, 7, 10, -1, 7, 10, -0, 7
+      ]);
+      expect(Array.from(source)).toEqual([0, 0, 1, 0, 0, 1, 0, 0]);
+      if (tesselator instanceof PolygonTesselator) {
+        expect(tesselator.buffers.indices).toBe(indices);
+        expect(tesselator.vertexCount).toBe(3);
+      }
+    } finally {
+      release(tesselator);
+    }
+  });
+}
+
 test('tessellator subdivides in input space and transforms each generated point once', () => {
   const path = [
     [0, 0],

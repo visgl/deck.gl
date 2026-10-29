@@ -15,9 +15,10 @@ import {
   Accessor,
   Color,
   UpdateParameters,
-  DefaultProps
+  DefaultProps,
+  _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 import {lineUniforms, LineProps} from './line-layer-uniforms';
 import {shaderWGSL} from './line-layer.wgsl';
@@ -114,7 +115,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   state!: {
     model?: Model;
-  };
+  } & Layer['state'];
 
   getBounds(): [number[], number[]] | null {
     return this.getAttributeManager()?.getBounds([
@@ -190,7 +191,10 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
 
   draw({uniforms}): void {
     const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
-    const wrapLongitude = this.props.wrapLongitude && !this.context.viewport.preproject;
+    const wrapLongitude =
+      this.props.wrapLongitude &&
+      !this.state.preproject &&
+      this.state.sourceCrs?.signature === 'WGS84';
     const model = this.state.model!;
     const lineProps: LineProps = {
       widthUnits: UNIT[widthUnits],
@@ -219,7 +223,7 @@ export default class LineLayer<DataT = any, ExtraProps extends {} = {}> extends 
      */
     const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
