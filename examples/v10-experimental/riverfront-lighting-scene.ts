@@ -4,7 +4,7 @@
 
 import {Deck, MapView, type MapViewState} from '@deck.gl/core';
 import {Buffer} from '@luma.gl/core';
-import {WebGPUDevice} from '@luma.gl/webgpu';
+import {WebGPUDevice} from '@luma.gl/core/webgpu';
 import {
   FireflyLayer,
   GlowPointLayer,
@@ -19,8 +19,8 @@ import {
   createSSGICompositeShaderPass,
   createClusteredVolumetricLightingCompositeShaderPass,
   toneMapping
-} from '@luma.gl/effects';
-import type {ShaderPass, LightingProps, PointLight} from '@luma.gl/shadertools';
+} from '@luma.gl/engine/effects';
+import type {ShaderPass, LightingProps, PointLight} from '@luma.gl/shaders';
 import {Matrix4} from '@math.gl/core';
 import {getRiverfrontSkyLighting} from './riverfront-sky-lighting';
 import {getSkyCameraState, SKY_FIELD_OF_VIEW} from './soft-shadows/sky-camera';

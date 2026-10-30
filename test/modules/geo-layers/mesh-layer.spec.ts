@@ -5,7 +5,7 @@
 import {test, expect} from 'vitest';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 import MeshLayer from '../../../modules/geo-layers/src/mesh-layer/mesh-layer';
 

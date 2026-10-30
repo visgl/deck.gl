@@ -23,7 +23,7 @@ Parameters:
 ## Example
 
 ```js
-import {brightnessContrast} from '@luma.gl/effects';
+import {brightnessContrast} from '@luma.gl/engine/effects';
 import {PostProcessEffect} from '@deck.gl/core';
 
 const postProcessEffect = new PostProcessEffect(brightnessContrast, {

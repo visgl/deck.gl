@@ -7,8 +7,8 @@ import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {WIDTH, HEIGHT, OS} from './constants';
 
 export type TestDeviceType = 'webgl' | 'webgpu';

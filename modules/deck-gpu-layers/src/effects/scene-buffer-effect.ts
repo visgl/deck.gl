@@ -17,7 +17,7 @@ import {
   type Parameters,
   type TextureFormatColor
 } from '@luma.gl/core';
-import {GBuffer} from '@luma.gl/experimental';
+import {GBuffer} from '@luma.gl/anari';
 import {Matrix4} from '@math.gl/core';
 import {getSceneBufferCamera} from './scene-buffer-camera';
 import {SceneVelocityModel} from './scene-velocity-model';

@@ -6,7 +6,7 @@ import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from
 import {getGlobeCloudViewUniforms} from '@deck.gl-community/gpu-layers';
 import type {RenderPass, Texture} from '@luma.gl/core';
 import {Model, SphereGeometry} from '@luma.gl/engine';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import type {NumberArray3} from '@math.gl/core';
 
 const earthScene = {

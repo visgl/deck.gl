@@ -21,13 +21,13 @@ import {
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 import {
   dashShaders,
   offsetShaders,
   pathStylePipelineShaders
 } from '../../../modules/extensions/src/path-style/shaders.glsl';
-import * as vec3 from '@math.gl/core/vec3';
+import {vec3} from '@math.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

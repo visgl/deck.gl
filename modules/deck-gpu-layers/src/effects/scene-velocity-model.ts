@@ -4,7 +4,7 @@
 
 import type {Device, Texture, Framebuffer} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const cameraMotion = {
   name: 'cameraMotion',

@@ -15,7 +15,7 @@ import {
 import {Buffer, type RenderPass, type ShaderLayout} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {GPUVector, VertexList} from '@luma.gl/gpgpu/gpu-data';
-import {PathStorageModel} from '@luma.gl/experimental/models';
+import {PathStorageModel} from '@luma.gl/engine/models';
 import {
   getGPUVectorPickingProvenance,
   type GPUVectorLayerPickingInfo

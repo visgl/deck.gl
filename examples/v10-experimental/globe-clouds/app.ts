@@ -13,7 +13,7 @@ import {
   getMoonLight,
   getSkyDirection,
   skyDirectionToGlobe
-} from '@math.gl/sun';
+} from '@math.gl/earth/sun';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {EarthLayer} from './earth-layer';
 import earthImage from '../shared/showcase/globe/earth.jpg';

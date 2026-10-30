@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ShaderAssembler, gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
+import {
+  type ShaderAssembler,
+  GLSLShaderAssembler,
+  WGSLShaderAssembler,
+  gouraudMaterial,
+  phongMaterial
+} from '@luma.gl/shaders';
+import {GPUVectorModel, Model} from '@luma.gl/engine';
 import {layerUniforms} from './misc/layer-uniforms';
 import color from './color/color';
 import geometry from './misc/geometry';
@@ -24,17 +31,13 @@ const SHADER_HOOKS_WGSL = [
   // Not yet supported
 ];
 
-export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
-  const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler(language);
+function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
+  const shaderAssembler =
+    language === 'wgsl' ? new WGSLShaderAssembler() : new GLSLShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
     shaderAssembler.addDefaultModule(shaderModule);
   }
-
-  // if we're recreating the device we may have changed language
-  // and must not inject hooks for the wrong language
-  // shaderAssembler.resetShaderHooks();
-  (shaderAssembler as any)._hookFunctions.length = 0;
 
   // Add shader hooks based on language
   // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?
@@ -44,6 +47,20 @@ export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   }
 
   return shaderAssembler;
+}
+
+// Shared registries preserve application-wide module and hook registration.
+const glslShaderAssembler = createShaderAssembler('glsl');
+const wgslShaderAssembler = createShaderAssembler('wgsl');
+
+// Model snapshots its base defaults, so both classes need the WebGL fallback.
+// luma ignores this default on devices using a different shader language.
+GPUVectorModel.defaultProps.shaderAssembler = glslShaderAssembler;
+Model.defaultProps.shaderAssembler = glslShaderAssembler;
+
+/** Return deck.gl's shared shader assembler for registering modules and hooks. */
+export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
+  return language === 'wgsl' ? wgslShaderAssembler : glslShaderAssembler;
 }
 
 export {layerUniforms, color, picking, project, project32, gouraudMaterial, phongMaterial, shadow};

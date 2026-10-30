@@ -10,7 +10,7 @@ Consider a hypothetical use case: in a `ScatterplotLayer`, we inject a piece of 
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 // Declare uniform block & custom shader module
 const uniformBlock = `\

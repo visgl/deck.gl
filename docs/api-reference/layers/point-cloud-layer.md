@@ -134,7 +134,7 @@ function App() {
 
 ```ts
 import {PointCloudLayer} from '@deck.gl/layers';
-import {LASLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/pointclouds/las';
 
 new PointCloudLayer({
   data: 'path/to/pointcloud.laz',

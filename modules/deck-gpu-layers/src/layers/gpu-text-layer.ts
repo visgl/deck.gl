@@ -11,8 +11,8 @@ import {
 } from '@deck.gl/core';
 import type {RenderPass} from '@luma.gl/core';
 import type {Model, ModelProps} from '@luma.gl/engine';
-import {TextRenderer, type GPUTextData} from '@luma.gl/text';
-import {getTextRendererModel} from '@luma.gl/text/experimental';
+import {TextRenderer, type GPUTextData} from '@luma.gl/engine/text';
+import {getTextRendererModel} from '@luma.gl/engine/text-experimental';
 import type {GPUVectorLayerPickingInfo} from './gpu-vector-layer-utils';
 
 /** GPU-native prepared text props. Input text batches and atlas resources are borrowed. */

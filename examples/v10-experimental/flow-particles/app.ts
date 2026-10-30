@@ -9,7 +9,7 @@ import {
   FlowFieldAtlas,
   FlowParticleSimulation,
   type FlowParticleStepResult
-} from '@luma.gl/experimental';
+} from '@luma.gl/graph/experimental/simulation';
 import {CITY_ORIGIN, makeCityFeatures} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';

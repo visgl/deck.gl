@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import CartoVectorTileLoader from '@deck.gl/carto/layers/schema/carto-vector-tile-loader';
-import type {LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {LoaderWithParser} from '@loaders.gl/core/loader-utils';
 
 test('CartoVectorTileLoader', () => {
   const loader = CartoVectorTileLoader as LoaderWithParser;

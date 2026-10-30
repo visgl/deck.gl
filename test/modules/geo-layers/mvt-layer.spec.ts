@@ -9,8 +9,8 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {transform} from '@deck.gl/geo-layers/mvt-layer/coordinate-transform';
 import findIndexBinary from '@deck.gl/geo-layers/mvt-layer/find-index-binary';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import {geojsonToBinary} from '@loaders.gl/gis';
-import {MVTLoader} from '@loaders.gl/mvt';
+import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
@@ -58,7 +58,9 @@ const geoJSONDataWGS84 = [
   }
 ];
 
-const geoJSONBinaryData = geojsonToBinary(JSON.parse(JSON.stringify(geoJSONData)));
+const geoJSONBinaryData = convertGeojsonToBinaryFeatureCollection(
+  JSON.parse(JSON.stringify(geoJSONData))
+);
 
 const TRANSFORM_COORDS_DATA = [
   {
@@ -681,7 +683,7 @@ for (const tileset of ['mvt-tiles', 'mvt-with-hole']) {
 }
 
 test('findIndexBinary', () => {
-  const testData = geojsonToBinary([
+  const testData = convertGeojsonToBinaryFeatureCollection([
     {
       // For testing id collision
       id: 1,
@@ -759,7 +761,7 @@ test('findIndexBinary', () => {
     }
   ]);
 
-  // @loaders.gl/gis does not populate fields as of 3.0.8
+  // @loaders.gl/core/geoarrow does not populate fields as of 3.0.8
   testData.polygons.fields = [{id: 1}];
   testData.lines.fields = [{id: 2}];
   testData.points.fields = [{id: 1}, {id: 3}, {id: 4}];

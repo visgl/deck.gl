@@ -17,7 +17,7 @@ import {
   waterMaterial,
   type WaterMaterialProps,
   type RiverWaterMaterialProps
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 import {surfaceBuffer} from './surface-buffer';
 
 export type WaterSurfaceLayerProps = LayerProps & {

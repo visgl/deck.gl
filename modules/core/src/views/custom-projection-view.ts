@@ -5,7 +5,7 @@
 import View from './view';
 import {resolveCRS} from '../utils/crs';
 import {deepEqual} from '../utils/deep-equal';
-import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
+import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
 import type {CommonViewProps, CommonViewState} from './view';
 import CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import type {CustomProjectionViewportOptions} from '../viewports/custom-projection-viewport';

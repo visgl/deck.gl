@@ -89,6 +89,7 @@ const aliases = {
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
   '@deck.gl/arcgis': resolve(rootDir, 'modules/arcgis/src'),
   '@deck.gl/carto': resolve(rootDir, 'modules/carto/src'),
+  '@deck.gl/core/arrow': resolve(rootDir, 'modules/core/src/lib/luma-upstream/arrow-converter.ts'),
   '@deck.gl/core': resolve(rootDir, 'modules/core/src'),
   '@deck.gl/extensions': resolve(rootDir, 'modules/extensions/src'),
   '@deck.gl/geo-layers': resolve(rootDir, 'modules/geo-layers/src'),
@@ -107,7 +108,7 @@ const aliases = {
 };
 
 // Linked private luma.gl peers must share resource classes and Arrow types with deck.gl.
-const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/gpgpu', '@luma.gl/shadertools', 'apache-arrow'];
+const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/gpgpu', '@luma.gl/shaders', 'apache-arrow'];
 
 // Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
 // until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly
@@ -136,13 +137,13 @@ const optimizeDepsConfig = {
     // luma.gl WebGL dependencies
     '@luma.gl/core',
     '@luma.gl/engine',
-    '@luma.gl/webgl',
-    '@luma.gl/shadertools',
-    '@luma.gl/effects',
+    '@luma.gl/core/webgl',
+    '@luma.gl/shaders',
+    '@luma.gl/engine/effects',
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
-    '@loaders.gl/polyfills',
+    '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'

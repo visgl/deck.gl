@@ -4,7 +4,7 @@
 
 import type {Viewport} from '@deck.gl/core';
 import {Matrix4, type NumberArray3} from '@math.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {getMeterOffsetPosition} from '../projection/meter-offset-position';
 
 export const skyView = {
