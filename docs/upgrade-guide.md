@@ -22,6 +22,10 @@ Arrow conversion helpers move to `@luma.gl/gpgpu/arrow`. Test utilities move to
 `@luma.gl/core/test-utils`. The Arrow integration is now published,
 so website builds no longer require a pinned luma.gl source checkout.
 
+Custom layer models using deck.gl shader modules must receive the layer's shader
+assembler. Spread `this.getShaders(...)` into model options, or explicitly pass
+`shaderAssembler: this.context.shaderAssembler` when constructing a model directly.
+
 `Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
 of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
 

@@ -570,19 +570,8 @@ test('Layer#isLoaded', async () => {
 });
 
 test('Layer#updateModules', async () => {
-  const allocations: {buffer: {id: string; destroyed: boolean}; stack: string}[] = [];
-  let restoreBufferSpy = () => {};
   class LayerWithModel extends Layer {
-    initializeState() {
-      const device = this.context.device;
-      const createBuffer = device.createBuffer.bind(device);
-      const spy = vi.spyOn(device, 'createBuffer').mockImplementation(props => {
-        const buffer = createBuffer(props);
-        allocations.push({buffer, stack: new Error().stack || ''});
-        return buffer;
-      });
-      restoreBufferSpy = () => spy.mockRestore();
-    }
+    initializeState() {}
 
     updateState(params) {
       super.updateState(params);
@@ -596,6 +585,7 @@ test('Layer#updateModules', async () => {
 
     _getModel() {
       return new Model(this.context.device, {
+        shaderAssembler: this.context.shaderAssembler,
         vs: `\
   #version 300 es
   void main() {
@@ -799,16 +789,6 @@ test('Layer#updateModules', async () => {
         }
       }
     ],
-    onError: err => {
-      restoreBufferSpy();
-      if (err) {
-        console.error(
-          'Remaining model buffers',
-          allocations.filter(({buffer}) => !buffer.destroyed)
-        );
-      }
-      expect(err).toBeFalsy();
-    }
+    onError: err => expect(err).toBeFalsy()
   });
-  restoreBufferSpy();
 });
