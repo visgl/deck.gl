@@ -130,7 +130,7 @@ const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
-  exclude: ['modules/test-utils/**', '**/node_modules/**', ...(includePrivateModules ? [] : ['modules/deck-*/**'])]
+  exclude: ['modules/test-utils/**', '**/node_modules/**', ...(includePrivateModules ? [] : ['modules/deck-*/**', 'modules/webgpu-layers/**'])]
 };
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
@@ -243,7 +243,7 @@ const projects = [
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
           include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts', 'modules/webgpu-layers/test/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -277,7 +277,7 @@ const projects = [
         test: {
           name: 'browser',
           include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts', 'modules/webgpu-layers/test/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,
