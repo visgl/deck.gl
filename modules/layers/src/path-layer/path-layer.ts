@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   WebMercatorViewport,
   project,
   project32,
@@ -13,7 +14,7 @@ import {
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
@@ -222,15 +223,15 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       viewport instanceof WebMercatorViewport &&
       viewport.zoom >= 12 &&
       // Offset coordinate systems use their fixed coordinateOrigin as the projection origin.
-      // Default/lnglat and preprojected Cartesian paths follow the viewport center instead.
-      (coordinateSystem === 'default' ||
-        coordinateSystem === 'lnglat' ||
-        coordinateSystem === 'cartesian');
+      // Absolute CRS inputs and Cartesian paths follow the viewport center instead.
+      coordinateSystem !== 'meter-offsets' &&
+      coordinateSystem !== 'lnglat-offsets';
 
     if (trackViewportScale) {
       const projectUniforms = project.getUniforms({
         viewport,
         coordinateSystem,
+        sourceCrs: this.internalState!.sourceCrs,
         coordinateOrigin: this.props.coordinateOrigin,
         autoWrapLongitude: this.wrapLongitude
       }) as ProjectUniforms;
@@ -383,7 +384,6 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath);
     const geometryConfigurationChanged =
       changeFlags.projectionChanged ||
-      props.coordinateSystem !== oldProps.coordinateSystem ||
       (this.state.preproject &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
@@ -545,7 +545,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       1, 0
     ];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

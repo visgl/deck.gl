@@ -1,5 +1,5 @@
 {
     "load_extensions": {
-        "pydeck/extension": true
+        "pydeck/extensionRequires": true
     }
 }

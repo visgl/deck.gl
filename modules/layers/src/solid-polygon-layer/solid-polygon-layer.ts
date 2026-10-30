@@ -4,13 +4,14 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color,
   project32,
   picking,
   gouraudMaterial,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -345,7 +346,6 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     const projectionChanged =
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
-      props.coordinateSystem !== oldProps.coordinateSystem ||
       (viewport.isGeospatial &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)));
@@ -426,7 +426,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         );
       }
 
-      topModel = new Model(this.context.device, {
+      topModel = new GPUVectorModel(this.context.device, {
         ...shaders,
         id: `${id}-top`,
         topology: 'triangle-list',
@@ -448,7 +448,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferLayout = bufferLayout.filter(layout => layout.name !== 'indices');
       }
 
-      sideModel = new Model(this.context.device, {
+      sideModel = new GPUVectorModel(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
         bufferLayout,
@@ -468,7 +468,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         }
       });
 
-      wireframeModel = new Model(this.context.device, {
+      wireframeModel = new GPUVectorModel(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-wireframe`,
         bufferLayout,

@@ -13,7 +13,12 @@ export default class Fp64Extension extends LayerExtension {
 
   getShaders(this: Layer): any {
     const {coordinateSystem} = this.props;
-    if (coordinateSystem !== 'lnglat' && coordinateSystem !== 'default') {
+    if (
+      coordinateSystem !== 'default' &&
+      coordinateSystem !== 'lnglat' &&
+      (this.internalState!.packedCrs?.signature !== 'WGS84' ||
+        coordinateSystem === 'lnglat-offsets')
+    ) {
       throw new Error('fp64: coordinateSystem must be LNGLAT');
     }
 

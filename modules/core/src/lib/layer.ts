@@ -6,6 +6,7 @@
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
 import {WebGLDevice} from '@luma.gl/webgl';
 import AttributeManager from './attribute/attribute-manager';
+import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {LIFECYCLE, Lifecycle} from '../lifecycle/constants';
@@ -16,13 +17,13 @@ import assert from '../utils/assert';
 import memoize from '../utils/memoize';
 import {deepEqual} from '../utils/deep-equal';
 import {mergeShaders} from '../utils/shader';
-import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
+import {projectPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
 import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
 import type {CRSDescriptor} from '@math.gl/projection/core';
-import {resolveCRS} from '../utils/crs';
+import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
@@ -156,7 +157,12 @@ const defaultProps: DefaultProps<LayerProps> = {
   onDrag: {type: 'function', value: null, optional: true},
   onDragEnd: {type: 'function', value: null, optional: true},
 
-  coordinateSystem: 'default',
+  coordinateSystem: {
+    type: 'object',
+    value: 'default',
+    validate: value => typeof value === 'string' || (Boolean(value) && typeof value === 'object'),
+    equal: areCRSEqual
+  },
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
   modelMatrix: {type: 'array', value: null, compare: true, optional: true},
   wrapLongitude: false,
@@ -251,12 +257,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     assert(this.internalState);
     const viewport = this.internalState.viewport || this.context.viewport;
 
-    const worldPosition = getWorldPosition(xyz, {
-      viewport,
-      modelMatrix: this.props.modelMatrix,
-      coordinateOrigin: this.props.coordinateOrigin,
-      coordinateSystem: this.props.coordinateSystem
-    });
+    const worldPosition = this.projectPosition(xyz, {autoOffset: false});
     const [x, y, z] = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
     return xyz.length === 2 ? [x, y] : [x, y, z];
   }
@@ -272,36 +273,38 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Projects a point from the layer's coordinate system to common space, with optional parameter overrides. */
   projectPosition(
     xyz: number[],
-    params?: {
+    params: {
       /** The viewport to use */
       viewport?: Viewport;
       /** The model matrix to apply. Defaults to the layer prop; null disables it. */
       modelMatrix?: NumericArray | null;
-      /** The reference coordinate system. Defaults to the layer prop. */
-      coordinateSystem?: CoordinateSystem;
-      /** The reference coordinate origin. Defaults to the layer prop. */
+      /** Absolute CRS of the supplied point. Defaults to the layer's resolved CRS. */
+      sourceCrs?: CRSDescriptor;
+      /** Select local coordinates or meter offsets, taking precedence over sourceCrs. */
+      coordinateSystem?: 'cartesian' | 'meter-offsets';
+      /** Input origin applied before conversion. Defaults to the layer prop. */
       coordinateOrigin?: [number, number, number];
-      /** The coordinate system that the supplied position is in. Default to the same as `coordinateSystem`. */
-      fromCoordinateSystem?: CoordinateSystem;
-      /** The source coordinate origin. Defaults to `coordinateOrigin` for the same source system, or zero for a different system. */
-      fromCoordinateOrigin?: [number, number, number];
-      /** Whether to apply offset mode automatically as does the project shader module.
-       * Offset mode places the origin of the common space at the given viewport's center. It is used in some use cases
-       * to improve precision in the vertex shader due to the fp32 float limitation.
-       * Use `autoOffset:false` if the returned position should not be dependent on the current viewport.
-       * Default `true` */
+      /** Whether to use the shader's automatic common-space offset for precision.
+       * Set to false for absolute common-space coordinates. Default true. */
       autoOffset?: boolean;
-    }
+    } = {}
   ): [number, number, number] {
     assert(this.internalState);
-    const viewport = this.internalState.viewport || this.context.viewport;
-
+    const {
+      viewport = this.internalState.viewport || this.context.viewport,
+      sourceCrs = this.internalState.sourceCrs,
+      coordinateSystem = params.sourceCrs?.signature ?? this.props.coordinateSystem,
+      modelMatrix = this.props.modelMatrix,
+      coordinateOrigin = this.props.coordinateOrigin,
+      autoOffset
+    } = params;
     return projectPosition(xyz, {
       viewport,
-      modelMatrix: this.props.modelMatrix,
-      coordinateOrigin: this.props.coordinateOrigin,
-      coordinateSystem: this.props.coordinateSystem,
-      ...params
+      sourceCrs,
+      coordinateSystem,
+      modelMatrix,
+      coordinateOrigin,
+      autoOffset
     });
   }
 
@@ -789,8 +792,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
     }
 
+    const attributeManager = this.getAttributeManager();
+    const bufferGroupsUpdated = Boolean(attributeManager?.hasBufferGroups());
+    if (bufferGroupsUpdated) {
+      // Models share packed storage; uploading per model would destroy earlier bindings.
+      attributeManager!.getBufferGroupBindings(changedAttributes);
+    }
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged, bufferGroupsUpdated);
     }
   }
 
@@ -892,6 +901,38 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attribute.value = pickingColorCache.subarray(0, numInstances * 4);
   }
 
+  private _setGPUVectorModelAttributes(
+    model: GPUVectorModel,
+    attributeManager: AttributeManager,
+    changedAttributes: Record<string, Attribute>
+  ): void {
+    // @ts-ignore luma.gl type issue
+    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const bindings = attributeManager.getBufferGroupBindings(
+      changedAttributes,
+      model,
+      excludeAttributes
+    );
+    const attributes = {...attributeManager.getAttributes()};
+    let indexBuffer: Buffer | null | undefined;
+    for (const name in attributes) {
+      if (excludeAttributes[name] || bindings.groupedAttributeIds.has(name)) {
+        delete attributes[name];
+      } else if (attributes[name].settings.isIndexed) {
+        indexBuffer = attributes[name].getBuffer();
+        delete attributes[name];
+      }
+    }
+    const columns = attributeManager.getGPUVectors(attributes, {
+      ...bindings,
+      length: this.getNumInstances()
+    });
+    model.setGPUAttributes(columns, bindings.bufferLayouts);
+    if (indexBuffer !== undefined) {
+      model.setIndexBuffer(indexBuffer);
+    }
+  }
+
   /** Apply changed attributes to model */
   // eslint-disable-next-line max-statements
   protected _setModelAttributes(
@@ -899,15 +940,21 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     changedAttributes: {
       [id: string]: Attribute;
     },
-    bufferLayoutChanged = false
+    bufferLayoutChanged = false,
+    bufferGroupsUpdated = false
   ) {
     if (!Object.keys(changedAttributes).length) {
       return;
     }
 
     const attributeManager = this.getAttributeManager();
+    const changedGroupAttributes = bufferGroupsUpdated ? {} : changedAttributes;
+    if (model instanceof GPUVectorModel && attributeManager) {
+      this._setGPUVectorModelAttributes(model, attributeManager, changedGroupAttributes);
+      return;
+    }
     if (attributeManager?.hasBufferGroups()) {
-      this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
+      this._setGroupedModelAttributes(model, attributeManager, changedGroupAttributes);
       return;
     }
 
@@ -1227,8 +1274,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     try {
       const updateParams = this._getUpdateParams();
       const oldModels = this.getModels();
-      const coordinateSystemChanged =
-        updateParams.props.coordinateSystem !== updateParams.oldProps.coordinateSystem;
+      const coordinateSystemChanged = !areCRSEqual(
+        updateParams.props.coordinateSystem,
+        updateParams.oldProps.coordinateSystem
+      );
       if (
         internalState.preprojectionChanged ||
         (this.internalState.preproject &&
@@ -1456,7 +1505,10 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       and extracts change flags that describe what has change so that state
       can be update correctly with minimal effort */
   private _diffProps(newProps: Layer<PropsT>['props'], oldProps: Layer<PropsT>['props']) {
-    const changeFlags = diffProps(newProps, oldProps);
+    const changeFlags = {
+      ...diffProps(newProps, oldProps),
+      projectionChanged: !areCRSEqual(newProps.coordinateSystem, oldProps.coordinateSystem)
+    };
 
     // iterate over changedTriggers
     if (changeFlags.updateTriggersChanged) {
