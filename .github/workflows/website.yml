@@ -49,7 +49,7 @@ jobs:
     permissions:
       contents: write
 
-    if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_deploy }}
+    if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_deploy == 'true' }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
