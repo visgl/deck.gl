@@ -411,6 +411,7 @@ export class ScatterplotLayerColumns {
         type = type.replace('int', 'norm');
       const typeInfo = type === 'float64' ? null : dataTypeDecoder.getDataTypeInfo(type);
       if (
+        !descriptor.constant &&
         sourceSize === size &&
         type !== 'float64' &&
         (!typeInfo!.integer || accessor === 'rowIndexes') &&
@@ -455,7 +456,8 @@ export class ScatterplotLayerColumns {
       const stride =
         (descriptor.stride ?? sourceSize * view.BYTES_PER_ELEMENT) / view.BYTES_PER_ELEMENT;
       const offset = (descriptor.offset ?? 0) / view.BYTES_PER_ELEMENT;
-      if (length && offset + (length - 1) * stride + sourceSize > view.length)
+      const rowCount = descriptor.constant ? 1 : length;
+      if (rowCount && offset + (rowCount - 1) * stride + sourceSize > view.length)
         throw new Error('Binary attribute is shorter than the Arrow columns');
       binaryColor = color;
       const normalize = (value: number) => {
@@ -465,15 +467,16 @@ export class ScatterplotLayerColumns {
           ? Math.max(-1, value / (2 ** (bits - 1) - 1))
           : value / (2 ** bits - 1);
       };
+      const readValue = (index: number) =>
+        sourceSize === 1
+          ? normalize(view[offset + index * stride])
+          : Array.from(
+              view.subarray(offset + index * stride, offset + index * stride + sourceSize),
+              normalize
+            );
       props = {
         ...props,
-        [accessor]: (_row, {index}) =>
-          sourceSize === 1
-            ? normalize(view[offset + index * stride])
-            : Array.from(
-                view.subarray(offset + index * stride, offset + index * stride + sourceSize),
-                normalize
-              )
+        [accessor]: descriptor.constant ? readValue(0) : (_row, {index}) => readValue(index)
       };
     }
     const source = props[accessor];
