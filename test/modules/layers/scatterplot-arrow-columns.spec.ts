@@ -5,7 +5,7 @@
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import {GPUDataEvaluator} from '@luma.gl/gpgpu';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
+import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 import {Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
@@ -387,5 +387,190 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     });
     expect(pendingDraws).toBeGreaterThan(0);
     expect(finalLength).toBe(2);
+  });
+}
+
+test('Scatterplot WebGPU column mode fits the minimum vertex buffer limit', async ({skip}) => {
+  const testDevice = await getWebGPUTestDevice('core');
+  if (!testDevice) {
+    skip();
+    return;
+  }
+  const scalar = vectorFromArray([1, 2], new Float32());
+  const colors = vectorFromArray(
+    [
+      [255, 0, 0, 255],
+      [0, 255, 0, 255]
+    ],
+    new FixedSizeList(4, new Field('values', new Uint8(), false))
+  );
+  await testLayerAsync({
+    Layer: ScatterplotLayer,
+    device: testDevice,
+    testCases: [
+      {
+        props: {
+          data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}},
+          positions: positions([
+            [0, 0],
+            [1, 1]
+          ]),
+          radii: scalar,
+          fillColors: colors,
+          lineColors: colors,
+          lineWidths: scalar,
+          getPixelOffset: (_row, {index}) => [index, index]
+        },
+        onAfterUpdate: ({layer}) => {
+          if (!layer.isLoaded) return;
+          const model = layer.getModels()[0];
+          expect(
+            model.pipeline.shaderLayout.attributes!.some(
+              attribute => attribute.name === 'positions'
+            )
+          ).toBe(false);
+          expect(model.bufferLayout.length).toBeLessThanOrEqual(8);
+        }
+      }
+    ],
+    onError: error => {
+      throw error;
+    }
+  });
+});
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot restores accessor mode while data is pending on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const data = new Promise<never>(() => {});
+    testLayer({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {props: {data, radii: vectorFromArray([1, 2], new Float32())}},
+        {
+          updateProps: {radii: undefined},
+          onAfterUpdate: ({layer}) => {
+            expect(layer.getAttributeManager()).not.toBeNull();
+            expect(layer.getModels()).toHaveLength(1);
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot delays drawing across picking layout changes on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const source = positions([
+      [0, 0],
+      [1, 1]
+    ]);
+    const convert = ArrowConverter.prototype.convert;
+    let delay = false;
+    let observed = false;
+    const spy = vi.spyOn(ArrowConverter.prototype, 'convert').mockImplementation(async function (
+      ...args
+    ) {
+      if (delay) await new Promise(resolve => setTimeout(resolve, 50));
+      return convert.apply(this, args);
+    });
+    try {
+      await testLayerAsync({
+        Layer: ScatterplotLayer,
+        device: testDevice,
+        testCases: [
+          {props: {positions: source, data: {length: 2}}},
+          {
+            updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
+            onBeforeUpdate: () => {
+              delay = true;
+            },
+            onAfterUpdate: ({layer}) => {
+              if (!layer.state.columns?.loading) return;
+              const setProps = vi.spyOn(layer.state.model!.shaderInputs, 'setProps');
+              layer.draw({uniforms: {}});
+              expect(setProps).not.toHaveBeenCalled();
+              setProps.mockRestore();
+              observed = true;
+            }
+          }
+        ],
+        onError: error => {
+          throw error;
+        }
+      });
+      expect(observed).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot avoids stale picking layout after a failed conversion on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const source = positions([
+      [0, 0],
+      [1, 1]
+    ]);
+    const convert = ArrowConverter.prototype.convert;
+    let fail = false;
+    let observed = false;
+    const errors: Error[] = [];
+    const spy = vi.spyOn(ArrowConverter.prototype, 'convert').mockImplementation(async function (
+      ...args
+    ) {
+      if (fail) throw new Error('conversion failed');
+      return convert.apply(this, args);
+    });
+    try {
+      await testLayerAsync({
+        Layer: ScatterplotLayer,
+        device: testDevice,
+        testCases: [
+          {props: {positions: source, data: {length: 2}}},
+          {
+            updateProps: {data: {length: 2, attributes: {rowIndexes: new Uint32Array([0, 1])}}},
+            onBeforeUpdate: () => {
+              fail = true;
+            },
+            onAfterUpdate: ({layer}) => {
+              if (layer.state.columns?.loading || !errors.length) return;
+              const setProps = vi.spyOn(layer.state.model!.shaderInputs, 'setProps');
+              layer.draw({uniforms: {}});
+              expect(setProps).not.toHaveBeenCalled();
+              setProps.mockRestore();
+              observed = true;
+            }
+          }
+        ],
+        onError: error => {
+          errors.push(error);
+        }
+      });
+      expect(errors).toHaveLength(1);
+      expect(observed).toBe(true);
+    } finally {
+      spy.mockRestore();
+    }
   });
 }

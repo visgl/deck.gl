@@ -210,8 +210,19 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 }
 `;
 
-export function getShaderWGSL(useRowIndexes: boolean): string {
-  return shaderWGSL
+export function getShaderWGSL(useRowIndexes: boolean, useVertexIndex = false): string {
+  const source = useVertexIndex
+    ? shaderWGSL
+        .replace('@location(0) positions: vec3<f32>,', '')
+        .replace(
+          '  var varyings: Varyings;',
+          `  var varyings: Varyings;
+  let quadPositions = array<vec3<f32>, 4>(vec3<f32>(-1.0, -1.0, 0.0), vec3<f32>(1.0, -1.0, 0.0), vec3<f32>(-1.0, 1.0, 0.0), vec3<f32>(1.0, 1.0, 0.0));
+  let quadPosition = quadPositions[attributes.vertexIndex];`
+        )
+        .replaceAll('attributes.positions', 'quadPosition')
+    : shaderWGSL;
+  return source
     .replace('PICKING_COLOR_ATTRIBUTE', useRowIndexes ? '@location(8) rowIndexes: u32,' : '')
     .replace(
       'PICKING_COLOR_VALUE',
