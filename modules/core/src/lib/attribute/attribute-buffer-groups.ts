@@ -29,7 +29,11 @@ type PackedGroup = {
 };
 
 type PackedGroupState = {
-  packed: GPUDataEvaluator;
+  /**
+   * Shared vertex buffer owned by this helper. Every model of the layer binds it, so repacks write
+   * into it in place instead of returning it to the gpgpu buffer pool while it is still bound.
+   */
+  buffer: Buffer;
   layoutKey: string;
 };
 
@@ -88,7 +92,7 @@ export default class AttributeBufferGroups {
   /** Deletes shared buffers created by this helper. */
   finalize(): void {
     for (const state of Object.values(this.packedBuffers)) {
-      state.packed.destroy();
+      state.buffer.destroy();
     }
     this.packedBuffers = {};
   }
@@ -297,35 +301,40 @@ export default class AttributeBufferGroups {
       byteStride: group.layout.byteStride,
       attributes: group.layout.attributes
     });
-    const state: PackedGroupState | undefined = this.packedBuffers[group.id];
+    let state: PackedGroupState | undefined = this.packedBuffers[group.id];
 
     if (!state || state.layoutKey !== layoutKey) {
       upload = true;
     }
 
     if (upload) {
-      if (state) {
-        state.packed.destroy();
-        delete this.packedBuffers[group.id];
+      const packed = interleaveTables(
+        ...group.attributes.map(attribute => this._getInterleaveInput(group, attribute))
+      );
+      // Each model of a layer requests bindings with the same changed attributes, so a group is
+      // repacked once per model. Earlier models must keep binding a buffer with valid contents.
+      if (!state || state.buffer.byteLength < packed.byteLength) {
+        state?.buffer.destroy();
+        state = {
+          buffer: this.device.createBuffer({
+            id: `${this.id}-${group.id}`,
+            usage: Buffer.VERTEX | Buffer.STORAGE | Buffer.COPY_DST | Buffer.COPY_SRC,
+            byteLength: packed.byteLength
+          }),
+          layoutKey
+        };
+        this.packedBuffers[group.id] = state;
       }
-      const packed = this._interleavePackedGroup(group);
-      this.packedBuffers[group.id] = {packed, layoutKey};
-      return packed.buffer;
+      state.layoutKey = layoutKey;
+      packed.setTargetBuffer({buffer: state.buffer});
+      cleanEvaluateSync(this.device, packed);
+      packed.destroy();
     }
 
     if (!state) {
       throw new Error(`Attribute buffer group ${group.id} has no packed buffer`);
     }
-    return state.packed.buffer;
-  }
-
-  private _interleavePackedGroup(group: PackedGroup): GPUDataEvaluator {
-    const evaluators = group.attributes.map(attribute =>
-      this._getInterleaveInput(group, attribute)
-    );
-    const packed = interleaveTables(...evaluators);
-    cleanEvaluateSync(this.device, packed);
-    return packed;
+    return state.buffer;
   }
 
   private _getInterleaveInput(group: PackedGroup, attribute: Attribute): GPUDataEvaluator {
