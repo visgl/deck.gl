@@ -19,6 +19,16 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v9.3
 
+#### deck.gl [v9.3.12] - Oct 30 2026
+
+- fix(core): eliminate 300ms click delay and fix runtime controller prop changes (#10422)
+- fix(heatmap): compilation failure on Qualcomm Adreno 660 (#10301)
+- fix(core): make attribute buffer cleanup idempotent (#10609)
+- fix(core): compare viewport projection state in equals (#10611)
+- fix(arcgis): import MapView from the public @deck.gl/core entry (#10788)
+- fix(mapbox): guard getProjection against throw when map style is not ready (#10551)
+- fix(google-maps): wait for shared context in interleaved mode (#10792)
+
 #### deck.gl [v9.3.11] - Aug 28 2026
 
 - Lock luma.gl to 9.3 minor release
