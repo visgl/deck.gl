@@ -467,12 +467,15 @@ export default class IconManager {
     }) as CanvasRenderingContext2D;
 
     for (const icon of icons) {
+      const id = getIconId(icon);
+      const iconDef = this._mapping[id];
       this._pendingCount++;
       load(icon.url, this._loadOptions)
         .then(imageData => {
-          const id = getIconId(icon);
+          if (!this._texture || this._mapping[id] !== iconDef) {
+            return;
+          }
 
-          const iconDef = this._mapping[id];
           const {x: initialX, y: initialY, width: maxWidth, height: maxHeight} = iconDef;
 
           const {image, width, height} = resizeImage(
@@ -485,7 +488,7 @@ export default class IconManager {
           const x = initialX + (maxWidth - width) / 2;
           const y = initialY + (maxHeight - height) / 2;
 
-          this._texture?.copyExternalImage({
+          this._texture.copyExternalImage({
             image,
             x,
             y,
@@ -498,13 +501,14 @@ export default class IconManager {
           iconDef.height = height;
 
           // Call to regenerate mipmaps after modifying texture(s)
-          if (this._texture) {
-            regenerateMipmaps(this._texture);
-          }
+          regenerateMipmaps(this._texture);
 
           this.onUpdate(width !== maxWidth || height !== maxHeight);
         })
         .catch(error => {
+          if (!this._texture || this._mapping[id] !== iconDef) {
+            return;
+          }
           this.onError({
             url: icon.url,
             source: icon.source,
