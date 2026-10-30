@@ -65,7 +65,7 @@ const deckInstance = new Deck({
 import {Deck} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
-import type {Tileset3D} from '@loaders.gl/tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
@@ -110,7 +110,7 @@ import {DeckGL} from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 import type {MapViewState} from '@deck.gl/core';
-import type {Tileset3D} from '@loaders.gl/tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 function App() {
   const [initialViewState, setInitialViewState] = useState<MapViewState>({
@@ -156,7 +156,7 @@ function App() {
 
 ```ts
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {I3SLoader} from '@loaders.gl/i3s';
+import {I3SLoader} from '@loaders.gl/tiles-3d/i3s';
 
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',

@@ -9,6 +9,7 @@ import {
   gouraudMaterial,
   phongMaterial
 } from '@luma.gl/shaders';
+import {GPUVectorModel, Model} from '@luma.gl/engine';
 import {layerUniforms} from './misc/layer-uniforms';
 import color from './color/color';
 import geometry from './misc/geometry';
@@ -30,8 +31,7 @@ const SHADER_HOOKS_WGSL = [
   // Not yet supported
 ];
 
-/** Create a language-specific shader assembler with deck.gl modules and hooks. */
-export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
+function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   const shaderAssembler =
     language === 'wgsl' ? new WGSLShaderAssembler() : new GLSLShaderAssembler();
 
@@ -47,6 +47,20 @@ export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   }
 
   return shaderAssembler;
+}
+
+// Shared registries preserve application-wide module and hook registration.
+const glslShaderAssembler = createShaderAssembler('glsl');
+const wgslShaderAssembler = createShaderAssembler('wgsl');
+
+// Model snapshots its base defaults, so both classes need the WebGL fallback.
+// luma ignores this default on devices using a different shader language.
+GPUVectorModel.defaultProps.shaderAssembler = glslShaderAssembler;
+Model.defaultProps.shaderAssembler = glslShaderAssembler;
+
+/** Return deck.gl's shared shader assembler for registering modules and hooks. */
+export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
+  return language === 'wgsl' ? wgslShaderAssembler : glslShaderAssembler;
 }
 
 export {layerUniforms, color, picking, project, project32, gouraudMaterial, phongMaterial, shadow};

@@ -28,11 +28,11 @@
   "dependencies": {
     "@deck.gl-community/gpu-layers": "10.0.0-alpha.3",
     "@deck.gl/core": "9.4.0-beta.4",
-    "@luma.gl/core": "^10.0.0-alpha.6",
-    "@luma.gl/engine": "^10.0.0-alpha.6",
-    "@luma.gl/gpgpu": "^10.0.0-alpha.6",
-    "@luma.gl/graph": "^10.0.0-alpha.6",
-    "@luma.gl/shaders": "^10.0.0-alpha.6"
+    "@luma.gl/core": "10.0.0-alpha.6",
+    "@luma.gl/engine": "10.0.0-alpha.6",
+    "@luma.gl/gpgpu": "10.0.0-alpha.6",
+    "@luma.gl/graph": "10.0.0-alpha.6",
+    "@luma.gl/shaders": "10.0.0-alpha.6"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"

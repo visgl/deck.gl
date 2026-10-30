@@ -46,21 +46,21 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^5.0.0-beta.1",
-    "@loaders.gl/images": "^5.0.0-beta.1",
-    "@luma.gl/shaders": "^10.0.0-alpha.6",
+    "@loaders.gl/core": "5.0.0-beta.1",
+    "@loaders.gl/images": "5.0.0-beta.1",
+    "@luma.gl/shaders": "10.0.0-alpha.6",
     "@mapbox/tiny-sdf": "^2.0.5",
-    "@math.gl/core": "^5.0.0-beta.1",
-    "@math.gl/geometry": "^5.0.0-beta.1",
-    "@math.gl/web-mercator": "^5.0.0-beta.1",
+    "@math.gl/core": "5.0.0-beta.1",
+    "@math.gl/geometry": "5.0.0-beta.1",
+    "@math.gl/web-mercator": "5.0.0-beta.1",
     "@types/geojson": "^7946.0.16",
     "earcut": "^2.2.4"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0",
-    "@loaders.gl/core": "^5.0.0-beta.1",
-    "@luma.gl/core": "~10.0.0-alpha.6",
-    "@luma.gl/engine": "~10.0.0-alpha.6"
+    "@loaders.gl/core": "5.0.0-beta.1",
+    "@luma.gl/core": "10.0.0-alpha.6",
+    "@luma.gl/engine": "10.0.0-alpha.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

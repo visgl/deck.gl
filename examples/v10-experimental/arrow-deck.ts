@@ -33,7 +33,7 @@ export class ArrowDeck<ViewsT extends View | View[]> extends Deck<ViewsT> {
     let didLoad = false;
     super({
       ...deckProps,
-      onDeviceInitialized,
+      ...(onDeviceInitialized && {onDeviceInitialized}),
       onLoad: () => {
         didLoad = true;
         runOnLoad?.();

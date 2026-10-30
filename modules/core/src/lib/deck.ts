@@ -1652,7 +1652,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       });
     }
 
-    this.props.onDeviceInitialized(this.device);
+    this.props.onDeviceInitialized?.(this.device);
     if (this.device.type === 'webgl') {
       // Legacy callback - warn?
       // @ts-expect-error gl is not visible on Device base class

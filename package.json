@@ -51,11 +51,11 @@
   "devDependencies": {
     "@deck.gl-community/panels": "^9.4.2",
     "@floating-ui/dom": "^1.7.5",
-    "@loaders.gl/core": "^5.0.0-beta.1",
-    "@loaders.gl/tables": "^5.0.0-beta.1",
-    "@luma.gl/core": "^10.0.0-alpha.6",
-    "@luma.gl/engine": "^10.0.0-alpha.6",
-    "@math.gl/geospatial": "^5.0.0-beta.1",
+    "@loaders.gl/core": "5.0.0-beta.1",
+    "@loaders.gl/tables": "5.0.0-beta.1",
+    "@luma.gl/core": "10.0.0-alpha.6",
+    "@luma.gl/engine": "10.0.0-alpha.6",
+    "@math.gl/geospatial": "5.0.0-beta.1",
     "@probe.gl/bench": "^4.1.1",
     "@probe.gl/test-utils": "^4.1.1",
     "@types/jscodeshift": "^17.3.0",
@@ -79,7 +79,8 @@
     "sharp": "^0.35.4",
     "tape": "^5.10.2",
     "vite-bundle-analyzer": "^1.3.6",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "geotiff": "^2.1.0"
   },
   "pre-commit": [
     "test-fast",

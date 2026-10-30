@@ -2446,7 +2446,7 @@
   dependencies:
     compress-utils "^0.10.1"
 
-"@loaders.gl/core@^5.0.0-beta.1":
+"@loaders.gl/core@5.0.0-beta.1":
   version "5.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-5.0.0-beta.1.tgz#3fb87fd0dd9cc16cfde43234cacc2f6cbe8d9940"
   integrity sha512-ibHKLD/KDLXOqbfNrM7i0whZFO4foBIS5uOv1FYIriEz9UU1liyk3cF8oEo3e6hEwNHrRInnPI/S5HaT1Gkniw==
@@ -2476,7 +2476,7 @@
   resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-5.0.0-beta.1.tgz#88897c294d840e4f6ba01b64d56bb1f28dda77ef"
   integrity sha512-i6C5ASyyJdxFG9lmBsgdxnOOegXhe/Gm2y3Of9npzy8fLx8K4oIwR1+tuhw3tmmF0FOf8D8Y+HTEjPe/JsYp4w==
 
-"@loaders.gl/pointclouds@5.0.0-beta.1", "@loaders.gl/pointclouds@^5.0.0-beta.1":
+"@loaders.gl/pointclouds@5.0.0-beta.1":
   version "5.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@loaders.gl/pointclouds/-/pointclouds-5.0.0-beta.1.tgz#4738da484b097be8efdd46afded79ef0b555a0cc"
   integrity sha512-py6ZwVHMkL9WNTG+KADHF0Pjvkom3b2tO+tol+RK5XAzEXrpMyldDoiQhe5oJke4eXoD/t193HeJKqbpYi+TOA==
@@ -2487,7 +2487,7 @@
     copc "0.0.8"
     laz-perf "^0.0.7"
 
-"@loaders.gl/scene@5.0.0-beta.1", "@loaders.gl/scene@^5.0.0-beta.1":
+"@loaders.gl/scene@5.0.0-beta.1":
   version "5.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@loaders.gl/scene/-/scene-5.0.0-beta.1.tgz#9911cd999d37636015e934d67dfc5941c464ce5c"
   integrity sha512-0eduxBAXs3grwvokHnGOcvYdgy7gXgZ48JEsASvz201dW9LWcVjr386jooy8ostVZfW/brw+SdM4hnvPdjlURQ==
@@ -2508,7 +2508,7 @@
     "@math.gl/core" "5.0.0-beta.1"
     zod "^4.1.12"
 
-"@loaders.gl/tiles-3d@^5.0.0-beta.1":
+"@loaders.gl/tiles-3d@5.0.0-beta.1":
   version "5.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@loaders.gl/tiles-3d/-/tiles-3d-5.0.0-beta.1.tgz#e058bf12ef007af0218ba58d105f9e633661e59e"
   integrity sha512-5xFB0RwjWpIGO102uR93/fS/5JQIaZi778aXu726Z+F5jLS1k5MjnSHUdoxaJOaUs7b1taKBwyzsAwg1EMtp8A==

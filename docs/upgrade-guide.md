@@ -22,9 +22,13 @@ Arrow conversion helpers move to `@luma.gl/gpgpu/arrow`. Test utilities move to
 `@luma.gl/core/test-utils`. The Arrow integration is now published,
 so website builds no longer require a pinned luma.gl source checkout.
 
-Custom layer models using deck.gl shader modules must receive the layer's shader
-assembler. Spread `this.getShaders(...)` into model options, or explicitly pass
-`shaderAssembler: this.context.shaderAssembler` when constructing a model directly.
+`ShaderAssembler.getDefaultShaderAssembler()` is removed. Import `getShaderAssembler`
+from `@deck.gl/core` and call `getShaderAssembler('glsl')` or `getShaderAssembler('wgsl')`
+to register shared modules and hooks. Deck installs its GLSL assembler as the default
+for luma models, preserving custom WebGL layers that construct models directly.
+For language-specific custom models, spread `this.getShaders(...)` into model options
+or pass `shaderAssembler: this.context.shaderAssembler`. Without deck's assembler,
+shader modules can throw `Unknown shader hook vs:DECKGL_FILTER_GL_POSITION`.
 
 `Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
 of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
@@ -40,8 +44,9 @@ Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.1`. Several pac
 | `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
 | `@loaders.gl/las`, `@loaders.gl/ply` | Corresponding subpaths of `@loaders.gl/pointclouds` |
 | `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
+| `@loaders.gl/tiles` (3D tiles types and sources) | `@loaders.gl/tiles-3d` |
 | `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
-| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain`, `@loaders.gl/ogc/wms` |
+| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain/index`, `@loaders.gl/ogc/wms` |
 | `@math.gl/types` | `@math.gl/core` |
 | `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry`, `@math.gl/geometry/culling` |
 | `@math.gl/projection` | `@math.gl/geospatial/projection` |
@@ -50,6 +55,9 @@ Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.1`. Several pac
 Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
 
 The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
+
+Bundlers that resolve optional raster decoders may require `geotiff` to be installed
+explicitly. It is an optional peer of `@deck.gl/geo-layers`.
 
 ### Viewport
 

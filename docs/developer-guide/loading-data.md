@@ -112,7 +112,7 @@ new HexagonLayer({
 The following code adds the [LASLoader](https://loaders.gl/modules/las/docs/api-reference/las-loader) to support LAS/LAZ files:
 
 ```ts
-import {LASLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/pointclouds/las';
 
 new PointCloudLayer({
   mesh: '/path/to/pointcloud.laz',
