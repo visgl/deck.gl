@@ -93,6 +93,10 @@ If `event` is provided, returns `false` if the event is already handled, and mar
 
 Returns `true` if the user is dragging the view.
 
+#### `isTransitioning()` {#istransitioning}
+
+Returns `true` while a view state transition is in progress.
+
 
 ## Members
 
