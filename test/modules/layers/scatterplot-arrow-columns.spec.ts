@@ -624,3 +624,75 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     });
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot supports constant row indexes on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {
+          props: {
+            positions: positions([
+              [0, 0],
+              [1, 1]
+            ]),
+            data: {
+              length: 2,
+              attributes: {
+                rowIndexes: {constant: true, value: new Uint32Array([5])}
+              }
+            }
+          },
+          onAfterUpdate: ({layer}) => {
+            if (!layer.isLoaded) return;
+            const indexes = (layer.state.columns as any).prepared.columns.rowIndexes;
+            expect(indexes.format).toBe('uint32');
+            expect(indexes.value).toEqual(new Uint32Array([5]));
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+  test(`Scatterplot waits for async rows before fallback accessors on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const getRadius = vi.fn(row => row.radius);
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {
+          props: {
+            positions: positions([
+              [0, 0],
+              [1, 1]
+            ]),
+            data: new Promise(resolve => setTimeout(() => resolve([{radius: 2}, {radius: 3}]), 50)),
+            getRadius
+          },
+          onAfterUpdate: ({layer}) => {
+            if (!layer.isLoaded) expect(getRadius).not.toHaveBeenCalled();
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+    expect(getRadius).toHaveBeenCalled();
+  });
+}
