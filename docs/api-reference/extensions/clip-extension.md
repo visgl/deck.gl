@@ -62,7 +62,7 @@ Rectangular bounds to be used for clipping the rendered region.
 
 Supported format: `[left, bottom, right, top]`
 
-To clip across the antimeridian, use a `left` greater than `right`, e.g. `[170, -20, -170, 20]`. This only works when clipping by geometry. With `clipByInstance: true`, split the area into two layers.
+To clip across the antimeridian, use a `left` more than 180° greater than `right`, e.g. `[170, -20, -170, 20]`. Other reversed edges are re-ordered. Crossing regions 180° or wider, and clipping with `clipByInstance: true`, need two layers.
 
 #### `clipByInstance` (boolean, optional) {#clipbyinstance}
 
