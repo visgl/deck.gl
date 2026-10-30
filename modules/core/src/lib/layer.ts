@@ -579,6 +579,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
+  /** Returns shader options and the deck.gl assembler used by layer models. */
   getShaders(shaders: any): any {
     // Preprojection capability is stable for the lifetime of a layer instance.
     shaders = mergeShaders(
@@ -597,7 +598,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
-    return shaders;
+    return {...shaders, shaderAssembler: this.context.shaderAssembler};
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
