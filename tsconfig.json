@@ -29,6 +29,7 @@
       "@deck.gl/aggregation-layers": ["./modules/aggregation-layers/src"],
       "@deck.gl/arcgis": ["./modules/arcgis/src"],
       "@deck.gl/carto": ["./modules/carto/src"],
+      "@deck.gl/core/arrow": ["./modules/core/src/lib/luma-upstream/arrow-converter"],
       "@deck.gl/core": ["./modules/core/src"],
       "@deck.gl/extensions": ["./modules/extensions/src"],
       "@deck.gl/geo-layers": ["./modules/geo-layers/src"],
