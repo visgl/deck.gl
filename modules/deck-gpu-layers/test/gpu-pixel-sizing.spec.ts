@@ -7,7 +7,7 @@ import {IconLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {GPUIconLayer, GPUScatterplotLayer} from '@deck.gl-community/gpu-layers';
 import {Buffer, Texture, type Device} from '@luma.gl/core';
 import {GPUData, GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 
 const SIZE = 128;

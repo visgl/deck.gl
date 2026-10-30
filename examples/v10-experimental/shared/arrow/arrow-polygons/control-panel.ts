@@ -19,7 +19,10 @@ import {
   type ArrowPolygonRowCountKind,
   type ArrowPolygonSourceKind
 } from './arrow-polygon-data';
-import {type ArrowPolygonRendererMetrics, type ArrowPolygonRendererModel} from '@luma.gl/arrow';
+import {
+  type ArrowPolygonRendererMetrics,
+  type ArrowPolygonRendererModel
+} from '@luma.gl/engine/arrow';
 import {supportsVertexStorageBuffers} from '../utils/device-limits';
 import {
   ARROW_EXAMPLE_INPUT_MODE_OPTIONS,

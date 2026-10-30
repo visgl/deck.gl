@@ -7,7 +7,7 @@ import {GPUDataEvaluator} from '@luma.gl/gpgpu';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Geometry, type Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import BitmapLayer from '@deck.gl/layers/bitmap-layer/bitmap-layer';
 import SimpleMeshLayer from '@deck.gl/mesh-layers/simple-mesh-layer/simple-mesh-layer';

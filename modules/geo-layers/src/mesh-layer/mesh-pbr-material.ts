@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {pbrMaterial} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shaders';
 
 import type {
   PBRMaterialBindings,
   PBRMaterialProps,
   PBRMaterialUniforms,
   ShaderModule
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 
 // The stock PBR module still uses the pre-indexed UV field name in one helper and owns a
 // separate camera uniform. Align it with the current PBR input struct and deck.gl's project
@@ -33,7 +33,11 @@ const source = (pbrMaterial.source as string)
   )
   .replace(/pbrProjection\.camera/g, 'project.cameraPosition');
 
-export const meshPbrMaterial = {
+export const meshPbrMaterial: ShaderModule<
+  PBRMaterialProps,
+  PBRMaterialUniforms,
+  PBRMaterialBindings
+> = {
   ...pbrMaterial,
   source
-} as const satisfies ShaderModule<PBRMaterialProps, PBRMaterialUniforms, PBRMaterialBindings>;
+};

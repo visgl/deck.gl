@@ -5,15 +5,15 @@
 /* eslint-disable complexity, camelcase */
 
 import {Matrix4Like} from '@math.gl/core';
-import * as mat4 from '@math.gl/core/mat4';
-import * as vec4 from '@math.gl/core/vec4';
+import {mat4} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 
 import {COORDINATE_SYSTEM, PROJECTION_MODE} from './constants';
 
 import {getPackedCoordinateSystem} from './coordinate-systems';
 import memoize from '../../utils/memoize';
 
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import type Viewport from '../../viewports/viewport';
 import type {Buffer, Texture} from '@luma.gl/core';
 import type {CoordinateSystem} from '../../lib/constants';

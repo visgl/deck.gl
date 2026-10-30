@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {H3ClusterLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {ColumnLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import h3Data from 'deck.gl-test/data/h3-sf.json';
 
 const TEST_CASES = [

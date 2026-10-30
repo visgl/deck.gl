@@ -9,7 +9,7 @@ import {
   getSunPosition,
   getSkyDirection,
   skyDirectionToGlobe
-} from '@math.gl/sun';
+} from '@math.gl/earth/sun';
 import {getSkyObserver} from '../src/layers/sky-coordinates';
 import {getSkyBodyClipPosition} from '../src/layers/sky-body-layer';
 

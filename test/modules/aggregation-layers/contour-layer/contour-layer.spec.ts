@@ -12,7 +12,7 @@ import {LayerManager, MapView} from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ContourLayer, CPUAggregator} from '@deck.gl/aggregation-layers';
 import type {ContourLayerProps} from '@deck.gl/aggregation-layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const getPosition = d => d.COORDINATES;

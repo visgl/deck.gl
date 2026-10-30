@@ -5,7 +5,7 @@
 import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
 import type {RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {clouds, type CloudProps} from '@luma.gl/shadertools';
+import {clouds, type CloudProps} from '@luma.gl/shaders';
 import {skyView, getSkyViewUniforms, SKY_VERTEX_SOURCE, SKY_VERTEX_SHADER} from './sky-view';
 export {getSkyViewUniforms as getCloudViewUniforms} from './sky-view';
 

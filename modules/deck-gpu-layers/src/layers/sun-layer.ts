@@ -4,7 +4,7 @@
 
 import {_GlobeViewport, type DefaultProps} from '@deck.gl/core';
 import type {NumberArray3} from '@math.gl/core';
-import {getSunPosition, getSkyDirection, getSunLight} from '@math.gl/sun';
+import {getSunPosition, getSkyDirection, getSunLight} from '@math.gl/earth/sun';
 import {SkyBodyLayer, type SkyBodyLayerProps} from './sky-body-layer';
 
 export type SunLayerProps = SkyBodyLayerProps & {

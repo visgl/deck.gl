@@ -4,7 +4,7 @@
 
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ArcLayer, LineLayer, PathLayer, PointCloudLayer} from '@deck.gl/layers';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 
 const WIDTH = 3840;
 const HEIGHT = 2160;

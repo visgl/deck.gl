@@ -18,7 +18,7 @@ import {
   precipitation,
   type HeightFogProps,
   type PrecipitationProps
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 import {
   weatherRender,
   SOURCE,

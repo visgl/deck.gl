@@ -4,7 +4,7 @@
 
 import type {PickingInfo} from '@deck.gl/core';
 import type {Model} from '@luma.gl/engine';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 /** Deck draw parameters that preserve the Arrow renderers' alpha blending defaults. */
 export const DECK_ARROW_ALPHA_BLEND_PARAMETERS = {

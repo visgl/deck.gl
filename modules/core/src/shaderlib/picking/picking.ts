@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {picking} from '@luma.gl/shadertools';
+import {picking} from '@luma.gl/shaders';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;

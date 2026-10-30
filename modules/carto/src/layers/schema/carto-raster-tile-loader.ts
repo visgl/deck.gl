@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/core/loader-utils';
 import type {RasterMetadata} from '@carto/api-client';
 
 import {TileReader} from './carto-raster-tile';

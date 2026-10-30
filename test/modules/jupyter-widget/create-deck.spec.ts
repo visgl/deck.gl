@@ -22,7 +22,7 @@ import {
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
-import {NullDevice} from '@luma.gl/test-utils';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
 import {
   addCustomLibraries,

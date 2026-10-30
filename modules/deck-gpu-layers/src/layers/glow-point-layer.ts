@@ -18,7 +18,7 @@ import {
   type FireflyProps,
   type PointGlowProps,
   type ShaderModule
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 
 import {motionBuffer} from './motion-buffer';
 

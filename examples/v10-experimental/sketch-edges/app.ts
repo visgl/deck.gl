@@ -7,7 +7,7 @@ import {SketchEdgeLayer} from '@deck.gl-community/gpu-layers';
 import type {Buffer} from '@luma.gl/core';
 import type {MakeEdgeGeometryOptions} from '@luma.gl/engine';
 import {makeCityFeatures, type CityFeature} from '../river-district-data';
-import type {SketchStrokeProps} from '@luma.gl/shadertools';
+import type {SketchStrokeProps} from '@luma.gl/shaders';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';
 import {BuildingMeshLayer} from './building-layer';

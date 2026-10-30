@@ -13,8 +13,8 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {type Buffer, type RenderPass, type Texture} from '@luma.gl/core';
-import type {Model} from '@luma.gl/engine';
-import {GPUVectorModel, type GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVectorModel} from '@luma.gl/engine';
+import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {
   createGPUVectorStyleBuffer,
   getGPUVectorStyleBufferBinding,
@@ -173,7 +173,7 @@ export class GPUIconLayer extends Layer<GPUIconLayerProps> {
     ];
     this.setState({model, styleBuffer, defaults} satisfies GPUIconLayerState);
   }
-  override getModels(): Model[] {
+  override getModels(): GPUVectorModel[] {
     const model = (this.state as GPUIconLayerState).model;
     return model ? [model] : [];
   }

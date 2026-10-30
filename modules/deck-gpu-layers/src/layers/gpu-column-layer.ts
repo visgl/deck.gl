@@ -13,8 +13,8 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {type Buffer, type RenderPass} from '@luma.gl/core';
-import type {Model} from '@luma.gl/engine';
-import {GPUVectorModel, type GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVectorModel} from '@luma.gl/engine';
+import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {
   createGPUVectorStyleBuffer,
   getGPUVectorStyleBufferBinding,
@@ -208,7 +208,7 @@ export class GPUColumnLayer extends Layer<GPUColumnLayerProps> {
     this.setState({model, styleBuffer, defaults} satisfies GPUColumnLayerState);
   }
 
-  override getModels(): Model[] {
+  override getModels(): GPUVectorModel[] {
     const model = (this.state as GPUColumnLayerState).model;
     return model ? [model] : [];
   }

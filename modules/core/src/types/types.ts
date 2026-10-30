@@ -4,7 +4,7 @@
 
 // deck.gl, MIT license
 
-export type {TypedArray, TypedArrayConstructor, NumericArray} from '@math.gl/types';
+export type {TypedArray, TypedArrayConstructor, NumericArray} from '@math.gl/core';
 
 export interface ConstructorOf<T> {
   new (...args): T;

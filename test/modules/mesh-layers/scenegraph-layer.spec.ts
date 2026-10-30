@@ -9,7 +9,7 @@ import {project32} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import source from '@deck.gl/mesh-layers/scenegraph-layer/scenegraph-layer.wgsl';
 import {CubeGeometry, Model, GroupNode, ModelNode} from '@luma.gl/engine';
-import {GLTFAnimator} from '@luma.gl/gltf';
+import {GLTFAnimator} from '@luma.gl/engine/gltf';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

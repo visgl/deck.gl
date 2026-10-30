@@ -9,8 +9,13 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import type {NumberArray3} from '@math.gl/core';
-import {getSunPosition, getSkyDirection, skyDirectionToGlobe, type SkyObserver} from '@math.gl/sun';
-import type {CloudProps, GlobeCloudProps} from '@luma.gl/shadertools';
+import {
+  getSunPosition,
+  getSkyDirection,
+  skyDirectionToGlobe,
+  type SkyObserver
+} from '@math.gl/earth/sun';
+import type {CloudProps, GlobeCloudProps} from '@luma.gl/shaders';
 import {SunLayer, type SunLayerProps} from './sun-layer';
 import {MoonLayer, type MoonLayerProps} from './moon-layer';
 import {StarfieldLayer, type StarfieldLayerProps} from './starfield-layer';

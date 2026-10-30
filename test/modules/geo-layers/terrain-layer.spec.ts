@@ -7,8 +7,8 @@ import {generateLayerTests, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {TerrainLayer, TileLayer} from '@deck.gl/geo-layers';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {TerrainLoader} from '@loaders.gl/terrain';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {TerrainLoader} from '@loaders.gl/raster/terrain/index';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const TEST_TERRAIN_MESH = {
   header: {
