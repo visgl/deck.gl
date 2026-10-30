@@ -21,7 +21,7 @@ export function installModelCleanupCompatibility(): void {
     try {
       destroy.call(this);
     } finally {
-      if (!this.vertexArray.destroyed) this.vertexArray.destroy();
+      if (this.vertexArray && !this.vertexArray.destroyed) this.vertexArray.destroy();
     }
   };
   const applyBufferLayout = prototype.applyBufferLayout;
@@ -30,7 +30,8 @@ export function installModelCleanupCompatibility(): void {
     try {
       applyBufferLayout.call(this, layout);
     } finally {
-      if (this.vertexArray !== vertexArray && !vertexArray.destroyed) vertexArray.destroy();
+      if (vertexArray && this.vertexArray !== vertexArray && !vertexArray.destroyed)
+        vertexArray.destroy();
     }
   };
 }
