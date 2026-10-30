@@ -33,6 +33,15 @@
       },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./arrow": {
+      "types": "./dist/lib/luma-upstream/arrow-converter.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/lib/luma-upstream/arrow-converter.js",
+        "require": "./dist.webgl-only/lib/luma-upstream/arrow-converter.cjs"
+      },
+      "import": "./dist/lib/luma-upstream/arrow-converter.js",
+      "require": "./dist/lib/luma-upstream/arrow-converter.cjs"
     }
   },
   "files": [
@@ -66,5 +75,13 @@
     "gl-matrix": "^3.0.0",
     "mjolnir.js": "^3.1.1"
   },
-  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4",
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
 }

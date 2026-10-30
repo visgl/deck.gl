@@ -47,6 +47,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
+    "@luma.gl/gpgpu": "10.0.0-alpha.6",
     "@luma.gl/shaders": "10.0.0-alpha.6",
     "@math.gl/core": "5.0.0-beta.1",
     "@math.gl/web-mercator": "5.0.0-beta.1",

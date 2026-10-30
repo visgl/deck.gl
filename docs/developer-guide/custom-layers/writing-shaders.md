@@ -59,7 +59,6 @@ When [subclassing](./subclassed-layers.md) an official deck.gl layer with minor 
 const shaders = this.getShaders();
 
 const model = new Model(device, {
-  shaderAssembler: getShaderAssembler('glsl'),
   ...this.getShaders(),
   inject: {
     'fs:#decl': `
