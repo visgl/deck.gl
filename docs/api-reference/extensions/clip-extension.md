@@ -62,16 +62,14 @@ Rectangular bounds to be used for clipping the rendered region.
 
 Supported format: `[left, bottom, right, top]`
 
+To clip across the antimeridian, use a `left` greater than `right`, e.g. `[170, -20, -170, 20]`. This only works when clipping by geometry. With `clipByInstance: true`, split the area into two layers.
+
 #### `clipByInstance` (boolean, optional) {#clipbyinstance}
 
 `clipByInstance` controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon). If not specified, it is deduced from whether there is an attribute called `instancePositions`. This behavior can be overridden if:
 
 - the anchor attribute goes by some other name
 - to clip an anchored layer by geometry, like the text layer
-
-## Remarks
-
-- With `clipByInstance: true` the anchor position is compared with `clipBounds` in the layer's own coordinate system without any projection, so geospatial bounds require the layer's positions to be lng/lat, and bounds that cross the antimeridian (e.g. `[170, -20, -170, 20]`) must be split into two layers.
 
 ## Source
 

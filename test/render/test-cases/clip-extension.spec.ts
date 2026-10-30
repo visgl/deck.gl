@@ -11,26 +11,8 @@ import {SF_VIEW_STATE, expandViewMatrix} from '../view-presets';
 import type {TestCase} from '../deck-test-utils';
 
 /**
- * ClipExtension render cases. Every case draws a regular grid so that the effect of the bounds is
- * obvious at a glance:
- *
- * - `clip-geometry`: a 7 x 4 grid of red squares clipped by geometry (`clipByInstance: false`).
- *   The bounds run through the second and sixth columns and through the first and last rows.
- *   Expected: 5 columns x 4 rows of squares, with the outer columns and rows cut to about 60% of
- *   a square along a straight edge, and nothing outside the bounds.
- * - `clip-instance`: the same grid drawn as blue dots at the square centres, clipped by anchor
- *   (`clipByInstance: true`). Expected: 5 columns x 4 rows of whole dots, no partial dots, and
- *   nothing outside the bounds (the two outer columns are hidden).
- * - `clip-geometry-antimeridian-map-vs-globe`: MapView (left half) and GlobeView (right half),
- *   both centred on the antimeridian. A red rectangle spanning 150°E to 150°W is clipped by bounds
- *   that also cross 180°. Expected: one red rectangle 20° wide and 40° tall in the middle of each
- *   half, nothing else.
- * - `clip-geometry-antipode`: MapView showing 0° to 180°. Two red squares, one inside bounds about
- *   the prime meridian and one 180° away straddling the antimeridian. Expected: one red square at
- *   the centre, nothing at the right edge.
- *
- * The map, globe and orthographic variants of the grid cases show the same picture. On the globe
- * the clip edges follow parallels and meridians, which is where the flat bounds are evaluated.
+ * ClipExtension render cases. Each golden image shows only what survives the clip; everything
+ * outside `clipBounds` should be blank.
  */
 
 const COLUMNS = 7;
@@ -98,13 +80,15 @@ const ANTIPODE_POLYGONS = [
 ];
 const ANTIPODE_CLIP_BOUNDS: [number, number, number, number] = [-10, -10, 10, 10];
 
-// Only the globe preset needs a looser threshold: the sphere is tessellated, so edges that
-// follow parallels/meridians are not pixel-identical to the flat presets
+// The map, globe and orthographic goldens show the same picture. On the globe the clip edges follow
+// parallels and meridians, and the sphere is tessellated, so it needs a looser threshold.
 const GLOBE_OVERRIDES = {
   globe: {skip: ['webgpu'], imageDiffOptions: {threshold: 0.985}}
 };
 
 const testCases: TestCase[] = [
+  // 7 x 4 grid of squares, clipped by geometry.
+  // Golden: 5 x 4 squares. The outer ring of squares is cut short along straight edges.
   ...expandViewMatrix(
     {
       name: 'clip-geometry',
@@ -125,6 +109,8 @@ const testCases: TestCase[] = [
     },
     ['map', 'globe', 'orthographic']
   ),
+  // Dots at the same grid centres, clipped by anchor.
+  // Golden: 5 x 4 whole dots. The two outer columns are gone and no dot is cut.
   ...expandViewMatrix(
     {
       name: 'clip-instance',
@@ -146,6 +132,9 @@ const testCases: TestCase[] = [
     },
     ['map', 'globe', 'orthographic']
   ),
+  // A rectangle from 150°E to 150°W, clipped by bounds that also cross 180°.
+  // Golden: the 20° x 40° clipped part, centred on the antimeridian, in MapView (left) and
+  // GlobeView (right).
   {
     name: 'clip-geometry-antimeridian-map-vs-globe',
     views: [
@@ -168,10 +157,11 @@ const testCases: TestCase[] = [
     imageDiffOptions: {threshold: 0.985},
     goldenImage: './test/render/golden-images/clip-geometry-antimeridian-map-vs-globe.png'
   },
+  // Two squares: one inside the bounds at 0°, one outside them at 180°.
+  // Golden: only the square at 0°, left of centre. The square at 180° (right of centre) is fully
+  // clipped. If it were wrapped per vertex, its triangles would tear across the map and leak a
+  // stripe into the bounds.
   {
-    // The second square straddles the point 180° from the bounds centre, where a per-vertex wrap
-    // would tear its triangles across the world and leak a stripe into the bounds.
-    // Expected: one red square at the centre, nothing at the right edge
     name: 'clip-geometry-antipode',
     views: new MapView(),
     viewState: {longitude: 90, latitude: 0, zoom: 0.6},
