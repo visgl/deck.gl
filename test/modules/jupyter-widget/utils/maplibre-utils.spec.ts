@@ -8,7 +8,10 @@ import {test, expect, vi} from 'vitest';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {getVersion} from 'maplibre-gl';
-import {forwardLayerUpdates} from '@deck.gl/jupyter-widget/playground/utils/overlay-utils';
+import {
+  callOnFinalize,
+  forwardLayerUpdates
+} from '@deck.gl/jupyter-widget/playground/utils/overlay-utils';
 import {resizeMapWhenContainerSized} from '@deck.gl/jupyter-widget/playground/utils/maplibre-utils';
 import {loadBasemapCSS} from '@deck.gl/jupyter-widget/playground/playground';
 
@@ -45,6 +48,26 @@ test('jupyter-widget: MapLibre map is resized once its container is attached', a
   container.style.width = '400px';
   await new Promise(resolve => setTimeout(resolve, 100));
   expect(map.resize, 'Later resizes are left to MapLibre').toHaveBeenCalledTimes(1);
+
+  container.remove();
+});
+
+test('jupyter-widget: MapLibre map is not resized after a hidden widget is closed', async () => {
+  const container = document.createElement('div');
+  container.style.width = '320px';
+  container.style.height = '200px';
+  const map = createMockMap(container);
+  const overlay = new MapLibreOverlay({layers: []});
+  const finalizeOverlay = vi.spyOn(overlay, 'finalize');
+
+  // The widget is closed before its container is attached
+  callOnFinalize(overlay, resizeMapWhenContainerSized(map));
+  overlay.finalize();
+  expect(finalizeOverlay, 'The overlay is still finalized').toHaveBeenCalledTimes(1);
+
+  document.body.appendChild(container);
+  await new Promise(resolve => setTimeout(resolve, 100));
+  expect(map.resize, 'The resize observer is disconnected').not.toHaveBeenCalled();
 
   container.remove();
 });

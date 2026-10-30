@@ -9,7 +9,7 @@ import {MapLibreOverlay} from '@deck.gl/maplibre';
 import {Map, NavigationControl, getVersion} from 'maplibre-gl';
 
 import {loadCSS} from './css-utils';
-import {forwardLayerUpdates} from './overlay-utils';
+import {callOnFinalize, forwardLayerUpdates} from './overlay-utils';
 
 const MAPLIBRE_CSS_URL = `https://cdn.jsdelivr.net/npm/maplibre-gl@${getVersion()}/dist/maplibre-gl.css`;
 
@@ -22,11 +22,12 @@ export function loadMapLibreCSS(url = MAPLIBRE_CSS_URL) {
  * A map created in a container without a size falls back to 400x300. MapLibre's `trackResize`
  * observer skips its first notification, so when the container is attached before that
  * notification is sent, as in a Jupyter widget view, the map keeps the fallback size.
+ * Returns a function that stops waiting for the container.
  */
 export function resizeMapWhenContainerSized(map) {
   const container = map.getContainer();
   if (container.clientWidth && container.clientHeight) {
-    return;
+    return () => {};
   }
   const observer = new ResizeObserver(() => {
     if (container.clientWidth && container.clientHeight) {
@@ -35,7 +36,9 @@ export function resizeMapWhenContainerSized(map) {
     }
   });
   observer.observe(container);
-  map.once('remove', () => observer.disconnect());
+  const stop = () => observer.disconnect();
+  map.once('remove', stop);
+  return stop;
 }
 
 export function createMapLibreDeckOverlay({
@@ -65,7 +68,7 @@ export function createMapLibreDeckOverlay({
     pitch: initialViewState.pitch || 0,
     bearing: initialViewState.bearing || 0
   });
-  resizeMapWhenContainerSized(map);
+  const stopResizingMap = resizeMapWhenContainerSized(map);
 
   // Create deck overlay with interleaved mode for globe
   const deckOverlay = new MapLibreOverlay({
@@ -113,6 +116,8 @@ export function createMapLibreDeckOverlay({
   }
 
   forwardLayerUpdates(deckOverlay);
+  // Widget teardown finalizes the overlay, which does not remove the map
+  callOnFinalize(deckOverlay, stopResizingMap);
 
   return deckOverlay;
 }
