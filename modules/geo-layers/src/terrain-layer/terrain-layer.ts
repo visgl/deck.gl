@@ -6,7 +6,6 @@ import {
   Color,
   CompositeLayer,
   CompositeLayerProps,
-  COORDINATE_SYSTEM,
   DefaultProps,
   _GlobeViewport as GlobeViewport,
   Layer,
@@ -17,8 +16,8 @@ import {
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import type {MeshAttributes} from '@loaders.gl/schema';
-import {TerrainWorkerLoader} from '@loaders.gl/terrain';
+import type {MeshAttributes} from '@loaders.gl/core/schema';
+import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain/index';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
   Bounds,
@@ -216,6 +215,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
       terrain: {
         skirtHeight: this.state.isTiled ? effectiveMeshMaxError * 2 : 0,
         ...loadOptions?.terrain,
+        shape: 'mesh',
         bounds,
         meshMaxError: effectiveMeshMaxError,
         elevationDecoder
@@ -295,8 +295,7 @@ export default class TerrainLayer<ExtraPropsT extends {} = {}> extends Composite
         ([x, y]) =>
           x >= -MAX_LONGITUDE && x <= MAX_LONGITUDE && y >= -MAX_LATITUDE && y <= MAX_LATITUDE
       );
-    const coordinateSystem =
-      isGlobe && hasLngLatBounds ? COORDINATE_SYSTEM.LNGLAT : COORDINATE_SYSTEM.CARTESIAN;
+    const coordinateSystem = isGlobe && hasLngLatBounds ? 'lnglat' : 'cartesian';
 
     return new SubLayerClass(props, {
       data: DUMMY_DATA,

@@ -7,8 +7,8 @@ import {commands} from 'vitest/browser';
 import {Deck, MapView} from '@deck.gl/core';
 import {luma} from '@luma.gl/core';
 import type {Device} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {WIDTH, HEIGHT, OS} from './constants';
 
 export type TestDeviceType = 'webgl' | 'webgpu';
@@ -186,6 +186,13 @@ function getCanvasRegion(deck: Deck | null) {
   };
 }
 
+function areViewsReady(deck: Deck): boolean {
+  const viewports = deck.getViewports();
+  // A synchronous view can render while another view is still resolving its CRS.
+  // Wait for every requested view so callbacks and snapshots see the complete scene.
+  return deck.getViews().every(view => viewports.some(viewport => viewport.id === view.id));
+}
+
 /**
  * Runs a single render test case.
  * Creates a Deck instance, waits for render completion, captures and diffs screenshot.
@@ -238,8 +245,7 @@ export async function runRenderTest(
           // @ts-expect-error Accessing protected layerManager
           const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
 
-          // Skip if no layers yet (Deck still initializing)
-          if (currentLayers.length === 0) {
+          if (currentLayers.length === 0 || !areViewsReady(ctx.deck!)) {
             return;
           }
 
@@ -360,8 +366,7 @@ export async function updateDeckForTest(
           // @ts-expect-error Accessing protected layerManager
           const currentLayers = ctx.deck!.layerManager?.getLayers() || [];
 
-          // Skip if no layers yet (Deck still initializing)
-          if (currentLayers.length === 0) {
+          if (currentLayers.length === 0 || !areViewsReady(ctx.deck!)) {
             return;
           }
 

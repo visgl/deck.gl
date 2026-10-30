@@ -3,8 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import earcut from 'earcut';
-import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
-import type {BinaryFeatureCollection, BinaryPolygonFeature, TypedArray} from '@loaders.gl/schema';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/core/loader-utils';
+import type {
+  BinaryFeatureCollection,
+  BinaryPolygonFeature,
+  TypedArray
+} from '@loaders.gl/core/schema';
 
 import {TileReader} from './carto-tile';
 import {parsePbf} from './tile-loader-utils';

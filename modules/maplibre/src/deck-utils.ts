@@ -131,6 +131,7 @@ export function createMapLibreDeckInstance(map: MapLibreMap, deck: Deck): Deck {
     },
     renderListener: () => {
       if (deck.isInitialized) {
+        syncMapLibreElevation(deck, map);
         afterMapLibreRender(deck, map);
       }
     }
@@ -302,6 +303,18 @@ function afterMapLibreRender(deck: Deck, map: MapLibreMap): void {
   }
 
   (deck.userData as UserData).currentViewport = null;
+}
+
+/**
+ * Picking uses the stored view state, so it has to follow the center elevation that MapLibre
+ * changes without a move event while terrain loads.
+ */
+function syncMapLibreElevation(deck: Deck, map: MapLibreMap): void {
+  const elevation = getMapLibreElevation(map);
+  const viewState = deck.props.viewState as MapViewState | null;
+  if (Number.isFinite(elevation) && viewState?.position?.[2] !== elevation) {
+    onMapLibreMove(deck, map);
+  }
 }
 
 function onMapLibreMove(deck: Deck, map: MapLibreMap): void {

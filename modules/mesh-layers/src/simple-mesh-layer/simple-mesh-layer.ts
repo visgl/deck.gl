@@ -8,6 +8,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color,
   project32,
   picking,
@@ -18,8 +19,8 @@ import {
   phongMaterial
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
-import {ParsedPBRMaterial} from '@luma.gl/gltf';
+import {type Model, Geometry} from '@luma.gl/engine';
+import {ParsedPBRMaterial} from '@luma.gl/engine/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -37,9 +38,9 @@ import type {
   Color,
   TextureSource
 } from '@deck.gl/core';
-import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
-import {getMeshBoundingBox} from '@loaders.gl/schema';
+import {getMeshBoundingBox} from '@loaders.gl/core/schema';
 
 function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
   const positionAttribute = attributes.positions || attributes.POSITION;
@@ -77,8 +78,19 @@ function getGeometry(data: Mesh): Geometry {
     data.attributes = normalizeGeometryAttributes(data.attributes);
     return data;
   } else if ((data as any).attributes) {
+    const {indices} = data as {indices?: MeshAttribute};
+    // loaders.gl's Arrow mesh format uses signed indices; GPU index buffers require unsigned.
+    const indexValues = indices?.value;
+    const normalizedIndices =
+      indexValues instanceof Int32Array
+        ? {
+            ...indices,
+            value: new Uint32Array(indexValues.buffer, indexValues.byteOffset, indexValues.length)
+          }
+        : indices;
     return new Geometry({
       ...data,
+      indices: normalizedIndices,
       topology: 'triangle-list',
       attributes: normalizeGeometryAttributes((data as any).attributes)
     });
@@ -209,7 +221,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     emptyTexture: Texture;
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
-  };
+  } & Layer['state'];
 
   getShaders() {
     return super.getShaders({
@@ -256,6 +268,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
         transition: true,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         size: 3,
         accessor: 'getPosition'
       },
@@ -325,7 +338,13 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
-      composeModelMatrix: !_instanced || shouldComposeModelMatrix(viewport, coordinateSystem),
+      composeModelMatrix:
+        !_instanced ||
+        shouldComposeModelMatrix(
+          viewport,
+          this.state.sourceCrs?.signature || coordinateSystem,
+          Boolean(this.state.preproject)
+        ),
       flatShading: !this.state.hasNormals
     };
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
@@ -337,7 +356,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   protected getModel(mesh: Mesh): Model {
-    const model = new Model(this.context.device, {
+    const model = new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

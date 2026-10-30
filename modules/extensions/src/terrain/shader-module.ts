@@ -4,7 +4,7 @@
 
 /* eslint-disable camelcase */
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {project, ProjectProps, ProjectUniforms} from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
@@ -92,7 +92,7 @@ if (terrain.mode == TERRAIN_MODE_SKIP) {
     'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
 commonPos = geometry.position.xyz;
 terrainHeight = commonPos.z + project.commonOrigin.z;
-if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
   terrainMercPos = terrain_globe_to_mercator(commonPos);
   terrainHeight = length(commonPos) - GLOBE_RADIUS;
 } else {
@@ -106,13 +106,13 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
   vec3 anchor = geometry.worldPosition;
   anchor.z = 0.0;
   vec3 anchorCommon = project_position(anchor);
-  vec2 anchorMercPos = project.projectionMode == PROJECTION_MODE_GLOBE
+  vec2 anchorMercPos = (project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)
     ? terrain_globe_to_mercator(anchorCommon)
     : anchorCommon.xy;
   vec2 texCoords = (anchorMercPos - terrain.bounds.xy) / terrain.bounds.zw;
   if (texCoords.x >= 0.0 && texCoords.y >= 0.0 && texCoords.x <= 1.0 && texCoords.y <= 1.0) {
     float terrainZ = texture(terrain_map, texCoords).r;
-    if (project.projectionMode == PROJECTION_MODE_GLOBE) {
+    if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
       // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
       // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
       terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;

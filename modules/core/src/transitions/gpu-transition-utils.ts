@@ -6,7 +6,7 @@ import type {Device, Buffer, VertexFormat} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 import {NumericArray, TypedArray, TypedArrayConstructor} from '../types/types';
 import Attribute from '../lib/attribute/attribute';
-import {GL} from '@luma.gl/webgl/constants';
+import {GL} from '@luma.gl/core/webgl-constants';
 
 /** Create a new empty attribute with the same settings: type, shader layout etc. */
 export function cloneAttribute(attribute: Attribute): Attribute {
@@ -157,10 +157,10 @@ export function padBuffer({
     getData = (value, chunk) => attribute.normalizeConstant(getter(value, chunk));
   }
 
+  // The buffer read already accounts for byteOffset; i is relative to that data.
   const getMissingData = isConstant
     ? (i: number, chunk: NumericArray) => getData(toData, chunk)
-    : (i: number, chunk: NumericArray) =>
-        getData(toData.subarray(i + byteOffset, i + byteOffset + size), chunk);
+    : (i: number, chunk: NumericArray) => getData(toData.subarray(i, i + size), chunk);
 
   // TODO(v9.1): Avoid non-portable synchronous reads.
   const source = buffer

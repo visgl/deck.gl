@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/loader-utils';
+import {LoaderOptions, LoaderWithParser, StrictLoaderOptions} from '@loaders.gl/core/loader-utils';
 
 import {Tile, TileReader} from './carto-properties-tile';
 import {parsePbf} from './tile-loader-utils';

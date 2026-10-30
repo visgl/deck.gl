@@ -10,7 +10,7 @@ import type {Device} from '@luma.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {MapView} from '@deck.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 import RangeInput from './range-input';
 
@@ -39,7 +39,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
 
 const MS_PER_DAY = 8.64e7;
 
@@ -163,7 +163,7 @@ export async function renderToDOM(container: HTMLDivElement) {
   const root = createRoot(container);
   root.render(<App />);
 
-  const data = (await load(DATA_URL, CSVLoader)).data;
+  const data = (await load(DATA_URL, CSVLoader, {csv: {shape: 'object-row-table'}})).data;
 
   const earthquakes = data.map(row => ({
     timestamp: new Date(`${row.DateTime} UTC`).getTime(),

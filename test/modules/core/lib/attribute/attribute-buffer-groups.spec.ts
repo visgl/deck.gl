@@ -3,9 +3,9 @@
 // Copyright (c) vis.gl contributors
 
 import AttributeManager from '@deck.gl/core/lib/attribute/attribute-manager';
-import {Layer} from '@deck.gl/core';
+import {Layer, Viewport} from '@deck.gl/core';
 import {IconLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUDataEvaluator} from '@luma.gl/gpgpu';
 import {beforeAll, test, expect, vi} from 'vitest';
 import {device} from '@deck.gl/test-utils/vitest';
@@ -491,7 +491,7 @@ test('IconLayer opts into grouped WebGPU layouts without changing WebGL layouts'
   const getLayouts = (testDevice: Device) => {
     const attributeManager = new AttributeManager(testDevice);
     const layer = new IconLayer({id: 'icon-layer', data: []});
-    (layer as any).context = {device: testDevice};
+    (layer as any).context = {device: testDevice, viewport: new Viewport()};
     vi.spyOn(layer as any, 'getAttributeManager').mockReturnValue(attributeManager);
     (layer as any).initializeState();
 

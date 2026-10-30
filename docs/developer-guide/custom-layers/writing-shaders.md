@@ -3,10 +3,12 @@
 A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/visgl/luma.gl/blob/8.0-release/docs/api-reference/engine/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
-import {picking, project32, gouraudMaterial} from '@deck.gl/core';
+import {Model} from '@luma.gl/engine';
+import {picking, project32, gouraudMaterial, getShaderAssembler} from '@deck.gl/core';
 
-const model = new Model(gl, {
-  vs: '// vertex shader GLSL source'
+const model = new Model(device, {
+  shaderAssembler: getShaderAssembler('glsl'),
+  vs: '// vertex shader GLSL source',
   fs: '// fragment shader GLSL source',
   modules: [picking, project32, gouraudMaterial] // list of optional module names
 });
@@ -56,7 +58,8 @@ When [subclassing](./subclassed-layers.md) an official deck.gl layer with minor 
 ```js
 const shaders = this.getShaders();
 
-const model = new Model(gl, {
+const model = new Model(device, {
+  shaderAssembler: getShaderAssembler('glsl'),
   ...this.getShaders(),
   inject: {
     'fs:#decl': `

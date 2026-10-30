@@ -11,7 +11,7 @@ import {registerTypedArrayEquality} from './typed-array-equality';
 registerTypedArrayEquality();
 
 // Polyfill for loaders (may still be useful in browser for consistent behavior)
-import '@loaders.gl/polyfills';
+import '@loaders.gl/core/polyfills';
 
 // Mark that we're running in browser test mode
 const _global: any = globalThis;

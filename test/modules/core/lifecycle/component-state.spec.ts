@@ -8,7 +8,7 @@ import {test, expect} from 'vitest';
 import {_ComponentState as ComponentState, _Component as Component} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
 const EMPTY_ARRAY = Object.freeze([]);
@@ -266,7 +266,9 @@ webglTest('ComponentState#async props with transform', async () => {
   image = component.props.image;
   expect(image, 'Async value for image should be transformed').toBeTruthy();
 
-  const loadDataAsync = load('./test/data/bart-stations.csv', [CSVLoader]);
+  const loadDataAsync = load('./test/data/bart-stations.csv', [CSVLoader], {
+    csv: {shape: 'object-row-table'}
+  });
   component = makeComponent({
     data: loadDataAsync,
     image: testImageAsync

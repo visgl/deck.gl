@@ -9,7 +9,7 @@ import {
   Plane,
   AxisAlignedBoundingBox,
   makeOrientedBoundingBoxFromPoints
-} from '@math.gl/culling';
+} from '@math.gl/geometry/culling';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 import {Bounds, TileIndex, ZRange} from './types';
 import {osmTile2lngLat} from './utils';
@@ -86,8 +86,8 @@ class OSMNode {
       return false;
     }
 
-    const isInside = cullingVolume.computeVisibility(boundingVolume);
-    if (isInside < 0) {
+    const visibility = cullingVolume.computeVisibility(boundingVolume);
+    if (visibility === 'outside') {
       return false;
     }
 

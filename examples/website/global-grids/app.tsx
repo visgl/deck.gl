@@ -21,13 +21,22 @@ import {filterGridCells, normalizeGridCells, type GridCell} from './grid-data';
 import {LANDCOVER_LEGEND} from './landcover-palette';
 
 import {createRoot} from 'react-dom/client';
-import {CSVLoader} from '@loaders.gl/csv';
+import {parse} from '@loaders.gl/core';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 const INITIAL_VIEW_STATE: GlobeViewState = {longitude: 0, latitude: 0, zoom: 2};
 type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';
 
 const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/';
 const EMPTY_GRID_CELLS: GridCell[] = [];
+
+const GRID_DATA_FILES: Record<GridSystem, string> = {
+  a5: 'landcover-a5v1.csv',
+  geohash: 'landcover-geohash.csv',
+  h3: 'landcover-h3.csv',
+  quadkey: 'landcover-quadkey.csv',
+  s2: 'landcover-s2.csv'
+};
 
 export default function App({
   device,
@@ -71,14 +80,14 @@ export default function App({
 
     Promise.all(
       pendingSystems.map(async system => {
-        const response = await fetch(`${DATA_URL}landcover-${system}.csv`, {
+        const response = await fetch(`${DATA_URL}${GRID_DATA_FILES[system]}`, {
           signal: abortController.signal
         });
         if (!response.ok) {
           throw new Error(`Failed to load ${system} grid data: ${response.status}`);
         }
 
-        const table = await CSVLoader.parseText(await response.text(), {
+        const table = await parse(await response.text(), CSVLoader, {
           csv: {shape: 'object-row-table', dynamicTyping: false}
         });
         if (table.shape !== 'object-row-table') {
@@ -114,7 +123,9 @@ export default function App({
   );
 
   const getGridData = (system: GridSystem): string | GridCell[] =>
-    isWebGPU ? filteredGridData[system] || EMPTY_GRID_CELLS : `${DATA_URL}landcover-${system}.csv`;
+    isWebGPU
+      ? filteredGridData[system] || EMPTY_GRID_CELLS
+      : `${DATA_URL}${GRID_DATA_FILES[system]}`;
 
   const commonLayerProps = {
     opacity: 0.8,
@@ -129,9 +140,9 @@ export default function App({
         }),
     extruded: true,
     getElevation: 50000,
-    beforeId: 'watername_ocean',
+    beforeId: 'waterway_line_label',
     loaders: [CSVLoader],
-    loadOptions: {csv: {header: true, dynamicTyping: false}}
+    loadOptions: {csv: {shape: 'object-row-table', header: true, dynamicTyping: false}}
   } as Omit<H3HexagonLayerProps<GridCell>, 'data' | 'id'> & {beforeId: string};
 
   const layers = [
@@ -191,9 +202,12 @@ export default function App({
       <Map
         reuseMaps
         projection="globe"
+        // On WebGPU the deck canvas is overlaid in a MapLibre control slot, which is stacked above
+        // the website's info panel unless the map is a stacking context of its own
+        style={{isolation: 'isolate'}}
         id="map"
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle="https://tiles.openfreemap.org/styles/positron"
         dragRotate={false}
         maxPitch={0}
       >
