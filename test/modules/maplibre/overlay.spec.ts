@@ -207,8 +207,12 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
   });
 }
 
-for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
-  webglTest(`MapLibreOverlay picks over terrain with MapLibre ${version}`, async () => {
+const TERRAIN_CASES = MAPLIBRE_VERSIONS.flatMap(({version, MapClass}) =>
+  ['interleaved', 'overlaid'].map(mode => ({version, MapClass, mode}))
+);
+
+for (const {version, MapClass, mode} of TERRAIN_CASES) {
+  webglTest(`MapLibreOverlay picks over terrain with MapLibre ${version} (${mode})`, async () => {
     const container = document.createElement('div');
     Object.assign(container.style, {width: '400px', height: '300px'});
     document.body.append(container);
@@ -231,8 +235,10 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
     try {
       await new Promise<void>(resolve => map.once('load', () => resolve()));
 
+      const interleaved = mode === 'interleaved';
       const overlay = new MapLibreOverlay({
-        interleaved: true,
+        interleaved,
+        device: interleaved ? undefined : device,
         layers: [
           new ScatterplotLayer<[number, number, number]>({
             id: 'summit',
@@ -254,7 +260,9 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
       const elevation = getMapLibreElevation(map);
       expect(elevation).toBeCloseTo(1000);
       expect(overlay._deck!.props.viewState.position).toEqual([0, 0, elevation]);
-      expect(overlay.pickObject({x: 200, y: 150})?.layer?.id).toBe('summit');
+      // In overlaid mode the shared test device's canvas is not sized by the map container
+      const [x, y] = interleaved ? [200, 150] : overlay._deck!.getViewports()[0].project(summit);
+      expect(overlay.pickObject({x, y})?.layer?.id).toBe('summit');
     } finally {
       map.remove();
       container.remove();
