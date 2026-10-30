@@ -35,6 +35,9 @@ jobs:
       - name: Build packages
         run: yarn build
 
+      - name: Verify built packages
+        run: yarn test-packages
+
       - name: Run tests
         run: |
           yarn lint
