@@ -56,9 +56,6 @@ Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/cor
 
 The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
 
-Bundlers that resolve optional raster decoders may require `geotiff` to be installed
-explicitly. It is an optional peer of `@deck.gl/geo-layers`.
-
 ### Viewport
 
 #### CRS configuration
