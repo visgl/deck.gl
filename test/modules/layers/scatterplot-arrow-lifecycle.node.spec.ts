@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {NullDevice} from '@luma.gl/test-utils';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, Table, vectorFromArray} from 'apache-arrow';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 import {ScatterplotLayerColumns} from '../../../modules/layers/src/scatterplot-layer/scatterplot-layer-columns';
