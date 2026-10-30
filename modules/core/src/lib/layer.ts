@@ -792,8 +792,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
     }
 
+    const attributeManager = this.getAttributeManager();
+    const bufferGroupsUpdated = Boolean(attributeManager?.hasBufferGroups());
+    if (bufferGroupsUpdated) {
+      // Models share packed storage; uploading per model would destroy earlier bindings.
+      attributeManager!.getBufferGroupBindings(changedAttributes);
+    }
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged, bufferGroupsUpdated);
     }
   }
 
@@ -934,19 +940,21 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     changedAttributes: {
       [id: string]: Attribute;
     },
-    bufferLayoutChanged = false
+    bufferLayoutChanged = false,
+    bufferGroupsUpdated = false
   ) {
     if (!Object.keys(changedAttributes).length) {
       return;
     }
 
     const attributeManager = this.getAttributeManager();
+    const changedGroupAttributes = bufferGroupsUpdated ? {} : changedAttributes;
     if (model instanceof GPUVectorModel && attributeManager) {
-      this._setGPUVectorModelAttributes(model, attributeManager, changedAttributes);
+      this._setGPUVectorModelAttributes(model, attributeManager, changedGroupAttributes);
       return;
     }
     if (attributeManager?.hasBufferGroups()) {
-      this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
+      this._setGroupedModelAttributes(model, attributeManager, changedGroupAttributes);
       return;
     }
 

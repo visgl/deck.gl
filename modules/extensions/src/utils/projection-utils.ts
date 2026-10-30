@@ -8,8 +8,8 @@ import * as vec3 from '@math.gl/core/vec3';
 import * as vec4 from '@math.gl/core/vec4';
 import type {NumericArray} from '@math.gl/core';
 
-/** TILE_SIZE in the project shader module */
-const TILE_SIZE = 512;
+/** TILE_SIZE in the project shader module: the width of one world copy in flat common space */
+export const TILE_SIZE = 512;
 /** GLOBE_RADIUS / EARTH_RADIUS in the project shader module */
 const GLOBE_METERS_TO_COMMON = 256 / 6370972;
 
