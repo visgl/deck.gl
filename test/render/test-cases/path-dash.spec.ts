@@ -11,8 +11,8 @@ import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
 /**
- * PathStyleExtension dash cases. Most goldens stack horizontal strips, listed top to bottom; red
- * is flat and blue is billboard unless noted.
+ * PathStyleExtension dash cases. Most goldens stack horizontal strips, listed top to bottom. In
+ * the flat vs billboard cases, red is flat and blue is billboard.
  */
 
 const STRIP_LENGTH = 720;
@@ -679,8 +679,9 @@ const testCases: TestCase[] = [
   // ---------------------------------------------------------------------------------------
   // 120-piece circles at zoom -2, 0 and 2
   // ---------------------------------------------------------------------------------------
-  // Golden: the left (red) circle restarts at each piece and looks solid. The right (blue)
-  // circle is dashed all the way round.
+  // Both circles are flat. Left (red) is `dash`, right (blue) is `highPrecisionDash`.
+  // Golden: the left circle restarts at each piece and looks solid. The right circle is dashed
+  // all the way round.
   ...[-2, 0, 2].map(zoom => ({
     name: `path-dash-circle-zoom${zoom}`,
     views: new OrthographicView(),
