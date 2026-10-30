@@ -8,7 +8,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 import {Texture} from '@luma.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, Uint8, vectorFromArray} from 'apache-arrow';
 
 const bufferPoolSize = GPUDataEvaluator.bufferPoolSize;
