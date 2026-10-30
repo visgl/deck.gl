@@ -480,12 +480,19 @@ export class ScatterplotLayerColumns {
       };
     }
     const source = props[accessor];
-    const format = color && !binaryColor ? 'unorm8x4' : size === 1 ? 'float32' : `float32x${size}`;
+    const format =
+      accessor === 'rowIndexes'
+        ? 'uint32'
+        : color && !binaryColor
+          ? 'unorm8x4'
+          : size === 1
+            ? 'float32'
+            : `float32x${size}`;
     const lows =
       accessor === 'getPosition' && positionOptions.fp64
         ? new Float32Array(Math.max(1, length) * size)
         : undefined;
-    const pack = (value: any, target: Float32Array | Uint8Array, offset: number) => {
+    const pack = (value: any, target: Float32Array | Uint8Array | Uint32Array, offset: number) => {
       if (accessor === 'getPosition' && positionOptions.transform)
         value = positionOptions.transform(value);
       for (let component = 0; component < size; component++) {
@@ -497,7 +504,12 @@ export class ScatterplotLayerColumns {
       }
     };
     if (typeof source !== 'function') {
-      const value = color && !binaryColor ? new Uint8Array(size) : new Float32Array(size);
+      const value =
+        accessor === 'rowIndexes'
+          ? new Uint32Array(size)
+          : color && !binaryColor
+            ? new Uint8Array(size)
+            : new Float32Array(size);
       pack(source, value, 0);
       if (lows)
         columns.instancePositions64Low = new GPUConstant({
@@ -507,14 +519,18 @@ export class ScatterplotLayerColumns {
       return new GPUConstant({format: format as any, value});
     }
     const values =
-      color && !binaryColor ? new Uint8Array(length * size) : new Float32Array(length * size);
+      accessor === 'rowIndexes'
+        ? new Uint32Array(length * size)
+        : color && !binaryColor
+          ? new Uint8Array(length * size)
+          : new Float32Array(length * size);
     const {objectInfo} = createIterable(null);
     objectInfo.data = props.data;
     for (let index = 0; index < length; index++) {
       objectInfo.index = index;
       pack(source(rows.at(index) ?? null, objectInfo), values, index * size);
     }
-    const upload = (data: Float32Array | Uint8Array) => {
+    const upload = (data: Float32Array | Uint8Array | Uint32Array) => {
       const buffer = this.device.createBuffer({
         data,
         usage: Buffer.VERTEX | Buffer.COPY_DST | Buffer.COPY_SRC

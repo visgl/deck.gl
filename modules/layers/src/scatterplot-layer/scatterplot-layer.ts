@@ -326,7 +326,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         this.state.model?.destroy();
         this.state.model = this._getModel();
       }
-      if (!this.props.positions && this.internalState!.isAsyncPropLoading('data')) return;
+      if (this.internalState!.isAsyncPropLoading('data')) return;
       if (
         params.changeFlags.dataChanged ||
         params.changeFlags.updateTriggersChanged ||
