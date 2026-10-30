@@ -9,6 +9,7 @@ import {Transport} from '@deck.gl/json';
 import {createContainer} from './utils/css-utils';
 
 import {loadMapboxCSS} from './utils/mapbox-utils';
+import {loadMapLibreCSS} from './utils/maplibre-utils';
 
 import {createDeck, updateDeck} from './create-deck';
 
@@ -19,15 +20,14 @@ export function initPlayground() {
       const {width, height, customLibraries, mapboxApiKey, jsonInput, tooltip} =
         getPlaygroundProps(transport);
 
-      // Load mapbox CSS
-      loadMapboxCSS();
+      const jsonProps = JSON.parse(jsonInput);
+
+      loadBasemapCSS(jsonProps.mapProvider);
 
       // Create container div for deck.gl
       const transportRootElement = transport.getRootDOMElement();
       const deckContainer = createContainer(width, height);
       transportRootElement.appendChild(deckContainer);
-
-      const jsonProps = JSON.parse(jsonInput);
 
       const deck = createDeck({
         mapboxApiKey,
@@ -69,6 +69,13 @@ export function initPlayground() {
 }
 
 // HELPER FUNCTIONS
+
+export function loadBasemapCSS(mapProvider) {
+  loadMapboxCSS();
+  if (mapProvider === 'maplibre') {
+    loadMapLibreCSS();
+  }
+}
 
 // Takes JSON props and combines them with the binary data buffer
 export function processDataBuffer({binary, convertedJson}) {
