@@ -6,6 +6,7 @@ import type {CanvasContext, Device, PresentationContext} from '@luma.gl/core';
 import {Framebuffer} from '@luma.gl/core';
 import debug from '../debug/index';
 import DrawLayersPass from '../passes/draw-layers-pass';
+import type {RenderPassTimestamps} from './frame-timer';
 import PickLayersPass from '../passes/pick-layers-pass';
 import type {RenderStats} from '../passes/layers-pass';
 import type {Stats} from '@probe.gl/stats';
@@ -18,6 +19,23 @@ import type {LayersPassRenderOptions, FilterContext} from '../passes/layers-pass
 const TRACE_RENDER_LAYERS = 'deckRenderer.renderLayers';
 
 type LayerFilter = ((context: FilterContext) => boolean) | null;
+
+/** Options of `DeckRenderer.renderLayers` */
+export type RenderLayersOptions = {
+  pass: string;
+  layers: Layer[];
+  viewports: Viewport[];
+  views: {[viewId: string]: View};
+  onViewportActive: (viewport: Viewport) => void;
+  effects: Effect[];
+  target?: Framebuffer | null;
+  canvasContext?: CanvasContext | PresentationContext;
+  layerFilter?: LayerFilter;
+  clearStack?: boolean;
+  clearCanvas?: boolean;
+  /** Called once per layers render pass to get the timestamps that pass should write */
+  getRenderPassTimestamps?: (() => RenderPassTimestamps | null) | null;
+};
 
 export default class DeckRenderer {
   device: Device;
@@ -57,25 +75,15 @@ export default class DeckRenderer {
     }
   }
 
-  renderLayers(opts: {
-    pass: string;
-    layers: Layer[];
-    viewports: Viewport[];
-    views: {[viewId: string]: View};
-    onViewportActive: (viewport: Viewport) => void;
-    effects: Effect[];
-    target?: Framebuffer | null;
-    canvasContext?: CanvasContext | PresentationContext;
-    layerFilter?: LayerFilter;
-    clearStack?: boolean;
-    clearCanvas?: boolean;
-  }) {
+  renderLayers(opts: RenderLayersOptions) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
 
+    // Only the layers pass is timed, not effect passes, which also receive `renderOpts`
+    const {getRenderPassTimestamps, ...otherOpts} = opts;
     const renderOpts: LayersPassRenderOptions = {
       layerFilter: this.layerFilter,
       isPicking: this.drawPickingColors,
-      ...opts
+      ...otherOpts
     };
 
     if (!opts.viewports.length) {
@@ -95,7 +103,11 @@ export default class DeckRenderer {
       renderOpts.clearColor = [0, 0, 0, 0];
       renderOpts.clearCanvas = true;
     }
-    const renderResult = layerPass.render({...renderOpts, target: outputBuffer});
+    const renderResult = layerPass.render({
+      ...renderOpts,
+      target: outputBuffer,
+      getRenderPassTimestamps
+    });
     const renderStats = 'stats' in renderResult ? renderResult.stats : renderResult;
 
     if (renderOpts.effects) {
