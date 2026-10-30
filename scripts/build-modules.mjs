@@ -13,7 +13,7 @@ const buildOrderScript = join(
   dirname(require.resolve('@vis.gl/dev-tools')),
   'helpers/build-order.js'
 );
-const privateModules = new Set(['deck-gpu-layers', 'deck-arrow-layers']);
+const privateModules = new Set(['deck-gpu-layers', 'webgpu-layers', 'deck-arrow-layers']);
 const modules = execFileSync(process.execPath, [buildOrderScript], {encoding: 'utf8'})
   .trim()
   .split(/\s+/)

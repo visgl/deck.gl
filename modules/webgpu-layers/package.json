@@ -1,0 +1,46 @@
+{
+  "name": "@deck.gl/webgpu-layers",
+  "version": "10.0.0-alpha.3",
+  "private": true,
+  "description": "WebGPU layer counterparts for GPU-resident data",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/deck.gl.git"
+  },
+  "type": "module",
+  "exports": {
+    "./path-layer": {
+      "types": "./dist/path-layer/path-layer.d.ts",
+      "import": "./dist/path-layer/path-layer.js",
+      "require": "./dist/path-layer/path-layer.cjs"
+    },
+    "./polygon-layer": {
+      "types": "./dist/polygon-layer/polygon-layer.d.ts",
+      "import": "./dist/polygon-layer/polygon-layer.js",
+      "require": "./dist/polygon-layer/polygon-layer.cjs"
+    },
+    "./solid-polygon-layer": {
+      "types": "./dist/solid-polygon-layer/solid-polygon-layer.d.ts",
+      "import": "./dist/solid-polygon-layer/solid-polygon-layer.js",
+      "require": "./dist/solid-polygon-layer/solid-polygon-layer.cjs"
+    },
+    "./text-layer": {
+      "types": "./dist/text-layer/text-layer.d.ts",
+      "import": "./dist/text-layer/text-layer.js",
+      "require": "./dist/text-layer/text-layer.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@deck.gl/core": "9.4.0-beta.4",
+    "@luma.gl/core": "10.0.0-alpha.6",
+    "@luma.gl/engine": "10.0.0-alpha.6",
+    "@luma.gl/gpgpu": "10.0.0-alpha.6"
+  }
+}

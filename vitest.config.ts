@@ -59,8 +59,12 @@ import {browserCommands} from './test/setup/browser-commands';
 const rootDir = import.meta.dirname;
 // These prototypes require locally linked, unpublished luma.gl peers.
 const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
-const privateNodeTests = includePrivateModules ? ['modules/deck-*/test/**/*.node.spec.ts'] : [];
-const privateBrowserTests = includePrivateModules ? ['modules/deck-*/test/**/*.spec.ts'] : [];
+const privateNodeTests = includePrivateModules
+  ? ['modules/deck-*/test/**/*.node.spec.ts', 'modules/webgpu-layers/test/**/*.node.spec.ts']
+  : [];
+const privateBrowserTests = includePrivateModules
+  ? ['modules/deck-*/test/**/*.spec.ts', 'modules/webgpu-layers/test/**/*.spec.ts']
+  : [];
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
@@ -81,6 +85,10 @@ const excludedTests = [
 // Match aliases from .ocularrc.js
 // Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
+  '@deck.gl/webgpu-layers/path-layer': resolve(rootDir, 'modules/webgpu-layers/src/path-layer/path-layer.ts'),
+  '@deck.gl/webgpu-layers/polygon-layer': resolve(rootDir, 'modules/webgpu-layers/src/polygon-layer/polygon-layer.ts'),
+  '@deck.gl/webgpu-layers/solid-polygon-layer': resolve(rootDir, 'modules/webgpu-layers/src/solid-polygon-layer/solid-polygon-layer.ts'),
+  '@deck.gl/webgpu-layers/text-layer': resolve(rootDir, 'modules/webgpu-layers/src/text-layer/text-layer.ts'),
   '@deck.gl-community/gpu-layers/query': resolve(rootDir, 'modules/deck-gpu-layers/src/query'),
   '@deck.gl-community/gpu-layers': resolve(rootDir, 'modules/deck-gpu-layers/src'),
   '@deck.gl-community/arrow-layers': resolve(rootDir, 'modules/deck-arrow-layers/src'),

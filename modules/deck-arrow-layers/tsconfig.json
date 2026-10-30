@@ -18,6 +18,9 @@
     },
     {
       "path": "../deck-gpu-layers"
+    },
+    {
+      "path": "../webgpu-layers"
     }
   ]
 }

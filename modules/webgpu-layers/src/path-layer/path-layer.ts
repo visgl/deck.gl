@@ -19,7 +19,9 @@ import {PathStorageModel} from '@luma.gl/engine/models';
 import {
   getGPUVectorPickingProvenance,
   type GPUVectorLayerPickingInfo
-} from './gpu-vector-layer-utils';
+} from '../utils/gpu-vector-picking';
+
+export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native variable-length path props. Input vectors are borrowed. */
 export type GPUPathLayerProps = Omit<LayerProps, 'data'> & {
