@@ -15,7 +15,7 @@ import {
   skyDirectionToGlobe,
   type SkyObserver
 } from '@math.gl/earth/sun';
-import type {CloudProps, GlobeCloudProps} from '@luma.gl/shadertools';
+import type {CloudProps, GlobeCloudProps} from '@luma.gl/shaders';
 import {SunLayer, type SunLayerProps} from './sun-layer';
 import {MoonLayer, type MoonLayerProps} from './moon-layer';
 import {StarfieldLayer, type StarfieldLayerProps} from './starfield-layer';

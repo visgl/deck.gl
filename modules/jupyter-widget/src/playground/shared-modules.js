@@ -17,8 +17,8 @@ import * as deckMeshLayers from '@deck.gl/mesh-layers';
 import * as deckWidgets from '@deck.gl/widgets';
 import * as lumaCore from '@luma.gl/core';
 import * as lumaEngine from '@luma.gl/engine';
-import * as lumaShadertools from '@luma.gl/shadertools';
-import * as lumaShadertoolsWgsl from '@luma.gl/shadertools/wgsl';
+import * as lumaShadertools from '@luma.gl/shaders';
+import * as lumaShadertoolsWgsl from '@luma.gl/shaders/wgsl';
 import * as lumaWebgl from '@luma.gl/core/webgl';
 import * as lumaWebglConstants from '@luma.gl/core/webgl-constants';
 import * as loadersCore from '@loaders.gl/core';
@@ -34,8 +34,8 @@ export const SHARED_MODULES = {
   '@deck.gl/widgets': deckWidgets,
   '@luma.gl/core': lumaCore,
   '@luma.gl/engine': lumaEngine,
-  '@luma.gl/shadertools': lumaShadertools,
-  '@luma.gl/shadertools/wgsl': lumaShadertoolsWgsl,
+  '@luma.gl/shaders': lumaShadertools,
+  '@luma.gl/shaders/wgsl': lumaShadertoolsWgsl,
   '@luma.gl/core/webgl': lumaWebgl,
   '@luma.gl/core/webgl-constants': lumaWebglConstants,
   '@loaders.gl/core': loadersCore,

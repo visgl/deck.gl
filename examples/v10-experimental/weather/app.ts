@@ -10,7 +10,7 @@ import {
   type LightingProps,
   type PrecipitationProps,
   type SurfaceWeatherProps
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 import {
   getMeterOffsetPosition,
   WeatherParticleLayer,

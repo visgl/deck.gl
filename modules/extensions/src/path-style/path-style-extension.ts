@@ -28,7 +28,7 @@ import type {
   ProjectUniforms,
   UpdateParameters
 } from '@deck.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},

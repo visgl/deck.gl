@@ -31,7 +31,7 @@ import type {
   Parameters,
   PresentationContext
 } from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';

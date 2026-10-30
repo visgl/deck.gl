@@ -16,12 +16,12 @@ import {
   ArrowPathRenderer,
   getArrowRecordBatchAsyncIterator,
   resolveArrowPathSourceVectors,
-  type ArrowColorType,
   type ArrowPathSourceVectors,
   type ArrowPathSourceVectorSelectors,
   type ArrowRecordBatchSource,
   type PreparedArrowPathRendererGPUVectors
-} from '@luma.gl/arrow';
+} from '@luma.gl/engine/arrow';
+import {type ArrowColorType} from '@luma.gl/gpgpu/arrow';
 import {
   Buffer,
   type BufferLayout,

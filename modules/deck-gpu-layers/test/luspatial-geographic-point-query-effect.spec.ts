@@ -5,7 +5,7 @@
 import type {Effect, EffectContext} from '@deck.gl/core';
 import {LuSpatialGeographicPointQueryEffect} from '@deck.gl-community/gpu-layers/query';
 import type {Device} from '@luma.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 
 test('LuSpatialGeographicPointQueryEffect validates props before browser GPU allocation', () => {

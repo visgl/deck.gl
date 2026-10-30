@@ -5,7 +5,7 @@
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
-import {loadPBREnvironment} from '@luma.gl/gltf';
+import {loadPBREnvironment} from '@luma.gl/engine/gltf';
 
 import * as dataSamples from '../data-samples';
 

@@ -48,7 +48,7 @@
   "dependencies": {
     "@loaders.gl/core": "^5.0.0-beta.1",
     "@loaders.gl/images": "^5.0.0-beta.1",
-    "@luma.gl/shadertools": "^10.0.0-alpha.5",
+    "@luma.gl/shaders": "^10.0.0-alpha.6",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "^5.0.0-beta.1",
     "@math.gl/geometry": "^5.0.0-beta.1",
@@ -59,8 +59,8 @@
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0",
     "@loaders.gl/core": "^5.0.0-beta.1",
-    "@luma.gl/core": "~10.0.0-alpha.5",
-    "@luma.gl/engine": "~10.0.0-alpha.5"
+    "@luma.gl/core": "~10.0.0-alpha.6",
+    "@luma.gl/engine": "~10.0.0-alpha.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

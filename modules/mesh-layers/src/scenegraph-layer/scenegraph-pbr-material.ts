@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {pbrMaterial} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shaders';
 
 import type {
   PBRMaterialBindings,
   PBRMaterialProps,
   PBRMaterialUniforms,
   ShaderModule
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 
 const source = (pbrMaterial.source as string)
   .replace(

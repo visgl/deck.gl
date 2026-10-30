@@ -14,7 +14,6 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {type Buffer, type RenderPass} from '@luma.gl/core';
-import type {Model} from '@luma.gl/engine';
 import {GPUVectorModel} from '@luma.gl/engine';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {
@@ -177,7 +176,7 @@ export class GPUScatterplotLayer extends Layer<GPUScatterplotLayerProps> {
     this.setState({model, styleBuffer} satisfies GPUScatterplotLayerState);
   }
 
-  override getModels(): Model[] {
+  override getModels(): GPUVectorModel[] {
     const model = (this.state as GPUScatterplotLayerState).model;
     return model ? [model] : [];
   }

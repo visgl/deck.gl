@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {NullDevice} from '@luma.gl/test-utils';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import {PathTripsStorageModel, PathStorageModel, PathAttributeModel} from '@luma.gl/engine/models';
 import {Model} from '@luma.gl/engine';
 import * as arrow from 'apache-arrow';

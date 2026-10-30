@@ -8,7 +8,7 @@ import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Buffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import PathLayer from '@deck.gl/layers/path-layer/path-layer';
 import SolidPolygonLayer from '@deck.gl/layers/solid-polygon-layer/solid-polygon-layer';

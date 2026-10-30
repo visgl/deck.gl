@@ -7,8 +7,7 @@ import {LuSpatialPointLayer} from '@deck.gl-community/gpu-layers';
 import {Buffer, type Device} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
-import {ShaderAssembler} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, it} from 'vitest';
 import {vi, type MockInstance} from 'vitest';
 
@@ -58,21 +57,12 @@ it('LuSpatialPointLayer links and submits a caller-owned indirect draw', async (
   parent.style.width = `${TEST_VIEWPORT_SIZE}px`;
   parent.style.height = `${TEST_VIEWPORT_SIZE}px`;
   document.body.append(parent);
-  let restoreShaderAssembler = () => {};
   let deck: TestDeck | null = null;
 
   try {
-    deck = createTestDeck(
-      device,
-      parent,
-      layer,
-      error => {
-        deckError = error;
-      },
-      restore => {
-        restoreShaderAssembler = restore;
-      }
-    );
+    deck = createTestDeck(device, parent, layer, error => {
+      deckError = error;
+    });
     await waitForDeckInitialization(deck, () => layerError ?? deckError);
     const model = await waitForLayerModel(layer, () => layerError ?? deckError);
     await waitForPipeline(model);
@@ -103,7 +93,6 @@ it('LuSpatialPointLayer links and submits a caller-owned indirect draw', async (
     ).toBe(false);
   } finally {
     deck?.finalize();
-    restoreShaderAssembler();
     parent.remove();
     drawSpy.mockRestore();
     drawCommands.destroy();
@@ -118,8 +107,7 @@ function createTestDeck(
   device: Device,
   parent: HTMLDivElement,
   layer: Layer,
-  onError: (error: Error) => void,
-  onShaderAssemblerReady: (restore: () => void) => void
+  onError: (error: Error) => void
 ): TestDeck {
   return new Deck({
     parent,
@@ -129,23 +117,7 @@ function createTestDeck(
     views: new OrthographicView({id: 'main'}),
     initialViewState: {target: [0, 0], zoom: 0},
     layers: [layer],
-    onError,
-    onDeviceInitialized: initializedDevice => {
-      const getDefaultShaderAssembler = ShaderAssembler.getDefaultShaderAssembler;
-      const shaderAssemblerSpy = vi.spyOn(ShaderAssembler, 'getDefaultShaderAssembler');
-      const restore = () => shaderAssemblerSpy.mockRestore();
-      onShaderAssemblerReady(restore);
-      shaderAssemblerSpy.mockImplementation(shaderLanguage => {
-        if (shaderLanguage !== undefined) {
-          return getDefaultShaderAssembler.call(ShaderAssembler, shaderLanguage);
-        }
-        restore();
-        return getDefaultShaderAssembler.call(
-          ShaderAssembler,
-          initializedDevice.info.shadingLanguage
-        );
-      });
-    }
+    onError
   });
 }
 

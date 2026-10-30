@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ShaderAssembler, gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
+import {
+  type ShaderAssembler,
+  GLSLShaderAssembler,
+  WGSLShaderAssembler,
+  gouraudMaterial,
+  phongMaterial
+} from '@luma.gl/shaders';
 import {layerUniforms} from './misc/layer-uniforms';
 import color from './color/color';
 import geometry from './misc/geometry';
@@ -24,17 +30,14 @@ const SHADER_HOOKS_WGSL = [
   // Not yet supported
 ];
 
+/** Create a language-specific shader assembler with deck.gl modules and hooks. */
 export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
-  const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler(language);
+  const shaderAssembler =
+    language === 'wgsl' ? new WGSLShaderAssembler() : new GLSLShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
     shaderAssembler.addDefaultModule(shaderModule);
   }
-
-  // if we're recreating the device we may have changed language
-  // and must not inject hooks for the wrong language
-  // shaderAssembler.resetShaderHooks();
-  (shaderAssembler as any)._hookFunctions.length = 0;
 
   // Add shader hooks based on language
   // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?

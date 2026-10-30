@@ -4,8 +4,8 @@
 
 import type {Device} from '@luma.gl/core';
 import {Timeline, BufferTransform} from '@luma.gl/engine';
-import {fp64arithmetic} from '@luma.gl/shadertools';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import {fp64arithmetic} from '@luma.gl/shaders';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {GL} from '@luma.gl/core/webgl-constants';
 import Attribute from '../lib/attribute/attribute';
 import {

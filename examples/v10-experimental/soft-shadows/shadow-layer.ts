@@ -21,7 +21,7 @@ import {
   type CloudProps,
   type AtmosphereProps,
   type ShaderModule
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 import {getMeterOffsetPosition} from '@deck.gl-community/gpu-layers';
 import {makeCityMesh, type CityFeature} from '../river-district-data';
 import {RiverfrontShadowEffect} from './shadow-effect';

@@ -6,15 +6,24 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.5
+### luma.gl v10 alpha.6
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
 `@luma.gl/core/webgpu`. WebGL constants and debugging tools move to
 `@luma.gl/core/webgl-constants` and `@luma.gl/core/webgl-debug`.
 
-Import `postProcessGLTF` from `@luma.gl/gltf`; the legacy loaders.gl postprocessor
+Import `postProcessGLTF` from `@luma.gl/engine/gltf`; the legacy loaders.gl postprocessor
 dependency is no longer needed.
+
+`@luma.gl/shadertools` becomes `@luma.gl/shaders`. The glTF, effects, text, splats, and
+Arrow rendering integrations move to the corresponding `@luma.gl/engine` subpaths.
+Arrow conversion helpers move to `@luma.gl/gpgpu/arrow`. Test utilities move to
+`@luma.gl/core/test-utils`. The Arrow integration is now published,
+so website builds no longer require a pinned luma.gl source checkout.
+
+`Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
+of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
 
 ### loaders.gl and math.gl v5 beta
 

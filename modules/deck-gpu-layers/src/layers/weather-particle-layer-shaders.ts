@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 const UNIFORMS = `layout(std140) uniform weatherRenderUniforms {
   vec4 appearance;
   vec4 surfaceBounds;

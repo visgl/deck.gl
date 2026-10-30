@@ -52,8 +52,8 @@
     "@loaders.gl/core": "^5.0.0-beta.1",
     "@loaders.gl/tiles": "^5.0.0-beta.1",
     "@loaders.gl/tiles-3d": "^5.0.0-beta.1",
-    "@luma.gl/core": "^10.0.0-alpha.5",
-    "@luma.gl/shadertools": "^10.0.0-alpha.5",
+    "@luma.gl/core": "^10.0.0-alpha.6",
+    "@luma.gl/shaders": "^10.0.0-alpha.6",
     "@math.gl/web-mercator": "^5.0.0-beta.1",
     "@types/d3-array": "^3.0.2",
     "@types/d3-color": "^3.1.3",
@@ -76,7 +76,7 @@
     "@deck.gl/geo-layers": "~9.4.0",
     "@deck.gl/layers": "~9.4.0",
     "@loaders.gl/core": "^5.0.0-beta.1",
-    "@luma.gl/core": "~10.0.0-alpha.5"
+    "@luma.gl/core": "~10.0.0-alpha.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

@@ -5,7 +5,7 @@
 import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
 import type {Buffer, RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {getStarfieldRotation, type SkyObserver} from '@math.gl/earth/sun';
 import {getStarPositions, getStarLayerData, type StarLayerDatum} from '@math.gl/earth/sun/stars';
 import {getSkyObserver, getSkyProjectionMatrix, makeSkyRotationMatrix} from './sky-coordinates';

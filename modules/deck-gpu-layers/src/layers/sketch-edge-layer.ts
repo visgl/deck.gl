@@ -13,7 +13,7 @@ import {
 } from '@deck.gl/core';
 import type {Buffer, RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {sketchStroke, type SketchStrokeProps, type ShaderModule} from '@luma.gl/shadertools';
+import {sketchStroke, type SketchStrokeProps, type ShaderModule} from '@luma.gl/shaders';
 
 export type SketchEdgeLayerProps = LayerProps & {
   /** Borrowed interleaved float32 rows: start.xyz, end.xyz, featureIndex, stable seed. */

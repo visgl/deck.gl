@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule, UniformTypes} from '@luma.gl/shadertools';
+import type {ShaderModule, UniformTypes} from '@luma.gl/shaders';
 import type {DataFilterExtensionOptions, DataFilterExtensionProps} from './data-filter-extension';
 
 /*

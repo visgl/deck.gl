@@ -13,7 +13,7 @@ import {ClipExtension} from '@deck.gl/extensions';
 import {lngLatToMercatorCommon} from '@deck.gl/extensions/utils/projection-utils';
 import {GeoJsonLayer, PathLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getLayerUniforms, testLayer, device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow';
 
 import {geojson, polygons, points} from 'deck.gl-test/data';

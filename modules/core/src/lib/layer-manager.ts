@@ -4,7 +4,7 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderAssembler, ShaderModule} from '@luma.gl/shaders';
 import {getShaderAssembler, layerUniforms} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';

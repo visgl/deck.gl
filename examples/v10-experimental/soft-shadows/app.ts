@@ -4,7 +4,7 @@
 
 import {Deck, MapView, type MapViewState} from '@deck.gl/core';
 import {SunLayer, MoonLayer, CloudLayer, AtmosphereLayer} from '@deck.gl-community/gpu-layers';
-import type {CloudProps, AtmosphereProps} from '@luma.gl/shadertools';
+import type {CloudProps, AtmosphereProps} from '@luma.gl/shaders';
 import {getMoonPosition, getMoonIllumination, getSkyDirection} from '@math.gl/earth/sun';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {CITY_ORIGIN, makeCityFeatures} from '../river-district-data';

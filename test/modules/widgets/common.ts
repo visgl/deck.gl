@@ -4,7 +4,7 @@
 
 import {Deck} from '@deck.gl/core';
 import type {DeckProps, View} from '@deck.gl/core';
-import {nullAdapter} from '@luma.gl/test-utils';
+import {nullAdapter} from '@luma.gl/core/test-utils';
 import '@deck.gl/widgets/stylesheet.css';
 
 const WIDTH = 600;

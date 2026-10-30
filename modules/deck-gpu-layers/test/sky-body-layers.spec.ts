@@ -7,8 +7,8 @@ import {luma, Buffer, Texture, type RenderPass} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {Model} from '@luma.gl/engine';
-import {fromHalfFloat} from '@luma.gl/shadertools';
-import {getTestDevice} from '@luma.gl/test-utils';
+import {fromHalfFloat} from '@luma.gl/shaders';
+import {getTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 import {SunLayer, MoonLayer, CloudLayer, AtmosphereLayer, SkyLayer, StarfieldLayer} from '../src';
 

@@ -46,7 +46,7 @@ npx esbuild --bundle test/size/import-hexagon-layer.js \
   --external:@luma.gl/core \
   --external:@luma.gl/engine \
   --external:@luma.gl/gpgpu \
-  --external:@luma.gl/shadertools \
+  --external:@luma.gl/shaders \
   --external:@luma.gl/core/webgl \
   --outfile=/tmp/deck-size-bundle.js
 ```

@@ -3,7 +3,7 @@
 ## Overview
 
 Private deck.gl layers backed by the Arrow adapters and `GPUVector` objects from
-`@luma.gl/arrow`.
+`@luma.gl/engine/arrow`.
 
 The layers intentionally do not use deck.gl `AttributeManager` for Arrow columns.
 Arrow data is converted once into `GPUVector`/`GPUTable` inputs and bound directly
@@ -115,13 +115,11 @@ This private package was copied from luma.gl's `modules/deck-arrow-layers`. Its 
 is unchanged. It uses the local deck.gl core workspace and luma.gl 10 prereleases.
 Run `yarn build-private` and `yarn lint` from the repository root. Run
 `yarn test-private` for the module node and headless suites. The regular build and
-tests exclude these prototypes because their upstream peers are unpublished. The copied examples and integration tests live in this repository.
+tests exclude these private prototypes. The copied examples and integration tests live in this repository.
 Gallery-specific assertions were adapted to the standalone example metadata.
 
-luma.gl alpha.5 publishes the graph and text packages used here.
-Only `@luma.gl/arrow` remains unpublished; link it from the matching luma.gl
-revision when running Arrow examples locally. The website build pins that
-Arrow source revision automatically.
+luma.gl alpha.6 publishes the required integrations, including Arrow and text under
+`@luma.gl/engine`. A regular workspace install supplies these dependencies.
 
 Apache Arrow is also a peer dependency (`>=17.0.0`), so applications and the luma.gl
 adapter share the same Arrow types. Supply it in the consuming workspace. The deck.gl
@@ -131,5 +129,5 @@ workspace already receives Arrow through its loaders.gl dependencies.
 
 The original standalone examples and their shared fixtures are available in
 [`examples/v10-experimental`](../../examples/v10-experimental/README.md). Run `yarn build-private-examples`
-after linking the unpublished peers. `yarn test-private` includes the copied
+after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.

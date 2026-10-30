@@ -15,7 +15,7 @@ import {
 } from '@deck.gl/layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Matrix4} from '@math.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const projection = {forward: p => p, inverse: p => p};
 const options = {

@@ -14,10 +14,10 @@ import {
 } from '@deck.gl/core';
 import {
   ArrowPolygonRenderer,
-  type ArrowColorType,
   type ArrowPolygonRendererDataBatchUpdate,
   type ArrowPolygonRendererProps
-} from '@luma.gl/arrow';
+} from '@luma.gl/engine/arrow';
+import {type ArrowColorType} from '@luma.gl/gpgpu/arrow';
 import type {ShaderLayout} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {

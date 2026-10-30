@@ -62,7 +62,7 @@ as base extinction, corresponding to 2% transmittance through a homogeneous medi
 falloff makes visibility greater above that base. The model uses a daylight-dependent fog tint, without
 light scattering, shadowed fog, or temporal accumulation. Materials must opt into the fog
 module in this example. The same analytic integral also powers the height mode of
-`createVolumetricFogCompositeShaderPass` in `@luma.gl/effects`, demonstrated by Visualization City.
+`createVolumetricFogCompositeShaderPass` in `@luma.gl/engine/effects`, demonstrated by Visualization City.
 That pass can fog opaque geometry from depth; transparent precipitation applies fog in its material
 afterward to avoid using the background depth. Neither path models a planet-scale atmosphere.
 

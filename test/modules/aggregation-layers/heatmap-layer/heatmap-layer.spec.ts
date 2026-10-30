@@ -19,8 +19,8 @@ import weightSource from '@deck.gl/aggregation-layers/heatmap-layer/weights.wgsl
 import {
   getShaderModuleSource,
   getShaderModuleUniformLayoutValidationResult
-} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+} from '@luma.gl/shaders';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const getPosition = d => d.COORDINATES;
 

@@ -189,8 +189,7 @@ describe('@deck.gl-community/gpu-layers package boundary', () => {
       '@luma.gl/engine',
       '@luma.gl/gpgpu',
       '@luma.gl/graph',
-      '@luma.gl/shadertools',
-      '@luma.gl/text',
+      '@luma.gl/shaders',
       '@math.gl/core',
       '@math.gl/earth'
     ]);

@@ -49,15 +49,14 @@
   "dependencies": {
     "@loaders.gl/core": "^5.0.0-beta.1",
     "@loaders.gl/scene": "^5.0.0-beta.1",
-    "@luma.gl/gltf": "^10.0.0-alpha.5",
-    "@luma.gl/shadertools": "^10.0.0-alpha.5"
+    "@luma.gl/engine": "^10.0.0-alpha.6",
+    "@luma.gl/shaders": "^10.0.0-alpha.6"
   },
   "peerDependencies": {
     "@deck.gl/core": "~9.4.0",
-    "@luma.gl/core": "~10.0.0-alpha.5",
-    "@luma.gl/engine": "~10.0.0-alpha.5",
-    "@luma.gl/gltf": "~10.0.0-alpha.5",
-    "@luma.gl/shadertools": "~10.0.0-alpha.5"
+    "@luma.gl/core": "~10.0.0-alpha.6",
+    "@luma.gl/engine": "~10.0.0-alpha.6",
+    "@luma.gl/shaders": "~10.0.0-alpha.6"
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }

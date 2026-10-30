@@ -4,14 +4,14 @@
 
 import {Layer, project32, color, picking, log} from '@deck.gl/core';
 import type {Device, RenderPipelineParameters} from '@luma.gl/core';
-import {pbrMaterial} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shaders';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
 import {
   GLTFAnimator,
   PBREnvironment,
   createScenegraphsFromGLTF,
   postProcessGLTF
-} from '@luma.gl/gltf';
+} from '@luma.gl/engine/gltf';
 import {GLTFLoader} from '@loaders.gl/scene/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 

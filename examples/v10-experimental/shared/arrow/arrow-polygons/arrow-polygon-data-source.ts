@@ -7,7 +7,7 @@ import {
   type ArrowPolygonRendererDataBatchUpdate,
   type ArrowPolygonRendererModel,
   type ArrowPolygonRendererProps
-} from '@luma.gl/arrow';
+} from '@luma.gl/engine/arrow';
 import {
   createStreamingPolygonRecordBatchIterator,
   type ArrowPolygonColorKind,

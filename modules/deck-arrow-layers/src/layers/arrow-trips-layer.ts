@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ArrowPathSourceVectorSelectors} from '@luma.gl/arrow';
+import type {ArrowPathSourceVectorSelectors} from '@luma.gl/engine/arrow';
 import {ArrowPathLayer, type ArrowPathLayerProps} from './arrow-path-layer';
 import {DECK_ARROW_ALPHA_BLEND_PARAMETERS} from './arrow-layer-types';
 

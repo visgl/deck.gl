@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Texture} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlockWGSL = /* wgsl */ `\
 struct HexagonUniforms {

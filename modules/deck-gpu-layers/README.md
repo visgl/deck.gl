@@ -5,7 +5,7 @@ Reusable deck.gl layers for geographic rendering that consume caller-owned GPU b
 ## Water surfaces
 
 `WaterSurfaceLayer` shades flat, triangulated water polygons on WebGPU and WebGL2 using the shared
-`@luma.gl/shadertools` water material. Supply packed `float32x3` positions in local east/north/up
+`@luma.gl/shaders` water material. Supply packed `float32x3` positions in local east/north/up
 meters, `vertexCount`, and Deck's `coordinateOrigin`. The layer borrows the position buffer and owns
 only its render model; the application must release the buffer after removing/finalizing the layer.
 
@@ -220,7 +220,7 @@ same geometry. Draw opaque fill layers first to hide rear edges. The layer owns 
 quad buffer, and borrows `segments`; the application destroys that buffer after finalizing Deck.
 It does not extract mesh boundaries, join paths, or drape lines over terrain. The
 [Sketch buildings example](../../examples/v10-experimental/sketch-edges) demonstrates the controls, picking,
-and hidden-edge rendering. The underlying `sketchStroke` shader in `@luma.gl/shadertools`
+and hidden-edge rendering. The underlying `sketchStroke` shader in `@luma.gl/shaders`
 can also be used by non-Deck renderers.
 ## Auxiliary scene buffers
 
@@ -632,17 +632,15 @@ This private package was copied from luma.gl's `modules/deck-gpu-layers`. Its pa
 is unchanged. It uses the local deck.gl core workspace and luma.gl 10 prereleases.
 Run `yarn build-private` and `yarn lint` from the repository root. Run
 `yarn test-private` for the module node and headless suites. The regular build and
-tests exclude these prototypes because their upstream peers are unpublished. The copied examples and integration tests live in this repository.
+tests exclude these private prototypes. The copied examples and integration tests live in this repository.
 Gallery-specific assertions were adapted to the standalone example metadata.
 
-luma.gl alpha.5 publishes the graph, text, and ANARI packages used here.
-Only `@luma.gl/arrow` remains unpublished; link it from the matching luma.gl
-revision when running Arrow examples locally. The website build pins that
-Arrow source revision automatically.
+luma.gl alpha.6 publishes the required integrations, including Arrow and text under
+`@luma.gl/engine`. A regular workspace install supplies these dependencies.
 
 ## Examples and integration tests
 
 The original standalone examples and their shared fixtures are available in
 [`examples/v10-experimental`](../../examples/v10-experimental/README.md). Run `yarn build-private-examples`
-after linking the unpublished peers. `yarn test-private` includes the copied
+after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.

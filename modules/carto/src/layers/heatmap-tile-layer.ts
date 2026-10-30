@@ -4,7 +4,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {getResolution} from 'quadbin';
 import {getResolution as getH3Resolution, getNumCells} from 'h3-js';
 

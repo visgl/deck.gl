@@ -45,7 +45,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
-import {PickingProps} from '@luma.gl/shadertools';
+import {PickingProps} from '@luma.gl/shaders';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -418,11 +418,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.props.pickable && this.props.visible;
   }
 
-  /** Returns an array of models used by this layer, can be overriden by layer subclass */
-  getModels(): Model[] {
+  /** Returns the rendering models used by this layer, including GPU-vector models. */
+  getModels(): LumaGPUVectorModel[] {
     const state = this.state as {
-      models?: Model[];
-      model: Model;
+      models?: LumaGPUVectorModel[];
+      model: LumaGPUVectorModel;
     };
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
@@ -1585,7 +1585,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {props, oldProps} = updateParams;
 
     // Note: Automatic instance count update only works for single layers
-    const model = this.state.model as Model | undefined;
+    const model = this.state.model as LumaGPUVectorModel | undefined;
     if (model?.isInstanced) {
       model.setInstanceCount(this.getNumInstances());
     }
@@ -1685,7 +1685,7 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 }
 
 function applyModelParameters(
-  models: Model[],
+  models: LumaGPUVectorModel[],
   renderPass: RenderPass,
   parameters: LumaParameters,
   webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
@@ -1704,7 +1704,7 @@ function applyModelParameters(
   }
 }
 
-function syncModelAttachmentFormats(model: Model, renderPass: RenderPass): void {
+function syncModelAttachmentFormats(model: LumaGPUVectorModel, renderPass: RenderPass): void {
   const framebuffer =
     renderPass.props.framebuffer ||
     ((
