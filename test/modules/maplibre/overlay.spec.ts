@@ -261,7 +261,7 @@ for (const {version, MapClass, mode} of TERRAIN_CASES) {
       expect(elevation).toBeCloseTo(1000);
       expect(overlay._deck!.props.viewState.position).toEqual([0, 0, elevation]);
       // In overlaid mode the shared test device's canvas is not sized by the map container
-      const [x, y] = overlay._deck!.getViewports()[0].project(summit);
+      const [x, y] = interleaved ? [200, 150] : overlay._deck!.getViewports()[0].project(summit);
       expect(overlay.pickObject({x, y})?.layer?.id).toBe('summit');
     } finally {
       map.remove();
