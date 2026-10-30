@@ -574,3 +574,53 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     }
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Scatterplot accepts binary constant attributes with Arrow columns on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      testCases: [
+        {
+          props: {
+            positions: positions([
+              [0, 0],
+              [1, 1]
+            ]),
+            data: {
+              length: 2,
+              attributes: {
+                getRadius: {constant: true, value: new Float32Array([2])},
+                getFillColor: {
+                  constant: true,
+                  value: new Uint8Array([255, 128, 0, 255]),
+                  size: 4,
+                  normalized: true
+                }
+              }
+            }
+          },
+          onAfterUpdate: ({layer}) => {
+            if (!layer.isLoaded) return;
+            const columns = (layer.state.columns as any).prepared.columns;
+            expect(columns.instanceRadius.value[0]).toBe(2);
+            expect(Array.from(columns.instanceFillColors.value)).toEqual(
+              [1, 128 / 255, 0, 1].map(Math.fround)
+            );
+            expect(layer.getNumInstances()).toBe(2);
+          }
+        }
+      ],
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+}
