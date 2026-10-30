@@ -87,6 +87,10 @@ export class ScatterplotLayerColumns {
   get length(): number {
     return this.prepared?.length ?? 0;
   }
+  /** Identifies the picking input in the currently prepared columns. */
+  get hasRowIndexes(): boolean {
+    return Boolean(this.prepared?.columns.rowIndexes);
+  }
   /** Uses the layer's device to upload accessor values and convert Arrow columns. */
   constructor(private readonly device: Device) {}
 

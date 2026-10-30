@@ -222,7 +222,10 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(useRowIndexes),
+      source: getShaderWGSL(
+        useRowIndexes,
+        this.context.device.type === 'webgpu' && hasScatterplotColumns(this.props)
+      ),
       defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
       modules: [
         project32,
@@ -308,7 +311,6 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     if (hasScatterplotColumns(this.props)) {
       if (this.props.extensions.length)
         throw new Error('Scatterplot Arrow columns do not support extensions');
-      if (!this.props.positions && this.internalState!.isAsyncPropLoading('data')) return;
       const enteringColumns = !this.state.columns;
       if (enteringColumns) {
         this.internalState!.attributeManager?.finalize();
@@ -324,6 +326,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         this.state.model?.destroy();
         this.state.model = this._getModel();
       }
+      if (!this.props.positions && this.internalState!.isAsyncPropLoading('data')) return;
       if (
         params.changeFlags.dataChanged ||
         params.changeFlags.updateTriggersChanged ||
@@ -395,6 +398,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     };
     const model = this.state.model;
     if (!model) return;
+    if (
+      this.state.columns &&
+      this.state.columns.hasRowIndexes !== Boolean((this.props.data as any)?.attributes?.rowIndexes)
+    )
+      return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     if (this.state.columns) {
       this.state.columns.draw(model as GPUVectorModel, this.context.renderPass);
@@ -413,12 +421,14 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         this.state.columns?.getBufferLayouts(
           Boolean((this.props.data as any)?.attributes?.rowIndexes)
         ) ?? this.getAttributeManager()!.getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-strip',
-        attributes: {
-          positions: {size: 3, value: new Float32Array(positions)}
-        }
-      }),
+      ...(this.context.device.type === 'webgpu' && this.state.columns
+        ? {topology: 'triangle-strip' as const, vertexCount: 4}
+        : {
+            geometry: new Geometry({
+              topology: 'triangle-strip',
+              attributes: {positions: {size: 3, value: new Float32Array(positions)}}
+            })
+          }),
       isInstanced: true
     });
   }
