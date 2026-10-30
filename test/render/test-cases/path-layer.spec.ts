@@ -339,10 +339,8 @@ function getGraticules(resolution) {
   return graticules;
 }
 
-// `antialiasing` exists for contexts created without multisampling - notably interleaved rendering
-// into a base map, since MapLibre and Mapbox create their WebGL context with `antialias: false`.
-// Both the isolated no-MSAA device and `includeAA: true` are required for this golden to
-// distinguish shader coverage from browser multisampling and pixelmatch's default AA filtering.
+// Thin diagonals and two zigzags with `antialiasing` off (left) and on (right), without MSAA.
+// Golden: jagged steps on the left, smooth edges on the right.
 // See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
 const ANTIALIASING_GOLDEN_DIAGONALS = Array.from({length: 20}, (_, index) => ({
   path: [
