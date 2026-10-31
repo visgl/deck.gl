@@ -249,6 +249,29 @@ Install `apache-arrow` to pass Arrow vectors directly. Each column overrides its
 accessor; omitted columns use the accessors or binary attributes. All supplied columns must have
 the same length, and nonempty `data` must have that length as well.
 
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for modes and loading.
+These examples draw the same two circles.
+
+<Tabs groupId="scatterplot-input">
+<TabItem value="rows" label="Row accessors">
+
+```js
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+const layer = new ScatterplotLayer({
+  data: [
+    {position: [-122.4, 37.74], radius: 100},
+    {position: [-122.41, 37.75], radius: 200}
+  ],
+  getPosition: d => d.position,
+  getRadius: d => d.radius,
+  getFillColor: [255, 140, 0]
+});
+```
+
+</TabItem>
+<TabItem value="arrow" label="Arrow columns">
+
 ```js
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -260,6 +283,10 @@ const positions = vectorFromArray(
 const radii = vectorFromArray([100, 200], new Float32());
 const layer = new ScatterplotLayer({positions, radii, getFillColor: [255, 140, 0]});
 ```
+
+
+</TabItem>
+</Tabs>
 
 * `positions`: numeric XY or XYZ fixed-size lists, overriding `getPosition`.
 * `radii`: numeric scalars, overriding `getRadius`.
