@@ -378,6 +378,38 @@ webglTest('project#vs', async () => {
   }
 });
 
+webglTest('project#vs CARTESIAN z is continuous across zoom 12', async () => {
+  // A common space position with z in meters, e.g. of a TerrainLayer mesh, at the viewport center.
+  // Its projected z must not change between WEB_MERCATOR (zoom < 12) and
+  // WEB_MERCATOR_AUTO_OFFSET (zoom >= 12) modes
+  for (const latitude of [80, 46.2, 0, -46.2, -80]) {
+    for (const zoom of [11.99, 12]) {
+      const viewport = new WebMercatorViewport({
+        longitude: -122.19,
+        latitude,
+        zoom,
+        pitch: 60,
+        width: 800,
+        height: 600
+      });
+      const [x, y] = viewport.center;
+      const actual = await runOnGPU({
+        vs: TRANSFORM_VS.project_position,
+        varying: 'outValue',
+        modules: [project, testUniforms],
+        vertexCount: 1,
+        shaderInputProps: {
+          project: {viewport, coordinateSystem: COORDINATE_SYSTEM.CARTESIAN},
+          test: {uPos: [x, y, 1000], uPos64Low: [0, 0, 0]}
+        }
+      });
+      const elevation = actual[2] / viewport.getDistanceScales().unitsPerMeter[2];
+
+      expect(elevation, `elevation at latitude ${latitude}, zoom ${zoom}`).toBeCloseTo(1000, 3);
+    }
+  }
+});
+
 webglTest('project#vs#project_get_orientation_matrix', async () => {
   const vs = `\
 #version 300 es
