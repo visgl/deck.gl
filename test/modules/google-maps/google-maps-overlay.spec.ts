@@ -383,6 +383,42 @@ test('GoogleMapsOverlay#style', () => {
   overlay.finalize();
 });
 
+test('GoogleMapsOverlay#draw tolerates a zero-width vector map', async () => {
+  const map = new mapsApi.Map({
+    width: 0,
+    height: 600,
+    longitude: -122.45,
+    latitude: 37.78,
+    zoom: 13,
+    renderingType: mapsApi.RenderingType.VECTOR
+  });
+  let resolveDeviceInitialized = () => {};
+  const deviceInitialized = new Promise<void>(resolve => {
+    resolveDeviceInitialized = resolve;
+  });
+  const overlay = new GoogleMapsOverlay({
+    device,
+    interleaved: false,
+    onDeviceInitialized: () => resolveDeviceInitialized(),
+    layers: [
+      new ScatterplotLayer({
+        data: [{position: [-122.45, 37.78]}],
+        getPosition: datum => datum.position,
+        radiusMinPixels: 10
+      })
+    ]
+  });
+
+  overlay.setMap(map);
+  await deviceInitialized;
+
+  try {
+    expect(() => map.draw()).not.toThrow();
+  } finally {
+    overlay.finalize();
+  }
+});
+
 function drawPickTest(renderingType) {
   test(`GoogleMapsOverlay#draw, pick ${renderingType}`, () => {
     const map = new mapsApi.Map({
