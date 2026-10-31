@@ -197,6 +197,53 @@ webglTest('WebGLAggregator#1D', () => {
   aggregator.destroy();
 });
 
+webglTest('WebGLAggregator#COUNT only', () => {
+  const aggregator = new WebGLAggregator(device, {
+    dimensions: 1,
+    channelCount: 1,
+    bufferLayout: [{name: 'age', format: 'float32', stepMode: 'vertex'}],
+    modules: [binOptionsUniforms],
+    vs: `
+      in float age;
+
+      void getBin(out int binId) {
+        binId = int(floor(age / binOptions.ageGroupSize));
+      }
+      void getValue(out float value) {
+        value = 1.0;
+      }
+    `
+  });
+
+  const attributes = {
+    age: new Attribute(device, {id: 'age', size: 1, type: 'float32', accessor: 'getAge'})
+  };
+  attributes.age.setData({value: new Float32Array(IncomeSurvey.map(d => d.age))});
+
+  aggregator.setProps({
+    pointCount: IncomeSurvey.length,
+    binIdRange: [[2, 17]], // age: 10..84
+    attributes,
+    operations: ['COUNT'],
+    binOptions: {ageGroupSize: 5}
+  });
+
+  aggregator.update();
+  aggregator.preDraw();
+
+  expect(
+    binaryAttributeToArray(aggregator.getResult(0), aggregator.binCount),
+    'getResult() - total counts'
+  ).toEqual(
+    // biome-ignore format: preserve layout
+    [NaN, 1, 5, 5, 3, 2, 3, 2, 2, 2, 1, 2, 1, 1, 2]
+  );
+  expect(aggregator.getResultDomain(0), 'getResultDomain() - counts').toEqual([1, 5]);
+
+  attributes.age.delete();
+  aggregator.destroy();
+});
+
 webglTest('WebGLAggregator#2D', () => {
   // An aggregator that calculates:
   // [0] total count [1] average income, grouped by [age, education]
