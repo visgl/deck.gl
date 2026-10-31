@@ -76,14 +76,18 @@ export default class MapboxOverlay implements IControl {
     Object.assign(this._props, this.filterProps(props));
 
     if (this._deck && this._map) {
-      this._deck.setProps({
-        ...this._props,
+      // In interleaved mode getDeckInstance wraps onLoad to start tracking the map.
+      // Do not replace it; the latest user onLoad is called through _handleDeckLoad.
+      const {onLoad: _, ...restProps} = this._props;
+      const deckProps = {
+        ...(this._interleaved ? restProps : this._props),
         views: this._getViews(this._map),
         parameters: {
           ...getDefaultParameters(this._map, this._interleaved),
           ...this._props.parameters
         }
-      });
+      };
+      this._deck.setProps(deckProps);
     }
   }
 
@@ -151,6 +155,7 @@ export default class MapboxOverlay implements IControl {
       map,
       deck: new Deck({
         ...this._props,
+        onLoad: this._handleDeckLoad,
         views: this._getViews(map),
         gl,
         parameters: {...getDefaultParameters(map, true), ...this._props.parameters}
@@ -162,6 +167,10 @@ export default class MapboxOverlay implements IControl {
 
     return document.createElement('div');
   }
+
+  private _handleDeckLoad = () => {
+    this._props.onLoad?.();
+  };
 
   private _resolveLayers(
     map: Map | undefined,
