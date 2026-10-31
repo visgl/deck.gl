@@ -137,6 +137,14 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 });
 ```
 
+### GlobeController navigation
+
+`GlobeController` no longer switches to free rotation implicitly when the bearing is not north-up. The default
+`navigation: 'map'` preserves the current bearing during panning, zooming, and inertia, and limits latitude
+to approximately `±85.051°`. If you relied on free rotation with a rotated globe, or on pole crossing in the v9.4
+prereleases, set `controller: {navigation: 'ball'}` to retain pole crossing and evolving bearing. Explicit rotation
+gestures remain available in both modes.
+
 ## Upgrading to v9.4
 
 ### pydeck lighting

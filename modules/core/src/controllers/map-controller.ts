@@ -78,6 +78,8 @@ export type MapStateProps = {
   maxBoundsPadding?: ControllerProps['maxBoundsPadding'];
   /** Enables elastic bounds and zoom constraints during interaction. Defaults to `false`. */
   rubberBand?: boolean;
+  /** Globe navigation policy, forwarded by GlobeController. Default `'map'`. */
+  navigation?: ControllerProps['navigation'];
 };
 
 export type MapStateInternal = {
@@ -165,7 +167,8 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
 
       /** Normalize viewport props to fit map height into viewport */
       normalize = true,
-      rubberBand = false
+      rubberBand = false,
+      navigation = 'map'
     } = options;
     const {[CONSTRAINT_AROUND]: constraintAround} = options as typeof options & ConstraintAround;
 
@@ -195,6 +198,7 @@ export class MapState extends ViewState<MapState, MapStateProps, MapStateInterna
         maxBounds,
         maxBoundsPadding,
         rubberBand,
+        navigation,
         ...{[CONSTRAINT_AROUND]: constraintAround}
       },
       {

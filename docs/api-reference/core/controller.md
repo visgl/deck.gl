@@ -34,6 +34,16 @@ The base Controller class supports the following options:
 
 > **Mobile users:** See [Optimization for Mobile](../../developer-guide/tips-and-tricks.md#optimization-for-mobile) for CSS and browser event guards that help prevent native selection, tap highlight, and touch callout UI during repeated touch gestures.
 
+### `navigation` (string) {#navigation}
+
+Navigation behavior for [GlobeController](./globe-controller.md#navigation). Default `'map'`.
+
+- `'map'`: preserve bearing during panning, zooming, and inertia. With `bearing: 0`, north stays up.
+- `'ball'`: rotate the camera frame freely, allowing bearing to evolve through the poles.
+
+This option is only used by `GlobeController`. It does not change input bindings such as `dragMode`,
+disable explicit rotation gestures, or choose the zoom anchor (`zoomAround`).
+
 ## Methods
 
 > A controller is not meant to be instantiated by the application. The following methods are documented for creating custom controllers that extend the base Controller class.
@@ -71,9 +81,11 @@ See [Event object documentation](https://visgl.github.io/mjolnir.js/docs/api-ref
 
 Called by the view when the view state updates. This method handles adding/removing event listeners based on user options.
 
-#### `updateViewport(newMapState, extraProps, interactionState)` {#updateviewport}
+#### `updateViewport(newMapState, extraProps, interactionState, [oldViewState])` {#updateviewport}
 
 Called by the event handlers, this method updates internal state, and invokes `onViewStateChange` callback with a new map state.
+
+Pass `oldViewState` to preserve the previous view state when a controller configuration change resets its internal state. If omitted, the callback uses the current controller state's viewport props.
 
 #### `getCenter(event)` {#getcenter}
 
