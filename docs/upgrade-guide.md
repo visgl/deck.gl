@@ -85,6 +85,10 @@ To retain an old degree step `d`, set `resolution: 360 / d`; for example, the fo
 
 ### Layer
 
+#### External position buffers on WebGPU
+
+A `Buffer` supplied to a double-precision attribute, such as `getPosition`, now reads the same way on WebGPU as on WebGL. A `Buffer` alone, or with a `Float32Array` `value`, provides the high part only, with a zero `64Low` part. Previously WebGPU failed to bind a `Buffer` alone, and read the low part from the same `Buffer` when it was accompanied by a `Float32Array` `value`. If your `Buffer` holds interleaved high and low parts, specify `type: 'float64'`. A `Float64Array` `value` still declares this layout on both WebGL and WebGPU.
+
 #### Coordinate and projection constants
 
 Layer coordinate systems now use CRS strings, allowing applications to declare their data's CRS directly. Pass strings such as `'lnglat'`, `'cartesian'`, or `'meter-offsets'` to `coordinateSystem`; `COORDINATE_SYSTEM` and `_PROJECTION_MODE` are no longer exported.

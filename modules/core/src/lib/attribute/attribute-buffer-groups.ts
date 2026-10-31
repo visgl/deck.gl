@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import Attribute from './attribute';
-import {getStride} from './gl-utils';
+import {getStride, mergeZeroLowBufferLayouts} from './gl-utils';
 
 import {Buffer} from '@luma.gl/core';
 import {
@@ -282,11 +282,11 @@ export default class AttributeBufferGroups {
           emittedGroups.add(group.id);
         }
       } else {
-        layouts.push(attribute.getBufferLayout(modelInfo));
+        layouts.push(...attribute.getBufferLayouts(modelInfo));
       }
     }
 
-    return layouts;
+    return mergeZeroLowBufferLayouts(layouts);
   }
 
   private _getPackedBuffer(group: PackedGroup, upload: boolean): Buffer {

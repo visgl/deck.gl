@@ -7,7 +7,8 @@ import DataColumn, {
   DataColumnOptions,
   ShaderAttributeOptions,
   BufferAccessor,
-  DataColumnSettings
+  DataColumnSettings,
+  LogicalDataType
 } from './data-column';
 import assert from '../../utils/assert';
 import {createIterable, getAccessorFromBuffer} from '../../utils/iterable-utils';
@@ -67,7 +68,17 @@ export type AttributeOptions = DataColumnOptions<{
   shaderAttributes?: Record<string, Partial<ShaderAttributeOptions>>;
 }>;
 
-export type BinaryAttribute = Partial<BufferAccessor> & {value?: TypedArray; buffer?: Buffer};
+export type BinaryAttribute = Omit<Partial<BufferAccessor>, 'type'> & {
+  /**
+   * Vertex data type. On a double-precision attribute, `'float64'` declares that `buffer`
+   * holds deck.gl's interleaved layout: per row, `size` float32 high parts followed by
+   * `size` float32 low parts. Any other type reads the high parts only, with a zero low part.
+   * Without a type, a `Float64Array` `value` implies the interleaved layout.
+   */
+  type?: LogicalDataType;
+  value?: TypedArray;
+  buffer?: Buffer;
+};
 
 type AttributeInternalState = {
   startIndices: NumericArray | null;
@@ -81,6 +92,8 @@ type AttributeInternalState = {
   needsUpdate: string | boolean;
   needsRedraw: string | boolean;
   layoutChanged: boolean;
+  /** Whether the last published accessor reads the low part from a zero buffer */
+  hasZeroLowBuffer: boolean;
   updateRanges: number[][];
 };
 
@@ -88,7 +101,12 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
   /** Legacy approach to set attribute value - read `isConstant` instead for attribute state */
   constant: boolean = false;
 
-  constructor(device: Device, opts: AttributeOptions) {
+  constructor(
+    device: Device,
+    opts: AttributeOptions,
+    /** @internal Supplies a shared zero row owned and released by the attribute manager. */
+    private readonly getSharedZeroLowBuffer?: () => Buffer
+  ) {
     super(device, opts, {
       startIndices: null,
       constantValue: null,
@@ -98,6 +116,7 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       needsUpdate: true,
       needsRedraw: false,
       layoutChanged: false,
+      hasZeroLowBuffer: false,
       updateRanges: range.FULL
     });
 
@@ -133,8 +152,17 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     return this.state.layoutChanged;
   }
 
+  /**
+   * Publishes the accessor of the current data source.
+   * Callers must update `value`, `externalBuffer` and `constant` first, because
+   * `hasZeroLowBuffer` is derived from them and changes the number of buffer layouts.
+   */
   setAccessor(accessor: DataColumnSettings<AttributeOptions>) {
-    this.state.layoutChanged ||= !bufferLayoutEqual(accessor, this.getAccessor());
+    const {hasZeroLowBuffer} = this;
+    this.state.layoutChanged ||=
+      !bufferLayoutEqual(accessor, this.getAccessor()) ||
+      hasZeroLowBuffer !== this.state.hasZeroLowBuffer;
+    this.state.hasZeroLowBuffer = hasZeroLowBuffer;
     super.setAccessor(accessor);
   }
 
@@ -500,10 +528,26 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
         });
       }
     }
+    if (this.hasZeroLowBuffer) {
+      // External Buffers supply the high part only. GPUVectorModel binds these zero constants
+      // in their own zero-stride layout on WebGPU.
+      for (const definition of this._getAttributeZeroLowBufferLayout().attributes || []) {
+        const formatInfo = getGPUVectorFormatInfo(definition.format);
+        result[definition.attribute] = new GPUConstant({
+          format: definition.format,
+          value: new Float32Array(formatInfo.components)
+        });
+      }
+    }
     return result;
   }
 
-  /** Generate WebGPU-style buffer layout descriptor from this attribute */
+  /**
+   * Generate the WebGPU-style buffer layout descriptor of this attribute's own buffer.
+   * @note On WebGPU, an external Buffer bound to a double-precision attribute reads its low part
+   * from a separate zero buffer, which this layout does not declare. Use `getBufferLayouts()`,
+   * or `AttributeManager.getBufferLayouts()`, to build a `Model`'s complete buffer layout.
+   */
   getBufferLayout(
     /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
     modelInfo?: {isInstanced?: boolean}
@@ -537,6 +581,32 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       result.attributes.push(...map.attributes);
     }
     return result;
+  }
+
+  /**
+   * Generate all WebGPU-style buffer layout descriptors of this attribute, including the
+   * zero low-part layout of `hasZeroLowBuffer` attributes. Prefer this over `getBufferLayout()`.
+   */
+  getBufferLayouts(
+    /** A luma.gl Model-shaped object that supplies additional hint to attribute resolution */
+    modelInfo?: {isInstanced?: boolean}
+  ): BufferLayout[] {
+    const result = this.getBufferLayout(modelInfo);
+    if (!this.hasZeroLowBuffer) {
+      return [result];
+    }
+    return [result, {...this._getAttributeZeroLowBufferLayout(), stepMode: result.stepMode}];
+  }
+
+  /** Zero low-part layout of this attribute and its shader attributes */
+  private _getAttributeZeroLowBufferLayout(): BufferLayout {
+    const {shaderAttributes} = this.settings;
+    return this._getZeroLowBufferLayout(shaderAttributes && {[this.id]: null, ...shaderAttributes});
+  }
+
+  /** Borrow the manager's row; standalone attributes own their fallback buffer. */
+  protected override _getZeroLowBuffer(): Buffer {
+    return this.getSharedZeroLowBuffer?.() || super._getZeroLowBuffer();
   }
 
   /* eslint-disable max-depth, max-statements */
