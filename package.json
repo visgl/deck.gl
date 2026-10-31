@@ -66,6 +66,7 @@
     "@vitest/browser-playwright": "^4.1.0",
     "@vitest/coverage-v8": "^4.1.0",
     "autoprefixer": "^10.5.4",
+    "esbuild": "^0.28.1",
     "jscodeshift": "^17.3.0",
     "jsdom": "^20.0.0",
     "pixelmatch": "^7.1.0",
