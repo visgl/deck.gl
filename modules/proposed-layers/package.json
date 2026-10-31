@@ -1,5 +1,5 @@
 {
-  "name": "@deck.gl/webgpu-layers",
+  "name": "@deck.gl/proposed-layers",
   "version": "10.0.0-alpha.3",
   "private": true,
   "description": "WebGPU layer counterparts for GPU-resident data",

@@ -12,7 +12,7 @@ for (const [path, name] of [
   ['solid-polygon-layer', 'GPUSolidPolygonLayer'],
   ['text-layer', 'GPUTextLayer']
 ]) {
-  const specifier = `@deck.gl/webgpu-layers/${path}`;
+  const specifier = `@deck.gl/proposed-layers/${path}`;
   const esm = await import(specifier);
   const commonjs = require(specifier);
   assert.equal(esm[name]?.layerName, name);
