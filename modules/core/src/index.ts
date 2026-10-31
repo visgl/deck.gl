@@ -138,7 +138,7 @@ export type {WidgetProps} from './lib/widget';
 export type {WidgetPlacement} from './lib/widget-manager';
 export type {LightingEffectProps} from './effects/lighting/lighting-effect';
 export type {AmbientLightOptions} from './effects/lighting/ambient-light';
-export type {DirectionalLightOptions} from './effects/lighting/directional-light';
+export type {DirectionalLightOptions, ShadowBounds} from './effects/lighting/directional-light';
 export type {PointLightOptions} from './effects/lighting/point-light';
 export type {SunLightOptions} from './effects/lighting/sun-light';
 export type {
