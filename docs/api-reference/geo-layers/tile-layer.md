@@ -428,13 +428,14 @@ Properties:
 - `index` (object) - index of the tile. `index` is in the shape of `{x, y, z}`, corresponding to the integer values specifying the tile.
 - `id` (string) - unique string representation of index, as 'x-y-z', e.g. '0-2-3'.
 - `boundingBox` (number[2][2]) - bounding box of the tile in the shape of `[[minX, minY], [maxX, maxY]]`.
-- `content` (object) - the tile's cached content. `null` if the tile's initial load is pending, cancelled, or encountered an error.
+- `content` (object) - the tile's cached content. `null` if the initial load is pending, cancelled, failed, or successfully returned empty content.
 - `data` (object | Promise) - the tile's requested content. If the tile is loading, returns a Promise that resolves to the loaded content when loading is completed.
 - `parent` (Tile) - the nearest ancestor tile (a tile on a lower `z` that contains this tile), if present in the cache
 - `children` (Tile[]) - the nearest sub tiles (tiles on higher `z` that are contained by this tile), if present in the cache
 - `isSelected` (boolean) - if the tile is expected to show up in the current viewport
 - `isVisible` (boolean) - if the tile should be rendered
-- `isLoaded` (boolean) - if the content of the tile has been loaded
+- `isLoaded` (boolean) - whether the current request has settled, including empty results and errors
+- `isFailed` (boolean) - whether the current request settled with an error; false while pending, cancelled, or awaiting reload
 
 ## Tileset2D
 
@@ -478,6 +479,31 @@ const quadkeyTileLayer = new TileLayer({
   data: 'quadkey/{quadkey}.json',
   ...
 });
+```
+
+## Methods
+
+### `getTileLoadingState()` {#gettileloadingstate}
+
+Returns counts of request outcomes for the tiles selected for the current viewport, or `null` if the tileset has not selected tiles yet (before the first update or after the layer is finalized).
+
+Only selected tiles are counted. Placeholder tiles drawn from the cache while selected tiles load (see [`refinementStrategy`](#refinementstrategy)) are not. When the viewport selects no tiles, e.g. below `minZoom` without an `extent` or outside the `visibleMinZoom`/`visibleMaxZoom` range, all counts are `0`.
+
+The counts describe tile requests only. `layer.isLoaded` also waits for the sublayers rendered from successful tiles, so `pending === 0` does not mean that the layer is ready to render.
+
+Returns a `TileLoadingState` object:
+
+- `loaded` (number) - requests that succeeded, including empty results
+- `failed` (number) - requests that threw or rejected
+- `pending` (number) - requests not yet settled, including cancelled requests and tiles awaiting reload
+
+```ts
+import type {TileLoadingState} from '@deck.gl/geo-layers';
+
+const state: TileLoadingState | null = tileLayer.getTileLoadingState();
+if (state && state.pending === 0 && state.failed > 0) {
+  console.warn(`${state.failed} tiles failed to load`);
+}
 ```
 
 ## Source
