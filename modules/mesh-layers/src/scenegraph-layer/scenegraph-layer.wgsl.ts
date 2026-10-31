@@ -66,9 +66,11 @@ fn vertexMain(
   let clampedSize = clamp(originalSize, scenegraph.sizeMinPixels, scenegraph.sizeMaxPixels);
   let sizeRatio = select(0.0, clampedSize / originalSize, originalSize > 0.0);
 
-  let pos =
+  var pos =
     (instanceModelMatrix * scenePosition) * scenegraph.sizeScale * sizeRatio +
     inputs.instanceTranslation;
+
+  DECKGL_FILTER_VERTEX_SIZE(&pos, geometry);
 
   if (scenegraph.composeModelMatrix > 0.5) {
     geometry.normal = project_normal(worldNormal);

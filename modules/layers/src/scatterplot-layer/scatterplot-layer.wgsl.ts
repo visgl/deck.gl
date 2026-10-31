@@ -99,7 +99,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
     var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
-    // DECKGL_FILTER_SIZE(offset, geometry);
+    DECKGL_FILTER_VERTEX_SIZE(&offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
     varyings.position = vec4<f32>(varyings.position.x + clipPixels.x, varyings.position.y + clipPixels.y, varyings.position.z, varyings.position.w);
     geometry.position = vec4<f32>(
@@ -109,7 +109,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   } else {
     var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
-    // DECKGL_FILTER_SIZE(offset, geometry);
+    DECKGL_FILTER_VERTEX_SIZE(&offset, geometry);
     let projectedPosition = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
@@ -201,9 +201,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   // Apply premultiplied alpha as required by transparent canvas
-  fragColor = deckgl_premultiplied_alpha(fragColor);
-
   DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
+  fragColor = deckgl_premultiplied_alpha(fragColor);
   return fragColor;
   // return vec4<f32>(0, 0, 1, 1);
 }

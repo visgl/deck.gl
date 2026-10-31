@@ -286,15 +286,14 @@ fn vertexMain(
     arc.widthMinPixels,
     arc.widthMaxPixels
   );
-#ifdef ANTIALIASING
   var offset = getExtrusionOffset(
-#else
-  let offset = getExtrusionOffset(
-#endif
     (nextClip.xy - currentClip.xy) * indexDirection,
     segmentSide,
     widthPixels
   );
+  var size = vec3<f32>(offset, 0.0);
+  DECKGL_FILTER_VERTEX_SIZE(&size, geometry);
+  offset = size.xy;
 #ifdef ANTIALIASING
   let halfWidthPixels = length(offset);
   if (halfWidthPixels > 0.0) {

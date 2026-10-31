@@ -259,12 +259,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   geometry.worldPosition = currPosition;
 
-  let widthPixels =
+  var widthPixels =
     clamp(
       project_unit_size_to_pixel(attributes.instanceStrokeWidths * path.widthScale, path.widthUnits),
       path.widthMinPixels,
       path.widthMaxPixels
     ) / 2.0;
+  var size = vec3<f32>(widthPixels, widthPixels, 0.0);
+  DECKGL_FILTER_VERTEX_SIZE(&size, geometry);
+  widthPixels = size.x;
 
   if (path.billboard != 0.0) {
 #ifdef DASH_ENABLED

@@ -88,7 +88,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.instancePositions.xy,
       attributes.instancePositions.z + elevation
     );
-  let offset = getOffset(attributes.positions, strokeOffsetRatio, dotRadius, rotationMatrix);
+  var offset = getOffset(attributes.positions, strokeOffsetRatio, dotRadius, rotationMatrix);
+  DECKGL_FILTER_VERTEX_SIZE(&offset, geometry);
   let projected = project_position_to_clipspace_and_commonspace(
     centroidPosition,
     attributes.instancePositions64Low,
@@ -176,7 +177,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       attributes.instancePositions.xy,
       attributes.instancePositions.z + elevation
     );
-  let offset = getOffset(attributes.positions, strokeOffsetRatio, dotRadius, rotationMatrix);
+  var offset = getOffset(attributes.positions, strokeOffsetRatio, dotRadius, rotationMatrix);
+  DECKGL_FILTER_VERTEX_SIZE(&offset, geometry);
   let projected = project_position_to_clipspace_and_commonspace(
     centroidPosition,
     attributes.instancePositions64Low,

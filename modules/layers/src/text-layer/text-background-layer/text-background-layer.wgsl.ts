@@ -109,7 +109,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     );
     geometry.position = projected.commonPosition;
     var position = projected.clipPosition;
-    let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
+    var size = vec3<f32>(pixelOffset, 0.0);
+    DECKGL_FILTER_VERTEX_SIZE(&size, geometry);
+    let clipOffset = project_pixel_size_to_clipspace(size.xy);
     position = vec4<f32>(
       position.x + clipOffset.x,
       position.y + clipOffset.y,
@@ -122,6 +124,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     if (text.flipY > 0.5) {
       offsetCommon.y = offsetCommon.y * -1.0;
     }
+    DECKGL_FILTER_VERTEX_SIZE(&offsetCommon, geometry);
     let projected = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,

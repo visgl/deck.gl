@@ -6,14 +6,9 @@ import type {Buffer, Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {LayerExtension, log} from '@deck.gl/core';
-import {
-  CategoryBitMask,
-  DataFilterModuleProps,
-  Defines,
-  dataFilter,
-  dataFilter64
-} from './shader-module';
+import {CategoryBitMask, DataFilterModuleProps, Defines} from './shader-module';
 import * as aggregator from './aggregator';
+import {createDataFilterPlugin} from './shader-plugin';
 import {
   addDataFilterAttributes,
   addDataFilterCountingAttributes,
@@ -109,6 +104,7 @@ export type DataFilterExtensionOptions = {
   fp64?: boolean;
   /**
    * If `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback.
+   * Requires WebGL; enabling item counting on WebGPU throws an error.
    * @default `false`.
    */
   countItems?: boolean;
@@ -157,10 +153,10 @@ export default class DataFilterExtension extends LayerExtension<
       defines.DATAFILTER_DOUBLE = Boolean(fp64);
     }
 
-    const module = fp64 ? dataFilter64 : dataFilter;
-    module.uniformTypes = module.uniformTypesFromOptions(extension.opts);
-
-    return {modules: [module], defines};
+    if (this.context.device.type === 'webgpu' && extension.opts.countItems) {
+      throw new Error('DataFilterExtension countItems requires WebGL');
+    }
+    return {plugins: [createDataFilterPlugin(extension.opts)], defines};
   }
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
@@ -172,6 +168,9 @@ export default class DataFilterExtension extends LayerExtension<
     }
 
     const {device} = this.context;
+    if (device.type === 'webgpu' && extension.opts.countItems) {
+      throw new Error('DataFilterExtension countItems requires WebGL');
+    }
     if (attributeManager && extension.opts.countItems) {
       const useFloatTarget = aggregator.supportsFloatTarget(device);
       addDataFilterCountingAttributes(attributeManager, useFloatTarget);
