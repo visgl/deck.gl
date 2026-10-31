@@ -22,7 +22,7 @@ import {
   type AtmosphereProps,
   type ShaderModule
 } from '@luma.gl/shaders';
-import {getMeterOffsetPosition} from '@deck.gl-community/gpu-layers';
+import {getMeterOffsetPosition} from '@deck.gl/proposals/layers';
 import {makeCityMesh, type CityFeature} from '../river-district-data';
 import {RiverfrontShadowEffect} from './shadow-effect';
 import {getRiverfrontSkyLighting} from '../riverfront-sky-lighting';

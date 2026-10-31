@@ -12,9 +12,22 @@ for (const [path, name] of [
   ['solid-polygon-layer', 'GPUSolidPolygonLayer'],
   ['text-layer', 'GPUTextLayer']
 ]) {
-  const specifier = `@deck.gl/proposed-layers/${path}`;
+  const specifier = `@deck.gl/proposals/layers/${path}`;
   const esm = await import(specifier);
   const commonjs = require(specifier);
   assert.equal(esm[name]?.layerName, name);
   assert.equal(commonjs[name]?.layerName, name);
+}
+
+for (const [specifier, names] of [
+  ['@deck.gl/proposals/layers', ['GPUScatterplotLayer', 'ArrowScatterplotLayer', 'SkyLayer']],
+  ['@deck.gl/proposals/effects', ['SceneBufferEffect', 'ShaderPassEffect', 'GPUGraphDeckEffect']],
+  ['@deck.gl/proposals/effects/query', ['LuSpatialGeographicPointQueryEffect']]
+]) {
+  const esm = await import(specifier);
+  const commonjs = require(specifier);
+  for (const name of names) {
+    assert.equal(typeof esm[name], 'function', `${specifier}: ${name}`);
+    assert.equal(typeof commonjs[name], 'function', `${specifier}: ${name}`);
+  }
 }

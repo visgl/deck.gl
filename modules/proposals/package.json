@@ -1,0 +1,69 @@
+{
+  "name": "@deck.gl/proposals",
+  "version": "10.0.0-alpha.3",
+  "private": true,
+  "description": "Private experimental deck.gl layers and effects",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/visgl/deck.gl.git"
+  },
+  "type": "module",
+  "exports": {
+    "./layers": {
+      "types": "./dist/layers/index.d.ts",
+      "import": "./dist/layers/index.js",
+      "require": "./dist/layers/index.cjs"
+    },
+    "./layers/path-layer": {
+      "types": "./dist/layers/path-layer/path-layer.d.ts",
+      "import": "./dist/layers/path-layer/path-layer.js",
+      "require": "./dist/layers/path-layer/path-layer.cjs"
+    },
+    "./layers/polygon-layer": {
+      "types": "./dist/layers/polygon-layer/polygon-layer.d.ts",
+      "import": "./dist/layers/polygon-layer/polygon-layer.js",
+      "require": "./dist/layers/polygon-layer/polygon-layer.cjs"
+    },
+    "./layers/solid-polygon-layer": {
+      "types": "./dist/layers/solid-polygon-layer/solid-polygon-layer.d.ts",
+      "import": "./dist/layers/solid-polygon-layer/solid-polygon-layer.js",
+      "require": "./dist/layers/solid-polygon-layer/solid-polygon-layer.cjs"
+    },
+    "./layers/text-layer": {
+      "types": "./dist/layers/text-layer/text-layer.d.ts",
+      "import": "./dist/layers/text-layer/text-layer.js",
+      "require": "./dist/layers/text-layer/text-layer.cjs"
+    },
+    "./effects": {
+      "types": "./dist/effects/index.d.ts",
+      "import": "./dist/effects/index.js",
+      "require": "./dist/effects/index.cjs"
+    },
+    "./effects/query": {
+      "types": "./dist/effects/query/index.d.ts",
+      "import": "./dist/effects/query/index.js",
+      "require": "./dist/effects/query/index.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@deck.gl/core": "9.4.0-beta.4",
+    "@luma.gl/core": "10.0.0-alpha.6",
+    "@luma.gl/engine": "10.0.0-alpha.6",
+    "@luma.gl/gpgpu": "10.0.0-alpha.6",
+    "@luma.gl/anari": "10.0.0-alpha.6",
+    "@luma.gl/graph": "10.0.0-alpha.6",
+    "@luma.gl/shaders": "10.0.0-alpha.6",
+    "@math.gl/core": "5.0.0-beta.1",
+    "@math.gl/earth": "5.0.0-beta.1"
+  },
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  }
+}
