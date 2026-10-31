@@ -8,6 +8,10 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
+### ClipExtension shader plugins
+
+`ClipExtension` now uses luma.gl ShaderPlugins on both backends. WebGPU clipping is no longer hard-coded into individual layers, and both clipping modes compose with `BrushingExtension`.
+
 ### WebGPU brushing
 
 `BrushingExtension` now uses luma.gl ShaderPlugins for WebGL and WebGPU. luma.gl

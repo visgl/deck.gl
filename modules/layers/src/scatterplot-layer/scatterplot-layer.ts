@@ -16,7 +16,6 @@ import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniform
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
-import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -190,13 +189,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       fs,
       source: getShaderWGSL(useRowIndexes),
       defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
-      modules: [
-        project32,
-        color,
-        picking,
-        scatterplotUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, picking, scatterplotUniforms]
     });
   }
 

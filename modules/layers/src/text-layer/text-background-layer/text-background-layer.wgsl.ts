@@ -102,11 +102,13 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   }
 
   if (textBackground.billboard > 0.5) {
-    var position = project_position_to_clipspace(
+    let projected = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
       vec3<f32>(0.0)
     );
+    geometry.position = projected.commonPosition;
+    var position = projected.clipPosition;
     let clipOffset = project_pixel_size_to_clipspace(pixelOffset);
     position = vec4<f32>(
       position.x + clipOffset.x,
@@ -120,11 +122,13 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     if (text.flipY > 0.5) {
       offsetCommon.y = offsetCommon.y * -1.0;
     }
-    varyings.position = project_position_to_clipspace(
+    let projected = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
       offsetCommon
     );
+    geometry.position = projected.commonPosition;
+    varyings.position = projected.clipPosition;
   }
 
   varyings.vFillColor = vec4<f32>(
