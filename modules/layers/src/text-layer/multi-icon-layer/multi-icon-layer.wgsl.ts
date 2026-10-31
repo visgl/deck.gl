@@ -260,6 +260,8 @@ fn vertexMain(inp: Attributes) -> Varyings {
   outp.vColorMode = inp.instanceColorModes;
   outp.pickingColor = picking_getPickingColorFromIndex(inp.rowIndexes);
 
+  DECKGL_FILTER_POSITION(&outp.position, geometry);
+
   return outp;
 }
 
@@ -294,7 +296,9 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
     }
-    return vec4<f32>(inp.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(inp.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   ${
@@ -328,6 +332,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return fragColor;
 }
 `;

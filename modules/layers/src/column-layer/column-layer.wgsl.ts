@@ -111,13 +111,17 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     baseColor.a * layer.opacity
   );
 
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0);
-  return deckgl_premultiplied_alpha(varyings.color);
+  var extensionColor = varyings.color;
+  DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+  return deckgl_premultiplied_alpha(extensionColor);
 }
 `;
 
@@ -186,6 +190,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.cameraPosition = project.cameraPosition;
   varyings.positionCommonspace = projected.commonPosition;
 
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
@@ -208,6 +214,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     );
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

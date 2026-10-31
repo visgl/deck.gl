@@ -73,6 +73,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.normal = geometry.normal;
   varyings.positionCommon = geometry.position.xyz;
   varyings.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
   return varyings;
 }
 
@@ -84,7 +85,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    return vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   var color = varyings.color;
@@ -116,6 +119,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;

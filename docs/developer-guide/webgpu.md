@@ -85,11 +85,11 @@ The table below covers the public layer exports from the layer packages. It is d
 
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `ClipExtension` has initial WebGPU support on the primitive layers used by the default `MVTLayer` rendering path.
+The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` uses luma.gl shader plugins on the standard rendering primitives; custom and aggregation-specific shaders still need compatible hooks. `ClipExtension` has initial WebGPU support on the primitive layers used by the default `MVTLayer` rendering path.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
-| `@deck.gl/extensions` | `BrushingExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `BrushingExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `Fp64Extension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ❌ |

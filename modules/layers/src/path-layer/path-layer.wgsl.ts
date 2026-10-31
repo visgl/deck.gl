@@ -407,6 +407,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     attributes.instanceColors.rgb,
     attributes.instanceColors.a * layer.opacity
   );
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
   return varyings;
 }
 
@@ -489,9 +490,12 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // DECKGL_FILTER_COLOR
   clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
+  DECKGL_FILTER_FRAGMENT_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 #else
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  var color = varyings.vColor;
+  DECKGL_FILTER_FRAGMENT_COLOR(&color, fragmentGeometry);
+  return deckgl_premultiplied_alpha(color);
 #endif
 }
 `;

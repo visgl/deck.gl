@@ -313,6 +313,7 @@ fn vertexMain(
   output.uv = geometry.uv;
   output.pickingColor = geometry.pickingColor;
   output.isValid = isValid;
+  DECKGL_FILTER_POSITION(&output.position, geometry);
   return output;
 }
 
@@ -339,11 +340,14 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // two outer edges of the strip.
   color.a *= smoothedge(0.0, edgePixels);
 #endif
+
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    return vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
@@ -359,6 +363,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
       }
     }
   }
+  DECKGL_FILTER_FRAGMENT_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;

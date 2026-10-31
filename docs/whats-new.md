@@ -8,6 +8,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
+### WebGPU brushing
+
+`BrushingExtension` now uses luma.gl ShaderPlugins for WebGL and WebGPU. luma.gl
+handles the added vertex input and visibility varying; deck.gl retains accessors,
+pointer events, and attribute management. Brushing composes with `ClipExtension`
+on its supported primitives, including picking and live accessor updates.
+
 ### Custom projections (Experimental)
 
 [`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.

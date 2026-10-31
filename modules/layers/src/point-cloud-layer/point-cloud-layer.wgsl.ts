@@ -84,6 +84,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // DECKGL_FILTER_COLOR(vColor, geometry);
   varyings.pickingColor = geometry.pickingColor;
 
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
@@ -114,7 +116,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    return vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   if (picking.isHighlightActive > 0.5) {
@@ -137,6 +141,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Apply premultiplied alpha as required by transparent canvas
   fragColor = deckgl_premultiplied_alpha(fragColor);
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return fragColor;
 }
 `;
