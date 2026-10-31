@@ -71,15 +71,6 @@ streaming and ownership deterministic: adapters append batches explicitly, while
 neither combines nor repacks them. Picking uses global row indices and attaches physical batch
 provenance as `PickingInfo.gpuVector`.
 
-Variable geometry stays GPU-native as well:
-
-- `GPUPathLayer` consumes `GPUVector<'vertex-list<float32xN>'>` and expands segments on the GPU.
-- `GPUSolidPolygonLayer` consumes tessellated position, row-index, color, and triangle-index
-  GPUVectors prepared by an adapter.
-- `GPUPolygonLayer` composes the solid fill and path outline cores without copying either input.
-- `GPUTextLayer` consumes caller-owned `GPUTextData`, whose chosen strategy owns glyph GPUVectors
-  and atlas metadata.
-
 GeoJSON and GeoArrow are source formats rather than rendering primitives. Their adapters split
 features into these GPU cores. The same rule applies to future classic JavaScript and classic
 binary compatibility: each input family converts or borrows GPUVectors and delegates to the same

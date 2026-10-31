@@ -16,7 +16,8 @@ import {
 } from '@deck.gl-community/arrow-layers';
 import {ArrowPolygonRenderer} from '@luma.gl/engine/arrow';
 import {makeArrowFixedSizeListVector, makeGPUVectorFromArrow} from '@luma.gl/gpgpu/arrow';
-import {GPUPathLayer, GPUSolidPolygonLayer} from '@deck.gl-community/gpu-layers';
+import {GPUPathLayer} from '@deck.gl/proposed-layers/path-layer';
+import {GPUSolidPolygonLayer} from '@deck.gl/proposed-layers/solid-polygon-layer';
 import {expect, it} from 'vitest';
 import type {Device} from '@luma.gl/core';
 import type {GPUVectorModel} from '@luma.gl/engine';

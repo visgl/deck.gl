@@ -4,8 +4,10 @@
 
 import {CompositeLayer, type Color, type LayerProps} from '@deck.gl/core';
 import type {GPUVector, VertexList} from '@luma.gl/gpgpu/gpu-data';
-import {GPUPathLayer} from './gpu-path-layer';
-import {GPUSolidPolygonLayer} from './gpu-solid-polygon-layer';
+import {GPUPathLayer} from '../path-layer/path-layer';
+import {GPUSolidPolygonLayer} from '../solid-polygon-layer/solid-polygon-layer';
+
+export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native filled-and-stroked polygon props. All input vectors are borrowed. */
 export type GPUPolygonLayerProps = Omit<LayerProps, 'data'> & {

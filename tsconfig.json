@@ -24,6 +24,10 @@
     "paths": {
       "@luma.gl/core/webgl-constants": ["./node_modules/@luma.gl/core/dist/webgl-constants"],
       "@luma.gl/gpgpu/webgpu": ["./node_modules/@luma.gl/gpgpu/dist/operations/webgpu/index"],
+      "@deck.gl/proposed-layers/path-layer": ["./modules/proposed-layers/src/path-layer/path-layer.ts"],
+      "@deck.gl/proposed-layers/polygon-layer": ["./modules/proposed-layers/src/polygon-layer/polygon-layer.ts"],
+      "@deck.gl/proposed-layers/solid-polygon-layer": ["./modules/proposed-layers/src/solid-polygon-layer/solid-polygon-layer.ts"],
+      "@deck.gl/proposed-layers/text-layer": ["./modules/proposed-layers/src/text-layer/text-layer.ts"],
       "@deck.gl-community/gpu-layers": ["./modules/deck-gpu-layers/src"],
       "@deck.gl-community/arrow-layers": ["./modules/deck-arrow-layers/src"],
       "@deck.gl/aggregation-layers": ["./modules/aggregation-layers/src"],
