@@ -23,7 +23,7 @@ import {
   type HeightFogProps,
   type ShaderModule
 } from '@luma.gl/shaders';
-import {getMeterOffsetPosition, surfaceBuffer} from '@deck.gl-community/gpu-layers';
+import {getMeterOffsetPosition, surfaceBuffer} from '@deck.gl/proposals/layers';
 import {makeCityMesh, type CityFeature} from './river-district-data';
 
 type RiverDistrictLayerProps = LayerProps & {

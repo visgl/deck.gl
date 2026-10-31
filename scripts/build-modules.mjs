@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import './verify-private-modules.mjs';
+
 import {execFileSync, spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {basename, dirname, join} from 'node:path';
@@ -13,7 +15,7 @@ const buildOrderScript = join(
   dirname(require.resolve('@vis.gl/dev-tools')),
   'helpers/build-order.js'
 );
-const privateModules = new Set(['deck-gpu-layers', 'proposed-layers', 'deck-arrow-layers']);
+const privateModules = new Set(['proposals']);
 const modules = execFileSync(process.execPath, [buildOrderScript], {encoding: 'utf8'})
   .trim()
   .split(/\s+/)

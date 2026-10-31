@@ -7,7 +7,7 @@ import {
   LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_COUNTER_IDS,
   LU_SPATIAL_GEOGRAPHIC_POINT_QUERY_GRAPH_IDS,
   type LuSpatialGeographicPointQueryStats
-} from '@deck.gl-community/gpu-layers/query';
+} from '@deck.gl/proposals/effects/query';
 import {GPUCommandGraphInspectorPanel} from '../shared/gpu-command-graph-inspector-panel';
 import {
   getTaxiPoint,
