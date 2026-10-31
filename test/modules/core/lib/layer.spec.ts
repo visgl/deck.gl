@@ -584,8 +584,8 @@ test('Layer#updateModules', async () => {
     }
 
     _getModel() {
+      // Custom layers may omit shaderAssembler and rely on deck.gl's default for its hooks
       return new Model(this.context.device, {
-        shaderAssembler: this.context.shaderAssembler,
         vs: `\
   #version 300 es
   void main() {
@@ -619,6 +619,11 @@ test('Layer#updateModules', async () => {
         },
 
         onAfterUpdate: ({layer}) => {
+          expect(
+            layer.getShaders({}).shaderAssembler,
+            'getShaders returns the shader assembler of the layer context'
+          ).toBe(layer.context.shaderAssembler);
+
           let modelUniforms = layer.state.model.shaderInputs.getUniformValues();
           expect(
             modelUniforms.picking.highlightColor,

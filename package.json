@@ -34,6 +34,7 @@
     "test-ci": "RENDER_TEST_DEVICE=webgl ocular-test node headless render --coverage",
     "test-browser": "ocular-test browser",
     "test-tape-compat": "ocular-test tape-compat",
+    "test-packages": "node scripts/verify-packages.mjs",
     "test-website": "cd website && yarn && yarn test-build && cd ..",
     "bench": "vite --config test/bench/vite.config.mjs --open /browser.html",
     "metrics": "ocular-metrics",
@@ -79,8 +80,7 @@
     "sharp": "^0.35.4",
     "tape": "^5.10.2",
     "vite-bundle-analyzer": "^1.3.6",
-    "vitest": "^4.1.0",
-    "geotiff": "^2.1.0"
+    "vitest": "^4.1.0"
   },
   "pre-commit": [
     "test-fast",
