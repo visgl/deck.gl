@@ -4,7 +4,7 @@
 
 import {describe, expect, test} from 'vitest';
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';

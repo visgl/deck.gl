@@ -6,9 +6,9 @@ import {expect, it} from 'vitest';
 import {WebMercatorViewport, _GlobeViewport, project32} from '@deck.gl/core';
 import {Buffer, Texture} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {getTestDevice} from '@luma.gl/test-utils';
+import {getTestDevice} from '@luma.gl/core/test-utils';
 import {getMeterOffsetPosition} from '../../src/projection/meter-offset-position';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const cameraTest = {
   name: 'cameraTest',

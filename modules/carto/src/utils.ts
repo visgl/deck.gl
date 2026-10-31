@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {BinaryFeatureCollection, BinaryPointFeature} from '@loaders.gl/schema';
+import {BinaryFeatureCollection, BinaryPointFeature} from '@loaders.gl/core/schema';
 import {log} from '@deck.gl/core';
 import type {Properties, NumericProps} from './layers/schema/spatialjson-utils';
 

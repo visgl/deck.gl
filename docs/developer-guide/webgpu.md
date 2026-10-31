@@ -19,7 +19,7 @@ For composite and wrapper layers, statuses are based on their default or general
 deck.gl needs to be set up to use a luma.gl device that uses the luma.gl `webgpuAdapter`.
 
 ```ts
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 
 new Deck({
   deviceProps: {

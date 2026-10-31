@@ -13,7 +13,7 @@ import {
 } from '@deck.gl/core';
 import {assert, type Buffer, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import type {FlowParticleStepResult} from '@luma.gl/experimental';
+import type {FlowParticleStepResult} from '@luma.gl/graph/experimental/simulation';
 import {flowStreak, SOURCE, VERTEX_SHADER, FRAGMENT_SHADER} from './flow-particle-layer-shaders';
 
 export type FlowParticleLayerProps = LayerProps & {

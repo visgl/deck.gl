@@ -18,13 +18,6 @@ export {
   type GPUBitmapBounds,
   type GPUBitmapLayerProps
 } from './layers/gpu-bitmap-layer';
-export {GPUPathLayer, type GPUPathLayerProps} from './layers/gpu-path-layer';
-export {
-  GPUSolidPolygonLayer,
-  type GPUSolidPolygonLayerProps
-} from './layers/gpu-solid-polygon-layer';
-export {GPUTextLayer, type GPUTextLayerProps} from './layers/gpu-text-layer';
-export {GPUPolygonLayer, type GPUPolygonLayerProps} from './layers/gpu-polygon-layer';
 export type {GPUVectorLayerPickingInfo} from './layers/gpu-vector-layer-utils';
 
 export {FlowParticleLayer, type FlowParticleLayerProps} from './layers/flow-particle-layer';

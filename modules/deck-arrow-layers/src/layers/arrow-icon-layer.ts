@@ -4,7 +4,7 @@
 
 import {CompositeLayer, type Color, type LayerContext, type UpdateParameters} from '@deck.gl/core';
 import {GPUIconLayer, type GPUIconLayerProps} from '@deck.gl-community/gpu-layers';
-import {makeArrowFixedSizeListVector} from '@luma.gl/arrow';
+import {makeArrowFixedSizeListVector} from '@luma.gl/gpgpu/arrow';
 import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
 import {
   DataType,

@@ -585,6 +585,7 @@ test('Layer#updateModules', async () => {
 
     _getModel() {
       return new Model(this.context.device, {
+        shaderAssembler: this.context.shaderAssembler,
         vs: `\
   #version 300 es
   void main() {

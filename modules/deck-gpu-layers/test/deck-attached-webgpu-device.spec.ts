@@ -5,8 +5,8 @@
 import {Deck, Layer, OrthographicView} from '@deck.gl/core';
 import {Buffer, Texture, type Device, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {ShaderAssembler} from '@luma.gl/shadertools';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {WGSLShaderAssembler} from '@luma.gl/shaders';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {expect, it} from 'vitest';
 
 const VIEWPORT_SIZE = 16;
@@ -38,7 +38,7 @@ class FullViewportLayer extends Layer {
     const model = new Model(this.context.device, {
       id: `${this.id}-model`,
       source: FULL_VIEWPORT_SHADER,
-      shaderAssembler: ShaderAssembler.getDefaultShaderAssembler('wgsl'),
+      shaderAssembler: new WGSLShaderAssembler(),
       topology: 'triangle-list',
       vertexCount: 3,
       bufferLayout: [],

@@ -15,11 +15,13 @@ import {
 import type {RenderPass} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {GPUConstant, type GPUVector, type VertexList} from '@luma.gl/gpgpu/gpu-data';
-import {PolygonAttributeModel} from '@luma.gl/experimental/models';
+import {PolygonAttributeModel} from '@luma.gl/engine/models';
 import {
   getGPUVectorPickingProvenance,
   type GPUVectorLayerPickingInfo
-} from './gpu-vector-layer-utils';
+} from '../utils/gpu-vector-picking';
+
+export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native tessellated filled-polygon props. Input vectors are borrowed. */
 export type GPUSolidPolygonLayerProps = Omit<LayerProps, 'data'> & {

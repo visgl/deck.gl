@@ -3,12 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  getArrowVectorByteLength,
-  makeArrowFixedSizeListVector,
   type ArrowTextRendererSource,
   type CharacterColorDataType,
   type RowColorColumnDataType
-} from '@luma.gl/arrow';
+} from '@luma.gl/engine/arrow';
+import {getArrowVectorByteLength, makeArrowFixedSizeListVector} from '@luma.gl/gpgpu/arrow';
 import * as arrow from 'apache-arrow';
 
 export const LABEL_COLUMN_COUNT = 400;

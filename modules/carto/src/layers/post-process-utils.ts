@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Framebuffer, TextureProps} from '@luma.gl/core';
-import type {ShaderPass} from '@luma.gl/shadertools';
+import type {ShaderPass} from '@luma.gl/shaders';
 import {
   _ConstructorOf,
   CompositeLayer,

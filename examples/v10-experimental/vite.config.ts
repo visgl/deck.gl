@@ -23,7 +23,7 @@ export default defineConfig({
       '@luma.gl/core',
       '@luma.gl/engine',
       '@luma.gl/gpgpu',
-      '@luma.gl/shadertools',
+      '@luma.gl/shaders',
       'apache-arrow',
       'preact'
     ]

@@ -6,6 +6,56 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### luma.gl v10 alpha.6
+
+The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
+`@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
+`@luma.gl/core/webgpu`. WebGL constants and debugging tools move to
+`@luma.gl/core/webgl-constants` and `@luma.gl/core/webgl-debug`.
+
+Import `postProcessGLTF` from `@luma.gl/engine/gltf`; the legacy loaders.gl postprocessor
+dependency is no longer needed.
+
+`@luma.gl/shadertools` becomes `@luma.gl/shaders`. The glTF, effects, text, splats, and
+Arrow rendering integrations move to the corresponding `@luma.gl/engine` subpaths.
+Arrow conversion helpers move to `@luma.gl/gpgpu/arrow`. Test utilities move to
+`@luma.gl/core/test-utils`. The Arrow integration is now published,
+so website builds no longer require a pinned luma.gl source checkout.
+
+`ShaderAssembler.getDefaultShaderAssembler()` is removed. Import `getShaderAssembler`
+from `@deck.gl/core` and call `getShaderAssembler('glsl')` or `getShaderAssembler('wgsl')`
+to register shared modules and hooks. Deck installs its GLSL assembler as the default
+for luma models, preserving custom WebGL layers that construct models directly.
+For language-specific custom models, spread `this.getShaders(...)` into model options
+or pass `shaderAssembler: this.context.shaderAssembler`. Without deck's assembler,
+shader modules can throw `Unknown shader hook vs:DECKGL_FILTER_GL_POSITION`.
+
+`Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
+of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
+
+### loaders.gl and math.gl v5 beta
+
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.1`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+
+| Previous import | Replacement import |
+| --- | --- |
+| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core` |
+| `@loaders.gl/csv`, `@loaders.gl/json` | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json` |
+| `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
+| `@loaders.gl/las`, `@loaders.gl/ply` | Corresponding subpaths of `@loaders.gl/pointclouds` |
+| `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
+| `@loaders.gl/tiles` (3D tiles types and sources) | `@loaders.gl/tiles-3d` |
+| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
+| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain/index`, `@loaders.gl/ogc/wms` |
+| `@math.gl/types` | `@math.gl/core` |
+| `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry`, `@math.gl/geometry/culling` |
+| `@math.gl/projection` | `@math.gl/geospatial/projection` |
+| `@math.gl/sun` | `@math.gl/earth/sun` |
+
+Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
+
+The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
+
 ### Viewport
 
 #### CRS configuration
@@ -44,6 +94,10 @@ The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` 
 #### Coordinate origins
 
 Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
+
+#### A5Layer
+
+`A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
 
 #### projectPosition
 
@@ -304,7 +358,7 @@ The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module)
 See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
 
 Layers need to be modified:
-- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- `getShaders()` needs to additionally return the `ShaderModule` that defines the UBO
 - Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
 
 For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
@@ -632,7 +686,7 @@ Note that this flag may be removed in a future release.
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supported. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 - If a composite layer has `visible: false`, all of the layers generated by it will also be hidden regardless of their own `visible` prop. In previous versions, a descendant layer may be visible as long as it has `visible: true`, which often led to confusing behavior if a composite layer does not propagate its props correctly.
 

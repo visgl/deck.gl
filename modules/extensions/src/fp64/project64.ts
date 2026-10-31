@@ -3,8 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
-import {fp64} from '@luma.gl/shadertools';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import {fp64} from '@luma.gl/shaders';
+import type {ShaderModule} from '@luma.gl/shaders';
 const {fp64ify, fp64ifyMatrix4} = fp64;
 import {project, _memoize as memoize} from '@deck.gl/core';
 

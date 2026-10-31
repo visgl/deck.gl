@@ -14,18 +14,15 @@ import {
   ArrowTextLayer,
   ArrowTripsLayer
 } from '@deck.gl-community/arrow-layers';
-import {
-  ArrowPolygonRenderer,
-  makeArrowFixedSizeListVector,
-  makeGPUVectorFromArrow
-} from '@luma.gl/arrow';
-import {GPUPathLayer, GPUSolidPolygonLayer} from '@deck.gl-community/gpu-layers';
+import {ArrowPolygonRenderer} from '@luma.gl/engine/arrow';
+import {makeArrowFixedSizeListVector, makeGPUVectorFromArrow} from '@luma.gl/gpgpu/arrow';
+import {GPUPathLayer} from '@deck.gl/proposed-layers/path-layer';
+import {GPUSolidPolygonLayer} from '@deck.gl/proposed-layers/solid-polygon-layer';
 import {expect, it} from 'vitest';
 import type {Device} from '@luma.gl/core';
-import type {Model} from '@luma.gl/engine';
-import {ShaderAssembler} from '@luma.gl/shadertools';
-import {buildBitmapFontAtlas} from '@luma.gl/text';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import type {GPUVectorModel} from '@luma.gl/engine';
+import {buildBitmapFontAtlas} from '@luma.gl/engine/text';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';
 import {
   Field,
@@ -52,10 +49,8 @@ const TEXT_FONT_ATLAS = buildBitmapFontAtlas({
   characterSet: ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-'
 });
 let sharedStorageDeck: {deck: Deck; parent: HTMLDivElement} | null = null;
-let restoreLegacyDeckShaderAssembler: (() => void) | null = null;
 
 afterAll(() => {
-  restoreLegacyDeckShaderAssembler?.();
   finalizeSharedStorageDeck();
 });
 
@@ -526,7 +521,7 @@ it('Arrow deck layers return source row indices from Deck picking', async () => 
     layer: Layer;
     initialViewState: {target: [number, number]; zoom: number};
     getError?: () => unknown;
-    inspectModel?: (model: Model) => void;
+    inspectModel?: (model: GPUVectorModel) => void;
   }> = [
     {layer: pathLayer, initialViewState: {target: [0, 0], zoom: 8}},
     {
@@ -897,7 +892,7 @@ async function pickFirstLayerObject(
   layer: Layer,
   initialViewState: {target: [number, number]; zoom: number},
   getError: () => unknown = () => undefined,
-  inspectModel: (model: Model) => void = () => {}
+  inspectModel: (model: GPUVectorModel) => void = () => {}
 ): Promise<PickingInfo | null> {
   deck.setProps({layers: [layer], viewState: initialViewState});
 
@@ -954,31 +949,7 @@ function createTestDeck(device?: Device): {deck: Deck; parent: HTMLDivElement} {
     ...(device ? {device} : {}),
     views: new OrthographicView({id: 'main'}),
     initialViewState: {target: [0, 0], zoom: 0},
-    layers: [],
-    onDeviceInitialized: initializedDevice => {
-      restoreLegacyDeckShaderAssembler?.();
-
-      const getDefaultShaderAssembler = ShaderAssembler.getDefaultShaderAssembler;
-      const shaderAssemblerSpy = vi.spyOn(ShaderAssembler, 'getDefaultShaderAssembler');
-      restoreLegacyDeckShaderAssembler = () => {
-        shaderAssemblerSpy.mockRestore();
-        restoreLegacyDeckShaderAssembler = null;
-      };
-
-      shaderAssemblerSpy.mockImplementation(shaderLanguage => {
-        if (shaderLanguage !== undefined) {
-          return getDefaultShaderAssembler.call(ShaderAssembler, shaderLanguage);
-        }
-
-        // deck.gl 9.3.4 requests its assembler without the now-required language.
-        // Restore strict behavior before forwarding this single legacy call.
-        restoreLegacyDeckShaderAssembler?.();
-        return getDefaultShaderAssembler.call(
-          ShaderAssembler,
-          initializedDevice.info.shadingLanguage
-        );
-      });
-    }
+    layers: []
   });
   return {deck, parent};
 }
@@ -1003,7 +974,7 @@ function isSoftwareBackedDevice(device: Device): boolean {
 async function waitForLayerModel(
   layer: Layer,
   getError: () => unknown = () => undefined
-): Promise<Model> {
+): Promise<GPUVectorModel> {
   const timeout = Date.now() + TEST_MODEL_TIMEOUT_MILLISECONDS;
   while (Date.now() < timeout) {
     const model = layer.getModels()[0];
@@ -1019,7 +990,7 @@ async function waitForLayerModel(
   throw new Error(`${layer.id} did not create a draw model`);
 }
 
-async function waitForCompositeModels(layers: Layer[]): Promise<Model[]> {
+async function waitForCompositeModels(layers: Layer[]): Promise<GPUVectorModel[]> {
   const timeout = Date.now() + TEST_MODEL_TIMEOUT_MILLISECONDS;
   while (Date.now() < timeout) {
     const models = layers.flatMap(getLayerModels);
@@ -1029,7 +1000,7 @@ async function waitForCompositeModels(layers: Layer[]): Promise<Model[]> {
   throw new Error('GPUVector Arrow composite layers did not create draw models');
 }
 
-function getLayerModels(layer: Layer): Model[] {
+function getLayerModels(layer: Layer): GPUVectorModel[] {
   const subLayers = (layer as Layer & {getSubLayers?: () => Layer[]}).getSubLayers?.() ?? [];
   return [...layer.getModels(), ...subLayers.flatMap(getLayerModels)];
 }
@@ -1037,7 +1008,7 @@ function getLayerModels(layer: Layer): Model[] {
 async function waitForDrawableLayerModel(
   layer: Layer,
   getError: () => unknown = () => undefined
-): Promise<Model> {
+): Promise<GPUVectorModel> {
   const timeout = Date.now() + TEST_MODEL_TIMEOUT_MILLISECONDS;
   while (Date.now() < timeout) {
     const model = layer.getModels()[0];
@@ -1108,7 +1079,7 @@ async function waitForDeckInitialization(deck: Deck): Promise<void> {
   }
 }
 
-async function waitForPipeline(model: Model): Promise<void> {
+async function waitForPipeline(model: GPUVectorModel): Promise<void> {
   const timeout = Date.now() + TEST_MODEL_TIMEOUT_MILLISECONDS;
   while (Date.now() < timeout && model.pipeline.linkStatus === 'pending') {
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));

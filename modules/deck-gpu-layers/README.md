@@ -5,7 +5,7 @@ Reusable deck.gl layers for geographic rendering that consume caller-owned GPU b
 ## Water surfaces
 
 `WaterSurfaceLayer` shades flat, triangulated water polygons on WebGPU and WebGL2 using the shared
-`@luma.gl/shadertools` water material. Supply packed `float32x3` positions in local east/north/up
+`@luma.gl/shaders` water material. Supply packed `float32x3` positions in local east/north/up
 meters, `vertexCount`, and Deck's `coordinateOrigin`. The layer borrows the position buffer and owns
 only its render model; the application must release the buffer after removing/finalizing the layer.
 
@@ -70,15 +70,6 @@ All non-constant vectors must have identical row counts and physical chunk bound
 streaming and ownership deterministic: adapters append batches explicitly, while the renderer
 neither combines nor repacks them. Picking uses global row indices and attaches physical batch
 provenance as `PickingInfo.gpuVector`.
-
-Variable geometry stays GPU-native as well:
-
-- `GPUPathLayer` consumes `GPUVector<'vertex-list<float32xN>'>` and expands segments on the GPU.
-- `GPUSolidPolygonLayer` consumes tessellated position, row-index, color, and triangle-index
-  GPUVectors prepared by an adapter.
-- `GPUPolygonLayer` composes the solid fill and path outline cores without copying either input.
-- `GPUTextLayer` consumes caller-owned `GPUTextData`, whose chosen strategy owns glyph GPUVectors
-  and atlas metadata.
 
 GeoJSON and GeoArrow are source formats rather than rendering primitives. Their adapters split
 features into these GPU cores. The same rule applies to future classic JavaScript and classic
@@ -220,7 +211,7 @@ same geometry. Draw opaque fill layers first to hide rear edges. The layer owns 
 quad buffer, and borrows `segments`; the application destroys that buffer after finalizing Deck.
 It does not extract mesh boundaries, join paths, or drape lines over terrain. The
 [Sketch buildings example](../../examples/v10-experimental/sketch-edges) demonstrates the controls, picking,
-and hidden-edge rendering. The underlying `sketchStroke` shader in `@luma.gl/shadertools`
+and hidden-edge rendering. The underlying `sketchStroke` shader in `@luma.gl/shaders`
 can also be used by non-Deck renderers.
 ## Auxiliary scene buffers
 
@@ -497,7 +488,7 @@ phase shading, and a faint dark-side contribution: `phase` is 0 for new, 0.25 fo
 0.5 for full, and 0.75 for last quarter. `limbAngle` rotates the phase pattern counterclockwise
 from the screen's rightward axis, in radians.
 
-The layers use `@math.gl/sun` for automatic position and lunar phase when supplied with an
+The layers use `@math.gl/earth/sun` for automatic position and lunar phase when supplied with an
 observer and timestamp. Explicit directions and phase values remain supported. They do not
 illuminate geometry or cast shadows, write depth, or participate in picking. Draw them before
 transparent scene layers. Riverfront soft shadows and weather share math.gl astronomy with
@@ -583,7 +574,7 @@ astronomy timestamp drive every component. The application advances the clock; c
 
 ```typescript
 import {SkyLayer} from '@deck.gl-community/gpu-layers';
-import {createSkyObserver} from '@math.gl/sun';
+import {createSkyObserver} from '@math.gl/earth/sun';
 
 const sky = new SkyLayer({
   id: 'sky',
@@ -618,7 +609,7 @@ horizon proximity do not change the size.
 
 `StarfieldLayer` defaults to math.gl's BSC5 catalog and sidereal/precession rotation.
 Optional `data` uses `getStarLayerData(..., {coordinates: 'equatorial'})` from
-`@math.gl/sun/stars`; an empty array renders no stars. The catalog is calculated once
+`@math.gl/earth/sun/stars`; an empty array renders no stars. The catalog is calculated once
 and reused, and changing the timestamp only changes rotation uniforms. Catalog stars
 use compact sprites with subtle spectral tint. `colorStrength` defaults to `0.2`;
 set it to `0` for neutral stars or `1` for the original catalog RGB. Picking and
@@ -632,19 +623,15 @@ This private package was copied from luma.gl's `modules/deck-gpu-layers`. Its pa
 is unchanged. It uses the local deck.gl core workspace and luma.gl 10 prereleases.
 Run `yarn build-private` and `yarn lint` from the repository root. Run
 `yarn test-private` for the module node and headless suites. The regular build and
-tests exclude these prototypes because their upstream peers are unpublished. The copied examples and integration tests live in this repository.
+tests exclude these private prototypes. The copied examples and integration tests live in this repository.
 Gallery-specific assertions were adapted to the standalone example metadata.
 
-The upstream `@luma.gl/arrow`, `@luma.gl/experimental`, and `@luma.gl/text` packages
-are private and unavailable on npm. They are peer dependencies here. To build or run
-these packages, build a compatible luma.gl checkout and link the required private
-packages into deck.gl (for example, run `yarn link` in each luma.gl package, then
-`yarn link @luma.gl/experimental @luma.gl/text @luma.gl/arrow` in deck.gl).
-These modules require those peers at runtime; a regular install alone is insufficient.
+luma.gl alpha.6 publishes the required integrations, including Arrow and text under
+`@luma.gl/engine`. A regular workspace install supplies these dependencies.
 
 ## Examples and integration tests
 
 The original standalone examples and their shared fixtures are available in
 [`examples/v10-experimental`](../../examples/v10-experimental/README.md). Run `yarn build-private-examples`
-after linking the unpublished peers. `yarn test-private` includes the copied
+after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.

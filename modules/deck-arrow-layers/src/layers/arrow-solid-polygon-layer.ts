@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import type {ArrowPolygonSourceVectorSelectors} from '@luma.gl/arrow';
+import type {ArrowPolygonSourceVectorSelectors} from '@luma.gl/engine/arrow';
 import {CompositeLayer, type LayerProps} from '@deck.gl/core';
 import {
   ArrowPolygonLayer,

@@ -18,8 +18,8 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {VERSION} from './init';
 
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import {GL} from '@luma.gl/webgl/constants';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {GL} from '@luma.gl/core/webgl-constants';
 import {Timeline} from '@luma.gl/engine';
 import {AnimationLoop} from '@luma.gl/engine';
 import type {
@@ -31,7 +31,7 @@ import type {
   Parameters,
   PresentationContext
 } from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -60,6 +60,11 @@ import {CreateDeviceProps} from '@luma.gl/core';
 function noop() {}
 
 const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
+
+/** GPU debug setting for a device Deck creates or attaches; `deviceProps.debug` wins. */
+function getDeviceDebug(props: Pick<DeckProps, 'debug' | 'deviceProps'>): boolean | undefined {
+  return props.deviceProps?.debug ?? props.debug;
+}
 
 export type DeckMetrics = {
   fps: number;
@@ -246,7 +251,10 @@ export type DeckProps<ViewsT extends ViewOrViews = null> = {
   /** Callback that takes a hovered-over point and renders a tooltip. */
   getTooltip?: ((info: PickingInfo) => TooltipContent) | null;
 
-  /** (Debug) Flag to enable WebGL debug mode. Requires importing `@luma.gl/webgl/debug`. */
+  /**
+   * Enables GPU debug mode when initializing a device. Overridden by `deviceProps.debug`.
+   * Requires importing `@luma.gl/core/webgl-debug` for WebGL debugging tools.
+   */
   debug?: boolean;
   /** (Debug) Render the picking buffer to screen. */
   drawPickingColors?: boolean;
@@ -447,7 +455,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
         // Without this, interleaved mode (e.g., MapboxOverlay) creates new pipelines every frame
         _cacheShaders: true,
         _cachePipelines: true,
-        ...this.props.deviceProps
+        ...props.deviceProps,
+        debug: getDeviceDebug(props)
       });
     }
 
@@ -1466,7 +1475,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       adapters: [],
       _cacheShaders: true,
       _cachePipelines: true,
-      ...props.deviceProps
+      ...props.deviceProps,
+      debug: getDeviceDebug(props)
     };
     if (!deviceProps.adapters.includes(webgl2Adapter)) {
       deviceProps.adapters.push(webgl2Adapter);
@@ -1654,7 +1664,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       });
     }
 
-    this.props.onDeviceInitialized(this.device);
+    this.props.onDeviceInitialized?.(this.device);
     if (this.device.type === 'webgl') {
       // Legacy callback - warn?
       // @ts-expect-error gl is not visible on Device base class

@@ -10,7 +10,7 @@ import {
   type LightingProps,
   type PrecipitationProps,
   type SurfaceWeatherProps
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 import {
   getMeterOffsetPosition,
   WeatherParticleLayer,
@@ -18,7 +18,7 @@ import {
 } from '@deck.gl-community/gpu-layers';
 import {CITY_ORIGIN, makeCityFeatures, type CityFeature} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
-import {createSkyObserver, getMoonPosition, getSkyDirection} from '@math.gl/sun';
+import {createSkyObserver, getMoonPosition, getSkyDirection} from '@math.gl/earth/sun';
 import {getRiverfrontSun, DEFAULT_HOUR} from '../soft-shadows/sun';
 import {getSkyCameraState, SKY_FIELD_OF_VIEW} from '../soft-shadows/sky-camera';
 import {RiverDistrictLayer} from '../river-district-layer';

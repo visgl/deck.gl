@@ -18,7 +18,7 @@ vi.mock('../../../../examples/v10-experimental/arrow-deck', () => ({
     }
   }
 }));
-vi.mock('@luma.gl/text', () => ({buildSdfFontAtlas: () => ({})}));
+vi.mock('@luma.gl/engine/text', () => ({buildSdfFontAtlas: () => ({})}));
 vi.mock('../../../../examples/v10-experimental/arrow-text-layer/arrow-text-data-source', () => ({
   ArrowTextDataSource: class {
     constructor(props: any) {

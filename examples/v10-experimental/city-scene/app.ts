@@ -15,7 +15,7 @@ import {
 } from '../river-district-data';
 import {RiverDistrictLayer} from '../river-district-layer';
 import {makeBuildings, makeEdges} from '../river-district-edges';
-import type {SSRQuality} from '@luma.gl/effects';
+import type {SSRQuality} from '@luma.gl/engine/effects';
 import {RiverReflectionEffect} from './river-reflection-effect';
 
 export const CAMERA_PRESETS = {

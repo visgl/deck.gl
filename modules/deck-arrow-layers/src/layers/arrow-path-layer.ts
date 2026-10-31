@@ -16,12 +16,12 @@ import {
   ArrowPathRenderer,
   getArrowRecordBatchAsyncIterator,
   resolveArrowPathSourceVectors,
-  type ArrowColorType,
   type ArrowPathSourceVectors,
   type ArrowPathSourceVectorSelectors,
   type ArrowRecordBatchSource,
   type PreparedArrowPathRendererGPUVectors
-} from '@luma.gl/arrow';
+} from '@luma.gl/engine/arrow';
+import {type ArrowColorType} from '@luma.gl/gpgpu/arrow';
 import {
   Buffer,
   type BufferLayout,
@@ -31,7 +31,7 @@ import {
 } from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
-import {PathAttributeModel, PathStorageModel} from '@luma.gl/experimental/models';
+import {PathAttributeModel, PathStorageModel} from '@luma.gl/engine/models';
 import {
   DataType,
   vectorFromArray,
