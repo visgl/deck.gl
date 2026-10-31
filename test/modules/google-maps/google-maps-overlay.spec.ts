@@ -168,6 +168,129 @@ for (const interleaved of [true, false]) {
   });
 }
 
+for (const renderingType of [mapsApi.RenderingType.RASTER, mapsApi.RenderingType.VECTOR]) {
+  test(`GoogleMapsOverlay#finalize removes its containers (${renderingType})`, () => {
+    const map = new mapsApi.Map({
+      width: 1,
+      height: 1,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType
+    });
+    const overlay = new GoogleMapsOverlay({device, interleaved: false, layers: []});
+
+    overlay.setMap(map);
+    expect(map.getDiv().childElementCount, 'Deck is added to the map').toBe(2);
+    overlay.finalize();
+    expect(map.getDiv().childElementCount, 'Only the map is left').toBe(1);
+  });
+}
+
+for (const interleaved of [true, false]) {
+  test(`GoogleMapsOverlay#vector map bound again (interleaved:${interleaved})`, () => {
+    const map = new mapsApi.Map({
+      width: 1,
+      height: 1,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType: mapsApi.RenderingType.VECTOR
+    });
+    const layerFilter = () => true;
+    const overlay = new GoogleMapsOverlay({device, interleaved, layerFilter, layers: []});
+
+    overlay.setMap(map);
+    const deck = overlay._deck;
+    overlay.setMap(null);
+    expect(deck.props.layerFilter, 'Layers are hidden').not.toBe(layerFilter);
+    expect(
+      map.getDiv().querySelector('#deck-gl-google-maps-container'),
+      'Positioning container is removed'
+    ).toBeNull();
+
+    overlay.setMap(map);
+    const containers = map.getDiv().querySelectorAll('#deck-gl-google-maps-container');
+    expect(containers.length, 'One positioning container').toBe(1);
+    expect(overlay._deck, 'Deck instance is the same').toBe(deck);
+    expect(deck.props.parent.parentElement, 'Deck is in the new container').toBe(containers[0]);
+    expect(deck.props.layerFilter, 'Layers are shown again').toBe(layerFilter);
+
+    overlay.finalize();
+    expect(map.getDiv().childElementCount, 'Only the map is left').toBe(1);
+  });
+
+  test(`GoogleMapsOverlay#vector to raster fallback (interleaved:${interleaved})`, async () => {
+    const map = new mapsApi.Map({
+      width: 800,
+      height: 400,
+      longitude: 0,
+      latitude: 0,
+      zoom: 1,
+      renderingType: mapsApi.RenderingType.VECTOR
+    });
+    // Defer the mock's synchronous callbacks so the vector map's context can be supplied
+    const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
+      map._overlays.add(mapOverlay);
+    });
+    const layer = new ScatterplotLayer({
+      data: [{position: [0, 0]}],
+      getPosition: d => d.position
+    });
+    const overlay = new GoogleMapsOverlay({
+      interleaved,
+      layers: [layer],
+      ...(!interleaved && {device})
+    });
+
+    try {
+      overlay.setMap(map);
+      overlay._positioningOverlay.onAdd();
+      overlay._overlay.onContextRestored({gl});
+      const vectorDeck = overlay._deck;
+      expect(vectorDeck.props.gl, 'Deck uses the context selected at binding').toBe(
+        interleaved ? gl : null
+      );
+      await expect.poll(() => vectorDeck.isInitialized).toBe(true);
+      overlay._overlay.onDraw({gl, transformer: map.transformer});
+      await expect.poll(() => layer.isLoaded, 'Layer is initialized').toBe(true);
+      addOverlaySpy.mockRestore();
+
+      // Google reports VECTOR first, then falls back when the browser cannot run the vector map
+      map.opts.renderingType = mapsApi.RenderingType.RASTER;
+      map.emit({type: 'renderingtype_changed'});
+      expect(overlay._overlay, 'Raster overlay is created').toBeInstanceOf(mapsApi.OverlayView);
+      expect(map._overlays.size, 'Vector overlays are removed').toBe(1);
+      expect(
+        map.getDiv().querySelector('#deck-gl-google-maps-container'),
+        'Positioning container is removed'
+      ).toBeNull();
+      const deck = overlay._deck;
+      expect(deck, 'Deck is replaced').not.toBe(vectorDeck);
+      expect(deck.props.gl, 'Deck does not use the vector map context').toBeFalsy();
+      expect(deck.props.parent.parentElement, 'Deck is in the overlay pane').toBe(map.getDiv());
+      await expect.poll(() => deck.isInitialized).toBe(true);
+      if (interleaved) {
+        expect(deck.getCanvas(), 'Deck has its own canvas').not.toBe(gl.canvas);
+      }
+
+      map.draw();
+      expect(deck.props.width, 'Raster overlay draws').toBe(800);
+      await expect.poll(() => deck.layerManager?.getLayers()[0]?.isLoaded).toBe(true);
+      const [rasterLayer] = deck.layerManager.getLayers();
+      expect(rasterLayer, 'Layer is copied for the new deck').not.toBe(layer);
+      expect(
+        rasterLayer.getAttributeManager().attributes.instancePositions.getBuffer()?.destroyed,
+        'Layer draws with live buffers'
+      ).toBe(false);
+    } finally {
+      addOverlaySpy.mockRestore();
+      finalizeOverlay(overlay);
+    }
+    expect(map.getDiv().childElementCount, 'Only the map is left').toBe(1);
+  });
+}
+
 /** Release Deck-owned WebGL contexts before Chromium evicts the shared test device. */
 function finalizeOverlay(overlay: GoogleMapsOverlay): void {
   const deckDevice = overlay._deck?.device;

@@ -9,6 +9,7 @@ import {WebGLDevice} from '@luma.gl/core/webgl';
 import {
   createDeckInstance,
   destroyDeckInstance,
+  cloneLayers,
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer,
   POSITIONING_CONTAINER_ID
@@ -55,6 +56,9 @@ export default class GoogleMapsOverlay {
   private _deck: Deck | null = null;
   private _overlay: google.maps.WebGLOverlayView | google.maps.OverlayView | null = null;
   private _positioningOverlay: google.maps.OverlayView | null = null;
+  private _positioningContainer: HTMLElement | null = null;
+  private _renderingType: google.maps.RenderingType | null = null;
+  private _renderingTypeListener: google.maps.MapsEventListener | null = null;
   private _externalFramebuffer: {
     handle: WebGLFramebuffer;
     wrapper: import('@luma.gl/core').Framebuffer;
@@ -72,25 +76,24 @@ export default class GoogleMapsOverlay {
       return;
     }
 
-    const {VECTOR, UNINITIALIZED} = google.maps.RenderingType;
+    const {VECTOR} = google.maps.RenderingType;
     if (this._map) {
       if (!map && this._map.getRenderingType() === VECTOR && this.props.interleaved) {
         (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
       }
-      this._overlay?.setMap(null);
-      this._positioningOverlay?.setMap(null);
+      this._renderingTypeListener?.remove();
+      this._renderingTypeListener = null;
+      this._removeOverlay();
       this._map = null;
     }
     if (map) {
       this._map = map;
-      const renderingType = map.getRenderingType();
-      if (renderingType !== UNINITIALIZED) {
-        this._createOverlay(map);
-      } else {
-        map.addListener('renderingtype_changed', () => {
-          this._createOverlay(map);
-        });
-      }
+      // The rendering type may be UNINITIALIZED at first, and Google falls back from a vector map
+      // to a raster map when the browser cannot run it
+      this._renderingTypeListener = map.addListener('renderingtype_changed', () => {
+        this._onRenderingTypeChanged(map);
+      });
+      this._createOverlay(map);
     }
   }
 
@@ -141,6 +144,7 @@ export default class GoogleMapsOverlay {
     if (renderingType === UNINITIALIZED) {
       return;
     }
+    this._renderingType = renderingType;
 
     const isVectorMap = renderingType === VECTOR && google.maps.WebGLOverlayView;
     if (isVectorMap) {
@@ -148,6 +152,31 @@ export default class GoogleMapsOverlay {
     } else {
       this._createOverlayRaster(map);
     }
+  }
+
+  _removeOverlay() {
+    this._overlay?.setMap(null);
+    this._positioningOverlay?.setMap(null);
+    this._renderingType = null;
+  }
+
+  _onRenderingTypeChanged(map: google.maps.Map) {
+    if (map.getRenderingType() === this._renderingType) {
+      return;
+    }
+    if (this._renderingType) {
+      // The overlays, and the deck that may share the vector map's context, are for the old type
+      this._removeOverlay();
+      if (this._deck) {
+        destroyDeckInstance(this._deck);
+        this._deck = null;
+        // The destroyed deck finalized the layers, and a finalized layer cannot be added to another deck
+        if (this.props.layers) {
+          this.props.layers = cloneLayers(this.props.layers);
+        }
+      }
+    }
+    this._createOverlay(map);
   }
 
   /**
@@ -162,7 +191,7 @@ export default class GoogleMapsOverlay {
     const positioningOverlay = new google.maps.OverlayView();
     positioningOverlay.onAdd = this._onAddVectorOverlay.bind(this, interleaved);
     positioningOverlay.draw = this._updateContainerSize.bind(this);
-    positioningOverlay.onRemove = this._onRemove.bind(this);
+    positioningOverlay.onRemove = this._onRemoveVectorOverlay.bind(this);
     this._positioningOverlay = positioningOverlay;
     this._positioningOverlay.setMap(map);
 
@@ -188,8 +217,13 @@ export default class GoogleMapsOverlay {
   }
 
   _onAdd() {
-    // @ts-ignore (TS2345) map is defined at this stage
-    this._deck = createDeckInstance(this._map, this._overlay, this._deck, this.props);
+    this._deck = createDeckInstance(
+      // @ts-ignore (TS2345) map is defined at this stage
+      this._map,
+      (this._overlay as google.maps.OverlayView).getPanes()?.overlayLayer,
+      this._deck,
+      this.props
+    );
   }
 
   _onAddVectorOverlay(interleaved: boolean) {
@@ -202,23 +236,36 @@ export default class GoogleMapsOverlay {
       container.id = POSITIONING_CONTAINER_ID;
       container.style.position = 'absolute';
       panes.overlayLayer.appendChild(container);
+      this._positioningContainer = container;
     }
 
-    // In interleaved mode, _onContextRestored creates Deck with Google's context.
     if (!interleaved) {
-      // @ts-ignore (TS2345) map is defined at this stage
-      // Pass the positioning overlay for deck canvas creation (not WebGL overlay)
-      this._deck = createDeckInstance(this._map, overlay, this._deck, this.props);
+      this._deck = createDeckInstance(
+        // @ts-ignore (TS2345) map is defined at this stage
+        this._map,
+        this._positioningContainer,
+        this._deck,
+        this.props
+      );
+    } else if (this._deck?.props.parent && this._positioningContainer) {
+      // _onContextRestored creates Deck with Google's context, and may have run first
+      this._positioningContainer.appendChild(this._deck.props.parent);
     }
+  }
+
+  _onRemoveVectorOverlay() {
+    // Google leaves removing the elements to the overlay. The deck container stays inside this
+    // one, and moves to the next positioning container if this overlay is bound again.
+    this._positioningContainer?.remove();
+    this._positioningContainer = null;
+    this._onRemove();
   }
 
   _updateContainerSize() {
     // Update positioning container size and position to match map
     if (!this._map) return;
 
-    const container = this._map
-      .getDiv()
-      .querySelector(`#${POSITIONING_CONTAINER_ID}`) as HTMLElement;
+    const container = this._positioningContainer;
     if (!container) return;
 
     const mapContainer = this._map.getDiv().firstChild as HTMLElement;
@@ -243,7 +290,7 @@ export default class GoogleMapsOverlay {
         (this._overlay as google.maps.WebGLOverlayView).requestRedraw();
       }
     };
-    const deck = createDeckInstance(this._map, this._overlay, this._deck, {
+    const deck = createDeckInstance(this._map, this._positioningContainer, this._deck, {
       gl,
       _customRender,
       ...this.props
