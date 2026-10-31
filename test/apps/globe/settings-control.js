@@ -37,6 +37,8 @@ export function createSettingsControl({onZoomAroundChange, onViewChange, onReset
       <button type="button" data-zoom-around="pointer">Pointer</button>
       <button type="button" data-zoom-around="center">Center</button>
     </div>
+    <div class="label">Mobile gestures</div>
+    <div class="gesture-hint">Pinch to zoom<br>Two-finger drag to rotate<br>Double-tap to zoom<br>Double-tap + drag for smooth zoom</div>
     <div class="button-row">
       <button type="button" data-action="reset">Reset</button>
     </div>
@@ -67,6 +69,11 @@ export function createSettingsControl({onZoomAroundChange, onViewChange, onReset
       cursor: 'pointer'
     });
   }
+  Object.assign(controls.querySelector('.gesture-hint').style, {
+    color: 'rgba(255,255,255,0.72)',
+    lineHeight: '1.5',
+    margin: '4px 0 10px'
+  });
   document.body.appendChild(controls);
 
   controls.addEventListener('click', event => {
