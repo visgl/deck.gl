@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Layer, picking, _GlobeViewport, type LayerContext, type LayerProps} from '@deck.gl/core';
-import {getGlobeCloudViewUniforms} from '@deck.gl-community/gpu-layers';
+import {getGlobeCloudViewUniforms} from '@deck.gl/proposals/layers';
 import type {RenderPass, Texture} from '@luma.gl/core';
 import {Model, SphereGeometry} from '@luma.gl/engine';
 import type {ShaderModule} from '@luma.gl/shaders';

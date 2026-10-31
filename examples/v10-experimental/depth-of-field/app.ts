@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView, type Viewport} from '@deck.gl/core';
-import {SceneBufferEffect, ShaderPassEffect} from '@deck.gl-community/gpu-layers';
+import {SceneBufferEffect, ShaderPassEffect} from '@deck.gl/proposals/effects';
 import {dofCompositeShaderPass} from '@luma.gl/engine/effects';
 import {Matrix4} from '@math.gl/core';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
