@@ -206,6 +206,10 @@ new PathStyleExtension({dashMode: 'path'});
 
 See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
 
+### TerrainLayer and MVTLayer heights
+
+Starting in v9.4.1, `TerrainLayer`, extruded `MVTLayer` features and other layers using the `'cartesian'` coordinate system in a `MapView` look taller below zoom 12, by about 1.4x at 46° latitude and 2x at 60°. They were previously drawn too flat, and their height jumped when zooming past 12. If you raised `elevationScale` to make up for it, lower it again.
+
 ## Upgrading to v9.3
 
 Upgraded dependencies to [luma.gl v9.3](https://luma.gl/docs/upgrade-guide) and [loaders.gl v4.4](https://loaders.gl/docs/upgrade-guide). Your app may be affected if it contains custom layers.
