@@ -3,14 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 import assert from 'node:assert/strict';
-import {readdirSync, readFileSync} from 'node:fs';
+import {existsSync, readdirSync, readFileSync} from 'node:fs';
 
 const modulesRoot = new URL('../modules/', import.meta.url);
 const allowedPrivateModules = ['proposals'];
 const privateModules = readdirSync(modulesRoot, {withFileTypes: true})
   .filter(entry => entry.isDirectory())
   .filter(entry => {
-    const manifest = JSON.parse(readFileSync(new URL(`${entry.name}/package.json`, modulesRoot)));
+    const manifestPath = new URL(`${entry.name}/package.json`, modulesRoot);
+    // Ignored build output can leave removed workspace directories behind after a branch switch.
+    if (!existsSync(manifestPath)) return false;
+    const manifest = JSON.parse(readFileSync(manifestPath));
     return manifest.private === true;
   })
   .map(entry => entry.name)
