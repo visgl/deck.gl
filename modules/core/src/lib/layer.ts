@@ -1050,8 +1050,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       return;
     }
 
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const indexes = getPickingIndexAttribute(attributes);
     const colors = getPickingColorAttribute(attributes);
 
@@ -1090,8 +1089,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   // TODO - simplify subclassing interface
   protected _disablePickingIndex(objectIndex: number): void {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const indexes = getPickingIndexAttribute(attributes);
     if (indexes) {
       const start = indexes.getVertexOffset(objectIndex);
@@ -1119,8 +1117,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** (Internal) Re-enable all picking indices after multi-depth picking */
   restorePickingColors(): void {
-    // @ts-ignore (TS2531) this method is only called internally with attributeManager defined
-    const attributes = this.getAttributeManager().attributes;
+    const attributes = this.getAttributeManager()?.getAttributes() || {};
     const pickingAttribute = getPickingAttribute(attributes);
     if (!pickingAttribute) {
       if (this.internalState) {
