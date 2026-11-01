@@ -343,7 +343,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
           {
             transform: this.usePositionTransforms().transform?.bind(this),
             fp64: this.use64bitPositions(),
-            requireRows: this.props.getPosition === defaultPosition
+            requireRows: !this.props.positions && this.props.getPosition === defaultPosition
           }
         );
       }
@@ -405,7 +405,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     if (this.state.columns) {
-      this.state.columns.draw(model as GPUVectorModel, this.context.renderPass);
+      this.state.columns.draw(model as GPUVectorModel, this.context.renderPass, offset =>
+        model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}})
+      );
     } else {
       model.draw(this.context.renderPass);
     }

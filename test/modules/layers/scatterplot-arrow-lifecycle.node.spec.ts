@@ -379,3 +379,51 @@ test('Scatterplot shares normalized iterator input with a replacement pending re
     device.destroy();
   }
 });
+
+test('Arrow columns reject differing chunk structures and retain previous buffers', async () => {
+  const device = new NullDevice({});
+  const columns = new ScatterplotLayerColumns(device);
+  const error = vi.fn();
+  await columns.update(props(), () => {}, error);
+  const previous = (columns as any).prepared;
+  const source = positions().concat(positions());
+  const radii = vectorFromArray([1], new Float32()).concat(
+    vectorFromArray([2, 3, 4], new Float32())
+  );
+  await columns.update({...props(), positions: source, radii}, () => {}, error);
+  expect(error.mock.calls[0][0].message).toMatch('chunk structures must match');
+  expect((columns as any).prepared).toBe(previous);
+  columns.destroy();
+  device.destroy();
+});
+
+test('Arc columns prepare both position inputs and accessor fallbacks', async () => {
+  const {ArcLayerColumns} = await import('../../../modules/layers/src/arc-layer/arc-layer-columns');
+  const device = new NullDevice({});
+  const columns = new ArcLayerColumns(device);
+  const error = vi.fn();
+  const getTargetPosition = vi.fn((_row, {index}) => [index + 4, index + 5]);
+  await columns.update(
+    {
+      data: [{}, {}],
+      sourcePositions: positions(),
+      getTargetPosition,
+      getSourceColor: [255, 0, 0, 255],
+      getTargetColor: [0, 0, 255, 255],
+      getWidth: 1,
+      getHeight: 1,
+      getTilt: 0
+    },
+    () => {},
+    error,
+    {fp64: true, transform: value => [value[0] + 0.00000001, value[1], 0]}
+  );
+  expect(error).not.toHaveBeenCalled();
+  expect(columns.length).toBe(2);
+  expect(getTargetPosition).toHaveBeenCalledTimes(2);
+  const prepared = (columns as any).prepared.columns;
+  expect(prepared.instanceSourcePositions64Low).toBeDefined();
+  expect(prepared.instanceTargetPositions64Low).toBeDefined();
+  columns.destroy();
+  device.destroy();
+});

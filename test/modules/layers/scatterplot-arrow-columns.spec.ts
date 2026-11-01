@@ -37,16 +37,21 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       [0, 0],
       [1, 1]
     ]).concat(positions([[2, 2]]));
-    const radii = vectorFromArray([2], new Float32()).concat(
-      vectorFromArray([4, 6], new Float32())
+    const radii = vectorFromArray([2, 4], new Float32()).concat(
+      vectorFromArray([6], new Float32())
     );
     const colors = vectorFromArray(
       [
         [255, 0, 0, 255],
         [0, 255, 0, 255],
         [0, 0, 255, 255]
-      ],
+      ].slice(0, 2),
       new FixedSizeList(4, new Field('values', new Uint8(), false))
+    ).concat(
+      vectorFromArray(
+        [[0, 0, 255, 255]],
+        new FixedSizeList(4, new Field('values', new Uint8(), false))
+      )
     );
     const getPosition = vi.fn(() => [0, 0, 0] as [number, number, number]);
     const getRadius = vi.fn(() => 5);
@@ -83,7 +88,15 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 [4, 4, 4],
                 [5, 5, 5]
               ]),
-              radii: undefined
+              radii: undefined,
+              fillColors: vectorFromArray(
+                [
+                  [255, 0, 0, 255],
+                  [0, 255, 0, 255],
+                  [0, 0, 255, 255]
+                ],
+                new FixedSizeList(4, new Field('values', new Uint8(), false))
+              )
             }
           },
           {updateProps: {positions: undefined, fillColors: undefined}}
@@ -120,11 +133,11 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               testDevice.submit();
               if (backend === 'webgpu')
                 expect(await (testDevice as any).handle.popErrorScope()).toBeNull();
-              expect(bindings.mock.calls).toHaveLength(index < 2 ? 3 : 1);
+              expect(bindings.mock.calls).toHaveLength(index < 2 ? 2 : 1);
               const columns = bindings.mock.calls[0][0] as any;
               expect(columns.instancePositions.format).toBe('float32x3');
               if (index === 0) oldBuffer = columns.instancePositions.data[0].buffer;
-              expect(columns.instancePositions.length).toBe(index < 2 ? 1 : 3);
+              expect(columns.instancePositions.length).toBe(index < 2 ? 2 : 3);
             } finally {
               bindings.mockRestore();
             }

@@ -130,7 +130,7 @@ void main(void) {
 
   uv = vec2(segmentRatio, segmentSide);
   geometry.uv = uv;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + arc.rowIndexOffset);
 
   vec4 curr;
   vec4 next;

@@ -295,7 +295,7 @@ const layer = new ScatterplotLayer({positions, radii, getFillColor: [255, 140, 0
 * `lineWidths`: numeric scalars, overriding `getLineWidth`.
 
 Floating-point color components use the range 0–1; integer components use 0–255.
-Nulls and mismatched lengths are rejected. Column mode does not support attribute transitions or
+Nulls, mismatched lengths, and differing chunk structures are rejected. Column mode does not support attribute transitions or
 extensions. Conversion is asynchronous: `layer.isLoaded` includes conversion state, and Deck's
 [`onAfterRender`](../core/deck.md#onafterrender) runs after a frame. Neither is a dedicated callback
 for GPU completion. Errors are reported through the layer's `onError` callback.

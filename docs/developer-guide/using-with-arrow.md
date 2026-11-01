@@ -1,8 +1,7 @@
 # Using with Arrow
 
-ScatterplotLayer accepts Apache Arrow vectors through column props, avoiding the need to
-construct a JavaScript object for every point. These props currently apply to ScatterplotLayer,
-not every layer in the catalog.
+ScatterplotLayer and ArcLayer accept Apache Arrow vectors through column props, avoiding the need to
+construct a JavaScript object for every feature.
 
 Install `apache-arrow` alongside `@deck.gl/layers`. The layer loads its converter when needed;
 no converter registration or separate layer class is required.
@@ -79,13 +78,13 @@ Deck's `onAfterRender` runs after a frame, not specifically after an Arrow conve
 Conversion errors are reported through the layer's `onError` callback.
 
 Keep vectors stable between renders and supply new vectors when their contents change.
-Chunked columns draw in aligned ranges, preserving logical row indexes for picking.
+Chunked columns must have identical chunk lengths and draw in aligned ranges, preserving logical row indexes for picking.
 Arrow data still requires conversion and GPU upload; this is not a zero-copy rendering promise.
 The layer manages GPU buffers it creates during conversion.
 
 ## Limitations
 
-Column mode rejects nulls, mismatched lengths, attribute transitions, and layer extensions.
+Column mode rejects nulls, mismatched lengths or chunk structures, attribute transitions, and layer extensions.
 Use the normal accessor path when you need those features. See the
 [ScatterplotLayer API](../api-reference/layers/scatterplot-layer.md#arrow-columns) and
 [loading data guide](./loading-data.md) for more details.
