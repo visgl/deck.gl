@@ -77,6 +77,9 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             const model = bitmap.state.model!;
             const attributes = bitmap.getAttributeManager()!;
             expect(model).toBeInstanceOf(GPUVectorModel);
+            // Indexed meshes draw six indices even though they have four vertex rows.
+            expect(model.vertexCount).toBe(bitmap.state.mesh.vertexCount);
+            expect(model.vertexCount).toBe(6);
             for (const name of ['positions', 'texCoords']) {
               const column = attributes.getGPUVectors()[name] as GPUVector;
               expect(column).toBeInstanceOf(GPUVector);
