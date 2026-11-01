@@ -220,6 +220,23 @@ When enabled, this prop computes edge coverage in the shader. When disabled, the
 Other antialiasing techniques have different trade-offs; see [Antialiasing and Multisampling](https://luma.gl/docs/api-guide/gpu/gpu-antialiasing) in the luma.gl docs.
 
 
+### Arrow Columns
+
+Install `apache-arrow` to supply Arrow vectors directly. These props override their matching
+accessors; omitted props use the normal accessor or binary fallback. Position columns are
+numeric XY or XYZ fixed-size lists, color columns are RGB or RGBA fixed-size lists, and widths,
+heights, and tilts are numeric scalars.
+
+- `sourcePositions`, `targetPositions`: override `getSourcePosition`, `getTargetPosition`
+- `sourceColors`, `targetColors`: override `getSourceColor`, `getTargetColor`
+- `widths`, `heights`, `tilts`: override `getWidth`, `getHeight`, `getTilt`
+
+All columns must have the same row count and chunk lengths. Nulls, attribute transitions, and
+layer extensions are unsupported in column mode. On WebGPU, combinations of many varying
+attributes may exceed the device vertex-buffer limit (commonly eight); conversion reports an
+error in this case. For example, six varying Arrow attributes and a constant accessor can exceed
+the limit when both position columns require high- and low-precision buffers. See [Using with Arrow](../../developer-guide/using-with-arrow.md).
+
 ### Data Accessors
 
 #### `getSourcePosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getsourceposition}

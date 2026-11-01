@@ -48,6 +48,7 @@
   "dependencies": {
     "@loaders.gl/core": "5.0.0-beta.1",
     "@loaders.gl/images": "5.0.0-beta.1",
+    "@luma.gl/graph": "10.0.0-alpha.7",
     "@luma.gl/shaders": "10.0.0-alpha.7",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "5.0.0-beta.1",

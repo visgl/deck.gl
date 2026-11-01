@@ -6,6 +6,7 @@ import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlockWGSL = /* wgsl */ `\
 struct ArcUniforms {
+  rowIndexOffset: u32,
   greatCircle: f32,
   useShortestPath: f32,
   numSegments: f32,
@@ -20,6 +21,7 @@ struct ArcUniforms {
 
 const uniformBlock = `\
 layout(std140) uniform arcUniforms {
+  highp uint rowIndexOffset;
   bool greatCircle;
   bool useShortestPath;
   float numSegments;
@@ -31,6 +33,7 @@ layout(std140) uniform arcUniforms {
 `;
 
 export type ArcProps = {
+  rowIndexOffset?: number;
   greatCircle: boolean;
   useShortestPath: boolean;
   numSegments: number;
@@ -46,6 +49,7 @@ export const arcUniforms = {
   vs: uniformBlock,
   fs: uniformBlock,
   uniformTypes: {
+    rowIndexOffset: 'u32',
     greatCircle: 'f32',
     useShortestPath: 'f32',
     numSegments: 'f32',

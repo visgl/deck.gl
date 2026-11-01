@@ -18,6 +18,7 @@ struct ScatterplotUniforms {
   billboard: i32,
   radiusUnits: i32,
   lineWidthUnits: i32,
+  rowIndexOffset: u32,
 };
 
 @group(0) @binding(0) var<uniform> scatterplot: ScatterplotUniforms;
@@ -209,14 +210,25 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 }
 `;
 
-export function getShaderWGSL(useRowIndexes: boolean): string {
-  return shaderWGSL
+export function getShaderWGSL(useRowIndexes: boolean, useVertexIndex = false): string {
+  const source = useVertexIndex
+    ? shaderWGSL
+        .replace('@location(0) positions: vec3<f32>,', '')
+        .replace(
+          '  var varyings: Varyings;',
+          `  var varyings: Varyings;
+  let quadPositions = array<vec3<f32>, 4>(vec3<f32>(-1.0, -1.0, 0.0), vec3<f32>(1.0, -1.0, 0.0), vec3<f32>(-1.0, 1.0, 0.0), vec3<f32>(1.0, 1.0, 0.0));
+  let quadPosition = quadPositions[attributes.vertexIndex];`
+        )
+        .replaceAll('attributes.positions', 'quadPosition')
+    : shaderWGSL;
+  return source
     .replace('PICKING_COLOR_ATTRIBUTE', useRowIndexes ? '@location(8) rowIndexes: u32,' : '')
     .replace(
       'PICKING_COLOR_VALUE',
       useRowIndexes
         ? 'picking_getPickingColorFromIndex(attributes.rowIndexes)'
-        : 'picking_getPickingColorFromIndex(attributes.instanceIndex)'
+        : 'picking_getPickingColorFromIndex(attributes.instanceIndex + scatterplot.rowIndexOffset)'
     );
 }
 

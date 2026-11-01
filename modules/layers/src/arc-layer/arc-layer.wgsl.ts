@@ -279,7 +279,7 @@ fn vertexMain(
   }
 
   geometry.uv = vec2<f32>(segmentRatio, segmentSide);
-  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex + arc.rowIndexOffset);
 
   let widthPixels = clamp(
     project_unit_size_to_pixel(attributes.instanceWidths * arc.widthScale, arc.widthUnits),
