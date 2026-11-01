@@ -152,18 +152,13 @@ export const brushingPlugin: ShaderPlugin = {
   name: 'brushing',
   module: brushingModule,
   vertexInputs: {brushingTargets: 'vec2<f32>'},
-  varyings: {brushing_isVisible: {type: 'f32'}},
-  glsl: {
-    injections: [
-      {target: 'vs:DECKGL_FILTER_GL_POSITION', injection: inject['vs:DECKGL_FILTER_GL_POSITION']},
-      {target: 'fs:DECKGL_FILTER_COLOR', injection: inject['fs:DECKGL_FILTER_COLOR']}
-    ]
-  },
-  wgsl: {
-    injections: [
-      {
-        target: 'vs:DECKGL_FILTER_POSITION',
-        injection: `
+  interStageVariables: {brushing_isVisible: {type: 'f32'}},
+  injections: [
+    {target: 'vs:DECKGL_FILTER_GL_POSITION', glsl: inject['vs:DECKGL_FILTER_GL_POSITION']},
+    {target: 'fs:DECKGL_FILTER_COLOR', glsl: inject['fs:DECKGL_FILTER_COLOR']},
+    {
+      target: 'vs:DECKGL_FILTER_POSITION',
+      wgsl: `
 var brushTarget = geometry.worldPosition.xy;
 if (brushing.targetMode == 1) { brushTarget = geometry.worldPositionAlt.xy; }
 if (brushing.targetMode == 2) { brushTarget = brushingTargets; }
@@ -173,13 +168,12 @@ if (brushing.targetMode == 3) {
 }
 brushing_isVisible = select(0.0, 1.0, visible);
 `
-      },
-      {
-        target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
-        injection: `if (brushing.enabled != 0 && brushing_isVisible < 0.5) { discard; }`
-      }
-    ]
-  }
+    },
+    {
+      target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
+      wgsl: `if (brushing.enabled != 0 && brushing_isVisible < 0.5) { discard; }`
+    }
+  ]
 };
 
 export default brushingModule;
