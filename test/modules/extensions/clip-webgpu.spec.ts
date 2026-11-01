@@ -4,7 +4,7 @@
 
 import {beforeEach, expect, test} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {Deck, OrthographicView} from '@deck.gl/core';
+import {Deck, OrthographicView, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {BrushingExtension, ClipExtension} from '@deck.gl/extensions';
 import {luma, Texture, Buffer} from '@luma.gl/core';
@@ -267,61 +267,64 @@ test.each([true, false])(
   }
 );
 
-test('ClipExtension clips billboard icon edges on WebGPU', async ({skip}) => {
-  const {IconLayer} = await import('@deck.gl/layers');
-  if (!(await getWebGPUTestDevice())) return skip();
-  const device = await luma.createDevice({
-    type: 'webgpu',
-    adapters: [webgpuAdapter],
-    createCanvasContext: {width: 128, height: 128, useDevicePixels: false}
+for (const view of [new OrthographicView(), new MapView()]) {
+  test(`ClipExtension clips billboard icon edges in ${view.id} on WebGPU`, async ({skip}) => {
+    const {IconLayer} = await import('@deck.gl/layers');
+    if (!(await getWebGPUTestDevice())) return skip();
+    const device = await luma.createDevice({
+      type: 'webgpu',
+      adapters: [webgpuAdapter],
+      createCanvasContext: {width: 128, height: 128, useDevicePixels: false}
+    });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const atlas = device.createTexture({
+      width: 1,
+      height: 1,
+      data: new Uint8Array([255, 255, 255, 255])
+    });
+    const errors: Error[] = [];
+    const layer = new IconLayer({
+      id: 'billboard-clip',
+      data: [{}],
+      getPosition: [0, 0],
+      getIcon: 'square',
+      iconAtlas: atlas,
+      iconMapping: {square: {x: 0, y: 0, width: 1, height: 1}},
+      getSize: 40,
+      billboard: true,
+      pickable: true,
+      clipByInstance: false,
+      clipBounds: [0, -80, 100, 80],
+      extensions: [new ClipExtension()]
+    });
+    const deck = new Deck({
+      device,
+      parent: container,
+      width: 128,
+      height: 128,
+      useDevicePixels: false,
+      views: view,
+      initialViewState: {target: [0, 0, 0], longitude: 0, latitude: 0, pitch: 45, zoom: 3},
+      layers: [layer],
+      onError: error => errors.push(error)
+    });
+    try {
+      await new Promise<void>(resolve => deck.setProps({onAfterRender: () => resolve()}));
+      expect(errors).toEqual([]);
+      expect(layer.isLoaded).toBe(true);
+      const [x, y] = deck.getViewports()[0].project([0, 0, 0]);
+      expect((await deck.pickObjectAsync({x: x - 10, y}))?.object).toBeFalsy();
+      expect((await deck.pickObjectAsync({x: x + 10, y}))?.index).toBe(0);
+      expect(errors).toEqual([]);
+    } finally {
+      deck.finalize();
+      atlas.destroy();
+      container.remove();
+      device.destroy();
+    }
   });
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-  const atlas = device.createTexture({
-    width: 1,
-    height: 1,
-    data: new Uint8Array([255, 255, 255, 255])
-  });
-  const errors: Error[] = [];
-  const layer = new IconLayer({
-    id: 'billboard-clip',
-    data: [{}],
-    getPosition: [0, 0],
-    getIcon: 'square',
-    iconAtlas: atlas,
-    iconMapping: {square: {x: 0, y: 0, width: 1, height: 1}},
-    getSize: 40,
-    billboard: true,
-    pickable: true,
-    clipByInstance: false,
-    clipBounds: [0, -100, 100, 100],
-    extensions: [new ClipExtension()]
-  });
-  const deck = new Deck({
-    device,
-    parent: container,
-    width: 128,
-    height: 128,
-    useDevicePixels: false,
-    views: new OrthographicView(),
-    initialViewState: {target: [0, 0, 0], zoom: 0},
-    layers: [layer],
-    onError: error => errors.push(error)
-  });
-  try {
-    await new Promise<void>(resolve => deck.setProps({onAfterRender: () => resolve()}));
-    expect(errors).toEqual([]);
-    expect(layer.isLoaded).toBe(true);
-    expect((await deck.pickObjectAsync({x: 54, y: 64}))?.object).toBeFalsy();
-    expect((await deck.pickObjectAsync({x: 74, y: 64}))?.index).toBe(0);
-    expect(errors).toEqual([]);
-  } finally {
-    deck.finalize();
-    atlas.destroy();
-    container.remove();
-    device.destroy();
-  }
-});
+}
 
 // This file is also included in the WebGL browser project.
 beforeEach(async context => {

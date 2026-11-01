@@ -121,13 +121,16 @@ let matrix = project.viewProjectionMatrix;
 let rowX = vec3<f32>(matrix[0].x, matrix[1].x, matrix[2].x);
 let rowY = vec3<f32>(matrix[0].y, matrix[1].y, matrix[2].y);
 let rowZ = vec3<f32>(matrix[0].z, matrix[1].z, matrix[2].z);
+// Perspective billboards preserve homogeneous w; orthographic billboards preserve z.
+let rowW = vec3<f32>(matrix[0].w, matrix[1].w, matrix[2].w);
+let depthRow = select(rowZ, rowW, dot(rowW, rowW) > 0.0);
 let projected = project_common_position_to_clipspace(geometry.position);
 let delta = (*position).xy - projected.xy;
-let determinant = dot(rowX, cross(rowY, rowZ));
+let determinant = dot(rowX, cross(rowY, depthRow));
 var commonPosition = geometry.position;
 if (abs(determinant) > 0.0) {
   commonPosition = vec4<f32>(commonPosition.xyz +
-    (cross(rowY, rowZ) * delta.x + cross(rowZ, rowX) * delta.y) / determinant,
+    (cross(rowY, depthRow) * delta.x + cross(depthRow, rowX) * delta.y) / determinant,
     commonPosition.w);
 }
 clip_commonPosition = clip_getCoordinates(commonPosition);`
