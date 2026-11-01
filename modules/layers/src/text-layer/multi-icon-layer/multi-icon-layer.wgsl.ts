@@ -321,7 +321,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
       : ''
   }
 
-  var fragColor = deckgl_premultiplied_alpha(vec4<f32>(color.rgb, a));
+  var fragColor = vec4<f32>(color.rgb, a);
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
