@@ -76,7 +76,7 @@ const clipModule = {
 /** Clips whole instances by their anchor; luma.gl supplies the visibility varying. */
 export const clipInstancePlugin: ShaderPlugin = {
   name: 'clip-instance',
-  modules: [clipModule],
+  module: clipModule,
   varyings: {clip_isVisible: {type: 'f32'}},
   glsl: {
     injections: [
@@ -104,7 +104,7 @@ export const clipInstancePlugin: ShaderPlugin = {
 /** Clips fragments in continuous flat common space, preserving world-wrap behavior. */
 export const clipGeometryPlugin: ShaderPlugin = {
   name: 'clip-geometry',
-  modules: [clipModule],
+  module: clipModule,
   varyings: {clip_commonPosition: {type: 'vec2<f32>'}},
   glsl: {
     injections: [
