@@ -18,6 +18,7 @@ import {
 import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {Aggregator} from './aggregator/aggregator';
+import {WebGLAggregator} from './aggregator/gpu-aggregator/webgl-aggregator';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
@@ -33,6 +34,14 @@ export default abstract class AggregationLayer<
     aggregatorType: string;
     aggregator: Aggregator;
   } & CompositeLayer['state'];
+
+  /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
+  setShaderModuleProps(props: Record<string, any>): void {
+    super.setShaderModuleProps(props);
+    if (this.state?.aggregator instanceof WebGLAggregator) {
+      this.state.aggregator.setProps({shaderModuleProps: props});
+    }
+  }
 
   /** Allow this layer to participates in the draw cycle */
   get isDrawable() {
