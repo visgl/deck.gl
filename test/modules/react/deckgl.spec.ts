@@ -347,7 +347,7 @@ test.each([
   [0, 0.4]
 ])(
   'DeckGL#external WebGPU device waits for its final size with padding and rounding %j',
-  ([padding, fraction]) => {
+  (padding, fraction) => {
     let capturedProps: Record<string, any> | undefined;
     let deckInstance: TestDeck;
 
@@ -811,4 +811,39 @@ test('DeckGL#rerender does not force redraw', async () => {
     root.render(null);
   });
   container.remove();
+});
+
+test('Deck#shared device canvas uses the supplied canvas parent', async () => {
+  const {luma} = await import('@luma.gl/core');
+  const {webgl2Adapter} = await import('@luma.gl/core/webgl');
+  const container = document.createElement('div');
+  const canvasParent = document.createElement('div');
+  const placeholder = document.createElement('canvas');
+  canvasParent.appendChild(placeholder);
+  container.appendChild(canvasParent);
+  document.body.appendChild(container);
+  const device = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    createCanvasContext: {container: document.createElement('div'), width: 8, height: 8}
+  });
+  let deck: Deck | undefined;
+  try {
+    await new Promise<void>((resolve, reject) => {
+      deck = new Deck({
+        device,
+        parent: container,
+        canvas: placeholder,
+        width: 8,
+        height: 8,
+        onAfterRender: () => resolve(),
+        onError: reject
+      });
+    });
+    expect(device.getDefaultCanvasContext().canvas.parentElement).toBe(canvasParent);
+  } finally {
+    deck?.finalize();
+    device.destroy();
+    container.remove();
+  }
 });
