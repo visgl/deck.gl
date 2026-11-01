@@ -29,6 +29,7 @@ const SHADER_HOOKS_GLSL = [
 
 // Separate names prevent legacy GLSL module injections from entering WGSL hooks.
 const SHADER_HOOKS_WGSL = [
+  'vs:DECKGL_FILTER_VERTEX_SIZE(size: ptr<function, vec3<f32>>, geometry: Geometry)',
   'vs:DECKGL_FILTER_POSITION(position: ptr<function, vec4<f32>>, geometry: Geometry)',
   'fs:DECKGL_FILTER_FRAGMENT_COLOR(color: ptr<function, vec4<f32>>, geometry: FragmentGeometry)'
 ];

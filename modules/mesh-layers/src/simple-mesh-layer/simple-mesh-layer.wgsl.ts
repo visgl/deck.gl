@@ -40,9 +40,11 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     attributes.instanceModelMatrixCol1,
     attributes.instanceModelMatrixCol2
   );
-  let meshPosition =
+  var meshPosition =
     (instanceModelMatrix * attributes.positions) * simpleMesh.sizeScale +
     attributes.instanceTranslation;
+
+  DECKGL_FILTER_VERTEX_SIZE(&meshPosition, geometry);
 
   if (simpleMesh.composeModelMatrix > 0.5) {
     geometry.normal = project_normal(instanceModelMatrix * attributes.normals);

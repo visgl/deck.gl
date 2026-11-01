@@ -134,8 +134,9 @@ fn vertexMain(
   let offset: vec3<f32> = vec3<f32>(extrusion, 0.0);
 
   // Apply deck.gl filter functions.
-#ifdef ANTIALIASING
   var filteredOffset = deckgl_filter_size(offset, geometry);
+  DECKGL_FILTER_VERTEX_SIZE(&filteredOffset, geometry);
+#ifdef ANTIALIASING
   let halfWidthPixels = length(filteredOffset.xy);
   if (halfWidthPixels > 0.0) {
     // Keep the declared edge at abs(uv.y) == 1 while rasterizing the outer half of the centered
@@ -145,8 +146,6 @@ fn vertexMain(
     uv.y *= coverageScale;
   }
   geometry.uv = uv;
-#else
-  let filteredOffset = deckgl_filter_size(offset, geometry);
 #endif
   let filteredP = deckgl_filter_gl_position(p, geometry);
 
@@ -224,9 +223,8 @@ fn fragmentMain(
   }
 
   // Apply premultiplied alpha as required by transparent canvas
-  fragColor = deckgl_premultiplied_alpha(fragColor);
-
   DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
+  fragColor = deckgl_premultiplied_alpha(fragColor);
   return fragColor;
 }
 `;

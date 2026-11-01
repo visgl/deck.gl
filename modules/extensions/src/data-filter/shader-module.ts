@@ -48,19 +48,6 @@ layout(std140) uniform dataFilterUniforms {
 
 const vertex = /* glsl */ `
 #ifdef DATAFILTER_TYPE
-  in DATAFILTER_TYPE filterValues;
-#ifdef DATAFILTER_DOUBLE
-  in DATAFILTER_TYPE filterValues64Low;
-#endif
-#endif
-
-#ifdef DATACATEGORY_TYPE
-  in DATACATEGORY_TYPE filterCategoryValues;
-#endif
-
-out float dataFilter_value;
-
-#ifdef DATAFILTER_TYPE
   float dataFilter_getMin(float _) {
     return dataFilter.min.x;
   }
@@ -154,7 +141,7 @@ float dataFilter_reduceValue(vec4 value) {
 }
 
 #ifdef DATAFILTER_TYPE
-  void dataFilter_setValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
+  float dataFilter_getValue(DATAFILTER_TYPE valueFromMin, DATAFILTER_TYPE valueFromMax) {
     DATAFILTER_TYPE dataFilter_min = dataFilter_getMin(valueFromMin);
     DATAFILTER_TYPE dataFilter_softMin = dataFilter_getSoftMin(valueFromMin);
     DATAFILTER_TYPE dataFilter_softMax = dataFilter_getSoftMax(valueFromMin);
@@ -172,9 +159,9 @@ float dataFilter_reduceValue(vec4 value) {
         step(valueFromMax, dataFilter_max),
         step(dataFilter_max, dataFilter_softMax)
       );
-      dataFilter_value = dataFilter_reduceValue(leftInRange * rightInRange);
+      return dataFilter_reduceValue(leftInRange * rightInRange);
     } else {
-      dataFilter_value = dataFilter_reduceValue(
+      return dataFilter_reduceValue(
         step(dataFilter_min, valueFromMin) * step(valueFromMax, dataFilter_max)
       );
     }
@@ -182,7 +169,7 @@ float dataFilter_reduceValue(vec4 value) {
 #endif
 
 #ifdef DATACATEGORY_TYPE
-  void dataFilter_setCategoryValue(DATACATEGORY_TYPE category) {
+  float dataFilter_getCategoryValue(DATACATEGORY_TYPE category) {
     #if DATACATEGORY_CHANNELS == 1 // One 128-bit mask
     uint dataFilter_masks = dataFilter.categoryBitMask[category / 32u];
     #elif DATACATEGORY_CHANNELS == 2 // Two 64-bit masks
@@ -201,10 +188,11 @@ float dataFilter_reduceValue(vec4 value) {
     dataFilter_bits &= 1u;
 
     #if DATACATEGORY_CHANNELS == 1
-    if (dataFilter_bits == 0u) dataFilter_value = 0.0;
+    if (dataFilter_bits == 0u) return 0.0;
     #else
-    if (any(equal(dataFilter_bits, DATACATEGORY_TYPE(0u)))) dataFilter_value = 0.0;
+    if (any(equal(dataFilter_bits, DATACATEGORY_TYPE(0u)))) return 0.0;
     #endif
+    return 1.0;
   }
 #endif
 `;
@@ -214,14 +202,7 @@ ${uniformBlock}
 ${vertex}
 `;
 
-const fragment = /* glsl */ `
-in float dataFilter_value;
-`;
-
-const fs = `
-${uniformBlock}
-${fragment}
-`;
+const fs = uniformBlock;
 
 export type CategoryBitMask = Uint32Array;
 export type DataFilterModuleProps = {
@@ -310,17 +291,17 @@ const inject = {
     if (dataFilter.enabled) {
       #ifdef DATAFILTER_TYPE
         #ifdef DATAFILTER_DOUBLE
-          dataFilter_setValue(
+          dataFilter_value = dataFilter_getValue(
             filterValues - dataFilter_getMin64High(filterValues) + filterValues64Low,
             filterValues - dataFilter_getMax64High(filterValues) + filterValues64Low
           );
         #else
-          dataFilter_setValue(filterValues, filterValues);
+          dataFilter_value = dataFilter_getValue(filterValues, filterValues);
         #endif
       #endif
 
       #ifdef DATACATEGORY_TYPE
-        dataFilter_setCategoryValue(filterCategoryValues);
+        dataFilter_value *= dataFilter_getCategoryValue(filterCategoryValues);
       #endif
     }
   `,

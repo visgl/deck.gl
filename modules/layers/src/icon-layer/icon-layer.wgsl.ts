@@ -87,13 +87,13 @@ fn vertexMain(inp: Attributes) -> Varyings {
     // DECKGL_FILTER_GL_POSITION(pos, geometry);
 
     var offset = vec3<f32>(pixelOffset, 0.0);
-    // DECKGL_FILTER_SIZE(offset, geometry);
+    DECKGL_FILTER_VERTEX_SIZE(&offset, geometry);
     let clipOffset = project_pixel_size_to_clipspace(offset.xy);
     pos = vec4<f32>(pos.x + clipOffset.x, pos.y + clipOffset.y, pos.z, pos.w);
     outp.position = pos;
   } else {
     var offset_common = vec3<f32>(project_pixel_size_vec2(pixelOffset), 0.0);
-    // DECKGL_FILTER_SIZE(offset_common, geometry);
+    DECKGL_FILTER_VERTEX_SIZE(&offset_common, geometry);
     let projected = project_position_to_clipspace_and_commonspace(inp.instancePositions, inp.instancePositions64Low, offset_common);
     geometry.position = projected.commonPosition;
     var pos = projected.clipPosition;
@@ -141,7 +141,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     return extensionColor;
   }
 
-  var fragColor = deckgl_premultiplied_alpha(vec4<f32>(rgb, a));
+  var fragColor = vec4<f32>(rgb, a);
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
@@ -161,7 +161,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   }
 
   DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
-  return fragColor;
+  return deckgl_premultiplied_alpha(fragColor);
 }
 `;
 

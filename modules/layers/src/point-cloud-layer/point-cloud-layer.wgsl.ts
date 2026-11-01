@@ -51,13 +51,13 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 #ifdef ANTIALIASING
   var offset = vec3<f32>(
 #else
-  let offset = vec3<f32>(
+  var offset = vec3<f32>(
 #endif
     attributes.positions.xy *
       project_unit_size_to_pixel(pointCloudUniforms.radiusPixels, pointCloudUniforms.sizeUnits),
     0.0
   );
-  // DECKGL_FILTER_SIZE(offset, geometry);
+  DECKGL_FILTER_VERTEX_SIZE(&offset, geometry);
 #ifdef ANTIALIASING
   let triangleRadiusPixels = length(offset.xy);
   if (triangleRadiusPixels > 0.0) {
@@ -138,9 +138,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   // Apply premultiplied alpha as required by transparent canvas
-  fragColor = deckgl_premultiplied_alpha(fragColor);
-
   DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
+  fragColor = deckgl_premultiplied_alpha(fragColor);
   return fragColor;
 }
 `;
