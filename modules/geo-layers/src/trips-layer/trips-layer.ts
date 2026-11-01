@@ -78,8 +78,14 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
 
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject =
-      this.context.device.type === 'webgpu' ? tripsShaderInjectionsWGSL : tripsShaderInjectionsGLSL;
+    if (this.context.device.type === 'webgpu') {
+      // Declare timestamp inputs before plugins allocate additional attribute and varying locations.
+      for (const [target, injection] of Object.entries(tripsShaderInjectionsWGSL)) {
+        shaders.source = shaders.source.replace(target, target + injection);
+      }
+    } else {
+      shaders.inject = tripsShaderInjectionsGLSL;
+    }
     shaders.modules = [...shaders.modules, tripsUniforms];
     return shaders;
   }

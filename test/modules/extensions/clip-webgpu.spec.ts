@@ -167,6 +167,7 @@ test.each([true, false])(
   'ClipExtension#WebGPU primitive pipelines (instance=%s)',
   async clipByInstance => {
     const {LayerManager, OrthographicViewport} = await import('@deck.gl/core');
+    const {TripsLayer} = await import('@deck.gl/geo-layers');
     const {
       ArcLayer,
       LineLayer,
@@ -190,6 +191,23 @@ test.each([true, false])(
     device.handle.pushErrorScope('validation');
     try {
       manager.setLayers([
+        new TripsLayer({
+          id: 'clip-trips',
+          data: [
+            {
+              path: [
+                [-10, 0],
+                [10, 0]
+              ],
+              timestamps: [0, 1]
+            }
+          ],
+          getPath: object => object.path,
+          getTimestamps: object => object.timestamps,
+          currentTime: 1,
+          clipByInstance,
+          extensions
+        }),
         new IconLayer({id: 'clip-icon', data: [], clipByInstance, extensions}),
         new MultiIconLayer({id: 'clip-text', data: [], clipByInstance, extensions}),
         new TextBackgroundLayer({id: 'clip-text-background', data: [], clipByInstance, extensions}),
