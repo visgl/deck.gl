@@ -12,7 +12,7 @@ import {
   type VertexFormat
 } from '@luma.gl/core';
 import {DynamicBuffer} from '@luma.gl/engine';
-import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/gpgpu/gpu-data';
+import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 import type {_GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
 
 import type {ColumnSource} from '@deck.gl/core/arrow';

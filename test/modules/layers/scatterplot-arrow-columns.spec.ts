@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
-import {GPUDataEvaluator} from '@luma.gl/gpgpu';
+import {GPUDataEvaluator} from '@luma.gl/graph';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
