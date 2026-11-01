@@ -22,7 +22,7 @@ import TabItem from '@theme/TabItem';
 ```js
 import {Deck} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
@@ -64,8 +64,8 @@ const deckInstance = new Deck({
 ```ts
 import {Deck} from '@deck.gl/core';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
-import type {Tileset3D} from '@loaders.gl/tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
@@ -108,9 +108,9 @@ const deckInstance = new Deck({
 import React, {useState} from 'react';
 import {DeckGL} from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 import type {MapViewState} from '@deck.gl/core';
-import type {Tileset3D} from '@loaders.gl/tiles';
+import type {Tileset3D} from '@loaders.gl/tiles-3d';
 
 function App() {
   const [initialViewState, setInitialViewState] = useState<MapViewState>({
@@ -156,7 +156,7 @@ function App() {
 
 ```ts
 import {Tile3DLayer} from '@deck.gl/geo-layers';
-import {I3SLoader} from '@loaders.gl/i3s';
+import {I3SLoader} from '@loaders.gl/tiles-3d/i3s';
 
 const layer = new Tile3DLayer({
   id: 'tile-3d-layer',
@@ -257,7 +257,7 @@ On top of the [default options](../core/layer.md#loadoptions), also support the 
 - `tileset`: Forward parameters to the [`Tileset3D`](https://loaders.gl/modules/tiles/docs/api-reference/tileset-3d#constructor-1) instance after fetching the tileset metadata.
 
 ```ts
-import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
+import {CesiumIonLoader} from '@loaders.gl/tiles-3d/3d-tiles';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
 const layer = new Tile3DLayer({

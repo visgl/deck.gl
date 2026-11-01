@@ -4,7 +4,7 @@
 
 import {createPatternScene} from './app';
 import {resolveDeckExampleDeviceType} from '../deck-example-device';
-import type {PatternFillProps} from '@luma.gl/shadertools';
+import type {PatternFillProps} from '@luma.gl/shaders';
 
 declare global {
   interface Window {

@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {NumberArray3, NumberArray4} from '@math.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule} from '@luma.gl/shaders';
 import {Texture} from '@luma.gl/core';
 
 const uniformBlock = /* glsl */ `\

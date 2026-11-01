@@ -1,4 +1,14 @@
 [
+  {
+    "name": "2026 El Niño Kelvin Wave Tracker",
+    "url": "https://alexba.in/visuals/kelvin-wave/",
+    "image": "/images/showcase/alexba.in-kelvin-wave.jpg",
+    "links": {
+      "by Alex Bain": "https://alexba.in/",
+      "Blog post": "https://alexba.in/blog/2026/10/13/building-the-kelvin-wave-tracker/"
+    },
+    "description": "An interactive globe following the 2026 El Niño's Kelvin waves across the Pacific and up the coast of the Americas. Built from open data."
+  },
     {
     "name": "Toronto Dot Density Map",
     "url": "https://schoolofcities.github.io/dot-density/",

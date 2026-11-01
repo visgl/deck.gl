@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {equals, NumericArray, NumberArray2, NumberArray3, NumberArray4} from '@math.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 import {BufferTransform, BufferTransformProps} from '@luma.gl/engine';
 import {ProjectProps} from '@deck.gl/core';

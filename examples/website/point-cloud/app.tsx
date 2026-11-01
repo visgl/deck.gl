@@ -9,7 +9,7 @@ import {DeckGL} from '@deck.gl/react';
 import {OrbitView, LinearInterpolator} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 
-import {LASLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/pointclouds/las';
 import type {OrbitViewState, Widget} from '@deck.gl/core';
 import {Device} from '@luma.gl/core';
 

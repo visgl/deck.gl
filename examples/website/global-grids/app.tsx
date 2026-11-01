@@ -22,7 +22,7 @@ import {LANDCOVER_LEGEND} from './landcover-palette';
 
 import {createRoot} from 'react-dom/client';
 import {parse} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 const INITIAL_VIEW_STATE: GlobeViewState = {longitude: 0, latitude: 0, zoom: 2};
 type GridSystem = 'a5' | 'geohash' | 'h3' | 's2' | 'quadkey';

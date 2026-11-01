@@ -9,7 +9,7 @@ import {
   WebMercatorViewport,
   project
 } from '@deck.gl/core';
-import {projectionEngine} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {createTestCRS} from './test-crs';
 

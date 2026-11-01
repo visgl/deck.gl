@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView, type MapViewState} from '@deck.gl/core';
-import {SceneBufferEffect, SketchEdgeLayer, WaterSurfaceLayer} from '@deck.gl-community/gpu-layers';
+import {SketchEdgeLayer, WaterSurfaceLayer} from '@deck.gl/proposals/layers';
+import {SceneBufferEffect} from '@deck.gl/proposals/effects';
 import type {Buffer} from '@luma.gl/core';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';
@@ -15,7 +16,7 @@ import {
 } from '../river-district-data';
 import {RiverDistrictLayer} from '../river-district-layer';
 import {makeBuildings, makeEdges} from '../river-district-edges';
-import type {SSRQuality} from '@luma.gl/effects';
+import type {SSRQuality} from '@luma.gl/engine/effects';
 import {RiverReflectionEffect} from './river-reflection-effect';
 
 export const CAMERA_PRESETS = {

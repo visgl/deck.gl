@@ -4,8 +4,9 @@
 
 import {test, expect} from 'vitest';
 import * as FIXTURES from 'deck.gl-test/data';
-import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
-import {LayerManager, MapView} from '@deck.gl/core';
+import {testLayer, testLayerAsync, generateLayerTests, device} from '@deck.gl/test-utils/vitest';
+import {LayerManager, MapView, _GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
+import {Buffer} from '@luma.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
 import {
@@ -19,10 +20,76 @@ import weightSource from '@deck.gl/aggregation-layers/heatmap-layer/weights.wgsl
 import {
   getShaderModuleSource,
   getShaderModuleUniformLayoutValidationResult
-} from '@luma.gl/shadertools';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+} from '@luma.gl/shaders';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const getPosition = d => d.COORDINATES;
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`TriangleLayer borrows typed vertex buffers on ${backend}`, async ({skip}) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) {
+      skip();
+      return;
+    }
+    const positions = testDevice.createBuffer({
+      data: new Float32Array(12),
+      usage: Buffer.VERTEX | Buffer.COPY_DST
+    });
+    const texCoords = testDevice.createBuffer({
+      data: new Float32Array(8),
+      usage: Buffer.VERTEX | Buffer.COPY_DST
+    });
+    const texture = testDevice.createTexture({
+      width: 1,
+      height: 1,
+      data: new Uint8Array([0, 0, 0, 255])
+    });
+    try {
+      await testLayerAsync({
+        Layer: TriangleLayer,
+        device: testDevice,
+        testCases: [
+          {
+            props: {
+              data: {attributes: {positions, texCoords}},
+              vertexCount: 4,
+              colorDomain: [0, 1],
+              aggregationMode: 0,
+              threshold: 0,
+              intensity: 1,
+              colorTexture: texture,
+              maxTexture: texture,
+              weightsTexture: texture
+            },
+            onAfterUpdate: ({layer}) => {
+              const model = layer.getModels()[0] as GPUVectorModel;
+              expect(model).toBeInstanceOf(GPUVectorModel);
+              for (const [name, buffer] of Object.entries({positions, texCoords})) {
+                const slot =
+                  backend === 'webgl'
+                    ? model.pipeline.shaderLayout.attributes!.find(
+                        attribute => attribute.name === name
+                      )!.location
+                    : model.vertexArray.getBufferSlot(name)!;
+                expect(model.vertexArray.attributes[slot]).toBe(buffer);
+              }
+            }
+          }
+        ],
+        onError: error => {
+          throw error;
+        }
+      });
+      expect(positions.destroyed).toBe(false);
+      expect(texCoords.destroyed).toBe(false);
+    } finally {
+      positions.destroy();
+      texCoords.destroy();
+      texture.destroy();
+    }
+  });
+}
 
 test('HeatmapLayer#WGSL uniform layouts', () => {
   const modules = [

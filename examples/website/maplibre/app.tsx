@@ -11,7 +11,7 @@ import {MapLibreOverlay as DeckOverlay} from '@deck.gl/maplibre';
 
 import {createRoot} from 'react-dom/client';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';

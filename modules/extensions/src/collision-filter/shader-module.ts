@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Framebuffer, Texture, TextureView} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {project} from '@deck.gl/core';
 
 const vs = /* glsl */ `

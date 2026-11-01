@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {NumberArray2, NumberArray4} from '@math.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlock = /* glsl */ `\
 layout(std140) uniform binSorterUniforms {

@@ -2,10 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  type GPUGraphDeckEffect,
-  type GPUGraphDeckEffectStats
-} from '@deck.gl-community/arrow-layers';
+import {type GPUGraphDeckEffect, type GPUGraphDeckEffectStats} from '@deck.gl/proposals/effects';
 import {
   GRAPH_EXPLORER_LINEAR_LAYOUT_VERTEX_COUNT,
   GRAPH_EXPLORER_MAXIMUM_EXACT_VERTEX_COUNT,

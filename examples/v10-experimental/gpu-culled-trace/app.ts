@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {OrthographicView, type ViewStateChangeParameters} from '@deck.gl/core';
-import {buildSdfFontAtlas} from '@luma.gl/text';
+import {buildSdfFontAtlas} from '@luma.gl/engine/text';
 import {ArrowDeck} from '../arrow-deck';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {GPUCulledArrowTextLayer} from './gpu-culled-arrow-text-layer';

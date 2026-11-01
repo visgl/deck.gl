@@ -8,7 +8,7 @@ Import it as `_CustomProjectionViewport` from `@deck.gl/core` or `deck.gl`. This
 
 ```js
 import {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import {projectionEngine} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 
 const crs = await projectionEngine.getCRS('EPSG:3857');
 const viewport = new CustomProjectionViewport({
