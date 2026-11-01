@@ -3,8 +3,8 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView, type OrthographicViewState} from '@deck.gl/core';
-import {ArrowTextLayer} from '@deck.gl-community/arrow-layers';
-import {buildSdfFontAtlas, type FontAtlas} from '@luma.gl/text';
+import {ArrowTextLayer} from '@deck.gl/proposals/layers';
+import {buildSdfFontAtlas, type FontAtlas} from '@luma.gl/engine/text';
 import {ArrowDeck} from '../arrow-deck';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {getArrowLayerTooltip} from '../arrow-layer-tooltip';

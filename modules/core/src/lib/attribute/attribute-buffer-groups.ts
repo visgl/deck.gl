@@ -11,8 +11,8 @@ import {
   cleanEvaluateSync,
   GPUDataEvaluator,
   interleave as interleaveTables
-} from '@luma.gl/gpgpu';
-import {interleave as webgpuInterleave} from '@luma.gl/gpgpu/webgpu';
+} from '@luma.gl/graph/gpu-simple-graph';
+import {interleave as webgpuInterleave} from '@luma.gl/graph/gpu-simple-graph/webgpu';
 import type {BufferAttributeLayout, BufferLayout, Device} from '@luma.gl/core';
 
 type ModelInfo = {

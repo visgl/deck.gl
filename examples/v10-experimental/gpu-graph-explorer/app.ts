@@ -3,13 +3,12 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
-  GPUGraphDeckEffect,
   GPUGraphEdgeLayer,
   GPUGraphNodeLayer,
   OrthographicView,
-  type GPUGraphDeckEffectStats,
   type PickingInfo
-} from '@deck.gl-community/arrow-layers';
+} from '@deck.gl/proposals/layers';
+import {GPUGraphDeckEffect, type GPUGraphDeckEffectStats} from '@deck.gl/proposals/effects';
 import {Buffer, type Device} from '@luma.gl/core';
 import {ArrowDeck} from '../arrow-deck';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';

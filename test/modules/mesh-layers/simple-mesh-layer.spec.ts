@@ -8,7 +8,7 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {SimpleMeshLayer} from 'deck.gl';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
 

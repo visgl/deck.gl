@@ -9,18 +9,19 @@ import {
   GPUVector,
   getGPUVectorBuffer,
   getGPUVectorFormatInfo
-} from '@luma.gl/gpgpu/gpu-data';
+} from '@luma.gl/graph/gpu-data';
 
 /**
- * Internal adaptation of luma.gl's experimental GPUTableModel for the installed
- * Model API. Consumes typed columns with deck.gl's resolved physical layouts.
+ * Binds typed columns using deck.gl's resolved physical layouts.
+ * Unlike luma.gl's row-oriented binding API, this preserves layer draw counts
+ * and permits attributes with different lengths and vertex offsets.
  * Vectors remain caller-owned; only WebGPU constant buffers are owned here.
  */
 export default class GPUVectorModel extends Model {
   private constantBuffers: Record<string, Buffer> = {};
 
   /** Binds typed columns using their resolved physical layouts. */
-  setGPUAttributes(
+  override setGPUAttributes(
     columns: Readonly<Record<string, GPUVector | GPUConstant>>,
     bufferLayouts: BufferLayout[]
   ): void {

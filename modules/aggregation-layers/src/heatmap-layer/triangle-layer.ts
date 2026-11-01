@@ -3,8 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import type {Buffer, Device, Texture} from '@luma.gl/core';
-import {Model} from '@luma.gl/engine';
-import {Layer, LayerContext, color, project32} from '@deck.gl/core';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
+import {
+  Layer,
+  LayerContext,
+  color,
+  project32,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
 import source from './triangle-layer.wgsl';
 import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
@@ -26,7 +32,7 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
   static layerName = 'TriangleLayer';
 
   state!: {
-    model: Model;
+    model: GPUVectorModel;
     positions: Buffer;
     texCoords: Buffer;
   };
@@ -39,20 +45,41 @@ export default class TriangleLayer extends Layer<_TriangleLayerProps> {
     this.setState({model: this._getModel(device)});
   }
 
-  _getModel(device: Device): Model {
+  _getModel(device: Device): GPUVectorModel {
     const {vertexCount, data} = this.props;
-
-    return new Model(device, {
+    const bufferLayout = [
+      {name: 'positions', format: 'float32x3' as const},
+      {name: 'texCoords', format: 'float32x2' as const}
+    ];
+    const model = new GPUVectorModel(device, {
       ...this.getShaders(),
       id: this.props.id,
-      attributes: data.attributes,
-      bufferLayout: [
-        {name: 'positions', format: 'float32x3'},
-        {name: 'texCoords', format: 'float32x2'}
-      ],
+      bufferLayout,
       topology: 'triangle-strip',
       vertexCount
     });
+    model.setGPUAttributes(
+      {
+        positions: new GPUVector({
+          type: 'buffer',
+          name: 'positions',
+          buffer: data.attributes.positions,
+          format: 'float32x3',
+          length: vertexCount,
+          ownsBuffer: false
+        }),
+        texCoords: new GPUVector({
+          type: 'buffer',
+          name: 'texCoords',
+          buffer: data.attributes.texCoords,
+          format: 'float32x2',
+          length: vertexCount,
+          ownsBuffer: false
+        })
+      },
+      bufferLayout
+    );
+    return model;
   }
 
   draw(): void {

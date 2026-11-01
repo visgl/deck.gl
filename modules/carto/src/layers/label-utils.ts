@@ -1,6 +1,6 @@
 import {GeoBoundingBox} from '@deck.gl/geo-layers';
-import {TypedArray} from '@loaders.gl/loader-utils';
-import {BinaryPointFeature, BinaryLineFeature, BinaryPolygonFeature} from '@loaders.gl/schema';
+import {TypedArray} from '@loaders.gl/core/loader-utils';
+import {BinaryPointFeature, BinaryLineFeature, BinaryPolygonFeature} from '@loaders.gl/core/schema';
 import {copyNumericProps, createBinaryPointFeature, initializeNumericProps} from '../utils';
 
 type Vec2 = [number, number] | TypedArray;
