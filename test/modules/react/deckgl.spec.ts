@@ -341,9 +341,13 @@ test.skip('DeckGL#real WebGPU device draws through the React custom render loop'
   container.remove();
 });
 
-test.each([0, 20])(
-  'DeckGL#external WebGPU device waits for its final size with padding %s',
-  padding => {
+test.each([
+  [0, 0],
+  [20, 0],
+  [0, 0.4]
+])(
+  'DeckGL#external WebGPU device waits for its final size with padding and rounding %j',
+  ([padding, fraction]) => {
     let capturedProps: Record<string, any> | undefined;
     let deckInstance: TestDeck;
 
@@ -421,8 +425,8 @@ test.each([0, 20])(
     expect(container.querySelector('#map-child')).toBeNull();
     expect(deckInstance!.drawReasons).toEqual(['placeholder WebGPU viewport']);
 
-    deckInstance!.width = 100;
-    deckInstance!.height = 50;
+    deckInstance!.width = 100 + fraction;
+    deckInstance!.height = 50 + fraction;
     deckInstance!.viewports = [
       {
         id: 'default-view',

@@ -1634,7 +1634,11 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this._syncCanvasTargets();
     } else if (this.canvas && !this.canvas.isConnected && this.props.parent) {
       // external canvas may not be in DOM
-      this.props.parent.insertBefore(this.canvas, this.props.parent.firstChild);
+      // A supplied device may own a different canvas from the application's placeholder.
+      const canvasParent =
+        (this.props.canvas instanceof HTMLCanvasElement && this.props.canvas.parentElement) ||
+        this.props.parent;
+      canvasParent.insertBefore(this.canvas, canvasParent.firstChild);
     }
     // TODO v9
     // ts-expect-error - Currently luma.gl v9 does not expose these options

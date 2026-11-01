@@ -86,8 +86,8 @@ function deckSizeMatchesContainer(
   return Boolean(
     deck &&
       container &&
-      deck.width === container.clientWidth &&
-      deck.height === container.clientHeight
+      Math.abs(deck.width - container.clientWidth) < 1 &&
+      Math.abs(deck.height - container.clientHeight) < 1
   );
 }
 
