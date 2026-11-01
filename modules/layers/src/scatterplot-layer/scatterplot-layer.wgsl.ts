@@ -138,8 +138,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
-  // var geometry: Geometry;
-  // geometry.uv = unitPosition;
+  fragmentGeometry.uv = varyings.unitPosition;
 
   let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
   let inCircle = select(
