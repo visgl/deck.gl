@@ -55,3 +55,15 @@ test('mergeShaders', () => {
     expect(shaders, `${testCase.title} returned correct result`).toEqual(testCase.output);
   }
 });
+
+test('mergeShaders preserves layer and extension plugins in order', () => {
+  const basePlugin = {name: 'base'};
+  const firstPlugin = {name: 'first'};
+  const secondPlugin = {name: 'second'};
+  const shaders = {plugins: [basePlugin]};
+  const merged = mergeShaders(mergeShaders(shaders, {plugins: [firstPlugin]}), {
+    plugins: [secondPlugin]
+  });
+  expect(merged.plugins).toEqual([basePlugin, firstPlugin, secondPlugin]);
+  expect(shaders.plugins).toEqual([basePlugin]);
+});

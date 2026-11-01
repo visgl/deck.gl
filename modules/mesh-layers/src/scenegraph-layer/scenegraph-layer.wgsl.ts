@@ -97,6 +97,7 @@ fn vertexMain(
   outputs.pbrUV = texCoord;
   outputs.pbrNormal = geometry.normal;
   outputs.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_POSITION(&outputs.position, geometry);
   return outputs;
 }
 
@@ -108,7 +109,9 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inputs.pickingColor)) {
       discard;
     }
-    return vec4<f32>(inputs.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(inputs.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   var fragColor = inputs.vColor;
@@ -146,6 +149,7 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

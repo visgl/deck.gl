@@ -106,6 +106,8 @@ fn vertexMain(inp: Attributes) -> Varyings {
   outp.vColorMode = inp.instanceColorModes;
   outp.pickingColor = geometry.pickingColor;
 
+  DECKGL_FILTER_POSITION(&outp.position, geometry);
+
   return outp;
 }
 
@@ -113,6 +115,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   // expose to deck.gl filter hooks
   geometry.uv = inp.uv;
+  fragmentGeometry.uv = geometry.uv;
 
   let texColor = textureSample(iconsTexture, iconsTextureSampler, inp.vTextureCoords);
 
@@ -129,7 +132,9 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
     }
-    return vec4<f32>(inp.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(inp.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   var fragColor = deckgl_premultiplied_alpha(vec4<f32>(rgb, a));
@@ -151,6 +156,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return fragColor;
 }
 `;

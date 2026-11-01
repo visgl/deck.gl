@@ -66,16 +66,6 @@ var<storage, read> project_sizeScaleBuffer: array<vec4<f32>>;
 // state before calling the project functions below.
 // -----------------------------------------------------------------------------
 
-// Structure to carry additional geometry data used by deck.gl filters.
-struct Geometry {
-  worldPosition: vec3<f32>,
-  worldPositionAlt: vec3<f32>,
-  position: vec4<f32>,
-  normal: vec3<f32>,
-  uv: vec2<f32>,
-  pickingColor: vec3<f32>,
-};
-
 var<private> geometry: Geometry;
 `;
 

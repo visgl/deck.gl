@@ -49,7 +49,6 @@ struct LineUniforms {
 var<uniform> line: LineUniforms;
 
 
-
 // ---------- Vertex Output Structure ----------
 
 struct Varyings {
@@ -99,6 +98,7 @@ fn vertexMain(
       abortOut.gl_Position = vec4<f32>(0.0);
       abortOut.vColor = vec4<f32>(0.0);
       abortOut.uv = vec2<f32>(0.0);
+      DECKGL_FILTER_POSITION(&abortOut.gl_Position, geometry);
       return abortOut;
     }
   }
@@ -162,18 +162,21 @@ fn vertexMain(
   output.vColor = vColor;
   output.uv = uv;
   output.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_POSITION(&output.gl_Position, geometry);
   return output;
 }
 
 @fragment
 fn fragmentMain(
-  @location(0) vColor: vec4<f32>,
-  @location(1) uv: vec2<f32>,
-  @location(2) pickingColor: vec3<f32>
+  inputs: Varyings
 ) -> @location(0) vec4<f32> {
+  let vColor = inputs.vColor;
+  let uv = inputs.uv;
+  let pickingColor = inputs.pickingColor;
   // Create and initialize geometry with the provided uv.
   var geometry: Geometry;
   geometry.uv = uv;
+  fragmentGeometry.uv = geometry.uv;
 
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
@@ -198,7 +201,9 @@ fn fragmentMain(
     if (!picking_isColorValid(pickingColor)) {
       discard;
     }
-    return vec4<f32>(pickingColor, 1.0);
+    var extensionColor = vec4<f32>(pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   if (picking.isHighlightActive > 0.5) {
@@ -221,6 +226,7 @@ fn fragmentMain(
   // Apply premultiplied alpha as required by transparent canvas
   fragColor = deckgl_premultiplied_alpha(fragColor);
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return fragColor;
 }
 `;

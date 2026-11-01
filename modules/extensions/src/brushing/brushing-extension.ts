@@ -4,7 +4,7 @@
 
 import {LayerExtension} from '@deck.gl/core';
 import {addBrushingAttributes} from './attributes';
-import shaderModule, {BrushingModuleProps} from './shader-module';
+import {brushingPlugin, BrushingModuleProps} from './shader-module';
 
 import type {Layer, LayerContext, Accessor} from '@deck.gl/core';
 
@@ -44,7 +44,7 @@ export default class BrushingExtension extends LayerExtension {
 
   getShaders(): any {
     return {
-      modules: [shaderModule]
+      plugins: [brushingPlugin]
     };
   }
 

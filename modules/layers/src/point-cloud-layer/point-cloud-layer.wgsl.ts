@@ -18,7 +18,7 @@ struct Attributes {
   @location(1) instancePositions: vec3<f32>,
   @location(2) instancePositions64Low: vec3<f32>,
   @location(3) instanceNormals: vec3<f32>,
-  @location(4) instanceColors: vec4<f32>
+  @location(4) instanceColors: vec4<f32>,
 };
 
 struct Varyings {
@@ -84,13 +84,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // DECKGL_FILTER_COLOR(vColor, geometry);
   varyings.pickingColor = geometry.pickingColor;
 
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
-  // var geometry: Geometry;
-  // geometry.uv = unitPosition.xy;
+  fragmentGeometry.uv = varyings.unitPosition;
 
   let distToCenter = length(varyings.unitPosition);
 #ifdef ANTIALIASING
@@ -114,7 +115,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    return vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   if (picking.isHighlightActive > 0.5) {
@@ -137,6 +140,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Apply premultiplied alpha as required by transparent canvas
   fragColor = deckgl_premultiplied_alpha(fragColor);
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return fragColor;
 }
 `;
