@@ -268,6 +268,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
 @fragment
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = inp.uv;
+  fragmentGeometry.uv = geometry.uv;
 
   let texColor = textureSample(iconsTexture, iconsTextureSampler, inp.vTextureCoords);
   var alpha = texColor.a;

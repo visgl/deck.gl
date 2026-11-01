@@ -115,6 +115,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   // expose to deck.gl filter hooks
   geometry.uv = inp.uv;
+  fragmentGeometry.uv = geometry.uv;
 
   let texColor = textureSample(iconsTexture, iconsTextureSampler, inp.vTextureCoords);
 

@@ -176,6 +176,7 @@ fn fragmentMain(
   // Create and initialize geometry with the provided uv.
   var geometry: Geometry;
   geometry.uv = uv;
+  fragmentGeometry.uv = geometry.uv;
 
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;

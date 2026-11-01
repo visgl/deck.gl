@@ -8,11 +8,13 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {BrushingExtension, ClipExtension} from '@deck.gl/extensions';
 import {luma, Texture, Buffer} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 // Pixel assertions exercise AttributeManager -> Model reflection -> generated WGSL inputs/varyings.
 test.each([false, true])(
   'BrushingExtension#WebGPU composes with ClipExtension (reverse=%s)',
-  async reverse => {
+  async (reverse, context) => {
+    if (!(await getWebGPUTestDevice())) return context.skip();
     const container = document.createElement('div');
     container.style.cssText = 'position:absolute;top:0;left:0;width:128px;height:128px';
     document.body.appendChild(container);
@@ -153,14 +155,12 @@ test.each([false, true])(
   }
 );
 
-test('BrushingExtension#WebGPU primitive pipelines accept luma-injected interfaces', async () => {
+test('BrushingExtension#WebGPU primitive pipelines accept luma-injected interfaces', async context => {
   const {LayerManager, OrthographicViewport} = await import('@deck.gl/core');
   const {ArcLayer, LineLayer, PathLayer, ColumnLayer, PointCloudLayer, SolidPolygonLayer} =
     await import('@deck.gl/layers');
-  const {getWebGPUTestDevice} = await import('@luma.gl/core/test-utils');
   const device = await getWebGPUTestDevice();
-  expect(device, 'WebGPU is required for this regression').toBeTruthy();
-  if (!device) return;
+  if (!device) return context.skip();
   const manager = new LayerManager(device, {
     viewport: new OrthographicViewport({width: 128, height: 128})
   });
@@ -232,7 +232,8 @@ test('BrushingExtension#WebGPU primitive pipelines accept luma-injected interfac
   }
 });
 
-test('BrushingExtension#WebGPU source, target, combined, and custom modes', async () => {
+test('BrushingExtension#WebGPU source, target, combined, and custom modes', async context => {
+  if (!(await getWebGPUTestDevice())) return context.skip();
   const {LineLayer} = await import('@deck.gl/layers');
   const container = document.createElement('div');
   container.style.cssText = 'position:absolute;top:0;left:0;width:128px;height:128px';

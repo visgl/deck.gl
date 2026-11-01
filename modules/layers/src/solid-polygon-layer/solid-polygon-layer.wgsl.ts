@@ -37,6 +37,7 @@ function getSolidPolygonFragmentMain() {
 @fragment
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0, 0.0);
+  fragmentGeometry.uv = geometry.uv;
 
   clip_filterColor(inp.clipCoordinates);
 

@@ -119,6 +119,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0);
+  fragmentGeometry.uv = geometry.uv;
   var extensionColor = varyings.color;
   DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(extensionColor);
@@ -198,6 +199,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0);
+  fragmentGeometry.uv = geometry.uv;
 
   var fragColor = varyings.color;
   if (column.extruded > 0.5 && column.isStroke < 0.5) {

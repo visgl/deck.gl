@@ -118,6 +118,8 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
 
   geometry.uv = uv;
 
+  fragmentGeometry.uv = geometry.uv;
+
   if (picking.isActive > 0.5) {
     if (picking.isAttribute > 0.5) {
       var extensionColor = vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);

@@ -80,6 +80,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.texCoords;
+  fragmentGeometry.uv = geometry.uv;
 
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {

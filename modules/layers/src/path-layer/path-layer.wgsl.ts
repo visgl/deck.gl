@@ -414,6 +414,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
+  fragmentGeometry.uv = geometry.uv;
 
 #ifdef ANTIALIASING
   // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are

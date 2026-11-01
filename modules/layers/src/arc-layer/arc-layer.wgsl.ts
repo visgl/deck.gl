@@ -334,6 +334,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     discard;
   }
 #endif
+  fragmentGeometry.uv = varyings.uv;
   var color = varyings.color;
 #ifdef ANTIALIASING
   // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the

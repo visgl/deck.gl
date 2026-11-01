@@ -173,6 +173,7 @@ fn get_stroked_frag_color(
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.uv;
+  fragmentGeometry.uv = geometry.uv;
   var fragColor: vec4<f32>;
 
   if (any(textBackground.borderRadius != vec4<f32>(0.0))) {
