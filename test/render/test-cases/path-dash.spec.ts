@@ -11,24 +11,8 @@ import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension, type DashUnits} from '@deck.gl/extensions';
 
 /**
- * Dash rendering matrix for PathStyleExtension.
- *
- * Many images stack several horizontal strips. In the segment-density cases, every strip
- * draws the same straight line, but builds it from a different number of pieces. Imagine
- * drawing one line with one long ruler, then drawing it again with many short rulers:
- *
- * - `path-dash-density-default`: each piece starts the dash pattern over. Rows made from
- *   different numbers of pieces are therefore expected to look different.
- * - `path-dash-density-justified`: each piece still starts over, but its dashes and gaps are
- *   adjusted to fit that piece evenly. Rows with different piece lengths may look different.
- * - `path-dash-density-high-precision`: one measurement runs along the entire line instead
- *   of starting over at each piece. All rows should show the same dash pattern.
- * - `path-dash-density-rounded`: uses the same per-piece pattern as the default case, with
- *   rounded dash ends and path joints. It shows that rounding remains well formed as the
- *   number of pieces changes.
- *
- * The golden images are the expected output. Comments beside the remaining cases explain
- * what each image is meant to show and which differences between rows are intentional.
+ * PathStyleExtension dash cases. Most goldens stack horizontal strips, listed top to bottom. In
+ * the flat vs billboard cases, red is flat and blue is billboard.
  */
 
 const STRIP_LENGTH = 720;
@@ -100,12 +84,8 @@ function createDiagonalPath(
 }
 
 /**
- * A geographic line that climbs steadily in Z.
- *
- * The 3D render cases use an orthographic `MapView` at pitch 0. Elevation therefore changes
- * neither the line's position nor its scale on screen, so any difference between rows is
- * attributable to arclength alone. The elevated camera keeps the full path inside the clip
- * volume while retaining geographic coordinates and elevations in meters.
+ * A geographic line that climbs steadily in Z. Seen from straight above in an orthographic
+ * MapView, it looks the same at any height; only its arclength grows.
  */
 function createClimbingPath(
   segments: number,
@@ -123,6 +103,7 @@ function createClimbingPath(
 const MAP_CENTER = [-122.4, 37.78];
 const DASH_ELEVATION_ZOOM = 16;
 const DASH_ELEVATION_HEIGHTS = [0, 300, 720, 900];
+// altitude 3 keeps the 900 m paths inside the clip volume
 const DASH_ELEVATION_VIEW = new MapView({orthographic: true, altitude: 3});
 const DASH_ELEVATION_VIEW_STATE = {
   longitude: MAP_CENTER[0],
@@ -138,11 +119,7 @@ const DASH_ELEVATION_PITCHED_VIEW_STATE = {
   bearing: 20
 };
 
-// Web Mercator at a given zoom is 512 * 2^zoom pixels around the world, so a degree of
-// longitude is (512 * 2^zoom) / 360 pixels; a degree of latitude covers
-// `1 / cos(latitude)` as much ground. The MapView cases size their geometry through these so
-// that a case laid out at zoom 10 frames the same way as one at zoom 18 - a fixed degree span
-// would put half the paths off screen.
+// Degrees per Web Mercator pixel at `zoom`, so MapView cases frame the same at every zoom.
 function getLongitudePerPixel(zoom: number): number {
   return 360 / (512 * 2 ** zoom);
 }
@@ -179,12 +156,7 @@ const DASH_UNIT_WIDTH_VIEW_STATE = {
   bearing: 0
 };
 
-/**
- * Compares the same dash array on 2px and 6px strokes at one fixed view. The upper pair is
- * thin and the lower pair is thick; red is flat and blue is billboard. Absolute dash units
- * must have the same period in all four rows, while `widths` deliberately scales with the
- * stroke and serves as the control.
- */
+/** The same dash array on a 2px pair (top) and a 6px pair (bottom), at one view. */
 function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, number]): TestCase {
   return {
     name: `path-dash-units-width-${dashUnits}`,
@@ -215,10 +187,9 @@ function createDashUnitWidthCase(dashUnits: DashUnits, dashArray: [number, numbe
 }
 
 /**
- * Renders a case twice in one image: MapView on the left, GlobeView on the right, same viewState
- * and layers, so dash size, gap and phase can be compared across the seam. Only meaningful at
- * zoom <= 12, where GlobeView still builds a GlobeViewport. The globe half renders a few pixels
- * off the map half (fp32 sin/cos in `project_globe_`), hence its looser image-diff threshold.
+ * Renders a case as MapView (left) and GlobeView (right) in one image. Only valid at zoom <= 12,
+ * where GlobeView still uses a GlobeViewport. The globe half lands a few pixels off the map half
+ * (fp32 sin/cos in `project_globe_`), hence the looser threshold.
  */
 function withGlobeSideBySide(testCase: TestCase): TestCase {
   const {viewState} = testCase;
@@ -230,18 +201,12 @@ function withGlobeSideBySide(testCase: TestCase): TestCase {
       new GlobeView({resolution: 36, id: 'globe', x: '50%', width: '50%'})
     ],
     viewState: {map: viewState, globe: viewState},
-    // Absorbs the SwiftShader sin/cos drift described above; same threshold as other globe cases
     imageDiffOptions: {threshold: 0.985},
     goldenImage: testCase.goldenImage.replace(/\.png$/, '-map-vs-globe.png')
   };
 }
 
-/**
- * Unpitched MapView at `zoom`. Compares dense paths in the upper half with sparse paths in
- * the lower half, and flat red paths with billboarded blue paths. Because every path follows
- * the same straight line, their dashes should line up regardless of segment count or
- * billboard mode.
- */
+/** Unpitched MapView at `zoom`: a 120-piece pair (top) and a 1-piece pair (bottom). */
 function createBillboardMapCase(zoom: number): TestCase {
   return {
     name: `path-dash-billboard-map-z${zoom}`,
@@ -271,10 +236,8 @@ function createBillboardMapCase(zoom: number): TestCase {
 }
 
 /**
- * dashUnits at `zoom`. widthUnits is 'meters' here, so the stroke itself thickens with zoom.
- * The 'widths' rows are relative to the stroke and so grow with it, while the 'pixels' rows
- * must hold exactly the same dash period at every zoom. Comparing the golden images of
- * different zooms against each other is the assertion.
+ * dashUnits at `zoom`: a 'widths' pair (top) and a 'pixels' pair (bottom). The stroke is in
+ * meters, so it thickens with zoom.
  */
 function createDashUnitsCase(zoom: number): TestCase {
   return {
@@ -307,17 +270,8 @@ function createDashUnitsCase(zoom: number): TestCase {
 }
 
 /**
- * Four billboarded paths in a perspective view:
- *
- * - `control` stays completely in front of the camera and provides the ordinary reference.
- * - `clippedEnd` starts in front of the camera and ends behind it.
- * - `clippedStart` starts behind the camera and ends in front of it.
- * - `subpixel` also crosses behind the camera, but uses dashes smaller than one pixel.
- *
- * The clipped paths should keep the same dash measurement as their hidden portions pass behind
- * the camera. Their visible ends should remain rounded, offsets should only move them sideways,
- * and the subpixel pattern should blend evenly. The fixed coordinates keep every visible end
- * inside the 800x450 image so these behaviors can be reviewed together.
+ * Billboarded paths in a pitched view. `control` stays in front of the camera; `clippedEnd`,
+ * `clippedStart` and `subpixel` each cross behind it at one end.
  */
 const CLIPPED_COMPOSITION_PATHS = {
   control: [
@@ -409,10 +363,7 @@ function createSegmentDensityCase(name: string, dashProperties: Record<string, a
   };
 }
 
-/**
- * Four paths that vary length, width, dash array and shape. Together they show that the dash
- * controls behave consistently across common path shapes and styling combinations.
- */
+/** Four shapes: a long thin line, a short thick line, a zigzag and a shallow diagonal. */
 function createPathVariantsCase(name: string, layerProperties: Record<string, any>): TestCase {
   return {
     name,
@@ -486,12 +437,8 @@ function getModeCombinationVerticalPosition(index: number): number {
 const PARITY_OFFSET = 16;
 
 /**
- * Same geometry drawn twice as adjacent stripes: flat in red, billboarded in blue, with
- * identical width and dash array. Parity is read off vertically - when the two modes agree
- * the dashes line up into columns, and any disagreement shows as drifting phase or a
- * different period between the two stripes. They are deliberately *not* drawn on top of one
- * another, since the upper layer would simply hide the discrepancy this case exists to
- * catch. Closed shapes can request a larger `parityOffset` so the two copies do not overlap.
+ * The same path twice, flat (red) just above billboard (blue). They sit apart rather than
+ * overlapping so that neither hides the other.
  */
 function billboardParityLayers(
   layerId: string,
@@ -517,52 +464,59 @@ function billboardParityLayers(
 
 const testCases: TestCase[] = [
   // ---------------------------------------------------------------------------------------
-  // Segment density: every strip is the same line, drawn with a different number of vertices
+  // Segment density: every strip is the same line, split into 1, 2, 4, 12, 40 and 120 pieces
   // ---------------------------------------------------------------------------------------
+  // Each piece restarts the pattern.
+  // Golden: rows 1-3 match and row 4 differs. Rows 5-6 look solid: their pieces are shorter
+  // than one dash.
   createSegmentDensityCase('path-dash-density-default', {
     extensions: [new PathStyleExtension({dash: true})]
   }),
+  // Each piece restarts the pattern, fitted to that piece.
+  // Golden: rows 1-3 match, with half dashes at the ends; row 4 is spaced wider; rows 5-6 look
+  // solid.
   createSegmentDensityCase('path-dash-density-justified', {
     dashJustified: true,
     extensions: [new PathStyleExtension({dash: true})]
   }),
+  // Golden: all six rows match.
   createSegmentDensityCase('path-dash-density-high-precision', {
     extensions: [new PathStyleExtension({highPrecisionDash: true})]
   }),
+  // Golden: like path-dash-density-default, with rounded dash ends.
   createSegmentDensityCase('path-dash-density-rounded', {
     capRounded: true,
     jointRounded: true,
     extensions: [new PathStyleExtension({dash: true})]
   }),
-  // dashMode 'path' is the whole point of the exercise: all six strips draw the same line and
-  // must come out identical no matter how many vertices it was built from.
+  // Golden: all six rows match.
   createSegmentDensityCase('path-dash-density-mode-path', {
     extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
-  // Justified now composes with continuous phase instead of overriding it. The period is
-  // stretched once across the whole path, so every strip still matches.
+  // Golden: all six rows match, each with a half dash at both ends.
   createSegmentDensityCase('path-dash-density-mode-path-justified', {
     dashJustified: true,
     extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
-  // Matched variants isolate segment mode, continuous path mode, and whole-path
-  // justification on exactly the same geometry and style inputs.
+  // Golden: the long line, zigzag and diagonal are dashed. The short thick line looks solid: its
+  // pieces are shorter than one dash.
   createPathVariantsCase('path-dash-variants-default', {
     extensions: [new PathStyleExtension({dash: true})]
   }),
+  // Golden: all four shapes are dashed, including the short thick line.
   createPathVariantsCase('path-dash-variants-mode-path', {
     extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
-  // Whole-path justification must derive its period from each path's own arclength and
-  // stroke width. Every path should begin and end with half a dash and contain only complete
-  // periods between.
+  // Golden: every shape begins and ends with a half dash.
   createPathVariantsCase('path-dash-mode-path-justified-variants', {
     dashJustified: true,
     extensions: [new PathStyleExtension({dashMode: 'path'})]
   }),
   {
-    // Compare the complete dashMode x dashJustified state space on identical geometry.
-    // Unequal segments and joint markers make each phase domain visibly distinct.
+    // One path with unequal segments, in four rows: segment, segment + justified, path and
+    // path + justified. Grey ticks mark the joints.
+    // Golden: row 1 restarts the pattern at each tick; row 2 fits it to each segment; row 3 runs
+    // straight through the ticks; row 4 does too, with half dashes at both ends.
     name: 'path-dash-mode-combinations',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -603,6 +557,9 @@ const testCases: TestCase[] = [
   // Dash arrays, from long dashes down to sub-pixel periods
   // ---------------------------------------------------------------------------------------
   {
+    // Dash arrays [8, 2], [4, 5], [2, 2], [1, 1], [0.5, 0.5] and [2, 6] on a 40-piece line.
+    // Golden: rows 1-2 look solid, since a dash is longer than a piece. Rows 3-5 get finer and
+    // row 6 is square dots.
     name: 'path-dash-arrays',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -625,13 +582,12 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
-  // Sub-pixel dash periods. The stroke is 10px wide, so one dash unit is 5px and the last
-  // strips put a whole period well inside a single pixel. A per-fragment comparison cannot
-  // represent that and aliases into moire or reads as solid depending on where the phase lands.
-  // Square caps should fade toward their 50% interval duty cycle. Rounded caps should preserve
-  // capsule area per scanline: the center becomes opaque where neighboring caps close the gap,
-  // while coverage falls toward the square duty cycle at the lateral edge.
+  // Sub-pixel dash periods
   // ---------------------------------------------------------------------------------------
+  // Dashes of 4, 1, 0.4, 0.15, 0.06 and 0.02 widths on a 10px stroke, square or rounded.
+  // Golden (square): dashes get finer, then fade to an even half-transparent bar.
+  // Golden (rounded): row 1 is rounded dashes. The other rows look solid, since the round caps
+  // close the gaps.
   ...[false, true].map(capRounded => ({
     name: `path-dash-subpixel-${capRounded ? 'rounded' : 'square'}`,
     views: new OrthographicView(),
@@ -652,18 +608,15 @@ const testCases: TestCase[] = [
   })),
 
   // ---------------------------------------------------------------------------------------
-  // Diagonal strokes, where dash ends fall between pixel columns and prefiltering has real
-  // partial coverage to produce. Paired with the suite-wide includeAA policy, this is the case
-  // that actually holds dash-end antialiasing to account.
+  // Diagonal strokes, where dash ends fall between pixel columns
   // ---------------------------------------------------------------------------------------
   {
+    // Eight diagonals of fine dashes, alternating square and rounded caps.
+    // Golden: eight dashed diagonals with smooth dash ends.
+    // Dense on purpose: fewer dash ends would stay under the diff threshold.
     name: 'path-dash-diagonal',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
-    // Deliberately dense. One dash end perturbs only a handful of pixels, so a handful of
-    // ends stays far below the 1% mismatch the threshold requires and the case would pass
-    // with the feature deleted. Eight lines of fine dashes put enough dash-end edge on
-    // screen for the diff to register it.
     layers: createStripLayers(
       'path-dash-diagonal',
       [
@@ -691,6 +644,7 @@ const testCases: TestCase[] = [
   // Corners: dashes across sharp joints, square vs rounded
   // ---------------------------------------------------------------------------------------
   {
+    // Golden: four dashed zigzags: square, rounded, justified and high precision.
     name: 'path-dash-corners',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -723,9 +677,11 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
-  // Closed polylines at three zoom levels. The left circle restarts its pattern at each piece;
-  // the right circle measures continuously around the entire path.
+  // 120-piece circles at zoom -2, 0 and 2
   // ---------------------------------------------------------------------------------------
+  // Both circles are flat. Left (red) is `dash`, right (blue) is `highPrecisionDash`.
+  // Golden: the left circle restarts at each piece and looks solid. The right circle is dashed
+  // all the way round.
   ...[-2, 0, 2].map(zoom => ({
     name: `path-dash-circle-zoom${zoom}`,
     views: new OrthographicView(),
@@ -754,6 +710,9 @@ const testCases: TestCase[] = [
   // Billboard parity: flat (red) vs billboard (blue), same geometry, same view
   // ---------------------------------------------------------------------------------------
   {
+    // A 1-piece line, a 120-piece line and a circle, each as a red/blue pair.
+    // Golden: the 1-piece pair is dashed, with red and blue dashes in the same columns. The
+    // 120-piece lines and the circles look solid.
     name: 'path-dash-billboard-ortho',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -779,6 +738,7 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-billboard-ortho.png'
   },
   {
+    // Golden: like path-dash-billboard-ortho, but every pair is dashed, circles included.
     name: 'path-dash-billboard-ortho-continuous',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -808,36 +768,33 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-billboard-ortho-continuous.png'
   },
 
-  // Unpitched MapView across zoom levels. The zoom 10 case is also rendered as MapView and
-  // GlobeView side by side (`-map-vs-globe` golden): the CPU dash offsets and the shader's
-  // segment lengths are both measured in the active projection's common space (sphere units on
-  // the globe) and project.scale converts both to pixels, so the dashes must continue across the
-  // centre seam without any change in size, gap or phase. z14 and z18 are above GlobeView's
-  // Mercator handoff, where both halves would be Mercator, and stay map-only.
+  // Golden: in each pair, red and blue dashes sit in the same columns.
+  // Map-vs-globe golden: the dashes keep their size and gap across the centre seam.
+  // z14 and z18 are past GlobeView's zoom-12 switch to Mercator, so they are map-only.
   ...[10, 14, 18].map(createBillboardMapCase),
   withGlobeSideBySide(createBillboardMapCase(10)),
 
   // ---------------------------------------------------------------------------------------
-  // dashUnits at z12, z13 and z14 (see createDashUnitsCase). The z12 case is also rendered
-  // side by side with GlobeView, where zoom 12 still instantiates a GlobeViewport: 'widths' and
-  // 'pixels' both resolve through project.scale, which GlobeViewport calibrates to converge with
-  // Mercator, so both halves must show the same dash periods.
+  // dashUnits at z12, z13 and z14
   // ---------------------------------------------------------------------------------------
+  // Golden: from z12 to z14 the 'widths' dashes (top) grow with the stroke, while the 'pixels'
+  // dashes (bottom) keep the same period.
+  // Map-vs-globe golden: both halves show the same dash periods.
   ...[12, 13, 14].map(createDashUnitsCase),
   withGlobeSideBySide(createDashUnitsCase(12)),
 
-  // At a fixed view, changing only the stroke width must not affect absolute dash units.
-  // `widths` is the control and should visibly change between its thin and thick pairs.
+  // Golden: in 'widths' the thick pair has longer dashes than the thin pair. In 'pixels',
+  // 'meters' and 'common', all four rows share one period.
   createDashUnitWidthCase('widths', [4, 5]),
   createDashUnitWidthCase('pixels', [4, 5]),
   createDashUnitWidthCase('meters', [30, 38]),
   createDashUnitWidthCase('common', [4 / 2 ** DASH_UNIT_WIDTH_ZOOM, 5 / 2 ** DASH_UNIT_WIDTH_ZOOM]),
 
   {
-    // A round cap extends half the stroke width beyond each dash endpoint. On a 29px stroke,
-    // neighboring caps therefore close a nominal gap at or below 29px; a larger gap retains
-    // only the excess as visible whitespace. Square rows preserve the literal interval and
-    // make that geometric boundary explicit.
+    // 4px dashes on a 29px stroke, with 5, 29 and 45px gaps, square then rounded.
+    // Golden: square rows show the literal gaps. Each round cap adds half the stroke width, so the
+    // rounded 5px row is one solid bar, the 29px row is touching dots and the 45px row has 16px
+    // gaps.
     name: 'path-dash-units-rounded-cap-overlap',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -862,8 +819,9 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-units-rounded-cap-overlap.png'
   },
 
-  // Pitched MapView. Perspective makes the flat path shrink toward the horizon, while the
-  // billboarded path keeps its width facing the screen, so their screen patterns may diverge.
+  // Pitched MapView.
+  // Golden: the blue (billboard) dashes on top stay square; the red (flat) dashes below are
+  // thinner and slanted by perspective.
   {
     name: 'path-dash-billboard-pitched',
     views: new MapView({}),
@@ -886,11 +844,10 @@ const testCases: TestCase[] = [
   },
 
   // ---------------------------------------------------------------------------------------
-  // 3D paths. Every row draws the identical geographic line on screen - Z is invisible in
-  // an orthographic MapView at pitch 0 - while its true arclength increases with elevation.
-  // The projected dashes should therefore shorten uniformly without phase jumps at any of
-  // the 40 joints, and the flat and billboard images should agree exactly apart from color.
+  // 3D paths: 40-piece lines climbing to 0, 300, 720 and 900 m, seen from straight above
   // ---------------------------------------------------------------------------------------
+  // Golden: four lines whose dashes get shorter from top (0 m) to bottom (900 m), evenly along
+  // each line. Flat and billboard match apart from colour.
   ...[false, true].map(billboard => ({
     name: `path-dash-3d-${billboard ? 'billboard' : 'flat'}`,
     views: DASH_ELEVATION_VIEW,
@@ -899,8 +856,9 @@ const testCases: TestCase[] = [
     goldenImage: `./test/render/golden-images/path-dash-3d-${billboard ? 'billboard' : 'flat'}.png`
   })),
   {
-    // Rounded dash ends make any phase jump at a data vertex visible as a missing wedge. The
-    // expected pattern continues smoothly across every joint at every tested elevation.
+    // The same climbing lines, pitched, as round dots.
+    // Golden: four diagonal rows of evenly spaced blue dots. A jump at a joint would show as a
+    // cut dot.
     name: 'path-dash-3d-billboard-pitched-rounded',
     views: DASH_ELEVATION_VIEW,
     viewState: DASH_ELEVATION_PITCHED_VIEW_STATE,
@@ -924,6 +882,7 @@ const testCases: TestCase[] = [
     imageDiffOptions: {threshold: 0.999}
   },
   {
+    // Golden: like path-dash-3d-flat, with antialiasing on.
     name: 'path-dash-3d-flat-antialiasing',
     views: DASH_ELEVATION_VIEW,
     viewState: DASH_ELEVATION_VIEW_STATE,
@@ -935,13 +894,13 @@ const testCases: TestCase[] = [
   // Offset extension combined with dashing
   // ---------------------------------------------------------------------------------------
   {
+    // A 2-piece line at offsets 0, 1, 2 and -2.
+    // Golden: the same dashes in every row; the offsets only move rows up or down.
     name: 'path-dash-offset',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
     layers: createStripLayers(
       'path-dash-offset',
-      // The same two-piece line is drawn at four offsets. Only its sideways position should
-      // change; dash length, gap length and phase should remain the same in every row.
       [0, 1, 2, -2].map((offset, index) => ({
         data: [createStraightPath(2, getStripY(index, 4))],
         getDashArray: [4, 5],
@@ -952,15 +911,13 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-offset.png'
   },
   {
-    // A continuous pattern crosses all four pieces of the line. Increasing the offset should
-    // move the line sideways without changing the pattern or introducing a jump at a joint.
+    // A 4-piece line with a continuous pattern, at offsets 0, 2, 4 and 8.
+    // Golden: the same dashes in every row, with no jump at the joints.
     name: 'path-dash-offset-mode-path',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
     layers: createStripLayers(
       'path-dash-offset-mode-path',
-      // Four pieces provide three joints where continuity can be checked. `highPrecisionDash`
-      // selects the continuous-path behavior exercised by this case.
       [0, 2, 4, 8].map((offset, index) => ({
         data: [createStraightPath(4, getStripY(index, 4))],
         getDashArray: [4, 5],
@@ -971,6 +928,7 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-offset-mode-path.png'
   },
   {
+    // Golden: like path-dash-offset, with a half dash at both ends of every row.
     name: 'path-dash-offset-mode-path-justified',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -987,6 +945,7 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-offset-mode-path-justified.png'
   },
   {
+    // Golden: like path-dash-offset, with 20px dashes and 25px gaps.
     name: 'path-dash-offset-units',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -1007,6 +966,7 @@ const testCases: TestCase[] = [
   // Resolution: the same content supersampled, to catch aliasing in the dash test
   // ---------------------------------------------------------------------------------------
   {
+    // Golden: path-dash-arrays at device pixel ratio 2.
     name: 'path-dash-arrays-dpr2',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -1029,6 +989,7 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/path-dash-arrays-dpr2.png'
   },
   {
+    // Golden: path-dash-billboard-ortho at device pixel ratio 2.
     name: 'path-dash-billboard-ortho-dpr2',
     views: new OrthographicView(),
     viewState: ORTHO_VIEW_STATE,
@@ -1056,10 +1017,7 @@ const testCases: TestCase[] = [
   }
 ];
 
-// PathStyleExtension injects GLSL and has no WGSL equivalent, so no dash case can run on
-// WebGPU yet. The backend still belongs in the matrix rather than being commented out of it:
-// skipping case by case is what the rest of the render suite does, and these skips are the
-// list to delete once the extension gains WGSL sources.
+// PathStyleExtension has no WGSL sources yet
 const DASH_SKIP_DEVICES = ['webgpu'];
 
 // Dash ends are the subject of these images. Include antialiased pixels in the comparison so
@@ -1076,6 +1034,9 @@ const CLIPPED_COMPOSITION_VIEW_STATE = {
 
 const clippedCompositionTestCases: TestCase[] = [
   {
+    // Golden: a full grey row of rounded dashes on top. The red and blue rows stop at the same x
+    // where they pass behind the camera, still with rounded ends. The purple subpixel row
+    // blends into a solid bar.
     name: 'path-dash-clipped-composition',
     views: new MapView(),
     viewState: CLIPPED_COMPOSITION_VIEW_STATE,
