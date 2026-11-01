@@ -66,7 +66,7 @@ test.each([false, true])(
     device.handle.pushErrorScope('validation');
     const deck = new Deck({
       device,
-      parent: container,
+      parent: eventRoot,
       width: 128,
       height: 128,
       useDevicePixels: false,
