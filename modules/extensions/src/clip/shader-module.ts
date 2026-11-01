@@ -77,60 +77,48 @@ const clipModule = {
 export const clipInstancePlugin: ShaderPlugin = {
   name: 'clip-instance',
   module: clipModule,
-  varyings: {clip_isVisible: {type: 'f32'}},
-  glsl: {
-    injections: [
-      {
-        target: 'vs:DECKGL_FILTER_GL_POSITION',
-        injection: 'clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));'
-      },
-      {target: 'fs:DECKGL_FILTER_COLOR', injection: 'if (clip_isVisible < 0.5) discard;'}
-    ]
-  },
-  wgsl: {
-    injections: [
-      {
-        target: 'vs:DECKGL_FILTER_POSITION',
-        injection: 'clip_isVisible = select(0.0, 1.0, clip_isInBounds(geometry.worldPosition.xy));'
-      },
-      {
-        target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
-        injection: 'if (clip_isVisible < 0.5) { discard; }'
-      }
-    ]
-  }
+  interStageVariables: {clip_isVisible: {type: 'f32'}},
+  injections: [
+    {
+      target: 'vs:DECKGL_FILTER_GL_POSITION',
+      glsl: 'clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));'
+    },
+    {target: 'fs:DECKGL_FILTER_COLOR', glsl: 'if (clip_isVisible < 0.5) discard;'},
+    {
+      target: 'vs:DECKGL_FILTER_POSITION',
+      wgsl: 'clip_isVisible = select(0.0, 1.0, clip_isInBounds(geometry.worldPosition.xy));'
+    },
+    {
+      target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
+      wgsl: 'if (clip_isVisible < 0.5) { discard; }'
+    }
+  ]
 };
 
 /** Clips fragments in continuous flat common space, preserving world-wrap behavior. */
 export const clipGeometryPlugin: ShaderPlugin = {
   name: 'clip-geometry',
   module: clipModule,
-  varyings: {clip_commonPosition: {type: 'vec2<f32>'}},
-  glsl: {
-    injections: [
-      {
-        target: 'vs:DECKGL_FILTER_GL_POSITION',
-        injection: `
+  interStageVariables: {clip_commonPosition: {type: 'vec2<f32>'}},
+  injections: [
+    {
+      target: 'vs:DECKGL_FILTER_GL_POSITION',
+      glsl: `
 clip_commonPosition = project_common_position_to_flat_continuous(
   geometry.position, project_common_position_to_flat(project.cameraPosition).x
 );`
-      },
-      {
-        target: 'fs:DECKGL_FILTER_COLOR',
-        injection: 'if (!clip_isGeometryInBounds(clip_commonPosition)) discard;'
-      }
-    ]
-  },
-  wgsl: {
-    injections: [
-      {
-        target: 'vs:DECKGL_FILTER_POSITION',
-        injection: 'clip_commonPosition = clip_getCoordinates(geometry.position);'
-      },
-      {
-        target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
-        injection: 'if (!clip_isGeometryInBounds(clip_commonPosition)) { discard; }'
-      }
-    ]
-  }
+    },
+    {
+      target: 'fs:DECKGL_FILTER_COLOR',
+      glsl: 'if (!clip_isGeometryInBounds(clip_commonPosition)) discard;'
+    },
+    {
+      target: 'vs:DECKGL_FILTER_POSITION',
+      wgsl: 'clip_commonPosition = clip_getCoordinates(geometry.position);'
+    },
+    {
+      target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
+      wgsl: 'if (!clip_isGeometryInBounds(clip_commonPosition)) { discard; }'
+    }
+  ]
 };
