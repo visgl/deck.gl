@@ -442,3 +442,54 @@ function drawPickTest(renderingType) {
 for (const renderingType of [mapsApi.RenderingType.RASTER, mapsApi.RenderingType.VECTOR]) {
   drawPickTest(renderingType);
 }
+
+function cssTransformTest(renderingType, cssScale: number | [number, number]) {
+  const [scaleX, scaleY = scaleX] = [cssScale].flat();
+  test(`GoogleMapsOverlay#${renderingType} CSS transform (scale:${scaleX},${scaleY})`, async () => {
+    const map = new mapsApi.Map({
+      width: 800,
+      height: 400,
+      longitude: -122.45,
+      latitude: 37.78,
+      zoom: 13,
+      renderingType,
+      cssScale
+    });
+
+    const overlay = new GoogleMapsOverlay({device, layers: []});
+    overlay.setMap(map);
+    map.emit({type: 'renderingtype_changed'});
+    const deck = overlay._deck;
+
+    map.draw();
+    const {viewState, width, height} = deck.props;
+    expect(viewState.longitude, 'longitude is set').toBeCloseTo(map.opts.longitude, 6);
+    expect(viewState.latitude, 'latitude is set').toBeCloseTo(map.opts.latitude, 6);
+    expect(viewState.zoom, 'zoom is set').toBeCloseTo(map.opts.zoom - 1, 6);
+    if (renderingType === mapsApi.RenderingType.RASTER) {
+      expect(width, 'width is in layout pixels').toBe(800);
+      expect(height, 'height is in layout pixels').toBe(400);
+      const canvasParent = deck.getCanvas()?.parentElement || deck.props.parent;
+      expect(canvasParent.style.left, 'canvas is aligned with the map').toBe('-400px');
+      expect(canvasParent.style.top, 'canvas is aligned with the map').toBe('-200px');
+    }
+
+    await expect.poll(() => deck.isInitialized).toBe(true);
+    const pointerMoveSpy = vi.spyOn(deck, '_onPointerMove');
+    map.emit({type: 'mousemove', pixel: {x: 400 * scaleX, y: 100 * scaleY}});
+    expect(pointerMoveSpy.mock.calls[0][0].offsetCenter, 'event pixel is in layout pixels').toEqual(
+      {
+        x: 400,
+        y: 100
+      }
+    );
+
+    pointerMoveSpy.mockRestore();
+    overlay.finalize();
+  });
+}
+for (const renderingType of [mapsApi.RenderingType.RASTER, mapsApi.RenderingType.VECTOR]) {
+  for (const cssScale of [1, 0.5, [0.75, 0.5]] as const) {
+    cssTransformTest(renderingType, cssScale as number | [number, number]);
+  }
+}
