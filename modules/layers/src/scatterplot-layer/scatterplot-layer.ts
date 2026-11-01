@@ -196,6 +196,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
     columns?: ScatterplotLayerColumns;
   };
 
+  /** Uses converted position bounds when Arrow columns bypass the attribute manager. */
+  getBounds(): [number[], number[]] | null {
+    return this.state?.columns ? this.state.columns.getBounds() : super.getBounds();
+  }
+
   /** Bypasses accessor attribute generation when explicit columns drive the model. */
   protected _getAttributeManager() {
     return hasScatterplotColumns(this.props) ? null : super._getAttributeManager();
@@ -405,8 +410,11 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     if (this.state.columns) {
-      this.state.columns.draw(model as GPUVectorModel, this.context.renderPass, offset =>
-        model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}})
+      this.state.columns.draw(
+        model as GPUVectorModel,
+        this.context.renderPass,
+        offset => model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}}),
+        'scatterplot'
       );
     } else {
       model.draw(this.context.renderPass);

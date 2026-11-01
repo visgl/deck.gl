@@ -45,6 +45,10 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               if (!layer.isLoaded) return;
               expect(layer.getAttributeManager()).toBeNull();
               expect(layer.getNumInstances()).toBe(3);
+              expect(layer.getBounds()).toEqual([
+                [0, 0, 0],
+                [3, 2, 0]
+              ]);
               expect(getWidth).toHaveBeenCalledTimes(3);
               const model = layer.state.model!;
               const bindings = vi.spyOn(model as any, 'setGPUAttributes');
@@ -133,5 +137,50 @@ test('ArcLayer reports WebGPU vertex buffer limits for many varying attributes',
     expect(error.mock.calls[0][0].message).toMatch('vertex buffers');
   } finally {
     columns.destroy();
+  }
+});
+
+test('ArcLayer keeps picking indexes distinct across WebGPU chunks', async ({skip}) => {
+  const {Deck, OrthographicView} = await import('@deck.gl/core');
+  const testDevice = await getWebGPUTestDevice('core');
+  if (!testDevice) return skip();
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const errors: Error[] = [];
+  const layer = new ArcLayer({
+    id: 'chunk-picking',
+    data: [{id: 0}, {id: 1}],
+    sourcePositions: positions([[-20, -20]]).concat(positions([[-20, 20]])),
+    targetPositions: positions([[20, -20]]).concat(positions([[20, 20]])),
+    getHeight: 0,
+    getWidth: 10,
+    pickable: true
+  });
+  const deck = new Deck({
+    device: testDevice,
+    parent: container,
+    width: 128,
+    height: 128,
+    useDevicePixels: false,
+    views: new OrthographicView(),
+    initialViewState: {target: [0, 0, 0], zoom: 0},
+    layers: [layer],
+    onError: error => errors.push(error)
+  });
+  try {
+    await new Promise<void>(resolve => {
+      deck.setProps({
+        onAfterRender: () => {
+          if (layer.isLoaded) resolve();
+        }
+      });
+    });
+    const first = await deck.pickObjectAsync({x: 64, y: 44});
+    const second = await deck.pickObjectAsync({x: 64, y: 84});
+    expect(errors).toEqual([]);
+    expect([first?.index, second?.index].sort()).toEqual([0, 1]);
+  } finally {
+    deck.finalize();
+    container.remove();
   }
 });

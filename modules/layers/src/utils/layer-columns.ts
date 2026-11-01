@@ -5,6 +5,7 @@
 import {createIterable} from '@deck.gl/core';
 import {
   Buffer,
+  UniformStore,
   dataTypeDecoder,
   type BufferLayout,
   type Device,
@@ -43,17 +44,24 @@ type Prepared = {
   source: unknown;
   rows: Rows;
   chunkLengths?: number[];
+  bounds?: [number[], number[]];
 };
 
 /** Prepares column inputs and accessor fallbacks for a layer. */
 export class LayerColumns {
   private prepared?: Prepared;
+  private uniformStore?: UniformStore;
+  private batchUniformBuffers: Buffer[] = [];
   private version = 0;
   private request?: Request;
   loading = false;
   /** Number of rows in the last successfully prepared columns, used as the instance count. */
   get length(): number {
     return this.prepared?.length ?? 0;
+  }
+  /** Returns source-coordinate position bounds for view fitting, including accessor fallbacks. */
+  getBounds(): [number[], number[]] | null {
+    return this.prepared?.bounds ?? null;
   }
   /** Identifies the picking input in the currently prepared columns. */
   get hasRowIndexes(): boolean {
@@ -137,6 +145,23 @@ export class LayerColumns {
       const {ArrowConverter} = await import('@deck.gl/core/arrow');
       const converter = new ArrowConverter(this.device);
       const columns: Columns = {};
+      let bounds: [number[], number[]] | undefined;
+      const transform = positionOptions.transform;
+      positionOptions = {
+        ...positionOptions,
+        transform: value => {
+          bounds ??= [
+            [Infinity, Infinity, Infinity],
+            [-Infinity, -Infinity, -Infinity]
+          ];
+          for (let component = 0; component < 3; component++) {
+            const coordinate = value[component] ?? 0;
+            bounds[0][component] = Math.min(bounds[0][component], coordinate);
+            bounds[1][component] = Math.max(bounds[1][component], coordinate);
+          }
+          return transform ? transform(value) : value;
+        }
+      };
       let length: number | undefined;
       let chunkLengths: number[] | undefined;
       for (const [name, definition] of Object.entries(this.definitions)) {
@@ -232,6 +257,7 @@ export class LayerColumns {
         columns,
         length,
         chunkLengths,
+        bounds: length ? bounds : undefined,
         source: props.data,
         rows,
         destroy: () => {
@@ -251,10 +277,16 @@ export class LayerColumns {
   }
 
   /** Draws matching Arrow batches, slicing accessor buffers to the same ranges. */
-  draw(model: GPUVectorModel, renderPass: RenderPass, onBatch?: (offset: number) => void): void {
+  draw(
+    model: GPUVectorModel,
+    renderPass: RenderPass,
+    onBatch?: (offset: number) => void,
+    uniformModule?: string
+  ): void {
     const prepared = this.prepared;
     if (!prepared) return;
     let start = 0;
+    let batchIndex = 0;
     for (const length of prepared.chunkLengths ?? []) {
       if (!length) continue;
       const columns: Columns = {};
@@ -306,6 +338,15 @@ export class LayerColumns {
         });
       model.setGPUAttributes(columns, layouts);
       onBatch?.(start);
+      if (this.device.type === 'webgpu' && uniformModule) {
+        this.uniformStore ??= new UniformStore(this.device, model.shaderInputs.modules);
+        this.uniformStore.setUniforms(model.shaderInputs.getUniformValues());
+        const buffer = (this.batchUniformBuffers[batchIndex] ??=
+          this.uniformStore.createUniformBuffer(uniformModule));
+        buffer.write(this.uniformStore.getUniformBufferData(uniformModule));
+        model.setBindings({[uniformModule]: buffer});
+      }
+      batchIndex++;
       model.setInstanceCount(length);
       model.draw(renderPass);
       start += length;
@@ -315,6 +356,9 @@ export class LayerColumns {
   /** Releases owned conversion results and prevents completion of pending replacements. */
   destroy(): void {
     this.version++;
+    this.uniformStore?.destroy();
+    for (const buffer of this.batchUniformBuffers) buffer.destroy();
+    this.batchUniformBuffers = [];
     this.prepared?.destroy();
     this.prepared = undefined;
     this.request = undefined;

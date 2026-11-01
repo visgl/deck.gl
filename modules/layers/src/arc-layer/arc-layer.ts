@@ -184,6 +184,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getBounds(): [number[], number[]] | null {
+    if (this.state?.columns) return this.state.columns.getBounds();
     return this.getAttributeManager()?.getBounds([
       'instanceSourcePositions',
       'instanceTargetPositions'
@@ -360,8 +361,11 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     model.shaderInputs.setProps({arc: arcProps});
     model.setVertexCount(numSegments * 2);
     if (this.state.columns)
-      this.state.columns.draw(model as GPUVectorModel, this.context.renderPass, offset =>
-        model.shaderInputs.setProps({arc: {rowIndexOffset: offset}})
+      this.state.columns.draw(
+        model as GPUVectorModel,
+        this.context.renderPass,
+        offset => model.shaderInputs.setProps({arc: {rowIndexOffset: offset}}),
+        'arc'
       );
     else model.draw(this.context.renderPass);
   }
