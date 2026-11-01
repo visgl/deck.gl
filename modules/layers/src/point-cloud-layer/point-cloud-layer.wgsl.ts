@@ -18,7 +18,7 @@ struct Attributes {
   @location(1) instancePositions: vec3<f32>,
   @location(2) instancePositions64Low: vec3<f32>,
   @location(3) instanceNormals: vec3<f32>,
-  @location(4) instanceColors: vec4<f32>
+  @location(4) instanceColors: vec4<f32>,
 };
 
 struct Varyings {

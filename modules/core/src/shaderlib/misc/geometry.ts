@@ -7,6 +7,16 @@ import type {ShaderModule} from '@luma.gl/shaders';
 const source = /* wgsl */ `\
 const SMOOTH_EDGE_RADIUS: f32 = 0.5;
 
+// Structure to carry additional geometry data used by deck.gl filters.
+struct Geometry {
+  worldPosition: vec3<f32>,
+  worldPositionAlt: vec3<f32>,
+  position: vec4<f32>,
+  normal: vec3<f32>,
+  uv: vec2<f32>,
+  pickingColor: vec3<f32>,
+};
+
 struct VertexGeometry {
   position: vec4<f32>,
   worldPosition: vec3<f32>,

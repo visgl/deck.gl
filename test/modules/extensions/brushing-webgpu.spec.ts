@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
+import {beforeEach, expect, test} from 'vitest';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {BrushingExtension, ClipExtension} from '@deck.gl/extensions';
@@ -13,8 +13,7 @@ import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 // Pixel assertions exercise AttributeManager -> Model reflection -> generated WGSL inputs/varyings.
 test.each([false, true])(
   'BrushingExtension#WebGPU composes with ClipExtension (reverse=%s)',
-  async (reverse, context) => {
-    if (!(await getWebGPUTestDevice())) return context.skip();
+  async reverse => {
     const container = document.createElement('div');
     container.style.cssText = 'position:absolute;top:0;left:0;width:128px;height:128px';
     document.body.appendChild(container);
@@ -308,4 +307,8 @@ test('BrushingExtension#WebGPU source, target, combined, and custom modes', asyn
     device.destroy();
     container.remove();
   }
+});
+
+beforeEach(async context => {
+  if (!(await getWebGPUTestDevice())) context.skip();
 });
