@@ -709,3 +709,42 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     expect(getRadius).toHaveBeenCalled();
   });
 }
+
+test('Scatterplot borrows GPU-only positions without reading them for bounds', async ({skip}) => {
+  const {Buffer} = await import('@luma.gl/core');
+  const {ScatterplotLayerColumns} = await import(
+    '../../../modules/layers/src/scatterplot-layer/scatterplot-layer-columns'
+  );
+  const testDevice = await getWebGPUTestDevice('core');
+  if (!testDevice) return skip();
+  const buffer = testDevice.createBuffer({
+    data: new Float32Array([0, 0, 0, 1, 1, 0]),
+    usage: Buffer.VERTEX | Buffer.COPY_DST
+  });
+  const columns = new ScatterplotLayerColumns(testDevice);
+  const read = vi.spyOn(buffer, 'readAsync');
+  const failed = vi.fn();
+  try {
+    await columns.update(
+      {
+        data: {length: 2, attributes: {getPosition: {buffer, size: 3}}},
+        radii: vectorFromArray([1, 2], new Float32()),
+        getFillColor: [0, 0, 0, 255],
+        getLineColor: [0, 0, 0, 255],
+        getLineWidth: 1
+      },
+      () => {},
+      failed
+    );
+    expect(failed).not.toHaveBeenCalled();
+    expect(read).not.toHaveBeenCalled();
+    expect(columns.length).toBe(2);
+    expect(columns.getBounds()).toBeNull();
+    columns.destroy();
+    expect(buffer.destroyed).toBe(false);
+  } finally {
+    read.mockRestore();
+    columns.destroy();
+    buffer.destroy();
+  }
+});

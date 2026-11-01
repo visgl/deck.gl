@@ -30,6 +30,7 @@ type PositionOptions = {
   transform?: ((value: number[]) => readonly number[]) | null;
   fp64?: boolean;
   requireRows?: boolean;
+  onPosition?: (value: number[] | null) => void;
 };
 
 type Rows = {length: number; at(index: number): any};
@@ -146,10 +147,14 @@ export class LayerColumns {
       const converter = new ArrowConverter(this.device);
       const columns: Columns = {};
       let bounds: [number[], number[]] | undefined;
-      const transform = positionOptions.transform;
+      let boundsAvailable = true;
       positionOptions = {
         ...positionOptions,
-        transform: value => {
+        onPosition: value => {
+          if (!value) {
+            boundsAvailable = false;
+            return;
+          }
           bounds ??= [
             [Infinity, Infinity, Infinity],
             [-Infinity, -Infinity, -Infinity]
@@ -159,7 +164,6 @@ export class LayerColumns {
             bounds[0][component] = Math.min(bounds[0][component], coordinate);
             bounds[1][component] = Math.max(bounds[1][component], coordinate);
           }
-          return transform ? transform(value) : value;
         }
       };
       let length: number | undefined;
@@ -174,7 +178,10 @@ export class LayerColumns {
           ...(definition.semantic === 'position'
             ? {
                 format: 'float32x3',
-                transform: positionOptions.transform ?? undefined,
+                transform: value => {
+                  positionOptions.onPosition!(value);
+                  return positionOptions.transform ? positionOptions.transform(value) : value;
+                },
                 fp64: positionOptions.fp64
               }
             : {})
@@ -257,7 +264,7 @@ export class LayerColumns {
         columns,
         length,
         chunkLengths,
-        bounds: length ? bounds : undefined,
+        bounds: length && boundsAvailable ? bounds : undefined,
         source: props.data,
         rows,
         destroy: () => {
@@ -434,7 +441,7 @@ export class LayerColumns {
         sourceSize === size &&
         type !== 'float64' &&
         (!typeInfo!.integer || accessor === 'rowIndexes') &&
-        !(Boolean(lowAttribute) && positionOptions.transform)
+        !(Boolean(lowAttribute) && (positionOptions.transform || values))
       ) {
         const format = (size === 1 ? type : `${type}x${size}`) as any;
         const bytes = getGPUVectorFormatInfo(format).byteLength;
@@ -451,6 +458,8 @@ export class LayerColumns {
             buffer.byteLength
         )
           throw new Error('Binary attribute is shorter than the Arrow columns');
+        // GPU-only positions can be borrowed without requiring COPY_SRC/readback.
+        if (lowAttribute) positionOptions.onPosition?.(null);
         return new GPUVector({
           type: 'buffer',
           name: accessor,
@@ -512,6 +521,7 @@ export class LayerColumns {
         ? new Float32Array(Math.max(1, length) * size)
         : undefined;
     const pack = (value: any, target: Float32Array | Uint8Array | Uint32Array, offset: number) => {
+      if (lowAttribute) positionOptions.onPosition?.(value);
       if (Boolean(lowAttribute) && positionOptions.transform)
         value = positionOptions.transform(value);
       for (let component = 0; component < size; component++) {
