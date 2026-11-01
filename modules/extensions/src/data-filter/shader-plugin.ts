@@ -80,40 +80,32 @@ if (${category} >= ${limit}u) {
   const inject = baseModule.inject!;
   return {
     name: 'data-filter',
-    modules: [
-      {
-        ...baseModule,
-        dependencies: [picking],
-        inject: undefined,
-        source,
-        uniformTypes: baseModule.uniformTypesFromOptions(options)
-      } as ShaderModule<any, any, any>
-    ],
+    module: {
+      ...baseModule,
+      dependencies: [picking],
+      inject: undefined,
+      source,
+      uniformTypes: baseModule.uniformTypesFromOptions(options)
+    } as ShaderModule<any, any, any>,
     vertexInputs,
-    varyings: {dataFilter_value: {type: 'f32'}},
-    glsl: {
-      injections: [
-        {target: 'vs:#main-start', injection: inject['vs:#main-start'] as string},
-        {target: 'vs:#main-end', injection: inject['vs:#main-end'] as string},
-        {target: 'vs:DECKGL_FILTER_SIZE', injection: inject['vs:DECKGL_FILTER_SIZE'] as string},
-        {target: 'fs:DECKGL_FILTER_COLOR', injection: inject['fs:DECKGL_FILTER_COLOR'] as string}
-      ]
-    },
-    wgsl: {
-      injections: [
-        {target: 'vs:#main-start', injection: initialization.join('\n')},
-        {
-          target: 'vs:DECKGL_FILTER_VERTEX_SIZE',
-          injection: 'if (dataFilter.transformSize != 0) { *size *= dataFilter_value; }'
-        },
-        {
-          target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
-          injection: `
+    interStageVariables: {dataFilter_value: {type: 'f32'}},
+    injections: [
+      {target: 'vs:#main-start', glsl: inject['vs:#main-start'] as string},
+      {target: 'vs:#main-end', glsl: inject['vs:#main-end'] as string},
+      {target: 'vs:DECKGL_FILTER_SIZE', glsl: inject['vs:DECKGL_FILTER_SIZE'] as string},
+      {target: 'fs:DECKGL_FILTER_COLOR', glsl: inject['fs:DECKGL_FILTER_COLOR'] as string},
+      {target: 'vs:#main-start', wgsl: initialization.join('\n')},
+      {
+        target: 'vs:DECKGL_FILTER_VERTEX_SIZE',
+        wgsl: 'if (dataFilter.transformSize != 0) { *size *= dataFilter_value; }'
+      },
+      {
+        target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
+        wgsl: `
 if (dataFilter_value == 0.0) { discard; }
 if (dataFilter.transformColor != 0 && picking.isActive == 0.0) { (*color).a *= dataFilter_value; }
 `
-        }
-      ]
-    }
+      }
+    ]
   };
 }
