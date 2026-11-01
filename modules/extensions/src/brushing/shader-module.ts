@@ -150,7 +150,7 @@ fn brushing_isPointInRange(position: vec2<f32>) -> bool {
 /** Portable brushing interface; luma.gl owns vertex-input and varying declarations. */
 export const brushingPlugin: ShaderPlugin = {
   name: 'brushing',
-  modules: [brushingModule],
+  module: brushingModule,
   vertexInputs: {brushingTargets: 'vec2<f32>'},
   varyings: {brushing_isVisible: {type: 'f32'}},
   glsl: {
