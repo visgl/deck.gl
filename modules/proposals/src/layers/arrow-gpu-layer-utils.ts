@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {getArrowVectorByPath, makeGPUVectorFromArrow} from '@luma.gl/gpgpu/arrow';
+import {getArrowVectorByPath, makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
 import type {Device} from '@luma.gl/core';
-import type {GPUVector, GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector, GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {DataType, Float32, RecordBatch, Table, Uint8, Vector} from 'apache-arrow';
 
 /** Materialized Arrow sources accepted by synchronous GPUVector adapters. */

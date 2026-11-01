@@ -6,7 +6,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.6
+### luma.gl v10 alpha.7
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -18,7 +18,10 @@ dependency is no longer needed.
 
 `@luma.gl/shadertools` becomes `@luma.gl/shaders`. The glTF, effects, text, splats, and
 Arrow rendering integrations move to the corresponding `@luma.gl/engine` subpaths.
-Arrow conversion helpers move to `@luma.gl/gpgpu/arrow`. Test utilities move to
+`@luma.gl/gpgpu` is consolidated into `@luma.gl/graph`: use `/gpu-data` for
+typed GPU columns and `/gpu-simple-graph` for the legacy evaluator operations.
+WebGPU evaluator operations use `/gpu-simple-graph/webgpu`.
+Arrow conversion helpers move to `@luma.gl/graph/arrow`. Test utilities move to
 `@luma.gl/core/test-utils`. The Arrow integration is now published,
 so website builds no longer require a pinned luma.gl source checkout.
 

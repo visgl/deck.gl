@@ -16,9 +16,9 @@ import {
   getArrowVectorByteLength,
   makeArrowFixedSizeListVector,
   convertArrowTemporalToGPUVector
-} from '@luma.gl/gpgpu/arrow';
+} from '@luma.gl/graph/arrow';
 import {type CommandEncoder, type Device} from '@luma.gl/core';
-import {GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVector, type GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {GPURenderable} from '@luma.gl/graph/gpu-tables';
 import {
   PathAttributeModel,

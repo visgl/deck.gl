@@ -14,7 +14,7 @@ import {
 } from '@deck.gl/core';
 import type {RenderPass} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
-import {GPUConstant, type GPUVector, type VertexList} from '@luma.gl/gpgpu/gpu-data';
+import {GPUConstant, type GPUVector, type VertexList} from '@luma.gl/graph/gpu-data';
 import {PolygonAttributeModel} from '@luma.gl/engine/models';
 import {
   getGPUVectorPickingProvenance,

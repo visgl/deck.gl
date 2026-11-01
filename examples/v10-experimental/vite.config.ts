@@ -22,7 +22,7 @@ export default defineConfig({
     dedupe: [
       '@luma.gl/core',
       '@luma.gl/engine',
-      '@luma.gl/gpgpu',
+      '@luma.gl/graph',
       '@luma.gl/shaders',
       'apache-arrow',
       'preact'

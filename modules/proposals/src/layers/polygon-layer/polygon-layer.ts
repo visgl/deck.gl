@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {CompositeLayer, type Color, type LayerProps} from '@deck.gl/core';
-import type {GPUVector, VertexList} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector, VertexList} from '@luma.gl/graph/gpu-data';
 import {GPUPathLayer} from '../path-layer/path-layer';
 import {GPUSolidPolygonLayer} from '../solid-polygon-layer/solid-polygon-layer';
 

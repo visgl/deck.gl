@@ -6,7 +6,7 @@ import type {EffectContext} from '@deck.gl/core';
 import {GPUGraphEdgeLayer, GPUGraphNodeLayer} from '@deck.gl/proposals/layers';
 import {GPUGraphDeckEffect} from '@deck.gl/proposals/effects';
 import {Buffer} from '@luma.gl/core';
-import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, it} from 'vitest';
 import {vi} from 'vitest';

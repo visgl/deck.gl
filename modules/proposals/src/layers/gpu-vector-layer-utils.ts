@@ -4,9 +4,9 @@
 
 import type {PickingInfo} from '@deck.gl/core';
 import {Buffer, type BufferLayout, type Device, type VertexFormat} from '@luma.gl/core';
-import type {GPUData, GPUVector, GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUData, GPUVector, GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {getGPUVectorModelBatches} from '@luma.gl/engine';
-import {getGPUVectorFormatInfo} from '@luma.gl/gpgpu/gpu-data';
+import {getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 import {DynamicBuffer} from '@luma.gl/engine';
 
 /** One physical, row-aligned set of GPUVector chunks rendered as a model draw batch. */

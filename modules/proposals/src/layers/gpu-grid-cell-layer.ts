@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {CompositeLayer, type Color, type LayerProps} from '@deck.gl/core';
-import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {GPUColumnLayer} from './gpu-column-layer';
 
 /** GPUVector-native square grid-cell props. Input vectors are borrowed. */

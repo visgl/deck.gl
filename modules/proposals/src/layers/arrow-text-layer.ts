@@ -17,7 +17,7 @@ import {
   type ArrowTextRendererDataBatchUpdate,
   type ArrowTextRendererProps
 } from '@luma.gl/engine/arrow';
-import {type ArrowColorType} from '@luma.gl/gpgpu/arrow';
+import {type ArrowColorType} from '@luma.gl/graph/arrow';
 import {
   Buffer,
   type BufferLayout,
@@ -32,7 +32,7 @@ import {
   supportsGpuTextExpansion,
   type TextGlyphAlphaShaderSettings
 } from '@luma.gl/engine/text-experimental';
-import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {type GPURecordBatchSourceInfo} from '@luma.gl/graph/gpu-tables';
 import {Vector} from 'apache-arrow';
 import {

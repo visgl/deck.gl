@@ -12,7 +12,7 @@ import {
   ArrowScatterplotLayer,
   ArrowPathLayer
 } from '@deck.gl/proposals/layers';
-import {makeArrowFixedSizeListVector} from '@luma.gl/gpgpu/arrow';
+import {makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';
 import {expect, test, vi} from 'vitest';

@@ -23,7 +23,7 @@
     "skipLibCheck": true,
     "paths": {
       "@luma.gl/core/webgl-constants": ["./node_modules/@luma.gl/core/dist/webgl-constants"],
-      "@luma.gl/gpgpu/webgpu": ["./node_modules/@luma.gl/gpgpu/dist/operations/webgpu/index"],
+      "@luma.gl/graph/gpu-simple-graph/webgpu": ["./node_modules/@luma.gl/graph/dist/gpu-simple-graph/operations/webgpu/index"],
       "@deck.gl/proposals/layers/path-layer": ["./modules/proposals/src/layers/path-layer/path-layer.ts"],
       "@deck.gl/proposals/layers/polygon-layer": ["./modules/proposals/src/layers/polygon-layer/polygon-layer.ts"],
       "@deck.gl/proposals/layers/solid-polygon-layer": ["./modules/proposals/src/layers/solid-polygon-layer/solid-polygon-layer.ts"],
