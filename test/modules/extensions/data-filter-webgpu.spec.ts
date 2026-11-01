@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
+import {beforeEach, expect, test} from 'vitest';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, BrushingExtension, ClipExtension} from '@deck.gl/extensions';
@@ -240,7 +241,6 @@ test.each([true, false])(
       _MultiIconLayer: MultiIconLayer,
       _TextBackgroundLayer: TextBackgroundLayer
     } = await import('@deck.gl/layers');
-    const {getWebGPUTestDevice} = await import('@luma.gl/core/test-utils');
     const device = await getWebGPUTestDevice();
     expect(device, 'WebGPU is required for this regression').toBeTruthy();
     if (!device) return;
@@ -355,7 +355,6 @@ test.each([true, false])(
 
 test('DataFilterExtension#WebGPU rejects item counting before model creation', async () => {
   const {LayerManager, OrthographicViewport} = await import('@deck.gl/core');
-  const {getWebGPUTestDevice} = await import('@luma.gl/core/test-utils');
   const device = await getWebGPUTestDevice();
   expect(device).toBeTruthy();
   if (!device) return;
@@ -378,4 +377,9 @@ test('DataFilterExtension#WebGPU rejects item counting before model creation', a
   } finally {
     manager.finalize();
   }
+});
+
+// These regressions also run in the WebGL browser project.
+beforeEach(async context => {
+  if (!(await getWebGPUTestDevice())) context.skip();
 });

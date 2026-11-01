@@ -341,7 +341,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   }
 
   DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
-  return fragColor;
+  return deckgl_premultiplied_alpha(fragColor);
 }
 `;
 }
