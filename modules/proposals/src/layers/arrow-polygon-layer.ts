@@ -17,7 +17,7 @@ import {
   type ArrowPolygonRendererDataBatchUpdate,
   type ArrowPolygonRendererProps
 } from '@luma.gl/engine/arrow';
-import {type ArrowColorType} from '@luma.gl/gpgpu/arrow';
+import {type ArrowColorType} from '@luma.gl/graph/arrow';
 import type {ShaderLayout} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import {
@@ -29,7 +29,7 @@ import {
   watchDeckArrowModelPipeline
 } from './arrow-layer-types';
 import type {ArrowLayerPickingInfo} from './arrow-layer-types';
-import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {type GPURecordBatchSourceInfo} from '@luma.gl/graph/gpu-tables';
 import {POLYGON_STORAGE_SHADER_LAYOUT} from '@luma.gl/engine/models';
 import {Vector} from 'apache-arrow';

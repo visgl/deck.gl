@@ -14,7 +14,7 @@ import {
   type GPUVectorLayerPickingInfo
 } from '@deck.gl/proposals/layers';
 import type {Buffer, RenderPass, Texture} from '@luma.gl/core';
-import {GPUData, GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import {GPUData, GPUVector, type GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import {describe, expect, test, vi} from 'vitest';
 import {

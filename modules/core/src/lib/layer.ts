@@ -907,8 +907,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attributeManager: AttributeManager,
     changedAttributes: Record<string, Attribute>
   ): void {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -967,8 +966,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       changedAttributes = manager.getAttributes();
     }
 
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
 
@@ -1001,8 +999,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attributeManager: AttributeManager,
     changedAttributes: {[id: string]: Attribute}
   ) {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,

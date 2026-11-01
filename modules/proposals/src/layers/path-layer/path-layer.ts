@@ -14,7 +14,7 @@ import {
 } from '@deck.gl/core';
 import {Buffer, type RenderPass, type ShaderLayout} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
-import type {GPUVector, VertexList} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector, VertexList} from '@luma.gl/graph/gpu-data';
 import {PathStorageModel} from '@luma.gl/engine/models';
 import {
   getGPUVectorPickingProvenance,

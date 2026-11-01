@@ -116,7 +116,7 @@ const aliases = {
 };
 
 // Linked private luma.gl peers must share resource classes and Arrow types with deck.gl.
-const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/gpgpu', '@luma.gl/shaders', 'apache-arrow'];
+const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/graph', '@luma.gl/shaders', 'apache-arrow'];
 
 // Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
 // until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly

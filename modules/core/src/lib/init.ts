@@ -6,7 +6,6 @@ import {registerLoaders} from '@loaders.gl/core';
 import {ImageLoader} from '@loaders.gl/images';
 
 import log from '../utils/log';
-import {installModelCleanupCompatibility} from './luma-upstream/model-cleanup';
 import {register} from '../debug/index';
 import jsonLoader from '../utils/json-loader';
 
@@ -30,7 +29,6 @@ function checkVersion() {
   }
 
   if (!existingVersion) {
-    installModelCleanupCompatibility();
     log.log(1, `deck.gl ${version}`)();
 
     globalThis.deck = {

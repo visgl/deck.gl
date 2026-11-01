@@ -8,9 +8,9 @@ import {
   convertArrowToGPUVector,
   getArrowPaths,
   readArrowGPUVectorAsync
-} from '@luma.gl/gpgpu/arrow';
+} from '@luma.gl/graph/arrow';
 import type {Device} from '@luma.gl/core';
-import {GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVector, type GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {RecordBatch, Table, type DataType, type Vector} from 'apache-arrow';
 
 /** Arrow or GPU-resident column accepted by a deck Arrow layer input. */

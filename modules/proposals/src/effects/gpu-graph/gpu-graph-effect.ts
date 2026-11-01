@@ -17,7 +17,7 @@ import {
   GPUGraphAlgorithmsTopology,
   type GPUGraphAlgorithmsAdjacency
 } from '@luma.gl/graph/gpu-graph-algorithms';
-import {GPUData, GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUData, GPUVector} from '@luma.gl/graph/gpu-data';
 /** Caller-owned graph input preserving original edge partitions and vertex allocations. */
 export type GPUGraphDeckDataset = {
   /** Number of stable zero-based graph vertices. */

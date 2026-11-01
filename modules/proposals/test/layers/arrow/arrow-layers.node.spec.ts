@@ -4,7 +4,7 @@
 
 import {expect, it} from 'vitest';
 import {ArrowPathLayer, ArrowPolygonLayer, ArrowTextLayer} from '@deck.gl/proposals/layers';
-import {makeGPUVectorFromArrow, makeArrowFixedSizeListVector} from '@luma.gl/gpgpu/arrow';
+import {makeGPUVectorFromArrow, makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import type {Model} from '@luma.gl/engine';
 import {NullDevice} from '@luma.gl/core/test-utils';
 import * as arrow from 'apache-arrow';

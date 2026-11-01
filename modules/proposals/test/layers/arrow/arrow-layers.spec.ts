@@ -15,7 +15,7 @@ import {
   ArrowTripsLayer
 } from '@deck.gl/proposals/layers';
 import {ArrowPolygonRenderer} from '@luma.gl/engine/arrow';
-import {makeArrowFixedSizeListVector, makeGPUVectorFromArrow} from '@luma.gl/gpgpu/arrow';
+import {makeArrowFixedSizeListVector, makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
 import {GPUPathLayer} from '@deck.gl/proposals/layers/path-layer';
 import {GPUSolidPolygonLayer} from '@deck.gl/proposals/layers/solid-polygon-layer';
 import {expect, it} from 'vitest';

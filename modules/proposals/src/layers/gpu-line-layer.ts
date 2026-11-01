@@ -14,7 +14,7 @@ import {
 } from '@deck.gl/core';
 import {type Buffer, type RenderPass} from '@luma.gl/core';
 import {GPUVectorModel} from '@luma.gl/engine';
-import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   createGPUVectorStyleBuffer,
   getGPUVectorStyleBufferBinding,

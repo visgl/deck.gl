@@ -6,7 +6,7 @@ import {Deck, MapView, type Layer} from '@deck.gl/core';
 import {IconLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {GPUIconLayer, GPUScatterplotLayer} from '@deck.gl/proposals/layers';
 import {Buffer, Texture, type Device} from '@luma.gl/core';
-import {GPUData, GPUVector, type GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import {GPUData, GPUVector, type GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {expect, test} from 'vitest';
 

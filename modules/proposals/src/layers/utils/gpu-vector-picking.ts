@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {PickingInfo} from '@deck.gl/core';
-import type {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 
 /** Global row and physical chunk provenance attached to GPUVector layer picking results. */
 export type GPUVectorLayerPickingInfo = PickingInfo & {
