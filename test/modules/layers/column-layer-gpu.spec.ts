@@ -3,12 +3,12 @@
 // Copyright (c) vis.gl contributors
 
 import {afterAll, beforeAll, expect, test} from 'vitest';
-import {GPUDataEvaluator} from '@luma.gl/gpgpu';
+import {GPUDataEvaluator} from '@luma.gl/graph/gpu-simple-graph';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Buffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
-import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {GPUConstant, GPUVector} from '@luma.gl/graph/gpu-data';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
 import ColumnLayer from '@deck.gl/layers/column-layer/column-layer';
 import GridCellLayer from '@deck.gl/layers/column-layer/grid-cell-layer';

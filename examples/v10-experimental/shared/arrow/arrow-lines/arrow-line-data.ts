@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {getArrowVectorByteLength, makeArrowFixedSizeListVector} from '@luma.gl/arrow';
+import {getArrowVectorByteLength, makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import * as arrow from 'apache-arrow';
 import type {
   ArrowLineRendererModel,

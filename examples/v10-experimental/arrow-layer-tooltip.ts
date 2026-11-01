@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {PickingInfo} from '@deck.gl/core';
-import type {ArrowLayerPickingInfo} from '@deck.gl-community/arrow-layers';
+import type {ArrowLayerPickingInfo} from '@deck.gl/proposals/layers';
 
 /** Returns a compact tooltip for picked Arrow layer rows. */
 export function getArrowLayerTooltip(info: PickingInfo): string | null {

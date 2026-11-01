@@ -12,9 +12,9 @@ export default defineConfig({
   base: './',
   resolve: {
     alias: {
-      '@deck.gl-community/gpu-layers/query': resolve(root, 'modules/deck-gpu-layers/src/query'),
-      '@deck.gl-community/gpu-layers': resolve(root, 'modules/deck-gpu-layers/src'),
-      '@deck.gl-community/arrow-layers': resolve(root, 'modules/deck-arrow-layers/src'),
+      '@deck.gl/proposals/effects/query': resolve(root, 'modules/proposals/src/effects/query'),
+      '@deck.gl/proposals/layers': resolve(root, 'modules/proposals/src/layers'),
+      '@deck.gl/proposals/effects': resolve(root, 'modules/proposals/src/effects'),
       '@deck.gl/core': resolve(root, 'modules/core/src'),
       '@deck.gl/layers': resolve(root, 'modules/layers/src'),
       '@deck.gl/extensions': resolve(root, 'modules/extensions/src')
@@ -22,8 +22,8 @@ export default defineConfig({
     dedupe: [
       '@luma.gl/core',
       '@luma.gl/engine',
-      '@luma.gl/gpgpu',
-      '@luma.gl/shadertools',
+      '@luma.gl/graph',
+      '@luma.gl/shaders',
       'apache-arrow',
       'preact'
     ]

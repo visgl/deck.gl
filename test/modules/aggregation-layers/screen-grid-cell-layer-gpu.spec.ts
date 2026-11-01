@@ -4,8 +4,8 @@
 
 import {expect, test} from 'vitest';
 import {Buffer} from '@luma.gl/core';
-import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {GPUConstant, GPUVector} from '@luma.gl/graph/gpu-data';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {_GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import ScreenGridCellLayer from '@deck.gl/aggregation-layers/screen-grid-layer/screen-grid-cell-layer';

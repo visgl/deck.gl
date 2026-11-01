@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import {_Tile2DHeader as Tile2DHeader} from '@deck.gl/geo-layers';
-import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {RequestScheduler} from '@loaders.gl/core/loader-utils';
 
 const getRequestPriority = tile => (tile.isSelected ? 1 : -1);
 

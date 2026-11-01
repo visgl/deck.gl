@@ -208,6 +208,32 @@ test('project#getUniforms CARTESIAN z scale is continuous across zoom 12 with a 
   expect(zScales[1] / zScales[0], 'z scale at zoom 12 relative to zoom 11.99').toBeCloseTo(1, 6);
 });
 
+test('project#getUniforms CARTESIAN z scale matches LNGLAT at the viewport latitude', () => {
+  for (const latitude of [0, 46, 61]) {
+    const getZScale = (zoom: number, coordinateSystem: 'cartesian' | 'lnglat') => {
+      const viewport = new WebMercatorViewport({
+        width: 800,
+        height: 600,
+        latitude,
+        longitude: -122.19,
+        zoom,
+        pitch: 60
+      });
+      const uniforms = project.getUniforms({viewport, coordinateSystem}) as ProjectUniforms;
+      return uniforms.commonUnitsPerWorldUnit[2];
+    };
+    // Below zoom 12 LNGLAT scales z per vertex, so the uniform is only meaningful in offset mode
+    const lnglatZScale = getZScale(12.01, 'lnglat');
+
+    for (const zoom of [11.99, 12.01]) {
+      expect(
+        getZScale(zoom, 'cartesian') / lnglatZScale,
+        `z scale at latitude ${latitude}, zoom ${zoom}`
+      ).toBeCloseTo(1, 6);
+    }
+  }
+});
+
 test('project#getUniforms rejects legacy numeric coordinate systems', () => {
   expect(
     () => project.getUniforms({viewport: TEST_VIEWPORTS.map, coordinateSystem: -1 as never}),

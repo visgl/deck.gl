@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {ArrowTextLayer, type ArrowTextLayerProps} from '@deck.gl-community/arrow-layers';
-import type {ArrowTextRenderer} from '@luma.gl/arrow';
+import {ArrowTextLayer, type ArrowTextLayerProps} from '@deck.gl/proposals/layers';
+import type {ArrowTextRenderer} from '@luma.gl/engine/arrow';
 import {Buffer, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {DrawCommandBuffer} from '@luma.gl/gpgpu/gpu-core';
-import type {TextStorageModel} from '@luma.gl/text/experimental';
+import {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
+import type {TextStorageModel} from '@luma.gl/engine/text-experimental';
 
 export type GPUCulledTextDraw = {
   selectedGlyphRecords: Buffer;

@@ -249,7 +249,7 @@ Specifies the CRS of layer positions after `modelMatrix` and `coordinateOrigin` 
 - `'meter-offsets'`
 - `'lnglat-offsets'`
 
-`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
+`'lnglat'`, `'WGS84'`, `'EPSG:4326'`, and `'EPSG:4979'` identify WGS84 longitude/latitude/elevation. `'globe'` identifies geocentric meter coordinates on deck.gl's existing sphere; `'EPSG:4978'` identifies WGS84 ellipsoid geocentric coordinates. Other CRS identifiers and PROJ strings are resolved by `@math.gl/geospatial/projection`. While resolution is pending, the layer waits before initialization or updates; failures are reported through the layer's error handler.
 
 In [multi-view applications](../../developer-guide/views.md), the first viewport allowed by the layer filter determines the layer's CPU coordinate conversion. Use separate layer instances when views require different packed coordinate systems.
 
@@ -523,7 +523,7 @@ Out of the box, deck.gl supports loading JSON and image files (with [ImageLoader
 Support for addtional formats can be added by adding loaders to the `loaders` prop. For example, to load data from CSV files:
 
 ```js
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 const layer = new HexagonLayer({
   data: './data.csv',

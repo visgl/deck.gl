@@ -1,17 +1,16 @@
 # Experimental deck.gl v10 examples
 
 These examples and their shared fixtures were copied from `luma.gl/examples/deck`
-alongside `@deck.gl-community/gpu-layers` and `@deck.gl-community/arrow-layers`.
+alongside the prototypes now consolidated in the private `@deck.gl/proposals` package.
+Layers use `@deck.gl/proposals/layers`; effects use `@deck.gl/proposals/effects`.
 They use this repository's deck.gl source and the root dependency installation.
 Shared UI helpers live in `shared/`, Arrow fixtures in `shared/arrow/`,
 and showcase fixtures in `shared/showcase/`.
 
 ## Setup and commands
 
-Run `yarn` at the repository root, then link the unpublished luma.gl peers as
-explained in [GPU layers](../../modules/deck-gpu-layers/README.md) and
-[Arrow layers](../../modules/deck-arrow-layers/README.md). Do not install dependencies
-inside the example directories. Their package manifests provide commands using the
+Run `yarn` at the repository root to install the published luma.gl dependencies.
+Do not install dependencies inside the example directories. Their package manifests provide commands using the
 root installation; the examples are intentionally outside the package workspaces.
 
 ```sh
@@ -28,12 +27,11 @@ yarn test-private
 
 The examples prefer WebGPU where available. Individual examples declare backend
 requirements in `mobile-support.ts`; `gpu-graph-explorer` requires WebGPU.
-Private examples and tests remain opt-in because their luma.gl peers are unpublished.
+Private examples and tests remain opt-in.
 Visual smoke scripts beside the examples use Playwright and can be run with Node.
 The website embeds these examples under **Arrow Layers - deck.gl v10**,
 **Visual Effects - deck.gl v10**, and **GPU Graph Layers - deck.gl v10**.
-`yarn test-website` builds their assets using a pinned luma.gl source revision,
-without requiring local peer links. `yarn --cwd website start` also builds the
+`yarn test-website` builds their assets using the installed luma.gl packages. `yarn --cwd website start` also builds the
 embedded demos before starting the website. Their controls and device selectors
 remain available inside each example page.
 
@@ -70,5 +68,4 @@ meter-offset projection, and the restored graph rendering pipeline timeout.
 The styled-paths and city-scene visual smoke scripts also fail their WebGPU
 route-picking and roof-picking assertions, respectively.
 These tests remain enabled in the opt-in private suite; public test jobs exclude
-them. The website build bundles the demos using pinned sources for the unpublished
-peers.
+them. The website build bundles the demos using the published luma.gl packages.
