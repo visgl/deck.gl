@@ -21,7 +21,6 @@ import {pathUniforms, PathProps} from './path-layer-uniforms';
 import {shaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
-import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -191,13 +190,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       fs,
       source: shaderWGSL,
       defines: antialiasing ? {ANTIALIASING: 1} : {},
-      modules: [
-        project32,
-        color,
-        picking,
-        pathUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, picking, pathUniforms]
     }); // 'project' module added by default.
   }
 

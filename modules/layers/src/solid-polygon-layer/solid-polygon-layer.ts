@@ -21,7 +21,6 @@ import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 import {getSolidPolygonShaderWGSL} from './solid-polygon-layer.wgsl';
-import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -153,14 +152,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       defines: {
         RING_WINDING_ORDER_CW: ringWindingOrderCW
       },
-      modules: [
-        project32,
-        color,
-        gouraudMaterial,
-        picking,
-        solidPolygonUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 
