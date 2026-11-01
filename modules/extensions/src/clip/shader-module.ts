@@ -114,7 +114,23 @@ clip_commonPosition = project_common_position_to_flat_continuous(
     },
     {
       target: 'vs:DECKGL_FILTER_POSITION',
-      wgsl: 'clip_commonPosition = clip_getCoordinates(geometry.position);'
+      wgsl: `
+// Billboard offsets are applied in clip space after geometry.position is set.
+// Recover their common-space displacement before interpolating clipping coordinates.
+let matrix = project.viewProjectionMatrix;
+let rowX = vec3<f32>(matrix[0].x, matrix[1].x, matrix[2].x);
+let rowY = vec3<f32>(matrix[0].y, matrix[1].y, matrix[2].y);
+let rowZ = vec3<f32>(matrix[0].z, matrix[1].z, matrix[2].z);
+let projected = project_common_position_to_clipspace(geometry.position);
+let delta = (*position).xy - projected.xy;
+let determinant = dot(rowX, cross(rowY, rowZ));
+var commonPosition = geometry.position;
+if (abs(determinant) > 0.0) {
+  commonPosition = vec4<f32>(commonPosition.xyz +
+    (cross(rowY, rowZ) * delta.x + cross(rowZ, rowX) * delta.y) / determinant,
+    commonPosition.w);
+}
+clip_commonPosition = clip_getCoordinates(commonPosition);`
     },
     {
       target: 'fs:DECKGL_FILTER_FRAGMENT_COLOR',
