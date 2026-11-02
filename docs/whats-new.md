@@ -16,6 +16,11 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### Controllers
+
+- Touch pinch zoom now ends at the last live gesture position instead of applying inertia from the noisy finger-lift frame, allowing an immediate handoff to pan or another pinch.
+- Mobile gesture recognition now distinguishes two-finger translation from pinch zoom and accepts a more deliberate first tap for double-tap-drag zoom.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026
