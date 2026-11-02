@@ -5,6 +5,7 @@
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
 import {Deck, OrthographicView, MapView} from '@deck.gl/core';
 import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {PointLabelLayer} from '@deck.gl/carto';
 import {CollisionFilterExtension, DataFilterExtension} from '@deck.gl/extensions';
 import {createContainer, createTestDevice, removeContainer} from './deck-test-utils';
 import {isRenderTestDeviceEnabled} from './render-test-suite';
@@ -584,5 +585,31 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       getCollisionPriority: d => d.priority
     });
     expect(await drawLayers([layer])).toEqual([-100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'PointLabelLayer secondary labels share the primary label result',
+  async () => {
+    const layer = new PointLabelLayer({
+      id: 'point-labels',
+      data: [
+        {position: [0, 0], text: 'Primary', secondary: 'Secondary text', priority: 10},
+        {position: [10, 10], text: 'Hidden', secondary: 'Hidden text', priority: 5},
+        {position: [300, 0], text: 'Far', secondary: 'Far text', priority: 0}
+      ],
+      getPosition: d => d.position,
+      getText: d => d.text,
+      getSecondaryText: d => d.secondary,
+      getCollisionPriority: d => d.priority,
+      getRadius: 4,
+      sizeScale: 16,
+      extensions,
+      pickable: true
+    });
+    expect(await drawLayers([layer])).toEqual([0, 10]);
+    // Secondary labels are drawn last, so they are picked when they are visible.
+    const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+    expect(objects.every(({sourceLayer}) => sourceLayer!.id.endsWith('-secondary'))).toBe(true);
   }
 );

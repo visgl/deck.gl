@@ -29,8 +29,16 @@ type RenderInfo = {
 };
 
 // Sublayers of a composite share source object indices (e.g. text and its background).
+// So do composites that render their parent's data, such as PointLabelLayer's two labels.
 function getCollisionSourceId(layer: Layer): string {
-  return layer.parent?.id || layer.id;
+  let source = layer.parent;
+  if (!source) {
+    return layer.id;
+  }
+  while (source.parent && source.parent.props.data === source.props.data) {
+    source = source.parent;
+  }
+  return source.id;
 }
 
 // Character and background sublayers expose the bounds used by text collision shaders.

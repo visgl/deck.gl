@@ -65,8 +65,10 @@ class EnhancedTextLayer extends TextLayer {
     const charactersLayer = layers[1];
     const {renderBackground, collisionBackgroundPadding} = this.props as EnhancedTextLayerProps;
 
+    // Only the primary label tests collisions; the secondary label shares its result.
     const collisionBackgroundLayer =
       backgroundLayer &&
+      Boolean(collisionBackgroundPadding) &&
       new EnhancedTextBackgroundLayer(backgroundLayer.props, {
         id: `${this.id}-collision-background`,
         padding: collisionBackgroundPadding
