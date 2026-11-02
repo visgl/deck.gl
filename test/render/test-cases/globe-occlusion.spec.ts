@@ -11,49 +11,10 @@ import {IconLayer, ScatterplotLayer, SolidPolygonLayer, TextLayer} from '@deck.g
 import {iconAtlas as iconMapping} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
 
-/**
- * Camera-facing geometry on GlobeView. Back-face culling cannot tell the near side of the globe
- * from the far side for billboards, so IconLayer, TextLayer and billboard ScatterplotLayer hide
- * objects whose anchor is behind the globe with `project_globe_is_occluded`, and shift their depth
- * toward the camera with `project_globe_billboard_clipspace` so the curve of the globe does not
- * clip a visible sprite. Non-billboard marks lie on the surface and are handled by culling.
- *
- * The far-side cases look at the globe from above lng 0, lat 10 at zoom 0.9. Blue objects are on
- * the near side and must be visible; red objects are on the far side and must be hidden. Red
- * objects are drawn four times larger, so that any of them showing through covers enough of the
- * frame to fail the image diff, whose threshold is loose for SwiftShader.
- *
- * - `globe-occlusion-icons`: markers every 30° of longitude at four latitudes, plus a grid placed
- *   with `coordinateSystem: 'meter-offsets'` around an origin on the far side. Expected: 20 blue
- *   markers, no red ones.
- * - `globe-occlusion-icons-surface`: the same markers over an opaque SolidPolygonLayer earth.
- *   Expected: the same 20 blue markers, drawn whole, including the ones on the limb.
- * - `globe-occlusion-icons-altitude`: markers along the horizon at sea level (blue) and 600 km up
- *   (orange). Expected: the orange column reaches further down than the blue one, because a
- *   raised anchor is visible past the horizon of the ground below it.
- * - `globe-occlusion-text`: labels at the same grid. Expected: near-side labels with their
- *   backgrounds, no far-side labels.
- * - `globe-occlusion-text-content-box`: the same labels with a fixed-height content box, which
- *   routes the background through its clip-rect path. Expected: near-side labels in tall boxes,
- *   no far-side labels.
- * - `globe-occlusion-points-billboard`: billboard ScatterplotLayer at the same grid. Expected:
- *   20 blue dots, no red ones.
- * - `globe-occlusion-icons-meter-offsets`: a 5 x 4 grid of markers placed with
- *   `coordinateSystem: 'meter-offsets'` around an origin on the limb, over an opaque earth.
- *   Expected: whole markers, none cut by the surface.
- * - `globe-occlusion-marks-surface`: non-billboard ScatterplotLayer and IconLayer at the grid and
- *   along the horizon. Expected: near-side marks foreshortened on the surface, whole up to the
- *   limb, no far-side marks and no marks torn across the viewport.
- *
- * The last case looks at a pitched view from close up instead, and records the cost of the depth
- * shift that keeps the globe from clipping a sprite:
- *
- * - `globe-occlusion-billboard-depth`: an opaque wall 4 km tall standing 1 km in front of three
- *   columns of icons, at zoom 12 with pitch 60°, where the shift is about 1.8 km toward the
- *   camera. Expected: the flanking columns beside the wall show all three icons; behind the wall
- *   only the orange icon 1 km behind it draws through, because the wall is nearer its anchor than
- *   the shift is long, while the blue icons 3 km and 10 km behind it stay hidden.
- */
+// Billboards on GlobeView: IconLayer, TextLayer and billboard ScatterplotLayer hide anchors behind
+// the globe and shift depth toward the camera so the globe's curve does not clip visible sprites.
+// Far-side cases look from above lng 0, lat 10 at zoom 0.9: blue is near side and must show, red is
+// far side (drawn four times larger so a leak fails the loose SwiftShader diff) and must not.
 
 const ICON_ATLAS = '/test/data/icon-atlas.png';
 const VIEW_STATE = {longitude: 0, latitude: 10, zoom: 0.9, pitch: 0, bearing: 0};
@@ -204,6 +165,7 @@ async function loadPrepackedFontAtlas(): Promise<void> {
 const testCases: TestCase[] = [
   {
     name: 'globe-occlusion-icons',
+    // Golden: 20 blue markers on the globe every 30° of longitude at four latitudes, no red ones
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
@@ -220,6 +182,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-icons-surface',
+    // Golden: the same 20 blue markers drawn whole over a light grey earth, including on the limb
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
@@ -235,6 +198,8 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-icons-altitude',
+    // Golden: two marker columns along the horizon; the orange (600 km up) reaches further down
+    // than the blue (sea level), since a raised anchor is visible past the ground horizon
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
@@ -244,6 +209,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-text',
+    // Golden: near-side labels with backgrounds, no far-side labels
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [createTextLayer('labels')],
@@ -251,6 +217,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-text-content-box',
+    // Golden: near-side labels in tall boxes, no far-side labels
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     // Content boxes are in meters; this one fixes the height at about 40 px at zoom 0.9 and leaves
@@ -260,6 +227,7 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-points-billboard',
+    // Golden: 20 blue dots, no red ones
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
@@ -277,6 +245,8 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-marks-surface',
+    // Golden: near-side marks foreshortened on the surface, whole up to the limb, none on the far
+    // side and none torn across the viewport
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
@@ -303,9 +273,8 @@ const testCases: TestCase[] = [
     goldenImage: './test/render/golden-images/globe-occlusion-marks-surface.png'
   },
   {
-    // Meter offsets take the GLOBE_METER_OFFSETS projection mode. Expected: markers around the
-    // limb origin drawn whole over the earth, like the lng/lat markers on the limb
     name: 'globe-occlusion-icons-meter-offsets',
+    // Golden: a cluster of blue markers on the right limb drawn whole over the earth, none cut
     views: new GlobeView({resolution: 36}),
     viewState: VIEW_STATE,
     layers: [
@@ -333,6 +302,9 @@ const testCases: TestCase[] = [
   },
   {
     name: 'globe-occlusion-billboard-depth',
+    // Golden: zoom 12, pitch 60°; a 4 km wall 1 km in front of three icon columns. Flanking columns
+    // show all three icons; behind the wall only the orange icon 1 km behind it draws through,
+    // since the depth shift (about 1.8 km) exceeds its distance, and the blue ones stay hidden
     views: new GlobeView({resolution: 36}),
     viewState: DEPTH_VIEW_STATE,
     layers: [
