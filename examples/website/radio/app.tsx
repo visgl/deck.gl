@@ -12,7 +12,7 @@ import {MVTLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {scaleSqrt, scaleLinear} from 'd3-scale';
 import SearchBar from './search-bar';
 
@@ -136,7 +136,7 @@ function getTooltipText(
 export default function App({
   device,
   data,
-  mapStyle = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  mapStyle = 'https://tiles.openfreemap.org/styles/positron',
   showMinimap = true
 }: {
   device?: Device;
@@ -244,7 +244,8 @@ export default function App({
       extruded: false,
       getFillColor: d => coverageColorScale(d.count),
 
-      loaders: [CSVLoader]
+      loaders: [CSVLoader],
+      loadOptions: {csv: {shape: 'object-row-table'}}
     }),
 
     new PathLayer({
@@ -287,7 +288,7 @@ export async function renderToDOM(container: HTMLDivElement) {
 
   const stations = (
     await load(DATA_URL.STATIONS, CSVLoader, {
-      csv: {delimitersToGuess: '\t', skipEmptyLines: true}
+      csv: {shape: 'object-row-table', delimitersToGuess: '\t', skipEmptyLines: true}
     })
   ).data;
 

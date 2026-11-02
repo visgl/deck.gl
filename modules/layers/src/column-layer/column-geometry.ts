@@ -5,7 +5,7 @@
 import {log} from '@deck.gl/core';
 import {Geometry, type GeometryAttribute} from '@luma.gl/engine';
 
-import {modifyPolygonWindingDirection, WINDING} from '@math.gl/polygon';
+import {modifyPolygonWindingDirection} from '@math.gl/geometry';
 
 type ColumnGeometryProps = {
   id?: string;
@@ -45,7 +45,7 @@ function tesselateColumn(props: ColumnGeometryProps): {
   if (vertices) {
     log.assert(vertices.length >= nradial); // `vertices` must contain at least `diskResolution` points
     vertices = vertices.flatMap(v => [v[0], v[1]]);
-    modifyPolygonWindingDirection(vertices, WINDING.COUNTER_CLOCKWISE);
+    modifyPolygonWindingDirection(vertices, 'counter-clockwise');
   }
 
   const isExtruded = height > 0;

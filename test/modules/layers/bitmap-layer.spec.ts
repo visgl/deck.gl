@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect} from 'vitest';
 
-import {COORDINATE_SYSTEM, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {_GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils/vitest';
 import createMesh from '@deck.gl/layers/bitmap-layer/create-mesh';
@@ -62,6 +63,44 @@ test('BitmapLayer#constructor', () => {
   });
 });
 
+test('BitmapLayer#imageCoordinateSystem with preprojection', () => {
+  const viewport = createTestViewport({
+    width: 800,
+    height: 600,
+    converter: {
+      forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
+      inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
+    }
+  });
+  const bounds: NonNullable<BitmapLayer['props']['bounds']>[] = [
+    [0, -30, 45, 0],
+    [
+      [0, -30],
+      [0, 0],
+      [45, 0],
+      [45, -30]
+    ]
+  ];
+  for (const imageBounds of bounds) {
+    testLayer({
+      Layer: BitmapLayer,
+      viewport,
+      onError: error => {
+        throw error;
+      },
+      testCases: (['default', 'cartesian', 'lnglat'] as const).map(imageCoordinateSystem => ({
+        title: `CustomProjectionView + imageCoordinateSystem: ${imageCoordinateSystem}`,
+        props: {bounds: imageBounds, _imageCoordinateSystem: imageCoordinateSystem},
+        onAfterUpdate({layer}) {
+          expect(layer.state.coordinateConversion).toBe(0);
+          expect(layer.state.bounds).toEqual([0, 0, 0, 0]);
+          expect(layer.state.mesh.texCoords.length).toBeGreaterThan(0);
+        }
+      }))
+    });
+  }
+});
+
 test('BitmapLayer#imageCoordinateSystem', () => {
   testLayer({
     Layer: BitmapLayer,
@@ -81,7 +120,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'MapView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -92,7 +131,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'MapView + imageCoordinateSystem: LNGLAT',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          _imageCoordinateSystem: 'lnglat'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -122,7 +161,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'GlobeView + imageCoordinateSystem: CARTESIAN',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+          _imageCoordinateSystem: 'cartesian'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -133,7 +172,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
       {
         title: 'GlobeView + imageCoordinateSystem: LNGLAT',
         updateProps: {
-          _imageCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
+          _imageCoordinateSystem: 'lnglat'
         },
         onAfterUpdate({layer}) {
           const {coordinateConversion, bounds} = layer.state;
@@ -152,7 +191,7 @@ test('BitmapLayer#imageCoordinateSystem', () => {
         [2, 3, 0],
         [2, 1, 1]
       ],
-      _imageCoordinateSystem: COORDINATE_SYSTEM.CARTESIAN
+      _imageCoordinateSystem: 'cartesian'
     }),
     onError: () =>
       console.log('Layer should throw if _imageCoordinateSystem is used with quad bounds')

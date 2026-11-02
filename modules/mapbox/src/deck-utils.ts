@@ -64,8 +64,10 @@ export function getDeckInstance({
     watchMapMove(deck, map);
   } else {
     deckProps.onLoad = () => {
-      onLoad?.();
       watchMapMove(deck, map);
+      // Sync any camera changes made by the app between control creation and Deck initialization
+      onMapMove(deck, map);
+      onLoad?.();
     };
   }
 
@@ -158,7 +160,13 @@ export function drawLayerGroup(
 }
 
 export function getProjection(map: Map): 'mercator' | 'globe' {
-  const projection = map.getProjection?.();
+  let projection;
+  try {
+    projection = map.getProjection?.();
+  } catch {
+    // maplibre's getProjection() throws before the style is set
+    return 'mercator';
+  }
   const type =
     // maplibre projection spec
     projection?.type ||

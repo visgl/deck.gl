@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {GeoJsonLayer} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
 import {DATA, COLORS, SHAPE_NAMES, SIZES} from './data-sample';
@@ -92,7 +92,7 @@ class Root extends Component<any, RootState> {
 
     return [
       new GeoJsonLayer({
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         data: DATA,
 
         // Data accessors

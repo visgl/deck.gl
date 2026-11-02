@@ -93,13 +93,14 @@ All layers support a [loaders](../api-reference/core/layer.md#loaders) prop that
 For example, the following code adds the [CSVLoader](https://loaders.gl/modules/csv/docs/api-reference/csv-loader) to support CSV/TSV files:
 
 ```ts
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 new HexagonLayer({
   data: '/path/to/data.tsv',
   loaders: [CSVLoader],
   loadOptions: {
     csv: {
+      shape: 'object-row-table',
       delimiter: '\t',
       dynamicTyping: true,
       skipEmptyLines: true
@@ -111,7 +112,7 @@ new HexagonLayer({
 The following code adds the [LASLoader](https://loaders.gl/modules/las/docs/api-reference/las-loader) to support LAS/LAZ files:
 
 ```ts
-import {LASLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/pointclouds/las';
 
 new PointCloudLayer({
   mesh: '/path/to/pointcloud.laz',
@@ -257,7 +258,7 @@ It might be desirable for some applications to serve the worker code itself with
 new MVTLayer({
   loadOptions: {
     mvt: {
-      // cp node_modules/@loaders.gl/mvt/dist/mvt-worker.js static/mvt-worker.js
+      // cp node_modules/@loaders.gl/tiles/dist/mvt-worker.js static/mvt-worker.js
       workerUrl: '/static/mvt-worker.js'
     }
   }
@@ -267,7 +268,7 @@ new MVTLayer({
 If the layer is used in an environment that does not support web workers, or you need to debug the loader code on the main thread, you may import the full loader like this:
 
 ```ts
-import {MVTLoader} from '@loaders.gl/mvt';
+import {MVTLoader} from '@loaders.gl/tiles/mvt';
 new MVTLayer({
   loaders: [MVTLoader],
   loadOptions: {core: {worker: false}}
@@ -346,7 +347,7 @@ Or more directly, import the [parse](https://loaders.gl/modules/core/docs/api-re
 
 ```ts
 import {parse} from '@loaders.gl/core';
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 
 const layer = new ScenegraphLayer({
   scenegraph: parse(arraybuffer, GLTFLoader)
