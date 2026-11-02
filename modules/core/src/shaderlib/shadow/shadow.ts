@@ -12,6 +12,7 @@ import {pixelsToWorld} from '@math.gl/web-mercator';
 import type {Texture} from '@luma.gl/core';
 import {ShaderModule} from '@luma.gl/shaders';
 import type Viewport from '../../viewports/viewport';
+import type {ShadowBounds} from '../../effects/lighting/directional-light';
 import {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 
 const uniformBlock = /* glsl */ `
@@ -73,6 +74,10 @@ const vec4 bitUnpackShift = 1.0 / bitPackShift;
 const vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);
 
 float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
+  // Nothing outside the light's frustum was drawn into the shadow map
+  if (any(lessThan(position, vec3(0.0))) || any(greaterThan(position, vec3(1.0)))) {
+    return 0.0;
+  }
   vec4 rgbaDepth = texture(shadowMap, position.xy);
 
   float z = dot(rgbaDepth, bitUnpackShift);
@@ -122,6 +127,8 @@ export type ShadowModuleProps = {
   dummyShadowMap: Texture;
   shadowColor?: NumberArray4;
   shadowMatrices?: Matrix4[];
+  /** Per light: world-space bounds to fit its shadow map to, see `DirectionalLight._shadowBounds` */
+  shadowBounds?: (ShadowBounds | null)[];
   shadowLightId?: number;
 };
 
@@ -190,27 +197,82 @@ function getViewportCenterPosition({
   return new Matrix4(viewport.viewProjectionMatrix).invert().transform(center);
 }
 
+type LightBox = {
+  left: number;
+  right: number;
+  bottom: number;
+  top: number;
+  near: number;
+  far: number;
+};
+
+/** Returns the box around `positions` in a light's view space. */
+function getLightBox(positions: NumericArray[]): LightBox {
+  return {
+    left: Math.min(...positions.map(position => position[0])),
+    right: Math.max(...positions.map(position => position[0])),
+    bottom: Math.min(...positions.map(position => position[1])),
+    top: Math.max(...positions.map(position => position[1])),
+    near: Math.min(...positions.map(position => -position[2])),
+    far: Math.max(...positions.map(position => -position[2]))
+  };
+}
+
+/** Returns the part of `box` inside `bounds`, or `box` when they don't overlap. */
+function clipLightBox(box: LightBox, bounds: LightBox): LightBox {
+  const clipped = {
+    left: Math.max(box.left, bounds.left),
+    right: Math.min(box.right, bounds.right),
+    bottom: Math.max(box.bottom, bounds.bottom),
+    top: Math.min(box.top, bounds.top),
+    near: Math.max(box.near, bounds.near),
+    far: Math.min(box.far, bounds.far)
+  };
+  const overlaps =
+    clipped.left < clipped.right && clipped.bottom < clipped.top && clipped.near < clipped.far;
+  return overlaps ? clipped : box;
+}
+
+/** Returns the corners of world-space shadow bounds in common space. */
+function getBoundsCorners(viewport: Viewport, [min, max]: ShadowBounds): number[][] {
+  const corners: number[][] = [];
+  for (const x of [min[0], max[0]]) {
+    for (const y of [min[1], max[1]]) {
+      for (const z of [min[2] ?? 0, max[2] ?? 0]) {
+        corners.push(viewport.projectPosition([x, y, z]));
+      }
+    }
+  }
+  return corners;
+}
+
 function getViewProjectionMatrices({
   viewport,
-  shadowMatrices
+  shadowMatrices,
+  shadowBounds
 }: {
   viewport: Viewport;
   shadowMatrices: Matrix4[];
+  shadowBounds?: (ShadowBounds | null)[];
 }): Matrix4[] {
   const projectionMatrices: Matrix4[] = [];
   const corners = getFrustumCorners(viewport);
 
-  for (const shadowMatrix of shadowMatrices) {
+  for (let i = 0; i < shadowMatrices.length; i++) {
+    const shadowMatrix = shadowMatrices[i];
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
-    const positions = corners.map(corner => viewMatrix.transform(corner));
-    const projectionMatrix = new Matrix4().ortho({
-      left: Math.min(...positions.map(position => position[0])),
-      right: Math.max(...positions.map(position => position[0])),
-      bottom: Math.min(...positions.map(position => position[1])),
-      top: Math.max(...positions.map(position => position[1])),
-      near: Math.min(...positions.map(position => -position[2])),
-      far: Math.max(...positions.map(position => -position[2]))
-    });
+    let box = getLightBox(corners.map(corner => viewMatrix.transform(corner)));
+    // Fit the shadow map to the part of the light's bounds in view, so that its texels and its
+    // depth range stay small when the view spans kilometers (zoomed out or steeply pitched)
+    const bounds = shadowBounds?.[i];
+    if (bounds) {
+      const boundsCorners = getBoundsCorners(viewport, bounds);
+      box = clipLightBox(
+        box,
+        getLightBox(boundsCorners.map(corner => viewMatrix.transform(corner)))
+      );
+    }
+    const projectionMatrix = new Matrix4().ortho(box);
     projectionMatrices.push(projectionMatrix.multiplyRight(shadowMatrix));
   }
   return projectionMatrices;
@@ -246,6 +308,7 @@ function createShadowUniforms(
   const projectCenters: NumericArray[] = [];
   const viewProjectionMatrices = getMemoizedViewProjectionMatrices({
     shadowMatrices: opts.shadowMatrices,
+    shadowBounds: opts.shadowBounds,
     viewport: projectProps.viewport
   }).slice();
 

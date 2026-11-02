@@ -276,3 +276,78 @@ test('shadow#getUniforms keeps bound shadow maps for empty props', () => {
     shadow_uShadowMap1: dummyShadowMap
   });
 });
+
+test('shadow#getUniforms fits the shadow map to shadowBounds', () => {
+  // A steeply pitched view spans kilometers; the bounds cover ~200 m around its center
+  const [longitude, latitude] = [-122.42694, 37.75153];
+  const viewport = new MapView().makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {longitude, latitude, zoom: 16, pitch: 70, bearing: 0}
+  })!;
+  const props = {
+    project: {viewport},
+    shadowMatrices: [new Matrix4().lookAt({eye: new Vector3([1, 1, 2])})],
+    dummyShadowMaps: [true]
+  };
+  const shadowBounds = [
+    [-122.428, 37.7505, 0],
+    [-122.426, 37.7525, 20]
+  ];
+  const viewFit = shadow.getUniforms(props);
+  const boundsFit = shadow.getUniforms({...props, shadowBounds: [shadowBounds]});
+
+  // LNGLAT_AUTO_OFFSET mode: positions relative to the viewport center, plus projectCenter0
+  const origin = viewport.projectPosition([longitude, latitude, 0]);
+  const inShadowMap = (uniforms, position: number[]) => {
+    const common = viewport.projectPosition(position);
+    const result = uniforms.viewProjectionMatrix0.transform([
+      common[0] - origin[0],
+      common[1] - origin[1],
+      common[2] - origin[2]
+    ]);
+    const center = uniforms.projectCenter0;
+    // Bounds corners land on the edges of the fitted map, so allow for rounding
+    return [0, 1, 2].every(i => Math.abs((result[i] + center[i]) / center[3]) <= 1.01);
+  };
+
+  const corners = ([min, max]: number[][]) =>
+    [min[0], max[0]].flatMap(x =>
+      [min[1], max[1]].flatMap(y => [min[2], max[2]].map(z => [x, y, z]))
+    );
+  // The part of the bounds in view is in the shadow map
+  const visibleCorners = corners(shadowBounds).filter(corner => inShadowMap(viewFit, corner));
+  expect(visibleCorners.length, 'Some of the bounds are in view').toBeGreaterThan(0);
+  for (const corner of visibleCorners) {
+    expect(inShadowMap(boundsFit, corner), 'Visible bounds are in the shadow map').toBe(true);
+  }
+  // Bounds entirely in view are entirely in the shadow map
+  const visibleBounds = [
+    [-122.428, 37.752, 0],
+    [-122.426, 37.754, 20]
+  ];
+  const visibleFit = shadow.getUniforms({...props, shadowBounds: [visibleBounds]});
+  for (const corner of corners(visibleBounds)) {
+    expect(inShadowMap(viewFit, corner), 'Bounds are in view').toBe(true);
+    expect(inShadowMap(visibleFit, corner), 'Bounds are in the shadow map').toBe(true);
+  }
+
+  // A visible point 1 km beyond the bounds is left out of the shadow map
+  const farPoint = [longitude, 37.761, 0];
+  expect(inShadowMap(viewFit, farPoint), 'View fit covers the far point').toBe(true);
+  expect(inShadowMap(boundsFit, farPoint), 'Bounds fit leaves it out').toBe(false);
+
+  // Bounds outside the view fall back to the view
+  const offscreen = shadow.getUniforms({
+    ...props,
+    shadowBounds: [
+      [
+        [10, 10, 0],
+        [10.01, 10.01, 20]
+      ]
+    ]
+  });
+  expect(offscreen.viewProjectionMatrix0, 'Bounds outside the view are ignored').toEqual(
+    viewFit.viewProjectionMatrix0
+  );
+});

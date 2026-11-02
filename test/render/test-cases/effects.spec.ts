@@ -31,6 +31,13 @@ const groundPlane = {
   }
 };
 
+// Rows of 5 m columns, 15 m apart, around a point: short "trees" in a steeply pitched view
+const ORCHARD_CENTER = [-122.42694, 37.75153];
+const ORCHARD = Array.from({length: 81}, (_, i) => [
+  ORCHARD_CENTER[0] + ((i % 9) - 4) * 0.00017,
+  ORCHARD_CENTER[1] + (Math.floor(i / 9) - 4) * 0.000135
+]);
+
 const MASK_POLYGON = [
   [-122.48, 37.75],
   [-122.43, 37.73],
@@ -260,6 +267,58 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/shadow-effect-high-pitch.png'
+  },
+  {
+    name: 'shadow-effect-bounds',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({color: [255, 255, 255], intensity: 0.6}),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [-1, -1, -2],
+          _shadow: true,
+          // Fitted to the orchard: without bounds, its shadows fade out in this pitched view
+          _shadowBounds: [
+            [ORCHARD_CENTER[0] - 0.001, ORCHARD_CENTER[1] - 0.001, 0],
+            [ORCHARD_CENTER[0] + 0.001, ORCHARD_CENTER[1] + 0.001, 10]
+          ]
+        })
+      })
+    ],
+    viewState: {
+      longitude: ORCHARD_CENTER[0],
+      latitude: ORCHARD_CENTER[1],
+      zoom: 17,
+      pitch: 70,
+      bearing: 20
+    },
+    layers: [
+      // Ground well beyond the bounds: it takes no shadow there
+      new SolidPolygonLayer({
+        id: 'ground',
+        data: [
+          [
+            [ORCHARD_CENTER[0] - 0.02, ORCHARD_CENTER[1] - 0.02],
+            [ORCHARD_CENTER[0] + 0.02, ORCHARD_CENTER[1] - 0.02],
+            [ORCHARD_CENTER[0] + 0.02, ORCHARD_CENTER[1] + 0.02],
+            [ORCHARD_CENTER[0] - 0.02, ORCHARD_CENTER[1] + 0.02]
+          ]
+        ],
+        getPolygon: f => f,
+        getFillColor: [220, 220, 210]
+      }),
+      new ColumnLayer({
+        id: 'orchard',
+        data: ORCHARD,
+        radius: 2.5,
+        extruded: true,
+        getPosition: d => d,
+        getFillColor: [60, 150, 60],
+        getElevation: 5
+      })
+    ],
+    goldenImage: './test/render/golden-images/shadow-effect-bounds.png'
   },
   ...[true, false].map(maskInverted => ({
     name: `mask-effect${maskInverted ? '-inverted' : ''}`,
