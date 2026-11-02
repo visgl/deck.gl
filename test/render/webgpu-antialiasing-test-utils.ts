@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {luma, Texture, Buffer} from '@luma.gl/core';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {Deck, OrthographicView} from '@deck.gl/core';
 
 const WIDTH = 240;

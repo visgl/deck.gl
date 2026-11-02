@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {MapView, LayerManager} from '@deck.gl/core';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import * as FIXTURES from 'deck.gl-test/data';
@@ -136,48 +136,55 @@ test('MaskEffect#update', () => {
   layerManager.finalize();
 });
 
-test('MaskEffect#coordinates', () => {
+test('MaskEffect publishes the mask viewport bounds regardless of source coordinates', () => {
   const maskEffect = new MaskEffect();
   maskEffect.setup({device});
-
-  const TEST_MASK_LAYER_CARTESIAN = TEST_MASK_LAYER.clone({
-    coordinateOrigin: [1, 2, 3],
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN
-  });
-
+  const render = vi.spyOn(maskEffect.maskPass, 'render');
   const layerManager = new LayerManager(device, {viewport: testViewport});
-
-  const preRenderWithLayers = (layers, description) => {
-    console.log(description);
-    layerManager.setLayers(layers);
-    layerManager.updateLayers();
-
-    maskEffect.preRender({
-      pass: 'screen',
-      layers: layerManager.getLayers(),
-      onViewportActive: layerManager.activateViewport,
-      viewports: [testViewport]
-    });
-  };
-
-  preRenderWithLayers([TEST_MASK_LAYER, TEST_LAYER], 'Initial render');
-
-  let parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
-  let mask = parameters.maskChannels['test-mask-layer'];
-  expect(mask?.coordinateOrigin, 'Mask has correct coordinate origin').toEqual([0, 0, 0]);
-  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe(
-    COORDINATE_SYSTEM.DEFAULT
-  );
-
-  preRenderWithLayers([TEST_MASK_LAYER_CARTESIAN, TEST_LAYER], 'Update to cartesion coordinates');
-
-  parameters = maskEffect.getShaderModuleProps(TEST_LAYER).mask;
-  mask = parameters.maskChannels['test-mask-layer'];
-  expect(mask?.coordinateOrigin, 'Mask has correct coordinate origin').toEqual([1, 2, 3]);
-  expect(mask?.coordinateSystem, 'Mask has correct coordinate system').toBe(
-    COORDINATE_SYSTEM.CARTESIAN
-  );
-
-  maskEffect.cleanup();
-  layerManager.finalize();
+  const masks = [
+    TEST_MASK_LAYER.clone({
+      data: [
+        {
+          polygon: [
+            [-122, 37],
+            [-121.999, 37],
+            [-121.999, 37.001],
+            [-122, 37.001]
+          ]
+        }
+      ]
+    }),
+    TEST_MASK_LAYER.clone({
+      coordinateSystem: 'meter-offsets',
+      coordinateOrigin: [-122, 37, 0],
+      data: [
+        {
+          polygon: [
+            [0, 0],
+            [100, 0],
+            [100, 100],
+            [0, 100]
+          ]
+        }
+      ]
+    })
+  ];
+  try {
+    for (const layer of masks) {
+      layerManager.setLayers([layer]);
+      maskEffect.preRender({
+        pass: 'screen',
+        layers: layerManager.getLayers(),
+        onViewportActive: layerManager.activateViewport,
+        viewports: [testViewport]
+      });
+      const mask = maskEffect.getShaderModuleProps().mask.maskChannels!['test-mask-layer'];
+      const maskViewport = render.mock.lastCall![0].viewports[0];
+      expect(maskViewport).toBeTruthy();
+      expect(mask.bounds).toEqual(maskViewport.getBounds());
+    }
+  } finally {
+    maskEffect.cleanup();
+    layerManager.finalize();
+  }
 });

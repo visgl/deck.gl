@@ -137,7 +137,7 @@ void main(void) {
   vec3 source;
   vec3 target;
 
-  if ((arc.greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT) {
+  if ((arc.greatCircle || project.projectionMode == PROJECTION_MODE_GLOBE) && project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC && project.projectionMode != PROJECTION_MODE_GEODETIC_OFFSETS) {
     source = project_globe_(vec3(instanceSourcePositions.xy, 0.0));
     target = project_globe_(vec3(instanceTargetPositions.xy, 0.0));
     float angularDist = getAngularDist(instanceSourcePositions.xy, instanceTargetPositions.xy);
@@ -188,7 +188,7 @@ void main(void) {
     float antiMeridianX = 0.0;
 
     if (arc.useShortestPath) {
-      if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+      if ((project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET || project.projectionMode == PROJECTION_MODE_GEODETIC_OFFSETS)) {
         antiMeridianX = -(project.coordinateOrigin.x + 180.) / 360. * TILE_SIZE;
       }
       float thresholdRatio = (antiMeridianX - source.x) / (target.x - source.x);

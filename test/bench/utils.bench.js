@@ -7,7 +7,7 @@
 import {Layer, ScatterplotLayer, LineLayer} from 'deck.gl';
 import {inheritsFrom} from '@deck.gl/react/utils/inherits-from';
 
-import {fp64} from '@luma.gl/shadertools';
+import {fp64} from '@luma.gl/shaders';
 const {fp64ify, fp64LowPart} = fp64;
 
 const POSITION = [-122.4, 37.8, 0];

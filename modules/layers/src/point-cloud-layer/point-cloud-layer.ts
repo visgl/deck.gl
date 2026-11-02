@@ -17,10 +17,11 @@ import {
   Accessor,
   Color,
   Material,
-  DefaultProps
+  DefaultProps,
+  _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
 import {gouraudMaterial} from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 import {pointCloudUniforms, PointCloudProps} from './point-cloud-layer-uniforms';
 import vs from './point-cloud-layer-vertex.glsl';
@@ -152,6 +153,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getPosition'
       },
@@ -203,7 +205,7 @@ export default class PointCloudLayer<DataT = any, ExtraPropsT extends {} = {}> e
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

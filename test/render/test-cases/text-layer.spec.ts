@@ -6,9 +6,10 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {TextLayer, PathLayer} from '@deck.gl/layers';
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {PointLabelLayer} from '@deck.gl/carto';
+import {CollisionFilterExtension, PathStyleExtension} from '@deck.gl/extensions';
 import {points} from 'deck.gl-test/data';
 import fontMapping from '../../data/font-atlas.json';
 
@@ -459,6 +460,79 @@ const testCases = [
       })
     ],
     goldenImage: './test/render/golden-images/text-layer-background.png'
+  },
+  {
+    name: 'point-label-layer-background',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new PointLabelLayer({
+        id: 'point-label',
+        data: [0],
+        getPosition: () => [0, 0],
+        getText: () => 'PointLabelLayer',
+        getRadius: 0,
+        sizeScale: 32,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        getColor: [180, 0, 0],
+        background: true,
+        getBackgroundColor: [240, 250, 255],
+        getBorderWidth: 3,
+        getBorderColor: [0, 100, 180],
+        backgroundPadding: [12, 8],
+        backgroundBorderRadius: 8,
+        updateTriggers: {getText: 'point-label'},
+        _subLayerProps: {
+          'point-label-primary': {_getFontRenderer: () => fontRenderer}
+        }
+      })
+    ],
+    goldenImage: './test/render/golden-images/point-label-layer-background.png'
+  },
+  {
+    name: 'point-label-layer-collision',
+    // CollisionFilterExtension render tests are WebGL only, see collision-filter-extension.spec.ts
+    skip: ['webgpu'],
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new PointLabelLayer({
+        id: 'point-label-collision',
+        data: [
+          {position: [-60, 0], text: 'KEPT', priority: 1},
+          {position: [60, 0], text: 'HIDDEN', priority: 0}
+        ],
+        getPosition: d => d.position,
+        getText: d => d.text,
+        getCollisionPriority: d => d.priority,
+        getRadius: 0,
+        sizeScale: 32,
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        getColor: [255, 255, 255],
+        background: true,
+        // Opaque fill and a wide contrasting border, so a missing visual
+        // background is a large enough diff to fail the image comparison
+        getBackgroundColor: [0, 90, 170],
+        getBorderWidth: 5,
+        getBorderColor: [255, 200, 0],
+        backgroundPadding: [16, 10],
+        backgroundBorderRadius: 8,
+        extensions: [new CollisionFilterExtension()],
+        updateTriggers: {getText: 'point-label-collision'},
+        _subLayerProps: {
+          'point-label-collision-primary': {_getFontRenderer: () => fontRenderer}
+        }
+      })
+    ],
+    goldenImage: './test/render/golden-images/point-label-layer-collision.png'
   },
   {
     name: 'text-layer-auto-wrapping',

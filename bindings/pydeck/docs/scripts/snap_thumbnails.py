@@ -29,7 +29,7 @@ except ImportError:
 
 
 # LARGE_EXAMPLES have longer loading times for their data sets than most
-LARGE_EXAMPLES = ("bitmap_layer", "icon_layer", "heatmap_layer", "terrain_layer", "maplibre_globe")
+LARGE_EXAMPLES = ("bitmap_layer", "icon_layer", "heatmap_layer", "terrain_layer", "maplibre_globe", "paris_trees")
 
 THUMBNAIL_SIZE = (400, 300)
 

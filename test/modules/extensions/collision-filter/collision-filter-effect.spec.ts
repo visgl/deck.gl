@@ -4,7 +4,7 @@
 
 import {test, expect, vi} from 'vitest';
 import {MapView, LayerManager} from 'deck.gl';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';

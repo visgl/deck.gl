@@ -74,16 +74,24 @@ export default class PathTesselator extends Tesselator<
 
   /* Implement base Tesselator interface */
   protected getGeometryFromBuffer(buffer) {
-    if (this.normalize || this.opts.isWebGPU) {
+    // Prepared positions still need reading when their source CRS requires conversion.
+    if (this.normalize || this.opts.transform || this.opts.isWebGPU) {
       return super.getGeometryFromBuffer(buffer);
     }
-    // we don't need to read the positions if no normalization
     return null;
+  }
+
+  protected prepareGeometry(path: PathGeometry): PathGeometry {
+    return (
+      this.normalize
+        ? normalizePath(path, this.inputPositionSize, this.opts.resolution, this.opts.wrapLongitude)
+        : path
+    ) as PathGeometry;
   }
 
   /* Implement base Tesselator interface */
   protected normalizeGeometry(path: PathGeometry): NormalizedPathGeometry {
-    if (this.normalize) {
+    if (this.normalize && !this.opts.transform) {
       return normalizePath(path, this.positionSize, this.opts.resolution, this.opts.wrapLongitude);
     }
     return path as NormalizedPathGeometry;
