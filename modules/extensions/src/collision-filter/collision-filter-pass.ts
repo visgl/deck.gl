@@ -8,6 +8,8 @@ import {Layer, _LayersPass as LayersPass, LayersPassRenderOptions, Viewport} fro
 type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 
 export default class CollisionFilterPass extends LayersPass {
+  private drawToCollisionVisibility = false;
+
   renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     const padding = 1;
     const clearColor = [0, 0, 0, 0];
@@ -16,12 +18,24 @@ export default class CollisionFilterPass extends LayersPass {
     this.render({...options, clearColor, scissorRect, target, pass: 'collision'});
   }
 
+  renderCollisionVisibility(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
+    this.drawToCollisionVisibility = true;
+    try {
+      this.render({...options, clearColor: [0, 0, 0, 0], target, pass: 'collision'});
+    } finally {
+      this.drawToCollisionVisibility = false;
+    }
+  }
+
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return {
       ...layer.props.parameters,
       blend: false,
-      depthWriteEnabled: true,
-      depthCompare: 'less-equal'
+      // Collision depth encodes priority, independent of the layer's display order.
+      depthBias: 0,
+      depthBiasSlopeScale: 0,
+      depthWriteEnabled: !this.drawToCollisionVisibility,
+      depthCompare: this.drawToCollisionVisibility ? 'always' : 'less-equal'
     };
   }
 
@@ -29,7 +43,8 @@ export default class CollisionFilterPass extends LayersPass {
     // Draw picking colors into collision FBO
     return {
       collision: {
-        drawToCollisionMap: true
+        drawToCollisionMap: !this.drawToCollisionVisibility,
+        drawToCollisionVisibility: this.drawToCollisionVisibility
       },
       picking: {
         isActive: 1,

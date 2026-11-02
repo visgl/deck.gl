@@ -26,7 +26,8 @@ import type {
   UpdateParameters,
   GetPickingInfoParams,
   PickingInfo,
-  DefaultProps
+  DefaultProps,
+  FilterContext
 } from '@deck.gl/core';
 
 const TEXT_ANCHOR = {
@@ -327,6 +328,25 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return info;
   }
 
+  /** Render one rectangle per label in the collision pass, and glyphs in other passes. */
+  filterSubLayer({layer, renderPass}: FilterContext): boolean {
+    if (!(this.props as {collisionEnabled?: boolean}).collisionEnabled) {
+      return true;
+    }
+    const isBackground = layer.id === `${this.id}-background`;
+    if (renderPass === 'collision') {
+      return this.hasBinaryCollisionAttributes() ? !isBackground : isBackground;
+    }
+    return !isBackground || this.props.background;
+  }
+
+  // Binary character attributes may be GPU buffers. Reuse them directly rather
+  // than reading them back to create per-label background attributes.
+  private hasBinaryCollisionAttributes(): boolean {
+    const attributes = (this.props.data as {attributes?: Record<string, unknown>}).attributes;
+    return Boolean(attributes && !attributes.background);
+  }
+
   /** Returns true if font has changed */
   private _updateFontAtlas(): boolean {
     const {fontSettings, fontFamily, fontWeight, _getFontRenderer} = this.props;
@@ -466,6 +486,35 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return [((anchorX - 1) * width) / 2, ((anchorY - 1) * height) / 2, width, height];
   };
 
+  /** Glyph bounds in font-atlas pixels, excluding whitespace and empty lines. */
+  private getCollisionRect: AccessorFunction<DataT, [number, number, number, number]> = (
+    object,
+    objectInfo
+  ) => {
+    if (this.props.background) {
+      return this.getBoundingRect(object, objectInfo);
+    }
+    const text = Array.from(this.state.getText!(object, objectInfo) || '');
+    const offsets = this.getIconOffsets(object, objectInfo);
+    const mapping = this.state.fontAtlasManager.mapping!;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (let i = 0; i < text.length; i++) {
+      const frame = mapping[text[i]];
+      if (!text[i].trim() || !frame || frame.width <= 0 || frame.height <= 0) continue;
+      // MultiIconLayer centers the glyph horizontally at its paragraph offset.
+      const x = offsets[i * 2] - frame.width / 2;
+      const y = offsets[i * 2 + 1] - frame.anchorY;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + frame.width);
+      maxY = Math.max(maxY, y + frame.height);
+    }
+    return Number.isFinite(minX) ? [minX, minY, maxX - minX, maxY - minY] : [0, 0, 0, 0];
+  };
+
   /** Returns the x, y offsets of each character in a text string, in texture size.
    * Used to layout characters in the vertex shader.
    */
@@ -541,20 +590,29 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       updateTriggers
     } = this.props;
 
+    const collisionEnabled = Boolean((this.props as {collisionEnabled?: boolean}).collisionEnabled);
+    const layoutUpdateTriggers = {
+      getText: updateTriggers.getText,
+      getTextAnchor: [this.props.getTextAnchor, updateTriggers.getTextAnchor],
+      getAlignmentBaseline: [this.props.getAlignmentBaseline, updateTriggers.getAlignmentBaseline],
+      background,
+      styleVersion
+    };
+
     const CharactersLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
     const BackgroundLayerClass = this.getSubLayerClass('background', TextBackgroundLayer);
     const {fontSize} = this.state.fontAtlasManager.props;
 
     return [
-      background &&
+      (background || (collisionEnabled && !this.hasBinaryCollisionAttributes())) &&
         new BackgroundLayerClass(
           {
             // background props
             getFillColor: getBackgroundColor,
             getLineColor: getBorderColor,
-            getLineWidth: getBorderWidth,
-            borderRadius: backgroundBorderRadius,
-            padding: backgroundPadding,
+            getLineWidth: background ? getBorderWidth : 0,
+            borderRadius: background ? backgroundBorderRadius : 0,
+            padding: background ? backgroundPadding : [0, 0, 0, 0],
 
             // props shared with characters layer
             getPosition,
@@ -589,12 +647,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
               getLineColor: updateTriggers.getBorderColor,
               getLineWidth: updateTriggers.getBorderWidth,
               getPixelOffset: updateTriggers.getPixelOffset,
-              getBoundingRect: {
-                getText: updateTriggers.getText,
-                getTextAnchor: updateTriggers.getTextAnchor,
-                getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
-                styleVersion
-              }
+              getClipRect: updateTriggers.getContentBox,
+              getBoundingRect: layoutUpdateTriggers
             }
           }),
           {
@@ -607,7 +661,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             _dataDiff,
             // Maintain the same background behavior as <=8.3. Remove in v9?
             autoHighlight: false,
-            getBoundingRect: this.getBoundingRect
+            getBoundingRect: collisionEnabled ? this.getCollisionRect : this.getBoundingRect
           }
         ),
       new CharactersLayerClass(
@@ -627,6 +681,7 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           getAngle,
           getPixelOffset,
           getContentBox,
+          getCollisionRect: this.getCollisionRect,
 
           billboard,
           sizeScale,
@@ -657,11 +712,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getContentBox: updateTriggers.getContentBox,
-            getIconOffsets: {
-              getTextAnchor: updateTriggers.getTextAnchor,
-              getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
-              styleVersion
-            }
+            getCollisionRect: layoutUpdateTriggers,
+            getIconOffsets: layoutUpdateTriggers
           }
         }),
         {

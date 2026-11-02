@@ -28,6 +28,8 @@ const DEFAULT_BUFFER = 192.0 / 256;
 const EMPTY_ARRAY = [];
 
 type _MultiIconLayerProps<DataT> = {
+  /** Internal label bounds shared by every glyph, in font-atlas pixels. */
+  getCollisionRect?: Accessor<DataT, Readonly<[number, number, number, number]>>;
   getIconOffsets?: AccessorFunction<DataT, number[]>;
   getContentBox?: Accessor<DataT, [x: number, y: number, width: number, height: number]>;
 
@@ -46,6 +48,7 @@ export type MultiIconLayerProps<DataT = unknown> = _MultiIconLayerProps<DataT> &
   IconLayerProps<DataT>;
 
 const defaultProps: DefaultProps<MultiIconLayerProps> = {
+  getCollisionRect: {type: 'accessor', value: [0, 0, 0, 0]},
   getIconOffsets: {type: 'accessor', value: (x: any) => x.offsets},
   getContentBox: {type: 'accessor', value: [0, 0, -1, -1]},
   fontSize: 1,
@@ -182,7 +185,12 @@ export default class MultiIconLayer<DataT, ExtraPropsT extends {} = {}> extends 
     super.draw(params);
 
     // draw text without outline on top to ensure a thick outline won't occlude other characters
-    if (sdf && outlineWidth) {
+    if (
+      sdf &&
+      outlineWidth &&
+      !params.shaderModuleProps?.collision?.drawToCollisionMap &&
+      !params.shaderModuleProps?.collision?.drawToCollisionVisibility
+    ) {
       const {iconManager} = this.state;
       const iconsTexture = iconManager.getTexture();
 

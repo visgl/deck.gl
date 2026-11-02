@@ -31,6 +31,10 @@ Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md)
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### TextLayer collision bounds
+
+[CollisionFilterExtension](./api-reference/extensions/collision-filter-extension.md) now tests the full projected bounds of each TextLayer label, including GeoJSON text. Pixel offsets, anchors, baselines, rotation and backgrounds are respected, all characters of a label share one visibility, and priorities are respected across source layers in the same collision group.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

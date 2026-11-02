@@ -4,7 +4,7 @@
 
 import {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {equals} from '@math.gl/core';
-import {_deepEqual as deepEqual} from '@deck.gl/core';
+import {_deepEqual as deepEqual, log} from '@deck.gl/core';
 import type {Effect, EffectContext, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollisionFilterPass from './collision-filter-pass';
 import {MaskPreRenderStats} from '../mask/mask-effect';
@@ -15,13 +15,28 @@ import type {CollisionModuleProps} from './shader-module';
 
 // Factor by which to downscale Collision FBO relative to canvas
 const DOWNSCALE = 2;
+// RGB picking colors reserve zero for no object.
+const MAX_PICKING_COLOR = 0xffffff;
 
 type RenderInfo = {
   collisionGroup: string;
   layers: Layer<CollisionFilterExtensionProps>[];
   layerBounds: ([number[], number[]] | null)[];
   allLayersLoaded: boolean;
+  pickingColorOffsets: Record<string, number>;
+  hasText: boolean;
+  objectCount: number;
 };
+
+// Sublayers of a composite share source object indices (e.g. text and its background).
+function getCollisionSourceId(layer: Layer): string {
+  return layer.parent?.id || layer.id;
+}
+
+// Character and background sublayers expose the bounds used by text collision shaders.
+function isTextCollisionLayer(layer: Layer): boolean {
+  return 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
+}
 
 export default class CollisionFilterEffect implements Effect {
   id = 'collision-filter-effect';
@@ -33,6 +48,7 @@ export default class CollisionFilterEffect implements Effect {
   private channels: Record<string, RenderInfo> = {};
   private collisionFilterPass?: CollisionFilterPass;
   private collisionFBOs: Record<string, Framebuffer> = {};
+  private visibilityFBOs: Record<string, Framebuffer> = {};
   private dummyCollisionMap?: Texture;
   private lastViewport?: Viewport;
 
@@ -63,7 +79,8 @@ export default class CollisionFilterEffect implements Effect {
 
     const collisionLayers = layers.filter(
       // @ts-ignore
-      ({props: {visible, collisionEnabled}}) => visible && collisionEnabled
+      ({isComposite, props: {visible, collisionEnabled}}) =>
+        !isComposite && visible && collisionEnabled
     ) as Layer<CollisionFilterExtensionProps>[];
     if (collisionLayers.length === 0) {
       this.channels = {};
@@ -87,9 +104,11 @@ export default class CollisionFilterEffect implements Effect {
       const renderInfo = channels[collisionGroup];
       const [width, height] = device.canvasContext!.getDrawingBufferSize();
       const {width: oldWidth, height: oldHeight} = collisionFBO;
+      // Text bounds are tested per pixel, so groups with text use a full-resolution map
+      const downscale = renderInfo.hasText ? 1 : DOWNSCALE;
       collisionFBO.resize({
-        width: width / DOWNSCALE,
-        height: height / DOWNSCALE
+        width: width / downscale,
+        height: height / downscale
       });
       // Resizing clears the collision map, so it must be redrawn
       const sizeChanged = collisionFBO.width !== oldWidth || collisionFBO.height !== oldHeight;
@@ -154,7 +173,7 @@ export default class CollisionFilterEffect implements Effect {
         pass: 'collision-filter',
         isPicking: true,
         layers: renderInfo.layers,
-        effects,
+        effects: [...(effects || []), this],
         layerFilter,
         viewports: viewport ? [viewport] : [],
         onViewportActive,
@@ -167,10 +186,35 @@ export default class CollisionFilterEffect implements Effect {
           },
           project: {
             // Match the drawing buffer the collision FBO is sized from
-            devicePixelRatio: collisionFBO.device.canvasContext!.cssToDeviceRatio() / DOWNSCALE
+            devicePixelRatio:
+              collisionFBO.device.canvasContext!.cssToDeviceRatio() /
+              (renderInfo.hasText ? 1 : DOWNSCALE)
           }
         }
       });
+      if (renderInfo.hasText) {
+        // Test each label's projected bounds against the collision map
+        const textLayers = renderInfo.layers.filter(isTextCollisionLayer);
+        const visibilityFBO = this.visibilityFBOs[collisionGroup];
+        const pixelRatio = collisionFBO.device.canvasContext!.cssToDeviceRatio();
+        this.collisionFilterPass!.renderCollisionVisibility(visibilityFBO, {
+          pass: 'collision',
+          isPicking: true,
+          layers: textLayers,
+          effects: [...(effects || []), this],
+          layerFilter,
+          viewports: [viewport],
+          onViewportActive,
+          views,
+          shaderModuleProps: {
+            collision: {
+              enabled: true,
+              dummyCollisionMap: this.dummyCollisionMap
+            },
+            project: {devicePixelRatio: pixelRatio}
+          }
+        });
+      }
     }
   }
 
@@ -187,9 +231,26 @@ export default class CollisionFilterEffect implements Effect {
       const collisionGroup = layer.props.collisionGroup!;
       let channelInfo = channelMap[collisionGroup];
       if (!channelInfo) {
-        channelInfo = {collisionGroup, layers: [], layerBounds: [], allLayersLoaded: true};
+        channelInfo = {
+          collisionGroup,
+          layers: [],
+          layerBounds: [],
+          allLayersLoaded: true,
+          pickingColorOffsets: {},
+          hasText: false,
+          objectCount: 0
+        };
         channelMap[collisionGroup] = channelInfo;
       }
+      const isTextLayer = isTextCollisionLayer(layer);
+      channelInfo.hasText ||= isTextLayer;
+      const sourceId = getCollisionSourceId(layer);
+      channelInfo.pickingColorOffsets[sourceId] = Math.max(
+        channelInfo.pickingColorOffsets[sourceId] || 0,
+        'getCollisionRect' in layer.props && layer.props.startIndices
+          ? layer.props.startIndices.length - 1
+          : layer.getNumInstances()
+      );
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
       if (!layer.isLoaded) {
@@ -199,6 +260,50 @@ export default class CollisionFilterEffect implements Effect {
 
     // Create any new passes and remove any old ones
     for (const collisionGroup of Object.keys(channelMap)) {
+      // Reserve disjoint picking colors for each source layer. Object 0 from one
+      // layer must not match object 0 from another layer in the same group.
+      const offsets = channelMap[collisionGroup].pickingColorOffsets;
+      let offset = 0;
+      for (const sourceId in offsets) {
+        const count = offsets[sourceId];
+        offsets[sourceId] = offset;
+        offset += count;
+      }
+      channelMap[collisionGroup].objectCount = offset;
+      // Each object uses a 4x4 visibility cell, including the reserved zero ID.
+      const maxVisibilityColumns = Math.floor(device.limits.maxTextureDimension2D / 4);
+      const maxObjectCount = channelMap[collisionGroup].hasText
+        ? Math.min(MAX_PICKING_COLOR, maxVisibilityColumns ** 2 - 1)
+        : MAX_PICKING_COLOR;
+      if (offset > maxObjectCount) {
+        log.warn(
+          `CollisionFilterExtension: collision group "${collisionGroup}" exceeds the supported object count (${maxObjectCount}); collision filtering is disabled.`
+        )();
+        delete channelMap[collisionGroup];
+        delete this.channels[collisionGroup];
+        continue;
+      }
+      if (channelMap[collisionGroup].hasText) {
+        const width = Math.min(maxVisibilityColumns * 4, Math.ceil(Math.sqrt(offset + 1)) * 4);
+        const height = Math.ceil((offset + 1) / (width / 4)) * 4;
+        if (!this.visibilityFBOs[collisionGroup]) {
+          this.visibilityFBOs[collisionGroup] = device.createFramebuffer({
+            id: `collision-visibility-${collisionGroup}`,
+            width,
+            height,
+            colorAttachments: [
+              device.createTexture({
+                width,
+                height,
+                format: 'rgba8unorm',
+                sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+              })
+            ]
+          });
+        } else {
+          this.visibilityFBOs[collisionGroup].resize({width, height});
+        }
+      }
       if (!this.collisionFBOs[collisionGroup]) {
         this.createFBO(device, collisionGroup);
       }
@@ -218,16 +323,28 @@ export default class CollisionFilterEffect implements Effect {
   getShaderModuleProps(layer: Layer): {
     collision: CollisionModuleProps;
   } {
-    const {collisionGroup, collisionEnabled} = (layer as Layer<CollisionFilterExtensionProps>)
+    const props = (layer as Layer<CollisionFilterExtensionProps & Partial<CollisionModuleProps>>)
       .props;
+    const {collisionGroup, collisionEnabled} = props;
+    const testProps = props.collisionTestProps as Partial<CollisionModuleProps>;
     const {collisionFBOs, dummyCollisionMap} = this;
     const collisionFBO = collisionFBOs[collisionGroup!];
     const enabled = collisionEnabled && Boolean(collisionFBO);
+    const isTextLayer = isTextCollisionLayer(layer);
     return {
       collision: {
         enabled,
+        isTextLayer,
+        pickingColorOffset:
+          this.channels[collisionGroup!]?.pickingColorOffsets[getCollisionSourceId(layer)] || 0,
         collisionFBO,
-        dummyCollisionMap: dummyCollisionMap!
+        visibilityFBO: isTextLayer ? this.visibilityFBOs[collisionGroup!] : undefined,
+        dummyCollisionMap: dummyCollisionMap!,
+        // Match collisionTestProps sizing when projecting text collision bounds.
+        sizeScale: testProps?.sizeScale ?? props.sizeScale,
+        sizeMinPixels: testProps?.sizeMinPixels ?? props.sizeMinPixels,
+        sizeMaxPixels: testProps?.sizeMaxPixels ?? props.sizeMaxPixels,
+        sizeUnits: testProps?.sizeUnits ?? props.sizeUnits
       }
     };
   }
@@ -262,7 +379,8 @@ export default class CollisionFilterEffect implements Effect {
     const depthStencilAttachment = device.createTexture({
       format: 'depth16unorm',
       width,
-      height
+      height,
+      sampler: {minFilter: 'nearest', magFilter: 'nearest'}
     });
     this.collisionFBOs[collisionGroup] = device.createFramebuffer({
       id: `collision-${collisionGroup}`,
@@ -279,5 +397,11 @@ export default class CollisionFilterEffect implements Effect {
     fbo.depthStencilAttachment?.destroy();
     fbo.destroy();
     delete this.collisionFBOs[collisionGroup];
+    const visibilityFBO = this.visibilityFBOs[collisionGroup];
+    if (visibilityFBO) {
+      visibilityFBO.colorAttachments[0].destroy();
+      visibilityFBO.destroy();
+      delete this.visibilityFBOs[collisionGroup];
+    }
   }
 }
