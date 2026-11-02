@@ -85,19 +85,21 @@ export default class CollisionFilterEffect implements Effect {
     for (const collisionGroup in channels) {
       const collisionFBO = this.collisionFBOs[collisionGroup];
       const renderInfo = channels[collisionGroup];
-      // @ts-expect-error TODO - assuming WebGL context
-      const [width, height] = device.canvasContext.getPixelSize();
+      const [width, height] = device.canvasContext!.getDrawingBufferSize();
+      const {width: oldWidth, height: oldHeight} = collisionFBO;
       collisionFBO.resize({
         width: width / DOWNSCALE,
         height: height / DOWNSCALE
       });
+      // Resizing clears the collision map, so it must be redrawn
+      const sizeChanged = collisionFBO.width !== oldWidth || collisionFBO.height !== oldHeight;
       this._render(renderInfo, {
         effects,
         layerFilter,
         onViewportActive,
         views,
         viewport,
-        viewportChanged
+        viewportChanged: viewportChanged || sizeChanged
       });
     }
 
@@ -164,8 +166,8 @@ export default class CollisionFilterEffect implements Effect {
             dummyCollisionMap: this.dummyCollisionMap
           },
           project: {
-            // @ts-expect-error TODO - assuming WebGL context
-            devicePixelRatio: collisionFBO.device.canvasContext.getDevicePixelRatio() / DOWNSCALE
+            // Match the drawing buffer the collision FBO is sized from
+            devicePixelRatio: collisionFBO.device.canvasContext!.cssToDeviceRatio() / DOWNSCALE
           }
         }
       });
