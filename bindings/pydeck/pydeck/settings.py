@@ -19,8 +19,7 @@ SHARED_PACKAGES = (
     "@deck.gl/widgets",
     "@luma.gl/core",
     "@luma.gl/engine",
-    "@luma.gl/shadertools",
-    "@luma.gl/webgl",
+    "@luma.gl/shaders",
     "@loaders.gl/core",
     "@math.gl/core",
 )

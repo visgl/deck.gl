@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {DirectionalLight} from './directional-light';
-import {getSunDirection} from '@math.gl/sun';
+import {getSunDirection} from '@math.gl/earth/sun';
 
 import type Layer from '../../lib/layer';
 

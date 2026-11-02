@@ -11,7 +11,7 @@ import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
 import shadow from '../../shaderlib/shadow/shadow';
 
-import type {Light, LightingProps} from '@luma.gl/shadertools';
+import type {Light, LightingProps} from '@luma.gl/shaders';
 import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';

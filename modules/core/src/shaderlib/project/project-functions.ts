@@ -5,10 +5,10 @@
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 import {PROJECTION_MODE} from './constants';
 import {getOffsetOrigin} from './viewport-uniforms';
-import * as vec3 from '@math.gl/core/vec3';
-import * as vec4 from '@math.gl/core/vec4';
+import {vec3} from '@math.gl/core';
+import {vec4} from '@math.gl/core';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import type {CoordinateSystem} from '../../lib/constants';
 import type Viewport from '../../viewports/viewport';
 import type {NumericArray} from '../../types/types';

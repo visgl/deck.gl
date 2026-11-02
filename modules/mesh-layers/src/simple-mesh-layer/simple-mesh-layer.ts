@@ -20,7 +20,7 @@ import {
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
 import {type Model, Geometry} from '@luma.gl/engine';
-import {ParsedPBRMaterial} from '@luma.gl/gltf';
+import {ParsedPBRMaterial} from '@luma.gl/engine/gltf';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
 
@@ -38,9 +38,9 @@ import type {
   Color,
   TextureSource
 } from '@deck.gl/core';
-import type {MeshAttribute, MeshAttributes} from '@loaders.gl/schema';
+import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
-import {getMeshBoundingBox} from '@loaders.gl/schema';
+import {getMeshBoundingBox} from '@loaders.gl/core/schema';
 
 function normalizeGeometryAttributes(attributes: MeshAttributes): MeshAttributes {
   const positionAttribute = attributes.positions || attributes.POSITION;

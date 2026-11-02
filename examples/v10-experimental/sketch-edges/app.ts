@@ -3,11 +3,11 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView} from '@deck.gl/core';
-import {SketchEdgeLayer} from '@deck.gl-community/gpu-layers';
+import {SketchEdgeLayer} from '@deck.gl/proposals/layers';
 import type {Buffer} from '@luma.gl/core';
 import type {MakeEdgeGeometryOptions} from '@luma.gl/engine';
 import {makeCityFeatures, type CityFeature} from '../river-district-data';
-import type {SketchStrokeProps} from '@luma.gl/shadertools';
+import type {SketchStrokeProps} from '@luma.gl/shaders';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';
 import {BuildingMeshLayer} from './building-layer';

@@ -4,7 +4,7 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {ShaderAssembler, ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderAssembler, ShaderModule} from '@luma.gl/shaders';
 import {getShaderAssembler, layerUniforms} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
@@ -15,7 +15,7 @@ import ResourceManager from './resource/resource-manager';
 import ProjectionScaleResources from './projection-scale-resources';
 
 import {resolveCRS, areCRSEqual} from '../utils/crs';
-import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/projection/core';
+import type {CRSDescriptor, TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 
