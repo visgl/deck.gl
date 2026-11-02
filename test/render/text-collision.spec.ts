@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
-import {Deck, OrthographicView, MapView} from '@deck.gl/core';
+import {CompositeLayer, Deck, OrthographicView, MapView} from '@deck.gl/core';
 import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {PointLabelLayer} from '@deck.gl/carto';
 import {CollisionFilterExtension, DataFilterExtension} from '@deck.gl/extensions';
@@ -611,5 +611,79 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     // Secondary labels are drawn last, so they are picked when they are visible.
     const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
     expect(objects.every(({sourceLayer}) => sourceLayer!.id.endsWith('-secondary'))).toBe(true);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'GeoJsonLayer points do not collide with their own labels',
+  async () => {
+    const features = [
+      {position: [0, 0], text: 'Kept', priority: 10},
+      {position: [10, 10], text: 'Hidden', priority: 5},
+      {position: [300, 0], text: 'Far', priority: 0}
+    ].map(properties => ({
+      type: 'Feature',
+      properties,
+      geometry: {type: 'Point', coordinates: properties.position}
+    }));
+    const layer = new GeoJsonLayer({
+      id: 'geojson-circle-text',
+      data: {type: 'FeatureCollection', features},
+      pointType: 'circle+text',
+      pointRadiusUnits: 'pixels',
+      getPointRadius: 6,
+      getText: f => f.properties.text,
+      getTextSize: 24,
+      getCollisionPriority: f => f.properties.priority,
+      extensions,
+      pickable: true
+    });
+    for (const sublayer of ['points-circle', 'points-text']) {
+      // Pick one sublayer at a time, because picking deduplicates features
+      const pickedLayer = layer.clone({
+        _subLayerProps: {
+          'points-circle': {pickable: sublayer === 'points-circle'},
+          'points-text': {pickable: sublayer === 'points-text'}
+        }
+      });
+      await drawLayers([pickedLayer]);
+      const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+      const priorities = objects
+        .map(({object}) => object.properties.priority)
+        .sort((a, b) => a - b);
+      expect(priorities, sublayer).toEqual([0, 10]);
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text layers of one parent collide with each other',
+  async () => {
+    // Like a TileLayer's tiles, each TextLayer renders different rows from index 0
+    class LabelGroupLayer extends CompositeLayer {
+      static layerName = 'LabelGroupLayer';
+      renderLayers() {
+        return [100, -100].map(
+          priority =>
+            new TextLayer(
+              this.getSubLayerProps({
+                id: `labels-${priority}`,
+                data: [{...data[0], priority}],
+                getSize: 24
+              })
+            )
+        );
+      }
+    }
+    expect(
+      await drawLayers([
+        new LabelGroupLayer({
+          id: 'label-group',
+          extensions,
+          pickable: true,
+          getCollisionPriority: d => d.priority
+        })
+      ])
+    ).toEqual([100]);
   }
 );
