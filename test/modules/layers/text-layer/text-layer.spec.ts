@@ -329,3 +329,43 @@ test('TextLayer - collision layout and accessor updates', () => {
     ]
   });
 });
+
+test('TextLayer - layout is not recomputed for non-layout updates', () => {
+  let anchorCalls = 0;
+  const getTextAnchor = () => {
+    anchorCalls++;
+    return 'start' as const;
+  };
+  let callsAfterLayout = 0;
+  testLayer({
+    Layer: TextLayer,
+    onError: err => expect(err).toBeFalsy(),
+    testCases: [
+      {
+        props: {
+          data: FIXTURES.points,
+          getText: d => d.ADDRESS,
+          getPosition: d => d.COORDINATES,
+          getTextAnchor,
+          extensions: [new CollisionFilterExtension()]
+        },
+        onAfterUpdate: () => {
+          expect(anchorCalls).toBeGreaterThan(0);
+          callsAfterLayout = anchorCalls;
+        }
+      },
+      {
+        updateProps: {getColor: [255, 0, 0]},
+        onAfterUpdate: () => {
+          expect(anchorCalls).toBe(callsAfterLayout);
+        }
+      },
+      {
+        updateProps: {updateTriggers: {getTextAnchor: 1}},
+        onAfterUpdate: () => {
+          expect(anchorCalls).toBeGreaterThan(callsAfterLayout);
+        }
+      }
+    ]
+  });
+});

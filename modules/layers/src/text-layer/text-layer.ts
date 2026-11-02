@@ -591,10 +591,15 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     } = this.props;
 
     const collisionEnabled = Boolean((this.props as {collisionEnabled?: boolean}).collisionEnabled);
+    const {getTextAnchor, getAlignmentBaseline} = this.props;
+    // Trigger values are compared shallowly, so they must be stable between renders.
+    // Constant accessors have no update trigger, so their values are compared instead.
     const layoutUpdateTriggers = {
       getText: updateTriggers.getText,
-      getTextAnchor: [this.props.getTextAnchor, updateTriggers.getTextAnchor],
-      getAlignmentBaseline: [this.props.getAlignmentBaseline, updateTriggers.getAlignmentBaseline],
+      getTextAnchor: updateTriggers.getTextAnchor,
+      getAlignmentBaseline: updateTriggers.getAlignmentBaseline,
+      textAnchor: typeof getTextAnchor === 'function' ? null : getTextAnchor,
+      alignmentBaseline: typeof getAlignmentBaseline === 'function' ? null : getAlignmentBaseline,
       background,
       styleVersion
     };
