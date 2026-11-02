@@ -66,11 +66,13 @@ test('CollisionFilterEffect#visibility capacity', () => {
     ...device.limits,
     maxTextureDimension2D: 8
   });
+  // Separate data, so that the layers are separate collision sources
   const textLayer = TEST_LAYER.clone({
     id: 'text',
+    data: FIXTURES.polygons.slice(0, 3),
     getCollisionRect: () => [0, 0, 1, 1]
   });
-  const otherLayer = TEST_LAYER.clone({id: 'other'});
+  const otherLayer = TEST_LAYER.clone({id: 'other', data: FIXTURES.polygons.slice(0, 3)});
   vi.spyOn(textLayer, 'getNumInstances').mockReturnValue(1);
   const countSpy = vi.spyOn(otherLayer, 'getNumInstances').mockReturnValue(2);
   const group = TEST_LAYER.props.collisionGroup;
@@ -117,8 +119,9 @@ test('CollisionFilterEffect#visibility capacity', () => {
 
 test('CollisionFilterEffect#picking ID capacity', () => {
   const collisionFilterEffect = new CollisionFilterEffect();
-  const firstLayer = TEST_LAYER.clone({id: 'first'});
-  const secondLayer = TEST_LAYER.clone({id: 'second'});
+  // Separate data, so that the layers are separate collision sources
+  const firstLayer = TEST_LAYER.clone({id: 'first', data: FIXTURES.polygons.slice(0, 3)});
+  const secondLayer = TEST_LAYER.clone({id: 'second', data: FIXTURES.polygons.slice(0, 3)});
   vi.spyOn(firstLayer, 'getNumInstances').mockReturnValue(0xfffffe);
   const countSpy = vi.spyOn(secondLayer, 'getNumInstances').mockReturnValue(1);
   const group = TEST_LAYER.props.collisionGroup;
@@ -137,6 +140,24 @@ test('CollisionFilterEffect#picking ID capacity', () => {
   } finally {
     collisionFilterEffect.cleanup();
     vi.restoreAllMocks();
+  }
+});
+
+test('CollisionFilterEffect#object count', () => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  const layerManager = new LayerManager(device, {viewport: testViewport});
+  layerManager.setLayers([TEST_LAYER]);
+  layerManager.updateLayers();
+  const [layer] = layerManager.getLayers();
+
+  try {
+    // Picking colors are per polygon, not per vertex
+    expect(layer.getNumInstances()).toBeGreaterThan(3);
+    collisionFilterEffect._groupByCollisionGroup(device, [layer]);
+    expect(collisionFilterEffect.channels[TEST_LAYER.props.collisionGroup].objectCount).toBe(3);
+  } finally {
+    collisionFilterEffect.cleanup();
+    layerManager.finalize();
   }
 });
 

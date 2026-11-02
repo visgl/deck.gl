@@ -122,7 +122,7 @@ Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. 
 
 Every candidate label, including one that is hidden, reserves its rectangle in the collision map. In a chain of overlapping labels, a hidden label can therefore still hide a lower-priority neighbor that it overlaps.
 
-A label does not collide with other sublayers of its parent layer that render the same feature, such as a `GeoJsonLayer` point's circle or icon.
+A label does not collide with other objects that render the same row: other sublayers of its parent layer, such as a `GeoJsonLayer` point's circle or icon, or top-level layers in the group that use the same `data` object.
 
 The rectangles include the spaces between lines, so labels may hide before their visible glyphs touch. Multiline edge overlaps and smaller labels contained inside larger ones are both detected.
 

@@ -48,29 +48,48 @@ function getRowOwner(layer: Layer): Layer {
  */
 function getCollisionSourceIds(layers: Layer[]): Record<string, string> {
   const sourceIds: Record<string, string> = {};
+  // Top-level layers that render the same data object share their rows, e.g. icons and their labels
+  const dataSourceIds = new Map<unknown, string>();
+  const getSourceId = (owner: Layer): string => {
+    const {data} = owner.props;
+    if (owner.parent || !data || typeof data !== 'object') {
+      return owner.id;
+    }
+    if (!dataSourceIds.has(data)) {
+      dataSourceIds.set(data, `${owner.id}:data`);
+    }
+    return dataSourceIds.get(data)!;
+  };
+
   // Glyphs and backgrounds render their TextLayer's rows, which are usually also the rows of the
-  // TextLayer's parent (e.g. a GeoJsonLayer's circles and labels). A parent with several
+  // TextLayer's source (e.g. a GeoJsonLayer's circles and labels). A source with several
   // TextLayers, such as a TileLayer, renders different rows in each, so they stay separate.
-  const textLayersByParent: Record<string, Set<string>> = {};
-  const textParentIds: Record<string, string> = {};
+  const textLayersBySource: Record<string, Set<string>> = {};
+  const textSourceIds: Record<string, string> = {};
   for (const layer of layers) {
     const owner = getRowOwner(layer);
-    sourceIds[layer.id] = owner.id;
-    if (isTextCollisionLayer(layer) && owner !== layer) {
-      const parent = getRowOwner(owner);
-      if (parent !== owner) {
-        (textLayersByParent[parent.id] ||= new Set()).add(owner.id);
-        textParentIds[layer.id] = parent.id;
-      }
+    if (isTextCollisionLayer(layer)) {
+      const sourceId = getSourceId(getRowOwner(owner));
+      (textLayersBySource[sourceId] ||= new Set()).add(owner.id);
+      textSourceIds[layer.id] = sourceId;
+      sourceIds[layer.id] = owner.id;
+    } else {
+      sourceIds[layer.id] = getSourceId(owner);
     }
   }
-  for (const layerId in textParentIds) {
-    const parentId = textParentIds[layerId];
-    if (textLayersByParent[parentId].size === 1) {
-      sourceIds[layerId] = parentId;
+  for (const layerId in textSourceIds) {
+    const sourceId = textSourceIds[layerId];
+    if (textLayersBySource[sourceId].size === 1) {
+      sourceIds[layerId] = sourceId;
     }
   }
   return sourceIds;
+}
+
+// Picking colors are per object. A path, polygon or label spans several instances.
+function getObjectCount(layer: Layer): number {
+  const startIndices = layer.getStartIndices();
+  return startIndices ? startIndices.length - 1 : layer.getNumInstances();
 }
 
 // Character and background sublayers expose the bounds used by text collision shaders.
@@ -243,7 +262,7 @@ export default class CollisionFilterEffect implements Effect {
           layers: textLayers,
           effects: [...(effects || []), this],
           layerFilter,
-          viewports: [viewport],
+          viewports: viewport ? [viewport] : [],
           onViewportActive,
           views,
           shaderModuleProps: {
@@ -290,12 +309,7 @@ export default class CollisionFilterEffect implements Effect {
       channelInfo.hasText ||= isTextLayer;
       const counts = sourceObjectCounts[collisionGroup];
       const sourceId = sourceIds[layer.id];
-      counts[sourceId] = Math.max(
-        counts[sourceId] || 0,
-        'getCollisionRect' in layer.props && layer.props.startIndices
-          ? layer.props.startIndices.length - 1
-          : layer.getNumInstances()
-      );
+      counts[sourceId] = Math.max(counts[sourceId] || 0, getObjectCount(layer));
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
       if (!layer.isLoaded) {
@@ -325,7 +339,7 @@ export default class CollisionFilterEffect implements Effect {
         : MAX_PICKING_COLOR;
       if (offset > maxObjectCount) {
         log.warn(
-          `CollisionFilterExtension: collision group "${collisionGroup}" exceeds the supported object count (${maxObjectCount}); collision filtering is disabled.`
+          `CollisionFilterExtension: group "${collisionGroup}" exceeds ${maxObjectCount} objects, collision disabled`
         )();
         delete channelMap[collisionGroup];
         delete this.channels[collisionGroup];

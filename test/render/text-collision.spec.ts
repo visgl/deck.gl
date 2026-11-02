@@ -687,3 +687,45 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     ).toEqual([100]);
   }
 );
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'top-level layers with the same data do not collide with their own objects',
+  async () => {
+    const points = [
+      {position: [0, 0], text: 'Kept', priority: 10},
+      {position: [10, 10], text: 'Hidden', priority: 5},
+      {position: [300, 0], text: 'Far', priority: 0}
+    ];
+    const layers = [
+      new ScatterplotLayer({
+        id: 'same-data-points',
+        data: points,
+        getRadius: 6,
+        radiusUnits: 'pixels',
+        getCollisionPriority: d => d.priority,
+        extensions,
+        pickable: true
+      }),
+      new TextLayer({
+        id: 'same-data-labels',
+        data: points,
+        getSize: 24,
+        getCollisionPriority: d => d.priority,
+        extensions,
+        pickable: true
+      })
+    ];
+    await drawLayers(layers);
+    for (const layerId of ['same-data-points', 'same-data-labels']) {
+      const objects = await deck.pickObjectsAsync({
+        x: 0,
+        y: 0,
+        width: 800,
+        height: 450,
+        layerIds: [layerId]
+      });
+      const priorities = objects.map(({object}) => object.priority).sort((a, b) => a - b);
+      expect(priorities, layerId).toEqual([0, 10]);
+    }
+  }
+);
