@@ -221,14 +221,20 @@ function getViewProjectionMatrices({
 // eslint-disable-next-line complexity
 function createShadowUniforms(
   opts: Partial<ShadowModuleProps>
-): ShadowModuleBindings & ShadowModuleUniforms {
+): Partial<ShadowModuleBindings> & ShadowModuleUniforms {
   const {shadowEnabled = true, project: projectProps} = opts;
   if (!shadowEnabled || !projectProps || !opts.shadowMatrices || !opts.shadowMatrices.length) {
+    const uniforms = {drawShadowMap: false, useShadowMap: false};
+    // Passes that leave the LightingEffect out (picking, masks) still call getUniforms, with
+    // empty props. Keep the shadow maps already bound then: undefined bindings would unbind
+    // them, and luma.gl skips draws with missing texture bindings.
+    if (!opts.dummyShadowMap) {
+      return uniforms;
+    }
     return {
-      drawShadowMap: false,
-      useShadowMap: false,
-      shadow_uShadowMap0: opts.dummyShadowMap!,
-      shadow_uShadowMap1: opts.dummyShadowMap!
+      ...uniforms,
+      shadow_uShadowMap0: opts.dummyShadowMap,
+      shadow_uShadowMap1: opts.dummyShadowMap
     };
   }
   const projectUniforms = project.getUniforms(projectProps) as ProjectUniforms;
