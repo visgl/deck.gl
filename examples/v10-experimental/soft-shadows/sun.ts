@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {getSkyDirection, getSunPosition} from '@math.gl/sun';
+import {getSkyDirection, getSunPosition} from '@math.gl/earth/sun';
 import type {NumberArray3} from '@math.gl/core';
 import {CITY_ORIGIN} from '../river-district-data';
 

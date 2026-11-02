@@ -5,8 +5,8 @@
 import {expect, test, vi} from 'vitest';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {_CustomProjectionView as CustomProjectionView} from '@deck.gl/core';
-import {projectionEngine} from '@math.gl/projection';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {areCRSEqual, resolveCRS, WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {GLOBE_CRS} from '@deck.gl/core/viewports/globe-util';
 import {createTestCRS} from '../viewports/test-crs';

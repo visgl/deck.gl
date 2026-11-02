@@ -4,7 +4,7 @@
 
 import Viewport from './viewport';
 import type {ViewportOptions, DistanceScales, ProjectPositionOptions} from './viewport';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {
   getViewMatrix,
   getProjectionParameters,

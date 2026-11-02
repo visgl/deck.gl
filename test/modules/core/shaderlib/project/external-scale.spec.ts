@@ -8,11 +8,11 @@ import {runOnGPU} from './project-glsl-test-utils';
 import {project} from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
 import {BufferTransform} from '@luma.gl/engine';
-import {WGSLShaderAssembler} from '@luma.gl/shadertools';
+import {WGSLShaderAssembler} from '@luma.gl/shaders';
 import {Computation} from '@luma.gl/engine';
 import {Buffer} from '@luma.gl/core';
 import {Matrix4} from '@math.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
 import {getWorldPosition} from './project-glsl-test-utils';
 

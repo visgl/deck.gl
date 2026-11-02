@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView} from '@deck.gl/core';
-import type {PatternFillProps} from '@luma.gl/shadertools';
+import type {PatternFillProps} from '@luma.gl/shaders';
 import {makeCityFeatures, CITY_ORIGIN} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';

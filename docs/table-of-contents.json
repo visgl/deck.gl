@@ -33,6 +33,7 @@
           "developer-guide/using-layers",
           "developer-guide/interactivity",
           "developer-guide/coordinate-systems",
+          "developer-guide/projection-domains",
           "developer-guide/views",
           "developer-guide/animations-and-transitions",
           "developer-guide/zoom-dependent-layers",

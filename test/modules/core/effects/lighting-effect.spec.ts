@@ -77,6 +77,51 @@ test('LightingEffect#getShaderModuleProps', () => {
   layerManager.finalize();
 });
 
+test('LightingEffect#setProps toggles shadow resources', () => {
+  const makeLight = (shadow: boolean) =>
+    new DirectionalLight({
+      color: [255, 255, 255],
+      intensity: 1.0,
+      direction: [10, -20, -30],
+      _shadow: shadow
+    });
+
+  const layer = new PolygonLayer({
+    data: FIXTURES.polygons.slice(0, 3),
+    getPolygon: f => f,
+    getFillColor: (f, {index}) => [index, 0, 0]
+  });
+
+  const layerManager = new LayerManager(device, {viewport: testViewport});
+  layerManager.setLayers([layer]);
+  const hasShadowModule = () =>
+    layerManager.context.defaultShaderModules.some(module => module.name === 'shadow');
+
+  const lightingEffect = new LightingEffect({dirLight: makeLight(true)});
+  const effectContext = makeMockContext(device, layerManager);
+  lightingEffect.setup(effectContext);
+  layerManager.updateLayers();
+
+  expect(lightingEffect.shadowPasses.length, 'shadow passes are created').toBe(1);
+  expect(hasShadowModule(), 'shadow module is added').toBe(true);
+
+  lightingEffect.setProps({dirLight: makeLight(false)});
+
+  expect(lightingEffect.shadowPasses.length, 'shadow passes are released').toBe(0);
+  expect(lightingEffect.dummyShadowMap, 'dummy shadow map is released').toBeFalsy();
+  expect(hasShadowModule(), 'shadow module is removed').toBe(false);
+  expect(layerManager.needsUpdate(), 'layers are rebuilt without the shadow module').toBeTruthy();
+  layerManager.updateLayers();
+
+  lightingEffect.setProps({dirLight: makeLight(true)});
+
+  expect(lightingEffect.shadowPasses.length, 'shadow passes are recreated').toBe(1);
+  expect(hasShadowModule(), 'shadow module is added again').toBe(true);
+
+  lightingEffect.cleanup(effectContext);
+  layerManager.finalize();
+});
+
 test('LightingEffect#preRender, cleanup', () => {
   const dirLight0 = new DirectionalLight({
     color: [255, 255, 255],
