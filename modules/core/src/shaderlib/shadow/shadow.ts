@@ -10,7 +10,7 @@ import memoize from '../../utils/memoize';
 import {pixelsToWorld} from '@math.gl/web-mercator';
 
 import type {Texture} from '@luma.gl/core';
-import {ShaderModule} from '@luma.gl/shadertools';
+import {ShaderModule} from '@luma.gl/shaders';
 import type Viewport from '../../viewports/viewport';
 import {ProjectProps, ProjectUniforms} from '../project/viewport-uniforms';
 

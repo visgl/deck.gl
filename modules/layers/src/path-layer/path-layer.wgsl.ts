@@ -400,7 +400,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
-  varyings.clipCoordinates = geometry.position.xy;
+  varyings.clipCoordinates = clip_getCoordinates(geometry.position);
   clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   varyings.vColor = vec4<f32>(

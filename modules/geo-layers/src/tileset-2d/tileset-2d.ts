@@ -4,7 +4,7 @@
 
 import {Viewport} from '@deck.gl/core';
 
-import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {RequestScheduler} from '@loaders.gl/core/loader-utils';
 import {Matrix4, equals, NumericArray} from '@math.gl/core';
 
 import {Tile2DHeader} from './tile-2d-header';

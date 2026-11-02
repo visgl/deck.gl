@@ -4,7 +4,7 @@
 
 /* eslint-disable react/no-direct-mutation-state */
 import {Buffer, Parameters as LumaParameters, TypedArray} from '@luma.gl/core';
-import {WebGLDevice} from '@luma.gl/webgl';
+import {WebGLDevice} from '@luma.gl/core/webgl';
 import AttributeManager from './attribute/attribute-manager';
 import GPUVectorModel from './luma-upstream/gpu-vector-model';
 import UniformTransitionManager from './uniform-transition-manager';
@@ -22,21 +22,21 @@ import typedArrayManager from '../utils/typed-array-manager';
 import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {areCRSEqual, resolveCRS} from '../utils/crs';
 import {supportsSourceCRS} from '../shaderlib/project/coordinate-systems';
 import LayerState, {ChangeFlags} from './layer-state';
 
 import {worldToPixels} from '@math.gl/web-mercator';
-import {transformMat4} from '@math.gl/core/vec3';
+import {vec3TransformMat4 as transformMat4} from '@math.gl/core';
 
 import {load} from '@loaders.gl/core';
 
-import type {Loader} from '@loaders.gl/loader-utils';
+import type {Loader} from '@loaders.gl/core/loader-utils';
 import type {CoordinateSystem} from './constants';
 import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import type Attribute from './attribute/attribute';
-import type {Model} from '@luma.gl/engine';
+import type {Model, GPUVectorModel as LumaGPUVectorModel} from '@luma.gl/engine';
 import type {PickingInfo, GetPickingInfoParams} from './picking/pick-info';
 import type Viewport from '../viewports/viewport';
 import type {NumericArray} from '../types/types';
@@ -45,7 +45,7 @@ import type {LayerData, LayerProps} from '../types/layer-props';
 import type {LayerContext} from './layer-manager';
 import type {AttributeOptions, BinaryAttribute} from './attribute/attribute';
 import {RenderPass} from '@luma.gl/core';
-import {PickingProps} from '@luma.gl/shadertools';
+import {PickingProps} from '@luma.gl/shaders';
 
 const TRACE_CHANGE_FLAG = 'layer.changeFlag';
 const TRACE_INITIALIZE = 'layer.initialize';
@@ -418,11 +418,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     return this.props.pickable && this.props.visible;
   }
 
-  /** Returns an array of models used by this layer, can be overriden by layer subclass */
-  getModels(): Model[] {
+  /** Returns the rendering models used by this layer, including GPU-vector models. */
+  getModels(): LumaGPUVectorModel[] {
     const state = this.state as {
-      models?: Model[];
-      model: Model;
+      models?: LumaGPUVectorModel[];
+      model: LumaGPUVectorModel;
     };
     return (state && (state.models || (state.model && [state.model]))) || [];
   }
@@ -579,6 +579,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
   /** Called once to set up the initial state. Layers can create WebGL resources here. */
   abstract initializeState(context: LayerContext): void;
 
+  /** Returns shader options and the deck.gl assembler used by layer models. */
   getShaders(shaders: any): any {
     // Preprojection capability is stable for the lifetime of a layer instance.
     shaders = mergeShaders(
@@ -597,7 +598,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
-    return shaders;
+    return {...shaders, shaderAssembler: this.context.shaderAssembler};
   }
 
   /** Controls if updateState should be called. By default returns true if any prop has changed */
@@ -792,8 +793,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       }
     }
 
+    const attributeManager = this.getAttributeManager();
+    const bufferGroupsUpdated = Boolean(attributeManager?.hasBufferGroups());
+    if (bufferGroupsUpdated) {
+      // Models share packed storage; uploading per model would destroy earlier bindings.
+      attributeManager!.getBufferGroupBindings(changedAttributes);
+    }
     for (const model of this.getModels()) {
-      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged);
+      this._setModelAttributes(model, changedAttributes, bufferLayoutChanged, bufferGroupsUpdated);
     }
   }
 
@@ -900,8 +907,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     attributeManager: AttributeManager,
     changedAttributes: Record<string, Attribute>
   ): void {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -927,26 +933,28 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     }
   }
 
-  /** Apply changed attributes to model */
+  /** Apply changed attributes to a rendering model or texture transform model. */
   // eslint-disable-next-line max-statements
   protected _setModelAttributes(
-    model: Model,
+    model: Model | LumaGPUVectorModel,
     changedAttributes: {
       [id: string]: Attribute;
     },
-    bufferLayoutChanged = false
+    bufferLayoutChanged = false,
+    bufferGroupsUpdated = false
   ) {
     if (!Object.keys(changedAttributes).length) {
       return;
     }
 
     const attributeManager = this.getAttributeManager();
+    const changedGroupAttributes = bufferGroupsUpdated ? {} : changedAttributes;
     if (model instanceof GPUVectorModel && attributeManager) {
-      this._setGPUVectorModelAttributes(model, attributeManager, changedAttributes);
+      this._setGPUVectorModelAttributes(model, attributeManager, changedGroupAttributes);
       return;
     }
     if (attributeManager?.hasBufferGroups()) {
-      this._setGroupedModelAttributes(model, attributeManager, changedAttributes);
+      this._setGroupedModelAttributes(model, attributeManager, changedGroupAttributes);
       return;
     }
 
@@ -958,8 +966,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       changedAttributes = manager.getAttributes();
     }
 
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const attributeBuffers: Record<string, Buffer> = {};
     const constantAttributes: Record<string, TypedArray> = {};
 
@@ -988,12 +995,11 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
   /** Apply explicit WebGPU buffer groups while preserving legacy bindings for fallbacks. */
   private _setGroupedModelAttributes(
-    model: Model,
+    model: Model | LumaGPUVectorModel,
     attributeManager: AttributeManager,
     changedAttributes: {[id: string]: Attribute}
   ) {
-    // @ts-ignore luma.gl type issue
-    const excludeAttributes = model.userData?.excludeAttributes || {};
+    const excludeAttributes = (model.userData?.excludeAttributes || {}) as Record<string, boolean>;
     const bindings = attributeManager.getBufferGroupBindings(
       changedAttributes,
       model,
@@ -1577,7 +1583,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
     const {props, oldProps} = updateParams;
 
     // Note: Automatic instance count update only works for single layers
-    const model = this.state.model as Model | undefined;
+    const model = this.state.model as LumaGPUVectorModel | undefined;
     if (model?.isInstanced) {
       model.setInstanceCount(this.getNumInstances());
     }
@@ -1677,7 +1683,7 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 }
 
 function applyModelParameters(
-  models: Model[],
+  models: LumaGPUVectorModel[],
   renderPass: RenderPass,
   parameters: LumaParameters,
   webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
@@ -1696,7 +1702,7 @@ function applyModelParameters(
   }
 }
 
-function syncModelAttachmentFormats(model: Model, renderPass: RenderPass): void {
+function syncModelAttachmentFormats(model: LumaGPUVectorModel, renderPass: RenderPass): void {
   const framebuffer =
     renderPass.props.framebuffer ||
     ((
