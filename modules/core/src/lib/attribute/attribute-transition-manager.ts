@@ -90,6 +90,11 @@ export default class AttributeTransitionManager {
     }
   }
 
+  /** Returns `true` if any attribute transition is in progress */
+  isTransitioning(): boolean {
+    return Object.values(this.transitions).some(transition => transition.inProgress);
+  }
+
   // Returns `true` if attribute is transition-enabled
   hasAttribute(attributeName: string): boolean {
     const transition = this.transitions[attributeName];
