@@ -6,7 +6,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.7
+### luma.gl v10 alpha.8
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
