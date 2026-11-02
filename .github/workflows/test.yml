@@ -35,10 +35,6 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Diagnose MapLibre rendering
-        timeout-minutes: 3
-        run: RENDER_TEST_DEVICE=webgl yarn vitest run --project headless test/modules/maplibre/overlay.spec.ts --reporter verbose
-
       - name: Run tests
         run: |
           yarn lint
