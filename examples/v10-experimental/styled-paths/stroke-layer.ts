@@ -24,7 +24,7 @@ import {
   sketchStroke,
   type PathDashProps,
   type ShaderModule
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 
 export type StrokeAppearance = 'plain' | 'sketch' | 'glow';
 export type Route = {

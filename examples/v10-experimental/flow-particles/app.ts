@@ -4,12 +4,12 @@
 
 import {Deck, MapView} from '@deck.gl/core';
 import {assert, type Device} from '@luma.gl/core';
-import {FlowParticleLayer} from '@deck.gl-community/gpu-layers';
+import {FlowParticleLayer} from '@deck.gl/proposals/layers';
 import {
   FlowFieldAtlas,
   FlowParticleSimulation,
   type FlowParticleStepResult
-} from '@luma.gl/experimental';
+} from '@luma.gl/graph/experimental/simulation';
 import {CITY_ORIGIN, makeCityFeatures} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';

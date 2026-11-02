@@ -22,7 +22,7 @@ import {
   WebGLAggregator
 } from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Matrix4} from '@math.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {getUniformsFromViewport} from '@deck.gl/core/shaderlib/project/viewport-uniforms';

@@ -59,8 +59,12 @@ import {browserCommands} from './test/setup/browser-commands';
 const rootDir = import.meta.dirname;
 // These prototypes require locally linked, unpublished luma.gl peers.
 const includePrivateModules = process.env.DECK_GL_PRIVATE_MODULES === 'true';
-const privateNodeTests = includePrivateModules ? ['modules/deck-*/test/**/*.node.spec.ts'] : [];
-const privateBrowserTests = includePrivateModules ? ['modules/deck-*/test/**/*.spec.ts'] : [];
+const privateNodeTests = includePrivateModules
+  ? ['modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts']
+  : [];
+const privateBrowserTests = includePrivateModules
+  ? ['modules/proposals/test/effects/**/*.spec.ts', 'modules/proposals/test/layers/**/*.spec.ts']
+  : [];
 
 // Tests that were commented out or never imported in the original test suite
 // These need to be fixed before being included
@@ -81,14 +85,19 @@ const excludedTests = [
 // Match aliases from .ocularrc.js
 // Note: Order matters for Vite - more specific paths must come before less specific ones
 const aliases = {
-  '@deck.gl-community/gpu-layers/query': resolve(rootDir, 'modules/deck-gpu-layers/src/query'),
-  '@deck.gl-community/gpu-layers': resolve(rootDir, 'modules/deck-gpu-layers/src'),
-  '@deck.gl-community/arrow-layers': resolve(rootDir, 'modules/deck-arrow-layers/src'),
+  '@deck.gl/proposals/layers/path-layer': resolve(rootDir, 'modules/proposals/src/layers/path-layer/path-layer.ts'),
+  '@deck.gl/proposals/layers/polygon-layer': resolve(rootDir, 'modules/proposals/src/layers/polygon-layer/polygon-layer.ts'),
+  '@deck.gl/proposals/layers/solid-polygon-layer': resolve(rootDir, 'modules/proposals/src/layers/solid-polygon-layer/solid-polygon-layer.ts'),
+  '@deck.gl/proposals/layers/text-layer': resolve(rootDir, 'modules/proposals/src/layers/text-layer/text-layer.ts'),
+  '@deck.gl/proposals/effects/query': resolve(rootDir, 'modules/proposals/src/effects/query'),
+  '@deck.gl/proposals/layers': resolve(rootDir, 'modules/proposals/src/layers'),
+  '@deck.gl/proposals/effects': resolve(rootDir, 'modules/proposals/src/effects'),
   // Explicit vitest entry point (must come before @deck.gl/test-utils)
   '@deck.gl/test-utils/vitest': resolve(rootDir, 'modules/test-utils/src/vitest.ts'),
   '@deck.gl/aggregation-layers': resolve(rootDir, 'modules/aggregation-layers/src'),
   '@deck.gl/arcgis': resolve(rootDir, 'modules/arcgis/src'),
   '@deck.gl/carto': resolve(rootDir, 'modules/carto/src'),
+  '@deck.gl/core/arrow': resolve(rootDir, 'modules/core/src/lib/luma-upstream/arrow-converter.ts'),
   '@deck.gl/core': resolve(rootDir, 'modules/core/src'),
   '@deck.gl/extensions': resolve(rootDir, 'modules/extensions/src'),
   '@deck.gl/geo-layers': resolve(rootDir, 'modules/geo-layers/src'),
@@ -107,7 +116,7 @@ const aliases = {
 };
 
 // Linked private luma.gl peers must share resource classes and Arrow types with deck.gl.
-const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/gpgpu', '@luma.gl/shadertools', 'apache-arrow'];
+const linkedPeerDedupe = ['@luma.gl/core', '@luma.gl/engine', '@luma.gl/graph', '@luma.gl/shaders', 'apache-arrow'];
 
 // Browser aliases - redirect @deck.gl/test-utils to vitest entry for backwards compatibility
 // until all tests are migrated to import from @deck.gl/test-utils/vitest explicitly
@@ -121,7 +130,7 @@ const coverageConfig: TestUserConfig["coverage"] = {
   provider: 'v8' as const,
   reporter: ['text', 'lcov'],
   include: ['modules/*/src/**/*.ts'],
-  exclude: ['modules/test-utils/**', '**/node_modules/**', ...(includePrivateModules ? [] : ['modules/deck-*/**'])]
+  exclude: ['modules/test-utils/**', '**/node_modules/**', ...(includePrivateModules ? [] : ['modules/proposals/**'])]
 };
 
 // Pre-bundle dependencies to avoid Vite reloading during tests
@@ -136,13 +145,13 @@ const optimizeDepsConfig = {
     // luma.gl WebGL dependencies
     '@luma.gl/core',
     '@luma.gl/engine',
-    '@luma.gl/webgl',
-    '@luma.gl/shadertools',
-    '@luma.gl/effects',
+    '@luma.gl/core/webgl',
+    '@luma.gl/shaders',
+    '@luma.gl/engine/effects',
     'maplibre-gl-v4',
     'maplibre-gl-v5',
     // loaders.gl dependencies
-    '@loaders.gl/polyfills',
+    '@loaders.gl/core/polyfills',
     '@loaders.gl/core',
     '@loaders.gl/images',
     'd3-hexbin'
@@ -234,7 +243,7 @@ const projects = [
           // headless and render, so keep them in `browser` only for manual
           // debugging until the shared interaction harness is reworked.
           include: ['test/modules/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           // Disable isolation and file parallelism to avoid:
@@ -268,7 +277,7 @@ const projects = [
         test: {
           name: 'browser',
           include: ['test/modules/**/*.spec.ts', 'test/interaction/**/*.spec.ts', ...privateBrowserTests],
-          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/deck-*/test/**/*.node.spec.ts'],
+          exclude: [...excludedTests, 'test/modules/**/*.node.spec.ts', 'modules/proposals/test/effects/**/*.node.spec.ts', 'modules/proposals/test/layers/**/*.node.spec.ts'],
           globals: false,
           testTimeout: 30000,
           isolate: false,

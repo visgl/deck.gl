@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device, Framebuffer} from '@luma.gl/core';
-import {initializeShaderModule, ShaderPass} from '@luma.gl/shadertools';
+import {initializeShaderModule, ShaderPass} from '@luma.gl/shaders';
 
 import ScreenPass from '../passes/screen-pass';
 

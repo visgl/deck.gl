@@ -5,7 +5,7 @@
 import {Layer, type LayerContext, type LayerProps, type PickingInfo} from '@deck.gl/core';
 import {Buffer, type RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {DrawCommandBuffer} from '@luma.gl/gpgpu/gpu-core';
+import {DrawCommandBuffer} from '@luma.gl/graph/gpu-core';
 
 export type GPUCulledTraceLayerProps = LayerProps & {
   spans: Buffer;

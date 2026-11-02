@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {TypeScriptCRSInput} from '@math.gl/projection/core';
+import type {TypeScriptCRSInput} from '@math.gl/geospatial/projection/core';
 
 import {Pan, DoubleClickDrag, Pinch, Tap} from 'mjolnir.js';
 import type {PanRecognizerOptions, PinchRecognizerOptions, TapRecognizerOptions} from 'mjolnir.js';
