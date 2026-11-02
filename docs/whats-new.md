@@ -16,6 +16,11 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
+### Performance
+
+- `Tile3DLayer` adds an experimental `_maxTileProcessingTime` option to spread scenegraph creation across frames while retaining parent coverage until replacement tiles draw. The budget is soft: an individual tile can exceed it.
+- `Tile3DLayer` cancels unfinished scenegraph creation for superseded selections. Its opt-in `_refinementStencil` reserves WebGL stencil bits so completed opaque descendants remain visible through raised replacement parents, while parents fill uncovered pixels. See [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md#_refinementstencil) for attachment requirements and fallback cases.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

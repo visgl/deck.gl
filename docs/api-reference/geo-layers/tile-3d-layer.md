@@ -228,6 +228,24 @@ Along with other options as below,
 
 The opacity of the layer. The same as defined in [layer](../core/layer.md).
 
+#### `_maxTileProcessingTime` (number, optional) {#_maxtileprocessingtime}
+
+- Default: `0` (disabled)
+
+Experimental CPU time budget, in milliseconds per animation frame, for creating scenegraph GPU assets. For example, `8` spreads bursts of arriving tiles over several frames so camera interaction can continue between uploads. The budget is shared by the default scenegraph sublayers of this Tile3DLayer. Custom scenegraph sublayers manage their own scheduling.
+
+This is a soft limit: creation of one tile cannot be interrupted and may exceed the budget. Smaller values can improve frame pacing while delaying full refinement. Parent coverage remains until replacement models have successfully drawn. Point cloud and mesh tiles are not scheduled by this option.
+
+#### `_refinementStencil` (number, optional) {#_refinementstencil}
+
+- Default: `0` (disabled)
+
+Experimental WebGL stencil bit mask for opaque scenegraph tiles. Selected descendants draw before their replacement ancestors and mask the pixels they cover. This prevents a coarse parent surface from hiding finished detail when its geometry sits above the child. Parents continue filling pixels where descendants have not drawn, including while GPU assets are being prepared. Additive refinement keeps ordinary depth testing.
+
+For a standalone Deck canvas, create the device with `deviceProps: {webgl: {stencil: true}}` and set `_refinementStencil: 255` to reserve all eight stencil bits. Shared contexts must reserve bits that are unused by other renderers or layer extensions; for example, `240` reserves the upper four bits. Single-child replacement chains share a bit; nested branching scopes require additional bits. Sibling branches reuse bits, and unrelated branches still obey ordinary depth testing.
+
+The option falls back to ordinary depth testing and the original draw order on WebGPU, render targets without stencil, blended tiles, non-opaque layers, custom sublayer types, or selections that exceed the reserved bits. Tiles count as blended when their glTF materials use the `BLEND` alpha mode or `KHR_materials_transmission`, or when model or layer `parameters` enable blending. Fragment alpha is not inspected, so translucent models from a custom `getScene` must enable blending in their model `parameters`. Coverage masking does not change request scheduling or the requested level of detail. Post-processing targets must also provide stencil attachments to use coverage masking. Draw targets are checked as they render: when the canvas has no stencil, coverage starts on the frame after a stencil target draws, and frames that also draw into targets without stencil keep the original order. Picking applies coverage only when color rendering does, so picked tiles match the visible ones.
+
 #### `pointSize` (number, Optional) {#pointsize}
 
 - Default `1.0`
