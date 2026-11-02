@@ -59,8 +59,8 @@
     "@luma.gl/anari": "10.0.0-alpha.7",
     "@luma.gl/graph": "10.0.0-alpha.7",
     "@luma.gl/shaders": "10.0.0-alpha.7",
-    "@math.gl/core": "5.0.0-beta.1",
-    "@math.gl/earth": "5.0.0-beta.1"
+    "@math.gl/core": "5.0.0-beta.4",
+    "@math.gl/earth": "5.0.0-beta.4"
   },
   "peerDependencies": {
     "apache-arrow": ">=17.0.0"
