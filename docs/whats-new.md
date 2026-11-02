@@ -21,6 +21,7 @@ Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A sha
 - Touch pinch zoom now ends at the last live gesture position instead of applying inertia from the noisy finger-lift frame, allowing an immediate handoff to pan or another pinch.
 - Mobile gesture recognition now distinguishes two-finger translation from pinch zoom and accepts a more deliberate first tap for double-tap-drag zoom.
 - [`GlobeController`](./api-reference/core/globe-controller.md#navigation) adds a `navigation` option: `'map'` (the default) preserves bearing and stops short of the poles, while `'ball'` rotates freely through the poles. Drag, pointer-anchored zoom, keyboard movement, and inertia follow the selected mode.
+- [`GlobeController`](./api-reference/core/globe-controller.md#elastic-constraints) now supports `rubberBand`, allowing continuous interactions to temporarily overshoot pan bounds, zoom, pitch (tilt), and optional `minBearing`/`maxBearing` limits before easing back on release. Bearing remains unrestricted by default.
 
 ## deck.gl v9.4
 
