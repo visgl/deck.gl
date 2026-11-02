@@ -52,6 +52,8 @@ const antialiasingTestCase: TestCase = {
 const testCases: TestCase[] = [
   // The globe variant guards the strip winding: GlobeView draws with cullMode: 'back', and a
   // clockwise (back-facing) quad would be culled entirely
+  // Golden: San Francisco transit routes as 2 px orange (weekday) and yellow lines, the same
+  // picture on the map and on the globe
   ...expandViewMatrix(
     {
       name: 'line-lnglat',

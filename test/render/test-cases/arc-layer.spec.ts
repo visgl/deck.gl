@@ -18,6 +18,8 @@ import * as dataSamples from 'deck.gl-test/data';
 const testCases = [
   // The globe variant guards the strip winding: GlobeView draws with cullMode: 'back', and a
   // clockwise (back-facing) quad would be culled entirely
+  // Golden: San Francisco routes as arcs from green at the source to blue at the target, pitched
+  // 20°, the same picture on the map and on the globe
   ...expandViewMatrix(
     {
       name: 'arc-lnglat',
