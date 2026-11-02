@@ -16,8 +16,8 @@ import {
   UpdateParameters
 } from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import type {MeshAttributes} from '@loaders.gl/schema';
-import {TerrainWorkerLoader} from '@loaders.gl/terrain';
+import type {MeshAttributes} from '@loaders.gl/core/schema';
+import {TerrainWorkerLoader} from '@loaders.gl/raster/terrain/index';
 import TileLayer, {TileLayerProps} from '../tile-layer/tile-layer';
 import type {
   Bounds,

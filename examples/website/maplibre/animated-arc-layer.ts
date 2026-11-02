@@ -5,7 +5,7 @@
 import {ArcLayer, ArcLayerProps} from '@deck.gl/layers';
 import {Accessor, DefaultProps} from '@deck.gl/core';
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 const uniformBlock = `\
 uniform tripsUniforms {

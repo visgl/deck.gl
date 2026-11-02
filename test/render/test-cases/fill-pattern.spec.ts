@@ -66,7 +66,7 @@ function createPatternLayer({
   return new PolygonLayer<PatternDatum, FillStyleExtensionProps<PatternDatum>>({
     id,
     data,
-    coordinateSystem: cartesian ? 'cartesian' : undefined,
+    coordinateSystem: cartesian ? 'cartesian' : 'default',
     getPolygon: d => d.polygon,
     getFillColor: d => d.color ?? [40, 120, 220],
     getLineColor: [20, 20, 20],

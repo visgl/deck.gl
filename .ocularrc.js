@@ -9,9 +9,9 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/constants': `${lumaModules}/constants/src`,
   '@luma.gl/core': `${lumaModules}/core/src`,
   '@luma.gl/engine': `${lumaModules}/engine/src`,
-  '@luma.gl/webgl': `${lumaModules}/webgl/src`,
-  '@luma.gl/shadertools': `${lumaModules}/shadertools/src`,
-  '@luma.gl/test-utils': `${lumaModules}/test-utils/src`,
+  '@luma.gl/core/webgl': `${lumaModules}/core/src/webgl`,
+  '@luma.gl/shaders': `${lumaModules}/shaders/src`,
+  '@luma.gl/core/test-utils': `${lumaModules}/core/src/test-utils`,
   '@luma.gl/experimental': `${lumaModules}/experimental/src`
 };
 
