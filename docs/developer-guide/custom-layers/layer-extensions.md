@@ -262,3 +262,31 @@ new GeoJsonLayer({
 ```
 
 This example is on [codepen](https://codepen.io/vis-gl/pen/bXpNpK).
+
+
+## WebGPU shader plugins
+
+Extensions can return `{plugins: [plugin]}` from `getShaders`. deck.gl preserves
+plugins contributed by the layer and other extensions, in order. Declare shader
+inputs in `ShaderPlugin.vertexInputs` and cross-stage values in `ShaderPlugin.varyings`;
+luma.gl allocates locations and rewrites the WGSL entry-point interfaces. Keep
+accessors, attribute buffers, invalidation, and resource lifecycle in the extension.
+
+The built-in rendering primitives expose these WGSL hooks:
+
+```wgsl
+DECKGL_FILTER_POSITION(&output.position, geometry);
+DECKGL_FILTER_FRAGMENT_COLOR(&color, fragmentGeometry);
+```
+
+Call the position hook after populating `geometry.worldPosition` and, when relevant,
+`geometry.worldPositionAlt`. Call the fragment-color hook on visible and picking
+return paths, after derivative-dependent calculations. Custom layer shaders should
+return a named vertex-output struct and accept a named fragment-input struct so
+luma.gl can transport plugin varyings. Do not add extension-specific attributes or
+varyings to those structs yourself.
+
+WGSL hook names are distinct from the legacy GLSL hooks to avoid interpreting
+GLSL-only module injections as WGSL. With the pinned luma.gl alpha release, plugins
+select injections through `glsl` and `wgsl` variants. Brushing uses one shared module,
+one `vec2<f32>` vertex input, and one visibility varying on both backends.

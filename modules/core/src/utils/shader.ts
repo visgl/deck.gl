@@ -12,6 +12,9 @@ export function mergeShaders(target, source) {
   if ('defines' in source) {
     result.defines = {...target.defines, ...source.defines};
   }
+  if ('plugins' in source) {
+    result.plugins = (target.plugins || []).concat(source.plugins);
+  }
   if ('modules' in source) {
     result.modules = (target.modules || []).concat(source.modules);
 

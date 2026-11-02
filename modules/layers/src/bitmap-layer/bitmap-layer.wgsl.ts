@@ -96,6 +96,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     output.vTexPos = geometry.worldPosition.xy;
   }
 
+  DECKGL_FILTER_POSITION(&output.position, geometry);
+
   return output;
 }
 
@@ -116,11 +118,17 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
 
   geometry.uv = uv;
 
+  fragmentGeometry.uv = geometry.uv;
+
   if (picking.isActive > 0.5) {
     if (picking.isAttribute > 0.5) {
-      return vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
+      var extensionColor = vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
+      DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+      return extensionColor;
     }
-    return vec4<f32>(packUVsIntoRGB(uv), 1.0);
+    var extensionColor = vec4<f32>(packUVsIntoRGB(uv), 1.0);
+    DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+    return extensionColor;
   }
 
   if (picking.isHighlightActive > 0.5) {
@@ -140,6 +148,7 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

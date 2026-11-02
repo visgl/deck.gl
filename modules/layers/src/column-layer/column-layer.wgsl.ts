@@ -12,7 +12,7 @@ struct Attributes {
   @location(4) instanceElevations: f32,
   @location(5) instanceFillColors: vec4<f32>,
   @location(6) instanceLineColors: vec4<f32>,
-  @location(7) instanceStrokeWidths: f32
+  @location(7) instanceStrokeWidths: f32,
 };
 
 fn getRotationMatrix(angle: f32) -> mat2x2<f32> {
@@ -45,7 +45,7 @@ ${sharedSource}
 
 struct Varyings {
   @builtin(position) position: vec4<f32>,
-  @location(0) color: vec4<f32>
+  @location(0) color: vec4<f32>,
 };
 
 @vertex
@@ -111,13 +111,18 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     baseColor.a * layer.opacity
   );
 
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0);
-  return deckgl_premultiplied_alpha(varyings.color);
+  fragmentGeometry.uv = geometry.uv;
+  var extensionColor = varyings.color;
+  DECKGL_FILTER_FRAGMENT_COLOR(&extensionColor, fragmentGeometry);
+  return deckgl_premultiplied_alpha(extensionColor);
 }
 `;
 
@@ -128,7 +133,7 @@ struct Varyings {
   @builtin(position) position: vec4<f32>,
   @location(0) color: vec4<f32>,
   @location(1) cameraPosition: vec3<f32>,
-  @location(2) positionCommonspace: vec4<f32>
+  @location(2) positionCommonspace: vec4<f32>,
 };
 
 @vertex
@@ -186,12 +191,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.cameraPosition = project.cameraPosition;
   varyings.positionCommonspace = projected.commonPosition;
 
+  DECKGL_FILTER_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0);
+  fragmentGeometry.uv = geometry.uv;
 
   var fragColor = varyings.color;
   if (column.extruded > 0.5 && column.isStroke < 0.5) {
@@ -208,6 +216,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     );
   }
 
+  DECKGL_FILTER_FRAGMENT_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

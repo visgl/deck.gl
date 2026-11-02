@@ -27,8 +27,10 @@ const SHADER_HOOKS_GLSL = [
   'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
 ];
 
+// Separate names prevent legacy GLSL module injections from entering WGSL hooks.
 const SHADER_HOOKS_WGSL = [
-  // Not yet supported
+  'vs:DECKGL_FILTER_POSITION(position: ptr<function, vec4<f32>>, geometry: Geometry)',
+  'fs:DECKGL_FILTER_FRAGMENT_COLOR(color: ptr<function, vec4<f32>>, geometry: FragmentGeometry)'
 ];
 
 function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
