@@ -15,10 +15,14 @@ plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
-
 ### WebGPU brushing
 
 [`BrushingExtension`](./api-reference/extensions/brushing-extension.md) supports WebGPU on standard rendering primitives, including picking and live accessor updates.
+
+### WebGPU data filtering
+
+[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) supports numeric and category filtering on WebGPU, including fp64 values, soft ranges, and size and color transforms. Filtered item counting (`countItems`) requires WebGL.
+
 
 ### Custom projections (Experimental)
 
