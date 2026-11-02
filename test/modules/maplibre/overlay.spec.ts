@@ -8,15 +8,7 @@ import {device} from '@deck.gl/test-utils';
 import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
 import {Map as MapLibreV5Map} from 'maplibre-gl-v5';
 import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
-import {test, expect, beforeEach, afterEach} from 'vitest';
-
-beforeEach(context => {
-  console.info(`[MapLibre] START ${context.task.name}`);
-});
-
-afterEach(context => {
-  console.info(`[MapLibre] END ${context.task.name}`);
-});
+import {test, expect} from 'vitest';
 
 import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
 
