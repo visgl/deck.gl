@@ -56,7 +56,6 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
-  @location(7) clipCoordinates: vec2<f32>,
 #ifdef DASH_ENABLED
   @location(8) vPathBounds: vec2<f32>,
 #endif
@@ -419,8 +418,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
-  varyings.clipCoordinates = clip_getCoordinates(geometry.position);
-  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
@@ -509,7 +506,6 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
   DECKGL_FILTER_PATH_COLOR();
-  clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
   DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
