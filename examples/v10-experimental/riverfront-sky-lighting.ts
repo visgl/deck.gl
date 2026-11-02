@@ -8,8 +8,8 @@ import {
   getMoonPosition,
   getMoonIllumination,
   getSkyDirection
-} from '@math.gl/sun';
-import type {LightingProps} from '@luma.gl/shadertools';
+} from '@math.gl/earth/sun';
+import type {LightingProps} from '@luma.gl/shaders';
 import {CITY_ORIGIN} from './river-district-data';
 import {getRiverfrontSun} from './soft-shadows/sun';
 

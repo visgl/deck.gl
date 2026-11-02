@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {project} from '@deck.gl/core';
+
 import {
   log,
   Accessor,
@@ -282,7 +284,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
-    };
+    } & AggregationLayer<any>['state'];
 
   getAggregatorType(): string {
     const {gpuAggregation, gridAggregator, getColorValue, getElevationValue} = this.props;
@@ -463,16 +465,18 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         Math.floor(centroidCommon[0] / cellSizeCommon[0]) * cellSizeCommon[0],
         Math.floor(centroidCommon[1] / cellSizeCommon[1]) * cellSizeCommon[1]
       ];
-      centroid = viewport.preproject ? cellOriginCommon : viewport.unprojectFlat(cellOriginCommon);
+      centroid = project.isCustomProjection(viewport)
+        ? cellOriginCommon
+        : viewport.unprojectFlat(cellOriginCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
       viewport =
-        viewport.isGeospatial && !viewport.preproject
+        viewport.isGeospatial && !project.isCustomProjection(viewport)
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : viewport.preproject
+          : project.isCustomProjection(viewport)
             ? createAggregationViewport(viewport, centroid)
             : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 

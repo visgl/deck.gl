@@ -12,10 +12,10 @@ import {
 import ProjectionScaleResources from '@deck.gl/core/lib/projection-scale-resources';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
-import {projectionEngine} from '@math.gl/projection';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 import {createTestCRS, createTestViewport} from './test-crs';
-import {PROJECTION_MODE} from '@deck.gl/core/lib/constants';
+import {PROJECTION_MODE} from '@deck.gl/core/shaderlib/project/constants';
 
 const normalizationScale = 512 / 40075016.6855;
 const options = {bounds: [0, 0, 512, 512]};

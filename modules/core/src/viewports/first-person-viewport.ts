@@ -3,12 +3,14 @@
 // Copyright (c) vis.gl contributors
 
 import Viewport, {type ViewportOptions} from './viewport';
-import {PROJECTION_MODE} from '../lib/constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import {OSM_TILE_CRS, getMercatorScales} from './web-mercator-util';
 import {getMeterZoom} from '@math.gl/web-mercator';
 import {Matrix4, Vector3, SphericalCoordinates} from '@math.gl/core';
 
 export type FirstPersonViewportOptions = {
+  /** Subdivision intervals around the earth for nonlinear source CRS conversions. Default 0 disables subdivision. */
+  resolution?: number;
   /** Name of the viewport */
   id?: string;
   /** Left offset from the canvas edge, in pixels */

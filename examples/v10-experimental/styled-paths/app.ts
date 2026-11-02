@@ -1,9 +1,9 @@
 // luma.gl
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
-import {COORDINATE_SYSTEM, Deck, MapView} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import type {StrokeGeometryOptions} from '@luma.gl/engine';
-import type {PathDashProps} from '@luma.gl/shadertools';
+import type {PathDashProps} from '@luma.gl/shaders';
 import {CITY_ORIGIN, makeCityFeatures} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';
@@ -77,7 +77,7 @@ export function createStrokeScene(parent: HTMLDivElement, options: DeckExampleDe
   });
   function updateLayers() {
     const coordinates = {
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: 'meter-offsets',
       coordinateOrigin: CITY_ORIGIN
     };
     parent.style.backgroundColor = appearance === 'glow' ? '#08101b' : '#e6e2d9';

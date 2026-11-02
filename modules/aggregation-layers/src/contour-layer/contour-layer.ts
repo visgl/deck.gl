@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {project} from '@deck.gl/core';
+
 import {
   Accessor,
-  COORDINATE_SYSTEM,
-  _PROJECTION_MODE as PROJECTION_MODE,
   GetPickingInfoParams,
   project32,
   LayersList,
@@ -129,7 +129,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       binIdRange: [number, number][];
       aggregatorViewport: Viewport;
-    };
+    } & AggregationLayer<any>['state'];
 
   getAggregatorType(): string {
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
@@ -259,16 +259,18 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         Math.floor((centroidCommon[1] - gridOrigin[1]) / cellSizeCommon[1]) * cellSizeCommon[1] +
           gridOrigin[1]
       ];
-      centroid = viewport.preproject ? cellOriginCommon : viewport.unprojectFlat(cellOriginCommon);
+      centroid = project.isCustomProjection(viewport)
+        ? cellOriginCommon
+        : viewport.unprojectFlat(cellOriginCommon);
 
       const ViewportType = viewport.constructor as any;
       // We construct a viewport for the GPU aggregator's project module
       // This viewport is determined by data
       // removes arbitrary precision variance that depends on initial view state
       viewport =
-        viewport.isGeospatial && !viewport.preproject
+        viewport.isGeospatial && !project.isCustomProjection(viewport)
           ? new ViewportType({longitude: centroid[0], latitude: centroid[1], zoom: 12})
-          : viewport.preproject
+          : project.isCustomProjection(viewport)
             ? createAggregationViewport(viewport, centroid)
             : new Viewport({position: [centroid[0], centroid[1], 0], zoom: 12});
 
@@ -370,7 +372,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     const BandsSubLayerClass = this.getSubLayerClass('bands', SolidPolygonLayer);
     const {viewport} = this.context;
     const modelMatrix = new Matrix4();
-    if (viewport.projectionMode === PROJECTION_MODE.CUSTOM_GEOSPATIAL) {
+    if (project.isCustomProjection(viewport)) {
       const scale = viewport.distanceScales.unitsPerWorldUnit;
       modelMatrix.scale(scale.map(value => 1 / value));
     }
@@ -388,7 +390,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }),
         {
           data: lines,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPath: d => d.vertices,
@@ -408,7 +410,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         }),
         {
           data: polygons,
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+          coordinateSystem: 'cartesian',
           coordinateOrigin: [0, 0, 0],
           modelMatrix,
           getPolygon: d => d.vertices,

@@ -167,7 +167,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
   protected onViewStateChange: (params: ViewStateChangeParameters) => void;
   protected onStateChange: (state: InteractionState) => void;
   protected makeViewport: (opts: Record<string, any>) => Viewport;
-  protected pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+  protected pickPosition?: (x: number, y: number) => {coordinate?: number[] | null} | null;
 
   private _controllerState?: ControllerState;
   private _events: Record<string, boolean> = {};
@@ -210,7 +210,7 @@ export default abstract class Controller<ControllerState extends IViewState<Cont
     makeViewport: (opts: Record<string, any>) => Viewport;
     onViewStateChange: (params: ViewStateChangeParameters) => void;
     onStateChange: (state: InteractionState) => void;
-    pickPosition?: (x: number, y: number) => {coordinate?: number[]} | null;
+    pickPosition?: (x: number, y: number) => {coordinate?: number[] | null} | null;
   }) {
     this.transitionManager = new TransitionManager<ControllerState>({
       ...opts,

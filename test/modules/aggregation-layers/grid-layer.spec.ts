@@ -9,7 +9,7 @@ import {gridUniforms} from '@deck.gl/aggregation-layers/grid-layer/grid-layer-un
 import {
   getShaderModuleSource,
   getShaderModuleUniformLayoutValidationResult
-} from '@luma.gl/shadertools';
+} from '@luma.gl/shaders';
 import * as FIXTURES from 'deck.gl-test/data';
 import {device} from '@deck.gl/test-utils/vitest';
 

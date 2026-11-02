@@ -2,25 +2,23 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, Deck, MapView, type MapViewState} from '@deck.gl/core';
+import {Deck, MapView, type MapViewState} from '@deck.gl/core';
 import {Buffer} from '@luma.gl/core';
-import {WebGPUDevice} from '@luma.gl/webgpu';
+import {WebGPUDevice} from '@luma.gl/core/webgpu';
+import {FireflyLayer, GlowPointLayer, WaterSurfaceLayer} from '@deck.gl/proposals/layers';
 import {
-  FireflyLayer,
-  GlowPointLayer,
-  WaterSurfaceLayer,
   SceneBufferEffect,
   SceneShaderPassEffect,
   type SceneShaderPassContext
-} from '@deck.gl-community/gpu-layers';
+} from '@deck.gl/proposals/effects';
 import {
   createBloomCompositeShaderPass,
   createHDRAutoExposureCompositeShaderPass,
   createSSGICompositeShaderPass,
   createClusteredVolumetricLightingCompositeShaderPass,
   toneMapping
-} from '@luma.gl/effects';
-import type {ShaderPass, LightingProps, PointLight} from '@luma.gl/shadertools';
+} from '@luma.gl/engine/effects';
+import type {ShaderPass, LightingProps, PointLight} from '@luma.gl/shaders';
 import {Matrix4} from '@math.gl/core';
 import {getRiverfrontSkyLighting} from './riverfront-sky-lighting';
 import {getSkyCameraState, SKY_FIELD_OF_VIEW} from './soft-shadows/sky-camera';
@@ -327,7 +325,7 @@ export function createRiverfrontLightingScene(
           features: dryFeatures,
           data: dryFeatures,
           pickable: true,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: CITY_ORIGIN,
           roughness: 0.9,
           material: {ambient: 1, diffuse: 1},
@@ -396,7 +394,7 @@ export function createRiverfrontLightingScene(
               id: 'riverfront-lamppost-reflections',
               points: lampPoints,
               pointCount: lamps.length,
-              coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+              coordinateSystem: 'meter-offsets',
               coordinateOrigin: CITY_ORIGIN,
               animation: {enabled: 0},
               radiusPixels: 8,
@@ -417,7 +415,7 @@ export function createRiverfrontLightingScene(
               id: 'riverfront-lamppost-lights',
               points: lampPoints,
               pointCount: lamps.length,
-              coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+              coordinateSystem: 'meter-offsets',
               coordinateOrigin: CITY_ORIGIN,
               visible: settings.lamps,
               radiusPixels: 8,
@@ -434,7 +432,7 @@ export function createRiverfrontLightingScene(
               id: 'riverfront-firefly-reflections',
               points,
               pointCount: 320,
-              coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+              coordinateSystem: 'meter-offsets',
               coordinateOrigin: CITY_ORIGIN,
               time: () => diagnostics.time,
               animation: {enabled: 1, speed: settings.speed},
@@ -456,7 +454,7 @@ export function createRiverfrontLightingScene(
               id: 'riverfront-fireflies',
               points,
               pointCount: 320,
-              coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+              coordinateSystem: 'meter-offsets',
               coordinateOrigin: CITY_ORIGIN,
               time: () => diagnostics.time,
               animation: {enabled: settings.enabled ? 1 : 0, speed: settings.speed},
@@ -475,7 +473,7 @@ export function createRiverfrontLightingScene(
               id: 'riverfront-light-emitters',
               points,
               pointCount: kind === 'hdr-night-lighting' ? 4 : 1,
-              coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+              coordinateSystem: 'meter-offsets',
               coordinateOrigin: CITY_ORIGIN,
               radiusPixels: kind === 'hdr-night-lighting' ? 12 : 35,
               style: {

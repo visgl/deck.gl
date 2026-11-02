@@ -2,14 +2,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {
-  COORDINATE_SYSTEM,
-  Deck,
-  MapView,
-  _GlobeView,
-  type Viewport,
-  type MapViewState
-} from '@deck.gl/core';
+import {Deck, MapView, _GlobeView, type Viewport, type MapViewState} from '@deck.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
 import {
   integrateSurfaceWeather,
@@ -17,15 +10,11 @@ import {
   type LightingProps,
   type PrecipitationProps,
   type SurfaceWeatherProps
-} from '@luma.gl/shadertools';
-import {
-  getMeterOffsetPosition,
-  WeatherParticleLayer,
-  SkyLayer
-} from '@deck.gl-community/gpu-layers';
+} from '@luma.gl/shaders';
+import {getMeterOffsetPosition, WeatherParticleLayer, SkyLayer} from '@deck.gl/proposals/layers';
 import {CITY_ORIGIN, makeCityFeatures, type CityFeature} from '../river-district-data';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
-import {createSkyObserver, getMoonPosition, getSkyDirection} from '@math.gl/sun';
+import {createSkyObserver, getMoonPosition, getSkyDirection} from '@math.gl/earth/sun';
 import {getRiverfrontSun, DEFAULT_HOUR} from '../soft-shadows/sun';
 import {getSkyCameraState, SKY_FIELD_OF_VIEW} from '../soft-shadows/sky-camera';
 import {RiverDistrictLayer} from '../river-district-layer';
@@ -234,7 +223,7 @@ export function createWeatherScene(parent: HTMLDivElement, options: DeckExampleD
           lighting: getLighting,
           fog: getFog,
           surfaceWeather: getSurfaceWeather,
-          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateSystem: 'meter-offsets',
           coordinateOrigin: CITY_ORIGIN
         }),
         new WeatherParticleLayer({

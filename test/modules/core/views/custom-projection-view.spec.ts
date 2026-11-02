@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {WGS84_CRS} from '@deck.gl/core/utils/crs';
 import {test, expect, vi} from 'vitest';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import * as core from '@deck.gl/core';
@@ -68,7 +69,7 @@ test('CustomProjectionView constructs its viewport with layout, state and projec
     resolution: 2
   });
   expect(viewport.padding).toMatchObject({left: 80, bottom: 20});
-  expect(viewport.preproject!([450, 100, 2])[2]).toBe(2);
+  expect(viewport.getPreprojection(WGS84_CRS).preproject!([450, 100, 2])[2]).toBe(2);
   expect(viewport.projectPosition([450, 100, 2])[2]).toBe(2 * (512 / 40075016.6855));
 });
 

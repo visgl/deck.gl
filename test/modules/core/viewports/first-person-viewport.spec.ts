@@ -12,8 +12,8 @@ test('FirstPersonViewport inherits projection and retains its camera defaults', 
   expect(Object.getPrototypeOf(FirstPersonViewport.prototype)).toBe(Viewport.prototype);
   expect(viewport).not.toBeInstanceOf(WebMercatorViewport);
   expect(viewport.crs?.signature).toBe('OSMTile512');
-  expect(viewport.preproject).toBeNull();
-  expect(viewport.postUnproject).toBeNull();
+  expect('preproject' in viewport).toBe(false);
+  expect('postUnproject' in viewport).toBe(false);
   for (const method of [
     'projectPosition',
     'unprojectPosition',

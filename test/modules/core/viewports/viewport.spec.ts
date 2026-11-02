@@ -418,9 +418,4 @@ test('Viewport tracks CRS identity separately from CPU attribute preprojection',
   expect(viewport.equals(new Viewport({crs: createTestCRS({signature: 'second'})}))).toBe(false);
   expect(new WebMercatorViewport().projectionSignature).toBeNull();
   expect(new GlobeViewport().projectionSignature).toBeNull();
-  const preprojected = new Viewport({
-    crs,
-    preproject: position => position as [number, number, number]
-  });
-  expect(preprojected.projectionSignature).toBe(crs.signature);
 });

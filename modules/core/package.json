@@ -33,6 +33,15 @@
       },
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./arrow": {
+      "types": "./dist/lib/luma-upstream/arrow-converter.d.ts",
+      "visgl:webgl-only": {
+        "import": "./dist.webgl-only/lib/luma-upstream/arrow-converter.js",
+        "require": "./dist.webgl-only/lib/luma-upstream/arrow-converter.cjs"
+      },
+      "import": "./dist/lib/luma-upstream/arrow-converter.js",
+      "require": "./dist/lib/luma-upstream/arrow-converter.cjs"
     }
   },
   "files": [
@@ -49,18 +58,16 @@
     "prepublishOnly": "npm run build-debugger && npm run build-bundle && npm run build-bundle -- --env=dev"
   },
   "dependencies": {
-    "@loaders.gl/core": "^5.0.0-alpha.11",
-    "@loaders.gl/images": "^5.0.0-alpha.11",
-    "@luma.gl/core": "^10.0.0-alpha.4",
-    "@luma.gl/engine": "^10.0.0-alpha.4",
-    "@luma.gl/gpgpu": "^10.0.0-alpha.4",
-    "@luma.gl/shadertools": "^10.0.0-alpha.4",
-    "@luma.gl/webgl": "^10.0.0-alpha.4",
-    "@math.gl/core": "^5.0.0-alpha.15",
-    "@math.gl/projection": "^5.0.0-alpha.17",
-    "@math.gl/sun": "^5.0.0-alpha.15",
-    "@math.gl/types": "^5.0.0-alpha.15",
-    "@math.gl/web-mercator": "^5.0.0-alpha.15",
+    "@loaders.gl/core": "5.0.0-beta.1",
+    "@loaders.gl/images": "5.0.0-beta.1",
+    "@luma.gl/core": "10.0.0-alpha.7",
+    "@luma.gl/engine": "10.0.0-alpha.7",
+    "@luma.gl/graph": "10.0.0-alpha.7",
+    "@luma.gl/shaders": "10.0.0-alpha.7",
+    "@math.gl/core": "5.0.0-beta.1",
+    "@math.gl/earth": "5.0.0-beta.1",
+    "@math.gl/geospatial": "5.0.0-beta.1",
+    "@math.gl/web-mercator": "5.0.0-beta.1",
     "@probe.gl/env": "^4.1.1",
     "@probe.gl/log": "^4.1.1",
     "@probe.gl/stats": "^4.1.1",
@@ -68,5 +75,13 @@
     "gl-matrix": "^3.0.0",
     "mjolnir.js": "^3.1.1"
   },
-  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
+  "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4",
+  "peerDependencies": {
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
+  }
 }
