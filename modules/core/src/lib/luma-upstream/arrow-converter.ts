@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Device} from '@luma.gl/core';
-import type {GPUVectorFormat} from '@luma.gl/gpgpu/gpu-data';
+import type {GPUVectorFormat} from '@luma.gl/graph/gpu-data';
 import {DataType, type RecordBatch, type Vector} from 'apache-arrow';
 import {uploadArrowVector, type PreparedArrowGPUVector} from './arrow-to-gpu-vector';
 

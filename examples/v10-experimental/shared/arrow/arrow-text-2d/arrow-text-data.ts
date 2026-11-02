@@ -7,7 +7,7 @@ import {
   type CharacterColorDataType,
   type RowColorColumnDataType
 } from '@luma.gl/engine/arrow';
-import {getArrowVectorByteLength, makeArrowFixedSizeListVector} from '@luma.gl/gpgpu/arrow';
+import {getArrowVectorByteLength, makeArrowFixedSizeListVector} from '@luma.gl/graph/arrow';
 import * as arrow from 'apache-arrow';
 
 export const LABEL_COLUMN_COUNT = 400;

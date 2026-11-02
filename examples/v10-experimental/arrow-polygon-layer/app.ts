@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {OrthographicView, type OrthographicViewState} from '@deck.gl/core';
-import {ArrowPolygonLayer, type ArrowLayerPickingInfo} from '@deck.gl-community/arrow-layers';
+import {ArrowPolygonLayer, type ArrowLayerPickingInfo} from '@deck.gl/proposals/layers';
 import {
   ArrowPolygonDataSource,
   type ArrowPolygonDataSourceUpdate

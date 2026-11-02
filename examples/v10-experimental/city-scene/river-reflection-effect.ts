@@ -18,7 +18,7 @@ import {
   type SSRQuality
 } from '@luma.gl/engine/effects';
 import {Matrix4} from '@math.gl/core';
-import type {SceneBufferEffect} from '@deck.gl-community/gpu-layers';
+import type {SceneBufferEffect} from '@deck.gl/proposals/effects';
 
 export type RiverReflectionPassUniforms = Record<string, Record<string, unknown>>;
 

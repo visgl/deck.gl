@@ -6,7 +6,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.6
+### luma.gl v10 alpha.7
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -18,7 +18,10 @@ dependency is no longer needed.
 
 `@luma.gl/shadertools` becomes `@luma.gl/shaders`. The glTF, effects, text, splats, and
 Arrow rendering integrations move to the corresponding `@luma.gl/engine` subpaths.
-Arrow conversion helpers move to `@luma.gl/gpgpu/arrow`. Test utilities move to
+`@luma.gl/gpgpu` is consolidated into `@luma.gl/graph`: use `/gpu-data` for
+typed GPU columns and `/gpu-simple-graph` for the legacy evaluator operations.
+WebGPU evaluator operations use `/gpu-simple-graph/webgpu`.
+Arrow conversion helpers move to `@luma.gl/graph/arrow`. Test utilities move to
 `@luma.gl/core/test-utils`. The Arrow integration is now published,
 so website builds no longer require a pinned luma.gl source checkout.
 
@@ -55,9 +58,6 @@ Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.1`. Several pac
 Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
 
 The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
-
-Bundlers that resolve optional raster decoders may require `geotiff` to be installed
-explicitly. It is an optional peer of `@deck.gl/geo-layers`.
 
 ### Viewport
 
@@ -208,6 +208,10 @@ new PathStyleExtension({dashMode: 'path'});
 ```
 
 See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
+
+### TerrainLayer and MVTLayer heights
+
+Starting in v9.4.1, `TerrainLayer`, extruded `MVTLayer` features and other layers using the `'cartesian'` coordinate system in a `MapView` look taller below zoom 12, by about 1.4x at 46° latitude and 2x at 60°. They were previously drawn too flat, and their height jumped when zooming past 12. If you raised `elevationScale` to make up for it, lower it again.
 
 ## Upgrading to v9.3
 

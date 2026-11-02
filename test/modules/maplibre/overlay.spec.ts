@@ -8,7 +8,15 @@ import {device} from '@deck.gl/test-utils';
 import {Map as MapLibreV4Map} from 'maplibre-gl-v4';
 import {Map as MapLibreV5Map} from 'maplibre-gl-v5';
 import {Map as MapLibreV6Map} from 'maplibre-gl-v6';
-import {test, expect} from 'vitest';
+import {test, expect, beforeEach, afterEach} from 'vitest';
+
+beforeEach(context => {
+  console.info(`[MapLibre] START ${context.task.name}`);
+});
+
+afterEach(context => {
+  console.info(`[MapLibre] END ${context.task.name}`);
+});
 
 import {getMapLibreElevation} from '../../../modules/maplibre/src/compatibility';
 
@@ -136,74 +144,76 @@ for (const {version, MapClass} of MAPLIBRE_VERSIONS) {
       zoom: 14,
       attributionControl: false
     }) as unknown as MapLibreMap;
-    await new Promise<void>(resolve => map.once('load', () => resolve()));
+    try {
+      await new Promise<void>(resolve => map.once('load', () => resolve()));
 
-    for (const interleaved of [false, true]) {
-      map.jumpTo({center: [-122.45, 37.78], zoom: 14});
-      let centerPixel: number[] = [];
-      const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
-      const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
-      const overlay = new MapLibreOverlay({
-        interleaved,
-        device: interleaved ? undefined : device,
-        onAfterRender: ({gl}) => {
-          if (!gl || interleaved) {
-            return;
-          }
-          const renderedPixel = readCenterPixel(gl);
-          if (renderedPixel[0] === 255) {
-            centerPixel = renderedPixel;
-          }
-        },
-        layers: [
-          new BitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'}),
-          new BitmapLayer({id: 'above-labels', image, bounds})
-        ]
-      });
+      for (const interleaved of [false, true]) {
+        map.jumpTo({center: [-122.45, 37.78], zoom: 14});
+        let centerPixel: number[] = [];
+        const image = new ImageData(new Uint8ClampedArray([255, 0, 0, 255]), 1, 1);
+        const bounds: [number, number, number, number] = [-122.46, 37.77, -122.44, 37.79];
+        const overlay = new MapLibreOverlay({
+          interleaved,
+          device: interleaved ? undefined : device,
+          onAfterRender: ({gl}) => {
+            if (!gl || interleaved) {
+              return;
+            }
+            const renderedPixel = readCenterPixel(gl);
+            if (renderedPixel[0] === 255) {
+              centerPixel = renderedPixel;
+            }
+          },
+          layers: [
+            new BitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'}),
+            new BitmapLayer({id: 'above-labels', image, bounds})
+          ]
+        });
 
-      map.addControl(overlay);
-      map.triggerRepaint();
-      await waitForRender(() => {
+        map.addControl(overlay);
+        map.triggerRepaint();
+        await waitForRender(() => {
+          if (interleaved) {
+            const renderedPixel = readCenterPixel(map.getCanvas().getContext('webgl2')!);
+            if (renderedPixel[0] === 255) {
+              centerPixel = renderedPixel;
+            }
+          }
+          return Boolean(overlay._deck?.isInitialized && centerPixel[0] === 255);
+        });
+
+        expect(overlay._deck).toBeTruthy();
+        expect(overlay.getCanvas() === map.getCanvas()).toBe(interleaved);
         if (interleaved) {
-          const renderedPixel = readCenterPixel(map.getCanvas().getContext('webgl2')!);
-          if (renderedPixel[0] === 255) {
-            centerPixel = renderedPixel;
-          }
+          expect(map.getLayersOrder()).toEqual([
+            'deck-maplibre-layer-group-before:labels',
+            'labels',
+            'deck-maplibre-layer-group-last'
+          ]);
         }
-        return Boolean(overlay._deck?.isInitialized && centerPixel[0] === 255);
-      });
 
-      expect(overlay._deck).toBeTruthy();
-      expect(overlay.getCanvas() === map.getCanvas()).toBe(interleaved);
-      if (interleaved) {
-        expect(map.getLayersOrder()).toEqual([
-          'deck-maplibre-layer-group-before:labels',
-          'labels',
-          'deck-maplibre-layer-group-last'
-        ]);
+        expect(centerPixel).toEqual([255, 0, 0, 255]);
+
+        map.jumpTo({center: [-122.4, 37.8], zoom: 12});
+        map.triggerRepaint();
+        await waitForRender(() => overlay._deck!.props.viewState.zoom === map.getZoom());
+
+        const viewState = overlay._deck!.props.viewState;
+        expect(viewState.longitude).toBeCloseTo(map.getCenter().lng);
+        expect(viewState.latitude).toBeCloseTo(map.getCenter().lat);
+        expect(viewState.zoom).toBe(map.getZoom());
+
+        map.removeControl(overlay);
+        expect(overlay._deck).toBeFalsy();
+        if (!interleaved) {
+          // MapLibre leaves removing the control element to the control
+          expect(container.querySelector('.maplibregl-ctrl-top-left')?.childElementCount).toBe(0);
+        }
       }
-
-      expect(centerPixel).toEqual([255, 0, 0, 255]);
-
-      map.jumpTo({center: [-122.4, 37.8], zoom: 12});
-      map.triggerRepaint();
-      await waitForRender(() => overlay._deck!.props.viewState.zoom === map.getZoom());
-
-      const viewState = overlay._deck!.props.viewState;
-      expect(viewState.longitude).toBeCloseTo(map.getCenter().lng);
-      expect(viewState.latitude).toBeCloseTo(map.getCenter().lat);
-      expect(viewState.zoom).toBe(map.getZoom());
-
-      map.removeControl(overlay);
-      expect(overlay._deck).toBeFalsy();
-      if (!interleaved) {
-        // MapLibre leaves removing the control element to the control
-        expect(container.querySelector('.maplibregl-ctrl-top-left')?.childElementCount).toBe(0);
-      }
+    } finally {
+      map.remove();
+      container.remove();
     }
-
-    map.remove();
-    container.remove();
   });
 }
 

@@ -1,7 +1,8 @@
 # Experimental deck.gl v10 examples
 
 These examples and their shared fixtures were copied from `luma.gl/examples/deck`
-alongside `@deck.gl-community/gpu-layers` and `@deck.gl-community/arrow-layers`.
+alongside the prototypes now consolidated in the private `@deck.gl/proposals` package.
+Layers use `@deck.gl/proposals/layers`; effects use `@deck.gl/proposals/effects`.
 They use this repository's deck.gl source and the root dependency installation.
 Shared UI helpers live in `shared/`, Arrow fixtures in `shared/arrow/`,
 and showcase fixtures in `shared/showcase/`.

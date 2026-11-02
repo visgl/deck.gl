@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {picking} from '@luma.gl/shaders';
+import {picking, type ShaderModule} from '@luma.gl/shaders';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;
@@ -142,7 +142,7 @@ fn picking_getPickingColorFromIndex(objectIndex: u32) -> vec3<f32> {
 }
 `;
 
-export default {
+const pickingModule: ShaderModule = {
   ...picking,
   vs: `${addPickingUniformsGLSL(picking.vs)}\n${pickingHelpersGLSL}`,
   fs: addPickingUniformsGLSL(picking.fs),
@@ -191,3 +191,5 @@ export default {
     }
   }
 };
+
+export default pickingModule;

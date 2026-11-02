@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import type {Buffer, Device, Texture} from '@luma.gl/core';
-import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   Layer,
   LayerContext,
