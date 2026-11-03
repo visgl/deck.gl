@@ -114,15 +114,7 @@ new SolidPolygonLayer({
 })
 ```
 
-* Discard all surfaces that face away from the camera by passing the following prop to `Deck`:
-
-```
-parameters: {
-
-  cull: true
-
-}
-```
+* Discard surfaces that face away from the camera. This is the default: `GlobeView` sets `parameters: {cullMode: 'back'}`, see [parameters](#parameters).
 
 ## Source[​](#source "Direct link to Source")
 
