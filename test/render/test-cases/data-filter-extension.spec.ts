@@ -30,6 +30,7 @@ for (let y = 0; y < 20; y++) {
 
 const testCases: TestCase[] = [
   {
+    // Golden: a 32 x 20 grid of small dots with columns 3 to 8 drawn large, the same on map and globe
     name: 'filter-1d',
     presets: MAP_AND_GLOBE,
     props: {
@@ -39,6 +40,7 @@ const testCases: TestCase[] = [
     }
   },
   {
+    // Golden: large dots only where columns 3 to 8 meet rows 2 to 5
     name: 'filter-2d',
     props: {
       extensions: [new DataFilterExtension({filterSize: 2})],
@@ -50,6 +52,7 @@ const testCases: TestCase[] = [
     }
   },
   {
+    // Golden: 25 large dots scattered over the grid, five per 128 points, the same on map and globe
     name: 'single-category',
     presets: MAP_AND_GLOBE,
     props: {
@@ -59,6 +62,7 @@ const testCases: TestCase[] = [
     }
   },
   {
+    // Golden: large dots only on rows 4, 5, 8 and 16 whose index matches one of five categories
     name: '2-categories',
     props: {
       extensions: [new DataFilterExtension({categorySize: 2, filterSize: 0})],
@@ -70,6 +74,7 @@ const testCases: TestCase[] = [
     }
   },
   {
+    // Golden: large dots only in columns 1 to 5 of rows 0 to 6 whose index is 3 modulo 128
     name: '3-categories',
     props: {
       extensions: [new DataFilterExtension({categorySize: 3})],
@@ -78,6 +83,7 @@ const testCases: TestCase[] = [
     }
   },
   {
+    // Golden: large dots every 210th point, three of them along the grid
     name: '4-categories',
     props: {
       extensions: [new DataFilterExtension({categorySize: 4})],
@@ -86,6 +92,7 @@ const testCases: TestCase[] = [
     }
   },
   {
+    // Golden: the `4-categories` dots that also lie in column 2 or later and rows 0 to 15
     name: '4-categories-filter-2d',
     props: {
       extensions: [new DataFilterExtension({categorySize: 4, filterSize: 2})],
@@ -119,8 +126,8 @@ const testCases: TestCase[] = [
           radiusUnits: 'pixels'
         })
       ],
-      // Globe surfaces are tessellated, so globe goldens never match Mercator pixel-for-pixel
-      overrides: {globe: {imageDiffOptions: {threshold: 0.985}}}
+      // Tight enough that losing a third of the 25 `single-category` dots fails the globe diff
+      overrides: {globe: {imageDiffOptions: {threshold: 0.995}}}
     },
     presets ?? ['map']
   )
