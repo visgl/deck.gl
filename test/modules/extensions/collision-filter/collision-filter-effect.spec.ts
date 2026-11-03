@@ -161,7 +161,25 @@ test('CollisionFilterEffect#object count', () => {
   }
 });
 
-test('CollisionFilterEffect#binary row indexes', () => {
+test.each([
+  {title: 'tightly packed', rowIndexes: {value: new Uint32Array([5, 9]), size: 1}, expected: 10},
+  {
+    // Only the values the layer reads count: 0 and 1, not the skipped 0xffffff
+    title: 'strided',
+    rowIndexes: {value: new Uint32Array([0, 0xffffff, 1, 0xffffff]), size: 1, stride: 8},
+    expected: 2
+  },
+  {
+    title: 'offset',
+    rowIndexes: {value: new Uint32Array([0xffffff, 3, 4]), size: 1, offset: 4},
+    expected: 5
+  },
+  {
+    title: 'longer than the data',
+    rowIndexes: {value: new Uint32Array([5, 9, 0xffffff]), size: 1},
+    expected: 10
+  }
+])('CollisionFilterEffect#binary row indexes, $title', ({rowIndexes, expected}) => {
   const collisionFilterEffect = new CollisionFilterEffect();
   const layerManager = new LayerManager(device, {viewport: testViewport});
   // Binary GeoJSON encodes picking colors from global feature ids, which can exceed the count
@@ -172,7 +190,7 @@ test('CollisionFilterEffect#binary row indexes', () => {
         length: 2,
         attributes: {
           getPosition: {value: new Float32Array([0, 0, 0, 1, 1, 1]), size: 3},
-          rowIndexes: {value: new Uint32Array([5, 9]), size: 1}
+          rowIndexes
         }
       },
       extensions: [new CollisionFilterExtension()],
@@ -183,7 +201,7 @@ test('CollisionFilterEffect#binary row indexes', () => {
 
   try {
     collisionFilterEffect._groupByCollisionGroup(device, layerManager.getLayers());
-    expect(collisionFilterEffect.channels['COLLISION_GROUP'].objectCount).toBe(10);
+    expect(collisionFilterEffect.channels['COLLISION_GROUP'].objectCount).toBe(expected);
   } finally {
     collisionFilterEffect.cleanup();
     layerManager.finalize();

@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Accessor, Layer, LayerContext, LayerExtension, UpdateParameters} from '@deck.gl/core';
+import {
+  Accessor,
+  BinaryAttribute,
+  Layer,
+  LayerContext,
+  LayerExtension,
+  UpdateParameters
+} from '@deck.gl/core';
 import {collisionPlugin} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
@@ -38,20 +45,26 @@ export type CollisionFilterExtensionProps<DataT = any> = {
 
 /**
  * Binary data can set picking colors from row indexes, such as GeoJsonLayer's global feature ids,
- * which can exceed the object count. Returns 0 if the indexes are not readable on the CPU.
+ * which can exceed the object count. Reads the first `rowCount` values with the attribute's
+ * offset and stride. Returns 0 if the indexes are not readable on the CPU.
  */
-function getRowIndexCount(data: unknown): number {
+function getRowIndexCount(data: unknown, rowCount: number): number {
   const rowIndexes = (data as {attributes?: {rowIndexes?: unknown}} | null)?.attributes?.rowIndexes;
-  const value = ArrayBuffer.isView(rowIndexes)
-    ? rowIndexes
-    : (rowIndexes as {value?: unknown} | undefined)?.value;
+  const attribute = (ArrayBuffer.isView(rowIndexes) ? {value: rowIndexes} : rowIndexes) as
+    | BinaryAttribute
+    | undefined;
+  const value = attribute?.value;
   if (!ArrayBuffer.isView(value) || value instanceof DataView) {
     return 0;
   }
-  const indexes = value as unknown as ArrayLike<number>;
+  // Offset and stride are in bytes
+  const {BYTES_PER_ELEMENT} = value;
+  const start = Math.floor((attribute!.offset || 0) / BYTES_PER_ELEMENT);
+  const step = Math.floor((attribute!.stride || 0) / BYTES_PER_ELEMENT) || attribute!.size || 1;
+  const end = Math.min(value.length, start + rowCount * step);
   let max = -1;
-  for (let i = 0; i < indexes.length; i++) {
-    max = Math.max(max, indexes[i]);
+  for (let i = start; i < end; i += step) {
+    max = Math.max(max, value[i]);
   }
   return max + 1;
 }
@@ -128,8 +141,13 @@ export default class CollisionFilterExtension extends LayerExtension {
     this: Layer<CollisionFilterExtensionProps>,
     {props, changeFlags}: UpdateParameters<Layer<CollisionFilterExtensionProps>>
   ) {
-    if (changeFlags.dataChanged) {
-      this.setState({collisionRowCount: getRowIndexCount(props.data)});
+    // Runs after the layer's own updateState, so the instance count is current
+    const rowCount = this.getNumInstances();
+    if (changeFlags.dataChanged || rowCount !== this.state.collisionInstanceCount) {
+      this.setState({
+        collisionInstanceCount: rowCount,
+        collisionRowCount: getRowIndexCount(props.data, rowCount)
+      });
     }
   }
 
