@@ -34,6 +34,8 @@ export default class CollisionFilterPass extends LayersPass {
       // Collision depth encodes priority, independent of the layer's display order.
       depthBias: 0,
       depthBiasSlopeScale: 0,
+      // Visibility cells are screen-space quads, so the view's back-face culling does not apply
+      ...(this.drawToCollisionVisibility ? {cullMode: 'none'} : null),
       depthWriteEnabled: !this.drawToCollisionVisibility,
       depthCompare: this.drawToCollisionVisibility ? 'always' : 'less-equal'
     };

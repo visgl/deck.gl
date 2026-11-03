@@ -3,7 +3,13 @@
 // Copyright (c) vis.gl contributors
 
 import {afterAll, beforeAll, expect, test, vi} from 'vitest';
-import {CompositeLayer, Deck, OrthographicView, MapView} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  Deck,
+  _GlobeView as GlobeView,
+  OrthographicView,
+  MapView
+} from '@deck.gl/core';
 import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {PointLabelLayer} from '@deck.gl/carto';
 import {CollisionFilterExtension, DataFilterExtension} from '@deck.gl/extensions';
@@ -276,6 +282,44 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       deck.setProps({layers: []});
       await new Promise(requestAnimationFrame);
       buffer.destroy();
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text collision under GlobeView back-face culling',
+  async () => {
+    deck.setProps({views: new GlobeView()});
+    try {
+      for (const background of [false, true]) {
+        const layer = new TextLayer({
+          id: 'globe-text',
+          data: [
+            {position: [-10, 0], text: 'Left', priority: 1},
+            {position: [10, 0], text: 'Right', priority: 0},
+            {position: [10.2, 0], text: 'Right', priority: -1}
+          ],
+          extensions,
+          pickable: true,
+          background,
+          getSize: 24,
+          getCollisionPriority: d => d.priority
+        });
+        await new Promise<void>((resolve, reject) => {
+          deck.setProps({
+            layers: [layer],
+            viewState: {longitude: 0, latitude: 0, zoom: 2},
+            onError: reject,
+            onAfterRender: () => layer.isLoaded && resolve()
+          });
+        });
+        const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+        const priorities = objects.map(({object}) => object.priority).sort((a, b) => a - b);
+        // The overlapping lower-priority label is hidden, the others stay visible
+        expect(priorities, `background=${background}`).toEqual([0, 1]);
+      }
+    } finally {
+      deck.setProps({views: new OrthographicView()});
     }
   }
 );
