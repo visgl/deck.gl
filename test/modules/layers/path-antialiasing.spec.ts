@@ -6,7 +6,7 @@ import {test, expect} from 'vitest';
 import {device, testLayer} from '@deck.gl/test-utils/vitest';
 import {PathLayer} from '@deck.gl/layers';
 import {BufferTransform} from '@luma.gl/engine';
-import {preprocess} from '@luma.gl/shadertools';
+import {preprocess} from '@luma.gl/shaders';
 import pathVertexShader from '@deck.gl/layers/path-layer/path-layer-vertex.glsl';
 import pathFragmentShader from '@deck.gl/layers/path-layer/path-layer-fragment.glsl';
 import {shaderWGSL} from '@deck.gl/layers/path-layer/path-layer.wgsl';

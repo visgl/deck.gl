@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {LayerExtension} from '@deck.gl/core';
+import {addBrushingAttributes} from './attributes';
 import shaderModule, {BrushingModuleProps} from './shader-module';
 
 import type {Layer, LayerContext, Accessor} from '@deck.gl/core';
@@ -50,13 +51,7 @@ export default class BrushingExtension extends LayerExtension {
   initializeState(this: Layer<BrushingExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.add({
-        brushingTargets: {
-          size: 2,
-          stepMode: 'dynamic',
-          accessor: 'getBrushingTarget'
-        }
-      });
+      addBrushingAttributes(attributeManager);
     }
 
     // Trigger redraw when mouse moves

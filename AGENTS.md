@@ -98,6 +98,14 @@ When asked to "get ready for merge", do a full merge-readiness pass:
 - Use `log.log(priority, '...')()` at priority 3 or higher for lifecycle and diffing detail; see
   `docs/developer-guide/debugging.md`.
 
+## Render Tests
+
+- Comment each case in `test/render/test-cases` with what it draws, if the code doesn't make that
+  obvious, and a `// Golden:` line describing what the image should show, so a reviewer can
+  check the golden by eye. Keep file headers to a sentence or two.
+- Don't write paragraphs explaining a case. Keep a non-obvious reason (a skip, a threshold, why a
+  prop is off) to one line; implementation detail belongs in the PR or an issue.
+
 ## Dependencies
 
 - Be conservative with new external dependencies. Add one only when it provides meaningful

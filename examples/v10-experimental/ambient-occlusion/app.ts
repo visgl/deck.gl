@@ -3,14 +3,15 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, MapView, type Viewport} from '@deck.gl/core';
-import {SceneBufferEffect, WaterSurfaceLayer} from '@deck.gl-community/gpu-layers';
+import {WaterSurfaceLayer} from '@deck.gl/proposals/layers';
+import {SceneBufferEffect} from '@deck.gl/proposals/effects';
 import type {Buffer} from '@luma.gl/core';
-import type {CompositeShaderPass} from '@luma.gl/shadertools';
+import type {CompositeShaderPass} from '@luma.gl/shaders';
 import {
   createSSAOCompositeShaderPass,
   createOutlineCompositeShaderPass,
   toneMapping
-} from '@luma.gl/effects';
+} from '@luma.gl/engine/effects';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {RIVERFRONT_VIEW_LIMITS} from '../riverfront-view';
 import {CITY_ORIGIN, makeCityFeatures, makeCityMesh} from '../river-district-data';

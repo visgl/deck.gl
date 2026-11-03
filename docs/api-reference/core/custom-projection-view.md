@@ -1,6 +1,6 @@
 # CustomProjectionView (Experimental)
 
-`CustomProjectionView` renders a planar map in a target CRS resolved by `@math.gl/projection`. Input positions and camera centers use WGS84 longitude/latitude in degrees and altitude in meters. It supports planar projections, with altitude and extruded geometry, using [CustomProjectionViewport](./custom-projection-viewport.md) and [CustomProjectionController](./custom-projection-controller.md).
+`CustomProjectionView` renders a planar map in a target CRS resolved by `@math.gl/geospatial/projection`. Input positions and camera centers use WGS84 longitude/latitude in degrees and altitude in meters. It supports planar projections, with altitude and extruded geometry, using [CustomProjectionViewport](./custom-projection-viewport.md) and [CustomProjectionController](./custom-projection-controller.md).
 
 Import it as `_CustomProjectionView` from `@deck.gl/core` or `deck.gl`. This API is experimental and may change.
 

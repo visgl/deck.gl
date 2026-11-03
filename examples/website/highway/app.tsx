@@ -9,7 +9,7 @@ import {DeckGL} from '@deck.gl/react';
 import type {Device} from '@luma.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {scaleLinear, scaleThreshold} from 'd3-scale';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 import {load} from '@loaders.gl/core';
 
 import {Feature, LineString, MultiLineString} from 'geojson';

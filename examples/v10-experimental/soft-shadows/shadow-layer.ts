@@ -13,7 +13,7 @@ import {
 } from '@deck.gl/core';
 import type {Buffer, RenderPass} from '@luma.gl/core';
 import {Model} from '@luma.gl/engine';
-import {shadow} from '@luma.gl/experimental';
+import {shadow} from '@luma.gl/anari';
 import {
   lambertMaterial,
   clouds,
@@ -21,8 +21,8 @@ import {
   type CloudProps,
   type AtmosphereProps,
   type ShaderModule
-} from '@luma.gl/shadertools';
-import {getMeterOffsetPosition} from '@deck.gl-community/gpu-layers';
+} from '@luma.gl/shaders';
+import {getMeterOffsetPosition} from '@deck.gl/proposals/layers';
 import {makeCityMesh, type CityFeature} from '../river-district-data';
 import {RiverfrontShadowEffect} from './shadow-effect';
 import {getRiverfrontSkyLighting} from '../riverfront-sky-lighting';
