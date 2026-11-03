@@ -93,6 +93,8 @@ const GLOBE_OVERRIDES = {globe: {imageDiffOptions: {threshold: 0.985}}};
 
 const rasterPatternTestCases: TestCase[] = [
   // Rendered under MapView and GlobeView: the pattern must tile the same Mercator plane in both
+  // Golden: San Francisco polygons filled with dots and cross-hatch in light blue, the pattern
+  // masking the fill, the same picture on the map and on the globe
   ...expandViewMatrix(
     {
       name: 'polygon-pattern-mask',
@@ -122,6 +124,8 @@ const rasterPatternTestCases: TestCase[] = [
     },
     ['map', 'globe']
   ),
+  // Golden: the same polygons with the pattern texture drawn in its own colours over the fill,
+  // the same picture on the map and on the globe
   ...expandViewMatrix(
     {
       name: 'polygon-pattern',
@@ -212,6 +216,8 @@ const explicitUnitTestCases: TestCase[] = (
       skip: ['webgpu']
     };
     // One procedural case also renders under GlobeView (pixel-sized dots on the flattened sphere)
+    // Golden: a square of evenly spaced pixel-sized dots at the prime meridian, the same on the
+    // map and on the globe
     return sizeUnits === 'pixels' && zoom === 8
       ? expandViewMatrix({...testCase, overrides: GLOBE_OVERRIDES}, ['map', 'globe'])
       : [{...testCase, views: new MapView()}];
@@ -312,12 +318,9 @@ const ANTIMERIDIAN_POLYGON: PatternDatum[] = [
 
 const ANTIMERIDIAN_VIEW_STATE = {longitude: 180, latitude: 0, zoom: 1.6};
 
-/**
- * MapView (left half) and GlobeView (right half), both centred on the antimeridian, showing the
- * same hatched rectangle. Expected: evenly spaced diagonal hatching across the whole rectangle in
- * both halves. On the globe the pattern is laid out in Mercator, whose seam at 180° would otherwise
- * squeeze the whole world's worth of hatching into the middle of the rectangle.
- */
+// MapView (left half) and GlobeView (right half), both centred on the antimeridian. Guards the
+// Mercator seam at 180°, which would otherwise squeeze a world's worth of hatching into the rectangle
+// Golden: one hatched rectangle in each half with evenly spaced diagonal lines throughout
 const antimeridianTestCase: TestCase = {
   name: 'fill-pattern-antimeridian-map-vs-globe',
   views: [
