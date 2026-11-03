@@ -83,7 +83,7 @@ const testCases: TestCase[] = [
     }
   },
   {
-    // Golden: large dots every 210th point, three of them along the grid
+    // Golden: large dots every 210th point, four of them along the grid
     name: '4-categories',
     props: {
       extensions: [new DataFilterExtension({categorySize: 4})],
