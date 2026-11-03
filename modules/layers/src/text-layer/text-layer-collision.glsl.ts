@@ -5,6 +5,11 @@
 // Shared by the background and character shaders so both test the same label footprint.
 export default /* glsl */ `
 #ifdef MODULE_COLLISION
+// Whether the visibility pass skips this label. Set from the label's corners, so every vertex of a
+// label decides the same way: a triangle mixing a culled vertex with vertices moved to the label's
+// visibility cell would be clipped across other labels' cells.
+bool text_collisionCulled = false;
+
 void text_setCollisionBounds(
   vec3 worldPosition, vec3 position64Low, vec4 rect, vec2 pixelOffset,
   float angle, vec4 clipRect, bool billboard, bool flipY
@@ -12,6 +17,8 @@ void text_setCollisionBounds(
   if (!collision.enabled) return;
   collision_useBounds = true;
   if (!collision.visibilityPass) return;
+  bool behindCamera = false;
+  bool outsideDepth = true;
   for (int i = 0; i < 4; i++) {
     vec2 corner = vec2(i == 1 || i == 2 ? 1.0 : 0.0, i >= 2 ? 1.0 : 0.0);
     vec2 offset = rotate_by_angle(rect.xy + corner * rect.zw, angle) + pixelOffset;
@@ -32,7 +39,12 @@ void text_setCollisionBounds(
       position = project_position_to_clipspace(worldPosition, position64Low, offsetCommon);
     }
     collision_corners[i] = (position.xy / position.w + 1.0) / 2.0;
+    behindCamera = behindCamera || position.w <= 0.0;
+    outsideDepth = outsideDepth && abs(position.z) > position.w;
   }
+  // Corners behind the camera do not project to valid bounds. A label that only crosses the near
+  // or far plane is still tested; its bounds are clipped to the viewport by the bounds test.
+  text_collisionCulled = behindCamera || outsideDepth;
   // The projected corners' mean is inside the convex footprint, including under perspective.
   vec2 center = (collision_corners[0] + collision_corners[1] + collision_corners[2] + collision_corners[3]) / 4.0;
   collision_position = vec4(center * 2.0 - 1.0, 0.0, 1.0);

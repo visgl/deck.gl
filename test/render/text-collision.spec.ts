@@ -345,6 +345,68 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'labels crossing behind the camera do not change other labels',
+  async () => {
+    deck.setProps({views: new MapView()});
+    try {
+      // Pairs of overlapping labels: only the higher-priority label of each pair is visible
+      const pairs = Array.from({length: 30}, (_, i) => {
+        const position = [-0.2 + (i % 6) * 0.08, 0.02 + Math.floor(i / 6) * 0.04];
+        return [
+          {position, text: 'Pair', priority: 100 + i},
+          {position: [position[0] + 0.002, position[1]], text: 'Pair', priority: i}
+        ];
+      }).flat();
+      const overlapping = new TextLayer({
+        id: 'overlapping',
+        data: pairs,
+        getSize: 16,
+        extensions,
+        pickable: true,
+        getCollisionPriority: d => d.priority
+      });
+      const draw = async (pitch: number, layers: TextLayer[]) => {
+        await new Promise<void>((resolve, reject) => {
+          deck.setProps({
+            layers,
+            viewState: {longitude: 0, latitude: 0, zoom: 10, pitch, bearing: 0},
+            onError: reject,
+            onAfterRender: () => layers.every(layer => layer.isLoaded) && resolve()
+          });
+        });
+        const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+        return objects
+          .map(({object}) => object.priority)
+          .filter(priority => priority >= 0)
+          .sort((a, b) => a - b);
+      };
+      for (const {pitch, position, size} of [
+        {pitch: 45, position: [-0.1, -0.1], size: 400},
+        {pitch: 45, position: [0.05, -0.1], size: 400},
+        {pitch: 60, position: [-0.1, -0.2], size: 100}
+      ]) {
+        // A ground label running north to south whose near end passes under the camera.
+        // It has the lowest priority, so it cannot hide the pairs.
+        const crossing = new TextLayer({
+          id: 'crossing',
+          data: [{position, text: 'Collision label', priority: -100}],
+          getSize: size,
+          getAngle: 90,
+          billboard: false,
+          extensions,
+          getCollisionPriority: d => d.priority
+        });
+        expect(await draw(pitch, [overlapping, crossing]), `pitch=${pitch}, ${position}`).toEqual(
+          await draw(pitch, [overlapping])
+        );
+      }
+    } finally {
+      deck.setProps({views: new OrthographicView()});
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'text collision on pitched geographic views and HiDPI',
   async () => {
     deck.setProps({views: new MapView(), useDevicePixels: 2});

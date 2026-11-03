@@ -123,8 +123,15 @@ void main(void) {
   DECKGL_FILTER_COLOR(vLineColor, geometry);
 #ifdef MODULE_COLLISION
   if (collision.visibilityPass) {
-    // Preserve culling by the projection and other vertex extensions.
-    if (gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w) return;
+    // Billboard vertices share the anchor's depth, so this vertex's culling by the projection and
+    // other vertex extensions applies to the whole label. Other labels decide from their corners.
+    bool culled = textBackground.billboard
+      ? gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w
+      : text_collisionCulled;
+    if (culled) {
+      gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+      return;
+    }
     gl_Position = collision_getVisibilityPosition(positions);
   }
 #endif
