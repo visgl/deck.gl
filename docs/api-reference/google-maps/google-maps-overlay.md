@@ -4,6 +4,14 @@ This class implements the [OverlayView](https://developers.google.com/maps/docum
 
 As detailed in the [overview](./overview.md), the overlay supports both Vector and Raster Google map rendering. Depending on the Google Map configuration, the correct deck.gl overlay rendering method will be chosen at runtime.
 
+A Vector map falls back to Raster rendering when the browser cannot run it, and Google Maps then reports the new rendering type with the map's `renderingtype_changed` event. The overlay replaces its deck at that point. If the old deck already drew your layers, the new deck can't draw those layer instances. Supply new instances with [setProps](#setprops), for example in a `renderingtype_changed` listener:
+
+```ts
+map.addListener('renderingtype_changed', () => {
+  overlay.setProps({layers: createLayers()});
+});
+```
+
 ## Example
 
 import Tabs from '@theme/Tabs';

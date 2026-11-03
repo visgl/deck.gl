@@ -3,8 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* global google, document */
-import {Deck, Layer, MapView} from '@deck.gl/core';
-import type {LayersList} from '@deck.gl/core';
+import {Deck, MapView} from '@deck.gl/core';
 import {Matrix4, Vector2} from '@math.gl/core';
 import type {MjolnirGestureEvent, MjolnirPointerEvent} from 'mjolnir.js';
 export const POSITIONING_CONTAINER_ID = 'deck-gl-google-maps-container';
@@ -123,77 +122,6 @@ export function destroyDeckInstance(deck: Deck) {
   deck.finalize();
   // Deck does not remove a canvas it does not own, such as the `device` prop's
   deck.props.parent?.remove();
-}
-
-/**
- * Copies the layers, so that they can be added to a new deck, and records the copy of each layer.
- * Call it before destroying the deck that drew them: it reads their layer state.
- */
-export function cloneLayers(layers: LayersList, copies: WeakMap<Layer, Layer>): LayersList {
-  return layers.map(layer => {
-    if (Array.isArray(layer)) {
-      return cloneLayers(layer, copies);
-    }
-    if (!(layer instanceof Layer)) {
-      return layer;
-    }
-    const copy = layer.clone(getSuppliedAsyncProps(layer));
-    copies.set(layer, copy);
-    return copy;
-  });
-}
-
-/** Replaces the layers that were copied, e.g. when the app passes them again after a fallback */
-export function replaceCopiedLayers(layers: LayersList, copies: WeakMap<Layer, Layer>): LayersList {
-  let replaced = false;
-  const result = layers.map(layer => {
-    let next = Array.isArray(layer) ? replaceCopiedLayers(layer, copies) : layer;
-    // A copy is copied again if its deck is destroyed too
-    while (next instanceof Layer && copies.has(next)) {
-      next = copies.get(next)!;
-    }
-    replaced ||= next !== layer;
-    return next;
-  });
-  return replaced ? result : layers;
-}
-
-/** The fields of the private async prop state in `ComponentState` that are read here */
-type AsyncPropState = {
-  type: {transform?: unknown} | null;
-  lastValue: unknown;
-  resolvedValue: unknown;
-};
-
-/**
- * Initialization replaces the value of an async prop with a transform in the layer's props, e.g. an
- * image with a texture of the deck's device. Get the values that the app supplied instead.
- */
-function getSuppliedAsyncProps(layer: Layer): Record<string, unknown> {
-  const asyncProps: Partial<Record<string, AsyncPropState>> =
-    // @ts-expect-error asyncProps is private
-    layer.internalState?.asyncProps || {};
-  const props: Record<string, unknown> = {};
-  for (const name in asyncProps) {
-    const asyncProp = asyncProps[name];
-    // lastValue stays null while the prop has its default value
-    if (!asyncProp?.type?.transform || asyncProp.lastValue === null) {
-      continue;
-    }
-    if (name === 'data' && isAsyncIterable(asyncProp.lastValue)) {
-      // An async iterable can only be read once. Copy the loaded data, which dataTransform
-      // already processed.
-      props.data = asyncProp.resolvedValue;
-      props.dataTransform = null;
-    } else {
-      props[name] = asyncProp.lastValue;
-    }
-  }
-  return props;
-}
-
-function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
-  return typeof (value as AsyncIterable<unknown>)?.[Symbol.asyncIterator] === 'function';
 }
 
 /* eslint-disable max-statements */

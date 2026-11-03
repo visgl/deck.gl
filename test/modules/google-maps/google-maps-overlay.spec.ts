@@ -6,7 +6,7 @@
 import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
-import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, gl} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
@@ -239,29 +239,16 @@ for (const {interleaved, contextLost} of [
     const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
       map._overlays.add(mapOverlay);
     });
-    const layer = new ScatterplotLayer({
-      id: 'points',
-      data: [{position: [0, 0]}],
-      getPosition: d => d.position
-    });
-    const image = new ImageData(1, 1);
-    const bitmapLayer = new BitmapLayer({id: 'bitmap', image, bounds: [-1, -1, 1, 1]});
-    async function* streamRows() {
-      yield [{position: [0, 0]}];
-      yield [{position: [1, 1]}];
-    }
-    const streamedLayer = new ScatterplotLayer({
-      id: 'streamed',
-      data: streamRows(),
-      // Counts how many times each row is transformed
-      dataTransform: (chunk, previous = []) =>
-        previous.concat(chunk.map(row => ({...row, transforms: (row.transforms ?? 0) + 1}))),
-      getPosition: d => d.position
-    });
-    const layers = [layer, bitmapLayer, streamedLayer];
+    const createLayer = () =>
+      new ScatterplotLayer({
+        id: 'points',
+        data: [{position: [0, 0]}],
+        getPosition: d => d.position
+      });
+    const layer = createLayer();
     const overlay = new GoogleMapsOverlay({
       interleaved,
-      layers,
+      layers: [layer],
       ...(!interleaved && {device})
     });
 
@@ -277,9 +264,6 @@ for (const {interleaved, contextLost} of [
       await expect.poll(() => vectorDeck.isInitialized).toBe(true);
       vectorOverlay.onDraw({gl, transformer: map.transformer});
       await expect.poll(() => layer.isLoaded, 'Layer is initialized').toBe(true);
-      await expect.poll(() => streamedLayer.props.data.length, 'Stream is read').toBe(2);
-      const vectorTexture = bitmapLayer.props.image;
-      expect(vectorTexture, 'Image is replaced with a texture').not.toBe(image);
       addOverlaySpy.mockRestore();
 
       if (contextLost) {
@@ -300,6 +284,11 @@ for (const {interleaved, contextLost} of [
       expect(deck, 'Deck is replaced').not.toBe(vectorDeck);
       expect(deck.props.gl, 'Deck does not use the vector map context').toBeFalsy();
       expect(deck.props.parent.parentElement, 'Deck is in the overlay pane').toBe(map.getDiv());
+      expect(deck.props.layers, 'Deck does not get the finalized layer').toEqual([]);
+
+      // The app supplies new layers, e.g. when the map reports the new rendering type
+      const newLayer = createLayer();
+      overlay.setProps({layers: [newLayer]});
       await expect.poll(() => deck.isInitialized).toBe(true);
       if (interleaved) {
         expect(deck.getCanvas(), 'Deck has its own canvas').not.toBe(gl.canvas);
@@ -312,37 +301,15 @@ for (const {interleaved, contextLost} of [
       expect(overlay._deck, 'The replaced overlay does not change the deck').toBe(deck);
       expect(deck.props.layerFilter, 'The replaced overlay does not hide the layers').toBeNull();
 
-      // The app may pass its layers again, which the destroyed deck finalized
-      const copies = overlay.props.layers;
-      overlay.setProps({layers});
-      expect(
-        deck.props.layers.every((copy, i) => copy === copies[i]),
-        'Deck keeps the copies'
-      ).toBe(true);
-
       map.draw();
       expect(deck.props.width, 'Raster overlay draws').toBe(800);
-      const getLayer = id => deck.layerManager?.getLayers().find(l => l.id === id);
-      await expect.poll(() => getLayer('points')?.isLoaded).toBe(true);
-      const rasterLayer = getLayer('points');
-      expect(rasterLayer, 'Layer is copied for the new deck').not.toBe(layer);
+      await expect.poll(() => newLayer.isLoaded, 'New layer is initialized').toBe(true);
+      expect(deck.layerManager.getLayers()).toEqual([newLayer]);
       expect(
-        rasterLayer.getAttributeManager().attributes.instancePositions.getBuffer()?.destroyed,
-        'Layer draws with live buffers'
+        newLayer.getAttributeManager().attributes.instancePositions.getBuffer()?.destroyed,
+        'New layer draws with live buffers'
       ).toBe(false);
-      await expect.poll(() => getLayer('bitmap')?.isLoaded).toBe(true);
-      const rasterTexture = getLayer('bitmap').props.image;
-      expect(vectorTexture.destroyed, 'The destroyed deck deletes its texture').toBe(true);
-      expect(rasterTexture, 'Image is copied for the new deck').not.toBe(vectorTexture);
-      expect(rasterTexture.destroyed, 'Bitmap draws with a live texture').toBe(false);
-      expect(rasterTexture.device, 'Texture is on the new device').toBe(deck.device);
-      await expect.poll(() => getLayer('streamed')?.isLoaded, 'Streamed copy loads').toBe(true);
-      const streamedCopy = getLayer('streamed');
-      expect(streamedCopy.getNumInstances(), 'Streamed rows are copied').toBe(2);
-      expect(
-        streamedCopy.props.data.map(row => row.transforms),
-        'Streamed rows are transformed once'
-      ).toEqual([1, 1]);
+      expect(newLayer.state.model.device, 'New layer is on the new device').toBe(deck.device);
     } finally {
       addOverlaySpy.mockRestore();
       finalizeOverlay(overlay);
