@@ -11,7 +11,8 @@ import {
   DataFilterModuleProps,
   Defines,
   dataFilter,
-  dataFilter64
+  dataFilter64,
+  dataFilterInjections
 } from './shader-module';
 import * as aggregator from './aggregator';
 import {
@@ -160,7 +161,7 @@ export default class DataFilterExtension extends LayerExtension<
     const module = fp64 ? dataFilter64 : dataFilter;
     module.uniformTypes = module.uniformTypesFromOptions(extension.opts);
 
-    return {modules: [module], defines};
+    return {plugins: [{name: 'dataFilter', module, injections: dataFilterInjections}], defines};
   }
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {

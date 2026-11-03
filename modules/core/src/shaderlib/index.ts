@@ -4,6 +4,7 @@
 
 import {
   type ShaderAssembler,
+  type ShaderHook,
   GLSLShaderAssembler,
   WGSLShaderAssembler,
   gouraudMaterial,
@@ -15,19 +16,35 @@ import color from './color/color';
 import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
-import shadow from './shadow/shadow';
-import picking from './picking/picking';
+import shadow, {shadowPlugin} from './shadow/shadow';
+import picking, {pickingPlugin} from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-const SHADER_HOOKS_GLSL = [
-  'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',
-  'vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)',
-  'vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)',
-  'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
+const SHADER_HOOKS_GLSL: ShaderHook[] = [
+  {
+    name: 'DECKGL_FILTER_SIZE',
+    stage: 'vertex',
+    glsl: {parameters: 'inout vec3 size, VertexGeometry geometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_GL_POSITION',
+    stage: 'vertex',
+    glsl: {parameters: 'inout vec4 position, VertexGeometry geometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_COLOR',
+    stage: 'vertex',
+    glsl: {parameters: 'inout vec4 color, VertexGeometry geometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_COLOR',
+    stage: 'fragment',
+    glsl: {parameters: 'inout vec4 color, FragmentGeometry geometry'}
+  }
 ];
 
-const SHADER_HOOKS_WGSL = [
+const SHADER_HOOKS_WGSL: ShaderHook[] = [
   // Not yet supported
 ];
 
@@ -63,7 +80,18 @@ export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   return language === 'wgsl' ? wgslShaderAssembler : glslShaderAssembler;
 }
 
-export {layerUniforms, color, picking, project, project32, gouraudMaterial, phongMaterial, shadow};
+export {
+  layerUniforms,
+  color,
+  picking,
+  pickingPlugin,
+  project,
+  project32,
+  gouraudMaterial,
+  phongMaterial,
+  shadow,
+  shadowPlugin
+};
 
 // Useful for custom shader modules
 export type {ProjectProps, ProjectUniforms} from './project/viewport-uniforms';

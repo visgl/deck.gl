@@ -22,17 +22,20 @@ uniform highlightUniforms {
 type HighlightProps = {enabled: boolean};
 
 const highlightUniforms = {
-  name: 'trips',
+  name: 'highlight',
   fs: uniformBlock, // Only need to add block to fragment stage in this example
   uniformTypes: {enabled: 'f32'}
-} as const satisfies ShaderModule<TripsProps>;
+} as const satisfies ShaderModule<HighlightProps>;
 
 class FilteredScatterplotLayer extends ScatterplotLayer {
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      // Standard injection hook - see "Writing Shaders"
-      'fs:DECKGL_FILTER_COLOR': `
+    shaders.plugins = [...(shaders.plugins || []), {
+      name: 'highlight',
+      module: highlightUniforms,
+      injections: {
+        // Standard injection hook - see "Writing Shaders"
+        'glsl:fs:DECKGL_FILTER_COLOR': `
         if (highlight.enabled) {
           if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
             // is red
@@ -42,12 +45,9 @@ class FilteredScatterplotLayer extends ScatterplotLayer {
           }
         }
       `
-    };
-
-    // Add uniform binding to shader modules
-    shaders.modules = [...shaders.modules, highlightUniforms];
+      }
+    }];
     return shaders;
-    };
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -56,7 +56,7 @@ class FilteredScatterplotLayer extends ScatterplotLayer {
     if (props.highlightRed !== oldProps.highlightRed) {
       // Set the custom uniform
       const highlightProps: HighlightProps = {enabled: props.highlightRed};
-      model.shaderInputs.setProps({highlight: highlightProps});
+      this.setShaderModuleProps({highlight: highlightProps});
     }
   }
 }
@@ -96,6 +96,7 @@ The same functionality can be achieved by creating a layer extension. When we gi
 
 ```js
 import {LayerExtension} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 class RedFilter extends LayerExtension {
   // TODO - This is our reusable code
@@ -200,6 +201,7 @@ Back to our example use case. We can implement the red filter with the following
 
 ```js
 import {LayerExtension} from '@deck.gl/core';
+import type {ShaderModule} from '@luma.gl/shaders';
 
 // Declare uniform block & custom shader module
 const uniformBlock = `\
@@ -211,18 +213,21 @@ uniform highlightUniforms {
 type HighlightProps = {enabled: boolean};
 
 const highlightUniforms = {
-  name: 'trips',
+  name: 'highlight',
   fs: uniformBlock, // Only need to add block to fragment stage in this example
   uniformTypes: {enabled: 'f32'}
-} as const satisfies ShaderModule<TripsProps>;
+} as const satisfies ShaderModule<HighlightProps>;
 
 
 class RedFilter extends LayerExtension {
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      // Standard injection hook - see "Writing Shaders"
-      'fs:DECKGL_FILTER_COLOR': `
+    shaders.plugins = [...(shaders.plugins || []), {
+      name: 'highlight',
+      module: highlightUniforms,
+      injections: {
+        // Standard injection hook - see "Writing Shaders"
+        'glsl:fs:DECKGL_FILTER_COLOR': `
         if (highlight.enabled) {
           if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
             // is red
@@ -232,23 +237,18 @@ class RedFilter extends LayerExtension {
           }
         }
       `
-    };
-
-    // Add uniform binding to shader modules
-    shaders.modules = [...shaders.modules, highlightUniforms];
+      }
+    }];
     return shaders;
   }
 
   updateState(params) {
     const {highlightRed = true} = params.props;
-    for (const model of this.getModels()) {
-      const highlightProps: HighlightProps = {enabled: props.highlightRed};
-      model.shaderInputs.setProps({highlight: highlightProps});
-    }
+    this.setShaderModuleProps({highlight: {enabled: highlightRed}});
   }
 
   getSubLayerProps() {
-    const {highlightRed = true} = params.props;
+    const {highlightRed = true} = this.props;
     return {
       highlightRed
     };

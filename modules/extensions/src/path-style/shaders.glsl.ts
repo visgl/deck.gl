@@ -49,7 +49,7 @@ export type Defines = {
  */
 export const pathStylePipelineShaders = {
   inject: {
-    'vs:#main-end': `
+    'glsl:vs:#main-end': `
 #ifdef PATH_STYLE_OFFSET
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   float offsetDir = sign(instanceOffsets);
@@ -112,7 +112,7 @@ vDashPathLength = 0.0;
 #endif
 #endif
 `,
-    'fs:#main-end': `
+    'glsl:fs:#main-end': `
 #ifdef DASH_ENABLED
   // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
   // #main-start can remove helper invocations and make those derivatives undefined, so all
@@ -154,7 +154,7 @@ vDashPathLength = 0.0;
 
 export const dashShaders = {
   inject: {
-    'vs:#decl': `
+    'glsl:vs:#decl': `
 in vec2 instanceDashArrays;
 #ifdef HIGH_PRECISION_DASH
 // [distance from the start of the path, total length of the path], in common space.
@@ -174,7 +174,7 @@ layout(std140) uniform pathStyleUniforms {
 } pathStyle;
 `,
 
-    'fs:#decl': `
+    'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
@@ -226,7 +226,7 @@ float dashPatternCoverage(
     // o----     ----     ----     ---- o----     -o----     ----     o
     // 1 - stretch to fit, draw half dash at each end for nicer joints
     // o--    ----    ----    ----    --o--      --o--     ----     --o
-    'fs:#main-start': `
+    'glsl:fs:#main-start': `
   float dashCoverage = 1.0;
   bool shouldDiscardDash = false;
   bool inRoundedDashGap = false;
@@ -332,16 +332,16 @@ float dashPatternCoverage(
 
 export const scatterplotDashShaders = {
   inject: {
-    'vs:#decl': `
+    'glsl:vs:#decl': `
 in vec2 instanceDashArrays;
 out vec2 vDashArray;
 `,
 
-    'vs:#main-end': `
+    'glsl:vs:#main-end': `
 vDashArray = instanceDashArrays;
 `,
 
-    'fs:#decl': `
+    'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
@@ -351,7 +351,7 @@ in vec2 vDashArray;
 #define PI 3.141592653589793
 `,
 
-    'fs:#main-start': `
+    'glsl:fs:#main-start': `
   bool inDashGap = false;
   float dashUnitLength = vDashArray.x + vDashArray.y;
   if (dashUnitLength > 0.0 && scatterplot.stroked > 0.5) {
@@ -377,7 +377,7 @@ in vec2 vDashArray;
   }
 `,
 
-    'fs:#main-end': `
+    'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -390,16 +390,16 @@ in vec2 vDashArray;
 
 export const textBackgroundDashShaders = {
   inject: {
-    'vs:#decl': `
+    'glsl:vs:#decl': `
 in vec2 instanceDashArrays;
 out vec2 vDashArray;
 `,
 
-    'vs:#main-end': `
+    'glsl:vs:#main-end': `
 vDashArray = instanceDashArrays;
 `,
 
-    'fs:#decl': `
+    'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
@@ -499,7 +499,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
 }
 `,
 
-    'fs:#main-start': `
+    'glsl:fs:#main-start': `
   bool inDashGap = false;
   float dashUnitLength = vDashArray.x + vDashArray.y;
   if (dashUnitLength > 0.0 && textBackground.stroked) {
@@ -532,7 +532,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
   }
 `,
 
-    'fs:#main-end': `
+    'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -545,10 +545,10 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
 
 export const offsetShaders = {
   inject: {
-    'vs:#decl': `
+    'glsl:vs:#decl': `
 in float instanceOffsets;
 `,
-    'vs:DECKGL_FILTER_SIZE': `
+    'glsl:vs:DECKGL_FILTER_SIZE': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   size *= offsetWidth;
 `

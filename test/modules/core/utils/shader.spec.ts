@@ -7,6 +7,11 @@ import {project, phongMaterial} from '@deck.gl/core';
 import {mergeShaders} from '@deck.gl/core/utils/shader';
 
 const TEST_SHADERS = {vs: 'vs', fs: 'fs'};
+const discardPlugin = {name: 'discard', injections: {'glsl:fs:#main-start': 'discard;'}};
+const colorPlugin = {
+  name: 'color',
+  injections: {'glsl:fs:#main-end': 'filter_pickingColor(gl_FragColor);'}
+};
 
 const TEST_CASES = [
   {
@@ -19,14 +24,14 @@ const TEST_CASES = [
     input: {
       defines: {DRAW: 1},
       modules: [project],
-      inject: {'fs#main-start': 'discard;'}
+      plugins: [discardPlugin]
     },
     output: {
       vs: 'vs',
       fs: 'fs',
       defines: {DRAW: 1},
       modules: [project],
-      inject: {'fs#main-start': 'discard;'}
+      plugins: [discardPlugin]
     }
   },
   {
@@ -35,14 +40,14 @@ const TEST_CASES = [
       vs: 'vs-v2',
       defines: {DRAW: 0, EXTRUDE: 1},
       modules: [phongMaterial],
-      inject: {'fs#main-end': 'filter_pickingColor(gl_FragColor);'}
+      plugins: [colorPlugin]
     },
     output: {
       vs: 'vs-v2',
       fs: 'fs',
       defines: {DRAW: 0, EXTRUDE: 1},
       modules: [project, phongMaterial],
-      inject: {'fs#main-start': 'discard;', 'fs#main-end': 'filter_pickingColor(gl_FragColor);'}
+      plugins: [discardPlugin, colorPlugin]
     }
   }
 ];

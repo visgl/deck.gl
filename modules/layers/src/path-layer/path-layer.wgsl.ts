@@ -2,6 +2,23 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ShaderPlugin} from '@luma.gl/shaders';
+
+/** WGSL extension points for path color and time-window filtering. */
+export const pathShaderPlugin: ShaderPlugin = {
+  name: 'pathHooks',
+  hooks: [
+    {
+      name: 'DECKGL_FILTER_PATH_COLOR_VERTEX',
+      stage: 'vertex',
+      wgsl: {
+        parameters: 'color: ptr<function, vec4<f32>>, pathPosition: vec2<f32>, pathLength: f32'
+      }
+    },
+    {name: 'DECKGL_FILTER_PATH_COLOR', stage: 'fragment', wgsl: {parameters: ''}}
+  ]
+};
+
 export const shaderWGSL = /* wgsl */ `\
 const EPSILON: f32 = 0.001;
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
@@ -39,7 +56,6 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
-  // Location 6 is reserved for TripsLayer's injected vTime varying.
   @location(7) clipCoordinates: vec2<f32>,
 #ifdef DASH_ENABLED
   @location(8) vPathBounds: vec2<f32>,
@@ -407,6 +423,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     attributes.instanceColors.rgb,
     attributes.instanceColors.a * layer.opacity
   );
+  DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength);
   return varyings;
 }
 
@@ -486,7 +503,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
-  // DECKGL_FILTER_COLOR
+  DECKGL_FILTER_PATH_COLOR();
   clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
   return deckgl_premultiplied_alpha(color);

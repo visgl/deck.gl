@@ -33,6 +33,30 @@ For language-specific custom models, spread `this.getShaders(...)` into model op
 or pass `shaderAssembler: this.context.shaderAssembler`. Without deck's assembler,
 shader modules can throw `Unknown shader hook vs:DECKGL_FILTER_GL_POSITION`.
 
+Shader injections move from `inject` on modules or model options into native
+`ShaderPlugin` descriptors passed in `plugins`. Keep reusable shader source, uniforms,
+and dependencies in a `ShaderModule`; attach it as the plugin's `module` when it also
+contributes injections. Preserve inherited plugins when extending a layer:
+
+```ts
+const shaders = super.getShaders();
+return {
+  ...shaders,
+  plugins: [...(shaders.plugins || []), {
+    name: 'customFilter',
+    injections: {'glsl:fs:DECKGL_FILTER_COLOR': 'color.a *= 0.5;'}
+  }]
+};
+```
+
+`addShaderHook` now takes `{name, stage, glsl: {parameters}}` instead of a GLSL
+signature string. Use explicit `ShaderInjection` arrays for ordered injections and
+language-qualified keys for GLSL-only plugins. `Layer.getShaders` still installs
+picking hooks when its `modules` includes deck's `picking` module. Custom models
+constructed outside that method must pass `plugins: [pickingPlugin]` from
+`@deck.gl/core` to install the picking module and its hooks. Similarly, use
+`shadowPlugin` instead of adding `shadow` alone to a custom model.
+
 `Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
 of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
 

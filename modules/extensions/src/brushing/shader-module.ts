@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable camelcase */
-import type {ShaderModule} from '@luma.gl/shaders';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project} from '@deck.gl/core';
 import type {Viewport} from '@deck.gl/core';
 
@@ -78,7 +78,7 @@ const TARGET = {
 };
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     vec2 brushingTarget;
     vec2 brushingSource;
     if (brushing.target == 3) {
@@ -100,19 +100,18 @@ const inject = {
     brushing_setVisible(visible);
   `,
 
-  'fs:DECKGL_FILTER_COLOR': `
+  'glsl:fs:DECKGL_FILTER_COLOR': `
     if (brushing.enabled && brushing_isVisible < 0.5) {
       discard;
     }
   `
 };
 
-export default {
+const brushingModule = {
   name: 'brushing',
   dependencies: [project],
   vs,
   fs,
-  inject,
   getUniforms: (opts?: BrushingModuleProps | {}): BrushingModuleUniforms => {
     if (!opts || !('viewport' in opts)) {
       return {};
@@ -143,3 +142,11 @@ export default {
     radius: 'f32'
   }
 } as ShaderModule<BrushingModuleProps, BrushingModuleUniforms, {}>;
+
+export const brushingPlugin: ShaderPlugin = {
+  name: 'brushing',
+  module: brushingModule,
+  injections: inject
+};
+
+export default brushingModule;

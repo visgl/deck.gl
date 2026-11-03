@@ -59,15 +59,18 @@ When [subclassing](./subclassed-layers.md) an official deck.gl layer with minor 
 const shaders = this.getShaders();
 
 const model = new Model(device, {
-  ...this.getShaders(),
-  inject: {
-    'fs:#decl': `
+  ...shaders,
+  plugins: [...(shaders.plugins || []), {
+    name: 'coverage',
+    injections: {
+      'glsl:fs:#decl': `
       uniform float coverage;
-    `
-    'fs:DECKGL_FILTER_COLOR': `
+    `,
+      'glsl:fs:DECKGL_FILTER_COLOR': `
       if (abs(geometry.uv.x) > coverage) discard;
     `
-  }
+    }
+  }]
 });
 ```
 

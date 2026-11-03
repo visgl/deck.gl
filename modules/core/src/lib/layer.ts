@@ -19,7 +19,11 @@ import {deepEqual} from '../utils/deep-equal';
 import {mergeShaders} from '../utils/shader';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import typedArrayManager from '../utils/typed-array-manager';
-import {disablePickingIndex, PICKING_INVALID_INDEX} from '../shaderlib/picking/picking';
+import pickingModule, {
+  pickingPlugin,
+  disablePickingIndex,
+  PICKING_INVALID_INDEX
+} from '../shaderlib/picking/picking';
 
 import Component from '../lifecycle/component';
 import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
@@ -591,9 +595,14 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       },
       shaders
     );
+    // Preserve the public picking module contract while installing its hook contributions.
+    if (shaders.modules?.includes(pickingModule) && !shaders.plugins?.includes(pickingPlugin)) {
+      shaders = mergeShaders(shaders, {plugins: [pickingPlugin]});
+    }
     shaders = mergeShaders(shaders, {
       disableWarnings: true,
-      modules: this.context.defaultShaderModules
+      modules: this.context.defaultShaderModules,
+      plugins: this.context.defaultShaderPlugins
     });
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));

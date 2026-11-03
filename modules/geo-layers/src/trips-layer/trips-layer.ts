@@ -8,7 +8,7 @@ import type {AccessorFunction, Attribute, DefaultProps} from '@deck.gl/core';
 import {PathLayer, PathLayerProps} from '@deck.gl/layers';
 
 import {tripsUniforms, TripsProps} from './trips-layer-uniforms';
-import {packTripTimestamps, tripsShaderInjectionsWGSL} from './trips-layer.wgsl';
+import {packTripTimestamps, tripsShaderPluginWGSL} from './trips-layer.wgsl';
 
 const defaultProps: DefaultProps<TripsLayerProps> = {
   fadeTrail: true,
@@ -78,9 +78,11 @@ export default class TripsLayer<DataT = any, ExtraProps extends {} = {}> extends
 
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject =
-      this.context.device.type === 'webgpu' ? tripsShaderInjectionsWGSL : tripsShaderInjectionsGLSL;
-    shaders.modules = [...shaders.modules, tripsUniforms];
+    const plugin =
+      this.context.device.type === 'webgpu'
+        ? tripsShaderPluginWGSL
+        : {name: 'trips', module: tripsUniforms, injections: tripsShaderInjectionsGLSL};
+    shaders.plugins = [...(shaders.plugins || []), plugin];
     return shaders;
   }
 

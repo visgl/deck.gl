@@ -251,8 +251,11 @@ test('PathStyleExtension#PathLayer', () => {
         ).toBe(true);
         const pathStyleModule = layer
           .getShaders()
-          .modules.find(module => module.name === 'pathStyle')!;
-        expect(pathStyleModule.uniformTypes, 'dash module retains its uniform block').toEqual({
+          .plugins.find(plugin => plugin.name === 'pathStyle')!;
+        expect(
+          pathStyleModule.module.uniformTypes,
+          'dash module retains its uniform block'
+        ).toEqual({
           dashAlignMode: 'f32',
           dashGapPickable: 'i32',
           dashUnits: 'i32'
@@ -333,9 +336,9 @@ test('PathStyleExtension#offset-only shader module', () => {
           ).toBe(true);
           const pathStyleModule = layer
             .getShaders()
-            .modules.find(module => module.name === 'pathStyle')!;
+            .plugins.find(plugin => plugin.name === 'pathStyle')!;
           expect(
-            Object.hasOwn(pathStyleModule, 'uniformTypes'),
+            Object.hasOwn(pathStyleModule.module, 'uniformTypes'),
             'offset-only module does not declare an unused uniform block'
           ).toBe(false);
         }
@@ -539,13 +542,13 @@ test('PathStyleExtension#shader defines', () => {
           shaders.defines.DASH_ENABLED,
           'DASH_ENABLED is unset when only offset is enabled'
         ).toBeUndefined();
-        const pathStyleModule = shaders.modules.find(module => module.name === 'pathStyle')!;
+        const pathStyleModule = shaders.plugins.find(plugin => plugin.name === 'pathStyle')!;
         expect(
-          pathStyleModule.inject?.['fs:#main-start'],
+          pathStyleModule.injections?.['glsl:fs:#main-start'],
           'offset does not reject fragments before PathLayer evaluates derivatives'
         ).toBeUndefined();
         expect(
-          pathStyleModule.inject?.['fs:#main-end'],
+          pathStyleModule.injections?.['glsl:fs:#main-end'],
           'non-AA offset retains a deferred hard clip'
         ).toContain('#ifndef ANTIALIASING');
       }
@@ -564,9 +567,9 @@ test('PathStyleExtension#shader defines', () => {
         ).toBeUndefined();
         const pathStyleModule = layer
           .getShaders()
-          .modules.find(module => module.name === 'pathStyle')!;
-        const fragmentStart = pathStyleModule.inject?.['fs:#main-start'];
-        const fragmentEnd = pathStyleModule.inject?.['fs:#main-end'];
+          .plugins.find(plugin => plugin.name === 'pathStyle')!;
+        const fragmentStart = pathStyleModule.injections?.['glsl:fs:#main-start'];
+        const fragmentEnd = pathStyleModule.injections?.['glsl:fs:#main-end'];
         expect(fragmentStart, 'rounded caps use a signed pixel-distance ramp').toContain(
           'smoothedge(0.0, capEdgePixels)'
         );
@@ -600,7 +603,7 @@ test('PathStyleExtension#shader defines', () => {
 });
 
 test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
-  const injection = dashShaders.inject['fs:#main-start'];
+  const injection = dashShaders.inject['glsl:fs:#main-start'];
   const segmentShader = preprocess(injection);
   const pathShader = preprocess(injection, {defines: {HIGH_PRECISION_DASH: 1}});
 
@@ -629,7 +632,7 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
 });
 
 test('PathStyleExtension#orders offset remapping before dash conversion', () => {
-  const vertexInjection = pathStylePipelineShaders.inject['vs:#main-end'];
+  const vertexInjection = pathStylePipelineShaders.inject['glsl:vs:#main-end'];
   const offsetVertexShader = preprocess(vertexInjection, {
     defines: {PATH_STYLE_OFFSET: 1}
   });
@@ -687,13 +690,13 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
   expect(
     dashShaders.inject,
     'dash capability has no competing vertex-end injection'
-  ).not.toHaveProperty('vs:#main-end');
+  ).not.toHaveProperty('glsl:vs:#main-end');
   expect(
     offsetShaders.inject,
     'offset capability has no competing vertex-end injection'
-  ).not.toHaveProperty('vs:#main-end');
+  ).not.toHaveProperty('glsl:vs:#main-end');
 
-  const fragmentInjection = pathStylePipelineShaders.inject['fs:#main-end'];
+  const fragmentInjection = pathStylePipelineShaders.inject['glsl:fs:#main-end'];
   const antialiasedFragmentShader = preprocess(fragmentInjection, {
     defines: {ANTIALIASING: 1, DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
   });
