@@ -877,6 +877,51 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'labels shrunk by DataFilterExtension collide at their drawn size',
+  async () => {
+    // At full size the labels overlap; at the half size they are drawn at they are apart
+    const labels = [
+      {text: 'Collision label', x: 0, priority: 1},
+      {text: 'Collision label', x: 140, priority: 0}
+    ];
+    const {data: binaryData, buffer} = createBinaryText(labels);
+    try {
+      for (const filtered of [false, true]) {
+        const props = {
+          getSize: 24,
+          extensions: filtered
+            ? [new CollisionFilterExtension(), new DataFilterExtension({filterSize: 1})]
+            : extensions,
+          // A filter value halfway into the soft range draws labels at half size
+          getFilterValue: 0.5,
+          filterRange: [0, 10],
+          filterSoftRange: [1, 10],
+          getCollisionPriority: (d, {index}) => labels[index].priority,
+          pickable: true
+        };
+        const count = filtered ? 2 : 1;
+        for (const background of [false, true]) {
+          const layer = new TextLayer({
+            id: 'filtered',
+            data: labels.map(({text, x, priority}) => ({text, priority, position: [x, 0]})),
+            background,
+            ...props
+          });
+          expect(
+            await drawLayers([layer]),
+            `filtered=${filtered}, background=${background}`
+          ).toHaveLength(count);
+        }
+        const binary = new TextLayer({id: 'filtered-binary', data: binaryData, ...props});
+        expect(await pickBinaryText(binary), `binary, filtered=${filtered}`).toHaveLength(count);
+      }
+    } finally {
+      buffer.destroy();
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'binary text collision follows updated label lengths',
   async () => {
     const buffers: {destroy: () => void}[] = [];

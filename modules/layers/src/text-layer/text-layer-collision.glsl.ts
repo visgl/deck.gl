@@ -18,13 +18,17 @@ void text_setCollisionBounds(
     offset.y *= -1.0;
     if (clipRect.z >= 0.0) offset.x = clipRect.x + corner.x * clipRect.z;
     if (clipRect.w >= 0.0) offset.y = clipRect.y + corner.y * clipRect.w;
+    // Scale the offsets like the drawn geometry, e.g. DataFilterExtension's soft range
     vec4 position;
     if (billboard) {
+      vec3 offsetPixels = vec3(offset, 0.0);
+      DECKGL_FILTER_SIZE(offsetPixels, geometry);
       position = project_position_to_clipspace(worldPosition, position64Low, vec3(0.0));
-      position.xy += project_pixel_size_to_clipspace(offset);
+      position.xy += project_pixel_size_to_clipspace(offsetPixels.xy);
     } else {
       vec3 offsetCommon = vec3(project_pixel_size(offset), 0.0);
       if (flipY) offsetCommon.y *= -1.0;
+      DECKGL_FILTER_SIZE(offsetCommon, geometry);
       position = project_position_to_clipspace(worldPosition, position64Low, offsetCommon);
     }
     collision_corners[i] = (position.xy / position.w + 1.0) / 2.0;
