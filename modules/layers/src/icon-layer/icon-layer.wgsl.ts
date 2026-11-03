@@ -81,13 +81,19 @@ fn vertexMain(inp: Attributes) -> Varyings {
   pixelOffset.y = pixelOffset.y * -1.0;
 
   if (icon.billboard != 0) {
+    let anchorCommon = project_position_vec3_f64(inp.instancePositions, inp.instancePositions64Low);
     var pos = project_position_to_clipspace(inp.instancePositions, inp.instancePositions64Low, vec3<f32>(0.0)); // TODO, &geometry.position);
+    pos = project_globe_billboard_clipspace(pos, anchorCommon);
     // DECKGL_FILTER_GL_POSITION(pos, geometry);
 
     var offset = vec3<f32>(pixelOffset, 0.0);
     // DECKGL_FILTER_SIZE(offset, geometry);
     let clipOffset = project_pixel_size_to_clipspace(offset.xy);
     pos = vec4<f32>(pos.x + clipOffset.x, pos.y + clipOffset.y, pos.z, pos.w);
+    // Hide icons whose anchor is behind the globe; culling handles non-billboard icons
+    if (project_globe_is_occluded(anchorCommon)) {
+      pos = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+    }
     outp.position = pos;
   } else {
     var offset_common = vec3<f32>(project_pixel_size_vec2(pixelOffset), 0.0);

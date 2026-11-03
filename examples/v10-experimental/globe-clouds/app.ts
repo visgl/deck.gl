@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {Deck, _GlobeView, type MapViewState} from '@deck.gl/core';
-import {SkyLayer} from '@deck.gl-community/gpu-layers';
+import {SkyLayer} from '@deck.gl/proposals/layers';
 import {DynamicTexture, loadImageBitmap} from '@luma.gl/engine';
 import {
   createSkyObserver,
@@ -13,7 +13,7 @@ import {
   getMoonLight,
   getSkyDirection,
   skyDirectionToGlobe
-} from '@math.gl/sun';
+} from '@math.gl/earth/sun';
 import {getDeckExampleProps, type DeckExampleDeviceOptions} from '../deck-example-device';
 import {EarthLayer} from './earth-layer';
 import earthImage from '../shared/showcase/globe/earth.jpg';

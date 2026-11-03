@@ -4,7 +4,11 @@
 
 import {getDistanceScales, lngLatToWorld, worldToLngLat, MAX_LATITUDE} from '@math.gl/web-mercator';
 import type {DistanceScales} from './viewport';
-import type {CRSConversion, CRSDescriptor, CRSRenderingScale} from '@math.gl/projection/core';
+import type {
+  CRSConversion,
+  CRSDescriptor,
+  CRSRenderingScale
+} from '@math.gl/geospatial/projection/core';
 
 const TILE_SIZE = 512;
 const METERS_PER_WORLD_UNIT = getDistanceScales({longitude: 0, latitude: 0}).metersPerUnit[0];
