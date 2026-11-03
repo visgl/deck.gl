@@ -109,11 +109,16 @@ let rowW = vec3<f32>(matrix[0].w, matrix[1].w, matrix[2].w);
 let depthRow = select(rowZ, rowW, dot(rowW, rowW) > 0.0);
 let projected = project_common_position_to_clipspace(geometry.position);
 let delta = (*position).xy - projected.xy;
+// Some layers also offset geometry.position. Match the drawn depth rather than
+// preserving the depth of that already-offset common position.
+let depthDelta = select(2.0 * ((*position).z - projected.z), (*position).w - projected.w,
+  dot(rowW, rowW) > 0.0);
 let determinant = dot(rowX, cross(rowY, depthRow));
 var commonPosition = geometry.position;
 if (abs(determinant) > 0.0) {
   commonPosition = vec4<f32>(commonPosition.xyz +
-    (cross(rowY, depthRow) * delta.x + cross(depthRow, rowX) * delta.y) / determinant,
+    (cross(rowY, depthRow) * delta.x + cross(depthRow, rowX) * delta.y +
+      cross(rowX, rowY) * depthDelta) / determinant,
     commonPosition.w);
 }
 clip_commonPosition = clip_getCoordinates(commonPosition);`,

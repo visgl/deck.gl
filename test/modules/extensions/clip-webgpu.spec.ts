@@ -373,6 +373,69 @@ for (const view of [new OrthographicView(), new MapView()]) {
   });
 }
 
+test('ClipExtension clips billboard circles at horizontal bounds in perspective', async ({
+  skip
+}) => {
+  if (!(await getWebGPUTestDevice())) return skip();
+  const device = await luma.createDevice({
+    type: 'webgpu',
+    adapters: [webgpuAdapter],
+    createCanvasContext: {width: 128, height: 128, useDevicePixels: false}
+  });
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const errors: Error[] = [];
+  const layer = new ScatterplotLayer({
+    id: 'billboard-circle-clip',
+    data: [{}],
+    getPosition: [0, 0],
+    getRadius: 30,
+    radiusUnits: 'pixels',
+    billboard: true,
+    pickable: true,
+    clipByInstance: false,
+    clipBounds: [-180, -80, 180, 80],
+    extensions: [new ClipExtension()]
+  });
+  const deck = new Deck({
+    device,
+    parent: container,
+    width: 128,
+    height: 128,
+    useDevicePixels: false,
+    views: new MapView(),
+    initialViewState: {longitude: 0, latitude: 0, pitch: 60, zoom: 3},
+    layers: [layer],
+    onError: error => errors.push(error)
+  });
+  try {
+    await new Promise<void>(resolve => deck.setProps({onAfterRender: () => resolve()}));
+    const viewport = deck.getViewports()[0];
+    const [x, y, depth] = viewport.project([0, 0, 0]);
+    const boundary = viewport.unproject([x, y + 10, depth]);
+    await new Promise<void>(resolve =>
+      deck.setProps({
+        layers: [layer.clone({clipBounds: [-180, boundary[1], 180, 80]})],
+        onAfterRender: () => resolve()
+      })
+    );
+    // The edge is ten pixels from the anchor: both inner samples survive,
+    // while exactly one outer sample is clipped.
+    for (const offset of [-6, 6]) {
+      expect((await deck.pickObjectAsync({x, y: y + offset}))?.index).toBe(0);
+    }
+    const outerPicks = await Promise.all(
+      [-14, 14].map(offset => deck.pickObjectAsync({x, y: y + offset}))
+    );
+    expect(outerPicks.filter(pick => pick?.object)).toHaveLength(1);
+    expect(errors).toEqual([]);
+  } finally {
+    deck.finalize();
+    container.remove();
+    device.destroy();
+  }
+});
+
 // This file is also included in the WebGL browser project.
 beforeEach(async context => {
   if (!(await getWebGPUTestDevice())) context.skip();
