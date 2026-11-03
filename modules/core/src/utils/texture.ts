@@ -47,7 +47,10 @@ export function createTexture(
     };
   }
 
-  const {width, height} = image.data;
+  // Browser objects are wrapped as `{data: browserImage}` above, so their dimensions live on
+  // `data`. The plain object form `{data: <Uint8Array>, width, height}` carries them on the object
+  // itself - reading `image.data` there yields `undefined` and an invalid `mipLevels` count.
+  const {width, height} = image.data.width === undefined ? image : image.data;
   const texture = device.createTexture({
     ...image,
     sampler: {
