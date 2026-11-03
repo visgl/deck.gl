@@ -4,7 +4,7 @@
 
 import type {ShaderLayout} from '@luma.gl/core';
 import {ShaderInputs} from '@luma.gl/engine';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {TEMPORAL_MILLISECONDS_PER_MEASURE_UNIT} from './arrow-line-data';
 
 export const PATH_SHADER_LAYOUT = {

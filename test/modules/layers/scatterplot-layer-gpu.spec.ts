@@ -5,12 +5,12 @@
 import {test, expect} from 'vitest';
 import {testLayer} from '@deck.gl/test-utils/vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import ScatterplotLayer from '@deck.gl/layers/scatterplot-layer/scatterplot-layer';
 import GPUVectorModel from '@deck.gl/core/lib/luma-upstream/gpu-vector-model';
-import {GPUConstant, GPUVector} from '@luma.gl/gpgpu/gpu-data';
+import {GPUConstant, GPUVector} from '@luma.gl/graph/gpu-data';
 
 test('GPUVectorModel rejects untyped attribute inputs', () => {
   const model = Object.create(GPUVectorModel.prototype) as GPUVectorModel;

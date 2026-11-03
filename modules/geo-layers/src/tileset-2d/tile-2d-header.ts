@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-env browser */
-import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {RequestScheduler} from '@loaders.gl/core/loader-utils';
 import {TileBoundingBox, TileIndex, TileLoadProps} from './types';
 import type {Layer} from '@deck.gl/core';
 
