@@ -3,7 +3,7 @@
 
 The `DataFilterExtension` adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
 
-Numeric and category filtering, soft ranges, and size/color transforms work on WebGL and WebGPU through luma.gl ShaderPlugins. `countItems` currently requires WebGL. Filtering composes with `BrushingExtension` and `ClipExtension`.
+Numeric and category filtering, soft ranges, and size/color transforms work on supported layers on WebGL and WebGPU through luma.gl ShaderPlugins. `countItems` currently requires WebGL. Filtering composes with `BrushingExtension` and `ClipExtension`.
 
 > Note: This extension does not work with all deck.gl layers. See "limitations" below.
 
@@ -303,8 +303,10 @@ filterRange: [rangeStart - ORIGIN_TS, rangeEnd - ORIGIN_TS]
 
 Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-layers` module, support this feature.
 
+### WebGL only:
+* `HeatmapLayer`: the WebGPU weight-accumulation pass does not invoke the filtering hooks. WebGPU heatmap filtering requires a separate integration and is not supported by this port
+
 ### Always supported:
-* `HeatMapLayer`
 * `GPUGridLayer`
 
 ### Supported only when aggregation is performed on GPU:
