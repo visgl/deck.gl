@@ -49,10 +49,14 @@ void main(void) {
     fragColor = collision_getBoundsData();
     return;
   }
+  // The collision map holds full rectangles, matching the bounds the visibility pass tests
+  bool roundCorners = !collision.sort;
+#else
+  bool roundCorners = true;
 #endif
   geometry.uv = uv;
 
-  if (textBackground.borderRadius != vec4(0.0)) {
+  if (roundCorners && textBackground.borderRadius != vec4(0.0)) {
     float distToEdge = round_rect(uv, dimensions, textBackground.borderRadius);
     float shapeAlpha = smoothedge(-distToEdge, 0.0);
     if (shapeAlpha == 0.0) {

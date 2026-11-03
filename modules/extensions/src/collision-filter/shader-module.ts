@@ -135,7 +135,7 @@ bool collision_isOccluded(ivec2 pixel, vec3 pickingColor) {
   if (color.a == 0.0 || all(lessThan(abs(color.rgb - pickingColor), vec3(0.5 / 255.0)))) {
     return false;
   }
-  // Ignore lower-priority geometry visible through rounded corners or clipping.
+  // Ignore lower-priority geometry visible through clipped areas.
   // The depth buffer is 16-bit; equal depths use the collision pass's draw order.
   float depth = texelFetch(collision_depthTexture, pixel, 0).r;
   float ownDepth = (1.0 + collision_getPriorityDepth(collision_priority)) * 0.5;

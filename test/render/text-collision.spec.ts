@@ -129,6 +129,26 @@ async function drawLayers(layers, zoom = 0) {
 }
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'equal-priority labels with rounded backgrounds keep one label',
+  async () => {
+    // The second label's left corners lie inside the first label
+    const layer = new TextLayer({
+      id: 'rounded',
+      data: [
+        {position: [0, 0], text: 'Collision label', priority: 1},
+        {position: [40, 0], text: 'Collision label', priority: 2}
+      ],
+      getSize: 24,
+      background: true,
+      backgroundBorderRadius: 12,
+      extensions,
+      pickable: true
+    });
+    expect(await drawLayers([layer])).toHaveLength(1);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'text collision distinguishes source layers',
   async () => {
     const high = new TextLayer({
@@ -810,6 +830,51 @@ async function pickBinaryText(layer: TextLayer): Promise<number[]> {
   const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
   return objects.map(({index}) => index).sort();
 }
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'binary text collision includes background padding',
+  async () => {
+    // The glyph boxes are apart; only the padded backgrounds overlap
+    const labels = [
+      {text: 'AB', x: 0},
+      {text: 'AB', x: 60}
+    ];
+    const {data: textData, buffer} = createBinaryText(labels);
+    // Binary data with background: true supplies one background vertex per label
+    const data = {
+      ...textData,
+      attributes: {
+        ...textData.attributes,
+        background: {getPosition: {value: new Float32Array([0, 0, 0, 60, 0, 0]), size: 3}}
+      }
+    };
+    try {
+      for (const backgroundPadding of [
+        [0, 0],
+        [20, 0]
+      ]) {
+        const props = {
+          getSize: 24,
+          background: true,
+          backgroundPadding,
+          extensions,
+          pickable: true
+        };
+        const binary = new TextLayer({id: 'binary-padding', data, ...props});
+        const objects = new TextLayer({
+          id: 'object-padding',
+          data: labels.map(({text, x}) => ({text, position: [x, 0]})),
+          ...props
+        });
+        const count = backgroundPadding[0] ? 1 : 2;
+        expect(await pickBinaryText(objects), `objects, ${backgroundPadding}`).toHaveLength(count);
+        expect(await pickBinaryText(binary), `binary, ${backgroundPadding}`).toHaveLength(count);
+      }
+    } finally {
+      buffer.destroy();
+    }
+  }
+);
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'binary text collision follows updated label lengths',
