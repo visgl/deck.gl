@@ -166,24 +166,22 @@ export default class GoogleMapsOverlay {
     if (this._renderingType) {
       // The overlays, and the deck that may share the vector map's context, are for the old type
       this._removeOverlay();
-      this._destroyDeckForReplacement();
+      this._destroyDeck();
+      // A layer that a destroyed deck finalized cannot be drawn by another deck, and would pass its
+      // finalized state to a new layer with the same id. The app supplies new layers with setProps
+      if (this.props.layers) {
+        this.props.layers = (flatten(this.props.layers, Boolean) as Layer[]).filter(
+          layer => !layer.internalState
+        );
+      }
     }
     this._createOverlay(map);
   }
 
-  /** Destroys the deck, and removes the layers that it drew from the props of the deck that replaces it */
-  _destroyDeckForReplacement() {
-    if (!this._deck) {
-      return;
-    }
-    destroyDeckInstance(this._deck);
-    this._deck = null;
-    // A layer that the destroyed deck finalized cannot be drawn by another deck, and would pass its
-    // finalized state to a new layer with the same id. The app supplies new layers with setProps
-    if (this.props.layers) {
-      this.props.layers = (flatten(this.props.layers, Boolean) as Layer[]).filter(
-        layer => !layer.internalState
-      );
+  _destroyDeck() {
+    if (this._deck) {
+      destroyDeckInstance(this._deck);
+      this._deck = null;
     }
   }
 
@@ -332,7 +330,7 @@ export default class GoogleMapsOverlay {
 
   _onContextLost() {
     // TODO this isn't working
-    this._destroyDeckForReplacement();
+    this._destroyDeck();
   }
 
   _onRemove() {

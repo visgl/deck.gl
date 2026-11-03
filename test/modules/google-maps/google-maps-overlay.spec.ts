@@ -270,6 +270,7 @@ for (const {interleaved, contextLost} of [
         // The vector map's context may be lost before Google reports the fallback
         vectorOverlay.onContextLost();
         expect(overlay._deck, 'Deck is destroyed with the context').toBeNull();
+        expect(overlay.props.layers, 'Layers are kept for a restored context').toEqual([layer]);
       }
       // Google reports VECTOR first, then falls back when the browser cannot run the vector map
       map.opts.renderingType = mapsApi.RenderingType.RASTER;
