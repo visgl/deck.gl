@@ -17,6 +17,7 @@ layout(std140) uniform collisionUniforms {
   highp float sizeMaxPixels;
   highp int sizeUnits;
   highp float pickingColorOffset;
+  highp float visibilityOffset;
 } collision;
 `;
 
@@ -69,7 +70,9 @@ float collision_match(vec2 tex, vec3 pickingColor) {
 }
 
 ivec2 collision_getVisibilityPixel(vec3 pickingColor) {
-  float index = dot(round(pickingColor * 255.0), vec3(1.0, 256.0, 65536.0));
+  // Labels of separate layers can share picking colors, but each has its own visibility cell.
+  float index = dot(round(pickingColor * 255.0), vec3(1.0, 256.0, 65536.0)) -
+    collision.pickingColorOffset + collision.visibilityOffset;
   float columns = collision.visibilitySize.x / 4.0;
   return ivec2(mod(index, columns), floor(index / columns)) * 4;
 }
@@ -271,6 +274,7 @@ export type CollisionModuleProps = {
   visibilityFBO?: Framebuffer;
   dummyCollisionMap?: Texture;
   pickingColorOffset?: number;
+  visibilityOffset?: number;
   sizeScale?: number;
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
@@ -284,6 +288,7 @@ type CollisionUniforms = {
   visibilityPass?: boolean;
   visibilitySize?: [number, number];
   pickingColorOffset?: number;
+  visibilityOffset?: number;
   sizeScale?: number;
   sizeMinPixels?: number;
   sizeMaxPixels?: number;
@@ -316,6 +321,7 @@ const getCollisionUniforms = (
     visibilityPass: Boolean(drawToCollisionVisibility),
     visibilitySize: visibilityFBO ? [visibilityFBO.width, visibilityFBO.height] : [1, 1],
     pickingColorOffset: opts.pickingColorOffset ?? 0,
+    visibilityOffset: opts.visibilityOffset ?? opts.pickingColorOffset ?? 0,
     sizeScale: opts.sizeScale ?? 1,
     sizeMinPixels: opts.sizeMinPixels ?? 0,
     sizeMaxPixels: opts.sizeMaxPixels ?? Number.MAX_SAFE_INTEGER,
@@ -352,7 +358,8 @@ const collisionModule = {
     sizeMinPixels: 'f32',
     sizeMaxPixels: 'f32',
     sizeUnits: 'i32',
-    pickingColorOffset: 'f32'
+    pickingColorOffset: 'f32',
+    visibilityOffset: 'f32'
   }
 } as ShaderModule<CollisionModuleProps>;
 

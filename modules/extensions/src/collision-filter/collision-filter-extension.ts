@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
+import {Accessor, Layer, LayerContext, LayerExtension, UpdateParameters} from '@deck.gl/core';
 import {collisionPlugin} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
@@ -35,6 +35,26 @@ export type CollisionFilterExtensionProps<DataT = any> = {
    */
   collisionTestProps?: {};
 };
+
+/**
+ * Binary data can set picking colors from row indexes, such as GeoJsonLayer's global feature ids,
+ * which can exceed the object count. Returns 0 if the indexes are not readable on the CPU.
+ */
+function getRowIndexCount(data: unknown): number {
+  const rowIndexes = (data as {attributes?: {rowIndexes?: unknown}} | null)?.attributes?.rowIndexes;
+  const value = ArrayBuffer.isView(rowIndexes)
+    ? rowIndexes
+    : (rowIndexes as {value?: unknown} | undefined)?.value;
+  if (!ArrayBuffer.isView(value) || value instanceof DataView) {
+    return 0;
+  }
+  const indexes = value as unknown as ArrayLike<number>;
+  let max = -1;
+  for (let i = 0; i < indexes.length; i++) {
+    max = Math.max(max, indexes[i]);
+  }
+  return max + 1;
+}
 
 /** Allows layers to hide overlapping objects. */
 export default class CollisionFilterExtension extends LayerExtension {
@@ -82,7 +102,11 @@ export default class CollisionFilterExtension extends LayerExtension {
         collisionStartIndices: {
           size: 1,
           stepMode: 'dynamic',
-          accessor: (_, {index}) => this.props.startIndices?.[index] ?? index
+          accessor: (_, {index}) => index,
+          // Replacement layers inherit this attribute, so read the current layer's start indices
+          transform(this: Layer, index: number) {
+            return this.props.startIndices?.[index] ?? index;
+          }
         },
         instanceCollisionRects: {
           size: 4,
@@ -98,6 +122,15 @@ export default class CollisionFilterExtension extends LayerExtension {
         accessor: 'getCollisionPriority'
       }
     });
+  }
+
+  updateState(
+    this: Layer<CollisionFilterExtensionProps>,
+    {props, changeFlags}: UpdateParameters<Layer<CollisionFilterExtensionProps>>
+  ) {
+    if (changeFlags.dataChanged) {
+      this.setState({collisionRowCount: getRowIndexCount(props.data)});
+    }
   }
 
   getNeedsPickingBuffer(this: Layer<CollisionFilterExtensionProps>): boolean {

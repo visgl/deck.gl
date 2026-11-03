@@ -5,7 +5,7 @@
 import {test, expect, vi} from 'vitest';
 import {MapView, LayerManager} from 'deck.gl';
 
-import {SolidPolygonLayer} from '@deck.gl/layers';
+import {ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {CollisionFilterExtension} from '@deck.gl/extensions';
 import MaskEffect from '@deck.gl/extensions/mask/mask-effect';
 import CollisionFilterEffect from '@deck.gl/extensions/collision-filter/collision-filter-effect';
@@ -155,6 +155,64 @@ test('CollisionFilterEffect#object count', () => {
     expect(layer.getNumInstances()).toBeGreaterThan(3);
     collisionFilterEffect._groupByCollisionGroup(device, [layer]);
     expect(collisionFilterEffect.channels[TEST_LAYER.props.collisionGroup].objectCount).toBe(3);
+  } finally {
+    collisionFilterEffect.cleanup();
+    layerManager.finalize();
+  }
+});
+
+test('CollisionFilterEffect#binary row indexes', () => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  const layerManager = new LayerManager(device, {viewport: testViewport});
+  // Binary GeoJSON encodes picking colors from global feature ids, which can exceed the count
+  layerManager.setLayers([
+    new ScatterplotLayer({
+      id: 'binary-points',
+      data: {
+        length: 2,
+        attributes: {
+          getPosition: {value: new Float32Array([0, 0, 0, 1, 1, 1]), size: 3},
+          rowIndexes: {value: new Uint32Array([5, 9]), size: 1}
+        }
+      },
+      extensions: [new CollisionFilterExtension()],
+      collisionGroup: 'COLLISION_GROUP'
+    })
+  ]);
+  layerManager.updateLayers();
+
+  try {
+    collisionFilterEffect._groupByCollisionGroup(device, layerManager.getLayers());
+    expect(collisionFilterEffect.channels['COLLISION_GROUP'].objectCount).toBe(10);
+  } finally {
+    collisionFilterEffect.cleanup();
+    layerManager.finalize();
+  }
+});
+
+test('CollisionFilterEffect#redraws when object counts change', () => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  collisionFilterEffect.setup({device});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
+  layerManager.setLayers([TEST_LAYER]);
+  layerManager.updateLayers();
+  const [layer] = layerManager.getLayers();
+  const preRender = () =>
+    collisionFilterEffect.preRender({
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      ...PRERENDEROPTIONS
+    });
+  const renderSpy = vi.spyOn(collisionFilterEffect.collisionFilterPass, 'renderCollisionMap');
+
+  try {
+    preRender();
+    preRender();
+    expect(renderSpy, 'unchanged inputs are not redrawn').toHaveBeenCalledOnce();
+    // Picking colors, and the visibility map size, depend on the object count
+    vi.spyOn(layer, 'getStartIndices').mockReturnValue([0, 1, 2, 3, 4, 5]);
+    preRender();
+    expect(renderSpy).toHaveBeenCalledTimes(2);
   } finally {
     collisionFilterEffect.cleanup();
     layerManager.finalize();

@@ -25,8 +25,13 @@ type RenderInfo = {
   allLayersLoaded: boolean;
   /** Picking color offset of each layer, by layer id */
   pickingColorOffsets: Record<string, number>;
+  /** Visibility cell offset of each text layer, by layer id */
+  visibilityOffsets: Record<string, number>;
   hasText: boolean;
+  /** Number of picking colors */
   objectCount: number;
+  /** Number of visibility cells, which also covers the picking colors */
+  visibilityCount: number;
 };
 
 // A sublayer renders the rows of its parent, or of the highest ancestor with the same data
@@ -42,12 +47,20 @@ function getRowOwner(layer: Layer): Layer {
   return owner;
 }
 
+type CollisionSources = {
+  /** Source of each layer's picking colors, by layer id */
+  sourceIds: Record<string, string>;
+  /** Label owner of each glyph and background layer, by layer id */
+  labelIds: Record<string, string>;
+};
+
 /**
- * Map each layer id to the id of the source whose rows it renders. Layers of one source share
- * picking colors, so that an object does not collide with itself.
+ * Find the source whose rows each layer renders. Layers of one source share picking colors,
+ * so that an object does not collide with itself.
  */
-function getCollisionSourceIds(layers: Layer[]): Record<string, string> {
+function getCollisionSources(layers: Layer[]): CollisionSources {
   const sourceIds: Record<string, string> = {};
+  const labelIds: Record<string, string> = {};
   // Top-level layers that render the same data object share their rows, e.g. icons and their labels
   const dataSourceIds = new Map<unknown, string>();
   const getSourceId = (owner: Layer): string => {
@@ -62,34 +75,37 @@ function getCollisionSourceIds(layers: Layer[]): Record<string, string> {
   };
 
   // Glyphs and backgrounds render their TextLayer's rows, which are usually also the rows of the
-  // TextLayer's source (e.g. a GeoJsonLayer's circles and labels). A source with several
-  // TextLayers, such as a TileLayer, renders different rows in each, so they stay separate.
-  const textLayersBySource: Record<string, Set<string>> = {};
+  // TextLayer's source (e.g. a GeoJsonLayer's circles and labels). A source that renders different
+  // data in each of its TextLayers, such as a TileLayer, renders different rows in each.
+  const textDataBySource: Record<string, Set<unknown>> = {};
   const textSourceIds: Record<string, string> = {};
   for (const layer of layers) {
     const owner = getRowOwner(layer);
     if (isTextCollisionLayer(layer)) {
       const sourceId = getSourceId(getRowOwner(owner));
-      (textLayersBySource[sourceId] ||= new Set()).add(owner.id);
+      (textDataBySource[sourceId] ||= new Set()).add(owner.props.data);
       textSourceIds[layer.id] = sourceId;
       sourceIds[layer.id] = owner.id;
+      labelIds[layer.id] = owner.id;
     } else {
       sourceIds[layer.id] = getSourceId(owner);
     }
   }
   for (const layerId in textSourceIds) {
     const sourceId = textSourceIds[layerId];
-    if (textLayersBySource[sourceId].size === 1) {
+    if (textDataBySource[sourceId].size === 1) {
       sourceIds[layerId] = sourceId;
     }
   }
-  return sourceIds;
+  return {sourceIds, labelIds};
 }
 
 // Picking colors are per object. A path, polygon or label spans several instances.
 function getObjectCount(layer: Layer): number {
   const startIndices = layer.getStartIndices();
-  return startIndices ? startIndices.length - 1 : layer.getNumInstances();
+  const count = startIndices ? startIndices.length - 1 : layer.getNumInstances();
+  // Set by CollisionFilterExtension when binary row indexes encode the picking colors
+  return Math.max(count, (layer.state?.collisionRowCount as number | undefined) ?? 0);
 }
 
 // Character and background sublayers expose the bounds used by text collision shaders.
@@ -218,6 +234,10 @@ export default class CollisionFilterEffect implements Effect {
       renderInfo.layerBounds.some((b, i) => !equals(b, oldRenderInfo.layerBounds[i])) ||
       // If a sublayer's isLoaded state has been updated
       renderInfo.allLayersLoaded !== oldRenderInfo.allLayersLoaded ||
+      // If picking colors have moved, or the visibility map was resized (which clears it)
+      renderInfo.visibilityCount !== oldRenderInfo.visibilityCount ||
+      !deepEqual(oldRenderInfo.pickingColorOffsets, renderInfo.pickingColorOffsets, 1) ||
+      !deepEqual(oldRenderInfo.visibilityOffsets, renderInfo.visibilityOffsets, 1) ||
       // Some prop is in transition
       renderInfo.layers.some(layer => layer.props.transitions);
 
@@ -286,9 +306,10 @@ export default class CollisionFilterEffect implements Effect {
     collisionLayers: Layer<CollisionFilterExtensionProps>[]
   ): Record<string, RenderInfo> {
     const channelMap = {};
-    const sourceIds = getCollisionSourceIds(collisionLayers);
-    // Object count of each source, by collision group
+    const {sourceIds, labelIds} = getCollisionSources(collisionLayers);
+    // Object count of each source and label owner, by collision group
     const sourceObjectCounts: Record<string, Record<string, number>> = {};
+    const labelObjectCounts: Record<string, Record<string, number>> = {};
     for (const layer of collisionLayers) {
       const collisionGroup = layer.props.collisionGroup!;
       let channelInfo = channelMap[collisionGroup];
@@ -299,17 +320,26 @@ export default class CollisionFilterEffect implements Effect {
           layerBounds: [],
           allLayersLoaded: true,
           pickingColorOffsets: {},
+          visibilityOffsets: {},
           hasText: false,
-          objectCount: 0
+          objectCount: 0,
+          visibilityCount: 0
         };
         channelMap[collisionGroup] = channelInfo;
         sourceObjectCounts[collisionGroup] = {};
+        labelObjectCounts[collisionGroup] = {};
       }
       const isTextLayer = isTextCollisionLayer(layer);
       channelInfo.hasText ||= isTextLayer;
       const counts = sourceObjectCounts[collisionGroup];
       const sourceId = sourceIds[layer.id];
-      counts[sourceId] = Math.max(counts[sourceId] || 0, getObjectCount(layer));
+      const objectCount = getObjectCount(layer);
+      counts[sourceId] = Math.max(counts[sourceId] || 0, objectCount);
+      const labelId = labelIds[layer.id];
+      if (labelId) {
+        const labelCounts = labelObjectCounts[collisionGroup];
+        labelCounts[labelId] = Math.max(labelCounts[labelId] || 0, objectCount);
+      }
       channelInfo.layers.push(layer);
       channelInfo.layerBounds.push(layer.getBounds());
       if (!layer.isLoaded) {
@@ -328,10 +358,31 @@ export default class CollisionFilterEffect implements Effect {
         offset += count;
       }
       const renderInfo: RenderInfo = channelMap[collisionGroup];
-      for (const layer of renderInfo.layers) {
-        renderInfo.pickingColorOffsets[layer.id] = sourceOffsets[sourceIds[layer.id]];
-      }
       renderInfo.objectCount = offset;
+      // Each label needs its own visibility cell. The first label owner of a source uses the
+      // source's picking colors; other owners sharing them, such as a second TextLayer with the
+      // same data, get cells after the picking colors.
+      const labelOffsets: Record<string, number> = {};
+      const sourcesWithLabels = new Set<string>();
+      for (const layer of renderInfo.layers) {
+        const sourceId = sourceIds[layer.id];
+        renderInfo.pickingColorOffsets[layer.id] = sourceOffsets[sourceId];
+        const labelId = labelIds[layer.id];
+        if (!labelId) {
+          continue;
+        }
+        if (!(labelId in labelOffsets)) {
+          if (sourcesWithLabels.has(sourceId)) {
+            labelOffsets[labelId] = offset;
+            offset += labelObjectCounts[collisionGroup][labelId];
+          } else {
+            sourcesWithLabels.add(sourceId);
+            labelOffsets[labelId] = sourceOffsets[sourceId];
+          }
+        }
+        renderInfo.visibilityOffsets[layer.id] = labelOffsets[labelId];
+      }
+      renderInfo.visibilityCount = offset;
       // Each object uses a 4x4 visibility cell, including the reserved zero ID.
       const maxVisibilityColumns = Math.floor(device.limits.maxTextureDimension2D / 4);
       const maxObjectCount = channelMap[collisionGroup].hasText
@@ -393,11 +444,13 @@ export default class CollisionFilterEffect implements Effect {
     const collisionFBO = collisionFBOs[collisionGroup!];
     const enabled = collisionEnabled && Boolean(collisionFBO);
     const isTextLayer = isTextCollisionLayer(layer);
+    const channel = this.channels[collisionGroup!];
     return {
       collision: {
         enabled,
         isTextLayer,
-        pickingColorOffset: this.channels[collisionGroup!]?.pickingColorOffsets[layer.id] || 0,
+        pickingColorOffset: channel?.pickingColorOffsets[layer.id] || 0,
+        visibilityOffset: channel?.visibilityOffsets[layer.id] || 0,
         collisionFBO,
         visibilityFBO: isTextLayer ? this.visibilityFBOs[collisionGroup!] : undefined,
         dummyCollisionMap: dummyCollisionMap!,

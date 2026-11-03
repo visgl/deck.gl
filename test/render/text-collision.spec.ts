@@ -729,3 +729,145 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     }
   }
 );
+
+// Binary text with one GPU position per glyph
+function createBinaryText(labels: {text: string; x: number}[]) {
+  const startIndices = [0];
+  const positions: number[] = [];
+  labels.forEach(({text, x}, index) => {
+    startIndices.push(startIndices[index] + text.length);
+    for (const char of text) positions.push(x, 0, 0);
+  });
+  const buffer = device.createBuffer({data: new Float32Array(positions)});
+  const data = {
+    length: labels.length,
+    startIndices,
+    attributes: {
+      getText: new Uint8Array(
+        Array.from(labels.map(({text}) => text).join('')).map(char => char.charCodeAt(0))
+      ),
+      getPosition: {buffer, type: 'float32', size: 3, stride: 12}
+    }
+  };
+  return {data, buffer};
+}
+
+async function pickBinaryText(layer: TextLayer): Promise<number[]> {
+  await new Promise<void>((resolve, reject) => {
+    deck.setProps({
+      layers: [layer],
+      viewState: {target: [0, 0, 0], zoom: 0},
+      onError: reject,
+      onAfterRender: () => {
+        if (layer.isLoaded) resolve();
+      }
+    });
+  });
+  const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+  return objects.map(({index}) => index).sort();
+}
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'binary text collision follows updated label lengths',
+  async () => {
+    const buffers: {destroy: () => void}[] = [];
+    const createLayer = (firstText: string) => {
+      const {data, buffer} = createBinaryText([
+        {text: firstText, x: -250},
+        {text: 'Second label', x: 0},
+        {text: 'Third', x: 250}
+      ]);
+      buffers.push(buffer);
+      return new TextLayer({
+        id: 'binary-collision-update',
+        data,
+        extensions,
+        pickable: true,
+        getSize: 24,
+        getTextAnchor: 'start'
+      });
+    };
+    try {
+      expect(await pickBinaryText(createLayer('First'))).toEqual([0, 1, 2]);
+      // Glyphs of later labels move to new instance indices
+      expect(await pickBinaryText(createLayer('First, now longer'))).toEqual([0, 1, 2]);
+    } finally {
+      deck.setProps({layers: []});
+      await new Promise(requestAnimationFrame);
+      buffers.forEach(buffer => buffer.destroy());
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'binary text stays visible when its first glyph is clipped',
+  async () => {
+    const {data, buffer} = createBinaryText([{text: 'Clipped label', x: 0}]);
+    const layer = new TextLayer({
+      id: 'binary-collision-clipped',
+      data,
+      extensions,
+      pickable: true,
+      getSize: 24,
+      getTextAnchor: 'start',
+      // Clip the first glyph only
+      getContentBox: [30, -50, 1000, 100]
+    });
+    try {
+      expect(await pickBinaryText(layer)).toEqual([0]);
+    } finally {
+      deck.setProps({layers: []});
+      await new Promise(requestAnimationFrame);
+      buffer.destroy();
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text layers with the same data share rows but test labels separately',
+  async () => {
+    const rows = [
+      {position: [-200, 0], text: 'Collision label', priority: 10},
+      {position: [50, 0], text: 'Collision label', priority: 20}
+    ];
+    const createLayers = (pixelOffset: [number, number]) => [
+      new TextLayer({
+        id: 'same-data-a',
+        data: rows,
+        getSize: 24,
+        getCollisionPriority: d => d.priority,
+        extensions,
+        pickable: true
+      }),
+      new TextLayer({
+        id: 'same-data-b',
+        data: rows,
+        getSize: 24,
+        getPixelOffset: pixelOffset,
+        getCollisionPriority: d => d.priority,
+        extensions,
+        pickable: true
+      })
+    ];
+    const pickPriorities = async (layerId: string) => {
+      const objects = await deck.pickObjectsAsync({
+        x: 0,
+        y: 0,
+        width: 800,
+        height: 450,
+        layerIds: [layerId]
+      });
+      return objects.map(({object}) => object.priority).sort((a, b) => a - b);
+    };
+
+    // Labels of the same row overlap, and do not hide each other
+    await drawLayers(createLayers([0, 10]));
+    expect(await pickPriorities('same-data-a')).toEqual([10, 20]);
+    expect(await pickPriorities('same-data-b')).toEqual([10, 20]);
+
+    // The second layer's first label overlaps the first layer's higher-priority second label
+    await drawLayers(createLayers([250, 0]));
+    expect(await pickPriorities('same-data-a')).toEqual([10, 20]);
+    expect(await pickPriorities('same-data-b')).toEqual([20]);
+  }
+);

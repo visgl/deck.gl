@@ -135,6 +135,11 @@ void main(void) {
   }
   pixelOffset += scrollPixels;
   gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
+#ifdef MODULE_COLLISION
+  // The visibility pass tests the whole label, so it ignores the clipping of single glyphs below.
+  // Preserve culling by the projection and other vertex extensions.
+  bool collision_culled = gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w;
+#endif
 
   if (instanceClipRect.z >= 0.) {
     if (pixelOffset.x < xy.x || pixelOffset.x > xy.x + wh.x) {
@@ -179,8 +184,7 @@ void main(void) {
   vColorMode = instanceColorModes;
 #ifdef MODULE_COLLISION
   if (collision.visibilityPass) {
-    // Preserve culling by the projection and other vertex extensions.
-    if (gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w) return;
+    if (collision_culled) return;
     gl_Position = collision_getVisibilityPosition(positions / 2.0 + 0.5);
   }
 #endif
