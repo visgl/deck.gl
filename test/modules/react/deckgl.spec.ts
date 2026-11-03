@@ -858,7 +858,10 @@ test('DeckGL#stacks react-map-gl Map children around the canvas', async () => {
   expect(elementAt('test-control')?.id, 'map control is over the canvas').toBe('test-control');
   expect(elementAt('test-overlay')?.id, 'other child is over the canvas').toBe('test-overlay');
 
+  const ownedDevice = ref.current?.deck?.device;
   act(() => root.unmount());
+  ownedDevice?.loseDevice();
+  ownedDevice?.destroy();
   container.remove();
 });
 
@@ -900,6 +903,7 @@ test('DeckGL#shared device canvas stays above a react-map-gl Map', async () => {
   ).toBeTruthy();
 
   act(() => root.unmount());
-  container.remove();
+  device.loseDevice();
   device.destroy();
+  container.remove();
 });
