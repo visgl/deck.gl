@@ -5,8 +5,8 @@
 import {create} from 'zustand';
 
 import {luma, Device} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
-import {webgpuAdapter} from '@luma.gl/webgpu';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {createDeviceStoreState} from './device-store-state';
 
 // A backend's canvas and GPU resources belong to its Device. Reuse the same pending/resolved

@@ -6,7 +6,7 @@ import {expect, test} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {A5Layer} from '@deck.gl/geo-layers';
 import {PathLayer, PolygonLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 const A5_CELLS = [7176167147842830336n, 7176180341982363648n, 7175991225982386176n];
 

@@ -12,8 +12,8 @@ import {
   _GlobeViewport as GlobeViewport
 } from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
-import {projectionEngine} from '@math.gl/projection';
-import type {CRSDescriptor} from '@math.gl/projection/core';
+import {projectionEngine} from '@math.gl/geospatial/projection';
+import type {CRSDescriptor} from '@math.gl/geospatial/projection/core';
 import {Matrix4} from '@math.gl/core';
 import {addMetersToLngLat} from '@math.gl/web-mercator';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';

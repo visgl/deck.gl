@@ -18,7 +18,7 @@ import {bufferLayoutEqual} from './gl-utils';
 import {normalizeTransitionSettings, TransitionSettings} from './transition-settings';
 import {Buffer, getTypedArrayFromDataType} from '@luma.gl/core';
 import type {Device, BufferLayout} from '@luma.gl/core';
-import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/gpgpu/gpu-data';
+import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
 import type {NumericArray, TypedArray} from '../../types/types';
 

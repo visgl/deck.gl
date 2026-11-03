@@ -47,7 +47,8 @@ fn paraboloid(
 
 fn getExtrusionOffset(lineClipspace: vec2<f32>, side: f32, width: f32) -> vec2<f32> {
   var direction = normalize(lineClipspace * project.viewportSize);
-  direction = vec2<f32>(-direction.y, direction.x);
+  // Rotate by 90° clockwise so the strip (-1 side first) winds counter-clockwise
+  direction = vec2<f32>(direction.y, -direction.x);
   return direction * side * width / 2.0;
 }
 
