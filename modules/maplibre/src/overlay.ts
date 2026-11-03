@@ -243,6 +243,9 @@ export default class MapLibreOverlay implements IControl {
     map.off('click', this._handleMouseEvent);
     map.off('dblclick', this._handleMouseEvent);
     this._deck?.finalize();
+    // MapLibre leaves removing the element to the control. A canvas that Deck does not own, such
+    // as the `device` prop's, would otherwise stay in this container and stop resizing with the map.
+    this._container?.remove();
   }
 
   private _onRemoveInterleaved(map: MapLibreMap): void {

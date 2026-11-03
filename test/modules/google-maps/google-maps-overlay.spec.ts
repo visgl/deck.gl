@@ -214,6 +214,21 @@ for (const positioningFirst of [true, false]) {
       await expect.poll(() => deck.isInitialized).toBe(true);
       expect(deck.getCanvas(), 'Deck uses the supplied context canvas').toBe(gl.canvas);
       expect(deck.props._customRender, 'Map owns redraws').toBeTypeOf('function');
+      expect(map.getDiv().querySelector('canvas'), 'Deck does not add its own canvas').toBeNull();
+
+      overlay._overlay.onDraw({gl, transformer: map.transformer});
+      const {width, height} = gl.canvas;
+      for (let i = 0; i < 3; i++) {
+        overlay._overlay.onDraw({gl, transformer: map.transformer});
+      }
+      expect(
+        [gl.canvas.width, gl.canvas.height],
+        'Repeated draws do not grow the shared canvas'
+      ).toEqual([width, height]);
+      expect(
+        deck.device.getDefaultCanvasContext().getDrawingBufferSize(),
+        'Drawing buffer matches the shared canvas'
+      ).toEqual([width, height]);
     } finally {
       finalizeOverlay(overlay);
       addOverlaySpy.mockRestore();
@@ -247,6 +262,10 @@ test('GoogleMapsOverlay#non-interleaved context', async () => {
     await expect.poll(() => deck.isInitialized).toBe(true);
     expect(deck.getCanvas(), 'Deck keeps its own canvas').not.toBe(gl.canvas);
     expect(deck.getCanvas().parentElement.parentElement.id).toBe('deck-gl-google-maps-container');
+    expect(
+      map.getDiv().querySelectorAll('#deck-gl-google-maps-container canvas'),
+      'Exactly one Deck canvas is positioned'
+    ).toHaveLength(1);
   } finally {
     finalizeOverlay(overlay);
     addOverlaySpy.mockRestore();

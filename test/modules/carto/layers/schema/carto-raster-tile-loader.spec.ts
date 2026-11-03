@@ -4,7 +4,7 @@
 
 import {test, expect} from 'vitest';
 import CartoRasterTileLoader from '@deck.gl/carto/layers/schema/carto-raster-tile-loader';
-import type {LoaderWithParser} from '@loaders.gl/loader-utils';
+import type {LoaderWithParser} from '@loaders.gl/core/loader-utils';
 import {BAND, COMPRESSED_BAND, TEST_DATA} from './carto-raster-tile.spec';
 
 test('CartoRasterTileLoader', () => {

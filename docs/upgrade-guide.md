@@ -6,6 +6,59 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### luma.gl v10 alpha.8
+
+The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
+`@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
+`@luma.gl/core/webgpu`. WebGL constants and debugging tools move to
+`@luma.gl/core/webgl-constants` and `@luma.gl/core/webgl-debug`.
+
+Import `postProcessGLTF` from `@luma.gl/engine/gltf`; the legacy loaders.gl postprocessor
+dependency is no longer needed.
+
+`@luma.gl/shadertools` becomes `@luma.gl/shaders`. The glTF, effects, text, splats, and
+Arrow rendering integrations move to the corresponding `@luma.gl/engine` subpaths.
+`@luma.gl/gpgpu` is consolidated into `@luma.gl/graph`: use `/gpu-data` for
+typed GPU columns and `/gpu-simple-graph` for the legacy evaluator operations.
+WebGPU evaluator operations use `/gpu-simple-graph/webgpu`.
+Arrow conversion helpers move to `@luma.gl/graph/arrow`. Test utilities move to
+`@luma.gl/core/test-utils`. The Arrow integration is now published,
+so website builds no longer require a pinned luma.gl source checkout.
+
+`ShaderAssembler.getDefaultShaderAssembler()` is removed. Import `getShaderAssembler`
+from `@deck.gl/core` and call `getShaderAssembler('glsl')` or `getShaderAssembler('wgsl')`
+to register shared modules and hooks. Deck installs its GLSL assembler as the default
+for luma models, preserving custom WebGL layers that construct models directly.
+For language-specific custom models, spread `this.getShaders(...)` into model options
+or pass `shaderAssembler: this.context.shaderAssembler`. Without deck's assembler,
+shader modules can throw `Unknown shader hook vs:DECKGL_FILTER_GL_POSITION`.
+
+`Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
+of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
+
+### loaders.gl and math.gl v5 beta
+
+Update direct loaders.gl and math.gl dependencies to `5.0.0-beta.4`. Several packages are consolidated; update imports and declare the containing package as a dependency:
+
+| Previous import | Replacement import |
+| --- | --- |
+| `@loaders.gl/loader-utils`, `@loaders.gl/schema`, `@loaders.gl/polyfills` | Corresponding subpaths of `@loaders.gl/core` |
+| `@loaders.gl/csv`, `@loaders.gl/json` | `@loaders.gl/tables/csv`, `@loaders.gl/tables/json` |
+| `@loaders.gl/gltf`, `@loaders.gl/obj` | `@loaders.gl/scene/gltf`, `@loaders.gl/scene/obj` |
+| `@loaders.gl/las`, `@loaders.gl/ply` | Corresponding subpaths of `@loaders.gl/pointclouds` |
+| `@loaders.gl/mvt` | `@loaders.gl/tiles/mvt` |
+| `@loaders.gl/tiles` (3D tiles types and sources) | `@loaders.gl/tiles-3d` |
+| `@loaders.gl/3d-tiles`, `@loaders.gl/i3s` | Corresponding subpaths of `@loaders.gl/tiles-3d` |
+| `@loaders.gl/terrain`, `@loaders.gl/wms` | `@loaders.gl/raster/terrain/index`, `@loaders.gl/ogc/wms` |
+| `@math.gl/types` | `@math.gl/core` |
+| `@math.gl/polygon`, `@math.gl/culling` | `@math.gl/geometry`, `@math.gl/geometry/culling` |
+| `@math.gl/projection` | `@math.gl/geospatial/projection` |
+| `@math.gl/sun` | `@math.gl/earth/sun` |
+
+Import vector and matrix namespaces such as `vec3` and `mat4` from `@math.gl/core`; their old subpaths are removed. Replace `WINDING.CLOCKWISE` and `WINDING.COUNTER_CLOCKWISE` with `'clockwise'` and `'counter-clockwise'`.
+
+The `@loaders.gl/gis` helpers move to `@loaders.gl/core/geoarrow`: use `convertGeojsonToBinaryFeatureCollection` and `convertBinaryFeatureCollectionToGeojson` instead of `geojsonToBinary` and `binaryToGeojson`.
+
 ### Viewport
 
 #### CRS configuration
@@ -33,15 +86,59 @@ To retain an old degree step `d`, set `resolution: 360 / d`; for example, the fo
 
 `GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
 
-### Coordinate and projection constants
+### Layer
+
+#### Coordinate and projection constants
 
 Layer coordinate systems now use CRS strings, allowing applications to declare their data's CRS directly. Pass strings such as `'lnglat'`, `'cartesian'`, or `'meter-offsets'` to `coordinateSystem`; `COORDINATE_SYSTEM` and `_PROJECTION_MODE` are no longer exported.
 
 The `project` shader uniform `coordinateSystem` is renamed to `coordinateFrame` to distinguish packed attribute coordinates from the layer's source CRS. Shader coordinate-frame and projection-mode enums are internal to the module; meter and degree offsets select their own projection modes.
 
-### Layer coordinate origins
+#### Coordinate origins
 
 Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin` after `modelMatrix` and before projection, making the transform order consistent across source CRSs. If a nonzero origin was previously supplied but ignored, set it to `[0, 0, 0]` to preserve the rendered positions. Offset modes retain their geographic-anchor convention.
+
+#### A5Layer
+
+`A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
+
+#### projectPosition
+
+[`layer.projectPosition`](./api-reference/core/layer.md#projectposition) now uses simplified parameters when the input position is not in the layer's own CRS. Calls that use the layer's own CRS can continue to call `layer.projectPosition(position)`.
+
+| v9.4 parameter | v9.4 definition | v10 parameter | v10 definition / behavior |
+| --- | --- | --- | --- |
+| `coordinateSystem` | Overrides target common-space anchor. | (removed) | Matches input CRS. |
+| `fromCoordinateSystem` | Describes how to interpret the supplied position. Defaults to the layer's `coordinateSystem` prop. | `coordinateSystem` | Describes how to interpret the supplied position. Defaults to the layer's `coordinateSystem` prop. |
+|  | | `sourceCrs` | CRS descriptor for `coordinateSystem`. Defaults to the layer's resolved CRS. |
+| `coordinateOrigin` | Overrides target common-space anchor | (removed) | Matches input CRS origin |
+| `fromCoordinateOrigin` | Origin added to the supplied position before projection. Defaults to the layer's `coordinateOrigin` prop. | `coordinateOrigin` | Origin added to the supplied position before projection. Defaults to the layer's `coordinateOrigin` prop. |
+
+```ts
+const layer = new GeoJsonLayer({
+  id: 'mvt-2-1-0',
+  coordinateSystem: 'OSMTile512',
+  coordinateOrigin: [128, 0, 0],
+  modelMatrix: new Matrix4().scale([128, 128, 1]),
+});
+
+// Before
+const commonPosition1 = layer.projectPosition(mvtLocalPoint);
+const commonPosition2 = layer.projectPosition(lnglat, {
+  fromCoordinateSystem: 'lnglat',
+  fromCoordinateOrigin: [0, 0, 0],
+  modelMatrix: null
+});
+
+// After
+const commonPosition1 = layer.projectPosition(mvtLocalPoint);
+const sourceCrs = await projectionEngine.getCRS('EPSG:4326');
+const commonPosition2 = layer.projectPosition(lnglat, {
+  sourceCrs,
+  coordinateOrigin: [0, 0, 0],
+  modelMatrix: null
+});
+```
 
 ## Upgrading to v9.4
 
@@ -111,6 +208,10 @@ new PathStyleExtension({dashMode: 'path'});
 ```
 
 See [Choosing a dash mode](./api-reference/extensions/path-style-extension.md#choosing-a-dash-mode) for when to use `'path'` or `'segment'`.
+
+### TerrainLayer and MVTLayer heights
+
+Starting in v9.4.1, `TerrainLayer`, extruded `MVTLayer` features and other layers using the `'cartesian'` coordinate system in a `MapView` look taller below zoom 12, by about 1.4x at 46° latitude and 2x at 60°. They were previously drawn too flat, and their height jumped when zooming past 12. If you raised `elevationScale` to make up for it, lower it again.
 
 ## Upgrading to v9.3
 
@@ -264,7 +365,7 @@ The [ShaderModule](https://luma.gl/docs/api-reference/shadertools/shader-module)
 See [layerUniforms](https://github.com/visgl/deck.gl/blob/master/modules/core/src/shaderlib/misc/layer-uniforms.ts) for an example.
 
 Layers need to be modified:
-- `getShaders()` needs to additionaly return the `ShaderModule` that defines the UBO
+- `getShaders()` needs to additionally return the `ShaderModule` that defines the UBO
 - Instead of calling `model.setUniforms` (or `model.setBindings`) use `model.shaderInputs.setProps` to update the UBO with props
 
 For more information see [presentation](https://docs.google.com/presentation/d/1OcjA_hdu6vEvL_nxm7ywnXZQbMr5eR4R_L-wcz6K0HI/) ([recording](https://www.youtube.com/watch?v=ei6scnRpNhU))
@@ -592,7 +693,7 @@ Note that this flag may be removed in a future release.
   }
   ```
 
-  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supportd. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
+  This change is intended to make this callback easier to use for the most common use cases. Using this callback to filter out specific nested sub layers is no longer supported. Instead, you need to either set the [_subLayerProps](./api-reference/core/composite-layer.md#_sublayerprops) prop (stock layer) or implement the [filterSubLayer](./api-reference/core/composite-layer.md#filtersublayer) method (custom layer).
 
 - If a composite layer has `visible: false`, all of the layers generated by it will also be hidden regardless of their own `visible` prop. In previous versions, a descendant layer may be visible as long as it has `visible: true`, which often led to confusing behavior if a composite layer does not propagate its props correctly.
 

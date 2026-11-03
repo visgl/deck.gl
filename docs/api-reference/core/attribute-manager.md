@@ -157,7 +157,21 @@ Parameters:
   + `isInstanced` (boolean) - used to resolve `stepMode: 'dynamic'`
 
 
+#### `getGPUVectors` {#getgpuvectors}
+
+Returns a map of shader attribute names to luma.gl `GPUVector` or `GPUConstant` objects. Active transition attributes replace their source attributes in the result. Pass an attribute map, such as `getChangedAttributes()`, to retrieve a subset.
+
+GPU constants preserve raw values and formats; normalized colors are normalized when bound to shaders. See [Attribute.getGPUVector](./attribute.md#getgpuvector).
+
+```typescript
+const columns = attributeManager.getGPUVectors();
+```
+
 ## Remarks
+
+GPU vectors borrow the manager's existing buffers without copying them. Reacquire the map after updates that may replace storage, and do not retain it beyond the manager's lifetime.
+
+Supplying GPU vectors through `data.attributes` is not supported by this initial integration.
 
 ### Attribute Type
 

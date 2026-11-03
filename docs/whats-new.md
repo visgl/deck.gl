@@ -10,7 +10,7 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 ### Custom projections (Experimental)
 
-[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
+[`_CustomProjectionView`](./api-reference/core/custom-projection-view.md), [`_CustomProjectionViewport`](./api-reference/core/custom-projection-viewport.md) and [`_CustomProjectionController`](./api-reference/core/custom-projection-controller.md) support planar maps using target CRS descriptors resolved by `@math.gl/geospatial/projection`. Input coordinates use WGS84; target axis units, normalization, bounds and ground distance scales come from the descriptor. Layer support includes scatterplots, lines and arcs, paths, polygons and GeoJSON, icons and text, columns and grid cells, point clouds, instanced meshes, and aggregation layers (contours, grids, hexagons, heatmaps, and screen grids). See the view documentation for coordinate conventions and limitations, including restrictions on tiled layers, bitmaps and great-circle arcs.
 
 ### Layer source CRS (Experimental)
 
@@ -63,6 +63,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 - [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes render the same in `GlobeView` as in `MapView`.
 - [`BrushingExtension`](./api-reference/extensions/brushing-extension.md) works in `GlobeView`, comparing `brushingRadius` against the 3D distance between the pointer and each object.
 - [`BrushingExtension`](./api-reference/extensions/brushing-extension.md#brushingradius) measures `brushingRadius` in meters on `MapView` at every zoom level; below zoom 12 it was previously shrunk by cos(latitude).
+- [`ClipExtension`](./api-reference/extensions/clip-extension.md) clips by geometry on `GlobeView`, and `clipBounds` may cross the antimeridian, e.g. `[170, -20, -170, 20]`.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**

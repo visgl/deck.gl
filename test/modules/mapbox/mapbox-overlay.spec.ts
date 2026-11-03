@@ -64,6 +64,20 @@ test('MapboxOverlay#overlaid passes pixelSizeSource css-dpr', () => {
   map.removeControl(overlay);
 });
 
+test('MapboxOverlay#overlaid removes its container', () => {
+  const map = new MockMapboxMap({
+    center: {lng: -122.45, lat: 37.78},
+    zoom: 14
+  });
+  const overlay = new MapboxOverlay({device});
+
+  map.addControl(overlay);
+  expect(map.getContainer().childElementCount, 'container is added to the map').toBe(1);
+
+  map.removeControl(overlay);
+  expect(map.getContainer().childElementCount, 'container is removed from the map').toBe(0);
+});
+
 test('MapboxOverlay#overlaid', async () => {
   const map = new MockMapboxMap({
     center: {lng: -122.45, lat: 37.78},

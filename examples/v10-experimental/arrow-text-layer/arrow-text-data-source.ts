@@ -3,7 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import type {SettingsSchema} from '@deck.gl-community/panels';
-import type {ArrowTextLayerProps} from '@deck.gl-community/arrow-layers';
+import type {ArrowTextLayerProps} from '@deck.gl/proposals/layers';
 import type {Device} from '@luma.gl/core';
 import * as arrow from 'apache-arrow';
 import {

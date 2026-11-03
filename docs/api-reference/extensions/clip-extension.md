@@ -62,6 +62,8 @@ Rectangular bounds to be used for clipping the rendered region.
 
 Supported format: `[left, bottom, right, top]`
 
+To clip across the antimeridian, use a `left` more than 180° greater than `right`, e.g. `[170, -20, -170, 20]`. Other reversed edges are re-ordered. Crossing regions 180° or wider, and clipping with `clipByInstance: true`, need two layers.
+
 #### `clipByInstance` (boolean, optional) {#clipbyinstance}
 
 `clipByInstance` controls whether an object is clipped by its anchor (e.g. icon, point) or by its geometry (e.g. path, polygon). If not specified, it is deduced from whether there is an attribute called `instancePositions`. This behavior can be overridden if:
