@@ -126,20 +126,44 @@ export function destroyDeckInstance(deck: Deck) {
 }
 
 /**
- * Copies the layers, so that they can be added to a new deck.
+ * Copies the layers, so that they can be added to a new deck, and records the copy of each layer.
  * Call it before destroying the deck that drew them: it reads their layer state.
  */
-export function cloneLayers(layers: LayersList): LayersList {
+export function cloneLayers(layers: LayersList, copies: WeakMap<Layer, Layer>): LayersList {
   return layers.map(layer => {
     if (Array.isArray(layer)) {
-      return cloneLayers(layer);
+      return cloneLayers(layer, copies);
     }
-    return layer instanceof Layer ? layer.clone(getSuppliedAsyncProps(layer)) : layer;
+    if (!(layer instanceof Layer)) {
+      return layer;
+    }
+    const copy = layer.clone(getSuppliedAsyncProps(layer));
+    copies.set(layer, copy);
+    return copy;
   });
 }
 
+/** Replaces the layers that were copied, e.g. when the app passes them again after a fallback */
+export function replaceCopiedLayers(layers: LayersList, copies: WeakMap<Layer, Layer>): LayersList {
+  let replaced = false;
+  const result = layers.map(layer => {
+    let next = Array.isArray(layer) ? replaceCopiedLayers(layer, copies) : layer;
+    // A copy is copied again if its deck is destroyed too
+    while (next instanceof Layer && copies.has(next)) {
+      next = copies.get(next)!;
+    }
+    replaced ||= next !== layer;
+    return next;
+  });
+  return replaced ? result : layers;
+}
+
 /** The fields of the private async prop state in `ComponentState` that are read here */
-type AsyncPropState = {type: {transform?: unknown} | null; lastValue: unknown};
+type AsyncPropState = {
+  type: {transform?: unknown} | null;
+  lastValue: unknown;
+  resolvedValue: unknown;
+};
 
 /**
  * Initialization replaces the value of an async prop with a transform in the layer's props, e.g. an
@@ -153,11 +177,23 @@ function getSuppliedAsyncProps(layer: Layer): Record<string, unknown> {
   for (const name in asyncProps) {
     const asyncProp = asyncProps[name];
     // lastValue stays null while the prop has its default value
-    if (asyncProp?.type?.transform && asyncProp.lastValue !== null) {
+    if (!asyncProp?.type?.transform || asyncProp.lastValue === null) {
+      continue;
+    }
+    if (name === 'data' && isAsyncIterable(asyncProp.lastValue)) {
+      // An async iterable can only be read once. Copy the loaded data, which dataTransform
+      // already processed.
+      props.data = asyncProp.resolvedValue;
+      props.dataTransform = null;
+    } else {
       props[name] = asyncProp.lastValue;
     }
   }
   return props;
+}
+
+function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
+  return typeof (value as AsyncIterable<unknown>)?.[Symbol.asyncIterator] === 'function';
 }
 
 /* eslint-disable max-statements */

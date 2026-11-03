@@ -10,13 +10,14 @@ import {
   createDeckInstance,
   destroyDeckInstance,
   cloneLayers,
+  replaceCopiedLayers,
   getViewPropsFromOverlay,
   getViewPropsFromCoordinateTransformer,
   POSITIONING_CONTAINER_ID
 } from './utils';
 import {Deck} from '@deck.gl/core';
 
-import type {DeckProps, MapViewState} from '@deck.gl/core';
+import type {DeckProps, Layer, MapViewState} from '@deck.gl/core';
 import type {Device, Framebuffer} from '@luma.gl/core';
 const HIDE_ALL_LAYERS = () => false;
 const GL_STATE: GLParameters = {
@@ -59,6 +60,8 @@ export default class GoogleMapsOverlay {
   private _positioningContainer: HTMLElement | null = null;
   private _renderingType: google.maps.RenderingType | null = null;
   private _renderingTypeListener: google.maps.MapsEventListener | null = null;
+  /** The copies of the layers that a destroyed deck finalized */
+  private _layerCopies = new WeakMap<Layer, Layer>();
   private _externalFramebuffer: {
     handle: WebGLFramebuffer;
     wrapper: import('@luma.gl/core').Framebuffer;
@@ -101,6 +104,13 @@ export default class GoogleMapsOverlay {
    * Update (partial) props.
    */
   setProps(props: Partial<GoogleMapsOverlayProps>): void {
+    if (props.layers) {
+      // The app may pass again the layers that a destroyed deck finalized
+      const layers = replaceCopiedLayers(props.layers, this._layerCopies);
+      if (layers !== props.layers) {
+        props = {...props, layers};
+      }
+    }
     Object.assign(this.props, props);
     if (this._deck) {
       const parent = this._deck.props.parent || this._deck.getCanvas()?.parentElement;
@@ -180,7 +190,7 @@ export default class GoogleMapsOverlay {
     // A finalized layer cannot be added to another deck. Copy the layers first, while they still
     // have the prop values that initialization replaced, e.g. an image with a texture
     if (this.props.layers) {
-      this.props.layers = cloneLayers(this.props.layers);
+      this.props.layers = cloneLayers(this.props.layers, this._layerCopies);
     }
     destroyDeckInstance(this._deck);
     this._deck = null;
