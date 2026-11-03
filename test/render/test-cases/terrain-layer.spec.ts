@@ -91,15 +91,10 @@ const testCases = [
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
   },
   {
-    // GlobeView twin of the case above (same viewState; zoom 11.5 stays below GlobeView's zoom-12
-    // handoff to WebMercatorViewport), fills only. TerrainLayer switches its tile meshes to LNGLAT
-    // under GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
-    // globe -> Mercator inverse, so the draped fills follow the terrain on the globe.
-    // The stroke is left out on purpose: a draped PathLayer on GlobeView is re-tessellated twice
-    // per frame (Layer.activateViewport -> PathLayer.shouldUpdateState sees viewport.getSubdivisionStep(sourceCrs) /
-    // projectionMode flip between the Mercator terrain-cover pass and the globe screen pass),
-    // which flags needsRedraw every frame and starves the screenshot. Add `stroked` back once
-    // that is fixed.
+    // terrain-extension-drape in GlobeView, without outlines.
+    // Golden: the same choropleth fills draped over the terrain, on the globe.
+    // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
+    // never settles.
     name: 'terrain-extension-drape-fill-globe',
     skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),

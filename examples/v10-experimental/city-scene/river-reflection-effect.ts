@@ -11,10 +11,14 @@ import type {
 } from '@deck.gl/core';
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
 import {BackgroundTextureModel, ShaderPassRenderer} from '@luma.gl/engine';
-import type {CompositeShaderPass} from '@luma.gl/shadertools';
-import {createSSRCompositeShaderPass, SSR_QUALITY_PRESETS, type SSRQuality} from '@luma.gl/effects';
+import type {CompositeShaderPass} from '@luma.gl/shaders';
+import {
+  createSSRCompositeShaderPass,
+  SSR_QUALITY_PRESETS,
+  type SSRQuality
+} from '@luma.gl/engine/effects';
 import {Matrix4} from '@math.gl/core';
-import type {SceneBufferEffect} from '@deck.gl-community/gpu-layers';
+import type {SceneBufferEffect} from '@deck.gl/proposals/effects';
 
 export type RiverReflectionPassUniforms = Record<string, Record<string, unknown>>;
 

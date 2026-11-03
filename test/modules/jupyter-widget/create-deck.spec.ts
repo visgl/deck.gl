@@ -22,7 +22,7 @@ import {
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {_SplitterWidget as SplitterWidget} from '@deck.gl/widgets';
-import {NullDevice} from '@luma.gl/test-utils';
+import {NullDevice} from '@luma.gl/core/test-utils';
 import {device} from '@deck.gl/test-utils/vitest';
 import {
   addCustomLibraries,
@@ -203,6 +203,66 @@ describe('jupyter-widget: dynamic-registration', () => {
       container.remove();
       URL.revokeObjectURL(resourceUri);
       delete window.UpdateTestExtension;
+    }
+  });
+
+  test('createDeck retries deferred layers on a MapLibre overlay', async () => {
+    class MapLibreTestExtension extends LayerExtension {}
+    window.MapLibreTestExtension = MapLibreTestExtension;
+    const script =
+      'window.mapLibreTestLibrary = {MapLibreTestExtension: window.MapLibreTestExtension};';
+    const resourceUri = URL.createObjectURL(new Blob([script], {type: 'text/javascript'}));
+    const errors = vi.spyOn(console, 'error');
+
+    const container = document.createElement('div');
+    Object.assign(container.style, {width: '200px', height: '100px'});
+    document.body.appendChild(container);
+    const extendedLayer = {
+      '@@type': 'ScatterplotLayer',
+      id: 'extended',
+      data: [],
+      extensions: [{'@@type': 'MapLibreTestExtension'}]
+    };
+    const jsonInput = {
+      mapProvider: 'maplibre',
+      // An inline style loads without network requests
+      mapStyle: {version: 8, sources: {}, layers: []},
+      initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+      layers: [extendedLayer]
+    };
+    const overlay = createDeck({
+      container,
+      jsonInput,
+      customLibraries: [{libraryName: 'mapLibreTestLibrary', resourceUri}]
+    });
+
+    try {
+      await vi.waitFor(
+        () => {
+          expect(overlay._props.layers.map(l => l.id)).toEqual(['extended']);
+          // Wait for the map to load and add the overlay, so the map can be released below
+          expect(overlay._deck).toBeTruthy();
+        },
+        {timeout: 5000}
+      );
+      expect(overlay._props.layers[0].props.extensions[0]).toBeInstanceOf(MapLibreTestExtension);
+
+      updateDeck(
+        {...jsonInput, layers: [extendedLayer, {'@@type': 'ScatterplotLayer', id: 'plain'}]},
+        overlay
+      );
+      expect(overlay._deck.props.layers.map(l => l.id)).toEqual(['extended', 'plain']);
+      expect(errors).not.toHaveBeenCalled();
+    } finally {
+      const deckDevice = overlay._deck?.device;
+      overlay._map?.remove();
+      deckDevice?.loseDevice();
+      deckDevice?.destroy();
+      container.remove();
+      errors.mockRestore();
+      URL.revokeObjectURL(resourceUri);
+      delete window.MapLibreTestExtension;
+      delete window.mapLibreTestLibrary;
     }
   });
 
