@@ -260,12 +260,10 @@ export default class DeckPicker {
 
     this._resizeBuffer(canvasContext);
 
-    // Convert from canvas top-left to framebuffer coordinates [deviceX, deviceY]
+    // Convert from canvas top-left to WebGL bottom-left coordinates
+    // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for the context's current CSS-to-device ratio.
-    const devicePixelRange = canvasContext.cssToDevicePixels(
-      [x, y],
-      this._isFramebufferYInverted()
-    );
+    const devicePixelRange = canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
       devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
@@ -428,12 +426,10 @@ export default class DeckPicker {
 
     this._resizeBuffer(canvasContext);
 
-    // Convert from canvas top-left to framebuffer coordinates [deviceX, deviceY]
+    // Convert from canvas top-left to WebGL bottom-left coordinates
+    // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for the context's current CSS-to-device ratio.
-    const devicePixelRange = canvasContext.cssToDevicePixels(
-      [x, y],
-      this._isFramebufferYInverted()
-    );
+    const devicePixelRange = canvasContext.cssToDevicePixels([x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
       devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
@@ -586,10 +582,27 @@ export default class DeckPicker {
 
     this._resizeBuffer(canvasContext);
 
-    // Convert from canvas top-left to framebuffer coordinates
+    // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for the context's current CSS-to-device ratio.
     const pixelRatio = canvasContext.cssToDeviceRatio();
-    const deviceRect = this._getDeviceRect(canvasContext, {x, y, width, height});
+    const leftTop = canvasContext.cssToDevicePixels([x, y], true);
+
+    // take left and top (y inverted in device pixels) from start location
+    const deviceLeft = leftTop.x;
+    const deviceTop = leftTop.y + leftTop.height;
+
+    // take right and bottom (y inverted in device pixels) from end location
+    const rightBottom = canvasContext.cssToDevicePixels([x + width, y + height], true);
+    const deviceRight = rightBottom.x + rightBottom.width;
+    const deviceBottom = rightBottom.y;
+
+    const deviceRect = {
+      x: deviceLeft,
+      y: deviceBottom,
+      // deviceTop and deviceRight represent the first pixel outside the desired rect
+      width: deviceRight - deviceLeft,
+      height: deviceTop - deviceBottom
+    };
 
     const pickedResult = await this._drawAndSampleAsync({
       layers: pickableLayers,
@@ -675,10 +688,27 @@ export default class DeckPicker {
 
     this._resizeBuffer(canvasContext);
 
-    // Convert from canvas top-left to framebuffer coordinates
+    // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for the context's current CSS-to-device ratio.
     const pixelRatio = canvasContext.cssToDeviceRatio();
-    const deviceRect = this._getDeviceRect(canvasContext, {x, y, width, height});
+    const leftTop = canvasContext.cssToDevicePixels([x, y], true);
+
+    // take left and top (y inverted in device pixels) from start location
+    const deviceLeft = leftTop.x;
+    const deviceTop = leftTop.y + leftTop.height;
+
+    // take right and bottom (y inverted in device pixels) from end location
+    const rightBottom = canvasContext.cssToDevicePixels([x + width, y + height], true);
+    const deviceRight = rightBottom.x + rightBottom.width;
+    const deviceBottom = rightBottom.y;
+
+    const deviceRect = {
+      x: deviceLeft,
+      y: deviceBottom,
+      // deviceTop and deviceRight represent the first pixel outside the desired rect
+      width: deviceRight - deviceLeft,
+      height: deviceTop - deviceBottom
+    };
 
     const pickedResult = this._drawAndSample({
       layers: pickableLayers,
@@ -1046,34 +1076,6 @@ export default class DeckPicker {
     }
     // For draped layers or when no layer was picked, use terrain layers for depth
     return pickableLayers.filter(l => l.props.operation.includes('terrain'));
-  }
-
-  /** WebGL framebuffers start at the bottom-left, WebGPU framebuffers at the top-left */
-  _isFramebufferYInverted(): boolean {
-    return this.device.type !== 'webgpu';
-  }
-
-  /** Convert a CSS pixel rect to a device pixel rect in framebuffer coordinates */
-  _getDeviceRect(
-    canvasContext: CanvasContext | PresentationContext,
-    {x, y, width, height}: Rect
-  ): Rect {
-    const yInvert = this._isFramebufferYInverted();
-    const leftTop = canvasContext.cssToDevicePixels([x, y], yInvert);
-    const rightBottom = canvasContext.cssToDevicePixels([x + width, y + height], yInvert);
-
-    // Both corner pixels are included, so deviceRight and deviceYEnd are the first pixels outside the rect
-    const deviceLeft = leftTop.x;
-    const deviceRight = rightBottom.x + rightBottom.width;
-    const deviceY = Math.min(leftTop.y, rightBottom.y);
-    const deviceYEnd = Math.max(leftTop.y + leftTop.height, rightBottom.y + rightBottom.height);
-
-    return {
-      x: deviceLeft,
-      y: deviceY,
-      width: deviceRight - deviceLeft,
-      height: deviceYEnd - deviceY
-    };
   }
 
   /**
