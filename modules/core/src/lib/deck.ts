@@ -386,6 +386,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
     getEventRoot: canvas => this._getEventRoot(canvas)
   });
   private _ownedCanvas: HTMLCanvasElement | null = null;
+  /** A `props.canvas` hidden while a shared device canvas draws in its place */
+  private _hiddenPlaceholder: {canvas: HTMLCanvasElement; display: string} | null = null;
   private _pickRequest: {
     mode: string;
     event: MjolnirPointerEvent | null;
@@ -510,6 +512,10 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this.canvas.parentElement?.removeChild(this.canvas);
       this.canvas = null;
       this._ownedCanvas = null;
+    }
+    if (this._hiddenPlaceholder) {
+      this._hiddenPlaceholder.canvas.style.display = this._hiddenPlaceholder.display;
+      this._hiddenPlaceholder = null;
     }
     this._canvasContext = null;
   }
@@ -1637,6 +1643,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       const {canvas: placeholder, parent} = this.props;
       if (placeholder instanceof HTMLCanvasElement && placeholder.isConnected) {
         // Keep the stacking order of the canvas it stands in for, without its inline offset
+        this._hiddenPlaceholder ??= {canvas: placeholder, display: placeholder.style.display};
         placeholder.style.display = 'none';
         placeholder.after(this.canvas);
       } else {

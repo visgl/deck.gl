@@ -1561,3 +1561,35 @@ test('Deck waits for asynchronous viewports before initializing and updating lay
     deck.finalize();
   }
 });
+
+webglTest('Deck#restores a canvas it hid for a shared device canvas', async () => {
+  const {luma} = await import('@luma.gl/core');
+  const {webgl2Adapter} = await import('@luma.gl/core/webgl');
+  const sharedDevice = await luma.createDevice({
+    type: 'webgl',
+    adapters: [webgl2Adapter],
+    createCanvasContext: {container: document.createElement('div'), width: 8, height: 8}
+  });
+  const parent = document.createElement('div');
+  const canvas = document.createElement('canvas');
+  canvas.style.display = 'block';
+  parent.append(canvas);
+  document.body.append(parent);
+
+  const deck = new Deck({
+    device: sharedDevice,
+    parent,
+    canvas,
+    initialViewState: {longitude: 0, latitude: 0, zoom: 1},
+    layers: []
+  });
+  await waitForRender(deck);
+  expect(canvas.style.display, 'canvas is hidden while the shared canvas draws').toBe('none');
+
+  deck.finalize();
+  expect(canvas.style.display, 'canvas display is restored on finalize').toBe('block');
+
+  sharedDevice.loseDevice();
+  sharedDevice.destroy();
+  parent.remove();
+});
