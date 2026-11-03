@@ -112,7 +112,7 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | Feature | Status | Comment |
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
-| Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
+| Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. Through v9.4.1, picking away from a view's vertical center returned the object at the vertically mirrored point ([#11020](https://github.com/visgl/deck.gl/issues/11020)). |
 | Shader hooks / layer extensions | 🚧 | `ClipExtension` has targeted support on `ScatterplotLayer`, `PathLayer`, and `SolidPolygonLayer`; general WGSL shader injection is not yet supported. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
 | Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
