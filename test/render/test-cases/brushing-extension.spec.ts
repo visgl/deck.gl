@@ -42,10 +42,13 @@ const getPointLayer = (id: string, props = {}) =>
 
 const testCases: TestCase[] = [
   {
+    // Golden: green 6 px dots only inside a ~3 km circle around the canvas centre, the same on
+    // the map and on the globe
     name: 'brushing-source',
     layers: [getPointLayer('brushing-source')]
   },
   {
+    // Golden: every green dot of the dataset, nothing filtered
     name: 'brushing-disabled',
     layers: [getPointLayer('brushing-disabled', {brushingEnabled: false})]
   }
