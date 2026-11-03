@@ -119,7 +119,7 @@ export default function positionChildrenUnderViews<ViewsT extends ViewOrViews>({
       );
 
     if (viewMaps.length) {
-      maps.push(wrapChildren(`view-${viewId}-map`, viewMaps));
+      maps.push(wrapChildren(`view-${viewId}--map`, viewMaps));
     }
     return wrapChildren(`view-${viewId}`, viewChildren);
   });

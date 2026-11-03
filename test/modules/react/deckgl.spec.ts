@@ -901,6 +901,8 @@ test('DeckGL#shared device canvas stays above a react-map-gl Map', async () => {
     map.compareDocumentPosition(canvas) & Node.DOCUMENT_POSITION_FOLLOWING,
     'canvas follows the map in the DOM'
   ).toBeTruthy();
+  const wrapperLeft = document.getElementById('deckgl-wrapper')!.getBoundingClientRect().left;
+  expect(canvas.getBoundingClientRect().left, 'canvas is not offset').toBe(wrapperLeft);
 
   act(() => root.unmount());
   device.loseDevice();

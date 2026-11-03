@@ -112,11 +112,11 @@ test('positionChildrenUnderViews#map goes before the canvas', () => {
   });
 
   expect(maps.length, 'Returns wrapped map').toBe(1);
-  expect(maps[0].key, 'Map has deck context').toBe('view-map-map-context');
+  expect(maps[0].key, 'Map has deck context').toBe('view-map--map-context');
   expect(maps[0].type, 'Map is wrapped in DeckGlContext.Provider').toBe(DeckGlContext.Provider);
 
   const wrappedView = maps[0].props.children;
-  expect(wrappedView.key, 'Has map wrapper').toBe('view-map-map');
+  expect(wrappedView.key, 'Has map wrapper').toBe('view-map--map');
   expect(wrappedView.props.children.props.id, 'Wrapper has the map').toBe('test-map');
   expect(wrappedView.props.children.props.style.zIndex, 'Map has no z-index').toBeUndefined();
 

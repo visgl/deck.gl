@@ -1636,7 +1636,8 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       // external canvas may not be in DOM
       const {canvas: placeholder, parent} = this.props;
       if (placeholder instanceof HTMLCanvasElement && placeholder.isConnected) {
-        // Keep the stacking order of the canvas it stands in for
+        // Keep the stacking order of the canvas it stands in for, without its inline offset
+        placeholder.style.display = 'none';
         placeholder.after(this.canvas);
       } else {
         parent.insertBefore(this.canvas, parent.firstChild);
