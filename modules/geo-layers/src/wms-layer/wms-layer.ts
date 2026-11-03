@@ -19,9 +19,13 @@ import {
   _deepEqual as deepEqual
 } from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import type {GetImageParameters, ImageSourceMetadata, ImageType} from '@loaders.gl/loader-utils';
+import type {
+  GetImageParameters,
+  ImageSourceMetadata,
+  ImageType
+} from '@loaders.gl/core/loader-utils';
 import {createDataSource} from '@loaders.gl/core';
-import {ImageSource, WMSSource} from '@loaders.gl/wms';
+import {ImageSource, WMSSource} from '@loaders.gl/ogc/wms';
 import {WGS84ToPseudoMercator} from './utils';
 
 /** All props supported by the TileLayer */

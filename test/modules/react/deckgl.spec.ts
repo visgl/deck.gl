@@ -27,7 +27,7 @@ import {
 import {TooltipWidget} from '@deck.gl/core/lib/tooltip-widget';
 import DeckGL, {type DeckGLRef} from '@deck.gl/react';
 import {type WidgetProps, type WidgetPlacement} from '@deck.gl/core';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 // Required by React 19
 // @ts-expect-error undefined global flag

@@ -20,7 +20,7 @@ import type Layer from '../lib/layer';
 import type CompositeLayer from '../lib/composite-layer';
 import type {Effect} from '../lib/effect';
 import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
-import type {PickingProps} from '@luma.gl/shadertools';
+import type {PickingProps} from '@luma.gl/shaders';
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
@@ -485,6 +485,7 @@ export default class LayersPass extends Pass {
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
+        sourceCrs: layer.internalState!.sourceCrs,
         coordinateOrigin: layerProps.coordinateOrigin,
         autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps

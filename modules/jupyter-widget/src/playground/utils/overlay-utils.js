@@ -16,3 +16,13 @@ export function forwardLayerUpdates(overlay) {
   };
   return overlay;
 }
+
+/** Calls `callback` when the overlay is finalized, before the overlay's own finalization. */
+export function callOnFinalize(overlay, callback) {
+  const finalizeOverlay = overlay.finalize.bind(overlay);
+  overlay.finalize = function () {
+    callback();
+    finalizeOverlay();
+  };
+  return overlay;
+}

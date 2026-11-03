@@ -15,7 +15,7 @@ import {
   projectionGridBounds,
   type ProjectionGridPoint
 } from 'deck.gl-test/data/projection-grid';
-import {projectionEngine} from '@math.gl/projection';
+import {projectionEngine} from '@math.gl/geospatial/projection';
 import type {FeatureCollection, Polygon, MultiPolygon} from 'geojson';
 import states from 'deck.gl-test/data/us-states.geo.json';
 import capitals from 'deck.gl-test/data/us-state-capitals.geo.json';

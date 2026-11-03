@@ -12,9 +12,8 @@ import {Tesselator} from '@deck.gl/core';
 import {
   cutPolygonByGrid,
   cutPolygonByMercatorBounds,
-  modifyPolygonWindingDirection,
-  WINDING
-} from '@math.gl/polygon';
+  modifyPolygonWindingDirection
+} from '@math.gl/geometry';
 
 import type {
   PolygonGeometry,
@@ -104,7 +103,7 @@ export default class PolygonTesselator extends Tesselator<
           const end = ends[ring];
           const reversed = modifyPolygonWindingDirection(
             positions,
-            ring === 0 ? WINDING.CLOCKWISE : WINDING.COUNTER_CLOCKWISE,
+            ring === 0 ? 'clockwise' : 'counter-clockwise',
             {start, end, size: this.positionSize, isClosed: true}
           );
           if (reversed && edgeTypes) {
