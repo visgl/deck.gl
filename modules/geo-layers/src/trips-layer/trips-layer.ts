@@ -18,21 +18,21 @@ const defaultProps: DefaultProps<TripsLayerProps> = {
 };
 
 const tripsShaderInjectionsGLSL = {
-  'vs:#decl': `\
+  'glsl:vs:#decl': `\
 in float instanceTimestamps;
 in float instanceNextTimestamps;
 out float vTime;
 `,
   // Timestamp of the vertex
-  'vs:#main-end': `\
+  'glsl:vs:#main-end': `\
 vTime = instanceTimestamps + (instanceNextTimestamps - instanceTimestamps) * vPathPosition.y / vPathLength;
 `,
-  'fs:#decl': `\
+  'glsl:fs:#decl': `\
 in float vTime;
 `,
   // Drop segments only after PathLayer evaluates analytic-coverage derivatives, then
   // fade the color (currentTime - 100%, end of trail - 0%).
-  'fs:DECKGL_FILTER_COLOR': `\
+  'glsl:fs:DECKGL_FILTER_COLOR': `\
 if(vTime > trips.currentTime || (trips.fadeTrail && (vTime < trips.currentTime - trips.trailLength))) {
   discard;
 }
