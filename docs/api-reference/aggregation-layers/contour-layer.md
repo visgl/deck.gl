@@ -184,6 +184,8 @@ Inherits from all [Base Layer](../core/layer.md) properties.
 
 Size of each cell in meters
 
+In geospatial views, this size represents locally approximated ground meters. The viewport's distance scale is evaluated at the center of the data bounds and applied uniformly to all bins. Projection distortion may vary across the dataset, so ground dimensions away from that anchor are approximate. Panning does not change the bin definitions.
+
 #### `gpuAggregation` (boolean, optional) {#gpuaggregation}
 
 * Default: true

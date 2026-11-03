@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {COORDINATE_SYSTEM, _GlobeView as GlobeView, MapView} from '@deck.gl/core';
+import {_GlobeView as GlobeView, MapView} from '@deck.gl/core';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {testInitializeLayerAsync} from '@deck.gl/test-utils/vitest';
 import {TruncatedConeGeometry} from '@luma.gl/engine';
@@ -209,8 +209,6 @@ test('TerrainLayer renders tiled Martini meshes in lng/lat coordinates on GlobeV
 
   const tileLayer = layer.getSubLayers()[0];
   const meshLayer = tileLayer.getSubLayers()[0];
-  expect(meshLayer.props.coordinateSystem, 'Globe terrain mesh uses lng/lat').toBe(
-    COORDINATE_SYSTEM.LNGLAT
-  );
+  expect(meshLayer.props.coordinateSystem, 'Globe terrain mesh uses lng/lat').toBe('lnglat');
   handle?.finalize();
 });

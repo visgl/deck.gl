@@ -6,6 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
+import {_GlobeView as GlobeView} from '@deck.gl/core';
 import {GeoJsonLayer, IconLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
 import {_TerrainExtension as TerrainExtension} from '@deck.gl/extensions';
@@ -90,11 +91,41 @@ const testCases = [
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
   },
   {
+    // terrain-extension-drape in GlobeView, without outlines.
+    // Golden: the same choropleth fills draped over the terrain, on the globe.
+    // No stroke: a draped PathLayer on GlobeView re-tessellates every frame, so the screenshot
+    // never settles.
+    name: 'terrain-extension-drape-fill-globe',
+    skip: ['webgpu'],
+    views: new GlobeView({resolution: 36}),
+    viewState: {
+      longitude: -122.45,
+      latitude: 37.75,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    layers: [
+      new TerrainLayer({
+        elevationData: ELEVATION_DATA,
+        texture: TEXTURE,
+        elevationDecoder: DECODER,
+        operation: 'draw+terrain'
+      }),
+      new GeoJsonLayer({
+        data: choropleths,
+        stroked: false,
+        getFillColor: (_, {index}) => [(index % 3) * 80, (index % 2) * 128, 128, 200],
+        extensions: [new TerrainExtension()]
+      })
+    ],
+    onAfterRender: waitAfterDefaultCompletion(500),
+    imageDiffOptions: {threshold: 0.985},
+    goldenImage: './test/render/golden-images/terrain-extension-drape-fill-globe.png'
+  },
+  {
     name: 'terrain-extension-offset',
-    // Re-enabled during the Vitest migration, but still produces a large,
-    // deterministic render mismatch under the current Chromium render project.
-    // Keep this skipped until the offset path matches the historical golden.
-    skip: true,
+    skip: ['webgpu'],
     viewState: {
       longitude: -122.45,
       latitude: 37.75,

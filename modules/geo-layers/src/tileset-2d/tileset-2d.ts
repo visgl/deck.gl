@@ -4,7 +4,7 @@
 
 import {Viewport} from '@deck.gl/core';
 
-import {RequestScheduler} from '@loaders.gl/loader-utils';
+import {RequestScheduler} from '@loaders.gl/core/loader-utils';
 import {Matrix4, equals, NumericArray} from '@math.gl/core';
 
 import {Tile2DHeader} from './tile-2d-header';
@@ -158,6 +158,12 @@ export class Tileset2D {
     this.setOptions(this.opts);
 
     this.onTileLoad = tile => {
+      // A tile can finish loading after it has left the cache. Unload it
+      // instead of reporting it loaded.
+      if (this._cache.get(tile.id) !== tile) {
+        this.opts.onTileUnload?.(tile);
+        return;
+      }
       this.opts.onTileLoad?.(tile);
       if (this.opts.maxCacheByteSize !== null) {
         this._cacheByteSize += tile.byteLength;
@@ -216,12 +222,13 @@ export class Tileset2D {
     this._viewport = null;
   }
 
-  // Clean up any outstanding tile requests.
+  // Clean up any outstanding tile requests and unload all cached tiles.
   finalize(): void {
     for (const tile of this._cache.values()) {
       if (tile.isLoading) {
         tile.abort();
       }
+      this.opts.onTileUnload?.(tile);
     }
     this._cache.clear();
     this._tiles = [];

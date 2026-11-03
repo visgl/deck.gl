@@ -5,7 +5,7 @@
 import type {Buffer, Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
-import {_deepEqual as deepEqual, LayerExtension, log} from '@deck.gl/core';
+import {LayerExtension, log} from '@deck.gl/core';
 import {
   CategoryBitMask,
   DataFilterModuleProps,
@@ -14,6 +14,12 @@ import {
   dataFilter64
 } from './shader-module';
 import * as aggregator from './aggregator';
+import {
+  addDataFilterAttributes,
+  addDataFilterCountingAttributes,
+  updateDataFilterCategoryAttributes,
+  getDataFilterCategoryKey
+} from './attributes';
 import {NumberArray4} from '@math.gl/core';
 
 const defaultProps = {
@@ -159,74 +165,31 @@ export default class DataFilterExtension extends LayerExtension<
 
   initializeState(this: Layer<DataFilterExtensionProps>, context: LayerContext, extension: this) {
     const attributeManager = this.getAttributeManager();
-    const {categorySize, filterSize, fp64} = extension.opts;
-
     if (attributeManager) {
-      if (filterSize) {
-        attributeManager.add({
-          filterValues: {
-            size: filterSize,
-            type: fp64 ? 'float64' : 'float32',
-            stepMode: 'dynamic',
-            accessor: 'getFilterValue'
-          }
-        });
-      }
-
-      if (categorySize) {
-        attributeManager.add({
-          filterCategoryValues: {
-            size: categorySize,
-            stepMode: 'dynamic',
-            accessor: 'getFilterCategory',
-            type: 'uint32',
-            transform:
-              categorySize === 1
-                ? d => extension._getCategoryKey.call(this, d, 0)
-                : d => d.map((x, i) => extension._getCategoryKey.call(this, x, i))
-          }
-        });
-      }
+      addDataFilterAttributes(attributeManager, extension.opts, (category, channel) =>
+        extension._getCategoryKey.call(this, category, channel)
+      );
     }
 
     const {device} = this.context;
     if (attributeManager && extension.opts.countItems) {
       const useFloatTarget = aggregator.supportsFloatTarget(device);
-      // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
-      // The vertex shader checks if a vertex has the same "index" as the previous vertex
-      // so that we only write one count cross multiple vertices of the same object
-      attributeManager.add({
-        filterVertexIndices: {
-          size: useFloatTarget ? 1 : 2,
-          vertexOffset: 1,
-          type: 'unorm8',
-          accessor: (object, {index}) => {
-            const i = object && object.__source ? object.__source.index : index;
-            return useFloatTarget ? (i + 1) % 255 : [(i + 1) % 255, Math.floor(i / 255) % 255];
-          },
-          shaderAttributes: {
-            filterPrevIndices: {
-              vertexOffset: 0
-            },
-            filterIndices: {
-              vertexOffset: 1
-            }
-          }
-        }
-      });
+      addDataFilterCountingAttributes(attributeManager, useFloatTarget);
 
       const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
         device,
         attributeManager.getBufferLayouts({isInstanced: false}),
-        extension.getShaders.call(this, extension),
+        {
+          ...extension.getShaders.call(this, extension),
+          shaderAssembler: this.context.shaderAssembler
+        },
         useFloatTarget
       );
       this.setState({filterFBO, filterModel});
     }
   }
 
-  // eslint-disable-next-line complexity
   updateState(
     this: Layer<DataFilterExtensionProps>,
     {props, oldProps, changeFlags}: UpdateParameters<Layer<DataFilterExtensionProps>>,
@@ -247,26 +210,7 @@ export default class DataFilterExtension extends LayerExtension<
         this.setState({filterNeedsUpdate});
       }
     }
-    if (attributeManager?.attributes.filterCategoryValues) {
-      // Update bitmask if accessor or selected categories has changed
-      const categoryBitMaskNeedsUpdate =
-        attributeManager.attributes.filterCategoryValues.needsUpdate() ||
-        !deepEqual(props.filterCategories, oldProps.filterCategories, 2);
-      if (categoryBitMaskNeedsUpdate) {
-        this.setState({categoryBitMask: null});
-      }
-
-      // Need to recreate category map if categorySize has changed
-      const resetCategories = changeFlags.dataChanged;
-      if (resetCategories) {
-        this.setState({
-          categoryMap: Array(categorySize)
-            .fill(0)
-            .map(() => ({}))
-        });
-        attributeManager.attributes.filterCategoryValues.setNeedsUpdate('categoryMap');
-      }
-    }
+    updateDataFilterCategoryAttributes(this, {props, oldProps, changeFlags}, categorySize);
   }
 
   // eslint-disable-next-line max-statements
@@ -396,10 +340,6 @@ export default class DataFilterExtension extends LayerExtension<
     category: FilterCategory,
     channel: number
   ) {
-    const categoryMap = (this.state.categoryMap as Record<FilterCategory, number>[])[channel];
-    if (!(category in categoryMap)) {
-      categoryMap[category] = Object.keys(categoryMap).length;
-    }
-    return categoryMap[category];
+    return getDataFilterCategoryKey(this, category, channel);
   }
 }

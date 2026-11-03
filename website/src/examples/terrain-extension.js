@@ -78,13 +78,19 @@ class TerrainExtensionDemo extends Component {
     return (
       <div>
         <p>Reconstructed 3D terrain with official routes from Tour de France 2023.</p>
-        <p>
+        <div>
           Data sources:
           <div>
             Cycling Stage{' '}
             <a href="https://www.cyclingstage.com/tour-de-france-2023-gpx/">Tour de France 2023</a>
           </div>
-        </p>
+          <div>
+            <a href="https://mapterhorn.com/attribution">Mapterhorn terrain</a>
+          </div>
+          <div>
+            <a href="https://versatiles.org/sources/">VersaTiles satellite imagery</a>
+          </div>
+        </div>
       </div>
     );
   }

@@ -158,8 +158,13 @@ export const MATRIX_ATTRIBUTES = {
 // with `composeModelMatrix` enabled, the rotation part of the layer's modelMatrix will be composed to instance's transformations
 // since rotating latitude and longitude can not provide meaningful results, hence `composeModelMatrix` is disabled
 // when in LNGLAT and LNGLAT_OFFSET coordinates.
-export function shouldComposeModelMatrix(viewport, coordinateSystem) {
+export function shouldComposeModelMatrix(viewport, coordinateSystem, preproject = false) {
+  if (preproject) {
+    // Cartesian anchors bypass preprojection, so model transforms also apply to mesh offsets.
+    return coordinateSystem === 'cartesian';
+  }
   return (
+    coordinateSystem === viewport.crs?.signature ||
     coordinateSystem === 'cartesian' ||
     coordinateSystem === 'meter-offsets' ||
     (coordinateSystem === 'default' && !viewport.isGeospatial)

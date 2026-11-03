@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   project32,
   color,
   picking,
@@ -22,7 +23,7 @@ import {
   phongMaterial
 } from '@deck.gl/core';
 import type {BufferLayout} from '@luma.gl/core';
-import {Geometry, Model, makeInterleavedGeometry} from '@luma.gl/engine';
+import {Geometry, type Model, makeInterleavedGeometry} from '@luma.gl/engine';
 import ColumnGeometry from './column-geometry';
 
 import {columnUniforms, ColumnProps} from './column-layer-uniforms';
@@ -274,6 +275,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         transition: true,
         accessor: 'getPosition'
       },
@@ -366,19 +368,19 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
       GEOMETRY_BUFFER_LAYOUT
     ];
 
-    const fillModel = new Model(this.context.device, {
+    const fillModel = new GPUVectorModel(this.context.device, {
       ...shaders,
       id: `${this.props.id}-fill`,
       bufferLayout,
       isInstanced: true
     });
-    const strokeModel = new Model(this.context.device, {
+    const strokeModel = new GPUVectorModel(this.context.device, {
       ...shaders,
       id: `${this.props.id}-stroke`,
       bufferLayout,
       isInstanced: true
     });
-    const wireframeModel = new Model(this.context.device, {
+    const wireframeModel = new GPUVectorModel(this.context.device, {
       ...shaders,
       id: `${this.props.id}-wireframe`,
       bufferLayout,

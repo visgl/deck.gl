@@ -2,8 +2,15 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {Layer, color, project32, picking, UNIT} from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {
+  Layer,
+  color,
+  project32,
+  picking,
+  UNIT,
+  _GPUVectorModel as GPUVectorModel
+} from '@deck.gl/core';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
@@ -210,7 +217,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
         type: 'float64',
         fp64: this.use64bitPositions(),
         transition: true,
-        accessor: 'getPosition'
+        accessor: 'getPosition',
+        ...this.usePositionTransforms()
       },
       instanceRadius: {
         size: 1,
@@ -299,7 +307,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

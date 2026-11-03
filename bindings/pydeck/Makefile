@@ -22,8 +22,8 @@ copy-bundle:
 	cp $(WIDGET_DIST)/index.js.map $(NBEXT_STATIC)/index.js.map
 
 init:
-	. $(BIN)/activate; \
-	yarn bootstrap; \
+	. $(BIN)/activate && \
+	yarn bootstrap && \
 	yarn build
 	$(MAKE) copy-bundle
 	uv pip install -r requirements/requirements.txt && \
@@ -31,7 +31,7 @@ init:
 	uv pip install -e .
 
 fast-build:
-	cd ../../modules/jupyter-widget; webpack; cd -
+	cd ../../modules/jupyter-widget && yarn build
 	$(MAKE) copy-bundle
 	uv pip install -e .
 

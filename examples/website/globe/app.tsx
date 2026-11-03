@@ -20,7 +20,7 @@ import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {SphereGeometry} from '@luma.gl/engine';
 import {load} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
+import {CSVLoader} from '@loaders.gl/tables/csv';
 
 import AnimatedArcLayer from './animated-arc-group-layer';
 import RangeInput from './range-input';
@@ -181,7 +181,9 @@ export async function renderToDOM(container: HTMLDivElement) {
   const data: DailyFlights[] = [];
   for (const date of dates) {
     const url = `${DATA_URL}/${date}.csv`;
-    const flights: Flight[] = (await load(url, CSVLoader, {csv: {skipEmptyLines: true}})).data;
+    const flights: Flight[] = (
+      await load(url, CSVLoader, {csv: {shape: 'object-row-table', skipEmptyLines: true}})
+    ).data;
 
     // Join flight data from multiple dates into one continuous animation
     const offset = SEC_PER_DAY * data.length;

@@ -47,7 +47,8 @@ fn paraboloid(
 
 fn getExtrusionOffset(lineClipspace: vec2<f32>, side: f32, width: f32) -> vec2<f32> {
   var direction = normalize(lineClipspace * project.viewportSize);
-  direction = vec2<f32>(-direction.y, direction.x);
+  // Rotate by 90° clockwise so the strip (-1 side first) winds counter-clockwise
+  direction = vec2<f32>(direction.y, -direction.x);
   return direction * side * width / 2.0;
 }
 
@@ -139,7 +140,7 @@ fn vertexMain(
 
   if (
     (arc.greatCircle != 0.0 || project.projectionMode == PROJECTION_MODE_GLOBE) &&
-    project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT
+    project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC && project.projectionMode != PROJECTION_MODE_GEODETIC_OFFSETS
   ) {
     let source = project_globe_(vec3<f32>(attributes.instanceSourcePositions.xy, 0.0));
     let targetPosition = project_globe_(vec3<f32>(attributes.instanceTargetPositions.xy, 0.0));
@@ -241,7 +242,7 @@ fn vertexMain(
     // Common x at longitude=-180.
     var antimeridianX = 0.0;
     if (arc.useShortestPath != 0.0) {
-      if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+      if ((project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET || project.projectionMode == PROJECTION_MODE_GEODETIC_OFFSETS)) {
         antimeridianX = -(project.coordinateOrigin.x + 180.0) / 360.0 * TILE_SIZE;
       }
       let thresholdRatio = (antimeridianX - source.x) / (targetPosition.x - source.x);
