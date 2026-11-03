@@ -334,22 +334,6 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
 
-## Remarks[​](#remarks "Direct link to Remarks")
-
-### Using with GlobeView[​](#using-with-globeview "Direct link to Using with GlobeView")
-
-When using this layer with [GlobeView](https://deck.gl/docs/api-reference/core/globe-view.md) or MapLibre's globe projection, lines may be invisible when viewed from certain angles because `GlobeView` enables back-face culling by default. To ensure lines are visible from both sides, set:
-
-```
-new LineLayer({
-
-  // ...other props
-
-  parameters: {cullMode: 'none'}
-
-});
-```
-
 ## Source[​](#source "Direct link to Source")
 
 [modules/layers/src/line-layer](https://github.com/visgl/deck.gl/tree/9.4-release/modules/layers/src/line-layer)
