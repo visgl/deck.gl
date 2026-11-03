@@ -237,7 +237,11 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
       } else if (
         this.constant ||
         !this.buffer ||
-        this.buffer.byteLength < (this.value as TypedArray).byteLength + this.byteOffset
+        this.buffer.byteLength <
+          this._getUploadByteLength(this.value as TypedArray) + this.byteOffset ||
+        // A padded buffer cannot take an updater array of another type in place
+        (this.needsWebGPUPadding() &&
+          (this.value as TypedArray).BYTES_PER_ELEMENT !== this.getAccessor().bytesPerElement)
       ) {
         if (this.constant) {
           // Route legacy constant updater output through the same path used by constant accessors.
@@ -303,12 +307,14 @@ export default class Attribute extends DataColumn<AttributeOptions, AttributeInt
     const ArrayType = this.settings.defaultType;
     // DataColumn normalizes constants for shader consumption. Buffer grouping needs the original
     // vertex-format bytes so that interleaving preserves integer and normalized attribute formats.
-    this.state.constantValue = this._normalizeValue(
+    const constantValue = this._normalizeValue(
       data.value,
       new ArrayType(this.size),
       0
     ) as TypedArray;
     const hasChanged = super.setData(data);
+    // On WebGPU, unaligned 8/16-bit rows are padded to a valid vertex format
+    this.state.constantValue = this._getUploadValue(constantValue, this.getAccessor());
     if (this.device.type === 'webgpu') {
       let bufferValue = this.state.constantValue;
       if (

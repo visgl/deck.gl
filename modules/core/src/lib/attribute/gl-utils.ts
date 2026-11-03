@@ -4,8 +4,8 @@
 
 import {dataTypeDecoder, getTypedArrayConstructor} from '@luma.gl/core';
 import type {BufferAttributeLayout, VertexFormat} from '@luma.gl/core';
-import type {TypedArrayConstructor} from '../../types/types';
-import type {BufferAccessor, DataColumnSettings, LogicalDataType} from './data-column';
+import type {TypedArray, TypedArrayConstructor} from '../../types/types';
+import type {BufferAccessor, DataColumnSettings, DataType, LogicalDataType} from './data-column';
 
 export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstructor {
   // Sorted in some order of likelihood to reduce amount of comparisons
@@ -22,6 +22,23 @@ export function typedArrayFromDataType(type: LogicalDataType): TypedArrayConstru
 
 export const dataTypeFromTypedArray = dataTypeDecoder.getDataType.bind(dataTypeDecoder);
 
+/** Returns the byte length of one element of `type` in a vertex buffer */
+export function getDataTypeByteLength(type: DataType): number {
+  return dataTypeDecoder.getDataTypeInfo(type).byteLength;
+}
+
+/** 8- and 16-bit vertex data types */
+const SMALL_DATA_TYPES: readonly string[] = [
+  'uint8',
+  'sint8',
+  'unorm8',
+  'snorm8',
+  'uint16',
+  'sint16',
+  'unorm16',
+  'snorm16'
+];
+
 export function getBufferAttributeLayout(
   name: string,
   accessor: BufferAccessor,
@@ -31,17 +48,18 @@ export function getBufferAttributeLayout(
     // Definitely not valid. TODO - stricter validation?
     return null;
   }
+  const isWebGPU = deviceType === 'webgpu';
+  const isSmallType = Boolean(accessor.type && SMALL_DATA_TYPES.includes(accessor.type));
   // TODO(ibgreen): WebGPU change. Currently we always use normalized 8 bit integers
-  const type = deviceType === 'webgpu' && accessor.type === 'uint8' ? 'unorm8' : accessor.type;
-  const size = accessor.size as number;
-  const webglOnly = Boolean(
-    deviceType !== 'webgpu' &&
-      size === 3 &&
-      type &&
-      ['uint8', 'sint8', 'unorm8', 'snorm8', 'uint16', 'sint16', 'unorm16', 'snorm16'].includes(
-        type
-      )
-  );
+  const type =
+    isWebGPU && accessor.type === 'uint8' && (accessor.size as number) > 1
+      ? 'unorm8'
+      : accessor.type;
+  // Single-component 8/16-bit formats are not available in every WebGPU implementation. Scalars
+  // are read as x2 of the same type: the row stride is padded to 4 bytes, so the second
+  // component stays within the row, and the shader ignores it.
+  const size = isWebGPU && isSmallType && accessor.size === 1 ? 2 : (accessor.size as number);
+  const webglOnly = !isWebGPU && size === 3 && isSmallType;
   return {
     attribute: name,
     // @ts-expect-error Not all combinations are valid vertex formats; it's up to DataColumn to ensure
@@ -50,6 +68,74 @@ export function getBufferAttributeLayout(
     byteOffset: accessor.offset || 0
     // Note stride is set on the top level
   };
+}
+
+/**
+ * Returns the vertex layout of `accessor` as uploaded to a WebGPU buffer.
+ * WebGPU has no 8/16-bit x3 formats, so these are widened to x4. Rows are densely packed with a
+ * stride rounded up to a multiple of 4 bytes, as WebGPU requires. Scalars keep one component;
+ * `getBufferAttributeLayout` reads them as x2.
+ */
+export function getWebGPUPaddedAccessor<T extends DataColumnSettings<unknown>>(accessor: T): T {
+  const bytesPerElement = getDataTypeByteLength(accessor.type);
+  const size = accessor.size === 3 ? 4 : accessor.size;
+  const stride = Math.ceil((size * bytesPerElement) / 4) * 4;
+  return {...accessor, size, stride, offset: 0};
+}
+
+/**
+ * Value of a missing fourth vertex component, in the units of `type`. Like WebGL, which fills
+ * missing components with (0, 0, 0, 1), this is 1.0 for normalized types and 1 otherwise.
+ */
+function getMissingWValue(type: DataType): number {
+  switch (type) {
+    // uint8 is uploaded as unorm8 when widened, see getBufferAttributeLayout
+    case 'uint8':
+    case 'unorm8':
+      return 255;
+    case 'snorm8':
+      return 127;
+    case 'unorm16':
+      return 65535;
+    case 'snorm16':
+      return 32767;
+    default:
+      return 1;
+  }
+}
+
+/**
+ * Repacks `value`, described by `accessor` (offset and stride in bytes), into the dense rows of
+ * `uploadAccessor`. A widened fourth component is filled like WebGL's missing components, and
+ * any remaining bytes of a row are zero.
+ */
+export function padVertexValues(
+  value: TypedArray,
+  accessor: DataColumnSettings<unknown>,
+  uploadAccessor: DataColumnSettings<unknown>
+): TypedArray {
+  const {size, type} = accessor;
+  const bytesPerElement = value.BYTES_PER_ELEMENT;
+  const offset = (accessor.offset || 0) / bytesPerElement;
+  const stride = getStride(accessor) / bytesPerElement;
+  const uploadStride = getStride(uploadAccessor) / bytesPerElement;
+  const vertexCount =
+    value.length < offset + size ? 0 : Math.floor((value.length - offset - size) / stride) + 1;
+  const missingW = size === 3 && uploadAccessor.size === 4 ? getMissingWValue(type) : 0;
+
+  const ArrayType = value.constructor as TypedArrayConstructor;
+  const result = new ArrayType(vertexCount * uploadStride);
+  for (let vertex = 0; vertex < vertexCount; vertex++) {
+    const sourceIndex = offset + vertex * stride;
+    const targetIndex = vertex * uploadStride;
+    for (let component = 0; component < size; component++) {
+      result[targetIndex + component] = value[sourceIndex + component];
+    }
+    if (missingW) {
+      result[targetIndex + 3] = missingW;
+    }
+  }
+  return result;
 }
 
 export function getStride(accessor: DataColumnSettings<unknown>): number {
