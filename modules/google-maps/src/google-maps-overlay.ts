@@ -167,16 +167,23 @@ export default class GoogleMapsOverlay {
     if (this._renderingType) {
       // The overlays, and the deck that may share the vector map's context, are for the old type
       this._removeOverlay();
-      if (this._deck) {
-        destroyDeckInstance(this._deck);
-        this._deck = null;
-        // The destroyed deck finalized the layers, and a finalized layer cannot be added to another deck
-        if (this.props.layers) {
-          this.props.layers = cloneLayers(this.props.layers);
-        }
-      }
+      this._destroyDeckForReplacement();
     }
     this._createOverlay(map);
+  }
+
+  /** Destroys the deck, and copies the layers for the deck that replaces it */
+  _destroyDeckForReplacement() {
+    if (!this._deck) {
+      return;
+    }
+    // A finalized layer cannot be added to another deck. Copy the layers first, while they still
+    // have the prop values that initialization replaced, e.g. an image with a texture
+    if (this.props.layers) {
+      this.props.layers = cloneLayers(this.props.layers);
+    }
+    destroyDeckInstance(this._deck);
+    this._deck = null;
   }
 
   /**
@@ -197,11 +204,20 @@ export default class GoogleMapsOverlay {
 
     // Create WebGL overlay for camera data (and GL context if interleaved)
     const overlay = new google.maps.WebGLOverlayView();
+    // Google may still call an overlay that was replaced, e.g. onContextLost after a fallback to a
+    // raster map, and the deck is no longer the one that it was drawing
+    const ifCurrent =
+      <ArgsT extends unknown[]>(callback: (...args: ArgsT) => void) =>
+      (...args: ArgsT) => {
+        if (this._overlay === overlay) {
+          callback(...args);
+        }
+      };
     overlay.onAdd = noop;
-    overlay.onContextRestored = interleaved ? this._onContextRestored.bind(this) : noop;
-    overlay.onDraw = this._onDrawVector.bind(this, interleaved);
-    overlay.onContextLost = interleaved ? this._onContextLost.bind(this) : noop;
-    overlay.onRemove = interleaved ? this._onRemove.bind(this) : noop;
+    overlay.onContextRestored = interleaved ? ifCurrent(this._onContextRestored.bind(this)) : noop;
+    overlay.onDraw = ifCurrent(this._onDrawVector.bind(this, interleaved));
+    overlay.onContextLost = interleaved ? ifCurrent(this._onContextLost.bind(this)) : noop;
+    overlay.onRemove = interleaved ? ifCurrent(this._onRemove.bind(this)) : noop;
     this._overlay = overlay;
     this._overlay.setMap(map);
   }
@@ -315,10 +331,7 @@ export default class GoogleMapsOverlay {
 
   _onContextLost() {
     // TODO this isn't working
-    if (this._deck) {
-      destroyDeckInstance(this._deck);
-      this._deck = null;
-    }
+    this._destroyDeckForReplacement();
   }
 
   _onRemove() {

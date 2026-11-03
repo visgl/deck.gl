@@ -125,14 +125,39 @@ export function destroyDeckInstance(deck: Deck) {
   deck.props.parent?.remove();
 }
 
-/** Copies the layers, so that they can be added to a new deck */
+/**
+ * Copies the layers, so that they can be added to a new deck.
+ * Call it before destroying the deck that drew them: it reads their layer state.
+ */
 export function cloneLayers(layers: LayersList): LayersList {
   return layers.map(layer => {
     if (Array.isArray(layer)) {
       return cloneLayers(layer);
     }
-    return layer instanceof Layer ? layer.clone({}) : layer;
+    return layer instanceof Layer ? layer.clone(getSuppliedAsyncProps(layer)) : layer;
   });
+}
+
+/** The fields of the private async prop state in `ComponentState` that are read here */
+type AsyncPropState = {type: {transform?: unknown} | null; lastValue: unknown};
+
+/**
+ * Initialization replaces the value of an async prop with a transform in the layer's props, e.g. an
+ * image with a texture of the deck's device. Get the values that the app supplied instead.
+ */
+function getSuppliedAsyncProps(layer: Layer): Record<string, unknown> {
+  const asyncProps: Partial<Record<string, AsyncPropState>> =
+    // @ts-expect-error asyncProps is private
+    layer.internalState?.asyncProps || {};
+  const props: Record<string, unknown> = {};
+  for (const name in asyncProps) {
+    const asyncProp = asyncProps[name];
+    // lastValue stays null while the prop has its default value
+    if (asyncProp?.type?.transform && asyncProp.lastValue !== null) {
+      props[name] = asyncProp.lastValue;
+    }
+  }
+  return props;
 }
 
 /* eslint-disable max-statements */

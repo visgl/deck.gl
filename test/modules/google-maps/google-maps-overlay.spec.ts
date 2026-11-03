@@ -6,7 +6,7 @@
 import {test, expect, vi} from 'vitest';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {BitmapLayer, ScatterplotLayer} from '@deck.gl/layers';
 import {device, gl} from '@deck.gl/test-utils/vitest';
 import {equals} from '@math.gl/core';
 
@@ -219,8 +219,14 @@ for (const interleaved of [true, false]) {
     overlay.finalize();
     expect(map.getDiv().childElementCount, 'Only the map is left').toBe(1);
   });
+}
 
-  test(`GoogleMapsOverlay#vector to raster fallback (interleaved:${interleaved})`, async () => {
+for (const {interleaved, contextLost} of [
+  {interleaved: true, contextLost: false},
+  {interleaved: true, contextLost: true},
+  {interleaved: false, contextLost: false}
+]) {
+  test(`GoogleMapsOverlay#vector to raster fallback (interleaved:${interleaved}${contextLost ? ', context lost first' : ''})`, async () => {
     const map = new mapsApi.Map({
       width: 800,
       height: 400,
@@ -234,12 +240,15 @@ for (const interleaved of [true, false]) {
       map._overlays.add(mapOverlay);
     });
     const layer = new ScatterplotLayer({
+      id: 'points',
       data: [{position: [0, 0]}],
       getPosition: d => d.position
     });
+    const image = new ImageData(1, 1);
+    const bitmapLayer = new BitmapLayer({id: 'bitmap', image, bounds: [-1, -1, 1, 1]});
     const overlay = new GoogleMapsOverlay({
       interleaved,
-      layers: [layer],
+      layers: [layer, bitmapLayer],
       ...(!interleaved && {device})
     });
 
@@ -247,15 +256,23 @@ for (const interleaved of [true, false]) {
       overlay.setMap(map);
       overlay._positioningOverlay.onAdd();
       overlay._overlay.onContextRestored({gl});
+      const vectorOverlay = overlay._overlay;
       const vectorDeck = overlay._deck;
       expect(vectorDeck.props.gl, 'Deck uses the context selected at binding').toBe(
         interleaved ? gl : null
       );
       await expect.poll(() => vectorDeck.isInitialized).toBe(true);
-      overlay._overlay.onDraw({gl, transformer: map.transformer});
+      vectorOverlay.onDraw({gl, transformer: map.transformer});
       await expect.poll(() => layer.isLoaded, 'Layer is initialized').toBe(true);
+      const vectorTexture = bitmapLayer.props.image;
+      expect(vectorTexture, 'Image is replaced with a texture').not.toBe(image);
       addOverlaySpy.mockRestore();
 
+      if (contextLost) {
+        // The vector map's context may be lost before Google reports the fallback
+        vectorOverlay.onContextLost();
+        expect(overlay._deck, 'Deck is destroyed with the context').toBeNull();
+      }
       // Google reports VECTOR first, then falls back when the browser cannot run the vector map
       map.opts.renderingType = mapsApi.RenderingType.RASTER;
       map.emit({type: 'renderingtype_changed'});
@@ -274,15 +291,29 @@ for (const interleaved of [true, false]) {
         expect(deck.getCanvas(), 'Deck has its own canvas').not.toBe(gl.canvas);
       }
 
+      // Google may still call the vector overlay after replacing it
+      vectorOverlay.onContextLost();
+      vectorOverlay.onContextRestored({gl});
+      vectorOverlay.onRemove();
+      expect(overlay._deck, 'The replaced overlay does not change the deck').toBe(deck);
+      expect(deck.props.layerFilter, 'The replaced overlay does not hide the layers').toBeNull();
+
       map.draw();
       expect(deck.props.width, 'Raster overlay draws').toBe(800);
-      await expect.poll(() => deck.layerManager?.getLayers()[0]?.isLoaded).toBe(true);
-      const [rasterLayer] = deck.layerManager.getLayers();
+      const getLayer = id => deck.layerManager?.getLayers().find(l => l.id === id);
+      await expect.poll(() => getLayer('points')?.isLoaded).toBe(true);
+      const rasterLayer = getLayer('points');
       expect(rasterLayer, 'Layer is copied for the new deck').not.toBe(layer);
       expect(
         rasterLayer.getAttributeManager().attributes.instancePositions.getBuffer()?.destroyed,
         'Layer draws with live buffers'
       ).toBe(false);
+      await expect.poll(() => getLayer('bitmap')?.isLoaded).toBe(true);
+      const rasterTexture = getLayer('bitmap').props.image;
+      expect(vectorTexture.destroyed, 'The destroyed deck deletes its texture').toBe(true);
+      expect(rasterTexture, 'Image is copied for the new deck').not.toBe(vectorTexture);
+      expect(rasterTexture.destroyed, 'Bitmap draws with a live texture').toBe(false);
+      expect(rasterTexture.device, 'Texture is on the new device').toBe(deck.device);
     } finally {
       addOverlaySpy.mockRestore();
       finalizeOverlay(overlay);
