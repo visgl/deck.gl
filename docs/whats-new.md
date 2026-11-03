@@ -49,6 +49,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 - [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) dashes render the same in `GlobeView` as in `MapView`.
 - [IconLayer](./api-reference/layers/icon-layer.md), [TextLayer](./api-reference/layers/text-layer.md) and billboard [ScatterplotLayer](./api-reference/layers/scatterplot-layer.md) render on `GlobeView`: objects behind the globe are hidden, objects near the horizon are no longer clipped by the globe's surface, and objects with altitude stay visible past the ground horizon. The [`project` shader module](./api-reference/core/project.md#project_globe_is_occluded) exposes `project_globe_is_occluded` and `project_globe_billboard_clipspace` for custom billboard layers.
 - [`ClipExtension`](./api-reference/extensions/clip-extension.md) clips by geometry on `GlobeView`, and `clipBounds` may cross the antimeridian, e.g. `[170, -20, -170, 20]`.
+- [LineLayer](./api-reference/layers/line-layer.md) and [ArcLayer](./api-reference/layers/arc-layer.md) render on `GlobeView` with its default back-face culling; the `cullMode: 'none'` workaround is no longer needed.
 - [`GlobeController`](./api-reference/core/globe-controller.md) now supports bearing and pitch, including shift/right-click drag and multi-touch rotation, as well as inertial spinning after a fling gesture.
 
 **View management**
