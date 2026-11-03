@@ -245,10 +245,14 @@ for (const {interleaved, contextLost} of [
         data: [{position: [0, 0]}],
         getPosition: d => d.position
       });
-    const layer = createLayer();
+    // The app supplies new layers to each deck that the overlay creates
+    let suppliedLayer;
     const overlay = new GoogleMapsOverlay({
       interleaved,
-      layers: [layer],
+      onLoad: () => {
+        suppliedLayer = createLayer();
+        overlay.setProps({layers: [suppliedLayer]});
+      },
       ...(!interleaved && {device})
     });
 
@@ -262,6 +266,7 @@ for (const {interleaved, contextLost} of [
         interleaved ? gl : null
       );
       await expect.poll(() => vectorDeck.isInitialized).toBe(true);
+      const layer = suppliedLayer;
       vectorOverlay.onDraw({gl, transformer: map.transformer});
       await expect.poll(() => layer.isLoaded, 'Layer is initialized').toBe(true);
       addOverlaySpy.mockRestore();
@@ -270,7 +275,6 @@ for (const {interleaved, contextLost} of [
         // The vector map's context may be lost before Google reports the fallback
         vectorOverlay.onContextLost();
         expect(overlay._deck, 'Deck is destroyed with the context').toBeNull();
-        expect(overlay.props.layers, 'Layers are kept for a restored context').toEqual([layer]);
       }
       // Google reports VECTOR first, then falls back when the browser cannot run the vector map
       map.opts.renderingType = mapsApi.RenderingType.RASTER;
@@ -286,11 +290,9 @@ for (const {interleaved, contextLost} of [
       expect(deck.props.gl, 'Deck does not use the vector map context').toBeFalsy();
       expect(deck.props.parent.parentElement, 'Deck is in the overlay pane').toBe(map.getDiv());
       expect(deck.props.layers, 'Deck does not get the finalized layer').toEqual([]);
-
-      // The app supplies new layers, e.g. when the map reports the new rendering type
-      const newLayer = createLayer();
-      overlay.setProps({layers: [newLayer]});
       await expect.poll(() => deck.isInitialized).toBe(true);
+      const newLayer = suppliedLayer;
+      expect(newLayer, 'The app supplies a new layer').not.toBe(layer);
       if (interleaved) {
         expect(deck.getCanvas(), 'Deck has its own canvas').not.toBe(gl.canvas);
       }
@@ -318,6 +320,68 @@ for (const {interleaved, contextLost} of [
     expect(map.getDiv().childElementCount, 'Only the map is left').toBe(1);
   });
 }
+
+test('GoogleMapsOverlay#vector map context lost and restored', async () => {
+  const map = new mapsApi.Map({
+    width: 800,
+    height: 400,
+    longitude: 0,
+    latitude: 0,
+    zoom: 1,
+    renderingType: mapsApi.RenderingType.VECTOR
+  });
+  // Defer the mock's synchronous callbacks so the vector map's context can be supplied
+  const addOverlaySpy = vi.spyOn(map, '_addOverlay').mockImplementation(mapOverlay => {
+    map._overlays.add(mapOverlay);
+  });
+  // The app supplies new layers to each deck that the overlay creates
+  let suppliedLayer;
+  const overlay = new GoogleMapsOverlay({
+    interleaved: true,
+    onLoad: () => {
+      suppliedLayer = new ScatterplotLayer({
+        id: 'points',
+        data: [{position: [0, 0]}],
+        getPosition: d => d.position
+      });
+      overlay.setProps({layers: [suppliedLayer]});
+    }
+  });
+
+  try {
+    overlay.setMap(map);
+    overlay._positioningOverlay.onAdd();
+    const vectorOverlay = overlay._overlay;
+    vectorOverlay.onContextRestored({gl});
+    const lostDeck = overlay._deck;
+    await expect.poll(() => lostDeck.isInitialized).toBe(true);
+    const layer = suppliedLayer;
+    vectorOverlay.onDraw({gl, transformer: map.transformer});
+    await expect.poll(() => layer.isLoaded, 'Layer is initialized').toBe(true);
+
+    vectorOverlay.onContextLost();
+    expect(overlay._deck, 'Deck is destroyed with the context').toBeNull();
+    expect(overlay.props.layers, 'The finalized layer is removed').toEqual([]);
+
+    vectorOverlay.onContextRestored({gl});
+    const deck = overlay._deck;
+    expect(deck, 'Deck is replaced').not.toBe(lostDeck);
+    await expect.poll(() => deck.isInitialized).toBe(true);
+    const newLayer = suppliedLayer;
+    expect(newLayer, 'The app supplies a new layer').not.toBe(layer);
+    vectorOverlay.onDraw({gl, transformer: map.transformer});
+    await expect.poll(() => newLayer.isLoaded, 'New layer is initialized').toBe(true);
+    expect(deck.layerManager.getLayers()).toEqual([newLayer]);
+    expect(
+      newLayer.getAttributeManager().attributes.instancePositions.getBuffer()?.destroyed,
+      'New layer draws with live buffers'
+    ).toBe(false);
+    expect(newLayer.state.model.device, 'New layer is on the new device').toBe(deck.device);
+  } finally {
+    addOverlaySpy.mockRestore();
+    finalizeOverlay(overlay);
+  }
+});
 
 /** Release Deck-owned WebGL contexts before Chromium evicts the shared test device. */
 function finalizeOverlay(overlay: GoogleMapsOverlay): void {
