@@ -4,7 +4,14 @@
 
 import {test, expect, vi} from 'vitest';
 
-import {Layer, CompositeLayer, LayerManager, Viewport, MapView} from '@deck.gl/core';
+import {
+  Layer,
+  CompositeLayer,
+  LayerManager,
+  Viewport,
+  MapView,
+  OrthographicView
+} from '@deck.gl/core';
 import {layerIndexResolver} from '@deck.gl/core/passes/layers-pass';
 import DrawLayersPass from '@deck.gl/core/passes/draw-layers-pass';
 import PickLayersPass from '@deck.gl/core/passes/pick-layers-pass';
@@ -483,6 +490,86 @@ test('LayersPass#WebGPU renders and picks each repeated world in a separate pass
   } finally {
     beginRenderPass.mockRestore();
     submit.mockRestore();
+    readbackBuffer.destroy();
+    layerManager.finalize();
+    framebuffer.destroy();
+    colorTexture.destroy();
+  }
+});
+
+test('LayersPass#WebGPU viewport uses a top-left origin', async ({skip}) => {
+  const webgpuDevice = await getWebGPUTestDevice();
+  if (!webgpuDevice) {
+    skip();
+    return;
+  }
+
+  const size = 64;
+  // The view covers the top quarter of the framebuffer
+  const view = new OrthographicView({id: 'top', x: 0, y: 0, width: '100%', height: '25%'});
+  const viewport = view.makeViewport({
+    width: size,
+    height: size,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const colorTexture = webgpuDevice.createTexture({
+    format: 'rgba8unorm',
+    width: size,
+    height: size,
+    usage: Texture.RENDER | Texture.COPY_SRC
+  });
+  const framebuffer = webgpuDevice.createFramebuffer({
+    width: size,
+    height: size,
+    colorAttachments: [colorTexture],
+    depthStencilAttachment: 'depth24plus'
+  });
+  const readbackOptions = {x: size / 2, y: 0, width: 1, height: size};
+  const readbackLayout = colorTexture.computeMemoryLayout(readbackOptions);
+  const readbackBuffer = webgpuDevice.createBuffer({
+    byteLength: readbackLayout.byteLength,
+    usage: Buffer.COPY_DST | Buffer.MAP_READ
+  });
+  const layerManager = new LayerManager(webgpuDevice, {viewport});
+  const layersPass = new DrawLayersPass(webgpuDevice);
+
+  try {
+    layerManager.setProps({
+      onError: error => {
+        throw error;
+      }
+    });
+    layerManager.setLayers([
+      new ScatterplotLayer({
+        id: 'webgpu-viewport-origin',
+        data: [{position: [0, 0]}],
+        getPosition: point => point.position,
+        getFillColor: [255, 0, 0, 255],
+        radiusUnits: 'pixels',
+        getRadius: 4
+      })
+    ]);
+    layersPass.render({
+      target: framebuffer,
+      viewports: [viewport],
+      views: {[view.id]: view},
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      clearColor: [0, 0, 0, 0]
+    });
+
+    colorTexture.readBuffer(readbackOptions, readbackBuffer);
+    const pixels = await readbackBuffer.readAsync(0, readbackLayout.byteLength);
+    const getRowColor = (row: number) => {
+      const start = row * readbackLayout.bytesPerRow;
+      return Array.from(pixels.subarray(start, start + 4));
+    };
+
+    expect(getRowColor(size / 8), 'the view is drawn in the top quarter').toEqual([255, 0, 0, 255]);
+    expect(getRowColor(size - size / 8), 'nothing is drawn in the bottom quarter').toEqual([
+      0, 0, 0, 0
+    ]);
+  } finally {
     readbackBuffer.destroy();
     layerManager.finalize();
     framebuffer.destroy();

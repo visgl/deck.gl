@@ -580,7 +580,7 @@ export function layerIndexResolver(
   return resolveLayerIndex;
 }
 
-// Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+// Convert viewport top-left CSS coordinates to framebuffer pixel coordinates
 function getGLViewport(
   device: Device,
   {
@@ -602,11 +602,16 @@ function getGLViewport(
   const [, drawingBufferHeight] = canvasContext.getDrawingBufferSize();
   const height = target ? target.height : drawingBufferHeight;
 
-  // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+  // Viewports are in top-left CSS coordinates. WebGPU framebuffers also have a top-left origin,
+  // WebGL framebuffers have a bottom-left origin.
   const dimensions = viewport;
+  const y =
+    device.type === 'webgpu'
+      ? dimensions.y * pixelRatio
+      : height - (dimensions.y + dimensions.height) * pixelRatio;
   return [
     dimensions.x * pixelRatio,
-    height - (dimensions.y + dimensions.height) * pixelRatio,
+    y,
     dimensions.width * pixelRatio,
     dimensions.height * pixelRatio
   ];
