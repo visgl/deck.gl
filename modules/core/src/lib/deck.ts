@@ -514,7 +514,12 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
       this._ownedCanvas = null;
     }
     if (this._hiddenPlaceholder) {
-      this._hiddenPlaceholder.canvas.style.display = this._hiddenPlaceholder.display;
+      const {canvas: placeholder, display} = this._hiddenPlaceholder;
+      // Take out the shared canvas placed after it, which the restored canvas would offset
+      if (this.canvas && this.canvas.previousElementSibling === placeholder) {
+        this.canvas.remove();
+      }
+      placeholder.style.display = display;
       this._hiddenPlaceholder = null;
     }
     this._canvasContext = null;
@@ -1638,16 +1643,26 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
     if (this._isMultiCanvasMode()) {
       this._syncCanvasTargets();
-    } else if (this.canvas && !this.canvas.isConnected && this.props.parent) {
-      // external canvas may not be in DOM
+    } else if (this.canvas && this.props.parent) {
       const {canvas: placeholder, parent} = this.props;
-      if (placeholder instanceof HTMLCanvasElement && placeholder.isConnected) {
-        // Keep the stacking order of the canvas it stands in for, without its inline offset
+      const isStandIn =
+        placeholder instanceof HTMLCanvasElement &&
+        placeholder !== this.canvas &&
+        placeholder.isConnected;
+      // Hide the canvas the shared canvas draws in place of, so its inline box can't offset it.
+      // This also runs when a previous Deck already inserted the shared canvas.
+      if (isStandIn) {
         this._hiddenPlaceholder ??= {canvas: placeholder, display: placeholder.style.display};
         placeholder.style.display = 'none';
-        placeholder.after(this.canvas);
-      } else {
-        parent.insertBefore(this.canvas, parent.firstChild);
+      }
+      // external canvas may not be in DOM
+      if (!this.canvas.isConnected) {
+        if (isStandIn) {
+          // Keep the stacking order of the canvas it stands in for
+          placeholder.after(this.canvas);
+        } else {
+          parent.insertBefore(this.canvas, parent.firstChild);
+        }
       }
     }
     // TODO v9
