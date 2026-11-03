@@ -48,6 +48,25 @@ class TextDemo extends Component {
     );
   }
 
+  componentDidMount() {
+    // CollisionFilterExtension has not been ported to WebGPU yet. Switching devices remounts the
+    // demo, so this runs once per device.
+    const {device, params, useParam} = this.props;
+    const isWebGPU = device?.type === 'webgpu';
+    if (isWebGPU !== Boolean(params.noOverlap.disabled)) {
+      useParam({
+        noOverlap: isWebGPU
+          ? {
+              ...TextDemo.parameters.noOverlap,
+              displayName: 'Prevent overlap (WebGL only)',
+              value: false,
+              disabled: true
+            }
+          : TextDemo.parameters.noOverlap
+      });
+    }
+  }
+
   render() {
     const {params, data} = this.props;
 

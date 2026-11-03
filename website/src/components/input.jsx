@@ -96,7 +96,7 @@ function RangeInput({name, min, max, step, displayName, displayValue, onChange, 
   );
 }
 
-function Checkbox({name, value, displayName, displayValue, onChange}) {
+function Checkbox({name, value, displayName, displayValue, disabled, onChange}) {
   const onInput = useCallback(
     evt => {
       const newValue = evt.target.checked;
@@ -111,7 +111,7 @@ function Checkbox({name, value, displayName, displayValue, onChange}) {
       <div className="tooltip">
         {displayName}: {String(displayValue)}
       </div>
-      <input type="checkbox" checked={value} onChange={onInput} />
+      <input type="checkbox" checked={value} disabled={disabled} onChange={onInput} />
     </InputContainer>
   );
 }
