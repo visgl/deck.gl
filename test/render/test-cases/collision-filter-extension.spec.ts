@@ -15,10 +15,9 @@ import type {TestCase} from '../deck-test-utils';
 
 const getYear = d => d.YR_INSTALLED || 1997;
 
-// CollisionFilterExtension resolves collisions in clip space using the active view's matrices, so
-// it is view-agnostic: every variant is rendered under MapView and GlobeView (same lng/lat data,
-// same framing). The `simple` variant is additionally rendered under OrthographicView with the
-// data converted to the map preset's pixel space, proving the cartesian picture matches too.
+// Collision filtering happens in clip space, so each variant renders the same picture under MapView
+// and GlobeView; `simple` also renders under OrthographicView with the data in the map's pixel space.
+// Points are 10 px dots coloured by install year, red for 1997 through blue for 2014.
 type Variant = {
   name: string;
   props: Partial<ScatterplotLayerProps & CollisionFilterExtensionProps>;
@@ -28,23 +27,28 @@ type Variant = {
 
 const variants: Variant[] = [
   {
+    // Golden: San Francisco dots thinned so none overlap, the same on map, globe and orthographic
     name: 'simple',
     props: {},
     presets: ['map', 'globe', 'orthographic']
   },
   {
+    // Golden: fewer dots than `simple`, each surrounded by at least a dot's width of empty space
     name: '2x-radius',
     props: {collisionTestProps: {radiusScale: 2}}
   },
   {
+    // Golden: every dot of the dataset, overlapping freely
     name: 'disabled',
     props: {collisionEnabled: false}
   },
   {
+    // Golden: the thinned dots are mostly blue, since newer installs win the collisions
     name: 'ascending',
     props: {getCollisionPriority: d => getYear(d) - 2000}
   },
   {
+    // Golden: the thinned dots are mostly red, since older installs win the collisions
     name: 'descending',
     props: {getCollisionPriority: d => 2000 - getYear(d)}
   }
