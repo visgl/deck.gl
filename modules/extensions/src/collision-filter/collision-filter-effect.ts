@@ -50,7 +50,7 @@ function getRowOwner(layer: Layer): Layer {
 type CollisionSources = {
   /** Source of each layer's picking colors, by layer id */
   sourceIds: Record<string, string>;
-  /** Label owner of each glyph and background layer, by layer id */
+  /** TextLayer whose visibility cell each glyph and background layer uses, by layer id */
   labelIds: Record<string, string>;
 };
 
@@ -86,7 +86,9 @@ function getCollisionSources(layers: Layer[]): CollisionSources {
       (textDataBySource[sourceId] ||= new Set()).add(owner.props.data);
       textSourceIds[layer.id] = sourceId;
       sourceIds[layer.id] = owner.id;
-      labelIds[layer.id] = owner.id;
+      // Each TextLayer tests its own labels, unless it follows another label's result
+      const textLayer = (layer.parent || layer) as Layer<CollisionFilterExtensionProps>;
+      labelIds[layer.id] = textLayer.props._collisionLabelId || textLayer.id;
     } else {
       sourceIds[layer.id] = getSourceId(owner);
     }

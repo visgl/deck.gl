@@ -41,6 +41,12 @@ export type CollisionFilterExtensionProps<DataT = any> = {
    * Props to override when rendering collision map
    */
   collisionTestProps?: {};
+
+  /**
+   * @internal Id of a TextLayer with the same data whose collision result this TextLayer's labels
+   * use, for labels that draw nothing in the collision pass, such as a secondary label.
+   */
+  _collisionLabelId?: string;
 };
 
 /**

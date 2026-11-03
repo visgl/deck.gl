@@ -753,6 +753,64 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text layers sharing their parent data test their labels separately',
+  async () => {
+    // Each row draws a main label and a sublabel 40 pixels below it
+    class MainAndSubLabelLayer extends CompositeLayer {
+      static layerName = 'MainAndSubLabelLayer';
+      renderLayers() {
+        return [
+          ['main', [0, 0]],
+          ['sub', [0, 40]]
+        ].map(
+          ([id, getPixelOffset]) =>
+            new TextLayer(
+              this.getSubLayerProps({id, data: this.props.data, getPixelOffset, getSize: 24})
+            )
+        );
+      }
+    }
+    const rows = [
+      {position: [0, 0], text: 'Collision label', priority: 10},
+      // Only this row's sublabel overlaps the first row's main label
+      {position: [150, -40], text: 'Collision label', priority: 5},
+      {position: [0, 150], text: 'Collision label', priority: 0}
+    ];
+    deck.setProps({
+      layers: [
+        new MainAndSubLabelLayer({
+          id: 'main-and-sub',
+          data: rows,
+          extensions,
+          pickable: true,
+          getCollisionPriority: d => d.priority
+        })
+      ],
+      viewState: {target: [0, 0, 0], zoom: 0}
+    });
+    await new Promise<void>((resolve, reject) =>
+      deck.setProps({onError: reject, onAfterRender: () => resolve()})
+    );
+    // The labels of a row share picking colors, so identify each label by where it is picked
+    const pickLabel = async ([x, y]: number[]) => {
+      const objects = await deck.pickObjectsAsync({x: 380 + x, y: 220 + y, width: 40, height: 10});
+      return objects.map(({object}) => object.priority);
+    };
+    const labels = [
+      {name: 'main 10', center: [0, 0], visible: [10]},
+      {name: 'sub 10', center: [0, 40], visible: [10]},
+      {name: 'main 5', center: [150, -40], visible: [5]},
+      {name: 'sub 5', center: [150, 0], visible: []},
+      {name: 'main 0', center: [0, 150], visible: [0]},
+      {name: 'sub 0', center: [0, 190], visible: [0]}
+    ];
+    for (const {name, center, visible} of labels) {
+      expect(await pickLabel(center), name).toEqual(visible);
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'top-level layers with the same data do not collide with their own objects',
   async () => {
     const points = [
