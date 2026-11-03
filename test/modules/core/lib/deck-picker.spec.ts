@@ -48,6 +48,36 @@ test('DeckPicker#getPickingRect', () => {
   }
 });
 
+test('DeckPicker#_getDeviceRect covers the same rows in either framebuffer orientation', () => {
+  const deckPicker = new DeckPicker(device);
+  const deviceHeight = 100;
+  const canvasContext = {
+    cssToDevicePixels: ([x, y]: number[], yInvert: boolean) => ({
+      x: x * 2,
+      y: yInvert ? deviceHeight - 2 - y * 2 : y * 2,
+      width: 2,
+      height: 2
+    })
+  } as unknown as CanvasContext;
+  const cssRect = {x: 5, y: 10, width: 4, height: 3};
+
+  vi.spyOn(deckPicker, '_isFramebufferYInverted').mockReturnValue(false);
+  expect(deckPicker._getDeviceRect(canvasContext, cssRect), 'top-left framebuffer').toEqual({
+    x: 10,
+    y: 20,
+    width: 10,
+    height: 8
+  });
+
+  vi.spyOn(deckPicker, '_isFramebufferYInverted').mockReturnValue(true);
+  expect(deckPicker._getDeviceRect(canvasContext, cssRect), 'bottom-left framebuffer').toEqual({
+    x: 10,
+    y: deviceHeight - 28,
+    width: 10,
+    height: 8
+  });
+});
+
 test('DeckPicker#_resizeBuffer uses drawing buffer size', () => {
   const deckPicker = new DeckPicker(device);
   const drawingBufferSize: [number, number] = [37, 41];
