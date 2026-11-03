@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {fp32, ShaderModule} from '@luma.gl/shadertools';
+import {fp32, ShaderModule} from '@luma.gl/shaders';
 import {Buffer} from '@luma.gl/core';
 import geometry from '../misc/geometry';
 import {getUniformsFromViewport} from './viewport-uniforms';

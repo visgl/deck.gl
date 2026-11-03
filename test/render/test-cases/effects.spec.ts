@@ -9,7 +9,7 @@ import {
   DirectionalLight,
   _GlobeView as GlobeView
 } from '@deck.gl/core';
-import {zoomBlur, vignette} from '@luma.gl/effects';
+import {zoomBlur, vignette} from '@luma.gl/engine/effects';
 import {hexagons, points} from 'deck.gl-test/data';
 
 import {ScatterplotLayer, SolidPolygonLayer, ColumnLayer} from '@deck.gl/layers';

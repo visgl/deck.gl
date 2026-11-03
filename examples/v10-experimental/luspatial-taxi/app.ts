@@ -9,8 +9,8 @@ import {
   type Viewport,
   type ViewStateChangeParameters
 } from '@deck.gl/core';
-import {LuSpatialPointLayer} from '@deck.gl-community/gpu-layers';
-import {LuSpatialGeographicPointQueryEffect} from '@deck.gl-community/gpu-layers/query';
+import {LuSpatialPointLayer} from '@deck.gl/proposals/layers';
+import {LuSpatialGeographicPointQueryEffect} from '@deck.gl/proposals/effects/query';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {loadTaxiPointResidentWindow} from '../shared/showcase/billion-point-spatial-atlas/taxi-resident-window';

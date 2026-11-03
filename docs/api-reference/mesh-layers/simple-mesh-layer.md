@@ -16,7 +16,7 @@ import TabItem from '@theme/TabItem';
 ```js
 import {Deck} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 
 const layer = new SimpleMeshLayer({
   id: 'SimpleMeshLayer',
@@ -49,7 +49,7 @@ new Deck({
 ```ts
 import {Deck, PickingInfo} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 
 type BartStation = {
   name: string;
@@ -90,7 +90,7 @@ new Deck({
 import React from 'react';
 import {DeckGL} from '@deck.gl/react';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {OBJLoader} from '@loaders.gl/obj';
+import {OBJLoader} from '@loaders.gl/scene/obj';
 import type {PickingInfo} from '@deck.gl/core';
 
 type BartStation = {
@@ -135,7 +135,7 @@ function App() {
 
 ```ts
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
-import {PLYLoader} from '@loaders.gl/ply';
+import {PLYLoader} from '@loaders.gl/pointclouds/ply';
 
 new SimpleMeshLayer({
   mesh: 'path/to/model.ply',

@@ -11,7 +11,7 @@ import {
   GPUCompaction,
   GPUTextSelection,
   type CompiledGPUCommandGraph
-} from '@luma.gl/gpgpu/gpu-core';
+} from '@luma.gl/graph/gpu-core';
 import type {DeckTraceData} from './trace-data';
 import {GPUCulledArrowTextLayer, type GPUCulledTextSource} from './gpu-culled-arrow-text-layer';
 
