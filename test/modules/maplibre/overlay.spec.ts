@@ -20,9 +20,9 @@ import {
   addProtocol as addProtocolV6,
   removeProtocol as removeProtocolV6
 } from 'maplibre-gl-v6';
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 
-import type {Map as MapLibreMap} from 'maplibre-gl-v6';
+import type {GeoJSONSource, Map as MapLibreMap} from 'maplibre-gl-v6';
 
 const webglTest = device.type === 'webgl' ? test : test.skip;
 
@@ -223,17 +223,21 @@ for (const {version, MapClass, addProtocol, removeProtocol} of MAPLIBRE_VERSIONS
       Object.assign(container.style, {width: '400px', height: '300px'});
       document.body.append(container);
 
-      // Hold the GeoJSON source's data request open, so the style is parsed but
-      // `map.isStyleLoaded()` stays false until the test releases it.
+      // Hold GeoJSON data requests open, so the style is parsed but
+      // `map.isStyleLoaded()` stays false until the test releases them.
       let releaseData: () => void = () => {};
-      const dataReleased = new Promise<void>(resolve => {
-        releaseData = resolve;
-      });
+      let dataReleased = Promise.resolve();
+      const holdData = () => {
+        dataReleased = new Promise<void>(resolve => {
+          releaseData = resolve;
+        });
+      };
       addProtocol('delayed', async () => {
         await dataReleased;
         return {data: {type: 'FeatureCollection', features: []}};
       });
 
+      holdData();
       const map = new MapClass({
         container,
         style: {
@@ -255,13 +259,14 @@ for (const {version, MapClass, addProtocol, removeProtocol} of MAPLIBRE_VERSIONS
         interleaved: true,
         layers: [new BitmapLayer({id: 'under-labels', image, bounds, beforeId: 'labels'})]
       });
+      const waitForIdle = () => new Promise<void>(resolve => map.once('idle', () => resolve()));
 
       try {
         map.addControl(overlay);
         await new Promise<void>(resolve => map.once('styledata', () => resolve()));
         expect(map.isStyleLoaded()).toBe(false);
 
-        const idle = new Promise<void>(resolve => map.once('idle', () => resolve()));
+        let idle = waitForIdle();
         releaseData();
         await idle;
 
@@ -270,6 +275,35 @@ for (const {version, MapClass, addProtocol, removeProtocol} of MAPLIBRE_VERSIONS
           'deck-maplibre-layer-group-before:labels',
           'labels'
         ]);
+
+        // Layer changes made while a source reloads are applied once it finishes.
+        const getLayersOrder = vi.spyOn(map, 'getLayersOrder');
+        holdData();
+        void map.getSource<GeoJSONSource>('points')!.setData('delayed://points-2');
+        expect(map.isStyleLoaded()).toBe(false);
+        overlay.setProps({
+          layers: [new BitmapLayer({id: 'under-points', image, bounds, beforeId: 'points'})]
+        });
+        expect(getLayersOrder).not.toHaveBeenCalled();
+
+        idle = waitForIdle();
+        releaseData();
+        await idle;
+
+        expect(map.getLayersOrder()).toEqual([
+          'deck-maplibre-layer-group-before:points',
+          'points',
+          'labels'
+        ]);
+
+        // Once resolved, later source updates do not reconcile layer groups again.
+        getLayersOrder.mockClear();
+        idle = waitForIdle();
+        void map
+          .getSource<GeoJSONSource>('points')!
+          .setData({type: 'FeatureCollection', features: []});
+        await idle;
+        expect(getLayersOrder).not.toHaveBeenCalled();
       } finally {
         map.removeControl(overlay);
         map.remove();
