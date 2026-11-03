@@ -1527,12 +1527,12 @@
     probe.gl "^5.0.0"
     zod "^4.1.12"
 
-"@luma.gl/anari@10.0.0-alpha.8":
-  version "10.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@luma.gl/anari/-/anari-10.0.0-alpha.8.tgz#2836a2443efd8ce33290aeb684dd67d9a0ee7b37"
-  integrity sha512-ZYNP+H3Nj9JaZ0J4+SZ1TYEeKhLSIPfXwk1WiZiMXmwVbPl2Pu+bM0g/Pg8ycewt37LDoeJMCXWyyojEs8AoGw==
+"@luma.gl/anari@10.0.0-alpha.9":
+  version "10.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@luma.gl/anari/-/anari-10.0.0-alpha.9.tgz#623a89a5b40eccb08f60fe4b877c6e2970e3a6ee"
+  integrity sha512-6eN4bCVM98ZB0Ob3I+ZsnTlbiliPTb934P7J805iIbljfo9QGNLtIbchNIGYze/hjLur/PDHrh2VOWEAR4soxA==
   dependencies:
-    "@luma.gl/graph" "10.0.0-alpha.8"
+    "@luma.gl/graph" "10.0.0-alpha.9"
     "@math.gl/core" "5.0.0-beta.4"
     "@math.gl/geometry" "~5.0.0-beta.4"
     zod "^4.4.3"
@@ -1542,41 +1542,41 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-9.0.27.tgz#65d65fa1ea407fd5f74bfa92dfba43261be33763"
   integrity sha512-NBkMim3u0xt4UDe4e69L6E/pq5XNxfX60GrggJDzfilVRfIbx5XwKhBXTyNjjtNEk4oc6uYLHWd/05jGRHcfLg==
 
-"@luma.gl/core@10.0.0-alpha.8":
-  version "10.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-10.0.0-alpha.8.tgz#85e19ea701eb2955ba193882e41014a378133210"
-  integrity sha512-2OidZ0h8Twe+OPt4bIXqwMIJ8YD6T3pCATGShlcg+lYfDMc/h+D0/XoOTeG1AovJcnQb+6j8cQnjkuowiX+3xg==
+"@luma.gl/core@10.0.0-alpha.9":
+  version "10.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-10.0.0-alpha.9.tgz#fb586bbf68cebf2460cb72fd79d4d81c340636cf"
+  integrity sha512-Z6Xchkz5jygJhWKtIu0dPJtmtS3K0rHz2mWFG+8q1Ywgv+p4K9qsTz0QGuspAiaGK6NSEX8a4OuKU89PctkXwQ==
   dependencies:
-    "@luma.gl/shaders" "10.0.0-alpha.8"
+    "@luma.gl/shaders" "10.0.0-alpha.9"
     "@math.gl/core" "~5.0.0-beta.4"
     "@types/offscreencanvas" "^2019.7.3"
     "@webgpu/types" "^0.1.69"
     probe.gl "^5.0.0"
 
-"@luma.gl/engine@10.0.0-alpha.8":
-  version "10.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-10.0.0-alpha.8.tgz#49d276e8e56d8bb78f264f45c92d793facc3e8a8"
-  integrity sha512-/WGB3LBPdXbg2IO6uj0vt7W3pv91f2b4MvNJ7Z2nnK+JstCilA3esMlT5Dm6CpkjXR3QolbpB1ZSnU3p/AEATQ==
+"@luma.gl/engine@10.0.0-alpha.9":
+  version "10.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@luma.gl/engine/-/engine-10.0.0-alpha.9.tgz#0c309b22b254edec5c1a2753d8b76c2cc8b5846d"
+  integrity sha512-h6gKk3uhi2vtRMGFJxS09KN6FOUROXnO2EBDt1Nvk1cTMpzAQoz48Pjy6bVkCzEmX9sRvdwHJkAmmy6PYEWghA==
   dependencies:
-    "@luma.gl/graph" "10.0.0-alpha.8"
+    "@luma.gl/graph" "10.0.0-alpha.9"
     "@mapbox/tiny-sdf" "^2.0.7"
     "@math.gl/core" "~5.0.0-beta.4"
     "@math.gl/geometry" "~5.0.0-beta.4"
     probe.gl "^5.0.0"
 
-"@luma.gl/graph@10.0.0-alpha.8":
-  version "10.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@luma.gl/graph/-/graph-10.0.0-alpha.8.tgz#7ba2d3505045b7e9c5ea4a625ff53baa613085ee"
-  integrity sha512-CmlHGjKwKnyY6vRquQzd8dXe3r/hyaGHUZRn6JfvJEKWHSSQQMGTYoaoKoPoHD5+RjCAJu/A2QfcE9jL+r1tHA==
+"@luma.gl/graph@10.0.0-alpha.9":
+  version "10.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@luma.gl/graph/-/graph-10.0.0-alpha.9.tgz#dcf3214fd34fb5b7d6f40aab59b74dd1ffa99214"
+  integrity sha512-hqZiSC3HJB/Jx7sR7WL2k38M/tUPhkR95rWe9JucXt51VuIpywFdWBGHxCLH1hLn7CAhCoDX/m7Z+HZatNRm9Q==
   dependencies:
     "@math.gl/core" "~5.0.0-beta.4"
     "@math.gl/geospatial" "~5.0.0-beta.4"
     probe.gl "^5.0.0"
 
-"@luma.gl/shaders@10.0.0-alpha.8":
-  version "10.0.0-alpha.8"
-  resolved "https://registry.yarnpkg.com/@luma.gl/shaders/-/shaders-10.0.0-alpha.8.tgz#0d7ccfe35ce32e6c237643f6640a370f157ff2f8"
-  integrity sha512-ykTDGXqpBA0SzIn3cu4ZoBPxOVum3hRqLYoSxVkLLACrtjcU1E/srNqcK8wJ9+/mhh5nwhwtG3EM92IRuIldbw==
+"@luma.gl/shaders@10.0.0-alpha.9":
+  version "10.0.0-alpha.9"
+  resolved "https://registry.yarnpkg.com/@luma.gl/shaders/-/shaders-10.0.0-alpha.9.tgz#7211d193222359cd9b3097dae46e421bbc075085"
+  integrity sha512-wg7nuNOdgxFjEWunhoRCyu2UY/B8v1o0pRJ1iBZWcj4mWwUND74c5rIzox6UEeWqgBlPkZVbf9pxEX+2gNeQ7A==
   dependencies:
     "@math.gl/core" "~5.0.0-beta.4"
 

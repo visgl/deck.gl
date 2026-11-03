@@ -4,7 +4,7 @@
 
 import {LayerExtension} from '@deck.gl/core';
 
-import {FillStyleModuleProps, patternShaders} from './shader-module';
+import {FillStyleModuleProps, patternPlugin} from './shader-module';
 import {
   packProceduralPatterns,
   PROCEDURAL_PATTERN_TEXTURE_FORMAT,
@@ -140,7 +140,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     }
 
     return {
-      modules: [extension.opts.pattern && patternShaders].filter(Boolean)
+      plugins: [extension.opts.pattern && patternPlugin].filter(Boolean)
     };
   }
 

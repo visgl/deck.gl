@@ -18,7 +18,7 @@ import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
 import {pathUniforms, PathProps} from './path-layer-uniforms';
-import {shaderWGSL} from './path-layer.wgsl';
+import {shaderWGSL, pathShaderPlugin} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 import clipExtension from '../utils/clip-extension';
@@ -190,6 +190,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       vs,
       fs,
       source: shaderWGSL,
+      plugins: this.context.device.type === 'webgpu' ? [pathShaderPlugin] : [],
       defines: antialiasing ? {ANTIALIASING: 1} : {},
       modules: [
         project32,

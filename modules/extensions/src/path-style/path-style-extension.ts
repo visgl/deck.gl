@@ -328,12 +328,11 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
           : textBackgroundDashShaders.inject;
       const pathStyle: ShaderModule<SDFDashStyleProps> = {
         name: 'pathStyle',
-        inject,
         uniformTypes: {
           dashGapPickable: 'i32'
         }
       };
-      return {modules: [pathStyle]};
+      return {plugins: [{name: 'pathStyle', module: pathStyle, injections: inject}]};
     }
 
     // PathLayer: one ordered coordinate stage plus capability-specific declarations and setup.
@@ -356,8 +355,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
 
     const {inject} = result;
     const pathStyle: ShaderModule<PathStyleProps> = {
-      name: 'pathStyle',
-      inject
+      name: 'pathStyle'
     };
     if (extension.opts.dash) {
       pathStyle.uniformTypes = {
@@ -367,7 +365,7 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       };
     }
     return {
-      modules: [pathStyle],
+      plugins: [{name: 'pathStyle', module: pathStyle, injections: inject}],
       defines
     };
   }

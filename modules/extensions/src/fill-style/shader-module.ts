@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shaders';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {
   OrthographicViewport,
@@ -215,7 +215,7 @@ ${patternFs}
 `;
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     if (fill.patternEnabled) {
       // Patterns tile a flat plane. geometry.position is sphere XYZ under GlobeView, so flatten
       // it to Mercator; a no-op for flat projections. Pairs with getFlatCommonOrigin() on the CPU.
@@ -251,7 +251,7 @@ const inject = {
     }
   `,
 
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
+  'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       if (fill.procedural) {
         color.a *= fill_getProceduralPatternAlpha();
@@ -350,7 +350,6 @@ export const patternShaders = {
   name: 'fill',
   vs,
   fs,
-  inject,
   dependencies: [project],
   getUniforms: getPatternUniforms,
   uniformTypes: {
@@ -368,3 +367,9 @@ export const patternShaders = {
   FillStyleModuleUniforms,
   FillStyleModuleBindings
 >;
+
+export const patternPlugin: ShaderPlugin = {
+  name: 'pattern',
+  module: patternShaders,
+  injections: inject
+};

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {picking, type ShaderModule} from '@luma.gl/shaders';
+import {picking, type ShaderModule, type ShaderPlugin} from '@luma.gl/shaders';
 import log from '../../utils/log';
 
 export const PICKING_MAX_DISABLED_INDICES = 10;
@@ -170,18 +170,36 @@ const pickingModule: ShaderModule = {
     uniforms.disabledPickingIndices1 = packDisabledPickingIndices(disabledPickingIndices, 4);
     uniforms.disabledPickingIndices2 = packDisabledPickingIndices(disabledPickingIndices, 8);
     return uniforms;
-  },
-  inject: {
-    'vs:DECKGL_FILTER_GL_POSITION': `
+  }
+};
+
+export default pickingModule;
+
+/** Picking hook contributions for models assembled outside Layer.getShaders. */
+export const pickingPlugin: ShaderPlugin = {
+  name: 'picking',
+  module: pickingModule,
+  injections: [
+    {
+      stage: 'vertex',
+      target: 'DECKGL_FILTER_GL_POSITION',
+      glsl: `
     // for picking depth values
     picking_setPickingAttribute(position.z / position.w);
-  `,
-    'vs:DECKGL_FILTER_COLOR': `
+  `
+    },
+    {
+      stage: 'vertex',
+      target: 'DECKGL_FILTER_COLOR',
+      glsl: `
   picking_setPickingColor(geometry.pickingColor);
-  `,
-    'fs:DECKGL_FILTER_COLOR': {
+  `
+    },
+    {
+      stage: 'fragment',
+      target: 'DECKGL_FILTER_COLOR',
       order: 99,
-      injection: `
+      glsl: `
   // use highlight color if this fragment belongs to the selected object.
   color = picking_filterHighlightColor(color);
 
@@ -189,7 +207,5 @@ const pickingModule: ShaderModule = {
   color = picking_filterPickingColor(color);
     `
     }
-  }
+  ]
 };
-
-export default pickingModule;

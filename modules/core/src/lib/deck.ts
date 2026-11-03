@@ -31,7 +31,7 @@ import type {
   Parameters,
   PresentationContext
 } from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shaders';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 
 import {Stats} from '@probe.gl/stats';
 import {EventManager} from 'mjolnir.js';
@@ -902,6 +902,16 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
 
   _removeDefaultShaderModule(module: ShaderModule<Record<string, unknown>>) {
     this.layerManager?.removeDefaultShaderModule(module);
+  }
+
+  /** Install an effect's shader plugin on all layer models. */
+  _addDefaultShaderPlugin(plugin: ShaderPlugin) {
+    this.layerManager!.addDefaultShaderPlugin(plugin);
+  }
+
+  /** Remove an effect's shader plugin from layer models. */
+  _removeDefaultShaderPlugin(plugin: ShaderPlugin) {
+    this.layerManager?.removeDefaultShaderPlugin(plugin);
   }
 
   // Private Methods

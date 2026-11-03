@@ -71,16 +71,16 @@ const shaderModuleVs: ShaderModule<ClipModuleProps> = {
 };
 
 const injectionVs = {
-  'vs:#decl': /* glsl */ `
+  'glsl:vs:#decl': /* glsl */ `
 out float clip_isVisible;
 `,
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));
 `,
-  'fs:#decl': /* glsl */ `
+  'glsl:fs:#decl': /* glsl */ `
 in float clip_isVisible;
 `,
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
+  'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
   if (clip_isVisible < 0.5) discard;
 `
 };
@@ -101,22 +101,22 @@ const shaderModuleFs: ShaderModule<ClipModuleProps> = {
 };
 
 const injectionFs = {
-  'vs:#decl': /* glsl */ `
+  'glsl:vs:#decl': /* glsl */ `
 out vec2 clip_commonPosition;
 `,
   // Flat (Mercator / cartesian) common space, so that the position can be compared with the
   // bounds produced by projectBoundsToFlatCommon() in every projection mode, including globe.
   // Continuous within each triangle (the globe seam is moved opposite the camera); the fragment
   // stage wraps about the bounds centre, which a per-vertex wrap would tear 180° from the bounds.
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   clip_commonPosition = project_common_position_to_flat_continuous(
     geometry.position, project_common_position_to_flat(project.cameraPosition).x
   );
 `,
-  'fs:#decl': /* glsl */ `
+  'glsl:fs:#decl': /* glsl */ `
 in vec2 clip_commonPosition;
 `,
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
+  'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
   if (!clip_isGeometryInBounds(clip_commonPosition)) discard;
 `
 };
@@ -144,12 +144,10 @@ export default class ClipExtension extends LayerExtension {
 
     return clipByInstance
       ? {
-          modules: [shaderModuleVs],
-          inject: injectionVs
+          plugins: [{name: 'clip', module: shaderModuleVs, injections: injectionVs}]
         }
       : {
-          modules: [shaderModuleFs],
-          inject: injectionFs
+          plugins: [{name: 'clip', module: shaderModuleFs, injections: injectionFs}]
         };
   }
 
