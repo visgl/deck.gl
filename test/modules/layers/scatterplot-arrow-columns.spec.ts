@@ -27,6 +27,41 @@ function positions(rows: number[][]) {
 }
 
 for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Arrow fallback colors honor RGB and refresh on format changes on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    await testLayerAsync({
+      Layer: ScatterplotLayer,
+      device: testDevice,
+      draw: false,
+      testCases: ['RGB', 'RGBA', 'RGB'].map((colorFormat, index) => ({
+        ...(index === 0
+          ? {
+              props: {
+                positions: positions([[0, 0]]),
+                getFillColor: [255, 0, 0, 0],
+                getLineColor: () => [0, 255, 0, 0],
+                colorFormat
+              }
+            }
+          : {updateProps: {colorFormat}}),
+        onAfterUpdate: async ({layer}) => {
+          if (!layer.isLoaded) return;
+          const columns = (layer.state.columns as any).prepared.columns;
+          const alpha = colorFormat === 'RGB' ? 255 : 0;
+          expect(Array.from(columns.instanceFillColors.value)).toEqual([255, 0, 0, alpha]);
+          const bytes = await columns.instanceLineColors.data[0].buffer.readAsync();
+          expect(Array.from(bytes.slice(0, 4))).toEqual([0, 255, 0, alpha]);
+        }
+      })),
+      onError: error => {
+        throw error;
+      }
+    });
+  });
+
   test(`Scatterplot directly converts Arrow props on ${backend}`, async ({skip}) => {
     const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
     if (!testDevice) {
