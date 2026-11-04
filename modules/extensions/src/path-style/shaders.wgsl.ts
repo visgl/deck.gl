@@ -32,10 +32,11 @@ fn pathStyle_fitPeriod(length: f32, period: f32) -> f32 {
 `;
 
 /** Port the PathLayer dash and lateral offset stages using luma-managed inputs. */
-export function getPathStyleWGSLPlugin(
+export function getPathStylePlugin(
   dash: boolean,
   offset: boolean,
-  precise: boolean
+  precise: boolean,
+  glslInjections: Record<string, string>
 ): ShaderPlugin {
   return {
     name: 'pathStyle',
@@ -56,6 +57,7 @@ export function getPathStyleWGSLPlugin(
         }
       : {},
     injections: {
+      ...glslInjections,
       ...(offset && {
         'wgsl:vs:DECKGL_FILTER_SIZE': '*size *= abs(instanceOffsets * 2.0) + 1.0;'
       }),
@@ -269,7 +271,10 @@ fn pathStyle_getRectPerimeterPosition(fragUV: vec2<f32>, dims: vec2<f32>, lineWi
 `;
 
 /** Apply the dashed stroke to circle and text-background silhouettes. */
-export function getSDFDashWGSLPlugin(textBackground: boolean): ShaderPlugin {
+export function getSDFDashPlugin(
+  textBackground: boolean,
+  glslInjections: Record<string, string>
+): ShaderPlugin {
   return {
     name: 'pathStyle',
     module: {
@@ -280,6 +285,7 @@ export function getSDFDashWGSLPlugin(textBackground: boolean): ShaderPlugin {
     vertexInputs: {instanceDashArrays: 'vec2<f32>'},
     interStageVariables: {pathStyle_dashArray: {type: 'vec2<f32>'}},
     injections: {
+      ...glslInjections,
       'wgsl:vs:DECKGL_FILTER_GL_POSITION': 'pathStyle_dashArray = instanceDashArrays;',
       'wgsl:fs:#decl': /* wgsl */ `
 var<private> pathStyle_inGap: bool;

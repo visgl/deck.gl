@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {getPathStyleWGSLPlugin, getSDFDashWGSLPlugin} from './shaders.wgsl';
+import {getPathStylePlugin, getSDFDashPlugin} from './shaders.wgsl';
 import {
   LayerExtension,
   WebMercatorViewport,
@@ -29,7 +29,6 @@ import type {
   ProjectUniforms,
   UpdateParameters
 } from '@deck.gl/core';
-import type {ShaderModule} from '@luma.gl/shaders';
 
 const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]},
@@ -323,20 +322,11 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       if (!extension.opts.dash) {
         return null;
       }
-      if (this.context.device.type === 'webgpu') {
-        return {plugins: [getSDFDashWGSLPlugin(layerType === 'textBackground')]};
-      }
       const inject =
         layerType === 'scatterplot'
           ? scatterplotDashShaders.inject
           : textBackgroundDashShaders.inject;
-      const pathStyle: ShaderModule<SDFDashStyleProps> = {
-        name: 'pathStyle',
-        uniformTypes: {
-          dashGapPickable: 'i32'
-        }
-      };
-      return {plugins: [{name: 'pathStyle', module: pathStyle, injections: inject}]};
+      return {plugins: [getSDFDashPlugin(layerType === 'textBackground', inject)]};
     }
 
     // PathLayer: one ordered coordinate stage plus capability-specific declarations and setup.
@@ -357,28 +347,10 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       defines.PATH_STYLE_OFFSET = true;
     }
 
-    if (this.context.device.type === 'webgpu') {
-      const {dash, offset, dashMode} = extension.opts;
-      return {
-        defines,
-        plugins: [getPathStyleWGSLPlugin(dash, offset, dashMode === 'path')]
-      };
-    }
-
-    const {inject} = result;
-    const pathStyle: ShaderModule<PathStyleProps> = {
-      name: 'pathStyle'
-    };
-    if (extension.opts.dash) {
-      pathStyle.uniformTypes = {
-        dashAlignMode: 'f32',
-        dashGapPickable: 'i32',
-        dashUnits: 'i32'
-      };
-    }
+    const {dash, offset, dashMode} = extension.opts;
     return {
-      plugins: [{name: 'pathStyle', module: pathStyle, injections: inject}],
-      defines
+      defines,
+      plugins: [getPathStylePlugin(dash, offset, dashMode === 'path', result.inject)]
     };
   }
 
