@@ -8,7 +8,7 @@ import {luma, Buffer, Texture, type Device, type Framebuffer} from '@luma.gl/cor
 import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
 import {webglDevice as sharedWebGLDevice} from '@luma.gl/core/test-utils-legacy';
 import {webgpuAdapter, type WebGPUDevice} from '@luma.gl/core/webgpu';
-import {Deck, OrbitView, type Layer} from '@deck.gl/core';
+import {Deck, OrbitView, OrbitViewport, type Layer} from '@deck.gl/core';
 import {
   _TerrainExtension as TerrainExtension,
   ClipExtension,
@@ -551,6 +551,48 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
   });
 
   if (backend === 'webgpu') {
+    it('preserves camera-clipped billboard paths on zero-height terrain', async () => {
+      const viewport = new OrbitViewport({width: SIZE, height: SIZE, rotationX: 35});
+      const [x, y, z] = viewport.cameraPosition;
+      const layer = new PathLayer({
+        id: 'camera-clipped-path',
+        coordinateSystem: 'cartesian',
+        data: [
+          {
+            path: [
+              [0, 0, 0],
+              [x * 1.5 + 30, y * 1.5, z * 1.5]
+            ]
+          }
+        ],
+        getPath: d => d.path,
+        billboard: true,
+        widthUnits: 'pixels',
+        getWidth: 12,
+        getColor: [255, 255, 255]
+      });
+      const reference = await renderFrame(
+        {},
+        35,
+        0,
+        undefined,
+        0,
+        layer.clone({id: 'camera-clipped-reference'}),
+        false
+      );
+      const fitted = await renderFrame(
+        {},
+        35,
+        0,
+        createTerrain(() => 0),
+        0,
+        layer.clone({extensions: [new TerrainExtension()], terrainDrawMode: 'offset'}),
+        false
+      );
+      expect(totalBrightness(reference)).toBeGreaterThan(1000);
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+    });
+
     it.each([false, true])('clips billboard strokes with terrain first=%s', async terrainFirst => {
       const clip = new ClipExtension();
       const terrain = new TerrainExtension();
