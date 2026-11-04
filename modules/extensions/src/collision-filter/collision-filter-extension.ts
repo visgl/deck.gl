@@ -42,9 +42,7 @@ export default class CollisionFilterExtension extends LayerExtension {
   static extensionName = 'CollisionFilterExtension';
 
   getShaders(this: Layer<CollisionFilterExtensionProps>): any {
-    return {
-      plugins: [collisionPlugin]
-    };
+    return {plugins: [collisionPlugin]};
   }
 
   /* eslint-disable camelcase */
