@@ -49,11 +49,13 @@ export {default as FirstPersonViewport} from './viewports/first-person-viewport'
 export {
   color,
   picking,
+  pickingPlugin,
   project,
   project32,
   gouraudMaterial,
   phongMaterial,
-  shadow
+  shadow,
+  shadowPlugin
 } from './shaderlib/index';
 
 export {default as View} from './views/view';

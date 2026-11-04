@@ -163,7 +163,6 @@ const testCases = [
   },
   {
     name: 'scatterplot-dash',
-    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0

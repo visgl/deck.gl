@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Framebuffer, Texture, TextureView} from '@luma.gl/core';
-import type {ShaderModule} from '@luma.gl/shaders';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project} from '@deck.gl/core';
 
 const vs = /* glsl */ `
@@ -57,10 +57,10 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 `;
 
 const inject = {
-  'vs:#decl': /* glsl */ `
+  'glsl:vs:#decl': /* glsl */ `
   float collision_fade = 1.0;
 `,
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
   if (collision.sort) {
     float collisionPriority = collisionPriorities;
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
@@ -76,7 +76,7 @@ const inject = {
     }
   }
   `,
-  'vs:DECKGL_FILTER_COLOR': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_COLOR': /* glsl */ `
   color.a *= collision_fade;
   `
 };
@@ -114,14 +114,21 @@ const getCollisionUniforms = (
 };
 
 // @ts-ignore
-export default {
+const collisionModule = {
   name: 'collision',
   dependencies: [project],
   vs,
-  inject,
   getUniforms: getCollisionUniforms,
   uniformTypes: {
     sort: 'i32',
     enabled: 'i32'
   }
 } as ShaderModule<CollisionModuleProps>;
+
+export const collisionPlugin: ShaderPlugin = {
+  name: 'collision',
+  module: collisionModule,
+  injections: inject
+};
+
+export default collisionModule;

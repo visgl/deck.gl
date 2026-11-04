@@ -304,8 +304,8 @@ function getUniforms64(opts?: DataFilterModuleProps | {}): Record<string, any> {
   return uniforms;
 }
 
-const inject = {
-  'vs:#main-start': /* glsl */ `
+export const dataFilterInjections = {
+  'glsl:vs:#main-start': /* glsl */ `
     dataFilter_value = 1.0;
     if (dataFilter.enabled) {
       #ifdef DATAFILTER_TYPE
@@ -325,19 +325,19 @@ const inject = {
     }
   `,
 
-  'vs:#main-end': /* glsl */ `
+  'glsl:vs:#main-end': /* glsl */ `
     if (dataFilter_value == 0.0) {
       gl_Position = vec4(0.);
     }
   `,
 
-  'vs:DECKGL_FILTER_SIZE': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_SIZE': /* glsl */ `
     if (dataFilter.transformSize) {
       size = size * dataFilter_value;
     }
   `,
 
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
+  'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (dataFilter_value == 0.0) discard;
     if (dataFilter.transformColor) {
       color.a *= dataFilter_value;
@@ -370,7 +370,6 @@ export const dataFilter: ShaderModule<DataFilterModuleProps, DataFilterUniforms>
   name: 'dataFilter',
   vs,
   fs,
-  inject,
   getUniforms,
   uniformTypesFromOptions
 };
@@ -381,7 +380,6 @@ export const dataFilter64: ShaderModule<DataFilterModuleProps, DataFilterUniform
   name: 'dataFilter',
   vs,
   fs,
-  inject,
   getUniforms: getUniforms64,
   uniformTypesFromOptions
 };

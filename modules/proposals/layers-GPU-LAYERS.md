@@ -285,7 +285,7 @@ pixels retain the default roughness of 1.
 The GPU integration test exercises the unmodified `ScatterplotLayer` from Deck 9.4.0: opaque
 color/depth capture, transparent blending, exclusion, native picking, and removal of the effect.
 It does not establish compatibility with every stock layer or create normals for them. The pinned
-stock WebGPU shaders do not expose a consistent fragment normal/color-extension hook; supplying
+stock WebGPU shaders do not expose a consistent fragment normal/color-extension injection target; supplying
 `surfaceBuffer` output currently requires a participating shader implementation.
 
 `SceneBufferEffect` itself leaves ordinary Deck rendering and picking in place. Removing it releases
