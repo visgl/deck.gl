@@ -21,7 +21,9 @@ export default class CollisionFilterPass extends LayersPass {
   renderCollisionVisibility(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     this.drawToCollisionVisibility = true;
     try {
-      this.render({...options, clearColor: [0, 0, 0, 0], target, pass: 'collision'});
+      // Cells start unoccluded. Every world copy of a label writes its cell, and any copy that is
+      // occluded or hidden hides the label.
+      this.render({...options, clearColor: [1, 1, 1, 1], target, pass: 'collision'});
     } finally {
       this.drawToCollisionVisibility = false;
     }
@@ -30,7 +32,17 @@ export default class CollisionFilterPass extends LayersPass {
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return {
       ...layer.props.parameters,
-      blend: false,
+      ...(this.drawToCollisionVisibility
+        ? {
+            blend: true,
+            blendColorOperation: 'min',
+            blendColorSrcFactor: 'one',
+            blendColorDstFactor: 'one',
+            blendAlphaOperation: 'min',
+            blendAlphaSrcFactor: 'one',
+            blendAlphaDstFactor: 'one'
+          }
+        : {blend: false}),
       // Collision depth encodes priority, independent of the layer's display order.
       depthBias: 0,
       depthBiasSlopeScale: 0,

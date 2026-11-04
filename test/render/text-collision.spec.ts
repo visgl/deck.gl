@@ -10,9 +10,9 @@ import {
   OrthographicView,
   MapView
 } from '@deck.gl/core';
-import {TextLayer, GeoJsonLayer, ScatterplotLayer} from '@deck.gl/layers';
+import {TextLayer, GeoJsonLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {PointLabelLayer} from '@deck.gl/carto';
-import {CollisionFilterExtension, DataFilterExtension} from '@deck.gl/extensions';
+import {CollisionFilterExtension, DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
 import {createContainer, createTestDevice, removeContainer} from './deck-test-utils';
 import {isRenderTestDeviceEnabled} from './render-test-suite';
 
@@ -1258,6 +1258,90 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       }
       // The small label both overlaps and misses the rotated label along the band
       expect(counts, variant).toEqual(new Set([1, 2]));
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'repeated world copies keep overlapping labels hidden',
+  async () => {
+    // At zoom 0 the labels are drawn in three world copies; only the middle one is onscreen
+    deck.setProps({views: new MapView({repeat: true})});
+    try {
+      const layer = new TextLayer({
+        id: 'repeated',
+        data: [
+          {position: [0, 0], text: 'Collision label', priority: 100},
+          {position: [2, 0], text: 'Collision label', priority: -100}
+        ],
+        getSize: 24,
+        extensions,
+        pickable: true,
+        getCollisionPriority: d => d.priority
+      });
+      await new Promise<void>((resolve, reject) => {
+        deck.setProps({
+          layers: [layer],
+          viewState: {longitude: 0, latitude: 0, zoom: 0},
+          onError: reject,
+          onAfterRender: () => layer.isLoaded && resolve()
+        });
+      });
+      const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+      expect(objects.map(({object}) => object.priority)).toEqual([100]);
+    } finally {
+      deck.setProps({views: new OrthographicView()});
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'labels crossing a mask boundary keep their unmasked part',
+  async () => {
+    // The mask covers the right or the bottom half of the view; the labels cross its edge
+    for (const {polygon, offset} of [
+      {
+        polygon: [
+          [0, -1000],
+          [1000, -1000],
+          [1000, 1000],
+          [0, 1000]
+        ],
+        offset: [60, 0]
+      },
+      {
+        polygon: [
+          [-1000, 0],
+          [1000, 0],
+          [1000, 1000],
+          [-1000, 1000]
+        ],
+        offset: [0, 10]
+      }
+    ]) {
+      const mask = new SolidPolygonLayer({
+        id: 'text-mask',
+        operation: 'mask',
+        data: [{polygon}],
+        getPolygon: d => d.polygon
+      });
+      const single = new TextLayer({
+        id: 'masked',
+        data: [{position: [0, 0], text: 'Collision label', priority: -100}],
+        getSize: 24,
+        billboard: false,
+        maskId: 'text-mask',
+        maskByInstance: false,
+        extensions: [new CollisionFilterExtension(), new MaskExtension()],
+        pickable: true,
+        getCollisionPriority: d => d.priority
+      });
+      expect(await drawLayers([mask, single]), `${offset}`).toEqual([-100]);
+      // The second label overlaps the first one's unmasked part
+      const overlapping = single.clone({
+        data: [...single.props.data, {position: offset, text: 'Collision label', priority: 100}]
+      });
+      expect(await drawLayers([mask, overlapping]), `${offset}`).toEqual([100]);
     }
   }
 );

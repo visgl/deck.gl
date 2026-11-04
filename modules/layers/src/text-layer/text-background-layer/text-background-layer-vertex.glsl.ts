@@ -153,11 +153,7 @@ void main(void) {
     bool culled = textBackground.billboard
       ? gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w
       : text_collisionCulled;
-    if (culled) {
-      gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
-      return;
-    }
-    gl_Position = collision_getVisibilityPosition(positions);
+    gl_Position = collision_getVisibilityPosition(positions, culled);
   }
 #endif
 }

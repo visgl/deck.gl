@@ -85,8 +85,9 @@ void main(void) {
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
 #ifdef MODULE_COLLISION
   // Binary input can supply per-character GPU attributes without per-label
-  // background attributes. In that case this layer writes the label rectangle.
-  if (collision.sort) {
+  // background attributes. In that case this layer draws the label rectangle,
+  // which also places other extensions' per-fragment tests in the visibility pass.
+  if (collision.sort || collision.visibilityPass) {
     pixelOffset = instanceCollisionRects.xy + (positions / 2.0 + 0.5) * instanceCollisionRects.zw;
   }
 #endif
@@ -114,7 +115,7 @@ void main(void) {
   }
 #ifdef MODULE_COLLISION
   // Clip the label rectangle to the content box, which does not scroll, like the background layer
-  if (collision.sort) {
+  if (collision.sort || collision.visibilityPass) {
     vec2 corner = positions / 2.0 + 0.5;
     if (instanceClipRect.z >= 0.0) pixelOffset.x = xy.x + corner.x * wh.x;
     // Flipped like the default offset above, so the rectangle stays front-facing
@@ -198,11 +199,7 @@ void main(void) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
   if (collision.visibilityPass) {
-    if (collision_culled) {
-      gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
-      return;
-    }
-    gl_Position = collision_getVisibilityPosition(positions / 2.0 + 0.5);
+    gl_Position = collision_getVisibilityPosition(positions / 2.0 + 0.5, collision_culled);
   }
 #endif
 }

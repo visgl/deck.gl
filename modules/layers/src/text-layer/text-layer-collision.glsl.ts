@@ -5,9 +5,8 @@
 // Shared by the background and character shaders so both test the same label footprint.
 export default /* glsl */ `
 #ifdef MODULE_COLLISION
-// Whether the collision passes skip this label. Set from the label's corners, so every vertex of a
-// label decides the same way: a triangle mixing a culled vertex with vertices moved to the label's
-// visibility cell would be clipped across other labels' cells.
+// Whether the collision passes hide this label. Set from the label's corners, so every vertex of a
+// label decides the same way.
 bool text_collisionCulled = false;
 
 void text_setCollisionBounds(
