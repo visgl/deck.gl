@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Layer, LayerExtension, log, project, type ProjectUniforms} from '@deck.gl/core';
-import {maskPlugin, maskPluginWGSL, MaskProps} from './shader-module';
+import {maskPlugin, MaskProps} from './shader-module';
 import MaskEffect from './mask-effect';
 import {
   getFlatCommonOrigin,
@@ -53,7 +53,7 @@ export default class MaskExtension extends LayerExtension {
     this.state.maskByInstance = maskByInstance;
 
     return {
-      plugins: [this.context.device.type === 'webgpu' ? maskPluginWGSL : maskPlugin]
+      plugins: [maskPlugin]
     };
   }
 

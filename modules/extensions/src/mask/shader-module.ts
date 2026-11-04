@@ -60,9 +60,6 @@ ${fragment}
 `;
 
 const inject = {
-  'glsl:vs:#decl': /* glsl */ `
-out vec2 mask_texCoords;
-`,
   'glsl:vs:#main-end': /* glsl */ `
    // Anchor (instance) or vertex position in common space, then flattened to the space the
    // mask texture was rendered in (Mercator for geospatial views, identity otherwise)
@@ -70,9 +67,6 @@ out vec2 mask_texCoords;
      ? project_position(vec4(geometry.worldPosition, 1.0))
      : geometry.position;
    mask_texCoords = mask_getCoords(project_common_position_to_flat(mask_common_position));
-`,
-  'glsl:fs:#decl': /* glsl */ `
-in vec2 mask_texCoords;
 `,
   'glsl:fs:#main-start': /* glsl */ `
   if (mask.enabled) {
@@ -111,25 +105,6 @@ const getMaskUniforms = (opts?: MaskProps | {}): Record<string, any> => {
   return opts || {};
 };
 
-const maskModule = {
-  name: 'mask',
-  dependencies: [project],
-  vs,
-  fs,
-  getUniforms: getMaskUniforms,
-  uniformTypes: {
-    bounds: 'vec4<f32>',
-    channel: 'i32',
-    enabled: 'i32',
-    inverted: 'i32',
-    maskByInstance: 'i32'
-  }
-} as const satisfies ShaderModule<MaskProps>;
-
-export const maskPlugin: ShaderPlugin = {name: 'mask', module: maskModule, injections: inject};
-
-export default maskModule;
-
 const source = /* wgsl */ `
 struct MaskUniforms {
   bounds: vec4<f32>,
@@ -143,18 +118,35 @@ struct MaskUniforms {
 @group(0) @binding(auto) var mask_textureSampler: sampler;
 `;
 
-export const maskPluginWGSL: ShaderPlugin = {
+const maskModule = {
   name: 'mask',
-  module: {...maskModule, source},
+  dependencies: [project],
+  vs,
+  fs,
+  source,
+  getUniforms: getMaskUniforms,
+  uniformTypes: {
+    bounds: 'vec4<f32>',
+    channel: 'i32',
+    enabled: 'i32',
+    inverted: 'i32',
+    maskByInstance: 'i32'
+  }
+} as const satisfies ShaderModule<MaskProps>;
+
+export const maskPlugin: ShaderPlugin = {
+  name: 'mask',
+  module: maskModule,
   interStageVariables: {mask_texCoords: {type: 'vec2<f32>'}},
   injections: {
+    ...inject,
     'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
 if (mask.enabled != 0) {
-  var common = geometry.position;
+  var commonPosition = geometry.position;
   if (mask.maskByInstance != 0) {
-    common = vec4<f32>(project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0)), 1.0);
+    commonPosition = vec4<f32>(project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0)), 1.0);
   }
-  let flatPosition = project_common_position_to_flat(common);
+  let flatPosition = project_common_position_to_flat(commonPosition.xyz);
   let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
   mask_texCoords = vec2<f32>(coords.x, 1.0 - coords.y);
 }
@@ -168,3 +160,5 @@ if (mask.enabled != 0) {
 `
   }
 };
+
+export default maskModule;

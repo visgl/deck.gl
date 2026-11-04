@@ -53,7 +53,9 @@ export default class MaskPass extends LayersPass {
       id: 'maskmap',
       width: mapSize,
       height: mapSize,
-      colorAttachments: [this.maskMap]
+      colorAttachments: [this.maskMap],
+      // WebGPU mask pipelines include a depth attachment even though they do not depth-test.
+      ...(device.type === 'webgpu' ? {depthStencilAttachment: 'depth24plus' as const} : {})
     });
   }
 

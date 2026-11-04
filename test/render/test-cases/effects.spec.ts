@@ -410,3 +410,13 @@ describe.each([
 ] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });
+
+// Exercise normal and inverted masking on WebGPU using the existing map goldens.
+describe('webgpu', () => {
+  runRenderTestSuite(
+    (testCases as TestCase[]).filter(testCase =>
+      ['mask-effect', 'mask-effect-inverted'].includes(testCase.name)
+    ),
+    'webgpu'
+  );
+});
