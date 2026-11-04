@@ -242,7 +242,8 @@ export class LayerColumns {
         if (definition.semantic === 'position' && result.residualVector)
           columns[`${definition.attribute}64Low`] = result.residualVector;
       }
-      length ??= 0;
+      length ??= rows.length;
+      chunkLengths ??= [length];
       if (rows.length && rows.length !== length)
         throw new Error('data rows must match Arrow column lengths');
       for (const [name, definition] of Object.entries(this.definitions)) {
@@ -537,7 +538,11 @@ export class LayerColumns {
       Boolean(lowAttribute) && positionOptions.fp64
         ? new Float32Array(Math.max(1, length) * size)
         : undefined;
-    const pack = (value: any, target: Float32Array | Uint8Array | Uint32Array, offset: number) => {
+    const pack = (
+      value: any,
+      target: Float32Array | Uint8Array | Uint8ClampedArray | Uint32Array,
+      offset: number
+    ) => {
       if (lowAttribute) positionOptions.onPosition?.(value);
       if (Boolean(lowAttribute) && positionOptions.transform)
         value = positionOptions.transform(value);
@@ -559,7 +564,7 @@ export class LayerColumns {
         accessor === 'rowIndexes'
           ? new Uint32Array(size)
           : color && !binaryColor
-            ? new Uint8Array(size)
+            ? new Uint8ClampedArray(size)
             : new Float32Array(size);
       pack(source, value, 0);
       if (lows)
@@ -567,13 +572,16 @@ export class LayerColumns {
           format: 'float32x3',
           value: lows.slice(0, size)
         });
-      return new GPUConstant({format: format as any, value});
+      return new GPUConstant({
+        format: format as any,
+        value: value instanceof Uint8ClampedArray ? new Uint8Array(value.buffer) : value
+      });
     }
     const values =
       accessor === 'rowIndexes'
         ? new Uint32Array(length * size)
         : color && !binaryColor
-          ? new Uint8Array(length * size)
+          ? new Uint8ClampedArray(length * size)
           : new Float32Array(length * size);
     const {objectInfo} = createIterable(null);
     objectInfo.data = props.data;
@@ -581,7 +589,7 @@ export class LayerColumns {
       objectInfo.index = index;
       pack(source(rows.at(index) ?? null, objectInfo), values, index * size);
     }
-    const upload = (data: Float32Array | Uint8Array | Uint32Array) => {
+    const upload = (data: Float32Array | Uint8Array | Uint8ClampedArray | Uint32Array) => {
       const buffer = this.device.createBuffer({
         data,
         usage: Buffer.VERTEX | Buffer.COPY_DST | Buffer.COPY_SRC

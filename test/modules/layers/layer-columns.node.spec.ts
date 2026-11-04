@@ -106,3 +106,22 @@ test('LayerColumns waits for data and skips unrelated updates', async () => {
     device.destroy();
   }
 });
+
+test('LayerColumns prepares accessor-only rows and clamps colors', async () => {
+  const device = new NullDevice({});
+  const columns = new LayerColumns(
+    device,
+    {
+      colors: {attribute: 'colors', accessor: 'getColor', semantic: 'color', size: 4}
+    },
+    'test'
+  );
+  const failed = vi.fn();
+  await columns.update({data: [{}, {}], getColor: [300, -1, 0, 255]}, () => {}, failed);
+  expect(failed).not.toHaveBeenCalled();
+  expect(columns.length).toBe(2);
+  expect(Array.from((columns as any).prepared.columns.colors.value)).toEqual([255, 0, 0, 255]);
+  expect((columns as any).prepared.chunkLengths).toEqual([2]);
+  columns.destroy();
+  device.destroy();
+});
