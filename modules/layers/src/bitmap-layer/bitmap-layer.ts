@@ -4,6 +4,7 @@
 
 import {
   Layer,
+  _deepEqual as deepEqual,
   _GPUVectorModel as DeckGPUVectorModel,
   color as colorModule,
   project32,
@@ -282,6 +283,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     if (
       enteringMesh ||
       changeFlags.projectionChanged ||
+      !deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+      !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
       props.positions !== oldProps.positions ||
       props.texCoords !== oldProps.texCoords ||
       props.indices !== oldProps.indices
