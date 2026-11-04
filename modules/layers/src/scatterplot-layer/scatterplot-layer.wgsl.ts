@@ -182,11 +182,13 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = fragColor;
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
     // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
+
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
@@ -206,7 +208,6 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   // Apply premultiplied alpha as required by transparent canvas
-  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   fragColor = deckgl_premultiplied_alpha(fragColor);
   return fragColor;
   // return vec4<f32>(0, 0, 1, 1);
