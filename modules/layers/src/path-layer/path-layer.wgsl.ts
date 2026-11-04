@@ -15,7 +15,22 @@ export const pathShaderPlugin: ShaderPlugin = {
         parameters: 'color: ptr<function, vec4<f32>>, pathPosition: vec2<f32>, pathLength: f32'
       }
     },
-    {name: 'DECKGL_FILTER_PATH_COLOR', stage: 'fragment', wgsl: {parameters: ''}}
+    {name: 'DECKGL_FILTER_PATH_COLOR', stage: 'fragment', wgsl: {parameters: ''}},
+    {
+      name: 'DECKGL_PATH_STYLE_COORDINATES',
+      stage: 'vertex',
+      wgsl: {
+        parameters:
+          'pathPosition: ptr<function, vec2<f32>>, pathLength: ptr<function, f32>, pathBounds: ptr<function, vec2<f32>>, halfWidth: f32'
+      }
+    },
+    {
+      name: 'DECKGL_PATH_STYLE_COLOR',
+      stage: 'fragment',
+      wgsl: {
+        parameters: 'color: ptr<function, vec4<f32>>, pathPosition: vec2<f32>, pathCoverage: f32'
+      }
+    }
   ]
 };
 
@@ -418,6 +433,18 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
+  var pathBounds = vec2<f32>(0.0);
+#ifdef DASH_ENABLED
+  pathBounds = varyings.vPathBounds;
+#endif
+  DECKGL_PATH_STYLE_COORDINATES(
+    &varyings.vPathPosition, &varyings.vPathLength, &pathBounds,
+    select(project_pixel_size_float(widthPixels), widthPixels, path.billboard != 0)
+  );
+#ifdef DASH_ENABLED
+  varyings.vPathBounds = pathBounds;
+#endif
+  geometry.uv = varyings.vPathPosition;
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
@@ -478,7 +505,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Feather one device pixel across the width only, before premultiplication. edgePixels is a
   // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
-  color.a *= smoothedge(0.0, edgePixels);
+  let pathCoverage = smoothedge(0.0, edgePixels);
+  color.a *= pathCoverage;
 #else
 #ifdef DASH_ENABLED
   if (
@@ -506,13 +534,12 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
   DECKGL_FILTER_PATH_COLOR();
-#ifdef ANTIALIASING
-  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
-  return deckgl_premultiplied_alpha(color);
-#else
+#ifndef ANTIALIASING
   var color = varyings.vColor;
+  let pathCoverage = 1.0;
+#endif
+  DECKGL_PATH_STYLE_COLOR(&color, varyings.vPathPosition, pathCoverage);
   DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
-#endif
 }
 `;

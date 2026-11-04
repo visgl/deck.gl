@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {getPathStyleWGSLPlugin, getSDFDashWGSLPlugin} from './shaders.wgsl';
 import {
   LayerExtension,
   WebMercatorViewport,
@@ -322,6 +323,9 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
       if (!extension.opts.dash) {
         return null;
       }
+      if (this.context.device.type === 'webgpu') {
+        return {plugins: [getSDFDashWGSLPlugin(layerType === 'textBackground')]};
+      }
       const inject =
         layerType === 'scatterplot'
           ? scatterplotDashShaders.inject
@@ -351,6 +355,14 @@ export default class PathStyleExtension extends LayerExtension<ResolvedPathStyle
     if (extension.opts.offset) {
       result = mergeShaders(result, offsetShaders);
       defines.PATH_STYLE_OFFSET = true;
+    }
+
+    if (this.context.device.type === 'webgpu') {
+      const {dash, offset, dashMode} = extension.opts;
+      return {
+        defines,
+        plugins: [getPathStyleWGSLPlugin(dash, offset, dashMode === 'path')]
+      };
     }
 
     const {inject} = result;
