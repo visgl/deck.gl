@@ -272,7 +272,7 @@ test('BrushingExtension#WebGPU source, target, combined, and custom modes', asyn
   device.handle.pushErrorScope('validation');
   const deck = new Deck({
     device,
-    container,
+    parent: container,
     width: 128,
     height: 128,
     useDevicePixels: false,
