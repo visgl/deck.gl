@@ -27,7 +27,7 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 [`Fp64Extension`](./api-reference/extensions/fp64-extension.md) supports extended-precision Mercator projection on WebGPU using luma.gl's fp64 math. The default projection remains recommended for performance.
 
-[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) supports numeric and category filtering on WebGPU, including fp64 values, soft ranges, and size and color transforms. Filtered item counting (`countItems`) requires WebGL.
+[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) supports numeric and category filtering on WebGPU, including fp64 values, soft ranges, and size and color transforms. Filtered item counting (`countItems`) works on both backends, with asynchronous callbacks on WebGPU.
 
 
 ### Custom projections (Experimental)

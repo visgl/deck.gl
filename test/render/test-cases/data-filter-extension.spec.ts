@@ -22,11 +22,12 @@ for (let y = 0; y < 20; y++) {
   }
 }
 
+// Golden: only matching grid points remain large; counting must not change rendering.
 const testCases = [
   {
     name: 'filter-1d',
     props: {
-      extensions: [new DataFilterExtension({filterSize: 1})],
+      extensions: [new DataFilterExtension({countItems: true, filterSize: 1})],
       getFilterValue: d => d.column,
       filterRange: [3, 8]
     }
@@ -34,7 +35,7 @@ const testCases = [
   {
     name: 'filter-2d',
     props: {
-      extensions: [new DataFilterExtension({filterSize: 2})],
+      extensions: [new DataFilterExtension({countItems: true, filterSize: 2})],
       getFilterValue: d => [d.column, d.row],
       filterRange: [
         [3, 8],
@@ -45,7 +46,7 @@ const testCases = [
   {
     name: 'single-category',
     props: {
-      extensions: [new DataFilterExtension({categorySize: 1})],
+      extensions: [new DataFilterExtension({countItems: true, categorySize: 1})],
       getFilterCategory: d => d.index % 128,
       filterCategories: [3, 4, 5, 127, 0]
     }
@@ -53,7 +54,7 @@ const testCases = [
   {
     name: '2-categories',
     props: {
-      extensions: [new DataFilterExtension({categorySize: 2, filterSize: 0})],
+      extensions: [new DataFilterExtension({countItems: true, categorySize: 2, filterSize: 0})],
       getFilterCategory: d => [d.index % 128, d.row],
       filterCategories: [
         [3, 4, 5, 15, 50],
@@ -64,7 +65,7 @@ const testCases = [
   {
     name: '3-categories',
     props: {
-      extensions: [new DataFilterExtension({categorySize: 3})],
+      extensions: [new DataFilterExtension({countItems: true, categorySize: 3})],
       getFilterCategory: d => [d.index % 128, d.column, d.row],
       filterCategories: [[3], [1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6]]
     }
@@ -72,7 +73,7 @@ const testCases = [
   {
     name: '4-categories',
     props: {
-      extensions: [new DataFilterExtension({categorySize: 4})],
+      extensions: [new DataFilterExtension({countItems: true, categorySize: 4})],
       getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
       filterCategories: [[0], [0], [0], [0]]
     }
@@ -80,7 +81,7 @@ const testCases = [
   {
     name: '4-categories-filter-2d',
     props: {
-      extensions: [new DataFilterExtension({categorySize: 4, filterSize: 2})],
+      extensions: [new DataFilterExtension({countItems: true, categorySize: 4, filterSize: 2})],
       getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
       filterCategories: [[0], [0], [0], [0]],
       getFilterValue: d => [d.column, d.row],
@@ -97,6 +98,7 @@ const testCases = [
     new ScatterplotLayer({
       id: name,
       data: DATA,
+      onFilteredItemsChange: () => {},
       getRadius: 8,
       radiusUnits: 'pixels',
       ...props

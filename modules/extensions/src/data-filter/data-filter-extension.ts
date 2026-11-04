@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {Buffer, Framebuffer} from '@luma.gl/core';
+import {Buffer, type Framebuffer} from '@luma.gl/core';
 import type {Model} from '@luma.gl/engine';
 import type {Layer, LayerContext, Accessor, UpdateParameters} from '@deck.gl/core';
 import {LayerExtension, log} from '@deck.gl/core';
@@ -76,7 +76,8 @@ export type DataFilterExtensionProps<DataT = any> = {
    */
   filterCategories?: FilterCategory[] | FilterCategory[][];
   /**
-   * Only called if the `countItems` option is enabled.
+   * Only called if the `countItems` option is enabled. WebGPU delivers results asynchronously;
+   * results superseded by a filter or data update are discarded.
    */
   onFilteredItemsChange?: (evt: {
     /** The id of the source layer. */
@@ -104,7 +105,7 @@ export type DataFilterExtensionOptions = {
   fp64?: boolean;
   /**
    * If `true`, reports the number of filtered objects with the `onFilteredItemsChange` callback.
-   * Requires WebGL; enabling item counting on WebGPU throws an error.
+   * WebGPU reports counts asynchronously after GPU readback.
    * @default `false`.
    */
   countItems?: boolean;
@@ -153,9 +154,6 @@ export default class DataFilterExtension extends LayerExtension<
       defines.DATAFILTER_DOUBLE = Boolean(fp64);
     }
 
-    if (this.context.device.type === 'webgpu' && extension.opts.countItems) {
-      throw new Error('DataFilterExtension countItems requires WebGL');
-    }
     return {plugins: [createDataFilterPlugin(extension.opts)], defines};
   }
 
@@ -168,12 +166,9 @@ export default class DataFilterExtension extends LayerExtension<
     }
 
     const {device} = this.context;
-    if (device.type === 'webgpu' && extension.opts.countItems) {
-      throw new Error('DataFilterExtension countItems requires WebGL');
-    }
     if (attributeManager && extension.opts.countItems) {
-      const useFloatTarget = aggregator.supportsFloatTarget(device);
-      addDataFilterCountingAttributes(attributeManager, useFloatTarget);
+      const useFloatTarget = device.type === 'webgl' && aggregator.supportsFloatTarget(device);
+      addDataFilterCountingAttributes(attributeManager, useFloatTarget, device.type === 'webgpu');
 
       const filterFBO = aggregator.getFramebuffer(device, useFloatTarget);
       const filterModel = aggregator.getModel(
@@ -185,7 +180,7 @@ export default class DataFilterExtension extends LayerExtension<
         },
         useFloatTarget
       );
-      this.setState({filterFBO, filterModel});
+      this.setState({filterFBO, filterModel, filterNeedsUpdate: true, filterCountVersion: 0});
     }
   }
 
@@ -201,12 +196,17 @@ export default class DataFilterExtension extends LayerExtension<
         // attributeManager must be defined for filterModel to be set
         attributeManager!.attributes.filterValues?.needsUpdate() ||
         attributeManager!.attributes.filterCategoryValues?.needsUpdate() ||
+        changeFlags.dataChanged ||
+        props.onFilteredItemsChange !== oldProps.onFilteredItemsChange ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange ||
         props.filterCategories !== oldProps.filterCategories;
       if (filterNeedsUpdate) {
-        this.setState({filterNeedsUpdate});
+        this.setState({
+          filterNeedsUpdate,
+          filterCountVersion: Number(this.state.filterCountVersion) + 1
+        });
       }
     }
     updateDataFilterCategoryAttributes(this, {props, oldProps, changeFlags}, categorySize);
@@ -254,37 +254,74 @@ export default class DataFilterExtension extends LayerExtension<
       } = attributeManager;
       filterModel.setVertexCount(this.getNumInstances());
 
-      // @ts-expect-error filterValue and filterVertexIndices should always have buffer value
-      const attributes: Record<string, Buffer> = {
-        ...filterValues?.getValue(),
-        ...filterCategoryValues?.getValue(),
-        ...filterVertexIndices?.getValue()
-      };
+      const filterAttributes = [filterValues, filterCategoryValues, filterVertexIndices].filter(
+        Boolean
+      );
+      filterModel.setBufferLayout(
+        filterAttributes.map(attribute => attribute.getBufferLayout({isInstanced: false}))
+      );
+      const attributes: Record<string, Buffer> = {};
+      const constants = {};
+      for (const attribute of filterAttributes) {
+        for (const [name, value] of Object.entries(attribute.getValue())) {
+          if (value instanceof Buffer) attributes[name] = value;
+          else constants[name] = value;
+        }
+      }
       filterModel.setAttributes(attributes);
+      filterModel.setConstantAttributes(constants);
       filterModel.shaderInputs.setProps({
         dataFilter: dataFilterProps
       });
 
       const viewport = [0, 0, filterFBO.width, filterFBO.height] as NumberArray4;
 
-      const renderPass = filterModel.device.beginRenderPass({
+      // Extension draw runs inside the layer pass; count on a separate encoder.
+      const commandEncoder = filterModel.device.createCommandEncoder();
+      const renderPass = commandEncoder.beginRenderPass({
         id: 'data-filter-aggregation',
         framebuffer: filterFBO,
         parameters: {viewport},
         clearColor: [0, 0, 0, 0]
       });
       filterModel.setParameters(aggregator.parameters);
-      filterModel.draw(renderPass);
+      const didDraw = filterModel.draw(renderPass);
       renderPass.end();
+      filterModel.device.submit(commandEncoder.finish());
 
-      const color = filterModel.device.readPixelsToArrayWebGL(filterFBO);
-      let count = 0;
-      for (let i = 0; i < color.length; i++) {
-        count += color[i];
+      if (!didDraw) {
+        this.setNeedsRedraw();
+        return;
       }
-      onFilteredItemsChange({id: this.id, count});
 
       this.state.filterNeedsUpdate = false;
+      const state = this.state;
+      const version = state.filterCountVersion;
+      const reportCount = (color: ArrayLike<number>) => {
+        if (state.filterModel !== filterModel || state.filterCountVersion !== version) return;
+        let count = 0;
+        for (let i = 0; i < color.length; i++) count += color[i];
+        onFilteredItemsChange({id: this.id, count});
+      };
+      if (filterModel.device.type === 'webgpu') {
+        const texture = filterFBO.colorAttachments[0].texture;
+        const readback = filterModel.device.createBuffer({
+          id: 'data-filter-count-readback',
+          byteLength: texture.computeMemoryLayout().byteLength,
+          usage: Buffer.COPY_DST | Buffer.MAP_READ
+        });
+        texture.readBuffer({}, readback);
+        void readback
+          .readAsync()
+          .then(reportCount)
+          .catch(error => {
+            if (state.filterModel === filterModel)
+              this.raiseError(error, 'counting filtered items');
+          })
+          .finally(() => readback.destroy());
+      } else {
+        reportCount(filterModel.device.readPixelsToArrayWebGL(filterFBO));
+      }
     }
   }
 
@@ -292,7 +329,8 @@ export default class DataFilterExtension extends LayerExtension<
     const filterFBO = this.state.filterFBO as Framebuffer;
     const filterModel = this.state.filterModel as Model;
 
-    // filterFBO.color.delete();
+    this.state.filterModel = null;
+    filterFBO?.colorAttachments[0].texture.destroy();
     filterFBO?.destroy();
     filterModel?.destroy();
   }
