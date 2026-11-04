@@ -368,7 +368,8 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
   it.each([
     ['sizeScale', {sizeScale: 2}],
     ['instance scale', {getScale: [1, 1, 2]}],
-    ['instance translation', {getTranslation: [0, 0, 40]}]
+    ['instance translation', {getTranslation: [0, 0, 40]}],
+    ['instance rotation', {getOrientation: [180, 0, 0], getTranslation: [0, 0, 120]}]
   ])('fits paths to terrain with %s', async (_name, terrainProps) => {
     const reference = await renderFrame(
       {data: [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 80])}]},
