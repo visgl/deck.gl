@@ -163,8 +163,8 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     const {bounds} = this.props;
     if (isRectangularBounds(bounds))
       return [
-        [bounds[0], bounds[1], 0],
-        [bounds[2], bounds[3], 0]
+        [Math.min(bounds[0], bounds[2]), Math.min(bounds[1], bounds[3]), 0],
+        [Math.max(bounds[0], bounds[2]), Math.max(bounds[1], bounds[3]), 0]
       ];
     return [0, 1].map(side =>
       [0, 1, 2].map(i => Math[side ? 'max' : 'min'](...bounds.map(point => point[i] || 0)))

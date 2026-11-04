@@ -7,7 +7,8 @@ import {BitmapLayer} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
-import {Texture} from '@luma.gl/core';
+import {Buffer, Texture} from '@luma.gl/core';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {GPUVectorModel} from '@luma.gl/engine';
 import {Field, FixedSizeList, Float64, Uint16, vectorFromArray} from 'apache-arrow';
 
@@ -108,6 +109,91 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       framebuffer.destroy();
       target.destroy();
       image.destroy();
+    }
+  });
+}
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Bitmap borrows interleaved GPU vertices and offset indices on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const buffer = testDevice.createBuffer({
+      data: new Float32Array([0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0]),
+      usage: Buffer.VERTEX
+    });
+    const indexBuffer = testDevice.createBuffer({
+      data: new Uint32Array([99, 0, 1, 2]),
+      usage: Buffer.INDEX,
+      indexType: 'uint32'
+    });
+    const vector = (name: string, byteOffset: number) =>
+      new GPUVector({
+        type: 'buffer',
+        name,
+        buffer,
+        format: 'float32x2',
+        length: 3,
+        byteStride: 16,
+        byteOffset
+      });
+    const positions = vector('positions', 0);
+    const texCoords = vector('texCoords', 8);
+    const indices = new GPUVector({
+      type: 'buffer',
+      name: 'indices',
+      buffer: indexBuffer,
+      format: 'uint32',
+      length: 3,
+      byteOffset: 4
+    });
+    const image = testDevice.createTexture({width: 1, height: 1, format: 'rgba8unorm'});
+    const target = testDevice.createTexture({
+      width: 8,
+      height: 8,
+      format: 'rgba8unorm',
+      usage: Texture.RENDER_ATTACHMENT
+    });
+    const framebuffer = testDevice.createFramebuffer({colorAttachments: [target]});
+    try {
+      await testLayerAsync({
+        Layer: BitmapLayer,
+        device: testDevice,
+        draw: false,
+        onError: error => {
+          throw error;
+        },
+        testCases: [
+          {
+            props: {positions, texCoords, indices, image, bounds: [1, 1, 0, 0]},
+            onAfterUpdate: async ({layer}) => {
+              if (!layer.isLoaded) return;
+              expect(layer.getBounds()).toEqual([
+                [0, 0, 0],
+                [1, 1, 0]
+              ]);
+              expect(layer.state.model!.indexCount).toBe(3);
+              if (backend === 'webgpu') (testDevice as any).handle.pushErrorScope('validation');
+              const pass = testDevice.beginRenderPass({framebuffer});
+              layer.context.renderPass = pass;
+              layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+              pass.end();
+              testDevice.submit();
+              if (backend === 'webgpu')
+                expect(await (testDevice as any).handle.popErrorScope()).toBeNull();
+            }
+          }
+        ]
+      });
+      expect(buffer.destroyed).toBe(false);
+      expect(indexBuffer.destroyed).toBe(false);
+    } finally {
+      framebuffer.destroy();
+      target.destroy();
+      image.destroy();
+      buffer.destroy();
+      indexBuffer.destroy();
     }
   });
 }
