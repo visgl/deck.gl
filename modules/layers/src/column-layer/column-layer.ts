@@ -562,7 +562,7 @@ export default class ColumnLayer<DataT = any, ExtraPropsT extends {} = {}> exten
   }
 
   /** Draws aligned chunks with global picking indices and the requested instance limit. */
-  private drawModel(model: GPUVectorModel): void {
+  protected drawModel(model: GPUVectorModel): void {
     if (!this.state.columns) {
       model.draw(this.context.renderPass);
       return;

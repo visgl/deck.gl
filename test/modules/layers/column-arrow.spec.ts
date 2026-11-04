@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {expect, test, vi} from 'vitest';
-import {ColumnLayer} from '@deck.gl/layers';
+import {ColumnLayer, GridCellLayer} from '@deck.gl/layers';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVectorModel} from '@luma.gl/engine';
@@ -14,8 +14,10 @@ function positions(rows: number[][]) {
   return vectorFromArray(rows, new FixedSizeList(3, new Field('value', new Float64(), false)));
 }
 
-for (const backend of ['webgl', 'webgpu'] as const) {
-  test(`Column Arrow meshes support all draw modes and replacement on ${backend}`, async ({
+for (const [Layer, backend] of [ColumnLayer, GridCellLayer].flatMap(Layer =>
+  (['webgl', 'webgpu'] as const).map(backend => [Layer, backend] as const)
+)) {
+  test(`${Layer.layerName} Arrow meshes support draw modes and replacement on ${backend}`, async ({
     skip
   }) => {
     const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
@@ -40,7 +42,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     let previousBuffer;
     try {
       await testLayerAsync({
-        Layer: ColumnLayer,
+        Layer,
         device: testDevice,
         draw: false,
         onError: error => {
