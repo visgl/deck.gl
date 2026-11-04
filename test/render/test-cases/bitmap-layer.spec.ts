@@ -80,6 +80,25 @@ for (const indexed of [true, false]) {
   });
 }
 
+// Golden: projection-generated UVs reproduce the existing icon-atlas bitmap.
+testCases.push({
+  ...testCases[0],
+  name: 'bitmap-mapped-subdivision',
+  layers: [
+    new BitmapLayer({
+      opacity: 0.8,
+      bounds: [-122.45, 37.7, -122.35, 37.8],
+      image: '/test/data/icon-atlas.png',
+      imageMapping: {
+        bounds: [-122.45, 37.7, -122.35, 37.8],
+        positionCRS: '+proj=longlat +datum=WGS84',
+        imageCRS: '+proj=longlat +datum=WGS84'
+      },
+      meshMaxEdgeLength: 0.03
+    })
+  ]
+});
+
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
 });

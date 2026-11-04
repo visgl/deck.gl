@@ -52,6 +52,7 @@
     "@luma.gl/shaders": "10.0.0-alpha.10",
     "@mapbox/tiny-sdf": "^2.0.5",
     "@math.gl/core": "5.0.0-beta.4",
+    "@math.gl/geospatial": "5.0.0-beta.4",
     "@math.gl/geometry": "5.0.0-beta.4",
     "@math.gl/web-mercator": "5.0.0-beta.4",
     "@types/geojson": "^7946.0.16",

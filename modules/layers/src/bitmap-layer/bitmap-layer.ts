@@ -32,6 +32,8 @@ import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
 const defaultProps: DefaultProps<BitmapLayerProps> = {
+  imageMapping: {type: 'object', value: null, compare: false},
+  meshMaxEdgeLength: null,
   positions: {type: 'object', value: null, compare: false},
   texCoords: {type: 'object', value: null, compare: false},
   indices: {type: 'object', value: null, compare: false},
@@ -287,6 +289,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1) ||
       props.positions !== oldProps.positions ||
       props.texCoords !== oldProps.texCoords ||
+      props.imageMapping !== oldProps.imageMapping ||
+      props.meshMaxEdgeLength !== oldProps.meshMaxEdgeLength ||
+      (Boolean(props.imageMapping) && !props.positions && props.bounds !== oldProps.bounds) ||
       props.indices !== oldProps.indices
     ) {
       void this.state.typedMesh!.update(
