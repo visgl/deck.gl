@@ -193,6 +193,10 @@ void main(void) {
 
   vColorMode = instanceColorModes;
 #ifdef MODULE_COLLISION
+  // Labels the visibility pass skips are hidden, so they reserve no space
+  if (collision.sort && !icon.billboard && text_collisionCulled) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
   if (collision.visibilityPass) {
     if (collision_culled) {
       gl_Position = vec4(0.0, 0.0, 2.0, 1.0);

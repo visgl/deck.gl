@@ -380,25 +380,46 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
           .filter(priority => priority >= 0)
           .sort((a, b) => a - b);
       };
-      for (const {pitch, position, size} of [
-        {pitch: 45, position: [-0.1, -0.1], size: 400},
-        {pitch: 45, position: [0.05, -0.1], size: 400},
-        {pitch: 60, position: [-0.1, -0.2], size: 100}
+      for (const {pitch, position, size, behindCamera} of [
+        {pitch: 45, position: [-0.1, -0.1], size: 400, behindCamera: true},
+        {pitch: 45, position: [0.05, -0.1], size: 400, behindCamera: true},
+        // In front of the camera: the label is drawn, so only the lowest priority is checked
+        {pitch: 60, position: [-0.1, -0.2], size: 100, behindCamera: false}
       ]) {
-        // A ground label running north to south whose near end passes under the camera.
-        // It has the lowest priority, so it cannot hide the pairs.
-        const crossing = new TextLayer({
-          id: 'crossing',
-          data: [{position, text: 'Collision label', priority: -100}],
-          getSize: size,
-          getAngle: 90,
-          billboard: false,
-          extensions,
-          getCollisionPriority: d => d.priority
-        });
-        expect(await draw(pitch, [overlapping, crossing]), `pitch=${pitch}, ${position}`).toEqual(
-          await draw(pitch, [overlapping])
-        );
+        const baseline = await draw(pitch, [overlapping]);
+        // A ground label running north to south. When its near end passes behind the camera it is
+        // hidden, so it must not hide the pairs even at the highest priority.
+        const text = 'Collision label';
+        const binaryData = {
+          length: 1,
+          startIndices: [0, text.length],
+          attributes: {
+            getText: new Uint8Array(Array.from(text).map(char => char.charCodeAt(0))),
+            getPosition: {
+              value: new Float32Array(text.length * 3).map((_, i) => position[i % 3] ?? 0),
+              size: 3
+            }
+          }
+        };
+        for (const priority of behindCamera ? [-100, 1000] : [-100]) {
+          for (const variant of ['object', 'background', 'binary']) {
+            const crossing = new TextLayer({
+              id: 'crossing',
+              data: variant === 'binary' ? binaryData : [{position, text, priority}],
+              background: variant === 'background',
+              getSize: size,
+              getAngle: 90,
+              billboard: false,
+              extensions,
+              pickable: true,
+              getCollisionPriority: priority
+            });
+            expect(
+              await draw(pitch, [overlapping, crossing]),
+              `pitch=${pitch}, ${position}, priority=${priority}, ${variant}`
+            ).toEqual(baseline);
+          }
+        }
       }
     } finally {
       deck.setProps({views: new OrthographicView()});

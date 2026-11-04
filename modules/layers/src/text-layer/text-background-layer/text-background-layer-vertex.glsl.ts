@@ -143,6 +143,10 @@ void main(void) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
 #ifdef MODULE_COLLISION
+  // Labels the visibility pass skips are hidden, so they reserve no space
+  if (collision.sort && !textBackground.billboard && text_collisionCulled) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
   if (collision.visibilityPass) {
     // Billboard vertices share the anchor's depth, so this vertex's culling by the projection and
     // other vertex extensions applies to the whole label. Other labels decide from their corners.
