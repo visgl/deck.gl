@@ -121,7 +121,19 @@ export default abstract class AggregationLayer<
       // Extension uniforms affect binning even when no input attributes change.
       for (const extension of params.props.extensions) {
         const {defaultProps} = extension.constructor as typeof LayerExtension;
-        if (Object.keys(defaultProps).some(key => params.props[key] !== params.oldProps[key])) {
+        const uniformPropsChanged = Object.entries(defaultProps).some(([key, definition]) => {
+          // Accessor changes are handled by attributes; callbacks do not affect GPU uniforms.
+          if (
+            definition &&
+            typeof definition === 'object' &&
+            'type' in definition &&
+            (definition.type === 'accessor' || definition.type === 'function')
+          ) {
+            return false;
+          }
+          return !deepEqual(params.props[key], params.oldProps[key], 2);
+        });
+        if (uniformPropsChanged) {
           this.state.aggregator.setNeedsUpdate();
           break;
         }
