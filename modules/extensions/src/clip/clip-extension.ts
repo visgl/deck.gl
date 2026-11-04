@@ -52,7 +52,7 @@ export default class ClipExtension extends LayerExtension {
   }
 
   /* eslint-disable camelcase */
-  draw(this: Layer<Required<ClipExtensionProps>>): void {
+  draw(this: Layer<Required<ClipExtensionProps>>, {shaderModuleProps}: any = {}): void {
     const {clipBounds} = this.props;
     const viewport = shaderModuleProps?.project?.viewport ?? this.context.viewport;
     const clipProps = {worldWidth: 0} as ClipModuleProps;
