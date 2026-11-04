@@ -17,7 +17,7 @@ export type BrushingModuleProps = {
 
 type BrushingModuleUniforms = {
   enabled?: boolean;
-  target?: number;
+  targetMode?: number;
   mousePos?: [number, number];
   radius?: number;
 };
@@ -25,16 +25,13 @@ type BrushingModuleUniforms = {
 const uniformBlock = /* glsl */ `\
 layout(std140) uniform brushingUniforms {
   bool enabled;
-  highp int target;
+  highp int targetMode;
   vec2 mousePos;
   float radius;
 } brushing;
 `;
 
 const vertex = /* glsl */ `
-  in vec2 brushingTargets;
-
-  out float brushing_isVisible;
 
   bool brushing_isPointInRange(vec2 position) {
     if (!brushing.enabled) {
@@ -51,9 +48,6 @@ const vertex = /* glsl */ `
     return brushing_isPointInRange(sourcePos) || brushing_isPointInRange(targetPos);
   }
 
-  void brushing_setVisible(bool visible) {
-    brushing_isVisible = float(visible);
-  }
 `;
 
 const vs = `
@@ -61,14 +55,7 @@ ${uniformBlock}
 ${vertex}
 `;
 
-const fragment = /* glsl */ `
-  in float brushing_isVisible;
-`;
-
-const fs = `
-${uniformBlock}
-${fragment}
-`;
+const fs = uniformBlock;
 
 const TARGET = {
   source: 0,
@@ -81,23 +68,23 @@ const inject = {
   'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     vec2 brushingTarget;
     vec2 brushingSource;
-    if (brushing.target == 3) {
+    if (brushing.targetMode == 3) {
       brushingTarget = geometry.worldPositionAlt.xy;
       brushingSource = geometry.worldPosition.xy;
-    } else if (brushing.target == 0) {
+    } else if (brushing.targetMode == 0) {
       brushingTarget = geometry.worldPosition.xy;
-    } else if (brushing.target == 1) {
+    } else if (brushing.targetMode == 1) {
       brushingTarget = geometry.worldPositionAlt.xy;
     } else {
       brushingTarget = brushingTargets;
     }
     bool visible;
-    if (brushing.target == 3) {
+    if (brushing.targetMode == 3) {
       visible = brushing_arePointsInRange(brushingSource, brushingTarget);
     } else {
       visible = brushing_isPointInRange(brushingTarget);
     }
-    brushing_setVisible(visible);
+    brushing_isVisible = float(visible);
   `,
 
   'glsl:fs:DECKGL_FILTER_COLOR': `
@@ -112,6 +99,23 @@ const brushingModule = {
   dependencies: [project],
   vs,
   fs,
+  source: /* wgsl */ `
+struct BrushingUniforms {
+  enabled: i32,
+  targetMode: i32,
+  mousePos: vec2<f32>,
+  radius: f32,
+};
+@group(2) @binding(auto) var<uniform> brushing: BrushingUniforms;
+
+fn brushing_isPointInRange(position: vec2<f32>) -> bool {
+  if (brushing.enabled == 0) { return true; }
+  let sourceCommon = project_position_vec2_f32(position);
+  let targetCommon = project_position_vec2_f32(brushing.mousePos);
+  let distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter.xy);
+  return distance <= brushing.radius;
+}
+`,
   getUniforms: (opts?: BrushingModuleProps | {}): BrushingModuleUniforms => {
     if (!opts || !('viewport' in opts)) {
       return {};
@@ -126,7 +130,7 @@ const brushingModule = {
     return {
       enabled: Boolean(brushingEnabled && mousePosition && viewport.containsPixel(mousePosition)),
       radius: brushingRadius,
-      target: TARGET[brushingTarget] || 0,
+      targetMode: TARGET[brushingTarget] || 0,
       mousePos: mousePosition
         ? (viewport.unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y]) as [
             number,
@@ -137,16 +141,32 @@ const brushingModule = {
   },
   uniformTypes: {
     enabled: 'i32',
-    target: 'i32',
+    targetMode: 'i32',
     mousePos: 'vec2<f32>',
     radius: 'f32'
   }
 } as ShaderModule<BrushingModuleProps, BrushingModuleUniforms, {}>;
 
+/** Portable brushing interface; luma.gl owns vertex-input and varying declarations. */
 export const brushingPlugin: ShaderPlugin = {
   name: 'brushing',
   module: brushingModule,
-  injections: inject
+  vertexInputs: {brushingTargets: 'vec2<f32>'},
+  interStageVariables: {brushing_isVisible: {type: 'f32'}},
+  injections: {
+    ...inject,
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': `
+var brushTarget = geometry.worldPosition.xy;
+if (brushing.targetMode == 1) { brushTarget = geometry.worldPositionAlt.xy; }
+if (brushing.targetMode == 2) { brushTarget = brushingTargets; }
+var visible = brushing_isPointInRange(brushTarget);
+if (brushing.targetMode == 3) {
+  visible = visible || brushing_isPointInRange(geometry.worldPositionAlt.xy);
+}
+brushing_isVisible = select(0.0, 1.0, visible);
+`,
+    'wgsl:fs:DECKGL_FILTER_COLOR': `if (brushing.enabled != 0 && brushing_isVisible < 0.5) { discard; }`
+  }
 };
 
 export default brushingModule;
