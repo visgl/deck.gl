@@ -81,6 +81,40 @@ const inject = {
   `
 };
 
+const source = /* wgsl */ `
+struct CollisionUniforms {
+  sort: i32,
+  enabled: i32,
+};
+@group(0) @binding(auto) var<uniform> collision: CollisionUniforms;
+@group(0) @binding(auto) var collision_texture: texture_2d<f32>;
+
+fn collision_getCoords(position: vec4<f32>) -> vec2<f32> {
+  let clipPosition = project_common_position_to_clipspace(position);
+  // WebGPU textures start at the top left.
+  return vec2<f32>(0.5) + clipPosition.xy / clipPosition.w * vec2<f32>(0.5, -0.5);
+}
+
+fn collision_getVisibility(uv: vec2<f32>, id: vec3<f32>) -> f32 {
+  let dimensions = textureDimensions(collision_texture);
+  let step = vec2<f32>(1.0) / project.viewportSize;
+  var count = 0.0;
+  for (var y = -2; y <= 2; y++) {
+    for (var x = -2; x <= 2; x++) {
+      let offset = vec2<f32>(f32(x), f32(y)) * step;
+      let texel = clamp(
+        vec2<i32>(floor((uv + offset) * vec2<f32>(dimensions))),
+        vec2<i32>(0), vec2<i32>(dimensions) - vec2<i32>(1)
+      );
+      let sampledId = textureLoad(collision_texture, texel, 0).rgb;
+      let delta = dot(abs(sampledId - id), vec3<f32>(1.0));
+      count += select(0.0, 1.0, delta <= 0.001);
+    }
+  }
+  return pow(count / 25.0, 2.2);
+}
+`;
+
 export type CollisionModuleProps = {
   enabled: boolean;
   collisionFBO?: Framebuffer;
@@ -132,3 +166,34 @@ export const collisionPlugin: ShaderPlugin = {
 };
 
 export default collisionModule;
+
+export const collisionPluginWGSL: ShaderPlugin = {
+  name: 'collision',
+  module: {...collisionModule, source},
+  vertexInputs: {collisionPriorities: 'f32'},
+  interStageVariables: {collision_fade: {type: 'f32'}},
+  injections: {
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
+collision_fade = 1.0;
+if (collision.sort != 0 && (*position).w > 0.0 && (*position).z <= (*position).w) {
+  // WebGPU's normalized depth range is [0, 1].
+  (*position).z = (0.5 - 0.0005 * clamp(collisionPriorities, -1000.0, 1000.0)) * (*position).w;
+}
+if (collision.enabled != 0) {
+  let common = project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0));
+  collision_fade = collision_getVisibility(
+    collision_getCoords(vec4<f32>(common, 1.0)), geometry.pickingColor
+  );
+  if (collision_fade < 0.0001) {
+    *position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
+}
+`,
+    'wgsl:fs:DECKGL_FILTER_COLOR': /* wgsl */ `
+if (collision.enabled != 0) {
+  if (collision_fade < 0.0001) { discard; }
+  (*color).a *= collision_fade;
+}
+`
+  }
+};
