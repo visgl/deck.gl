@@ -233,7 +233,9 @@ fn project_mercator_(lnglat: vec2<f32>) -> vec2<f32> {
 fn project_globe_(lnglatz: vec3<f32>) -> vec3<f32> {
   let lambda = radians(lnglatz.x);
   let phi = radians(lnglatz.y);
-  let cosPhi = cos(phi);
+  // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
+  var cosPhi = cos(phi);
+  if (abs(lnglatz.y) == 90.0) { cosPhi = max(abs(cosPhi), 1e-7); }
   let D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
   return vec3<f32>(
     sin(lambda) * cosPhi,

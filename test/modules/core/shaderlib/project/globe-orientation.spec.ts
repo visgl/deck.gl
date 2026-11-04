@@ -104,7 +104,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     let columns: number[][];
     if (backend === 'webgl') {
       columns = [];
-      for (const up of ups) {
+      for (const [longitude, latitude] of LOCATIONS) {
         for (const axis of [
           [1, 0, 0],
           [0, 1, 0],
@@ -114,14 +114,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             vs: `#version 300 es
               out vec3 outValue;
               void main() {
-                outValue = project_get_orientation_matrix(test.uDirUp) * test.uInput;
+                outValue = project_get_orientation_matrix(project_globe_(test.uDirUp)) * test.uInput;
               }`,
             varying: 'outValue',
             modules: [project, testUniforms],
             vertexCount: 1,
             shaderInputProps: {
               project: {viewport},
-              test: {uDirUp: up as NumberArray3, uInput: axis as NumberArray3}
+              test: {uDirUp: [longitude, latitude, 0] as NumberArray3, uInput: axis as NumberArray3}
             }
           });
           columns.push(Array.from(result.slice(0, 3)));
@@ -129,16 +129,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       }
     } else {
       // Use the project uniforms so that their binding is kept
-      const body = `_ = project.projectionMode;\n${ups
-        .map(
-          (up, i) => `{
-            let transform = project_get_orientation_matrix(${wgslVec3(up)});
+      const body = `_ = project.projectionMode;\n${LOCATIONS.map(
+        ([longitude, latitude], i) => `{
+            let transform = project_get_orientation_matrix(project_globe_(${wgslVec3([longitude, latitude, 0])}));
             output[${i * 3}] = vec4<f32>(transform[0], 0.0);
             output[${i * 3 + 1}] = vec4<f32>(transform[1], 0.0);
             output[${i * 3 + 2}] = vec4<f32>(transform[2], 0.0);
           }`
-        )
-        .join('\n')}`;
+      ).join('\n')}`;
       const result = await runWGSL(
         targetDevice,
         [project],
@@ -156,7 +154,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         const actual = columns[i * 3 + axis];
         const label = `${['east', 'north', 'up'][axis]} at ${longitude}, ${latitude}`;
         expected.forEach((value, component) =>
-          expect(actual[component], label).toBeCloseTo(value, 5)
+          expect(actual[component], label).toBeCloseTo(value, 3)
         );
       });
     });

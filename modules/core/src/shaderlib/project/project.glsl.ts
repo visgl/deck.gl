@@ -211,6 +211,8 @@ vec3 project_globe_(vec3 lnglatz) {
   float lambda = radians(lnglatz.x);
   float phi = radians(lnglatz.y);
   float cosPhi = cos(phi);
+  // Preserve longitude at the poles despite GPU cosine rounding to zero or negative.
+  if (abs(lnglatz.y) == 90.0) cosPhi = max(abs(cosPhi), 1e-7);
   float D = (lnglatz.z / EARTH_RADIUS + 1.0) * GLOBE_RADIUS;
 
   return vec3(
