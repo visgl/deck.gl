@@ -379,6 +379,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 #endif
 
     geometry.uv = join.pathPosition;
+    // Match GLSL: fit the anchor before applying the screen-space stroke width.
+    DECKGL_FILTER_GL_POSITION(&currPositionScreen, geometry);
     varyings.position = vec4<f32>(
       currPositionScreen.xyz + join.offset * currPositionScreen.w,
       currPositionScreen.w
@@ -426,6 +428,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     geometry.position = vec4<f32>(currPositionCommon + join.offset, 1.0);
     geometry.uv = join.pathPosition;
     varyings.position = project_common_position_to_clipspace(geometry.position);
+    DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
     varyings.vCornerOffset = join.cornerOffset;
     varyings.vMiterLength = join.miterLength;
     varyings.vPathPosition = join.pathPosition;
@@ -455,7 +458,6 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     attributes.instanceColors.a * layer.opacity
   );
   DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength);
-  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
   return varyings;
 }
 

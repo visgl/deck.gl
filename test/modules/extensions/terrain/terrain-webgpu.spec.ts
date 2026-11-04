@@ -124,7 +124,8 @@ function renderFrame(
   rotationOrbit = 0,
   terrain?: Layer | Layer[],
   timelineTime: number | null = 1000,
-  overrideLayer?: Layer
+  overrideLayer?: Layer,
+  orthographic = true
 ): Promise<Uint8Array> {
   const layer =
     overrideLayer ||
@@ -184,7 +185,7 @@ function renderFrame(
         height: SIZE,
         useDevicePixels: false,
         _animate: true,
-        views: new OrbitView({orbitAxis: 'Z', orthographic: true}),
+        views: new OrbitView({orbitAxis: 'Z', orthographic}),
         initialViewState: {
           target: [0, 0, 0],
           zoom: 0,
@@ -494,6 +495,59 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       expect(pixelDifference(reference, pixels)).toBeLessThan(0.08);
     }
   );
+
+  it.each(['icon', 'path'])('matches elevated billboard %s geometry in perspective', async kind => {
+    const image = document.createElement('canvas');
+    image.width = image.height = 16;
+    const context = image.getContext('2d')!;
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, 16, 16);
+    const props = {
+      id: 'perspective-billboard',
+      coordinateSystem: 'cartesian' as const,
+      billboard: true,
+      getColor: [255, 255, 255] as [number, number, number]
+    };
+    const layer =
+      kind === 'icon'
+        ? new IconLayer({
+            ...props,
+            data: [{}],
+            getPosition: [0, 0, 0],
+            iconAtlas: image,
+            iconMapping: {square: {x: 0, y: 0, width: 16, height: 16}},
+            getIcon: () => 'square',
+            getSize: 40,
+            getPixelOffset: [12, 3]
+          })
+        : new PathLayer({
+            ...props,
+            data: DATA,
+            getPath: d => d.path,
+            getWidth: 8,
+            widthUnits: 'pixels'
+          });
+    const reference = await renderFrame(
+      {},
+      35,
+      0,
+      undefined,
+      0,
+      layer.clone({id: 'perspective-reference', modelMatrix: new Matrix4().translate([0, 0, 80])}),
+      false
+    );
+    const fitted = await renderFrame(
+      {},
+      35,
+      0,
+      createTerrain(() => 80),
+      0,
+      layer.clone({extensions: [new TerrainExtension()], terrainDrawMode: 'offset'}),
+      false
+    );
+    expect(totalBrightness(reference)).toBeGreaterThan(1000);
+    expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+  });
 
   it('samples the correct texture row and lifts billboard anchors without collapsing their radius', async () => {
     const height = (x: number, y: number) => 50 + x * 0.1 + y * 0.3;

@@ -89,12 +89,12 @@ export const terrainWGSLVertexInjection = /* wgsl */ `
       offset = normalize(commonPos) * terrain_globe_latitude_scale(anchor) * PI;
     }
     let height = terrain_get_height(anchorMerc);
-    // Preserve screen-space extrusion already applied by billboard paths.
+    // Preserve clip-space billboard offsets so perspective scales them at the fitted height.
     let anchorClip = project_common_position_to_clipspace(geometry.position);
-    let screenOffset = (*position).xyz / (*position).w - anchorClip.xyz / anchorClip.w;
+    let clipOffset = *position - anchorClip;
     // Keep the source elevation available for layers that sample their full footprint.
     let fittedClip = project_common_position_to_clipspace(geometry.position + vec4<f32>(offset * height, 0.0));
-    *position = vec4<f32>(fittedClip.xyz + screenOffset * fittedClip.w, fittedClip.w);
+    *position = fittedClip + clipOffset;
   }
 `;
 export const terrainWGSLFragmentInjection = /* wgsl */ `
