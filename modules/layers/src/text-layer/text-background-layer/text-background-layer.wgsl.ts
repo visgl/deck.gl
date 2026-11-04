@@ -234,6 +234,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
 
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
+
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);
     if (picking_isColorZero(abs(varyings.pickingColor - highlightedObjectColor))) {
@@ -251,7 +253,6 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
-  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

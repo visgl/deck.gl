@@ -130,7 +130,7 @@ let capSpan = 2.0 * sqrt(max(1.0 - transverse * transverse, 0.0));
 pathStyle_dutyCycle = clamp((solid + min(period - solid, capSpan)) / period, 0.0, 1.0);
 pathStyle_subPixelBlend = smoothstep(period, 2.0 * period, filterWidth);
 let rounded = path.capType > 0.5;
-pathStyle_roundedGap = rounded && gapDistance > 0.0;
+pathStyle_roundedGap = gap > 0.0 && rounded && gapDistance > 0.0;
 pathStyle_dashCoverage = 1.0;
 pathStyle_discardDash = false;
 if (gap > 0.0) {
