@@ -296,3 +296,49 @@ be used when a custom projection requires CPU preprojection. No implicit GPU
 readback is performed. Async mesh iterators and topology transitions are not supported.
 
 Removing all three mesh props restores the bounds-generated mesh.
+
+### Generated texture coordinates
+
+Set `imageMapping` to generate texture coordinates from CPU-readable Arrow positions:
+
+```typescript
+new BitmapLayer({
+  image,
+  positions,
+  indices, // optional manual segmentation
+  imageMapping: {
+    bounds: [left, bottom, right, top],
+    positionCRS: '+proj=longlat +datum=WGS84',
+    imageCRS: '+proj=merc +a=6378137 +b=6378137 +units=m'
+  },
+  meshMaxEdgeLength: 0.25 // optional, in input position-coordinate units
+});
+```
+
+`imageMapping.bounds` is an axis-aligned rectangle in `imageCRS`. Both CRS values
+are explicit math.gl CRS definitions. Positions are interpreted in `positionCRS`
+before the layer's model matrix or rendering projection. The viewport does not
+select the image projection. Set the layer's `coordinateSystem` consistently with
+`positionCRS`; the mapping affects UVs, not the layer's position interpretation.
+Without positions, the layer generates a footprint
+from its ordinary `bounds` prop. Explicit `texCoords` and `imageMapping` are mutually
+exclusive; `_imageCoordinateSystem` does not replace generated UVs.
+
+`meshMaxEdgeLength` must be finite and positive and requires `imageMapping`.
+It subdivides source-space triangles using math.gl's bounded refinement helper.
+Omitting it preserves the supplied segmentation and winding. Distinct seam vertices
+are not welded. The limit is a source-space edge length, not a screen-space error
+bound; for geographic positions use degrees, and avoid mixing elevation units in
+refinement inputs. Tiny limits may exceed math.gl's refinement or allocation bounds
+and report an error.
+
+The layer transforms each resulting vertex into the image CRS, then calculates
+`u = (x - left) / (right - left)` and `v = (top - y) / (top - bottom)`.
+Out-of-range UVs retain the configured texture sampler's behavior. Split projection
+seams and clip invalid projection domains before supplying a mesh. Nonfinite
+positions or projection results and degenerate image bounds are rejected.
+
+Generation requires CPU-readable Arrow columns. GPUVector inputs currently expose
+no supported CPU-value interface and must supply complete positions and UVs instead;
+the layer never performs implicit GPU readback. Manual GPU meshes remain supported
+without `imageMapping`.

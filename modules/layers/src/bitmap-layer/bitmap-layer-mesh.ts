@@ -6,13 +6,15 @@ import {Buffer, type Device, type BufferLayout, type VertexFormat} from '@luma.g
 import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel} from '@luma.gl/engine';
 import {GPUVector, GPUConstant} from '@luma.gl/graph/gpu-data';
+import type {BitmapMappingProps} from './bitmap-layer-mapping';
+import type {BitmapBoundingBox} from './bitmap-layer';
 import type {ColumnSource} from '@deck.gl/core/arrow';
 
 /** A single contiguous Arrow column or caller-owned GPU vector. */
 export type BitmapMeshSource = ColumnSource | GPUVector;
 
-/** Explicit triangle mesh inputs; positions and texture coordinates must be supplied together. */
-export type BitmapMeshProps = {
+/** Triangle mesh inputs with explicit texture coordinates or a CPU image mapping. */
+export type BitmapMeshProps = BitmapMappingProps & {
   /** XY/XYZ positions. GPU-only meshes use bounds for view-fitting metadata. */
   positions?: BitmapMeshSource | null;
   /** Two texture coordinates per vertex, with (0, 0) at the image's top left. */
@@ -23,7 +25,13 @@ export type BitmapMeshProps = {
 
 /** Detects explicit mesh inputs, including incomplete inputs that need validation. */
 export function hasBitmapMesh(props: BitmapMeshProps): boolean {
-  return Boolean(props.positions || props.texCoords || props.indices);
+  return Boolean(
+    props.positions ||
+      props.texCoords ||
+      props.indices ||
+      props.imageMapping ||
+      props.meshMaxEdgeLength != null
+  );
 }
 
 /** Owns only converted Arrow allocations; supplied GPU vectors remain caller-owned. */
@@ -41,7 +49,7 @@ export class BitmapLayerMesh {
 
   /** Prepares a replacement atomically and ignores superseded asynchronous conversions. */
   async update(
-    props: BitmapMeshProps,
+    props: BitmapMeshProps & {bounds?: BitmapBoundingBox},
     options: {transform?: (value: number[]) => readonly number[]; fp64?: boolean},
     changed: () => void,
     failed: (error: Error) => void
@@ -50,6 +58,10 @@ export class BitmapLayerMesh {
     this.loading = true;
     const resources: {destroy(): void}[] = [];
     try {
+      if (props.imageMapping || props.meshMaxEdgeLength != null) {
+        const {createMappedBitmapMesh} = await import('./bitmap-layer-mapping');
+        props = createMappedBitmapMesh({...props, bounds: props.bounds ?? [1, 0, 0, 1]});
+      }
       if (!props.positions || !props.texCoords)
         throw new Error('Bitmap positions require texCoords');
       for (const source of [props.positions, props.texCoords, props.indices]) {

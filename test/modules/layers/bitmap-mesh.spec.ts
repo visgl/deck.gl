@@ -258,3 +258,69 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     });
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Bitmap generated UVs replace mappings and preserve picking on ${backend}`, async ({
+    skip
+  }) => {
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const image = testDevice.createTexture({width: 8, height: 8, format: 'rgba8unorm'});
+    let oldBuffer;
+    try {
+      await testLayerAsync({
+        Layer: BitmapLayer,
+        device: testDevice,
+        draw: false,
+        onError: error => {
+          throw error;
+        },
+        testCases: [
+          {
+            props: {
+              image,
+              bounds: [0, 0, 1, 1],
+              imageMapping: {
+                bounds: [0, 0, 1, 1],
+                positionCRS: '+proj=longlat +datum=WGS84',
+                imageCRS: '+proj=longlat +datum=WGS84'
+              }
+            }
+          },
+          {updateProps: {meshMaxEdgeLength: 0.5}},
+          {updateProps: {imageMapping: null, meshMaxEdgeLength: null}}
+        ].map((testCase, index) => ({
+          ...testCase,
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) return;
+            if (index === 2) {
+              expect(layer.getAttributeManager()).not.toBeNull();
+              expect(oldBuffer.destroyed).toBe(true);
+              return;
+            }
+            const mesh = layer.state.typedMesh as any;
+            if (index === 0) {
+              oldBuffer = mesh.attributes.texCoords.data[0].buffer;
+              const bytes = await oldBuffer.readAsync();
+              expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 8))).toEqual([
+                0, 1, 0, 0, 1, 0, 1, 1
+              ]);
+            } else {
+              expect(oldBuffer.destroyed).toBe(true);
+              oldBuffer = mesh.attributes.texCoords.data[0].buffer;
+              expect(mesh.vertexCount).toBeGreaterThan(4);
+            }
+            const info = layer.getPickingInfo({info: {color: new Uint8Array([64, 32, 0])}} as any);
+            expect(info.bitmap).toEqual({
+              size: {width: 8, height: 8},
+              uv: [0.25, 0.125],
+              pixel: [2, 1]
+            });
+          }
+        }))
+      });
+    } finally {
+      image.destroy();
+    }
+  });
+}
