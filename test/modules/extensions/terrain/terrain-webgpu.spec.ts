@@ -11,6 +11,7 @@ import {webgpuAdapter, type WebGPUDevice} from '@luma.gl/core/webgpu';
 import {Deck, OrbitView, type Layer} from '@deck.gl/core';
 import {
   _TerrainExtension as TerrainExtension,
+  ClipExtension,
   type TerrainExtensionProps
 } from '@deck.gl/extensions';
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
@@ -548,6 +549,54 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     expect(totalBrightness(reference)).toBeGreaterThan(1000);
     expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
   });
+
+  if (backend === 'webgpu') {
+    it.each([false, true])('clips billboard strokes with terrain first=%s', async terrainFirst => {
+      const clip = new ClipExtension();
+      const terrain = new TerrainExtension();
+      const layer = new PathLayer({
+        id: 'clipped-billboard',
+        data: DATA,
+        coordinateSystem: 'cartesian',
+        billboard: true,
+        widthUnits: 'pixels',
+        getWidth: 60,
+        getColor: [255, 255, 255],
+        getPath: d => d.path,
+        clipByInstance: false,
+        clipBounds: [-200, 10, 200, 200]
+      });
+      const elevated = layer.clone({
+        id: 'clipped-reference',
+        modelMatrix: new Matrix4().translate([0, 0, 80])
+      });
+      const full = await renderFrame({}, 35, 0, undefined, 0, elevated, false);
+      const reference = await renderFrame(
+        {},
+        35,
+        0,
+        undefined,
+        0,
+        elevated.clone({id: 'clipped-reference-with-clip', extensions: [clip]}),
+        false
+      );
+      expect(totalBrightness(reference)).toBeGreaterThan(1000);
+      expect(totalBrightness(reference) / totalBrightness(full)).toBeLessThan(0.8);
+      const fitted = await renderFrame(
+        {},
+        35,
+        0,
+        createTerrain(() => 80),
+        0,
+        layer.clone({
+          extensions: terrainFirst ? [terrain, clip] : [clip, terrain],
+          terrainDrawMode: 'offset'
+        }),
+        false
+      );
+      expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+    });
+  }
 
   it('samples the correct texture row and lifts billboard anchors without collapsing their radius', async () => {
     const height = (x: number, y: number) => 50 + x * 0.1 + y * 0.3;
