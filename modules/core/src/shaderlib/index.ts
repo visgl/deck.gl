@@ -4,7 +4,7 @@
 
 import {
   type ShaderAssembler,
-  type ShaderHook,
+  type ShaderInjectionTarget,
   GLSLShaderAssembler,
   WGSLShaderAssembler,
   gouraudMaterial,
@@ -21,7 +21,7 @@ import picking, {pickingPlugin} from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-const SHADER_HOOKS_GLSL: ShaderHook[] = [
+const SHADER_INJECTION_TARGETS_GLSL: ShaderInjectionTarget[] = [
   {
     name: 'DECKGL_FILTER_SIZE',
     stage: 'vertex',
@@ -44,7 +44,7 @@ const SHADER_HOOKS_GLSL: ShaderHook[] = [
   }
 ];
 
-const SHADER_HOOKS_WGSL: ShaderHook[] = [
+const SHADER_INJECTION_TARGETS_WGSL: ShaderInjectionTarget[] = [
   // Not yet supported
 ];
 
@@ -58,9 +58,10 @@ function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
 
   // Add shader hooks based on language
   // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?
-  const shaderHooks = language === 'glsl' ? SHADER_HOOKS_GLSL : SHADER_HOOKS_WGSL;
-  for (const shaderHook of shaderHooks) {
-    shaderAssembler.addShaderHook(shaderHook);
+  const shaderInjectionTargets =
+    language === 'glsl' ? SHADER_INJECTION_TARGETS_GLSL : SHADER_INJECTION_TARGETS_WGSL;
+  for (const shaderInjectionTarget of shaderInjectionTargets) {
+    shaderAssembler.addShaderInjectionTarget(shaderInjectionTarget);
   }
 
   return shaderAssembler;

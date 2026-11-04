@@ -6,7 +6,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.9
+### luma.gl v10 alpha.10
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -49,8 +49,10 @@ return {
 };
 ```
 
-`addShaderHook` now takes `{name, stage, glsl: {parameters}}` instead of a GLSL
-signature string. Use explicit `ShaderInjection` arrays for ordered injections and
+`addShaderInjectionTarget` replaces `addShaderHook` and takes
+`{name, stage, glsl: {parameters}}` instead of a GLSL signature string. Rename
+`ShaderHook` to `ShaderInjectionTarget` and plugin `hooks` to `injectionTargets`.
+Use explicit `ShaderInjection` arrays for ordered injections and
 language-qualified keys for GLSL-only plugins. `Layer.getShaders` still installs
 picking hooks when its `modules` includes deck's `picking` module. Custom models
 constructed outside that method must pass `plugins: [pickingPlugin]` from
@@ -59,6 +61,10 @@ constructed outside that method must pass `plugins: [pickingPlugin]` from
 
 `Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
 of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
+
+`RenderPassParameters.colorMask` is removed in alpha.10. Set `colorMask` on layer
+or model pipeline parameters instead. `LayersPassRenderOptions.colorMask` still
+applies to layer draws and preserves masked WebGL attachment clears.
 
 ### loaders.gl and math.gl v5 beta
 

@@ -1398,7 +1398,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       const webGPUDrawParameters =
         context.device instanceof WebGLDevice ? null : splitWebGPUDrawParameters(parameters);
 
-      applyModelParameters(this.getModels(), renderPass, parameters, webGPUDrawParameters);
+      applyModelParameters(this.getModels(), parameters, webGPUDrawParameters);
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
@@ -1413,17 +1413,15 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
           this.draw(opts);
         });
       } else {
-        if (webGPUDrawParameters?.renderPassParameters) {
-          renderPass.setParameters(webGPUDrawParameters.renderPassParameters);
-        }
-        const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
+        renderPass.withParameters(webGPUDrawParameters?.renderPassParameters || {}, () => {
+          const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
-        // extensions
-        for (const extension of this.props.extensions) {
-          extension.draw.call(this, opts, extension);
-        }
+          for (const extension of this.props.extensions) {
+            extension.draw.call(this, opts, extension);
+          }
 
-        this.draw(opts);
+          this.draw(opts);
+        });
       }
     } finally {
       this.props = currentProps;
@@ -1693,13 +1691,11 @@ function splitWebGPUDrawParameters(parameters: LumaParameters): {
 
 function applyModelParameters(
   models: LumaGPUVectorModel[],
-  renderPass: RenderPass,
   parameters: LumaParameters,
   webGPUDrawParameters: ReturnType<typeof splitWebGPUDrawParameters> | null
 ): void {
   for (const model of models) {
     if (model.device.type === 'webgpu') {
-      syncModelAttachmentFormats(model, renderPass);
       // TODO(ibgreen): model.setParameters currently wipes parameters. Semantics TBD.
       model.setParameters({
         ...model.parameters,
@@ -1710,62 +1706,6 @@ function applyModelParameters(
     }
   }
 }
-
-function syncModelAttachmentFormats(model: LumaGPUVectorModel, renderPass: RenderPass): void {
-  const framebuffer =
-    renderPass.props.framebuffer ||
-    ((
-      renderPass as RenderPass & {
-        framebuffer?: {
-          colorAttachments: Array<{texture: {format: string}}>;
-          depthStencilAttachment: {texture: {format: string}} | null;
-        };
-      }
-    ).framebuffer ??
-      null);
-
-  if (!framebuffer) {
-    return;
-  }
-
-  const colorAttachmentFormats = framebuffer.colorAttachments.map(
-    attachment => attachment?.texture?.format ?? null
-  );
-  const depthStencilAttachmentFormat = framebuffer.depthStencilAttachment?.texture?.format;
-
-  const modelWithProps = model as unknown as {
-    props: {
-      colorAttachmentFormats?: (string | null)[];
-      depthStencilAttachmentFormat?: string;
-    };
-    _setPipelineNeedsUpdate(reason: string): void;
-  };
-
-  if (
-    !equalAttachmentFormats(modelWithProps.props.colorAttachmentFormats, colorAttachmentFormats) ||
-    modelWithProps.props.depthStencilAttachmentFormat !== depthStencilAttachmentFormat
-  ) {
-    modelWithProps.props.colorAttachmentFormats = colorAttachmentFormats;
-    modelWithProps.props.depthStencilAttachmentFormat = depthStencilAttachmentFormat;
-    modelWithProps._setPipelineNeedsUpdate('attachment formats');
-  }
-}
-
-function equalAttachmentFormats(left?: (string | null)[], right?: (string | null)[]): boolean {
-  if (left === right) {
-    return true;
-  }
-  if (!left || !right || left.length !== right.length) {
-    return false;
-  }
-  for (let i = 0; i < left.length; i++) {
-    if (left[i] !== right[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
 // Resolve the current layer at invocation: layer instances are replaced while attributes survive.
 function transformPosition(this: Layer, input: number[]): [number, number, number] {
   const position: [number, number, number] = [input[0], input[1], input[2] ?? 0];

@@ -4,6 +4,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### luma.gl v10 alpha.10
+
+The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
+constant-buffer binding and render-target format tracking to luma.gl. WebGPU
+layer draws restore dynamic render-pass parameters after drawing. Custom shader
+plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
+
 ### deck.gl v10 examples (Experimental)
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.

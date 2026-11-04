@@ -11,6 +11,7 @@ import type {
   RenderPipelineParameters
 } from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import {withDeviceParameters} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
@@ -53,6 +54,7 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  /** Color write channels for layer pipelines and WebGL attachment clears. */
   colorMask?: number;
   scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
@@ -93,6 +95,16 @@ export default class LayersPass extends Pass {
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    if (this.device.type === 'webgl' && options.colorMask !== undefined) {
+      // WebGL clears honor the write mask; mask passes must preserve other channels.
+      return withDeviceParameters(this.device, {colorMask: options.colorMask}, () =>
+        this._renderLayers(options)
+      );
+    }
+    return this._renderLayers(options);
+  }
+
+  private _renderLayers(options: LayersPassRenderOptions): RenderStats[] {
     this._activatedLayers.clear();
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
@@ -103,12 +115,7 @@ export default class LayersPass extends Pass {
     let clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     let clearDepth = clearCanvas ? 1 : false;
     let clearStencil = clearCanvas ? 0 : false;
-    const colorMask = options.colorMask ?? 0xf;
-
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
-    if (options.colorMask) {
-      parameters.colorMask = colorMask;
-    }
     if (options.scissorRect) {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
@@ -209,6 +216,7 @@ export default class LayersPass extends Pass {
       views,
       effects,
       canvasContext = this.device.canvasContext!,
+      colorMask,
       shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
@@ -259,6 +267,9 @@ export default class LayersPass extends Pass {
           ...views?.[viewport.id]?.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
+        if (colorMask !== undefined) {
+          layerParam.layerParameters.colorMask = colorMask;
+        }
       }
 
       drawLayerParams[layerIndex] = layerParam;
