@@ -27,6 +27,8 @@ export type Rect = {x: number; y: number; width: number; height: number};
 
 // WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
 const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
+  // Models retain pipeline state across mask and screen passes.
+  colorMask: 0xf,
   depthWriteEnabled: true,
   depthCompare: 'less-equal',
   blendColorOperation: 'add',
