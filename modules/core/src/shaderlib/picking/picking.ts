@@ -175,7 +175,7 @@ const pickingModule: ShaderModule = {
 
 export default pickingModule;
 
-/** Picking hook contributions for models assembled outside Layer.getShaders. */
+/** Picking injection target contributions for models assembled outside Layer.getShaders. */
 export const pickingPlugin: ShaderPlugin = {
   name: 'picking',
   module: pickingModule,

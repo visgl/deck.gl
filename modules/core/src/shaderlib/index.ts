@@ -4,7 +4,7 @@
 
 import {
   type ShaderAssembler,
-  type ShaderHook,
+  type ShaderInjectionTarget,
   GLSLShaderAssembler,
   WGSLShaderAssembler,
   gouraudMaterial,
@@ -21,31 +21,32 @@ import picking, {pickingPlugin} from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-const SHADER_HOOKS_GLSL: ShaderHook[] = [
+// WGSL targets are no-op stubs until layer call sites and extensions are wired.
+const SHADER_INJECTION_TARGETS: ShaderInjectionTarget[] = [
   {
     name: 'DECKGL_FILTER_SIZE',
     stage: 'vertex',
-    glsl: {parameters: 'inout vec3 size, VertexGeometry geometry'}
+    glsl: {parameters: 'inout vec3 size, VertexGeometry geometry'},
+    wgsl: {parameters: 'size: ptr<function, vec3<f32>>, geometry: VertexGeometry'}
   },
   {
     name: 'DECKGL_FILTER_GL_POSITION',
     stage: 'vertex',
-    glsl: {parameters: 'inout vec4 position, VertexGeometry geometry'}
+    glsl: {parameters: 'inout vec4 position, VertexGeometry geometry'},
+    wgsl: {parameters: 'position: ptr<function, vec4<f32>>, geometry: VertexGeometry'}
   },
   {
     name: 'DECKGL_FILTER_COLOR',
     stage: 'vertex',
-    glsl: {parameters: 'inout vec4 color, VertexGeometry geometry'}
+    glsl: {parameters: 'inout vec4 color, VertexGeometry geometry'},
+    wgsl: {parameters: 'color: ptr<function, vec4<f32>>, geometry: VertexGeometry'}
   },
   {
     name: 'DECKGL_FILTER_COLOR',
     stage: 'fragment',
-    glsl: {parameters: 'inout vec4 color, FragmentGeometry geometry'}
+    glsl: {parameters: 'inout vec4 color, FragmentGeometry geometry'},
+    wgsl: {parameters: 'color: ptr<function, vec4<f32>>, geometry: FragmentGeometry'}
   }
-];
-
-const SHADER_HOOKS_WGSL: ShaderHook[] = [
-  // Not yet supported
 ];
 
 function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
@@ -56,17 +57,15 @@ function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
     shaderAssembler.addDefaultModule(shaderModule);
   }
 
-  // Add shader hooks based on language
-  // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?
-  const shaderHooks = language === 'glsl' ? SHADER_HOOKS_GLSL : SHADER_HOOKS_WGSL;
-  for (const shaderHook of shaderHooks) {
-    shaderAssembler.addShaderHook(shaderHook);
+  // Each assembler selects its language implementation from the shared targets.
+  for (const shaderInjectionTarget of SHADER_INJECTION_TARGETS) {
+    shaderAssembler.addShaderInjectionTarget(shaderInjectionTarget);
   }
 
   return shaderAssembler;
 }
 
-// Shared registries preserve application-wide module and hook registration.
+// Shared registries preserve application-wide module and injection target registration.
 const glslShaderAssembler = createShaderAssembler('glsl');
 const wgslShaderAssembler = createShaderAssembler('wgsl');
 
@@ -75,7 +74,7 @@ const wgslShaderAssembler = createShaderAssembler('wgsl');
 GPUVectorModel.defaultProps.shaderAssembler = glslShaderAssembler;
 Model.defaultProps.shaderAssembler = glslShaderAssembler;
 
-/** Return deck.gl's shared shader assembler for registering modules and hooks. */
+/** Return deck.gl's shared shader assembler for registering modules and injection targets. */
 export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
   return language === 'wgsl' ? wgslShaderAssembler : glslShaderAssembler;
 }

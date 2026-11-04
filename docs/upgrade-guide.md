@@ -6,7 +6,7 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
-### luma.gl v10 alpha.9
+### luma.gl v10 alpha.10
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from
 `@luma.gl/webgl` and `@luma.gl/webgpu` with `@luma.gl/core/webgl` and
@@ -27,11 +27,11 @@ so website builds no longer require a pinned luma.gl source checkout.
 
 `ShaderAssembler.getDefaultShaderAssembler()` is removed. Import `getShaderAssembler`
 from `@deck.gl/core` and call `getShaderAssembler('glsl')` or `getShaderAssembler('wgsl')`
-to register shared modules and hooks. Deck installs its GLSL assembler as the default
+to register shared modules and injection targets. Deck installs its GLSL assembler as the default
 for luma models, preserving custom WebGL layers that construct models directly.
 For language-specific custom models, spread `this.getShaders(...)` into model options
 or pass `shaderAssembler: this.context.shaderAssembler`. Without deck's assembler,
-shader modules can throw `Unknown shader hook vs:DECKGL_FILTER_GL_POSITION`.
+shader modules can throw `Unknown shader injection target vs:DECKGL_FILTER_GL_POSITION`.
 
 Shader injections move from `inject` on modules or model options into native
 `ShaderPlugin` descriptors passed in `plugins`. Keep reusable shader source, uniforms,
@@ -49,16 +49,22 @@ return {
 };
 ```
 
-`addShaderHook` now takes `{name, stage, glsl: {parameters}}` instead of a GLSL
-signature string. Use explicit `ShaderInjection` arrays for ordered injections and
+Register `ShaderInjectionTarget` descriptors with `addShaderInjectionTarget`, using
+`{name, stage, glsl: {parameters}, wgsl: {parameters}}` instead of signature strings.
+Declare plugin targets in `injectionTargets`.
+Use explicit `ShaderInjection` arrays for ordered injections and
 language-qualified keys for GLSL-only plugins. `Layer.getShaders` still installs
-picking hooks when its `modules` includes deck's `picking` module. Custom models
+picking injections when its `modules` includes deck's `picking` module. Custom models
 constructed outside that method must pass `plugins: [pickingPlugin]` from
-`@deck.gl/core` to install the picking module and its hooks. Similarly, use
+`@deck.gl/core` to install the picking module and its injections. Similarly, use
 `shadowPlugin` instead of adding `shadow` alone to a custom model.
 
 `Layer.getModels()` now returns luma.gl `GPUVectorModel` instances, the common base
 of both rendering model classes. Narrow to `Model` when accessing material-specific APIs.
+
+`RenderPassParameters.colorMask` is removed in alpha.10. Set `colorMask` on layer
+or model pipeline parameters instead. `LayersPassRenderOptions.colorMask` still
+applies to layer draws and preserves masked WebGL attachment clears.
 
 ### loaders.gl and math.gl v5 beta
 

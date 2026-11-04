@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Model, ModelProps} from '@luma.gl/engine';
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import {createRenderTarget} from './utils';
 
 import type {Device, Framebuffer, Texture} from '@luma.gl/core';
@@ -137,28 +138,41 @@ export class WebGLBinSorter {
     const target = this.binsFBO!;
 
     const initialValue = operation === 'MAX' ? -MAX_FLOAT32 : operation === 'MIN' ? MAX_FLOAT32 : 0;
-    const renderPass = this.device.beginRenderPass({
-      id: `gpu-aggregation-${operation}`,
-      framebuffer: target,
-      parameters: {
-        viewport: [0, 0, target.width, target.height],
-        colorMask
+    // Clearing one operation must preserve channels assigned to other operations.
+    (this.device as WebGLDevice).withParametersWebGL(
+      {
+        colorMask: [
+          Boolean(colorMask & 1),
+          Boolean(colorMask & 2),
+          Boolean(colorMask & 4),
+          Boolean(colorMask & 8)
+        ]
       },
-      clearColor: [initialValue, initialValue, initialValue, 0],
-      clearDepth: false,
-      clearStencil: false
-    });
-    model.setParameters({
-      blend: true,
-      blendColorSrcFactor: 'one',
-      blendColorDstFactor: 'one',
-      blendAlphaSrcFactor: 'one',
-      blendAlphaDstFactor: 'one',
-      blendColorOperation: operation === 'MAX' ? 'max' : operation === 'MIN' ? 'min' : 'add',
-      blendAlphaOperation: 'add'
-    });
-    model.draw(renderPass);
-    renderPass.end();
+      () => {
+        const renderPass = this.device.beginRenderPass({
+          id: `gpu-aggregation-${operation}`,
+          framebuffer: target,
+          parameters: {
+            viewport: [0, 0, target.width, target.height]
+          },
+          clearColor: [initialValue, initialValue, initialValue, 0],
+          clearDepth: false,
+          clearStencil: false
+        });
+        model.setParameters({
+          colorMask,
+          blend: true,
+          blendColorSrcFactor: 'one',
+          blendColorDstFactor: 'one',
+          blendAlphaSrcFactor: 'one',
+          blendAlphaDstFactor: 'one',
+          blendColorOperation: operation === 'MAX' ? 'max' : operation === 'MIN' ? 'min' : 'add',
+          blendAlphaOperation: 'add'
+        });
+        model.draw(renderPass);
+        renderPass.end();
+      }
+    );
   }
 }
 

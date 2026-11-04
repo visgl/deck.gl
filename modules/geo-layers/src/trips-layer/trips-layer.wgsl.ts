@@ -35,7 +35,7 @@ export function packTripTimestamps(
   return packedTimestamps;
 }
 
-/** Extend PathLayer through native WGSL plugin inputs, varyings, and named hooks. */
+/** Extend PathLayer through native WGSL plugin inputs, varyings, and named injection targets. */
 export const tripsShaderPluginWGSL: ShaderPlugin = {
   name: 'trips',
   module: tripsUniforms,

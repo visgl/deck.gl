@@ -52,7 +52,7 @@ test('TripsLayer#WebGPU shader extends PathLayer', () => {
     },
     source: pathShaderWGSL,
     modules: [tripsUniforms],
-    pluginHooks: resolvedPlugins.hooks,
+    pluginInjectionTargets: resolvedPlugins.injectionTargets,
     pluginInjections: resolvedPlugins.injections,
     pluginVertexInputs: resolvedPlugins.vertexInputs,
     pluginInterStageVariables: resolvedPlugins.interStageVariables
@@ -82,7 +82,7 @@ test('TripsLayer#time-window discard follows PathLayer coverage derivatives', ()
     source: pathShaderWGSL,
     defines: {ANTIALIASING: 1},
     modules: [tripsUniforms],
-    pluginHooks: resolvedPlugins.hooks,
+    pluginInjectionTargets: resolvedPlugins.injectionTargets,
     pluginInjections: resolvedPlugins.injections,
     pluginVertexInputs: resolvedPlugins.vertexInputs,
     pluginInterStageVariables: resolvedPlugins.interStageVariables

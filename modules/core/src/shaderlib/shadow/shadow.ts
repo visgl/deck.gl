@@ -326,7 +326,7 @@ type NumberArray16 = [
   number
 ];
 
-/** Shadow hook contributions and uniforms for custom model assembly. */
+/** Shadow injection target contributions and uniforms for custom model assembly. */
 export const shadowPlugin: ShaderPlugin = {
   name: 'shadow',
   module: shadowModule,

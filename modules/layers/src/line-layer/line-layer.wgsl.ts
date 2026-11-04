@@ -12,7 +12,7 @@ fn deckgl_filter_size(offset: vec3<f32>, geometry: Geometry) -> vec3<f32> {
 fn deckgl_filter_gl_position(p: vec4<f32>, geometry: Geometry) -> vec4<f32> {
   if (picking.isAttribute > 0.5) {
     // For depth picking, write normalized depth into the picking payload.
-    // This mirrors the legacy DECKGL_FILTER_GL_POSITION hook on WebGL.
+    // This mirrors the legacy DECKGL_FILTER_GL_POSITION injection target on WebGL.
   }
   return p;
 }

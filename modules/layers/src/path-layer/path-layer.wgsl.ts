@@ -6,8 +6,8 @@ import type {ShaderPlugin} from '@luma.gl/shaders';
 
 /** WGSL extension points for path color and time-window filtering. */
 export const pathShaderPlugin: ShaderPlugin = {
-  name: 'pathHooks',
-  hooks: [
+  name: 'pathShaderPlugin',
+  injectionTargets: [
     {
       name: 'DECKGL_FILTER_PATH_COLOR_VERTEX',
       stage: 'vertex',

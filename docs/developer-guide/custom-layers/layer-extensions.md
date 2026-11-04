@@ -34,7 +34,7 @@ class FilteredScatterplotLayer extends ScatterplotLayer {
       name: 'highlight',
       module: highlightUniforms,
       injections: {
-        // Standard injection hook - see "Writing Shaders"
+        // Standard injection injection target - see "Writing Shaders"
         'glsl:fs:DECKGL_FILTER_COLOR': `
         if (highlight.enabled) {
           if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
@@ -133,7 +133,7 @@ When a layer extension is used, it injects itself into a layer. This means that 
 
 ##### `getShaders` {#getshaders}
 
-Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/visgl/luma.gl/blob/8.5-release/modules/shadertools/docs/api-reference/assemble-shaders.md). See [writing shaders](./writing-shaders.md) for deck.gl-specific modules and hooks.
+Called to retrieve the *additional* shader parameters. Returns an object that will be merged with the layer's own `getShaders` result before sending to luma.gl's [shader assembly](https://github.com/visgl/luma.gl/blob/8.5-release/modules/shadertools/docs/api-reference/assemble-shaders.md). See [writing shaders](./writing-shaders.md) for deck.gl-specific modules and injection targets.
 
 When this method is executed, `this` points to the layer.
 
@@ -226,7 +226,7 @@ class RedFilter extends LayerExtension {
       name: 'highlight',
       module: highlightUniforms,
       injections: {
-        // Standard injection hook - see "Writing Shaders"
+        // Standard injection injection target - see "Writing Shaders"
         'glsl:fs:DECKGL_FILTER_COLOR': `
         if (highlight.enabled) {
           if (color.r / max(color.g, 0.001) > 2. && color.r / max(color.b, 0.001) > 2.) {
