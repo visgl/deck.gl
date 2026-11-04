@@ -9,7 +9,7 @@ import {
   ScatterplotLayer,
   _TextBackgroundLayer as TextBackgroundLayer
 } from '@deck.gl/layers';
-import {PathStyleExtension} from '@deck.gl/extensions';
+import {PathStyleExtension, type PathStyleExtensionProps} from '@deck.gl/extensions';
 import {Buffer, luma, Texture} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
@@ -53,15 +53,15 @@ test.each(['scatterplot', 'text-background'] as const)(
     const props = {
       id: 'highlighted-dash',
       data: [{position: [0, 0, 0]}],
-      getPosition: [0, 0, 0],
-      getFillColor: [255, 0, 0, 255],
-      getLineColor: [255, 0, 0, 255],
-      getDashArray: [1, 2],
+      getPosition: [0, 0, 0] as [number, number, number],
+      getFillColor: [255, 0, 0, 255] as [number, number, number, number],
+      getLineColor: [255, 0, 0, 255] as [number, number, number, number],
+      getDashArray: [1, 2] as [number, number],
       extensions: [new PathStyleExtension({dash: true})],
       pickable: true,
       highlightedObjectIndex: 0,
-      highlightColor: [0, 255, 0, 255]
-    } as const;
+      highlightColor: [0, 255, 0, 255] as [number, number, number, number]
+    };
     const layer =
       layerType === 'scatterplot'
         ? new ScatterplotLayer({
@@ -146,7 +146,7 @@ test('PathStyleExtension#WebGPU solid dash pattern preserves rounded antialiasin
     byteLength: texture.computeMemoryLayout().byteLength,
     usage: Buffer.COPY_DST | Buffer.MAP_READ
   });
-  const layer = new PathLayer({
+  const layer = new PathLayer<{path: [number, number][]}, PathStyleExtensionProps>({
     id: 'solid-path',
     data: [
       {
