@@ -99,13 +99,19 @@ export class HeightMapBuilder {
         for (const layer of layers) {
           const bounds = layer.getBounds();
           if (!bounds) continue;
+          const options = layer.state.preproject
+            ? {
+                viewport: referenceViewport,
+                autoOffset: false,
+                sourceCrs: layer.state.packedCrs!,
+                coordinateOrigin: [0, 0, 0] as [number, number, number],
+                modelMatrix: null
+              }
+            : {viewport: referenceViewport, autoOffset: false};
           // Include every corner: model matrices may rotate the terrain mesh.
           for (let corner = 0; corner < 8; corner++) {
             const position = [0, 1, 2].map(axis => bounds[(corner >> axis) & 1][axis] || 0);
-            const height = layer.projectPosition(position, {
-              viewport: referenceViewport,
-              autoOffset: false
-            })[2];
+            const height = layer.projectPosition(position, options)[2];
             minHeight = Math.min(minHeight, height);
             maxHeight = Math.max(maxHeight, height);
           }
