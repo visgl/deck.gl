@@ -2,20 +2,23 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test} from 'vitest';
+import {beforeEach, describe, expect, test} from 'vitest';
 import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';
 import {Buffer, luma, Texture} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/core/webgl';
+import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
-import {getTestDevice} from '@luma.gl/core/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {webglDevice as sharedWebGLDevice} from '@luma.gl/core/test-utils-legacy';
 
-for (const type of ['webgl', 'webgpu'] as const) {
+describe.each(['webgl', 'webgpu'] as const)('MaskExtension %s', type => {
+  beforeEach(async context => {
+    if (type === 'webgpu' && !(await getWebGPUTestDevice())) context.skip();
+  });
   test.each(['map', 'globe'] as const)(
     `MaskExtension#${type} %s channel updates and picking`,
-    async (view, context) => {
-      if (!(await getTestDevice(type))) return context.skip();
+    async view => {
       const width = 256;
       const height = 256;
       const positions = [
@@ -135,10 +138,15 @@ for (const type of ['webgl', 'webgpu'] as const) {
         framebuffer.destroy();
         texture.destroy();
         device.destroy();
+        // WebGLDevice.destroy does not release the browser's context slot.
+        if (type === 'webgl') {
+          (device as WebGLDevice).gl.getExtension('WEBGL_lose_context')?.loseContext();
+        }
         container.remove();
+        expect(sharedWebGLDevice?.isLost).toBe(false);
       }
     },
     // Four mask channels and repeated asynchronous picks are expensive on software GPUs.
     120000
   );
-}
+});
