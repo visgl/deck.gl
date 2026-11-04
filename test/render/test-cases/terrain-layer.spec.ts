@@ -94,12 +94,8 @@ const testCases = [
     goldenImage: './test/render/golden-images/terrain-extension-drape.png'
   },
   {
-    // GlobeView twin of the case above (same viewState; zoom 11.5 stays below GlobeView's zoom-12
-    // handoff to WebMercatorViewport). TerrainLayer switches its tile meshes to LNGLAT under
-    // GlobeViewport and TerrainExtension samples its Mercator-space cover FBOs through the
-    // globe -> Mercator inverse, so the draped fills and strokes follow the terrain on the globe.
-    // The stroke guards the terrain cover pass: a draped PathLayer that adopts the cover's
-    // Mercator viewport re-tessellates on every frame, and deck never settles.
+    // Golden: choropleth fills and strokes draped over terrain in GlobeView.
+    // Wait for redraws to stop so repeated terrain cover updates fail the test.
     name: 'terrain-extension-drape-globe',
     skip: ['webgpu'],
     views: new GlobeView({resolution: 36}),
