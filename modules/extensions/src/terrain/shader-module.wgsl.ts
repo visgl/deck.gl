@@ -94,7 +94,9 @@ export const terrainWGSLVertexInjection = /* wgsl */ `
     let clipOffset = *position - anchorClip;
     // Keep the source elevation available for layers that sample their full footprint.
     let fittedClip = project_common_position_to_clipspace(geometry.position + vec4<f32>(offset * height, 0.0));
-    *position = fittedClip + clipOffset;
+    // Billboard paths keep a fixed screen-space stroke; other billboard offsets scale with depth.
+    let screenOffsetCorrection = geometry.screenSpaceOffset * (fittedClip.w - (*position).w);
+    *position = fittedClip + clipOffset + vec4<f32>(screenOffsetCorrection, 0.0);
   }
 `;
 export const terrainWGSLFragmentInjection = /* wgsl */ `
