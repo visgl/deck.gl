@@ -12,7 +12,7 @@ import type {ShaderModule, ShaderAssembler, ShaderPlugin} from '@luma.gl/shaders
 
 /** Options used to construct a new WebGLAggregator */
 export type WebGLAggregatorProps = {
-  /** Assembler providing the layer shader hooks and default modules. */
+  /** Assembler providing the layer shader injection targets and default modules. */
   shaderAssembler?: ShaderAssembler;
   /** Size of bin IDs */
   dimensions: 1 | 2;

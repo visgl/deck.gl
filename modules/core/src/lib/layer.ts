@@ -595,7 +595,7 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
       },
       shaders
     );
-    // Preserve the public picking module contract while installing its hook contributions.
+    // Preserve the public picking module contract while installing its injection target contributions.
     if (shaders.modules?.includes(pickingModule) && !shaders.plugins?.includes(pickingPlugin)) {
       shaders = mergeShaders(shaders, {plugins: [pickingPlugin]});
     }
