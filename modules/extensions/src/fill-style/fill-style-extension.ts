@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createFloatParameterTexture} from '../utils/float-parameter-texture';
 import {LayerExtension} from '@deck.gl/core';
 
-import {FillStyleModuleProps, patternPlugin} from './shader-module';
-import {
-  packProceduralPatterns,
-  PROCEDURAL_PATTERN_TEXTURE_FORMAT,
-  type ProceduralPatternMapping
-} from './procedural-pattern';
+import {FillStyleModuleProps, patternPlugin, patternPluginWGSL} from './shader-module';
+import {packProceduralPatterns, type ProceduralPatternMapping} from './procedural-pattern';
 
 import type {
   Layer,
@@ -140,7 +137,10 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     }
 
     return {
-      plugins: [extension.opts.pattern && patternPlugin].filter(Boolean)
+      plugins: extension.opts.pattern
+        ? [this.context.device.type === 'webgpu' ? patternPluginWGSL : patternPlugin]
+        : [],
+      defines: {FILL_PROCEDURAL_PATTERN: extension.opts.proceduralPattern}
     };
   }
 
@@ -292,13 +292,7 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     const packedPatterns = packProceduralPatterns(mapping);
     return {
       proceduralPatternIndices: packedPatterns.patternIndices,
-      proceduralPatternTexture: this.context.device.createTexture({
-        data: packedPatterns.data,
-        width: packedPatterns.width,
-        height: packedPatterns.height,
-        format: PROCEDURAL_PATTERN_TEXTURE_FORMAT,
-        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
-      })
+      proceduralPatternTexture: createFloatParameterTexture(this.context.device, packedPatterns)
     };
   }
 }

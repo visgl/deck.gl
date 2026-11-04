@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import * as wgsl from './shader-module.wgsl';
 import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {
@@ -372,4 +373,12 @@ export const patternPlugin: ShaderPlugin = {
   name: 'pattern',
   module: patternShaders,
   injections: inject
+};
+
+export const patternPluginWGSL: ShaderPlugin = {
+  ...patternPlugin,
+  module: {...patternShaders, source: wgsl.source},
+  vertexInputs: wgsl.vertexInputs,
+  interStageVariables: wgsl.interStageVariables,
+  injections: wgsl.injections
 };
