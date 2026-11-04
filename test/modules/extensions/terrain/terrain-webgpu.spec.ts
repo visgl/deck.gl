@@ -5,17 +5,17 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {log} from '@deck.gl/core';
 import {luma, Buffer, Texture, type Device, type Framebuffer} from '@luma.gl/core';
-import {webgl2Adapter, type WebGLDevice} from '@luma.gl/webgl';
-import {webglDevice as sharedWebGLDevice} from '@luma.gl/test-utils';
-import {webgpuAdapter, type WebGPUDevice} from '@luma.gl/webgpu';
-import {COORDINATE_SYSTEM, Deck, OrbitView, type Layer} from '@deck.gl/core';
+import {webgl2Adapter, type WebGLDevice} from '@luma.gl/core/webgl';
+import {webglDevice as sharedWebGLDevice} from '@luma.gl/core/test-utils-legacy';
+import {webgpuAdapter, type WebGPUDevice} from '@luma.gl/core/webgpu';
+import {Deck, OrbitView, type Layer} from '@deck.gl/core';
 import {
   _TerrainExtension as TerrainExtension,
   type TerrainExtensionProps
 } from '@deck.gl/extensions';
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
-import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 import {Geometry} from '@luma.gl/engine';
 import {Matrix4} from '@math.gl/core';
 import {
@@ -131,7 +131,7 @@ function renderFrame(
     new PathLayer({
       id: `path-${props.terrainDrawMode ?? 'xyz'}`,
       data: DATA,
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPath: d => d.path,
       widthUnits: 'pixels',
       getWidth: 8,
@@ -234,7 +234,7 @@ function createTerrain(height: (x: number, y: number) => number, draw = false, o
       indices: new Uint16Array(indices),
       attributes: {positions: {size: 3, value: new Float32Array(positions)}}
     }),
-    coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    coordinateSystem: 'cartesian',
     _instanced: false,
     getPosition: [0, 0, 0],
     getColor: [0, 0, 0],
@@ -365,6 +365,25 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
   });
 
+  it.each([
+    ['sizeScale', {sizeScale: 2}],
+    ['instance scale', {getScale: [1, 1, 2]}],
+    ['instance translation', {getTranslation: [0, 0, 40]}]
+  ])('fits paths to terrain with %s', async (_name, terrainProps) => {
+    const reference = await renderFrame(
+      {data: [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 80])}]},
+      35
+    );
+    const terrain = createTerrain(() => 40).clone(terrainProps);
+    const fitted = await renderFrame(
+      {extensions: [new TerrainExtension()], terrainDrawMode: 'offset'},
+      35,
+      0,
+      terrain
+    );
+    expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
+  });
+
   it('selects the upper surface regardless of terrain draw order and updates changed meshes', async () => {
     const extensions = [new TerrainExtension()];
     const props = {extensions, terrainDrawMode: 'offset' as const};
@@ -400,7 +419,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const props = {
         id: kind,
         data: [{}],
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         extensions: [new TerrainExtension()],
         terrainDrawMode: 'offset' as const,
         getPosition: [0, 0, 0] as [number, number, number],
@@ -484,7 +503,7 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     const scatter = new ScatterplotLayer({
       id: 'points-xyz',
       data: points.map(([x, y]) => [x, y, height(x, y)]),
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       getPosition: d => d,
       radiusUnits: 'pixels',
       getRadius: 8,

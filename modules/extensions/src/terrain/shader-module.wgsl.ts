@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule, ShaderPlugin} from '@luma.gl/shadertools';
-import {terrainModule, TERRAIN_MODE, type TerrainModuleProps} from './shader-module';
+import {TERRAIN_MODE} from './terrain-mode';
 
-// RGBA8 stores the four bytes of an IEEE float. This preserves elevation precision without
-// requiring optional float32 filtering or blending. Interpolation happens after decoding.
-const source = /* wgsl */ `
+export const terrainWGSLSource = /* wgsl */ `
 ${Object.entries(TERRAIN_MODE)
   .map(([key, value]) => `const TERRAIN_MODE_${key}: f32 = ${value}.0;`)
   .join('\n')}
@@ -61,43 +58,23 @@ fn terrain_get_height(commonPosition: vec3<f32>) -> f32 {
 }
 `;
 
-export const terrainModuleWGSL = {
-  name: terrainModule.name,
-  dependencies: terrainModule.dependencies,
-  source,
-  uniformTypes: {...terrainModule.uniformTypes, heightRange: 'vec2<f32>'},
-  getUniforms: (opts: Partial<TerrainModuleProps> = {}) => ({
-    ...terrainModule.getUniforms(opts),
-    heightRange: opts.heightMapRange || [0, 1]
-  })
-} as const satisfies ShaderModule;
-
-export const terrainPlugin: ShaderPlugin = {
-  name: terrainModule.name,
-  wgsl: {
-    varyings: {
-      terrainHeight: {type: 'f32'}
-    },
-    injections: [
-      {
-        target: 'vs:deckgl_filter_position',
-        injection: /* wgsl */ `
+export const terrainWGSLVertexInjection = /* wgsl */ `
   let commonPos = geometry.position.xyz;
   // Globe meter offsets are projected into the same globe common space as absolute positions.
   let isGlobe = project.projectionMode == PROJECTION_MODE_GLOBE ||
     project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS;
   var terrainMercPos = commonPos.xy;
-  terrainHeight = commonPos.z + project.commonOrigin.z;
+  terrainHeightWGSL = commonPos.z + project.commonOrigin.z;
   if (isGlobe) {
     terrainMercPos = terrain_globe_to_mercator(commonPos);
-    terrainHeight = length(commonPos) - GLOBE_RADIUS;
+    terrainHeightWGSL = length(commonPos) - GLOBE_RADIUS;
   }
   if (terrain.mode == TERRAIN_MODE_SKIP) {
     *position = vec4<f32>(0.0);
   } else if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
     let uv = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
     // Higher surfaces win independently of draw order, including below sea level.
-    let depth = (terrain.heightRange.y - terrainHeight) / (terrain.heightRange.y - terrain.heightRange.x);
+    let depth = (terrain.heightRange.y - terrainHeightWGSL) / (terrain.heightRange.y - terrain.heightRange.x);
     *position = vec4<f32>(uv * 2.0 - 1.0, depth, 1.0);
   } else if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
     let anchor = project_position_vec3_f32(vec3<f32>(geometry.worldPosition.xy, 0.0));
@@ -115,17 +92,10 @@ export const terrainPlugin: ShaderPlugin = {
     let fittedClip = project_common_position_to_clipspace(geometry.position + vec4<f32>(offset * height, 0.0));
     *position = vec4<f32>(fittedClip.xyz + screenOffset * fittedClip.w, fittedClip.w);
   }
-`
-      },
-      {
-        target: 'fs:#main-start',
-        injection: /* wgsl */ `
+`;
+export const terrainWGSLFragmentInjection = /* wgsl */ `
   if (terrain.mode == TERRAIN_MODE_SKIP) { discard; }
   if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
-    return terrain_encode_height(terrainHeight);
+    return terrain_encode_height(terrainHeightWGSL);
   }
-`
-      }
-    ]
-  }
-};
+`;
