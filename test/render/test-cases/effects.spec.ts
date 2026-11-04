@@ -284,7 +284,8 @@ const testCases = [
     ],
     goldenImage: './test/render/golden-images/shadow-effect-high-pitch.png'
   },
-  // -> mask-effect, mask-effect-globe, mask-effect-inverted, mask-effect-inverted-globe
+  // Mask polygons per fragment and points by their anchor in map/globe views.
+  // Golden: green polygons and blue circles appear inside (or outside) the red mask.
   ...[true, false].flatMap(maskInverted =>
     expandViewMatrix(
       {
@@ -333,7 +334,8 @@ const testCases = [
     )
   ),
   {
-    // Most of the globe is visible: the mask must still only hide points inside the quad
+    // Most of the globe is visible.
+    // Golden: blue grid points appear only inside the translucent mask quad.
     name: 'mask-effect-globe-world',
     views: new GlobeView(),
     viewState: {longitude: -100, latitude: 40, zoom: 0.5},
@@ -409,4 +411,12 @@ describe.each([
   // 'webgpu'
 ] as const)('%s', deviceType => {
   runRenderTestSuite(testCases as TestCase[], deviceType);
+});
+
+// Golden: WebGPU masking matches the WebGL map and globe images.
+describe('webgpu', () => {
+  runRenderTestSuite(
+    (testCases as TestCase[]).filter(testCase => testCase.name.startsWith('mask-effect')),
+    'webgpu'
+  );
 });

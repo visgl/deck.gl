@@ -23,6 +23,10 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 [`BrushingExtension`](./api-reference/extensions/brushing-extension.md) supports WebGPU on standard rendering primitives, including picking and live accessor updates.
 
+### WebGPU masking
+
+[`MaskExtension`](./api-reference/extensions/mask-extension.md) supports WebGPU, including inverted masks, picking, map and globe views, and updates to multiple masks.
+
 ### WebGPU data filtering
 
 [`Fp64Extension`](./api-reference/extensions/fp64-extension.md) supports extended-precision Mercator projection on WebGPU using luma.gl's fp64 math. The default projection remains recommended for performance.
