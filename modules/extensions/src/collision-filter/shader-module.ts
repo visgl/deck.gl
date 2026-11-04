@@ -184,6 +184,7 @@ float collision_testBounds(vec3 pickingColor, int tileIndex) {
   // Check the part's center first: densely packed labels usually reject in one lookup.
   ivec2 centerPixel = ivec2((corners[0] + corners[1] + corners[2] + corners[3]) / 4.0);
   if (all(greaterThanEqual(centerPixel, first)) && all(lessThanEqual(centerPixel, last)) &&
+      collision_isInside(edges, vec2(centerPixel) + 0.5) &&
       collision_isOccluded(centerPixel, pickingColor)) return 0.0;
 
   // Test every covered map pixel, rather than a fixed sample grid that can miss
