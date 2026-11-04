@@ -437,14 +437,18 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 #ifdef DASH_ENABLED
   pathBounds = varyings.vPathBounds;
 #endif
+  var pathPosition = varyings.vPathPosition;
+  var pathLength = varyings.vPathLength;
   DECKGL_PATH_STYLE_COORDINATES(
-    &varyings.vPathPosition, &varyings.vPathLength, &pathBounds,
+    &pathPosition, &pathLength, &pathBounds,
     select(project_pixel_size_float(widthPixels), widthPixels, path.billboard != 0)
   );
 #ifdef DASH_ENABLED
   varyings.vPathBounds = pathBounds;
 #endif
-  geometry.uv = varyings.vPathPosition;
+  varyings.vPathPosition = pathPosition;
+  varyings.vPathLength = pathLength;
+  geometry.uv = pathPosition;
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,

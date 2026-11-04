@@ -118,8 +118,8 @@ let filterWidth = max(fwidth(along), 0.0001);
 let gapDistance = min(phase - solid, period - phase);
 let transverse = varyings.vPathPosition.x;
 let endDistance = length(vec2<f32>(max(gapDistance, 0.0), transverse));
-let edgePixels = (1.0 - endDistance) / max(fwidth(endDistance), 1e-6);
-pathStyle_capCoverage = smoothedge(0.0, edgePixels);
+let pathStyle_edgePixels = (1.0 - endDistance) / max(fwidth(endDistance), 1e-6);
+pathStyle_capCoverage = smoothedge(0.0, pathStyle_edgePixels);
 let rectangularCoverage = (
   pathStyle_dashIntegral(phase + 0.5 * filterWidth, solid, period) -
   pathStyle_dashIntegral(phase - 0.5 * filterWidth, solid, period)
