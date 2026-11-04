@@ -171,7 +171,9 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
   }
 
   getNumInstances(): number {
-    return this.state?.columns ? this.state.columns.length : super.getNumInstances();
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
   }
 
   get isLoaded(): boolean {
@@ -356,9 +358,12 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
     model.shaderInputs.setProps({arc: arcProps});
     model.setVertexCount(numSegments * 2);
     if (this.state.columns)
-      this.state.columns.draw(model, this.context.renderPass, offset =>
-        model.shaderInputs.setProps({arc: {rowIndexOffset: offset}})
-      );
+      this.state.columns.draw(model, this.context.renderPass, offset => {
+        model.setInstanceCount(
+          Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - offset))
+        );
+        model.shaderInputs.setProps({arc: {rowIndexOffset: offset}});
+      });
     else model.draw(this.context.renderPass);
   }
 

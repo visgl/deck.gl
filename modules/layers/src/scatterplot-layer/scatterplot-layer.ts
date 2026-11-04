@@ -208,7 +208,9 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   /** Uses the prepared column length as the instance count in column mode. */
   getNumInstances(): number {
-    return this.state?.columns ? this.state.columns.length : super.getNumInstances();
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
   }
 
   /** Keeps the layer loading until its asynchronous column conversion finishes. */
@@ -402,9 +404,12 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     if (this.state.columns) {
-      this.state.columns.draw(model, this.context.renderPass, offset =>
-        model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}})
-      );
+      this.state.columns.draw(model, this.context.renderPass, offset => {
+        model.setInstanceCount(
+          Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - offset))
+        );
+        model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}});
+      });
     } else {
       model.draw(this.context.renderPass);
     }
