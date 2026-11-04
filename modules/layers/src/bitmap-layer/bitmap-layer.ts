@@ -146,9 +146,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
     });
   }
 
-  /** Bypasses attribute generation for explicit mesh inputs. */
-  protected _getAttributeManager() {
-    return hasBitmapMesh(this.props) ? null : super._getAttributeManager();
+  /** Keeps extension metadata available without generating or binding mesh attributes. */
+  protected _updateAttributes(): void {
+    if (!hasBitmapMesh(this.props)) super._updateAttributes();
   }
 
   /** Includes pending Arrow conversion in the layer loading state. */
@@ -178,7 +178,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   }
 
   initializeState() {
-    if (hasBitmapMesh(this.props)) return;
     const attributeManager = this.getAttributeManager()!;
 
     const noAlloc = true;
@@ -231,8 +230,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       this.state.model?.destroy();
       this.state.typedMesh!.destroy();
       this.state.typedMesh = undefined;
-      this.internalState!.attributeManager = super._getAttributeManager();
-      this.initializeState();
     }
     // setup model first
     const attributeManager = this.getAttributeManager()!;
@@ -268,8 +265,6 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
   private updateMeshState({props, oldProps, changeFlags}: UpdateParameters<this>): void {
     const enteringMesh = !this.state.typedMesh;
     if (enteringMesh) {
-      this.internalState!.attributeManager?.finalize();
-      this.internalState!.attributeManager = null;
       this.state.typedMesh = new BitmapLayerMesh(this.context.device);
     }
     if (enteringMesh || changeFlags.extensionsChanged) {
