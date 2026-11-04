@@ -13,6 +13,7 @@ import {
   terrainWGSLVertexInjection,
   terrainWGSLFragmentInjection
 } from './shader-module.wgsl';
+import {isFlatViewport} from '../utils/projection-utils';
 import type {Bounds} from '../utils/projection-utils';
 import type {TerrainCover} from './terrain-cover';
 
@@ -99,7 +100,10 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
         terrainSkipRender
       } = opts;
       const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
-      const {commonOrigin} = projectUniforms;
+      // Globe sampling uses absolute Mercator positions, not the sphere's common origin.
+      const commonOrigin = isFlatViewport(opts.project!.viewport)
+        ? projectUniforms.commonOrigin
+        : [0, 0, 0];
 
       let mode: number = terrainSkipRender ? TERRAIN_MODE.SKIP : TERRAIN_MODE.NONE;
       // height map if case USE_HEIGHT_MAP, terrain cover if USE_COVER, otherwise empty
