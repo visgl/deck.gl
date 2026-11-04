@@ -88,3 +88,11 @@ describe.each([
 ] as const)('%s', deviceType => {
   runRenderTestSuite(testCases, deviceType);
 });
+
+// Cover the map and orthographic collision variants on WebGPU.
+describe('webgpu', () => {
+  runRenderTestSuite(
+    testCases.filter(testCase => !testCase.name.endsWith('-globe')),
+    'webgpu'
+  );
+});

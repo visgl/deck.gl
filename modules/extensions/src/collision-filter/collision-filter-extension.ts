@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
-import {collisionPlugin, collisionPluginWGSL} from './shader-module';
+import {collisionPlugin} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
 const defaultProps = {
@@ -43,7 +43,7 @@ export default class CollisionFilterExtension extends LayerExtension {
 
   getShaders(this: Layer<CollisionFilterExtensionProps>): any {
     return {
-      plugins: [this.context.device.type === 'webgpu' ? collisionPluginWGSL : collisionPlugin]
+      plugins: [collisionPlugin]
     };
   }
 

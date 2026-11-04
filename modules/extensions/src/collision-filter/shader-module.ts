@@ -7,8 +7,6 @@ import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project} from '@deck.gl/core';
 
 const vs = /* glsl */ `
-in float collisionPriorities;
-
 uniform sampler2D collision_texture;
 
 layout(std140) uniform collisionUniforms {
@@ -57,10 +55,8 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
 `;
 
 const inject = {
-  'glsl:vs:#decl': /* glsl */ `
-  float collision_fade = 1.0;
-`,
   'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  collision_fade = 1.0;
   if (collision.sort) {
     float collisionPriority = collisionPriorities;
     position.z = -0.001 * collisionPriority * position.w; // Support range -1000 -> 1000
@@ -152,6 +148,7 @@ const collisionModule = {
   name: 'collision',
   dependencies: [project],
   vs,
+  source,
   getUniforms: getCollisionUniforms,
   uniformTypes: {
     sort: 'i32',
@@ -162,17 +159,10 @@ const collisionModule = {
 export const collisionPlugin: ShaderPlugin = {
   name: 'collision',
   module: collisionModule,
-  injections: inject
-};
-
-export default collisionModule;
-
-export const collisionPluginWGSL: ShaderPlugin = {
-  name: 'collision',
-  module: {...collisionModule, source},
   vertexInputs: {collisionPriorities: 'f32'},
   interStageVariables: {collision_fade: {type: 'f32'}},
   injections: {
+    ...inject,
     'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
 collision_fade = 1.0;
 if (collision.sort != 0 && (*position).w > 0.0 && (*position).z <= (*position).w) {
@@ -180,9 +170,9 @@ if (collision.sort != 0 && (*position).w > 0.0 && (*position).z <= (*position).w
   (*position).z = (0.5 - 0.0005 * clamp(collisionPriorities, -1000.0, 1000.0)) * (*position).w;
 }
 if (collision.enabled != 0) {
-  let common = project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0));
+  let commonPosition = project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0));
   collision_fade = collision_getVisibility(
-    collision_getCoords(vec4<f32>(common, 1.0)), geometry.pickingColor
+    collision_getCoords(vec4<f32>(commonPosition, 1.0)), geometry.pickingColor
   );
   if (collision_fade < 0.0001) {
     *position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
@@ -197,3 +187,5 @@ if (collision.enabled != 0) {
 `
   }
 };
+
+export default collisionModule;
