@@ -3,12 +3,17 @@
 // Copyright (c) vis.gl contributors
 
 import {beforeEach, expect, test} from 'vitest';
+import type {ShaderPlugin} from '@luma.gl/shaders';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Deck, OrthographicView, MapView} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {BrushingExtension, ClipExtension} from '@deck.gl/extensions';
 import {luma, Texture, Buffer} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
+
+const hasWebGPUBrushing = new BrushingExtension()
+  .getShaders()
+  .plugins?.some((plugin: ShaderPlugin) => Boolean(plugin.module?.source));
 
 // Pixel assertions exercise AttributeManager -> Model reflection -> generated WGSL inputs/varyings.
 test.for([
@@ -23,7 +28,7 @@ test.for([
   async ({clipByInstance, reverse, compose}, context) => {
     // This PR is independent of the Brushing WebGPU port. Run the integration
     // regression when that implementation is present (including combined-branch validation).
-    if (compose && !new BrushingExtension().getShaders().plugins) {
+    if (compose && !hasWebGPUBrushing) {
       context.skip('Requires the Brushing ShaderPlugin port');
     }
     const container = document.createElement('div');
@@ -199,7 +204,7 @@ test.each([true, false])(
     const errors: Error[] = [];
     manager.setProps({onError: error => errors.push(error)});
     const extensions = [
-      ...(new BrushingExtension().getShaders().plugins ? [new BrushingExtension()] : []),
+      ...(hasWebGPUBrushing ? [new BrushingExtension()] : []),
       new ClipExtension()
     ];
     device.handle.pushErrorScope('validation');
@@ -302,7 +307,7 @@ test.each([true, false])(
               attribute => attribute.name === 'brushingTargets'
             ),
             layer.id
-          ).toBe(Boolean(new BrushingExtension().getShaders().plugins));
+          ).toBe(Boolean(hasWebGPUBrushing));
         }
       }
       await Promise.all(compilationChecks);
