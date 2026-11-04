@@ -155,7 +155,7 @@ export const brushingPlugin: ShaderPlugin = {
   interStageVariables: {brushing_isVisible: {type: 'f32'}},
   injections: {
     ...inject,
-    'wgsl:vs:DECKGL_FILTER_POSITION': `
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': `
 var brushTarget = geometry.worldPosition.xy;
 if (brushing.targetMode == 1) { brushTarget = geometry.worldPositionAlt.xy; }
 if (brushing.targetMode == 2) { brushTarget = brushingTargets; }
@@ -165,7 +165,7 @@ if (brushing.targetMode == 3) {
 }
 brushing_isVisible = select(0.0, 1.0, visible);
 `,
-    'wgsl:fs:DECKGL_FILTER_FRAGMENT_COLOR': `if (brushing.enabled != 0 && brushing_isVisible < 0.5) { discard; }`
+    'wgsl:fs:DECKGL_FILTER_COLOR': `if (brushing.enabled != 0 && brushing_isVisible < 0.5) { discard; }`
   }
 };
 
