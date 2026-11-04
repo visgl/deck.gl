@@ -42,7 +42,6 @@ export type ProceduralPatternConfig =
 
 export type ProceduralPatternMapping = Readonly<Record<string, ProceduralPatternConfig>>;
 
-export const PROCEDURAL_PATTERN_TEXTURE_FORMAT = 'rg32float' as const;
 export const PROCEDURAL_PATTERN_COMPONENTS_PER_TEXEL = 2;
 export const PROCEDURAL_PATTERN_TEXELS_PER_PATTERN = 4;
 

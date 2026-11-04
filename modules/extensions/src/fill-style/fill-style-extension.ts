@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {createFloatParameterTexture} from '../utils/float-parameter-texture';
 import {LayerExtension} from '@deck.gl/core';
 
 import {FillStyleModuleProps, patternPlugin, patternPluginWGSL} from './shader-module';
-import {
-  packProceduralPatterns,
-  PROCEDURAL_PATTERN_TEXTURE_FORMAT,
-  type ProceduralPatternMapping
-} from './procedural-pattern';
+import {packProceduralPatterns, type ProceduralPatternMapping} from './procedural-pattern';
 
 import type {
   Layer,
@@ -293,18 +290,9 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     mapping: ProceduralPatternMapping
   ) {
     const packedPatterns = packProceduralPatterns(mapping);
-    // WebGPU reads procedural parameters with textureLoad and preserves the f32 bit pattern.
-    const webgpu = this.context.device.type === 'webgpu';
-    const {data} = packedPatterns;
     return {
       proceduralPatternIndices: packedPatterns.patternIndices,
-      proceduralPatternTexture: this.context.device.createTexture({
-        data: webgpu ? new Uint32Array(data.buffer, data.byteOffset, data.length) : data,
-        width: packedPatterns.width,
-        height: packedPatterns.height,
-        format: webgpu ? 'rg32uint' : PROCEDURAL_PATTERN_TEXTURE_FORMAT,
-        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
-      })
+      proceduralPatternTexture: createFloatParameterTexture(this.context.device, packedPatterns)
     };
   }
 }
