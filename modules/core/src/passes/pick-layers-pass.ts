@@ -83,7 +83,9 @@ export default class PickLayersPass extends LayersPass {
   } {
     this.pickZ = pickZ;
     const colorEncoderState = this._resetColorEncoder(pickZ);
-    const scissorRect = [x, y, width, height];
+    // deviceRect has a bottom-left origin. WebGPU framebuffers have a top-left origin.
+    const scissorY = this.device.type === 'webgpu' ? pickingFBO.height - y - height : y;
+    const scissorRect = [x, scissorY, width, height];
 
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
