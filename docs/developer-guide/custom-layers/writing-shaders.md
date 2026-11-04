@@ -96,7 +96,7 @@ Arguments:
 - `VertexGeometry geometry` - descriptor of the current geometry
 
 
-The WGSL ShaderPlugin equivalent is `vs:DECKGL_FILTER_VERTEX_SIZE(size: ptr<function, vec3<f32>>, geometry: Geometry)`. Custom WGSL layers should call `DECKGL_FILTER_VERTEX_SIZE(&size, geometry)` at the corresponding size calculation to support extension size transforms.
+The WGSL ShaderPlugin equivalent is `vs:DECKGL_FILTER_SIZE(size: ptr<function, vec3<f32>>, geometry: Geometry)`. Custom WGSL layers should call `DECKGL_FILTER_SIZE(&size, geometry)` at the corresponding size calculation to support extension size transforms.
 
 ##### vs:DECKGL_FILTER_GL_POSITION
 

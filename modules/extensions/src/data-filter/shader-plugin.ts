@@ -94,9 +94,9 @@ if (${category} >= ${limit}u) {
       'glsl:vs:DECKGL_FILTER_SIZE': inject['glsl:vs:DECKGL_FILTER_SIZE'] as string,
       'glsl:fs:DECKGL_FILTER_COLOR': inject['glsl:fs:DECKGL_FILTER_COLOR'] as string,
       'wgsl:vs:#main-start': initialization.join('\n'),
-      'wgsl:vs:DECKGL_FILTER_VERTEX_SIZE':
+      'wgsl:vs:DECKGL_FILTER_SIZE':
         'if (dataFilter.transformSize != 0) { *size *= dataFilter_value; }',
-      'wgsl:fs:DECKGL_FILTER_FRAGMENT_COLOR': `
+      'wgsl:fs:DECKGL_FILTER_COLOR': `
 if (dataFilter_value == 0.0) { discard; }
 if (dataFilter.transformColor != 0 && picking.isActive == 0.0) { (*color).a *= dataFilter_value; }
 `
