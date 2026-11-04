@@ -1630,10 +1630,18 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     ];
     const {data: binaryData, buffer} = createBinaryText(labels);
     try {
-      for (const cutoff of [30, 50]) {
+      for (const [cutoff, collisionGreedy, billboard] of [
+        [30, false, true],
+        [50, false, true],
+        [30, true, true],
+        [50, true, true],
+        [50, true, false]
+      ] as const) {
         const props = {
           getSize: 24,
           extensions,
+          collisionGreedy,
+          billboard,
           pickable: true,
           getCollisionPriority: (d, {index}) => labels[index].priority,
           getContentBox: (d, {index}) =>
@@ -1641,16 +1649,15 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
           contentCutoffPixels: [cutoff, 0]
         };
         const hidden = cutoff > 40;
+        const message = `cutoff=${cutoff}, greedy=${collisionGreedy}, billboard=${billboard}`;
         const layer = new TextLayer({
           id: 'cutoff',
           data: labels.map(({text, x, priority}) => ({text, priority, position: [x, 0]})),
           ...props
         });
-        expect(await drawLayers([layer]), `cutoff=${cutoff}`).toEqual(hidden ? [-100] : [100]);
+        expect(await drawLayers([layer]), message).toEqual(hidden ? [-100] : [100]);
         const binary = new TextLayer({id: 'cutoff-binary', data: binaryData, ...props});
-        expect(await pickBinaryText(binary), `binary, cutoff=${cutoff}`).toEqual(
-          hidden ? [1] : [0]
-        );
+        expect(await pickBinaryText(binary), `binary, ${message}`).toEqual(hidden ? [1] : [0]);
       }
     } finally {
       buffer.destroy();

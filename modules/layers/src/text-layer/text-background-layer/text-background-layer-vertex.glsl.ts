@@ -154,8 +154,8 @@ void main(void) {
     bool culled = textBackground.billboard
       ? gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w
       : text_collisionCulled;
-    // A culled copy of the label does not write its cell
-    gl_Position = culled || collision_skipsPlacement(instancePositions, instancePositions64Low)
+    // A culled copy of the label does not write its cell, nor does a label that is cut off
+    gl_Position = culled || cutOff || collision_skipsPlacement(instancePositions, instancePositions64Low)
       ? vec4(0.0, 0.0, 2.0, 1.0)
       : collision_getVisibilityPosition(positions);
   }

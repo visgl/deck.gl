@@ -152,6 +152,8 @@ void main(void) {
     : text_collisionCulled;
 #endif
 
+  // Whether the content cutoff hides the whole label, rather than clipping a single glyph
+  bool contentCutOff = false;
   if (instanceClipRect.z >= 0.) {
     if (pixelOffset.x < xy.x || pixelOffset.x > xy.x + wh.x) {
       gl_Position = vec4(0.0);
@@ -162,6 +164,7 @@ void main(void) {
       float r = min(anchorPosScreen.x + xy.x + wh.x, vpWidth);
       if (r - l < text.cutoffPixels.x) {
         gl_Position = vec4(0.0);
+        contentCutOff = true;
       }
     }
   }
@@ -175,6 +178,7 @@ void main(void) {
       float b = min(anchorPosScreen.y - xy.y, vpHeight);
       if (b - t < text.cutoffPixels.y) {
         gl_Position = vec4(0.0);
+        contentCutOff = true;
       }
     }
   }
@@ -199,8 +203,9 @@ void main(void) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
   if (collision.visibilityPass) {
-    // A culled copy of the label does not write its cell
-    gl_Position = collision_culled || collision_skipsPlacement(instancePositions, instancePositions64Low)
+    // A culled copy of the label does not write its cell, nor does a label that is cut off
+    bool skipped = collision_culled || contentCutOff;
+    gl_Position = skipped || collision_skipsPlacement(instancePositions, instancePositions64Low)
       ? vec4(0.0, 0.0, 2.0, 1.0)
       : collision_getVisibilityPosition(positions / 2.0 + 0.5);
   }
