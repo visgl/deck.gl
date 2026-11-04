@@ -8,6 +8,7 @@ import {ScatterplotLayer} from '@deck.gl/layers';
 import {device, testLayer, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {ArrowConverter} from '@deck.gl/core/arrow';
 import {Texture} from '@luma.gl/core';
+import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, Uint8, vectorFromArray} from 'apache-arrow';
 
@@ -158,6 +159,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
             }
             if (index === 1) expect(conversions).not.toHaveBeenCalled();
             const model = layer.state.model!;
+            expect(model.constructor).toBe(GPUVectorModel);
             const bindings = vi.spyOn(model as any, 'setAttributeVectors');
             try {
               if (backend === 'webgpu') (testDevice as any).handle.pushErrorScope('validation');

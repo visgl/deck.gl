@@ -6,6 +6,7 @@ import {expect, test, vi} from 'vitest';
 import {ArcLayer} from '@deck.gl/layers';
 import {device, testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {Texture} from '@luma.gl/core';
+import {GPUVectorModel} from '@luma.gl/engine';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 
@@ -51,6 +52,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               ]);
               expect(getWidth).toHaveBeenCalledTimes(3);
               const model = layer.state.model!;
+              expect(model.constructor).toBe(GPUVectorModel);
               const bindings = vi.spyOn(model as any, 'setAttributeVectors');
               try {
                 if (backend === 'webgpu') (testDevice as any).handle.pushErrorScope('validation');

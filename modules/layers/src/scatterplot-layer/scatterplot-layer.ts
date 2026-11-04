@@ -8,15 +8,14 @@ import {
   project32,
   picking,
   UNIT,
-  _GPUVectorModel as GPUVectorModel
+  _GPUVectorModel as DeckGPUVectorModel
 } from '@deck.gl/core';
-import {type Model, Geometry} from '@luma.gl/engine';
+import {GPUVectorModel, GPUVectorGeometry, Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
 
 import {scatterplotUniforms, ScatterplotProps} from './scatterplot-layer-uniforms';
 import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 import {getShaderWGSL} from './scatterplot-layer.wgsl';
-import clipExtension from '../utils/clip-extension';
 import {
   ScatterplotLayerColumns,
   hasScatterplotColumns,
@@ -192,7 +191,8 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   static layerName: string = 'ScatterplotLayer';
 
   state!: {
-    model?: Model;
+    model?: GPUVectorModel;
+    geometry?: GPUVectorGeometry;
     columns?: ScatterplotLayerColumns;
   };
 
@@ -220,6 +220,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   finalizeState(context) {
     this.state.columns?.destroy();
     super.finalizeState(context);
+    this.state.geometry?.destroy();
   }
 
   getShaders() {
@@ -308,44 +309,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
 
   updateState(params: UpdateParameters<this>) {
     if (hasScatterplotColumns(this.props)) {
-      if (this.props.extensions.length)
-        throw new Error('Scatterplot Arrow columns do not support extensions');
-      const enteringColumns = !this.state.columns;
-      if (enteringColumns) {
-        this.internalState!.attributeManager?.finalize();
-        this.internalState!.attributeManager = null;
-        this.state.columns = new ScatterplotLayerColumns(this.context.device);
-      }
-      if (
-        enteringColumns ||
-        params.changeFlags.extensionsChanged ||
-        Boolean((params.props.data as any)?.attributes?.rowIndexes) !==
-          Boolean((params.oldProps.data as any)?.attributes?.rowIndexes)
-      ) {
-        this.state.model?.destroy();
-        this.state.model = this._getModel();
-      }
-      if (this.internalState!.isAsyncPropLoading('data')) return;
-      if (
-        params.changeFlags.dataChanged ||
-        params.changeFlags.updateTriggersChanged ||
-        params.changeFlags.projectionChanged ||
-        this.state.columns!.needsUpdate(params.props, params.oldProps)
-      ) {
-        void this.state.columns!.update(
-          this.props,
-          () => {
-            this.setState({});
-            this.setNeedsUpdate();
-          },
-          error => this.raiseError(error, 'converting Arrow columns'),
-          {
-            transform: this.usePositionTransforms().transform?.bind(this),
-            fp64: this.use64bitPositions(),
-            requireRows: !this.props.positions && this.props.getPosition === defaultPosition
-          }
-        );
-      }
+      this.updateColumnState(params);
       return;
     }
     if (this.state.columns) {
@@ -363,6 +327,40 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
+  }
+
+  /** Updates the model and schedules conversion while Arrow columns are active. */
+  private updateColumnState(params: UpdateParameters<this>): void {
+    if (this.props.extensions.length)
+      throw new Error('Scatterplot Arrow columns do not support extensions');
+    const enteringColumns = !this.state.columns;
+    if (enteringColumns) {
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      this.state.columns = new ScatterplotLayerColumns(this.context.device);
+    }
+    if (
+      enteringColumns ||
+      params.changeFlags.extensionsChanged ||
+      Boolean((params.props.data as any)?.attributes?.rowIndexes) !==
+        Boolean((params.oldProps.data as any)?.attributes?.rowIndexes)
+    ) {
+      this.state.model?.destroy();
+      this.state.model = this._getModel();
+    }
+    void this.state.columns!.updateIfNeeded(params, {
+      dataLoading: this.internalState!.isAsyncPropLoading('data'),
+      changed: () => {
+        this.setState({});
+        this.setNeedsUpdate();
+      },
+      failed: error => this.raiseError(error, 'converting Arrow columns'),
+      positionOptions: {
+        transform: this.usePositionTransforms().transform?.bind(this),
+        fp64: this.use64bitPositions(),
+        requireRows: !this.props.positions && this.props.getPosition === defaultPosition
+      }
+    });
   }
 
   draw({uniforms}) {
@@ -404,7 +402,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
       return;
     model.shaderInputs.setProps({scatterplot: scatterplotProps});
     if (this.state.columns) {
-      this.state.columns.draw(model as GPUVectorModel, this.context.renderPass, offset =>
+      this.state.columns.draw(model, this.context.renderPass, offset =>
         model.shaderInputs.setProps({scatterplot: {rowIndexOffset: offset}})
       );
     } else {
@@ -415,24 +413,43 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
   protected _getModel() {
     // a square that minimally cover the unit circle
     const positions = [-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0];
-    return new GPUVectorModel(this.context.device, {
+    this.state.geometry?.destroy();
+    this.state.geometry = undefined;
+    const geometry = new Geometry({
+      topology: 'triangle-strip',
+      attributes: {positions: {size: 3, value: new Float32Array(positions)}}
+    });
+    const options = {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout:
         this.state.columns?.getBufferLayouts(
           Boolean((this.props.data as any)?.attributes?.rowIndexes)
         ) ?? this.getAttributeManager()!.getBufferLayouts(),
-      ...(this.context.device.type === 'webgpu' && this.state.columns
-        ? {topology: 'triangle-strip' as const, vertexCount: 4}
-        : {
-            geometry: new Geometry({
-              topology: 'triangle-strip',
-              attributes: {positions: {size: 3, value: new Float32Array(positions)}}
-            })
-          }),
-      enforceMatchingVectorLengths: Boolean(this.state.columns),
-      inferDrawCount: this.state.columns ? 'instance' : 'no',
       isInstanced: true
+    };
+    if (this.state.columns) {
+      if (this.context.device.type === 'webgpu') {
+        return new GPUVectorModel(this.context.device, {
+          ...options,
+          topology: 'triangle-strip',
+          vertexCount: 4,
+          inferDrawCount: 'instance'
+        });
+      }
+      const vectorGeometry = makeGPUVectorGeometry(this.context.device, geometry);
+      this.state.geometry = vectorGeometry;
+      return new GPUVectorModel(this.context.device, {
+        ...options,
+        geometry: vectorGeometry,
+        inferDrawCount: 'instance'
+      });
+    }
+    return new DeckGPUVectorModel(this.context.device, {
+      ...options,
+      geometry,
+      enforceMatchingVectorLengths: false,
+      inferDrawCount: 'no'
     });
   }
 }
