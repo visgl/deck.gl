@@ -199,7 +199,10 @@ void main(void) {
     gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
   }
   if (collision.visibilityPass) {
-    gl_Position = collision_getVisibilityPosition(positions / 2.0 + 0.5, collision_culled);
+    // A culled copy of the label does not write its cell
+    gl_Position = collision_culled
+      ? vec4(0.0, 0.0, 2.0, 1.0)
+      : collision_getVisibilityPosition(positions / 2.0 + 0.5);
   }
 #endif
 }

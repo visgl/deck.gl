@@ -40,7 +40,6 @@ uniform sampler2D collision_visibilityTexture;
 ${uniformBlock}
 
 // Text layers supply their projected footprint for the visibility pass.
-flat out float collision_hidden;
 bool collision_useBounds = false;
 flat out vec2 collision_corners[4];
 
@@ -77,9 +76,8 @@ ivec2 collision_getVisibilityPixel(vec3 pickingColor) {
   return ivec2(mod(index, columns), floor(index / columns)) * 4;
 }
 
-// Maps a corner of the label to its visibility cell. A hidden label writes an occluded cell.
-vec4 collision_getVisibilityPosition(vec2 corner, bool hidden) {
-  collision_hidden = hidden ? 1.0 : 0.0;
+// Maps a corner of the label to its visibility cell.
+vec4 collision_getVisibilityPosition(vec2 corner) {
   // Texel rows run bottom to top like the tiles of collision_testBounds, while corner.y runs
   // from the label's top edge, so that a texel's fragment lies in the part of the label it tests
   vec2 pixel = vec2(collision_getVisibilityPixel(collision_pickingColor)) + vec2(corner.x, 1.0 - corner.y) * 4.0;
@@ -92,14 +90,18 @@ float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
   }
 
   if (collision_useBounds) {
-    // Each tile of the label's 4x4 visibility cell tests part of its bounds.
+    // Each tile of the label's 4x4 visibility cell tests part of its bounds. The label is
+    // visible when no tile is occluded and at least one tile was drawn.
     ivec2 first = collision_getVisibilityPixel(pickingColor);
+    bool drawn = false;
     for (int y = 0; y < 4; y++) {
       for (int x = 0; x < 4; x++) {
-        if (texelFetch(collision_visibilityTexture, first + ivec2(x, y), 0).r < 0.5) return 0.0;
+        vec4 result = texelFetch(collision_visibilityTexture, first + ivec2(x, y), 0);
+        if (result.r < 0.5) return 0.0;
+        drawn = drawn || result.a > 0.5;
       }
     }
-    return 1.0;
+    return drawn ? 1.0 : 0.0;
   }
 
   // Visibility test, sample area of 5x5 pixels in order to fade in/out.
@@ -130,7 +132,6 @@ ${uniformBlock}
 ${priorityDepth}
 flat in highp vec3 collision_pickingColor;
 flat in float collision_priority;
-flat in float collision_hidden;
 flat in vec2 collision_corners[4];
 uniform sampler2D collision_texture;
 uniform highp sampler2D collision_depthTexture;
@@ -198,7 +199,6 @@ float collision_testBounds(vec3 pickingColor, int tileIndex) {
 // Write whether this texel's part of the object's bounds is unoccluded. Texels that other
 // extensions discard, such as masked-out parts of the label, keep the cleared, unoccluded value.
 vec4 collision_getBoundsData() {
-  if (collision_hidden > 0.5) return vec4(0.0, 0.0, 0.0, 1.0);
   ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
   return vec4(collision_testBounds(collision_pickingColor, tile.y * 4 + tile.x), 0.0, 0.0, 1.0);
 }

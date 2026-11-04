@@ -21,9 +21,10 @@ export default class CollisionFilterPass extends LayersPass {
   renderCollisionVisibility(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     this.drawToCollisionVisibility = true;
     try {
-      // Cells start unoccluded. Every world copy of a label writes its cell, and any copy that is
-      // occluded or hidden hides the label.
-      this.render({...options, clearColor: [1, 1, 1, 1], target, pass: 'collision'});
+      // Cells start unoccluded and undrawn. Each world copy of a label that is not culled writes
+      // its cell: red keeps the minimum, so any occluded copy hides the label, and alpha keeps
+      // the maximum, so a label that no copy drew stays hidden.
+      this.render({...options, clearColor: [1, 1, 1, 0], target, pass: 'collision'});
     } finally {
       this.drawToCollisionVisibility = false;
     }
@@ -38,7 +39,7 @@ export default class CollisionFilterPass extends LayersPass {
             blendColorOperation: 'min',
             blendColorSrcFactor: 'one',
             blendColorDstFactor: 'one',
-            blendAlphaOperation: 'min',
+            blendAlphaOperation: 'max',
             blendAlphaSrcFactor: 'one',
             blendAlphaDstFactor: 'one'
           }

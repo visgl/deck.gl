@@ -1296,6 +1296,38 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'culled world copies do not hide a visible label',
+  async () => {
+    // Looking east, one world copy of the label is behind the camera
+    deck.setProps({views: new MapView({repeat: true})});
+    try {
+      for (const billboard of [true, false]) {
+        const layer = new TextLayer({
+          id: 'repeated-pitched',
+          data: [{position: [0, 0], text: 'Collision label'}],
+          getSize: 24,
+          billboard,
+          extensions,
+          pickable: true
+        });
+        await new Promise<void>((resolve, reject) => {
+          deck.setProps({
+            layers: [layer],
+            viewState: {longitude: 0, latitude: 0, zoom: 1, pitch: 85, bearing: 90},
+            onError: reject,
+            onAfterRender: () => layer.isLoaded && resolve()
+          });
+        });
+        const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+        expect(objects, `billboard=${billboard}`).toHaveLength(1);
+      }
+    } finally {
+      deck.setProps({views: new OrthographicView()});
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'labels crossing a mask boundary keep their unmasked part',
   async () => {
     // The mask covers the right or the bottom half of the view; the labels cross its edge
