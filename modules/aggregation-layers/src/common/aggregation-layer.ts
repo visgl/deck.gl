@@ -8,6 +8,7 @@ import {
   CompositeLayer,
   LayerDataSource,
   LayerContext,
+  LayerExtension,
   UpdateParameters,
   CompositeLayerProps,
   Attribute,
@@ -115,6 +116,16 @@ export default abstract class AggregationLayer<
       });
       this.setState({aggregator, aggregatorType});
       return true;
+    }
+    if (this.state.aggregator instanceof WebGLAggregator) {
+      // Extension uniforms affect binning even when no input attributes change.
+      for (const extension of params.props.extensions) {
+        const {defaultProps} = extension.constructor as typeof LayerExtension;
+        if (Object.keys(defaultProps).some(key => params.props[key] !== params.oldProps[key])) {
+          this.state.aggregator.setNeedsUpdate();
+          break;
+        }
+      }
     }
     if (
       project.isCustomProjection(this.context.viewport) &&
