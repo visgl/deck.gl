@@ -609,7 +609,7 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
 
   for (const [mode, shader, unitLengthAssignment] of [
     ['segment', segmentShader, 'unitLength = vPathLength /'],
-    ['path', pathShader, 'unitLength = vDashPathLength /']
+    ['path', pathShader, 'unitLength = pathStyle_dashPathLength /']
   ] as const) {
     const assignmentIndex = shader.indexOf(unitLengthAssignment);
     const clampIndex = shader.indexOf('solidLength = min(solidLength, unitLength);');
@@ -624,10 +624,10 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
   }
 
   expect(segmentShader, 'segment mode uses its local phase').not.toContain(
-    'offset += vDashOffset;'
+    'offset += pathStyle_dashOffset;'
   );
   expect(pathShader, 'path mode adds the accumulated path phase').toContain(
-    'offset += vDashOffset;'
+    'offset += pathStyle_dashOffset;'
   );
 });
 
@@ -644,8 +644,8 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
   });
   const remapIndex = combinedVertexShader.indexOf('vPathPosition.y *= offsetWidth');
   const widthRestoreIndex = combinedVertexShader.indexOf('strokeHalfWidth /= offsetWidth');
-  const dashArrayIndex = combinedVertexShader.indexOf('vDashArray = instanceDashArrays');
-  const dashOffsetIndex = combinedVertexShader.indexOf('vDashOffset = dashPeriod');
+  const dashArrayIndex = combinedVertexShader.indexOf('pathStyle_dashArray = instanceDashArrays');
+  const dashOffsetIndex = combinedVertexShader.indexOf('pathStyle_dashOffset = dashPeriod');
 
   expect(remapIndex, 'restores the along-path coordinate').toBeGreaterThanOrEqual(0);
   expect(combinedVertexShader, 'restores segment length in the same stage').toContain(
@@ -667,7 +667,7 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
     'restoredDashPeriod'
   );
   expect(
-    combinedVertexShader.match(/vDashOffset = dashPeriod/g),
+    combinedVertexShader.match(/pathStyle_dashOffset = dashPeriod/g),
     'combined path mode reduces phase exactly once'
   ).toHaveLength(1);
 
@@ -675,14 +675,14 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
     'vPathPosition.y *= offsetWidth'
   );
   expect(offsetVertexShader, 'offset-only does not compile dash calculations').not.toContain(
-    'vDashArray'
+    'pathStyle_dashArray'
   );
   expect(offsetVertexShader, 'offset-only does not access dash path bounds').not.toContain(
     'vPathBounds'
   );
 
   expect(dashVertexShader, 'dash-only keeps dash conversion').toContain(
-    'vDashArray = instanceDashArrays'
+    'pathStyle_dashArray = instanceDashArrays'
   );
   expect(dashVertexShader, 'dash-only does not compile offset remapping').not.toContain(
     'offsetWidth'
