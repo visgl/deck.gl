@@ -32,6 +32,7 @@ const cartoData = vectorTableSource({
 /* eslint-disable react/no-deprecated */
 export default function App() {
   const [collisionEnabled, setCollisionEnabled] = useState(true);
+  const [collisionGreedy, setCollisionGreedy] = useState(false);
   const [maskEnabled, setMaskEnabled] = useState(false);
   const [showCarto, setShowCarto] = useState(false);
   const [showPoints, setShowPoints] = useState(true);
@@ -164,6 +165,7 @@ export default function App() {
         extensions: [new CollisionFilterExtension(), new MaskExtension()],
         getCollisionPriority: d => -d.properties.scalerank,
         collisionEnabled,
+        collisionGreedy,
         collisionGroup: 'labels',
         collisionTestProps: {
           sizeScale: textCollisionScale
@@ -208,6 +210,16 @@ export default function App() {
         </label>
         {showLabels && (
           <>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={collisionGreedy}
+                  onChange={event => setCollisionGreedy(event.target.checked)}
+                />
+                Greedy placement
+              </label>
+            </div>
             <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
               <label htmlFor="text-collision-scale" style={{whiteSpace: 'nowrap'}}>
                 Collision scale
