@@ -387,11 +387,17 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
     expect(pixelDifference(reference, fitted)).toBeLessThan(0.08);
   });
 
-  it('selects the upper surface regardless of terrain draw order and updates changed meshes', async () => {
+  it('selects the upper surface regardless of draw order or depth bias and updates meshes', async () => {
     const extensions = [new TerrainExtension()];
     const props = {extensions, terrainDrawMode: 'offset' as const};
-    const lower = createTerrain(() => 15).clone({id: 'lower'});
-    const upper = createTerrain(() => 55).clone({id: 'upper'});
+    const lower = createTerrain(() => 15).clone({
+      id: 'lower',
+      parameters: {cullMode: 'none', depthBias: -16777216}
+    });
+    const upper = createTerrain(() => 55).clone({
+      id: 'upper',
+      parameters: {cullMode: 'none', depthBias: 16777216}
+    });
     const elevatedData = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, 55])}];
     const reference = await renderFrame({data: elevatedData}, 35);
     for (const terrain of [

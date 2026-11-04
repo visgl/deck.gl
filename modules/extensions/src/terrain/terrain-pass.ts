@@ -88,6 +88,9 @@ export class TerrainPass extends LayersPass {
         ...layer.props.parameters,
         depthWriteEnabled: true,
         depthCompare: 'less-equal',
+        // Height selection must not depend on display offsets or layer order.
+        depthBias: 0,
+        depthBiasSlopeScale: 0,
         // Override deck's premultiplied-alpha defaults: these channels contain float bytes.
         blendColorOperation: 'add',
         blendColorSrcFactor: 'one',
