@@ -197,3 +197,64 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     }
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Bitmap refreshes CPU-preprojected positions after transform changes on ${backend}`, async ({
+    skip
+  }) => {
+    const {createTestViewport} = await import('../core/viewports/test-crs');
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    const viewport = createTestViewport({
+      width: 800,
+      height: 600,
+      converter: {
+        forward: ([x, y, z = 0]) => [x * 2, y * 2, z],
+        inverse: ([x, y, z = 0]) => [x / 2, y / 2, z]
+      }
+    });
+    const expected = [
+      [2, 4, 0],
+      [8, 4, 0],
+      [18, 16, 0]
+    ];
+    await testLayerAsync({
+      Layer: BitmapLayer,
+      device: testDevice,
+      viewport,
+      draw: false,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {
+          props: {
+            positions: column([
+              [1, 2],
+              [2, 2],
+              [1, 3]
+            ]),
+            texCoords: column([
+              [0, 0],
+              [1, 0],
+              [0, 1]
+            ])
+          }
+        },
+        {updateProps: {modelMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3, 0, 0, 1]}},
+        {updateProps: {coordinateOrigin: [5, 6, 0]}}
+      ].map((testCase, index) => ({
+        ...testCase,
+        onAfterUpdate: async ({layer}) => {
+          if (!layer.isLoaded) return;
+          expect(layer.state.preproject).toBeTruthy();
+          const buffer = (layer.state.typedMesh as any).attributes.positions.data[0].buffer;
+          const bytes = await buffer.readAsync();
+          expect(Array.from(new Float32Array(bytes.buffer, bytes.byteOffset, 3))).toEqual(
+            expected[index]
+          );
+        }
+      }))
+    });
+  });
+}
