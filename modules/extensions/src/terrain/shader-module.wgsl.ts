@@ -22,6 +22,10 @@ fn terrain_globe_to_mercator(position: vec3<f32>) -> vec2<f32> {
   return (vec2<f32>(atan2(position.x, -position.y), atanh(sinLat)) + PI) * WORLD_SCALE;
 }
 
+fn terrain_globe_latitude_scale(position: vec3<f32>) -> f32 {
+  return length(position.xy) / length(position);
+}
+
 fn terrain_encode_height(height: f32) -> vec4<f32> {
   let bits = bitcast<u32>(height);
   return vec4<f32>(vec4<u32>(bits, bits >> 8u, bits >> 16u, bits >> 24u) & vec4<u32>(255u)) / 255.0;
@@ -82,7 +86,7 @@ export const terrainWGSLVertexInjection = /* wgsl */ `
     var offset = vec3<f32>(0.0, 0.0, 1.0);
     if (isGlobe) {
       anchorMerc = vec3<f32>(terrain_globe_to_mercator(anchor), 0.0);
-      offset = normalize(commonPos) * cos(radians(geometry.worldPosition.y)) * PI;
+      offset = normalize(commonPos) * terrain_globe_latitude_scale(anchor) * PI;
     }
     let height = terrain_get_height(anchorMerc);
     // Preserve screen-space extrusion already applied by billboard paths.

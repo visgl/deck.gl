@@ -78,6 +78,10 @@ vec2 terrain_globe_to_mercator(vec3 globePosition) {
   float y = atanh(sinLat);
   return (vec2(x, y) + PI) * WORLD_SCALE;
 }
+
+float terrain_globe_latitude_scale(vec3 globePosition) {
+  return length(globePosition.xy) / length(globePosition);
+}
 `,
   fs: `${uniformBlock}in vec2 terrainMercPos;\nin float terrainHeight;`,
 
@@ -208,7 +212,7 @@ if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
     if ((project.projectionMode == PROJECTION_MODE_GLOBE || project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS)) {
       // Height map is written in Mercator common space (units = TILE_SIZE / EARTH_CIRCUMFERENCE / cos(lat))
       // Convert to globe radial units (units = GLOBE_RADIUS / EARTH_RADIUS)
-      terrainZ *= cos(radians(geometry.worldPosition.y)) * PI;
+      terrainZ *= terrain_globe_latitude_scale(anchorCommon) * PI;
       geometry.position.xyz += normalize(geometry.position.xyz) * terrainZ;
     } else {
       geometry.position.z += terrainZ;
