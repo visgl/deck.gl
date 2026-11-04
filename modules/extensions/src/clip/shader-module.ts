@@ -79,11 +79,13 @@ export const clipInstancePlugin: ShaderPlugin = {
   module: clipModule,
   interStageVariables: {clip_isVisible: {type: 'f32'}},
   injections: {
-'glsl:vs:DECKGL_FILTER_GL_POSITION': 'clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));',
-'glsl:fs:DECKGL_FILTER_COLOR': 'if (clip_isVisible < 0.5) discard;',
-'wgsl:vs:DECKGL_FILTER_POSITION': 'clip_isVisible = select(0.0, 1.0, clip_isInBounds(geometry.worldPosition.xy));',
-'wgsl:fs:DECKGL_FILTER_FRAGMENT_COLOR': 'if (clip_isVisible < 0.5) { discard; }'
-}
+    'glsl:vs:DECKGL_FILTER_GL_POSITION':
+      'clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));',
+    'glsl:fs:DECKGL_FILTER_COLOR': 'if (clip_isVisible < 0.5) discard;',
+    'wgsl:vs:DECKGL_FILTER_POSITION':
+      'clip_isVisible = select(0.0, 1.0, clip_isInBounds(geometry.worldPosition.xy));',
+    'wgsl:fs:DECKGL_FILTER_FRAGMENT_COLOR': 'if (clip_isVisible < 0.5) { discard; }'
+  }
 };
 
 /** Clips fragments in continuous flat common space, preserving world-wrap behavior. */
@@ -92,12 +94,12 @@ export const clipGeometryPlugin: ShaderPlugin = {
   module: clipModule,
   interStageVariables: {clip_commonPosition: {type: 'vec2<f32>'}},
   injections: {
-'glsl:vs:DECKGL_FILTER_GL_POSITION': `
+    'glsl:vs:DECKGL_FILTER_GL_POSITION': `
 clip_commonPosition = project_common_position_to_flat_continuous(
   geometry.position, project_common_position_to_flat(project.cameraPosition).x
 );`,
-'glsl:fs:DECKGL_FILTER_COLOR': 'if (!clip_isGeometryInBounds(clip_commonPosition)) discard;',
-'wgsl:vs:DECKGL_FILTER_POSITION': `
+    'glsl:fs:DECKGL_FILTER_COLOR': 'if (!clip_isGeometryInBounds(clip_commonPosition)) discard;',
+    'wgsl:vs:DECKGL_FILTER_POSITION': `
 // Billboard offsets are applied in clip space after geometry.position is set.
 // Recover their common-space displacement before interpolating clipping coordinates.
 let matrix = project.viewProjectionMatrix;
@@ -122,6 +124,7 @@ if (abs(determinant) > 0.0) {
     commonPosition.w);
 }
 clip_commonPosition = clip_getCoordinates(commonPosition);`,
-'wgsl:fs:DECKGL_FILTER_FRAGMENT_COLOR': 'if (!clip_isGeometryInBounds(clip_commonPosition)) { discard; }'
-}
+    'wgsl:fs:DECKGL_FILTER_FRAGMENT_COLOR':
+      'if (!clip_isGeometryInBounds(clip_commonPosition)) { discard; }'
+  }
 };
