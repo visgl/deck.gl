@@ -45,6 +45,22 @@ async function createDeck(layer, counts: number[], configureDevice = device => {
   };
 }
 
+function delayReadbacks(device, release: (() => void)[]) {
+  const createBuffer = device.createBuffer.bind(device);
+  vi.spyOn(device, 'createBuffer').mockImplementation((props: any) => {
+    const buffer = createBuffer(props);
+    if (props.id === 'data-filter-count-readback') {
+      const readAsync = buffer.readAsync.bind(buffer);
+      vi.spyOn(buffer, 'readAsync').mockImplementation(async () => {
+        const result = await readAsync();
+        await new Promise<void>(resolve => release.push(resolve));
+        return result;
+      });
+    }
+    return buffer;
+  });
+}
+
 test('DataFilterExtension#WebGPU counts, updates, constants and empty data', async context => {
   if (!(await getWebGPUTestDevice())) return context.skip();
   const counts: number[] = [];
@@ -162,19 +178,7 @@ test('DataFilterExtension#WebGPU ignores superseded and finalized readbacks', as
     extensions: [new DataFilterExtension({countItems: true})]
   });
   const fixture = await createDeck(layer, counts, device => {
-    const createBuffer = device.createBuffer.bind(device);
-    vi.spyOn(device, 'createBuffer').mockImplementation((props: any) => {
-      const buffer = createBuffer(props);
-      if (props.id === 'data-filter-count-readback') {
-        const readAsync = buffer.readAsync.bind(buffer);
-        vi.spyOn(buffer, 'readAsync').mockImplementation(async () => {
-          const result = await readAsync();
-          await new Promise<void>(resolve => release.push(resolve));
-          return result;
-        });
-      }
-      return buffer;
-    });
+    delayReadbacks(device, release);
   });
   try {
     await expect.poll(() => release.length, {timeout: 20000}).toBe(1);
@@ -259,3 +263,48 @@ test('DataFilterExtension#WebGPU preserves the soft-filter counting threshold', 
     await fixture.cleanup();
   }
 });
+
+test.each([true, false])(
+  'DataFilterExtension#WebGPU callback-only update (replace=%s)',
+  async (replace, context) => {
+    if (!(await getWebGPUTestDevice())) return context.skip();
+    const counts: number[] = [];
+    const replacementCounts: number[] = [];
+    const release: (() => void)[] = [];
+    const layer = new ScatterplotLayer({
+      id: 'count-callback',
+      data: [0, 1, 2],
+      getPosition: [0, 0],
+      getFilterValue: value => value,
+      filterRange: [0, 2],
+      extensions: [new DataFilterExtension({countItems: true})]
+    });
+    const fixture = await createDeck(layer, counts, device => delayReadbacks(device, release));
+    try {
+      await expect.poll(() => release.length, {timeout: 20000}).toBe(1);
+      await new Promise<void>(resolve =>
+        fixture.deck.setProps({
+          layers: [
+            layer.clone({
+              onFilteredItemsChange: replace ? ({count}) => replacementCounts.push(count) : null
+            })
+          ],
+          onAfterRender: () => resolve()
+        })
+      );
+      release[0]();
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(counts).toEqual([]);
+      if (replace) {
+        await expect.poll(() => release.length, {timeout: 20000}).toBe(2);
+        release[1]();
+        await expect.poll(() => replacementCounts).toEqual([3]);
+      } else {
+        expect(release).toHaveLength(1);
+      }
+    } finally {
+      release.forEach(resolve => resolve());
+      await fixture.cleanup();
+    }
+  }
+);

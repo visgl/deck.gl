@@ -20,7 +20,7 @@ import {NumberArray4} from '@math.gl/core';
 const defaultProps = {
   getFilterValue: {type: 'accessor', value: 0},
   getFilterCategory: {type: 'accessor', value: 0},
-  onFilteredItemsChange: {type: 'function', value: null, optional: true},
+  onFilteredItemsChange: {type: 'function', value: null, optional: true, ignore: false},
 
   filterEnabled: true,
   filterRange: [-1, 1],
