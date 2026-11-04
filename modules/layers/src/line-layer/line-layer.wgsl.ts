@@ -49,7 +49,6 @@ struct LineUniforms {
 var<uniform> line: LineUniforms;
 
 
-
 // ---------- Vertex Output Structure ----------
 
 struct Varyings {
@@ -99,6 +98,7 @@ fn vertexMain(
       abortOut.gl_Position = vec4<f32>(0.0);
       abortOut.vColor = vec4<f32>(0.0);
       abortOut.uv = vec2<f32>(0.0);
+      DECKGL_FILTER_GL_POSITION(&abortOut.gl_Position, geometry);
       return abortOut;
     }
   }
@@ -134,8 +134,9 @@ fn vertexMain(
   let offset: vec3<f32> = vec3<f32>(extrusion, 0.0);
 
   // Apply deck.gl filter functions.
-#ifdef ANTIALIASING
   var filteredOffset = deckgl_filter_size(offset, geometry);
+  DECKGL_FILTER_SIZE(&filteredOffset, geometry);
+#ifdef ANTIALIASING
   let halfWidthPixels = length(filteredOffset.xy);
   if (halfWidthPixels > 0.0) {
     // Keep the declared edge at abs(uv.y) == 1 while rasterizing the outer half of the centered
@@ -145,8 +146,6 @@ fn vertexMain(
     uv.y *= coverageScale;
   }
   geometry.uv = uv;
-#else
-  let filteredOffset = deckgl_filter_size(offset, geometry);
 #endif
   let filteredP = deckgl_filter_gl_position(p, geometry);
 
@@ -162,18 +161,21 @@ fn vertexMain(
   output.vColor = vColor;
   output.uv = uv;
   output.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_GL_POSITION(&output.gl_Position, geometry);
   return output;
 }
 
 @fragment
 fn fragmentMain(
-  @location(0) vColor: vec4<f32>,
-  @location(1) uv: vec2<f32>,
-  @location(2) pickingColor: vec3<f32>
+  inputs: Varyings
 ) -> @location(0) vec4<f32> {
+  let vColor = inputs.vColor;
+  let uv = inputs.uv;
+  let pickingColor = inputs.pickingColor;
   // Create and initialize geometry with the provided uv.
   var geometry: Geometry;
   geometry.uv = uv;
+  fragmentGeometry.uv = geometry.uv;
 
   // Start with the input color.
   var fragColor: vec4<f32> = vColor;
@@ -198,6 +200,9 @@ fn fragmentMain(
     if (!picking_isColorValid(pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(pickingColor, 1.0);
   }
 
@@ -219,8 +224,8 @@ fn fragmentMain(
   }
 
   // Apply premultiplied alpha as required by transparent canvas
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   fragColor = deckgl_premultiplied_alpha(fragColor);
-
   return fragColor;
 }
 `;

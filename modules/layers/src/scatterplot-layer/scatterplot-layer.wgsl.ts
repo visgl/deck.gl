@@ -100,7 +100,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     // DECKGL_FILTER_GL_POSITION(varyings.position, geometry);
     var offset = edgePadding * attributes.positions * varyings.outerRadiusPixels;
     offset = vec3<f32>(offset.xy + attributes.instancePixelOffset, offset.z);
-    // DECKGL_FILTER_SIZE(offset, geometry);
+    DECKGL_FILTER_SIZE(&offset, geometry);
     let clipPixels = project_pixel_size_to_clipspace(offset.xy);
     varyings.position = vec4<f32>(varyings.position.x + clipPixels.x, varyings.position.y + clipPixels.y, varyings.position.z, varyings.position.w);
     geometry.position = vec4<f32>(
@@ -114,7 +114,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   } else {
     var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
-    // DECKGL_FILTER_SIZE(offset, geometry);
+    DECKGL_FILTER_SIZE(&offset, geometry);
     let projectedPosition = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
       attributes.instancePositions64Low,
@@ -135,13 +135,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   // DECKGL_FILTER_COLOR(varyings.vLineColor, geometry);
   varyings.pickingColor = geometry.pickingColor;
 
+  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
+
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
-  // var geometry: Geometry;
-  // geometry.uv = unitPosition;
+  fragmentGeometry.uv = varyings.unitPosition;
 
   let distToCenter = length(varyings.unitPosition) * varyings.outerRadiusPixels;
   let inCircle = select(
@@ -185,6 +186,9 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
 
@@ -206,8 +210,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   }
 
   // Apply premultiplied alpha as required by transparent canvas
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   fragColor = deckgl_premultiplied_alpha(fragColor);
-
   return fragColor;
   // return vec4<f32>(0, 0, 1, 1);
 }

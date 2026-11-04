@@ -287,15 +287,14 @@ fn vertexMain(
     arc.widthMinPixels,
     arc.widthMaxPixels
   );
-#ifdef ANTIALIASING
   var offset = getExtrusionOffset(
-#else
-  let offset = getExtrusionOffset(
-#endif
     (nextClip.xy - currentClip.xy) * indexDirection,
     segmentSide,
     widthPixels
   );
+  var size = vec3<f32>(offset, 0.0);
+  DECKGL_FILTER_SIZE(&size, geometry);
+  offset = size.xy;
 #ifdef ANTIALIASING
   let halfWidthPixels = length(offset);
   if (halfWidthPixels > 0.0) {
@@ -314,6 +313,7 @@ fn vertexMain(
   output.uv = geometry.uv;
   output.pickingColor = geometry.pickingColor;
   output.isValid = isValid;
+  DECKGL_FILTER_GL_POSITION(&output.position, geometry);
   return output;
 }
 
@@ -334,16 +334,21 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     discard;
   }
 #endif
+  fragmentGeometry.uv = varyings.uv;
   var color = varyings.color;
 #ifdef ANTIALIASING
   // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
   // two outer edges of the strip.
   color.a *= smoothedge(0.0, edgePixels);
 #endif
+
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
   if (picking.isHighlightActive > 0.5) {
@@ -360,6 +365,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
       }
     }
   }
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;
