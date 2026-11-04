@@ -58,11 +58,7 @@ When added to a layer via the `extensions` prop, the `Fp64Extension` uses WGS84 
 
 ## Limitations
 
-- Only `MapView` (and other Web Mercator based viewports) are supported. `GlobeView` and Non-geospatial views such as `OrthographicView` and `OrbitView` are not supported.
-
-## Limitations
-
-This extension supports longitude/latitude coordinates in `MapView`. It does not add globe or custom projection support. The default projection remains recommended for most applications because it is substantially faster.
+Only `MapView` and other Web Mercator based viewports are supported. `GlobeView`, custom projections, and non-geospatial views such as `OrthographicView` and `OrbitView` are not supported. The default projection remains recommended for most applications because it is substantially faster.
 
 WebGPU uses luma.gl's device-specific fp64 arithmetic selection, including integer-controlled arithmetic on Apple GPUs. Shader compilation and rendering can cost substantially more than the default projection. Software WebGPU adapters such as SwiftShader are not validated for high-zoom fp64 precision.
 
