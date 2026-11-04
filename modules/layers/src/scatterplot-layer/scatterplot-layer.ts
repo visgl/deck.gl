@@ -431,6 +431,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
             })
           }),
       enforceMatchingVectorLengths: Boolean(this.state.columns),
+      inferDrawCount: this.state.columns ? 'instance' : 'no',
       isInstanced: true
     });
   }
