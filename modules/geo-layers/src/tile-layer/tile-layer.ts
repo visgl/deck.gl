@@ -28,6 +28,16 @@ import {
 import {urlType, URLTemplate, getURLFromTemplate} from '../tileset-2d/index';
 import {Matrix4} from '@math.gl/core';
 
+/** Request outcomes of the tiles selected for the current viewport. */
+export type TileLoadingState = {
+  /** Requests that succeeded, including empty results. */
+  loaded: number;
+  /** Requests that threw or rejected. */
+  failed: number;
+  /** Requests not yet settled, including cancelled requests and tiles awaiting reload. */
+  pending: number;
+};
+
 const defaultProps: DefaultProps<TileLayerProps> = {
   TilesetClass: Tileset2D,
   data: {type: 'data', value: []},
@@ -220,6 +230,32 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           (!tile.content || !tile.layers || tile.layers.every(layer => layer.isLoaded))
       )
     );
+  }
+
+  /**
+   * Count request outcomes of the tiles selected for the current viewport.
+   * Returns `null` before the tileset has selected tiles (before the first update or after
+   * finalization). All counts are zero when the viewport selects no tiles, e.g. outside the
+   * `minZoom` or `visibleMinZoom`/`visibleMaxZoom` range.
+   */
+  getTileLoadingState(): TileLoadingState | null {
+    const selectedTiles = this.state?.tileset?.selectedTiles;
+    if (!selectedTiles) {
+      return null;
+    }
+    let loaded = 0;
+    let failed = 0;
+    let pending = 0;
+    for (const tile of selectedTiles) {
+      if (!tile.isLoaded) {
+        pending++;
+      } else if (tile.isFailed) {
+        failed++;
+      } else {
+        loaded++;
+      }
+    }
+    return {loaded, failed, pending};
   }
 
   shouldUpdateState({changeFlags}): boolean {
