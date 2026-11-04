@@ -13,11 +13,11 @@ import {
   type Viewport
 } from '@deck.gl/core';
 import {device} from '@deck.gl/test-utils/vitest';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Buffer, type Device} from '@luma.gl/core';
 import {Computation} from '@luma.gl/engine';
 import type {NumberArray3} from '@math.gl/core';
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {runOnGPU, testUniforms} from './project-glsl-test-utils';
 
 const EARTH_RADIUS = 6370972;

@@ -112,10 +112,6 @@ Distance scales now describe world units for any CRS, so the same API supports g
 
 To retain an old degree step `d`, set `resolution: 360 / d`; for example, the former `GlobeView` default of 10 degrees becomes `resolution: 36`. Custom layers should use `viewport.getSubdivisionStep(sourceCrs)` for a step in their source CRS units instead of interpreting `viewport.resolution` directly.
 
-#### GlobeView position
-
-`GlobeView` now applies `viewState.position` as meter offsets to the east, north and up at every zoom, matching `MapView`. Camera offsets follow the local directions consistently across locations and the zoom-12 projection transition. If your application compensated for the former globe-axis interpretation below zoom 12, update those offsets to use local east, north and up.
-
 ### Layer
 
 #### Coordinate and projection constants
@@ -131,12 +127,6 @@ Absolute layer CRSs, including WGS84 (`'lnglat'`), now support `coordinateOrigin
 #### A5Layer
 
 `A5Layer` now uses [A5](https://a5geo.org) v1, [which changes the cell index](https://a5geo.org/docs/upgrade-guide).
-
-#### Meter offsets in GlobeView
-
-Below zoom 12, `GlobeView` turned meter offsets from a position half a turn about the local up direction, toward the west and south. This applies to `SimpleMeshLayer` and `ScenegraphLayer` meshes, `ColumnLayer` angles, `IconLayer` and `TextLayer` with `billboard: false`, and custom layers that pass an offset to `project_position_to_clipspace`. These offsets now point east, north and up, matching `MapView` and `GlobeView` above zoom 12. If your application turned its meshes or offsets by 180° in `GlobeView` to compensate, remove that rotation.
-
-`project_get_orientation_matrix` now returns east, north and up columns, and the same matrix in WGSL; WebGPU previously ignored the location. At a pole, east is its limit along the position's longitude, and the common-space x axis only when the position lies exactly on the polar axis.
 
 #### projectPosition
 
@@ -177,6 +167,10 @@ const commonPosition2 = layer.projectPosition(lnglat, {
 ```
 
 ## Upgrading to v9.4
+
+### GlobeView meter offsets
+
+Below zoom 12, `GlobeView` now applies camera and layer meter offsets east, north and up, matching `MapView`. If your application compensated for the previous orientation, update its offsets or remove the compensating rotation.
 
 ### pydeck lighting
 
