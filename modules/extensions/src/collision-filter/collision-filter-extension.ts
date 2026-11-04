@@ -16,6 +16,7 @@ import CollisionFilterEffect from './collision-filter-effect';
 const defaultProps = {
   getCollisionPriority: {type: 'accessor', value: 0},
   collisionEnabled: true,
+  collisionGreedy: false,
   collisionGroup: {type: 'string', value: 'default'},
   collisionTestProps: {}
 };
@@ -36,6 +37,15 @@ export type CollisionFilterExtensionProps<DataT = any> = {
    * Collision group this layer belongs to. If it is not set, the 'default' collision group is used
    */
   collisionGroup?: string;
+
+  /**
+   * Place text labels in descending priority, so that rejected labels do not reserve space.
+   * This reads label bounds back from the GPU and places them on the CPU whenever the collision
+   * map redraws. Enabling it on any text layer applies to every text layer in its
+   * `collisionGroup`. It has no effect on groups without text. WebGL only.
+   * @default false
+   */
+  collisionGreedy?: boolean;
 
   /**
    * Props to override when rendering collision map

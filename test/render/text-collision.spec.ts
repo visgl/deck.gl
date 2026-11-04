@@ -59,18 +59,21 @@ afterAll(() => {
 
 const cases = ['start', 'middle', 'end'].flatMap(anchor =>
   ['top', 'center', 'bottom'].flatMap(baseline =>
-    [false, true].map(useGeoJson => ({anchor, baseline, useGeoJson}))
+    [false, true].flatMap(useGeoJson =>
+      [false, true].map(collisionGreedy => ({anchor, baseline, useGeoJson, collisionGreedy}))
+    )
   )
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl')).each(cases)(
-  'text collision: $anchor / $baseline / GeoJSON=$useGeoJson',
-  async ({anchor, baseline, useGeoJson}) => {
+  'text collision: $anchor / $baseline / GeoJSON=$useGeoJson / greedy=$collisionGreedy',
+  async ({anchor, baseline, useGeoJson, collisionGreedy}) => {
     for (const reverse of [false, true]) {
       for (const zoom of [-1, 0, 5]) {
         const props = {
           id: 'collision-text',
           data,
+          collisionGreedy,
           getSize: 20,
           getTextAnchor: anchor,
           getAlignmentBaseline: baseline,
@@ -149,7 +152,12 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       extensions,
       pickable: true
     });
-    expect(await drawLayers([layer])).toHaveLength(1);
+    for (const collisionGreedy of [false, true]) {
+      expect(
+        await drawLayers([layer.clone({collisionGreedy})]),
+        `greedy=${collisionGreedy}`
+      ).toHaveLength(1);
+    }
   }
 );
 
@@ -174,55 +182,68 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'text collision priorities are independent of layer depth offsets',
   async () => {
-    const high = new TextLayer({
-      id: 'priority-high',
-      data: [{position: [0, 0], text: 'Label\nsecond line', priority: 1}],
-      getSize: 24,
-      collisionGroup: 'shared-priority',
-      getCollisionPriority: d => d.priority,
-      extensions,
-      pickable: true
-    });
-    const low = high.clone({
-      id: 'priority-low',
-      data: [{position: [12, 0], text: 'Label\nsecond line', priority: 0}]
-    });
-    expect(await drawLayers([high, low])).toEqual([1]);
-    expect(await drawLayers([low.clone(), high.clone()])).toEqual([1]);
-    expect(
-      await drawLayers([
-        high.clone({getPolygonOffset: () => [0, 1000]}),
-        low.clone({getPolygonOffset: () => [0, -1000]})
-      ])
-    ).toEqual([1]);
+    for (const collisionGreedy of [false, true]) {
+      const high = new TextLayer({
+        id: 'priority-high',
+        data: [{position: [0, 0], text: 'Label\nsecond line', priority: 1}],
+        getSize: 24,
+        collisionGroup: 'shared-priority',
+        collisionGreedy,
+        getCollisionPriority: d => d.priority,
+        extensions,
+        pickable: true
+      });
+      const low = high.clone({
+        id: 'priority-low',
+        data: [{position: [12, 0], text: 'Label\nsecond line', priority: 0}]
+      });
+      const message = `greedy=${collisionGreedy}`;
+      expect(await drawLayers([high, low]), message).toEqual([1]);
+      expect(await drawLayers([low.clone(), high.clone()]), message).toEqual([1]);
+      expect(
+        await drawLayers([
+          high.clone({getPolygonOffset: () => [0, 1000]}),
+          low.clone({getPolygonOffset: () => [0, -1000]})
+        ]),
+        message
+      ).toEqual([1]);
+    }
   }
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
-  'text collision clamps priorities to the supported range',
+  'text collision clamps priorities consistently in GPU and greedy placement',
   async () => {
-    const layer = new TextLayer({
-      id: 'clamped-priorities',
-      data: [
-        {position: [0, 0], text: 'Label', priority: 2000},
-        {position: [0, 0], text: 'Label', priority: 1000}
-      ],
-      getSize: 24,
-      extensions,
-      pickable: true,
-      getCollisionPriority: d => d.priority
-    });
-    // Both priorities clamp to 1000, so the later label wins the tie.
-    expect(await drawLayers([layer])).toEqual([1000]);
-    expect(
-      await drawLayers([
-        layer.clone({data: layer.props.data.map(d => ({...d, priority: d.priority + 1000}))})
-      ])
-    ).toEqual([2000]);
-    // A priority below the supported range must remain visible when isolated.
-    expect(
-      await drawLayers([layer.clone({data: [{position: [0, 0], text: 'Label', priority: -2000}]})])
-    ).toEqual([-2000]);
+    for (const collisionGreedy of [false, true]) {
+      const layer = new TextLayer({
+        id: 'clamped-priorities',
+        data: [
+          {position: [0, 0], text: 'Label', priority: 2000},
+          {position: [0, 0], text: 'Label', priority: 1000}
+        ],
+        getSize: 24,
+        collisionGreedy,
+        extensions,
+        pickable: true,
+        getCollisionPriority: d => d.priority
+      });
+      const message = `greedy=${collisionGreedy}`;
+      // Both priorities clamp to 1000, so the later label wins the tie.
+      expect(await drawLayers([layer]), message).toEqual([1000]);
+      expect(
+        await drawLayers([
+          layer.clone({data: layer.props.data.map(d => ({...d, priority: d.priority + 1000}))})
+        ]),
+        message
+      ).toEqual([2000]);
+      // A priority below the supported range must remain visible when isolated.
+      expect(
+        await drawLayers([
+          layer.clone({data: [{position: [0, 0], text: 'Label', priority: -2000}]})
+        ]),
+        message
+      ).toEqual([-2000]);
+    }
   }
 );
 
@@ -316,7 +337,12 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   async () => {
     deck.setProps({views: new GlobeView()});
     try {
-      for (const background of [false, true]) {
+      for (const [background, collisionGreedy] of [
+        [false, false],
+        [true, false],
+        [false, true],
+        [true, true]
+      ]) {
         const layer = new TextLayer({
           id: 'globe-text',
           data: [
@@ -327,6 +353,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
           extensions,
           pickable: true,
           background,
+          collisionGreedy,
           getSize: 24,
           getCollisionPriority: d => d.priority
         });
@@ -341,7 +368,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
         const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
         const priorities = objects.map(({object}) => object.priority).sort((a, b) => a - b);
         // The overlapping lower-priority label is hidden, the others stay visible
-        expect(priorities, `background=${background}`).toEqual([0, 1]);
+        expect(priorities, `background=${background}, greedy=${collisionGreedy}`).toEqual([0, 1]);
       }
     } finally {
       deck.setProps({views: new OrthographicView()});
@@ -428,6 +455,77 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       }
     } finally {
       deck.setProps({views: new OrthographicView()});
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'text behind the globe does not hide visible text',
+  async () => {
+    deck.setProps({views: new GlobeView()});
+    // The hidden label on the far side projects onto the visible label
+    const labels = [
+      {text: 'Front', x: 0, priority: 0},
+      {text: 'Back', x: 180, priority: 10}
+    ];
+    const {data: binaryData, buffer} = createBinaryText(labels);
+    const draw = async (layer: TextLayer) => {
+      await new Promise<void>((resolve, reject) => {
+        deck.setProps({
+          layers: [layer],
+          viewState: {longitude: 0, latitude: 0, zoom: 2},
+          onError: reject,
+          onAfterRender: () => layer.isLoaded && resolve()
+        });
+      });
+      const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+      return objects.map(({index}) => index);
+    };
+    try {
+      for (const collisionGreedy of [false, true]) {
+        for (const billboard of [false, true]) {
+          const props = {
+            extensions,
+            collisionGreedy,
+            billboard,
+            pickable: true,
+            getSize: 24,
+            // Binary rows have no objects
+            getCollisionPriority: (_, {index}) => labels[index].priority
+          };
+          const message = `greedy=${collisionGreedy}, billboard=${billboard}`;
+          const objects = new TextLayer({
+            id: 'globe-back',
+            data: labels.map(({text, x}) => ({text, position: [x, 0]})),
+            ...props
+          });
+          expect(await draw(objects), message).toEqual([0]);
+          // Binary text tests collisions with its characters
+          const binary = new TextLayer({id: 'globe-back-binary', data: binaryData, ...props});
+          expect(await draw(binary), `binary, ${message}`).toEqual([0]);
+        }
+        // A large label behind the globe must not draw over the visibility cells of the two
+        // overlapping front labels, of which only the higher-priority one is visible
+        const rows = [
+          {position: [0, 0], text: 'Front', priority: 0, size: 24},
+          {position: [3, 0], text: 'Front', priority: 5, size: 24},
+          {position: [150, 10], text: 'BackBackBack', priority: 10, size: 5000}
+        ];
+        const large = new TextLayer({
+          id: 'globe-back-large',
+          data: rows,
+          extensions,
+          collisionGreedy,
+          billboard: false,
+          pickable: true,
+          getSize: d => d.size,
+          getCollisionPriority: d => d.priority
+        });
+        expect(await draw(large), `large, greedy=${collisionGreedy}`).toEqual([1]);
+      }
+    } finally {
+      deck.setProps({views: new OrthographicView()});
+      buffer.destroy();
     }
   }
 );
@@ -585,47 +683,57 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   }
 );
 
-test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
-  'multiline collision agrees within and across layers at fractional pixel ratios',
-  async () => {
-    try {
-      for (const devicePixels of [1, 1.5, 2]) {
-        deck.setProps({useDevicePixels: devicePixels});
-        for (const splitLayers of [false, true]) {
-          for (const reverse of [false, true]) {
-            const labels = [
-              {position: [-30, 0], text: 'Label\nsecond line', priority: reverse ? -100 : 100},
-              {position: [30, 0], text: 'Much longer line\nshort', priority: reverse ? 100 : -100}
-            ];
-            const text = new TextLayer({
-              id: 'multiline-split',
-              data: labels,
-              collisionGroup: 'multiline',
-              getSize: 24,
-              fontFamily: 'Arial',
-              extensions,
-              pickable: true,
-              getPixelOffset: [40, -25],
-              getCollisionPriority: d => d.priority
-            });
-            const layers = splitLayers
-              ? labels.map((label, index) => text.clone({id: `multiline-${index}`, data: [label]}))
-              : [text];
-            // Leave room around the collision threshold: system font metrics can differ by OS.
-            expect(await drawLayers(layers, 0)).toEqual([100]);
-            expect(
-              await drawLayers(
-                layers.map(layer => layer.clone()),
-                2
-              )
-            ).toEqual([-100, 100]);
-          }
+async function expectMultilineAgreement(collisionGreedy: boolean) {
+  try {
+    for (const devicePixels of [1, 1.5, 2]) {
+      deck.setProps({useDevicePixels: devicePixels});
+      for (const splitLayers of [false, true]) {
+        for (const reverse of [false, true]) {
+          const labels = [
+            {position: [-30, 0], text: 'Label\nsecond line', priority: reverse ? -100 : 100},
+            {position: [30, 0], text: 'Much longer line\nshort', priority: reverse ? 100 : -100}
+          ];
+          const text = new TextLayer({
+            id: 'multiline-split',
+            data: labels,
+            collisionGreedy,
+            collisionGroup: 'multiline',
+            getSize: 24,
+            fontFamily: 'Arial',
+            extensions,
+            pickable: true,
+            getPixelOffset: [40, -25],
+            getCollisionPriority: d => d.priority
+          });
+          const layers = splitLayers
+            ? labels.map((label, index) => text.clone({id: `multiline-${index}`, data: [label]}))
+            : [text];
+          // Leave room around the collision threshold: system font metrics can differ by OS.
+          const message = JSON.stringify({collisionGreedy, devicePixels, splitLayers, reverse});
+          expect(await drawLayers(layers, 0), message).toEqual([100]);
+          expect(
+            await drawLayers(
+              layers.map(layer => layer.clone()),
+              2
+            ),
+            message
+          ).toEqual([-100, 100]);
         }
       }
-    } finally {
-      deck.setProps({useDevicePixels: false});
     }
+  } finally {
+    deck.setProps({useDevicePixels: false});
   }
+}
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'multiline collision agrees within and across layers at fractional pixel ratios',
+  () => expectMultilineAgreement(false)
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy multiline placement agrees within and across layers at fractional pixel ratios',
+  () => expectMultilineAgreement(true)
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
@@ -696,6 +804,62 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'rejected labels do not block non-overlapping neighbors',
+  async () => {
+    const layer = new TextLayer({
+      id: 'greedy-collision-chain',
+      data: [
+        {position: [-60, 0], text: 'XXXXX', priority: 10},
+        {position: [0, 0], text: 'XXXXX', priority: 20},
+        {position: [60, 0], text: 'XXXXX', priority: 30}
+      ],
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    const readPixels = vi.spyOn(device, 'readPixelsToArrayWebGL');
+    const readCollisionBounds = () =>
+      readPixels.mock.calls.some(([target]) =>
+        (target as {id?: string}).id?.startsWith('collision-visibility-')
+      );
+    try {
+      // Greedy placement reads label bounds back, and the rejected middle label frees its space.
+      expect(await drawLayers([layer.clone({collisionGreedy: true})])).toEqual([10, 30]);
+      expect(readCollisionBounds()).toBe(true);
+      readPixels.mockClear();
+      expect(await drawLayers([layer.clone({collisionGreedy: false})])).toEqual([30]);
+      expect(readCollisionBounds()).toBe(false);
+    } finally {
+      readPixels.mockRestore();
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy placement fills a long chain at different zoom levels',
+  async () => {
+    const layer = new TextLayer({
+      id: 'long-collision-chain',
+      collisionGreedy: true,
+      data: Array.from({length: 10}, (_, index) => ({
+        position: [index * 60 - 270, 0],
+        text: 'XXXXX',
+        priority: index
+      })),
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer], 0)).toEqual([1, 3, 5, 7, 9]);
+    expect(await drawLayers([layer.clone()], -1)).toEqual([0, 3, 6, 9]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'text collision respects non-text priorities in a shared group',
   async () => {
     // Both layers use object index 0, so this also checks per-layer picking color offsets.
@@ -709,6 +873,34 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     });
     const point = new ScatterplotLayer({
       id: 'mixed-point',
+      data: [{position: [0, 0], priority: 200}],
+      getRadius: 8,
+      radiusUnits: 'pixels',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([text, point])).toEqual([200]);
+    expect(
+      await drawLayers([text.clone(), point.clone({data: [{position: [0, 0], priority: -200}]})])
+    ).toEqual([100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy placement respects non-text collision priorities',
+  async () => {
+    const text = new TextLayer({
+      id: 'greedy-mixed-text',
+      collisionGreedy: true,
+      data: [data[0]],
+      getSize: 24,
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    const point = new ScatterplotLayer({
+      id: 'greedy-mixed-point',
       data: [{position: [0, 0], priority: 200}],
       getRadius: 8,
       radiusUnits: 'pixels',
@@ -741,6 +933,104 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'filtered text does not reserve greedy placement space',
+  async () => {
+    const layer = new TextLayer({
+      id: 'greedy-filtered-collision-text',
+      collisionGreedy: true,
+      data,
+      getSize: 24,
+      extensions: [...extensions, new DataFilterExtension({filterSize: 1})],
+      filterRange: [-100, 0],
+      getFilterValue: d => d.priority,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([layer])).toEqual([-100]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'clipped text does not hide visible text',
+  async () => {
+    const rows = [
+      {position: [0, 0], text: 'Clipped label', priority: 20},
+      {position: [40, 0], text: 'Visible label', priority: 10}
+    ];
+    // The higher-priority label's anchor is outside the clip bounds, so ClipExtension hides it
+    const props = {
+      getSize: 24,
+      extensions: [...extensions, new ClipExtension()],
+      clipBounds: [20, -100, 400, 100],
+      pickable: true,
+      // Binary rows have no objects
+      getCollisionPriority: (_, {index}) => rows[index].priority
+    };
+    const {data: binaryData, buffer} = createBinaryText([
+      {text: 'Clipped label', x: 0},
+      {text: 'Visible label', x: 40}
+    ]);
+    try {
+      for (const collisionGreedy of [false, true]) {
+        for (const background of [false, true]) {
+          const layer = new TextLayer({
+            id: 'clipped',
+            data: rows,
+            background,
+            collisionGreedy,
+            ...props
+          });
+          expect(
+            await drawLayers([layer]),
+            `background=${background}, greedy=${collisionGreedy}`
+          ).toEqual([10]);
+        }
+        // Binary text tests collisions with its characters
+        const binary = new TextLayer({
+          id: 'clipped-binary',
+          data: binaryData,
+          collisionGreedy,
+          ...props
+        });
+        expect(await pickBinaryText(binary), `binary, greedy=${collisionGreedy}`).toEqual([1]);
+      }
+    } finally {
+      buffer.destroy();
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy placement applies to its collision group only',
+  async () => {
+    const low = new TextLayer({
+      id: 'group-low',
+      data: [{position: [-60, 0], text: 'XXXXX', priority: 10}],
+      getSize: 24,
+      fontFamily: 'Arial',
+      extensions,
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    const middle = low.clone({
+      id: 'group-middle',
+      data: [{position: [0, 0], text: 'XXXXX', priority: 20}]
+    });
+    const high = low.clone({
+      id: 'group-high',
+      data: [{position: [60, 0], text: 'XXXXX', priority: 30}],
+      collisionGreedy: true
+    });
+    // One greedy layer makes the whole group greedy
+    expect(await drawLayers([low, middle, high])).toEqual([10, 30]);
+    // In its own group, the greedy layer no longer affects the others
+    expect(
+      await drawLayers([low.clone(), middle.clone(), high.clone({collisionGroup: 'other'})])
+    ).toEqual([20, 30]);
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'PointLabelLayer secondary labels share the primary label result',
   async () => {
     const layer = new PointLabelLayer({
@@ -759,10 +1049,15 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       extensions,
       pickable: true
     });
-    expect(await drawLayers([layer])).toEqual([0, 10]);
-    // Secondary labels are drawn last, so they are picked when they are visible.
-    const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
-    expect(objects.every(({sourceLayer}) => sourceLayer!.id.endsWith('-secondary'))).toBe(true);
+    for (const collisionGreedy of [false, true]) {
+      expect(
+        await drawLayers([layer.clone({collisionGreedy})]),
+        `greedy=${collisionGreedy}`
+      ).toEqual([0, 10]);
+      // Secondary labels are drawn last, so they are picked when they are visible.
+      const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+      expect(objects.every(({sourceLayer}) => sourceLayer!.id.endsWith('-secondary'))).toBe(true);
+    }
   }
 );
 
@@ -790,20 +1085,23 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       extensions,
       pickable: true
     });
-    for (const sublayer of ['points-circle', 'points-text']) {
-      // Pick one sublayer at a time, because picking deduplicates features
-      const pickedLayer = layer.clone({
-        _subLayerProps: {
-          'points-circle': {pickable: sublayer === 'points-circle'},
-          'points-text': {pickable: sublayer === 'points-text'}
-        }
-      });
-      await drawLayers([pickedLayer]);
-      const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
-      const priorities = objects
-        .map(({object}) => object.properties.priority)
-        .sort((a, b) => a - b);
-      expect(priorities, sublayer).toEqual([0, 10]);
+    for (const collisionGreedy of [false, true]) {
+      for (const sublayer of ['points-circle', 'points-text']) {
+        // Pick one sublayer at a time, because picking deduplicates features
+        const pickedLayer = layer.clone({
+          collisionGreedy,
+          _subLayerProps: {
+            'points-circle': {pickable: sublayer === 'points-circle'},
+            'points-text': {pickable: sublayer === 'points-text'}
+          }
+        });
+        await drawLayers([pickedLayer]);
+        const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+        const priorities = objects
+          .map(({object}) => object.properties.priority)
+          .sort((a, b) => a - b);
+        expect(priorities, `${sublayer}, greedy=${collisionGreedy}`).toEqual([0, 10]);
+      }
     }
   }
 );
@@ -827,16 +1125,20 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
         );
       }
     }
-    expect(
-      await drawLayers([
-        new LabelGroupLayer({
-          id: 'label-group',
-          extensions,
-          pickable: true,
-          getCollisionPriority: d => d.priority
-        })
-      ])
-    ).toEqual([100]);
+    for (const collisionGreedy of [false, true]) {
+      expect(
+        await drawLayers([
+          new LabelGroupLayer({
+            id: 'label-group',
+            extensions,
+            collisionGreedy,
+            pickable: true,
+            getCollisionPriority: d => d.priority
+          })
+        ]),
+        `greedy=${collisionGreedy}`
+      ).toEqual([100]);
+    }
   }
 );
 
@@ -864,21 +1166,24 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       {position: [150, -40], text: 'Collision label', priority: 5},
       {position: [0, 150], text: 'Collision label', priority: 0}
     ];
-    deck.setProps({
-      layers: [
-        new MainAndSubLabelLayer({
-          id: 'main-and-sub',
-          data: rows,
-          extensions,
-          pickable: true,
-          getCollisionPriority: d => d.priority
-        })
-      ],
-      viewState: {target: [0, 0, 0], zoom: 0}
-    });
-    await new Promise<void>((resolve, reject) =>
-      deck.setProps({onError: reject, onAfterRender: () => resolve()})
-    );
+    const draw = async (collisionGreedy: boolean) => {
+      deck.setProps({
+        layers: [
+          new MainAndSubLabelLayer({
+            id: 'main-and-sub',
+            data: rows,
+            extensions,
+            collisionGreedy,
+            pickable: true,
+            getCollisionPriority: d => d.priority
+          })
+        ],
+        viewState: {target: [0, 0, 0], zoom: 0}
+      });
+      await new Promise<void>((resolve, reject) =>
+        deck.setProps({onError: reject, onAfterRender: () => resolve()})
+      );
+    };
     // The labels of a row share picking colors, so identify each label by where it is picked
     const pickLabel = async ([x, y]: number[]) => {
       const objects = await deck.pickObjectsAsync({x: 380 + x, y: 220 + y, width: 40, height: 10});
@@ -892,8 +1197,11 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       {name: 'main 0', center: [0, 150], visible: [0]},
       {name: 'sub 0', center: [0, 190], visible: [0]}
     ];
-    for (const {name, center, visible} of labels) {
-      expect(await pickLabel(center), name).toEqual(visible);
+    for (const collisionGreedy of [false, true]) {
+      await draw(collisionGreedy);
+      for (const {name, center, visible} of labels) {
+        expect(await pickLabel(center), `${name}, greedy=${collisionGreedy}`).toEqual(visible);
+      }
     }
   }
 );
@@ -906,36 +1214,39 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       {position: [10, 10], text: 'Hidden', priority: 5},
       {position: [300, 0], text: 'Far', priority: 0}
     ];
-    const layers = [
-      new ScatterplotLayer({
-        id: 'same-data-points',
-        data: points,
-        getRadius: 6,
-        radiusUnits: 'pixels',
-        getCollisionPriority: d => d.priority,
-        extensions,
-        pickable: true
-      }),
-      new TextLayer({
-        id: 'same-data-labels',
-        data: points,
-        getSize: 24,
-        getCollisionPriority: d => d.priority,
-        extensions,
-        pickable: true
-      })
-    ];
-    await drawLayers(layers);
-    for (const layerId of ['same-data-points', 'same-data-labels']) {
-      const objects = await deck.pickObjectsAsync({
-        x: 0,
-        y: 0,
-        width: 800,
-        height: 450,
-        layerIds: [layerId]
-      });
-      const priorities = objects.map(({object}) => object.priority).sort((a, b) => a - b);
-      expect(priorities, layerId).toEqual([0, 10]);
+    for (const collisionGreedy of [false, true]) {
+      const layers = [
+        new ScatterplotLayer({
+          id: 'same-data-points',
+          data: points,
+          getRadius: 6,
+          radiusUnits: 'pixels',
+          getCollisionPriority: d => d.priority,
+          extensions,
+          pickable: true
+        }),
+        new TextLayer({
+          id: 'same-data-labels',
+          data: points,
+          getSize: 24,
+          collisionGreedy,
+          getCollisionPriority: d => d.priority,
+          extensions,
+          pickable: true
+        })
+      ];
+      await drawLayers(layers);
+      for (const layerId of ['same-data-points', 'same-data-labels']) {
+        const objects = await deck.pickObjectsAsync({
+          x: 0,
+          y: 0,
+          width: 800,
+          height: 450,
+          layerIds: [layerId]
+        });
+        const priorities = objects.map(({object}) => object.priority).sort((a, b) => a - b);
+        expect(priorities, `${layerId}, greedy=${collisionGreedy}`).toEqual([0, 10]);
+      }
     }
   }
 );
@@ -1158,8 +1469,15 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     ];
     const {data: binaryData, buffer} = createBinaryText(labels);
     try {
-      for (const filtered of [false, true]) {
+      for (const [filtered, collisionGreedy] of [
+        [false, false],
+        [true, false],
+        [false, true],
+        [true, true]
+      ]) {
+        const message = `filtered=${filtered}, greedy=${collisionGreedy}`;
         const props = {
+          collisionGreedy,
           getSize: 24,
           extensions: filtered
             ? [new CollisionFilterExtension(), new DataFilterExtension({filterSize: 1})]
@@ -1179,13 +1497,12 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
             background,
             ...props
           });
-          expect(
-            await drawLayers([layer]),
-            `filtered=${filtered}, background=${background}`
-          ).toHaveLength(count);
+          expect(await drawLayers([layer]), `${message}, background=${background}`).toHaveLength(
+            count
+          );
         }
         const binary = new TextLayer({id: 'filtered-binary', data: binaryData, ...props});
-        expect(await pickBinaryText(binary), `binary, filtered=${filtered}`).toHaveLength(count);
+        expect(await pickBinaryText(binary), `binary, ${message}`).toHaveLength(count);
       }
     } finally {
       buffer.destroy();
@@ -1256,13 +1573,14 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       {position: [-200, 0], text: 'Collision label', priority: 10},
       {position: [50, 0], text: 'Collision label', priority: 20}
     ];
-    const createLayers = (pixelOffset: [number, number]) => [
+    const createLayers = (pixelOffset: [number, number], collisionGreedy: boolean) => [
       new TextLayer({
         id: 'same-data-a',
         data: rows,
         getSize: 24,
         getCollisionPriority: d => d.priority,
         extensions,
+        collisionGreedy,
         pickable: true
       }),
       new TextLayer({
@@ -1272,6 +1590,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
         getPixelOffset: pixelOffset,
         getCollisionPriority: d => d.priority,
         extensions,
+        collisionGreedy,
         pickable: true
       })
     ];
@@ -1286,15 +1605,18 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       return objects.map(({object}) => object.priority).sort((a, b) => a - b);
     };
 
-    // Labels of the same row overlap, and do not hide each other
-    await drawLayers(createLayers([0, 10]));
-    expect(await pickPriorities('same-data-a')).toEqual([10, 20]);
-    expect(await pickPriorities('same-data-b')).toEqual([10, 20]);
+    for (const collisionGreedy of [false, true]) {
+      const message = `greedy=${collisionGreedy}`;
+      // Labels of the same row overlap, and do not hide each other
+      await drawLayers(createLayers([0, 10], collisionGreedy));
+      expect(await pickPriorities('same-data-a'), message).toEqual([10, 20]);
+      expect(await pickPriorities('same-data-b'), message).toEqual([10, 20]);
 
-    // The second layer's first label overlaps the first layer's higher-priority second label
-    await drawLayers(createLayers([250, 0]));
-    expect(await pickPriorities('same-data-a')).toEqual([10, 20]);
-    expect(await pickPriorities('same-data-b')).toEqual([20]);
+      // The second layer's first label overlaps the first layer's higher-priority second label
+      await drawLayers(createLayers([250, 0], collisionGreedy));
+      expect(await pickPriorities('same-data-a'), message).toEqual([10, 20]);
+      expect(await pickPriorities('same-data-b'), message).toEqual([20]);
+    }
   }
 );
 
@@ -1399,27 +1721,33 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     // At zoom 0 the labels are drawn in three world copies; only the middle one is onscreen
     deck.setProps({views: new MapView({repeat: true})});
     try {
-      const layer = new TextLayer({
-        id: 'repeated',
-        data: [
-          {position: [0, 0], text: 'Collision label', priority: 100},
-          {position: [2, 0], text: 'Collision label', priority: -100}
-        ],
-        getSize: 24,
-        extensions,
-        pickable: true,
-        getCollisionPriority: d => d.priority
-      });
-      await new Promise<void>((resolve, reject) => {
-        deck.setProps({
-          layers: [layer],
-          viewState: {longitude: 0, latitude: 0, zoom: 0},
-          onError: reject,
-          onAfterRender: () => layer.isLoaded && resolve()
+      for (const collisionGreedy of [false, true]) {
+        const layer = new TextLayer({
+          id: 'repeated',
+          data: [
+            {position: [0, 0], text: 'Collision label', priority: 100},
+            {position: [2, 0], text: 'Collision label', priority: -100}
+          ],
+          getSize: 24,
+          extensions,
+          collisionGreedy,
+          pickable: true,
+          getCollisionPriority: d => d.priority
         });
-      });
-      const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
-      expect(objects.map(({object}) => object.priority)).toEqual([100]);
+        await new Promise<void>((resolve, reject) => {
+          deck.setProps({
+            layers: [layer],
+            viewState: {longitude: 0, latitude: 0, zoom: 0},
+            onError: reject,
+            onAfterRender: () => layer.isLoaded && resolve()
+          });
+        });
+        const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+        expect(
+          objects.map(({object}) => object.priority),
+          `greedy=${collisionGreedy}`
+        ).toEqual([100]);
+      }
     } finally {
       deck.setProps({views: new OrthographicView()});
     }
@@ -1432,13 +1760,19 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     // Looking east, one world copy of the label is behind the camera
     deck.setProps({views: new MapView({repeat: true})});
     try {
-      for (const billboard of [true, false]) {
+      for (const [billboard, collisionGreedy] of [
+        [true, false],
+        [false, false],
+        [true, true],
+        [false, true]
+      ]) {
         const layer = new TextLayer({
           id: 'repeated-pitched',
           data: [{position: [0, 0], text: 'Collision label'}],
           getSize: 24,
           billboard,
           extensions,
+          collisionGreedy,
           pickable: true
         });
         await new Promise<void>((resolve, reject) => {
@@ -1450,7 +1784,7 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
           });
         });
         const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
-        expect(objects, `billboard=${billboard}`).toHaveLength(1);
+        expect(objects, `billboard=${billboard}, greedy=${collisionGreedy}`).toHaveLength(1);
       }
     } finally {
       deck.setProps({views: new OrthographicView()});
@@ -1552,6 +1886,45 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       });
       expect(await drawLayers([mask, overlapping]), `${offset}`).toEqual([100]);
     }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'greedy placement hides labels that a mask partly covers',
+  async () => {
+    // The mask keeps the right half of the view, which the first label crosses. Greedy placement
+    // reads label bounds from the label's fragments, and masked fragments leave it without bounds.
+    const mask = new SolidPolygonLayer({
+      id: 'text-mask',
+      operation: 'mask',
+      data: [
+        {
+          polygon: [
+            [0, -1000],
+            [1000, -1000],
+            [1000, 1000],
+            [0, 1000]
+          ]
+        }
+      ],
+      getPolygon: d => d.polygon
+    });
+    const layer = new TextLayer({
+      id: 'masked',
+      data: [
+        {position: [20, 0], text: 'Collision label', priority: 1},
+        {position: [300, 0], text: 'Collision label', priority: 2}
+      ],
+      getSize: 24,
+      billboard: false,
+      maskId: 'text-mask',
+      maskByInstance: false,
+      collisionGreedy: true,
+      extensions: [new CollisionFilterExtension(), new MaskExtension()],
+      pickable: true,
+      getCollisionPriority: d => d.priority
+    });
+    expect(await drawLayers([mask, layer])).toEqual([2]);
   }
 );
 

@@ -7,6 +7,7 @@ import {equals} from '@math.gl/core';
 import {_deepEqual as deepEqual, log} from '@deck.gl/core';
 import type {Effect, EffectContext, Layer, PreRenderOptions, Viewport} from '@deck.gl/core';
 import CollisionFilterPass from './collision-filter-pass';
+import {placeTextLabels} from './text-collision-placement';
 import {MaskPreRenderStats} from '../mask/mask-effect';
 // import {debugFBO} from '../utils/debug';
 
@@ -28,6 +29,8 @@ type RenderInfo = {
   /** Visibility cell offset of each text layer, by layer id */
   visibilityOffsets: Record<string, number>;
   hasText: boolean;
+  /** Place the group's text on the CPU, in priority order */
+  greedy: boolean;
   /** Number of picking colors */
   objectCount: number;
   /** Number of visibility cells, which also covers the picking colors */
@@ -115,6 +118,33 @@ function isTextCollisionLayer(layer: Layer): boolean {
   return 'getCollisionRect' in layer.props || 'getBoundingRect' in layer.props;
 }
 
+// Create or resize a framebuffer with a 4x4 RGBA8 cell per label
+function getCellFBO(
+  device: Device,
+  framebuffer: Framebuffer | undefined,
+  id: string,
+  width: number,
+  height: number
+): Framebuffer {
+  if (framebuffer) {
+    framebuffer.resize({width, height});
+    return framebuffer;
+  }
+  return device.createFramebuffer({
+    id,
+    width,
+    height,
+    colorAttachments: [
+      device.createTexture({
+        width,
+        height,
+        format: 'rgba8unorm',
+        sampler: {minFilter: 'nearest', magFilter: 'nearest'}
+      })
+    ]
+  });
+}
+
 export default class CollisionFilterEffect implements Effect {
   id = 'collision-filter-effect';
   props = null;
@@ -126,6 +156,8 @@ export default class CollisionFilterEffect implements Effect {
   private collisionFilterPass?: CollisionFilterPass;
   private collisionFBOs: Record<string, Framebuffer> = {};
   private visibilityFBOs: Record<string, Framebuffer> = {};
+  /** Placement data of each label, read back for greedy placement */
+  private placementFBOs: Record<string, Framebuffer> = {};
   private dummyCollisionMap?: Texture;
   private lastViewport?: Viewport;
 
@@ -249,8 +281,12 @@ export default class CollisionFilterEffect implements Effect {
       this.lastViewport = viewport;
       const collisionFBO = this.collisionFBOs[collisionGroup];
 
-      // Rerender collision FBO
-      this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
+      const textLayers = renderInfo.layers.filter(isTextCollisionLayer);
+      const otherLayers = renderInfo.layers.filter(layer => !isTextCollisionLayer(layer));
+      const {greedy} = renderInfo;
+      // Whether the collision map has anything for text to test against
+      const hasColliders = !greedy || otherLayers.length > 0;
+      const renderOptions = {
         pass: 'collision-filter',
         isPicking: true,
         layers: renderInfo.layers,
@@ -272,13 +308,21 @@ export default class CollisionFilterEffect implements Effect {
               (renderInfo.hasText ? 1 : DOWNSCALE)
           }
         }
-      });
+      };
+
+      // Greedy placement tests text against other text on the CPU, so the map only holds
+      // non-text layers until placement is done.
+      if (hasColliders) {
+        this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
+          ...renderOptions,
+          layers: greedy ? otherLayers : renderInfo.layers
+        });
+      }
       if (renderInfo.hasText) {
         // Test each label's projected bounds against the collision map
-        const textLayers = renderInfo.layers.filter(isTextCollisionLayer);
         const visibilityFBO = this.visibilityFBOs[collisionGroup];
         const pixelRatio = collisionFBO.device.canvasContext!.cssToDeviceRatio();
-        this.collisionFilterPass!.renderCollisionVisibility(visibilityFBO, {
+        const visibilityOptions = {
           pass: 'collision',
           isPicking: true,
           layers: textLayers,
@@ -290,11 +334,40 @@ export default class CollisionFilterEffect implements Effect {
           shaderModuleProps: {
             collision: {
               enabled: true,
+              hasColliders,
               dummyCollisionMap: this.dummyCollisionMap
             },
             project: {devicePixelRatio: pixelRatio}
           }
-        });
+        };
+        this.collisionFilterPass!.renderCollisionVisibility(visibilityFBO, visibilityOptions);
+        if (greedy && viewport) {
+          // Hide the labels that overlap higher-priority text in their visibility cells
+          const placementFBO = this.placementFBOs[collisionGroup];
+          this.collisionFilterPass!.renderCollisionPlacement(placementFBO, visibilityOptions);
+          const {device} = collisionFBO;
+          const visibility = device.readPixelsToArrayWebGL(visibilityFBO) as Uint8Array;
+          placeTextLabels(
+            visibility,
+            device.readPixelsToArrayWebGL(placementFBO) as Uint8Array,
+            visibilityFBO.width,
+            renderInfo.visibilityCount,
+            viewport.width * pixelRatio,
+            viewport.height * pixelRatio
+          );
+          visibilityFBO.colorAttachments[0].texture.writeData(visibility);
+          // Only accepted labels write into the map that non-text layers sample, so rejected
+          // labels cannot hide them.
+          if (otherLayers.length > 0) {
+            this.collisionFilterPass!.renderCollisionMap(collisionFBO, {
+              ...renderOptions,
+              shaderModuleProps: {
+                ...renderOptions.shaderModuleProps,
+                collision: {...renderOptions.shaderModuleProps.collision, filterByVisibility: true}
+              }
+            });
+          }
+        }
       }
     }
   }
@@ -324,6 +397,7 @@ export default class CollisionFilterEffect implements Effect {
           pickingColorOffsets: {},
           visibilityOffsets: {},
           hasText: false,
+          greedy: false,
           objectCount: 0,
           visibilityCount: 0
         };
@@ -333,6 +407,9 @@ export default class CollisionFilterEffect implements Effect {
       }
       const isTextLayer = isTextCollisionLayer(layer);
       channelInfo.hasText ||= isTextLayer;
+      // Greedy placement reads label bounds back with WebGL
+      channelInfo.greedy ||=
+        isTextLayer && Boolean(layer.props.collisionGreedy) && device.type === 'webgl';
       const counts = sourceObjectCounts[collisionGroup];
       const sourceId = sourceIds[layer.id];
       const objectCount = getObjectCount(layer);
@@ -401,22 +478,21 @@ export default class CollisionFilterEffect implements Effect {
       if (channelMap[collisionGroup].hasText) {
         const width = Math.min(maxVisibilityColumns * 4, Math.ceil(Math.sqrt(offset + 1)) * 4);
         const height = Math.ceil((offset + 1) / (width / 4)) * 4;
-        if (!this.visibilityFBOs[collisionGroup]) {
-          this.visibilityFBOs[collisionGroup] = device.createFramebuffer({
-            id: `collision-visibility-${collisionGroup}`,
+        this.visibilityFBOs[collisionGroup] = getCellFBO(
+          device,
+          this.visibilityFBOs[collisionGroup],
+          `collision-visibility-${collisionGroup}`,
+          width,
+          height
+        );
+        if (channelMap[collisionGroup].greedy) {
+          this.placementFBOs[collisionGroup] = getCellFBO(
+            device,
+            this.placementFBOs[collisionGroup],
+            `collision-placement-${collisionGroup}`,
             width,
-            height,
-            colorAttachments: [
-              device.createTexture({
-                width,
-                height,
-                format: 'rgba8unorm',
-                sampler: {minFilter: 'nearest', magFilter: 'nearest'}
-              })
-            ]
-          });
-        } else {
-          this.visibilityFBOs[collisionGroup].resize({width, height});
+            height
+          );
         }
       }
       if (!this.collisionFBOs[collisionGroup]) {
@@ -513,11 +589,13 @@ export default class CollisionFilterEffect implements Effect {
     fbo.depthStencilAttachment?.destroy();
     fbo.destroy();
     delete this.collisionFBOs[collisionGroup];
-    const visibilityFBO = this.visibilityFBOs[collisionGroup];
-    if (visibilityFBO) {
-      visibilityFBO.colorAttachments[0].destroy();
-      visibilityFBO.destroy();
-      delete this.visibilityFBOs[collisionGroup];
+    for (const cellFBOs of [this.visibilityFBOs, this.placementFBOs]) {
+      const cellFBO = cellFBOs[collisionGroup];
+      if (cellFBO) {
+        cellFBO.colorAttachments[0].destroy();
+        cellFBO.destroy();
+        delete cellFBOs[collisionGroup];
+      }
     }
   }
 }

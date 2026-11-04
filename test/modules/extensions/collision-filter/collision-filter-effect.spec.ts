@@ -60,7 +60,8 @@ test('CollisionFilterEffect#constructor', () => {
   collisionFilterEffect.cleanup();
 });
 
-test('CollisionFilterEffect#visibility capacity', () => {
+// Greedy placement uses the same 4x4 visibility cell per object, so capacity is unchanged.
+test.each([false, true])('CollisionFilterEffect#visibility capacity (greedy=%s)', greedy => {
   const collisionFilterEffect = new CollisionFilterEffect();
   const limitsSpy = vi.spyOn(device, 'limits', 'get').mockReturnValue({
     ...device.limits,
@@ -70,7 +71,8 @@ test('CollisionFilterEffect#visibility capacity', () => {
   const textLayer = TEST_LAYER.clone({
     id: 'text',
     data: FIXTURES.polygons.slice(0, 3),
-    getCollisionRect: () => [0, 0, 1, 1]
+    getCollisionRect: () => [0, 0, 1, 1],
+    collisionGreedy: greedy
   });
   const otherLayer = TEST_LAYER.clone({id: 'other', data: FIXTURES.polygons.slice(0, 3)});
   vi.spyOn(textLayer, 'getNumInstances').mockReturnValue(1);
@@ -84,6 +86,7 @@ test('CollisionFilterEffect#visibility capacity', () => {
     const collisionFBO = collisionFilterEffect.collisionFBOs[group];
     expect([visibilityFBO.width, visibilityFBO.height]).toEqual([8, 8]);
     expect(collisionFilterEffect.getShaderModuleProps(textLayer).collision.enabled).toBe(true);
+    expect(collisionFilterEffect.channels[group].greedy).toBe(greedy);
 
     const resizeSpy = vi.spyOn(visibilityFBO, 'resize');
     const destroyVisibilitySpy = vi.spyOn(visibilityFBO, 'destroy');
@@ -140,6 +143,75 @@ test('CollisionFilterEffect#picking ID capacity', () => {
   } finally {
     collisionFilterEffect.cleanup();
     vi.restoreAllMocks();
+  }
+});
+
+test('CollisionFilterEffect#greedy placement', () => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  const textLayer = TEST_LAYER.clone({
+    id: 'text',
+    getCollisionRect: () => [0, 0, 1, 1],
+    collisionGreedy: true
+  });
+  const group = TEST_LAYER.props.collisionGroup;
+  const deviceType = device.type;
+
+  try {
+    // collisionGreedy on a non-text layer has no effect
+    const otherLayer = TEST_LAYER.clone({id: 'other', collisionGreedy: true});
+    expect(collisionFilterEffect._groupByCollisionGroup(device, [otherLayer])[group].greedy).toBe(
+      false
+    );
+    expect(collisionFilterEffect._groupByCollisionGroup(device, [textLayer])[group].greedy).toBe(
+      true
+    );
+
+    // Greedy placement reads pixels back with WebGL, so other devices keep GPU-only filtering
+    // @ts-expect-error device type is read-only
+    device.type = 'webgpu';
+    expect(collisionFilterEffect._groupByCollisionGroup(device, [textLayer])[group].greedy).toBe(
+      false
+    );
+  } finally {
+    // @ts-expect-error device type is read-only
+    device.type = deviceType;
+    collisionFilterEffect.cleanup();
+  }
+});
+
+test('CollisionFilterEffect#greedy placement without a viewport', () => {
+  const collisionFilterEffect = new CollisionFilterEffect();
+  collisionFilterEffect.setup({device});
+  const layerManager = new LayerManager(device, {viewport: testViewport});
+  const textLayer = TEST_LAYER.clone({
+    id: 'text',
+    getCollisionRect: () => [0, 0, 1, 1],
+    collisionGreedy: true
+  });
+  layerManager.setLayers([textLayer]);
+  layerManager.updateLayers();
+  const readPixelsSpy = vi.spyOn(device, 'readPixelsToArrayWebGL');
+
+  try {
+    collisionFilterEffect.preRender({
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      ...PRERENDEROPTIONS,
+      viewports: []
+    });
+    expect(readPixelsSpy).not.toHaveBeenCalled();
+
+    collisionFilterEffect.preRender({
+      layers: layerManager.getLayers(),
+      onViewportActive: layerManager.activateViewport,
+      ...PRERENDEROPTIONS
+    });
+    // The visibility and placement cells
+    expect(readPixelsSpy).toHaveBeenCalledTimes(2);
+  } finally {
+    readPixelsSpy.mockRestore();
+    collisionFilterEffect.cleanup();
+    layerManager.finalize();
   }
 });
 

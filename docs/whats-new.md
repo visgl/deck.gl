@@ -35,6 +35,8 @@ Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A sha
 
 [CollisionFilterExtension](./api-reference/extensions/collision-filter-extension.md) now tests the full projected bounds of each TextLayer label, including GeoJSON text. Pixel offsets, anchors, baselines, rotation and backgrounds are respected, all characters of a label share one visibility, and priorities are respected across source layers in the same collision group.
 
+Opt-in [`collisionGreedy`](./api-reference/extensions/collision-filter-extension.md#collisiongreedy) text placement places labels in priority order and reuses space from rejected labels, so dense overlap chains no longer hide all but one label.
+
 ## deck.gl v9.4
 
 Release date: September 5, 2026

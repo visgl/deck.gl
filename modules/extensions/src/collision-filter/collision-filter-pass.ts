@@ -9,6 +9,7 @@ type CollisionFilterPassRenderOptions = LayersPassRenderOptions & {};
 
 export default class CollisionFilterPass extends LayersPass {
   private drawToCollisionVisibility = false;
+  private drawToCollisionPlacement = false;
 
   renderCollisionMap(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
     const padding = 1;
@@ -30,10 +31,23 @@ export default class CollisionFilterPass extends LayersPass {
     }
   }
 
+  /** Write the placement data of each label to its cell, for greedy placement on the CPU */
+  renderCollisionPlacement(target: Framebuffer, options: CollisionFilterPassRenderOptions) {
+    this.drawToCollisionVisibility = true;
+    this.drawToCollisionPlacement = true;
+    try {
+      // Cells start without data, and the last copy of a label that writes its cell wins
+      this.render({...options, clearColor: [0, 0, 0, 0], target, pass: 'collision'});
+    } finally {
+      this.drawToCollisionVisibility = false;
+      this.drawToCollisionPlacement = false;
+    }
+  }
+
   protected getLayerParameters(layer: Layer, layerIndex: number, viewport: Viewport): Parameters {
     return {
       ...layer.props.parameters,
-      ...(this.drawToCollisionVisibility
+      ...(this.drawToCollisionVisibility && !this.drawToCollisionPlacement
         ? {
             blend: true,
             blendColorOperation: 'min',
@@ -59,7 +73,8 @@ export default class CollisionFilterPass extends LayersPass {
     return {
       collision: {
         drawToCollisionMap: !this.drawToCollisionVisibility,
-        drawToCollisionVisibility: this.drawToCollisionVisibility
+        drawToCollisionVisibility: this.drawToCollisionVisibility,
+        drawToCollisionPlacement: this.drawToCollisionPlacement
       },
       picking: {
         isActive: 1,

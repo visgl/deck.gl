@@ -11,6 +11,8 @@ layout(std140) uniform collisionUniforms {
   bool sort;
   bool enabled;
   bool visibilityPass;
+  bool hasColliders;
+  bool placementPass;
   vec2 visibilitySize;
   highp float sizeScale;
   highp float sizeMinPixels;
@@ -82,6 +84,17 @@ vec4 collision_getVisibilityPosition(vec2 corner) {
   // from the label's top edge, so that a texel's fragment lies in the part of the label it tests
   vec2 pixel = vec2(collision_getVisibilityPixel(collision_pickingColor)) + vec2(corner.x, 1.0 - corner.y) * 4.0;
   return vec4(pixel / collision.visibilitySize * 2.0 - 1.0, 0.0, 1.0);
+}
+
+// Greedy placement reads one copy of each label: the last one drawn that overlaps the viewport.
+// Labels behind the globe are hidden when drawn, by back-face culling or by testing billboard
+// anchors, so they write no placement data either.
+bool collision_skipsPlacement(vec3 position, vec3 position64Low) {
+  if (!collision.placementPass) return false;
+  vec2 minCorner = min(min(collision_corners[0], collision_corners[1]), min(collision_corners[2], collision_corners[3]));
+  vec2 maxCorner = max(max(collision_corners[0], collision_corners[1]), max(collision_corners[2], collision_corners[3]));
+  return any(lessThanEqual(maxCorner, vec2(0.0))) || any(greaterThanEqual(minCorner, vec2(1.0))) ||
+    project_globe_is_occluded(project_position(position, position64Low));
 }
 
 float collision_isVisible(vec2 texCoords, vec3 pickingColor) {
@@ -156,6 +169,7 @@ bool collision_isInside(vec3 edges[4], vec2 point) {
 }
 
 float collision_testBounds(vec3 pickingColor, int tileIndex) {
+  if (!collision.hasColliders) return 1.0;
   ivec2 size = textureSize(collision_texture, 0);
   // Split the object's bounds into a 4x4 grid in its own coordinates, one part per texel of its
   // visibility cell. The texel's fragment lies in the same part, so tests by other extensions
@@ -197,11 +211,38 @@ float collision_testBounds(vec3 pickingColor, int tileIndex) {
   }
   return 1.0;
 }
+int collision_getCellComponent() {
+  ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
+  return tile.y * 4 + tile.x;
+}
+
+// Ten 32-bit words for greedy placement: the projected corners, priority and picking color index
+uint collision_getPlacementWord(int word) {
+  if (word < 8) return floatBitsToUint(collision_corners[word / 2][word % 2]);
+  if (word == 8) return floatBitsToUint(collision_priority);
+  // Labels of the same row do not collide. Picking color indices start at 1.
+  return uint(dot(round(collision_pickingColor * 255.0), vec3(1.0, 256.0, 65536.0)));
+}
+
 // Write whether this texel's part of the object's bounds is unoccluded. Texels that other
 // extensions discard, such as masked-out parts of the label, keep the cleared, unoccluded value.
+// The placement pass instead writes the placement words, three bytes per texel and least
+// significant first, so that the target can stay RGBA8. Alpha marks written texels, since an
+// extension such as MaskExtension can discard some.
 vec4 collision_getBoundsData() {
-  ivec2 tile = ivec2(gl_FragCoord.xy) % 4;
-  return vec4(collision_testBounds(collision_pickingColor, tile.y * 4 + tile.x), 0.0, 0.0, 1.0);
+  int component = collision_getCellComponent();
+  if (!collision.placementPass) {
+    return vec4(collision_testBounds(collision_pickingColor, component), 0.0, 0.0, 1.0);
+  }
+  vec3 bytes = vec3(0.0);
+  for (int i = 0; i < 3; i++) {
+    int byteIndex = component * 3 + i;
+    if (byteIndex < 40) {
+      uint word = collision_getPlacementWord(byteIndex / 4);
+      bytes[i] = float((word >> (8 * (byteIndex % 4))) & 255u);
+    }
+  }
+  return vec4(bytes / 255.0, 1.0);
 }
 `;
 
@@ -219,7 +260,10 @@ const inject: Extract<ShaderPlugin['injections'], unknown[]> = [
     position.z = collision_getPriorityDepth(collision_priority) * position.w;
   }
 
-  if (collision.enabled && !collision.visibilityPass) {
+  // collision.sort is set while drawing the collision map. That pass only tests visibility with
+  // filterByVisibility, so that text hidden by greedy placement is left out; other layers still
+  // draw everything.
+  if (collision.enabled && !collision.visibilityPass && (!collision.sort || collision_useBounds)) {
     vec4 collision_common_position = project_position(vec4(geometry.worldPosition, 1.0));
     vec2 collision_texCoords = collision_getCoords(collision_common_position);
     collision_fade = collision_isVisible(collision_texCoords, collision_pickingColor);
@@ -288,6 +332,12 @@ export type CollisionModuleProps = {
   collisionFBO?: Framebuffer;
   drawToCollisionMap?: boolean;
   drawToCollisionVisibility?: boolean;
+  /** Write greedy placement data instead of visibility tests */
+  drawToCollisionPlacement?: boolean;
+  /** Draw only visible text into the collision map */
+  filterByVisibility?: boolean;
+  /** Whether the collision map has objects for text bounds to test against */
+  hasColliders?: boolean;
   visibilityFBO?: Framebuffer;
   dummyCollisionMap?: Texture;
   pickingColorOffset?: number;
@@ -303,6 +353,8 @@ type CollisionUniforms = {
   enabled?: boolean;
   sort?: boolean;
   visibilityPass?: boolean;
+  hasColliders?: boolean;
+  placementPass?: boolean;
   visibilitySize?: [number, number];
   pickingColorOffset?: number;
   visibilityOffset?: number;
@@ -333,9 +385,11 @@ const getCollisionUniforms = (
     dummyCollisionMap
   } = opts;
   return {
-    enabled: enabled && !drawToCollisionMap,
+    enabled: enabled && (!drawToCollisionMap || Boolean(opts.filterByVisibility)),
     sort: Boolean(drawToCollisionMap),
     visibilityPass: Boolean(drawToCollisionVisibility),
+    hasColliders: opts.hasColliders ?? true,
+    placementPass: Boolean(opts.drawToCollisionPlacement),
     visibilitySize: visibilityFBO ? [visibilityFBO.width, visibilityFBO.height] : [1, 1],
     pickingColorOffset: opts.pickingColorOffset ?? 0,
     visibilityOffset: opts.visibilityOffset ?? opts.pickingColorOffset ?? 0,
@@ -370,6 +424,8 @@ const collisionModule = {
     sort: 'i32',
     enabled: 'i32',
     visibilityPass: 'i32',
+    hasColliders: 'i32',
+    placementPass: 'i32',
     visibilitySize: 'vec2<f32>',
     sizeScale: 'f32',
     sizeMinPixels: 'f32',
