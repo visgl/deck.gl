@@ -54,6 +54,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
               const model = layer.state.model!;
               expect(model.constructor).toBe(GPUVectorModel);
               const bindings = vi.spyOn(model as any, 'setAttributeVectors');
+              const counts = vi.spyOn(model, 'setInstanceCount');
               try {
                 if (backend === 'webgpu') (testDevice as any).handle.pushErrorScope('validation');
                 const pass = testDevice.beginRenderPass({framebuffer});
@@ -63,12 +64,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
                 testDevice.submit();
                 if (backend === 'webgpu')
                   expect(await (testDevice as any).handle.popErrorScope()).toBeNull();
+                expect(counts.mock.calls.map(([count]) => count)).toEqual([3, 2, 2, 1, 1, 3]);
                 expect(bindings).toHaveBeenCalledTimes(1);
                 expect(
                   bindings.mock.calls[0][0].instanceSourcePositions.data.map(chunk => chunk.length)
                 ).toEqual([2, 1]);
               } finally {
                 bindings.mockRestore();
+                counts.mockRestore();
               }
             }
           }
