@@ -279,25 +279,40 @@ test.each([true, false])(
     const fixture = await createDeck(layer, counts, device => delayReadbacks(device, release));
     try {
       await expect.poll(() => release.length, {timeout: 20000}).toBe(1);
-      await new Promise<void>(resolve =>
-        fixture.deck.setProps({
-          layers: [
-            layer.clone({
-              onFilteredItemsChange: replace ? ({count}) => replacementCounts.push(count) : null
-            })
-          ],
-          onAfterRender: () => resolve()
-        })
-      );
+      const generations: number[] = [];
+      // React-style inline callbacks change each render without invalidating the data.
+      for (let generation = 0; generation < (replace ? 5 : 1); generation++) {
+        await new Promise<void>(resolve =>
+          fixture.deck.setProps({
+            layers: [
+              layer.clone({
+                onFilteredItemsChange: replace
+                  ? ({count}) => {
+                      replacementCounts.push(count);
+                      generations.push(generation);
+                    }
+                  : null
+              })
+            ],
+            onAfterRender: () => resolve()
+          })
+        );
+      }
+      expect(release).toHaveLength(1);
       release[0]();
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(counts).toEqual([]);
       if (replace) {
+        await expect.poll(() => replacementCounts).toEqual([3]);
+        expect(generations).toEqual([4]);
+      } else {
+        expect(replacementCounts).toEqual([]);
+        fixture.deck.setProps({
+          layers: [layer.clone({onFilteredItemsChange: ({count}) => replacementCounts.push(count)})]
+        });
         await expect.poll(() => release.length, {timeout: 20000}).toBe(2);
         release[1]();
         await expect.poll(() => replacementCounts).toEqual([3]);
-      } else {
-        expect(release).toHaveLength(1);
       }
     } finally {
       release.forEach(resolve => resolve());

@@ -197,7 +197,7 @@ export default class DataFilterExtension extends LayerExtension<
         attributeManager!.attributes.filterValues?.needsUpdate() ||
         attributeManager!.attributes.filterCategoryValues?.needsUpdate() ||
         changeFlags.dataChanged ||
-        props.onFilteredItemsChange !== oldProps.onFilteredItemsChange ||
+        (Boolean(props.onFilteredItemsChange) && !oldProps.onFilteredItemsChange) ||
         props.filterEnabled !== oldProps.filterEnabled ||
         props.filterRange !== oldProps.filterRange ||
         props.filterSoftRange !== oldProps.filterSoftRange ||
@@ -301,7 +301,8 @@ export default class DataFilterExtension extends LayerExtension<
         if (state.filterModel !== filterModel || state.filterCountVersion !== version) return;
         let count = 0;
         for (let i = 0; i < color.length; i++) count += color[i];
-        onFilteredItemsChange({id: this.id, count});
+        // Callback identity may change while readback is pending without changing the count.
+        this.getCurrentLayer()?.props.onFilteredItemsChange?.({id: this.id, count});
       };
       if (filterModel.device.type === 'webgpu') {
         const texture = filterFBO.colorAttachments[0].texture;
