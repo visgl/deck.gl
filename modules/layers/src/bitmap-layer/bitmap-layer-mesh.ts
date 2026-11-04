@@ -56,9 +56,6 @@ export class BitmapLayerMesh {
         if (source && source.data.length > 1)
           throw new Error('Bitmap meshes require single chunks');
       }
-      const {ArrowConverter} = await import('@deck.gl/core/arrow');
-      const {DataType, makeVector} = await import('apache-arrow');
-      const converter = new ArrowConverter(this.device);
       let bounds: [number[], number[]] | null = null;
       const attributes: Record<string, GPUVector | GPUConstant> = {};
       for (const name of ['positions', 'texCoords'] as const) {
@@ -71,6 +68,9 @@ export class BitmapLayerMesh {
             throw new Error('Bitmap GPU positions cannot be preprojected');
           attributes[name] = source;
         } else {
+          const {ArrowConverter} = await import('@deck.gl/core/arrow');
+          const {DataType, makeVector} = await import('apache-arrow');
+          const converter = new ArrowConverter(this.device);
           if (
             !DataType.isFixedSizeList(source.type) ||
             !(name === 'positions' ? [2, 3] : [2]).includes(source.type.listSize)
@@ -111,6 +111,7 @@ export class BitmapLayerMesh {
       if (props.indices instanceof GPUVector) {
         indices = props.indices;
       } else if (props.indices) {
+        const {DataType, makeVector} = await import('apache-arrow');
         const source = props.indices;
         if (
           !DataType.isInt(source.type) ||
