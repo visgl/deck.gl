@@ -2,13 +2,17 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {expect, test, vi} from 'vitest';
+import {beforeEach, expect, test, vi} from 'vitest';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScatterplotLayer, PathLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import {luma} from '@luma.gl/core';
 import {webgpuAdapter} from '@luma.gl/core/webgpu';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+
+beforeEach(async context => {
+  if (!(await getWebGPUTestDevice())) context.skip();
+});
 
 async function createDeck(layer, counts: number[], configureDevice = device => {}) {
   const container = document.createElement('div');
@@ -61,8 +65,7 @@ function delayReadbacks(device, release: (() => void)[]) {
   });
 }
 
-test('DataFilterExtension#WebGPU counts, updates, constants and empty data', async context => {
-  if (!(await getWebGPUTestDevice())) return context.skip();
+test('DataFilterExtension#WebGPU counts, updates, constants and empty data', async () => {
   const counts: number[] = [];
   const layer = new ScatterplotLayer({
     id: 'count-points',
@@ -93,8 +96,7 @@ test('DataFilterExtension#WebGPU counts, updates, constants and empty data', asy
   }
 });
 
-test('DataFilterExtension#WebGPU counts source objects in variable-length paths', async context => {
-  if (!(await getWebGPUTestDevice())) return context.skip();
+test('DataFilterExtension#WebGPU counts source objects in variable-length paths', async () => {
   const counts: number[] = [];
   const fixture = await createDeck(
     new PathLayer({
@@ -132,8 +134,7 @@ test('DataFilterExtension#WebGPU counts source objects in variable-length paths'
 
 test.each([1, 2, 3, 4])(
   'DataFilterExtension#WebGPU counts fp64 and %s filter channels',
-  async (filterSize, context) => {
-    if (!(await getWebGPUTestDevice())) return context.skip();
+  async filterSize => {
     const counts: number[] = [];
     const range = [1e9 + 0.25, 1e9 + 0.75];
     const fixture = await createDeck(
@@ -165,8 +166,7 @@ test.each([1, 2, 3, 4])(
   }
 );
 
-test('DataFilterExtension#WebGPU ignores superseded and finalized readbacks', async context => {
-  if (!(await getWebGPUTestDevice())) return context.skip();
+test('DataFilterExtension#WebGPU ignores superseded and finalized readbacks', async () => {
   const counts: number[] = [];
   const release: (() => void)[] = [];
   const layer = new ScatterplotLayer({
@@ -211,8 +211,7 @@ test('DataFilterExtension#WebGPU ignores superseded and finalized readbacks', as
 
 test.each([1, 2, 3, 4])(
   'DataFilterExtension#WebGPU counts %s category channels and disabled filters',
-  async (categorySize, context) => {
-    if (!(await getWebGPUTestDevice())) return context.skip();
+  async categorySize => {
     const counts: number[] = [];
     const callback = ({count}) => counts.push(count);
     const layer = new ScatterplotLayer({
@@ -242,8 +241,7 @@ test.each([1, 2, 3, 4])(
   }
 );
 
-test('DataFilterExtension#WebGPU preserves the soft-filter counting threshold', async context => {
-  if (!(await getWebGPUTestDevice())) return context.skip();
+test('DataFilterExtension#WebGPU preserves the soft-filter counting threshold', async () => {
   const counts: number[] = [];
   const fixture = await createDeck(
     new ScatterplotLayer({
@@ -266,8 +264,7 @@ test('DataFilterExtension#WebGPU preserves the soft-filter counting threshold', 
 
 test.each([true, false])(
   'DataFilterExtension#WebGPU callback-only update (replace=%s)',
-  async (replace, context) => {
-    if (!(await getWebGPUTestDevice())) return context.skip();
+  async replace => {
     const counts: number[] = [];
     const replacementCounts: number[] = [];
     const release: (() => void)[] = [];
