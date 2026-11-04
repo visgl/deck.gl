@@ -107,16 +107,6 @@ fn vertexMain(
 fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
   fragmentGeometry.uv = inputs.vTexCoord;
 
-  if (picking.isActive > 0.5) {
-    if (!picking_isColorValid(inputs.pickingColor)) {
-      discard;
-    }
-    var extensionColor = vec4<f32>(inputs.pickingColor, 1.0);
-    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
-    // Color filters may discard, but must not alter the picking payload.
-    return vec4<f32>(inputs.pickingColor, 1.0);
-  }
-
   var fragColor = inputs.vColor;
 
 #ifdef LIGHTING_PBR
@@ -136,6 +126,16 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
 #endif
 
   fragColor.a *= layer.opacity;
+
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(inputs.pickingColor)) {
+      discard;
+    }
+    var extensionColor = fragColor;
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
+    return vec4<f32>(inputs.pickingColor, 1.0);
+  }
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedObjectColor = picking_normalizeColor(picking.highlightedObjectColor);

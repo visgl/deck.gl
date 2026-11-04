@@ -85,16 +85,6 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.texCoords;
   fragmentGeometry.uv = geometry.uv;
 
-  if (picking.isActive > 0.5) {
-    if (!picking_isColorValid(varyings.pickingColor)) {
-      discard;
-    }
-    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
-    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
-    // Color filters may discard, but must not alter the picking payload.
-    return vec4<f32>(varyings.pickingColor, 1.0);
-  }
-
   var color = varyings.color;
   if (simpleMesh.hasTexture > 0.5) {
     color = textureSample(simpleMeshTexture, simpleMeshTextureSampler, varyings.texCoords);
@@ -110,6 +100,16 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     lighting_getLightColor2(color.rgb, project.cameraPosition, varyings.positionCommon, normal),
     color.a * layer.opacity
   );
+
+  if (picking.isActive > 0.5) {
+    if (!picking_isColorValid(varyings.pickingColor)) {
+      discard;
+    }
+    var extensionColor = color;
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
+    return vec4<f32>(varyings.pickingColor, 1.0);
+  }
 
   if (picking.isHighlightActive > 0.5) {
     let highlightedColor = picking_normalizeColor(picking.highlightedObjectColor);

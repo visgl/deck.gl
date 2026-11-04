@@ -263,10 +263,6 @@ fn vertexMain(inp: Attributes) -> Varyings {
       : ''
   }
 
-  if (globeOccluded) {
-    pos = vec4<f32>(0.0, 0.0, 2.0, 1.0);
-  }
-
   let uvMix = (inp.positions.xy + vec2<f32>(1.0, 1.0)) * 0.5;
   outp.vTextureCoords = mix(inp.instanceIconFrames.xy, inp.instanceIconFrames.xy + iconSize, uvMix) / icon.iconsTextureDim;
 
@@ -276,6 +272,9 @@ fn vertexMain(inp: Attributes) -> Varyings {
   outp.pickingColor = picking_getPickingColorFromIndex(inp.rowIndexes);
 
   DECKGL_FILTER_GL_POSITION(&outp.position, geometry);
+  if (globeOccluded) {
+    outp.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
 
   return outp;
 }
@@ -312,7 +311,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
     }
-    var extensionColor = vec4<f32>(inp.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(color.rgb, a);
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
     // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(inp.pickingColor, 1.0);

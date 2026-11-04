@@ -80,6 +80,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
   pixelOffset = pixelOffset + inp.instancePixelOffset;
   pixelOffset.y = pixelOffset.y * -1.0;
 
+  var globeOccluded = false;
   if (icon.billboard != 0) {
     let anchorCommon = project_position_vec3_f64(inp.instancePositions, inp.instancePositions64Low);
     geometry.position = vec4<f32>(anchorCommon, 1.0);
@@ -91,10 +92,7 @@ fn vertexMain(inp: Attributes) -> Varyings {
     DECKGL_FILTER_SIZE(&offset, geometry);
     let clipOffset = project_pixel_size_to_clipspace(offset.xy);
     pos = vec4<f32>(pos.x + clipOffset.x, pos.y + clipOffset.y, pos.z, pos.w);
-    // Hide icons whose anchor is behind the globe; culling handles non-billboard icons
-    if (project_globe_is_occluded(anchorCommon)) {
-      pos = vec4<f32>(0.0, 0.0, 2.0, 1.0);
-    }
+    globeOccluded = project_globe_is_occluded(anchorCommon);
     outp.position = pos;
   } else {
     var offset_common = vec3<f32>(project_pixel_size_vec2(pixelOffset), 0.0);
@@ -116,6 +114,9 @@ fn vertexMain(inp: Attributes) -> Varyings {
   outp.pickingColor = geometry.pickingColor;
 
   DECKGL_FILTER_GL_POSITION(&outp.position, geometry);
+  if (globeOccluded) {
+    outp.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
 
   return outp;
 }
@@ -141,7 +142,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
     }
-    var extensionColor = vec4<f32>(inp.pickingColor, 1.0);
+    var extensionColor = vec4<f32>(rgb, a);
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
     // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(inp.pickingColor, 1.0);

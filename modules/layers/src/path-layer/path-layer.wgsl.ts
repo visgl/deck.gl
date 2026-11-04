@@ -276,15 +276,12 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   geometry.worldPosition = currPosition;
 
-  var widthPixels =
+  let widthPixels =
     clamp(
       project_unit_size_to_pixel(attributes.instanceStrokeWidths * path.widthScale, path.widthUnits),
       path.widthMinPixels,
       path.widthMaxPixels
     ) / 2.0;
-  var size = vec3<f32>(widthPixels, widthPixels, 0.0);
-  DECKGL_FILTER_SIZE(&size, geometry);
-  widthPixels = size.x;
 
   if (path.billboard != 0.0) {
 #ifdef DASH_ENABLED
@@ -324,11 +321,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     nextPositionScreen = clipLine(nextPositionScreen, currPositionScreen);
     currPositionScreen = clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
 
+    var width = vec3<f32>(widthPixels, widthPixels, 0.0);
+    DECKGL_FILTER_SIZE(&width, geometry);
 #ifdef ANTIALIASING
+    let widthLength = length(width.xy);
     let coverageScale = select(
       1.0,
-      (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
-      widthPixels > 0.0
+      length(width.xy + vec2<f32>(0.5 / project.devicePixelRatio)) / max(widthLength, 1e-6),
+      widthLength > 0.0
     );
 #endif
 #ifdef DASH_ENABLED
@@ -339,15 +339,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     );
     let billboardPathLength = select(
       0.0,
-      length(currentDeltaCommon) * project.scale / (widthPixels * project.focalDistance),
-      widthPixels > 0.0
+      length(currentDeltaCommon) * project.scale / (width.x * project.focalDistance),
+      width.x > 0.0
     );
 #endif
     let join = getLineJoinOffset(
       prevPositionScreen.xyz / prevPositionScreen.w,
       currPositionScreen.xyz / currPositionScreen.w,
       nextPositionScreen.xyz / nextPositionScreen.w,
-      project_pixel_size_to_clipspace(vec2<f32>(widthPixels, widthPixels)),
+      project_pixel_size_to_clipspace(width.xy),
 #ifdef DASH_ENABLED
       billboardPathLength,
       billboardPathRange,
@@ -379,22 +379,23 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     let currPositionCommon = project_position_vec3_f64(currPosition, currPosition64Low);
     let nextPositionCommon = project_position_vec3_f64(nextPosition, nextPosition64Low);
 
-    let width = vec2<f32>(
-      project_pixel_size_float(widthPixels),
-      project_pixel_size_float(widthPixels)
-    );
+    geometry.position = vec4<f32>(currPositionCommon, 1.0);
+    var width = vec3<f32>(project_pixel_size_vec2(vec2<f32>(widthPixels)), 0.0);
+    DECKGL_FILTER_SIZE(&width, geometry);
 #ifdef ANTIALIASING
+    let widthLength = length(width.xy);
+    let padding = project_pixel_size_vec2(vec2<f32>(0.5 / project.devicePixelRatio));
     let coverageScale = select(
       1.0,
-      (widthPixels + 0.5 / project.devicePixelRatio) / max(widthPixels, 1e-6),
-      widthPixels > 0.0
+      length(width.xy + padding) / max(widthLength, 1e-6),
+      widthLength > 0.0
     );
 #endif
     let join = getLineJoinOffset(
       prevPositionCommon,
       currPositionCommon,
       nextPositionCommon,
-      width,
+      width.xy,
 #ifdef DASH_ENABLED
       1.0,
       vec2<f32>(0.0, 1.0),

@@ -104,6 +104,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     );
   }
 
+  var globeOccluded = false;
   if (textBackground.billboard > 0.5) {
     let anchorCommon = project_position_vec3_f64(attributes.instancePositions, attributes.instancePositions64Low);
     geometry.position = vec4<f32>(anchorCommon, 1.0);
@@ -122,10 +123,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       position.z,
       position.w
     );
-    // Hide backgrounds whose anchor is behind the globe; culling handles non-billboard ones
-    if (project_globe_is_occluded(anchorCommon)) {
-      position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
-    }
+    globeOccluded = project_globe_is_occluded(anchorCommon);
     varyings.position = position;
   } else {
     var offsetCommon = vec3<f32>(project_pixel_size_vec2(pixelOffset), 0.0);
@@ -152,6 +150,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   );
   varyings.pickingColor = geometry.pickingColor;
   DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
+  if (globeOccluded) {
+    varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
   return varyings;
 }
 
@@ -228,7 +229,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = fragColor;
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
     // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);

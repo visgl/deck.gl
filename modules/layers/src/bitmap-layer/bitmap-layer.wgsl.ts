@@ -121,15 +121,11 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4<f32> {
   fragmentGeometry.uv = geometry.uv;
 
   if (picking.isActive > 0.5) {
+    DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     if (picking.isAttribute > 0.5) {
-      var extensionColor = vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
-      DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
-      // Color filters may discard, but must not alter the picking payload.
       return vec4<f32>(input.pickingDepth, 0.0, 0.0, 1.0);
     }
-    var extensionColor = vec4<f32>(packUVsIntoRGB(uv), 1.0);
-    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
-    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(packUVsIntoRGB(uv), 1.0);
   }
 

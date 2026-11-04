@@ -115,7 +115,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = fragColor;
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
     // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);

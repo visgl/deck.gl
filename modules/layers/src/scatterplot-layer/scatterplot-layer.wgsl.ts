@@ -89,6 +89,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   varyings.innerUnitRadius = 1.0 - scatterplot.stroked * lineWidthPixels / varyings.outerRadiusPixels;
 
+  var globeOccluded = false;
   if (scatterplot.billboard != 0) {
     let projectedPosition = project_position_to_clipspace_and_commonspace(
       attributes.instancePositions,
@@ -107,10 +108,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
       geometry.position.xy + project_pixel_size_vec2(offset.xy),
       geometry.position.zw
     );
-    // Hide points whose anchor is behind the globe; culling handles non-billboard points
-    if (project_globe_is_occluded(projectedPosition.commonPosition.xyz)) {
-      varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
-    }
+    globeOccluded = project_globe_is_occluded(projectedPosition.commonPosition.xyz);
   } else {
     var offset = edgePadding * attributes.positions * project_pixel_size_float(varyings.outerRadiusPixels);
     offset = vec3<f32>(offset.xy + project_pixel_size_vec2(attributes.instancePixelOffset), offset.z);
@@ -136,6 +134,9 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   varyings.pickingColor = geometry.pickingColor;
 
   DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
+  if (globeOccluded) {
+    varyings.position = vec4<f32>(0.0, 0.0, 2.0, 1.0);
+  }
 
   return varyings;
 }
@@ -186,7 +187,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
-    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    var extensionColor = fragColor;
     DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
     // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
