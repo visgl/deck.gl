@@ -11,7 +11,7 @@ import type {
   RenderPipelineParameters
 } from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
-import {withDeviceParameters} from '@luma.gl/core/webgl';
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
@@ -99,8 +99,10 @@ export default class LayersPass extends Pass {
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
     if (this.device.type === 'webgl' && options.colorMask !== undefined) {
       // WebGL clears honor the write mask; mask passes must preserve other channels.
-      return withDeviceParameters(this.device, {colorMask: options.colorMask}, () =>
-        this._renderLayers(options)
+      const mask = options.colorMask;
+      return (this.device as WebGLDevice).withParametersWebGL(
+        {colorMask: [Boolean(mask & 1), Boolean(mask & 2), Boolean(mask & 4), Boolean(mask & 8)]},
+        () => this._renderLayers(options)
       );
     }
     return this._renderLayers(options);

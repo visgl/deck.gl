@@ -1402,7 +1402,20 @@ export default abstract class Layer<PropsT extends {} = {}> extends Component<
 
       // Call subclass lifecycle method
       if (context.device instanceof WebGLDevice) {
-        context.device.withParametersWebGL(parameters, () => {
+        const {colorMask, ...webGLParameters} = parameters;
+        if (typeof colorMask === 'number') {
+          Object.assign(webGLParameters, {
+            colorMask: [
+              Boolean(colorMask & 1),
+              Boolean(colorMask & 2),
+              Boolean(colorMask & 4),
+              Boolean(colorMask & 8)
+            ]
+          });
+        } else if (colorMask) {
+          Object.assign(webGLParameters, {colorMask});
+        }
+        context.device.withParametersWebGL(webGLParameters, () => {
           const opts: DrawOptions = {renderPass, shaderModuleProps, uniforms, parameters, context};
 
           // extensions
