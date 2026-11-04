@@ -46,9 +46,6 @@ void text_setCollisionBounds(
   // depth would clip them at w = 0 instead of the near plane. A label that only crosses the near
   // or far plane is still tested; its bounds are clipped to the viewport by the bounds test.
   text_collisionCulled = behindCamera || outsideDepth;
-  // The projected corners' mean is inside the convex footprint, including under perspective.
-  vec2 center = (collision_corners[0] + collision_corners[1] + collision_corners[2] + collision_corners[3]) / 4.0;
-  collision_position = vec4(center * 2.0 - 1.0, 0.0, 1.0);
 }
 #endif
 `;

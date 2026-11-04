@@ -1345,3 +1345,68 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     }
   }
 );
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'rotated labels crossing a mask boundary test their unmasked part',
+  async () => {
+    // A vertical label whose right half is unmasked, and a small label beside its axis on either
+    // side. Only the unmasked half collides, whichever label has the higher priority.
+    // Few renders: many masked renders in one page crash the headless browser, also on master.
+    const mask = new SolidPolygonLayer({
+      id: 'text-mask',
+      operation: 'mask',
+      data: [
+        {
+          polygon: [
+            [0, -1000],
+            [1000, -1000],
+            [1000, 1000],
+            [0, 1000]
+          ]
+        }
+      ],
+      getPolygon: d => d.polygon
+    });
+    const maskedExtensions = [new CollisionFilterExtension(), new MaskExtension()];
+    for (const position of [
+      [-5, 30],
+      [5, 30],
+      [-5, -30],
+      [5, -30]
+    ]) {
+      for (const rotatedPriority of [1, -1]) {
+        const rotated = new TextLayer({
+          id: 'masked-rotated',
+          data: [{position: [0, 0], text: 'Collision label'}],
+          getSize: 24,
+          getAngle: 90,
+          billboard: false,
+          maskId: 'text-mask',
+          maskByInstance: false,
+          extensions: maskedExtensions,
+          pickable: true,
+          getCollisionPriority: rotatedPriority
+        });
+        const small = new TextLayer({
+          id: 'small',
+          data: [{position, text: 'o'}],
+          getSize: 12,
+          extensions,
+          pickable: true
+        });
+        await new Promise<void>((resolve, reject) => {
+          deck.setProps({
+            layers: [mask, rotated, small],
+            viewState: {target: [0, 0, 0], zoom: 0},
+            onError: reject,
+            onAfterRender: () => rotated.isLoaded && small.isLoaded && resolve()
+          });
+        });
+        const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+        expect
+          .soft(objects.length, `small label at ${position}, rotated priority ${rotatedPriority}`)
+          .toBe(position[0] > 0 ? 1 : 2);
+      }
+    }
+  }
+);

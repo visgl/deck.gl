@@ -40,7 +40,6 @@ uniform sampler2D collision_visibilityTexture;
 ${uniformBlock}
 
 // Text layers supply their projected footprint for the visibility pass.
-flat out vec4 collision_position;
 flat out float collision_hidden;
 bool collision_useBounds = false;
 flat out vec2 collision_corners[4];
@@ -131,7 +130,6 @@ ${uniformBlock}
 ${priorityDepth}
 flat in highp vec3 collision_pickingColor;
 flat in float collision_priority;
-flat in vec4 collision_position;
 flat in float collision_hidden;
 flat in vec2 collision_corners[4];
 uniform sampler2D collision_texture;
@@ -148,41 +146,51 @@ bool collision_isOccluded(ivec2 pixel, vec3 pickingColor) {
   return depth <= ownDepth + 0.5 / 65535.0;
 }
 
+bool collision_isInside(vec3 edges[4], vec2 point) {
+  vec4 distances = vec4(
+    dot(edges[0], vec3(point, 1.0)), dot(edges[1], vec3(point, 1.0)),
+    dot(edges[2], vec3(point, 1.0)), dot(edges[3], vec3(point, 1.0))
+  );
+  return all(greaterThanEqual(distances, vec4(0.0))) || all(lessThanEqual(distances, vec4(0.0)));
+}
+
 float collision_testBounds(vec3 pickingColor, int tileIndex) {
   ivec2 size = textureSize(collision_texture, 0);
-  vec2 minCorner = min(min(collision_corners[0], collision_corners[1]), min(collision_corners[2], collision_corners[3]));
-  vec2 maxCorner = max(max(collision_corners[0], collision_corners[1]), max(collision_corners[2], collision_corners[3]));
-  ivec2 first = max(ivec2(floor(minCorner * vec2(size))), ivec2(0));
-  ivec2 last = min(ivec2(ceil(maxCorner * vec2(size))), size - 1);
-
-  // Check the center first: densely packed labels usually reject in one lookup.
-  vec2 center = (collision_position.xy / collision_position.w + 1.0) / 2.0;
-  ivec2 centerPixel = ivec2(center * vec2(size));
-  if (all(greaterThanEqual(centerPixel, first)) && all(lessThanEqual(centerPixel, last)) &&
-      collision_isOccluded(centerPixel, pickingColor)) return 0.0;
-
-  // Split the bounds across the sixteen texels of the object's visibility cell.
-  ivec2 tiles = ivec2(4);
-  ivec2 extent = (last - first + tiles) / tiles;
-  ivec2 tile = ivec2(tileIndex % tiles.x, tileIndex / tiles.x);
-  first += tile * extent;
-  last = min(last, first + extent - 1);
-
-  // Test every covered map pixel, rather than a fixed sample grid that can miss
-  // edge intersections or a small, higher-priority label inside a larger label.
+  // Split the object's bounds into a 4x4 grid in its own coordinates, one part per texel of its
+  // visibility cell. The texel's fragment lies in the same part, so tests by other extensions
+  // at that fragment, such as masks, apply to the part it tests at any rotation.
+  // Texel rows run bottom to top, while the corners' v runs from the label's top edge.
+  vec2 tile = vec2(tileIndex % 4, 3 - tileIndex / 4);
+  vec2 corners[4];
+  for (int i = 0; i < 4; i++) {
+    vec2 uv = (tile + vec2(i == 1 || i == 2 ? 1.0 : 0.0, i >= 2 ? 1.0 : 0.0)) / 4.0;
+    vec2 top = mix(collision_corners[0], collision_corners[1], uv.x);
+    vec2 bottom = mix(collision_corners[3], collision_corners[2], uv.x);
+    corners[i] = mix(top, bottom, uv.y) * vec2(size);
+  }
   vec3 edges[4];
   for (int i = 0; i < 4; i++) {
-    vec2 a = collision_corners[i] * vec2(size);
-    vec2 b = collision_corners[(i + 1) % 4] * vec2(size);
+    vec2 a = corners[i];
+    vec2 b = corners[(i + 1) % 4];
     vec2 normal = vec2(a.y - b.y, b.x - a.x);
     edges[i] = vec3(normal, -dot(normal, a));
   }
+  vec2 minCorner = min(min(corners[0], corners[1]), min(corners[2], corners[3]));
+  vec2 maxCorner = max(max(corners[0], corners[1]), max(corners[2], corners[3]));
+  ivec2 first = max(ivec2(floor(minCorner)), ivec2(0));
+  ivec2 last = min(ivec2(ceil(maxCorner)), size - 1);
+
+  // Check the part's center first: densely packed labels usually reject in one lookup.
+  ivec2 centerPixel = ivec2((corners[0] + corners[1] + corners[2] + corners[3]) / 4.0);
+  if (all(greaterThanEqual(centerPixel, first)) && all(lessThanEqual(centerPixel, last)) &&
+      collision_isOccluded(centerPixel, pickingColor)) return 0.0;
+
+  // Test every covered map pixel, rather than a fixed sample grid that can miss
+  // edge intersections or a small, higher-priority label inside a larger label.
   for (int y = first.y; y <= last.y; y++) {
     for (int x = first.x; x <= last.x; x++) {
-      vec3 point = vec3(vec2(x, y) + 0.5, 1.0);
-      vec4 distances = vec4(dot(edges[0], point), dot(edges[1], point), dot(edges[2], point), dot(edges[3], point));
-      bool inside = all(greaterThanEqual(distances, vec4(0.0))) || all(lessThanEqual(distances, vec4(0.0)));
-      if (inside && collision_isOccluded(ivec2(x, y), pickingColor)) return 0.0;
+      if (collision_isInside(edges, vec2(x, y) + 0.5) &&
+          collision_isOccluded(ivec2(x, y), pickingColor)) return 0.0;
     }
   }
   return 1.0;
