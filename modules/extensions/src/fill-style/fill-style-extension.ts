@@ -4,7 +4,7 @@
 
 import {LayerExtension} from '@deck.gl/core';
 
-import {FillStyleModuleProps, patternPlugin} from './shader-module';
+import {FillStyleModuleProps, patternPlugin, patternPluginWGSL} from './shader-module';
 import {
   packProceduralPatterns,
   PROCEDURAL_PATTERN_TEXTURE_FORMAT,
@@ -140,7 +140,10 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     }
 
     return {
-      plugins: [extension.opts.pattern && patternPlugin].filter(Boolean)
+      plugins: extension.opts.pattern
+        ? [this.context.device.type === 'webgpu' ? patternPluginWGSL : patternPlugin]
+        : [],
+      defines: {FILL_PROCEDURAL_PATTERN: extension.opts.proceduralPattern}
     };
   }
 
@@ -290,13 +293,16 @@ export default class FillStyleExtension extends LayerExtension<FillStyleExtensio
     mapping: ProceduralPatternMapping
   ) {
     const packedPatterns = packProceduralPatterns(mapping);
+    // WebGPU reads procedural parameters with textureLoad and preserves the f32 bit pattern.
+    const webgpu = this.context.device.type === 'webgpu';
+    const {data} = packedPatterns;
     return {
       proceduralPatternIndices: packedPatterns.patternIndices,
       proceduralPatternTexture: this.context.device.createTexture({
-        data: packedPatterns.data,
+        data: webgpu ? new Uint32Array(data.buffer, data.byteOffset, data.length) : data,
         width: packedPatterns.width,
         height: packedPatterns.height,
-        format: PROCEDURAL_PATTERN_TEXTURE_FORMAT,
+        format: webgpu ? 'rg32uint' : PROCEDURAL_PATTERN_TEXTURE_FORMAT,
         sampler: {minFilter: 'nearest', magFilter: 'nearest'}
       })
     };
