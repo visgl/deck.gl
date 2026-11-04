@@ -23,7 +23,9 @@ void text_setCollisionBounds(
     vec2 offset = rotate_by_angle(rect.xy + corner * rect.zw, angle) + pixelOffset;
     offset.y *= -1.0;
     if (clipRect.z >= 0.0) offset.x = clipRect.x + corner.x * clipRect.z;
-    if (clipRect.w >= 0.0) offset.y = clipRect.y + corner.y * clipRect.w;
+    // Pair the corners like the background layer and the collision map, which flip the clipped
+    // y like the default offset above; a rotated label otherwise leans the other way
+    if (clipRect.w >= 0.0) offset.y = clipRect.y + (1.0 - corner.y) * clipRect.w;
     // Scale the offsets like the drawn geometry, e.g. DataFilterExtension's soft range
     vec4 position;
     if (billboard) {

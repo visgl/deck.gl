@@ -1204,3 +1204,60 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     }
   }
 );
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'rotated labels clipped on one axis test the shape they reserve',
+  async () => {
+    // A rotated label clipped to a horizontal band, and a small label moved along the band.
+    // Overlapping labels keep exactly one label whichever has the higher priority.
+    const text = 'Collision label';
+    const binaryData = {
+      length: 1,
+      startIndices: [0, text.length],
+      attributes: {
+        getText: new Uint8Array(Array.from(text).map(char => char.charCodeAt(0))),
+        getPosition: {value: new Float32Array(text.length * 3), size: 3}
+      }
+    };
+    for (const variant of ['object', 'background', 'binary']) {
+      const counts = new Set<number>();
+      for (let x = -200; x <= 200; x += 20) {
+        const visibleCounts: number[] = [];
+        for (const rotatedPriority of [1, -1]) {
+          const rotated = new TextLayer({
+            id: 'rotated',
+            data: variant === 'binary' ? binaryData : [{position: [0, 0], text}],
+            background: variant === 'background',
+            getSize: 48,
+            getAngle: 45,
+            getContentBox: [0, -20, -1, 40],
+            extensions,
+            pickable: true,
+            getCollisionPriority: rotatedPriority
+          });
+          const small = new TextLayer({
+            id: 'small',
+            data: [{position: [x, 15], text: 'o'}],
+            getSize: 12,
+            extensions,
+            pickable: true
+          });
+          await new Promise<void>((resolve, reject) => {
+            deck.setProps({
+              layers: [rotated, small],
+              viewState: {target: [0, 0, 0], zoom: 0},
+              onError: reject,
+              onAfterRender: () => rotated.isLoaded && small.isLoaded && resolve()
+            });
+          });
+          const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+          visibleCounts.push(objects.length);
+        }
+        expect.soft(visibleCounts[0], `${variant}, x=${x}`).toBe(visibleCounts[1]);
+        counts.add(visibleCounts[0]);
+      }
+      // The small label both overlaps and misses the rotated label along the band
+      expect(counts, variant).toEqual(new Set([1, 2]));
+    }
+  }
+);
