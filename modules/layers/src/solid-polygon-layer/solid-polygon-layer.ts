@@ -432,6 +432,8 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         topology: 'triangle-list',
         bufferLayout,
         isIndexed: true,
+        // The attribute manager can supply layouts for the instanced side models.
+        isInstanced: false,
         userData: {
           excludeAttributes: {
             vertexValid: true,
