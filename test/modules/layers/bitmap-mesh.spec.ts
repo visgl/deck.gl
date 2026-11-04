@@ -324,3 +324,118 @@ for (const backend of ['webgl', 'webgpu'] as const) {
     }
   });
 }
+
+for (const backend of ['webgl', 'webgpu'] as const) {
+  test(`Bitmap Mercator mapping matches independently calculated UVs on ${backend}`, async ({
+    skip
+  }) => {
+    const {OrthographicViewport} = await import('@deck.gl/core');
+    const testDevice = backend === 'webgpu' ? await getWebGPUTestDevice('core') : device;
+    if (!testDevice) return skip();
+    // Cover a wide latitude range, where Mercator differs substantially from linear UVs.
+    const rows: number[][] = [];
+    for (let latitude = -70; latitude < 70; latitude += 20) {
+      rows.push(
+        [-60, latitude],
+        [60, latitude],
+        [60, latitude + 20],
+        [-60, latitude],
+        [60, latitude + 20],
+        [-60, latitude + 20]
+      );
+    }
+    const mercatorY = (latitude: number) =>
+      Math.log(Math.tan(Math.PI / 4 + (latitude * Math.PI) / 360));
+    const extent = mercatorY(75);
+    const positions = column(rows);
+    const texCoords = column(
+      rows.map(([longitude, latitude]) => [
+        (longitude + 60) / 120,
+        (extent - mercatorY(latitude)) / (2 * extent)
+      ])
+    );
+    const pixels = new Uint8Array(8 * 8 * 4);
+    for (let i = 0; i < 64; i++)
+      pixels.set([(i % 8) * 32, Math.floor(i / 8) * 32, 128, 255], i * 4);
+    const image = testDevice.createTexture({
+      width: 8,
+      height: 8,
+      format: 'rgba8unorm',
+      data: pixels
+    });
+    const target = testDevice.createTexture({
+      width: 64,
+      height: 64,
+      format: 'rgba8unorm',
+      usage: Texture.RENDER_ATTACHMENT | Texture.COPY_SRC
+    });
+    const depth = testDevice.createTexture({
+      width: 64,
+      height: 64,
+      format: 'depth24plus',
+      usage: Texture.RENDER_ATTACHMENT
+    });
+    const framebuffer = testDevice.createFramebuffer({
+      colorAttachments: [target],
+      depthStencilAttachment: depth
+    });
+    const readback = testDevice.createBuffer({
+      byteLength: 64 * 64 * 4,
+      usage: Buffer.COPY_DST | Buffer.MAP_READ
+    });
+    let reference: Uint8Array;
+    try {
+      await testLayerAsync({
+        Layer: BitmapLayer,
+        device: testDevice,
+        viewport: new OrthographicViewport({width: 64, height: 64, zoom: -1.5}),
+        onError: error => {
+          throw error;
+        },
+        testCases: [
+          {props: {positions, texCoords, image, coordinateSystem: 'cartesian'}},
+          {
+            updateProps: {
+              texCoords: null,
+              imageMapping: {
+                bounds: [
+                  ((-60 * Math.PI) / 180) * 6378137,
+                  -extent * 6378137,
+                  ((60 * Math.PI) / 180) * 6378137,
+                  extent * 6378137
+                ],
+                positionCRS: '+proj=longlat +datum=WGS84',
+                imageCRS: '+proj=merc +a=6378137 +b=6378137'
+              }
+            }
+          }
+        ].map((testCase, index) => ({
+          ...testCase,
+          onAfterUpdate: async ({layer}) => {
+            if (!layer.isLoaded) return;
+            const pass = testDevice.beginRenderPass({
+              framebuffer,
+              parameters: {viewport: [0, 0, 64, 64], scissorRect: [0, 0, 64, 64]},
+              clearColor: [0, 0, 0, 0]
+            });
+            layer.context.renderPass = pass;
+            layer.draw({shaderModuleProps: {picking: {isActive: false}}});
+            pass.end();
+            testDevice.submit();
+            target.readBuffer({width: 64, height: 64}, readback);
+            const rendered = new Uint8Array(await readback.readAsync());
+            expect(rendered.filter(value => value > 0).length).toBeGreaterThan(1000);
+            if (index === 0) reference = rendered;
+            else expect(rendered).toEqual(reference);
+          }
+        }))
+      });
+    } finally {
+      readback.destroy();
+      framebuffer.destroy();
+      depth.destroy();
+      target.destroy();
+      image.destroy();
+    }
+  });
+}
