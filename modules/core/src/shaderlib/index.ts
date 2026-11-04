@@ -21,7 +21,7 @@ import picking, {pickingPlugin} from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-// WGSL targets are no-op stubs until layer call sites and extensions are wired.
+// GLSL and WGSL share target names with language-specific signatures.
 const SHADER_INJECTION_TARGETS: ShaderInjectionTarget[] = [
   {
     name: 'DECKGL_FILTER_SIZE',

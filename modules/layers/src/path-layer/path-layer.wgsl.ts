@@ -276,12 +276,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   geometry.worldPosition = currPosition;
 
-  let widthPixels =
+  var widthPixels =
     clamp(
       project_unit_size_to_pixel(attributes.instanceStrokeWidths * path.widthScale, path.widthUnits),
       path.widthMinPixels,
       path.widthMaxPixels
     ) / 2.0;
+  var size = vec3<f32>(widthPixels, widthPixels, 0.0);
+  DECKGL_FILTER_SIZE(&size, geometry);
+  widthPixels = size.x;
 
   if (path.billboard != 0.0) {
 #ifdef DASH_ENABLED
@@ -424,12 +427,14 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     attributes.instanceColors.a * layer.opacity
   );
   DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength);
+  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
+  fragmentGeometry.uv = geometry.uv;
 
 #ifdef ANTIALIASING
   // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
@@ -506,9 +511,12 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   DECKGL_FILTER_PATH_COLOR();
   clip_filterColor(varyings.clipCoordinates);
 #ifdef ANTIALIASING
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 #else
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  var color = varyings.vColor;
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
+  return deckgl_premultiplied_alpha(color);
 #endif
 }
 `;

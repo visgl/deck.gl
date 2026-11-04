@@ -262,3 +262,43 @@ new GeoJsonLayer({
 ```
 
 This example is on [codepen](https://codepen.io/vis-gl/pen/bXpNpK).
+
+## WebGPU shader plugins
+
+Extensions can return `{plugins: [plugin]}` from `getShaders`. deck.gl preserves
+plugins contributed by the layer and other extensions, in order. Declare shader
+inputs in `ShaderPlugin.vertexInputs` and cross-stage values in `ShaderPlugin.interStageVariables`;
+luma.gl allocates locations and rewrites the WGSL entry-point interfaces. Keep
+accessors, attribute buffers, invalidation, and resource lifecycle in the extension.
+
+Injections use explicit stages and language-specific source. For example:
+
+```typescript
+const plugin: ShaderPlugin = {
+  name: 'fade',
+  injections: {
+    'glsl:fs:DECKGL_FILTER_COLOR': 'color.a *= 0.5;',
+    'wgsl:fs:DECKGL_FILTER_COLOR': '(*color).a *= 0.5;'
+  }
+};
+```
+
+The built-in rendering primitives expose these WGSL injection targets:
+
+```wgsl
+DECKGL_FILTER_SIZE(&size, geometry);
+DECKGL_FILTER_GL_POSITION(&output.position, geometry);
+DECKGL_FILTER_COLOR(&color, fragmentGeometry);
+```
+
+Call the position target after populating `geometry.worldPosition` and, when relevant,
+`geometry.worldPositionAlt`. Call the fragment color target on visible and picking
+return paths, after derivative-dependent calculations and before premultiplying color. Custom layer shaders should
+return a named vertex-output struct and accept a named fragment-input struct so
+luma.gl can transport plugin varyings. Do not add extension-specific attributes or
+varyings to those structs yourself.
+
+GLSL and WGSL share injection target names, with language-specific signatures in one descriptor.
+Plugins select the shader language and stage through qualified injection keys.
+Luma.gl alpha.10 resolves vertex and fragment targets with the same name by
+stage. The WGSL layer call sites shown above apply color filters in the fragment stage.

@@ -37,6 +37,7 @@ function getSolidPolygonFragmentMain() {
 @fragment
 fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = vec2<f32>(0.0, 0.0);
+  fragmentGeometry.uv = geometry.uv;
 
   clip_filterColor(inp.clipCoordinates);
 
@@ -44,6 +45,9 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inp.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(inp.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(inp.pickingColor, 1.0);
   }
 
@@ -66,6 +70,7 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;
@@ -125,6 +130,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.clipCoordinates = clip_getCoordinates(geometry.position);
   clip_filterPosition(&outp.position, geometry.worldPosition.xy);
 
+  DECKGL_FILTER_GL_POSITION(&outp.position, geometry);
+
   return outp;
 }
 
@@ -167,6 +174,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   outp.clipCoordinates = vec2<f32>(0.0);
 
   if (attributes.vertexValid < 0.5) {
+    DECKGL_FILTER_GL_POSITION(&outp.position, geometry);
     return outp;
   }
 
@@ -219,6 +227,8 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   outp.clipCoordinates = clip_getCoordinates(geometry.position);
   clip_filterPosition(&outp.position, geometry.worldPosition.xy);
+
+  DECKGL_FILTER_GL_POSITION(&outp.position, geometry);
 
   return outp;
 }
