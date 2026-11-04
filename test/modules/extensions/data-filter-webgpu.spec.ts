@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ShaderPlugin} from '@luma.gl/shaders';
 import {beforeEach, expect, test} from 'vitest';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Deck, OrthographicView} from '@deck.gl/core';
@@ -82,6 +83,10 @@ const baseProps = {
   getFillColor: [255, 0, 0] as [number, number, number],
   pickable: true
 };
+
+const hasWebGPUBrushing = new BrushingExtension()
+  .getShaders()
+  .plugins?.some((plugin: ShaderPlugin) => Boolean(plugin.module?.source));
 
 test.each(
   [false, true].flatMap(fp64 => ([1, 2, 3, 4] as const).map(filterSize => ({fp64, filterSize})))
@@ -190,7 +195,7 @@ test.for([false, true])(
   async (reverse, context) => {
     // This PR is independent of the Brushing WebGPU port. Run the integration
     // regression when that implementation is present (including combined-branch validation).
-    if (!new BrushingExtension().getShaders().plugins) {
+    if (!hasWebGPUBrushing) {
       context.skip('Requires the Brushing ShaderPlugin port');
     }
     const fixture = await createFixture();
@@ -256,7 +261,7 @@ test.each([true, false])(
     manager.setProps({onError: error => errors.push(error)});
     const extensions = [
       new DataFilterExtension({filterSize: 4, categorySize: 4, fp64: true}),
-      ...(new BrushingExtension().getShaders().plugins ? [new BrushingExtension()] : []),
+      ...(hasWebGPUBrushing ? [new BrushingExtension()] : []),
       new ClipExtension()
     ];
     device.handle.pushErrorScope('validation');
