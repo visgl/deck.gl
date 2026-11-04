@@ -112,8 +112,15 @@ void main(void) {
       -getPixelOffsetFromAlignment(anchorPosScreen.y, viewportPixels.y, -xy.y - wh.y, -xy.y, text.align.y)
     );
   }
-
 #ifdef MODULE_COLLISION
+  // Clip the label rectangle to the content box, which does not scroll, like the background layer
+  if (collision.sort) {
+    vec2 corner = positions / 2.0 + 0.5;
+    if (instanceClipRect.z >= 0.0) pixelOffset.x = xy.x + corner.x * wh.x;
+    // Flipped like the default offset above, so the rectangle stays front-facing
+    if (instanceClipRect.w >= 0.0) pixelOffset.y = xy.y + (1.0 - corner.y) * wh.y;
+    scrollPixels = vec2(0.0);
+  }
   text_setCollisionBounds(instancePositions, instancePositions64Low,
     instanceCollisionRects * collision_getSize(instanceSizes) / text.fontSize,
     instancePixelOffset, instanceAngles, vec4(xy, wh), icon.billboard, text.flipY);

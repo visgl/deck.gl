@@ -30,6 +30,8 @@ import type {
   FilterContext
 } from '@deck.gl/core';
 
+const NO_CONTENT_CUTOFF: [number, number] = [0, 0];
+
 const TEXT_ANCHOR = {
   start: 1,
   middle: 0,
@@ -618,6 +620,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             getLineWidth: background ? getBorderWidth : 0,
             borderRadius: background ? backgroundBorderRadius : 0,
             padding: background ? backgroundPadding : [0, 0, 0, 0],
+            // A collision-only background reserves space only while the characters are shown
+            contentCutoffPixels: background ? NO_CONTENT_CUTOFF : contentCutoffPixels,
 
             // props shared with characters layer
             getPosition,

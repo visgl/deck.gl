@@ -78,6 +78,24 @@ void main(void) {
     pixelOffset.y = xy.y + v * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, v);
   }
 
+  // Hide the label where the character shader cuts off its content box
+  bool cutOff = false;
+  if (text.cutoffPixels != vec2(0.0)) {
+    vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
+    vec2 viewportPixels = project.viewportSize / project.devicePixelRatio;
+    vec2 anchorPixels = vec2(anchorPos.x / anchorPos.w + 1.0, 1.0 - anchorPos.y / anchorPos.w) / 2.0 * viewportPixels;
+    if (instanceClipRect.z >= 0.0 && text.cutoffPixels.x > 0.0) {
+      float l = max(anchorPixels.x + xy.x, 0.0);
+      float r = min(anchorPixels.x + xy.x + wh.x, viewportPixels.x);
+      cutOff = r - l < text.cutoffPixels.x;
+    }
+    if (instanceClipRect.w >= 0.0 && text.cutoffPixels.y > 0.0) {
+      float t = max(anchorPixels.y - xy.y - wh.y, 0.0);
+      float b = min(anchorPixels.y - xy.y, viewportPixels.y);
+      cutOff = cutOff || b - t < text.cutoffPixels.y;
+    }
+  }
+
 #ifdef MODULE_COLLISION
   vec4 collisionRect = instanceRects * collision_getSize(instanceSizes) / text.fontSize;
   collisionRect.xy -= textBackground.padding.xy;
@@ -121,6 +139,9 @@ void main(void) {
   DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
+  if (cutOff) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
 #ifdef MODULE_COLLISION
   if (collision.visibilityPass) {
     // Billboard vertices share the anchor's depth, so this vertex's culling by the projection and

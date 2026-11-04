@@ -1145,3 +1145,41 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     expect(await pickPriorities('same-data-b')).toEqual([20]);
   }
 );
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'labels hidden by the content cutoff do not hide other labels',
+  async () => {
+    // The high-priority label's 40-pixel content box is cut off below 50 pixels
+    const labels = [
+      {text: 'Collision label', x: 0, priority: 100},
+      {text: 'Collision label', x: 0, priority: -100}
+    ];
+    const {data: binaryData, buffer} = createBinaryText(labels);
+    try {
+      for (const cutoff of [30, 50]) {
+        const props = {
+          getSize: 24,
+          extensions,
+          pickable: true,
+          getCollisionPriority: (d, {index}) => labels[index].priority,
+          getContentBox: (d, {index}) =>
+            labels[index].priority > 0 ? [-20, -20, 40, 40] : [0, 0, -1, -1],
+          contentCutoffPixels: [cutoff, 0]
+        };
+        const hidden = cutoff > 40;
+        const layer = new TextLayer({
+          id: 'cutoff',
+          data: labels.map(({text, x, priority}) => ({text, priority, position: [x, 0]})),
+          ...props
+        });
+        expect(await drawLayers([layer]), `cutoff=${cutoff}`).toEqual(hidden ? [-100] : [100]);
+        const binary = new TextLayer({id: 'cutoff-binary', data: binaryData, ...props});
+        expect(await pickBinaryText(binary), `binary, cutoff=${cutoff}`).toEqual(
+          hidden ? [1] : [0]
+        );
+      }
+    } finally {
+      buffer.destroy();
+    }
+  }
+);
