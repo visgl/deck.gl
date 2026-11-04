@@ -430,6 +430,7 @@ export default class ScatterplotLayer<DataT = any, ExtraPropsT extends {} = {}> 
               attributes: {positions: {size: 3, value: new Float32Array(positions)}}
             })
           }),
+      enforceMatchingVectorLengths: Boolean(this.state.columns),
       isInstanced: true
     });
   }

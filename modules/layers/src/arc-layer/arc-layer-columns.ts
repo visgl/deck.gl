@@ -31,8 +31,20 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     semantic: 'color',
     size: 4
   },
-  widths: {attribute: 'instanceWidths', accessor: 'getWidth', semantic: 'scalar', size: 1},
-  heights: {attribute: 'instanceHeights', accessor: 'getHeight', semantic: 'scalar', size: 1},
+  widths: {
+    attribute: 'instanceWidths',
+    accessor: 'getWidth',
+    semantic: 'scalar',
+    size: 1,
+    defaultValue: 1
+  },
+  heights: {
+    attribute: 'instanceHeights',
+    accessor: 'getHeight',
+    semantic: 'scalar',
+    size: 1,
+    defaultValue: 1
+  },
   tilts: {attribute: 'instanceTilts', accessor: 'getTilt', semantic: 'scalar', size: 1}
 };
 

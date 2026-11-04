@@ -13,7 +13,13 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     semantic: 'position',
     size: 3
   },
-  radii: {attribute: 'instanceRadius', accessor: 'getRadius', semantic: 'scalar', size: 1},
+  radii: {
+    attribute: 'instanceRadius',
+    accessor: 'getRadius',
+    semantic: 'scalar',
+    size: 1,
+    defaultValue: 1
+  },
   fillColors: {
     attribute: 'instanceFillColors',
     accessor: 'getFillColor',
@@ -30,7 +36,8 @@ const DEFINITIONS: Record<string, ColumnDefinition> = {
     attribute: 'instanceLineWidths',
     accessor: 'getLineWidth',
     semantic: 'scalar',
-    size: 1
+    size: 1,
+    defaultValue: 1
   },
   pixelOffsets: {
     attribute: 'instancePixelOffset',

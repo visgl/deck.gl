@@ -374,6 +374,7 @@ export default class ArcLayer<DataT = any, ExtraPropsT extends {} = {}> extends 
       bufferLayout:
         this.state.columns?.getBufferLayouts() ?? this.getAttributeManager()!.getBufferLayouts(),
       topology: 'triangle-strip',
+      enforceMatchingVectorLengths: Boolean(this.state.columns),
       isInstanced: true
     });
   }
