@@ -166,6 +166,19 @@ export default abstract class AggregationLayer<
 
     for (const id in changedAttributes) {
       this.onAttributeChange(id);
+      if (aggregator instanceof WebGLAggregator) {
+        const {accessor} = changedAttributes[id].settings;
+        const accessors = Array.isArray(accessor) ? accessor : [accessor];
+        // Extension inputs can affect every bin, beyond the layer's position/weight inputs.
+        if (
+          this.props.extensions.some(extension => {
+            const {defaultProps} = extension.constructor as typeof LayerExtension;
+            return accessors.some(name => typeof name === 'string' && name in defaultProps);
+          })
+        ) {
+          aggregator.setNeedsUpdate();
+        }
+      }
     }
 
     // In aggregator.update() the aggregator allocates the buffers to store its output
