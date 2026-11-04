@@ -129,3 +129,42 @@ const maskModule = {
 export const maskPlugin: ShaderPlugin = {name: 'mask', module: maskModule, injections: inject};
 
 export default maskModule;
+
+const source = /* wgsl */ `
+struct MaskUniforms {
+  bounds: vec4<f32>,
+  channel: i32,
+  enabled: i32,
+  inverted: i32,
+  maskByInstance: i32,
+};
+@group(0) @binding(auto) var<uniform> mask: MaskUniforms;
+@group(0) @binding(auto) var mask_texture: texture_2d<f32>;
+@group(0) @binding(auto) var mask_textureSampler: sampler;
+`;
+
+export const maskPluginWGSL: ShaderPlugin = {
+  name: 'mask',
+  module: {...maskModule, source},
+  interStageVariables: {mask_texCoords: {type: 'vec2<f32>'}},
+  injections: {
+    'wgsl:vs:DECKGL_FILTER_GL_POSITION': /* wgsl */ `
+if (mask.enabled != 0) {
+  var common = geometry.position;
+  if (mask.maskByInstance != 0) {
+    common = vec4<f32>(project_position_vec3_f64(geometry.worldPosition, vec3<f32>(0.0)), 1.0);
+  }
+  let flatPosition = project_common_position_to_flat(common);
+  let coords = (flatPosition - mask.bounds.xy) / (mask.bounds.zw - mask.bounds.xy);
+  mask_texCoords = vec2<f32>(coords.x, 1.0 - coords.y);
+}
+`,
+    'wgsl:fs:DECKGL_FILTER_COLOR': /* wgsl */ `
+if (mask.enabled != 0) {
+  let maskColor = textureSampleLevel(mask_texture, mask_textureSampler, mask_texCoords, 0.0);
+  let inside = maskColor[u32(mask.channel)] < 0.5;
+  if (inside == (mask.inverted != 0)) { discard; }
+}
+`
+  }
+};
