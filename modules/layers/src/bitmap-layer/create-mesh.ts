@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {lerp} from '@math.gl/core';
-import {subdivideTriangleMesh} from '@math.gl/polygon';
+import {subdivideTriangleMesh} from '@math.gl/geometry';
 
 const DEFAULT_INDICES = new Uint32Array([0, 2, 1, 0, 3, 2]);
 const DEFAULT_TEX_COORDS = new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]);
