@@ -26,8 +26,9 @@ alive while a layer uses them, and release them after the layer is done.
 
 - `GPUPathLayer` takes variable-length `paths`, optional `colors` and `widths`, and
   optional per-vertex `timestamps`. To close a path, repeat its first vertex. Stroke
-  width defaults to pixels and supports scaling and pixel clamps. Strokes use butt
-  caps and clamped miter joins.
+  width defaults to pixels and supports scaling and pixel clamps. Use
+  `jointRounded`, `capRounded`, and `antialiasing` to control stroke coverage.
+  Set `billboard: false` to extrude in the path plane.
 - `GPUSolidPolygonLayer` takes tessellated `positions`, per-vertex feature IDs in
   `rowIndices`, triangle `indices`, and optional `fillColors`. The index buffer needs
   index usage. Tessellate holes before uploading the mesh.
@@ -36,6 +37,5 @@ alive while a layer uses them, and release them after the layer is done.
   per outline row. Deck picking then returns the same index for the fill and its
   outlines.
 
-These proposals cover WebGPU strokes and flat fills. Standard PathLayer's rounded
-joins and caps, antialiasing, and non-billboard rendering are outside this scope,
-as are extrusion, wireframe, and extension parity.
+These proposals cover WebGPU strokes and flat fills. Extrusion, wireframe, and
+extension parity are outside this scope.
