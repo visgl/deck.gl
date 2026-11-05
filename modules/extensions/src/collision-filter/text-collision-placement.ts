@@ -12,6 +12,8 @@ type Candidate = {
   priority: number;
   /** Projected corners, or null for an axis-aligned rectangle given by its bounds */
   polygon: number[] | null;
+  /** The drawn parts of a label that an extension such as ClipExtension hides in part */
+  parts: number[][] | null;
   axisAligned: boolean;
   minX: number;
   minY: number;
@@ -28,6 +30,7 @@ type Candidate = {
 // priority and picking color index.
 const CELL_SIZE = 4;
 const TEXEL_COUNT = CELL_SIZE * CELL_SIZE;
+const ALL_PARTS = (1 << TEXEL_COUNT) - 1;
 const PLACEMENT_BYTE_COUNT = 40;
 const PLACEMENT_TEXEL_COUNT = Math.ceil(PLACEMENT_BYTE_COUNT / 3);
 const PRIORITY_BYTE_OFFSET = 32;
@@ -41,15 +44,38 @@ function getTexelOffset(cellOffset: number, texel: number, rowStride: number): n
   return cellOffset + Math.floor(texel / CELL_SIZE) * rowStride + (texel % CELL_SIZE) * 4;
 }
 
-// Whether the GPU found the label visible: no part is occluded, and at least one part was drawn
-function isCellVisible(visibility: Uint8Array, cellOffset: number, rowStride: number): boolean {
-  let drawn = false;
+// Get a bit mask of the label's drawn parts, by texel. Returns 0 unless the GPU found the label
+// visible: no part is occluded, and at least one part was drawn.
+function getDrawnParts(visibility: Uint8Array, cellOffset: number, rowStride: number): number {
+  let drawnParts = 0;
   for (let texel = 0; texel < TEXEL_COUNT; texel++) {
     const offset = getTexelOffset(cellOffset, texel, rowStride);
-    if (visibility[offset] < 128) return false;
-    drawn ||= visibility[offset + 3] >= 128;
+    if (visibility[offset] < 128) return 0;
+    if (visibility[offset + 3] >= 128) drawnParts |= 1 << texel;
   }
-  return drawn;
+  return drawnParts;
+}
+
+// Get the part of the label that a texel of its cell tests. Like collision_testBounds, the parts
+// split the label 4x4 between its corners. Texel rows run bottom to top, from the label's last row
+// of parts.
+function getPartPolygon(corners: number[], texel: number): number[] {
+  const column = texel % CELL_SIZE;
+  const row = CELL_SIZE - 1 - Math.floor(texel / CELL_SIZE);
+  const polygon: number[] = [];
+  for (const [u, v] of [
+    [column, row],
+    [column + 1, row],
+    [column + 1, row + 1],
+    [column, row + 1]
+  ]) {
+    for (let axis = 0; axis < 2; axis++) {
+      const top = corners[axis] + ((corners[2 + axis] - corners[axis]) * u) / CELL_SIZE;
+      const bottom = corners[6 + axis] + ((corners[4 + axis] - corners[6 + axis]) * u) / CELL_SIZE;
+      polygon.push(top + ((bottom - top) * v) / CELL_SIZE);
+    }
+  }
+  return polygon;
 }
 
 // Copy the label's placement words. Fails if no copy of the label wrote them, or if an extension
@@ -129,15 +155,27 @@ function hasSeparatingAxis(a: number[], b: number[]): boolean {
   return false;
 }
 
+function getPolygons(candidate: Candidate): number[][] {
+  if (candidate.parts) return candidate.parts;
+  // Create the rectangles of axis-aligned labels only when a rotated label needs them.
+  const {minX, minY, maxX, maxY} = candidate;
+  candidate.polygon ||= [minX, minY, maxX, minY, maxX, maxY, minX, maxY];
+  return [candidate.polygon];
+}
+
 function overlaps(a: Candidate, b: Candidate): boolean {
   if (a.maxX <= b.minX || b.maxX <= a.minX || a.maxY <= b.minY || b.maxY <= a.minY) {
     return false;
   }
   if (a.axisAligned && b.axisAligned) return true;
-  // Create the rectangles of axis-aligned labels only when a rotated label needs them.
-  a.polygon ||= [a.minX, a.minY, a.maxX, a.minY, a.maxX, a.maxY, a.minX, a.maxY];
-  b.polygon ||= [b.minX, b.minY, b.maxX, b.minY, b.maxX, b.maxY, b.minX, b.maxY];
-  return !hasSeparatingAxis(a.polygon, b.polygon) && !hasSeparatingAxis(b.polygon, a.polygon);
+  for (const polygonA of getPolygons(a)) {
+    for (const polygonB of getPolygons(b)) {
+      if (!hasSeparatingAxis(polygonA, polygonB) && !hasSeparatingAxis(polygonB, polygonA)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /**
@@ -145,7 +183,8 @@ function overlaps(a: Candidate, b: Candidate): boolean {
  * but not always, the label drawn later. Labels that share a picking color, such as the labels of
  * two TextLayers with the same data, do not collide with each other.
  * Places the labels that the GPU found visible in their visibility cells, which hold the tests
- * against non-text geometry, using the projected corners in their placement cells. Hides the
+ * against non-text geometry, using the projected corners in their placement cells. A label that
+ * another extension hides in part is placed with the parts of it that were drawn. Hides the
  * labels that are not placed by marking their first visibility texel occluded.
  * @returns the number of visible labels
  */
@@ -167,7 +206,8 @@ export function placeTextLabels(
     const cellOffset =
       Math.floor(index / columns) * CELL_SIZE * rowStride + (index % columns) * CELL_SIZE * 4;
     // Objects without text, and labels that were not drawn or are occluded, stay hidden
-    if (!isCellVisible(visibility, cellOffset, rowStride)) continue;
+    const drawnParts = getDrawnParts(visibility, cellOffset, rowStride);
+    if (!drawnParts) continue;
     // Hide the label unless it is placed below, e.g. when it is behind the globe
     const visibilityOffset = cellOffset;
     visibility[visibilityOffset] = 0;
@@ -180,10 +220,10 @@ export function placeTextLabels(
     const y2 = getCoordinate(5, viewportHeight);
     const x3 = getCoordinate(6, viewportWidth);
     const y3 = getCoordinate(7, viewportHeight);
-    const minX = Math.min(x0, x1, x2, x3);
-    const minY = Math.min(y0, y1, y2, y3);
-    const maxX = Math.max(x0, x1, x2, x3);
-    const maxY = Math.max(y0, y1, y2, y3);
+    let minX = Math.min(x0, x1, x2, x3);
+    let minY = Math.min(y0, y1, y2, y3);
+    let maxX = Math.max(x0, x1, x2, x3);
+    let maxY = Math.max(y0, y1, y2, y3);
     // Skip empty and offscreen labels. NaN corners also fail these comparisons.
     if (
       !(
@@ -196,11 +236,36 @@ export function placeTextLabels(
       )
     )
       continue;
+    const crossesViewport = minX < 0 || minY < 0 || maxX > viewportWidth || maxY > viewportHeight;
+    const corners = [x0, y0, x1, y1, x2, y2, x3, y3];
+    let parts: number[][] | null = null;
+    if (drawnParts !== ALL_PARTS) {
+      parts = [];
+      minX = minY = Infinity;
+      maxX = maxY = -Infinity;
+      for (let texel = 0; texel < TEXEL_COUNT; texel++) {
+        if (!(drawnParts & (1 << texel))) continue;
+        let part = getPartPolygon(corners, texel);
+        if (crossesViewport) {
+          part = clipPolygon(part, viewportWidth, viewportHeight);
+          if (part.length < 6) continue;
+        }
+        parts.push(part);
+        for (let i = 0; i < part.length; i += 2) {
+          minX = Math.min(minX, part[i]);
+          minY = Math.min(minY, part[i + 1]);
+          maxX = Math.max(maxX, part[i]);
+          maxY = Math.max(maxY, part[i + 1]);
+        }
+      }
+      if (!parts.length) continue;
+    }
     const axisAligned =
-      (x0 === x3 && x1 === x2 && y0 === y1 && y2 === y3) ||
-      (x0 === x1 && x2 === x3 && y0 === y3 && y1 === y2);
-    let polygon = axisAligned ? null : [x0, y0, x1, y1, x2, y2, x3, y3];
-    if (polygon && (minX < 0 || minY < 0 || maxX > viewportWidth || maxY > viewportHeight)) {
+      !parts &&
+      ((x0 === x3 && x1 === x2 && y0 === y1 && y2 === y3) ||
+        (x0 === x1 && x2 === x3 && y0 === y3 && y1 === y2));
+    let polygon = axisAligned || parts ? null : corners;
+    if (polygon && crossesViewport) {
       polygon = clipPolygon(polygon, viewportWidth, viewportHeight);
       if (polygon.length < 6) continue;
     }
@@ -210,6 +275,7 @@ export function placeTextLabels(
       visibilityOffset,
       priority: words.getFloat32(PRIORITY_BYTE_OFFSET, true),
       polygon,
+      parts,
       axisAligned,
       minX: Math.max(0, minX),
       minY: Math.max(0, minY),

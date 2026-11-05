@@ -11,6 +11,8 @@ type Label = {
   /** Whether the GPU found the label visible */
   eligible?: boolean;
   pickingIndex?: number;
+  /** Texels of the parts that were drawn, e.g. not hidden by ClipExtension. Defaults to all. */
+  drawnTexels?: number[];
   /** Whether the placement data was written whole, partly (e.g. masked), or not at all */
   placementData?: 'whole' | 'partial' | 'none';
 };
@@ -47,7 +49,7 @@ function place(
     (texel % 4) * 4;
   for (let i = 0; i < labels.length; i++) {
     const label = labels[i];
-    for (let texel = 0; texel < 16; texel++) {
+    for (const texel of label.drawnTexels ?? Array.from({length: 16}, (_, texel) => texel)) {
       visibility[getTexelOffset(ids[i], texel) + 3] = 255;
     }
     if (label.eligible === false) visibility[getTexelOffset(ids[i], 5)] = 0;
@@ -135,6 +137,26 @@ test('text placement hides visible labels without whole placement data', () => {
       {corners: rectangle(20, 0, 100, 30), priority: 10, placementData: 'none'}
     ])
   ).toEqual([0]);
+});
+
+test('text placement uses the drawn parts of partly hidden labels', () => {
+  // Texel rows run bottom to top, so the last row of texels tests the label's first row of parts
+  const firstRow = [12, 13, 14, 15];
+  const leftHalf = [0, 1, 4, 5, 8, 9, 12, 13];
+  expect(
+    place([
+      {corners: rectangle(0, 0, 200, 40), priority: 2, drawnTexels: firstRow},
+      {corners: rectangle(0, 20, 200, 20), priority: 1}
+    ])
+  ).toEqual([0, 1]);
+  expect(
+    place([
+      {corners: rectangle(0, 0, 200, 40), priority: 2, drawnTexels: leftHalf},
+      {corners: rectangle(120, 0, 200, 40), priority: 1},
+      {corners: rectangle(20, 30, 80, 20), priority: 1},
+      {corners: rectangle(0, 100, 200, 40), priority: 1, drawnTexels: leftHalf}
+    ])
+  ).toEqual([0, 1, 3]);
 });
 
 test('text placement skips object IDs without text', () => {

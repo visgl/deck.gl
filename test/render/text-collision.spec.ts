@@ -1805,37 +1805,43 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
     // The clip bounds keep the left half of the view. The other label overlaps only the clipped part.
     const {data: binaryData, buffer} = createBinaryText([{text: 'Collision label', x: 0}]);
     const objectData = [{position: [0, 0], text: 'Collision label'}];
-    const other = new TextLayer({
-      id: 'unclipped',
-      data: [{position: [120, 0], text: 'Collision label'}],
-      getSize: 24,
-      billboard: false,
-      extensions,
-      pickable: true,
-      getCollisionPriority: 100
-    });
     try {
-      for (const {input, data, background} of [
-        {input: 'objects', data: objectData, background: false},
-        {input: 'objects', data: objectData, background: true},
-        {input: 'binary', data: binaryData, background: false}
-      ]) {
-        const layer = new TextLayer({
-          id: 'clipped',
-          data,
-          background,
-          getSize: 24,
-          billboard: false,
-          clipBounds: [-1000, -1000, 0, 1000],
-          clipByInstance: false,
-          extensions: [new CollisionFilterExtension(), new ClipExtension()],
-          pickable: true,
-          getCollisionPriority: -100
-        });
-        expect(await pickLayerIds([layer, other]), `${input}, background=${background}`).toEqual([
-          'clipped',
-          'unclipped'
-        ]);
+      for (const collisionGreedy of [false, true]) {
+        for (const clippedPriority of [-100, 100]) {
+          const other = new TextLayer({
+            id: 'unclipped',
+            data: [{position: [120, 0], text: 'Collision label'}],
+            getSize: 24,
+            billboard: false,
+            extensions,
+            collisionGreedy,
+            pickable: true,
+            getCollisionPriority: -clippedPriority
+          });
+          for (const {input, data, background} of [
+            {input: 'objects', data: objectData, background: false},
+            {input: 'objects', data: objectData, background: true},
+            {input: 'binary', data: binaryData, background: false}
+          ]) {
+            const layer = new TextLayer({
+              id: 'clipped',
+              data,
+              background,
+              getSize: 24,
+              billboard: false,
+              clipBounds: [-1000, -1000, 0, 1000],
+              clipByInstance: false,
+              extensions: [new CollisionFilterExtension(), new ClipExtension()],
+              collisionGreedy,
+              pickable: true,
+              getCollisionPriority: clippedPriority
+            });
+            expect(
+              await pickLayerIds([layer, other]),
+              `${input}, background=${background}, greedy=${collisionGreedy}, priority=${clippedPriority}`
+            ).toEqual(['clipped', 'unclipped']);
+          }
+        }
       }
     } finally {
       deck.setProps({layers: []});
