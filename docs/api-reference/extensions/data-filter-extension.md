@@ -277,7 +277,7 @@ Enable/disable the data filter. If the data filter is disabled, all objects are 
 
 #### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
 
-Only used if the `countItems` option is enabled. Called with the following arguments when the filter or data changes. On WebGPU, the callback runs asynchronously after GPU readback. Results superseded by another filter or data update, or by layer removal, are discarded:
+Only used if the `countItems` option is enabled. Called with the following arguments when the filter or data changes. Results superseded by another filter or data update, or by layer removal, are discarded:
 
 - `event` (object)
   + `id` (string) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](../core/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
