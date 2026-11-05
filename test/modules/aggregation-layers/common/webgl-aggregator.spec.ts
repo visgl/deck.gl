@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import {GPUVector, getGPUVectorData} from '@luma.gl/graph/gpu-data';
 import {getAggregatorValueReader} from '../../../../modules/aggregation-layers/src/contour-layer/value-reader';
 import type {ShaderModule} from '@luma.gl/shaders';
@@ -451,3 +452,66 @@ webglTest.each([1, 2] as const)('WebGLAggregator#GPUVector outputs (%i dimension
   aggregator.destroy();
   expect(finalBuffer.destroyed).toBe(true);
 });
+
+webglTest.each([
+  {dimensions: 1 as const, emptyEnd: 1},
+  {dimensions: 2 as const, emptyEnd: 1},
+  {dimensions: 1 as const, emptyEnd: NaN},
+  {dimensions: 2 as const, emptyEnd: Infinity}
+])(
+  'WebGLAggregator#empty draws ($dimensions dimensions, end=$emptyEnd)',
+  ({dimensions, emptyEnd}) => {
+    const gl = (device as WebGLDevice).gl;
+    // Other suites share this context; only attribute errors from this test to these draws.
+    while (gl.getError() !== gl.NO_ERROR) {}
+    const aggregator = new WebGLAggregator(device, {
+      dimensions,
+      channelCount: 2,
+      bufferLayout: [],
+      operations: ['SUM', 'SUM'],
+      vs:
+        dimensions === 1
+          ? 'void getBin(out int id) { id = 1; } void getValue(out vec2 value) { value = vec2(2.0, 5.0); }'
+          : 'void getBin(out ivec2 id) { id = ivec2(1, 0); } void getValue(out vec2 value) { value = vec2(2.0, 5.0); }'
+    });
+    try {
+      // Start empty, recover, empty populated storage, then recover with new values.
+      for (const [end, pointCount] of [
+        [emptyEnd, 3],
+        [3, 3],
+        [emptyEnd, 5],
+        [3, 7]
+      ]) {
+        const binIdRange: [number, number][] =
+          dimensions === 1
+            ? [[1, end]]
+            : [
+                [1, end],
+                [0, 1]
+              ];
+        aggregator.setProps({binIdRange, pointCount});
+        expect(gl.getError(), 'allocation errors').toBe(gl.NO_ERROR);
+        aggregator.update();
+        aggregator.preDraw();
+        expect(gl.getError(), 'draw errors').toBe(gl.NO_ERROR);
+        const count = end === 3 ? 2 : 0;
+        expect(aggregator.binCount).toBe(count);
+        expect(aggregator.getBins()!.length).toBe(count);
+        expect(aggregator.getResult(0)!.length).toBe(count);
+        expect(aggregator.getResult(1)!.length).toBe(count);
+        expect(binaryAttributeToArray(aggregator.getBins(), count)).toEqual(
+          count ? (dimensions === 1 ? [1, 2] : [1, 0, 2, 0]) : []
+        );
+        expect(binaryAttributeToArray(aggregator.getResult(0), count)).toEqual(
+          count ? [pointCount * 2, NaN] : []
+        );
+        expect(binaryAttributeToArray(aggregator.getResult(1), count)).toEqual(
+          count ? [pointCount * 5, NaN] : []
+        );
+        expect(gl.getError(), `GPU errors after range end ${end}`).toBe(gl.NO_ERROR);
+      }
+    } finally {
+      aggregator.destroy();
+    }
+  }
+);
