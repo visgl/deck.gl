@@ -5,10 +5,7 @@
 import {Deck, OrbitView, OrthographicView, type PickingInfo} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {StoragePathLayer} from '@deck.gl/proposals/layers/path-layer';
-import {
-  StoragePolygonLayer,
-  type StoragePolygonLayerProps
-} from '@deck.gl/proposals/layers/polygon-layer';
+import {StoragePolygonLayer} from '@deck.gl/proposals/layers/polygon-layer';
 import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, type VertexList} from '@luma.gl/graph/gpu-data';
@@ -70,7 +67,7 @@ test('GPU polygon outline rows can resolve to the fill feature ID', () => {
   const polygon = new StoragePolygonLayer({
     id: 'polygon',
     pathFeatureIds: [0, 0, 1]
-  } as StoragePolygonLayerProps);
+  } as never);
   const outline = new StoragePathLayer({id: 'polygon-stroke'} as never);
   const info = {index: 1} as PickingInfo;
   expect(polygon.getPickingInfo({info, sourceLayer: outline, mode: 'query'}).index).toBe(0);

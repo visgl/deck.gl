@@ -20,7 +20,6 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {Buffer, type RenderPass, type ShaderLayout} from '@luma.gl/core';
-import type {Model} from '@luma.gl/engine';
 import type {GPUVector, VertexList} from '@luma.gl/graph/gpu-data';
 import {PathStorageModel} from '@luma.gl/engine/models';
 import {
@@ -94,7 +93,7 @@ export class StoragePathLayer extends CompositeLayer<StoragePathLayerProps> {
   }
 
   /** Returns the active renderer's models. */
-  override getModels(): Model[] {
+  override getModels() {
     return this.getSubLayers().flatMap(layer => layer.getModels());
   }
 }
@@ -270,7 +269,7 @@ class PreparedPathLayer extends Layer<PreparedPathLayerProps> {
     }
   }
 
-  override getModels(): Model[] {
+  override getModels() {
     const model = (this.state as StoragePathLayerState | undefined)?.model;
     return model ? [model] : [];
   }
