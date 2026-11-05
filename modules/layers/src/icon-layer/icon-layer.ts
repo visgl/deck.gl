@@ -345,7 +345,6 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       }
     } else if (
       changeFlags.dataChanged ||
-      props.getIcon !== oldProps.getIcon ||
       props.iconAtlas !== oldProps.iconAtlas ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
@@ -432,9 +431,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           ...changeFlags,
           dataChanged:
             changeFlags.dataChanged ||
-            (this.state.iconDefinitionsDirty ||
-            props.iconMapping !== oldProps.iconMapping ||
-            props.getIcon !== oldProps.getIcon
+            (this.state.iconDefinitionsDirty || props.iconMapping !== oldProps.iconMapping
               ? 'icon definitions changed'
               : false)
         }
