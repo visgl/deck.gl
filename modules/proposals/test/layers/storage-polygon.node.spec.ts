@@ -16,7 +16,13 @@ function pendingMesh() {
     finish = resolve;
   });
   const destroy = vi.fn();
-  return {result, destroy, finish: () => finish({destroy} as unknown as Mesh)};
+  const mesh = {
+    destroy() {
+      expect(this).toBe(mesh);
+      destroy();
+    }
+  };
+  return {result, destroy, finish: () => finish(mesh as unknown as Mesh)};
 }
 
 test('polygon preparation releases stale, replaced, and finalized meshes', async () => {

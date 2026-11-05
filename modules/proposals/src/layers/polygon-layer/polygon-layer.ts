@@ -128,8 +128,8 @@ export class StoragePolygonLayer extends CompositeLayer<StoragePolygonLayerProps
         prepared.destroy();
         return;
       }
-      const {positions, rowIndices, indices, destroy} = prepared;
-      this.replaceMesh({positions, rowIndices, indices}, destroy);
+      const {positions, rowIndices, indices} = prepared;
+      this.replaceMesh({positions, rowIndices, indices}, () => prepared.destroy());
     } catch (error) {
       if (this.state.request === request) {
         this.getCurrentLayer()?.raiseError(
