@@ -15,6 +15,15 @@ export function getAggregatorValueReader(opts: {
   channel: 0 | 1 | 2;
 }): ValueReader | null {
   const {aggregator, binIdRange, channel} = opts;
+  // Empty outputs may retain storage. Invalid ranges must never reach contour iteration.
+  if (
+    aggregator.binCount === 0 ||
+    binIdRange.some(
+      ([start, end]) => !Number.isFinite(start) || !Number.isFinite(end) || end <= start
+    )
+  ) {
+    return null;
+  }
 
   if (aggregator instanceof WebGLAggregator) {
     const attribute = getAggregationAttribute(aggregator.getResult(channel));

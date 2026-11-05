@@ -508,6 +508,24 @@ webglTest.each([
         expect(binaryAttributeToArray(aggregator.getResult(1), count)).toEqual(
           count ? [pointCount * 5, NaN] : []
         );
+        if (dimensions === 2) {
+          const reader = getAggregatorValueReader({aggregator, binIdRange, channel: 1});
+          if (count) {
+            expect(reader!(1, 0)).toBe(pointCount * 5);
+            expect(
+              getAggregatorValueReader({
+                aggregator,
+                binIdRange: [
+                  [1, Infinity],
+                  [0, 1]
+                ],
+                channel: 1
+              })
+            ).toBeNull();
+          } else {
+            expect(reader).toBeNull();
+          }
+        }
         expect(gl.getError(), `GPU errors after range end ${end}`).toBe(gl.NO_ERROR);
       }
     } finally {
