@@ -186,6 +186,7 @@ The geometry to render for each data object. One of:
 
 - An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
 - A luma.gl [Geometry](https://github.com/visgl/luma.gl/blob/8.5-release/modules/engine/docs/api-reference/geometry.md) instance
+- A luma.gl `GPUVectorGeometry` with shader inputs named `positions`, `normals`, `colors`, and `texCoords`. Works with Arrow columns and ordinary accessors.
 - An object containing the following fields:
   + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
   + `normals` (Float32Array) - 3d normals
@@ -305,6 +306,27 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
+
+### Arrow Columns
+
+#### `positions` (Arrow Vector, optional)
+
+Numeric XY or XYZ fixed-size lists for instance anchors. Overrides `getPosition`.
+
+#### `colors` (Arrow Vector, optional)
+
+RGB or RGBA fixed-size lists for instance colors. Overrides `getColor`.
+
+The `mesh` prop supplies the shared geometry. Transform accessors can use
+row data or constant values. See
+[Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input
+requirements and limitations.
+
+## Remarks
+
+- GPU mesh vertex attributes and indices must each fit in one chunk.
+  Keep the geometry alive while the layer uses it and release it yourself.
+- With `_instanced: false`, GPU-only meshes do not report bounds.
 
 ## Source
 
