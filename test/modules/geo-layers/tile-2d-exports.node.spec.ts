@@ -77,6 +77,7 @@ it('marks compatibility aliases deprecated in the TypeScript language service', 
   };
   const host: ts.LanguageServiceHost = {
     ...ts.sys,
+    useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
     getCompilationSettings: () => options,
     getScriptFileNames: () => [...files.keys()],
     getScriptVersion: () => '0',
