@@ -53,7 +53,7 @@ describe('Tileset2D compatibility and independent consumers', () => {
         view.update(viewport(5, longitude));
       }
       const stats = vi.spyOn(tileset as any, '_updateStats');
-      const bytes = vi.spyOn(tileset as any, '_getCacheByteSize');
+      const bytes = vi.spyOn(tileset as any, '_updateTileByteSize');
       tileset.setOptions({maxCacheSize: 1});
       view.update(viewport(5, 120));
       expect(stats.mock.calls.length).toBeLessThanOrEqual(2);
@@ -62,6 +62,30 @@ describe('Tileset2D compatibility and independent consumers', () => {
       expect(tileset.stats.get('Tiles In Cache').count).toBe(tileset.tiles.length);
       expect(tileset.cacheByteSize).toBe(tileset.tiles.length * 16);
     } finally {
+      view.finalize();
+      tileset.finalize();
+    }
+  });
+
+  it('notifies stationary consumers of reloads and counts replacement bytes', async () => {
+    const getTileData = vi.fn(async () => ({byteLength: 16}));
+    const tileset = new Tileset2D({getTileData});
+    const view = new Tile2DView(tileset);
+    const currentViewport = viewport();
+    const onUpdate = vi.fn(() => view.update(currentViewport));
+    const unsubscribe = tileset.subscribe({onUpdate});
+    try {
+      view.update(currentViewport);
+      await vi.waitFor(() => expect(view.isLoaded).toBe(true));
+      const tileCount = getTileData.mock.calls.length;
+      expect(tileset.cacheByteSize).toBe(tileCount * 16);
+      getTileData.mockResolvedValue({byteLength: 32});
+      tileset.reloadAll();
+      expect(onUpdate).toHaveBeenCalledOnce();
+      await vi.waitFor(() => expect(tileset.cacheByteSize).toBe(tileCount * 32));
+      expect(getTileData).toHaveBeenCalledTimes(tileCount * 2);
+    } finally {
+      unsubscribe();
       view.finalize();
       tileset.finalize();
     }

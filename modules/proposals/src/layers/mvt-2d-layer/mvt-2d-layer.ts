@@ -184,8 +184,8 @@ export class MVT2DLayer extends Tile2DLayer<
       ...props,
       autoHighlight: false,
       data: geographic ? getMVTDataInWGS84(props.data, props.tile.index) : props.data,
-      modelMatrix: geographic ? new Matrix4() : new Matrix4().scale([scale, -scale, 1]),
-      coordinateOrigin: geographic ? [0, 0, 0] : [scale * x, WORLD_SIZE - scale * y, 0],
+      modelMatrix: geographic ? new Matrix4() : new Matrix4().scale([scale, scale, 1]),
+      coordinateOrigin: geographic ? [0, 0, 0] : [scale * x, scale * y, 0],
       coordinateSystem: geographic ? 'lnglat' : 'OSMTile512',
       extensions:
         geographic &&

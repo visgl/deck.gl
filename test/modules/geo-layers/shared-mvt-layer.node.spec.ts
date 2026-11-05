@@ -126,7 +126,7 @@ describe('MVT2DLayer', () => {
         } else {
           expect(captured.coordinateSystem).toBe('OSMTile512');
           expect(captured.data).toBe(DATA);
-          expect(captured.modelMatrix.transformAsPoint([0.5, 0.5, 0])).toEqual([256, -256, 0]);
+          expect(captured.modelMatrix.transformAsPoint([0.5, 0.5, 0])).toEqual([256, 256, 0]);
         }
       }
       expect(fetch).toHaveBeenCalledTimes(1);

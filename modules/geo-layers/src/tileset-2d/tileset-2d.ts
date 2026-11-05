@@ -199,6 +199,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Estimated bytes retained in cached content. */
   private _cacheByteSize: number;
+  private _tileByteSizes = new WeakMap<Tile2DHeader<DataT>, number>();
   /** Last viewport used by the compatibility default consumer. */
   private _viewport: Viewport | null;
   /** Elevation range used by the default consumer. */
@@ -374,10 +375,9 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
         if (this._selectedTiles.includes(tile)) {
           tile.setNeedsReload();
         } else {
-          this._cache.delete(id);
+          this._removeCachedTile(id, tile);
         }
       }
-      this._cacheByteSize = this._getCacheByteSize();
       this._updateStats();
       return;
     }
@@ -386,7 +386,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     for (const id of this._cache.keys()) {
       const tile = this._cache.get(id) as Tile2DHeader;
       if (!selectedTiles.has(tile) && !visibleTiles.has(tile)) {
-        this._cache.delete(id);
+        this._removeCachedTile(id, tile);
         tile.abort();
         this._handleTileUnload(tile);
         this._dirty = true;
@@ -394,9 +394,9 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
         tile.setNeedsReload();
       }
     }
-    this._cacheByteSize = this._getCacheByteSize();
     this.prepareTiles();
     this._updateStats();
+    this._notifyUpdate();
   }
 
   /**
@@ -833,10 +833,8 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     if (overflown) {
       for (const [id, tile] of this._cache) {
         if (!visibleTiles.has(tile) && !selectedTiles.has(tile)) {
-          this._cache.delete(id);
+          this._removeCachedTile(id, tile);
           tile.abort();
-          const byteLength = (tile.content as any)?.byteLength;
-          this._cacheByteSize -= Number.isFinite(byteLength) ? byteLength : 0;
           this._handleTileUnload(tile);
         }
         if (this._cache.size <= maxCacheSize && this._cacheByteSize <= maxCacheByteSize) {
@@ -1078,7 +1076,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       return;
     }
     this.opts.onTileLoad?.(tile);
-    this._cacheByteSize = this._getCacheByteSize();
+    this._updateTileByteSize(tile);
     if (this._consumers.size || this.opts.maxCacheByteSize !== null) this._resizeCache();
     for (const listener of this._listeners) {
       listener.onTileLoad?.(tile);
@@ -1088,6 +1086,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
 
   /** Handles tile load failures. */
   private _handleTileError(error: any, tile: Tile2DHeader<DataT>): void {
+    if (this._cache.get(tile.id) === tile) this._updateTileByteSize(tile);
     this.opts.onTileError?.(error, tile);
     for (const listener of this._listeners) {
       listener.onTileError?.(error, tile);
@@ -1175,14 +1174,18 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
     this._cache.set(id, tile);
   }
 
-  /** Computes the total byte size of all cached tile content. */
-  private _getCacheByteSize(): number {
-    let byteLength = 0;
-    for (const tile of this._cache.values()) {
-      byteLength += Number.isFinite((tile.content as any)?.byteLength)
-        ? (tile.content as any).byteLength
-        : 0;
-    }
-    return byteLength;
+  /** Records the change in content size for a cached tile. */
+  private _updateTileByteSize(tile: Tile2DHeader<DataT>): void {
+    const byteLength = (tile.content as any)?.byteLength;
+    const size = Number.isFinite(byteLength) ? byteLength : 0;
+    this._cacheByteSize += size - (this._tileByteSizes.get(tile) ?? 0);
+    this._tileByteSizes.set(tile, size);
+  }
+
+  /** Removes the entry and subtracts the bytes previously counted for it. */
+  private _removeCachedTile(id: string, tile: Tile2DHeader<DataT>): void {
+    this._cache.delete(id);
+    this._cacheByteSize -= this._tileByteSizes.get(tile) ?? 0;
+    this._tileByteSizes.delete(tile);
   }
 }

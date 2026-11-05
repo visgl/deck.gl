@@ -55,9 +55,11 @@ new Deck({
 
 ## Installation
 
+Run these commands from the root of a deck.gl source checkout.
+
 ```bash
-npm install deck.gl
-# or
+yarn
+yarn build
 yarn build-private
 ```
 
