@@ -4,7 +4,7 @@
 
 import type {Device, RenderPass} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/engine';
-import type {ShaderAssembler, ShaderModule} from '@luma.gl/shaders';
+import type {ShaderAssembler, ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {getShaderAssembler, layerUniforms} from '../shaderlib/index';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
@@ -33,6 +33,8 @@ export type LayerContext = {
   device: Device;
   shaderAssembler: ShaderAssembler;
   defaultShaderModules: ShaderModule[];
+  /** Effect plugins applied to all layer models alongside default shader modules. */
+  defaultShaderPlugins: ShaderPlugin[];
   renderPass: RenderPass;
   stats: Stats;
   viewport: Viewport;
@@ -110,6 +112,7 @@ export default class LayerManager {
       deck,
       shaderAssembler: getShaderAssembler(device?.info?.shadingLanguage || 'glsl'),
       defaultShaderModules: [layerUniforms],
+      defaultShaderPlugins: [],
       renderPass: undefined!,
       stats: stats || new Stats({id: 'deck.gl'}),
       viewport: viewport || null,
@@ -315,6 +318,25 @@ export default class LayerManager {
     const i = defaultShaderModules.findIndex(m => m.name === module.name);
     if (i >= 0) {
       defaultShaderModules.splice(i, 1);
+      this._defaultShaderModulesChanged = true;
+    }
+  }
+
+  /** Register a default plugin and its uniform module for all layers. */
+  addDefaultShaderPlugin(plugin: ShaderPlugin) {
+    if (!this.context.defaultShaderPlugins.some(p => p.name === plugin.name)) {
+      this.context.defaultShaderPlugins.push(plugin);
+      if (plugin.module) this.addDefaultShaderModule(plugin.module);
+      this._defaultShaderModulesChanged = true;
+    }
+  }
+
+  /** Deregister a default plugin and rebuild layer models. */
+  removeDefaultShaderPlugin(plugin: ShaderPlugin) {
+    const index = this.context.defaultShaderPlugins.findIndex(p => p.name === plugin.name);
+    if (index >= 0) {
+      this.context.defaultShaderPlugins.splice(index, 1);
+      if (plugin.module) this.removeDefaultShaderModule(plugin.module);
       this._defaultShaderModulesChanged = true;
     }
   }

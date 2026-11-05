@@ -51,8 +51,8 @@ const testCases = [
     goldenImage: './test/render/golden-images/scatterplot-lnglat.png'
   },
   {
+    // Golden: Orange circles match the default Mercator projection.
     name: 'scatterplot-lnglat-64',
-    skip: ['webgpu'],
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -163,7 +163,6 @@ const testCases = [
   },
   {
     name: 'scatterplot-dash',
-    skip: ['webgpu'],
     viewState: {
       target: [0, 0, 0],
       zoom: 0
