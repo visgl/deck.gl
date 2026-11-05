@@ -214,7 +214,7 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       this.state.subdivisionStep !== subdivisionStep ||
       props._projectionTolerance !== oldProps._projectionTolerance ||
       props.coordinateSystem !== oldProps.coordinateSystem ||
-      (this.context.viewport.preproject && props.modelMatrix !== oldProps.modelMatrix)
+      (this.state.preproject && props.modelMatrix !== oldProps.modelMatrix)
     ) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
