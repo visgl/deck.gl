@@ -11,6 +11,7 @@ import {
   LayerExtension,
   UpdateParameters,
   CompositeLayerProps,
+  DefaultProps,
   Attribute,
   AttributeManager,
   Viewport,
@@ -18,18 +19,67 @@ import {
 } from '@deck.gl/core';
 import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import {Aggregator} from './aggregator/aggregator';
-import {WebGLAggregator} from './aggregator/gpu-aggregator/webgl-aggregator';
+import type {Aggregator, AggregatorFactory} from './aggregator/aggregator';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
+  /** Factory for a layer-owned aggregator. Omit to retain CPU/WebGL selection. */
+  aggregator?: AggregatorFactory | null;
+  /** Borrowed GPU position column; requires a custom aggregator and bypasses accessors. */
+  positions?: GPUVector | null;
+  /** Borrowed scalar columns in channel order; required with positions. */
+  weights?: readonly GPUVector[] | null;
+  /** Bounds in input coordinates for GPU positions used by world-space binning. */
+  dataBounds?: [number[], number[]] | null;
 };
 
 export default abstract class AggregationLayer<
   DataT,
   ExtraPropsT extends {} = {}
-> extends CompositeLayer<Required<AggregationLayer<DataT>> & ExtraPropsT> {
+> extends CompositeLayer<Required<AggregationLayerProps<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
+  static defaultProps: DefaultProps<AggregationLayerProps<unknown>> = {
+    aggregator: {type: 'function', value: null, optional: true, compare: true},
+    positions: {type: 'object', value: null, optional: true},
+    weights: {type: 'array', value: null, optional: true, compare: 1},
+    dataBounds: {type: 'array', value: null, optional: true, compare: 2}
+  };
+
+  /** Uses the column row count when positions bypass accessor generation. */
+  override getNumInstances(): number {
+    return this.props.positions && !Number.isFinite(this.props.numInstances)
+      ? this.props.positions.length
+      : super.getNumInstances();
+  }
+
+  /** GPU columns are forwarded directly to the aggregator, like ArcLayer's column path. */
+  protected override _updateAttributes(): void {
+    if (!this.props.positions) {
+      super._updateAttributes();
+      return;
+    }
+    const {positions, weights, aggregator: factory, extensions} = this.props;
+    if (!factory || extensions.length || !weights) {
+      throw new Error(
+        'GPU aggregation columns require a custom aggregator, weights, and no extensions'
+      );
+    }
+    if (
+      this.getNumInstances() > positions.length ||
+      weights.length !== this.getAggregationChannelCount() ||
+      weights.some(weight => weight.length !== positions.length)
+    ) {
+      throw new Error('GPU aggregation weights must match the channels and position length');
+    }
+    this.state.aggregator.setProps({positions, weights});
+    this.state.aggregator.update();
+  }
+
+  /** Number of weight columns consumed by this layer. */
+  protected getAggregationChannelCount(): number {
+    return 1;
+  }
 
   state!: {
     aggregatorType: string;
@@ -39,7 +89,7 @@ export default abstract class AggregationLayer<
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
   setShaderModuleProps(props: Record<string, any>): void {
     super.setShaderModuleProps(props);
-    if (this.state?.aggregator instanceof WebGLAggregator) {
+    if (this.state?.aggregator) {
       this.state.aggregator.setProps({shaderModuleProps: props});
     }
   }
@@ -83,7 +133,7 @@ export default abstract class AggregationLayer<
 
   /** Bound transformed Cartesian geometry using its bounding-box corners, without rewriting positions. */
   getBounds(): [number[], number[]] | null {
-    const bounds = super.getBounds();
+    const bounds = this.props.dataBounds || super.getBounds();
     const {viewport} = this.context;
     if (!bounds || !project.isCustomProjection(viewport) || this.state.preproject) return bounds;
     // Both backends need bounds in packed coordinates, before viewport projection.
@@ -106,18 +156,37 @@ export default abstract class AggregationLayer<
   // returns true if aggregator is changed
   updateState(params: UpdateParameters<this>): boolean {
     super.updateState(params);
+    if (this.props.weights && !this.props.positions) {
+      throw new Error('GPU aggregation weights require positions');
+    }
+    if (
+      params.props.positions !== params.oldProps.positions ||
+      params.props.weights !== params.oldProps.weights
+    ) {
+      this.state.aggregator?.setNeedsUpdate();
+      if (!params.props.positions) this.getAttributeManager()?.invalidateAll();
+    }
 
-    const aggregatorType = this.getAggregatorType();
-    if (params.changeFlags.extensionsChanged || this.state.aggregatorType !== aggregatorType) {
+    const aggregatorType = this.props.aggregator ? 'custom' : this.getAggregatorType();
+    if (
+      params.changeFlags.extensionsChanged ||
+      this.state.aggregatorType !== aggregatorType ||
+      params.props.aggregator !== params.oldProps.aggregator
+    ) {
       this.state.aggregator?.destroy();
-      const aggregator = this.createAggregator(aggregatorType);
+      const createDefaultAggregator = () => this.createAggregator(this.getAggregatorType());
+      const aggregator = this.props.aggregator
+        ? this.props.aggregator({device: this.context.device, createDefaultAggregator})
+        : createDefaultAggregator();
       aggregator.setProps({
-        attributes: this.getAttributeManager()?.attributes
+        attributes: this.getAttributeManager()?.attributes,
+        positions: this.props.positions,
+        weights: this.props.weights
       });
       this.setState({aggregator, aggregatorType});
       return true;
     }
-    if (this.state.aggregator instanceof WebGLAggregator) {
+    if (this.state.aggregator) {
       // Extension uniforms affect binning even when no input attributes change.
       for (const extension of params.props.extensions) {
         const {defaultProps} = extension.constructor as typeof LayerExtension;
@@ -154,19 +223,21 @@ export default abstract class AggregationLayer<
   // Override Layer.finalizeState to dispose the Aggregator instance
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
-    this.state.aggregator.destroy();
+    this.state.aggregator?.destroy();
   }
 
   // Override Layer.updateAttributes to update the aggregator
   protected updateAttributes(changedAttributes: {[id: string]: Attribute}) {
     const {aggregator} = this.state;
     aggregator.setProps({
-      attributes: changedAttributes
+      attributes: changedAttributes,
+      positions: null,
+      weights: null
     });
 
     for (const id in changedAttributes) {
       this.onAttributeChange(id);
-      if (aggregator instanceof WebGLAggregator) {
+      if (aggregator) {
         const {accessor} = changedAttributes[id].settings;
         const accessors = Array.isArray(accessor) ? accessor : [accessor];
         // Extension inputs can affect every bin, beyond the layer's position/weight inputs.
@@ -229,7 +300,6 @@ export default abstract class AggregationLayer<
         }
       };
     }
-    // @ts-expect-error only used by GPU aggregators
     aggregator.setProps({shaderModuleProps});
     aggregator.preDraw();
   }

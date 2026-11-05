@@ -166,3 +166,67 @@ The number of bins in the aggregated result.
 ## Source
 
 [modules/aggregation-layers/src/common/aggregator/aggregator.ts](https://github.com/visgl/deck.gl/tree/master/modules/aggregation-layers/src/common/aggregator/aggregator.ts)
+
+## Supplying an aggregator to a layer
+
+`ScreenGridLayer`, `GridLayer`, `HexagonLayer`, and `ContourLayer` accept an optional
+`aggregator` factory. Omitting it preserves the existing `gpuAggregation` selection and
+CPU fallbacks. The factory receives `{device, createDefaultAggregator}` and returns an
+`Aggregator`. The layer owns that instance: it destroys it when the factory changes,
+when extensions change, or when the layer is finalized. Keep the factory reference stable
+between updates, and return a fresh instance each time it is called.
+
+```typescript
+new ScreenGridLayer({
+  data,
+  aggregator: ({createDefaultAggregator}) => createDefaultAggregator()
+});
+```
+
+Factories can supply a custom implementation without subclassing the layer. Implementations
+receive `binIdRange`, `binOptions`, operations, and projection/extension settings through
+`setProps`. Accessor inputs remain available as `Attribute` objects; `Attribute.getGPUVector()`
+exposes their typed GPU columns. Allocate outputs in `update()` before sublayers are built,
+and encode GPU work in `preDraw()` before those sublayers draw. Notify `onUpdate` when a
+channel's output changes, following the existing aggregator lifecycle.
+
+### GPU column inputs
+
+The optional `positions` and `weights` props pass borrowed luma `GPUVector` columns directly
+to a custom aggregator, bypassing accessor generation. `positions.length` determines the
+input count unless `numInstances` explicitly selects a shorter prefix. `weights` contains one column for ScreenGridLayer/ContourLayer, or two columns
+(color then elevation) for GridLayer/HexagonLayer. Each weight column must have the same
+length as positions. The custom aggregator defines supported input formats and chunking.
+GridLayer, HexagonLayer, and ContourLayer also require `dataBounds: [min, max]` in input
+coordinates because GPU-only positions cannot supply CPU bounds.
+
+```typescript
+new ScreenGridLayer({
+  positions: positionVector,
+  weights: [weightVector],
+  aggregator: createMyAggregator,
+  colorDomain: [0, 100]
+});
+```
+
+Input columns remain caller-owned. Replace column references when their data changes, or
+explicitly invalidate the aggregator when updating storage in place. This preparatory path
+requires a custom aggregator and does not support layer extensions or accessor fallbacks.
+The built-in CPU/WebGL aggregators continue to consume accessor/binary attributes.
+
+### GPU column results
+
+`getBins()` and `getResult(channel)` may return either the existing `BinaryAttribute` or a
+borrowed `GPUVector`. Cell rendering uses the same AttributeManager/`GPUVectorModel` path as
+accessor-backed layers, including ArcLayer. The vector adapter preserves offsets and strides
+without uploading, copying, or reading the buffer. Current result support requires one
+concrete buffer chunk: `float32x2` bin IDs and `float32` channel values. Result vectors and
+buffers remain owned by the aggregator, and must stay valid through sublayer drawing.
+
+This is an integration boundary, not a new WebGPU aggregation backend. Domains still use the
+existing CPU-facing API. Supplying explicit color/elevation domains and omitting domain callbacks avoids automatic
+domain readback for custom aggregators. Explicit domain callbacks still receive the actual
+aggregation domain through `getResultDomain()`. Percentile/ordinal processing on WebGPU buffers requires future GPU scale operations.
+Picking still uses `getBin()`. ContourLayer still requires CPU-readable results for marching
+squares; returning GPU vectors alone does not enable GPU contour generation. HeatmapLayer has
+its own aggregation pipeline and is unaffected.

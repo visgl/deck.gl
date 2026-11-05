@@ -3,6 +3,8 @@
 // Copyright (c) vis.gl contributors
 
 import type {BinaryAttribute} from '@deck.gl/core';
+import type {AggregationResult} from '../aggregator/aggregator';
+import {getAggregationAttribute} from '../aggregator/aggregation-result';
 import type {ScaleType} from '../types';
 
 type ScaleProps = {
@@ -36,11 +38,11 @@ export class AttributeWithScale {
   /** Valid domain if lower/upper percentile are defined */
   cutoff: [number, number] | null = null;
 
-  constructor(input: BinaryAttribute, inputLength: number) {
-    this.input = input;
+  constructor(input: AggregationResult, inputLength: number) {
+    this.input = getAggregationAttribute(input)!;
     this.inputLength = inputLength;
     // No processing is needed with the default scale
-    this.attribute = input;
+    this.attribute = this.input;
   }
 
   private getScalePercentile() {
@@ -184,7 +186,13 @@ function getAttributeValue(attribute: BinaryAttribute, length: number): Float32A
   const elementOffset = (attribute.offset ?? 0) / 4;
   let value = attribute.value as Float32Array;
   if (!value) {
-    const bytes = attribute.buffer?.readSyncWebGL(0, elementStride * 4 * length);
+    if (attribute.buffer?.device.type === 'webgpu') {
+      throw new Error('GPU aggregation percentile and ordinal scales require GPU scale operations');
+    }
+    const bytes = attribute.buffer?.readSyncWebGL(
+      0,
+      length ? (elementOffset + (length - 1) * elementStride + 1) * 4 : 0
+    );
     if (bytes) {
       value = new Float32Array(bytes.buffer);
       attribute.value = value;
@@ -192,7 +200,7 @@ function getAttributeValue(attribute: BinaryAttribute, length: number): Float32A
   }
 
   if (elementStride === 1) {
-    return value.subarray(0, length);
+    return value.subarray(elementOffset, elementOffset + length);
   }
   const result = new Float32Array(length);
   for (let i = 0; i < length; i++) {

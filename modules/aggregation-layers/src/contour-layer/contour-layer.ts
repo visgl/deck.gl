@@ -18,8 +18,7 @@ import {
 } from '@deck.gl/core';
 import {PathLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
-import {AggregationLayerProps} from '../common/aggregation-layer';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {generateContours, Contour, ContourLine, ContourPolygon} from './contour-utils';
 import {getAggregatorValueReader} from './value-reader';
 import {getBinIdRange} from '../common/utils/bounds-utils';
@@ -206,6 +205,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       props.cellSize !== oldProps.cellSize ||
       !_deepEqual(props.gridOrigin, oldProps.gridOrigin, 1) ||
       props.aggregation !== oldProps.aggregation
@@ -214,7 +216,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
 
       aggregator.setProps({
-        // @ts-expect-error only used by GPUAggregator
         binIdRange,
         pointCount: this.getNumInstances(),
         operations: [props.aggregation],
@@ -235,6 +236,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   private _updateBinOptions() {
     const bounds = this.getBounds();
+    if (this.props.positions && !this.props.dataBounds) {
+      throw new Error('GPU aggregation positions require dataBounds for world-space binning');
+    }
     const cellSizeCommon: [number, number] = [1, 1];
     let cellOriginCommon: [number, number] = [0, 0];
     let binIdRange: [number, number][] = [
@@ -341,7 +345,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this._updateBinOptions();
         const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
         aggregator.setProps({
-          // @ts-expect-error only used by GPUAggregator
           binIdRange,
           binOptions: {
             cellSizeCommon,

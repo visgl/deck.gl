@@ -9,7 +9,6 @@ import {
   Accessor,
   Color,
   GetPickingInfoParams,
-  CompositeLayerProps,
   createIterable,
   Layer,
   Material,
@@ -22,7 +21,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
+import {getAggregationAttribute} from '../common/aggregator/aggregation-result';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
 import {AttributeWithScale} from '../common/utils/scale-utils';
@@ -73,7 +73,7 @@ const defaultProps: DefaultProps<GridLayerProps> = {
 };
 
 /** All properties supported by GridLayer. */
-export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & CompositeLayerProps;
+export type GridLayerProps<DataT = unknown> = _GridLayerProps<DataT> & AggregationLayerProps<DataT>;
 
 /** Properties added by GridLayer. */
 type _GridLayerProps<DataT> = {
@@ -286,6 +286,10 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       aggregatorViewport: Viewport;
     } & AggregationLayer<any>['state'];
 
+  protected override getAggregationChannelCount(): number {
+    return 2;
+  }
+
   getAggregatorType(): string {
     const {gpuAggregation, gridAggregator, getColorValue, getElevationValue} = this.props;
     if (gpuAggregation && (gridAggregator || getColorValue || getElevationValue)) {
@@ -389,6 +393,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       props.cellSize !== oldProps.cellSize ||
       props.getColorValue !== oldProps.getColorValue ||
       props.getElevationValue !== oldProps.getElevationValue ||
@@ -399,7 +406,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       const {cellSizeCommon, cellOriginCommon, binIdRange, dataAsArray} = this.state;
 
       aggregator.setProps({
-        // @ts-expect-error only used by GPUAggregator
         binIdRange,
         pointCount: this.getNumInstances(),
         operations: [props.colorAggregation, props.elevationAggregation],
@@ -443,6 +449,9 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   private _updateBinOptions() {
     const bounds = this.getBounds();
+    if (this.props.positions && !this.props.dataBounds) {
+      throw new Error('GPU aggregation positions require dataBounds for world-space binning');
+    }
     const cellSizeCommon: [number, number] = [1, 1];
     let cellOriginCommon: [number, number] = [0, 0];
     let binIdRange: [number, number][] = [
@@ -514,13 +523,17 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.setState({
         colors: new AttributeWithScale(result, aggregator.binCount)
       });
-      props.onSetColorDomain(aggregator.getResultDomain(0));
+      if (!props.aggregator || props.onSetColorDomain !== noop) {
+        props.onSetColorDomain(aggregator.getResultDomain(0));
+      }
     } else if (channel === 1) {
       const result = aggregator.getResult(1)!;
       this.setState({
         elevations: new AttributeWithScale(result, aggregator.binCount)
       });
-      props.onSetElevationDomain(aggregator.getResultDomain(1));
+      if (!props.aggregator || props.onSetElevationDomain !== noop) {
+        props.onSetElevationDomain(aggregator.getResultDomain(1));
+      }
     }
   }
 
@@ -533,7 +546,6 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         this._updateBinOptions();
         const {cellSizeCommon, cellOriginCommon, binIdRange} = this.state;
         aggregator.setProps({
-          // @ts-expect-error only used by GPUAggregator
           binIdRange,
           binOptions: {
             cellSizeCommon,
@@ -575,7 +587,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       elevationDomain
     } = this.props;
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
-    const binAttribute = aggregator.getBins();
+    const binAttribute = getAggregationAttribute(aggregator.getBins());
 
     const colors = this.state.colors?.update({
       scaleType: colorScaleType,

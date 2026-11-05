@@ -6,7 +6,6 @@ import {
   Accessor,
   Color,
   GetPickingInfoParams,
-  CompositeLayerProps,
   Layer,
   project32,
   LayersList,
@@ -16,7 +15,8 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
+import {getAggregationAttribute} from '../common/aggregator/aggregation-result';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
@@ -36,7 +36,7 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
 
 /** All properties supported by ScreenGridLayer. */
 export type ScreenGridLayerProps<DataT = unknown> = _ScreenGridLayerProps<DataT> &
-  CompositeLayerProps;
+  AggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
 export type _ScreenGridLayerProps<DataT> = {
@@ -207,6 +207,9 @@ export default class ScreenGridLayer<
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       changeFlags.updateTriggersChanged ||
       changeFlags.viewportChanged ||
       aggregation !== oldProps.aggregation ||
@@ -215,16 +218,11 @@ export default class ScreenGridLayer<
       const {width, height} = this.context.viewport;
       const {aggregator} = this.state;
 
-      if (aggregator instanceof WebGLAggregator) {
-        aggregator.setProps({
-          binIdRange: [
-            [0, Math.ceil(width / cellSizePixels)],
-            [0, Math.ceil(height / cellSizePixels)]
-          ]
-        });
-      }
-
       aggregator.setProps({
+        binIdRange: [
+          [0, Math.ceil(width / cellSizePixels)],
+          [0, Math.ceil(height / cellSizePixels)]
+        ],
         pointCount: this.getNumInstances(),
         operations: [aggregation],
         binOptions: {
@@ -259,8 +257,8 @@ export default class ScreenGridLayer<
   renderLayers(): LayersList | Layer | null {
     const {aggregator} = this.state;
     const CellLayerClass = this.getSubLayerClass('cells', ScreenGridCellLayer);
-    const binAttribute = aggregator.getBins();
-    const weightAttribute = aggregator.getResult(0);
+    const binAttribute = getAggregationAttribute(aggregator.getBins());
+    const weightAttribute = getAggregationAttribute(aggregator.getResult(0));
 
     return new CellLayerClass(
       this.props,
