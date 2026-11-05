@@ -24,17 +24,21 @@ and [focused layer entry points](../../docs/api-reference/proposals/layers.md) f
 These layers borrow prepared GPU vectors on WebGPU. Keep the vectors and their buffers
 alive while a layer uses them, and release them after the layer is done.
 
-- `GPUPathLayer` takes variable-length `paths`, optional `colors` and `widths`, and
+- `StoragePathLayer` takes variable-length `paths`, optional `colors` and `widths`, and
   optional per-vertex `timestamps`. It also accepts Arrow path columns and batch
   sources on WebGL and WebGPU through the Arrow renderer. For prepared GPU vectors,
   repeat the first vertex to close a path. Stroke
   width defaults to pixels and supports scaling and pixel clamps. Use
   `jointRounded`, `capRounded`, and `antialiasing` to control stroke coverage.
   Set `billboard: false` to extrude in the path plane.
-- `GPUSolidPolygonLayer` takes tessellated `positions`, per-vertex feature IDs in
+- `StorageSolidPolygonLayer` takes tessellated `positions`, per-vertex feature IDs in
   `rowIndices`, triangle `indices`, and optional `fillColors`. The index buffer needs
   index usage. Tessellate holes before uploading the mesh.
-- `GPUPolygonLayer` adds outline `paths`, `lineColors`, and `lineWidths`. When outline
+- `StoragePolygonLayer` accepts either prepared `polygonMeshes` (positions, triangle
+  indices, and feature row indices) or raw Arrow `polygons`. The layer tessellates raw
+  rings asynchronously and retains the previous mesh while preparing its replacement.
+  GPU ring vectors require `allowPolygonReadback` to tessellate on the CPU. Supply
+  outline `paths` separately, with optional `lineColors` and `lineWidths`. When outline
   row indexes differ from fill feature IDs, pass `pathFeatureIds` with one feature ID
   per outline row. Deck picking then returns the same index for the fill and its
   outlines.
