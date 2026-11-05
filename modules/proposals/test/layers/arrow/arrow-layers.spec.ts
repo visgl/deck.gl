@@ -38,9 +38,9 @@ import {afterAll, vi} from 'vitest';
 import {
   makeArrowLineRecordBatches,
   makeArrowLineSourceData
-} from '../../../../../examples/v10-experimental/shared/arrow/arrow-lines/arrow-line-data';
-import {makeArrowPolygonExampleData} from '../../../../../examples/v10-experimental/shared/arrow/arrow-polygons/arrow-polygon-data';
-import {makeArrowTextSource} from '../../../../../examples/v10-experimental/shared/arrow/arrow-text-2d/arrow-text-data';
+} from '../../../../../examples/proposals/shared/arrow/arrow-lines/arrow-line-data';
+import {makeArrowPolygonExampleData} from '../../../../../examples/proposals/shared/arrow/arrow-polygons/arrow-polygon-data';
+import {makeArrowTextSource} from '../../../../../examples/proposals/shared/arrow/arrow-text-2d/arrow-text-data';
 
 const TEST_VIEWPORT_WIDTH = 640;
 const TEST_VIEWPORT_HEIGHT = 480;

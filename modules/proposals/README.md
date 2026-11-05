@@ -16,8 +16,8 @@ that `proposals` is the only private package under `modules`.
 Run `yarn build-private`, `yarn test-private`, and `yarn build-private-examples`
 from the repository root to validate these prototypes and their examples.
 
-See [GPU layers](./layers-GPU-LAYERS.md), [Arrow layers](./layers-ARROW-LAYERS.md),
-and [focused layer entry points](./layers-README.md) for API details.
+See [GPU layers](../../docs/api-reference/proposals/gpu-layers.md), [Arrow layers](../../docs/api-reference/proposals/arrow-layers.md),
+and [focused layer entry points](../../docs/api-reference/proposals/layers.md) for API details.
 
 ### GPU path and polygon layers
 
