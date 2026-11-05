@@ -110,7 +110,14 @@ export default class TextBackgroundLayer<DataT = any, ExtraPropsT extends {} = {
         transition: true,
         accessor: 'getPosition'
       },
-      // Interleave six inputs to stay below WebGPU's portable vertex-buffer and storage-buffer limits.
+      /** Source row for picking colors, which binary data can set like the character layer. */
+      rowIndexes: {
+        type: 'uint32',
+        size: 1,
+        bufferGroup: 'text-background-instance-data',
+        accessor: (object, {index}) => index
+      },
+      // Interleave seven inputs to stay below WebGPU's portable vertex-buffer and storage-buffer limits.
       instanceSizes: {
         size: 1,
         transition: true,

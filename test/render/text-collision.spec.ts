@@ -1099,6 +1099,56 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'binary row indexes identify labels drawn with background attributes',
+  async () => {
+    const buffers: {destroy: () => void}[] = [];
+    // Characters set picking colors from row indexes, such as feature ids, not label indexes
+    const createData = (x: number, backgroundAttributes: boolean) => {
+      const {data, buffer} = createBinaryText([
+        {text: 'AB', x: 0},
+        {text: 'AB', x}
+      ]);
+      buffers.push(buffer);
+      const attributes = {
+        ...data.attributes,
+        rowIndexes: {value: new Uint32Array([5, 5, 9, 9]), size: 1}
+      };
+      if (backgroundAttributes) {
+        attributes.background = {
+          getPosition: {value: new Float32Array([0, 0, 0, x, 0, 0]), size: 3}
+        };
+      }
+      return {...data, attributes};
+    };
+    try {
+      for (const {backgroundAttributes, background} of [
+        {backgroundAttributes: false, background: false},
+        {backgroundAttributes: true, background: false},
+        {backgroundAttributes: true, background: true}
+      ]) {
+        for (const x of [200, 20]) {
+          const layer = new TextLayer({
+            id: 'binary-row-indexes',
+            data: createData(x, backgroundAttributes),
+            background,
+            getSize: 24,
+            extensions,
+            pickable: true
+          });
+          const name = `background attributes=${backgroundAttributes}, background=${background}, x=${x}`;
+          // Apart, both labels are visible; overlapping, one is
+          expect(await pickBinaryText(layer), name).toHaveLength(x === 20 ? 1 : 2);
+        }
+      }
+    } finally {
+      deck.setProps({layers: []});
+      await new Promise(requestAnimationFrame);
+      buffers.forEach(buffer => buffer.destroy());
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'labels shrunk by DataFilterExtension collide at their drawn size',
   async () => {
     // At full size the labels overlap; at the half size they are drawn at they are apart

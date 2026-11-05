@@ -568,6 +568,7 @@ To use `background: true` with binary data, the background attributes must be su
 - `getFillColor`: corresponds to the `getBackgroundColor` accessor
 - `getLineColor`: corresponds to the `getBorderColor` accessor
 - `getLineWidth`: corresponds to the `getBorderWidth` accessor
+- `rowIndexes`: the row of each label for picking and collisions. Defaults to the row index of the label's first character if `data.attributes.rowIndexes` is a typed array, otherwise to the label index
 
 Following the above example, additional attributes are required to render the background:
 

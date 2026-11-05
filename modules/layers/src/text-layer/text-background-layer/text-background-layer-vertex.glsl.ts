@@ -20,6 +20,7 @@ in vec2 instancePixelOffsets;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
+in float rowIndexes;
 
 out vec4 vFillColor;
 out vec4 vLineColor;
@@ -40,7 +41,7 @@ ${collision}
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
   uv = positions;
   vLineWidth = instanceLineWidths;
 

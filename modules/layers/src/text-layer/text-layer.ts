@@ -8,7 +8,7 @@ import FontAtlasManager, {
   DEFAULT_FONT_SETTINGS,
   setFontAtlasCacheLimit
 } from './font-atlas-manager';
-import {transformParagraph, getTextFromBuffer} from './utils';
+import {transformParagraph, getTextFromBuffer, getLabelRowIndexes} from './utils';
 
 import TextBackgroundLayer from './text-background-layer/text-background-layer';
 import type {ContentAlignModes} from './text-uniforms';
@@ -282,6 +282,8 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     startIndices?: number[];
     numInstances?: number;
     getText?: AccessorFunction<DataT, string>;
+    /** Row index of each label's first character, for binary background attributes. */
+    backgroundRowIndexes?: {value: Uint32Array; size: 1} | null;
   };
 
   initializeState() {
@@ -422,6 +424,11 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       getText,
       startIndices,
       numInstances,
+      backgroundRowIndexes: getLabelRowIndexes(
+        (data as any).attributes,
+        (data as any).length,
+        startIndices
+      ),
       characterSet: autoCharacterSet || characterSet
     });
   }
@@ -664,8 +671,19 @@ export default class TextLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             data:
               // @ts-ignore (2339) attribute is not defined on all data types
               data.attributes && data.attributes.background
-                ? // @ts-ignore (2339) attribute is not defined on all data types
-                  {length: data.length, attributes: data.attributes.background}
+                ? {
+                    // @ts-ignore (2339) attribute is not defined on all data types
+                    length: data.length,
+                    attributes: this.state.backgroundRowIndexes
+                      ? {
+                          // Pick and test collisions with the same rows as the characters
+                          rowIndexes: this.state.backgroundRowIndexes,
+                          // @ts-ignore (2339) attribute is not defined on all data types
+                          ...data.attributes.background
+                        }
+                      : // @ts-ignore (2339) attribute is not defined on all data types
+                        data.attributes.background
+                  }
                 : data,
             _dataDiff,
             // Maintain the same background behavior as <=8.3. Remove in v9?
