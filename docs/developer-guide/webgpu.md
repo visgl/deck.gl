@@ -85,16 +85,16 @@ The table below covers the public layer exports from the layer packages. It is d
 
 ## Extensions
 
-The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `ClipExtension` has initial WebGPU support on the primitive layers used by the default `MVTLayer` rendering path.
+The table below covers the public extensions in `@deck.gl/extensions`. Most remain WebGL-only because they rely on GLSL shader injections, GLSL-only shader modules, or extra render/picking passes that have not been ported to WebGPU. `BrushingExtension` and `ClipExtension` support standard rendering primitives on WebGPU. Custom and aggregation-specific shaders still need compatible hooks.
 
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
-| `@deck.gl/extensions` | `BrushingExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `Fp64Extension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `BrushingExtension` | ✅ | ✅ |
+| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ✅ Filtering; `countItems` requires WebGL |
+| `@deck.gl/extensions` | `Fp64Extension` | ✅ | ✅ |
+| `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `ClipExtension` | ✅ | 🚧 |
+| `@deck.gl/extensions` | `ClipExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
 
@@ -113,7 +113,7 @@ The table below covers the public effect classes exported by `@deck.gl/core`.
 | --- | --- | --- |
 | Views | 🚧 | The core `project` and `project32` shader modules have WGSL ports, so standard view/projection paths should work. |
 | Picking | ✅ | `Deck` does **async** picking on WebGPU, including hover and click picking paths. |
-| Shader hooks / layer extensions | 🚧 | `ClipExtension` has targeted support on `ScatterplotLayer`, `PathLayer`, and `SolidPolygonLayer`; general WGSL shader injection is not yet supported. |
+| Shader injection targets / layer extensions | 🚧 | `ClipExtension` uses ShaderPlugins on standard primitives; other extensions still require migration. |
 | GPU transforms | 🚧 | Underlying GPU transform APIs are evolving, but deck.gl still has transform-gated tests and no documented WebGPU support for transform-based workflows. |
 | Constant attributes | ✅  | `AttributeManager` now materializes constant attributes into full buffers on WebGPU as a compatibility path for layers that rely on constant accessors. |
 | Attribute transitions | 🚧 | Some layers disable transitions on WebGPU, and transition utilities still contain WebGL-specific buffer read paths. |

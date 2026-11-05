@@ -6,7 +6,7 @@ The `PathStyleExtension` adds dashes and offsets to the [PathLayer](../layers/pa
 
 <PathStyleExtensionDemo />
 
-> `PathStyleExtension` currently requires WebGL. Layers that use it do not render on WebGPU.
+WebGPU supports PathLayer dashes and offsets, ScatterplotLayer outline dashes, and TextLayer background dashes.
 
 ## Installation
 
@@ -135,7 +135,6 @@ Three differences cause most surprises:
 
 ## Limitations
 
-* Requires WebGL. Layers that use `PathStyleExtension` do not render on WebGPU.
 * `getDashArray` takes a single dash and gap. Dash-dot patterns are not supported.
 * `ScatterplotLayer` and `TextLayer` support `getDashArray` and `dashGapPickable` only.
 * WebGL2 guarantees 16 vertex attributes and `PathLayer` already uses 13. A dash pattern, `'path'` mode, and an offset use one each, so enabling all three leaves no room for another extension that adds attributes.
