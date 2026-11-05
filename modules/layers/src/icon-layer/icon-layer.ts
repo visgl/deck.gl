@@ -12,13 +12,21 @@ import {
   _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
-import {type Model, Geometry} from '@luma.gl/engine';
+import {
+  type Model,
+  Geometry,
+  GPUVectorModel as ArrowModel,
+  makeGPUVectorGeometry,
+  type GPUVectorGeometry
+} from '@luma.gl/engine';
 
 import {iconUniforms, IconProps} from './icon-layer-uniforms';
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
 import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
+import type {ColumnSource} from '@deck.gl/core/arrow';
+import {LayerColumns, type ColumnDefinition} from '../utils/layer-columns';
 
 import type {
   LayerProps,
@@ -37,6 +45,16 @@ import type {UnpackedIcon, IconMapping, LoadIconErrorContext} from './icon-manag
 
 type _IconLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Arrow column overriding `getPosition`. */
+  positions?: ColumnSource | null;
+  /** Arrow column overriding `getSize`. */
+  sizes?: ColumnSource | null;
+  /** Arrow column overriding `getColor`. */
+  colors?: ColumnSource | null;
+  /** Arrow column overriding `getAngle`. */
+  angles?: ColumnSource | null;
+  /** Arrow column overriding `getPixelOffset`. */
+  pixelOffsets?: ColumnSource | null;
   /** A prepacked image that contains all icons. */
   iconAtlas?: string | Texture;
   /** Icon names mapped to icon definitions, or a URL to load such mapping from a JSON file. */
@@ -112,7 +130,57 @@ export type IconLayerProps<DataT = unknown> = _IconLayerProps<DataT> & LayerProp
 
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
+const COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
+  positions: {
+    attribute: 'instancePositions',
+    accessor: 'getPosition',
+    semantic: 'position',
+    size: 3
+  },
+  sizes: {
+    attribute: 'instanceSizes',
+    accessor: 'getSize',
+    semantic: 'scalar',
+    size: 1,
+    defaultValue: 1
+  },
+  colors: {attribute: 'instanceColors', accessor: 'getColor', semantic: 'color', size: 4},
+  angles: {attribute: 'instanceAngles', accessor: 'getAngle', semantic: 'scalar', size: 1},
+  pixelOffsets: {
+    attribute: 'instancePixelOffset',
+    accessor: 'getPixelOffset',
+    semantic: 'vector',
+    size: 2
+  },
+  iconOffset: {
+    attribute: 'instanceOffsets',
+    accessor: 'iconOffset',
+    semantic: 'vector',
+    size: 2,
+    prop: false
+  },
+  iconFrame: {
+    attribute: 'instanceIconFrames',
+    accessor: 'iconFrame',
+    semantic: 'vector',
+    size: 4,
+    prop: false
+  },
+  iconMask: {
+    attribute: 'instanceColorModes',
+    accessor: 'iconMask',
+    semantic: 'vector',
+    size: 1,
+    prop: false
+  }
+};
+
 const defaultProps: DefaultProps<IconLayerProps> = {
+  positions: {type: 'object', value: null, optional: true},
+  sizes: {type: 'object', value: null, optional: true},
+  colors: {type: 'object', value: null, optional: true},
+  angles: {type: 'object', value: null, optional: true},
+  pixelOffsets: {type: 'object', value: null, optional: true},
   iconAtlas: {type: 'image', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
@@ -144,6 +212,10 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   state!: {
     model?: Model;
+    arrowModel?: ArrowModel;
+    arrowGeometry?: GPUVectorGeometry;
+    columns?: LayerColumns;
+    iconDefinitionsDirty?: boolean;
     iconManager: IconManager;
   };
 
@@ -152,7 +224,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return super.getShaders({
       vs,
       fs,
-      source: getShaderWGSL(useRowIndexes),
+      source: getShaderWGSL(useRowIndexes, Boolean(this.state?.columns)),
       defines: useRowIndexes ? {USE_ROW_INDEXES: true} : {},
       modules: [project32, color, picking, iconUniforms]
     });
@@ -166,6 +238,10 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       })
     };
 
+    this._initializeAttributes();
+  }
+
+  private _initializeAttributes(): void {
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager!.addInstanced({
@@ -265,10 +341,12 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     // prepacked iconAtlas from user
     if (prePacked) {
       if (oldProps.iconMapping !== props.iconMapping) {
-        attributeManager!.invalidate('getIcon');
+        attributeManager?.invalidate('getIcon');
       }
     } else if (
       changeFlags.dataChanged ||
+      props.getIcon !== oldProps.getIcon ||
+      props.iconAtlas !== oldProps.iconAtlas ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
     ) {
@@ -276,36 +354,147 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       iconManager.packIcons(data, getIcon as AccessorFunction<any, UnpackedIcon>);
     }
 
-    if (changeFlags.extensionsChanged) {
+    if (
+      Object.keys(COLUMN_DEFINITIONS).some(
+        name => COLUMN_DEFINITIONS[name].prop !== false && props[name]
+      )
+    ) {
+      this._updateColumns(params);
+      return;
+    }
+    const leaving = Boolean(this.state.columns);
+    if (leaving) {
+      this._destroyColumns();
+      this.internalState!.attributeManager = super._getAttributeManager();
+      this._initializeAttributes();
+    }
+    if (leaving || changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
-      attributeManager!.invalidateAll();
+      this.getAttributeManager()!.invalidateAll();
     }
   }
   /* eslint-enable max-statements, complexity */
 
+  /** Rebuilds atlas-derived columns when icon definitions or column inputs change. */
+  private _updateColumns(params: UpdateParameters<this>): void {
+    const {props, oldProps, changeFlags} = params;
+    if (props.extensions.length || Object.keys(props.transitions || {}).length) {
+      throw new Error('Icon Arrow columns do not support extensions or transitions');
+    }
+    const useRowIndexes = Boolean((props.data as any)?.attributes?.rowIndexes);
+    if (
+      !this.state.columns ||
+      useRowIndexes !== Boolean((oldProps.data as any)?.attributes?.rowIndexes)
+    ) {
+      this._destroyColumns();
+      this.state.model?.destroy();
+      this.state.model = undefined;
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      const columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'Icon', true);
+      this.state.columns = columns;
+      const geometry =
+        this.context.device.type === 'webgl'
+          ? makeGPUVectorGeometry(this.context.device, this._getGeometry())
+          : undefined;
+      this.state.arrowGeometry = geometry;
+      this.state.arrowModel = new ArrowModel(this.context.device, {
+        ...this.getShaders(),
+        id: props.id,
+        ...(geometry ? {geometry} : {topology: 'triangle-strip', vertexCount: 4}),
+        bufferLayout: columns.getBufferLayouts(useRowIndexes),
+        isInstanced: true,
+        inferDrawCount: 'instance'
+      });
+    }
+    type IconAccessor = AccessorFunction<DataT, string | UnpackedIcon>;
+    const getDefinition = (row: DataT, info: Parameters<IconAccessor>[1]) =>
+      this.getInstanceIconDef(props.getIcon(row, info));
+    const accessors = {
+      iconOffset: (row: DataT, info: Parameters<IconAccessor>[1]) =>
+        getDefinition(row, info).slice(0, 2),
+      iconFrame: (row: DataT, info: Parameters<IconAccessor>[1]) =>
+        getDefinition(row, info).slice(2, 6),
+      iconMask: (row: DataT, info: Parameters<IconAccessor>[1]) => getDefinition(row, info)[6]
+    };
+    void this.state.columns.updateIfNeeded(
+      {
+        props: Object.assign(Object.create(props), accessors),
+        oldProps: Object.assign(Object.create(oldProps), accessors),
+        changeFlags: {
+          ...changeFlags,
+          dataChanged:
+            changeFlags.dataChanged ||
+            this.state.iconDefinitionsDirty ||
+            props.iconMapping !== oldProps.iconMapping ||
+            props.getIcon !== oldProps.getIcon
+        }
+      },
+      {
+        dataLoading: this.internalState!.isAsyncPropLoading('data'),
+        changed: () => {
+          this.setState({});
+          this.setNeedsUpdate();
+        },
+        failed: error => this.raiseError(error, 'converting Arrow columns'),
+        positionOptions: {
+          transform: this.usePositionTransforms().transform?.bind(this),
+          fp64: this.use64bitPositions(),
+          requireRows: true
+        }
+      }
+    );
+    this.state.iconDefinitionsDirty = false;
+  }
+
+  private _destroyColumns(): void {
+    this.state.columns?.destroy();
+    this.state.arrowModel?.destroy();
+    this.state.arrowGeometry?.destroy();
+    this.state.columns = undefined;
+    this.state.arrowModel = undefined;
+    this.state.arrowGeometry = undefined;
+  }
+
+  getModels(): ArrowModel[] {
+    return this.state?.arrowModel ? [this.state.arrowModel] : super.getModels();
+  }
+
+  getBounds(): [number[], number[]] | null {
+    return this.state?.columns ? this.state.columns.getBounds() : super.getBounds();
+  }
+
+  getNumInstances(): number {
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
+  }
+
   get isLoaded(): boolean {
-    return super.isLoaded && this.state.iconManager.isLoaded;
+    return super.isLoaded && this.state.iconManager.isLoaded && !this.state.columns?.loading;
   }
 
   finalizeState(context: LayerContext): void {
+    this._destroyColumns();
     super.finalizeState(context);
     // Release resources held by the icon manager
     this.state.iconManager.finalize();
   }
 
   draw({uniforms}): void {
-    this._drawModel(this.state.model!);
+    this._drawModel(this.state.arrowModel ?? this.state.model!);
   }
 
   /** Draw one icon model with the current atlas and layer props. */
-  protected _drawModel(model: Model): void {
+  protected _drawModel(model: ArrowModel): void {
     const {sizeScale, sizeBasis, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, alphaCutoff} =
       this.props;
     const {iconManager} = this.state;
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
       const iconProps: IconProps = {
+        rowIndexOffset: 0,
         iconsTexture,
         iconsTextureDim: [iconsTexture.width, iconsTexture.height],
         sizeUnits: UNIT[sizeUnits],
@@ -318,38 +507,45 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       };
 
       model.shaderInputs.setProps({icon: iconProps});
-      model.draw(this.context.renderPass);
+      if (this.state.columns) {
+        this.state.columns.draw(model, this.context.renderPass, offset => {
+          model.setInstanceCount(
+            Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - offset))
+          );
+          model.shaderInputs.setProps({icon: {rowIndexOffset: offset}});
+        });
+      } else {
+        model.draw(this.context.renderPass);
+      }
     }
   }
 
-  protected _getModel(id = this.props.id): Model {
+  private _getGeometry(): Geometry {
     // The icon-layer vertex shader uses 2d positions
     // specifed via: in vec2 positions;
     // Top row first: the shader flips y, so this order keeps the strip front-facing (counter-
     // clockwise) and it survives back-face culling, which GlobeView enables by default
     const positions = [-1, 1, 1, 1, -1, -1, 1, -1];
 
+    return new Geometry({
+      topology: 'triangle-strip',
+      attributes: {positions: {size: 2, value: new Float32Array(positions)}}
+    });
+  }
+
+  protected _getModel(id = this.props.id): Model {
     return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),
-      geometry: new Geometry({
-        topology: 'triangle-strip',
-        attributes: {
-          // The size must be explicitly passed here otherwise luma.gl
-          // will default to assuming that positions are 3D (x,y,z)
-          positions: {
-            size: 2,
-            value: new Float32Array(positions)
-          }
-        }
-      }),
+      geometry: this._getGeometry(),
       isInstanced: true
     });
   }
 
   private _onUpdate(didFrameChange: boolean): void {
     if (didFrameChange) {
+      this.state.iconDefinitionsDirty = true;
       this.getAttributeManager()?.invalidate('getIcon');
       this.setNeedsUpdate();
     } else {
@@ -366,7 +562,7 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
   }
 
-  protected getInstanceIconDef(icon: string): number[] {
+  protected getInstanceIconDef(icon: string | UnpackedIcon): number[] {
     const {
       x,
       y,

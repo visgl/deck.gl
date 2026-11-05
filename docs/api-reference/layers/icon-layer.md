@@ -511,6 +511,25 @@ This section is about the special requirements when [supplying attributes direct
 If `data.attributes.getIcon` is supplied, since its value can only be a typed array, `iconMapping` can only use integers as keys.
 
 
+### Arrow Columns
+
+The optional Arrow vector props below override the corresponding accessors. Provide one
+`data` row per icon so `getIcon` can select it. Both prepacked atlases and automatic icon
+packing use `getIcon`.
+
+| Prop | Arrow layout | Overrides |
+| --- | --- | --- |
+| `positions` | Numeric XY or XYZ fixed-size lists | `getPosition` |
+| `sizes` | Numeric scalars | `getSize` |
+| `colors` | RGB or RGBA fixed-size lists | `getColor` |
+| `angles` | Numeric scalars | `getAngle` |
+| `pixelOffsets` | Numeric XY fixed-size lists | `getPixelOffset` |
+
+On WebGPU devices with eight vertex buffer slots, some combinations of per-icon
+attributes exceed the slot limit. Use constant accessors for styling values shared
+by all icons. See [Using with Arrow](../../developer-guide/using-with-arrow.md)
+for shared input requirements and limitations.
+
 ## Source
 
 [modules/layers/src/icon-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/icon-layer)
