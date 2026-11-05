@@ -431,6 +431,32 @@ const testCases = [
     goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
   },
   {
+    name: 'text-layer-letter-spacing-align',
+    viewState: {
+      target: [0, 0, 0],
+      zoom: 0
+    },
+    views: [new OrthographicView()],
+    layers: [
+      new TextLayer({
+        id: 'labels',
+        data: points.slice(2, 5),
+        _getFontRenderer: () => fontRenderer,
+        fontFamily: 'Arial',
+        getPosition: (_, {index}) => [0, (index - 1) * 160],
+        getText: d => `${d.ADDRESS}\n${d.LOCATION_NAME}\n${d.RACKS} racks - ${d.SPACES} spaces`,
+        getSize: 20,
+        getTextAnchor: (_, {index}) => TextAnchors[index],
+        getAlignmentBaseline: (_, {index}) => TextBaselines[index],
+        getTextAlign: (_, {index}) => ['right', 'left', 'center'][index],
+        getLetterSpacing: (_, {index}) => [0.1, 0.2, 0.3][index],
+        background: true,
+        getBackgroundColor: [255, 255, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-letter-spacing-align.png'
+  },
+  {
     name: 'text-layer-background',
     viewState: {
       target: [0, 0, 0],

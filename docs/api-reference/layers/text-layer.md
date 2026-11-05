@@ -421,6 +421,26 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 * If a function is provided, it is called on each object to retrieve its alignment baseline.
 
 
+#### `getTextAlign` ([Accessor&lt;string&gt;](../../developer-guide/using-layers.md#accessors), optional) {#gettextalign}
+
+* Default: `'auto'`
+
+How the rows of a multi-line text block are aligned within the block. Available options include `'auto'`, `'left'`, `'center'` and `'right'`. `'auto'` aligns the rows by the text anchor: `'start'` aligns them to the left, `'middle'` to the center and `'end'` to the right. Other values align the rows independently of the anchor, which only positions the block, e.g. `getTextAnchor: 'start'` with `getTextAlign: 'right'` places the block to the right of the anchor and aligns its rows to the right edge of the block.
+
+* If a string is provided, it is used as the text alignment for all objects.
+* If a function is provided, it is called on each object to retrieve its text alignment.
+
+
+#### `getLetterSpacing` ([Accessor&lt;number&gt;](../../developer-guide/using-layers.md#accessors), optional) {#getletterspacing}
+
+* Default: `0`
+
+Extra space between the characters of each row, as a unitless number that is multiplied with the current text size (an `em`). It is added after each character but the last of a row, so it does not offset the row from its anchor. Negative values tighten the text. Characters are counted as Unicode code points. The space is included in the width of the text block, which sizes the background and the wrapping at [maxWidth](#maxwidth).
+
+* If a number is provided, it is used as the letter spacing for all objects.
+* If a function is provided, it is called on each object to retrieve its letter spacing.
+
+
 #### `getPixelOffset` ([Accessor&lt;number[2]&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getpixeloffset}
 
 * Default: `[0, 0]`
