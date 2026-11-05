@@ -113,6 +113,10 @@ How data should be fitted to the terrain surface. If not specified, will be auto
   </tbody>
 </table>
 
+## Limitations
+
+On WebGPU, terrain sources must include their elevation range in `getBounds()`. `TerrainLayer` and non-instanced `SimpleMeshLayer` meshes provide this range. Texture draping (`terrainDrawMode: 'drape'`) is available only on WebGL. On WebGPU, omitting `terrainDrawMode` selects `'offset'`.
+
 ## Source
 
 [modules/extensions/src/terrain](https://github.com/visgl/deck.gl/tree/8.6-release/modules/extensions/src/terrain)

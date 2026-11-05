@@ -142,7 +142,10 @@ Arguments:
 
 ### VertexGeometry struct
 
+`screenSpaceOffset` defaults to zero. A shader that adds an offset multiplied by clip-space `w` should set it before `DECKGL_FILTER_GL_POSITION`, allowing extensions to preserve screen size when moving the vertex.
+
 - `vec3 worldPosition` - The world position of the current geometry, usually populated from a `getPosition` accessor.
+- `vec3 screenSpaceOffset` - The normalized-device-coordinate offset already applied to the vertex. This excludes offsets added directly in clip space, such as icon pixel offsets. Available as `vec3<f32>` in WGSL.
 - `vec3 worldPositionAlt` - The secondary world position of the current geometry. This property is populated if the geometry is instanced between a source position and a target position, for example `ArcLayer`.
 - `vec3 normal` - The normal at the current vertex in common space. Only populated for 3D layers.
 - `vec2 uv` - The uv position at the current vertex.

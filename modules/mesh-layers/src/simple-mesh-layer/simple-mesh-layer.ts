@@ -232,6 +232,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     });
   }
 
+  /** Returns mesh bounds translated by the instance positions for non-instanced meshes. */
   getBounds(): [number[], number[]] | null {
     if (this.props._instanced) {
       return super.getBounds();
@@ -256,6 +257,44 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       result = getMeshBoundingBox(attributes);
     }
 
+    const matrixAttribute = this.getAttributeManager()?.getAttributes().instanceModelMatrix;
+    const matrices = matrixAttribute?.value;
+    if (result && matrices && matrices.length >= 12 && this.getNumInstances() > 0) {
+      const transformed: [number[], number[]] = [
+        [Infinity, Infinity, Infinity],
+        [-Infinity, -Infinity, -Infinity]
+      ];
+      const matrixCount = matrixAttribute.constant
+        ? 1
+        : Math.min(this.getNumInstances(), Math.floor(matrices.length / 12));
+      for (let instance = 0; instance < matrixCount; instance++) {
+        const offset = instance * 12;
+        for (let corner = 0; corner < 8; corner++) {
+          const x = result[corner & 1][0];
+          const y = result[(corner >> 1) & 1][1];
+          const z = result[(corner >> 2) & 1][2];
+          for (let axis = 0; axis < 3; axis++) {
+            const value =
+              (matrices[offset + axis] * x +
+                matrices[offset + axis + 3] * y +
+                matrices[offset + axis + 6] * z) *
+                this.props.sizeScale +
+              matrices[offset + axis + 9];
+            transformed[0][axis] = Math.min(transformed[0][axis], value);
+            transformed[1][axis] = Math.max(transformed[1][axis], value);
+          }
+        }
+      }
+      result = transformed;
+    }
+    // Non-instanced terrain still applies getPosition in its vertex shader.
+    // Include it in the bounds used by terrain's render viewport and height range.
+    const instanceBounds = super.getBounds();
+    if (result && instanceBounds) {
+      result = result.map((corner, i) =>
+        corner.map((value, axis) => value + (instanceBounds[i][axis] || 0))
+      ) as [number[], number[]];
+    }
     this.state.positionBounds = result;
     return result;
   }
@@ -297,6 +336,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
+    if (changeFlags.propsOrDataChanged) {
+      this.state.positionBounds = null;
+    }
     if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
       this.state.positionBounds = null;
       this.state.model?.destroy();

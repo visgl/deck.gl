@@ -232,6 +232,7 @@ const projects = [
       // Used by test-headless and test-ci
       {
         extends: true,
+        define: {...renderTestDefine},
         resolve: {alias: browserAliases, dedupe: includePrivateModules ? linkedPeerDedupe : []},
         optimizeDeps: optimizeDepsConfig,
         assetsInclude: assetsIncludeConfig,

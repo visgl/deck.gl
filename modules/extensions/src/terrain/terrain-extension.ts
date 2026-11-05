@@ -15,7 +15,7 @@ const defaultProps = {
 export type TerrainExtensionProps = {
   /**
    * controls whether an object is drawn over the terrain surface by its anchor (usually defined by an accessor called `getPosition`, e.g. icon, scatterplot) or by its geometry (e.g. path, polygon).
-   * If not specified, it is automatically deduced from the layer.
+   * If not specified, the mode is inferred from the layer. WebGPU defaults to `offset` and does not support draping.
    */
   terrainDrawMode?: 'offset' | 'drape';
 };
@@ -27,7 +27,7 @@ type TerrainExtensionState = {
   terrainCoverNeedsRedraw: boolean;
 };
 
-/** Allows layers to show/hide objects by a geofence. */
+/** Fits layer anchors or geometry to terrain. WebGPU currently supports offset mode. */
 export default class TerrainExtension extends LayerExtension {
   static defaultProps = defaultProps;
   static extensionName = 'TerrainExtension';
@@ -38,17 +38,17 @@ export default class TerrainExtension extends LayerExtension {
     };
   }
 
-  initializeState(this: Layer<TerrainExtensionProps>) {
-    this.context.deck?._addDefaultEffect(new TerrainEffect());
-  }
-
   updateState(
     this: Layer<TerrainExtensionProps>,
     params: UpdateParameters<Layer<TerrainExtensionProps>>
   ) {
-    const {props, oldProps} = params;
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged) {
+      this.context.deck?._addDefaultEffect(new TerrainEffect());
+    }
 
     if (
+      !changeFlags.extensionsChanged &&
       this.state.terrainDrawMode &&
       props.terrainDrawMode === oldProps.terrainDrawMode &&
       // @ts-ignore `extruded` may not exist in props
@@ -57,6 +57,7 @@ export default class TerrainExtension extends LayerExtension {
       return;
     }
 
+    const supportsDraping = this.context.device.type !== 'webgpu';
     let {terrainDrawMode} = props;
     if (!terrainDrawMode) {
       // props.extruded is used as an indication that the layer is 2.5D
@@ -64,7 +65,10 @@ export default class TerrainExtension extends LayerExtension {
       const is3d = this.props.extruded as boolean;
       const attributes = this.getAttributeManager()?.attributes;
       const hasAnchor = attributes && 'instancePositions' in attributes;
-      terrainDrawMode = is3d || hasAnchor ? 'offset' : 'drape';
+      terrainDrawMode = !supportsDraping || is3d || hasAnchor ? 'offset' : 'drape';
+    }
+    if (!supportsDraping && terrainDrawMode === 'drape') {
+      throw new Error('TerrainExtension: WebGPU supports terrainDrawMode: "offset" only');
     }
     this.setState({terrainDrawMode});
   }

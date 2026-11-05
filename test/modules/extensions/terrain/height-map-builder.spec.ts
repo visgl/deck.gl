@@ -2,11 +2,46 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {HeightMapBuilder} from '@deck.gl/extensions/terrain/height-map-builder';
 import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {LifecycleTester} from '../utils';
+import type {Device} from '@luma.gl/core';
+import type {Layer} from '@deck.gl/core';
+
+test('HeightMapBuilder projects preprojected bounds without reapplying transforms', () => {
+  const viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: 0,
+    latitude: 0,
+    zoom: 0
+  });
+  const packedCrs = {id: 'packed'};
+  const projectPosition = vi.fn((position: number[], _options: unknown) => position);
+  const layer = {
+    getBounds: () => [
+      [-1, -1, -2],
+      [1, 1, 3]
+    ],
+    state: {preproject: true, packedCrs},
+    props: {},
+    projectPosition
+  } as unknown as Layer;
+  const builder = new HeightMapBuilder({type: 'webgpu'} as Device);
+  builder.shouldUpdate({layers: [layer], viewport});
+  expect(projectPosition).toHaveBeenCalledTimes(10);
+  for (const [, options] of projectPosition.mock.calls) {
+    expect(options).toMatchObject({
+      sourceCrs: packedCrs,
+      modelMatrix: null,
+      coordinateOrigin: [0, 0, 0]
+    });
+  }
+  expect(builder.heightRange[0]).toBeLessThan(-2);
+  expect(builder.heightRange[1]).toBeGreaterThan(3);
+});
 
 test('HeightMapBuilder#diffing', async () => {
   const lifecycle = new LifecycleTester();

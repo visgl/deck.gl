@@ -1,0 +1,108 @@
+// deck.gl
+// SPDX-License-Identifier: MIT
+// Copyright (c) vis.gl contributors
+
+import {TERRAIN_MODE} from './terrain-mode';
+
+export const terrainWGSLSource = /* wgsl */ `
+${Object.entries(TERRAIN_MODE)
+  .map(([key, value]) => `const TERRAIN_MODE_${key}: f32 = ${value}.0;`)
+  .join('\n')}
+
+struct TerrainUniforms {
+  mode: f32,
+  bounds: vec4<f32>,
+  heightRange: vec2<f32>,
+};
+@group(0) @binding(auto) var<uniform> terrain: TerrainUniforms;
+@group(0) @binding(auto) var terrain_map: texture_2d<f32>;
+
+fn terrain_globe_to_mercator(position: vec3<f32>) -> vec2<f32> {
+  let sinLat = clamp(position.z / length(position), -0.999998, 0.999998);
+  return (vec2<f32>(atan2(position.x, -position.y), atanh(sinLat)) + PI) * WORLD_SCALE;
+}
+
+fn terrain_globe_latitude_scale(position: vec3<f32>) -> f32 {
+  return length(position.xy) / length(position);
+}
+
+fn terrain_encode_height(height: f32) -> vec4<f32> {
+  let bits = bitcast<u32>(height);
+  return vec4<f32>(vec4<u32>(bits, bits >> 8u, bits >> 16u, bits >> 24u) & vec4<u32>(255u)) / 255.0;
+}
+
+fn terrain_decode_height(pixel: vec4<f32>) -> f32 {
+  let bytes = vec4<u32>(round(pixel * 255.0));
+  return bitcast<f32>(bytes.x | (bytes.y << 8u) | (bytes.z << 16u) | (bytes.w << 24u));
+}
+
+fn terrain_load_height(pixel: vec2<i32>) -> f32 {
+  let dimensions = vec2<i32>(textureDimensions(terrain_map));
+  return terrain_decode_height(textureLoad(terrain_map, clamp(pixel, vec2<i32>(0), dimensions - 1), 0));
+}
+
+fn terrain_sample_height(uv: vec2<f32>) -> f32 {
+  // WebGPU render textures have their origin at the top left.
+  let pixel = vec2<f32>(uv.x, 1.0 - uv.y) * vec2<f32>(textureDimensions(terrain_map)) - 0.5;
+  let base = vec2<i32>(floor(pixel));
+  let weight = fract(pixel);
+  let a = terrain_load_height(base);
+  let b = terrain_load_height(base + vec2<i32>(1, 0));
+  let c = terrain_load_height(base + vec2<i32>(0, 1));
+  let d = terrain_load_height(base + vec2<i32>(1, 1));
+  return mix(mix(a, b, weight.x), mix(c, d, weight.x), weight.y);
+}
+
+fn terrain_get_height(commonPosition: vec3<f32>) -> f32 {
+  let uv = (commonPosition.xy - terrain.bounds.xy) / terrain.bounds.zw;
+  if (all(uv >= vec2<f32>(0.0)) && all(uv <= vec2<f32>(1.0))) {
+    return terrain_sample_height(uv);
+  }
+  return 0.0;
+}
+`;
+
+export const terrainWGSLVertexInjection = /* wgsl */ `
+  let commonPos = geometry.position.xyz;
+  // Globe meter offsets are projected into the same globe common space as absolute positions.
+  let isGlobe = project.projectionMode == PROJECTION_MODE_GLOBE ||
+    project.projectionMode == PROJECTION_MODE_GLOBE_METER_OFFSETS;
+  var terrainMercPos = commonPos.xy;
+  terrainHeightWGSL = commonPos.z + project.commonOrigin.z;
+  if (isGlobe) {
+    terrainMercPos = terrain_globe_to_mercator(commonPos);
+    terrainHeightWGSL = length(commonPos) - GLOBE_RADIUS;
+  }
+  if (terrain.mode == TERRAIN_MODE_SKIP) {
+    *position = vec4<f32>(0.0);
+  } else if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+    let uv = (terrainMercPos - terrain.bounds.xy) / terrain.bounds.zw;
+    // Higher surfaces win independently of draw order, including below sea level.
+    let depth = (terrain.heightRange.y - terrainHeightWGSL) / (terrain.heightRange.y - terrain.heightRange.x);
+    *position = vec4<f32>(uv * 2.0 - 1.0, depth, 1.0);
+  } else if (terrain.mode == TERRAIN_MODE_USE_HEIGHT_MAP) {
+    let anchor = project_position_vec3_f32(vec3<f32>(geometry.worldPosition.xy, 0.0));
+    var anchorMerc = anchor;
+    var offset = vec3<f32>(0.0, 0.0, 1.0);
+    if (isGlobe) {
+      anchorMerc = vec3<f32>(terrain_globe_to_mercator(anchor), 0.0);
+      offset = normalize(commonPos) * terrain_globe_latitude_scale(anchor) * PI;
+    }
+    let height = terrain_get_height(anchorMerc);
+    // Preserve clip-space billboard offsets so perspective scales them at the fitted height.
+    let anchorClip = project_common_position_to_clipspace(geometry.position);
+    let clipOffset = *position - anchorClip;
+    // Keep the source elevation available for layers that sample their full footprint.
+    let fittedClip = project_common_position_to_clipspace(geometry.position + vec4<f32>(offset * height, 0.0));
+    // Billboard paths keep a fixed screen-space stroke; other billboard offsets scale with depth.
+    // Preserve any earlier camera clipping carried in clipOffset.w.
+    let screenOffsetCorrection = geometry.screenSpaceOffset * (fittedClip.w - anchorClip.w);
+    *position = fittedClip + clipOffset + vec4<f32>(screenOffsetCorrection, 0.0);
+  }
+`;
+export const terrainWGSLFragmentInjection = /* wgsl */ `
+  if (terrain.mode == TERRAIN_MODE_SKIP) { discard; }
+  if (terrain.mode == TERRAIN_MODE_WRITE_HEIGHT_MAP) {
+    return terrain_encode_height(terrainHeightWGSL);
+  }
+`;
