@@ -936,12 +936,12 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
 );
 
 // Binary text with one GPU position per glyph
-function createBinaryText(labels: {text: string; x: number}[]) {
+function createBinaryText(labels: {text: string; x: number; y?: number}[]) {
   const startIndices = [0];
   const positions: number[] = [];
-  labels.forEach(({text, x}, index) => {
+  labels.forEach(({text, x, y = 0}, index) => {
     startIndices.push(startIndices[index] + text.length);
-    for (const char of text) positions.push(x, 0, 0);
+    for (const char of text) positions.push(x, y, 0);
   });
   const buffer = device.createBuffer({data: new Float32Array(positions)});
   const data = {
@@ -1012,6 +1012,67 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
         expect(await pickBinaryText(binary), `binary, ${backgroundPadding}`).toHaveLength(count);
       }
     } finally {
+      buffer.destroy();
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'rotated labels collide alike in every collision rectangle path',
+  async () => {
+    // Stacked labels are apart, and overlap once rotated 90 degrees
+    const labels = [
+      {text: 'Collision', x: 0, y: 0},
+      {text: 'Collision', x: 0, y: 40}
+    ];
+    const {data: binaryData, buffer} = createBinaryText(labels);
+    const binaryWithBackground = {
+      ...binaryData,
+      attributes: {
+        ...binaryData.attributes,
+        background: {getPosition: {value: new Float32Array([0, 0, 0, 0, 40, 0]), size: 3}}
+      }
+    };
+    const objectData = labels.map(({text, x, y}) => ({text, position: [x, y]}));
+    // Each case names the sublayer that draws the label rectangle in the collision passes
+    const cases = [
+      {input: 'objects', data: objectData, background: false, drawnBy: 'background'},
+      {input: 'objects', data: objectData, background: true, drawnBy: 'background'},
+      {input: 'binary', data: binaryData, background: false, drawnBy: 'characters'},
+      {input: 'binary', data: binaryWithBackground, background: false, drawnBy: 'background'},
+      {input: 'binary', data: binaryWithBackground, background: true, drawnBy: 'background'}
+    ];
+    try {
+      for (const {input, data, background, drawnBy} of cases) {
+        for (const billboard of [true, false]) {
+          for (const angle of [0, 90]) {
+            const layer = new TextLayer({
+              id: 'collision-paths',
+              data,
+              background,
+              billboard,
+              getAngle: angle,
+              getSize: 24,
+              fontFamily: 'Arial',
+              getCollisionPriority: (_, {index}) => [100, -100][index],
+              extensions,
+              pickable: true
+            });
+            const name = `${input}, background=${background}, billboard=${billboard}, angle=${angle}`;
+            expect(await pickBinaryText(layer), name).toEqual(angle ? [0] : [0, 1]);
+            const collisionSubLayers = layer
+              .getSubLayers()
+              .filter(subLayer =>
+                layer.filterSubLayer({layer: subLayer, renderPass: 'collision'} as any)
+              )
+              .map(subLayer => subLayer.id);
+            expect(collisionSubLayers, name).toEqual([`collision-paths-${drawnBy}`]);
+          }
+        }
+      }
+    } finally {
+      deck.setProps({layers: []});
+      await new Promise(requestAnimationFrame);
       buffer.destroy();
     }
   }
