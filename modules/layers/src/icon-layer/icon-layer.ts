@@ -426,9 +426,11 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           ...changeFlags,
           dataChanged:
             changeFlags.dataChanged ||
-            this.state.iconDefinitionsDirty ||
+            (this.state.iconDefinitionsDirty ||
             props.iconMapping !== oldProps.iconMapping ||
             props.getIcon !== oldProps.getIcon
+              ? 'icon definitions changed'
+              : false)
         }
       },
       {

@@ -31,6 +31,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         draw: false,
         testCases: [
           {
+            title: 'Draw two chunks from a prepacked atlas',
             props: {
               data: [{icon: 'a'}, {icon: 'b'}],
               iconAtlas: atlas,
