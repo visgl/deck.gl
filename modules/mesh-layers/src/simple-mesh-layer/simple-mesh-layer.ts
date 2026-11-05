@@ -8,6 +8,9 @@
 
 import {
   Layer,
+  _deepEqual as deepEqual,
+  _LayerColumns as LayerColumns,
+  type _ColumnDefinition as ColumnDefinition,
   _GPUVectorModel as GPUVectorModel,
   color,
   project32,
@@ -19,10 +22,20 @@ import {
   phongMaterial
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
-import {type Model, Geometry} from '@luma.gl/engine';
+import {
+  type Model,
+  Geometry,
+  GPUVectorModel as ArrowModel,
+  makeGPUVectorGeometry,
+  type GPUVectorGeometry
+} from '@luma.gl/engine';
 import {ParsedPBRMaterial} from '@luma.gl/engine/gltf';
 
-import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
+import {
+  MATRIX_ATTRIBUTES,
+  getMeshInstanceTransform,
+  shouldComposeModelMatrix
+} from '../utils/matrix';
 
 import {simpleMeshUniforms, SimpleMeshProps} from './simple-mesh-layer-uniforms';
 import vs from './simple-mesh-layer-vertex.glsl';
@@ -34,10 +47,12 @@ import type {
   LayerDataSource,
   UpdateParameters,
   Accessor,
+  AccessorFunction,
   Position,
   Color,
   TextureSource
 } from '@deck.gl/core';
+import type {ColumnSource} from '@deck.gl/core/arrow';
 import type {MeshAttribute, MeshAttributes} from '@loaders.gl/core/schema';
 import type {Geometry as GeometryType} from '@luma.gl/engine';
 import {getMeshBoundingBox} from '@loaders.gl/core/schema';
@@ -102,6 +117,33 @@ function getGeometry(data: Mesh): Geometry {
   }
 }
 
+const TRANSFORM_ACCESSORS = [
+  'getTransformMatrix',
+  'getOrientation',
+  'getScale',
+  'getTranslation'
+] as const;
+const TRANSFORM_ATTRIBUTES = Object.keys(MATRIX_ATTRIBUTES.shaderAttributes);
+const COLUMN_DEFINITIONS: Record<string, ColumnDefinition> = {
+  positions: {
+    attribute: 'instancePositions',
+    accessor: 'getPosition',
+    semantic: 'position',
+    size: 3
+  },
+  colors: {attribute: 'instanceColors', accessor: 'getColor', semantic: 'color', size: 4}
+};
+for (const attribute of TRANSFORM_ATTRIBUTES) {
+  COLUMN_DEFINITIONS[attribute] = {
+    attribute,
+    accessor: attribute,
+    semantic: 'vector',
+    size: 3,
+    prop: false
+  };
+}
+
+const defaultPosition = (object: any) => object.position;
 const DEFAULT_COLOR = [0, 0, 0, 255] as const;
 
 type Mesh =
@@ -114,6 +156,10 @@ type Mesh =
 
 type _SimpleMeshLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
+  /** Arrow XY or XYZ instance anchors. Overrides `getPosition`. */
+  positions?: ColumnSource | null;
+  /** Arrow RGB or RGBA instance colors. Overrides `getColor`. */
+  colors?: ColumnSource | null;
   mesh: string | Mesh | Promise<Mesh> | null;
   texture?: string | TextureSource | Promise<TextureSource>;
   /** Customize the [texture parameters](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texParameter). */
@@ -182,6 +228,8 @@ export type SimpleMeshLayerProps<DataT = unknown> = _SimpleMeshLayerProps<DataT>
 const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   mesh: {type: 'object', value: null, async: true},
   texture: {type: 'image', value: null, async: true},
+  positions: {type: 'object', value: null, optional: true},
+  colors: {type: 'object', value: null, optional: true},
   sizeScale: {type: 'number', value: 1, min: 0},
 
   // _instanced is a hack to use world position instead of meter offsets in mesh
@@ -193,7 +241,7 @@ const defaultProps: DefaultProps<SimpleMeshLayerProps> = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: true,
-  getPosition: {type: 'accessor', value: (x: any) => x.position},
+  getPosition: {type: 'accessor', value: defaultPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
@@ -218,6 +266,9 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   state!: {
     parsedPBRMaterial?: ParsedPBRMaterial;
     model?: Model;
+    arrowModel?: ArrowModel;
+    arrowGeometry?: GPUVectorGeometry;
+    columns?: LayerColumns;
     emptyTexture: Texture;
     hasNormals?: boolean;
     positionBounds?: [number[], number[]] | null;
@@ -234,7 +285,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   getBounds(): [number[], number[]] | null {
     if (this.props._instanced) {
-      return super.getBounds();
+      return this.state.columns ? this.state.columns.getBounds() : super.getBounds();
     }
     let result = this.state.positionBounds;
     if (result) {
@@ -261,6 +312,20 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   initializeState() {
+    this.initializeAccessorAttributes();
+    this.setState({
+      // Avoid luma.gl's missing uniform warning
+      // TODO - add feature to luma.gl to specify ignored uniforms?
+      emptyTexture: this.context.device.createTexture({
+        data: new Uint8Array(4),
+        width: 1,
+        height: 1
+      })
+    });
+  }
+
+  /** Registers the attributes used by the ordinary accessor path. */
+  private initializeAccessorAttributes(): void {
     const attributeManager = this.getAttributeManager();
     // attributeManager is always defined in a primitive layer
     attributeManager!.addInstanced({
@@ -281,25 +346,21 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
-
-    this.setState({
-      // Avoid luma.gl's missing uniform warning
-      // TODO - add feature to luma.gl to specify ignored uniforms?
-      emptyTexture: this.context.device.createTexture({
-        data: new Uint8Array(4),
-        width: 1,
-        height: 1
-      })
-    });
   }
 
   updateState(params: UpdateParameters<this>) {
+    if (params.props.positions || params.props.colors) {
+      this.updateColumnState(params);
+      return;
+    }
+    const restored = this.restoreAccessorState();
     super.updateState(params);
 
     const {props, oldProps, changeFlags} = params;
-    if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
+    if (restored || props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
       this.state.positionBounds = null;
       this.state.model?.destroy();
+      this.state.model = undefined;
       if (props.mesh) {
         this.state.model = this.getModel(props.mesh as Mesh);
 
@@ -321,14 +382,148 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
   }
 
+  /** Updates instance columns independently of the mesh and texture lifecycle. */
+  private updateColumnState(params: UpdateParameters<this>): void {
+    const {props, oldProps, changeFlags} = params;
+    if (props.extensions.length || Object.keys(props.transitions || {}).length) {
+      throw new Error('SimpleMesh Arrow columns do not support extensions or transitions');
+    }
+    const entering = !this.state.columns;
+    if (entering) {
+      this.state.model?.destroy();
+      this.state.model = undefined;
+      this.internalState!.attributeManager?.finalize();
+      this.internalState!.attributeManager = null;
+      this.state.columns = new LayerColumns(this.context.device, COLUMN_DEFINITIONS, 'SimpleMesh');
+    }
+    if (entering || props.mesh !== oldProps.mesh) {
+      this.updateColumnModel(props.mesh as Mesh | null);
+    }
+    const model = this.state.arrowModel;
+    if (model) {
+      model.setTopology(props.wireframe ? 'line-strip' : 'triangle-list');
+      model.shaderInputs.setProps({simpleMesh: this.getTextureProps(props.texture as Texture)});
+    }
+    this.updateInstanceColumns(params);
+  }
+
+  /** Uploads the current mesh for the Arrow model, including any index buffer. */
+  private updateColumnModel(mesh: Mesh | null): void {
+    this.state.arrowModel?.destroy();
+    this.state.arrowGeometry?.destroy();
+    this.state.arrowModel = undefined;
+    this.state.arrowGeometry = undefined;
+    this.state.positionBounds = null;
+    if (!mesh) return;
+    const geometry = makeGPUVectorGeometry(this.context.device, getGeometry(mesh));
+    this.state.arrowGeometry = geometry;
+    const attributes = (mesh as any).attributes || mesh;
+    this.state.hasNormals = Boolean(attributes.NORMAL || attributes.normals);
+    this.state.arrowModel = new ArrowModel(this.context.device, {
+      ...this.getShaders(),
+      id: this.props.id,
+      geometry,
+      bufferLayout: this.state.columns!.getBufferLayouts(),
+      isInstanced: true,
+      inferDrawCount: 'instance'
+    });
+  }
+
+  /** Supplies mesh transform accessors as the four instance vectors expected by the shaders. */
+  private updateInstanceColumns({props, oldProps, changeFlags}: UpdateParameters<this>): void {
+    const accessors = this.getColumnTransformAccessors(props);
+    // Function-valued transforms follow updateTriggers, like ordinary mesh accessors.
+    const transformsChanged = TRANSFORM_ACCESSORS.some(name => {
+      const value = props[name];
+      const oldValue = oldProps[name];
+      return (
+        (typeof value !== 'function' || typeof oldValue !== 'function') &&
+        !deepEqual(value, oldValue, 1)
+      );
+    });
+    void this.state.columns!.updateIfNeeded(
+      {
+        props: Object.assign(Object.create(props), accessors),
+        oldProps: Object.assign(Object.create(oldProps), accessors),
+        changeFlags: {
+          ...changeFlags,
+          dataChanged:
+            changeFlags.dataChanged || (transformsChanged ? 'mesh transforms changed' : false)
+        }
+      },
+      {
+        dataLoading: this.internalState!.isAsyncPropLoading('data'),
+        changed: () => {
+          this.setState({});
+          this.setNeedsUpdate();
+        },
+        failed: error => this.raiseError(error, 'converting Arrow columns'),
+        positionOptions: {
+          transform: this.usePositionTransforms().transform?.bind(this),
+          fp64: this.use64bitPositions(),
+          requireRows:
+            !props.positions &&
+            props.getPosition === defaultPosition &&
+            !(props.data as any)?.attributes?.getPosition
+        }
+      }
+    );
+  }
+
+  /** Preserves constant transforms as constants so they can share a WebGPU binding. */
+  private getColumnTransformAccessors(props: typeof this.props) {
+    const accessors = TRANSFORM_ACCESSORS.map(name => props[name]);
+    const evaluate = (row: DataT, info: Parameters<AccessorFunction<DataT, number[]>>[1]) => {
+      const [matrix, orientation, scale, translation] = accessors.map(accessor =>
+        typeof accessor === 'function' ? accessor(row, info) : accessor
+      );
+      return getMeshInstanceTransform(matrix, orientation, scale, translation);
+    };
+    const constant = accessors.every(accessor => Array.isArray(accessor));
+    const matrix = constant ? evaluate(undefined as DataT, undefined!) : null;
+    return Object.fromEntries(
+      TRANSFORM_ATTRIBUTES.map((name, index) => [
+        name,
+        matrix
+          ? matrix.slice(index * 3, index * 3 + 3)
+          : (row: DataT, info: Parameters<AccessorFunction<DataT, number[]>>[1]) =>
+              evaluate(row, info).subarray(index * 3, index * 3 + 3)
+      ])
+    );
+  }
+
+  /** Releases the Arrow path and reinstates the regular attribute manager. */
+  private restoreAccessorState(): boolean {
+    if (!this.state.columns) return false;
+    this.state.columns.destroy();
+    this.state.columns = undefined;
+    this.updateColumnModel(null);
+    this.internalState!.attributeManager = super._getAttributeManager();
+    this.initializeAccessorAttributes();
+    return true;
+  }
+
+  getModels(): ArrowModel[] {
+    return this.state?.arrowModel ? [this.state.arrowModel] : super.getModels();
+  }
+
+  getNumInstances(): number {
+    return this.state?.columns && !Number.isFinite(this.props.numInstances)
+      ? this.state.columns.length
+      : super.getNumInstances();
+  }
+
   finalizeState(context: LayerContext) {
     super.finalizeState(context);
+    this.state.columns?.destroy();
+    this.state.arrowGeometry?.destroy();
 
     this.state.emptyTexture.delete();
   }
 
   draw({uniforms}) {
-    const {model} = this.state;
+    const {columns} = this.state;
+    const model = this.state.arrowModel ?? this.state.model;
     if (!model) {
       return;
     }
@@ -338,6 +533,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
     const simpleMeshProps: SimpleMeshProps = {
       sizeScale,
+      rowIndexOffset: 0,
       composeModelMatrix:
         !_instanced ||
         shouldComposeModelMatrix(
@@ -348,11 +544,24 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
       flatShading: !this.state.hasNormals
     };
     model.shaderInputs.setProps({simpleMesh: simpleMeshProps});
-    model.draw(renderPass);
+    if (columns) {
+      columns.draw(model, renderPass, rowIndexOffset => {
+        model.setInstanceCount(
+          Math.min(model.instanceCount, Math.max(0, this.getNumInstances() - rowIndexOffset))
+        );
+        model.shaderInputs.setProps({simpleMesh: {rowIndexOffset}});
+      });
+    } else {
+      model.draw(renderPass);
+    }
   }
 
   get isLoaded(): boolean {
-    return Boolean(this.state?.model && super.isLoaded);
+    return Boolean(
+      (this.state?.model || this.state?.arrowModel) &&
+        !this.state.columns?.loading &&
+        super.isLoaded
+    );
   }
 
   protected getModel(mesh: Mesh): Model {

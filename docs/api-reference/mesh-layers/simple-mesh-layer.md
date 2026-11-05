@@ -306,6 +306,21 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 * If an array is provided, it is used as the transform matrix for all objects.
 * If a function is provided, it is called on each object to retrieve its transform matrix.
 
+### Arrow Columns
+
+#### `positions` (Arrow Vector, optional)
+
+Numeric XY or XYZ fixed-size lists for instance anchors. Overrides `getPosition`.
+
+#### `colors` (Arrow Vector, optional)
+
+RGB or RGBA fixed-size lists for instance colors. Overrides `getColor`.
+
+The `mesh` prop still supplies the shared geometry. Transform accessors can use
+row data or constant values. See
+[Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input
+requirements and limitations.
+
 ## Source
 
 [modules/mesh-layers/src/simple-mesh-layer](https://github.com/visgl/deck.gl/tree/master/modules/mesh-layers/src/simple-mesh-layer)

@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {createIterable, _deepEqual as deepEqual, type UpdateParameters} from '@deck.gl/core';
+import {createIterable} from '../utils/iterable-utils';
+import {deepEqual} from '../utils/deep-equal';
+import type {UpdateParameters} from './layer';
 import {
   Buffer,
   dataTypeDecoder,
@@ -15,7 +17,7 @@ import {DynamicBuffer} from '@luma.gl/core/dynamic';
 import type {GPUVectorModel, GPUVectorModelInputs} from '@luma.gl/engine';
 import {GPUConstant, GPUVector, getGPUVectorFormatInfo} from '@luma.gl/graph/gpu-data';
 
-import type {ColumnSource} from '@deck.gl/core/arrow';
+import type {ColumnSource} from './luma-upstream/arrow-converter';
 
 export type ColumnDefinition = {
   attribute: string;
