@@ -1076,6 +1076,7 @@ export class Tileset2D<DataT = any, ViewStateT = Viewport> {
       return;
     }
     this.opts.onTileLoad?.(tile);
+    if (this._cache.get(tile.id) !== tile) return;
     this._updateTileByteSize(tile);
     if (this._consumers.size || this.opts.maxCacheByteSize !== null) this._resizeCache();
     for (const listener of this._listeners) {
