@@ -157,14 +157,10 @@ test('CollisionFilterEffect#greedy placement', () => {
   const deviceType = device.type;
 
   try {
-    // collisionGreedy on a non-text layer has no effect
-    const otherLayer = TEST_LAYER.clone({id: 'other', collisionGreedy: true});
-    expect(collisionFilterEffect._groupByCollisionGroup(device, [otherLayer])[group].greedy).toBe(
-      false
-    );
     expect(collisionFilterEffect._groupByCollisionGroup(device, [textLayer])[group].greedy).toBe(
       true
     );
+    expect(collisionFilterEffect.placementFBOs[group]).toBeDefined();
 
     // Greedy placement reads pixels back with WebGL, so other devices keep GPU-only filtering
     // @ts-expect-error device type is read-only
@@ -172,6 +168,21 @@ test('CollisionFilterEffect#greedy placement', () => {
     expect(collisionFilterEffect._groupByCollisionGroup(device, [textLayer])[group].greedy).toBe(
       false
     );
+    // @ts-expect-error device type is read-only
+    device.type = deviceType;
+    // The group keeps its visibility cells, but frees the placement cells it no longer uses
+    expect(collisionFilterEffect.visibilityFBOs[group]).toBeDefined();
+    expect(collisionFilterEffect.placementFBOs[group]).toBeUndefined();
+
+    // collisionGreedy on a non-text layer has no effect
+    const otherLayer = TEST_LAYER.clone({id: 'other', collisionGreedy: true});
+    collisionFilterEffect._groupByCollisionGroup(device, [textLayer]);
+    expect(collisionFilterEffect._groupByCollisionGroup(device, [otherLayer])[group].greedy).toBe(
+      false
+    );
+    // A group without text frees its cells
+    expect(collisionFilterEffect.visibilityFBOs[group]).toBeUndefined();
+    expect(collisionFilterEffect.placementFBOs[group]).toBeUndefined();
   } finally {
     // @ts-expect-error device type is read-only
     device.type = deviceType;

@@ -145,6 +145,15 @@ function getCellFBO(
   });
 }
 
+function destroyCellFBO(cellFBOs: Record<string, Framebuffer>, collisionGroup: string): void {
+  const cellFBO = cellFBOs[collisionGroup];
+  if (cellFBO) {
+    cellFBO.colorAttachments[0].destroy();
+    cellFBO.destroy();
+    delete cellFBOs[collisionGroup];
+  }
+}
+
 export default class CollisionFilterEffect implements Effect {
   id = 'collision-filter-effect';
   props = null;
@@ -495,6 +504,13 @@ export default class CollisionFilterEffect implements Effect {
           );
         }
       }
+      // Free the cells of a group that no longer has text, or no longer places it greedily
+      if (!channelMap[collisionGroup].hasText) {
+        destroyCellFBO(this.visibilityFBOs, collisionGroup);
+      }
+      if (!channelMap[collisionGroup].greedy) {
+        destroyCellFBO(this.placementFBOs, collisionGroup);
+      }
       if (!this.collisionFBOs[collisionGroup]) {
         this.createFBO(device, collisionGroup);
       }
@@ -589,13 +605,7 @@ export default class CollisionFilterEffect implements Effect {
     fbo.depthStencilAttachment?.destroy();
     fbo.destroy();
     delete this.collisionFBOs[collisionGroup];
-    for (const cellFBOs of [this.visibilityFBOs, this.placementFBOs]) {
-      const cellFBO = cellFBOs[collisionGroup];
-      if (cellFBO) {
-        cellFBO.colorAttachments[0].destroy();
-        cellFBO.destroy();
-        delete cellFBOs[collisionGroup];
-      }
-    }
+    destroyCellFBO(this.visibilityFBOs, collisionGroup);
+    destroyCellFBO(this.placementFBOs, collisionGroup);
   }
 }
