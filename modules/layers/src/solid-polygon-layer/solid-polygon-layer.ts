@@ -419,7 +419,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           this.state.sourceCrs?.signature === 'WGS84',
         resolution: subdivisionStep,
         projectionTolerance: props._projectionTolerance,
-        projectionToleranceScale,
+        projectionToleranceScale: projectionToleranceScale ?? undefined,
         fp64: this.use64bitPositions(),
         dataChanged: projectionChanged || refinementChanged ? undefined : changeFlags.dataChanged,
         // A geocentric target needs a polygon plane selected from XYZ, even for flat source data.

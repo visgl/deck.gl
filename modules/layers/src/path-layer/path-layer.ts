@@ -447,7 +447,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         // Subdivision runs in accessor coordinates before the source CRS transform.
         resolution: this.getSubdivisionStep(),
         projectionTolerance: props._projectionTolerance,
-        projectionToleranceScale,
+        projectionToleranceScale: projectionToleranceScale ?? undefined,
         // A partial data diff is only valid while normalization inputs remain unchanged.
         dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });

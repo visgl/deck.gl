@@ -10,7 +10,9 @@ type CRSUnits = {
 };
 
 /** Return the per-axis scale needed to measure projected coordinates in meters. */
-export function getMetersPerUnit(crs: CRSUnits | null): [number, number, number] | null {
+export function getMetersPerUnit(
+  crs: CRSUnits | null | undefined
+): [number, number, number] | null {
   if (!crs || (crs.coordinateFrame !== 'projected' && crs.coordinateFrame !== 'geocentric')) {
     return null;
   }
