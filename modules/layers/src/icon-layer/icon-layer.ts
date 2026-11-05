@@ -9,6 +9,8 @@ import {
   picking,
   log,
   UNIT,
+  _LayerColumns as LayerColumns,
+  type _ColumnDefinition as ColumnDefinition,
   _GPUVectorModel as GPUVectorModel
 } from '@deck.gl/core';
 import {SamplerProps, Texture} from '@luma.gl/core';
@@ -26,7 +28,6 @@ import fs from './icon-layer-fragment.glsl';
 import {getShaderWGSL} from './icon-layer.wgsl';
 import IconManager from './icon-manager';
 import type {ColumnSource} from '@deck.gl/core/arrow';
-import {LayerColumns, type ColumnDefinition} from '../utils/layer-columns';
 
 import type {
   LayerProps,

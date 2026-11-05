@@ -513,22 +513,43 @@ If `data.attributes.getIcon` is supplied, since its value can only be a typed ar
 
 ### Arrow Columns
 
-The optional Arrow vector props below override the corresponding accessors. Provide one
-`data` row per icon so `getIcon` can select it. Both prepacked atlases and automatic icon
-packing use `getIcon`.
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
 
-| Prop | Arrow layout | Overrides |
-| --- | --- | --- |
-| `positions` | Numeric XY or XYZ fixed-size lists | `getPosition` |
-| `sizes` | Numeric scalars | `getSize` |
-| `colors` | RGB or RGBA fixed-size lists | `getColor` |
-| `angles` | Numeric scalars | `getAngle` |
-| `pixelOffsets` | Numeric XY fixed-size lists | `getPixelOffset` |
+#### `positions` (Arrow Vector, optional)
 
-On WebGPU devices with eight vertex buffer slots, some combinations of per-icon
-attributes exceed the slot limit. Use constant accessors for styling values shared
-by all icons. See [Using with Arrow](../../developer-guide/using-with-arrow.md)
-for shared input requirements and limitations.
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying icon anchors. Overrides [`getPosition`](#getposition).
+
+#### `sizes` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar icon sizes in `sizeUnits`. Overrides [`getSize`](#getsize).
+
+#### `colors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying icon colors. Overrides [`getColor`](#getcolor).
+
+#### `angles` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar rotations in degrees. Overrides [`getAngle`](#getangle).
+
+#### `pixelOffsets` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY fixed-size lists specifying offsets in pixels. Overrides [`getPixelOffset`](#getpixeloffset).
+
+## Remarks
+
+- Provide one `data` row per icon so `getIcon` can select it in either atlas mode.
+- If varying attributes exceed the WebGPU device's vertex buffer limit, use constant
+  accessors for styling values shared by all icons.
 
 ## Source
 
