@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import React from 'react';
-import {MVT2DLayer} from '@deck.gl/geo-layers';
+import {MVT2DLayer} from '@deck.gl/proposals/layers';
 import {MVTLoader} from '@loaders.gl/tiles/mvt';
 import {makeLayerDemo} from './demo-base';
 import {GITHUB_TREE} from '../constants/defaults';

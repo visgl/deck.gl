@@ -6,11 +6,11 @@ import {OrthographicViewport, WebMercatorViewport} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {
   Tile2DHeader,
-  Tile2DLayer,
   Tileset2D,
   tile2DDeckAdapter,
   type Tileset2DAdapter
 } from '@deck.gl/geo-layers';
+import {Tile2DLayer} from '@deck.gl/proposals/layers';
 import {RequestScheduler, type TileSource} from '@loaders.gl/core/loader-utils';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 import {describe, expect, it} from 'vitest';

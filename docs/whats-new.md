@@ -33,7 +33,7 @@ Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A sha
 
 ### Tile layers
 
-[`Tile2DLayer`](./api-reference/geo-layers/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/geo-layers/mvt-2d-layer.md) are the new tile layers for applications sharing content across styles and views. One [`Tileset2D`](./api-reference/geo-layers/tileset-2d.md) owns loading and caching while each layer maintains independent per-view selection, picking, and highlighting. `viewIds` scopes consumers to their intended views without loading tiles for unrelated views. The [shared-tileset example](/examples/shared-tile-2d-layer) compares shared and independent caches in synchronized split-screen views and a minimap. `Tileset2D` retains the legacy default-view API, and `TileLayer` and `MVTLayer` remain available for compatibility.
+[`Tile2DLayer`](./api-reference/geo-layers/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/geo-layers/mvt-2d-layer.md) are available in the private `@deck.gl/proposals/layers` module for applications sharing content across styles and views. One [`Tileset2D`](./api-reference/geo-layers/tileset-2d.md) owns loading and caching while each layer maintains independent per-view selection, picking, and highlighting. `viewIds` scopes consumers to their intended views without loading tiles for unrelated views. The [shared-tileset example](/examples/shared-tile-2d-layer) compares shared and independent caches in synchronized split-screen views and a minimap. `Tileset2D` retains the legacy default-view API, and `TileLayer` and `MVTLayer` remain available for compatibility.
 
 ## deck.gl v9.4
 

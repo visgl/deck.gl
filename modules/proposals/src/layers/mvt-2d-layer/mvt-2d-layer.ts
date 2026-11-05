@@ -17,8 +17,8 @@ import {worldToLngLat} from '@math.gl/web-mercator';
 import {load} from '@loaders.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
 import {Tile2DLayer, type Tile2DLayerProps} from '../tile-2d-layer/index';
-import type {Tile2DHeader, TileLoadProps} from '../tileset-2d/index';
-import {getURLFromTemplate} from '../tileset-2d/utils';
+import type {Tile2DHeader, TileLoadProps} from '@deck.gl/geo-layers';
+import {_getURLFromTemplate as getURLFromTemplate} from '@deck.gl/geo-layers';
 
 /** GeoJSON features decoded in normalized tile-local coordinates. */
 export type MVT2DData = Array<any>;

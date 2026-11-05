@@ -5,7 +5,8 @@
 import {Deck, MapView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {expect, test, vi} from 'vitest';
-import {MVT2DLayer, Tile2DLayer, Tileset2D} from '@deck.gl/geo-layers';
+import {Tileset2D} from '@deck.gl/geo-layers';
+import {MVT2DLayer, Tile2DLayer} from '@deck.gl/proposals/layers';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {lngLatToWorld} from '@math.gl/web-mercator';
 

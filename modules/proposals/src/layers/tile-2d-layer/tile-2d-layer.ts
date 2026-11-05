@@ -24,14 +24,17 @@ import {
   Tileset2D,
   Tile2DHeader,
   type TileLoadProps,
-  type ZRange,
+  type _TileZRange as ZRange,
   type RefinementStrategy,
-  STRATEGY_DEFAULT
-} from '../tileset-2d/index';
-import {Tile2DView} from '../tileset-2d/tile-2d-view';
-import {tile2DDeckAdapter} from '../tileset-2d/deck-tileset-adapter';
-import {type URLTemplate, getURLFromTemplate} from '../tileset-2d/utils';
-import {urlType} from '../tileset-2d/index';
+  _TILE_REFINEMENT_DEFAULT as STRATEGY_DEFAULT
+} from '@deck.gl/geo-layers';
+import {_Tile2DView as Tile2DView} from '@deck.gl/geo-layers';
+import {tile2DDeckAdapter} from '@deck.gl/geo-layers';
+import {
+  type _TileURLTemplate as URLTemplate,
+  _getURLFromTemplate as getURLFromTemplate
+} from '@deck.gl/geo-layers';
+import {_tileURLType as urlType} from '@deck.gl/geo-layers';
 
 /** Tests whether a value looks like a loaders.gl {@link TileSource}. */
 function isTileSource(value: unknown): value is TileSource {

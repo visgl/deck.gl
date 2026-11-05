@@ -151,6 +151,7 @@ const config = {
             '@deck.gl/core': resolve('../modules/core/dist'),
             '@deck.gl/extensions': resolve('../modules/extensions/dist'),
             '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
+            '@deck.gl/proposals/layers': resolve('../modules/proposals/src/layers/index.ts'),
             '@deck.gl/google-maps': resolve('../modules/google-maps/dist'),
             '@deck.gl/json': resolve('../modules/json/dist'),
             '@deck.gl/layers': resolve('../modules/layers/dist'),

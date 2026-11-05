@@ -13,7 +13,6 @@ export {default as GreatCircleLayer} from './great-circle-layer/great-circle-lay
 export {default as S2Layer} from './s2-layer/s2-layer';
 export {default as QuadkeyLayer} from './quadkey-layer/quadkey-layer';
 export {default as TileLayer} from './tile-layer/tile-layer';
-export {Tile2DLayer} from './tile-2d-layer/index';
 export {default as TripsLayer} from './trips-layer/trips-layer';
 export {default as H3ClusterLayer} from './h3-layers/h3-cluster-layer';
 export {default as H3HexagonLayer} from './h3-layers/h3-hexagon-layer';
@@ -32,10 +31,6 @@ export type {H3HexagonLayerProps} from './h3-layers/h3-hexagon-layer';
 export type {GreatCircleLayerProps} from './great-circle-layer/great-circle-layer';
 export type {S2LayerProps} from './s2-layer/s2-layer';
 export type {TileLayerProps, TileLayerPickingInfo} from './tile-layer/tile-layer';
-export type {
-  Tile2DLayerPickingInfo,
-  Tile2DLayerProps
-} from './tile-2d-layer/index';
 export type {TripsLayerProps} from './trips-layer/trips-layer';
 export type {QuadkeyLayerProps} from './quadkey-layer/quadkey-layer';
 export type {TerrainLayerProps} from './terrain-layer/terrain-layer';
@@ -68,7 +63,10 @@ export {
 } from './tileset-2d/index';
 export {Tileset2D} from './tileset-2d/index';
 export {Tile2DHeader} from './tileset-2d/index';
-export {tile2DDeckAdapter} from './tile-2d-layer/index';
+export {tile2DDeckAdapter} from './tileset-2d/deck-tileset-adapter';
 
-export {MVT2DLayer} from './mvt-2d-layer/mvt-2d-layer';
-export type {MVT2DLayerProps, MVT2DData} from './mvt-2d-layer/mvt-2d-layer';
+export {Tile2DView as _Tile2DView} from './tileset-2d/tile-2d-view';
+export {urlType as _tileURLType} from './tileset-2d/index';
+export type {URLTemplate as _TileURLTemplate} from './tileset-2d/utils';
+export {STRATEGY_DEFAULT as _TILE_REFINEMENT_DEFAULT} from './tileset-2d/index';
+export type {ZRange as _TileZRange} from './tileset-2d/index';

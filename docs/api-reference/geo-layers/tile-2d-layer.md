@@ -2,6 +2,8 @@
 
 import {Tile2DLayerDemo} from '@site/src/doc-demos/shared-tile-2d-layer';
 
+This layer is available from the private `@deck.gl/proposals/layers` module in a source checkout.
+
 <Tile2DLayerDemo />
 
 `Tile2DLayer` is the tile layer API for new applications. It renders tiled content with independent selection and visibility per view, while multiple layers can reuse the same `Tileset2D`. The existing [`TileLayer`](./tile-layer.md) remains available for compatibility with existing applications and subclasses.
@@ -13,11 +15,8 @@ The inline demo uses two styled layers and three synchronized views. Toggle **Sh
 ```ts
 import {Deck, MapView} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/layers';
-import {
-  Tile2DLayer,
-  Tileset2D,
-  tile2DDeckAdapter
-} from '@deck.gl/geo-layers';
+import {Tile2DLayer} from '@deck.gl/proposals/layers';
+import {Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
 
 const tileset = new Tileset2D<ImageBitmap>({
   adapter: tile2DDeckAdapter,
@@ -59,12 +58,12 @@ new Deck({
 ```bash
 npm install deck.gl
 # or
-npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+yarn build-private
 ```
 
 ```ts
-import {Tile2DLayer} from '@deck.gl/geo-layers';
-import type {Tile2DLayerPickingInfo, Tile2DLayerProps} from '@deck.gl/geo-layers';
+import {Tile2DLayer} from '@deck.gl/proposals/layers';
+import type {Tile2DLayerPickingInfo, Tile2DLayerProps} from '@deck.gl/proposals/layers';
 
 new Tile2DLayer<TileDataT>(...props: Tile2DLayerProps<TileDataT>[]);
 ```

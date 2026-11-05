@@ -13,8 +13,6 @@ import {
   QuadkeyLayer,
   S2Layer,
   Tile2DHeader,
-  Tile2DLayer,
-  MVT2DLayer,
   tile2DDeckAdapter,
   Tileset2D,
   TileLayer,
@@ -22,6 +20,7 @@ import {
   TerrainLayer,
   GeohashLayer
 } from '@deck.gl/geo-layers';
+import {Tile2DLayer, MVT2DLayer} from '@deck.gl/proposals/layers';
 
 test('Top-level imports', () => {
   expect(A5Layer, 'A5Layer symbol imported').toBeTruthy();

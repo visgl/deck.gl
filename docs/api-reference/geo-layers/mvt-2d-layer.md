@@ -2,6 +2,8 @@
 
 import {MVT2DLayerDemo} from '@site/src/doc-demos/mvt-2d-layer';
 
+This layer is available from the private `@deck.gl/proposals/layers` module in a source checkout.
+
 <MVT2DLayerDemo />
 
 `MVT2DLayer` is the MVT layer API for new applications. It extends [Tile2DLayer](./tile-2d-layer.md) with MVT decoding, tile transforms, clipping, geographic picking and feature-ID highlighting. It accepts MVT URL templates or an externally owned `Tileset2D` containing tile-local GeoJSON features. The existing [MVTLayer](./mvt-layer.md) remains available for applications requiring its binary data, TileJSON, or rendered-feature APIs while feature parity is completed.
@@ -9,8 +11,9 @@ import {MVT2DLayerDemo} from '@site/src/doc-demos/mvt-2d-layer';
 Decoded tiles always use normalized local coordinates. Map consumers apply a tile transform; globe consumers and low-zoom map extrusions use WGS84 geometry so heights scale at each vertex's latitude. Switching views does not invalidate decoded content or fetch a tile again while it remains cached. Each consumer retains its own rendering layers and GPU attributes.
 
 ```typescript
-import {MVT2DLayer, Tileset2D} from '@deck.gl/geo-layers';
-import type {MVT2DData} from '@deck.gl/geo-layers';
+import {MVT2DLayer} from '@deck.gl/proposals/layers';
+import {Tileset2D} from '@deck.gl/geo-layers';
+import type {MVT2DData} from '@deck.gl/proposals/layers';
 
 const loader = new MVT2DLayer({
   data: 'https://tiles-a.basemaps.cartocdn.com/vectortiles/carto.streets/v1/{z}/{x}/{y}.mvt'

@@ -188,7 +188,6 @@ export type TileLayerPickingInfo<
  */
 /**
  * Compatibility layer for applications using the legacy single-view tile API.
- * @deprecated Use Tile2DLayer for new applications and shared tile content.
  */
 export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TileLayerProps<DataT>>

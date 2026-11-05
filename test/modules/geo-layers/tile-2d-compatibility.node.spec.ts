@@ -4,13 +4,8 @@
 
 import {describe, expect, it, vi} from 'vitest';
 import {WebMercatorViewport} from '@deck.gl/core';
-import {
-  Tileset2D,
-  _Tileset2D,
-  MVT2DLayer,
-  Tile2DLayer,
-  tile2DDeckAdapter
-} from '@deck.gl/geo-layers';
+import {Tileset2D, _Tileset2D, tile2DDeckAdapter} from '@deck.gl/geo-layers';
+import {MVT2DLayer, Tile2DLayer} from '@deck.gl/proposals/layers';
 import {Tile2DView} from '../../../modules/geo-layers/src/tileset-2d/tile-2d-view';
 
 const viewport = (zoom = 4, longitude = 0) =>

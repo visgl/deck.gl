@@ -6,11 +6,12 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {MapView} from '@deck.gl/core';
-import {Tile2DLayer, Tileset2D} from '@deck.gl/geo-layers';
+import {Tileset2D} from '@deck.gl/geo-layers';
+import {Tile2DLayer} from '@deck.gl/proposals/layers';
 import {BitmapLayer} from '@deck.gl/layers';
 import {DeckGL} from '@deck.gl/react';
 import type {MapViewState, ViewStateChangeParameters} from '@deck.gl/core';
-import type {Tile2DLayerPickingInfo} from '@deck.gl/geo-layers';
+import type {Tile2DLayerPickingInfo} from '@deck.gl/proposals/layers';
 import './style.css';
 
 /** Live aggregate counters for the caches in the current comparison mode. */
