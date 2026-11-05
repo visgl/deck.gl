@@ -309,18 +309,19 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 ### Arrow Columns
 
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
+
 #### `positions` (Arrow Vector, optional)
 
-Numeric XY or XYZ fixed-size lists for instance anchors. Overrides `getPosition`.
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying instance anchors. Overrides [`getPosition`](#getposition).
 
 #### `colors` (Arrow Vector, optional)
 
-RGB or RGBA fixed-size lists for instance colors. Overrides `getColor`.
+* Default: `null`
 
-The `mesh` prop supplies the shared geometry. Transform accessors can use
-row data or constant values. See
-[Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input
-requirements and limitations.
+RGB or RGBA fixed-size lists specifying instance colors. Overrides [`getColor`](#getcolor).
 
 ## Remarks
 
