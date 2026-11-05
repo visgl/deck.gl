@@ -121,9 +121,11 @@ struct BrushingUniforms {
 
 fn brushing_isPointInRange(position: vec2<f32>) -> bool {
   if (brushing.enabled == 0) { return true; }
-  let sourceCommon = project_position_vec2_f32(position);
-  let targetCommon = project_position_vec2_f32(brushing.mousePos);
-  let distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter.xy);
+  // 3D chord distance in common space, as in the GLSL version: on the globe dropping z would
+  // shrink distances and let far points pass the test
+  let sourceCommon = project_position_vec3_f32(vec3<f32>(position, 0.0));
+  let targetCommon = project_position_vec3_f32(vec3<f32>(brushing.mousePos, 0.0));
+  let distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter);
   return distance <= brushing.radius;
 }
 `,
