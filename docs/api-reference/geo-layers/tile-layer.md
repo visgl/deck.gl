@@ -3,6 +3,7 @@ description: "TileLayer loads tiled data for the current viewport and renders it
 ---
 
 # TileLayer
+Use [Tile2DLayer](./tile-2d-layer.md) for new applications. `TileLayer` is retained for compatibility with existing apps and subclasses.
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {TileLayerDemo} from '@site/src/doc-demos/geo-layers';
@@ -451,7 +452,7 @@ To implement a custom indexing scheme, extend `Tileset2D` and implement the foll
 For example, to index using [quadkeys](https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system#tile-coordinates-and-quadkeys):
 
 ```ts
-import {_Tileset2D as Tileset2D} from '@deck.gl/geo-layers';
+import {Tileset2D} from '@deck.gl/geo-layers';
 class QuadkeyTileset2D extends Tileset2D {
   getTileIndices(opts) {
     // Quadkeys and OSM tiles share the layout, leverage existing algorithm

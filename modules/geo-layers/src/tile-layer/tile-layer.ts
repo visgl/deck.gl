@@ -186,6 +186,10 @@ export type TileLayerPickingInfo<
  *
  * Instead of fetching the entire dataset, it only loads and renders what's visible in the current viewport.
  */
+/**
+ * Compatibility layer for applications using the legacy single-view tile API.
+ * @deprecated Use Tile2DLayer for new applications and shared tile content.
+ */
 export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends CompositeLayer<
   ExtraPropsT & Required<_TileLayerProps<DataT>>
 > {

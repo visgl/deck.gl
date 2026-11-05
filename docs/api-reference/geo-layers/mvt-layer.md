@@ -1,4 +1,5 @@
 # MVTLayer
+`MVTLayer` remains supported and is not deprecated. Use it when you need binary data, TileJSON resolution, or rendered-feature querying. [MVT2DLayer](./mvt-2d-layer.md) adds shared caches and independent multi-view traversal but does not yet support those features.
 
 import {MVTLayerDemo} from '@site/src/doc-demos/geo-layers';
 
