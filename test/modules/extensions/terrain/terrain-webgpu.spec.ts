@@ -291,7 +291,10 @@ describe.each(['webgl', 'webgpu'] as const)('TerrainExtension %s rendering', bac
       const elevatedData = [{...DATA[0], path: DATA[0].path.map(([x, y]) => [x, y, height(x, y)])}];
       const reference = await renderFrame({data: elevatedData}, 35);
       const fitted = await renderFrame(
-        {extensions: [new TerrainExtension()], terrainDrawMode: 'offset'},
+        {
+          extensions: [new TerrainExtension()],
+          terrainDrawMode: backend === 'webgl' ? 'offset' : undefined
+        },
         35,
         0,
         createTerrain(height)
