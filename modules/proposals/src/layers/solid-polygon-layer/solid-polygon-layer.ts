@@ -28,7 +28,7 @@ export type GPUSolidPolygonLayerProps = Omit<LayerProps, 'data'> & {
   positions: GPUVector<VertexList<'float32x4'>>;
   rowIndices: GPUVector<VertexList<'uint32'>>;
   indices: GPUVector<VertexList<'uint32'>>;
-  getFillColor?: Color | GPUVector<VertexList<'unorm8x4'>>;
+  fillColors?: Color | GPUVector<VertexList<'unorm8x4'>>;
 };
 
 type GPUSolidPolygonLayerState = {model: PolygonAttributeModel | null};
@@ -86,7 +86,7 @@ export class GPUSolidPolygonLayer extends Layer<GPUSolidPolygonLayerProps> {
       props.positions !== boundInputs[0] ||
       props.rowIndices !== boundInputs[1] ||
       props.indices !== boundInputs[2] ||
-      props.getFillColor !== boundInputs[3]
+      props.fillColors !== boundInputs[3]
     ) {
       this.destroyModel();
       this.createModel();
@@ -118,11 +118,16 @@ export class GPUSolidPolygonLayer extends Layer<GPUSolidPolygonLayerProps> {
       modules: [project32, picking],
       source: GPU_SOLID_POLYGON_SHADER
     });
-    const color = isGPUVector(this.props.getFillColor)
-      ? this.props.getFillColor
+    const color = isGPUVector(this.props.fillColors)
+      ? this.props.fillColors
       : new GPUConstant({
           format: 'unorm8x4',
-          value: new Uint8Array(this.props.getFillColor ?? [0, 0, 0, 255])
+          value: new Uint8Array([
+            this.props.fillColors?.[0] ?? 0,
+            this.props.fillColors?.[1] ?? 0,
+            this.props.fillColors?.[2] ?? 0,
+            this.props.fillColors?.[3] ?? 255
+          ])
         });
     const model = new PolygonAttributeModel(this.context.device, {
       ...shaderProps,
@@ -137,7 +142,7 @@ export class GPUSolidPolygonLayer extends Layer<GPUSolidPolygonLayerProps> {
       this.props.positions,
       this.props.rowIndices,
       this.props.indices,
-      this.props.getFillColor
+      this.props.fillColors
     ];
     this.setState({model} satisfies GPUSolidPolygonLayerState);
   }
