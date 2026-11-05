@@ -12,7 +12,12 @@ import {
 } from '@deck.gl/core';
 import {TextLayer, GeoJsonLayer, ScatterplotLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {PointLabelLayer} from '@deck.gl/carto';
-import {CollisionFilterExtension, DataFilterExtension, MaskExtension} from '@deck.gl/extensions';
+import {
+  ClipExtension,
+  CollisionFilterExtension,
+  DataFilterExtension,
+  MaskExtension
+} from '@deck.gl/extensions';
 import {createContainer, createTestDevice, removeContainer} from './deck-test-utils';
 import {isRenderTestDeviceEnabled} from './render-test-suite';
 
@@ -972,6 +977,21 @@ async function pickBinaryText(layer: TextLayer): Promise<number[]> {
   return objects.map(({index}) => index).sort();
 }
 
+async function pickLayerIds(layers): Promise<string[]> {
+  await new Promise<void>((resolve, reject) => {
+    deck.setProps({
+      layers,
+      viewState: {target: [0, 0, 0], zoom: 0},
+      onError: reject,
+      onAfterRender: () => {
+        if (layers.every(layer => layer.isLoaded)) resolve();
+      }
+    });
+  });
+  const objects = await deck.pickObjectsAsync({x: 0, y: 0, width: 800, height: 450});
+  return Array.from(new Set(objects.map(({layer}) => layer!.id))).sort();
+}
+
 test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
   'binary text collision includes background padding',
   async () => {
@@ -1384,6 +1404,52 @@ test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
       }
     } finally {
       deck.setProps({views: new OrthographicView()});
+    }
+  }
+);
+
+test.skipIf(!isRenderTestDeviceEnabled('webgl'))(
+  'labels crossing a clip boundary keep their unclipped part',
+  async () => {
+    // The clip bounds keep the left half of the view. The other label overlaps only the clipped part.
+    const {data: binaryData, buffer} = createBinaryText([{text: 'Collision label', x: 0}]);
+    const objectData = [{position: [0, 0], text: 'Collision label'}];
+    const other = new TextLayer({
+      id: 'unclipped',
+      data: [{position: [120, 0], text: 'Collision label'}],
+      getSize: 24,
+      billboard: false,
+      extensions,
+      pickable: true,
+      getCollisionPriority: 100
+    });
+    try {
+      for (const {input, data, background} of [
+        {input: 'objects', data: objectData, background: false},
+        {input: 'objects', data: objectData, background: true},
+        {input: 'binary', data: binaryData, background: false}
+      ]) {
+        const layer = new TextLayer({
+          id: 'clipped',
+          data,
+          background,
+          getSize: 24,
+          billboard: false,
+          clipBounds: [-1000, -1000, 0, 1000],
+          clipByInstance: false,
+          extensions: [new CollisionFilterExtension(), new ClipExtension()],
+          pickable: true,
+          getCollisionPriority: -100
+        });
+        expect(await pickLayerIds([layer, other]), `${input}, background=${background}`).toEqual([
+          'clipped',
+          'unclipped'
+        ]);
+      }
+    } finally {
+      deck.setProps({layers: []});
+      await new Promise(requestAnimationFrame);
+      buffer.destroy();
     }
   }
 );

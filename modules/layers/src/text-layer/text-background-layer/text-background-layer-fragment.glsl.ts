@@ -46,6 +46,11 @@ vec4 get_stroked_fragColor(float dist) {
 void main(void) {
 #ifdef MODULE_COLLISION
   if (collision.visibilityPass) {
+    // Run other extensions' fragment tests, so parts of the label that ClipExtension discards are
+    // not tested. The color itself is not used.
+    geometry.uv = uv;
+    vec4 filteredColor = vec4(1.0);
+    DECKGL_FILTER_COLOR(filteredColor, geometry);
     fragColor = collision_getBoundsData();
     return;
   }
