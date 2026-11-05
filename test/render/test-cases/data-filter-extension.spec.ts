@@ -4,9 +4,9 @@
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {DataFilterExtension} from '@deck.gl/extensions';
-import {describe} from 'vitest';
+import {describe, expect} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
-import type {TestCase} from '../deck-test-utils';
+import {defaultOnAfterRender, type TestCase} from '../deck-test-utils';
 
 const VIEWSTATE = {latitude: 37, longitude: -122, zoom: 10.2, pitch: 0, bearing: 0};
 const DATA = [];
@@ -26,6 +26,7 @@ for (let y = 0; y < 20; y++) {
 const testCases = [
   {
     name: 'filter-1d',
+    expectedCount: 120,
     props: {
       extensions: [new DataFilterExtension({countItems: true, filterSize: 1})],
       getFilterValue: d => d.column,
@@ -34,6 +35,7 @@ const testCases = [
   },
   {
     name: 'filter-2d',
+    expectedCount: 24,
     props: {
       extensions: [new DataFilterExtension({countItems: true, filterSize: 2})],
       getFilterValue: d => [d.column, d.row],
@@ -45,6 +47,7 @@ const testCases = [
   },
   {
     name: 'single-category',
+    expectedCount: 25,
     props: {
       extensions: [new DataFilterExtension({countItems: true, categorySize: 1})],
       getFilterCategory: d => d.index % 128,
@@ -53,6 +56,7 @@ const testCases = [
   },
   {
     name: '2-categories',
+    expectedCount: 13,
     props: {
       extensions: [new DataFilterExtension({countItems: true, categorySize: 2, filterSize: 0})],
       getFilterCategory: d => [d.index % 128, d.row],
@@ -64,14 +68,16 @@ const testCases = [
   },
   {
     name: '3-categories',
+    expectedCount: 7,
     props: {
       extensions: [new DataFilterExtension({countItems: true, categorySize: 3})],
-      getFilterCategory: d => [d.index % 128, d.column, d.row],
+      getFilterCategory: d => [d.index % 32, d.column, d.row],
       filterCategories: [[3], [1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6]]
     }
   },
   {
     name: '4-categories',
+    expectedCount: 4,
     props: {
       extensions: [new DataFilterExtension({countItems: true, categorySize: 4})],
       getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
@@ -80,6 +86,7 @@ const testCases = [
   },
   {
     name: '4-categories-filter-2d',
+    expectedCount: 2,
     props: {
       extensions: [new DataFilterExtension({countItems: true, categorySize: 4, filterSize: 2})],
       getFilterCategory: ({index}) => [index % 2, index % 3, index % 5, index % 7],
@@ -91,28 +98,42 @@ const testCases = [
       ]
     }
   }
-].map(({name, props}) => ({
-  name: `data-filter-effect-${name}`,
-  viewState: VIEWSTATE,
-  layers: [
-    new ScatterplotLayer({
-      id: name,
-      data: DATA,
-      onFilteredItemsChange: () => {},
-      getRadius: 8,
-      radiusUnits: 'pixels',
-      ...props
-    }),
-    new ScatterplotLayer({
-      id: `${name}-background`,
-      data: DATA,
-      getRadius: 2,
-      radiusUnits: 'pixels'
-    })
-  ],
-  goldenImage: `./test/render/golden-images/data-filter-effect-${name}.png`
-}));
+];
 
 describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases as TestCase[], deviceType);
+  const renderCases = testCases.map(({name, props, expectedCount}) => {
+    let filteredCount: number | undefined;
+    return {
+      name: `data-filter-effect-${name}`,
+      viewState: VIEWSTATE,
+      layers: [
+        new ScatterplotLayer({
+          id: name,
+          data: DATA,
+          onFilteredItemsChange: ({count}) => {
+            filteredCount = count;
+          },
+          getRadius: 8,
+          radiusUnits: 'pixels',
+          ...props
+        }),
+        new ScatterplotLayer({
+          id: `${name}-background`,
+          data: DATA,
+          getRadius: 2,
+          radiusUnits: 'pixels'
+        })
+      ],
+      onAfterRender: params => {
+        if (filteredCount === undefined) {
+          params.layers[0].setNeedsRedraw();
+          return;
+        }
+        expect(filteredCount).toBe(expectedCount);
+        defaultOnAfterRender(params);
+      },
+      goldenImage: `./test/render/golden-images/data-filter-effect-${name}.png`
+    };
+  });
+  runRenderTestSuite(renderCases as TestCase[], deviceType);
 });
