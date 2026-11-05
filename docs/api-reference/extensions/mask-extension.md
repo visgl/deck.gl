@@ -3,7 +3,7 @@
 
 The `MaskExtension` allows layers to show/hide objects by a geofence. For example, a map may filter a list of user locations by the boundaries of a given country, or highlight part of a base map that is inside a user-drawn circle or lasso area. This extension provides a significantly more performant alternative to testing the data array against a bounding geometry on the CPU.
 
-Masking and picking work on supported layers on both WebGL and WebGPU, including map and globe views. Up to four masks can be used together.
+Use up to four masks in map and globe views. Masked objects outside the visible region cannot be picked.
 
 To use this extension, first define a mask layer with the prop `operation: 'mask'`. A mask layer is not rendered to screen; it defines the geometry of the mask. If the layer renders 3D objects, its footprint on the XY plane is used.
 

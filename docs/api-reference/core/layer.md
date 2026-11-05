@@ -587,7 +587,7 @@ Please refer to the luma.gl [GPU Parameters](https://luma.gl/docs/api-reference/
 
 * Default: `({layerIndex}) => [0, -layerIndex * 100]`
 
-When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl applies a depth offset using `gl.polygonOffset` on WebGL and depth bias on WebGPU. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
+When multiple layers are rendered on the same plane, [z-fighting](https://en.wikipedia.org/wiki/Z-fighting) may create undesirable artifacts. To improve the visual quality of composition, deck.gl applies a depth offset. By default, each layer is offset a small amount by its index so that layers are cleanly stacked from bottom to top.
 
 This accessor takes a single parameter `uniform` - an object that contains the current render uniforms, and returns an array of two numbers `factor` and `units`. Negative values pull layer towards the camera, and positive values push layer away from the camera. For more information, refer to the [documentation](https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glPolygonOffset.xml) and [FAQ](https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm).
 

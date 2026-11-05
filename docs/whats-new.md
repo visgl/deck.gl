@@ -23,9 +23,9 @@ The website gallery includes three new sections: Arrow Layers, Visual Effects, a
 
 [`BrushingExtension`](./api-reference/extensions/brushing-extension.md) supports WebGPU on standard rendering primitives, including picking and live accessor updates.
 
-### WebGPU masking
+### Layer masking
 
-[`MaskExtension`](./api-reference/extensions/mask-extension.md) supports WebGPU, including inverted masks, picking, map and globe views, and updates to multiple masks.
+[`MaskExtension`](./api-reference/extensions/mask-extension.md) lets you combine and update up to four masks in map and globe views. Invert a mask to show and pick objects outside its boundary.
 
 ### WebGPU data filtering
 

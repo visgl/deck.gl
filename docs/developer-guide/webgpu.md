@@ -96,7 +96,7 @@ The table below covers the public extensions in `@deck.gl/extensions`. Most rema
 | `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `ClipExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `MaskExtension` | ✅ | ✅ |
 
 ## Effects
 
