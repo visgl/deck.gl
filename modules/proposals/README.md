@@ -21,11 +21,13 @@ and [focused layer entry points](./layers-README.md) for API details.
 
 ### GPU path and polygon layers
 
-These WebGPU layers borrow prepared GPU vectors. Keep the vectors and their buffers
+These layers borrow prepared GPU vectors on WebGPU. Keep the vectors and their buffers
 alive while a layer uses them, and release them after the layer is done.
 
 - `GPUPathLayer` takes variable-length `paths`, optional `colors` and `widths`, and
-  optional per-vertex `timestamps`. To close a path, repeat its first vertex. Stroke
+  optional per-vertex `timestamps`. It also accepts Arrow path columns and batch
+  sources on WebGL and WebGPU through the Arrow renderer. For prepared GPU vectors,
+  repeat the first vertex to close a path. Stroke
   width defaults to pixels and supports scaling and pixel clamps. Use
   `jointRounded`, `capRounded`, and `antialiasing` to control stroke coverage.
   Set `billboard: false` to extrude in the path plane.
