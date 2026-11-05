@@ -133,10 +133,6 @@
           "api-reference/layers/scatterplot-layer",
           "api-reference/mesh-layers/scenegraph-layer",
           "api-reference/aggregation-layers/screen-grid-layer",
-          "api-reference/geo-layers/tile-2d-layer",
-          "api-reference/geo-layers/mvt-2d-layer",
-          "api-reference/geo-layers/tileset-2d",
-          "api-reference/geo-layers/tile-2d-header",
           "api-reference/mesh-layers/simple-mesh-layer",
           "api-reference/layers/solid-polygon-layer",
           "api-reference/geo-layers/terrain-layer",
@@ -145,6 +141,21 @@
           "api-reference/geo-layers/tile-3d-layer",
           "api-reference/geo-layers/trips-layer",
           "api-reference/geo-layers/wms-layer"
+        ]
+      },
+      {
+        "type": "category",
+        "label": "Proposals",
+        "items": [
+          "api-reference/proposals/overview",
+          "api-reference/proposals/layers",
+          "api-reference/proposals/arrow-layers",
+          "api-reference/proposals/gpu-layers",
+          "api-reference/proposals/effects",
+          "api-reference/proposals/tile-2d-layer",
+          "api-reference/proposals/mvt-2d-layer",
+          "api-reference/proposals/tileset-2d",
+          "api-reference/proposals/tile-2d-header"
         ]
       },
       {

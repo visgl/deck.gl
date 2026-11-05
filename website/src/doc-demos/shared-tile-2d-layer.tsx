@@ -4,7 +4,7 @@
 
 import React from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
-import App from 'website-examples/shared-tile-2d-layer/app';
+import App from 'proposal-examples/shared-tile-2d-layer/app';
 
 /** Bounded shared-cache comparison using the same app as the standalone example. */
 export function Tile2DLayerDemo() {

@@ -5,7 +5,7 @@
 import {createElement} from 'react';
 import {createRoot} from 'react-dom/client';
 import {expect, test, vi} from 'vitest';
-import App, {type TileDemoStats} from '../../../examples/website/shared-tile-2d-layer/app';
+import App, {type TileDemoStats} from '../../../examples/proposals/shared-tile-2d-layer/app';
 
 /** Exercises the actual demo with deterministic raster content instead of a public tile server. */
 test('shared tileset demo renders both styles and minimap, compares caches, and remounts', async () => {

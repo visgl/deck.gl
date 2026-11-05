@@ -160,6 +160,7 @@ const config = {
             '@deck.gl/mesh-layers': resolve('../modules/mesh-layers/dist'),
             '@deck.gl/react': resolve('../modules/react/dist'),
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
+            'proposal-examples': resolve('../examples/proposals'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
             'react-dom': resolve('node_modules/react-dom')

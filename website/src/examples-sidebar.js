@@ -40,7 +40,6 @@ const sidebars = {
         'scatterplot-layer',
         'scenegraph-layer',
         'screen-grid-layer',
-        'shared-tile-2d-layer',
         // 'simple-mesh-layer',
         'terrain-layer',
         'text-layer',
@@ -51,6 +50,11 @@ const sidebars = {
         'trips-layer',
         'wms-layer'
       ]
+    },
+    {
+      type: 'category',
+      label: 'Proposals',
+      items: ['shared-tile-2d-layer']
     },
     {
       type: 'category',

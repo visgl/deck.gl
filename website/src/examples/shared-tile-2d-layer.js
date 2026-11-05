@@ -4,7 +4,7 @@
 
 import React, {Component} from 'react';
 import {GITHUB_TREE} from '../constants/defaults';
-import App from 'website-examples/shared-tile-2d-layer/app';
+import App from 'proposal-examples/shared-tile-2d-layer/app';
 
 import {makeExample} from '../components';
 
@@ -14,7 +14,7 @@ class Tile2DLayerDemo extends Component {
   static title = 'Shared Tileset';
 
   /** Source link for the standalone app reused by this page. */
-  static code = `${GITHUB_TREE}/examples/website/shared-tile-2d-layer`;
+  static code = `${GITHUB_TREE}/examples/proposals/shared-tile-2d-layer`;
 
   /** The app supplies its own raster tiles rather than a separate basemap. */
   static mapStyle = null;

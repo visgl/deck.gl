@@ -3,7 +3,7 @@ description: "TileLayer loads tiled data for the current viewport and renders it
 ---
 
 # TileLayer
-Use [Tile2DLayer](./tile-2d-layer.md) for new applications. `TileLayer` is retained for compatibility with existing apps and subclasses.
+Use [Tile2DLayer](../proposals/tile-2d-layer.md) for new applications. `TileLayer` is retained for compatibility with existing apps and subclasses.
 ![webgpu](https://img.shields.io/badge/webgpu-supported-blue.svg?style=flat-square)
 
 import {TileLayerDemo} from '@site/src/doc-demos/geo-layers';

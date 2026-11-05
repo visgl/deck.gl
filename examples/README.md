@@ -48,11 +48,11 @@ This is the main example used for testing layers during development of deck.gl.
 These are examples that use experimental deck.gl features, or implement features that we consider adding to the deck.gl API. We think they are useful to advanced users, but not yet mature enough to be an "official" example on the website.
 
 
-### [Experimental deck.gl Examples](./v10-experimental)
+### [Proposals Examples](./proposals)
 
 These examples explore experimental Arrow layers, GPU graph layers, and visual effects.
-They share fixtures in [Arrow fixtures](./v10-experimental/shared/arrow) and
-[showcase fixtures](./v10-experimental/shared/showcase). See the example collection README
+They share fixtures in [Arrow fixtures](./proposals/shared/arrow) and
+[showcase fixtures](./proposals/shared/showcase). See the example collection README
 for setup requirements and commands.
 
 
