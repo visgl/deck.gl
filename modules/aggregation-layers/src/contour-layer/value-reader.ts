@@ -3,6 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Aggregator, CPUAggregator, WebGLAggregator} from '../common/aggregator/index';
+import {getAggregationAttribute} from '../common/aggregator/aggregation-result';
 import type {TypedArray} from '@luma.gl/core';
 
 type ValueReader = (x: number, y: number) => number;
@@ -16,10 +17,16 @@ export function getAggregatorValueReader(opts: {
   const {aggregator, binIdRange, channel} = opts;
 
   if (aggregator instanceof WebGLAggregator) {
-    const buffer = aggregator.getResult(channel)?.buffer;
+    const attribute = getAggregationAttribute(aggregator.getResult(channel));
+    const buffer = attribute?.buffer;
     if (buffer) {
       const values = new Float32Array(buffer.readSyncWebGL().buffer);
-      return getWebGLAggregatorValueReader(values, binIdRange);
+      return getWebGLAggregatorValueReader(
+        values,
+        binIdRange,
+        (attribute.offset || 0) / 4,
+        (attribute.stride || 4) / 4
+      );
     }
   }
   if (aggregator instanceof CPUAggregator) {
@@ -48,7 +55,9 @@ export function getAggregatorValueReader(opts: {
 
 function getWebGLAggregatorValueReader(
   values: Float32Array,
-  binIdRange: [number, number][]
+  binIdRange: [number, number][],
+  offset: number,
+  stride: number
 ): ValueReader {
   const [[minX, maxX], [minY, maxY]] = binIdRange;
   const width = maxX - minX;
@@ -59,7 +68,7 @@ function getWebGLAggregatorValueReader(
     if (x < 0 || x >= width || y < 0 || y >= height) {
       return NaN;
     }
-    return values[y * width + x];
+    return values[offset + (y * width + x) * stride];
   };
 }
 
