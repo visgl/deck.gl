@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
-import {LayerExtension} from '@deck.gl/core';
+import {clipInstancePlugin, clipGeometryPlugin} from './shader-module';
+import {LayerExtension, project} from '@deck.gl/core';
 
 import type {Layer} from '@deck.gl/core';
+import {projectBoundsToFlatCommon, TILE_SIZE} from '../utils/projection-utils';
 
 const defaultProps = {
   clipBounds: [0, 0, 1, 1],
@@ -24,77 +25,10 @@ export type ClipExtensionProps = {
   clipByInstance?: boolean;
 };
 
-const shaderFunction = /* glsl */ `
-layout(std140) uniform clipUniforms {
-  vec4 bounds;
-} clip;
-
-bool clip_isInBounds(vec2 position) {
-  return position.x >= clip.bounds[0] && position.y >= clip.bounds[1] && position.x < clip.bounds[2] && position.y < clip.bounds[3];
-}
-`;
-
 export type ClipModuleProps = {
   bounds: Readonly<[number, number, number, number]>;
-};
-
-type WebGPUClipModuleProps = ClipModuleProps & {
-  enabled?: boolean;
-  mode?: 'instance' | 'geometry';
-};
-
-/*
- * The vertex-shader version clips geometries by their anchor position
- * e.g. ScatterplotLayer - show if the center of a circle is within bounds
- */
-const shaderModuleVs: ShaderModule<ClipModuleProps> = {
-  name: 'clip',
-  vs: shaderFunction,
-  uniformTypes: {
-    bounds: 'vec4<f32>'
-  }
-};
-
-const injectionVs = {
-  'vs:#decl': /* glsl */ `
-out float clip_isVisible;
-`,
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-  clip_isVisible = float(clip_isInBounds(geometry.worldPosition.xy));
-`,
-  'fs:#decl': /* glsl */ `
-in float clip_isVisible;
-`,
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
-  if (clip_isVisible < 0.5) discard;
-`
-};
-
-/*
- * The fragment-shader version clips pixels at the bounds
- * e.g. PolygonLayer - show the part of the polygon that intersect with the bounds
- */
-const shaderModuleFs: ShaderModule<ClipModuleProps> = {
-  name: 'clip',
-  fs: shaderFunction,
-  uniformTypes: {
-    bounds: 'vec4<f32>'
-  }
-};
-
-const injectionFs = {
-  'vs:#decl': /* glsl */ `
-out vec2 clip_commonPosition;
-`,
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
-  clip_commonPosition = geometry.position.xy;
-`,
-  'fs:#decl': /* glsl */ `
-in vec2 clip_commonPosition;
-`,
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
-  if (!clip_isInBounds(clip_commonPosition)) discard;
-`
+  /** Width of one world copy in flat common space; 0 disables wrapping */
+  worldWidth: number;
 };
 
 /** Adds support for clipping rendered layers by rectangular bounds. */
@@ -114,42 +48,36 @@ export default class ClipExtension extends LayerExtension {
     }
     this.state.clipByInstance = clipByInstance;
 
-    if (this.context.device.type === 'webgpu') {
-      return {};
-    }
-
-    return clipByInstance
-      ? {
-          modules: [shaderModuleVs],
-          inject: injectionVs
-        }
-      : {
-          modules: [shaderModuleFs],
-          inject: injectionFs
-        };
+    return {plugins: [clipByInstance ? clipInstancePlugin : clipGeometryPlugin]};
   }
 
   /* eslint-disable camelcase */
   draw(this: Layer<Required<ClipExtensionProps>>): void {
     const {clipBounds} = this.props;
-    const clipProps = {} as WebGPUClipModuleProps;
+    const {viewport} = this.context;
+    const clipProps = {worldWidth: 0} as ClipModuleProps;
     if (this.state.clipByInstance) {
-      clipProps.bounds = clipBounds;
+      // Instance shaders see packed attributes. Match their CPU conversion when
+      // the layer source CRS needs preprojection (e.g. tile-local MVT positions).
+      const transform = this.usePositionTransforms().transform;
+      if (transform) {
+        const corner0 = transform.call(this, [clipBounds[0], clipBounds[1], 0]);
+        const corner1 = transform.call(this, [clipBounds[2], clipBounds[3], 0]);
+        clipProps.bounds = [
+          Math.min(corner0[0], corner1[0]),
+          Math.min(corner0[1], corner1[1]),
+          Math.max(corner0[0], corner1[0]),
+          Math.max(corner0[1], corner1[1])
+        ];
+      } else {
+        clipProps.bounds = clipBounds;
+      }
     } else {
-      const corner0 = this.projectPosition([clipBounds[0], clipBounds[1], 0]);
-      const corner1 = this.projectPosition([clipBounds[2], clipBounds[3], 0]);
-
-      clipProps.bounds = [
-        Math.min(corner0[0], corner1[0]),
-        Math.min(corner0[1], corner1[1]),
-        Math.max(corner0[0], corner1[0]),
-        Math.max(corner0[1], corner1[1])
-      ];
-    }
-
-    if (this.context.device.type === 'webgpu') {
-      clipProps.enabled = true;
-      clipProps.mode = this.state.clipByInstance ? 'instance' : 'geometry';
+      // Pairs with project_common_position_to_flat_continuous() in the vertex shader
+      clipProps.bounds = projectBoundsToFlatCommon(this, clipBounds);
+      if (viewport.isGeospatial && !project.isCustomProjection(viewport)) {
+        clipProps.worldWidth = TILE_SIZE;
+      }
     }
 
     this.setShaderModuleProps({clip: clipProps});

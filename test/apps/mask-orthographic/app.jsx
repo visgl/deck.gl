@@ -6,7 +6,7 @@
 import React, {useState, useMemo} from 'react';
 import {createRoot} from 'react-dom/client';
 import DeckGL from '@deck.gl/react';
-import {COORDINATE_SYSTEM, OrthographicView} from '@deck.gl/core';
+import {OrthographicView} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {MaskExtension} from '@deck.gl/extensions';
 
@@ -19,7 +19,7 @@ export default function App() {
     new SolidPolygonLayer({
       id: 'mask',
       operation: 'mask',
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       data: [
         [
           [-20, -200],
@@ -35,7 +35,7 @@ export default function App() {
       id: 'square',
       extensions: [new MaskExtension()],
       maskId: maskEnabled && 'mask',
-      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+      coordinateSystem: 'cartesian',
       data: [
         [
           [-100, -100],

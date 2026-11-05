@@ -7,7 +7,8 @@ import DeckGL from '@deck.gl/react';
 import {Map} from 'react-map-gl/maplibre';
 import styled from 'styled-components';
 import {useColorMode} from '@docusaurus/theme-common';
-import {MAPBOX_STYLES} from '../constants/defaults';
+import {cloneMapStyle, MAPBOX_STYLES} from '../constants/defaults';
+import OpenFreeMapAttribution from '../components/openfreemap-attribution';
 import {gotoLayerSource} from './codepen-automation';
 
 const INITIAL_VIEW_STATE = {
@@ -95,6 +96,7 @@ export function makeLayerDemo(config) {
     getTooltip,
     props,
     mapStyle = true,
+    attribution = false,
     initialViewState = INITIAL_VIEW_STATE,
     imports
   } = config;
@@ -118,7 +120,10 @@ export function makeLayerDemo(config) {
 
     const layer = new Layer(layerProps);
 
-    const mapStyleSheet = colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT;
+    const mapStyleSheet = React.useMemo(
+      () => cloneMapStyle(colorMode === 'dark' ? MAPBOX_STYLES.DARK : MAPBOX_STYLES.LIGHT),
+      [colorMode]
+    );
 
     return (
       <DemoPlaceholder>
@@ -137,6 +142,7 @@ export function makeLayerDemo(config) {
               />
             )}
           </DeckGL>
+          {attribution && <OpenFreeMapAttribution />}
         </DemoContainer>
         <DemoSourceLink onClick={() => gotoLayerSource(config, layer)}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

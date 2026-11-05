@@ -40,7 +40,7 @@ The JavaScript uniforms are extracted from both contextual and per-layer props. 
 
 Uniforms are considered private to each shader module. They may change in between patch releases. Always use documented functions instead of accessing module uniforms directly.
 
-The uniforms of the `project` shader module are prefixed with `project_` in their names.
+The `project.coordinateFrame` uniform describes packed attributes as identity, geodetic, projected, or geocentric coordinates. It is distinct from a layer's `coordinateSystem` CRS string. Local meter and degree offsets select their own projection modes. Both numeric enum definitions are internal to the project shader module.
 
 ## GLSL Functions
 
@@ -122,6 +122,26 @@ vec2 project_pixel_size_to_clipspace(vec2 pixels)
 Converts the size of a geometry from the screen space to the clip space.
 
 
+### project_globe_is_occluded
+
+```glsl
+bool project_globe_is_occluded(vec3 commonPosition)
+```
+
+Returns `true` when the globe hides `commonPosition` from the camera in `GlobeView`, that is, when the segment from the camera to the position passes through the sphere. The test is exact at any altitude, so a position above the surface stays visible past the horizon of the ground below it. Always `false` in flat projections. Layers with camera-facing geometry such as icons, text and billboard points use it to hide objects whose anchor is behind the globe, since back-face culling cannot tell the near side from the far side for such geometry.
+
+
+### project_globe_billboard_clipspace
+
+```glsl
+vec4 project_globe_billboard_clipspace(vec4 clipPosition, vec3 commonPosition)
+```
+
+Adjusts the clip-space position of a billboard anchored at `commonPosition` so that in `GlobeView` its depth moves toward the camera by the amount the globe surface rises within a 64 pixel radius around the anchor. A sprite whose anchor is visible is then not clipped by the curve of the globe around it, for example by a basemap or a `SolidPolygonLayer` drawn as the earth's surface. The shift only depends on where the anchor is on the globe, so sprites anchored at the same place keep their depth order whatever their altitude, and a label's glyphs stay at the depth of their background. Returns `clipPosition` unchanged in flat projections. Pair with `project_globe_is_occluded`.
+
+The shift is paid for in depth against the rest of the scene. It is zero where the surface faces the camera, and where the surface is foreshortened it grows with the grazing angle, roughly the 64 pixel radius times the tangent of the angle between the camera ray and the surface normal: about 1.8 km at zoom 12 with pitch 60°. Other 3D geometry that is in front of a billboard's anchor by less than that no longer hides the billboard. A sprite that reaches further than 64 pixels toward the point of the globe below the camera can also still lose its inner pixels to the surface. Both are fixed trade-offs; the radius is a constant in the shader module and is not configurable.
+
+
 ### project_normal
 
 ```glsl
@@ -138,6 +158,36 @@ vec4 project_common_position_to_clipspace(vec4 position)
 ```
 
 Converts the coordinates of a point from the common space to the clip space, which can be assigned to `gl_Position` as the "return value" from the vertex shader.
+
+
+### project_common_position_to_flat
+
+```glsl
+vec2 project_common_position_to_flat(vec3 commonPosition)
+vec2 project_common_position_to_flat(vec4 commonPosition)
+```
+
+Converts a position in the common space of the current projection mode into flat common space: Web Mercator for geospatial views, cartesian otherwise. Returns `commonPosition.xy` unchanged for flat projections; in `GlobeView` the sphere position is inverted back to absolute Mercator. Use it when looking up textures or bounds that were computed in a flat viewport, such as an effect's framebuffer.
+
+
+### project_common_position_to_flat_wrapped
+
+```glsl
+vec2 project_common_position_to_flat_wrapped(vec3 commonPosition, float referenceX)
+vec2 project_common_position_to_flat_wrapped(vec4 commonPosition, float referenceX)
+```
+
+Same as `project_common_position_to_flat`, with x moved to the world copy nearest to `referenceX` (within half a world width) in every geospatial projection mode. No-op for identity. Use it when comparing a position against geospatial bounds or sampling a texture of a geospatial region, passing the flat x of the bounds centre: bounds that cross the antimeridian are unwrapped past one world width by the CPU helper `projectBoundsToFlatCommon` in `@deck.gl/extensions`, and this brings positions on either side of 180° into their frame.
+
+
+### project_common_position_to_flat_continuous
+
+```glsl
+vec2 project_common_position_to_flat_continuous(vec3 commonPosition, float referenceX)
+vec2 project_common_position_to_flat_continuous(vec4 commonPosition, float referenceX)
+```
+
+Same as `project_common_position_to_flat`, made continuous across the antimeridian for non-flat projections. A sphere has no seam, but its flat inverse does: at 180° longitude x jumps by one world width, so a triangle that spans the antimeridian in `GlobeView` would interpolate across the whole world. Every vertex is moved to the world copy nearest to `referenceX`, which moves the seam to the antipode of the reference; pass `project_common_position_to_flat(project.cameraPosition).x` so it is never visible. Identity for flat projection modes, where positions are already continuous. Use it for periodic patterns, which must not jump at world boundaries on a flat map.
 
 
 ### project_get_orientation_matrix

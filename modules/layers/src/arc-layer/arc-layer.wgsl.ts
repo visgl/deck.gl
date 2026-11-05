@@ -47,7 +47,8 @@ fn paraboloid(
 
 fn getExtrusionOffset(lineClipspace: vec2<f32>, side: f32, width: f32) -> vec2<f32> {
   var direction = normalize(lineClipspace * project.viewportSize);
-  direction = vec2<f32>(-direction.y, direction.x);
+  // Rotate by 90° clockwise so the strip (-1 side first) winds counter-clockwise
+  direction = vec2<f32>(direction.y, -direction.x);
   return direction * side * width / 2.0;
 }
 
@@ -139,7 +140,7 @@ fn vertexMain(
 
   if (
     (arc.greatCircle != 0.0 || project.projectionMode == PROJECTION_MODE_GLOBE) &&
-    project.coordinateSystem == COORDINATE_SYSTEM_LNGLAT
+    project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC && project.projectionMode != PROJECTION_MODE_GEODETIC_OFFSETS
   ) {
     let source = project_globe_(vec3<f32>(attributes.instanceSourcePositions.xy, 0.0));
     let targetPosition = project_globe_(vec3<f32>(attributes.instanceTargetPositions.xy, 0.0));
@@ -241,7 +242,7 @@ fn vertexMain(
     // Common x at longitude=-180.
     var antimeridianX = 0.0;
     if (arc.useShortestPath != 0.0) {
-      if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET) {
+      if ((project.projectionMode == PROJECTION_MODE_WEB_MERCATOR_AUTO_OFFSET || project.projectionMode == PROJECTION_MODE_GEODETIC_OFFSETS)) {
         antimeridianX = -(project.coordinateOrigin.x + 180.0) / 360.0 * TILE_SIZE;
       }
       let thresholdRatio = (antimeridianX - source.x) / (targetPosition.x - source.x);
@@ -279,22 +280,21 @@ fn vertexMain(
   }
 
   geometry.uv = vec2<f32>(segmentRatio, segmentSide);
-  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex + arc.rowIndexOffset);
 
   let widthPixels = clamp(
     project_unit_size_to_pixel(attributes.instanceWidths * arc.widthScale, arc.widthUnits),
     arc.widthMinPixels,
     arc.widthMaxPixels
   );
-#ifdef ANTIALIASING
   var offset = getExtrusionOffset(
-#else
-  let offset = getExtrusionOffset(
-#endif
     (nextClip.xy - currentClip.xy) * indexDirection,
     segmentSide,
     widthPixels
   );
+  var size = vec3<f32>(offset, 0.0);
+  DECKGL_FILTER_SIZE(&size, geometry);
+  offset = size.xy;
 #ifdef ANTIALIASING
   let halfWidthPixels = length(offset);
   if (halfWidthPixels > 0.0) {
@@ -313,6 +313,7 @@ fn vertexMain(
   output.uv = geometry.uv;
   output.pickingColor = geometry.pickingColor;
   output.isValid = isValid;
+  DECKGL_FILTER_GL_POSITION(&output.position, geometry);
   return output;
 }
 
@@ -333,16 +334,21 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
     discard;
   }
 #endif
+  fragmentGeometry.uv = varyings.uv;
   var color = varyings.color;
 #ifdef ANTIALIASING
   // Feather one device pixel across the width. Arc segments meet lengthwise, so only soften the
   // two outer edges of the strip.
   color.a *= smoothedge(0.0, edgePixels);
 #endif
+
   if (picking.isActive > 0.5) {
     if (!picking_isColorValid(varyings.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(varyings.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(varyings.pickingColor, 1.0);
   }
   if (picking.isHighlightActive > 0.5) {
@@ -359,6 +365,7 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
       }
     }
   }
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;

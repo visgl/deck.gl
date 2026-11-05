@@ -63,6 +63,19 @@ Remarks:
 
 Inherits all [Viewport methods](./viewport.md#methods).
 
+## Target CRS
+
+`viewport.crs` describes deck.gl's `OSMTile512` coordinate system. X increases eastward
+and Y increases southward across a 512-unit zoom-zero tile; Z is altitude in meters.
+Its bounds `[[0, 0], [512, 512]]` describe an appropriate rendering target, not the
+projection algorithm's validity limits. This is a tile-coordinate convention, distinct
+from EPSG:3857 coordinates in meters.
+
+The descriptor's WGS84 converters use `@math.gl/web-mercator`. Conversion preserves
+altitude and continuous longitude; explicit normalization wraps longitude and clamps
+latitude to the Mercator rendering extent. The viewport retains its northward Y in
+common space and its existing meter-based altitude scaling.
+
 ## Methods
 
 Inherits all methods from [Viewport](./viewport.md).

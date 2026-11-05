@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {GZipCompression} from '@loaders.gl/compression';
+// The fflate decoder supports synchronous parsing without WASM preloading.
+import {GZipFflateDecompressor} from '@loaders.gl/compression/gzip-decompressor-fflate';
 
 type ReadPackedOptions = {
   compression: null | 'gzip';
@@ -14,8 +15,8 @@ export function readPackedTypedArray(TypedArray, pbf, obj, options?: ReadPackedO
   const data = pbf.buf.buffer.slice(pbf.pos, end);
 
   if (options?.compression === 'gzip') {
-    const compression = new GZipCompression();
-    const decompressedData = compression.decompressSync(data);
+    const decompressor = new GZipFflateDecompressor();
+    const decompressedData = decompressor.decompressSync(data);
     obj.value = new TypedArray(decompressedData);
   } else {
     obj.value = new TypedArray(data);

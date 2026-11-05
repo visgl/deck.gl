@@ -141,11 +141,13 @@ const config = {
       {
         debug: true,
         resolve: {
+          // Resolve dependencies through their package export maps, including subpaths.
           modules: [resolve('node_modules'), resolve('../node_modules')],
           alias: {
             '@deck.gl/aggregation-layers': resolve('../modules/aggregation-layers/dist'),
             '@deck.gl/arcgis': resolve('../modules/arcgis/dist'),
             '@deck.gl/carto': resolve('../modules/carto/dist'),
+            '@deck.gl/core/arrow': resolve('../modules/core/dist/lib/luma-upstream/arrow-converter.js'),
             '@deck.gl/core': resolve('../modules/core/dist'),
             '@deck.gl/extensions': resolve('../modules/extensions/dist'),
             '@deck.gl/geo-layers': resolve('../modules/geo-layers/dist'),
@@ -159,26 +161,7 @@ const config = {
             '@deck.gl/widgets': resolve('../modules/widgets/dist'),
             'website-examples': resolve('../examples/website'),
             react: resolve('node_modules/react'),
-            'react-dom': resolve('node_modules/react-dom'),
-            // Explicit subpaths must precede the namespace alias, which otherwise bypasses
-            // package exports and resolves them as nonexistent directories.
-            '@luma.gl/webgl/constants': resolve(
-              '../node_modules/@luma.gl/webgl/dist/constants'
-            ),
-            '@luma.gl/gpgpu/webgpu': resolve(
-              '../node_modules/@luma.gl/gpgpu/dist/operations/webgpu'
-            ),
-            '@luma.gl/gpgpu/gpu-data': resolve('../node_modules/@luma.gl/gpgpu/dist/gpu-data'),
-            '@luma.gl/shadertools/wgsl': resolve('../node_modules/@luma.gl/shadertools/dist/wgsl'),
-            '@luma.gl': resolve('../node_modules/@luma.gl'),
-            '@math.gl': resolve('../node_modules/@math.gl'),
-            '@loaders.gl/compression': resolve('node_modules/@loaders.gl/compression'),
-            '@loaders.gl/i3s': resolve('node_modules/@loaders.gl/i3s'),
-            '@loaders.gl/las': resolve('node_modules/@loaders.gl/las'),
-            '@loaders.gl/obj': resolve('node_modules/@loaders.gl/obj'),
-            '@loaders.gl/ply': resolve('node_modules/@loaders.gl/ply'),
-            '@loaders.gl/schema': resolve('../node_modules/@loaders.gl/schema-utils'),
-            '@loaders.gl': resolve('../node_modules/@loaders.gl')
+            'react-dom': resolve('node_modules/react-dom')
           }
         },
         plugins: [
