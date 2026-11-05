@@ -327,30 +327,42 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 * If a number is provided, it is used as the outline width for all columns.
 * If a function is provided, it is called on each object to retrieve its outline width.
 
+### Arrow Columns
+
+These optional props replace the corresponding accessors. See [Using with Arrow](../../developer-guide/using-with-arrow.md)
+for input layouts, accessor fallbacks, loading, ownership, and limitations.
+
+#### `positions` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying each column's center position. Overrides [`getPosition`](#getposition).
+
+#### `elevations` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar elevations, in meters. Overrides [`getElevation`](#getelevation); `elevationScale` still applies.
+
+#### `fillColors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying fill colors. Overrides [`getFillColor`](#getfillcolor).
+
+#### `lineColors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying outline colors. Overrides [`getLineColor`](#getlinecolor).
+
+#### `lineWidths` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar outline widths, in `lineWidthUnits`. Overrides [`getLineWidth`](#getlinewidth);
+`lineWidthScale`, `lineWidthMinPixels`, and `lineWidthMaxPixels` still apply.
+
 ## Source
 
 [modules/layers/src/column-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/column-layer)
-
-### Arrow columns
-
-Supply `positions`, `elevations`, `fillColors`, `lineColors`, or `lineWidths` to
-replace the corresponding `getPosition`, `getElevation`, `getFillColor`,
-`getLineColor`, or `getLineWidth` accessor. These props use the same Arrow column
-conversion as ScatterplotLayer and ArcLayer. Positions accept numeric
-`FixedSizeList[2]` or `FixedSizeList[3]` columns, colors accept RGB/RGBA columns,
-and elevations and widths accept numeric columns.
-
-Omitted columns use their ordinary accessor, constant, or binary-attribute fallback.
-When data rows are supplied, their count must match the columns. All supplied
-columns must have matching lengths and chunk boundaries; different chunk structures
-are rejected rather than combined. `numInstances` can limit rendering to a prefix
-of the columns. Picking indices remain global across chunks.
-
-Flat fills, outlines, extruded columns, wireframes, custom vertices, and lighting
-use the same geometry and shaders as the accessor path. Geometry changes do not
-re-upload unchanged columns. The layer owns converted GPU buffers and releases them
-on replacement or removal. Pending conversions keep `isLoaded` false, and stale
-conversions cannot replace newer inputs.
-
-Arrow mode does not support extensions or attribute transitions. Removing every
-column prop restores the ordinary accessor path.
