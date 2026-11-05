@@ -7,6 +7,7 @@ import {Deck, OrthographicView} from '@deck.gl/core';
 import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {device} from '@deck.gl/test-utils/vitest';
 import {Geometry, makeGPUVectorGeometry} from '@luma.gl/engine';
+import {Buffer} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {Field, FixedSizeList, Float32, vectorFromArray} from 'apache-arrow';
 
@@ -29,8 +30,14 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       new Geometry({topology: 'triangle-list', attributes, indices})
     );
     const destroyMesh = vi.spyOn(mesh, 'destroy');
+    const transform = [1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0];
+    const buffer = testDevice.createBuffer({
+      data: new Float32Array([0, ...transform, 0, ...transform]),
+      usage: Buffer.VERTEX
+    });
     const layer = new SimpleMeshLayer({
       positions,
+      data: {length: 2, attributes: {instanceModelMatrix: {buffer, offset: 4, stride: 52}}},
       mesh,
       getTranslation: [10, 0, 0],
       pickable: true
@@ -65,6 +72,12 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       ]);
       expect((await deck.pickObjectAsync({x: 50, y: 64}))?.index).toBe(0);
       expect((await deck.pickObjectAsync({x: 98, y: 64}))?.index).toBe(1);
+      const getTranslation = vi.fn(() => [10, 0, 0] as [number, number, number]);
+      const rowLayer = layer.clone({data: [{}, {}], getTranslation});
+      deck.setProps({layers: [rowLayer]});
+      await expect.poll(() => rowLayer.isLoaded).toBe(true);
+      expect((await deck.pickObjectAsync({x: 98, y: 64}))?.index).toBe(1);
+      expect(getTranslation).toHaveBeenCalledTimes(2);
       const accessorLayer = layer.clone({
         positions: null,
         data: [{position: [-24, 0, 0]}, {position: [24, 0, 0]}]
@@ -78,6 +91,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         expect(destroyMesh).not.toHaveBeenCalled();
       } finally {
         mesh.destroy();
+        buffer.destroy();
         parent.remove();
       }
     }

@@ -37,6 +37,12 @@ type PositionOptions = {
 
 type Rows = {length: number; at(index: number): any};
 
+type PrepareFallbacks = (
+  rows: Rows,
+  length: number,
+  own: (resource: {destroy(): void}) => void
+) => Record<string, unknown>;
+
 type Request = {source: unknown; rows?: Rows};
 
 type Columns = Record<string, GPUVector | GPUConstant>;
@@ -134,12 +140,14 @@ export class LayerColumns {
       dataLoading,
       changed,
       failed,
-      positionOptions
+      positionOptions,
+      prepareFallbacks
     }: {
       dataLoading: boolean;
       changed: () => void;
       failed: (error: Error) => void;
       positionOptions?: PositionOptions;
+      prepareFallbacks?: PrepareFallbacks;
     }
   ): Promise<void> | undefined {
     if (
@@ -149,7 +157,7 @@ export class LayerColumns {
         changeFlags.projectionChanged ||
         this.needsUpdate(props, oldProps))
     ) {
-      return this.update(props, changed, failed, positionOptions);
+      return this.update(props, changed, failed, positionOptions, prepareFallbacks);
     }
     return undefined;
   }
@@ -163,7 +171,8 @@ export class LayerColumns {
     props: Record<string, any>,
     changed: () => void,
     failed: (error: Error) => void,
-    positionOptions: PositionOptions = {}
+    positionOptions: PositionOptions = {},
+    prepareFallbacks?: PrepareFallbacks
   ): Promise<void> {
     const version = ++this.version;
     this.loading = true;
@@ -182,7 +191,7 @@ export class LayerColumns {
         changed();
         return;
       }
-      const {ArrowConverter} = await import('@deck.gl/core/arrow');
+      const {ArrowConverter} = await import('./luma-upstream/arrow-converter');
       const converter = new ArrowConverter(this.device);
       const columns: Columns = {};
       let bounds: [number[], number[]] | undefined;
@@ -248,6 +257,7 @@ export class LayerColumns {
       chunkLengths ??= [length];
       if (rows.length && rows.length !== length)
         throw new Error('data rows must match Arrow column lengths');
+      const fallbacks = prepareFallbacks?.(rows, length, resource => results.push(resource));
       for (const [name, definition] of Object.entries(this.definitions)) {
         if (definition.prop === false || !props[name]) {
           columns[definition.attribute] = await this.makeAccessorColumn(
@@ -261,7 +271,8 @@ export class LayerColumns {
             positionOptions,
             rows,
             definition.semantic === 'position' ? `${definition.attribute}64Low` : undefined,
-            definition.defaultValue
+            definition.defaultValue,
+            fallbacks?.[definition.accessor]
           );
         }
       }
@@ -430,10 +441,11 @@ export class LayerColumns {
     positionOptions: PositionOptions,
     rows: Rows,
     lowAttribute?: string,
-    defaultValue = 0
+    defaultValue = 0,
+    binaryOverride?: unknown
   ): Promise<GPUVector | GPUConstant> {
     let binaryColor = false;
-    const binary = props.data?.attributes?.[accessor];
+    const binary = binaryOverride ?? props.data?.attributes?.[accessor];
     if (binary) {
       const descriptor = ArrayBuffer.isView(binary)
         ? {value: binary}
@@ -488,6 +500,7 @@ export class LayerColumns {
           format,
           length,
           byteOffset: descriptor.offset ?? 0,
+          rowByteLength: bytes,
           byteStride: descriptor.stride ?? bytes
         });
       }

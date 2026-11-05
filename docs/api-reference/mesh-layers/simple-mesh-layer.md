@@ -186,7 +186,7 @@ The geometry to render for each data object. One of:
 
 - An URL to a mesh description file in a format supported by [loaders.gl](https://loaders.gl/docs/specifications/category-mesh). The appropriate loader will have to be registered via the loaders.gl `registerLoaders` function for this usage.
 - A luma.gl [Geometry](https://github.com/visgl/luma.gl/blob/8.5-release/modules/engine/docs/api-reference/geometry.md) instance
-- A luma.gl `GPUVectorGeometry` with shader inputs named `positions`, `normals`, `colors`, and `texCoords`
+- A luma.gl `GPUVectorGeometry` with shader inputs named `positions`, `normals`, `colors`, and `texCoords`. Works with Arrow columns and ordinary accessors.
 - An object containing the following fields:
   + `positions` (Float32Array) - 3d vertex offset from the object center, in meters
   + `normals` (Float32Array) - 3d normals
@@ -324,8 +324,7 @@ requirements and limitations.
 
 ## Remarks
 
-- You can pass a luma.gl `GPUVectorGeometry` to `mesh` with either Arrow columns or
-  ordinary accessors. Mesh vertex attributes and indices must each fit in one chunk.
+- GPU mesh vertex attributes and indices must each fit in one chunk.
   Keep the geometry alive while the layer uses it and release it yourself.
 - With `_instanced: false`, GPU-only meshes do not report bounds.
 

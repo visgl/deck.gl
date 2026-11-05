@@ -8,6 +8,7 @@
 
 import {
   Layer,
+  createIterable,
   _deepEqual as deepEqual,
   _LayerColumns as LayerColumns,
   type _ColumnDefinition as ColumnDefinition,
@@ -21,7 +22,7 @@ import {
   Material,
   phongMaterial
 } from '@deck.gl/core';
-import {SamplerProps, Texture} from '@luma.gl/core';
+import {Buffer, SamplerProps, Texture} from '@luma.gl/core';
 import {
   type Model,
   Geometry,
@@ -47,7 +48,6 @@ import type {
   LayerDataSource,
   UpdateParameters,
   Accessor,
-  AccessorFunction,
   Position,
   Color,
   TextureSource
@@ -469,7 +469,6 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
 
   /** Supplies mesh transform accessors as the four instance vectors expected by the shaders. */
   private updateInstanceColumns({props, oldProps, changeFlags}: UpdateParameters<this>): void {
-    const accessors = this.getColumnTransformAccessors(props);
     // Function-valued transforms follow updateTriggers, like ordinary mesh accessors.
     const transformsChanged = TRANSFORM_ACCESSORS.some(name => {
       const value = props[name];
@@ -481,8 +480,8 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     });
     void this.state.columns!.updateIfNeeded(
       {
-        props: Object.assign(Object.create(props), accessors),
-        oldProps: Object.assign(Object.create(oldProps), accessors),
+        props,
+        oldProps,
         changeFlags: {
           ...changeFlags,
           dataChanged:
@@ -496,6 +495,7 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
           this.setNeedsUpdate();
         },
         failed: error => this.raiseError(error, 'converting Arrow columns'),
+        prepareFallbacks: (rows, length, own) => this.prepareTransforms(props, rows, length, own),
         positionOptions: {
           transform: this.usePositionTransforms().transform?.bind(this),
           fp64: this.use64bitPositions(),
@@ -508,24 +508,53 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
     );
   }
 
-  /** Preserves constant transforms as constants so they can share a WebGPU binding. */
-  private getColumnTransformAccessors(props: typeof this.props) {
-    const accessors = TRANSFORM_ACCESSORS.map(name => props[name]);
-    const evaluate = (row: DataT, info: Parameters<AccessorFunction<DataT, number[]>>[1]) => {
-      const [matrix, orientation, scale, translation] = accessors.map(accessor =>
-        typeof accessor === 'function' ? accessor(row, info) : accessor
-      );
-      return getMeshInstanceTransform(matrix, orientation, scale, translation);
-    };
-    const constant = accessors.every(accessor => Array.isArray(accessor));
-    const matrix = constant ? evaluate(undefined as DataT, undefined!) : null;
+  /** Splits one packed transform buffer into the shader's four vector views. */
+  private prepareTransforms(
+    props: typeof this.props,
+    rows: {at(index: number): DataT},
+    length: number,
+    own: (buffer: Buffer) => void
+  ) {
+    const binary = (props.data as any)?.attributes?.instanceModelMatrix;
+    let descriptor =
+      binary instanceof Buffer
+        ? {buffer: binary}
+        : ArrayBuffer.isView(binary)
+          ? {value: binary}
+          : binary;
+    if (!descriptor) {
+      const accessors = TRANSFORM_ACCESSORS.map(name => props[name]);
+      const constant = accessors.every(accessor => Array.isArray(accessor));
+      const count = constant ? 1 : length;
+      const values = new Float32Array(count * 12);
+      const {objectInfo: info} = createIterable(props.data);
+      for (let index = 0; index < count; index++) {
+        info.index = index;
+        const row = rows.at(index);
+        const [matrix, orientation, scale, translation] = accessors.map(accessor =>
+          typeof accessor === 'function' ? accessor(row, info) : accessor
+        );
+        values.set(getMeshInstanceTransform(matrix, orientation, scale, translation), index * 12);
+      }
+      descriptor = {value: values, constant};
+    }
+    if (!descriptor.constant && !descriptor.buffer && length) {
+      const buffer = this.context.device.createBuffer({
+        data: descriptor.value,
+        usage: Buffer.VERTEX | Buffer.COPY_DST
+      });
+      own(buffer);
+      descriptor = {...descriptor, buffer};
+    }
     return Object.fromEntries(
       TRANSFORM_ATTRIBUTES.map((name, index) => [
         name,
-        matrix
-          ? matrix.slice(index * 3, index * 3 + 3)
-          : (row: DataT, info: Parameters<AccessorFunction<DataT, number[]>>[1]) =>
-              evaluate(row, info).subarray(index * 3, index * 3 + 3)
+        {
+          ...descriptor,
+          size: 3,
+          stride: descriptor.stride ?? 48,
+          offset: (descriptor.offset ?? 0) + index * 12
+        }
       ])
     );
   }
