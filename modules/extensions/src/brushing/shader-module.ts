@@ -125,7 +125,14 @@ fn brushing_isPointInRange(position: vec2<f32>) -> bool {
   // shrink distances and let far points pass the test
   let sourceCommon = project_position_vec3_f32(vec3<f32>(position, 0.0));
   let targetCommon = project_position_vec3_f32(vec3<f32>(brushing.mousePos, 0.0));
-  let distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter);
+  var distance = length((targetCommon - sourceCommon) / project.commonUnitsPerMeter);
+  if (project.projectionMode == PROJECTION_MODE_WEB_MERCATOR &&
+      project.coordinateFrame == COORDINATE_SYSTEM_GEODETIC &&
+      project.pseudoMeters == 0) {
+    // Below the auto-offset zoom commonUnitsPerMeter is equatorial; scale by latitude so the
+    // radius is true meters, as in the GLSL version
+    distance /= _project_size_at_latitude(0.5 * (brushing.mousePos.y + position.y));
+  }
   return distance <= brushing.radius;
 }
 `,
