@@ -21,7 +21,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import {getAggregationAttribute} from '../common/aggregator/aggregation-result';
 import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import {AggregateAccessor} from '../common/types';
 import {defaultColorRange} from '../common/utils/color-utils';
@@ -587,7 +586,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       elevationDomain
     } = this.props;
     const CellLayerClass = this.getSubLayerClass('cells', GridCellLayer);
-    const binAttribute = getAggregationAttribute(aggregator.getBins());
+    const binAttribute = aggregator.getBins();
 
     const colors = this.state.colors?.update({
       scaleType: colorScaleType,
@@ -609,6 +608,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         id: 'cells'
       }),
       {
+        numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
           attributes: {

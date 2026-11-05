@@ -152,8 +152,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
             ];
           }
         },
-        getValue: [{sources: ['counts'], getValue: ({counts}) => counts}],
-        onUpdate: this._onAggregationUpdate.bind(this)
+        getValue: [{sources: ['counts'], getValue: ({counts}) => counts}]
       });
     }
     return new WebGLAggregator(this.context.device, {
@@ -176,8 +175,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     value = counts;
   }
   `
-      }),
-      onUpdate: this._onAggregationUpdate.bind(this)
+      })
     });
   }
 
@@ -219,6 +217,7 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         binIdRange,
         pointCount: this.getNumInstances(),
         operations: [props.aggregation],
+        onUpdate: this._onAggregationUpdate.bind(this),
         binOptions: {
           cellSizeCommon,
           cellOriginCommon

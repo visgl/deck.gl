@@ -5,12 +5,13 @@
 import {AttributeWithScale} from '../../../../modules/aggregation-layers/src/common/utils/scale-utils';
 import {test, expect, vi} from 'vitest';
 import {Buffer} from '@luma.gl/core';
-import {LayerExtension} from '@deck.gl/core';
+import {LayerExtension, OrthographicView, Attribute} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
   ScreenGridLayer,
   GridLayer,
+  ContourLayer,
   CPUAggregator,
   type Aggregator
 } from '@deck.gl/aggregation-layers';
@@ -173,7 +174,11 @@ test('Aggregation GPU columns bypass accessors and render borrowed vectors', () 
           onAfterUpdate: ({layer}) => {
             expect(layer.getNumInstances()).toBe(1);
             expect(getPosition).not.toHaveBeenCalled();
-            expect(aggregator.setProps).toHaveBeenCalledWith({positions, weights: [weights]});
+            expect(aggregator.setProps).toHaveBeenCalledWith({
+              positions,
+              weights: [weights],
+              pointCount: 1
+            });
             expect(aggregator.preDraw).toHaveBeenCalled();
             expect(aggregator.getResultDomain).not.toHaveBeenCalled();
           }
@@ -297,3 +302,127 @@ test('Grid WebGPU results render with explicit domains without domain readback',
     }
   }
 );
+
+test('GPU column prefix updates refresh the aggregator count', () => {
+  const buffer = device.createBuffer({data: new Float32Array(12), usage: Buffer.VERTEX});
+  const positions = createVector('positions', 'float32x2', 4, buffer);
+  const weights = createVector('weights', 'float32', 4, buffer, 32);
+  let pointCount = 0;
+  const totals: number[] = [];
+  const aggregator: Aggregator = {
+    binCount: 1,
+    setProps: props => {
+      if (props.pointCount !== undefined) pointCount = props.pointCount;
+    },
+    setNeedsUpdate: vi.fn(),
+    update: () => {
+      totals.push(pointCount);
+    },
+    preDraw() {},
+    destroy() {},
+    getBins: () => positions,
+    getResult: () => weights,
+    getResultDomain: () => [0, 1],
+    getBin: () => null
+  };
+  try {
+    testLayer({
+      Layer: ScreenGridLayer,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {
+          title: 'full column',
+          props: {positions, weights: [weights], aggregator},
+          onAfterUpdate: () => expect(totals.at(-1)).toBe(4)
+        },
+        {
+          title: 'shorter prefix',
+          updateProps: {numInstances: 2},
+          onAfterUpdate: () => expect(totals.at(-1)).toBe(2)
+        },
+        {
+          title: 'empty prefix',
+          updateProps: {numInstances: 0},
+          onAfterUpdate: () => expect(totals.at(-1)).toBe(0)
+        },
+        {
+          title: 'restore full prefix',
+          updateProps: {numInstances: 4},
+          onAfterUpdate: () => expect(totals.at(-1)).toBe(4)
+        }
+      ]
+    });
+  } finally {
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
+  }
+});
+
+test('Custom contour aggregators receive result callbacks', () => {
+  const aggregator = new CPUAggregator({
+    dimensions: 2,
+    getBin: {
+      sources: ['positions'],
+      getValue: (_values, index) => [index % 2, Math.floor(index / 2)]
+    },
+    getValue: [{sources: ['counts'], getValue: (_values, index) => (index === 0 ? 2 : 0)}]
+  });
+  testLayer({
+    Layer: ContourLayer,
+    viewport: new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    }),
+    onError: error => {
+      throw error;
+    },
+    testCases: [
+      {
+        title: 'publish contour results',
+        props: {
+          data: [
+            [0, 0],
+            [1, 0],
+            [0, 1],
+            [1, 1]
+          ],
+          getPosition: d => d,
+          cellSize: 1,
+          contours: [{threshold: 1}],
+          aggregator
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          expect(layer.state.aggregatedValueReader).toBeTypeOf('function');
+          expect(layer.state.aggregatedValueReader?.(0, 0)).toBe(2);
+          expect(subLayers.length).toBeGreaterThan(0);
+        }
+      }
+    ]
+  });
+});
+
+test('GPUVector attribute identity avoids rebinding unchanged storage', () => {
+  const buffer = device.createBuffer({data: new Float32Array([0, 1, 2, 3]), usage: Buffer.VERTEX});
+  const vector = createVector('values', 'float32', 2, buffer);
+  const moved = createVector('values', 'float32', 2, buffer, 4);
+  const attribute = new Attribute(device, {id: 'values', size: 1, accessor: 'getValue'});
+  attribute.numInstances = 2;
+  const setData = vi.spyOn(attribute, 'setData');
+  try {
+    attribute.setBinaryValue(vector);
+    attribute.setBinaryValue(vector);
+    expect(setData).toHaveBeenCalledTimes(1);
+    attribute.setBinaryValue(moved);
+    expect(setData).toHaveBeenCalledTimes(2);
+    expect(attribute.getValue().values).toBe(buffer);
+  } finally {
+    attribute.delete();
+    vector.destroy();
+    moved.destroy();
+    buffer.destroy();
+  }
+});

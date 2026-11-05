@@ -18,7 +18,7 @@ type ScaleProps = {
 /** Applies a scale to BinaryAttribute */
 export class AttributeWithScale {
   /** Input values accessor. Has either a `value` (CPU aggregation) or a `buffer` (GPU aggregation) */
-  private readonly input: BinaryAttribute;
+  private readonly input: AggregationResult;
   private readonly inputLength: number;
 
   private props: ScaleProps = {
@@ -32,14 +32,14 @@ export class AttributeWithScale {
   private _ordinal?: {attribute: BinaryAttribute; domain: number[]};
 
   /** Output values accessor */
-  attribute: BinaryAttribute;
+  attribute: AggregationResult;
   /** [min, max] of attribute values, or null if unknown */
   domain: [number, number] | null = null;
   /** Valid domain if lower/upper percentile are defined */
   cutoff: [number, number] | null = null;
 
   constructor(input: AggregationResult, inputLength: number) {
-    this.input = getAggregationAttribute(input)!;
+    this.input = input;
     this.inputLength = inputLength;
     // No processing is needed with the default scale
     this.attribute = this.input;
@@ -181,7 +181,8 @@ export function applyScaleQuantile(
   };
 }
 
-function getAttributeValue(attribute: BinaryAttribute, length: number): Float32Array {
+function getAttributeValue(input: AggregationResult, length: number): Float32Array {
+  const attribute = getAggregationAttribute(input)!;
   const elementStride = (attribute.stride ?? 4) / 4;
   const elementOffset = (attribute.offset ?? 0) / 4;
   let value = attribute.value as Float32Array;

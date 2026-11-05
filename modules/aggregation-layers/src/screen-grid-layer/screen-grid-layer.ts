@@ -15,7 +15,6 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import {getAggregationAttribute} from '../common/aggregator/aggregation-result';
 import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
@@ -257,8 +256,8 @@ export default class ScreenGridLayer<
   renderLayers(): LayersList | Layer | null {
     const {aggregator} = this.state;
     const CellLayerClass = this.getSubLayerClass('cells', ScreenGridCellLayer);
-    const binAttribute = getAggregationAttribute(aggregator.getBins());
-    const weightAttribute = getAggregationAttribute(aggregator.getResult(0));
+    const binAttribute = aggregator.getBins();
+    const weightAttribute = aggregator.getResult(0);
 
     return new CellLayerClass(
       this.props,
@@ -266,6 +265,7 @@ export default class ScreenGridLayer<
         id: 'cell-layer'
       }),
       {
+        numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
           attributes: {

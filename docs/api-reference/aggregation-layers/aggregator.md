@@ -171,7 +171,7 @@ The number of bins in the aggregated result.
 
 `ScreenGridLayer`, `GridLayer`, `HexagonLayer`, and `ContourLayer` accept an optional
 `aggregator` instance. When omitted, the layer creates its default aggregator using the
-existing `gpuAggregation` selection and CPU fallbacks.
+existing layer settings.
 
 ```typescript
 new ScreenGridLayer({
@@ -216,7 +216,6 @@ new ScreenGridLayer({
 Input columns remain caller-owned. Replace column references when their data changes, or
 explicitly invalidate the aggregator when updating storage in place. GPU column inputs require
 a custom aggregator and do not support layer extensions or accessor fallbacks.
-The built-in CPU/WebGL aggregators continue to consume accessor/binary attributes.
 
 ### GPU column results
 
@@ -232,5 +231,5 @@ color/elevation domains and omitting domain callbacks avoids automatic domain re
 custom aggregators. Explicit domain callbacks receive the aggregation domain through
 `getResultDomain()`.
 
-Percentile and ordinal scales require CPU-readable values or WebGL buffers. Picking uses
-`getBin()`. ContourLayer requires CPU-readable results for marching squares.
+Percentile and ordinal scales access results on the CPU. Picking uses `getBin()`.
+ContourLayer uses CPU-readable results for marching squares.

@@ -72,7 +72,7 @@ export default abstract class AggregationLayer<
     ) {
       throw new Error('GPU aggregation weights must match the channels and position length');
     }
-    this.state.aggregator.setProps({positions, weights});
+    this.state.aggregator.setProps({positions, weights, pointCount: this.getNumInstances()});
     this.state.aggregator.update();
   }
 
@@ -161,7 +161,8 @@ export default abstract class AggregationLayer<
     }
     if (
       params.props.positions !== params.oldProps.positions ||
-      params.props.weights !== params.oldProps.weights
+      params.props.weights !== params.oldProps.weights ||
+      params.props.numInstances !== params.oldProps.numInstances
     ) {
       this.state.aggregator?.setNeedsUpdate();
       if (!params.props.positions) this.getAttributeManager()?.invalidateAll();
