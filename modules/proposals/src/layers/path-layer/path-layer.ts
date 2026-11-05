@@ -6,6 +6,8 @@ import {
   Layer,
   picking,
   project32,
+  UNIT,
+  type Unit,
   type Color,
   type LayerContext,
   type LayerProps,
@@ -25,11 +27,21 @@ export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native variable-length path props. Input vectors are borrowed. */
 export type GPUPathLayerProps = Omit<LayerProps, 'data'> & {
-  getPath: GPUVector<VertexList<'float32x2' | 'float32x3' | 'float32x4'>>;
-  getColor?: Color | GPUVector<'unorm8x4' | VertexList<'unorm8x4'>>;
-  getWidth?: number | GPUVector<'float32'>;
-  getTimestamps?: GPUVector<VertexList<'float32'>>;
+  paths: GPUVector<VertexList<'float32x2' | 'float32x3' | 'float32x4'>>;
+  colors?: Color | GPUVector<'unorm8x4' | VertexList<'unorm8x4'>>;
+  widths?: number | GPUVector<'float32'>;
+  timestamps?: GPUVector<VertexList<'float32'>>;
   viewOrigins?: GPUVector<'float32x4'>;
+  /** Units of the stroke widths. Defaults to pixels. */
+  widthUnits?: Unit;
+  /** Multiplier for stroke widths. */
+  widthScale?: number;
+  /** Lower bound on the rendered stroke width. */
+  widthMinPixels?: number;
+  /** Upper bound on the rendered stroke width. */
+  widthMaxPixels?: number;
+  /** Maximum ratio of join length to stroke half-width. */
+  miterLimit?: number;
   currentTime?: number;
   trailLength?: number;
   fadeTrail?: boolean;
@@ -77,6 +89,11 @@ struct PathLayerStyle {
   trailLength: f32,
   temporalMode: u32,
   fadeTrail: u32,
+  widthScale: f32,
+  widthMinPixels: f32,
+  widthMaxPixels: f32,
+  miterLimit: f32,
+  widthUnits: u32,
 };
 @group(0) @binding(auto) var<uniform> pathLayerStyle: PathLayerStyle;
 
@@ -122,6 +139,23 @@ fn readPathPoint(pointIndex: u32) -> vec4<f32> {
   );
 }
 
+fn pathDirection(start: vec4<f32>, end: vec4<f32>, fallback: vec2<f32>) -> vec2<f32> {
+  let delta = (end.xy / end.w - start.xy / start.w) * project.viewportSize;
+  if (length(delta) < 0.000001) { return fallback; }
+  return normalize(delta);
+}
+
+fn strokeNormal(direction: vec2<f32>) -> vec2<f32> {
+  return vec2<f32>(-direction.y, direction.x);
+}
+
+fn joinNormal(incoming: vec2<f32>, outgoing: vec2<f32>, fallback: vec2<f32>) -> vec2<f32> {
+  let sum = strokeNormal(incoming) + strokeNormal(outgoing);
+  if (length(sum) < 0.000001) { return fallback; }
+  let miter = normalize(sum);
+  return miter * min(pathLayerStyle.miterLimit, 1.0 / max(dot(miter, fallback), 0.000001));
+}
+
 fn getCorner(vertexIndex: u32) -> vec2<f32> {
   let corners = array<vec2<f32>, 6>(
     vec2<f32>(0.0, -1.0), vec2<f32>(1.0, -1.0), vec2<f32>(1.0, 1.0),
@@ -142,13 +176,31 @@ fn getCorner(vertexIndex: u32) -> vec2<f32> {
   let endWorld = readPathPoint(endPointIndex) + viewOrigin;
   let startClip = project_position_to_clipspace(startWorld.xyz, vec3<f32>(0.0), vec3<f32>(0.0));
   let endClip = project_position_to_clipspace(endWorld.xyz, vec3<f32>(0.0), vec3<f32>(0.0));
-  let delta = endClip.xy / endClip.w - startClip.xy / startClip.w;
-  let direction = select(vec2<f32>(1.0, 0.0), normalize(delta), length(delta) > 0.000001);
-  let normal = vec2<f32>(-direction.y, direction.x);
+  let direction = pathDirection(startClip, endClip, vec2<f32>(1.0, 0.0));
+  let normal = strokeNormal(direction);
   let corner = getCorner(vertexIndex);
+  let first = pathRange.x;
+  let last = pathRange.y - 1u;
+  let closed = last > first + 2u && all(readPathPoint(first).xyz == readPathPoint(last).xyz);
+  var offsetNormal = normal;
+  if (corner.x == 0.0 && (inputs.segmentStartPointIndex > first || closed)) {
+    let previous = select(max(inputs.segmentStartPointIndex, 1u) - 1u, last - 1u, inputs.segmentStartPointIndex == first);
+    let previousClip = project_position_to_clipspace((readPathPoint(previous) + viewOrigin).xyz, vec3<f32>(0.0), vec3<f32>(0.0));
+    offsetNormal = joinNormal(pathDirection(previousClip, startClip, direction), direction, normal);
+  } else if (corner.x == 1.0 && (endPointIndex < last || closed)) {
+    let next = select(endPointIndex + 1u, first + 1u, endPointIndex == last);
+    let nextClip = project_position_to_clipspace((readPathPoint(next) + viewOrigin).xyz, vec3<f32>(0.0), vec3<f32>(0.0));
+    offsetNormal = joinNormal(direction, pathDirection(endClip, nextClip, direction), normal);
+  }
+  geometry.worldPosition = mix(startWorld.xyz, endWorld.xyz, corner.x);
   let width = select(pathStorageStyleConfig.constantWidth, pathRowWidths[localRowIndex], pathStorageStyleConfig.useRowWidths != 0u);
+  let widthPixels = clamp(
+    project_unit_size_to_pixel(width * pathLayerStyle.widthScale, i32(pathLayerStyle.widthUnits)),
+    pathLayerStyle.widthMinPixels, pathLayerStyle.widthMaxPixels
+  );
   var clipPosition = mix(startClip, endClip, corner.x);
-  clipPosition = vec4<f32>(clipPosition.xy + project_pixel_size_to_clipspace(normal * corner.y * width * 0.5), clipPosition.z, clipPosition.w);
+  let pixelOffset = project_pixel_size_to_clipspace(offsetNormal * corner.y * widthPixels * 0.5);
+  clipPosition = vec4<f32>(clipPosition.xy + pixelOffset * clipPosition.w / project.focalDistance, clipPosition.z, clipPosition.w);
   var color = pathStorageStyleConfig.constantColor;
   if (pathStorageStyleConfig.useVertexColors != 0u) {
     color = mix(unpackPathColor(pathVertexColors[inputs.segmentStartPointIndex]), unpackPathColor(pathVertexColors[endPointIndex]), corner.x);
@@ -162,7 +214,6 @@ fn getCorner(vertexIndex: u32) -> vec2<f32> {
   let visible = !temporalEnabled || (endMeasure >= pathLayerStyle.currentTime - pathLayerStyle.trailLength && startMeasure <= pathLayerStyle.currentTime);
   let vertexMeasure = mix(startMeasure, endMeasure, corner.x);
   let pickingColor = encodePickingColor(inputs.rowIndex);
-  geometry.worldPosition = mix(startWorld.xyz, endWorld.xyz, corner.x);
   geometry.pickingColor = pickingColor;
   var output: VertexOutputs;
   output.position = clipPosition;
@@ -200,10 +251,10 @@ export class GPUPathLayer extends Layer<GPUPathLayerProps> {
     const boundInputs = ((this.state as GPUPathLayerState).model?.userData['boundInputs'] ??
       []) as unknown[];
     if (
-      props.getPath !== boundInputs[0] ||
-      props.getColor !== boundInputs[1] ||
-      props.getWidth !== boundInputs[2] ||
-      props.getTimestamps !== boundInputs[3] ||
+      props.paths !== boundInputs[0] ||
+      props.colors !== boundInputs[1] ||
+      props.widths !== boundInputs[2] ||
+      props.timestamps !== boundInputs[3] ||
       props.viewOrigins !== boundInputs[4]
     ) {
       this.destroyModel();
@@ -219,24 +270,34 @@ export class GPUPathLayer extends Layer<GPUPathLayerProps> {
   override draw({renderPass}: {renderPass: RenderPass}): void {
     const {model, temporalBuffer} = this.state as GPUPathLayerState;
     if (!model || !temporalBuffer) return;
-    const values = new ArrayBuffer(16);
+    const values = new ArrayBuffer(48);
     const floats = new Float32Array(values);
     const uints = new Uint32Array(values);
     floats.set([this.props.currentTime ?? 0, this.props.trailLength ?? 0]);
     uints.set(
       [
-        this.props.getTimestamps ? 2 : this.props.currentTime !== undefined ? 1 : 0,
+        this.props.timestamps ? 2 : this.props.currentTime !== undefined ? 1 : 0,
         this.props.fadeTrail ? 1 : 0
       ],
       2
     );
+    floats.set(
+      [
+        this.props.widthScale ?? 1,
+        this.props.widthMinPixels ?? 0,
+        this.props.widthMaxPixels ?? Number.MAX_SAFE_INTEGER,
+        this.props.miterLimit ?? 4
+      ],
+      4
+    );
+    uints[8] = UNIT[this.props.widthUnits ?? 'pixels'];
     temporalBuffer.write(new Uint8Array(values));
     model.draw(renderPass);
   }
 
   override getPickingInfo({info}: {info: PickingInfo}): PickingInfo {
     const result = info as GPUVectorLayerPickingInfo;
-    result.gpuVector = getGPUVectorPickingProvenance(this.props.getPath, result.index);
+    result.gpuVector = getGPUVectorPickingProvenance(this.props.paths, result.index);
     return result;
   }
 
@@ -249,7 +310,7 @@ export class GPUPathLayer extends Layer<GPUPathLayerProps> {
     const {device} = this.context;
     const temporalBuffer = device.createBuffer({
       id: `${this.id}-temporal-style`,
-      byteLength: 16,
+      byteLength: 48,
       usage: Buffer.UNIFORM | Buffer.COPY_DST
     });
     const defaultTimestampBuffer = device.createBuffer({
@@ -257,29 +318,29 @@ export class GPUPathLayer extends Layer<GPUPathLayerProps> {
       data: new Float32Array([0]),
       usage: Buffer.STORAGE | Buffer.COPY_DST
     });
-    const color = isGPUVector(this.props.getColor)
+    const color = isGPUVector(this.props.colors)
       ? undefined
-      : normalizeColor(this.props.getColor ?? [0, 0, 0, 255]);
+      : normalizeColor(this.props.colors ?? [0, 0, 0, 255]);
     const model = new PathStorageModel(device, {
       ...this.getShaders({modules: [project32, picking], source: GPU_PATH_SHADER}),
       id: `${this.id}-model`,
       shaderLayout: GPU_PATH_SHADER_LAYOUT,
-      paths: this.props.getPath,
-      ...(isGPUVector(this.props.getColor) ? {colors: this.props.getColor} : {color}),
-      ...(isGPUVector(this.props.getWidth)
-        ? {widths: this.props.getWidth}
-        : {width: typeof this.props.getWidth === 'number' ? this.props.getWidth : 1}),
-      ...(this.props.getTimestamps ? {timestamps: this.props.getTimestamps} : {}),
+      paths: this.props.paths,
+      ...(isGPUVector(this.props.colors) ? {colors: this.props.colors} : {color}),
+      ...(isGPUVector(this.props.widths)
+        ? {widths: this.props.widths}
+        : {width: typeof this.props.widths === 'number' ? this.props.widths : 1}),
+      ...(this.props.timestamps ? {timestamps: this.props.timestamps} : {}),
       ...(this.props.viewOrigins ? {viewOrigins: this.props.viewOrigins} : {}),
       bindings: {pathLayerStyle: temporalBuffer, pathTimestamps: defaultTimestampBuffer},
       topology: 'triangle-list',
       vertexCount: 6
     });
     model.userData['boundInputs'] = [
-      this.props.getPath,
-      this.props.getColor,
-      this.props.getWidth,
-      this.props.getTimestamps,
+      this.props.paths,
+      this.props.colors,
+      this.props.widths,
+      this.props.timestamps,
       this.props.viewOrigins
     ];
     this.setState({model, temporalBuffer, defaultTimestampBuffer} satisfies GPUPathLayerState);
