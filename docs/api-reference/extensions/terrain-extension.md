@@ -113,9 +113,7 @@ How data should be fitted to the terrain surface. If not specified, will be auto
   </tbody>
 </table>
 
-## Height fitting and draping
-
-Set `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Set it explicitly for paths and polygons, which otherwise default to draping.
+## Limitations
 
 On WebGPU, terrain sources must include their elevation range in `getBounds()`. `TerrainLayer` and non-instanced `SimpleMeshLayer` meshes provide this range. Texture draping (`terrainDrawMode: 'drape'`) is available only on WebGL.
 
