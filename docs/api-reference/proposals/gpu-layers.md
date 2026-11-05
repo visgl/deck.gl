@@ -210,7 +210,7 @@ Width, jitter, and endpoint extension use CSS pixels. Set `sketch: 0` for solid 
 same geometry. Draw opaque fill layers first to hide rear edges. The layer owns its model and
 quad buffer, and borrows `segments`; the application destroys that buffer after finalizing Deck.
 It does not extract mesh boundaries, join paths, or drape lines over terrain. The
-[Sketch buildings example](../../../examples/proposals/sketch-edges) demonstrates the controls, picking,
+[Sketch buildings example](https://github.com/visgl/deck.gl/tree/master/examples/proposals/sketch-edges) demonstrates the controls, picking,
 and hidden-edge rendering. The underlying `sketchStroke` shader in `@luma.gl/shaders`
 can also be used by non-Deck renderers.
 ## Auxiliary scene buffers
@@ -632,6 +632,6 @@ luma.gl alpha.6 publishes the required integrations, including Arrow and text un
 ## Examples and integration tests
 
 The original standalone examples and their shared fixtures are available in
-[`examples/proposals`](../../../examples/proposals/README.md). Run `yarn build-private-examples`
+[`examples/proposals`](https://github.com/visgl/deck.gl/tree/master/examples/proposals). Run `yarn build-private-examples`
 after installing workspace dependencies. `yarn test-private` includes the copied
 example integration tests alongside the module tests.
