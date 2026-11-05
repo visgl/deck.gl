@@ -5,6 +5,7 @@
 import {AttributeWithScale} from '../../../../modules/aggregation-layers/src/common/utils/scale-utils';
 import {test, expect, vi} from 'vitest';
 import {Buffer} from '@luma.gl/core';
+import {LayerExtension} from '@deck.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {
@@ -51,17 +52,22 @@ test('Aggregation vectors preserve borrowed buffer ranges', () => {
   buffer.destroy();
 });
 
-test('Aggregation factory lifecycle preserves default behavior', () => {
-  const created: Aggregator[] = [];
-  const makeFactory = () =>
-    vi.fn(({createDefaultAggregator}) => {
-      const aggregator = createDefaultAggregator();
-      vi.spyOn(aggregator, 'destroy');
-      created.push(aggregator);
-      return aggregator;
+test('Aggregation instance lifecycle preserves default behavior', () => {
+  const createAggregator = () => {
+    const aggregator = new CPUAggregator({
+      dimensions: 2,
+      getBin: {sources: ['positions'], getValue: () => [0, 0]},
+      getValue: [{sources: ['counts'], getValue: () => 1}]
     });
-  const first = makeFactory();
-  const second = makeFactory();
+    return Object.assign(aggregator, {
+      initialize: vi.fn(),
+      destroy: vi.fn(),
+      setNeedsUpdate: vi.fn(aggregator.setNeedsUpdate.bind(aggregator))
+    });
+  };
+  const first = createAggregator();
+  const second = createAggregator();
+  const third = createAggregator();
   testLayer({
     Layer: ScreenGridLayer,
     onError: error => {
@@ -69,36 +75,59 @@ test('Aggregation factory lifecycle preserves default behavior', () => {
     },
     testCases: [
       {
-        title: 'create custom aggregator',
+        title: 'adopt custom aggregator',
         props: {data: [{position: [0, 0]}], gpuAggregation: false, aggregator: first},
         onAfterUpdate: ({layer}) => {
-          expect(first).toHaveBeenCalledTimes(1);
-          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+          expect(layer.state.aggregator).toBe(first);
+          expect(first.initialize).toHaveBeenCalledExactlyOnceWith(device);
         }
       },
       {
         title: 'reuse custom aggregator',
         updateProps: {cellSizePixels: 50},
-        onAfterUpdate: () => expect(first).toHaveBeenCalledTimes(1)
+        onAfterUpdate: () => {
+          expect(first.initialize).toHaveBeenCalledTimes(1);
+          expect(first.destroy).not.toHaveBeenCalled();
+        }
+      },
+      {
+        title: 'refresh extensions without destroying supplied instance',
+        updateProps: {extensions: [new LayerExtension()]},
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.aggregator).toBe(first);
+          expect(first.initialize).toHaveBeenCalledTimes(1);
+          expect(first.destroy).not.toHaveBeenCalled();
+          expect(first.setNeedsUpdate).toHaveBeenCalled();
+        }
       },
       {
         title: 'replace custom aggregator',
         updateProps: {aggregator: second},
-        onAfterUpdate: () => {
-          expect(second).toHaveBeenCalledTimes(1);
-          expect(created[0].destroy).toHaveBeenCalledTimes(1);
+        onAfterUpdate: ({layer}) => {
+          expect(layer.state.aggregator).toBe(second);
+          expect(second.initialize).toHaveBeenCalledExactlyOnceWith(device);
+          expect(first.destroy).toHaveBeenCalledTimes(1);
         }
       },
       {
         title: 'restore default aggregator',
         updateProps: {aggregator: null},
         onAfterUpdate: ({layer}) => {
-          expect(created[1].destroy).toHaveBeenCalledTimes(1);
+          expect(second.destroy).toHaveBeenCalledTimes(1);
           expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+          expect(layer.state.aggregator).not.toBe(second);
         }
+      },
+      {
+        title: 'adopt instance for finalization',
+        updateProps: {aggregator: third}
       }
     ]
   });
+  expect(first.destroy).toHaveBeenCalledTimes(1);
+  expect(second.destroy).toHaveBeenCalledTimes(1);
+  expect(third.initialize).toHaveBeenCalledTimes(1);
+  expect(third.destroy).toHaveBeenCalledTimes(1);
 });
 
 test('Aggregation GPU columns bypass accessors and render borrowed vectors', () => {
@@ -137,7 +166,7 @@ test('Aggregation GPU columns bypass accessors and render borrowed vectors', () 
           props: {
             positions,
             weights: [weights],
-            aggregator: () => aggregator,
+            aggregator,
             colorDomain: [0, 2],
             getPosition
           },
@@ -238,7 +267,7 @@ test('Grid WebGPU results render with explicit domains without domain readback',
               [0, 0],
               [0, 0]
             ],
-            aggregator: () => aggregator,
+            aggregator,
             colorDomain: [0, 2],
             elevationDomain: [0, 2]
           },

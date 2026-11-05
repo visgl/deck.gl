@@ -22,7 +22,6 @@ export type {
 } from './screen-grid-layer/screen-grid-layer';
 
 export type {
-  AggregatorFactory,
   AggregationResult,
   Aggregator,
   AggregationOperation,

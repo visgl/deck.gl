@@ -19,13 +19,13 @@ import {
 } from '@deck.gl/core';
 import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
-import type {Aggregator, AggregatorFactory} from './aggregator/aggregator';
+import type {Aggregator} from './aggregator/aggregator';
 import type {GPUVector} from '@luma.gl/graph/gpu-data';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
-  /** Factory for a layer-owned aggregator. Omit to retain CPU/WebGL selection. */
-  aggregator?: AggregatorFactory | null;
+  /** Layer-owned aggregator instance. Omit to retain CPU/WebGL selection. */
+  aggregator?: Aggregator | null;
   /** Borrowed GPU position column; requires a custom aggregator and bypasses accessors. */
   positions?: GPUVector | null;
   /** Borrowed scalar columns in channel order; required with positions. */
@@ -40,7 +40,7 @@ export default abstract class AggregationLayer<
 > extends CompositeLayer<Required<AggregationLayerProps<DataT>> & ExtraPropsT> {
   static layerName = 'AggregationLayer';
   static defaultProps: DefaultProps<AggregationLayerProps<unknown>> = {
-    aggregator: {type: 'function', value: null, optional: true, compare: true},
+    aggregator: {type: 'object', value: null, optional: true},
     positions: {type: 'object', value: null, optional: true},
     weights: {type: 'array', value: null, optional: true, compare: 1},
     dataBounds: {type: 'array', value: null, optional: true, compare: 2}
@@ -59,8 +59,8 @@ export default abstract class AggregationLayer<
       super._updateAttributes();
       return;
     }
-    const {positions, weights, aggregator: factory, extensions} = this.props;
-    if (!factory || extensions.length || !weights) {
+    const {positions, weights, aggregator, extensions} = this.props;
+    if (!aggregator || extensions.length || !weights) {
       throw new Error(
         'GPU aggregation columns require a custom aggregator, weights, and no extensions'
       );
@@ -173,11 +173,14 @@ export default abstract class AggregationLayer<
       this.state.aggregatorType !== aggregatorType ||
       params.props.aggregator !== params.oldProps.aggregator
     ) {
-      this.state.aggregator?.destroy();
-      const createDefaultAggregator = () => this.createAggregator(this.getAggregatorType());
-      const aggregator = this.props.aggregator
-        ? this.props.aggregator({device: this.context.device, createDefaultAggregator})
-        : createDefaultAggregator();
+      const aggregator = this.props.aggregator || this.createAggregator(aggregatorType);
+      if (aggregator !== this.state.aggregator) {
+        this.state.aggregator?.destroy();
+        aggregator.initialize?.(this.context.device);
+      } else {
+        // Extension changes refresh the supplied instance without destroying it.
+        aggregator.setNeedsUpdate();
+      }
       aggregator.setProps({
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,

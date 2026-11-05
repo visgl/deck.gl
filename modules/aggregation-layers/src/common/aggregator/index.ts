@@ -6,7 +6,6 @@ export {CPUAggregator} from './cpu-aggregator/cpu-aggregator';
 export {WebGLAggregator} from './gpu-aggregator/webgl-aggregator';
 
 export type {
-  AggregatorFactory,
   AggregationResult,
   Aggregator,
   AggregatedBin,

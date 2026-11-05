@@ -9,14 +9,6 @@ import type {GPUVector} from '@luma.gl/graph/gpu-data';
 /** Borrowed aggregation output; vectors use single-chunk float32 scalar/XY storage. */
 export type AggregationResult = BinaryAttribute | GPUVector;
 
-/** Factory for a layer-owned aggregator, recreated on factory or extension changes. */
-export type AggregatorFactory = (context: {
-  /** Device used for input and result storage. */
-  device: Device;
-  /** Creates the implementation selected by the existing layer props. */
-  createDefaultAggregator: () => Aggregator;
-}) => Aggregator;
-
 /** Method used to reduce a list of values to one number */
 export type AggregationOperation = 'SUM' | 'MEAN' | 'MIN' | 'MAX' | 'COUNT';
 
@@ -75,6 +67,9 @@ export type AggregatedBin = {
  *
  */
 export interface Aggregator {
+  /** Called once when the layer adopts this instance, before setProps. */
+  initialize?(device: Device): void;
+
   /** Update aggregation props */
   setProps(props: Partial<AggregationProps>): void;
 
