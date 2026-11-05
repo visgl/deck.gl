@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
 import {
+  CompositeLayer,
   Layer,
   picking,
   project32,
@@ -27,10 +28,12 @@ import {
   type GPUVectorLayerPickingInfo
 } from '../utils/gpu-vector-picking';
 
+import {ArrowPathLayer, type ArrowPathLayerProps} from '../arrow-path-layer';
+
 export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native variable-length path props. Input vectors are borrowed. */
-export type GPUPathLayerProps = Omit<LayerProps, 'data'> & {
+type StoragePathLayerProps = Omit<LayerProps, 'data'> & {
   paths: GPUVector<VertexList<'float32x2' | 'float32x3' | 'float32x4'>>;
   colors?: Color | GPUVector<'unorm8x4' | VertexList<'unorm8x4'>>;
   widths?: number | GPUVector<'float32'>;
@@ -58,6 +61,50 @@ export type GPUPathLayerProps = Omit<LayerProps, 'data'> & {
   trailLength?: number;
   fadeTrail?: boolean;
 };
+
+/** Path columns supplied directly or selected from an Arrow batch source. */
+export type GPUPathLayerProps =
+  | StoragePathLayerProps
+  | (Omit<ArrowPathLayerProps, 'color' | 'width'> & {
+      /** Constant or column for stroke colors. */
+      colors?: ArrowPathLayerProps['color'];
+      /** Constant or column for stroke widths. */
+      widths?: ArrowPathLayerProps['width'];
+    });
+
+/** Renders Arrow path columns and prepared GPU path vectors. */
+export class GPUPathLayer extends CompositeLayer<GPUPathLayerProps> {
+  static override layerName = 'GPUPathLayer';
+
+  static override defaultProps = {data: ArrowPathLayer.defaultProps.data};
+
+  /** Selects the renderer for the supplied path representation. */
+  override renderLayers(): Layer {
+    const {paths, colors, widths, ...props} = this.props;
+    if (isGPUVector(paths)) {
+      return new StoragePathLayer({
+        ...props,
+        ...this.getSubLayerProps({id: 'storage'}),
+        paths,
+        colors,
+        widths
+      } as StoragePathLayerProps);
+    }
+    return new ArrowPathLayer({
+      ...props,
+      ...this.getSubLayerProps({id: 'arrow'}),
+      parameters: {...ArrowPathLayer.defaultProps.parameters, ...this.props.parameters},
+      paths,
+      color: colors,
+      width: widths
+    } as ArrowPathLayerProps);
+  }
+
+  /** Returns the active renderer's models. */
+  override getModels(): Model[] {
+    return this.getSubLayers().flatMap(layer => layer.getModels());
+  }
+}
 
 type GPUPathLayerState = {
   model: PathStorageModel | null;
@@ -201,8 +248,8 @@ const GPU_PATH_SHADER = makePathShaderWGSL({
 });
 
 /** Deck host for the GPU-only variable-length path model. */
-export class GPUPathLayer extends Layer<GPUPathLayerProps> {
-  static override layerName = 'GPUPathLayer';
+class StoragePathLayer extends Layer<StoragePathLayerProps> {
+  static override layerName = 'StoragePathLayer';
 
   override getAttributeManager() {
     return null;

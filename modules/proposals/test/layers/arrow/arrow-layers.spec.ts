@@ -364,13 +364,13 @@ it('Arrow deck layers return source row indices from Deck picking', async () => 
     model: 'attribute'
   });
   let constantPathDataError: unknown;
-  const constantPathLayer = new ArrowPathLayer({
+  const constantPathLayer = new GPUPathLayer({
     id: 'arrow-paths-constant-picking-test',
     pickable: true,
     data: new Table({paths: pathSource.sourceVectors.paths}),
     paths: 'paths',
-    color: [255, 180, 90, 255],
-    width: 0.004,
+    colors: [255, 180, 90, 255],
+    widths: 0.004,
     model: 'attribute',
     onDataError: error => {
       constantPathDataError = error;
