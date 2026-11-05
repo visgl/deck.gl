@@ -26,16 +26,9 @@ ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor 
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
-### WebGPU brushing
+### Extension updates
 
-[`BrushingExtension`](./api-reference/extensions/brushing-extension.md) supports WebGPU on standard rendering primitives, including picking and live accessor updates.
-
-### WebGPU data filtering
-
-[`Fp64Extension`](./api-reference/extensions/fp64-extension.md) supports extended-precision Mercator projection on WebGPU using luma.gl's fp64 math. The default projection remains recommended for performance.
-
-[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) supports numeric and category filtering on WebGPU, including fp64 values, soft ranges, and size and color transforms. Filtered item counting (`countItems`) requires WebGL.
-
+Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
 

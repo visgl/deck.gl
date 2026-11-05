@@ -3,7 +3,7 @@
 
 The `FillStyleExtension` adds selected features to layers that render a "fill", such as the `PolygonLayer` and `ScatterplotLayer`.
 
-The WebGPU port covers texture atlas patterns and procedural hatches, cross-hatches, and dots.
+Choose texture atlas patterns or procedural hatches, cross-hatches, and dots.
 
 <div style={{position:'relative',height:450}}></div>
 <div style={{position:'absolute',transform:'translateY(-450px)',paddingLeft:'inherit',paddingRight:'inherit',left:0,right:0}}>

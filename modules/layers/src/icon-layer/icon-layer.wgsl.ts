@@ -11,7 +11,8 @@ struct IconUniforms {
   sizeMaxPixels: f32,
   billboard: i32,
   sizeUnits: i32,
-  alphaCutoff: f32
+  alphaCutoff: f32,
+  rowIndexOffset: u32
 };
 
 @group(0) @binding(auto) var<uniform> icon: IconUniforms;
@@ -171,14 +172,25 @@ fn fragmentMain(inp: Varyings) -> @location(0) vec4<f32> {
 }
 `;
 
-export function getShaderWGSL(useRowIndexes: boolean): string {
-  return shaderWGSL
+export function getShaderWGSL(useRowIndexes: boolean, useVertexIndex = false): string {
+  const source = useVertexIndex
+    ? shaderWGSL
+        .replace('@location(0) positions: vec2<f32>,', '@builtin(vertex_index) vertexIndex: u32,')
+        .replace(
+          '  // write geometry fields',
+          `  let quad = array(vec2<f32>(-1, 1), vec2<f32>(1, 1), vec2<f32>(-1, -1), vec2<f32>(1, -1));
+  let quadPosition = quad[inp.vertexIndex];
+  // write geometry fields`
+        )
+        .replaceAll('inp.positions', 'quadPosition')
+    : shaderWGSL;
+  return source
     .replace('PICKING_COLOR_ATTRIBUTE', useRowIndexes ? '@location(10) rowIndexes: u32,' : '')
     .replace(
       'PICKING_COLOR_VALUE',
       useRowIndexes
         ? 'picking_getPickingColorFromIndex(inp.rowIndexes)'
-        : 'picking_getPickingColorFromIndex(inp.instanceIndex)'
+        : 'picking_getPickingColorFromIndex(inp.instanceIndex + icon.rowIndexOffset)'
     );
 }
 

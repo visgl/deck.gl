@@ -226,9 +226,9 @@ it('clips temporal path fragments at both ends of the trail window', async conte
       const layers = [
         new GPUPathLayer({
           id: `gpu-temporal-clipping-${fadeTrail}`,
-          getPath: pathVector,
-          getTimestamps: timestampVector,
-          getWidth: 10,
+          paths: pathVector,
+          timestamps: timestampVector,
+          widths: 10,
           currentTime: 50,
           trailLength: 25,
           fadeTrail,
@@ -297,7 +297,7 @@ it('GPUPathLayer renders variable-length GPUVectors without an Arrow dependency'
     format: 'vertex-list<float32x2>',
     preserveDataChunks: true
   });
-  const layer = new GPUPathLayer({id: 'gpu-path-core', getPath: paths, getWidth: 2});
+  const layer = new GPUPathLayer({id: 'gpu-path-core', paths, widths: 2});
   const {deck, parent} = createTestDeck(device);
   try {
     await waitForDeckInitialization(deck);
@@ -333,7 +333,7 @@ it('GPUSolidPolygonLayer renders adapter-prepared tessellated GPUVectors', async
     positions: prepared.positions,
     rowIndices: prepared.rowIndices,
     indices: prepared.indices,
-    getFillColor: prepared.colors
+    fillColors: prepared.colors
   });
   const {deck, parent} = createTestDeck(device);
   try {

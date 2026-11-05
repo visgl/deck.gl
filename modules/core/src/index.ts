@@ -164,3 +164,8 @@ export type {
   CustomProjectionViewState
 } from './views/custom-projection-view';
 export type {CustomProjectionViewportOptions} from './viewports/custom-projection-viewport';
+
+export {
+  LayerColumns as _LayerColumns,
+  type ColumnDefinition as _ColumnDefinition
+} from './lib/layer-columns';

@@ -2,7 +2,13 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: Copyright (c) vis.gl contributors
 
-import {CompositeLayer, type Color, type LayerProps} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  type Color,
+  type LayerProps,
+  type GetPickingInfoParams,
+  type Unit
+} from '@deck.gl/core';
 import type {GPUVector, VertexList} from '@luma.gl/graph/gpu-data';
 import {GPUPathLayer} from '../path-layer/path-layer';
 import {GPUSolidPolygonLayer} from '../solid-polygon-layer/solid-polygon-layer';
@@ -14,10 +20,17 @@ export type GPUPolygonLayerProps = Omit<LayerProps, 'data'> & {
   positions: GPUVector<VertexList<'float32x4'>>;
   rowIndices: GPUVector<VertexList<'uint32'>>;
   indices: GPUVector<VertexList<'uint32'>>;
-  getFillColor?: Color | GPUVector<VertexList<'unorm8x4'>>;
-  getPath?: GPUVector<VertexList<'float32x2' | 'float32x3' | 'float32x4'>>;
-  getLineColor?: Color | GPUVector<'unorm8x4' | VertexList<'unorm8x4'>>;
-  getLineWidth?: number | GPUVector<'float32'>;
+  fillColors?: Color | GPUVector<VertexList<'unorm8x4'>>;
+  paths?: GPUVector<VertexList<'float32x2' | 'float32x3' | 'float32x4'>>;
+  lineColors?: Color | GPUVector<'unorm8x4' | VertexList<'unorm8x4'>>;
+  lineWidths?: number | GPUVector<'float32'>;
+  /** Feature IDs for outline rows when one feature has multiple rings. */
+  pathFeatureIds?: readonly number[];
+  lineWidthUnits?: Unit;
+  lineWidthScale?: number;
+  lineWidthMinPixels?: number;
+  lineWidthMaxPixels?: number;
+  lineMiterLimit?: number;
   filled?: boolean;
   stroked?: boolean;
 };
@@ -26,17 +39,31 @@ export type GPUPolygonLayerProps = Omit<LayerProps, 'data'> & {
 export class GPUPolygonLayer extends CompositeLayer<GPUPolygonLayerProps> {
   static override layerName = 'GPUPolygonLayer';
 
+  override getPickingInfo(params: GetPickingInfoParams) {
+    const info = super.getPickingInfo(params);
+    if (params.sourceLayer?.id === `${this.id}-stroke` && info.index >= 0) {
+      info.index = this.props.pathFeatureIds?.[info.index] ?? info.index;
+    }
+    return info;
+  }
+
   override renderLayers(): Array<GPUSolidPolygonLayer | GPUPathLayer> {
     const {
       positions,
       rowIndices,
       indices,
-      getFillColor,
-      getPath,
-      getLineColor,
-      getLineWidth,
+      fillColors,
+      paths,
+      lineColors,
+      lineWidths,
+      pathFeatureIds,
+      lineWidthUnits,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      lineMiterLimit,
       filled = true,
-      stroked = Boolean(getPath),
+      stroked = Boolean(paths),
       ...props
     } = this.props;
     const layers: Array<GPUSolidPolygonLayer | GPUPathLayer> = [];
@@ -48,18 +75,23 @@ export class GPUPolygonLayer extends CompositeLayer<GPUPolygonLayerProps> {
           positions,
           rowIndices,
           indices,
-          getFillColor
+          fillColors
         })
       );
     }
-    if (stroked && getPath) {
+    if (stroked && paths) {
       layers.push(
         new GPUPathLayer({
           ...props,
           id: `${this.props.id}-stroke`,
-          getPath,
-          getColor: getLineColor,
-          getWidth: getLineWidth
+          paths,
+          colors: lineColors,
+          widths: lineWidths,
+          widthUnits: lineWidthUnits,
+          widthScale: lineWidthScale,
+          widthMinPixels: lineWidthMinPixels,
+          widthMaxPixels: lineWidthMaxPixels,
+          miterLimit: lineMiterLimit
         })
       );
     }
