@@ -113,20 +113,11 @@ How data should be fitted to the terrain surface. If not specified, will be auto
   </tbody>
 </table>
 
-## WebGPU
+## Height fitting and draping
 
-WebGPU supports `terrainDrawMode: 'offset'` using a GPU height map. Set the mode explicitly
-for paths and polygons, whose automatic mode is otherwise `drape`. No CPU elevation sampling
-or optional float-texture filtering/blending features are required.
+Set `terrainDrawMode: 'offset'` to fit objects to the uppermost terrain surface. Set it explicitly for paths and polygons, which otherwise default to draping.
 
-The WebGPU pass stores each elevation as four bytes in an RGBA8 texture, preserving float32
-precision. A depth attachment selects the uppermost overlapping terrain surface. Vertex shaders
-decode and interpolate the surrounding texels before projecting each object. Terrain source
-`getBounds()` must include its elevation range, as supplied by `TerrainLayer` and non-instanced
-`SimpleMeshLayer` meshes.
-
-Texture draping (`terrainDrawMode: 'drape'`) is still WebGL-only. WebGPU reports an error for
-this mode rather than silently rendering an unfitted layer.
+On WebGPU, terrain sources must include their elevation range in `getBounds()`. `TerrainLayer` and non-instanced `SimpleMeshLayer` meshes provide this range. Texture draping (`terrainDrawMode: 'drape'`) is available only on WebGL.
 
 ## Source
 

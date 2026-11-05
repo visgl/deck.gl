@@ -99,7 +99,7 @@ The table below covers the public extensions in `@deck.gl/extensions`. Most rema
 | `@deck.gl/extensions` | `MaskExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `TerrainExtension` | ✅ | 🚧 |
 
-`TerrainExtension` supports GPU height-map fitting with `terrainDrawMode: 'offset'`. Texture draping remains WebGL-only. See the [terrain extension reference](../api-reference/extensions/terrain-extension.md#webgpu).
+`TerrainExtension` supports GPU height-map fitting with `terrainDrawMode: 'offset'`. Texture draping remains WebGL-only. See the [terrain extension reference](../api-reference/extensions/terrain-extension.md#height-fitting-and-draping).
 
 ## Effects
 
