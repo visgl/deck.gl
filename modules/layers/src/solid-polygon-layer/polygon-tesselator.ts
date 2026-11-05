@@ -44,6 +44,7 @@ export default class PolygonTesselator extends Tesselator<
     IndexType?: Uint32ArrayConstructor | Uint16ArrayConstructor;
     resolution?: number;
     projectionTolerance?: number;
+    projectionToleranceScale?: [number, number, number];
     wrapLongitude?: boolean;
     preproject?: (xy: number[]) => number[];
     full3d?: boolean;
@@ -166,9 +167,10 @@ export default class PolygonTesselator extends Tesselator<
     polygons: (NormalizedPolygonGeometry | CutPolygon)[],
     size: number
   ): CutPolygon[] {
-    const {projectionTolerance, transform} = this.opts;
+    const {projectionTolerance, projectionToleranceScale, transform} = this.opts;
     if (!projectionTolerance) return polygons as CutPolygon[];
     if (!transform) throw new Error('Projection refinement requires preprojected polygons');
+    const scale = projectionToleranceScale || [1, 1, 1];
     return polygons.map(polygon => {
       const input = Polygon.getPositions(polygon);
       const holes = Polygon.getHoleIndices(polygon);
@@ -191,7 +193,10 @@ export default class PolygonTesselator extends Tesselator<
         const refined = subdividePolyline(ring, {
           size: size as 2 | 3,
           targetSize: 3,
-          transform: position => transform(Array.from(position)),
+          transform: position => {
+            const projected = transform(Array.from(position));
+            return projected.map((value, index) => value * scale[index]);
+          },
           tolerance: projectionTolerance
         });
         for (const value of refined.sourcePositions) positions.push(value);

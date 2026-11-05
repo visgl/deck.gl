@@ -21,6 +21,7 @@ import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 import {getSolidPolygonShaderWGSL} from './solid-polygon-layer.wgsl';
+import {getMetersPerUnit} from '../utils';
 
 import type {
   LayerProps,
@@ -38,7 +39,8 @@ import type {PolygonGeometry} from './polygon';
 
 type _SolidPolygonLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
-  /** Sampled edge error in map meters for a preprojecting viewport. Zero disables refinement.
+  /** Sampled edge error in map meters for a projected or geocentric preprojecting viewport.
+   * Zero disables refinement.
    * Requires normalized geometry, finite samples and pre-split projection seams.
    * Throws when math.gl refinement limits are exhausted.
    * @experimental
@@ -381,16 +383,18 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
     if (geometryConfigChanged) {
       const {polygonTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      const projectionToleranceScale = getMetersPerUnit(this.state.packedCrs);
       if (
         props._projectionTolerance &&
-        (!this.usePositionTransforms().transform ||
+        (!projectionToleranceScale ||
+          !this.usePositionTransforms().transform ||
           !props._normalize ||
           (buffers.getPolygon &&
             !ArrayBuffer.isView(buffers.getPolygon.value ?? buffers.getPolygon)) ||
           Object.keys(buffers).some(key => key !== 'getPolygon'))
       ) {
         throw new Error(
-          'Projection refinement requires normalized polygons with per-object attributes'
+          'Projection refinement requires a projected or geocentric target CRS with linear units, normalized polygons and per-object attributes'
         );
       }
       polygonTesselator.updateGeometry({
@@ -416,6 +420,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
           this.state.sourceCrs?.signature === 'WGS84',
         resolution: subdivisionStep,
         projectionTolerance: props._projectionTolerance,
+        projectionToleranceScale,
         fp64: this.use64bitPositions(),
         dataChanged: projectionChanged || refinementChanged ? undefined : changeFlags.dataChanged,
         // A geocentric target needs a polygon plane selected from XYZ, even for flat source data.

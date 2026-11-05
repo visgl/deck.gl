@@ -7,7 +7,6 @@ import {test, expect, vi} from 'vitest';
 import {
   LayerManager,
   OrthographicViewport,
-  _CustomProjectionViewport as CustomProjectionViewport,
   WebMercatorViewport
 } from '@deck.gl/core';
 import {
@@ -468,9 +467,56 @@ test('WebGPU binary polygons project every subdivided vertex', async ({skip}) =>
 });
 
 for (const LayerType of [PathLayer, SolidPolygonLayer]) {
+  test(`${LayerType.layerName} measures projection tolerance in meters for foot-based CRSs`, () => {
+    const source = [
+      [0, 0],
+      [8, 0],
+      [8, 2],
+      [0, 0]
+    ];
+    const createLayerInstanceCount = (
+      metersPerUnit: number,
+      converter: {
+        forward: (position: number[]) => number[];
+        inverse: (position: number[]) => number[];
+      }
+    ) => {
+      const manager = new LayerManager(device, {
+        viewport: createTestViewport({converter, metersPerUnit: [metersPerUnit, metersPerUnit, 1]})
+      });
+      manager.setProps({
+        onError: error => {
+          throw error;
+        }
+      });
+      try {
+        const layer = new LayerType({
+          id: 'adaptive-unit-scale',
+          data: [source],
+          getPath: path => path,
+          getPolygon: polygon => polygon,
+          _projectionTolerance: 0.1
+        });
+        manager.setLayers([layer]);
+        return layer.state.numInstances;
+      } finally {
+        manager.finalize();
+      }
+    };
+    const meters = {
+      forward: ([x, y, z = 0]) => [x, y + x * x, z],
+      inverse: ([x, y, z = 0]) => [x, y - x * x, z]
+    };
+    const feet = {
+      forward: ([x, y, z = 0]) => [x / 0.3048, (y + x * x) / 0.3048, z],
+      inverse: ([x, y, z = 0]) => [x * 0.3048, y * 0.3048 - (x * 0.3048) ** 2, z]
+    };
+    expect(createLayerInstanceCount(1, meters)).toBe(createLayerInstanceCount(0.3048, feet));
+  });
+
   test(`${LayerType.layerName} adaptive tolerance rebuilds every row alongside a partial data diff`, () => {
-    const viewport = new CustomProjectionViewport({
-      projection: {
+    const viewport = createTestViewport({
+      converter: {
         forward: ([x, y, z = 0]) => [x, y + x * x, z],
         inverse: ([x, y, z = 0]) => [x, y - x * x, z]
       }
@@ -522,7 +568,7 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
   });
 
   test(`${LayerType.layerName} adaptive refinement rejects GPU-only coordinates`, () => {
-    const viewport = new CustomProjectionViewport(options);
+    const viewport = createTestViewport(options);
     const manager = new LayerManager(device, {viewport});
     manager.setProps({
       onError: error => {
@@ -549,7 +595,7 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
 }
 
 test('adaptive RGB paths accept the default RGBA color', () => {
-  const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+  const manager = new LayerManager(device, {viewport: createTestViewport(options)});
   manager.setProps({
     onError: error => {
       throw error;
@@ -584,7 +630,7 @@ test('adaptive RGB paths accept the default RGBA color', () => {
 
 for (const accessor of ['getFillColor', 'getLineColor', 'getElevation']) {
   test(`adaptive polygons reject per-vertex ${accessor}`, () => {
-    const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+    const manager = new LayerManager(device, {viewport: createTestViewport(options)});
     manager.setProps({
       onError: error => {
         throw error;
@@ -622,8 +668,8 @@ for (const accessor of ['getFillColor', 'getLineColor', 'getElevation']) {
 
 for (const LayerType of [PathLayer, SolidPolygonLayer]) {
   test(`${LayerType.layerName} adaptive RGB attributes repeat a single accessor RGBA color`, () => {
-    const viewport = new CustomProjectionViewport({
-      projection: {
+    const viewport = createTestViewport({
+      converter: {
         forward: ([x, y, z = 0]) => [x, y + x * x, z],
         inverse: ([x, y, z = 0]) => [x, y - x * x, z]
       }
@@ -711,7 +757,7 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
   });
 
   test(`${LayerType.layerName} removes styling transforms when refinement is disabled`, () => {
-    const manager = new LayerManager(device, {viewport: new CustomProjectionViewport(options)});
+    const manager = new LayerManager(device, {viewport: createTestViewport(options)});
     manager.setProps({
       onError: error => {
         throw error;
@@ -755,7 +801,7 @@ for (const LayerType of [PathLayer, SolidPolygonLayer]) {
   test(`${LayerType.layerName} toggles refinement on source attributes during transitions`, () => {
     const timeline = new Timeline();
     const manager = new LayerManager(device, {
-      viewport: new CustomProjectionViewport(options),
+      viewport: createTestViewport(options),
       timeline
     });
     manager.setProps({

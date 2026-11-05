@@ -22,6 +22,7 @@ export default class PathTesselator extends Tesselator<
     fp64?: boolean;
     resolution?: number;
     projectionTolerance?: number;
+    projectionToleranceScale?: [number, number, number];
     wrapLongitude?: boolean;
     loop?: boolean;
     isWebGPU?: boolean;
@@ -89,16 +90,20 @@ export default class PathTesselator extends Tesselator<
         ? normalizePath(path, this.inputPositionSize, this.opts.resolution, this.opts.wrapLongitude)
         : path
     ) as NormalizedPathGeometry;
-    const {projectionTolerance, transform} = this.opts;
+    const {projectionTolerance, projectionToleranceScale, transform} = this.opts;
     if (!projectionTolerance) return prepared as PathGeometry;
     if (!this.normalize || !transform) {
       throw new Error('Projection refinement requires normalized, preprojected paths');
     }
+    const scale = projectionToleranceScale || [1, 1, 1];
     const refine = (part: FlatPathGeometry) =>
       subdividePolyline(part, {
         size: this.inputPositionSize as 2 | 3,
         targetSize: 3,
-        transform: position => transform(Array.from(position)),
+        transform: position => {
+          const projected = transform(Array.from(position));
+          return projected.map((value, index) => value * scale[index]);
+        },
         tolerance: projectionTolerance
       }).sourcePositions;
     return (isCut(prepared) ? prepared.map(refine) : refine(prepared)) as PathGeometry;

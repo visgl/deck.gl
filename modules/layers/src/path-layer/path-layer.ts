@@ -20,6 +20,7 @@ import {
 import {Geometry} from '@luma.gl/engine';
 import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
+import {getMetersPerUnit} from '../utils';
 
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
@@ -42,7 +43,8 @@ import type {PathGeometry} from './path';
 
 type _PathLayerProps<DataT> = {
   data: LayerDataSource<DataT>;
-  /** Sampled edge error in map meters for a preprojecting viewport. Zero disables refinement.
+  /** Sampled edge error in map meters for a projected or geocentric preprojecting viewport.
+   * Zero disables refinement.
    * Requires normalized geometry, finite samples and pre-split projection seams.
    * Throws when math.gl refinement limits are exhausted.
    * @experimental
@@ -414,15 +416,17 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     if (geometryChanged) {
       const {pathTesselator} = this.state;
       const buffers = (props.data as any).attributes || {};
+      const projectionToleranceScale = getMetersPerUnit(this.state.packedCrs);
       if (
         props._projectionTolerance &&
-        (!this.usePositionTransforms().transform ||
+        (!projectionToleranceScale ||
+          !this.usePositionTransforms().transform ||
           props._pathType ||
           (buffers.getPath && !ArrayBuffer.isView(buffers.getPath.value ?? buffers.getPath)) ||
           Object.keys(buffers).some(key => key !== 'getPath'))
       ) {
         throw new Error(
-          'Projection refinement requires normalized paths with per-object attributes'
+          'Projection refinement requires a projected or geocentric target CRS with linear units, normalized paths and per-object attributes'
         );
       }
 
@@ -443,6 +447,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
         // Subdivision runs in accessor coordinates before the source CRS transform.
         resolution: this.getSubdivisionStep(),
         projectionTolerance: props._projectionTolerance,
+        projectionToleranceScale,
         // A partial data diff is only valid while normalization inputs remain unchanged.
         dataChanged: geometryConfigurationChanged ? undefined : changeFlags.dataChanged
       });
