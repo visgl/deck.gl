@@ -366,8 +366,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       this.state.subdivisionStep !== subdivisionStep ||
       (viewport.isGeospatial &&
         (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
-          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
-      props.coordinateSystem !== oldProps.coordinateSystem;
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)));
     const refinementChanged =
       props._projectionTolerance !== oldProps._projectionTolerance ||
       (props._projectionTolerance > 0 && props._normalize !== oldProps._normalize);
