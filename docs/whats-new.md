@@ -31,10 +31,6 @@ Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md)
 
 Layers accept CRS identifiers and PROJ strings through `coordinateSystem`. A shared resolver loads descriptors before layer lifecycle updates. GPU-supported CRSs retain their original attribute coordinates; other CRSs are converted on the CPU into the view's supported attribute CRS.
 
-### Tile layers
-
-[`Tile2DLayer`](./api-reference/proposals/tile-2d-layer.md) and [`MVT2DLayer`](./api-reference/proposals/mvt-2d-layer.md) are available in the private `@deck.gl/proposals/layers` module for applications sharing content across styles and views. One [`Tileset2D`](./api-reference/proposals/tileset-2d.md) owns loading and caching while each layer maintains independent per-view selection, picking, and highlighting. `viewIds` scopes consumers to their intended views without loading tiles for unrelated views. The [shared-tileset example](/examples/shared-tile-2d-layer) compares shared and independent caches in synchronized split-screen views and a minimap. `Tileset2D` retains the legacy default-view API, and `TileLayer` and `MVTLayer` remain available for compatibility.
-
 ## deck.gl v9.4
 
 Release date: September 5, 2026
