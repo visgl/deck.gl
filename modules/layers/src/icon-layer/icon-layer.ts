@@ -354,27 +354,33 @@ export default class IconLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       iconManager.packIcons(data, getIcon as AccessorFunction<any, UnpackedIcon>);
     }
 
-    if (
-      Object.keys(COLUMN_DEFINITIONS).some(
-        name => COLUMN_DEFINITIONS[name].prop !== false && props[name]
-      )
-    ) {
-      this._updateColumns(params);
-      return;
-    }
-    const leaving = Boolean(this.state.columns);
-    if (leaving) {
-      this._destroyColumns();
-      this.internalState!.attributeManager = super._getAttributeManager();
-      this._initializeAttributes();
-    }
-    if (leaving || changeFlags.extensionsChanged) {
+    if (!this._updateColumnState(params) && changeFlags.extensionsChanged) {
       this.state.model?.destroy();
       this.state.model = this._getModel();
       this.getAttributeManager()!.invalidateAll();
     }
   }
   /* eslint-enable max-statements, complexity */
+
+  /** Switches between Arrow and accessor models when column props change. */
+  private _updateColumnState(params: UpdateParameters<this>): boolean {
+    const hasColumns = Object.entries(COLUMN_DEFINITIONS).some(
+      ([name, definition]) => definition.prop !== false && params.props[name]
+    );
+    if (hasColumns) {
+      this._updateColumns(params);
+      return true;
+    }
+    if (this.state.columns) {
+      this._destroyColumns();
+      this.internalState!.attributeManager = super._getAttributeManager();
+      this._initializeAttributes();
+      this.state.model = this._getModel();
+      this.getAttributeManager()!.invalidateAll();
+      return true;
+    }
+    return false;
+  }
 
   /** Rebuilds atlas-derived columns when icon definitions or column inputs change. */
   private _updateColumns(params: UpdateParameters<this>): void {
