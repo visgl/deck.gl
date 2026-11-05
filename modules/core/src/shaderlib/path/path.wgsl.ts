@@ -34,7 +34,23 @@ export const pathShaderPlugin: ShaderPlugin = {
   ]
 };
 
-export const shaderWGSL = /* wgsl */ `\
+/** Builds the shared stroke shader with an optional alternate vertex input adapter. */
+export function makePathShaderWGSL({
+  vertexEntry = '@vertex\nfn vertexMain(attributes: Attributes) -> Varyings',
+  vertexSetup = '',
+  vertexOutput = '',
+  extraVaryings = '',
+  fragmentFilter = '',
+  colorFilter = ''
+}: {
+  vertexEntry?: string;
+  vertexSetup?: string;
+  vertexOutput?: string;
+  extraVaryings?: string;
+  fragmentFilter?: string;
+  colorFilter?: string;
+} = {}): string {
+  return /* wgsl */ `\
 const EPSILON: f32 = 0.001;
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
 
@@ -64,6 +80,7 @@ struct Attributes {
 };
 
 struct Varyings {
+  ${extraVaryings}
   @builtin(position) position: vec4<f32>,
   @location(0) vColor: vec4<f32>,
   @location(1) vCornerOffset: vec2<f32>,
@@ -261,8 +278,8 @@ fn getLineJoinOffset(
 #endif
 }
 
-@vertex
-fn vertexMain(attributes: Attributes) -> Varyings {
+${vertexEntry} {
+  ${vertexSetup}
   var varyings: Varyings;
 
   geometry.pickingColor = picking_getPickingColorFromIndex(attributes.rowIndexes);
@@ -456,6 +473,7 @@ fn vertexMain(attributes: Attributes) -> Varyings {
   );
   DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength);
   DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
+  ${vertexOutput}
   return varyings;
 }
 
@@ -537,13 +555,18 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
+  ${fragmentFilter}
   DECKGL_FILTER_PATH_COLOR();
 #ifndef ANTIALIASING
   var color = varyings.vColor;
   let pathCoverage = 1.0;
 #endif
+  ${colorFilter}
   DECKGL_PATH_STYLE_COLOR(&color, varyings.vPathPosition, pathCoverage);
   DECKGL_FILTER_COLOR(&color, fragmentGeometry);
   return deckgl_premultiplied_alpha(color);
 }
 `;
+}
+
+export const shaderWGSL = makePathShaderWGSL();

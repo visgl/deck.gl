@@ -11,14 +11,16 @@ import {
   color,
   picking,
   UNIT,
-  _deepEqual as deepEqual
+  _deepEqual as deepEqual,
+  _pathUniforms as pathUniforms,
+  type _PathProps as PathProps,
+  _pathShaderWGSL as shaderWGSL,
+  _pathShaderPlugin as pathShaderPlugin
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
 import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
-import {pathUniforms, PathProps} from './path-layer-uniforms';
-import {shaderWGSL, pathShaderPlugin} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
 

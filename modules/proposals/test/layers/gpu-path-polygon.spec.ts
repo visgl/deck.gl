@@ -3,9 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 import {Deck, OrthographicView, type PickingInfo} from '@deck.gl/core';
+import {PathLayer} from '@deck.gl/layers';
 import {GPUPathLayer} from '@deck.gl/proposals/layers/path-layer';
 import {GPUPolygonLayer, type GPUPolygonLayerProps} from '@deck.gl/proposals/layers/polygon-layer';
-import {Buffer} from '@luma.gl/core';
+import {Buffer, Texture} from '@luma.gl/core';
 import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 import {GPUVector, type VertexList} from '@luma.gl/graph/gpu-data';
 import {makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
@@ -171,3 +172,107 @@ test('GPU polygon fill and hole outline pick the same feature', async ({skip}) =
     for (const vector of [positions, rowIndices, indices, paths]) vector.destroy();
   }
 });
+
+for (const billboard of [false, true]) {
+  test(`GPU path matches standard rounded, antialiased strokes (billboard: ${billboard})`, async ({
+    skip
+  }) => {
+    const device = await getWebGPUTestDevice('core');
+    if (!device) return skip();
+    const points = [
+      [-28, 0],
+      [0, 0],
+      [0, 28]
+    ];
+    const type = new List(
+      new Field('points', new FixedSizeList(2, new Field('xy', new Float32())))
+    );
+    const paths = makeGPUVectorFromArrow(device, vectorFromArray([points], type), {
+      format: 'vertex-list<float32x2>'
+    });
+    const style = {
+      billboard,
+      antialiasing: true,
+      capRounded: true,
+      jointRounded: true,
+      pickable: true,
+      widthUnits: 'pixels'
+    } as const;
+    const standard = new PathLayer({
+      ...style,
+      id: 'standard',
+      data: [points],
+      getPath: row => row,
+      getWidth: 12,
+      getColor: [255, 0, 0, 255]
+    });
+    const storage = new GPUPathLayer({
+      ...style,
+      id: 'storage',
+      paths,
+      widths: 12,
+      colors: [255, 0, 0, 255]
+    });
+    const parent = document.createElement('div');
+    document.body.append(parent);
+    const texture = device.createTexture({
+      width: 128,
+      height: 128,
+      format: 'rgba8unorm',
+      usage: Texture.RENDER_ATTACHMENT | Texture.COPY_SRC
+    });
+    const framebuffer = device.createFramebuffer({
+      width: 128,
+      height: 128,
+      colorAttachments: [texture],
+      depthStencilAttachment: 'depth24plus'
+    });
+    const deck = new Deck({
+      parent,
+      device,
+      width: 128,
+      height: 128,
+      useDevicePixels: false,
+      _framebuffer: framebuffer,
+      views: new OrthographicView({near: -1000, far: 100}),
+      initialViewState: {target: [0, 0, 0], zoom: 0},
+      layers: []
+    });
+    async function render(layer: PathLayer | GPUPathLayer): Promise<Uint8Array> {
+      deck.setProps({layers: [layer]});
+      await expect
+        .poll(() => layer.getModels()[0]?.pipeline.linkStatus, {timeout: 5000})
+        .toBe('success');
+      deck.redraw('stroke comparison');
+      const readback = device.createBuffer({
+        byteLength: 128 * 128 * 4,
+        usage: Buffer.COPY_DST | Buffer.MAP_READ
+      });
+      try {
+        texture.readBuffer({}, readback);
+        return await readback.readAsync();
+      } finally {
+        readback.destroy();
+      }
+    }
+    try {
+      const expected = await render(standard);
+      const actual = await render(storage);
+      const red = actual.filter((_value, index) => index % 4 === 0);
+      expect(red.some(value => value > 0 && value < 255)).toBe(true);
+      let differentPixels = 0;
+      for (let index = 0; index < actual.length; index += 4) {
+        if (Math.abs(actual[index] - expected[index]) > 8) differentPixels++;
+      }
+      expect(differentPixels).toBeLessThan(16);
+      expect((await deck.pickObjectAsync({x: 32, y: 64}))?.index).toBe(0);
+      expect(await deck.pickObjectAsync({x: 30, y: 69})).toBeNull();
+    } finally {
+      deck.finalize();
+      framebuffer.destroy();
+      texture.destroy();
+      parent.remove();
+      paths.destroy();
+    }
+  });
+}
