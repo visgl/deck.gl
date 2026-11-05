@@ -42,7 +42,8 @@ export function addDataFilterAttributes(
 
 export function addDataFilterCountingAttributes(
   attributeManager: AttributeManager,
-  useFloatTarget: boolean
+  useFloatTarget: boolean,
+  useFloat32 = false
 ): void {
   // This attribute is needed for variable-width data, e.g. Path, SolidPolygon, Text
   // The vertex shader checks if a vertex has the same "index" as the previous vertex
@@ -51,10 +52,13 @@ export function addDataFilterCountingAttributes(
     filterVertexIndices: {
       size: useFloatTarget ? 1 : 2,
       vertexOffset: 1,
-      type: 'unorm8',
+      // WebGPU vertex offsets must be aligned to four bytes.
+      type: useFloat32 ? 'float32' : 'unorm8',
       accessor: (object, {index}) => {
         const i = object && object.__source ? object.__source.index : index;
-        return useFloatTarget ? (i + 1) % 255 : [(i + 1) % 255, Math.floor(i / 255) % 255];
+        if (useFloatTarget) return (i + 1) % 255;
+        const indices = [(i + 1) % 255, Math.floor(i / 255) % 255];
+        return useFloat32 ? indices.map(value => value / 255) : indices;
       },
       shaderAttributes: {
         filterPrevIndices: {
