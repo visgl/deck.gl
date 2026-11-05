@@ -38,17 +38,17 @@ export default class TerrainExtension extends LayerExtension {
     };
   }
 
-  initializeState(this: Layer<TerrainExtensionProps>) {
-    this.context.deck?._addDefaultEffect(new TerrainEffect());
-  }
-
   updateState(
     this: Layer<TerrainExtensionProps>,
     params: UpdateParameters<Layer<TerrainExtensionProps>>
   ) {
-    const {props, oldProps} = params;
+    const {props, oldProps, changeFlags} = params;
+    if (changeFlags.extensionsChanged) {
+      this.context.deck?._addDefaultEffect(new TerrainEffect());
+    }
 
     if (
+      !changeFlags.extensionsChanged &&
       this.state.terrainDrawMode &&
       props.terrainDrawMode === oldProps.terrainDrawMode &&
       // @ts-ignore `extruded` may not exist in props
