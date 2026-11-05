@@ -50,28 +50,34 @@ export default class AnimatedArcLayer<DataT = any, ExtraProps = {}> extends ArcL
 
   getShaders() {
     const shaders = super.getShaders();
-    shaders.inject = {
-      'vs:#decl': `\
+    shaders.plugins = [
+      ...(shaders.plugins || []),
+      {
+        name: 'animatedArc',
+        module: tripsUniforms,
+        injections: {
+          'glsl:vs:#decl': `\
 in float instanceSourceTimestamp;
 in float instanceTargetTimestamp;
 out float vTimestamp;
 `,
-      'vs:#main-end': `\
+          'glsl:vs:#main-end': `\
 vTimestamp = mix(instanceSourceTimestamp, instanceTargetTimestamp, segmentRatio);
 `,
-      'fs:#decl': `\
+          'glsl:fs:#decl': `\
 in float vTimestamp;
 `,
-      'fs:#main-start': `\
+          'glsl:fs:#main-start': `\
 if (vTimestamp < trips.timeRange.x || vTimestamp > trips.timeRange.y) {
   discard;
 }
 `,
-      'fs:DECKGL_FILTER_COLOR': `\
+          'glsl:fs:DECKGL_FILTER_COLOR': `\
 color.a *= (vTimestamp - trips.timeRange.x) / (trips.timeRange.y - trips.timeRange.x);
 `
-    };
-    shaders.modules = [...shaders.modules, tripsUniforms];
+        }
+      }
+    ];
     return shaders;
   }
 

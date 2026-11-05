@@ -2,6 +2,38 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import type {ShaderPlugin} from '@luma.gl/shaders';
+
+/** WGSL extension points for path color and time-window filtering. */
+export const pathShaderPlugin: ShaderPlugin = {
+  name: 'pathShaderPlugin',
+  injectionTargets: [
+    {
+      name: 'DECKGL_FILTER_PATH_COLOR_VERTEX',
+      stage: 'vertex',
+      wgsl: {
+        parameters: 'color: ptr<function, vec4<f32>>, pathPosition: vec2<f32>, pathLength: f32'
+      }
+    },
+    {name: 'DECKGL_FILTER_PATH_COLOR', stage: 'fragment', wgsl: {parameters: ''}},
+    {
+      name: 'DECKGL_PATH_STYLE_COORDINATES',
+      stage: 'vertex',
+      wgsl: {
+        parameters:
+          'pathPosition: ptr<function, vec2<f32>>, pathLength: ptr<function, f32>, pathBounds: ptr<function, vec2<f32>>, halfWidth: f32'
+      }
+    },
+    {
+      name: 'DECKGL_PATH_STYLE_COLOR',
+      stage: 'fragment',
+      wgsl: {
+        parameters: 'color: ptr<function, vec4<f32>>, pathPosition: vec2<f32>, pathCoverage: f32'
+      }
+    }
+  ]
+};
+
 export const shaderWGSL = /* wgsl */ `\
 const EPSILON: f32 = 0.001;
 const ZERO_OFFSET: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
@@ -39,8 +71,6 @@ struct Varyings {
   @location(3) vPathPosition: vec2<f32>,
   @location(4) vPathLength: f32,
   @location(5) vJointType: f32,
-  // Location 6 is reserved for TripsLayer's injected vTime varying.
-  @location(7) clipCoordinates: vec2<f32>,
 #ifdef DASH_ENABLED
   @location(8) vPathBounds: vec2<f32>,
 #endif
@@ -260,12 +290,15 @@ fn vertexMain(attributes: Attributes) -> Varyings {
 
   geometry.worldPosition = currPosition;
 
-  let widthPixels =
+  var widthPixels =
     clamp(
       project_unit_size_to_pixel(attributes.instanceStrokeWidths * path.widthScale, path.widthUnits),
       path.widthMinPixels,
       path.widthMaxPixels
     ) / 2.0;
+  var size = vec3<f32>(widthPixels, widthPixels, 0.0);
+  DECKGL_FILTER_SIZE(&size, geometry);
+  widthPixels = size.x;
 
   if (path.billboard != 0.0) {
 #ifdef DASH_ENABLED
@@ -400,19 +433,36 @@ fn vertexMain(attributes: Attributes) -> Varyings {
     varyings.vJointType = join.jointType;
   }
 
-  varyings.clipCoordinates = clip_getCoordinates(geometry.position);
-  clip_filterPosition(&varyings.position, geometry.worldPosition.xy);
+  var pathBounds = vec2<f32>(0.0);
+#ifdef DASH_ENABLED
+  pathBounds = varyings.vPathBounds;
+#endif
+  var pathPosition = varyings.vPathPosition;
+  var pathLength = varyings.vPathLength;
+  DECKGL_PATH_STYLE_COORDINATES(
+    &pathPosition, &pathLength, &pathBounds,
+    select(project_pixel_size_float(widthPixels), widthPixels, path.billboard != 0)
+  );
+#ifdef DASH_ENABLED
+  varyings.vPathBounds = pathBounds;
+#endif
+  varyings.vPathPosition = pathPosition;
+  varyings.vPathLength = pathLength;
+  geometry.uv = pathPosition;
 
   varyings.vColor = vec4<f32>(
     attributes.instanceColors.rgb,
     attributes.instanceColors.a * layer.opacity
   );
+  DECKGL_FILTER_PATH_COLOR_VERTEX(&varyings.vColor, varyings.vPathPosition, varyings.vPathLength);
+  DECKGL_FILTER_GL_POSITION(&varyings.position, geometry);
   return varyings;
 }
 
 @fragment
 fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
   geometry.uv = varyings.vPathPosition;
+  fragmentGeometry.uv = geometry.uv;
 
 #ifdef ANTIALIASING
   // Coordinates of the outer silhouette, in units of half-width: rounded joints and caps are
@@ -459,7 +509,8 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Feather one device pixel across the width only, before premultiplication. edgePixels is a
   // signed device-pixel distance and SMOOTH_EDGE_RADIUS is 0.5, so this ramps across one pixel.
-  color.a *= smoothedge(0.0, edgePixels);
+  let pathCoverage = smoothedge(0.0, edgePixels);
+  color.a *= pathCoverage;
 #else
 #ifdef DASH_ENABLED
   if (
@@ -486,12 +537,13 @@ fn fragmentMain(varyings: Varyings) -> @location(0) vec4<f32> {
 
   // Fragment-layer injections that discard pixels must run after analytic coverage derivatives.
   // See TripsLayer, which rejects fragments outside of the active time window at this anchor.
-  // DECKGL_FILTER_COLOR
-  clip_filterColor(varyings.clipCoordinates);
-#ifdef ANTIALIASING
-  return deckgl_premultiplied_alpha(color);
-#else
-  return deckgl_premultiplied_alpha(varyings.vColor);
+  DECKGL_FILTER_PATH_COLOR();
+#ifndef ANTIALIASING
+  var color = varyings.vColor;
+  let pathCoverage = 1.0;
 #endif
+  DECKGL_PATH_STYLE_COLOR(&color, varyings.vPathPosition, pathCoverage);
+  DECKGL_FILTER_COLOR(&color, fragmentGeometry);
+  return deckgl_premultiplied_alpha(color);
 }
 `;

@@ -126,16 +126,14 @@ const testCases: TestCase[] = [
           radiusUnits: 'pixels'
         })
       ],
-      // Tight enough that losing a third of the 25 `single-category` dots fails the globe diff
-      overrides: {globe: {imageDiffOptions: {threshold: 0.995}}}
+      // Tight enough that losing a third of the 25 `single-category` dots fails the globe diff.
+      // The globe variants are WebGL only until they are validated on WebGPU
+      overrides: {globe: {skip: ['webgpu'], imageDiffOptions: {threshold: 0.995}}}
     },
     presets ?? ['map']
   )
 );
 
-describe.each([
-  'webgl'
-  // 'webgpu'
-] as const)('%s', deviceType => {
-  runRenderTestSuite(testCases, deviceType);
+describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
+  runRenderTestSuite(testCases as TestCase[], deviceType);
 });
