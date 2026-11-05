@@ -296,8 +296,8 @@ test('adaptive bitmap mesh preserves bilinear UVs, altitude and seed indices', (
 });
 
 test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement', () => {
-  const viewport = new CustomProjectionViewport({
-    projection: {
+  const viewport = createTestViewport({
+    converter: {
       forward: ([x, y, z = 0]) => [x, y + x * x, z],
       inverse: ([x, y, z = 0]) => [x, y - x * x, z]
     }
@@ -324,7 +324,18 @@ test('adaptive bitmap rebuilds on modelMatrix changes and disabling refinement',
         }
       },
       {
-        updateProps: {modelMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1]},
+        updateProps: {coordinateOrigin: [3, 0, 0]},
+        onAfterUpdate({layer, oldState}) {
+          expect(layer.state.mesh).not.toBe(oldState.mesh);
+          expect(layer.state.mesh.projectedPositions[0]).toBe(3);
+          expect(layer.getAttributeManager()!.attributes.positions.value[0]).toBe(3);
+        }
+      },
+      {
+        updateProps: {
+          coordinateOrigin: [0, 0, 0],
+          modelMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1]
+        },
         onAfterUpdate({layer, oldState}) {
           expect(layer.state.mesh).not.toBe(oldState.mesh);
           expect(layer.state.mesh.projectedPositions[0]).toBe(2);

@@ -9,6 +9,7 @@ import {
   project32,
   picking,
   CoordinateSystem,
+  _deepEqual as deepEqual,
   LayerProps,
   PickingInfo,
   GetPickingInfoParams,
@@ -213,8 +214,9 @@ export default class BitmapLayer<ExtraPropsT extends {} = {}> extends Layer<
       changeFlags.projectionChanged ||
       this.state.subdivisionStep !== subdivisionStep ||
       props._projectionTolerance !== oldProps._projectionTolerance ||
-      props.coordinateSystem !== oldProps.coordinateSystem ||
-      (this.state.preproject && props.modelMatrix !== oldProps.modelMatrix)
+      (this.state.preproject &&
+        (!deepEqual(props.modelMatrix, oldProps.modelMatrix, 1) ||
+          !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1)))
     ) {
       const oldMesh = this.state.mesh;
       const mesh = this._createMesh();
