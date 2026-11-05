@@ -325,7 +325,8 @@ requirements and limitations.
 ## Remarks
 
 - You can pass a luma.gl `GPUVectorGeometry` to `mesh` with either Arrow columns or
-  ordinary accessors. Keep it alive while the layer uses it and release it yourself.
+  ordinary accessors. Mesh vertex attributes and indices must each fit in one chunk.
+  Keep the geometry alive while the layer uses it and release it yourself.
 - With `_instanced: false`, GPU-only meshes do not report bounds.
 
 ## Source

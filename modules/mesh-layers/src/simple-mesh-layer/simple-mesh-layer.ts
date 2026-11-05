@@ -155,6 +155,16 @@ type Mesh =
     }
   | MeshAttributes;
 
+/** Rejects GPU meshes that would need multiple geometry bindings per draw. */
+function validateMeshChunks(mesh: GPUVectorGeometry): void {
+  if (
+    (mesh.indices && mesh.indices.data.length > 1) ||
+    Object.values(mesh.attributes).some(input => input && 'data' in input && input.data.length > 1)
+  ) {
+    throw new Error('SimpleMeshLayer GPU mesh attributes and indices must be single-chunk');
+  }
+}
+
 /** Detects normal inputs, including those in an interleaved GPU buffer layout. */
 function hasMeshNormals(mesh: Mesh): boolean {
   if (mesh instanceof GPUVectorGeometry) {
@@ -364,6 +374,10 @@ export default class SimpleMeshLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   updateState(params: UpdateParameters<this>) {
+    const {mesh} = params.props;
+    if (mesh instanceof GPUVectorGeometry && mesh !== params.oldProps.mesh) {
+      validateMeshChunks(mesh);
+    }
     if (params.props.positions || params.props.colors) {
       this.updateColumnState(params);
       return;
