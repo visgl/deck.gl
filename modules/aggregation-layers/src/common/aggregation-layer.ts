@@ -20,6 +20,7 @@ import {
 import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import type {Aggregator} from './aggregator/aggregator';
+import {CPUAggregator} from './aggregator/cpu-aggregator/cpu-aggregator';
 import type {GPUVector} from '@luma.gl/graph/gpu-data';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
@@ -89,7 +90,7 @@ export default abstract class AggregationLayer<
   /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
   setShaderModuleProps(props: Record<string, any>): void {
     super.setShaderModuleProps(props);
-    if (this.state?.aggregator) {
+    if (this.state?.aggregator && !(this.state.aggregator instanceof CPUAggregator)) {
       this.state.aggregator.setProps({shaderModuleProps: props});
     }
   }
@@ -194,7 +195,7 @@ export default abstract class AggregationLayer<
       this.setState({aggregator, aggregatorType});
       return true;
     }
-    if (this.state.aggregator) {
+    if (this.state.aggregator && !(this.state.aggregator instanceof CPUAggregator)) {
       // Extension uniforms affect binning even when no input attributes change.
       for (const extension of params.props.extensions) {
         const {defaultProps} = extension.constructor as typeof LayerExtension;

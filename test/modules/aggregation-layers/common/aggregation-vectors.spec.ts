@@ -426,3 +426,62 @@ test('GPUVector attribute identity avoids rebinding unchanged storage', () => {
     buffer.destroy();
   }
 });
+
+test('Shader-only changes skip CPU aggregators but invalidate custom GPU aggregators', () => {
+  class UniformExtension extends LayerExtension {
+    static defaultProps = {aggregationUniform: 0};
+  }
+  for (const cpu of [true, false]) {
+    const delegate = new CPUAggregator({
+      dimensions: 2,
+      getBin: {sources: ['positions'], getValue: () => [0, 0]},
+      getValue: [{sources: ['counts'], getValue: () => 1}]
+    });
+    const aggregator = cpu
+      ? delegate
+      : {
+          get binCount() {
+            return delegate.binCount;
+          },
+          setProps: delegate.setProps.bind(delegate),
+          setNeedsUpdate: delegate.setNeedsUpdate.bind(delegate),
+          update: delegate.update.bind(delegate),
+          preDraw: delegate.preDraw.bind(delegate),
+          getBins: delegate.getBins.bind(delegate),
+          getResult: delegate.getResult.bind(delegate),
+          getResultDomain: delegate.getResultDomain.bind(delegate),
+          getBin: delegate.getBin.bind(delegate),
+          destroy: delegate.destroy.bind(delegate)
+        };
+    const setProps = vi.spyOn(aggregator, 'setProps');
+    const setNeedsUpdate = vi.spyOn(aggregator, 'setNeedsUpdate');
+    testLayer({
+      Layer: ScreenGridLayer,
+      onError: error => {
+        throw error;
+      },
+      testCases: [
+        {
+          props: {data: [{position: [0, 0]}], aggregator, extensions: [new UniformExtension()]},
+          onAfterUpdate({layer}) {
+            setProps.mockClear();
+            layer.setShaderModuleProps({testUniforms: {value: 1}});
+            if (cpu) expect(setProps).not.toHaveBeenCalled();
+            else
+              expect(setProps).toHaveBeenCalledWith({
+                shaderModuleProps: {testUniforms: {value: 1}}
+              });
+            setNeedsUpdate.mockClear();
+          }
+        },
+        {
+          updateProps: {aggregationUniform: 1},
+          onAfterUpdate() {
+            if (cpu) expect(setNeedsUpdate).not.toHaveBeenCalled();
+            else expect(setNeedsUpdate).toHaveBeenCalled();
+          }
+        }
+      ]
+    });
+  }
+});
