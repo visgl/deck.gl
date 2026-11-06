@@ -314,6 +314,17 @@ const defaultProps: DeckProps = {
   drawPickingColors: false
 };
 
+/** Replace explicitly `undefined` props with their defaults, so `undefined` behaves like omitting the prop */
+function resolveUndefinedProps<PropsT extends DeckProps<any>>(props: PropsT): PropsT {
+  const resolvedProps: Record<string, unknown> = {...props};
+  for (const key in resolvedProps) {
+    if (resolvedProps[key] === undefined && key in defaultProps) {
+      resolvedProps[key] = defaultProps[key as keyof DeckProps];
+    }
+  }
+  return resolvedProps as PropsT;
+}
+
 /* eslint-disable max-statements */
 export default class Deck<ViewsT extends ViewOrViews = null> {
   static defaultProps = defaultProps;
@@ -414,7 +425,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   constructor(props: DeckProps<ViewsT>) {
     const initialProps = props;
     // @ts-ignore views
-    this.props = {...defaultProps, ...props};
+    this.props = {...defaultProps, ...resolveUndefinedProps(props)};
     props = this.props;
 
     this._validateCanvasConfiguration(props);
@@ -517,6 +528,7 @@ export default class Deck<ViewsT extends ViewOrViews = null> {
   /** Partially update props */
   setProps(props: DeckProps<ViewsT>): void {
     this.stats.get('setProps Time').timeStart();
+    props = resolveUndefinedProps(props);
 
     if ('onLayerHover' in props) {
       log.removed('onLayerHover', 'onHover')();
