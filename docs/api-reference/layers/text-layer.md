@@ -702,7 +702,12 @@ TextLayer.fontAtlasCacheLimit = 10;
 // ... rest of the application
 ```
 
-It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates the cache which removes existing cached `fontAtlas`.
+It is recommended to set `fontAtlasCacheLimit` once in your application since it recreates deck.gl's cache.
+
+Setting `fontAtlasCacheLimit` also resets luma.gl's shared generated-font cache and
+sets its capacity. SDF packing reserves enough padding for the full distance field,
+which can increase atlas size for small `buffer` values.
+TextLayer does not support multi-page or MSDF font atlases.
 
 ### Content Box Behavior
 

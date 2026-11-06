@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-/* global document */
-import TinySDF from '@mapbox/tiny-sdf';
+import {
+  buildBitmapFontAtlas,
+  buildSdfFontAtlas,
+  buildBrowserFontAtlas,
+  setFontAtlasCacheLimit as setLumaFontAtlasCacheLimit
+} from '@luma.gl/engine/text-fonts';
 
 import {log} from '@deck.gl/core';
 
-import {buildMapping, CharacterMapping} from './utils';
+import type {CharacterMapping} from './utils';
 import LRUCache from './lru-cache';
 
 // import type {Texture} from '@deck.gl/core';
@@ -102,11 +106,6 @@ export const DEFAULT_FONT_SETTINGS: Required<FontSettings> = {
   smoothing: 0.1
 };
 
-const MAX_CANVAS_WIDTH = 1024;
-
-const DEFAULT_ASCENT = 0.9;
-const DEFAULT_DESCENT = 0.3;
-
 // only preserve latest three fontAtlas
 const CACHE_LIMIT = 3;
 
@@ -121,7 +120,7 @@ type FontAtlas = {
   /** bounding box of each character in the texture */
   mapping: CharacterMapping;
   /** packed texture */
-  data: HTMLCanvasElement;
+  data: HTMLCanvasElement | OffscreenCanvas;
   /** texture width */
   width: number;
   /** texture height */
@@ -155,69 +154,6 @@ function getNewChars(cacheKey: string, characterSet: Set<string> | string[] | st
   return newCharSet;
 }
 
-function populateAlphaChannel(
-  alphaChannel: Uint8ClampedArray | Uint8Array,
-  imageData: ImageData
-): void {
-  // populate distance value from tinySDF to image alpha channel
-  for (let i = 0; i < alphaChannel.length; i++) {
-    imageData.data[4 * i + 3] = alphaChannel[i];
-  }
-}
-
-function setTextStyle(
-  ctx: CanvasRenderingContext2D,
-  fontFamily: string,
-  fontSize: number,
-  fontWeight: string | number
-): void {
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-  ctx.fillStyle = '#000';
-  ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'left';
-}
-
-function measureText(
-  ctx: CanvasRenderingContext2D,
-  fontSize: number,
-  char: string | undefined
-): {advance: number; width: number; ascent: number; descent: number} {
-  if (char === undefined) {
-    const fontMetrics = ctx.measureText('A');
-    if (fontMetrics.fontBoundingBoxAscent) {
-      return {
-        advance: 0,
-        width: 0,
-        ascent: Math.ceil(fontMetrics.fontBoundingBoxAscent),
-        descent: Math.ceil(fontMetrics.fontBoundingBoxDescent)
-      };
-    }
-    return {
-      advance: 0,
-      width: 0,
-      ascent: fontSize * DEFAULT_ASCENT,
-      descent: fontSize * DEFAULT_DESCENT
-    };
-  }
-
-  const metrics = ctx.measureText(char);
-  if (!metrics.actualBoundingBoxAscent) {
-    // TextMetrics not fully supported
-    return {
-      advance: metrics.width,
-      width: metrics.width,
-      ascent: fontSize * DEFAULT_ASCENT,
-      descent: fontSize * DEFAULT_DESCENT
-    };
-  }
-  return {
-    advance: metrics.width,
-    width: Math.ceil(metrics.actualBoundingBoxRight - metrics.actualBoundingBoxLeft),
-    ascent: Math.ceil(metrics.actualBoundingBoxAscent),
-    descent: Math.ceil(metrics.actualBoundingBoxDescent)
-  };
-}
-
 /**
  * Sets the Font Atlas LRU Cache Limit
  * @param {number} limit LRU Cache limit
@@ -226,6 +162,7 @@ export function setFontAtlasCacheLimit(limit: number): void {
   log.assert(Number.isFinite(limit) && limit >= CACHE_LIMIT, 'Invalid cache limit');
 
   cache = new LRUCache(limit);
+  setLumaFontAtlasCacheLimit(limit);
 }
 
 export default class FontAtlasManager {
@@ -263,7 +200,7 @@ export default class FontAtlasManager {
     }
 
     // update cache key
-    this._key = this._getKey();
+    this._key = `${this._getFontRenderer ? 'custom ' : ''}${this._getKey()}`;
 
     const charSet = getNewChars(this._key, this.props.characterSet);
     const cachedFontAtlas = cache.get(this._key);
@@ -286,97 +223,31 @@ export default class FontAtlasManager {
     cache.set(this._key, fontAtlas);
   }
 
-  // eslint-disable-next-line max-statements
+  /** Delegates rasterization and packing while preserving deck's atlas and cache API. */
   private _generateFontAtlas(characterSet: Set<string>, cachedFontAtlas?: FontAtlas): FontAtlas {
-    const {fontFamily, fontWeight, fontSize, buffer, sdf, radius, cutoff} = this.props;
-    let canvas = cachedFontAtlas && cachedFontAtlas.data;
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.width = MAX_CANVAS_WIDTH;
-    }
-    const ctx = canvas.getContext('2d', {willReadFrequently: true})!;
-    setTextStyle(ctx, fontFamily, fontSize, fontWeight);
-    const defaultMeasure = (char?: string) => measureText(ctx, fontSize, char);
-
-    let renderer: FontRenderer | undefined;
-    if (this._getFontRenderer) {
-      renderer = this._getFontRenderer(this.props);
-    } else if (sdf) {
-      renderer = {
-        measure: defaultMeasure,
-        draw: getSdfFontRenderer(this.props)
-      };
-    }
-
-    // 1. build mapping
-    const {mapping, canvasHeight, xOffset, yOffsetMin, yOffsetMax} = buildMapping({
-      measureText: char => (renderer ? renderer.measure(char) : defaultMeasure(char)),
-      buffer,
-      characterSet,
-      maxCanvasWidth: MAX_CANVAS_WIDTH,
-      ...(cachedFontAtlas && {
-        mapping: cachedFontAtlas.mapping,
-        xOffset: cachedFontAtlas.xOffset,
-        yOffsetMin: cachedFontAtlas.yOffsetMin,
-        yOffsetMax: cachedFontAtlas.yOffsetMax
-      })
-    });
-
-    // 2. update canvas
-    // copy old canvas data to new canvas only when height changed
-    if (canvas.height !== canvasHeight) {
-      const imageData =
-        canvas.height > 0 ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
-      canvas.height = canvasHeight;
-      if (imageData) {
-        ctx.putImageData(imageData, 0, 0);
-      }
-    }
-    setTextStyle(ctx, fontFamily, fontSize, fontWeight);
-
-    // 3. layout characters
-    if (renderer) {
-      for (const char of characterSet) {
-        const frame = mapping[char];
-        const measuredWidth = frame.width;
-        const {data, left = 0, top = 0} = renderer.draw(char);
-        const x = frame.x - left;
-        const y = frame.y - top;
-        // snap origin to the nearest pixel
-        const x0 = Math.max(0, Math.round(x));
-        const y0 = Math.max(0, Math.round(y));
-        const w = Math.min(data.width, canvas.width - x0);
-        const h = Math.min(data.height, canvas.height - y0);
-        ctx.putImageData(data, x0, y0, 0, 0, w, h);
-
-        // The rendered image may extend beyond the measured glyph bounds, e.g. an SDF halo.
-        // Use the entire copied image as the icon frame while preserving its layout position.
-        frame.x = x0;
-        frame.y = y0;
-        frame.width = w;
-        frame.height = h;
-        frame.anchorX += w / 2 - left - measuredWidth / 2;
-        frame.anchorY += top;
-      }
-    } else {
-      for (const char of characterSet) {
-        const frame = mapping[char];
-        ctx.fillText(char, frame.x, frame.y + frame.anchorY);
-      }
-    }
-
-    const fontMetrics = renderer ? renderer.measure() : defaultMeasure();
-
-    return {
-      baselineOffset: (fontMetrics.ascent - fontMetrics.descent) / 2,
-      xOffset,
-      yOffsetMin,
-      yOffsetMax,
-      mapping,
-      data: canvas,
-      width: canvas.width,
-      height: canvas.height
+    // Preserve expanded character sets if another luma consumer evicts this font.
+    const settings = {
+      ...this.props,
+      characterSet: new Set([...Object.keys(cachedFontAtlas?.mapping ?? {}), ...characterSet])
     };
+    const atlas = this._getFontRenderer
+      ? buildBrowserFontAtlas({
+          settings,
+          cacheKey: `deck.gl ${this._key}`,
+          renderSettings: {
+            mode: settings.sdf ? 'sdf' : 'bitmap',
+            threshold: settings.cutoff,
+            smoothing: settings.smoothing
+          },
+          createRenderer: () => this._getFontRenderer!(this.props)
+        })
+      : settings.sdf
+        ? buildSdfFontAtlas(settings)
+        : buildBitmapFontAtlas(settings);
+    const canvas = atlas.pages[0] as HTMLCanvasElement | OffscreenCanvas;
+    // Until luma clamps empty atlases, keep WebGPU uploads at least one pixel tall.
+    if (!canvas.height) canvas.height = 1;
+    return {...atlas, data: canvas, height: canvas.height};
   }
 
   private _getKey(): string {
@@ -386,29 +257,4 @@ export default class FontAtlasManager {
     }
     return `${fontFamily} ${fontWeight} ${fontSize} ${buffer}`;
   }
-}
-
-function getSdfFontRenderer({
-  fontSize,
-  buffer,
-  radius,
-  cutoff,
-  fontFamily,
-  fontWeight
-}: Required<FontSettings>): FontRenderer['draw'] {
-  const tinySDF = new TinySDF({
-    fontSize,
-    buffer,
-    radius,
-    cutoff,
-    fontFamily,
-    fontWeight: `${fontWeight}`
-  });
-
-  return (char: string) => {
-    const {data, width, height} = tinySDF.draw(char);
-    const imageData = new ImageData(width, height);
-    populateAlphaChannel(data, imageData);
-    return {data: imageData, left: buffer, top: buffer};
-  };
 }
