@@ -220,7 +220,8 @@ new ScreenGridLayer({
 
 Input columns remain caller-owned. Replace column references when their data changes, or
 explicitly invalidate the aggregator when updating storage in place. GPU column inputs require
-a custom aggregator and do not support layer extensions or accessor fallbacks.
+a custom aggregator, except for the built-in [ScreenGrid compute path](./screen-grid-layer.md#compute-aggregation),
+and do not support layer extensions or accessor fallbacks.
 
 ### GPU column results
 
