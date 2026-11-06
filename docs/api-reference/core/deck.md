@@ -435,10 +435,11 @@ By default, the deck canvas captures all touch interactions. This prop is useful
 Set options for gesture recognition. May contain the following fields:
 
 - `pan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for `onDrag` events, viewport panning (mouse/touch) and rotating (mouse+ctrl). Default `{threshold: 1}`.
-- `pinch` - an object that is [Pinch](https://visgl.github.io/mjolnir.js/docs/api-reference/pinch) options. This gesture is used for multi-touch zooming/rotating and trackpad pinch. Default `{trackpad: true}`.
-- `multipan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for multi-touch and trackpad panning/rotation. Default `{threshold: 10, pointers: 2, trackpad: true}`.
+- `pinch` - an object that is [Pinch](https://visgl.github.io/mjolnir.js/docs/api-reference/pinch) options. This gesture is used for multi-touch zooming/rotating and trackpad pinch. By default, `coherent` conditions make touch input wait until both pointers have moved, or one pointer has moved for 40ms, and the scale has changed by 3% or the rotation by 3 degrees. Supplying `coherent` replaces these conditions; `coherent: []` restores `threshold`-only recognition. Default `{trackpad: true, coherent: [...]}`.
+- `multipan` - an object that is [Pan](https://visgl.github.io/mjolnir.js/docs/api-reference/pan) options. This gesture is used for multi-touch and trackpad panning/rotation. Two-finger translation waits until both pointers have moved. Default `{threshold: 10, pointers: 2, trackpad: true, coherent: [{distancePerPointer: 1}]}`.
 - `click` - an object that is [Tap](https://visgl.github.io/mjolnir.js/docs/api-reference/tap) options. This gesture is used for the `onClick` event.
 - `dblclick` - an object that is [Tap](https://visgl.github.io/mjolnir.js/docs/api-reference/tap) options. This gesture is used for double-click zooming.
+- `dblclickdrag` - an object that is [DoubleClickDrag](https://visgl.github.io/mjolnir.js/docs/api-reference/double-click-drag) options. This gesture is used for continuous zooming by double-clicking or double-tapping, holding the second press, and dragging vertically. Default `{time: 750}`.
 
 For example, the following setting makes panning less sensitive and clicking easier on mobile:
 
