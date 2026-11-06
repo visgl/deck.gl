@@ -15,11 +15,11 @@ import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 
 import {Matrix4} from '@math.gl/core';
-import {MVTWorkerLoader} from '@loaders.gl/mvt';
-import {binaryToGeojson} from '@loaders.gl/gis';
+import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
+import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 
-import type {Loader} from '@loaders.gl/loader-utils';
-import type {BinaryFeatureCollection} from '@loaders.gl/schema';
+import type {Loader} from '@loaders.gl/core/loader-utils';
+import type {BinaryFeatureCollection} from '@loaders.gl/core/schema';
 import type {Feature, Geometry} from 'geojson';
 
 import {transform} from './coordinate-transform';
@@ -100,7 +100,7 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
   /**
    * Loaders used to transform tiles into `data` property passed to `renderSubLayers`.
    *
-   * @default [MVTWorkerLoader] from `@loaders.gl/mvt`
+   * @default [MVTWorkerLoader] from `@loaders.gl/tiles/mvt`
    */
   loaders?: Loader[];
 };
@@ -108,6 +108,10 @@ export type _MVTLayerProps<FeaturePropertiesT> = Omit<
 type ContentWGS84Cache = {_contentWGS84?: Feature[]};
 
 /** Render data formatted as [Mapbox Vector Tiles](https://docs.mapbox.com/vector-tiles/specification/). */
+/**
+ * Compatibility MVT layer retaining binary data, TileJSON, and rendered-feature APIs.
+ * Remains supported while MVT2DLayer gains equivalent feature coverage.
+ */
 export default class MVTLayer<
   FeaturePropertiesT = any,
   ExtraProps extends {} = {}
@@ -339,7 +343,7 @@ export default class MVTLayer<
 
     if (this.state.binary && info.index !== -1) {
       const {data} = params.sourceLayer!.props;
-      info.object = binaryToGeojson(data as BinaryFeatureCollection, {
+      info.object = convertBinaryFeatureCollectionToGeojson(data as BinaryFeatureCollection, {
         globalFeatureId: info.index
       }) as Feature;
     }
@@ -445,7 +449,7 @@ export default class MVTLayer<
             }
 
             if (this.state.binary && Array.isArray(tile.content) && !tile.content.length) {
-              // TODO: @loaders.gl/mvt returns [] when no content. It should return a valid empty binary.
+              // TODO: @loaders.gl/tiles/mvt returns [] when no content. It should return a valid empty binary.
               // https://github.com/visgl/loaders.gl/pull/1137
               return [];
             }
@@ -454,7 +458,9 @@ export default class MVTLayer<
             if (tile._contentWGS84 === undefined && isGeoBoundingBox(bbox)) {
               // Create a cache to transform only once
 
-              const content = this.state.binary ? binaryToGeojson(tile.content) : tile.content;
+              const content = this.state.binary
+                ? convertBinaryFeatureCollectionToGeojson(tile.content)
+                : tile.content;
               tile._contentWGS84 = content.map(feature =>
                 transformTileCoordsToWGS84(feature, bbox)
               );

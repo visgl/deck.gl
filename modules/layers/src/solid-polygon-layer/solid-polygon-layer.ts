@@ -4,13 +4,14 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   color,
   project32,
   picking,
   gouraudMaterial,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
-import {Model, Geometry} from '@luma.gl/engine';
+import {type Model, Geometry} from '@luma.gl/engine';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -20,7 +21,6 @@ import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 import {getSolidPolygonShaderWGSL} from './solid-polygon-layer.wgsl';
-import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -152,14 +152,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
       defines: {
         RING_WINDING_ORDER_CW: ringWindingOrderCW
       },
-      modules: [
-        project32,
-        color,
-        gouraudMaterial,
-        picking,
-        solidPolygonUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, gouraudMaterial, picking, solidPolygonUniforms]
     });
   }
 
@@ -425,12 +418,14 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         );
       }
 
-      topModel = new Model(this.context.device, {
+      topModel = new GPUVectorModel(this.context.device, {
         ...shaders,
         id: `${id}-top`,
         topology: 'triangle-list',
         bufferLayout,
         isIndexed: true,
+        // The attribute manager can supply layouts for the instanced side models.
+        isInstanced: false,
         userData: {
           excludeAttributes: {
             vertexValid: true,
@@ -447,7 +442,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         bufferLayout = bufferLayout.filter(layout => layout.name !== 'indices');
       }
 
-      sideModel = new Model(this.context.device, {
+      sideModel = new GPUVectorModel(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-side`,
         bufferLayout,
@@ -467,7 +462,7 @@ export default class SolidPolygonLayer<DataT = any, ExtraPropsT extends {} = {}>
         }
       });
 
-      wireframeModel = new Model(this.context.device, {
+      wireframeModel = new GPUVectorModel(this.context.device, {
         ...this.getShaders('side'),
         id: `${id}-wireframe`,
         bufferLayout,

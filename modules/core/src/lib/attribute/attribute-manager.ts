@@ -14,8 +14,8 @@ import {NumericArray} from '../../types/types';
 import AttributeTransitionManager from './attribute-transition-manager';
 
 import type {Buffer, Device, BufferLayout} from '@luma.gl/core';
-import {GPUVector} from '@luma.gl/gpgpu/gpu-data';
-import type {GPUConstant} from '@luma.gl/gpgpu/gpu-data';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
+import type {GPUConstant} from '@luma.gl/graph/gpu-data';
 import type {Stats} from '@probe.gl/stats';
 import type {Timeline} from '@luma.gl/engine';
 

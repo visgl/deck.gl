@@ -8,6 +8,7 @@ import {
   CompositeLayer,
   LayerDataSource,
   LayerContext,
+  LayerExtension,
   UpdateParameters,
   CompositeLayerProps,
   Attribute,
@@ -15,9 +16,10 @@ import {
   Viewport,
   _deepEqual as deepEqual
 } from '@deck.gl/core';
-import {transformMat4} from '@math.gl/core/vec4';
+import {vec4TransformMat4 as transformMat4} from '@math.gl/core';
 import type {_CustomProjectionViewport as CustomProjectionViewport} from '@deck.gl/core';
 import {Aggregator} from './aggregator/aggregator';
+import {WebGLAggregator} from './aggregator/gpu-aggregator/webgl-aggregator';
 
 export type AggregationLayerProps<DataT> = CompositeLayerProps & {
   data: LayerDataSource<DataT>;
@@ -33,6 +35,14 @@ export default abstract class AggregationLayer<
     aggregatorType: string;
     aggregator: Aggregator;
   } & CompositeLayer['state'];
+
+  /** Forwards extension uniforms to the GPU aggregation model as well as rendering models. */
+  setShaderModuleProps(props: Record<string, any>): void {
+    super.setShaderModuleProps(props);
+    if (this.state?.aggregator instanceof WebGLAggregator) {
+      this.state.aggregator.setProps({shaderModuleProps: props});
+    }
+  }
 
   /** Allow this layer to participates in the draw cycle */
   get isDrawable() {
@@ -107,6 +117,28 @@ export default abstract class AggregationLayer<
       this.setState({aggregator, aggregatorType});
       return true;
     }
+    if (this.state.aggregator instanceof WebGLAggregator) {
+      // Extension uniforms affect binning even when no input attributes change.
+      for (const extension of params.props.extensions) {
+        const {defaultProps} = extension.constructor as typeof LayerExtension;
+        const uniformPropsChanged = Object.entries(defaultProps).some(([key, definition]) => {
+          // Accessor changes are handled by attributes; callbacks do not affect GPU uniforms.
+          if (
+            definition &&
+            typeof definition === 'object' &&
+            'type' in definition &&
+            (definition.type === 'accessor' || definition.type === 'function')
+          ) {
+            return false;
+          }
+          return !deepEqual(params.props[key], params.oldProps[key], 2);
+        });
+        if (uniformPropsChanged) {
+          this.state.aggregator.setNeedsUpdate();
+          break;
+        }
+      }
+    }
     if (
       project.isCustomProjection(this.context.viewport) &&
       !this.state.preproject &&
@@ -134,6 +166,19 @@ export default abstract class AggregationLayer<
 
     for (const id in changedAttributes) {
       this.onAttributeChange(id);
+      if (aggregator instanceof WebGLAggregator) {
+        const {accessor} = changedAttributes[id].settings;
+        const accessors = Array.isArray(accessor) ? accessor : [accessor];
+        // Extension inputs can affect every bin, beyond the layer's position/weight inputs.
+        if (
+          this.props.extensions.some(extension => {
+            const {defaultProps} = extension.constructor as typeof LayerExtension;
+            return accessors.some(name => typeof name === 'string' && name in defaultProps);
+          })
+        ) {
+          aggregator.setNeedsUpdate();
+        }
+      }
     }
 
     // In aggregator.update() the aggregator allocates the buffers to store its output

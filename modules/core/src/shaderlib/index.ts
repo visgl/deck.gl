@@ -2,51 +2,95 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {ShaderAssembler, gouraudMaterial, phongMaterial} from '@luma.gl/shadertools';
+import {
+  type ShaderAssembler,
+  type ShaderInjectionTarget,
+  GLSLShaderAssembler,
+  WGSLShaderAssembler,
+  gouraudMaterial,
+  phongMaterial
+} from '@luma.gl/shaders';
+import {GPUVectorModel, Model} from '@luma.gl/engine';
 import {layerUniforms} from './misc/layer-uniforms';
 import color from './color/color';
 import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
-import shadow from './shadow/shadow';
-import picking from './picking/picking';
+import shadow, {shadowPlugin} from './shadow/shadow';
+import picking, {pickingPlugin} from './picking/picking';
 
 const DEFAULT_MODULES = [geometry];
 
-const SHADER_HOOKS_GLSL = [
-  'vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)',
-  'vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)',
-  'vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)',
-  'fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)'
+// GLSL and WGSL share target names with language-specific signatures.
+const SHADER_INJECTION_TARGETS: ShaderInjectionTarget[] = [
+  {
+    name: 'DECKGL_FILTER_SIZE',
+    stage: 'vertex',
+    glsl: {parameters: 'inout vec3 size, VertexGeometry geometry'},
+    wgsl: {parameters: 'size: ptr<function, vec3<f32>>, geometry: VertexGeometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_GL_POSITION',
+    stage: 'vertex',
+    glsl: {parameters: 'inout vec4 position, VertexGeometry geometry'},
+    wgsl: {parameters: 'position: ptr<function, vec4<f32>>, geometry: VertexGeometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_COLOR',
+    stage: 'vertex',
+    glsl: {parameters: 'inout vec4 color, VertexGeometry geometry'},
+    wgsl: {parameters: 'color: ptr<function, vec4<f32>>, geometry: VertexGeometry'}
+  },
+  {
+    name: 'DECKGL_FILTER_COLOR',
+    stage: 'fragment',
+    glsl: {parameters: 'inout vec4 color, FragmentGeometry geometry'},
+    wgsl: {parameters: 'color: ptr<function, vec4<f32>>, geometry: FragmentGeometry'}
+  }
 ];
 
-const SHADER_HOOKS_WGSL = [
-  // Not yet supported
-];
-
-export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
-  const shaderAssembler = ShaderAssembler.getDefaultShaderAssembler(language);
+function createShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
+  const shaderAssembler =
+    language === 'wgsl' ? new WGSLShaderAssembler() : new GLSLShaderAssembler();
 
   for (const shaderModule of DEFAULT_MODULES) {
     shaderAssembler.addDefaultModule(shaderModule);
   }
 
-  // if we're recreating the device we may have changed language
-  // and must not inject hooks for the wrong language
-  // shaderAssembler.resetShaderHooks();
-  (shaderAssembler as any)._hookFunctions.length = 0;
-
-  // Add shader hooks based on language
-  // TODO(ibgreen) - should the luma shader assembler support both sets of hooks?
-  const shaderHooks = language === 'glsl' ? SHADER_HOOKS_GLSL : SHADER_HOOKS_WGSL;
-  for (const shaderHook of shaderHooks) {
-    shaderAssembler.addShaderHook(shaderHook);
+  // Each assembler selects its language implementation from the shared targets.
+  for (const shaderInjectionTarget of SHADER_INJECTION_TARGETS) {
+    shaderAssembler.addShaderInjectionTarget(shaderInjectionTarget);
   }
 
   return shaderAssembler;
 }
 
-export {layerUniforms, color, picking, project, project32, gouraudMaterial, phongMaterial, shadow};
+// Shared registries preserve application-wide module and injection target registration.
+const glslShaderAssembler = createShaderAssembler('glsl');
+const wgslShaderAssembler = createShaderAssembler('wgsl');
+
+// Model snapshots its base defaults, so both classes need the WebGL fallback.
+// luma ignores this default on devices using a different shader language.
+GPUVectorModel.defaultProps.shaderAssembler = glslShaderAssembler;
+Model.defaultProps.shaderAssembler = glslShaderAssembler;
+
+/** Return deck.gl's shared shader assembler for registering modules and injection targets. */
+export function getShaderAssembler(language: 'glsl' | 'wgsl'): ShaderAssembler {
+  return language === 'wgsl' ? wgslShaderAssembler : glslShaderAssembler;
+}
+
+export {
+  layerUniforms,
+  color,
+  picking,
+  pickingPlugin,
+  project,
+  project32,
+  gouraudMaterial,
+  phongMaterial,
+  shadow,
+  shadowPlugin
+};
 
 // Useful for custom shader modules
 export type {ProjectProps, ProjectUniforms} from './project/viewport-uniforms';

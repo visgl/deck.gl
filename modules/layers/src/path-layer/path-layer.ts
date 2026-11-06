@@ -4,23 +4,25 @@
 
 import {
   Layer,
+  _GPUVectorModel as GPUVectorModel,
   WebMercatorViewport,
   project,
   project32,
   color,
   picking,
   UNIT,
-  _deepEqual as deepEqual
+  _deepEqual as deepEqual,
+  _pathUniforms as pathUniforms,
+  type _PathProps as PathProps,
+  _pathShaderWGSL as shaderWGSL,
+  _pathShaderPlugin as pathShaderPlugin
 } from '@deck.gl/core';
 import {Geometry} from '@luma.gl/engine';
-import {Model} from '@luma.gl/engine';
+import type {Model} from '@luma.gl/engine';
 import PathTesselator from './path-tesselator';
 
-import {pathUniforms, PathProps} from './path-layer-uniforms';
-import {shaderWGSL} from './path-layer.wgsl';
 import vs from './path-layer-vertex.glsl';
 import fs from './path-layer-fragment.glsl';
-import clipExtension from '../utils/clip-extension';
 
 import type {
   LayerProps,
@@ -189,14 +191,9 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       vs,
       fs,
       source: shaderWGSL,
+      plugins: this.context.device.type === 'webgpu' ? [pathShaderPlugin] : [],
       defines: antialiasing ? {ANTIALIASING: 1} : {},
-      modules: [
-        project32,
-        color,
-        picking,
-        pathUniforms,
-        ...(this.context.device.type === 'webgpu' ? [clipExtension] : [])
-      ]
+      modules: [project32, color, picking, pathUniforms]
     }); // 'project' module added by default.
   }
 
@@ -544,7 +541,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       1, 0
     ];
 
-    return new Model(this.context.device, {
+    return new GPUVectorModel(this.context.device, {
       ...this.getShaders(),
       id: this.props.id,
       bufferLayout: this.getAttributeManager()!.getBufferLayouts(),

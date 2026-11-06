@@ -9,9 +9,9 @@ import {DirectionalLight} from './directional-light';
 import {PointLight} from './point-light';
 import {Matrix4, Vector3} from '@math.gl/core';
 import ShadowPass from '../../passes/shadow-pass';
-import shadow from '../../shaderlib/shadow/shadow';
+import {shadowPlugin} from '../../shaderlib/shadow/shadow';
 
-import type {Light, LightingProps} from '@luma.gl/shadertools';
+import type {Light, LightingProps} from '@luma.gl/shaders';
 import type {ShadowModuleProps} from '../../shaderlib/shadow/shadow';
 import type Layer from '../../lib/layer';
 import type {Effect, EffectContext, PreRenderOptions} from '../../lib/effect';
@@ -62,7 +62,7 @@ export default class LightingEffect implements Effect {
     if (this.shadow && !this.dummyShadowMap) {
       this._createShadowPasses(device);
 
-      deck._addDefaultShaderModule(shadow);
+      deck._addDefaultShaderPlugin(shadowPlugin);
 
       this.dummyShadowMap = device.createTexture({
         width: 1,
@@ -169,7 +169,7 @@ export default class LightingEffect implements Effect {
     if (this.dummyShadowMap) {
       this.dummyShadowMap.destroy();
       this.dummyShadowMap = null;
-      context.deck._removeDefaultShaderModule(shadow);
+      context.deck._removeDefaultShaderPlugin(shadowPlugin);
     }
   }
 

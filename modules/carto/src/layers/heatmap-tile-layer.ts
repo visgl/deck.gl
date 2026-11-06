@@ -4,7 +4,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import type {ShaderModule} from '@luma.gl/shaders';
 import {getResolution} from 'quadbin';
 import {getResolution as getH3Resolution, getNumCells} from 'h3-js';
 
@@ -107,8 +107,13 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
 
   getShaders(type) {
     const shaders = super.getShaders(type);
-    shaders.inject = {
-      'vs:#main-end': `
+    shaders.plugins = [
+      ...(shaders.plugins || []),
+      {
+        name: 'density',
+        module: densityUniforms,
+        injections: {
+          'glsl:vs:#main-end': `
       // Value from getWeight accessor
   float weight = elevations;
 
@@ -126,8 +131,9 @@ class RTTSolidPolygonLayer extends RTTModifier(SolidPolygonLayer) {
   weight = clamp(weight, 0.0, MAX_VAL);
   vColor = vec4(mod(vec3(weight, floor(weight / SHIFT.yz)), 256.0), 255.0) / 255.0;
 `
-    };
-    shaders.modules = [...shaders.modules, densityUniforms];
+        }
+      }
+    ];
     return shaders;
   }
 
