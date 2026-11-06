@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - v*
+  # Re-run a release from an existing tag: gh workflow run release.yml --ref vX.Y.Z
+  workflow_dispatch:
 
 jobs:
   check_branch:
@@ -36,7 +38,7 @@ jobs:
       contents: write
       id-token: write
 
-    if: ${{ github.repository_owner == 'visgl' && needs.check_branch.outputs.should_build }}
+    if: ${{ github.repository_owner == 'visgl' && startsWith(github.ref, 'refs/tags/v') && needs.check_branch.outputs.should_build }}
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
