@@ -41,7 +41,14 @@ function mergeTriggers(getHexagon, coverage) {
   return trigger;
 }
 
+import {
+  cellColumnDefaults,
+  renderCellColumns,
+  type CellColumnProps
+} from '../geo-cell-layer/cell-columns';
+
 const defaultProps: DefaultProps<H3HexagonLayerProps> = {
+  ...cellColumnDefaults,
   ...PolygonLayer.defaultProps,
   highPrecision: 'auto',
   coverage: {type: 'number', min: 0, max: 1, value: 1},
@@ -55,7 +62,7 @@ export type H3HexagonLayerProps<DataT = unknown> = _H3HexagonLayerProps<DataT> &
   PolygonLayerProps<DataT>;
 
 /** Props added by the H3HexagonLayer */
-type _H3HexagonLayerProps<DataT> = {
+type _H3HexagonLayerProps<DataT> = CellColumnProps & {
   /**
    * Whether or not draw hexagons with high precision.
    * @default 'auto'
@@ -120,6 +127,7 @@ export default class H3HexagonLayer<
   }
 
   updateState({props, changeFlags}: UpdateParameters<this>): void {
+    if (props.cells) return;
     if (
       props.highPrecision !== true &&
       (changeFlags.dataChanged ||
@@ -221,7 +229,15 @@ export default class H3HexagonLayer<
     this.setState({centerHex: hex, vertices});
   }
 
+  /** Routes cell columns through source-preserving geometry and style accessors. */
+  /** Routes cell columns through source-preserving geometry and style accessors. */
   renderLayers(): Layer | null | LayersList {
+    if (this.props.cells)
+      return renderCellColumns(this, 'getHexagon', false, {
+        row: this.getSubLayerRow.bind(this),
+        accessor: this.getSubLayerAccessor.bind(this),
+        props: this.getSubLayerProps.bind(this)
+      });
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
 
