@@ -409,3 +409,39 @@ export function getTextFromBuffer({
 
   return {texts, characterCount};
 }
+
+/**
+ * Binary characters can set picking colors from per-character `rowIndexes`, such as feature ids.
+ * Returns the row index of each label's first character for the background attributes, which have
+ * one row per label, unless they set their own. Returns null if the row indexes are not readable
+ * on the CPU.
+ */
+export function getLabelRowIndexes(
+  attributes: {rowIndexes?: unknown; background?: {rowIndexes?: unknown}} | undefined,
+  length: number,
+  startIndices: NumericArray
+): {value: Uint32Array; size: 1} | null {
+  const rowIndexes = attributes?.rowIndexes;
+  if (!rowIndexes || !attributes.background || attributes.background.rowIndexes) {
+    return null;
+  }
+  const attribute = (ArrayBuffer.isView(rowIndexes) ? {value: rowIndexes} : rowIndexes) as {
+    value?: unknown;
+    size?: number;
+    stride?: number;
+    offset?: number;
+  };
+  const {value} = attribute;
+  if (!ArrayBuffer.isView(value) || value instanceof DataView) {
+    return null;
+  }
+  // Offset and stride are in bytes
+  const {BYTES_PER_ELEMENT} = value as unknown as Uint32Array;
+  const start = Math.floor((attribute.offset || 0) / BYTES_PER_ELEMENT);
+  const step = Math.floor((attribute.stride || 0) / BYTES_PER_ELEMENT) || attribute.size || 1;
+  const labelRowIndexes = new Uint32Array(length);
+  for (let index = 0; index < length; index++) {
+    labelRowIndexes[index] = (value as unknown as Uint32Array)[start + startIndices[index] * step];
+  }
+  return {value: labelRowIndexes, size: 1};
+}

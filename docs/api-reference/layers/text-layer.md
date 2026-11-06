@@ -482,7 +482,9 @@ The border thickness of each text label, in pixels. Only effective if `backgroun
 The TextLayer renders the following sublayers:
 
 * `characters` - an `IconLayer` rendering all the characters.
-* `background` - the background for each text block, if `background: true`.
+* `background` - the background for each text block, if `background: true`. With [CollisionFilterExtension](../extensions/collision-filter-extension.md), this sublayer also renders one collision rectangle per label, even when backgrounds are disabled. These rectangles are hidden during normal rendering and picking unless `background: true`.
+
+When collision filtering is enabled, the collision pass uses the `background` sublayer instead of individual characters. Binary data without `data.attributes.background` uses the `characters` sublayer for collision rectangles so that supplied GPU attributes can be reused directly.
 
 
 ## Use binary attributes
@@ -566,6 +568,7 @@ To use `background: true` with binary data, the background attributes must be su
 - `getFillColor`: corresponds to the `getBackgroundColor` accessor
 - `getLineColor`: corresponds to the `getBorderColor` accessor
 - `getLineWidth`: corresponds to the `getBorderWidth` accessor
+- `rowIndexes`: the row of each label for picking and collisions. Defaults to the row index of the label's first character if `data.attributes.rowIndexes` is a typed array, otherwise to the label index
 
 Following the above example, additional attributes are required to render the background:
 
