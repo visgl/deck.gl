@@ -90,9 +90,9 @@ The table below covers the public extensions in `@deck.gl/extensions`. Most rema
 | Module | Extension | WebGL | WebGPU |
 | --- | --- | --- | --- |
 | `@deck.gl/extensions` | `BrushingExtension` | ✅ | ✅ |
-| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `Fp64Extension` | ✅ | ❌ |
-| `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ❌ |
+| `@deck.gl/extensions` | `DataFilterExtension` | ✅ | ✅ Filtering; `countItems` requires WebGL |
+| `@deck.gl/extensions` | `Fp64Extension` | ✅ | ✅ |
+| `@deck.gl/extensions` | `PathStyleExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `FillStyleExtension` | ✅ | ❌ |
 | `@deck.gl/extensions` | `ClipExtension` | ✅ | ✅ |
 | `@deck.gl/extensions` | `CollisionFilterExtension` | ✅ | ❌ |

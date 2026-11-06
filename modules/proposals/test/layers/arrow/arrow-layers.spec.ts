@@ -38,9 +38,9 @@ import {afterAll, vi} from 'vitest';
 import {
   makeArrowLineRecordBatches,
   makeArrowLineSourceData
-} from '../../../../../examples/v10-experimental/shared/arrow/arrow-lines/arrow-line-data';
-import {makeArrowPolygonExampleData} from '../../../../../examples/v10-experimental/shared/arrow/arrow-polygons/arrow-polygon-data';
-import {makeArrowTextSource} from '../../../../../examples/v10-experimental/shared/arrow/arrow-text-2d/arrow-text-data';
+} from '../../../../../examples/proposals/shared/arrow/arrow-lines/arrow-line-data';
+import {makeArrowPolygonExampleData} from '../../../../../examples/proposals/shared/arrow/arrow-polygons/arrow-polygon-data';
+import {makeArrowTextSource} from '../../../../../examples/proposals/shared/arrow/arrow-text-2d/arrow-text-data';
 
 const TEST_VIEWPORT_WIDTH = 640;
 const TEST_VIEWPORT_HEIGHT = 480;
@@ -226,9 +226,9 @@ it('clips temporal path fragments at both ends of the trail window', async conte
       const layers = [
         new GPUPathLayer({
           id: `gpu-temporal-clipping-${fadeTrail}`,
-          getPath: pathVector,
-          getTimestamps: timestampVector,
-          getWidth: 10,
+          paths: pathVector,
+          timestamps: timestampVector,
+          widths: 10,
           currentTime: 50,
           trailLength: 25,
           fadeTrail,
@@ -297,7 +297,7 @@ it('GPUPathLayer renders variable-length GPUVectors without an Arrow dependency'
     format: 'vertex-list<float32x2>',
     preserveDataChunks: true
   });
-  const layer = new GPUPathLayer({id: 'gpu-path-core', getPath: paths, getWidth: 2});
+  const layer = new GPUPathLayer({id: 'gpu-path-core', paths, widths: 2});
   const {deck, parent} = createTestDeck(device);
   try {
     await waitForDeckInitialization(deck);
@@ -333,7 +333,7 @@ it('GPUSolidPolygonLayer renders adapter-prepared tessellated GPUVectors', async
     positions: prepared.positions,
     rowIndices: prepared.rowIndices,
     indices: prepared.indices,
-    getFillColor: prepared.colors
+    fillColors: prepared.colors
   });
   const {deck, parent} = createTestDeck(device);
   try {
@@ -364,13 +364,13 @@ it('Arrow deck layers return source row indices from Deck picking', async () => 
     model: 'attribute'
   });
   let constantPathDataError: unknown;
-  const constantPathLayer = new ArrowPathLayer({
+  const constantPathLayer = new GPUPathLayer({
     id: 'arrow-paths-constant-picking-test',
     pickable: true,
     data: new Table({paths: pathSource.sourceVectors.paths}),
     paths: 'paths',
-    color: [255, 180, 90, 255],
-    width: 0.004,
+    colors: [255, 180, 90, 255],
+    widths: 0.004,
     model: 'attribute',
     onDataError: error => {
       constantPathDataError = error;

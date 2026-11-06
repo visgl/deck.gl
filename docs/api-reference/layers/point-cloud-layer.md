@@ -205,6 +205,28 @@ Other antialiasing techniques have different trade-offs; see [Antialiasing and M
 This is an object that contains material props for [lighting effect](../core/lighting-effect.md) applied on extruded polygons.
 Check [the lighting guide](../../developer-guide/using-effects.md#material-settings) for configurable settings.
 
+### Arrow Columns
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
+
+#### `positions` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying point positions. Overrides [`getPosition`](#getposition).
+
+#### `normals` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XYZ fixed-size lists specifying point normals. Overrides [`getNormal`](#getnormal).
+
+#### `colors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying point colors. Overrides [`getColor`](#getcolor).
+
 ### Data Accessors
 
 #### `getPosition` ([Accessor&lt;Position&gt;](../../developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square") {#getposition}

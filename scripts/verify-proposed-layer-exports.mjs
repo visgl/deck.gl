@@ -20,7 +20,7 @@ for (const [path, name] of [
 }
 
 for (const [specifier, names] of [
-  ['@deck.gl/proposals/layers', ['GPUScatterplotLayer', 'ArrowScatterplotLayer', 'SkyLayer']],
+  ['@deck.gl/proposals/layers', ['GPUScatterplotLayer', 'ArrowScatterplotLayer', 'SkyLayer', 'Tile2DLayer', 'MVT2DLayer']],
   ['@deck.gl/proposals/effects', ['SceneBufferEffect', 'ShaderPassEffect', 'GPUGraphDeckEffect']],
   ['@deck.gl/proposals/effects/query', ['LuSpatialGeographicPointQueryEffect']]
 ]) {

@@ -106,3 +106,8 @@ export {
   type GPUGraphDeckNodeSizeMode,
   type GPUGraphNodeLayerProps
 } from './gpu-graph/gpu-graph-node-layer';
+
+export {Tile2DLayer} from './tile-2d-layer/index';
+export type {Tile2DLayerPickingInfo, Tile2DLayerProps} from './tile-2d-layer/index';
+export {MVT2DLayer} from './mvt-2d-layer/mvt-2d-layer';
+export type {MVT2DData, MVT2DLayerProps} from './mvt-2d-layer/mvt-2d-layer';
