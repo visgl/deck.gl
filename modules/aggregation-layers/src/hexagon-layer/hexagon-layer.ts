@@ -527,7 +527,7 @@ export default class HexagonLayer<
       this.setState({
         colors: new AttributeWithScale(result, aggregator.binCount)
       });
-      if (!props.aggregator || props.onSetColorDomain !== noop) {
+      if (props.onSetColorDomain !== noop) {
         props.onSetColorDomain(aggregator.getResultDomain(0));
       }
     } else if (channel === 1) {
@@ -535,7 +535,7 @@ export default class HexagonLayer<
       this.setState({
         elevations: new AttributeWithScale(result, aggregator.binCount)
       });
-      if (!props.aggregator || props.onSetElevationDomain !== noop) {
+      if (props.onSetElevationDomain !== noop) {
         props.onSetElevationDomain(aggregator.getResultDomain(1));
       }
     }
