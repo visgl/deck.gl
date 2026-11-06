@@ -47,6 +47,7 @@ export function isFlatViewport(viewport: Viewport): boolean {
 
 /** Per-call overrides of the layer's coordinateSystem, coordinateOrigin and modelMatrix */
 export type FlatProjectOptions = {
+  viewport?: Viewport;
   sourceCrs?: import('@math.gl/geospatial/projection/core').CRSDescriptor;
   coordinateSystem?: 'cartesian' | 'meter-offsets';
   coordinateOrigin?: [number, number, number];
@@ -64,7 +65,7 @@ export function projectToFlatCommon(
   opts: FlatProjectOptions = {}
 ): [number, number, number] {
   // Same resolution as Layer.projectPosition so multi-view setups stay consistent
-  const viewport = getLayerViewport(layer);
+  const viewport = opts.viewport ?? getLayerViewport(layer);
   if (isFlatViewport(viewport)) {
     return layer.projectPosition(position, opts);
   }
@@ -124,7 +125,7 @@ export function projectBoundsToFlatCommon(
   const b = projectToFlatCommon(layer, [bounds[2], bounds[3], 0], opts);
   if (
     bounds[0] - bounds[2] > 180 &&
-    getLayerViewport(layer).isGeospatial &&
+    (opts?.viewport ?? getLayerViewport(layer)).isGeospatial &&
     getSourceCoordinateSystem(layer, opts) === 'lnglat'
   ) {
     b[0] += TILE_SIZE;
