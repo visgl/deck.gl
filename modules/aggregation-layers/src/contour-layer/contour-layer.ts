@@ -316,7 +316,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     polygons: ContourPolygon[];
   } | null {
     const {aggregatedValueReader} = this.state;
-    if (!aggregatedValueReader) {
+    if (
+      !aggregatedValueReader ||
+      this.state.binIdRange.some(
+        ([start, end]) => !Number.isFinite(start) || !Number.isFinite(end) || end <= start
+      )
+    ) {
       return null;
     }
 
