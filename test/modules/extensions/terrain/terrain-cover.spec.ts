@@ -192,6 +192,44 @@ test('TerrainCover#viewport diffing#non-geo', async () => {
   lifecycle.finalize();
 });
 
+test('TerrainCover#delete releases render target textures', async () => {
+  const lifecycle = new LifecycleTester();
+  const viewport = new WebMercatorViewport({
+    width: 400,
+    height: 300,
+    longitude: -50,
+    latitude: 0,
+    zoom: 0
+  });
+  const targetLayer = new ScatterplotLayer({
+    data: [
+      [-90, -40.97989806962013],
+      [0, 0]
+    ],
+    getPosition: d => d
+  });
+  await lifecycle.update({viewport, layers: [targetLayer]});
+
+  const tc = new TerrainCover(targetLayer);
+  tc.shouldUpdate({targetLayer, viewport, layers: [new ScatterplotLayer({id: 'drape'})]});
+  const fbo = tc.getRenderFramebuffer()!;
+  const pickingFbo = tc.getPickingFramebuffer()!;
+
+  // TerrainPass resizes the render target before drawing into it
+  const initialTexture = fbo.colorAttachments[0].texture;
+  fbo.resize({width: 256, height: 256});
+  expect(initialTexture.destroyed, 'resize() releases the replaced texture').toBe(true);
+
+  const textures = [fbo.colorAttachments[0].texture, pickingFbo.colorAttachments[0].texture];
+  tc.delete();
+  expect(
+    textures.map(texture => texture.destroyed),
+    'delete() releases the render and picking textures'
+  ).toEqual([true, true]);
+
+  lifecycle.finalize();
+});
+
 test.skip('TerrainCover#layers diffing#non-geo', async () => {
   const lifecycle = new LifecycleTester();
   const terrainSource = new TileLayer({

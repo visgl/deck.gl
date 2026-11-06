@@ -251,6 +251,7 @@ export class TerrainEffect implements Effect {
     const idsToRemove: string[] = [];
     for (const [id, terrainCover] of this.terrainCovers) {
       if (!terrainCover.isActive) {
+        terrainCover.delete();
         idsToRemove.push(id);
       }
     }
