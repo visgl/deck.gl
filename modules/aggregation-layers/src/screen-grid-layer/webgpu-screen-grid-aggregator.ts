@@ -91,8 +91,8 @@ const finalizeSource = `${storage}
   binIds[index] = vec2f(f32(index % screenAggregation.counts.z), f32(index / screenAggregation.counts.z));
   let count = atomicLoad(&bins[index].count);
   var value = bitcast<f32>(atomicLoad(&bins[index].value));
-  if (screenAggregation.counts.w == 4u) { value = f32(count); }
-  else if (count == 0u) { values[index] = 0x7fc00000u; return; }
+  if (count == 0u) { values[index] = 0x7fc00000u; return; }
+  else if (screenAggregation.counts.w == 4u) { value = f32(count); }
   else if (screenAggregation.counts.w == 1u) { value /= f32(count); }
   values[index] = bitcast<u32>(value);
 }`;

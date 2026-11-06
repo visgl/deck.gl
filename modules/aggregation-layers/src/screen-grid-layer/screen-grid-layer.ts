@@ -226,6 +226,9 @@ export default class ScreenGridLayer<
       props.dataBounds !== oldProps.dataBounds ||
       changeFlags.updateTriggersChanged ||
       changeFlags.viewportChanged ||
+      changeFlags.projectionChanged ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
       aggregation !== oldProps.aggregation ||
       cellSizePixels !== oldProps.cellSizePixels
     ) {
