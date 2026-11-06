@@ -8,7 +8,7 @@ import {diffProps} from './props';
 
 /** Experimental lifecycle base for declarative components with retained resources. */
 export default class StatefulComponent<PropsT extends {} = {}> extends Component<PropsT> {
-  static defaultProps = {updateTriggers: {}};
+  static defaultProps: Readonly<{}> = {updateTriggers: {}};
 
   /** User state retained when an owner replaces a matching descriptor. */
   state: Record<string, any> = {};
