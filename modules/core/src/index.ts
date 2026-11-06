@@ -179,3 +179,5 @@ export {
   pathUniforms as _pathUniforms,
   type PathProps as _PathProps
 } from './shaderlib/path/path-uniforms';
+
+export {default as _StatefulComponent} from './lifecycle/stateful-component';

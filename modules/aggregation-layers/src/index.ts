@@ -29,3 +29,9 @@ export type {
   WebGLAggregatorProps,
   CPUAggregatorProps
 } from './common/aggregator/index';
+
+export {
+  Aggregation as _Aggregation,
+  GridAggregation as _GridAggregation
+} from './experimental/aggregation';
+export {AggregatedLayer as _AggregatedLayer} from './experimental/aggregated-layer';
