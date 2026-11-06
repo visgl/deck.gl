@@ -182,7 +182,7 @@ test('Explicit aggregation bounds use packed coordinates in custom views', () =>
     aggregator.update = () => {};
     const expectedOrigin = layer.state.cellOriginCommon;
     const expectedRange = layer.state.binIdRange;
-    const gpuLayer = layer.clone({
+    let gpuLayer = layer.clone({
       id: 'gpu-bounds',
       data: [],
       positions,
@@ -197,6 +197,35 @@ test('Explicit aggregation bounds use packed coordinates in custom views', () =>
       ]);
       expect(gpuLayer.state.cellOriginCommon).toEqual(expectedOrigin);
       expect(gpuLayer.state.binIdRange).toEqual(expectedRange);
+      for (const props of [
+        {modelMatrix: new Matrix4().translate([30, 40, 0])},
+        {coordinateOrigin: [12, 13, 0] as [number, number, number]}
+      ]) {
+        gpuLayer = gpuLayer.clone(props);
+        const expected = layer.clone({
+          ...props,
+          id: 'expected-bounds',
+          modelMatrix: gpuLayer.props.modelMatrix,
+          coordinateOrigin: gpuLayer.props.coordinateOrigin
+        });
+        manager.setLayers([gpuLayer, expected]);
+        expect(gpuLayer.getBounds()).toEqual(expected.getBounds());
+        expect(gpuLayer.state.cellOriginCommon).toEqual(expected.state.cellOriginCommon);
+        expect(gpuLayer.state.binIdRange).toEqual(expected.state.binIdRange);
+      }
+      const changedViewport = createViewport('changed-gpu-bounds', true, 2000);
+      manager.activateViewport(changedViewport);
+      gpuLayer.activateViewport(changedViewport);
+      manager.updateLayers();
+      const expected = layer.clone({
+        id: 'expected-projection',
+        modelMatrix: gpuLayer.props.modelMatrix,
+        coordinateOrigin: gpuLayer.props.coordinateOrigin
+      });
+      manager.setLayers([gpuLayer, expected]);
+      expect(gpuLayer.getBounds()).toEqual(expected.getBounds());
+      expect(gpuLayer.state.cellOriginCommon).toEqual(expected.state.cellOriginCommon);
+      expect(gpuLayer.state.binIdRange).toEqual(expected.state.binIdRange);
     } finally {
       positions.destroy();
       weights.destroy();

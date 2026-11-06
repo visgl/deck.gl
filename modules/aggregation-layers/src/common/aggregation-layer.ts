@@ -219,11 +219,12 @@ export default abstract class AggregationLayer<
     }
     if (
       project.isCustomProjection(this.context.viewport) &&
-      !this.state.preproject &&
+      (this.props.positions || !this.state.preproject) &&
       (!deepEqual(params.props.modelMatrix, params.oldProps.modelMatrix, 1) ||
-        !deepEqual(params.props.coordinateOrigin, params.oldProps.coordinateOrigin, 1))
+        !deepEqual(params.props.coordinateOrigin, params.oldProps.coordinateOrigin, 1) ||
+        (this.props.positions && params.changeFlags.projectionChanged))
     ) {
-      // Projection props affect binning and bounds, but both backends retain the packed positions.
+      // GPU columns bypass the position attribute callback, including preprojection changes.
       this.onAttributeChange('positions');
     }
     return false;
