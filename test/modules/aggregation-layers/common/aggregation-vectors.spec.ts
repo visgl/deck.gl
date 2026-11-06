@@ -429,7 +429,14 @@ test('GPUVector attribute identity avoids rebinding unchanged storage', () => {
 
 test('Shader-only changes skip CPU aggregators but invalidate custom GPU aggregators', () => {
   class UniformExtension extends LayerExtension {
-    static defaultProps = {aggregationUniform: 0};
+    static defaultProps = {
+      aggregationUniform: 0,
+      getFilterWeight: {type: 'accessor', value: 1}
+    };
+
+    initializeState(this: ScreenGridLayer) {
+      this.getAttributeManager()!.add({filterWeight: {size: 1, accessor: 'getFilterWeight'}});
+    }
   }
   for (const cpu of [true, false]) {
     const delegate = new CPUAggregator({
@@ -462,7 +469,12 @@ test('Shader-only changes skip CPU aggregators but invalidate custom GPU aggrega
       },
       testCases: [
         {
-          props: {data: [{position: [0, 0]}], aggregator, extensions: [new UniformExtension()]},
+          props: {
+            data: [{position: [0, 0]}],
+            aggregator,
+            extensions: [new UniformExtension()],
+            getFilterWeight: () => 1
+          },
           onAfterUpdate({layer}) {
             setProps.mockClear();
             layer.setShaderModuleProps({testUniforms: {value: 1}});
@@ -476,6 +488,14 @@ test('Shader-only changes skip CPU aggregators but invalidate custom GPU aggrega
         },
         {
           updateProps: {aggregationUniform: 1},
+          onAfterUpdate() {
+            if (cpu) expect(setNeedsUpdate).not.toHaveBeenCalled();
+            else expect(setNeedsUpdate).toHaveBeenCalled();
+            setNeedsUpdate.mockClear();
+          }
+        },
+        {
+          updateProps: {getFilterWeight: () => 2, updateTriggers: {getFilterWeight: 1}},
           onAfterUpdate() {
             if (cpu) expect(setNeedsUpdate).not.toHaveBeenCalled();
             else expect(setNeedsUpdate).toHaveBeenCalled();

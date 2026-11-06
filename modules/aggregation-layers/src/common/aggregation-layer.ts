@@ -246,7 +246,7 @@ export default abstract class AggregationLayer<
 
     for (const id in changedAttributes) {
       this.onAttributeChange(id);
-      if (aggregator) {
+      if (!(aggregator instanceof CPUAggregator)) {
         const {accessor} = changedAttributes[id].settings;
         const accessors = Array.isArray(accessor) ? accessor : [accessor];
         // Extension inputs can affect every bin, beyond the layer's position/weight inputs.
