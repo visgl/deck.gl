@@ -135,7 +135,9 @@ export default abstract class AggregationLayer<
   getBounds(): [number[], number[]] | null {
     const bounds = this.props.dataBounds || super.getBounds();
     const {viewport} = this.context;
-    if (!bounds || !project.isCustomProjection(viewport) || this.state.preproject) return bounds;
+    if (!bounds || !project.isCustomProjection(viewport)) return bounds;
+    // Attribute-derived bounds are already packed; explicit bounds describe source coordinates.
+    if (this.state.preproject && !this.props.dataBounds) return bounds;
     // Both backends need bounds in packed coordinates, before viewport projection.
     // Transforming the box is conservative under rotation, but includes every transformed point.
     const result: [number[], number[]] = [Array(3).fill(Infinity), Array(3).fill(-Infinity)];
@@ -143,8 +145,10 @@ export default abstract class AggregationLayer<
       const position = [0, 1, 2].map(axis => bounds[(corner >> axis) & 1][axis] ?? 0);
       position.push(1);
       if (this.props.modelMatrix) transformMat4(position, position, this.props.modelMatrix);
+      for (let axis = 0; axis < 3; axis++) position[axis] += this.props.coordinateOrigin[axis];
+      const packedPosition = this.state.preproject ? this.state.preproject(position) : position;
       for (let axis = 0; axis < 3; axis++) {
-        const value = position[axis] + this.props.coordinateOrigin[axis];
+        const value = packedPosition[axis];
         result[0][axis] = Math.min(result[0][axis], value);
         result[1][axis] = Math.max(result[1][axis], value);
       }

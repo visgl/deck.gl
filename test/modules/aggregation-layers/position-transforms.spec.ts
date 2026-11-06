@@ -12,9 +12,11 @@ import {
   GridLayer,
   HexagonLayer,
   ContourLayer,
-  HeatmapLayer
+  HeatmapLayer,
+  CPUAggregator
 } from '@deck.gl/aggregation-layers';
 import {device} from '@deck.gl/test-utils/vitest';
+import {GPUVector} from '@luma.gl/graph/gpu-data';
 import {Matrix4} from '@math.gl/core';
 
 function createViewport(signature: string, projected: boolean, scale = 2, resolution = 1) {
@@ -122,5 +124,89 @@ test('HeatmapLayer packed position layout composes projection with XY normalizat
       attributes.finalize();
       vi.restoreAllMocks();
     }
+  }
+});
+
+test('Explicit aggregation bounds use packed coordinates in custom views', () => {
+  const viewport = createViewport('gpu-bounds', true, 1000);
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const bounds: [number[], number[]] = [
+    [1, 2, 0],
+    [3, 4, 0]
+  ];
+  const layer = new GridLayer({
+    data: bounds,
+    getPosition: p => p,
+    dataBounds: bounds,
+    gpuAggregation: false,
+    modelMatrix: new Matrix4().translate([10, 20, 0]),
+    coordinateOrigin: [2, 3, 0]
+  });
+  try {
+    manager.setLayers([layer]);
+    expect(layer.state.preproject).toBeTruthy();
+    expect(layer.getBounds()).toEqual([
+      [13000, 25000, 0],
+      [15000, 27000, 0]
+    ]);
+    const buffer = device.createBuffer({data: new Float32Array(bounds.flat())});
+    const positions = new GPUVector({
+      type: 'buffer',
+      name: 'positions',
+      buffer,
+      format: 'float32x3',
+      length: 2,
+      ownsBuffer: false
+    });
+    const weights = new GPUVector({
+      type: 'buffer',
+      name: 'weights',
+      buffer,
+      format: 'float32',
+      length: 2,
+      ownsBuffer: false
+    });
+    const aggregator = new CPUAggregator({
+      dimensions: 2,
+      getBin: {sources: [], getValue: () => [0, 0]},
+      getValue: [
+        {sources: [], getValue: () => 1},
+        {sources: [], getValue: () => 1}
+      ]
+    });
+    aggregator.update = () => {};
+    const expectedOrigin = layer.state.cellOriginCommon;
+    const expectedRange = layer.state.binIdRange;
+    const gpuLayer = layer.clone({
+      id: 'gpu-bounds',
+      data: [],
+      positions,
+      weights: [weights, weights],
+      aggregator
+    });
+    try {
+      manager.setLayers([gpuLayer]);
+      expect(gpuLayer.getBounds()).toEqual([
+        [13000, 25000, 0],
+        [15000, 27000, 0]
+      ]);
+      expect(gpuLayer.state.cellOriginCommon).toEqual(expectedOrigin);
+      expect(gpuLayer.state.binIdRange).toEqual(expectedRange);
+    } finally {
+      positions.destroy();
+      weights.destroy();
+      buffer.destroy();
+    }
+    expect(bounds).toEqual([
+      [1, 2, 0],
+      [3, 4, 0]
+    ]);
+  } finally {
+    manager.finalize();
   }
 });
