@@ -4,4 +4,5 @@
 
 import './controllers.spec';
 import './custom-controller.spec';
+import './globe-navigation.spec';
 import './view-states.spec';
