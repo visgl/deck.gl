@@ -295,6 +295,7 @@ export default abstract class AggregationLayer<
     if (
       project.isCustomProjection(this.context.viewport) &&
       this.state.preproject &&
+      !this.props.positions &&
       shaderModuleProps.project
     ) {
       // Grid/hexagon/contour aggregation uses a separate precision viewport.

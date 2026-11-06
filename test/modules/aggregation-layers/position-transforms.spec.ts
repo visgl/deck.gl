@@ -197,6 +197,20 @@ test('Explicit aggregation bounds use packed coordinates in custom views', () =>
       ]);
       expect(gpuLayer.state.cellOriginCommon).toEqual(expectedOrigin);
       expect(gpuLayer.state.binIdRange).toEqual(expectedRange);
+      const setProps = vi.spyOn(aggregator, 'setProps');
+      const projectionProps = {
+        viewport,
+        coordinateSystem: gpuLayer.props.coordinateSystem,
+        coordinateOrigin: gpuLayer.props.coordinateOrigin,
+        modelMatrix: gpuLayer.props.modelMatrix
+      };
+      gpuLayer.draw({shaderModuleProps: {project: projectionProps}});
+      const received = setProps.mock.calls.at(-1)![0].shaderModuleProps!.project;
+      expect(received.coordinateSystem).toEqual(projectionProps.coordinateSystem);
+      expect(received.coordinateOrigin).toEqual(projectionProps.coordinateOrigin);
+      expect(received.modelMatrix).toEqual(projectionProps.modelMatrix);
+      setProps.mockRestore();
+
       for (const props of [
         {modelMatrix: new Matrix4().translate([30, 40, 0])},
         {coordinateOrigin: [12, 13, 0] as [number, number, number]}

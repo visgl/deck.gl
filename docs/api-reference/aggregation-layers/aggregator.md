@@ -204,6 +204,11 @@ length as positions. The custom aggregator defines supported input formats and c
 GridLayer, HexagonLayer, and ContourLayer also require `dataBounds: [min, max]` in input
 coordinates because GPU-only positions cannot supply CPU bounds.
 
+Position columns remain in their input coordinate system. The custom aggregator is responsible
+for converting them into the binning coordinate system, including any custom projection.
+Projection settings retain the layer's coordinate system, origin, and model matrix for these
+columns; accessor-generated position attributes have already applied CPU preprojection.
+
 ```typescript
 new ScreenGridLayer({
   positions: positionVector,
