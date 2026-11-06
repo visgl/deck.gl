@@ -267,3 +267,32 @@ new BitmapLayer({
 ## Source
 
 [modules/layers/src/bitmap-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/bitmap-layer)
+
+### Typed meshes
+
+`positions`, `texCoords`, and optional `indices` supply a triangle mesh instead of
+one generated from `bounds`. Each input accepts an Apache Arrow column or a
+caller-owned luma.gl `GPUVector`.
+
+* `positions`: `FixedSizeList[2]` or `FixedSizeList[3]` numeric Arrow positions,
+  or `float32x2`/`float32x3` GPU positions. Arrow float64 coordinates retain
+  high/low precision when required by the layer.
+* `texCoords`: `FixedSizeList[2]` numeric Arrow values or a `float32x2` GPU vector.
+  `(0, 0)` is the top-left corner of the image.
+* `indices`: optional tightly packed `uint16` or `uint32` triangle indices.
+  GPU index buffers must have index usage and matching index-type metadata.
+
+Supply positions and texture coordinates together, with matching vertex counts.
+Without indices, every three consecutive vertices form a triangle. Inputs must
+have a single contiguous chunk; indexed multi-chunk topology is not supported.
+GPU buffers retain their offsets and strides and remain caller-owned. Keep them
+alive until the layer no longer uses them. Arrow conversion buffers are released
+by the layer. In-place mutations do not trigger updates; replace the input object.
+
+Supplied UVs take precedence over `_imageCoordinateSystem`. Bitmap picking still
+returns image UV and pixel coordinates. CPU positions provide view-fitting bounds;
+for GPU-only inputs, set `bounds` to the mesh footprint. GPU-only positions cannot
+be used when a custom projection requires CPU preprojection. No implicit GPU
+readback is performed. Async mesh iterators and topology transitions are not supported.
+
+Removing all three mesh props restores the bounds-generated mesh.

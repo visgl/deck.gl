@@ -61,7 +61,13 @@
     "@deck.gl/core": "~9.4.0",
     "@loaders.gl/core": "5.0.0-beta.4",
     "@luma.gl/core": "10.0.0-alpha.10",
-    "@luma.gl/engine": "10.0.0-alpha.10"
+    "@luma.gl/engine": "10.0.0-alpha.10",
+    "apache-arrow": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "apache-arrow": {
+      "optional": true
+    }
   },
   "gitHead": "13ace64fc2cee08c133afc882fc307253489a4e4"
 }
