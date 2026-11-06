@@ -183,15 +183,7 @@ export default class MapLibreOverlay implements IControl {
     this._deck = new Deck<any>({
       ...this._props,
       parent: container,
-      deviceProps: {
-        ...this._props.deviceProps,
-        createCanvasContext: {
-          ...(typeof this._props.deviceProps?.createCanvasContext === 'object'
-            ? this._props.deviceProps.createCanvasContext
-            : undefined),
-          pixelSizeSource: 'css-dpr'
-        }
-      },
+      deviceProps: this._getDeviceProps(),
       parameters: {
         ...getMapLibreDefaultParameters(map, false),
         ...this._props.parameters
@@ -219,6 +211,7 @@ export default class MapLibreOverlay implements IControl {
     this._deck = createMapLibreInterleavedDeck(map, {
       ...this._props,
       views: this._getViews(map),
+      deviceProps: this._getDeviceProps(),
       parameters: {
         ...getMapLibreDefaultParameters(map, true),
         ...this._props.parameters
@@ -229,6 +222,22 @@ export default class MapLibreOverlay implements IControl {
     resolveMapLibreLayerGroups(map, [], this._props.layers);
 
     return document.createElement('div');
+  }
+
+  /**
+   * Tracks the canvas size the way the base map computes it, CSS size times `devicePixelRatio`.
+   * Page zoom changes the CSS size of the canvas without always changing its device pixel size.
+   */
+  private _getDeviceProps(): MapLibreOverlayProps['deviceProps'] {
+    return {
+      ...this._props.deviceProps,
+      createCanvasContext: {
+        ...(typeof this._props.deviceProps?.createCanvasContext === 'object'
+          ? this._props.deviceProps.createCanvasContext
+          : undefined),
+        pixelSizeSource: 'css-dpr'
+      }
+    };
   }
 
   private _onRemoveOverlaid(map: MapLibreMap): void {
