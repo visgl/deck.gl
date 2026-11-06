@@ -23,9 +23,9 @@ import {
 import {device, getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {preprocess} from '@luma.gl/shaders';
 import {
-  dashShaders,
-  offsetShaders,
-  pathStylePipelineShaders
+  dashInjections,
+  offsetInjections,
+  pathStylePipelineInjections
 } from '../../../modules/extensions/src/path-style/shaders.glsl';
 import {vec3} from '@math.gl/core';
 
@@ -603,7 +603,7 @@ test('PathStyleExtension#shader defines', () => {
 });
 
 test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
-  const injection = dashShaders.inject['glsl:fs:#main-start'];
+  const injection = dashInjections['glsl:fs:#main-start'];
   const segmentShader = preprocess(injection);
   const pathShader = preprocess(injection, {defines: {HIGH_PRECISION_DASH: 1}});
 
@@ -632,7 +632,7 @@ test('PathStyleExtension#bounds justified dash intervals in every mode', () => {
 });
 
 test('PathStyleExtension#orders offset remapping before dash conversion', () => {
-  const vertexInjection = pathStylePipelineShaders.inject['glsl:vs:#main-end'];
+  const vertexInjection = pathStylePipelineInjections['glsl:vs:#main-end'];
   const offsetVertexShader = preprocess(vertexInjection, {
     defines: {PATH_STYLE_OFFSET: 1}
   });
@@ -688,15 +688,15 @@ test('PathStyleExtension#orders offset remapping before dash conversion', () => 
     'offsetWidth'
   );
   expect(
-    dashShaders.inject,
+    dashInjections,
     'dash capability has no competing vertex-end injection'
   ).not.toHaveProperty('glsl:vs:#main-end');
   expect(
-    offsetShaders.inject,
+    offsetInjections,
     'offset capability has no competing vertex-end injection'
   ).not.toHaveProperty('glsl:vs:#main-end');
 
-  const fragmentInjection = pathStylePipelineShaders.inject['glsl:fs:#main-end'];
+  const fragmentInjection = pathStylePipelineInjections['glsl:fs:#main-end'];
   const antialiasedFragmentShader = preprocess(fragmentInjection, {
     defines: {ANTIALIASING: 1, DASH_ENABLED: 1, PATH_STYLE_OFFSET: 1}
   });

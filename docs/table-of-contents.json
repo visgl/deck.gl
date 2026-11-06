@@ -145,6 +145,21 @@
       },
       {
         "type": "category",
+        "label": "Proposals",
+        "items": [
+          "api-reference/proposals/overview",
+          "api-reference/proposals/layers",
+          "api-reference/proposals/arrow-layers",
+          "api-reference/proposals/gpu-layers",
+          "api-reference/proposals/effects",
+          "api-reference/proposals/tile-2d-layer",
+          "api-reference/proposals/mvt-2d-layer",
+          "api-reference/proposals/tileset-2d",
+          "api-reference/proposals/tile-2d-header"
+        ]
+      },
+      {
+        "type": "category",
         "label": "Aggregation Layers",
         "items": [
           "api-reference/aggregation-layers/overview",

@@ -272,7 +272,8 @@ export class LayerColumns {
             rows,
             definition.semantic === 'position' ? `${definition.attribute}64Low` : undefined,
             definition.defaultValue,
-            fallbacks?.[definition.accessor]
+            fallbacks?.[definition.accessor],
+            definition.attribute
           );
         }
       }
@@ -442,10 +443,14 @@ export class LayerColumns {
     rows: Rows,
     lowAttribute?: string,
     defaultValue = 0,
-    binaryOverride?: unknown
+    binaryOverride?: unknown,
+    attribute?: string
   ): Promise<GPUVector | GPUConstant> {
     let binaryColor = false;
-    const binary = binaryOverride ?? props.data?.attributes?.[accessor];
+    const binary =
+      binaryOverride ??
+      props.data?.attributes?.[accessor] ??
+      (attribute && props.data?.attributes?.[attribute]);
     if (binary) {
       const descriptor = ArrayBuffer.isView(binary)
         ? {value: binary}
