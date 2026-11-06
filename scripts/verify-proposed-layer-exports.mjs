@@ -7,10 +7,10 @@ import {createRequire} from 'node:module';
 
 const require = createRequire(import.meta.url);
 for (const [path, name] of [
-  ['path-layer', 'GPUPathLayer'],
-  ['polygon-layer', 'GPUPolygonLayer'],
-  ['solid-polygon-layer', 'GPUSolidPolygonLayer'],
-  ['text-layer', 'GPUTextLayer']
+  ['path-layer', 'StoragePathLayer'],
+  ['polygon-layer', 'StoragePolygonLayer'],
+  ['solid-polygon-layer', 'StorageSolidPolygonLayer'],
+  ['text-layer', 'StorageTextLayer']
 ]) {
   const specifier = `@deck.gl/proposals/layers/${path}`;
   const esm = await import(specifier);

@@ -20,7 +20,6 @@ import {
   type UpdateParameters
 } from '@deck.gl/core';
 import {Buffer, type RenderPass, type ShaderLayout} from '@luma.gl/core';
-import type {Model} from '@luma.gl/engine';
 import type {GPUVector, VertexList} from '@luma.gl/graph/gpu-data';
 import {PathStorageModel} from '@luma.gl/engine/models';
 import {
@@ -28,12 +27,12 @@ import {
   type GPUVectorLayerPickingInfo
 } from '../utils/gpu-vector-picking';
 
-import {ArrowPathLayer, type ArrowPathLayerProps} from '../arrow-path-layer';
+import {ArrowPathRendererLayer, type ArrowPathLayerProps} from './arrow-path-renderer-layer';
 
 export type {GPUVectorLayerPickingInfo} from '../utils/gpu-vector-picking';
 
 /** GPUVector-native variable-length path props. Input vectors are borrowed. */
-type StoragePathLayerProps = Omit<LayerProps, 'data'> & {
+type PreparedPathLayerProps = Omit<LayerProps, 'data'> & {
   paths: GPUVector<VertexList<'float32x2' | 'float32x3' | 'float32x4'>>;
   colors?: Color | GPUVector<'unorm8x4' | VertexList<'unorm8x4'>>;
   widths?: number | GPUVector<'float32'>;
@@ -63,50 +62,43 @@ type StoragePathLayerProps = Omit<LayerProps, 'data'> & {
 };
 
 /** Path columns supplied directly or selected from an Arrow batch source. */
-export type GPUPathLayerProps =
-  | StoragePathLayerProps
-  | (Omit<ArrowPathLayerProps, 'color' | 'width'> & {
-      /** Constant or column for stroke colors. */
-      colors?: ArrowPathLayerProps['color'];
-      /** Constant or column for stroke widths. */
-      widths?: ArrowPathLayerProps['width'];
-    });
+export type StoragePathLayerProps = PreparedPathLayerProps | ArrowPathLayerProps;
 
 /** Renders Arrow path columns and prepared GPU path vectors. */
-export class GPUPathLayer extends CompositeLayer<GPUPathLayerProps> {
-  static override layerName = 'GPUPathLayer';
+export class StoragePathLayer extends CompositeLayer<StoragePathLayerProps> {
+  static override layerName = 'StoragePathLayer';
 
-  static override defaultProps = {data: ArrowPathLayer.defaultProps.data};
+  static override defaultProps = {data: ArrowPathRendererLayer.defaultProps.data};
 
   /** Selects the renderer for the supplied path representation. */
   override renderLayers(): Layer {
     const {paths, colors, widths, ...props} = this.props;
     if (isGPUVector(paths)) {
-      return new StoragePathLayer({
+      return new PreparedPathLayer({
         ...props,
         ...this.getSubLayerProps({id: 'storage'}),
         paths,
         colors,
         widths
-      } as StoragePathLayerProps);
+      } as PreparedPathLayerProps);
     }
-    return new ArrowPathLayer({
+    return new ArrowPathRendererLayer({
       ...props,
       ...this.getSubLayerProps({id: 'arrow'}),
-      parameters: {...ArrowPathLayer.defaultProps.parameters, ...this.props.parameters},
+      parameters: {...ArrowPathRendererLayer.defaultProps.parameters, ...this.props.parameters},
       paths,
-      color: colors,
-      width: widths
+      colors,
+      widths
     } as ArrowPathLayerProps);
   }
 
   /** Returns the active renderer's models. */
-  override getModels(): Model[] {
+  override getModels() {
     return this.getSubLayers().flatMap(layer => layer.getModels());
   }
 }
 
-type GPUPathLayerState = {
+type StoragePathLayerState = {
   model: PathStorageModel | null;
   temporalBuffer: Buffer | null;
   defaultTimestampBuffer: Buffer | null;
@@ -248,21 +240,21 @@ const GPU_PATH_SHADER = makePathShaderWGSL({
 });
 
 /** Deck host for the GPU-only variable-length path model. */
-class StoragePathLayer extends Layer<StoragePathLayerProps> {
-  static override layerName = 'StoragePathLayer';
+class PreparedPathLayer extends Layer<PreparedPathLayerProps> {
+  static override layerName = 'PreparedPathLayer';
 
   override getAttributeManager() {
     return null;
   }
 
   override initializeState({device}: LayerContext): void {
-    if (device.type !== 'webgpu') throw new Error('GPUPathLayer requires WebGPU');
+    if (device.type !== 'webgpu') throw new Error('StoragePathLayer requires WebGPU');
     this.setState({model: null, temporalBuffer: null, defaultTimestampBuffer: null});
     this.createModel();
   }
 
   override updateState({props}: UpdateParameters<this>): void {
-    const boundInputs = ((this.state as GPUPathLayerState).model?.userData['boundInputs'] ??
+    const boundInputs = ((this.state as StoragePathLayerState).model?.userData['boundInputs'] ??
       []) as unknown[];
     if (
       props.paths !== boundInputs[0] ||
@@ -277,13 +269,13 @@ class StoragePathLayer extends Layer<StoragePathLayerProps> {
     }
   }
 
-  override getModels(): Model[] {
-    const model = (this.state as GPUPathLayerState | undefined)?.model;
+  override getModels() {
+    const model = (this.state as StoragePathLayerState | undefined)?.model;
     return model ? [model] : [];
   }
 
   override draw({renderPass}: {renderPass: RenderPass}): void {
-    const {model, temporalBuffer} = this.state as GPUPathLayerState;
+    const {model, temporalBuffer} = this.state as StoragePathLayerState;
     if (!model || !temporalBuffer) return;
     const values = new ArrayBuffer(16);
     const floats = new Float32Array(values);
@@ -366,11 +358,11 @@ class StoragePathLayer extends Layer<StoragePathLayerProps> {
       this.props.viewOrigins,
       Boolean(this.props.antialiasing)
     ];
-    this.setState({model, temporalBuffer, defaultTimestampBuffer} satisfies GPUPathLayerState);
+    this.setState({model, temporalBuffer, defaultTimestampBuffer} satisfies StoragePathLayerState);
   }
 
   private destroyModel(): void {
-    const state = this.state as GPUPathLayerState;
+    const state = this.state as StoragePathLayerState;
     state.model?.destroy();
     state.temporalBuffer?.destroy();
     state.defaultTimestampBuffer?.destroy();
