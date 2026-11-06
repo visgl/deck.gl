@@ -189,7 +189,8 @@ export default class DeckPicker {
       });
       this.pickingFBO = this.device.createFramebuffer({
         colorAttachments: [pickingColorTexture],
-        depthStencilAttachment: 'depth16unorm'
+        // Match color rendering when a layer uses stencil coverage during refinement.
+        depthStencilAttachment: 'depth24plus-stencil8'
       });
 
       if (this.device.isTextureFormatRenderable('rgba32float')) {
@@ -201,7 +202,7 @@ export default class DeckPicker {
         });
         const depthFBO = this.device.createFramebuffer({
           colorAttachments: [depthColorTexture],
-          depthStencilAttachment: 'depth16unorm'
+          depthStencilAttachment: 'depth24plus-stencil8'
         });
         this.depthFBO = depthFBO;
       }
