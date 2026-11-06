@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import collision from '../text-layer-collision.glsl';
+
 export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME multi-icon-layer-vertex-shader
@@ -19,6 +21,10 @@ in float instanceColorModes;
 in vec2 instanceOffsets;
 in vec2 instancePixelOffset;
 in vec4 instanceClipRect;
+#ifdef MODULE_COLLISION
+in vec4 instanceCollisionRects;
+in float collisionStartIndices;
+#endif
 
 out float vColorMode;
 out vec4 vColor;
@@ -49,7 +55,16 @@ float getPixelOffsetFromAlignment(float anchor, float extent, float clipStart, f
   return 0.0;
 }
 
+${collision}
+
 void main(void) {
+#ifdef MODULE_COLLISION
+  // Binary input renders through the character layer. Evaluate only its first glyph.
+  if (collision.visibilityPass && gl_InstanceID != int(collisionStartIndices)) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+    return;
+  }
+#endif
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
   geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
@@ -68,50 +83,77 @@ void main(void) {
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
+#ifdef MODULE_COLLISION
+  // Binary input can supply per-character GPU attributes without per-label
+  // background attributes. In that case this layer draws the label rectangle,
+  // which also places other extensions' per-fragment tests in the visibility pass.
+  if (collision.sort || collision.visibilityPass) {
+    pixelOffset = instanceCollisionRects.xy + (positions / 2.0 + 0.5) * instanceCollisionRects.zw;
+  }
+#endif
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
   pixelOffset += instancePixelOffset;
   pixelOffset.y *= -1.0;
 
-  vec2 anchorPosScreen;
+  vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
+  vec2 anchorPosScreen = anchorPos.xy / anchorPos.w;
   // Hide glyphs whose anchor is behind the globe; culling handles non-billboard glyphs
   bool globeOccluded = false;
-  if (icon.billboard)  {
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
-    gl_Position = project_globe_billboard_clipspace(gl_Position, geometry.position.xyz);
-    globeOccluded = project_globe_is_occluded(geometry.position.xyz);
-    anchorPosScreen = gl_Position.xy / gl_Position.w;
-    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-    vec3 offset = vec3(pixelOffset, 0.0);
-    DECKGL_FILTER_SIZE(offset, geometry);
-    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
-  } else {
-    vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
-    if (text.flipY) {
-      offset_common.y *= -1.;
-    }
-    DECKGL_FILTER_SIZE(offset_common, geometry);
-    vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
-    anchorPosScreen = anchorPos.xy / anchorPos.w;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
-    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
-  }
-
   anchorPosScreen = vec2(anchorPosScreen.x + 1.0, 1.0 - anchorPosScreen.y) / 2.0 * project.viewportSize / project.devicePixelRatio;
   vec2 xy = project_size_to_pixel(instanceClipRect.xy);
   vec2 wh = project_size_to_pixel(instanceClipRect.zw);
   if (text.flipY) {
     xy.y = -xy.y - wh.y;
   }
+  vec2 scrollPixels = vec2(0.0);
   if (text.align.x > 0 || text.align.y > 0) {
     vec2 viewportPixels = project.viewportSize / project.devicePixelRatio;
-    vec2 scrollPixels = vec2(
+    scrollPixels = vec2(
       getPixelOffsetFromAlignment(anchorPosScreen.x, viewportPixels.x, xy.x, xy.x + wh.x, text.align.x),
       -getPixelOffsetFromAlignment(anchorPosScreen.y, viewportPixels.y, -xy.y - wh.y, -xy.y, text.align.y)
     );
-    pixelOffset += scrollPixels;
-    gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
   }
+#ifdef MODULE_COLLISION
+  // Clip the label rectangle to the content box, which does not scroll, like the background layer
+  if (collision.sort || collision.visibilityPass) {
+    vec2 corner = positions / 2.0 + 0.5;
+    if (instanceClipRect.z >= 0.0) pixelOffset.x = xy.x + corner.x * wh.x;
+    // Flipped like the default offset above, so the rectangle stays front-facing
+    if (instanceClipRect.w >= 0.0) pixelOffset.y = xy.y + (1.0 - corner.y) * wh.y;
+    scrollPixels = vec2(0.0);
+  }
+  text_setCollisionBounds(instancePositions, instancePositions64Low,
+    instanceCollisionRects * collision_getSize(instanceSizes) / text.fontSize,
+    instancePixelOffset, instanceAngles, vec4(xy, wh), icon.billboard, text.flipY);
+#endif
 
+  if (icon.billboard) {
+    gl_Position = project_globe_billboard_clipspace(anchorPos, geometry.position.xyz);
+    globeOccluded = project_globe_is_occluded(geometry.position.xyz);
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+    vec3 offset = vec3(pixelOffset, 0.0);
+    DECKGL_FILTER_SIZE(offset, geometry);
+    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
+  } else {
+    vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
+    if (text.flipY) offset_common.y *= -1.0;
+    DECKGL_FILTER_SIZE(offset_common, geometry);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, offset_common, geometry.position);
+    DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  }
+  pixelOffset += scrollPixels;
+  gl_Position.xy += project_pixel_size_to_clipspace(scrollPixels);
+#ifdef MODULE_COLLISION
+  // The visibility pass tests the whole label, so it ignores the clipping of single glyphs below.
+  // Billboard vertices share the anchor's depth, so this vertex's culling by the projection and
+  // other vertex extensions applies to the whole label. Other labels decide from their corners.
+  bool collision_culled = icon.billboard
+    ? gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w
+    : text_collisionCulled;
+#endif
+
+  // Whether the content cutoff hides the whole label, rather than clipping a single glyph
+  bool contentCutOff = false;
   if (instanceClipRect.z >= 0.) {
     if (pixelOffset.x < xy.x || pixelOffset.x > xy.x + wh.x) {
       gl_Position = vec4(0.0);
@@ -122,6 +164,7 @@ void main(void) {
       float r = min(anchorPosScreen.x + xy.x + wh.x, vpWidth);
       if (r - l < text.cutoffPixels.x) {
         gl_Position = vec4(0.0);
+        contentCutOff = true;
       }
     }
   }
@@ -135,6 +178,7 @@ void main(void) {
       float b = min(anchorPosScreen.y - xy.y, vpHeight);
       if (b - t < text.cutoffPixels.y) {
         gl_Position = vec4(0.0);
+        contentCutOff = true;
       }
     }
   }
@@ -153,5 +197,18 @@ void main(void) {
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   vColorMode = instanceColorModes;
+#ifdef MODULE_COLLISION
+  // Labels the visibility pass skips are hidden, so they reserve no space
+  if (collision.sort && !icon.billboard && text_collisionCulled) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
+  if (collision.visibilityPass) {
+    // A culled copy of the label does not write its cell, nor does a label that is cut off
+    bool skipped = collision_culled || contentCutOff;
+    gl_Position = skipped || collision_skipsPlacement(instancePositions, instancePositions64Low)
+      ? vec4(0.0, 0.0, 2.0, 1.0)
+      : collision_getVisibilityPosition(positions / 2.0 + 0.5);
+  }
+#endif
 }
 `;

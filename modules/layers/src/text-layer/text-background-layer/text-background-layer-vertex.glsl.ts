@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import collision from '../text-layer-collision.glsl';
+
 export default /* glsl */ `\
 #version 300 es
 #define SHADER_NAME text-background-layer-vertex-shader
@@ -18,6 +20,7 @@ in vec2 instancePixelOffsets;
 in float instanceLineWidths;
 in vec4 instanceFillColors;
 in vec4 instanceLineColors;
+in float rowIndexes;
 
 out vec4 vFillColor;
 out vec4 vLineColor;
@@ -33,10 +36,12 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
   return rotationMatrix * vertex;
 }
 
+${collision}
+
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(rowIndexes);
   uv = positions;
   vLineWidth = instanceLineWidths;
 
@@ -74,6 +79,41 @@ void main(void) {
     pixelOffset.y = xy.y + v * wh.y + mix(-textBackground.padding.y, textBackground.padding.w, v);
   }
 
+  // Hide the label where the character shader cuts off its content box
+  bool cutOff = false;
+  if (text.cutoffPixels != vec2(0.0)) {
+    vec4 anchorPos = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0));
+    vec2 viewportPixels = project.viewportSize / project.devicePixelRatio;
+    vec2 anchorPixels = vec2(anchorPos.x / anchorPos.w + 1.0, 1.0 - anchorPos.y / anchorPos.w) / 2.0 * viewportPixels;
+    if (instanceClipRect.z >= 0.0 && text.cutoffPixels.x > 0.0) {
+      float l = max(anchorPixels.x + xy.x, 0.0);
+      float r = min(anchorPixels.x + xy.x + wh.x, viewportPixels.x);
+      cutOff = r - l < text.cutoffPixels.x;
+    }
+    if (instanceClipRect.w >= 0.0 && text.cutoffPixels.y > 0.0) {
+      float t = max(anchorPixels.y - xy.y - wh.y, 0.0);
+      float b = min(anchorPixels.y - xy.y, viewportPixels.y);
+      cutOff = cutOff || b - t < text.cutoffPixels.y;
+    }
+  }
+
+#ifdef MODULE_COLLISION
+  vec4 collisionRect = instanceRects * collision_getSize(instanceSizes) / text.fontSize;
+  collisionRect.xy -= textBackground.padding.xy;
+  collisionRect.zw += textBackground.padding.xy + textBackground.padding.zw;
+  vec4 collisionClipRect = vec4(xy, wh);
+  if (instanceClipRect.z >= 0.0) {
+    collisionClipRect.x -= textBackground.padding.x;
+    collisionClipRect.z += textBackground.padding.x + textBackground.padding.z;
+  }
+  if (instanceClipRect.w >= 0.0) {
+    collisionClipRect.y -= textBackground.padding.y;
+    collisionClipRect.w += textBackground.padding.y + textBackground.padding.w;
+  }
+  text_setCollisionBounds(instancePositions, instancePositions64Low,
+    collisionRect, instancePixelOffsets, instanceAngles, collisionClipRect, textBackground.billboard, text.flipY);
+#endif
+
   if (textBackground.billboard)  {
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, vec3(0.0), geometry.position);
     gl_Position = project_globe_billboard_clipspace(gl_Position, geometry.position.xyz);
@@ -100,5 +140,25 @@ void main(void) {
   DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * layer.opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
+  if (cutOff) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
+#ifdef MODULE_COLLISION
+  // Labels the visibility pass skips are hidden, so they reserve no space
+  if (collision.sort && !textBackground.billboard && text_collisionCulled) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+  }
+  if (collision.visibilityPass) {
+    // Billboard vertices share the anchor's depth, so this vertex's culling by the projection and
+    // other vertex extensions applies to the whole label. Other labels decide from their corners.
+    bool culled = textBackground.billboard
+      ? gl_Position.w <= 0.0 || abs(gl_Position.z) > gl_Position.w
+      : text_collisionCulled;
+    // A culled copy of the label does not write its cell, nor does a label that is cut off
+    gl_Position = culled || cutOff || collision_skipsPlacement(instancePositions, instancePositions64Low)
+      ? vec4(0.0, 0.0, 2.0, 1.0)
+      : collision_getVisibilityPosition(positions);
+  }
+#endif
 }
 `;

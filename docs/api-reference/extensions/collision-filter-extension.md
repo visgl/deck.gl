@@ -70,6 +70,23 @@ When added to a layer via the `extensions` prop, the `CollisionFilterExtension` 
 
 Enable/disable collisions. If collisions are disabled, all objects are rendered. Defaults to `true`.
 
+#### `collisionGreedy` (boolean, optional) {#collisiongreedy}
+
+Place text labels in priority order. Defaults to `false`.
+
+* `false`: filter collisions on the GPU only, with the lowest overhead. Every candidate label reserves its rectangle, so a rejected label can still hide other labels in an overlap chain.
+* `true`: place text labels in descending priority, and reserve space only for accepted labels. Dense scenes can show more labels. Whenever the collision map redraws, for example on every frame while the map moves, the label bounds are read back from the GPU and placed on the CPU. This readback stalls the GPU pipeline, and placement time grows with the number of labels.
+
+Enabling this on any TextLayer (including GeoJSON text) applies to all text layers in its `collisionGroup`. Groups without text are unaffected. Use separate groups when independent placement modes are needed. Greedy placement requires WebGL; on other devices, the GPU-only filtering is used.
+
+```js
+new TextLayer({
+  ...,
+  extensions: [new CollisionFilterExtension()],
+  collisionGreedy: true
+})
+```
+
 #### `collisionGroup` (string, optional) {#collisiongroup}
 
 Collision group this layer belongs to. If it is not set, the 'default' collision group is used. Two (or more) layers that share the same `collisionGroup` will be considered together when calculating collisions.
@@ -112,9 +129,25 @@ The priority is a number in the range -1000 -> 1000, values outside will be clam
 * If a number is provided, it is used for all objects in the layer.
 * If a function is provided, it is called on each object to retrieve its priority.
 
+## Using with TextLayer
+
+Text labels are tested over their entire projected glyph bounds, after applying `getPixelOffset`, `getTextAnchor`, `getAlignmentBaseline`, `getAngle`, and the layer's size settings. Every character in a label shares the same visibility. This also applies to `GeoJsonLayer` with `pointType: 'text'` and its corresponding text accessors.
+
+TextLayer projects a rectangle covering each label. Whitespace and empty lines do not enlarge the glyph bounds. When `background: true`, the background rectangle, including `backgroundPadding`, is used instead. No visible background or `alphaCutoff` override is required for text collision filtering.
+
+Use `collisionTestProps: {sizeScale: 1.5}` to enlarge the collision rectangles. The tested bounds follow the overridden size settings, including `sizeMinPixels` and `sizeMaxPixels`, so labels remain visible when using a non-centered anchor.
+
+Every candidate label, including one that is hidden, reserves its rectangle in the collision map. In a chain of overlapping labels, a hidden label can therefore still hide a lower-priority neighbor that it overlaps.
+
+With `collisionGreedy: true`, text labels are placed in descending priority. A label is accepted if its projected rectangle does not overlap an already accepted label. Rejected labels do not reserve space, so a chain of overlapping candidates can display several separated labels. Greedy placement fills available space while honoring priority; it does not guarantee the largest possible number of labels. Labels still test non-text geometry in the same group at the collision map's pixel resolution, and non-text features are only hidden by accepted labels.
+
+A label does not collide with other objects that render the same row: other sublayers of its parent layer, such as a `GeoJsonLayer` point's circle or icon, or top-level layers in the group that use the same `data` object.
+
+The rectangles include the spaces between lines, so labels may hide before their visible glyphs touch. Multiline edge overlaps and smaller labels contained inside larger ones are both detected.
+
 ## Using with transparent layers
 
-The `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
+For layers other than TextLayer, the `CollisionFilterExtension` samples at the anchor point of a feature when calculating collisions. Layers must ensure that a pixel is rendered at this location when the picking pass is drawn.
 
 A common issue is with the `IconLayer`, which [discards transparent pixels](https://deck.gl/docs/api-reference/layers/icon-layer#alphacutoff). To avoid this, use `alphaCutoff: -1`. A similar issue occurs when the anchor point of the `IconLayer` is too close to the edge of the image, to be safe include a few pixels of padding, e.g.
 
@@ -126,9 +159,11 @@ iconMapping: {
 
 ## Limitations
 
+- Each collision group supports at most 16,777,215 source objects. Groups containing text are also limited to `floor(maxTextureDimension2D / 4)² - 1` objects, where `maxTextureDimension2D` is the device's maximum 2D texture dimension. Counts include non-text objects in the group; text characters and backgrounds share their label's ID, and labels of separate layers that use the same `data` object count separately. Binary data with `rowIndexes` counts up to its highest row index. If either limit is exceeded, a warning is logged and collision filtering is disabled for the entire group until its object count is within the limits again.
 - Accessors are not supported in `collisionTestProps`
 - Given that collisions is performed on the GPU, the layers of `@deck.gl/aggregation-layers` module that does aggregation on the CPU, for example `CPUGridLayer` and `HexagonLayer`, are not supported.
-- The collision is point-in-polygon, specifically is computed by comparing the anchor point of a feature with the rasterized screen-space areas of other features. While good for realtime applications, generally this will not give the same results as a full collision test would.
+- Non-text layers use point-in-polygon collision tests: the feature's anchor is compared with the rasterized areas of other features. TextLayer tests full projected rectangles at the collision map’s pixel resolution. With `collisionGreedy`, it compares projected rectangles with other text on the CPU. A label that [ClipExtension](./clip-extension.md) clips in part is compared by the parts left after clipping, in a 4x4 grid over the label.
+- With `collisionGreedy`, a label that a [MaskExtension](./mask-extension.md) mask covers only in part is hidden. When world copies repeat, all copies of a label follow the placement of the last copy drawn in the viewport.
 
 ## Source
 

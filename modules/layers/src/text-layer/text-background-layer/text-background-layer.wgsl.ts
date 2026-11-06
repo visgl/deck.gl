@@ -24,7 +24,6 @@ fn rotate_by_angle(vertex: vec2<f32>, angle: f32) -> vec2<f32> {
 }
 
 struct Attributes {
-  @builtin(instance_index) instanceIndex: u32,
   @location(0) positions: vec2<f32>,
   @location(1) instancePositions: vec3<f32>,
   @location(2) instancePositions64Low: vec3<f32>,
@@ -36,6 +35,7 @@ struct Attributes {
   @location(8) instanceFillColors: vec4<f32>,
   @location(9) instanceLineColors: vec4<f32>,
   @location(10) instanceLineWidths: f32,
+  @location(11) rowIndexes: u32,
 };
 
 struct Varyings {
@@ -52,7 +52,7 @@ struct Varyings {
 fn vertexMain(attributes: Attributes) -> Varyings {
   geometry.worldPosition = attributes.instancePositions;
   geometry.uv = attributes.positions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(attributes.rowIndexes);
 
   var varyings: Varyings;
   varyings.uv = attributes.positions;
