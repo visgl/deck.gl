@@ -29,6 +29,7 @@ import {getBinIdRange} from '../common/utils/bounds-utils';
 import {createAggregationViewport} from '../common/utils/projection-utils';
 
 import {GridCellLayer} from './grid-cell-layer';
+import {WebGPUGridAggregator} from './webgpu-grid-aggregator';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -298,6 +299,39 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     }
 
     if (
+      gpuAggregation &&
+      this.context.device.type === 'webgpu' &&
+      this.props.colorDomain &&
+      this.props.elevationDomain &&
+      !this.props.pickable &&
+      !this.props.extensions.length &&
+      this.props.onSetColorDomain === noop &&
+      this.props.onSetElevationDomain === noop &&
+      this.props.colorScaleType !== 'quantile' &&
+      this.props.colorScaleType !== 'ordinal' &&
+      this.props.elevationScaleType !== 'quantile' &&
+      this.props.lowerPercentile === 0 &&
+      this.props.upperPercentile === 100 &&
+      this.props.elevationLowerPercentile === 0 &&
+      this.props.elevationUpperPercentile === 100
+    ) {
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('Grid GPU columns must use the custom view coordinate system');
+      }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 16 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions) throw new Error('Grid aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
+      return 'webgpu';
+    }
+
+    if (
       // GPU aggregation is requested
       gpuAggregation &&
       // GPU aggregation is supported by the device
@@ -308,7 +342,8 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
     return 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUGridAggregator {
+    if (type === 'webgpu') return new WebGPUGridAggregator(this.context.device);
     if (type === 'cpu') {
       const {gridAggregator, cellSize} = this.props;
       return new CPUAggregator({

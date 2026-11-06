@@ -17,6 +17,8 @@ export type BinOptions = {
 export const binOptionsUniforms = {
   name: 'binOptions',
   vs: uniformBlock,
+  source: `struct BinOptionsUniforms { cellSizePixels: f32, };
+    @group(0) @binding(auto) var<uniform> binOptions: BinOptionsUniforms;`,
   uniformTypes: {
     cellSizePixels: 'f32'
   }
