@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {WebGPUScreenGridAggregator} from './webgpu-screen-grid-aggregator';
+
 import {
   Accessor,
   Color,
@@ -125,12 +127,25 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
+    if (
+      this.props.gpuAggregation &&
+      this.context.device.type === 'webgpu' &&
+      this.props.colorDomain &&
+      !this.props.extensions.length &&
+      !this.props.pickable
+    ) {
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('ScreenGrid GPU columns must use the custom view coordinate system');
+      }
+      return 'webgpu';
+    }
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
       ? 'gpu'
       : 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
+    if (type === 'webgpu') return new WebGPUScreenGridAggregator(this.context.device);
     if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
