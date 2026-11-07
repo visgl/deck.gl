@@ -483,9 +483,6 @@ async function update({draw, layerManager, deckRenderer}: TestResources): Promis
   while (true) {
     // Let asynchronous data and coordinate-system loads finish between update attempts.
     await new Promise<void>(resolve => setTimeout(resolve, delay));
-    if (layerManager.getLayers().some(layer => layer.internalState?.needsUpdate)) {
-      layerManager.setNeedsUpdate('pending layer update');
-    }
     if (!layerManager.needsUpdate()) {
       delay = 50;
       continue;
