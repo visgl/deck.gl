@@ -613,6 +613,93 @@ webglTest('TerrainEffect#picks layers draped over external terrain', async () =>
   }
 });
 
+webglTest('TerrainEffect#picks draped layers across a switch of the terrain source', async () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 300;
+  // Deck sizes its views from the canvas in the document when the layers change
+  document.body.append(canvas);
+  const webglContext = canvas.getContext('webgl2', {preserveDrawingBuffer: true});
+  const externalTerrain = {
+    id: 'terrain',
+    renderHeightMap: ({target}: {target: Framebuffer}) => {
+      target.device.beginRenderPass({framebuffer: target, clearColor: [500, 0, 0, 1]}).end();
+    },
+    setDrapeRenderer: vi.fn()
+  };
+  const externalTerrainLayer = new ExternalTerrainLayer({id: 'external-terrain', externalTerrain});
+  // Terrain that deck.gl draws, at sea level
+  const groundLayer = new SolidPolygonLayer({
+    id: 'ground',
+    data: [
+      [
+        [7.9, 46.4],
+        [8.1, 46.4],
+        [8.1, 46.6],
+        [7.9, 46.6]
+      ]
+    ],
+    getPolygon: d => d,
+    operation: 'terrain+draw',
+    pickable: true
+  });
+  const glacierLayer = new SolidPolygonLayer({
+    id: 'glacier',
+    data: [
+      [
+        [7.999, 46.501],
+        [8.007, 46.501],
+        [8.007, 46.503],
+        [7.999, 46.503]
+      ]
+    ],
+    getPolygon: d => d,
+    pickable: true,
+    extensions: [new TerrainExtension()]
+  });
+  const deck = new Deck({
+    gl: webglContext!,
+    width: 600,
+    height: 300,
+    useDevicePixels: false,
+    controller: false,
+    viewState: {longitude: 8, latitude: 46.5, zoom: 13, pitch: 60, bearing: 0},
+    layers: [externalTerrainLayer, glacierLayer]
+  });
+
+  try {
+    await waitForRender(deck);
+    const viewport = deck.getViewports()[0];
+    const pick = (lngLatZ: number[]) => {
+      const [x, y] = viewport.project(lngLatZ);
+      return deck.pickObject({x, y});
+    };
+    expect(pick([8.003, 46.502, 500])?.layer?.id, 'Draped over external terrain').toBe('glacier');
+
+    await new Promise<void>(resolve => {
+      deck.setProps({layers: [groundLayer, glacierLayer], onAfterRender: () => resolve()});
+    });
+    expect(
+      externalTerrain.setDrapeRenderer,
+      'External terrain is released'
+    ).toHaveBeenLastCalledWith(null);
+    expect(pick([8.003, 46.502, 0])?.layer?.id, 'Draped over terrain that deck.gl draws').toBe(
+      'glacier'
+    );
+
+    await new Promise<void>(resolve => {
+      deck.setProps({layers: [externalTerrainLayer, glacierLayer], onAfterRender: () => resolve()});
+    });
+    expect(pick([8.003, 46.502, 500])?.layer?.id, 'Draped over external terrain again').toBe(
+      'glacier'
+    );
+  } finally {
+    deck.finalize();
+    webglContext!.getExtension('WEBGL_lose_context')?.loseContext();
+    canvas.remove();
+  }
+});
+
 webglTest('TerrainEffect#raises offset layers by the ground height at their latitude', async () => {
   const canvas = document.createElement('canvas');
   canvas.width = 600;
