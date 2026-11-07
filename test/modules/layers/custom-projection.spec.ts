@@ -4,11 +4,7 @@
 
 import {createTestViewport} from '../core/viewports/test-crs';
 import {test, expect, vi} from 'vitest';
-import {
-  LayerManager,
-  OrthographicViewport,
-  WebMercatorViewport
-} from '@deck.gl/core';
+import {LayerManager, OrthographicViewport, WebMercatorViewport} from '@deck.gl/core';
 import {
   ArcLayer,
   LineLayer,
