@@ -15,7 +15,7 @@ import {GeoJsonLayer, GeoJsonLayerProps} from '@deck.gl/layers';
 import {ClipExtension} from '@deck.gl/extensions';
 import type {ClipExtensionProps} from '@deck.gl/extensions';
 
-import {Matrix4} from '@math.gl/core';
+import {Matrix4, equals} from '@math.gl/core';
 import {MVTWorkerLoader} from '@loaders.gl/tiles/mvt';
 import {convertBinaryFeatureCollectionToGeojson} from '@loaders.gl/core/geoarrow';
 
@@ -297,14 +297,17 @@ export default class MVTLayer<
     // only its own area or the shared geometry is drawn once per tile. This applies to the point
     // sub layers too: a point inside a neighbor's buffer is emitted by both tiles. `ClipExtension`
     // clips those by anchor rather than by geometry, so a label or icon still overhangs the edge.
-    if (props.clipBounds) {
+    // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
+    // rather than both.
+    const tileClipBounds = [0, 0, 1, 1]; // the tile, in tile-local coordinates
+    // ClipExtension's default clipBounds is the same unit square, so only other bounds were set
+    // by the caller
+    if (props.clipBounds && !equals(props.clipBounds, tileClipBounds)) {
       log.warn(
         `${this.id}: clipBounds is reserved by MVTLayer, which clips each sub layer to its tile`
       )();
     }
-    // `clip_isInBounds` is half-open, so a feature exactly on a shared edge is drawn by one tile
-    // rather than both.
-    props.clipBounds = [0, 0, 1, 1]; // the tile, in tile-local coordinates
+    props.clipBounds = tileClipBounds;
     // A second ClipExtension would inject the same shader declarations twice and fail to compile
     if (!props.extensions?.some(extension => extension instanceof ClipExtension)) {
       props.extensions = [...(props.extensions || []), new ClipExtension()];

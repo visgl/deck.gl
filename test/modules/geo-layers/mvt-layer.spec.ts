@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import {getLayerUniforms, testLayer} from '@deck.gl/test-utils/vitest';
 import {MVTLayer} from '@deck.gl/geo-layers';
 import {ClipExtension} from '@deck.gl/extensions';
@@ -13,7 +13,7 @@ import {convertGeojsonToBinaryFeatureCollection} from '@loaders.gl/core/geoarrow
 import {MVTLoader} from '@loaders.gl/tiles/mvt';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {WebMercatorViewport, _GlobeViewport as GlobeViewport} from '@deck.gl/core';
+import {WebMercatorViewport, _GlobeViewport as GlobeViewport, log} from '@deck.gl/core';
 import {testLayerAsync} from '@deck.gl/test-utils/vitest';
 
 import {testPickingLayer} from '../layers/test-picking-layer';
@@ -636,6 +636,7 @@ test('MVTLayer#tile clipping overrides user clip props', async () => {
   }
   TestMVTLayer.layerName = 'TestMVTLayer';
 
+  const warnSpy = vi.spyOn(log, 'warn');
   expect.hasAssertions();
   await testLayerAsync({
     Layer: TestMVTLayer,
@@ -671,6 +672,53 @@ test('MVTLayer#tile clipping overrides user clip props', async () => {
     ],
     onError: err => expect(err).toBeFalsy()
   });
+  expect(
+    warnSpy.mock.calls.some(([message]) => String(message).includes('clipBounds is reserved')),
+    'warns that the user clipBounds is ignored'
+  ).toBe(true);
+  warnSpy.mockRestore();
+});
+
+test('MVTLayer#tile clipping does not warn about the default ClipExtension bounds', async () => {
+  class TestMVTLayer extends MVTLayer {
+    getTileData() {
+      return geoJSONData;
+    }
+  }
+  TestMVTLayer.layerName = 'TestMVTLayer';
+
+  const warnSpy = vi.spyOn(log, 'warn');
+  expect.hasAssertions();
+  await testLayerAsync({
+    Layer: TestMVTLayer,
+    viewport: new WebMercatorViewport({
+      width: 400,
+      height: 300,
+      longitude: 0,
+      latitude: 0,
+      zoom: 0
+    }),
+    testCases: [
+      {
+        // ClipExtension adds its default clipBounds to the props; the caller set none
+        props: {
+          data: ['https://server.com/{z}/{x}/{y}.mvt'],
+          binary: false,
+          extensions: [new ClipExtension()]
+        },
+        onAfterUpdate: ({layer, subLayers}) => {
+          if (!layer.isLoaded) return;
+          expect(subLayers.length, 'renders sub layers').toBeGreaterThan(0);
+        }
+      }
+    ],
+    onError: err => expect(err).toBeFalsy()
+  });
+  expect(
+    warnSpy.mock.calls.some(([message]) => String(message).includes('clipBounds is reserved')),
+    'does not warn when the caller set no clipBounds'
+  ).toBe(false);
+  warnSpy.mockRestore();
 });
 
 test('MVTLayer#triangulation', async () => {
