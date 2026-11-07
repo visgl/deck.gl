@@ -191,6 +191,7 @@ export default abstract class AggregationLayer<
         aggregator.setNeedsUpdate();
       }
       aggregator.setProps({
+        onError: error => this.getCurrentLayer()?.raiseError(error, 'aggregation'),
         attributes: this.getAttributeManager()?.attributes,
         positions: this.props.positions,
         weights: this.props.weights

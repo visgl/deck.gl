@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {project32, _GPUVectorModel as GPUVectorModel} from '@deck.gl/core';
+import {project32, _GPUVectorModel as GPUVectorModel, _deepEqual as deepEqual} from '@deck.gl/core';
 import {Buffer, type Device, type Texture, type Framebuffer} from '@luma.gl/core';
 import {getFilterSource} from './filter.wgsl';
 import {Computation, type ModelProps} from '@luma.gl/engine';
@@ -48,6 +48,21 @@ const aggregationUniforms = {
     dispatchWidth: 'u32'
   }
 } as const;
+
+// Keep plain uniform values by value, but retain resource identity and revision.
+function snapshotUniformProps(value: any, depth = 4): any {
+  if (!value || typeof value !== 'object' || depth === 0) return value;
+  if (Array.isArray(value) || ArrayBuffer.isView(value))
+    return Array.from(value as ArrayLike<unknown>);
+  if (Object.getPrototypeOf(value) !== Object.prototype) {
+    return typeof value.updateTimestamp === 'number'
+      ? {resource: value, revision: value.updateTimestamp}
+      : value;
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [key, snapshotUniformProps(entry, depth - 1)])
+  );
+}
 
 /** Shared dense-bin compute reduction. Layer adapters supply only bin assignment. @internal */
 export class WebGPUAggregator implements Aggregator {
@@ -108,6 +123,7 @@ export class WebGPUAggregator implements Aggregator {
   private props: AggregationProps = {pointCount: 0, attributes: {}, operations: [], binOptions: {}};
   private dirty = true;
   private revision = 0;
+  private extensionUniformProps: Record<string, unknown> = {};
   private destroyed = false;
   private snapshot: {
     values: Float32Array[];
@@ -168,6 +184,18 @@ export class WebGPUAggregator implements Aggregator {
   }
 
   setProps(props: Partial<AggregationProps>): void {
+    if (props.shaderModuleProps && this.filterModel) {
+      for (const plugin of this.options.shaders?.plugins || []) {
+        const name = plugin.module?.name;
+        if (name && name in props.shaderModuleProps) {
+          const next = snapshotUniformProps(props.shaderModuleProps[name]);
+          if (!deepEqual(next, this.extensionUniformProps[name], 4)) {
+            this.extensionUniformProps[name] = next;
+            this.setNeedsUpdate();
+          }
+        }
+      }
+    }
     for (const key in props) {
       if (key === 'attributes') {
         // Attribute objects are mutable; only the changed-attribute map signals new data.
@@ -175,6 +203,7 @@ export class WebGPUAggregator implements Aggregator {
       } else if (
         key !== 'shaderModuleProps' &&
         key !== 'onUpdate' &&
+        key !== 'onError' &&
         props[key] !== this.props[key]
       ) {
         this.setNeedsUpdate();
@@ -414,9 +443,16 @@ export class WebGPUAggregator implements Aggregator {
       );
       const counts = Uint32Array.from({length}, (_, i) => scratch[i * channels * 2]);
       this.snapshot = {values, counts, range};
-      for (let channel = 0; channel < channels; channel++) this.props.onUpdate?.({channel});
+      for (let channel = 0; channel < channels; channel++) {
+        if (this.destroyed || revision !== this.revision) return;
+        this.props.onUpdate?.({channel});
+      }
     } catch (error) {
-      if (!this.destroyed && revision === this.revision) throw error;
+      if (!this.destroyed && revision === this.revision) {
+        const failure = error instanceof Error ? error : new Error(String(error));
+        if (this.props.onError) this.props.onError(failure);
+        else this.device.reportError(failure, this.valueBuffer!)();
+      }
     }
   }
 

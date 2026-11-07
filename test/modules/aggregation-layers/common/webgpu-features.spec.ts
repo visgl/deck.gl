@@ -257,3 +257,71 @@ test('Compute metadata discards stale readbacks and handles empty input', async 
     buffer.destroy();
   }
 });
+
+test('Brushing recomputes Grid bins on pointer changes without a layer update', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {LayerManager} = await import('@deck.gl/core');
+  const {BrushingExtension} = await import('@deck.gl/extensions');
+  const viewport = new OrthographicView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {target: [0, 0, 0], zoom: 0}
+  });
+  const manager = new LayerManager(device, {viewport});
+  manager.setProps({
+    onError: error => {
+      throw error;
+    }
+  });
+  const layer = new GridLayer({
+    data: [
+      {position: [0, 0], value: 2},
+      {position: [20, 20], value: 3}
+    ],
+    getPosition: d => d.position,
+    getColorWeight: d => d.value,
+    getElevationWeight: d => d.value,
+    cellSize: 10,
+    colorDomain: [0, 10],
+    elevationDomain: [0, 10],
+    pickable: true,
+    extensions: [new BrushingExtension()],
+    brushingRadius: 2
+  });
+  try {
+    manager.setLayers([layer]);
+    for (const [position, expected] of [
+      [[0, 0], 2],
+      [[20, 20], 3]
+    ] as const) {
+      const [x, y] = viewport.project(position);
+      layer.setShaderModuleProps({
+        brushing: {
+          viewport,
+          mousePosition: {x, y},
+          brushingEnabled: true,
+          brushingRadius: 2,
+          brushingTarget: 'source'
+        }
+      });
+      layer.draw({
+        shaderModuleProps: {
+          project: {
+            viewport,
+            coordinateSystem: 'cartesian',
+            coordinateOrigin: [0, 0, 0],
+            modelMatrix: null,
+            devicePixelRatio: 1
+          }
+        }
+      } as any);
+      await vi.waitFor(
+        () => expect(layer.state.aggregator.getResultDomain(0)).toEqual([expected, expected]),
+        {timeout: 10000}
+      );
+    }
+  } finally {
+    manager.finalize();
+  }
+});

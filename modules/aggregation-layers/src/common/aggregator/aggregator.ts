@@ -32,6 +32,8 @@ export type AggregationProps = {
   operations: AggregationOperation[];
   /** Additional options to control bin sorting, e.g. bin size */
   binOptions: Record<string, number | number[]>;
+  /** Report an asynchronous backend failure to the owning layer. */
+  onError?: (error: Error) => void;
   /** Callback after a channel is updated */
   onUpdate?: (event: {channel: number}) => void;
 };
