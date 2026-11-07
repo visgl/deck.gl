@@ -84,8 +84,8 @@ export const finalizeSource = `${storage}
     let count = atomicLoad(&bins[offset].count);
     let operation = aggregation.operations[channel];
     var value = bitcast<f32>(atomicLoad(&bins[offset].value));
-    if (operation == 4u) { value = f32(count); }
-    else if (count == 0u) { values[offset] = 0x7fc00000u; continue; }
+    if (count == 0u) { values[offset] = 0x7fc00000u; continue; }
+    else if (operation == 4u) { value = f32(count); }
     else if (operation == 1u) { value /= f32(count); }
     values[offset] = bitcast<u32>(value);
   }

@@ -120,8 +120,7 @@ for (const geospatial of [false, true]) {
                 expect(colors[i], `color bin ${key}`).toBeCloseTo(values[0], 4);
                 expect(elevations[i], `elevation bin ${key}`).toBeCloseTo(values[1], 4);
               } else {
-                if (layer.props.colorAggregation === 'COUNT') expect(colors[i]).toBe(0);
-                else expect(colors[i]).toBeNaN();
+                expect(colors[i]).toBeNaN();
                 expect(elevations[i]).toBeNaN();
               }
             }

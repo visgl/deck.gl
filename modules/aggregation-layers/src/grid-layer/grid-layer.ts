@@ -318,6 +318,16 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       if (this.props.positions && this.state.preproject) {
         throw new Error('Grid GPU columns must use the custom view coordinate system');
       }
+      this._updateBinOptions();
+      const count = this.state.binIdRange.reduce((total, [start, end]) => total * (end - start), 1);
+      const limits = this.context.device.limits;
+      if (
+        !Number.isSafeInteger(count) ||
+        count * 16 > Math.min(limits.maxBufferSize, limits.maxStorageBufferBindingSize)
+      ) {
+        if (this.props.positions) throw new Error('Grid aggregation exceeds device buffer limits');
+        return 'cpu';
+      }
       return 'webgpu';
     }
 
@@ -528,7 +538,12 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       });
     }
 
-    this.setState({cellSizeCommon, cellOriginCommon, binIdRange, aggregatorViewport: viewport});
+    Object.assign(this.state, {
+      cellSizeCommon,
+      cellOriginCommon,
+      binIdRange,
+      aggregatorViewport: viewport
+    });
   }
 
   override draw(opts) {
