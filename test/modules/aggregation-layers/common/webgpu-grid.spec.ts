@@ -358,6 +358,12 @@ test('Grid preserves CPU fallback when binary weights change to integer storage'
         }
       },
       {
+        updateProps: {opacity: 0.5},
+        onAfterUpdate({layer}) {
+          expect(layer.state.aggregator).toBeInstanceOf(CPUAggregator);
+        }
+      },
+      {
         updateProps: {data: makeData(new Float32Array([2, 3]))},
         onAfterUpdate({layer}) {
           expect(layer.state.aggregator).toBeInstanceOf(WebGPUGridAggregator);

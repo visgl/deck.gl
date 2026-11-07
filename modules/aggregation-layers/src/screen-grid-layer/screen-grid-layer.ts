@@ -134,6 +134,15 @@ export default class ScreenGridLayer<
       !this.props.extensions.length &&
       !this.props.pickable
     ) {
+      if (
+        !WebGPUScreenGridAggregator.supportsData(this.props.data, ['getPosition', 'getWeight']) ||
+        (!this.props.positions &&
+          this.props.data === this.internalState?.getOldProps().data &&
+          !WebGPUScreenGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
+            'counts'
+          ]))
+      )
+        return 'cpu';
       if (this.props.positions && this.state.preproject) {
         throw new Error('ScreenGrid GPU columns must use the custom view coordinate system');
       }

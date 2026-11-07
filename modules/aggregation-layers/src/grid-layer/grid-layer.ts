@@ -315,6 +315,20 @@ export default class GridLayer<DataT = any, ExtraPropsT extends {} = {}> extends
       this.props.elevationLowerPercentile === 0 &&
       this.props.elevationUpperPercentile === 100
     ) {
+      if (
+        !WebGPUGridAggregator.supportsData(this.props.data, [
+          'getPosition',
+          'getColorWeight',
+          'getElevationWeight'
+        ]) ||
+        (!this.props.positions &&
+          this.props.data === this.internalState?.getOldProps().data &&
+          !WebGPUGridAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
+            'colorWeights',
+            'elevationWeights'
+          ]))
+      )
+        return 'cpu';
       if (this.props.positions && this.state.preproject) {
         throw new Error('Grid GPU columns must use the custom view coordinate system');
       }
