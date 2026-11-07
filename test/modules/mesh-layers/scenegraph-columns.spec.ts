@@ -6,7 +6,8 @@ import {test, expect} from 'vitest';
 import {Deck, OrthographicView} from '@deck.gl/core';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry, Model, ModelNode, GroupNode} from '@luma.gl/engine';
-import {getWebGLTestDevice, getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
+import {device as webglDevice} from '@deck.gl/test-utils/vitest';
 import {makeGPUVectorFromArrow} from '@luma.gl/graph/arrow';
 import {Vector, vectorFromArray, FixedSizeList, Field, Float32} from 'apache-arrow';
 
@@ -14,7 +15,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
   test(`Scenegraph columns preserve model identity and borrowed buffers (${backend})`, async ({
     skip
   }) => {
-    const device = await (backend === 'webgl' ? getWebGLTestDevice : getWebGPUTestDevice)('core');
+    const device = backend === 'webgl' ? webglDevice : await getWebGPUTestDevice('core');
     if (!device) return skip();
     const type = new FixedSizeList(3, new Field('component', new Float32()));
     const arrowPositions = new Vector([
@@ -92,6 +93,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
       expect(model).toBe(firstModel);
     } finally {
       deck.finalize();
+      expect(device.isLost).toBe(false);
       parent.remove();
       expect(positions.data[0].buffer.destroyed).toBe(false);
       positions.destroy();
