@@ -5,6 +5,7 @@
 import type {CoordinateSystem} from '../lib/constants';
 import type Layer from '../lib/layer';
 import type LayerExtension from '../lib/layer-extension';
+import type {GPUVector} from '@luma.gl/graph/gpu-data';
 import type {BinaryAttribute} from '../lib/attribute/attribute';
 import type {ConstructorOf, NumericArray, TypedArray} from './types';
 import type {PickingInfo} from '../lib/picking/pick-info';
@@ -20,7 +21,7 @@ export type LayerData<T> =
   | Iterable<T>
   | {
       length: number;
-      attributes?: Record<string, TypedArray | Buffer | BinaryAttribute>;
+      attributes?: Record<string, TypedArray | Buffer | BinaryAttribute | GPUVector>;
     };
 
 export type AccessorContext<T> = {

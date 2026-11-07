@@ -6,6 +6,14 @@ description: "Breaking changes, removals and deprecations for each deck.gl relea
 
 ## Upgrading to v10
 
+### WebGLAggregator outputs
+
+`WebGLAggregator.getBins()` and `getResult(channel)` now return borrowed `GPUVector`
+views instead of binary attribute descriptors. They can still be passed directly
+as layer binary attributes. For direct buffer access, use `getGPUVectorData(vector)`
+from `@luma.gl/graph/gpu-data` and read its `buffer`, `byteOffset`, and `byteStride`
+instead of the former descriptor's `buffer`, `offset`, and `stride` fields.
+
 ### luma.gl v10 alpha.10
 
 The WebGL and WebGPU adapters are now part of `@luma.gl/core`. Replace imports from

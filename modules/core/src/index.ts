@@ -164,3 +164,18 @@ export type {
   CustomProjectionViewState
 } from './views/custom-projection-view';
 export type {CustomProjectionViewportOptions} from './viewports/custom-projection-viewport';
+
+export {
+  LayerColumns as _LayerColumns,
+  type ColumnDefinition as _ColumnDefinition
+} from './lib/layer-columns';
+
+export {
+  makePathShaderWGSL as _makePathShaderWGSL,
+  shaderWGSL as _pathShaderWGSL,
+  pathShaderPlugin as _pathShaderPlugin
+} from './shaderlib/path/path.wgsl';
+export {
+  pathUniforms as _pathUniforms,
+  type PathProps as _PathProps
+} from './shaderlib/path/path-uniforms';

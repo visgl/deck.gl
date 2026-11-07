@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
+import {WebGPUScreenGridAggregator} from './webgpu-screen-grid-aggregator';
+
 import {
   Accessor,
   Color,
   GetPickingInfoParams,
-  CompositeLayerProps,
   Layer,
   project32,
   LayersList,
@@ -16,7 +17,7 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
@@ -36,7 +37,7 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
 
 /** All properties supported by ScreenGridLayer. */
 export type ScreenGridLayerProps<DataT = unknown> = _ScreenGridLayerProps<DataT> &
-  CompositeLayerProps;
+  AggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
 export type _ScreenGridLayerProps<DataT> = {
@@ -126,12 +127,25 @@ export default class ScreenGridLayer<
   static defaultProps = defaultProps;
 
   getAggregatorType(): string {
+    if (
+      this.props.gpuAggregation &&
+      this.context.device.type === 'webgpu' &&
+      this.props.colorDomain &&
+      !this.props.extensions.length &&
+      !this.props.pickable
+    ) {
+      if (this.props.positions && this.state.preproject) {
+        throw new Error('ScreenGrid GPU columns must use the custom view coordinate system');
+      }
+      return 'webgpu';
+    }
     return this.props.gpuAggregation && WebGLAggregator.isSupported(this.context.device)
       ? 'gpu'
       : 'cpu';
   }
 
-  createAggregator(type: string): WebGLAggregator | CPUAggregator {
+  createAggregator(type: string): WebGLAggregator | CPUAggregator | WebGPUScreenGridAggregator {
+    if (type === 'webgpu') return new WebGPUScreenGridAggregator(this.context.device);
     if (type === 'cpu' || !WebGLAggregator.isSupported(this.context.device)) {
       return new CPUAggregator({
         dimensions: 2,
@@ -207,24 +221,25 @@ export default class ScreenGridLayer<
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       changeFlags.updateTriggersChanged ||
       changeFlags.viewportChanged ||
+      changeFlags.projectionChanged ||
+      props.modelMatrix !== oldProps.modelMatrix ||
+      props.coordinateOrigin !== oldProps.coordinateOrigin ||
       aggregation !== oldProps.aggregation ||
       cellSizePixels !== oldProps.cellSizePixels
     ) {
       const {width, height} = this.context.viewport;
       const {aggregator} = this.state;
 
-      if (aggregator instanceof WebGLAggregator) {
-        aggregator.setProps({
-          binIdRange: [
-            [0, Math.ceil(width / cellSizePixels)],
-            [0, Math.ceil(height / cellSizePixels)]
-          ]
-        });
-      }
-
       aggregator.setProps({
+        binIdRange: [
+          [0, Math.ceil(width / cellSizePixels)],
+          [0, Math.ceil(height / cellSizePixels)]
+        ],
         pointCount: this.getNumInstances(),
         operations: [aggregation],
         binOptions: {
@@ -268,6 +283,7 @@ export default class ScreenGridLayer<
         id: 'cell-layer'
       }),
       {
+        numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
           attributes: {

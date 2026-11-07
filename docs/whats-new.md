@@ -4,6 +4,20 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
+### Custom aggregators and GPUVector inputs
+
+GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
+instances. Custom aggregators can consume GPUVector position/weight columns and publish
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+result layouts, and supported scales and contours.
+
 ### luma.gl v10 alpha.10
 
 The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
@@ -11,18 +25,17 @@ constant-buffer binding and render-target format tracking to luma.gl. WebGPU
 layer draws restore dynamic render-pass parameters after drawing. Custom shader
 plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
 
+### ScatterplotLayer Arrow columns
+
+ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for modes and [tabbed examples](./api-reference/layers/scatterplot-layer.md#arrow-columns).
+
 ### deck.gl v10 examples (Experimental)
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
 
-### WebGPU brushing
+### Extension updates
 
-[`BrushingExtension`](./api-reference/extensions/brushing-extension.md) supports WebGPU on standard rendering primitives, including picking and live accessor updates.
-
-### WebGPU data filtering
-
-[`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) supports numeric and category filtering on WebGPU, including fp64 values, soft ranges, and size and color transforms. Filtered item counting (`countItems`) requires WebGL.
-
+Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
 
