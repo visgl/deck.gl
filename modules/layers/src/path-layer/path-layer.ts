@@ -410,6 +410,7 @@ export default class PathLayer<DataT = any, ExtraPropsT extends {} = {}> extends
           !deepEqual(props.coordinateOrigin, oldProps.coordinateOrigin, 1))) ||
       getPathChanged ||
       props._projectionTolerance !== oldProps._projectionTolerance ||
+      props._projectionNoCut !== oldProps._projectionNoCut ||
       props._pathType !== oldProps._pathType ||
       props.positionFormat !== oldProps.positionFormat ||
       props.wrapLongitude !== oldProps.wrapLongitude ||
