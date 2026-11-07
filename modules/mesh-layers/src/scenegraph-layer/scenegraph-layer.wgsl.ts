@@ -38,7 +38,7 @@ fn vertexMain(
   var outputs: FragmentInputs;
 
   geometry.worldPosition = inputs.instancePositions;
-  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex);
+  geometry.pickingColor = picking_getPickingColorFromIndex(instanceIndex + u32(scenegraph.rowIndexOffset));
 
   var vertexPosition = inputs.positions;
   var texCoord = vec2<f32>(0.0, 0.0);
@@ -66,11 +66,12 @@ fn vertexMain(
   let clampedSize = clamp(originalSize, scenegraph.sizeMinPixels, scenegraph.sizeMaxPixels);
   let sizeRatio = select(0.0, clampedSize / originalSize, originalSize > 0.0);
 
-  let pos =
+  var pos =
     (instanceModelMatrix * scenePosition) * scenegraph.sizeScale * sizeRatio +
     inputs.instanceTranslation;
 
   if (scenegraph.composeModelMatrix > 0.5) {
+    DECKGL_FILTER_SIZE(&pos, geometry);
     geometry.normal = project_normal(worldNormal);
     geometry.worldPosition = inputs.instancePositions + pos;
     geometry.position = vec4<f32>(
@@ -78,7 +79,8 @@ fn vertexMain(
       1.0
     );
   } else {
-    let sizeAdjustedPos = project_size_vec3(pos);
+    var sizeAdjustedPos = project_size_vec3(pos);
+    DECKGL_FILTER_SIZE(&sizeAdjustedPos, geometry);
     // Scenegraph offsets are east/north/up in globe mode. Use project32's helper so it can
     // rotate the offset onto the local tangent plane before producing the common position.
     let projectResult = project_position_to_clipspace_and_commonspace(
@@ -97,6 +99,7 @@ fn vertexMain(
   outputs.pbrUV = texCoord;
   outputs.pbrNormal = geometry.normal;
   outputs.pickingColor = geometry.pickingColor;
+  DECKGL_FILTER_GL_POSITION(&outputs.position, geometry);
   return outputs;
 }
 
@@ -108,6 +111,9 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
     if (!picking_isColorValid(inputs.pickingColor)) {
       discard;
     }
+    var extensionColor = vec4<f32>(inputs.pickingColor, 1.0);
+    DECKGL_FILTER_COLOR(&extensionColor, fragmentGeometry);
+    // Color filters may discard, but must not alter the picking payload.
     return vec4<f32>(inputs.pickingColor, 1.0);
   }
 
@@ -146,6 +152,7 @@ fn fragmentMain(inputs: FragmentInputs) -> @location(0) vec4<f32> {
     }
   }
 
+  DECKGL_FILTER_COLOR(&fragColor, fragmentGeometry);
   return deckgl_premultiplied_alpha(fragColor);
 }
 `;

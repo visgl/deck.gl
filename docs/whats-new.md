@@ -4,9 +4,38 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## Unreleased
 
+### ScreenGrid compute aggregation
+
+`ScreenGridLayer` can aggregate on WebGPU using an explicit `colorDomain`, with
+picking and extensions disabled. SUM, MEAN, MIN, MAX, and COUNT produce GPUVector
+outputs consumed directly by the cell layer. See [ScreenGridLayer](./api-reference/aggregation-layers/screen-grid-layer.md#compute-aggregation).
+
+### Custom aggregators and GPUVector inputs
+
+GridLayer, HexagonLayer, ScreenGridLayer, and ContourLayer now accept custom aggregator
+instances. Custom aggregators can consume GPUVector position/weight columns and publish
+GPUVector cell results without copying them to the CPU. The default `WebGLAggregator` also returns borrowed GPUVectors for bin IDs and
+channel values. See [Aggregator](./api-reference/aggregation-layers/aggregator.md) for ownership,
+result layouts, and supported scales and contours.
+
+### luma.gl v10 alpha.10
+
+The v10 packages use luma.gl alpha.10. Layer models delegate typed vector and
+constant-buffer binding and render-target format tracking to luma.gl. WebGPU
+layer draws restore dynamic render-pass parameters after drawing. Custom shader
+plugins use the renamed injection-target API; see the [upgrade guide](./upgrade-guide.md).
+
+### ScatterplotLayer Arrow columns
+
+ScatterplotLayer accepts Arrow vectors for positions and styling, with accessor and binary fallbacks. See [Using with Arrow](./developer-guide/using-with-arrow.md) for modes and [tabbed examples](./api-reference/layers/scatterplot-layer.md#arrow-columns).
+
 ### deck.gl v10 examples (Experimental)
 
 The website gallery includes three new sections: Arrow Layers, Visual Effects, and GPU Graph Layers. Explore [streaming Arrow paths](/examples/v10/arrow-path-layer), [riverfront weather](/examples/v10/weather), and [GPU graph exploration](/examples/v10/gpu-graph-explorer), alongside the other copied luma.gl examples. Each page embeds the live demo and its controls. GPU graph exploration requires WebGPU; these examples use private prototype modules and remain experimental.
+
+### Extension updates
+
+Use [`DataFilterExtension`](./api-reference/extensions/data-filter-extension.md) with `countItems` to report how many objects pass numeric or category filters.
 
 ### Custom projections (Experimental)
 
@@ -57,6 +86,7 @@ deck.gl v9.4 brings numerous view and controller improvements on top of the subs
 [`GlobeView`](./api-reference/core/globe-view.md) continues to mature, including significantly expanded layer compatibility:
 
 - [TerrainLayer](./api-reference/geo-layers/terrain-layer.md) now renders correctly on `GlobeView`, producing properly projected terrain meshes on the globe.
+- [`MaskExtension`](./api-reference/extensions/mask-extension.md) works in `GlobeView`; masks are evaluated in Web Mercator space, so the mask shape follows the same latitude stretch as the layers it masks.
 - [TerrainExtension](./api-reference/extensions/terrain-extension.md) now supports `GlobeView`, enabling terrain-draped layers on the globe.
 - [Tile3DLayer](./api-reference/geo-layers/tile-3d-layer.md) renders correctly on `GlobeView`.
 - The [`project` shader module](./api-reference/core/project.md#project_common_position_to_flat) adds `project_common_position_to_flat` and its wrapped and continuous variants, so extensions and custom layers can test bounds or sample textures computed in flat Web Mercator space while rendering on the globe.
@@ -125,6 +155,7 @@ New [`@deck.gl/maplibre`](./api-reference/maplibre/overview.md) module is forked
 - [`PathLayer`](./api-reference/layers/path-layer.md), [`LineLayer`](./api-reference/layers/line-layer.md), [`ArcLayer`](./api-reference/layers/arc-layer.md), and [`PointCloudLayer`](./api-reference/layers/point-cloud-layer.md) now use analytic antialiasing for smooth edges without requiring MSAA. Composite layers that render paths, including `GeoJsonLayer`, `PolygonLayer`, and the geospatial cell layers, forward the new `antialiasing` prop to their path sublayers.
 - [`PathStyleExtension`](./api-reference/extensions/path-style-extension.md) adds `dashMode` to choose whether a dash pattern restarts at each segment or runs continuously across a complete path, and `dashUnits` to express dash lengths in stroke widths, pixels, meters, or common units. Dash rendering is also more robust for dense and 3D paths, billboarded or offset strokes, long paths, and subpixel patterns.
 - [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) can generate hatch, cross-hatch, and dot patterns directly in the fragment shader without a texture atlas. It also adds `fillPatternSizeUnits` for ground- or screen-relative pattern sizing and `getFillPatternBackgroundColor` for compositing patterns over a per-object background color.
+- [`FillStyleExtension`](./api-reference/extensions/fill-style-extension.md) patterns now render in [GlobeView](./api-reference/core/globe-view.md).
 
 ### Other Improvements
 

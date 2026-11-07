@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {Accessor, Layer, LayerContext, LayerExtension} from '@deck.gl/core';
-import collision from './shader-module';
+import {collisionPlugin} from './shader-module';
 import CollisionFilterEffect from './collision-filter-effect';
 
 const defaultProps = {
@@ -42,7 +42,7 @@ export default class CollisionFilterExtension extends LayerExtension {
   static extensionName = 'CollisionFilterExtension';
 
   getShaders(this: Layer<CollisionFilterExtensionProps>): any {
-    return {modules: [collision]};
+    return {plugins: [collisionPlugin]};
   }
 
   /* eslint-disable camelcase */

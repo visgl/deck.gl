@@ -511,6 +511,46 @@ This section is about the special requirements when [supplying attributes direct
 If `data.attributes.getIcon` is supplied, since its value can only be a typed array, `iconMapping` can only use integers as keys.
 
 
+### Arrow Columns
+
+See [Using with Arrow](../../developer-guide/using-with-arrow.md) for shared input requirements and limitations.
+
+#### `positions` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY or XYZ fixed-size lists specifying icon anchors. Overrides [`getPosition`](#getposition).
+
+#### `sizes` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar icon sizes in `sizeUnits`. Overrides [`getSize`](#getsize).
+
+#### `colors` (Arrow Vector, optional)
+
+* Default: `null`
+
+RGB or RGBA fixed-size lists specifying icon colors. Overrides [`getColor`](#getcolor).
+
+#### `angles` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric scalar rotations in degrees. Overrides [`getAngle`](#getangle).
+
+#### `pixelOffsets` (Arrow Vector, optional)
+
+* Default: `null`
+
+Numeric XY fixed-size lists specifying offsets in pixels. Overrides [`getPixelOffset`](#getpixeloffset).
+
+## Remarks
+
+- Provide one `data` row per icon so `getIcon` can select it in either atlas mode.
+- If varying attributes exceed the WebGPU device's vertex buffer limit, use constant
+  accessors for styling values shared by all icons.
+
 ## Source
 
 [modules/layers/src/icon-layer](https://github.com/visgl/deck.gl/tree/master/modules/layers/src/icon-layer)

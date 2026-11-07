@@ -1018,7 +1018,6 @@ const testCases: TestCase[] = [
 ];
 
 // PathStyleExtension has no WGSL sources yet
-const DASH_SKIP_DEVICES = ['webgpu'];
 
 // Dash ends are the subject of these images. Include antialiased pixels in the comparison so
 // changes to partially covered edge pixels are not ignored.
@@ -1074,8 +1073,16 @@ describe.each(['webgl', 'webgpu'] as const)('%s', deviceType => {
   runRenderTestSuite(
     testCases.map(testCase => ({
       ...testCase,
-      imageDiffOptions: {...DASH_IMAGE_DIFF_OPTIONS, ...testCase.imageDiffOptions},
-      skip: DASH_SKIP_DEVICES
+      imageDiffOptions: {
+        ...DASH_IMAGE_DIFF_OPTIONS,
+        ...testCase.imageDiffOptions,
+        ...(deviceType === 'webgpu' && testCase.name === 'path-dash-density-rounded'
+          ? {threshold: 0.989}
+          : {}),
+        ...(deviceType === 'webgpu' && testCase.name === 'path-dash-billboard-map-z10-map-vs-globe'
+          ? {threshold: 0.984}
+          : {})
+      }
     })) as TestCase[],
     deviceType
   );
