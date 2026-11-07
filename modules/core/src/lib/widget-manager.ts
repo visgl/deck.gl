@@ -11,6 +11,7 @@ import {Widget} from './widget';
 
 import {EVENT_HANDLERS} from './constants';
 import {deepEqual} from '../utils/deep-equal';
+import log from '../utils/log';
 
 const PLACEMENTS = {
   'top-left': {top: 0, left: 0},
@@ -194,6 +195,12 @@ export class WidgetManager {
 
     for (let widget of nextWidgets) {
       const oldWidget = oldWidgetMap[widget.id];
+      if (oldWidget === null) {
+        // null, rather than undefined, means a widget with this id was already matched in this
+        // pass. Mounting another one would leave two widgets that later updates cannot tell apart.
+        log.warn(`Multiple widgets with same id ${widget.id}`)();
+        continue;
+      }
       if (!oldWidget) {
         // Widget is new
         this._addWidget(widget);
