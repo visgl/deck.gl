@@ -9,17 +9,12 @@
 //
 
 export {
-  // CONSTANTS
   VERSION,
-  COORDINATE_SYSTEM,
   OPERATION,
   UNIT,
-  // Main class
   Deck,
-  // Base Layers
   Layer,
   CompositeLayer,
-  // Views
   View,
   MapView,
   FirstPersonView,
@@ -27,7 +22,6 @@ export {
   OrthographicView,
   _CustomProjectionView,
   _GlobeView,
-  // Viewports
   Viewport,
   WebMercatorViewport,
   _GlobeViewport,
@@ -35,7 +29,6 @@ export {
   OrthographicViewport,
   FirstPersonViewport,
   _CustomProjectionViewport,
-  // Controllers
   Controller,
   MapController,
   TerrainController,
@@ -44,43 +37,35 @@ export {
   OrthographicController,
   _CustomProjectionController,
   _GlobeController,
-  // For custom layers
   Attribute,
   AttributeManager,
-  // Shader modules
   color,
   picking,
+  pickingPlugin,
   project,
   project32,
   gouraudMaterial,
   phongMaterial,
   shadow,
-  // Internal classes
+  shadowPlugin,
   LayerManager,
   DeckRenderer,
-  // Logging
   log,
   assert,
-  // Transition bindings
   TRANSITION_EVENTS,
   TransitionInterpolator,
   LinearInterpolator,
   FlyToInterpolator,
-  // Effects
   LightingEffect,
   PostProcessEffect,
-  // Lights
   AmbientLight,
   PointLight,
   DirectionalLight,
-  // Extension
   LayerExtension,
-  // Utilities
   Tesselator,
   fp64LowPart,
   createIterable,
   getShaderAssembler,
-  // Widgets
   Widget
 } from '@deck.gl/core';
 
@@ -122,6 +107,10 @@ export {
   H3ClusterLayer,
   H3HexagonLayer,
   TileLayer,
+  Tileset2D,
+  Tile2DHeader,
+  tile2DDeckAdapter,
+  /** @deprecated Use Tileset2D. */
   _Tileset2D,
   TripsLayer,
   Tile3DLayer,
@@ -190,7 +179,6 @@ export type {
   CustomProjectionViewState,
   CustomProjectionViewProps,
   CustomProjectionViewportOptions,
-  ProjectionConverter,
   CoordinateSystem,
   ChangeFlags,
   LayersList,
@@ -238,7 +226,18 @@ export type {
   ScreenGridLayerProps
 } from '@deck.gl/aggregation-layers';
 
-export type {MVTLayerProps, QuadkeyLayerProps, TileLayerProps} from '@deck.gl/geo-layers';
+export type {
+  MVTLayerProps,
+  QuadkeyLayerProps,
+  RefinementStrategy,
+  TileLoadProps,
+  Tileset2DAdapter,
+  Tileset2DListener,
+  Tileset2DProps,
+  Tileset2DTileContext,
+  Tileset2DTraversalContext,
+  TileLayerProps
+} from '@deck.gl/geo-layers';
 
 export type {DeckGLProps, DeckGLRef, DeckGLContextValue} from '@deck.gl/react';
 

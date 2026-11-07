@@ -79,7 +79,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   maxPitch: 45
 };
 
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/dark';
 
 const MARKING_EXTENSION = new PathStyleExtension({dashMode: 'path', offset: true});
 const LANE_EXTENSION = new PathStyleExtension({offset: true});

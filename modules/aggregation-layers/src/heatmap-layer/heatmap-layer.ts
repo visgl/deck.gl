@@ -205,7 +205,7 @@ export default class HeatmapLayer<
     weightsScale: number;
     visibleWorldBounds: number[];
     viewportCorners: number[][];
-  };
+  } & AggregationLayer<any>['state'];
 
   getShaders(shaders: any) {
     let modules = [project32];
@@ -294,6 +294,9 @@ export default class HeatmapLayer<
         // position buffer is filled with world coordinates generated from viewport.unproject
         // i.e. LNGLAT if geospatial, CARTESIAN otherwise
         coordinateSystem: 'default',
+        // The screen quad comes from the viewport, independently of data transforms.
+        coordinateOrigin: [0, 0, 0],
+        modelMatrix: null,
         data: {
           attributes: {
             positions: triPositionBuffer,
@@ -404,9 +407,12 @@ export default class HeatmapLayer<
           accessor: 'getPosition',
           // Normalize binary XY positions into the packed XYZ high/low layout WebGPU requires.
           ...this.usePositionTransforms(),
-          transform:
-            this.usePositionTransforms().transform ||
-            ((position: Position) => [position[0], position[1], position[2] ?? 0])
+          transform(this: HeatmapLayer, position: Position) {
+            // Keep XYZ packing even when source-CRS changes add or remove CPU conversion.
+            const transformed =
+              this.usePositionTransforms().transform?.call(this, position) || position;
+            return [transformed[0], transformed[1], transformed[2] ?? 0];
+          }
         },
         instanceWeights: {size: 1, accessor: 'getWeight'}
       });
@@ -574,7 +580,7 @@ export default class HeatmapLayer<
       [0, viewport.height],
       [viewport.width, viewport.height]
     ].map(pixel =>
-      (viewport.preproject
+      (project.isCustomProjection(viewport)
         ? pixelsToWorld(pixel, viewport.pixelUnprojectionMatrix, 0)
         : viewport.unproject(pixel)
       ).map(Math.fround)
@@ -599,7 +605,11 @@ export default class HeatmapLayer<
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      if (!viewport.preproject && this.props.coordinateSystem === 'lnglat') {
+      if (
+        !project.isCustomProjection(viewport) &&
+        this.internalState!.packedCrs?.signature === 'WGS84' &&
+        this.props.coordinateSystem !== 'lnglat-offsets'
+      ) {
         worldBounds[1] = Math.max(worldBounds[1], -85.051129);
         worldBounds[3] = Math.min(worldBounds[3], 85.051129);
         worldBounds[0] = Math.max(worldBounds[0], -360);
@@ -627,14 +637,16 @@ export default class HeatmapLayer<
 
     triPositionBuffer!.write(
       packVertices(
-        viewport.preproject ? viewportCorners.map(p => viewport.unprojectFlat(p)) : viewportCorners,
+        project.isCustomProjection(viewport)
+          ? viewportCorners.map(p => viewport.unprojectFlat(p))
+          : viewportCorners,
         3
       )
     );
 
     const textureBounds = viewportCorners.map(p =>
       getTextureCoordinates(
-        viewport.preproject ? p : viewport.projectPosition(p),
+        project.isCustomProjection(viewport) ? p : viewport.projectPosition(p),
         normalizedCommonBounds!
       )
     );
@@ -708,6 +720,7 @@ export default class HeatmapLayer<
         devicePixelRatio,
         modelMatrix,
         coordinateSystem,
+        sourceCrs: this.internalState!.sourceCrs,
         coordinateOrigin,
         sizeScale: this.context.layerManager.projectionScaleResources.get(viewport)
       },
@@ -754,13 +767,13 @@ export default class HeatmapLayer<
     const {coordinateSystem} = this.props;
 
     const offsetMode =
-      !viewport.preproject &&
+      !project.isCustomProjection(viewport) &&
       useLayerCoordinateSystem &&
       (coordinateSystem === 'lnglat-offsets' || coordinateSystem === 'meter-offsets');
     // The weight shader uses offset common coordinates. Match its precision
     // origin without projecting the already-common bounds through the converter.
     const offsetOriginCommon =
-      viewport.preproject && useLayerCoordinateSystem
+      project.isCustomProjection(viewport) && useLayerCoordinateSystem
         ? (project.getUniforms({viewport}) as ProjectUniforms).commonOrigin
         : offsetMode
           ? viewport.projectPosition(this.props.coordinateOrigin)
@@ -771,12 +784,20 @@ export default class HeatmapLayer<
     let topRightCommon;
 
     // Y-axis is flipped between World and Common bounds
-    if (viewport.preproject) {
+    if (project.isCustomProjection(viewport)) {
       bottomLeftCommon = [minLong, minLat, 0];
       topRightCommon = [maxLong, maxLat, 0];
     } else if (useLayerCoordinateSystem && !offsetMode) {
-      bottomLeftCommon = this.projectPosition([minLong, minLat, 0]);
-      topRightCommon = this.projectPosition([maxLong, maxLat, 0]);
+      // Attribute bounds already consumed CPU source conversion and layer transforms.
+      const params = this.state.preproject
+        ? {
+            sourceCrs: this.internalState!.packedCrs!,
+            coordinateOrigin: [0, 0, 0] as [number, number, number],
+            modelMatrix: null
+          }
+        : undefined;
+      bottomLeftCommon = this.projectPosition([minLong, minLat, 0], params);
+      topRightCommon = this.projectPosition([maxLong, maxLat, 0], params);
     } else {
       bottomLeftCommon = viewport.projectPosition([minLong, minLat, 0]);
       topRightCommon = viewport.projectPosition([maxLong, maxLat, 0]);
@@ -798,7 +819,7 @@ export default class HeatmapLayer<
   // output worldBounds: [minLong, minLat, maxLong, maxLat]
   _commonToWorldBounds(commonBounds) {
     // Preprojected heatmaps maintain their working bounds entirely in common space.
-    if (this.context.viewport.preproject) return commonBounds.slice();
+    if (project.isCustomProjection(this.context.viewport)) return commonBounds.slice();
     const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
     const bottomLeftWorld = viewport.unprojectPosition([xMin, yMin]);

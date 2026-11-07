@@ -82,7 +82,10 @@ export default class ShadowPass extends LayersPass {
       ...layer.props.parameters,
       blend: false,
       depthWriteEnabled: true,
-      depthCompare: 'less-equal'
+      depthCompare: 'less-equal',
+      // The shadow map stores gl_FragCoord.z, which includes the per-layer polygon offset
+      // (`getPolygonOffset`). Draw without it so layers do not shadow themselves.
+      depthBias: 0
     };
   }
 
@@ -95,7 +98,10 @@ export default class ShadowPass extends LayersPass {
       shadow: {
         project: otherShaderModuleProps.project,
         drawToShadowMap: true
-      }
+      },
+      // The shadow map stores depth packed into RGBA. Layers that light their color after
+      // DECKGL_FILTER_COLOR (e.g. SimpleMeshLayer) would otherwise scale the packed depth.
+      lighting: {enabled: false}
     };
   }
 }

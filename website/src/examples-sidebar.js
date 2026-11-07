@@ -26,6 +26,7 @@ const sidebars = {
       label: 'Layers',
       items: [
         'arc-layer',
+        'bitmap-layer',
         'contour-layer',
         'geojson-layer-polygons',
         'geojson-layer-paths',
@@ -48,6 +49,18 @@ const sidebars = {
         'tile-3d-layer',
         'trips-layer',
         'wms-layer'
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Proposals',
+      items: [
+        'shared-tile-2d-layer',
+        ...v10Sections.map(({label, examples}) => ({
+          type: 'category',
+          label,
+          items: examples.map(({id}) => `v10/${id}`)
+        }))
       ]
     },
     {
@@ -87,12 +100,7 @@ const sidebars = {
           href: `/pydeck`
         }
       ]
-    },
-    ...v10Sections.map(({label, examples}) => ({
-      type: 'category',
-      label,
-      items: examples.map(({id}) => `v10/${id}`)
-    }))
+    }
   ]
 };
 

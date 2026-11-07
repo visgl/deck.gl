@@ -32,12 +32,13 @@ test('MaskPass#shouldDrawLayer', () => {
     })
   ];
 
-  const layerManager = new LayerManager(device, {});
+  const viewport = new Viewport({id: 'A'});
+  const layerManager = new LayerManager(device, {viewport});
   const maskPass = new MaskPass(device, {});
   layerManager.setLayers(layers);
 
   const renderStats = maskPass.render({
-    viewports: [new Viewport({id: 'A'})],
+    viewports: [viewport],
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     onError: err => expect(err).toBeFalsy()

@@ -49,17 +49,11 @@ for (let latitude = -90; latitude <= 90; latitude += 15) {
 }
 
 function createView(name: ProjectionName): CustomProjectionView {
-  const {projection, fromCrs, toCrs, fromBounds, toBounds, getDistanceScale, note} =
-    projections[name];
+  const {crs, note} = projections[name];
   document.getElementById('projection-note')!.textContent = note;
   return new CustomProjectionView({
-    fromCrs,
-    toCrs,
-    projection,
-    fromBounds,
-    toBounds,
-    getDistanceScale,
-    resolution: 5,
+    crs,
+    resolution: 72,
     controller: true
   });
 }

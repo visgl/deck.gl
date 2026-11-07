@@ -315,3 +315,30 @@ test('GlobeViewport#getBounds', () => {
     expect(bounds[0] < testCase.longitude && bounds[2] > testCase.longitude).toBeTruthy();
   }
 });
+
+test('GlobeViewport exposes a local geocentric CRS while preserving its sphere', () => {
+  const viewport = new GlobeViewport();
+  const crs = viewport.crs!;
+  expect(crs.coordinateFrame).toBe('geocentric');
+  expect(crs.ellipsoid).toEqual({semiMajorAxis: 6370972, semiMinorAxis: 6370972});
+  for (const source of [
+    [0, 0, 100],
+    [12, 60, 123],
+    [-122, -40, 0]
+  ]) {
+    const target = crs.converter.WGS84.from(source);
+    const common = viewport.projectPosition(source);
+    const scale = 256 / crs.ellipsoid.semiMajorAxis;
+    // Standard XYZ becomes the viewport's existing [Y, -X, Z] orientation.
+    expect(common[0]).toBeCloseTo(target[1] * scale, 10);
+    expect(common[1]).toBeCloseTo(-target[0] * scale, 10);
+    expect(common[2]).toBeCloseTo(target[2] * scale, 10);
+    const restored = crs.converter.WGS84.to(target);
+    expect(restored[0]).toBeCloseTo(source[0], 8);
+    expect(restored[1]).toBeCloseTo(source[1], 8);
+    expect(restored[2]).toBeCloseTo(source[2], 5);
+    const output = new Float64Array(3);
+    expect(crs.converter.WGS84.from(source, output)).toBe(output);
+    expect(Array.from(output)).toEqual(target);
+  }
+});

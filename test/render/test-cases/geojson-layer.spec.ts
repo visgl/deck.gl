@@ -6,13 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {
-  LightingEffect,
-  AmbientLight,
-  DirectionalLight,
-  OrbitView,
-  COORDINATE_SYSTEM
-} from '@deck.gl/core';
+import {LightingEffect, AmbientLight, DirectionalLight, OrbitView} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {geojson, geojsonLarge, geojsonHole} from 'deck.gl-test/data';
 import antarctica from 'deck.gl-test/data/antarctica.geo.json';
@@ -271,7 +265,7 @@ const testCases = [
       }),
       new SimpleMeshLayer({
         id: 'geojson-hole-and-lighting-ref-sphere',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: [0],
         mesh: sphere,
         sizeScale: 50,
