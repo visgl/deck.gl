@@ -373,7 +373,13 @@ test('TerrainEffect#external terrain', async () => {
   expect(Array.from(device.readPixelsToArrayWebGL(tile)), 'Layer filter').toEqual(
     new Array(64).fill(0)
   );
+  externalTerrain.onDrapeChange.mockClear();
   lifecycle.effectContext.deck.props.layerFilter = ({layer}) => layer.id !== 'glacier';
+  lifecycle.render();
+  expect(
+    externalTerrain.onDrapeChange,
+    "Deck's layer filter changes what the draped layers draw"
+  ).toHaveBeenCalledTimes(1);
   renderDrape({target: tile, bounds: tileBounds});
   expect(Array.from(device.readPixelsToArrayWebGL(tile)), "Deck's layer filter").toEqual(
     new Array(64).fill(0)

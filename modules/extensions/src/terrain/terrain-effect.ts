@@ -49,9 +49,16 @@ export class TerrainEffect implements Effect {
   private externalHeightMapId: string | null = null;
   /** True if the height map holds meters drawn by external terrain, until a terrain layer draws it */
   private heightMapInMeters: boolean = false;
-  /** Layers draped over the external terrain, with the options to draw them */
-  private externalDrape: {layers: Layer[]; opts: PreRenderOptions; viewport: Viewport} | null =
-    null;
+  /**
+   * Layers draped over the external terrain, with the options to draw them and the `layerFilter`
+   * of Deck when they were last drawn
+   */
+  private externalDrape: {
+    layers: Layer[];
+    opts: PreRenderOptions;
+    viewport: Viewport;
+    layerFilter: Deck['props']['layerFilter'];
+  } | null = null;
   /** True if a terrain layer is present, which offset and draped layers follow */
   private hasTerrain: boolean = false;
   private device?: Device;
@@ -378,7 +385,10 @@ export class TerrainEffect implements Effect {
     }
   };
 
-  /** Remembers the draped layers for the external terrain, and tells it when they change */
+  /**
+   * Remembers the draped layers for the external terrain, and tells it when they, or the
+   * `layerFilter` of Deck, change
+   */
   private _updateExternalDrape(
     externalTerrain: ExternalTerrain,
     opts: PreRenderOptions,
@@ -386,9 +396,11 @@ export class TerrainEffect implements Effect {
   ) {
     const layers = opts.layers.filter(l => !l.isComposite && l.state.terrainDrawMode === 'drape');
     const previousLayers = this.externalDrape?.layers ?? [];
+    const layerFilter = this.deck?.props.layerFilter ?? null;
     let changed =
       layers.length !== previousLayers.length ||
-      layers.some((l, i) => l.id !== previousLayers[i].id);
+      layers.some((l, i) => l.id !== previousLayers[i].id) ||
+      layerFilter !== (this.externalDrape?.layerFilter ?? null);
     for (const layer of layers) {
       if (layer.state.terrainCoverNeedsRedraw) {
         layer.state.terrainCoverNeedsRedraw = false;
@@ -398,7 +410,8 @@ export class TerrainEffect implements Effect {
     this.externalDrape = {
       layers,
       opts: {...opts, effects: opts.effects?.filter(e => e !== this)},
-      viewport
+      viewport,
+      layerFilter
     };
     if (changed) {
       externalTerrain.onDrapeChange?.(layers);
