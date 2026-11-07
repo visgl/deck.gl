@@ -40,16 +40,18 @@ void main() {
 }
 `;
 
+/** Shows the draped layers' picking colors where the elevation is known, like the depth pass */
 const fs = /* glsl */ `\
 #version 300 es
 precision highp float;
 uniform sampler2D pickingCover;
 in vec2 vTexCoords;
+in float vKnown;
 out vec4 fragColor;
 
 void main() {
   vec4 pickingColor = texture(pickingCover, vTexCoords);
-  if (pickingColor.a == 0.0) {
+  if (pickingColor.a == 0.0 || vKnown < 0.5) {
     discard;
   }
   fragColor = pickingColor;
