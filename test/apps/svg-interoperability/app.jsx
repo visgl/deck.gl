@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {createRoot} from 'react-dom/client';
-import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
+import DeckGL, {ScatterplotLayer, OrthographicView} from 'deck.gl';
 import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 const DEGREE_TO_RADIAN = Math.PI / 180;
@@ -141,7 +141,7 @@ class Root extends PureComponent {
       ],
       getRadius: p => 2,
       getColor: p => [255, 0, 128, 196],
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: 'cartesian',
       // there's a bug that the radius calculated with project_scale
       radiusMinPixels: 2
     });
@@ -172,7 +172,7 @@ class Root extends PureComponent {
         p.radius * Math.cos(p.theta * DEGREE_TO_RADIAN) * size,
         p.radius * Math.sin(p.theta * DEGREE_TO_RADIAN) * size
       ],
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+      coordinateSystem: 'cartesian',
       cellSize: 20,
       contours: this._getContours(bandsOn),
       gpuAggregation: true

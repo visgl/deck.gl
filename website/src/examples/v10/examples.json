@@ -1,0 +1,105 @@
+[
+  {
+    "label": "Arrow Layers - deck.gl v10",
+    "examples": [
+      {
+        "id": "arrow-path-layer",
+        "title": "Arrow Path Layer"
+      },
+      {
+        "id": "arrow-polygon-layer",
+        "title": "Arrow Polygon Layer"
+      },
+      {
+        "id": "arrow-text-layer",
+        "title": "Arrow Text Layer"
+      }
+    ]
+  },
+  {
+    "label": "Visual Effects - deck.gl v10",
+    "examples": [
+      {
+        "id": "weather",
+        "title": "Riverfront Weather"
+      },
+      {
+        "id": "soft-shadows",
+        "title": "Soft Shadows"
+      },
+      {
+        "id": "globe-clouds",
+        "title": "Globe Clouds"
+      },
+      {
+        "id": "city-scene",
+        "title": "City Scene"
+      },
+      {
+        "id": "flow-particles",
+        "title": "Flow Particles"
+      },
+      {
+        "id": "point-glow",
+        "title": "Point Glow"
+      },
+      {
+        "id": "fireflies",
+        "title": "Fireflies"
+      },
+      {
+        "id": "hdr-night-lighting",
+        "title": "HDR Night Lighting"
+      },
+      {
+        "id": "global-illumination",
+        "title": "Global Illumination"
+      },
+      {
+        "id": "light-shafts",
+        "title": "Light Shafts"
+      },
+      {
+        "id": "ambient-occlusion",
+        "title": "Ambient Occlusion"
+      },
+      {
+        "id": "depth-of-field",
+        "title": "Depth of Field"
+      },
+      {
+        "id": "sketch-edges",
+        "title": "Sketch Edges"
+      },
+      {
+        "id": "scene-buffers",
+        "title": "Scene Buffers"
+      },
+      {
+        "id": "pattern-fills",
+        "title": "Pattern Fills"
+      },
+      {
+        "id": "styled-paths",
+        "title": "Styled Paths"
+      }
+    ]
+  },
+  {
+    "label": "GPU Graph Layers - deck.gl v10",
+    "examples": [
+      {
+        "id": "luspatial-taxi",
+        "title": "luProj + luSpatial: Taxi Explorer"
+      },
+      {
+        "id": "gpu-graph-explorer",
+        "title": "GPU Graph: Network Explorer"
+      },
+      {
+        "id": "gpu-culled-trace",
+        "title": "GPU Culled Trace"
+      }
+    ]
+  }
+]

@@ -47,9 +47,8 @@ export type Defines = {
  * avoids making their result depend on the order in which the capability shaders are merged.
  * It also owns their deferred fragment rejection, after PathLayer has evaluated derivatives.
  */
-export const pathStylePipelineShaders = {
-  inject: {
-    'vs:#main-end': `
+export const pathStylePipelineInjections = {
+  'glsl:vs:#main-end': `
 #ifdef PATH_STYLE_OFFSET
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   float offsetDir = sign(instanceOffsets);
@@ -88,31 +87,31 @@ if (pathStyle.dashUnits == 1) {
 } else if (pathStyle.dashUnits == 3) {
   dashUnitPixels = project.scale;
 }
-vDashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
+pathStyle_dashArray = instanceDashArrays * (dashUnitPixels / dashWidthPixels);
 
 #ifdef HIGH_PRECISION_DASH
 // instanceDashOffsets accumulates common-space distance on the CPU. Convert it to pixels, then
 // divide by the pixel half-width so both extrusion branches use the same dash coordinate.
 vec2 dashOffsetAndLength = (instanceDashOffsets * project.scale) / dashWidthPixels;
-vDashPathLength = dashOffsetAndLength.y;
+pathStyle_dashPathLength = dashOffsetAndLength.y;
 
 // Reduce the phase into the first period here rather than in the fragment shader. On a long
 // path at high zoom the raw offset reaches into the millions, and adding the much smaller
 // vDashSegment.x to it in fp32 loses the latter entirely, freezing the pattern mid-segment.
 // The dash function is periodic, so this discards nothing - but it has to be reduced modulo
 // whichever period the fragment stage will actually test against, hence dashAlignMode here.
-float dashUnitLength = vDashArray.x + vDashArray.y;
+float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
 float dashPeriod = pathStyle.dashAlignMode == 0.0
   ? dashUnitLength
-  : vDashPathLength / max(round(vDashPathLength / max(dashUnitLength, 0.0001)), 1.0);
-vDashOffset = dashPeriod > 0.0 ? mod(dashOffsetAndLength.x, dashPeriod) : 0.0;
+  : pathStyle_dashPathLength / max(round(pathStyle_dashPathLength / max(dashUnitLength, 0.0001)), 1.0);
+pathStyle_dashOffset = dashPeriod > 0.0 ? mod(dashOffsetAndLength.x, dashPeriod) : 0.0;
 #else
-vDashOffset = 0.0;
-vDashPathLength = 0.0;
+pathStyle_dashOffset = 0.0;
+pathStyle_dashPathLength = 0.0;
 #endif
 #endif
 `,
-    'fs:#main-end': `
+  'glsl:fs:#main-end': `
 #ifdef DASH_ENABLED
   // PathLayer computes analytic-edge derivatives in its fragment body. A discard in
   // #main-start can remove helper invocations and make those derivatives undefined, so all
@@ -149,21 +148,10 @@ vDashPathLength = 0.0;
 #endif
 #endif
 `
-  }
 };
 
-export const dashShaders = {
-  inject: {
-    'vs:#decl': `
-in vec2 instanceDashArrays;
-#ifdef HIGH_PRECISION_DASH
-// [distance from the start of the path, total length of the path], in common space.
-in vec2 instanceDashOffsets;
-#endif
-out vec2 vDashArray;
-out float vDashOffset;
-out float vDashPathLength;
-
+export const dashInjections = {
+  'glsl:vs:#decl': `
 // Also declared in the fragment stage. The vertex stage needs dashAlignMode so that it can
 // reduce the dash phase modulo the same period the fragment stage will test against, and
 // dashUnits to scale the dash array into that period's units.
@@ -174,16 +162,13 @@ layout(std140) uniform pathStyleUniforms {
 } pathStyle;
 `,
 
-    'fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   float dashAlignMode;
   bool dashGapPickable;
   highp int dashUnits;
 } pathStyle;
 
-in vec2 vDashArray;
-in float vDashOffset;
-in float vDashPathLength;
 // [position along the source segment, complete source-segment length]
 in vec2 vDashSegment;
 
@@ -220,15 +205,15 @@ float dashPatternCoverage(
 }
 `,
 
-    // if given position is in the gap part of the dashed line
-    // dashArray.x: solid stroke length, relative to width
-    // dashArray.y: gap length, relative to width
-    // alignMode:
-    // 0 - no adjustment
-    // o----     ----     ----     ---- o----     -o----     ----     o
-    // 1 - stretch to fit, draw half dash at each end for nicer joints
-    // o--    ----    ----    ----    --o--      --o--     ----     --o
-    'fs:#main-start': `
+  // if given position is in the gap part of the dashed line
+  // dashArray.x: solid stroke length, relative to width
+  // dashArray.y: gap length, relative to width
+  // alignMode:
+  // 0 - no adjustment
+  // o----     ----     ----     ---- o----     -o----     ----     o
+  // 1 - stretch to fit, draw half dash at each end for nicer joints
+  // o--    ----    ----    ----    --o--      --o--     ----     --o
+  'glsl:fs:#main-start': `
   float dashCoverage = 1.0;
   bool shouldDiscardDash = false;
   bool inRoundedDashGap = false;
@@ -236,14 +221,14 @@ float dashPatternCoverage(
   float roundedDashSubPixelBlend = 0.0;
   float roundedDashDutyCycle = 1.0;
 
-  float solidLength = vDashArray.x;
-  float gapLength = vDashArray.y;
+  float solidLength = pathStyle_dashArray.x;
+  float gapLength = pathStyle_dashArray.y;
   float unitLength = solidLength + gapLength;
 
   if (unitLength > 0.0 && gapLength > 0.0) {
     float offset;
     if (pathStyle.dashAlignMode == 0.0) {
-      offset = vDashOffset;
+      offset = pathStyle_dashOffset;
     } else {
       // Justified: stretch the period so a whole number of them spans the run, and start
       // half a dash in so both ends finish on a joint. Rounding up to at least one period
@@ -251,10 +236,10 @@ float dashPatternCoverage(
       // unitLength infinite and rendered it solid.
 #ifdef HIGH_PRECISION_DASH
       // Justify across the entire path rather than each segment separately, so the gaps stay
-      // even instead of being stretched by a different amount on every segment. vDashOffset
+      // even instead of being stretched by a different amount on every segment. pathStyle_dashOffset
       // already carries the distance to the start of this segment, reduced modulo this same
       // period in the vertex shader.
-      unitLength = vDashPathLength / max(round(vDashPathLength / unitLength), 1.0);
+      unitLength = pathStyle_dashPathLength / max(round(pathStyle_dashPathLength / unitLength), 1.0);
 #else
       unitLength = vDashSegment.y / max(round(vDashSegment.y / unitLength), 1.0);
 #endif
@@ -263,7 +248,7 @@ float dashPatternCoverage(
       solidLength = min(solidLength, unitLength);
       offset = solidLength / 2.0;
 #ifdef HIGH_PRECISION_DASH
-      offset += vDashOffset;
+      offset += pathStyle_dashOffset;
 #endif
     }
 
@@ -329,33 +314,24 @@ float dashPatternCoverage(
     shouldDiscardDash = shouldDiscardDash || dashCoverage <= 0.0;
   }
 `
-  }
 };
 
-export const scatterplotDashShaders = {
-  inject: {
-    'vs:#decl': `
-in vec2 instanceDashArrays;
-out vec2 vDashArray;
+export const scatterplotDashInjections = {
+  'glsl:vs:#main-end': `
+pathStyle_dashArray = instanceDashArrays;
 `,
 
-    'vs:#main-end': `
-vDashArray = instanceDashArrays;
-`,
-
-    'fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
 
-in vec2 vDashArray;
-
 #define PI 3.141592653589793
 `,
 
-    'fs:#main-start': `
+  'glsl:fs:#main-start': `
   bool inDashGap = false;
-  float dashUnitLength = vDashArray.x + vDashArray.y;
+  float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
   if (dashUnitLength > 0.0 && scatterplot.stroked > 0.5) {
     float _distToCenter = length(unitPosition) * outerRadiusPixels;
     float innerRadius = innerUnitRadius * outerRadiusPixels;
@@ -366,7 +342,7 @@ in vec2 vDashArray;
       float circumference = 2.0 * PI * midStrokeRadius;
       float posAlongStroke = (angle / (2.0 * PI)) * circumference / strokeWidth;
       float unitOffset = mod(posAlongStroke, dashUnitLength);
-      if (unitOffset > vDashArray.x) {
+      if (unitOffset > pathStyle_dashArray.x) {
         if (scatterplot.filled > 0.5) {
           inDashGap = true;
         } else {
@@ -379,7 +355,7 @@ in vec2 vDashArray;
   }
 `,
 
-    'fs:#main-end': `
+  'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -387,26 +363,17 @@ in vec2 vDashArray;
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
-  }
 };
 
-export const textBackgroundDashShaders = {
-  inject: {
-    'vs:#decl': `
-in vec2 instanceDashArrays;
-out vec2 vDashArray;
+export const textBackgroundDashInjections = {
+  'glsl:vs:#main-end': `
+pathStyle_dashArray = instanceDashArrays;
 `,
 
-    'vs:#main-end': `
-vDashArray = instanceDashArrays;
-`,
-
-    'fs:#decl': `
+  'glsl:fs:#decl': `
 layout(std140) uniform pathStyleUniforms {
   bool dashGapPickable;
 } pathStyle;
-
-in vec2 vDashArray;
 
 #define PI 3.141592653589793
 
@@ -501,9 +468,9 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
 }
 `,
 
-    'fs:#main-start': `
+  'glsl:fs:#main-start': `
   bool inDashGap = false;
-  float dashUnitLength = vDashArray.x + vDashArray.y;
+  float dashUnitLength = pathStyle_dashArray.x + pathStyle_dashArray.y;
   if (dashUnitLength > 0.0 && textBackground.stroked) {
     float distToEdge;
     bool hasRoundedCorners = textBackground.borderRadius != vec4(0.0);
@@ -521,7 +488,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
         posAlongStroke = getRectPerimeterPosition(uv, dimensions, vLineWidth);
       }
       float unitOffset = mod(posAlongStroke, dashUnitLength);
-      if (unitOffset > vDashArray.x) {
+      if (unitOffset > pathStyle_dashArray.x) {
         if (vFillColor.a > 0.0) {
           inDashGap = true;
         } else {
@@ -534,7 +501,7 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
   }
 `,
 
-    'fs:#main-end': `
+  'glsl:fs:#main-end': `
   if (inDashGap) {
     float alphaFactor = fragColor.a / max(vLineColor.a, 0.001);
     fragColor = vec4(vFillColor.rgb, vFillColor.a * alphaFactor);
@@ -542,17 +509,11 @@ float getRectPerimeterPosition(vec2 fragUV, vec2 dims, float lineWidth) {
     fragColor = picking_filterHighlightColor(fragColor);
   }
 `
-  }
 };
 
-export const offsetShaders = {
-  inject: {
-    'vs:#decl': `
-in float instanceOffsets;
-`,
-    'vs:DECKGL_FILTER_SIZE': `
+export const offsetInjections = {
+  'glsl:vs:DECKGL_FILTER_SIZE': `
   float offsetWidth = abs(instanceOffsets * 2.0) + 1.0;
   size *= offsetWidth;
 `
-  }
 };

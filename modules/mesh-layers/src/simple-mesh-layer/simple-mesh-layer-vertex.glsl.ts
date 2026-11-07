@@ -30,7 +30,7 @@ out vec4 vColor;
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = texCoords;
-  geometry.pickingColor = picking_getPickingColorFromInstanceID();
+  geometry.pickingColor = picking_getPickingColorFromIndex(uint(gl_InstanceID) + simpleMesh.rowIndexOffset);
 
   vTexCoord = texCoords;
   cameraPosition = project.cameraPosition;

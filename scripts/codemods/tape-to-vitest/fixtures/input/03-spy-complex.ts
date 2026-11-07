@@ -9,7 +9,7 @@ import {TerrainEffect} from '@deck.gl/extensions/terrain/terrain-effect';
 import {TERRAIN_MODE} from '@deck.gl/extensions/terrain/shader-module';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import {TerrainLayer} from '@deck.gl/geo-layers';
-import {TerrainLoader} from '@loaders.gl/terrain';
+import {TerrainLoader} from '@loaders.gl/raster/terrain/index';
 
 import {makeSpy} from '@probe.gl/test-utils';
 import {device, getLayerUniforms} from '@deck.gl/test-utils';

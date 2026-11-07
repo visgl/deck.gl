@@ -4,12 +4,12 @@
 
 import {describe, expect, test} from 'vitest';
 import {luma} from '@luma.gl/core';
-import {webgl2Adapter} from '@luma.gl/webgl';
+import {webgl2Adapter} from '@luma.gl/core/webgl';
 import {runRenderTestSuite, isRenderTestDeviceEnabled} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 import {measureWebGPUEdges, STROKE_COLOR} from '../webgpu-antialiasing-test-utils';
 
-import {COORDINATE_SYSTEM, Deck, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
+import {Deck, OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PathLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {zigzag, zigzag3D, meterPaths, positionOrigin} from 'deck.gl-test/data';
@@ -138,7 +138,7 @@ const testCases = [
         getColor: [255, 0, 0],
         getWidth: 10,
         widthScale: 100,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: positionOrigin
       })
     ],
@@ -161,7 +161,7 @@ const testCases = [
         getWidth: 60,
         jointRounded: true,
         capRounded: true,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: [-122.41, 37.79]
       }),
       new PathLayer({
@@ -171,7 +171,7 @@ const testCases = [
         getWidth: 60,
         jointRounded: false,
         capRounded: true,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: [-122.415, 37.79]
       }),
       new PathLayer({
@@ -181,7 +181,7 @@ const testCases = [
         getWidth: 60,
         jointRounded: true,
         capRounded: false,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateSystem: 'meter-offsets',
         coordinateOrigin: [-122.405, 37.79]
       })
     ],
@@ -299,7 +299,7 @@ const testCases = [
   },
   {
     name: 'path-globe',
-    views: [new GlobeView()],
+    views: [new GlobeView({resolution: 36})],
     viewState: {
       latitude: 0,
       longitude: 0,
@@ -339,10 +339,8 @@ function getGraticules(resolution) {
   return graticules;
 }
 
-// `antialiasing` exists for contexts created without multisampling - notably interleaved rendering
-// into a base map, since MapLibre and Mapbox create their WebGL context with `antialias: false`.
-// Both the isolated no-MSAA device and `includeAA: true` are required for this golden to
-// distinguish shader coverage from browser multisampling and pixelmatch's default AA filtering.
+// Thin diagonals and two zigzags with `antialiasing` off (left) and on (right), without MSAA.
+// Golden: jagged steps on the left, smooth edges on the right.
 // See dev-docs/RFCs/v9.4/analytic-antialiasing-rfc.md
 const ANTIALIASING_GOLDEN_DIAGONALS = Array.from({length: 20}, (_, index) => ({
   path: [

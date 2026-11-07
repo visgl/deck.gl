@@ -195,6 +195,8 @@ CPU aggregation is used as fallback in the following cases:
 
 Radius of hexagon in meters. The hexagons are pointy-topped (rather than flat-topped).
 
+In geospatial views, this size represents locally approximated ground meters. The viewport's distance scale is evaluated at the center of the data bounds and applied uniformly to all bins. Projection distortion may vary across the dataset, so ground dimensions away from that anchor are approximate. Panning does not change the bin definitions.
+
 #### `colorAggregation` (string, optional) {#coloraggregation}
 
 * Default: `'SUM'`
@@ -515,6 +517,7 @@ This callback will be called when hexagon elevation domain has been calculated.
 
 The [PickingInfo.object](../../developer-guide/interactivity.md#the-pickinginfo-object) field returned by hover/click events of this layer represents an aggregated hexagon. The object contains the following fields:
 
+- `position` (number[] | null) - Center of the picked hexagon in the source CRS, or `null` when inverse projection is unavailable.
 - `col` (number) - Column index of the picked hexagon.
 - `row` (number) - Row index of the picked hexagon.
 - `colorValue` (number) - Aggregated color value, as determined by `getColorWeight` and `colorAggregation`

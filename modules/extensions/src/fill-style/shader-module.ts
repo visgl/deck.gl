@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import type {ShaderModule} from '@luma.gl/shadertools';
+import * as wgsl from './shader-module.wgsl';
+import type {ShaderModule, ShaderPlugin} from '@luma.gl/shaders';
 import {project, fp64LowPart} from '@deck.gl/core';
 import type {
   OrthographicViewport,
@@ -13,6 +14,7 @@ import type {
 } from '@deck.gl/core';
 
 import type {Texture} from '@luma.gl/core';
+import {getFlatCommonOrigin} from '../utils/projection-utils';
 
 // Common-space size of one atlas texel: the equator measures 40,000km and spans 512 common units
 const FILL_UV_SCALE = 512 / 40000000;
@@ -214,12 +216,18 @@ ${patternFs}
 `;
 
 const inject = {
-  'vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
+  'glsl:vs:DECKGL_FILTER_GL_POSITION': /* glsl */ `
     if (fill.patternEnabled) {
+      // Patterns tile a flat plane. geometry.position is sphere XYZ under GlobeView, so flatten
+      // it to Mercator; a no-op for flat projections. Pairs with getFlatCommonOrigin() on the CPU.
+      // On the globe the Mercator seam is moved to the far side of the camera, so a polygon that
+      // spans the antimeridian stays continuous; on flat maps the position is used as is.
+      float fill_cameraFlatX = project_common_position_to_flat(project.cameraPosition).x;
+      vec2 fill_flatPosition = project_common_position_to_flat_continuous(geometry.position, fill_cameraFlatX);
       fill_patternPlacement.xy = fillPatternOffsets;
       fill_backgroundColor = fillPatternBackgroundColors;
       if (fill.procedural) {
-        fill_uv = geometry.position.xy;
+        fill_uv = fill_flatPosition;
         fill_patternCoordinateScale = fill.patternUnitScale * fillPatternScales;
         int texelIndex = int(fillPatternFrames.x) * 4;
         fill_patternParams0 = vec4(
@@ -236,7 +244,7 @@ const inject = {
         // Reduce the coordinate origin to within one tile before adding the vertex position. The
         // origin is large in common space, and fp32 cannot carry the sum at full precision.
         vec2 origin = mod(fill.uvCoordinateOrigin, patternFrameCommon) + fill.uvCoordinateOrigin64Low;
-        fill_uv = (origin + geometry.position.xy) / patternFrameCommon;
+        fill_uv = (origin + fill_flatPosition) / patternFrameCommon;
         // Pattern atlases use top-left coordinates, so reverse common-space Y in bottom-left views.
         fill_uv.y *= fill.flipY ? 1.0 : -1.0;
         fill_uv += fillPatternOffsets;
@@ -244,7 +252,7 @@ const inject = {
     }
   `,
 
-  'fs:DECKGL_FILTER_COLOR': /* glsl */ `
+  'glsl:fs:DECKGL_FILTER_COLOR': /* glsl */ `
     if (fill.patternEnabled) {
       if (fill.procedural) {
         color.a *= fill_getProceduralPatternAlpha();
@@ -316,12 +324,13 @@ function getPatternUniforms(
       procedural = false
     } = opts;
     const projectUniforms = project.getUniforms(opts.project) as ProjectUniforms;
-    const {commonOrigin: coordinateOriginCommon} = projectUniforms;
     const unitScale = getPatternUnitScale(fillPatternSizeUnits, opts.project.viewport);
 
+    // The origin that the shader's flat position is relative to: project.commonOrigin on flat
+    // viewports, [0, 0] on GlobeView where project_common_position_to_flat() is absolute Mercator
+    const origin = getFlatCommonOrigin(projectUniforms, opts.project.viewport);
     // Improve the precision of the uv mapping by removing an integer multiple of the
     // pattern frames. This results in the same result, without wobbling at high zooms
-    const origin: [number, number] = [coordinateOriginCommon[0], coordinateOriginCommon[1]];
     if (fillPatternCommonFrame) {
       origin[0] %= unitScale * fillPatternCommonFrame[0];
       origin[1] %= unitScale * fillPatternCommonFrame[1];
@@ -342,7 +351,6 @@ export const patternShaders = {
   name: 'fill',
   vs,
   fs,
-  inject,
   dependencies: [project],
   getUniforms: getPatternUniforms,
   uniformTypes: {
@@ -360,3 +368,17 @@ export const patternShaders = {
   FillStyleModuleUniforms,
   FillStyleModuleBindings
 >;
+
+export const patternPlugin: ShaderPlugin = {
+  name: 'pattern',
+  module: patternShaders,
+  injections: inject
+};
+
+export const patternPluginWGSL: ShaderPlugin = {
+  ...patternPlugin,
+  module: {...patternShaders, source: wgsl.source},
+  vertexInputs: wgsl.vertexInputs,
+  interStageVariables: wgsl.interStageVariables,
+  injections: wgsl.injections
+};

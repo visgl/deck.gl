@@ -3,8 +3,10 @@
 // Copyright (c) vis.gl contributors
 
 /* eslint-disable func-style, no-console, max-len */
-import {test, expect} from 'vitest';
-import {LayerManager, ScatterplotLayer, Layer, CompositeLayer} from 'deck.gl';
+import {test, expect, vi} from 'vitest';
+import {LayerManager, ScatterplotLayer, Layer, CompositeLayer, Viewport, MapView} from 'deck.gl';
+import ViewManager from '../../../../modules/core/src/lib/view-manager';
+import {Timeline} from '@luma.gl/engine';
 import {device} from '@deck.gl/test-utils/vitest';
 
 class TestLayer extends Layer {
@@ -44,7 +46,7 @@ test('LayerManager#constructor', () => {
 });
 
 test('LayerManager#getLayers', () => {
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
   layerManager.setLayers(LAYERS);
   let layers = layerManager.getLayers();
   expect(layers.length, 'LayerManager.getLayers()').toBe(4);
@@ -52,6 +54,46 @@ test('LayerManager#getLayers', () => {
   expect(layers.length, 'LayerManager.getLayers()').toBe(3);
   layers = layerManager.getLayers({layerIds: ['non-existent-id']});
   expect(layers.length, 'LayerManager.getLayers()').toBe(0);
+});
+
+test('LayerManager#getViewports follows active views, removal and renaming', () => {
+  const viewManager = new ViewManager({
+    width: 256,
+    height: 256,
+    timeline: new Timeline(),
+    eventManager: null
+  });
+  const deck = {getViewports: () => viewManager.getViewports()} as any;
+  const layerManager = new LayerManager(device, {deck});
+  try {
+    const setViews = (ids: string[]) =>
+      viewManager.setProps({
+        views: ids.map(id => new MapView({id})),
+        viewState: {longitude: 0, latitude: 0, zoom: 4}
+      });
+    setViews(['main', 'mini']);
+    expect(layerManager.getViewports().map(viewport => viewport.id)).toEqual(['main', 'mini']);
+    setViews(['main']);
+    expect(layerManager.getViewports().map(viewport => viewport.id)).toEqual(['main']);
+    setViews(['main', 'mini2']);
+    expect(layerManager.getViewports().map(viewport => viewport.id)).toEqual(['main', 'mini2']);
+  } finally {
+    layerManager.finalize();
+    viewManager.finalize();
+  }
+});
+
+test('LayerManager#getViewports falls back to the active viewport without a deck', () => {
+  const viewport = new Viewport({id: 'fallback'});
+  const layerManager = new LayerManager(device, {viewport});
+  try {
+    expect(layerManager.getViewports()).toEqual([viewport]);
+    const next = new Viewport({id: 'next'});
+    layerManager.activateViewport(next);
+    expect(layerManager.getViewports()).toEqual([next]);
+  } finally {
+    layerManager.finalize();
+  }
 });
 
 test('LayerManager#setLayers', () => {
@@ -158,7 +200,7 @@ test('LayerManager#setLayers', () => {
     }
   ];
 
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
 
   TEST_CASES.forEach(testCase => {
     console.log(testCase.title);
@@ -203,7 +245,7 @@ test('LayerManager#error handling', () => {
 
   BadLayer.layerName = 'BadLayer';
 
-  const layerManager = new LayerManager(device);
+  const layerManager = new LayerManager(device, {viewport: new Viewport()});
   layerManager.setProps({onError});
 
   layerManager.setLayers([
@@ -223,4 +265,63 @@ test('LayerManager#error handling', () => {
 
   expect(errorArgs.length, 'onError is called').toBe(2);
   expect(errorArgs[1].layer.id, 'onError is called with correct args').toBe('crash-on-update');
+});
+
+test('LayerManager defers lifecycle work until a viewport is available', () => {
+  const manager = new LayerManager(device);
+  const discarded = new TestLayer({id: 'discarded'});
+  const composite = new TestCompositeLayer({id: 'pending'});
+  const initialize = vi.spyOn(composite, '_initialize');
+  const update = vi.spyOn(composite, '_update');
+  const render = vi.spyOn(composite, 'renderLayers');
+  const discardedInitialize = vi.spyOn(discarded, '_initialize');
+  try {
+    expect(manager.context.viewport).toBeNull();
+    manager.setLayers([discarded]);
+    manager.setProps({layers: [composite]});
+    manager.addDefaultShaderModule({name: 'pending-module'});
+    manager.updateLayers();
+    manager.updateLayers();
+    expect(manager.needsUpdate()).toBeTruthy();
+    expect(manager.getLayers()).toHaveLength(0);
+    expect(initialize).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(render).not.toHaveBeenCalled();
+
+    const viewport = new Viewport({id: 'resolved'});
+    manager.activateViewport(viewport);
+    manager.updateLayers();
+    expect(discardedInitialize).not.toHaveBeenCalled();
+    expect(initialize).toHaveBeenCalledTimes(1);
+    expect(render).toHaveBeenCalledTimes(1);
+    expect(manager.getLayers()).toHaveLength(3);
+    expect(manager.needsUpdate()).toBe(false);
+
+    composite.activateViewport(viewport);
+    update.mockClear();
+    render.mockClear();
+    manager.activateViewport(null);
+    composite.setNeedsUpdate();
+    manager.updateLayers();
+    expect(manager.context.viewport).toBeNull();
+    expect(update).not.toHaveBeenCalled();
+    expect(render).not.toHaveBeenCalled();
+    expect(manager.needsUpdate()).toBeTruthy();
+
+    const nextViewport = new Viewport({id: 'next'});
+    manager.activateViewport(nextViewport);
+    expect(update).not.toHaveBeenCalled();
+    manager.updateLayers();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(composite.internalState!.viewport).toBe(nextViewport);
+    expect(render).toHaveBeenCalledTimes(1);
+
+    manager.activateViewport(undefined);
+    const finalize = vi.spyOn(composite, '_finalize');
+    manager.finalize();
+    expect(finalize).toHaveBeenCalledTimes(1);
+  } catch (error) {
+    manager.finalize();
+    throw error;
+  }
 });

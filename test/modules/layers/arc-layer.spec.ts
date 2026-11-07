@@ -5,7 +5,7 @@
 import {expect, test} from 'vitest';
 import {LayerManager, MapView} from '@deck.gl/core';
 import {ArcLayer, GeoJsonLayer, SolidPolygonLayer} from '@deck.gl/layers';
-import {getWebGPUTestDevice} from '@luma.gl/test-utils';
+import {getWebGPUTestDevice} from '@luma.gl/core/test-utils';
 
 test('ArcLayer#WebGPU renders arcs alongside filled GeoJSON polygons', async ({skip}) => {
   const webgpuDevice = await getWebGPUTestDevice();

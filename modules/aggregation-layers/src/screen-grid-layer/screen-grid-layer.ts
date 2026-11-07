@@ -6,7 +6,6 @@ import {
   Accessor,
   Color,
   GetPickingInfoParams,
-  CompositeLayerProps,
   Layer,
   project32,
   LayersList,
@@ -16,10 +15,11 @@ import {
   DefaultProps
 } from '@deck.gl/core';
 import {WebGLAggregator, CPUAggregator, AggregationOperation} from '../common/aggregator/index';
-import AggregationLayer from '../common/aggregation-layer';
+import AggregationLayer, {type AggregationLayerProps} from '../common/aggregation-layer';
 import ScreenGridCellLayer from './screen-grid-cell-layer';
 import {BinOptions, binOptionsUniforms} from './bin-options-uniforms';
 import {defaultColorRange} from '../common/utils/color-utils';
+import {worldToPixels} from '@math.gl/web-mercator';
 
 const defaultProps: DefaultProps<ScreenGridLayerProps> = {
   cellSizePixels: {type: 'number', value: 100, min: 1},
@@ -35,7 +35,7 @@ const defaultProps: DefaultProps<ScreenGridLayerProps> = {
 
 /** All properties supported by ScreenGridLayer. */
 export type ScreenGridLayerProps<DataT = unknown> = _ScreenGridLayerProps<DataT> &
-  CompositeLayerProps;
+  AggregationLayerProps<DataT>;
 
 /** Properties added by ScreenGridLayer. */
 export type _ScreenGridLayerProps<DataT> = {
@@ -137,8 +137,10 @@ export default class ScreenGridLayer<
         getBin: {
           sources: ['positions'],
           getValue: ({positions}: {positions: number[]}, index: number, opts: BinOptions) => {
-            const viewport = this.context.viewport;
-            const p = viewport.project(positions);
+            const layer = this.getCurrentLayer()!;
+            const viewport = layer.context.viewport;
+            const commonPosition = this.projectPositionFromAttribute(positions, viewport);
+            const p = worldToPixels(commonPosition, viewport.pixelProjectionMatrix);
             const cellSizePixels: number = opts.cellSizePixels;
             if (p[0] < 0 || p[0] >= viewport.width || p[1] < 0 || p[1] >= viewport.height) {
               // Not on screen
@@ -184,7 +186,8 @@ export default class ScreenGridLayer<
         size: 3,
         accessor: 'getPosition',
         type: 'float64',
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms()
       },
       // this attribute is used in gpu aggregation path only
       counts: {size: 1, accessor: 'getWeight'}
@@ -203,6 +206,9 @@ export default class ScreenGridLayer<
     if (
       aggregatorChanged ||
       changeFlags.dataChanged ||
+      props.positions !== oldProps.positions ||
+      props.weights !== oldProps.weights ||
+      props.dataBounds !== oldProps.dataBounds ||
       changeFlags.updateTriggersChanged ||
       changeFlags.viewportChanged ||
       aggregation !== oldProps.aggregation ||
@@ -211,16 +217,11 @@ export default class ScreenGridLayer<
       const {width, height} = this.context.viewport;
       const {aggregator} = this.state;
 
-      if (aggregator instanceof WebGLAggregator) {
-        aggregator.setProps({
-          binIdRange: [
-            [0, Math.ceil(width / cellSizePixels)],
-            [0, Math.ceil(height / cellSizePixels)]
-          ]
-        });
-      }
-
       aggregator.setProps({
+        binIdRange: [
+          [0, Math.ceil(width / cellSizePixels)],
+          [0, Math.ceil(height / cellSizePixels)]
+        ],
         pointCount: this.getNumInstances(),
         operations: [aggregation],
         binOptions: {
@@ -264,6 +265,7 @@ export default class ScreenGridLayer<
         id: 'cell-layer'
       }),
       {
+        numInstances: aggregator.binCount,
         data: {
           length: aggregator.binCount,
           attributes: {
