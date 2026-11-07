@@ -53,7 +53,7 @@ for (const backend of ['webgl', 'webgpu'] as const) {
         return new GroupNode([new ModelNode({model})]);
       }
     };
-    let layer = new ScenegraphLayer(props);
+    let layer: ScenegraphLayer = new ScenegraphLayer(props);
     const deck = new Deck({
       device,
       parent,

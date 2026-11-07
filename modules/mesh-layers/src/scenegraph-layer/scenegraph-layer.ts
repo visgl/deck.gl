@@ -520,10 +520,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           scenegraph: scenegraphProps
         });
         if (this.state.columns) {
-          this.state.columns.draw(model, renderPass, offset => {
-            model.setInstanceCount(
-              Math.min(model.instanceCount, Math.max(0, numInstances - offset))
-            );
+          this.state.columns.draw(model, renderPass, (offset, rowCount) => {
+            model.setInstanceCount(Math.min(rowCount, Math.max(0, numInstances - offset)));
             model.shaderInputs.setProps({scenegraph: {rowIndexOffset: offset}});
           });
         } else {
