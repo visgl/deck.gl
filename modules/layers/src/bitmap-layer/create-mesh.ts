@@ -18,7 +18,11 @@ const DEFAULT_TEX_COORDS = new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]);
 export default function createMesh(
   bounds,
   resolution,
-  projection?: {transform: (position: number[]) => number[]; tolerance: number}
+  projection?: {
+    transform: (position: number[]) => number[];
+    tolerance: number;
+    scale: [number, number, number];
+  }
 ) {
   if (projection) return createProjectedMesh(bounds, resolution, projection);
   if (!resolution) {
@@ -101,7 +105,7 @@ function interpolateQuad(quad, ut, vt) {
 function createProjectedMesh(
   bounds,
   resolution,
-  {transform, tolerance}: {transform: (position: number[]) => number[]; tolerance: number}
+  {transform, tolerance, scale}: {transform: (position: number[]) => number[]; tolerance: number; scale: [number, number, number]}
 ) {
   const seed = createMesh(bounds, resolution);
   const uv = Float64Array.from(seed.texCoords);
@@ -114,7 +118,8 @@ function createProjectedMesh(
       tolerance,
       transform: position => {
         const point = interpolateQuad(bounds, position[0], position[1]);
-        return transform([point[0], point[1], point[2] ?? 0]);
+        const projected = transform([point[0], point[1], point[2] ?? 0]);
+        return projected.map((value, axis) => value * scale[axis]);
       }
     }
   );
@@ -131,7 +136,7 @@ function createProjectedMesh(
   return {
     vertexCount: refined.indices.length,
     positions,
-    projectedPositions: refined.positions,
+    projectedPositions: refined.positions.map((value, index) => value / scale[index % 3]),
     indices: refined.indices,
     texCoords
   };
