@@ -182,3 +182,78 @@ test('ScreenGrid applies clipping before reduction and updates extension uniform
     ]
   });
 });
+
+test('Compute metadata discards stale readbacks and handles empty input', async ({skip}) => {
+  const device = await getWebGPUTestDevice();
+  if (!device) return skip();
+  const {Buffer} = await import('@luma.gl/core');
+  const {GPUVector} = await import('@luma.gl/graph/gpu-data');
+  const {WebGPUGridAggregator} = await import(
+    '../../../../modules/aggregation-layers/src/grid-layer/webgpu-grid-aggregator'
+  );
+  const buffer = device.createBuffer({
+    data: new Float32Array([0.1, 0.1, 0, 0.2, 0.2, 0, 2, 3]),
+    usage: Buffer.STORAGE | Buffer.COPY_DST
+  });
+  const positions = new GPUVector({
+    type: 'buffer',
+    name: 'positions',
+    format: 'float32x3',
+    buffer,
+    length: 2,
+    ownsBuffer: false
+  });
+  const weights = new GPUVector({
+    type: 'buffer',
+    name: 'weights',
+    format: 'float32',
+    buffer,
+    length: 2,
+    byteOffset: 24,
+    ownsBuffer: false
+  });
+  const aggregator = new WebGPUGridAggregator(device);
+  const onUpdate = vi.fn();
+  try {
+    const viewport = new OrthographicView().makeViewport({
+      width: 100,
+      height: 100,
+      viewState: {target: [0, 0, 0], zoom: 0}
+    });
+    aggregator.setProps({
+      positions,
+      weights: [weights, weights],
+      attributes: {},
+      pointCount: 2,
+      readback: true,
+      operations: ['SUM', 'SUM'],
+      binIdRange: [
+        [0, 1],
+        [0, 1]
+      ],
+      binOptions: {cellSizeCommon: [1, 1], cellOriginCommon: [0, 0]},
+      onUpdate,
+      shaderModuleProps: {
+        project: {
+          viewport,
+          coordinateSystem: 'cartesian',
+          coordinateOrigin: [0, 0, 0],
+          devicePixelRatio: 1
+        }
+      }
+    });
+    aggregator.preDraw();
+    aggregator.setProps({pointCount: 0});
+    aggregator.preDraw();
+    await vi.waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(2), {timeout: 10000});
+    expect(aggregator.isLoaded).toBe(true);
+    expect(aggregator.getResultDomain(0)).toEqual([0, 0]);
+    expect(aggregator.getResultValues(0)![0]).toBeNaN();
+    expect(aggregator.getBin(0)).toBeNull();
+  } finally {
+    aggregator.destroy();
+    positions.destroy();
+    weights.destroy();
+    buffer.destroy();
+  }
+});
