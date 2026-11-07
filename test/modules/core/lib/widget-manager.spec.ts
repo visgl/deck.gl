@@ -128,32 +128,35 @@ test('WidgetManager#setProps#duplicate ids', () => {
   const widgetManager = new WidgetManager({deck: mockDeckInstance, parentElement: container});
   const warn = vi.spyOn(log, 'warn').mockReturnValue(() => {});
 
-  // Re-render several times with two new instances that share an id each time
-  for (let version = 1; version <= 3; version++) {
-    widgetManager.setProps({
-      widgets: [
-        new TestWidget({id: 'A', version}),
-        new TestWidget({id: 'A', version: version + 10})
-      ]
-    });
+  try {
+    // Re-render several times with two new instances that share an id each time
+    for (let version = 1; version <= 3; version++) {
+      widgetManager.setProps({
+        widgets: [
+          new TestWidget({id: 'A', version}),
+          new TestWidget({id: 'A', version: version + 10})
+        ]
+      });
 
-    expect(widgetManager.getWidgets(), 'only one widget is mounted').toHaveLength(1);
+      expect(widgetManager.getWidgets(), 'only one widget is mounted').toHaveLength(1);
+      expect(
+        container.querySelectorAll('.deck-test-widget'),
+        'only one widget element is in the DOM'
+      ).toHaveLength(1);
+      expect(widgetManager.getWidgets()[0].props.version, 'the first widget wins').toBe(version);
+    }
+    expect(warn).toHaveBeenCalledWith('Multiple widgets with same id A');
+
+    widgetManager.setProps({widgets: []});
+    expect(widgetManager.getWidgets(), 'all widgets are removed').toHaveLength(0);
     expect(
       container.querySelectorAll('.deck-test-widget'),
-      'only one widget element is in the DOM'
-    ).toHaveLength(1);
-    expect(widgetManager.getWidgets()[0].props.version, 'the first widget wins').toBe(version);
+      'no widget element is left'
+    ).toHaveLength(0);
+  } finally {
+    warn.mockRestore();
+    widgetManager.finalize();
   }
-  expect(warn).toHaveBeenCalledWith('Multiple widgets with same id A');
-
-  widgetManager.setProps({widgets: []});
-  expect(widgetManager.getWidgets(), 'all widgets are removed').toHaveLength(0);
-  expect(container.querySelectorAll('.deck-test-widget'), 'no widget element is left').toHaveLength(
-    0
-  );
-
-  warn.mockRestore();
-  widgetManager.finalize();
 });
 
 test('WidgetManager#finalize', () => {
