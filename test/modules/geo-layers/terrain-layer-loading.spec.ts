@@ -232,7 +232,9 @@ test('TerrainLayer passes the elevation range of loaded tiles to its TileLayer',
     expect(layer.isLoaded, 'TerrainLayer loads').toBe(true);
     expect(layerManager.needsUpdate(), 'Layer updates settle').toBeFalsy();
 
-    const tileLayer = layerManager.getLayers().find(l => l.id === 'terrain-tiled-zrange-tiles');
+    const tileLayer = layerManager
+      .getLayers()
+      .find(subLayer => subLayer.id === 'terrain-tiled-zrange-tiles');
     expect(layer.state.zRange, 'TerrainLayer stores the range of the loaded tiles').toEqual([
       100, 2000
     ]);

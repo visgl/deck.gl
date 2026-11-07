@@ -261,14 +261,17 @@ test('LayerManager#update requested by a sublayer during an update', () => {
   StoringLayer.layerName = 'StoringLayer';
 
   const layerManager = new LayerManager(device, {viewport: new Viewport()});
-  layerManager.setLayers([new StoringLayer({id: 'storing', value: 1})]);
-  expect(layerManager.needsUpdate(), 'update requested during the update is kept').toBeTruthy();
+  try {
+    layerManager.setLayers([new StoringLayer({id: 'storing', value: 1})]);
+    expect(layerManager.needsUpdate(), 'update requested during the update is kept').toBeTruthy();
 
-  layerManager.updateLayers();
-  const reporter = layerManager.getLayers().find(layer => layer.id === 'storing-reporter');
-  expect(reporter.props.reported, 'sublayer rendered with the stored value').toBe(1);
-  expect(layerManager.needsUpdate(), 'no further update').toBeFalsy();
-  layerManager.finalize();
+    layerManager.updateLayers();
+    const reporter = layerManager.getLayers().find(layer => layer.id === 'storing-reporter');
+    expect(reporter.props.reported, 'sublayer rendered with the stored value').toBe(1);
+    expect(layerManager.needsUpdate(), 'no further update').toBeFalsy();
+  } finally {
+    layerManager.finalize();
+  }
 });
 
 test("LayerManager#setState in a layer's own update", () => {
@@ -284,9 +287,12 @@ test("LayerManager#setState in a layer's own update", () => {
   SelfUpdatingLayer.layerName = 'SelfUpdatingLayer';
 
   const layerManager = new LayerManager(device, {viewport: new Viewport()});
-  layerManager.setLayers([new SelfUpdatingLayer({id: 'self', value: 1})]);
-  expect(layerManager.needsUpdate(), 'no further update').toBeFalsy();
-  layerManager.finalize();
+  try {
+    layerManager.setLayers([new SelfUpdatingLayer({id: 'self', value: 1})]);
+    expect(layerManager.needsUpdate(), 'no further update').toBeFalsy();
+  } finally {
+    layerManager.finalize();
+  }
 });
 
 test('LayerManager#update waits for a layer whose viewport is pending', () => {
@@ -294,23 +300,26 @@ test('LayerManager#update waits for a layer whose viewport is pending', () => {
   const mainViewport = new Viewport({id: 'main'});
   const views = [new MapView({id: 'mini'}), new MapView({id: 'main'})];
   const layerManager = new LayerManager(device, {viewport: miniViewport});
-  layerManager.setViewports([miniViewport, mainViewport], views);
-  const layer = new TestLayer({id: 'test'});
-  layerManager.setLayers([layer]);
-  expect(layer.internalState.viewport, 'initialized in the first view').toBe(miniViewport);
+  try {
+    layerManager.setViewports([miniViewport, mainViewport], views);
+    const layer = new TestLayer({id: 'test'});
+    layerManager.setLayers([layer]);
+    expect(layer.internalState.viewport, 'initialized in the first view').toBe(miniViewport);
 
-  // The first view has no viewport, e.g. while it resolves asynchronously
-  layerManager.setViewports([mainViewport], views);
-  layerManager.updateLayers();
-  // e.g. an async prop resolves
-  layer.setNeedsUpdate();
-  layerManager.updateLayers();
-  expect(layerManager.needsUpdate(), 'no repeated update while it waits').toBeFalsy();
+    // The first view has no viewport, e.g. while it resolves asynchronously
+    layerManager.setViewports([mainViewport], views);
+    layerManager.updateLayers();
+    // e.g. an async prop resolves
+    layer.setNeedsUpdate();
+    layerManager.updateLayers();
+    expect(layerManager.needsUpdate(), 'no repeated update while it waits').toBeFalsy();
 
-  layerManager.setViewports([miniViewport, mainViewport], views);
-  layerManager.updateLayers();
-  expect(layer.internalState.needsUpdate, 'updated once its viewport is ready').toBe(false);
-  layerManager.finalize();
+    layerManager.setViewports([miniViewport, mainViewport], views);
+    layerManager.updateLayers();
+    expect(layer.internalState.needsUpdate, 'updated once its viewport is ready').toBe(false);
+  } finally {
+    layerManager.finalize();
+  }
 });
 
 test('LayerManager#error handling', () => {
