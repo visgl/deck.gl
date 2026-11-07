@@ -472,7 +472,12 @@ function calculateViewportUniforms({
       // a.k.a "preprojected" positions
       case 'cartesian':
         uniforms.commonUnitsPerWorldUnit = [1, 1, distanceScalesAtOrigin.unitsPerMeter[2]];
-        uniforms.commonUnitsPerWorldUnit2 = [0, 0, distanceScalesAtOrigin.unitsPerMeter2[2]];
+        // The correction scales with the y offset from the origin. WEB_MERCATOR mode does not
+        // offset positions, so it would scale with the absolute y and step at zoom 12
+        uniforms.commonUnitsPerWorldUnit2 =
+          viewport.projectionMode === PROJECTION_MODE.WEB_MERCATOR_AUTO_OFFSET
+            ? [0, 0, distanceScalesAtOrigin.unitsPerMeter2[2]]
+            : [0, 0, 0];
         break;
 
       default:
