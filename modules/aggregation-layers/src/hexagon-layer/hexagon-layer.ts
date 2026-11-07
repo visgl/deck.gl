@@ -320,6 +320,21 @@ export default class HexagonLayer<
       this.props.elevationLowerPercentile === 0 &&
       this.props.elevationUpperPercentile === 100
     ) {
+      if (
+        !WebGPUHexagonAggregator.supportsData(this.props.data, [
+          'getPosition',
+          'getColorWeight',
+          'getElevationWeight'
+        ]) ||
+        (!this.props.positions &&
+          this.props.data ===
+            (this.internalState?.getOldProps() as Partial<this['props']> | undefined)?.data &&
+          !WebGPUHexagonAggregator.supportsAttributes(this.getAttributeManager()!.attributes, [
+            'colorWeights',
+            'elevationWeights'
+          ]))
+      )
+        return 'cpu';
       if (this.props.positions && this.state.preproject) {
         throw new Error('Hexagon GPU columns must use the custom view coordinate system');
       }
