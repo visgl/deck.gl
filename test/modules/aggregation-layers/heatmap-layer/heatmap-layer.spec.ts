@@ -462,13 +462,14 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
   if (!webgpuDevice) return skip();
   const {GPUVector} = await import('@luma.gl/graph/gpu-data');
   const buffer = webgpuDevice.createBuffer({
-    data: new Float32Array([-122.4, 37.8, 0, 2, -122.3, 37.7, 0, 3]),
+    data: new Float32Array([999, 999, 999, 999, -122.4, 37.8, 0, 2, -122.3, 37.7, 0, 3]),
     usage: Buffer.VERTEX | Buffer.COPY_DST
   });
   const positions = new GPUVector({
     type: 'buffer',
     name: 'positions',
     format: 'float32x3',
+    byteOffset: 16,
     buffer,
     length: 2,
     byteStride: 16,
@@ -480,7 +481,7 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
     format: 'float32',
     buffer,
     length: 2,
-    byteOffset: 12,
+    byteOffset: 28,
     byteStride: 16,
     ownsBuffer: false
   });
@@ -503,6 +504,18 @@ test('Heatmap borrows GPU columns and updates row prefixes', async ({skip}) => {
         manager.setLayers([layer]);
         expect(errors.map(error => error.message)).toEqual([]);
         expect(layer.state.weightsTransform.model.instanceCount).toBe(count);
+        const model = layer.state.weightsTransform.model;
+        const vertexArray = model.vertexArray;
+        for (const [name, offset] of [
+          ['instancePositions', 16],
+          ['instanceWeights', 28]
+        ] as const) {
+          const slot = vertexArray.getBufferSlot(name)!;
+          expect(slot).not.toBeNull();
+          expect(vertexArray.attributes[slot]).toBe(buffer);
+          expect(vertexArray.attributeByteOffsets[slot]).toBe(offset);
+          expect(model.bufferLayout.find(layout => layout.name === name)!.byteStride).toBe(16);
+        }
       }
     } finally {
       manager.finalize();
