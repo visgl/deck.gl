@@ -40,18 +40,43 @@ class EnhancedTextBackgroundLayer extends TextBackgroundLayer {
   }
 }
 
-// TextLayer which includes modified text-background-layer-vertex shader and only renders the
-// primary background layer in the collision pass
+type EnhancedTextLayerProps = TextLayerProps & {
+  renderBackground?: boolean;
+  collisionBackgroundPadding?: TextLayerProps['backgroundPadding'];
+};
+
+// TextLayer which includes modified text-background-layer-vertex shader and uses a separate
+// background layer for collision testing, while preserving TextLayer's visual background support.
 class EnhancedTextLayer extends TextLayer {
   static layerName = 'EnhancedTextLayer';
 
   filterSubLayer({layer, renderPass}) {
-    const background = layer.id.includes('primary-background');
+    const collisionBackground = layer.id.endsWith('-collision-background');
     if (renderPass === 'collision') {
-      return background; // Only draw primary background layer in collision pass
+      return collisionBackground; // Only draw collision background layer in collision pass
     }
 
-    return !background; // Do not draw background layer in other passes
+    return !collisionBackground; // Do not draw collision background layer in other passes
+  }
+
+  renderLayers(): ReturnType<TextLayer['renderLayers']> {
+    const layers = super.renderLayers();
+    const backgroundLayer = layers[0] as TextBackgroundLayer | false;
+    const charactersLayer = layers[1];
+    const {renderBackground, collisionBackgroundPadding} = this.props as EnhancedTextLayerProps;
+
+    const collisionBackgroundLayer =
+      backgroundLayer &&
+      new EnhancedTextBackgroundLayer(backgroundLayer.props, {
+        id: `${this.id}-collision-background`,
+        padding: collisionBackgroundPadding
+      });
+
+    return [
+      Boolean(renderBackground) && backgroundLayer,
+      collisionBackgroundLayer,
+      charactersLayer
+    ];
   }
 }
 
@@ -154,13 +179,13 @@ export default class PointLabelLayer<
         ];
   }
 
-  calculateBackgroundPadding() {
+  calculateBackgroundPadding(): [number, number, number, number] {
     const {getTextAnchor: anchor, getAlignmentBaseline: alignment, sizeScale} = this.props;
 
     // Heuristics to avoid label overlap
     const paddingX = 12 * sizeScale;
     const paddingY = 3 * sizeScale;
-    const backgroundPadding = [0, 0, 0, 0];
+    const backgroundPadding: [number, number, number, number] = [0, 0, 0, 0];
     if (alignment === 'top') {
       backgroundPadding[TOP] = paddingY;
     } else if (alignment === 'bottom') {
@@ -192,6 +217,11 @@ export default class PointLabelLayer<
       outlineColor,
       outlineWidth,
       sizeScale,
+      getBackgroundColor,
+      getBorderColor,
+      getBorderWidth,
+      backgroundBorderRadius,
+      backgroundPadding,
       radiusScale,
 
       getAlignmentBaseline,
@@ -223,6 +253,11 @@ export default class PointLabelLayer<
         outlineColor,
         outlineWidth,
         sizeScale,
+        getBackgroundColor,
+        getBorderColor,
+        getBorderWidth,
+        backgroundBorderRadius,
+        backgroundPadding,
 
         getAlignmentBaseline,
         getColor,
@@ -242,8 +277,7 @@ export default class PointLabelLayer<
         }
       }),
       {
-        getSize: 1,
-        _subLayerProps: {background: {type: EnhancedTextBackgroundLayer}}
+        getSize: 1
       },
       props
     );
@@ -251,6 +285,7 @@ export default class PointLabelLayer<
 
   renderLayers(): Layer | null | LayersList {
     const {
+      background,
       getText,
       getSecondaryColor,
       getSecondaryText,
@@ -259,14 +294,15 @@ export default class PointLabelLayer<
       updateTriggers
     } = this.props;
     const getPixelOffset = this.calculatePixelOffset(false);
-    const backgroundPadding = this.calculateBackgroundPadding();
+    const collisionBackgroundPadding = this.calculateBackgroundPadding();
     const out = [
       // Text doesn't update via updateTrigger for some reason
       this.renderTextLayer(`${updateTriggers.getText}-primary`, {
-        backgroundPadding,
+        background: true,
+        renderBackground: background,
         getText,
         getPixelOffset,
-        background: true // Only use background for primary label for faster collisions
+        collisionBackgroundPadding
       }),
       Boolean(getSecondaryText) &&
         this.renderTextLayer(`${updateTriggers.getSecondaryText}-secondary`, {

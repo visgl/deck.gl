@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) vis.gl contributors
 
-import {test, expect} from 'vitest';
+import {test, expect, vi} from 'vitest';
 import IconManager, {buildMapping, getDiffIcons} from '@deck.gl/layers/icon-layer/icon-manager';
 import {device} from '@deck.gl/test-utils/vitest';
+
+// 16x16
+const TEST_IMAGE =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAACXBIWXMAAD2EAAA9hAHVrK90AAAAjElEQVQYlXWPMQrCQBBFn7NJI9oobraz1kqv4zk9h4iCEDsLq4gBR4LgGi3WNRhxmj88Zv6f6Sz5LuEPSNMWsLYFnHs3SRBjMY8I+iPoCpMKCiUBHUwFGFPvNKwcynkPuK40ml5ygFyblAzvyZoUcec1M7etAbMAhrfN3R+FKk6UJ+C5Nx+PcFKQn29fOzIjztSX8AwAAAAASUVORK5CYII=';
 
 const DATA = [
   {
@@ -240,9 +244,6 @@ test('IconManager#events', () => {
 });
 
 test('IconManager#resize', () => {
-  // 16x16
-  const testImage =
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAAAAAA6mKC9AAAACXBIWXMAAD2EAAA9hAHVrK90AAAAjElEQVQYlXWPMQrCQBBFn7NJI9oobraz1kqv4zk9h4iCEDsLq4gBR4LgGi3WNRhxmj88Zv6f6Sz5LuEPSNMWsLYFnHs3SRBjMY8I+iPoCpMKCiUBHUwFGFPvNKwcynkPuK40ml5ygFyblAzvyZoUcec1M7etAbMAhrfN3R+FKk6UJ+C5Nx+PcFKQn29fOzIjztSX8AwAAAAASUVORK5CYII=';
   let updateCount = 0;
 
   const icons = [
@@ -281,6 +282,34 @@ test('IconManager#resize', () => {
   });
   iconManager.packIcons(icons, d => ({
     ...d,
-    url: testImage
+    url: TEST_IMAGE
   }));
+});
+
+test('IconManager#finalize with loads pending', async () => {
+  const onError = evt => {
+    throw new Error(evt.error.message);
+  };
+  const iconManager = new IconManager(device, {onError});
+
+  iconManager.setProps({
+    autoPacking: true
+  });
+  iconManager.packIcons([{id: 'pending', width: 16, height: 16}], d => ({
+    ...d,
+    url: TEST_IMAGE
+  }));
+  const texture = iconManager.getTexture();
+  // Texture instances are not extensible, so spy on the class
+  const copyExternalImage = vi.spyOn(Object.getPrototypeOf(texture), 'copyExternalImage');
+
+  iconManager.finalize();
+
+  await vi.waitUntil(() => iconManager.isLoaded);
+  expect(
+    copyExternalImage.mock.contexts,
+    'the load that finished after finalize wrote into the deleted texture'
+  ).not.toContain(texture);
+  expect(iconManager.getTexture(), 'texture is released').toBeNull();
+  copyExternalImage.mockRestore();
 });

@@ -27,7 +27,7 @@ setWorkerUrl(maplibreWorkerUrl);
 
 const map = new Map({
   container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  style: 'https://tiles.openfreemap.org/styles/positron',
   center: [0.45, 51.47],
   zoom: 11
 });

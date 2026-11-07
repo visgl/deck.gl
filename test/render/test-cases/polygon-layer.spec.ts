@@ -6,7 +6,7 @@ import {describe} from 'vitest';
 import {runRenderTestSuite} from '../render-test-suite';
 import type {TestCase} from '../deck-test-utils';
 
-import {OrthographicView, COORDINATE_SYSTEM, _GlobeView as GlobeView} from '@deck.gl/core';
+import {OrthographicView, _GlobeView as GlobeView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 import {Fp64Extension, PathStyleExtension} from '@deck.gl/extensions';
 
@@ -37,7 +37,9 @@ const testCases = [
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
   },
   {
+    // Golden: Red polygons with black outlines match the default Mercator projection.
     name: 'polygon-lnglat-64',
+    // WebGPU fp64 polygon rendering times out on software adapters.
     skip: ['webgpu'],
     viewState: {
       latitude: 37.751537058389985,
@@ -50,7 +52,7 @@ const testCases = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: polygons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: 'lnglat',
         getPolygon: f => f,
         getFillColor: [200, 0, 0],
         getLineColor: [0, 0, 0],
@@ -72,7 +74,7 @@ const testCases = [
     layers: [
       new PolygonLayer({
         id: 'polygon-lnglat',
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+        coordinateSystem: 'cartesian',
         data: [
           [
             [-100, -100],
@@ -96,7 +98,7 @@ const testCases = [
   },
   {
     name: 'polygon-globe',
-    views: [new GlobeView()],
+    views: [new GlobeView({resolution: 36})],
     viewState: {
       latitude: 0,
       longitude: 50,
@@ -131,7 +133,7 @@ const testCases = [
   },
   {
     name: 'polygon-globe-extruded',
-    views: [new GlobeView()],
+    views: [new GlobeView({resolution: 36})],
     viewState: {
       latitude: 0,
       longitude: 50,

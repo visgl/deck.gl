@@ -4,10 +4,15 @@
 
 import {Layer, project32, color, picking, log} from '@deck.gl/core';
 import type {Device, RenderPipelineParameters} from '@luma.gl/core';
-import {pbrMaterial} from '@luma.gl/shadertools';
+import {pbrMaterial} from '@luma.gl/shaders';
 import {ScenegraphNode, GroupNode, ModelNode, Model} from '@luma.gl/engine';
-import {GLTFAnimator, PBREnvironment, createScenegraphsFromGLTF} from '@luma.gl/gltf';
-import {GLTFLoader, postProcessGLTF} from '@loaders.gl/gltf';
+import {
+  GLTFAnimator,
+  PBREnvironment,
+  createScenegraphsFromGLTF,
+  postProcessGLTF
+} from '@luma.gl/engine/gltf';
+import {GLTFLoader} from '@loaders.gl/scene/gltf';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES, shouldComposeModelMatrix} from '../utils/matrix';
@@ -185,7 +190,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     materials?: {destroy(): void}[] | null;
     models: Model[];
     firstDrawSignaled: boolean;
-  };
+  } & Layer['state'];
 
   getShaders() {
     const defines: {LIGHTING_PBR?: 1} = {};
@@ -224,6 +229,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
         size: 3,
         type: 'float64',
         fp64: this.use64bitPositions(),
+        ...this.usePositionTransforms(),
         accessor: 'getPosition',
         transition: supportsTransitions
       },
@@ -266,7 +272,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && typeof props.scenegraph === 'object') {
-      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/experimental function
+      // Converts loaders.gl glTF data to a luma.gl scenegraph.
       const gltf = props.scenegraph;
 
       // Tiles3DLoader already processes GLTF
@@ -421,7 +427,13 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
           sizeScale,
           sizeMinPixels,
           sizeMaxPixels,
-          composeModelMatrix: shouldComposeModelMatrix(viewport, coordinateSystem) ? 1 : 0,
+          composeModelMatrix: shouldComposeModelMatrix(
+            viewport,
+            this.state.sourceCrs?.signature || coordinateSystem,
+            Boolean(this.state.preproject)
+          )
+            ? 1
+            : 0,
           sceneModelMatrix: worldMatrix
         };
 
