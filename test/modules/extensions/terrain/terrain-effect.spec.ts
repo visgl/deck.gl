@@ -436,6 +436,20 @@ test('TerrainEffect#external terrain', async () => {
   externalTerrainLayer = new ExternalTerrainLayer({id: 'external-terrain', externalTerrain});
   await lifecycle.update({layers: [externalTerrainLayer, summitLayer, hutLayer, glacierLayer]});
 
+  // A terrain layer that is still loading leaves the meters in the height map until it draws
+  await lifecycle.update({
+    layers: [
+      new LoadingTerrainLayer({id: 'loading-terrain', operation: 'terrain+draw'}),
+      externalTerrainLayer,
+      summitLayer,
+      glacierLayer
+    ]
+  });
+  expect(externalTerrain.setDrapeRenderer).toHaveBeenLastCalledWith(null);
+  expect(getLayerUniforms(summitLayer).mode, 'Height map still in meters').toBe(
+    TERRAIN_MODE.USE_HEIGHT_MAP_METERS
+  );
+
   // Terrain layers take precedence
   externalTerrain.renderHeightMap.mockClear();
   await lifecycle.update({

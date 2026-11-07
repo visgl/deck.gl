@@ -47,6 +47,8 @@ export class TerrainEffect implements Effect {
   private externalTerrainLayerId: string | null = null;
   /** The `id` of the external terrain that the height map holds */
   private externalHeightMapId: string | null = null;
+  /** True if the height map holds meters drawn by external terrain, until a terrain layer draws it */
+  private heightMapInMeters: boolean = false;
   /** Layers draped over the external terrain, with the options to draw them */
   private externalDrape: {layers: Layer[]; opts: PreRenderOptions; viewport: Viewport} | null =
     null;
@@ -188,7 +190,7 @@ export class TerrainEffect implements Effect {
         isPicking: this.isPicking,
         heightMap: this.heightMap?.getRenderFramebuffer()?.colorAttachments[0].texture || null,
         heightMapBounds: this.heightMap?.bounds,
-        heightMapInMeters: this.externalTerrain !== null,
+        heightMapInMeters: this.heightMapInMeters,
         dummyHeightMap: this.dummyHeightMap!,
         terrainCover,
         useTerrainHeightMap: terrainDrawMode === 'offset' && this.hasTerrain,
@@ -239,6 +241,7 @@ export class TerrainEffect implements Effect {
       return;
     }
 
+    this.heightMapInMeters = false;
     this.terrainPass.renderHeightMap(this.heightMap, {
       ...opts,
       layers: terrainLayers,
@@ -314,6 +317,7 @@ export class TerrainEffect implements Effect {
     target.device.beginRenderPass({framebuffer: target, clearColor: [0, 0, 0, 0]}).end();
     externalTerrain.renderHeightMap({target, bounds});
     this.externalHeightMapId = externalTerrain.id;
+    this.heightMapInMeters = true;
   }
 
   /**
