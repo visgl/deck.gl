@@ -29,6 +29,20 @@ export function getAggregatorValueReader(opts: {
       return getCPUAggregatorValueReader(values, ids, aggregator.binCount);
     }
   }
+  // Custom aggregators may expose CPU snapshots without requiring a WebGL implementation.
+  const values = aggregator.getResult(channel);
+  const ids = aggregator.getBins();
+  if (values && ids && 'value' in values && 'value' in ids && values.value && ids.value) {
+    return getCPUAggregatorValueReader(values.value, ids.value, aggregator.binCount, {
+      valueOffset: (values.offset || 0) / values.value.BYTES_PER_ELEMENT,
+      valueStride: values.stride ? values.stride / values.value.BYTES_PER_ELEMENT : 1,
+      idOffset: (ids.offset || 0) / ids.value.BYTES_PER_ELEMENT,
+      idStride: ids.stride ? ids.stride / ids.value.BYTES_PER_ELEMENT : 2
+    });
+  }
+  if (values && ids) {
+    throw new Error('ContourLayer requires CPU aggregation results for contour generation');
+  }
   return null;
 }
 
@@ -52,14 +66,16 @@ function getWebGLAggregatorValueReader(
 function getCPUAggregatorValueReader(
   values: TypedArray,
   ids: TypedArray,
-  count: number
+  count: number,
+  layout = {valueOffset: 0, valueStride: 1, idOffset: 0, idStride: 2}
 ): ValueReader {
   const idMap: Record<string, Record<string, number>> = {};
   for (let i = 0; i < count; i++) {
-    const x = ids[i * 2];
-    const y = ids[i * 2 + 1];
+    const offset = layout.idOffset + i * layout.idStride;
+    const x = ids[offset];
+    const y = ids[offset + 1];
     idMap[x] = idMap[x] || {};
-    idMap[x][y] = values[i];
+    idMap[x][y] = values[layout.valueOffset + i * layout.valueStride];
   }
   return (x: number, y: number) => idMap[x]?.[y] ?? NaN;
 }

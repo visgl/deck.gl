@@ -11,8 +11,8 @@ import {
   cleanEvaluateSync,
   GPUDataEvaluator,
   interleave as interleaveTables
-} from '@luma.gl/gpgpu';
-import {interleave as webgpuInterleave} from '@luma.gl/gpgpu/webgpu';
+} from '@luma.gl/graph/gpu-simple-graph';
+import {interleave as webgpuInterleave} from '@luma.gl/graph/gpu-simple-graph/webgpu';
 import type {BufferAttributeLayout, BufferLayout, Device} from '@luma.gl/core';
 
 type ModelInfo = {
@@ -335,6 +335,7 @@ export default class AttributeBufferGroups {
     assertU32Aligned(`${group.id}.${attribute.id} rowByteLength`, rowByteLength);
     assertU32Aligned(`${group.id}.${attribute.id} groupByteOffset`, groupByteOffset);
 
+    // Pack complete physical rows; shader views may only expose parts of a row.
     if (attribute.isConstant) {
       const constantValue = attribute.getConstantValue();
       if (!constantValue) {

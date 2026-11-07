@@ -167,9 +167,8 @@ export default class H3HexagonLayer<
   private _shouldUseHighPrecision(): boolean {
     if (this.props.highPrecision === 'auto') {
       const {resolution, hasPentagon, hasMultipleRes} = this.state;
-      const {viewport} = this.context;
       return (
-        Boolean(viewport?.resolution) ||
+        this.getSubdivisionStep() > 0 ||
         hasMultipleRes ||
         hasPentagon ||
         (resolution >= 0 && resolution <= 5)

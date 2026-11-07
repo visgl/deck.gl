@@ -4,7 +4,7 @@
 
 import {Buffer} from '@luma.gl/core';
 import type {Device, Texture} from '@luma.gl/core';
-import {PROJECTION_MODE} from './constants';
+import {PROJECTION_MODE} from '../shaderlib/project/constants';
 import type Viewport from '../viewports/viewport';
 import type CustomProjectionViewport from '../viewports/custom-projection-viewport';
 import log from '../utils/log';

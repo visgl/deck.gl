@@ -3,7 +3,7 @@
 // Copyright (c) vis.gl contributors
 
 import {readPackedTypedArray} from './fast-pbf';
-import {TypedArray} from '@loaders.gl/loader-utils';
+import {TypedArray} from '@loaders.gl/core/loader-utils';
 
 // KeyValueObject ========================================
 interface KeyValueObject {

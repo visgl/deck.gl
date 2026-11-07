@@ -17,7 +17,8 @@ export type PickingInfo<DataT = any, ExtraInfo = {}> = ExtraInfo & {
   x: number;
   y: number;
   pixel?: [number, number];
-  coordinate?: number[];
+  /** Position under the pointer, or null when the viewport cannot unproject it. */
+  coordinate?: number[] | null;
   devicePixel?: [number, number];
   pixelRatio: number;
 };
@@ -53,14 +54,19 @@ export function getEmptyPickingInfo({
     // Find the viewport that contain the picked pixel
     pickedViewport = getViewportFromCoordinates(pickInfo?.pickedViewports || viewports, {x, y});
   }
-  let coordinate: number[] | undefined;
+  let coordinate: number[] | null | undefined;
   if (pickedViewport) {
     const point = [x - pickedViewport.x, y - pickedViewport.y];
     if (z !== undefined) {
       point[2] = z;
     }
-    coordinate = pickedViewport.unproject(point);
-    if (!coordinate.every(Number.isFinite)) coordinate = undefined;
+    try {
+      coordinate = pickedViewport.unproject(point);
+      if (!coordinate.every(Number.isFinite)) coordinate = null;
+    } catch {
+      // A visible screen position can fall outside the projection's inverse domain.
+      coordinate = null;
+    }
   }
 
   return {

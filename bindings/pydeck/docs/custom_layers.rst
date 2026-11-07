@@ -63,7 +63,7 @@ ES module libraries can also import these packages by name, and receive the copi
 
 ``@deck.gl/core``, ``@deck.gl/layers``, ``@deck.gl/extensions``, ``@deck.gl/aggregation-layers``,
 ``@deck.gl/geo-layers``, ``@deck.gl/mesh-layers``, ``@deck.gl/widgets``, ``@luma.gl/core``,
-``@luma.gl/engine``, ``@luma.gl/shadertools`` (and ``/wgsl``), ``@luma.gl/webgl`` (and ``/constants``),
+``@luma.gl/engine``, ``@luma.gl/shaders`` (and ``/wgsl``), ``@luma.gl/core/webgl``, ``@luma.gl/core/webgl-constants``,
 ``@loaders.gl/core`` and ``@math.gl/core``.
 
 Before it loads the first ``module=True`` library, pydeck adds an

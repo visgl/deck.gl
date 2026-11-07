@@ -51,7 +51,7 @@ deck = pdk.Deck(
     layers=layers,
     # Use MapLibre with globe projection
     map_provider="maplibre",
-    map_style="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    map_style="https://tiles.openfreemap.org/styles/dark",
     map_projection="globe",
 )
 

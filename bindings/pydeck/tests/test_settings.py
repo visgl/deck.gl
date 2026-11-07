@@ -51,6 +51,19 @@ def test_register_library():
         assert r.deck_widget.custom_libraries == pydeck.settings.custom_libraries
 
 
+def test_register_library_again_replaces_entry():
+    pydeck.settings.custom_libraries = []
+    pydeck.settings.register_library("FirstLibrary", "https://deck.gl/first.js")
+    pydeck.settings.register_library("SecondLibrary", "https://deck.gl/second.js")
+    # Re-running a notebook cell registers the same name again
+    pydeck.settings.register_library("FirstLibrary", "https://deck.gl/first.mjs", module=True)
+    pydeck.settings.register_library("SecondLibrary", "https://deck.gl/second.js")
+    assert pydeck.settings.custom_libraries == [
+        {"libraryName": "FirstLibrary", "resourceUri": "https://deck.gl/first.mjs", "module": True},
+        {"libraryName": "SecondLibrary", "resourceUri": "https://deck.gl/second.js"},
+    ]
+
+
 def test_module_library_renders_as_json():
     pydeck.settings.custom_libraries = []
     pydeck.settings.register_library("EsmLibrary", "https://deck.gl/demo.mjs", module=True)

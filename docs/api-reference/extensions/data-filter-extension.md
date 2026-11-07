@@ -3,6 +3,8 @@
 
 The `DataFilterExtension` adds GPU-based data filtering functionalities to layers. It allows the layer to show/hide objects based on user-defined properties. This extension provides a significantly more performant alternative to filtering the data array on the CPU.
 
+Use numeric ranges or categories to select objects, soften numeric filter boundaries, and count the objects that pass the filter. Filtering composes with `BrushingExtension` and `ClipExtension`.
+
 > Note: This extension does not work with all deck.gl layers. See "limitations" below.
 
 <div style={{position:'relative',height:450}}></div>
@@ -275,7 +277,7 @@ Enable/disable the data filter. If the data filter is disabled, all objects are 
 
 #### `onFilteredItemsChange` (Function, optional) {#onfiltereditemschange}
 
-Only used if the `countItems` option is enabled. Called with the following arguments when the filter changes:
+Only used if the `countItems` option is enabled. Called with the following arguments when the filter or data changes. On WebGPU, the callback runs asynchronously after the count is read back. Results superseded by another filter or data update, or by layer removal, are discarded:
 
 - `event` (object)
   + `id` (string) - the id of the source layer. Note when this prop is specified on a [CompositeLayer](../core/composite-layer.md), such as `GeoJsonLayer`, the callback is called once by each sub layer.
@@ -301,8 +303,10 @@ filterRange: [rangeStart - ORIGIN_TS, rangeEnd - ORIGIN_TS]
 
 Given data filtering happens on GPU, not all layers of `@deck.gl/aggregation-layers` module, support this feature.
 
+### WebGL only:
+* `HeatmapLayer`: filtering is unavailable when rendering heatmaps with WebGPU.
+
 ### Always supported:
-* `HeatMapLayer`
 * `GPUGridLayer`
 
 ### Supported only when aggregation is performed on GPU:

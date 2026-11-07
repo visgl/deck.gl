@@ -11,20 +11,24 @@ import type {
   RenderPipelineParameters
 } from '@luma.gl/core';
 import type {Framebuffer, RenderPass} from '@luma.gl/core';
+import type {WebGLDevice} from '@luma.gl/core/webgl';
 import type {NumberArray4} from '@math.gl/core';
 
 import Pass from './pass';
 import type Viewport from '../viewports/viewport';
 import type View from '../views/view';
 import type Layer from '../lib/layer';
+import type CompositeLayer from '../lib/composite-layer';
 import type {Effect} from '../lib/effect';
 import type {ProjectProps} from '../shaderlib/project/viewport-uniforms';
-import type {PickingProps} from '@luma.gl/shadertools';
+import type {PickingProps} from '@luma.gl/shaders';
 
 export type Rect = {x: number; y: number; width: number; height: number};
 
 // WebGPU complication: Matching attachment state of the renderpass requires including a depth buffer
 const WEBGPU_DEFAULT_DRAW_PARAMETERS: RenderPipelineParameters = {
+  // Models retain pipeline state across mask and screen passes.
+  colorMask: 0xf,
   depthWriteEnabled: true,
   depthCompare: 'less-equal',
   blendColorOperation: 'add',
@@ -52,6 +56,7 @@ export type LayersPassRenderOptions = {
   clearStack?: boolean;
   clearCanvas?: boolean;
   clearColor?: number[];
+  /** Color write channels for layer pipelines and WebGL attachment clears. */
   colorMask?: number;
   scissorRect?: number[];
   layerFilter?: ((context: FilterContext) => boolean) | null;
@@ -85,12 +90,26 @@ export type RenderStats = {
 /** A Pass that renders all layers */
 export default class LayersPass extends Pass {
   _lastRenderIndex: number = -1;
+  private _activatedLayers = new Set<Layer>();
 
   render(options: LayersPassRenderOptions): void {
     this._render(options);
   }
 
   protected _render(options: LayersPassRenderOptions): RenderStats[] {
+    if (this.device.type === 'webgl' && options.colorMask !== undefined) {
+      // WebGL clears honor the write mask; mask passes must preserve other channels.
+      const mask = options.colorMask;
+      return (this.device as WebGLDevice).withParametersWebGL(
+        {colorMask: [Boolean(mask & 1), Boolean(mask & 2), Boolean(mask & 4), Boolean(mask & 8)]},
+        () => this._renderLayers(options)
+      );
+    }
+    return this._renderLayers(options);
+  }
+
+  private _renderLayers(options: LayersPassRenderOptions): RenderStats[] {
+    this._activatedLayers.clear();
     const {canvasContext = this.device.canvasContext!} = options;
     const framebuffer = options.target ?? canvasContext.getCurrentFramebuffer();
     const [width, height] = canvasContext.getDrawingBufferSize();
@@ -100,12 +119,7 @@ export default class LayersPass extends Pass {
     let clearColor = options.clearColor ?? (clearCanvas ? [0, 0, 0, 0] : false);
     let clearDepth = clearCanvas ? 1 : false;
     let clearStencil = clearCanvas ? 0 : false;
-    const colorMask = options.colorMask ?? 0xf;
-
     const parameters: RenderPassParameters = {viewport: [0, 0, width, height]};
-    if (options.colorMask) {
-      parameters.colorMask = colorMask;
-    }
     if (options.scissorRect) {
       parameters.scissorRect = options.scissorRect as NumberArray4;
     }
@@ -206,6 +220,7 @@ export default class LayersPass extends Pass {
       views,
       effects,
       canvasContext = this.device.canvasContext!,
+      colorMask,
       shaderModuleProps
     }: LayersPassRenderOptions,
     /** Internal flag, true if only used to determine whether each layer should be drawn */
@@ -256,6 +271,9 @@ export default class LayersPass extends Pass {
           ...views?.[viewport.id]?.props.parameters,
           ...this.getLayerParameters(layer, layerIndex, viewport)
         };
+        if (colorMask !== undefined) {
+          layerParam.layerParameters.colorMask = colorMask;
+        }
       }
 
       drawLayerParams[layerIndex] = layerParam;
@@ -419,6 +437,7 @@ export default class LayersPass extends Pass {
     layerFilter: ((params: FilterContext) => boolean) | undefined | null,
     layerFilterCache: Record<string, boolean>
   ) {
+    if (!layer.internalState || !layer.isCoordinateSystemLoaded) return false;
     const shouldDrawLayer = layer.props.visible && this.shouldDrawLayer(layer);
 
     if (!shouldDrawLayer) {
@@ -429,8 +448,11 @@ export default class LayersPass extends Pass {
 
     let parent = layer.parent;
     while (parent) {
-      // @ts-ignore
-      if (!parent.props.visible || !parent.filterSubLayer(drawContext)) {
+      if (
+        !parent.isCoordinateSystemLoaded ||
+        !parent.props.visible ||
+        !(parent as CompositeLayer).filterSubLayer(drawContext)
+      ) {
         return false;
       }
       drawContext.layer = parent;
@@ -447,8 +469,12 @@ export default class LayersPass extends Pass {
       }
     }
 
-    // If a layer is drawn, update its viewportChanged flag
-    layer.activateViewport(drawContext.viewport);
+    // One attribute set is shared by all views. Only the first eligible viewport
+    // selects its conversion; later views and picking reuse the prepared geometry.
+    if (!drawContext.isPicking && !this._activatedLayers.has(layer)) {
+      this._activatedLayers.add(layer);
+      layer.activateViewport(drawContext.viewport);
+    }
 
     return true;
   }
@@ -474,6 +500,7 @@ export default class LayersPass extends Pass {
         devicePixelRatio,
         modelMatrix: layerProps.modelMatrix,
         coordinateSystem: layerProps.coordinateSystem,
+        sourceCrs: layer.internalState!.sourceCrs,
         coordinateOrigin: layerProps.coordinateOrigin,
         autoWrapLongitude: layer.wrapLongitude
       } satisfies ProjectProps
