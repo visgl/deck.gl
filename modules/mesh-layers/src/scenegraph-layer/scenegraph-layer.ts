@@ -312,7 +312,8 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
     }
     const transformsChanged = TRANSFORM_ACCESSORS.some(
       name =>
-        params.props[name] !== params.oldProps[name] && typeof params.props[name] !== 'function'
+        !deepEqual(params.props[name], params.oldProps[name], 1) &&
+        (typeof params.props[name] !== 'function' || typeof params.oldProps[name] !== 'function')
     );
     void this.state.columns.updateIfNeeded(
       {
@@ -481,7 +482,7 @@ export default class ScenegraphLayer<DataT = any, ExtraPropsT extends {} = {}> e
   }
 
   draw({context}) {
-    if (!this.state.scenegraph) return;
+    if (!this.state.scenegraph || (this.state.columns && !this.getNumInstances())) return;
 
     if (this.props._animations && this.state.animator) {
       this.state.animator.setTime(context.timeline.getTime());
